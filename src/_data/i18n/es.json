@@ -352,8 +352,8 @@
     },
     "extensions": {
       "title": "Extensiones",
-      "lede": "Instala extensiones privadas de un solo archivo que viven únicamente en este dispositivo. Aparecen en tu lanzador y terminal, y nunca en el sitio público.",
-      "tldr": "Una plataforma trae-tu-propia-herramienta. Una extensión es un archivo HTML con un manifiesto integrado; instálala aquí y obtiene una ficha en tu lanzador, comandos de terminal opcionales y su propio almacenamiento local que se incluye en tu copia de seguridad cifrada. Las extensiones se ejecutan con acceso completo en este dispositivo, así que instala solo archivos de personas de confianza. Nada de ellas se sube jamás."
+      "lede": "Instala extensiones privadas de un solo archivo que viven únicamente en este dispositivo. Aparecen en tu lanzador y en la paleta de comandos, y nunca en el sitio público.",
+      "tldr": "Una plataforma trae-tu-propia-herramienta. Una extensión es un archivo HTML con un manifiesto integrado; instálala aquí y obtiene una ficha en tu lanzador, entradas opcionales en la paleta de comandos y su propio almacenamiento local que se incluye en tu copia de seguridad cifrada. Las extensiones se ejecutan con acceso completo en este dispositivo, así que instala solo archivos de personas de confianza. Nada de ellas se sube jamás."
     },
     "coin-flip": {
       "title": "Lanzar Moneda",
@@ -1139,16 +1139,29 @@
       "confirm_remove": "¿Eliminar {name}? Su código y datos guardados se borrarán de este dispositivo.",
       "trust_prompt": "¿Instalar {name} v{version}? Se ejecutará con acceso completo a tus datos en este dispositivo. Instala solo archivos de personas de confianza. Permisos: {perms}",
       "update_prompt": "¿Actualizar {name} {old} → {new}? Los datos guardados se conservan.",
+      "reinstall_prompt": "¿Reinstalar {name} {new}? Los datos guardados se conservan.",
       "downgrade_prompt": "¿Reemplazar {name} {old} por la versión anterior {new}? Los datos guardados se conservan.",
       "replace_prompt": "¿Reemplazar {oldName} {old} por {name} {new}? Usa el mismo ID, así que se queda con los datos guardados de {oldName} y se ejecutará con acceso completo a tus datos en este dispositivo. Continúa solo si confías en el archivo.",
       "update_perms_added": "Permisos nuevos: {perms}.",
       "update_perms_removed": "Ya no usa: {perms}.",
+      "large_note": "({kb} KB — grande para el almacenamiento local)",
       "installed_ok": "instalada.",
       "installed_where": "{name} instalada. Ábrela cuando quieras desde el menú Herramientas.",
       "sample_heading": "Prueba el ejemplo",
       "sample_install": "instalar hello-world",
       "sample_download": "descargar el archivo",
       "err_prefix": "error al instalar:",
+      "err_no_manifest": "este archivo no tiene manifiesto de extensión (script#mentria-ext).",
+      "err_bad_json": "el manifiesto no es un JSON válido.",
+      "err_bad_id": "el id debe estar en kebab-case, con 3 a 48 caracteres.",
+      "err_reserved_id": "el id \"{id}\" está reservado.",
+      "err_bad_name": "el manifiesto necesita un nombre de hasta 40 caracteres.",
+      "err_bad_version": "la versión debe tener el formato major.minor.patch, como 1.0.0.",
+      "err_too_large": "el archivo ocupa {kb} KB. Las extensiones se guardan en el almacenamiento local, así que deben ocupar menos de 1536 KB.",
+      "err_storage_full": "el almacenamiento está lleno. Quita una extensión o libera espacio.",
+      "err_app_only": "las extensiones de tipo app se instalan desde su página en la Galería de extensiones.",
+      "err_manifest": "el manifiesto no es válido ({detail}).",
+      "err_download": "no se pudo descargar {url}",
       "choose_file": "Elegir archivo"
     },
     "search": {
@@ -1793,7 +1806,7 @@
     },
     "ext_gallery": {
       "title": "Galería de extensiones",
-      "lede": "Extensiones propias que puedes instalar con un clic. Cada una es un único archivo HTML que se ejecuta solo en este dispositivo: obtiene un icono en tu lanzador y su propio almacenamiento local, y nunca toca el sitio público.",
+      "lede": "Extensiones hechas por Mentria. Instala una con un clic: obtiene un icono en tu lanzador y su propio almacenamiento en este dispositivo, y se abre aunque no tengas conexión.",
       "btn_install": "Instalar",
       "btn_update": "Actualizar a v{v}",
       "installed": "Instalada",

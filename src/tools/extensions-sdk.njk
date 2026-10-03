@@ -81,7 +81,7 @@ eleventyComputed:
 
   const box = document.getElementById('note');
 
-  // Storage roundtrip: last saved note, or text passed on the command line.
+  // Storage roundtrip: last saved note, or text passed in a run link (#cmd=starter&amp;args=…).
   box.value = storage.get('note') || (args &amp;&amp; args.args) || '';
 
   document.getElementById('save').addEventListener('click', () =&gt; {
@@ -90,7 +90,7 @@ eleventyComputed:
   });
 &lt;/script&gt;{% endraw %}</code></pre>
   </div>
-  <p class="sdk__note">Install it: open the <a href="{{ locale.pathPrefix }}/tools/extensions/">manager</a>, expand <em>paste source</em>, paste the file, and confirm the trust prompt. Because it declares <code>mounts.tool</code> it also gets a launcher tile, and its <code>starter</code> command shows up in the terminal.</p>
+  <p class="sdk__note">Install it: open the <a href="{{ locale.pathPrefix }}/tools/extensions/">manager</a>, expand <em>paste source</em>, paste the file, and confirm the trust prompt. Because it declares <code>mounts.tool</code> it also gets a launcher tile, and its <code>starter</code> command shows up in the command palette (⌘K).</p>
 
   <h2 class="sdk__h2">{{ "tool.extensions-sdk.heading_reference" | t }}</h2>
 
@@ -109,7 +109,7 @@ eleventyComputed:
         <tr><td><code>permissions</code></td><td>string[]</td><td>no</td><td>Up to 16 labels (≤32 chars each). Vocabulary: <code>storage ai bluetooth usb serial network notifications share</code>. Advisory only — surfaced in the trust prompt and the manager row; not enforced by a sandbox. Network access is limited separately by the site’s content security policy (see <a href="#sdk-network">Network</a>).</td></tr>
         <tr><td><code>mounts</code></td><td>object</td><td>no</td><td>Where the extension appears (below).</td></tr>
         <tr><td><code>mounts.tool</code></td><td>object</td><td>no</td><td>Present (usually <code>{}</code>) → a launcher tile plus the manager's <em>open</em> button.</td></tr>
-        <tr><td><code>mounts.commands</code></td><td>object[]</td><td>no</td><td>Each <code>{ name, description, usage? }</code> registers a terminal/palette command. <code>name</code> kebab-case 2–16 chars; <code>description</code> required; <code>usage</code> is an optional hint. Colliding names are skipped.</td></tr>
+        <tr><td><code>mounts.commands</code></td><td>object[]</td><td>no</td><td>Each <code>{ name, description, usage? }</code> adds an entry to the command palette (⌘K) that opens the extension with <code>args</code> set to <code>{ cmd: name, args: '' }</code>. <code>name</code> kebab-case 2–16 chars; <code>description</code> required, shown beside the entry; <code>usage</code> is an optional hint the palette does not show.</td></tr>
         <tr><td><code>mounts.widget</code></td><td>object</td><td>no</td><td><code>{ key, label }</code> → a live status tile on the home launcher (see <em>Widgets</em>). <code>key</code> (1–64 chars) is the storage key the tile watches; <code>label</code> (1–48 chars) names the tile.</td></tr>
       </tbody>
     </table>
@@ -134,7 +134,7 @@ eleventyComputed:
         <tr><td><code>locale</code></td><td>string</td><td>The page's current language code, such as <code>en</code>, <code>es</code>, <code>fr</code>, <code>ja</code> or <code>pt-BR</code>. Read it when you render.</td></tr>
         <tr><td><code>onLocaleChange</code></td><td><code>(fn) → void</code></td><td>Calls <code>fn(code)</code> when the visitor switches language without reloading. <code>onLocaleChange(render)</code></td></tr>
         <tr><td><code>theme</code></td><td><code>{ accent, bg, fg, muted, fontMono }</code></td><td>The site's live CSS token values. <code>root.style.setProperty('--x', theme.accent)</code></td></tr>
-        <tr><td><code>args</code></td><td><code>null | { cmd, args }</code></td><td>Set when opened via a command (<code>#cmd=…&amp;args=…</code>); otherwise <code>null</code>. <code>if (args) run(args.args)</code></td></tr>
+        <tr><td><code>args</code></td><td><code>null | { cmd, args }</code></td><td>Set when opened from a palette command (<code>args</code> is then <code>''</code>) or from a link to the run page, <code>/tools/extensions/run/?id=…</code>, ending in <code>#cmd=starter&amp;args=hello</code>; otherwise <code>null</code>. <code>if (args &amp;&amp; args.args) run(args.args)</code></td></tr>
         <tr><td><code>notify</code></td><td><code>(msg) → void</code></td><td>Host toast, bottom-center, first 120 chars. <code>notify('saved')</code></td></tr>
         <tr><td><code>close</code></td><td><code>() → void</code></td><td>Leave the extension and return to the home launcher. <code>close()</code></td></tr>
       </tbody>
@@ -179,7 +179,7 @@ eleventyComputed:
 
   <h3 class="sdk__h3">Install &amp; share</h3>
   <ul class="sdk__list">
-    <li><strong>Manager</strong> (<a href="{{ locale.pathPrefix }}/tools/extensions/">/tools/extensions/</a>): drop an <code>.html</code> file, choose a file, or paste the source. Every install shows a human trust prompt naming the extension, its version and its declared permissions; updates call out permissions the new version adds or drops, and installing an older version is labeled as a replacement, not an update.</li>
+    <li><strong>Manager</strong> (<a href="{{ locale.pathPrefix }}/tools/extensions/">/tools/extensions/</a>): drop an <code>.html</code> file, choose a file, or paste the source. Every install shows a human trust prompt naming the extension, its version and its declared permissions; updates call out permissions the new version adds or drops, installing an older version is labeled as a replacement, not an update, and installing the same version again is labeled as a reinstall.</li>
     <li><strong>Share over comms</strong>: from an installed row, <em>share</em> hands the file to an open <a href="/comms/">comms</a> session; the peer gets the same trust prompt, attributed <em>from you</em>, before anything installs. If comms is closed it points you there.</li>
     <li><strong>Export</strong>: <em>export</em> downloads the stored source back out as <code>&lt;id&gt;.html</code>, so an extension is always portable.</li>
   </ul>
@@ -203,7 +203,7 @@ eleventyComputed:
 </script>
 
 <style>
-.sdk { font-family: var(--font-mono, 'JetBrains Mono', monospace); max-width: 900px; margin: 0 auto; padding: 0.5rem 0.25rem; color: var(--term-fg); line-height: 1.65; }
+.sdk { font-family: var(--font-mono, 'JetBrains Mono', monospace); width: 100%; max-width: 900px; margin: 0 auto; padding: 0.5rem 0.25rem; color: var(--term-fg); line-height: 1.65; }
 .sdk p { margin: 0.75rem 0; }
 .sdk__lead { font-size: 1rem; color: var(--term-fg); }
 .sdk code { background: var(--term-bg-raised, #0d0f12); border: 1px solid var(--term-border, #2a3138); border-radius: 4px; padding: 0.05em 0.35em; font-size: 0.85em; color: var(--accent, #6ef3c5); }

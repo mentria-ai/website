@@ -57,14 +57,27 @@ localeReload: true
 const COPY = {
   trustPrompt:   {{ ("tool.extensions.trust_prompt"   | t) | dump | safe }},
   updatePrompt:  {{ ("tool.extensions.update_prompt"  | t) | dump | safe }},
+  reinstallPrompt: {{ ("tool.extensions.reinstall_prompt" | t) | dump | safe }},
   downgradePrompt: {{ ("tool.extensions.downgrade_prompt" | t) | dump | safe }},
   replacePrompt: {{ ("tool.extensions.replace_prompt" | t) | dump | safe }},
   permsAdded:    {{ ("tool.extensions.update_perms_added" | t) | dump | safe }},
   permsRemoved:  {{ ("tool.extensions.update_perms_removed" | t) | dump | safe }},
+  largeNote:     {{ ("tool.extensions.large_note"     | t) | dump | safe }},
   confirmRemove: {{ ("tool.extensions.confirm_remove" | t) | dump | safe }},
   installedOk:   {{ ("tool.extensions.installed_ok"   | t) | dump | safe }},
   installedWhere:{{ ("tool.extensions.installed_where" | t) | dump | safe }},
   errPrefix:     {{ ("tool.extensions.err_prefix"     | t) | dump | safe }},
+  errNoManifest: {{ ("tool.extensions.err_no_manifest" | t) | dump | safe }},
+  errJson:       {{ ("tool.extensions.err_bad_json"   | t) | dump | safe }},
+  errId:         {{ ("tool.extensions.err_bad_id"     | t) | dump | safe }},
+  errReserved:   {{ ("tool.extensions.err_reserved_id" | t) | dump | safe }},
+  errName:       {{ ("tool.extensions.err_bad_name"   | t) | dump | safe }},
+  errVersion:    {{ ("tool.extensions.err_bad_version" | t) | dump | safe }},
+  errTooLarge:   {{ ("tool.extensions.err_too_large"  | t) | dump | safe }},
+  errFull:       {{ ("tool.extensions.err_storage_full" | t) | dump | safe }},
+  errApp:        {{ ("tool.extensions.err_app_only"   | t) | dump | safe }},
+  errManifest:   {{ ("tool.extensions.err_manifest"   | t) | dump | safe }},
+  errDownload:   {{ ("tool.extensions.err_download"   | t) | dump | safe }},
   btnOpen:       {{ ("tool.extensions.btn_open"       | t) | dump | safe }},
   btnExport:     {{ ("tool.extensions.btn_export"     | t) | dump | safe }},
   btnRemove:     {{ ("tool.extensions.btn_remove"     | t) | dump | safe }},
@@ -80,6 +93,25 @@ const COPY = {
   galInstalling: {{ ("store.installing" | t) | dump | safe }},
   galFailed:     {{ ("store.install_failed" | t) | dump | safe }}
 };
+const PERMS = {
+  {%- for p in ["storage", "ai", "bluetooth", "usb", "serial", "network", "notifications", "share"] %}
+  {{ p | dump | safe }}: {{ (("store.perm_" + p) | t) | dump | safe }}{% if not loop.last %},{% endif %}
+  {%- endfor %}
+};
+const INSTALL_OPTS = {
+  copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, reinstall: COPY.reinstallPrompt, downgrade: COPY.downgradePrompt, replace: COPY.replacePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved, large: COPY.largeNote },
+  perms: PERMS
+};
+const ERRORS = [
+  ['no manifest block', 'errNoManifest'],
+  ['manifest is not valid JSON', 'errJson'],
+  ['id must be', 'errId'],
+  ['name is required', 'errName'],
+  ['version must be', 'errVersion'],
+  ['storage full', 'errFull'],
+  ['app extensions install', 'errApp']
+];
+const FIELD_ERRORS = ['manifest must be', 'icon ', 'author ', 'description ', 'permissions ', 'too many permissions', 'mounts', 'command names', 'each command', 'app must be'];
 const CATALOG = [
   {%- for e in extensions %}
   { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }}, size: {{ e.size | dump | safe }}, version: {{ e.version | dump | safe }}{% if e.kind == 'app' %}, app: {{ e.app | dump | safe }}, manifest: {{ e.manifest | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
@@ -140,6 +172,20 @@ function showError(msg) { errEl.classList.remove('xt__error--ok'); errEl.textCon
 function showOk(msg) { errEl.classList.add('xt__error--ok'); errEl.textContent = msg; errEl.hidden = false; }
 function clearError() { errEl.hidden = true; }
 
+function errText(e) {
+  const msg = String((e && e.message) || e || '');
+  const hit = ERRORS.find((pair) => msg.startsWith(pair[0]));
+  if (hit) return COPY[hit[1]];
+  if (msg.startsWith('id "') && msg.endsWith('" is reserved')) return fmt(COPY.errReserved, { id: msg.slice(4, -13) });
+  if (msg.startsWith('file is ')) return fmt(COPY.errTooLarge, { kb: parseInt(msg.slice(8), 10) });
+  if (FIELD_ERRORS.some((start) => msg.startsWith(start))) return fmt(COPY.errManifest, { detail: msg });
+  return msg;
+}
+
+function permName(p) {
+  return Object.prototype.hasOwnProperty.call(PERMS, p) ? PERMS[p] : p;
+}
+
 function fmt(tpl, vars) {
   return tpl.replace(/\{(\w+)\}/g, (s, k) => (vars[k] != null ? vars[k] : s));
 }
@@ -153,12 +199,12 @@ function announceInstall(entry) {
 async function installFlow(html) {
   clearError();
   try {
-    const entry = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, replace: COPY.replacePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
+    const entry = await confirmInstall(html, INSTALL_OPTS);
     if (!entry) return;
     showOk(entry.manifest.name + ' ' + COPY.installedOk);
     render();
     announceInstall(entry);
-  } catch (e) { showError(e.message); }
+  } catch (e) { showError(errText(e)); }
 }
 
 function row(entry) {
@@ -181,7 +227,7 @@ function row(entry) {
   const perms = document.createElement('div');
   perms.className = 'xt__perms';
   const cat = CATALOG.find((c) => c.id === m.id && c.version === m.version);
-  perms.textContent = (m.permissions || []).join(' · ') + (X.isApp(entry) ? '' : '  (' + (cat ? cat.size : Math.round(entry.size / 1024) + ' KB') + ')');
+  perms.textContent = (m.permissions || []).map(permName).join(' · ') + (X.isApp(entry) ? '' : '  (' + (cat ? cat.size : Math.round(entry.size / 1024) + ' KB') + ')');
   meta.appendChild(title); meta.appendChild(sub); meta.appendChild(perms);
   const actions = document.createElement('div');
   actions.className = 'xt__actions';
@@ -251,7 +297,7 @@ function render() {
 ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('xt__drop--hot'); }));
 drop.addEventListener('drop', (e) => {
   const f = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f) f.text().then(installFlow).catch((e) => showError(e.message));
+  if (f) f.text().then(installFlow).catch((e) => showError(errText(e)));
 });
 chooseBtn.addEventListener('click', () => fileInput.click());
 drop.addEventListener('click', (e) => {
@@ -260,7 +306,7 @@ drop.addEventListener('click', (e) => {
 });
 fileInput.addEventListener('change', (e) => {
   const f = e.target.files && e.target.files[0];
-  if (f) f.text().then(installFlow).catch((e) => showError(e.message));
+  if (f) f.text().then(installFlow).catch((e) => showError(errText(e)));
   e.target.value = '';
 });
 document.getElementById('xt-paste-install').addEventListener('click', async () => {
@@ -268,20 +314,27 @@ document.getElementById('xt-paste-install').addEventListener('click', async () =
   if (!pasted) return;
   if (/^https?:\/\/\S+$/.test(pasted)) {
     clearError();
+    let html = null;
+    let status = 0;
     try {
       const res = await fetch(pasted, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      installFlow(await res.text());
-    } catch (e) { showError(pasted + ' · ' + e.message); }
+      if (res.ok) html = await res.text();
+      else status = res.status;
+    } catch (_) {}
+    if (html === null) { showError(fmt(COPY.errDownload, { url: pasted }) + (status ? ' (HTTP ' + status + ')' : '')); return; }
+    installFlow(html);
     return;
   }
   installFlow(pasted);
 });
 document.getElementById('xt-sample-install').addEventListener('click', async () => {
+  let html = null;
   try {
-    const html = await fetch('/assets/extensions/hello-world.html').then((r) => r.text());
-    installFlow(html);
-  } catch (e) { showError(e.message); }
+    const res = await fetch('/assets/extensions/hello-world.html');
+    if (res.ok) html = await res.text();
+  } catch (_) {}
+  if (html === null) { showError(fmt(COPY.errDownload, { url: 'hello-world.html' })); return; }
+  installFlow(html);
 });
 
 const galGrid = document.getElementById('exg-grid');
@@ -389,16 +442,25 @@ async function galInstall(entry, card, b) {
     }
     return;
   }
+  let html = entry.html;
+  if (!html) {
+    try {
+      html = await fetchSource(entry.id);
+    } catch (_) {
+      b.disabled = false;
+      galStatus(card, COPY.galFailed);
+      return;
+    }
+  }
   try {
-    const html = entry.html || await fetchSource(entry.id);
-    const result = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, replace: COPY.replacePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
+    const result = await confirmInstall(html, INSTALL_OPTS);
     if (!result) { b.disabled = false; return; }
     render();
     announceInstall(result);
     if (entry.page) X.fetchPackage(entry.id).then((pkg) => X.downloadFiles(entry.id, pkg.files, [PREFIX + '/extensions/' + entry.id + '/'])).catch(() => {});
   } catch (e) {
     b.disabled = false;
-    galStatus(card, e.message);
+    galStatus(card, errText(e));
   }
 }
 
@@ -424,7 +486,7 @@ async function galLoad(entry, card) {
     p.badges.innerHTML = '';
     p.badges.append(galChip('v' + am.version));
     if (am.author) p.badges.append(galChip(am.author));
-    (am.permissions || []).forEach((perm) => p.badges.append(galChip(perm, 'perm')));
+    (am.permissions || []).forEach((perm) => p.badges.append(galChip(permName(perm), 'perm')));
     if (entry.size) p.badges.append(galChip(entry.size));
     galActions(entry, card);
     return;
@@ -441,11 +503,12 @@ async function galLoad(entry, card) {
   try {
     ins = X.inspect(html);
   } catch (e) {
-    galStatus(card, COPY.galErrLoad + ' ' + e.message);
+    galStatus(card, COPY.galErrLoad + ' ' + errText(e));
     return;
   }
   entry.ready = true;
   const m = ins.manifest;
+  if (!entry.size || entry.version !== m.version) entry.size = Math.max(1, Math.round(ins.size / 1024)) + ' KB';
   entry.version = m.version;
   entry.name = m.name;
   p.icon.textContent = m.icon && !/^data:/.test(m.icon) ? m.icon : '🧩';
@@ -453,8 +516,8 @@ async function galLoad(entry, card) {
   p.badges.innerHTML = '';
   p.badges.append(galChip('v' + m.version));
   if (m.author) p.badges.append(galChip(m.author));
-  (m.permissions || []).forEach((perm) => p.badges.append(galChip(perm, 'perm')));
-  p.badges.append(galChip(Math.max(1, Math.round(ins.size / 1024)) + ' KB'));
+  (m.permissions || []).forEach((perm) => p.badges.append(galChip(permName(perm), 'perm')));
+  p.badges.append(galChip(entry.size));
   galActions(entry, card);
 }
 

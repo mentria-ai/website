@@ -352,8 +352,8 @@
     },
     "extensions": {
       "title": "Extensões",
-      "lede": "Instale extensões privadas em um único arquivo que vivem apenas neste dispositivo. Elas aparecem no seu lançador e terminal — e nunca no site público.",
-      "tldr": "Uma plataforma traga-sua-própria-ferramenta. Uma extensão é um arquivo HTML com um manifesto embutido; instale aqui e ela ganha um bloco no seu lançador, comandos de terminal opcionais e seu próprio armazenamento local incluído no seu backup criptografado. As extensões rodam com acesso total neste dispositivo, então instale apenas arquivos de quem você confia. Nada sobre elas é enviado para servidor algum."
+      "lede": "Instale extensões privadas em um único arquivo que vivem apenas neste dispositivo. Elas aparecem no seu lançador e na paleta de comandos — e nunca no site público.",
+      "tldr": "Uma plataforma traga-sua-própria-ferramenta. Uma extensão é um arquivo HTML com um manifesto embutido; instale aqui e ela ganha um bloco no seu lançador, entradas opcionais na paleta de comandos e seu próprio armazenamento local incluído no seu backup criptografado. As extensões rodam com acesso total neste dispositivo, então instale apenas arquivos de quem você confia. Nada sobre elas é enviado para servidor algum."
     },
     "coin-flip": {
       "title": "Cara ou Coroa",
@@ -1139,16 +1139,29 @@
       "confirm_remove": "Remover {name}? O código e os dados salvos serão apagados deste dispositivo.",
       "trust_prompt": "Instalar {name} v{version}? Será executada com acesso total aos seus dados neste dispositivo. Instale apenas arquivos de quem você confia. Permissões: {perms}",
       "update_prompt": "Atualizar {name} {old} → {new}? Os dados salvos são mantidos.",
+      "reinstall_prompt": "Reinstalar {name} {new}? Os dados salvos são mantidos.",
       "downgrade_prompt": "Substituir {name} {old} pela versão anterior {new}? Os dados salvos são mantidos.",
       "replace_prompt": "Substituir {oldName} {old} por {name} {new}? Ela usa o mesmo ID, então assume os dados salvos de {oldName} e será executada com acesso total aos seus dados neste aparelho. Continue só se confiar no arquivo.",
       "update_perms_added": "Novas permissões: {perms}.",
       "update_perms_removed": "Não usa mais: {perms}.",
+      "large_note": "({kb} KB — grande para o armazenamento local)",
       "installed_ok": "instalada.",
       "installed_where": "{name} instalada. Abra quando quiser pelo menu Ferramentas.",
       "sample_heading": "Experimente o exemplo",
       "sample_install": "instalar hello-world",
       "sample_download": "baixar o arquivo",
       "err_prefix": "falha ao instalar:",
+      "err_no_manifest": "este arquivo não tem manifesto de extensão (script#mentria-ext).",
+      "err_bad_json": "o manifesto não é um JSON válido.",
+      "err_bad_id": "o id deve estar em kebab-case, com 3 a 48 caracteres.",
+      "err_reserved_id": "o id \"{id}\" é reservado.",
+      "err_bad_name": "o manifesto precisa de um nome de até 40 caracteres.",
+      "err_bad_version": "a versão deve seguir o formato major.minor.patch, como 1.0.0.",
+      "err_too_large": "o arquivo tem {kb} KB. As extensões ficam no armazenamento local, então precisam ter menos de 1536 KB.",
+      "err_storage_full": "o armazenamento está cheio. Remova uma extensão ou libere espaço.",
+      "err_app_only": "extensões do tipo app são instaladas pela página delas na Galeria de extensões.",
+      "err_manifest": "o manifesto é inválido ({detail}).",
+      "err_download": "não foi possível baixar {url}",
       "choose_file": "Escolher arquivo"
     },
     "search": {
@@ -1793,7 +1806,7 @@
     },
     "ext_gallery": {
       "title": "Galeria de extensões",
-      "lede": "Extensões próprias que você pode instalar com um clique. Cada uma é um único arquivo HTML que roda apenas neste dispositivo: ganha um atalho no seu lançador e seu próprio armazenamento local, e nunca toca no site público.",
+      "lede": "Extensões feitas pelo Mentria. Instale uma com um clique: ela ganha um atalho no seu lançador e seu próprio armazenamento neste dispositivo, e abre mesmo offline.",
       "btn_install": "Instalar",
       "btn_update": "Atualizar para v{v}",
       "installed": "Instalada",

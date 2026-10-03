@@ -352,8 +352,8 @@
     },
     "extensions": {
       "title": "Extensions",
-      "lede": "Install private single-file extensions that live only on this device. They appear in your launcher and terminal — and never on the public site.",
-      "tldr": "A bring-your-own-tool platform. An extension is one HTML file with an embedded manifest; install it here and it gets a tile in your launcher, optional terminal commands, and its own local storage that rides your encrypted backup. Extensions run with full access on this device, so only install files from people you trust. Nothing about them is ever uploaded."
+      "lede": "Install private single-file extensions that live only on this device. They appear in your launcher and command palette — and never on the public site.",
+      "tldr": "A bring-your-own-tool platform. An extension is one HTML file with an embedded manifest; install it here and it gets a tile in your launcher, optional command-palette entries, and its own local storage that rides your encrypted backup. Extensions run with full access on this device, so only install files from people you trust. Nothing about them is ever uploaded."
     },
     "coin-flip": {
       "title": "Coin Flip",
@@ -536,7 +536,7 @@
     "extensions-sdk": {
       "title": "Extension SDK",
       "lede": "Build single-file extensions that run locally in Mentria — no store, no server, no upload.",
-      "tldr": "Extensions are single HTML files that run inside Mentria with a small host API: storage scoped to the extension, theme tokens, toasts, launcher tiles and command-line mounts. Installing is a human-confirmed local import — nothing is uploaded, remotely reviewed, or auto-updated. This page documents the manifest and host API and ships a copy-paste starter."
+      "tldr": "Extensions are single HTML files that run inside Mentria with a small host API: storage scoped to the extension, theme tokens, toasts, launcher tiles and command-palette entries. Installing is a human-confirmed local import — nothing is uploaded, remotely reviewed, or auto-updated. This page documents the manifest and host API and ships a copy-paste starter."
     },
     "comms": {
       "title": "Comms",
@@ -1139,16 +1139,29 @@
       "confirm_remove": "Remove {name}? Its source and saved data are deleted from this device.",
       "trust_prompt": "Install {name} v{version}? It will run with full access to your data on this device. Only install files from people you trust. Permissions: {perms}",
       "update_prompt": "Update {name} {old} → {new}? Saved data is kept.",
+      "reinstall_prompt": "Reinstall {name} {new}? Saved data is kept.",
       "downgrade_prompt": "Replace {name} {old} with older {new}? Saved data is kept.",
       "replace_prompt": "Replace {oldName} {old} with {name} {new}? It uses the same ID, so it takes over {oldName}'s saved data and runs with full access to your data on this device. Only continue if you trust the file.",
       "update_perms_added": "New permissions: {perms}.",
       "update_perms_removed": "No longer uses: {perms}.",
+      "large_note": "({kb} KB — large for local storage)",
       "installed_ok": "installed.",
       "installed_where": "{name} installed. Open it any time from the Tools menu.",
       "sample_heading": "Try the sample",
       "sample_install": "install hello-world",
       "sample_download": "download the file",
       "err_prefix": "install failed:",
+      "err_no_manifest": "this file has no extension manifest (script#mentria-ext).",
+      "err_bad_json": "the manifest isn't valid JSON.",
+      "err_bad_id": "the id must be kebab-case, 3–48 characters.",
+      "err_reserved_id": "the id \"{id}\" is reserved.",
+      "err_bad_name": "the manifest needs a name of up to 40 characters.",
+      "err_bad_version": "the version must be major.minor.patch, like 1.0.0.",
+      "err_too_large": "the file is {kb} KB. Extensions are kept in local storage, so they must be under 1536 KB.",
+      "err_storage_full": "storage is full. Remove an extension or free some space.",
+      "err_app_only": "app extensions install from their page in the Extension Gallery.",
+      "err_manifest": "the manifest is invalid ({detail}).",
+      "err_download": "couldn't download {url}",
       "choose_file": "Choose file"
     },
     "search": {
@@ -1793,7 +1806,7 @@
     },
     "ext_gallery": {
       "title": "Extension Gallery",
-      "lede": "First-party extensions you can install in one click. Each is a single HTML file that runs only on this device — it gets a launcher tile and its own local storage, and never touches the public site.",
+      "lede": "Extensions made by Mentria. Install one in a click: it gets a launcher tile and its own storage on this device, and it opens even when you're offline.",
       "btn_install": "Install",
       "btn_update": "Update to v{v}",
       "installed": "Installed",

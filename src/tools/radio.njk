@@ -18,6 +18,7 @@ eleventyComputed:
 </section>
 
 {% set terminalTitle = "radio.js" %}
+{% set terminalMini = "radio" %}
 {% include "terminal-frame-open.njk" %}
 <section class="rd">
 
@@ -109,7 +110,9 @@ window.RADIO_COPY = {
   likedRemove:     {{ ("tool.radio.liked_remove"     | t) | dump | safe }},
   sleepLeft:       {{ ("tool.radio.sleep_left"       | t) | dump | safe }},
   sleepMinutes:    {{ ("tool.radio.sleep_minutes"    | t) | dump | safe }},
-  floatDocTitle:   {{ ("tool.radio.float_doc_title"  | t) | dump | safe }}
+  floatDocTitle:   {{ ("tool.radio.float_doc_title"  | t) | dump | safe }},
+  btnPlayAria:     {{ ("tool.radio.btn_play_aria"    | t) | dump | safe }},
+  btnPauseAria:    {{ ("tool.radio.btn_pause_aria"   | t) | dump | safe }}
 };
 </script>
 <script type="module" src="/assets/radio/radio.js"></script>

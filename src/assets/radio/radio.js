@@ -8,6 +8,8 @@ import {
 } from "./preferences.js";
 
 const ART_BASE = "https://mentria-ai.github.io/radio-catalog/";
+const RESUME_KEY = "mentria-radio-resume";
+const RESUME_MAX_AGE = 12 * 3600000;
 
 const COPY = window.RADIO_COPY || {
   ready: "Ready",
@@ -20,6 +22,8 @@ const COPY = window.RADIO_COPY || {
   errLoadTrack: "Failed to load track",
   trackCountFmt: "{n} tracks",
   untitled: "Untitled",
+  btnPlayAria: "Play",
+  btnPauseAria: "Pause",
 };
 
 const PLAY_SVG =
@@ -41,11 +45,14 @@ class MentriaRadio {
     this.preferences = {};
     this.history = [];
     this.currentTrack = null;
-    this.nextTrack = null;
-    this.nextLoaded = null; // { audio, duration }
     this.currentDuration = 0;
+    this.loading = null;
+    this.next = null;
+    this.seq = 0;
+    this.wantPlay = false;
+    this.resumeAt = null;
     this.progressTimer = null;
-    this.crossfadeTimer = null;
+    this.player.onblocked = () => this.pausePlayback();
 
     this.el = {
       statusDot: document.getElementById("rd-status-dot"),
@@ -102,7 +109,9 @@ class MentriaRadio {
       console.error("[radio] init failed:", err);
       this.setStatus("error", COPY.errLoadCatalog);
       if (this.el.retry) this.el.retry.hidden = false;
+      return;
     }
+    this.restore();
   }
 
   canPlayCatalog() {
@@ -117,6 +126,7 @@ class MentriaRadio {
   syncTransport(playing) {
     this.el.play.innerHTML = playing ? PAUSE_SVG : PLAY_SVG;
     this.el.play.classList.toggle("playing", playing);
+    this.el.play.setAttribute("aria-label", playing ? COPY.btnPauseAria : COPY.btnPlayAria);
     if ("mediaSession" in navigator) {
       try {
         navigator.mediaSession.playbackState = playing ? "playing" : "paused";
@@ -124,167 +134,202 @@ class MentriaRadio {
     }
   }
 
+  togglePlayback() {
+    if (this.wantPlay) this.pausePlayback();
+    else this.resumePlayback();
+  }
+
   pausePlayback() {
-    if (!this.player.isPlaying) return;
     this.player.pause();
+    if (!this.wantPlay) return;
+    this.wantPlay = false;
     this.syncTransport(false);
     this.setStatus("ready", COPY.paused);
-    if (this.progressTimer) clearInterval(this.progressTimer);
-    if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
+    this.stopProgressTimer();
   }
 
   resumePlayback() {
-    if (!this.currentTrack || this.player.isPlaying) return;
-    this.player.resume();
+    if (this.wantPlay) return;
+    if (!this.player._a && !this.loading) {
+      this.play();
+      return;
+    }
+    this.wantPlay = true;
     this.syncTransport(true);
+    if (this.loading) {
+      this.setStatus("loading", COPY.loadingTrack);
+      return;
+    }
+    this.player.resume();
     this.setStatus("playing", COPY.playing);
     this.startProgressTimer();
-    this.scheduleCrossfade();
   }
 
   // ── Playback ──────────────────────────────────────
 
-  async play() {
-    this.player.init();
+  play() {
+    const seq = ++this.seq;
+    this.wantPlay = true;
+    this.syncTransport(true);
     this.player.setVolume(this.el.volume.value / 100);
-
     this.setStatus("loading", COPY.selectingTrack);
+    this.dropNext();
+    return this.loadAndPlay(this.pick(this.history, this.lastPlayed()), seq);
+  }
 
-    const currentMood = this.currentTrack ? this.currentTrack.mood : null;
-    const currentEnergy = this.currentTrack ? this.currentTrack.energy : null;
-    const track = selectNextTrack(
-      this.catalog,
-      this.history,
+  lastPlayed() {
+    return this.history[this.history.length - 1] || null;
+  }
+
+  pick(history, after, pool) {
+    return selectNextTrack(
+      pool || this.catalog,
+      history,
       this.preferences,
-      currentMood,
-      currentEnergy
+      after ? after.mood : null,
+      after ? after.energy : null
     );
+  }
 
-    await this.loadAndPlay(track);
+  async loadAndPlay(track, seq, failedIds, req) {
+    if (!track) {
+      this.failLoad();
+      return;
+    }
+    failedIds = failedIds || new Set();
+    this.setCurrent(track);
+    req = req || this.player.load(track.url);
+    this.loading = req;
+    let loaded = null;
+    let error = null;
+    try {
+      loaded = await req.ready;
+    } catch (err) {
+      error = err;
+    }
+    if (seq !== this.seq) {
+      this.player.discard(req.audio);
+      return;
+    }
+    this.loading = null;
+    if (loaded) {
+      this.begin(loaded);
+      return;
+    }
+    console.error("[radio] loadAndPlay failed:", error);
+    this.player.discard(req.audio);
+    failedIds.add(track.id);
+    const okCatalog = this.catalog.filter((t) => !failedIds.has(t.id));
+    if (okCatalog.length > 0 && failedIds.size < 5) {
+      const next = this.pick(this.history, this.lastPlayed(), okCatalog);
+      if (next) return this.loadAndPlay(next, seq, failedIds);
+    }
+    this.failLoad();
+  }
+
+  failLoad() {
+    this.loading = null;
+    this.wantPlay = false;
+    this.player.pause();
+    this.stopProgressTimer();
+    this.setStatus("error", COPY.errLoadTrack);
+    this.syncTransport(false);
+    this.el.play.disabled = false;
+    this.el.skip.disabled = false;
+  }
+
+  setCurrent(track) {
+    this.currentTrack = track;
+    this.currentDuration = 0;
+    this.stopProgressTimer();
+    this.updateNowPlaying();
+    if (this.wantPlay) this.setStatus("loading", COPY.loadingTrack);
+  }
+
+  begin(loaded) {
+    const { audio, duration } = loaded;
+    const at = this.resumeAt;
+    this.resumeAt = null;
+    this.currentDuration = duration;
+    this.watch(audio);
+    if (at && at.id === this.currentTrack.id && at.t > 0 && !(at.t >= duration)) {
+      try {
+        audio.currentTime = at.t;
+      } catch (_) {}
+    }
+    this.player.start(audio, this.wantPlay);
+    this.updateNowPlaying();
+    this.renderProgress();
+    this.el.play.disabled = false;
+    this.el.skip.disabled = false;
+    this.el.like.disabled = false;
+    if (this.wantPlay) {
+      this.setStatus("playing", COPY.playing);
+      this.startProgressTimer();
+    } else {
+      this.setStatus("ready", COPY.paused);
+    }
+    this.syncTransport(this.wantPlay);
     this.prepareNext();
   }
 
-  async loadAndPlay(track, failedIds) {
-    this.setStatus("loading", COPY.loadingTrack);
-    failedIds = failedIds || new Set();
-    try {
-      const loaded = await this.player.loadTrack(track.url);
-      const { duration } = this.player.playAudio(loaded);
-
-      this.currentTrack = track;
-      this.currentDuration = duration;
-      this.updateNowPlaying();
-      this.startProgressTimer();
-      this.scheduleCrossfade();
-
-      this.setStatus("playing", COPY.playing);
-      this.syncTransport(true);
-      this.el.play.disabled = false;
-      this.el.skip.disabled = false;
-      this.el.like.disabled = false;
-    } catch (err) {
-      console.error("[radio] loadAndPlay failed:", err);
-      failedIds.add(track.id);
-      const okCatalog = this.catalog.filter((t) => !failedIds.has(t.id));
-      if (okCatalog.length > 0 && failedIds.size < 5) {
-        const next = selectNextTrack(
-          okCatalog,
-          this.history,
-          this.preferences,
-          this.currentTrack ? this.currentTrack.mood : null,
-          this.currentTrack ? this.currentTrack.energy : null
-        );
-        if (next) return this.loadAndPlay(next, failedIds);
-      }
-      this.setStatus("error", COPY.errLoadTrack);
-      this.syncTransport(false);
-      this.el.play.disabled = false;
-      this.el.skip.disabled = false;
-    }
+  watch(audio) {
+    audio.onended = () => {
+      if (audio === this.player._a) this.advance(false);
+    };
+    audio.addEventListener("pause", () => {
+      if (audio === this.player._a && this.wantPlay && audio.paused && !audio.ended) this.pausePlayback();
+    });
+    audio.addEventListener("play", () => {
+      if (audio === this.player._a && !this.wantPlay && !audio.paused) this.resumePlayback();
+    });
   }
 
-  async crossfadeToNext() {
-    if (!this.player.isPlaying) return;
-    if (this.currentTrack) {
-      await this.recordEnd(false);
-      this.history.push(this.currentTrack);
+  endCurrent(skipped, restart) {
+    this.stopProgressTimer();
+    const track = this.currentTrack;
+    if (this.loading) {
+      this.player.discard(this.loading.audio);
+      this.loading = null;
+    } else if (track && this.player._a && !restart) {
+      this.recordEnd(track, this.player.currentTime, this.currentDuration, skipped);
     }
-
-    if (this.nextLoaded && this.nextTrack) {
-      const { duration } = this.player.playAudio(this.nextLoaded);
-      this.currentTrack = this.nextTrack;
-      this.currentDuration = duration;
-      this.nextTrack = null;
-      this.nextLoaded = null;
-
-      this.updateNowPlaying();
-      this.startProgressTimer();
-      this.scheduleCrossfade();
-      this.setStatus("playing", COPY.playing);
-      this.syncTransport(true);
-      this.prepareNext();
-    } else {
-      await this.play();
-    }
+    this.player.discard(this.player._a);
+    if (track && !restart) this.history.push(track);
+    return track;
   }
 
-  scheduleCrossfade() {
-    if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
-    const audio = this.player._a;
-    if (audio) {
-      audio.onended = () => { audio.onended = null; this.crossfadeToNext(); };
-      return;
-    }
-    const delayMs = Math.max(0, (this.currentDuration - this.player.currentTime) * 1000);
-    this.crossfadeTimer = setTimeout(() => this.crossfadeToNext(), delayMs);
+  advance(skipped) {
+    const seq = ++this.seq;
+    const last = this.endCurrent(skipped);
+    this.wantPlay = true;
+    this.syncTransport(true);
+    const next = this.next;
+    this.next = null;
+    this.el.nextTitle.textContent = "\u2014";
+    if (next) return this.loadAndPlay(next.track, seq, null, next);
+    return this.loadAndPlay(this.pick(this.history, last), seq);
   }
 
-  async prepareNext() {
-    const currentMood = this.currentTrack ? this.currentTrack.mood : null;
-    const currentEnergy = this.currentTrack ? this.currentTrack.energy : null;
-    const track = selectNextTrack(
-      this.catalog,
-      [...this.history, this.currentTrack].filter(Boolean),
-      this.preferences,
-      currentMood,
-      currentEnergy
-    );
+  skip() {
+    return this.advance(true);
+  }
 
+  prepareNext() {
+    this.dropNext();
+    const current = this.currentTrack;
+    const track = this.pick([...this.history, current].filter(Boolean), current);
+    if (!track) return;
     this.el.nextTitle.textContent = track.title || track.id;
-    this.nextTrack = track;
-
-    try {
-      this.nextLoaded = await this.player.loadTrack(track.url);
-    } catch (err) {
-      console.warn("[radio] pre-load failed:", err);
-      this.nextLoaded = null;
-    }
+    const req = this.player.load(track.url);
+    this.next = { track, audio: req.audio, ready: req.ready };
+    req.ready.catch((err) => console.warn("[radio] pre-load failed:", err));
   }
 
-  async skip() {
-    if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
-
-    if (this.currentTrack) {
-      await this.recordEnd(true);
-      this.history.push(this.currentTrack);
-    }
-
-    if (this.nextLoaded && this.nextTrack) {
-      const { duration } = this.player.playAudio(this.nextLoaded);
-      this.currentTrack = this.nextTrack;
-      this.currentDuration = duration;
-      this.nextTrack = null;
-      this.nextLoaded = null;
-
-      this.updateNowPlaying();
-      this.startProgressTimer();
-      this.scheduleCrossfade();
-      this.setStatus("playing", COPY.playing);
-      this.syncTransport(true);
-      this.prepareNext();
-    } else {
-      await this.play();
-    }
+  dropNext() {
+    if (!this.next) return;
+    this.player.discard(this.next.audio);
+    this.next = null;
   }
 
   async toggleLike() {
@@ -305,16 +350,15 @@ class MentriaRadio {
 
   async playTrack(track) {
     if (!track) return;
-    if (!this.player._a) this.player.init();
+    const seq = ++this.seq;
+    this.endCurrent(false, !!(this.currentTrack && this.currentTrack.id === track.id));
+    this.wantPlay = true;
+    this.syncTransport(true);
     this.player.setVolume(this.el.volume.value / 100);
-    if (this.crossfadeTimer) clearTimeout(this.crossfadeTimer);
-    if (this.currentTrack && this.currentTrack.id !== track.id) {
-      await this.recordEnd(false);
-      this.history.push(this.currentTrack);
-    }
-    await this.loadAndPlay(track);
-    this.renderLiked();
-    this.prepareNext();
+    this.dropNext();
+    this.el.nextTitle.textContent = "\u2014";
+    await this.loadAndPlay(track, seq);
+    if (seq === this.seq) this.renderLiked();
   }
 
   renderLiked() {
@@ -384,7 +428,7 @@ class MentriaRadio {
       d.querySelector(".pip__title").textContent = this.el.title.textContent;
       d.querySelector(".pip__mood").textContent = this.el.mood.textContent;
       const play = d.querySelector('[data-act="play"]');
-      play.textContent = this.player.isPlaying ? "\u275A\u275A" : "\u25B6";
+      play.textContent = this.wantPlay ? "\u275A\u275A" : "\u25B6";
       play.setAttribute("aria-label", this.el.play.getAttribute("aria-label") || "");
       play.disabled = this.el.play.disabled;
       const skip = d.querySelector('[data-act="skip"]');
@@ -426,7 +470,7 @@ class MentriaRadio {
     this.sleepAt = 0;
     this.el.sleepLeft.textContent = "";
     if (this.sleepControl) this.sleepControl.set("0");
-    if (!this.player.isPlaying) return;
+    if (!this.wantPlay) return;
     const target = this.el.volume.value / 100;
     const steps = 40;
     let i = 0;
@@ -441,14 +485,11 @@ class MentriaRadio {
     }, 200);
   }
 
-  async recordEnd(skipped) {
-    if (!this.currentTrack) return;
-    const trackId = this.currentTrack.id;
-
-    const elapsed = this.player.currentTime;
+  async recordEnd(track, elapsed, duration, skipped) {
+    const trackId = track.id;
     const listenedRatio =
-      this.currentDuration > 0
-        ? Math.min(1, elapsed / this.currentDuration)
+      duration > 0
+        ? Math.min(1, elapsed / duration)
         : 0;
 
     const existing = this.preferences[trackId] || {};
@@ -456,8 +497,8 @@ class MentriaRadio {
 
     const sessionContext = {
       timestamp: Date.now(),
-      mood: this.currentTrack.mood,
-      energy: this.currentTrack.energy,
+      mood: track.mood,
+      energy: track.energy,
       listened_ratio: listenedRatio,
       skipped,
     };
@@ -466,39 +507,49 @@ class MentriaRadio {
       ? [...existing.session_contexts, sessionContext]
       : [sessionContext];
 
-    const updated = await updatePreference(trackId, {
-      listened_ratio: listenedRatio,
-      skipped,
-      play_count: playCount,
-      session_contexts: contexts,
-    });
-    this.preferences[trackId] = updated;
+    try {
+      const updated = await updatePreference(trackId, {
+        listened_ratio: listenedRatio,
+        skipped,
+        play_count: playCount,
+        session_contexts: contexts,
+      });
+      this.preferences[trackId] = updated;
+    } catch (err) {
+      console.warn("[radio] could not save play history:", err);
+    }
   }
 
   // ── Progress timer ────────────────────────────────
 
   startProgressTimer() {
+    this.stopProgressTimer();
+    this.progressTimer = setInterval(() => this.renderProgress(), 250);
+  }
+
+  stopProgressTimer() {
     if (this.progressTimer) clearInterval(this.progressTimer);
+    this.progressTimer = null;
+  }
 
-    this.progressTimer = setInterval(() => {
-      const elapsed = this.player.currentTime;
-      const pct =
-        this.currentDuration > 0
-          ? Math.min(100, (elapsed / this.currentDuration) * 100)
-          : 0;
+  renderProgress() {
+    const elapsed = this.player.currentTime;
+    const pct =
+      this.currentDuration > 0
+        ? Math.min(100, (elapsed / this.currentDuration) * 100)
+        : 0;
 
-      this.el.progressFill.style.width = `${pct}%`;
-      this.el.elapsed.textContent = formatTime(elapsed);
-      if (this.el.progress) this.el.progress.setAttribute("aria-valuenow", Math.round(pct));
-      if ("mediaSession" in navigator && "setPositionState" in navigator.mediaSession && this.currentDuration > 0) {
-        try {
-          navigator.mediaSession.setPositionState({
-            duration: this.currentDuration,
-            position: Math.min(elapsed, this.currentDuration),
-          });
-        } catch (_) {}
-      }
-    }, 250);
+    this.el.progressFill.style.width = `${pct}%`;
+    this.el.elapsed.textContent = formatTime(elapsed);
+    if (this.el.progress) this.el.progress.setAttribute("aria-valuenow", Math.round(pct));
+    if ("mediaSession" in navigator && "setPositionState" in navigator.mediaSession && this.currentDuration > 0) {
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: this.currentDuration,
+          position: Math.min(elapsed, this.currentDuration),
+        });
+      } catch (_) {}
+    }
   }
 
   // ── UI updates ────────────────────────────────────
@@ -506,7 +557,8 @@ class MentriaRadio {
   updateNowPlaying() {
     if (!this.currentTrack) return;
 
-    this.el.title.textContent = this.currentTrack.title || this.currentTrack.id;
+    const title = this.currentTrack.title || this.currentTrack.id;
+    if (this.el.title.textContent !== title) this.el.title.textContent = title;
     this.el.mood.textContent = (this.currentTrack.mood || "").replace(/_/g, " ");
     this.el.duration.textContent = formatTime(this.currentDuration);
     this.el.elapsed.textContent = "0:00";
@@ -540,7 +592,7 @@ class MentriaRadio {
       setHandler("pause", () => this.pausePlayback());
       setHandler("nexttrack", () => this.skip());
       try {
-        navigator.mediaSession.playbackState = this.player.isPlaying ? "playing" : "paused";
+        navigator.mediaSession.playbackState = this.wantPlay ? "playing" : "paused";
         if ("setPositionState" in navigator.mediaSession && this.currentDuration > 0) {
           navigator.mediaSession.setPositionState({ duration: this.currentDuration, position: 0 });
         }
@@ -579,20 +631,63 @@ class MentriaRadio {
         if (v > 0) b.setAttribute("aria-label", (COPY.sleepMinutes || "{n}").replace("{n}", String(v)));
       });
     }
+    this.syncTransport(this.wantPlay);
+  }
+
+  minimize() {
+    if (!window.MentriaMini) return;
+    const track = this.currentTrack;
+    if (track && (this.player._a || this.loading)) {
+      this.saveResume({
+        id: track.id,
+        t: this.loading ? 0 : this.player.currentTime,
+        history: this.history.slice(-20).map((t) => t.id),
+        at: Date.now(),
+      });
+    }
+    this.pausePlayback();
+    window.MentriaMini.minimizeTool();
+  }
+
+  saveResume(state) {
+    try {
+      sessionStorage.setItem(RESUME_KEY, JSON.stringify(state));
+    } catch (_) {}
+  }
+
+  forgetResume() {
+    try {
+      sessionStorage.removeItem(RESUME_KEY);
+    } catch (_) {}
+  }
+
+  takeResume() {
+    let saved = null;
+    try {
+      saved = JSON.parse(sessionStorage.getItem(RESUME_KEY) || "null");
+    } catch (_) {}
+    this.forgetResume();
+    if (!saved || saved.id == null || !(Date.now() - saved.at < RESUME_MAX_AGE)) return null;
+    return saved;
+  }
+
+  restore() {
+    const saved = this.takeResume();
+    if (!saved) return;
+    const byId = new Map(this.catalog.map((t) => [t.id, t]));
+    const track = byId.get(saved.id);
+    if (!track) return;
+    this.history = (Array.isArray(saved.history) ? saved.history : []).map((id) => byId.get(id)).filter(Boolean);
+    this.resumeAt = { id: track.id, t: Number(saved.t) || 0 };
+    this.player.setVolume(this.el.volume.value / 100);
+    this.setStatus("loading", COPY.loadingTrack);
+    this.loadAndPlay(track, ++this.seq);
   }
 
   // ── UI binding ────────────────────────────────────
 
   bindUI() {
-    this.el.play.addEventListener("click", () => {
-      if (!this.currentTrack) {
-        this.play();
-      } else if (this.player.isPlaying) {
-        this.pausePlayback();
-      } else {
-        this.resumePlayback();
-      }
-    });
+    this.el.play.addEventListener("click", () => this.togglePlayback());
 
     this.el.skip.addEventListener("click", () => this.skip());
     this.el.like.addEventListener("click", () => this.toggleLike());
@@ -612,6 +707,14 @@ class MentriaRadio {
       this.el.retry.addEventListener("click", () => this.loadCatalogAndInit());
     }
     document.addEventListener("mentria:localechange", () => this.relabel());
+    const mini = document.querySelector('[data-mini="radio"]');
+    if (mini) mini.addEventListener("click", () => this.minimize());
+    window.addEventListener("pagehide", (e) => {
+      if (e.persisted) this.pausePlayback();
+    });
+    window.addEventListener("pageshow", (e) => {
+      if (e.persisted) this.forgetResume();
+    });
 
     if (window.MentriaStore) {
       const saved = window.MentriaStore.get("tools", "radio_volume");

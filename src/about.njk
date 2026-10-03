@@ -634,7 +634,12 @@ localeReload: true
         file:  {{ ('common.restore_err_file'  | t) | dump | safe }},
         pass:  {{ ('common.restore_err_pass'  | t) | dump | safe }},
         space: {{ ('common.restore_err_space' | t) | dump | safe }},
-        newer: {{ ('common.restore_err_newer' | t) | dump | safe }}
+        newer: {{ ('common.restore_err_newer' | t) | dump | safe }},
+        blocked: {{ ('common.restore_err_blocked' | t) | dump | safe }}
+      },
+      exportErr: {
+        blocked: {{ ('common.backup_err_blocked' | t) | dump | safe }},
+        read:    {{ ('common.backup_err_read'    | t) | dump | safe }}
       }
     };
 
@@ -715,7 +720,8 @@ localeReload: true
         window.MentriaBackup.downloadBackupJson(env, 'mentria-backup');
         setStatus(exportStat, COPY.exportDone, 'ok');
       } catch (err) {
-        setStatus(exportStat, String(err && err.message || err), 'err');
+        var ecode = window.MentriaBackup.exportErrorCode(err);
+        setStatus(exportStat, ecode ? COPY.exportErr[ecode] : String(err && err.message || err), 'err');
       } finally {
         pw = pw2 = ''; passEl.value = ''; pass2El.value = ''; strengthEl.textContent = ''; delete strengthEl.dataset.level;
         exportBtn.disabled = false;

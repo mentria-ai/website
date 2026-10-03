@@ -97,11 +97,11 @@ try {
     if (ls) {
       var seen = (parseInt(ls.getItem(SEEN_KEY), 10) || 0) + 1;
       if (seen > SEEN_CAP) {
-        ls.setItem(DISMISS_KEY, String(Date.now()));
-        ls.removeItem(SEEN_KEY);
+        try { ls.removeItem(SEEN_KEY); } catch (_) {}
+        try { ls.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
         return;
       }
-      ls.setItem(SEEN_KEY, String(seen));
+      try { ls.setItem(SEEN_KEY, String(seen)); } catch (_) {}
     }
     banner.hidden = false;
     void banner.offsetHeight; // reflow so the slide-in transition runs
@@ -110,7 +110,10 @@ try {
   }
 
   function dismissBanner() {
-    if (ls) { ls.setItem(DISMISS_KEY, String(Date.now())); ls.removeItem(SEEN_KEY); }
+    if (ls) {
+      try { ls.removeItem(SEEN_KEY); } catch (_) {}
+      try { ls.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
+    }
     banner.classList.remove('pwa-install-banner--visible');
     setTimeout(function () { banner.hidden = true; }, 280);
   }
@@ -354,19 +357,25 @@ try {
 } catch (e) { console.error(e); }
 try {
       (function () {
-        var storageFullMsg = {{ ("common.storage_full" | t) | dump | safe }};
+        var storageMsg = { full: {{ ("common.storage_full" | t) | dump | safe }}, blocked: {{ ("common.storage_blocked" | t) | dump | safe }} };
         document.addEventListener('mentria:localechange', function () {
           if (window.MentriaI18n && window.MentriaI18n.t) {
             var m = window.MentriaI18n.t('common.storage_full');
-            if (m != null) storageFullMsg = m;
+            if (m != null) storageMsg.full = m;
+            var b = window.MentriaI18n.t('common.storage_blocked');
+            if (b != null) storageMsg.blocked = b;
           }
         });
         var storageErrorActive = false;
+        var storageBlockedTold = false;
         window.addEventListener('mentria:write', function (e) {
           var d = e.detail || {};
           if (d.op !== 'error' || storageErrorActive) return;
+          var blocked = d.reason === 'blocked';
+          if (blocked && storageBlockedTold) return;
+          if (blocked) storageBlockedTold = true;
           storageErrorActive = true;
-          Promise.resolve(typeof window.mentriaAlert === 'function' ? window.mentriaAlert(storageFullMsg) : null)
+          Promise.resolve(typeof window.mentriaAlert === 'function' ? window.mentriaAlert(blocked ? storageMsg.blocked : storageMsg.full) : null)
             .catch(function () {})
             .then(function () { setTimeout(function () { storageErrorActive = false; }, 3000); });
         });

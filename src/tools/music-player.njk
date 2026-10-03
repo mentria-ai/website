@@ -1435,7 +1435,7 @@ root.addEventListener('drop', async (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (npEl.hidden || e.altKey || e.ctrlKey || e.metaKey || menuState) return;
+  if (e.defaultPrevented || npEl.hidden || e.altKey || e.ctrlKey || e.metaKey || menuState) return;
   const t = e.target;
   const tag = (t && t.tagName) || '';
   if (/INPUT|TEXTAREA|SELECT/.test(tag) || (t && t.isContentEditable)) return;

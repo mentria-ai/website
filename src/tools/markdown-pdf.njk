@@ -98,6 +98,7 @@ localeReload: true
 const COPY = {
   remoteImgBlocked: {{ ("tool.markdown-pdf.remote_img_blocked" | t) | dump | safe }},
   importNoteConfirm: {{ ("tool.markdown-pdf.import_note_confirm" | t) | dump | safe }},
+  importFileConfirm: {{ ("tool.markdown-pdf.import_file_confirm" | t) | dump | safe }},
   saved:              {{ ("tool.markdown-pdf.saved"              | t) | dump | safe }},
   countsFmt:          {{ ("tool.markdown-pdf.counts_format"      | t) | dump | safe }},
   errLoadLib:         {{ ("tool.markdown-pdf.err_load_lib"       | t) | dump | safe }},
@@ -441,15 +442,16 @@ async function shareMD() {
   } catch (_) { /* dismissed */ }
 }
 
-function importMD(file) {
+async function importMD(file) {
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    inputEl.value = e.target.result || '';
-    render();
-    saver.schedule();
-  };
-  reader.readAsText(file);
+  let text = '';
+  try { text = await file.text(); } catch (_) { return; }
+  const current = inputEl.value || '';
+  if (current.trim() && current.trim() !== text.trim() && current !== SAMPLE) {
+    if (!(await window.mentriaConfirm(COPY.importFileConfirm))) return;
+  }
+  inputEl.value = text;
+  inputEl.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 /* ── Tabs (mobile) ──────────────────────────────────────────────── */
@@ -478,13 +480,10 @@ inputEl.addEventListener('keydown', (e) => {
   if (e.key === 'Tab' && !e.shiftKey) {
     if (tabExit) { tabExit = false; return; }
     e.preventDefault();
-    const start = inputEl.selectionStart;
-    const end   = inputEl.selectionEnd;
-    const v = inputEl.value;
-    inputEl.value = v.slice(0, start) + '  ' + v.slice(end);
-    inputEl.selectionStart = inputEl.selectionEnd = start + 2;
-    scheduleRender();
-    saver.schedule();
+    if (!document.execCommand || !document.execCommand('insertText', false, '  ')) {
+      inputEl.setRangeText('  ', inputEl.selectionStart, inputEl.selectionEnd, 'end');
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    }
     return;
   }
   tabExit = false;

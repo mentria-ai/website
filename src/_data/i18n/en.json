@@ -948,6 +948,7 @@
       "tab_hint": "Tab inserts spaces. Press Escape, then Tab, to leave the editor.",
       "remote_img_blocked": "remote image blocked: {src}",
       "import_note_confirm": "Replace your current Markdown draft with the note from Quick Notes?",
+      "import_file_confirm": "Replace your current Markdown draft with the imported file?",
       "sample": "# Welcome to Markdown → PDF\n\nThis is a quick demo so you can see how your document will print.\n**Edit on the left**, see the preview on the right, and click **Download PDF** when you're happy.\n\n## Features\n\n- GitHub-Flavored Markdown — tables, task lists, strikethrough\n- Clean code blocks\n- Fast live preview, debounced\n- Auto-saved to your browser\n\n### Code\n\n```js\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n```\n\n### Table\n\n| Feature      | Status |\n| ------------ | :----: |\n| Tables       | ✓      |\n| Lists        | ✓      |\n| Code blocks  | ✓      |\n| Math (KaTeX) | later  |\n\n### Task list\n\n- [x] Type some markdown\n- [x] Watch the preview update\n- [ ] Hit **Download PDF**\n\n> Tip: in the print dialog, choose **Save as PDF** as the destination, set margins to *Default*, and turn off headers/footers for the cleanest result.\n\n---\n\nMade with [Mentria](https://mentria.ai).\n"
     },
     "quote": {

@@ -904,6 +904,13 @@ localeReload: true
     strengthEl.textContent = COPY.strengthHint.replace('{label}', strengthLabel(s.label));
   });
 
+  passInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('files-export-confirm').click(); }
+  });
+  $('files-restore-pass').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('files-restore-confirm').click(); }
+  });
+
   $('files-export-all').addEventListener('click', () => {
     passInput.value = '';
     strengthEl.textContent = '';
@@ -915,7 +922,7 @@ localeReload: true
   $('files-export-confirm').addEventListener('click', async () => {
     if (!window.MentriaBackup) { status.set(COPY.backupFailed.replace('{msg}', 'MentriaBackup'), 'err'); return; }
     const pass = passInput.value;
-    if (!pass || pass.length < 8) { status.set(COPY.passShort, 'err'); return; }
+    if (!pass || pass.length < 8) { strengthEl.dataset.level = 'weak'; strengthEl.textContent = COPY.passShort; passInput.focus(); return; }
     const btn = $('files-export-confirm');
     btn.disabled = true;
     try {
@@ -925,7 +932,8 @@ localeReload: true
       exportModal.close();
       status.set(COPY.backupDone, 'ok');
     } catch (err) {
-      status.set(COPY.backupFailed.replace('{msg}', String(err && err.message || err)), 'err');
+      strengthEl.dataset.level = 'weak';
+      strengthEl.textContent = COPY.backupFailed.replace('{msg}', String(err && err.message || err));
     } finally {
       btn.disabled = false;
     }

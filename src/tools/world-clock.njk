@@ -58,6 +58,11 @@ eleventyComputed:
     </div>
   </details>
 
+  <p class="wc__unsaved" id="wc-unsaved" role="status" aria-live="polite" hidden>
+    <span data-unsaved="blocked" hidden>{{ "tool.world-clock.unsaved_blocked" | t }}</span>
+    <span data-unsaved="full" hidden>{{ "tool.world-clock.unsaved_full" | t }}</span>
+  </p>
+
   <div class="wc__head">
     <h2 class="wc__heading" id="wc-list-title">{{ "tool.world-clock.list_title" | t }}</h2>
     <div class="m-seg wc__seg" id="wc-fmt" role="radiogroup" aria-label="{{ 'tool.world-clock.format_aria' | t }}">
@@ -1428,6 +1433,29 @@ eleventyComputed:
     return mode === 'live' ? Date.now() : moment;
   }
 
+  function storageTrouble() {
+    const S = window.MentriaStore;
+    if (S && typeof S.status === 'function') {
+      try {
+        const s = S.status();
+        if (s === 'ok') return null;
+        if (s === 'blocked' || s === 'full') return s;
+      } catch (_) {}
+    }
+    try {
+      window.localStorage.getItem('mentria.store.' + NS + '.' + KEY);
+      return null;
+    } catch (_) {
+      return 'blocked';
+    }
+  }
+
+  function showUnsaved(why) {
+    const box = $('wc-unsaved');
+    box.hidden = !why;
+    box.querySelectorAll('[data-unsaved]').forEach((s) => { s.hidden = s.dataset.unsaved !== why; });
+  }
+
   function loadState() {
     let raw = null;
     try {
@@ -1439,6 +1467,7 @@ eleventyComputed:
     hasSaved = state.saved;
     saved = state.saved ? state.zones : Z.pickDefaults(localId);
     h12Choice = state.h12;
+    if (storageTrouble() === 'blocked') showUnsaved('blocked');
   }
 
   function persist() {
@@ -1446,9 +1475,11 @@ eleventyComputed:
     if (!window.MentriaStore) return;
     const value = { zones: saved.slice() };
     if (h12Choice !== null) value.h12 = h12Choice;
+    let ok = false;
     try {
-      window.MentriaStore.set(NS, KEY, value);
+      ok = window.MentriaStore.set(NS, KEY, value);
     } catch (_) {}
+    showUnsaved(ok ? null : (storageTrouble() === 'blocked' ? 'blocked' : 'full'));
   }
 
   function makeButton(act, glyph, label, disabled) {
@@ -2291,6 +2322,17 @@ eleventyComputed:
 }
 .wc__status[data-tone="ok"] { color: var(--syn-green); }
 .wc__status[data-tone="err"] { color: var(--syn-pink); }
+
+.wc__unsaved {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--syn-amber);
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--term-fg);
+}
+.wc__unsaved[hidden] { display: none; }
 
 .wc__conv {
   border: 1px solid var(--term-border);

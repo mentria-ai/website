@@ -948,6 +948,7 @@
       "tab_hint": "Tab inserta espacios. Pulsa Escape y luego Tab para salir del editor.",
       "remote_img_blocked": "imagen remota bloqueada: {src}",
       "import_note_confirm": "¿Reemplazar tu borrador de Markdown actual con la nota de Notas Rápidas?",
+      "import_file_confirm": "¿Reemplazar tu borrador de Markdown actual con el archivo importado?",
       "sample": "# Te damos la bienvenida a Markdown → PDF\n\nEsta es una demo rápida para que veas cómo se imprimirá tu documento.\n**Edita a la izquierda**, mira la vista previa a la derecha y pulsa **Descargar PDF** cuando te guste el resultado.\n\n## Funciones\n\n- Markdown al estilo de GitHub: tablas, listas de tareas y tachado\n- Bloques de código limpios\n- Vista previa en vivo y rápida\n- Se guarda automáticamente en tu navegador\n\n### Código\n\n```js\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n```\n\n### Tabla\n\n| Función           | Estado       |\n| ----------------- | :----------: |\n| Tablas            | ✓            |\n| Listas            | ✓            |\n| Bloques de código | ✓            |\n| Fórmulas (KaTeX)  | más adelante |\n\n### Lista de tareas\n\n- [x] Escribe algo de markdown\n- [x] Mira cómo se actualiza la vista previa\n- [ ] Pulsa **Descargar PDF**\n\n> Consejo: en el diálogo de impresión, elige **Guardar como PDF** como destino, deja los márgenes en *Predeterminados* y desactiva los encabezados y pies de página para un resultado más limpio.\n\n---\n\nHecho con [Mentria](https://mentria.ai).\n"
     },
     "quote": {

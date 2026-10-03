@@ -36,7 +36,7 @@ localeReload: true
     <p class="ex__note" id="ex-drop-note" role="alert" hidden></p>
   </div>
 
-  <div class="ex__report" id="ex-report" hidden>
+  <div class="ex__report" id="ex-report" tabindex="-1" hidden>
     <div class="ex__head">
       <img class="ex__thumb" id="ex-thumb" alt="">
       <dl class="ex__facts" id="ex-facts"></dl>
@@ -838,8 +838,10 @@ localeReload: true
       }
     };
     renderReport(meta, file);
+    const had = document.activeElement;
     dropEl.hidden = true;
     reportEl.hidden = false;
+    if (!had || had === document.body || dropEl.contains(had)) { try { reportEl.focus({ preventScroll: true }); } catch (_) {} }
   }
 
   function showError() {
@@ -850,8 +852,10 @@ localeReload: true
   }
 
   function reset() {
+    const had = document.activeElement;
     dropEl.hidden = false;
     reportEl.hidden = true;
+    if (!had || had === document.body || reportEl.contains(had)) { try { dropEl.focus({ preventScroll: true }); } catch (_) {} }
     resultEl.hidden = true;
     if (objUrl) { URL.revokeObjectURL(objUrl); objUrl = null; }
     thumbEl.src = '';
@@ -917,6 +921,10 @@ localeReload: true
   });
   dropEl.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+  dropEl.addEventListener('click', e => {
+    if (e.target.closest('label, input, .ex__note')) return;
+    fileInput.click();
   });
   document.addEventListener('paste', e => {
     const items = e.clipboardData && e.clipboardData.items;

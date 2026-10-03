@@ -237,6 +237,7 @@ function scrollByY(dy) {
 function anchorNow() {
   if (mainEl.hidden || !layout.rows.length) return null;
   const top = Math.max(0, -grid.getBoundingClientRect().top);
+  if (!top) return null;
   for (let r = firstRowBelow(top); r < layout.rows.length; r++) {
     const row = layout.rows[r];
     if (row.type === 'cells') return { fp: items[row.start].fp, off: row.y - top };
@@ -1102,12 +1103,13 @@ function onTap(e) {
 
 stage.addEventListener('pointerdown', (e) => {
   if (e.pointerType === 'mouse' && e.button !== 0) return;
-  if (e.target.closest('video')) return;
+  const vid = e.target.closest('video');
+  if (vid && (e.pointerType === 'mouse' || pointers.size || e.clientY > vid.getBoundingClientRect().bottom - 72)) return;
   if (sliding) return;
-  try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+  if (!vid) { try { stage.setPointerCapture(e.pointerId); } catch (_) {} }
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (pointers.size === 2) startPinch();
-  else if (pointers.size === 1) gesture = { type: 'pending', x0: e.clientX, y0: e.clientY, t0: e.timeStamp, tx0: zoom.tx, ty0: zoom.ty };
+  else if (pointers.size === 1) gesture = { type: 'pending', video: !!vid, x0: e.clientX, y0: e.clientY, t0: e.timeStamp, tx0: zoom.tx, ty0: zoom.ty };
 });
 stage.addEventListener('pointermove', (e) => {
   const p = pointers.get(e.pointerId);
@@ -1124,6 +1126,7 @@ stage.addEventListener('pointermove', (e) => {
     else if (Math.abs(dx) >= Math.abs(dy)) gesture.type = 'swipe';
     else if (dy > 0 && e.pointerType !== 'mouse') gesture.type = 'drop';
     else gesture.type = 'none';
+    if (gesture.video && gesture.type !== 'none') { try { stage.setPointerCapture(e.pointerId); } catch (_) {} }
   }
   if (gesture.type === 'swipe') {
     const edge = (dx > 0 && cur <= 0) || (dx < 0 && cur >= items.length - 1);
@@ -1167,7 +1170,7 @@ function endPointer(e) {
   } else if (g.type === 'drop') {
     if (e.type !== 'pointercancel' && dy > 110) closeBox();
     else { box.style.removeProperty('--fade'); place(0, true); }
-  } else if (g.type === 'pending' && e.type !== 'pointercancel') {
+  } else if (g.type === 'pending' && !g.video && e.type !== 'pointercancel') {
     onTap(e);
   }
 }

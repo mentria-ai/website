@@ -16,6 +16,7 @@ function nowMs() {
 
 export function createEngine(opts = {}) {
   const canvas = opts.canvas;
+  let offscreen = false;
   if (!canvas) throw new Error('createEngine: canvas required');
   let quality = normalizeQuality(opts.quality);
   let preset = qualityPreset(quality);
@@ -306,6 +307,7 @@ export function createEngine(opts = {}) {
       acc = 0;
     }
     applySize(true);
+    if (offscreen) { hiddenStopped = true; return; }
     if (!raf) raf = requestAnimationFrame(frame);
   }
 
@@ -316,8 +318,8 @@ export function createEngine(opts = {}) {
   }
 
   function onVisibility() {
-    let hidden = false;
-    try { hidden = document.visibilityState === 'hidden'; } catch (_) {}
+    let hidden = offscreen;
+    try { hidden = hidden || document.visibilityState === 'hidden'; } catch (_) {}
     if (hidden) {
       if (!running) return;
       hiddenStopped = true;
@@ -336,6 +338,18 @@ export function createEngine(opts = {}) {
     }
   }
   try { document.addEventListener('visibilitychange', onVisibility); } catch (_) {}
+  let io = null;
+  try {
+    if (window.parent !== window && typeof IntersectionObserver === 'function') {
+      io = new IntersectionObserver((entries) => {
+        const next = !entries[entries.length - 1].isIntersecting;
+        if (next === offscreen) return;
+        offscreen = next;
+        onVisibility();
+      });
+      io.observe(canvas);
+    }
+  } catch (_) {}
 
   function onLost(e) {
     try { e.preventDefault(); } catch (_) {}
@@ -423,6 +437,7 @@ export function createEngine(opts = {}) {
     try { if (ro) ro.disconnect(); } catch (_) {}
     try { window.removeEventListener('resize', onWindowResize); } catch (_) {}
     try { document.removeEventListener('visibilitychange', onVisibility); } catch (_) {}
+    try { if (io) io.disconnect(); } catch (_) {}
     canvas.removeEventListener('webglcontextlost', onLost, false);
     canvas.removeEventListener('webglcontextrestored', onRestored, false);
     try { if (composer && typeof composer.dispose === 'function') composer.dispose(); } catch (_) {}

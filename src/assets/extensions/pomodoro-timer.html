@@ -2,7 +2,7 @@
 {
   "id": "pomodoro-timer",
   "name": "Pomodoro Timer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "icon": "🍅",
   "author": "Mentria",
   "description": "In-page focus timer with work and break phases. State survives reloads.",
@@ -41,11 +41,13 @@
   .settings { display: flex; gap: 1rem; justify-content: center; }
   .settings label { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 0.3rem; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ext-muted); }
   .settings input { width: 5rem; background: #10141a; border: 1px solid #2a3138; border-radius: 6px; padding: 0.4rem; color: var(--ext-fg); font-family: inherit; font-size: 0.95rem; text-align: center; }
+  .sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 </style>
 <div class="wrap">
   <div class="phase" id="phase" data-p="work"></div>
-  <div class="clock" id="clock" aria-live="polite"></div>
+  <div class="clock" id="clock" role="timer" aria-labelledby="phase clock"></div>
   <div class="done" id="done"></div>
+  <div class="sr" id="say" role="status" aria-live="polite"></div>
   <div class="controls">
     <button class="primary toggle" id="toggle" type="button"><span id="start-label"></span><span id="pause-label" class="off"></span></button>
     <button id="reset" type="button"></button>
@@ -118,6 +120,8 @@
     var breakEl = document.getElementById('break');
     var workLabelEl = document.getElementById('work-label');
     var breakLabelEl = document.getElementById('break-label');
+    var sayEl = document.getElementById('say');
+    var sayTimer = 0;
 
     var L = 'en', PR, NF, NF2;
     function pickLoc(c) {
@@ -163,14 +167,22 @@
       if (s.running) return Math.max(0, Math.round((s.endsAt - Date.now()) / 1000));
       return s.remaining;
     }
+    function put(el, text) {
+      if (el.textContent !== text) el.textContent = text;
+    }
     function render() {
       var sec = left();
-      clockEl.textContent = NF2.format(Math.floor(sec / 60)) + ':' + NF2.format(sec % 60);
-      phaseEl.textContent = t(s.phase === 'work' ? 'focus' : 'brk');
+      put(clockEl, NF2.format(Math.floor(sec / 60)) + ':' + NF2.format(sec % 60));
+      put(phaseEl, t(s.phase === 'work' ? 'focus' : 'brk'));
       phaseEl.dataset.p = s.phase;
-      doneEl.textContent = t('done', { n: s.done });
+      put(doneEl, t('done', { n: s.done }));
       startLabelEl.classList.toggle('off', s.running);
       pauseLabelEl.classList.toggle('off', !s.running);
+    }
+    function say(text) {
+      clearTimeout(sayTimer);
+      sayEl.textContent = '';
+      sayTimer = setTimeout(function () { sayEl.textContent = text; }, 120);
     }
 
     var audio = null;
@@ -210,7 +222,9 @@
       save();
       render();
       if (!skipped) chime();
-      notify(t(s.phase === 'break' ? 'toBreak' : 'toFocus'));
+      var msg = t(s.phase === 'break' ? 'toBreak' : 'toFocus');
+      say(msg);
+      notify(msg);
     }
 
     function tick() {
@@ -242,11 +256,12 @@
     skipEl.addEventListener('click', function () { advance(true); });
 
     function onSetting() {
+      var fresh = !s.running && s.remaining === total();
       s.work = Math.min(180, Math.max(1, parseInt(workEl.value, 10) || 25));
       s.brk = Math.min(60, Math.max(1, parseInt(breakEl.value, 10) || 5));
       workEl.value = s.work;
       breakEl.value = s.brk;
-      if (!s.running) s.remaining = total();
+      if (fresh) s.remaining = total();
       save(); render();
     }
     workEl.addEventListener('change', onSetting);

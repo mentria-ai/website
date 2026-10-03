@@ -123,12 +123,27 @@ function runApp(MentriaEngine) {
 
   let engine = null;
   let generating = false;
+  let loading = null;
 
 
   function onEngineProgress(p) { if (strip) strip.onProgress(p); }
 
+  function onDeviceLost(info) {
+    const dead = engine;
+    engine = null;
+    if (dead) { try { dead.terminate(); } catch (_) {} }
+    setStatus('error', COPY.errDeviceLost);
+    if (!generating && !loading) newBtn.disabled = false;
+    console.error('WebGPU device lost:', info);
+  }
+
+  function loadModel() {
+    if (!loading) loading = startModel().finally(() => { loading = null; });
+    return loading;
+  }
+
   /* Load engine + model */
-  async function loadModel() {
+  async function startModel() {
     setStatus('loading', COPY.statusLoadingModel);
     await ensureStrip();
     try {
@@ -144,11 +159,7 @@ function runApp(MentriaEngine) {
         offerUpgrade: true,
         onProgress: onEngineProgress,
         onTier: (info) => strip.setTier(info),
-        onDeviceLost: (info) => {
-          setStatus('error', COPY.errDeviceLost);
-          newBtn.disabled = true;
-          console.error('WebGPU device lost:', info);
-        }
+        onDeviceLost
       });
       engine = res.engine;
       const base = Tiers.TIERS[res.tier].base;
@@ -160,6 +171,11 @@ function runApp(MentriaEngine) {
         });
       } catch (err) {
         console.warn('Quotes LoRA load failed, using base model:', err);
+      }
+      if (engine !== res.engine) {
+        if (strip) strip.hide();
+        newBtn.disabled = generating;
+        return;
       }
       strip.done({ prime: COPY.statusReady, linger: 1200 });
       setStatus('ready', COPY.statusReady);
@@ -175,9 +191,15 @@ function runApp(MentriaEngine) {
 
   /* Generate quote */
   async function generateQuote() {
-    if (generating || !engine) return;
+    if (generating) return;
     generating = true;
     newBtn.disabled = true;
+    if (!engine) await loadModel();
+    const eng = engine;
+    if (!eng) {
+      generating = false;
+      return;
+    }
     copyBtn.style.display = 'none';
     shareBtn.style.display = 'none';
     quoteEl.textContent = '';
@@ -192,18 +214,21 @@ function runApp(MentriaEngine) {
     let fullText = '';
 
     let nTok = 0;
-    let pendingPaint = false;
+    let frame = 0;
+    let open = true;
 
     function paintToken() {
+      frame = 0;
+      if (!open) return;
       const display = stripWrapQuotes(fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim());
       // Markdown-rendered output (escapes html first → safe). Falls back to text.
       if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || '<p>…</p>';
       else quoteEl.textContent = display || '…';
-      pendingPaint = false;
     }
+    const close = () => { open = false; if (frame) { cancelAnimationFrame(frame); frame = 0; } };
 
     try {
-      await engine.generate({
+      await eng.generate({
         messages,
         maxTokens: MAX_TOKENS,
         // Match the original transformers.js sampling for similar
@@ -214,18 +239,17 @@ function runApp(MentriaEngine) {
         repetitionPenalty: 1.1,
         enableThinking: false,
       }, (event) => {
+        if (!open) return;
         if (typeof event.token === 'string' && event.token.length > 0) {
           // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
           if (/^<\|[^|]*\|>$/.test(event.token)) return;
           fullText += event.token;
           if (strip) strip.token(++nTok);
-          if (!pendingPaint) {
-            pendingPaint = true;
-            requestAnimationFrame(paintToken);
-          }
+          if (!frame) frame = requestAnimationFrame(paintToken);
         }
       });
 
+      close();
       if (strip) strip.done({ tokens: nTok });
       const display = stripWrapQuotes(fullText
         .replace(/<think>[\s\S]*?<\/think>/g, '')
@@ -238,15 +262,17 @@ function runApp(MentriaEngine) {
       if (display) copyBtn.style.display = '';
       if (display && navigator.share) shareBtn.style.display = '';
     } catch (err) {
+      close();
       console.error('Generation error:', err);
-      if (strip) strip.error(String(err && err.message || err), { phase: 'answering' });
+      const lost = engine !== eng;
+      if (strip) strip.error(String(err && err.message || err), lost ? { phase: 'answering', prime: COPY.errDeviceLost, onRetry: generateQuote } : { phase: 'answering' });
       quoteEl.textContent = COPY.errGeneration;
       quoteEl.classList.remove('mq__quote--typing');
     }
 
     generating = false;
     newBtn.disabled = false;
-    setStatus('ready', COPY.statusReady);
+    if (engine === eng) setStatus('ready', COPY.statusReady);
   }
 
   function stripWrapQuotes(text) {
@@ -284,11 +310,6 @@ function runApp(MentriaEngine) {
 
   /* Init */
   (async () => {
-    setStatus('idle', COPY.statusLoadingModel);
-    if (!(await window.mentriaConfirmHeavyDownload())) {
-      setStatus('idle', COPY.downloadPostponed);
-      return;
-    }
     await loadModel();
     if (engine) generateQuote();
   })();

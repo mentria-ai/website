@@ -82,7 +82,7 @@ localeReload: true
     <p class="cps__panel-body">{{ "tool.compass.unsupported_body" | t }}</p>
     <canvas class="cps__qr" id="cps-qr" role="img" aria-label="{{ 'tool.compass.qr_caption' | t }}" hidden></canvas>
     <p class="cps__qr-caption">{{ "tool.compass.qr_caption" | t }}</p>
-    <a class="cps__qr-link" href="https://mentria.ai/tools/compass/">mentria.ai/tools/compass/</a>
+    <a class="cps__qr-link" href="{{ site.siteUrl }}{{ page.url }}">{{ site.siteUrl | replace("https://", "") }}{{ page.url }}</a>
   </div>
 
 </section>
@@ -112,7 +112,7 @@ localeReload: true
   };
 
   var CARDINALS = [COPY.dirN, COPY.dirNE, COPY.dirE, COPY.dirSE, COPY.dirS, COPY.dirSW, COPY.dirW, COPY.dirNW];
-  var QR_URL = 'https://mentria.ai/tools/compass/';
+  var QR_URL = {{ (site.siteUrl ~ page.url) | dump | safe }};
   var SVG_NS = 'http://www.w3.org/2000/svg';
   var SMOOTHING = 0.18;
   var SETTLE_MS = 2200;

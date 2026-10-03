@@ -1590,13 +1590,13 @@ function runApp(MentriaEngine, Tiers) {
     try {
       const keys = await caches.keys();
       for (const key of keys) {
-        if (key.includes('mentria') || key.includes('huggingface') || key.includes('transformers')) {
+        if (key === 'mentria-models' || key.startsWith('mentria-models-') || key.includes('huggingface') || key.includes('transformers')) {
           await caches.delete(key);
         }
       }
       const dbs = (typeof indexedDB.databases === 'function') ? await indexedDB.databases() : [];
       for (const db of dbs) {
-        if (db.name && (db.name.includes('mentria') || db.name.includes('transformers') || db.name.includes('onnxruntime'))) {
+        if (db.name && (db.name === 'mentria-engine' || db.name.includes('transformers') || db.name.includes('onnxruntime'))) {
           indexedDB.deleteDatabase(db.name);
         }
       }

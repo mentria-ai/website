@@ -45,6 +45,11 @@ localeReload: true
     </button>
   </div>
 
+  <p class="iv__unsaved no-print" id="iv-unsaved" role="status" aria-live="polite" hidden>
+    <span data-unsaved="blocked" hidden>{{ "tool.invoice.unsaved_blocked" | t }}</span>
+    <span data-unsaved="full" hidden>{{ "tool.invoice.unsaved_full" | t }}</span>
+  </p>
+
   <details class="iv__saved no-print" id="iv-saved">
     <summary class="iv__saved-sum">{{ "tool.invoice.saved_title" | t }} <span class="iv__saved-count" id="iv-saved-count"></span></summary>
     <p class="iv__saved-hint">{{ "tool.invoice.saved_hint" | t }}</p>
@@ -230,13 +235,45 @@ localeReload: true
     const v = window.MentriaStore ? window.MentriaStore.get(NS, el.id) : localStorage.getItem(LS + el.id);
     if (v != null) el.value = v;
   };
+  const unsavedEl = document.getElementById('iv-unsaved');
+  const unsavedKeys = new Set();
+  let unsavedWhy = null;
+  const storageTrouble = () => {
+    const S = window.MentriaStore;
+    if (S && typeof S.status === 'function') {
+      try {
+        const s = S.status();
+        if (s === 'ok') return null;
+        if (s === 'blocked' || s === 'full') return s;
+      } catch (_) {}
+    }
+    try { window.localStorage.getItem(LS + 'probe'); return null; } catch (_) { return 'blocked'; }
+  };
+  const showUnsaved = (why) => {
+    if (why === unsavedWhy) return;
+    unsavedWhy = why;
+    unsavedEl.hidden = !why;
+    unsavedEl.querySelectorAll('[data-unsaved]').forEach((s) => { s.hidden = s.dataset.unsaved !== why; });
+  };
+  const noteWrite = (key, ok) => {
+    if (ok) unsavedKeys.delete(key);
+    else unsavedKeys.add(key);
+    showUnsaved(unsavedKeys.size ? (storageTrouble() === 'blocked' ? 'blocked' : 'full') : null);
+    return ok;
+  };
+  if (storageTrouble() === 'blocked') showUnsaved('blocked');
   const persist = (el) => {
-    if (window.MentriaStore) window.MentriaStore.set(NS, el.id, el.value);
-    else localStorage.setItem(LS + el.id, el.value);
+    let ok = false;
+    if (window.MentriaStore) ok = window.MentriaStore.set(NS, el.id, el.value);
+    else {
+      try { localStorage.setItem(LS + el.id, el.value); ok = true; } catch (_) {}
+    }
+    noteWrite(el.id, ok);
   };
   const dropField = (id) => {
-    if (window.MentriaStore) window.MentriaStore.remove(NS, id);
-    else localStorage.removeItem(LS + id);
+    if (window.MentriaStore) {
+      if (window.MentriaStore.remove(NS, id)) noteWrite(id, true);
+    } else localStorage.removeItem(LS + id);
   };
   const hasField = (id) => {
     if (window.MentriaStore) return window.MentriaStore.get(NS, id) != null;
@@ -578,12 +615,12 @@ localeReload: true
     const v = window.MentriaStore ? window.MentriaStore.get(NS, DOCS_KEY) : null;
     return Array.isArray(v) ? v.filter((d) => d && d.id && d.data) : [];
   };
-  const setDocs = (docs) => { if (window.MentriaStore) window.MentriaStore.set(NS, DOCS_KEY, docs); };
+  const setDocs = (docs) => { if (window.MentriaStore) noteWrite(DOCS_KEY, window.MentriaStore.set(NS, DOCS_KEY, docs)); };
   const getCur = () => (window.MentriaStore ? window.MentriaStore.get(NS, CUR_KEY) : null) || null;
   const setCur = (id) => {
     if (!window.MentriaStore) return;
-    if (id) window.MentriaStore.set(NS, CUR_KEY, id);
-    else window.MentriaStore.remove(NS, CUR_KEY);
+    if (id) noteWrite(CUR_KEY, window.MentriaStore.set(NS, CUR_KEY, id));
+    else if (window.MentriaStore.remove(NS, CUR_KEY)) noteWrite(CUR_KEY, true);
   };
   const newDocId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const hasContent = (p) => !!(String((p.billTo && p.billTo.companyNameInp) || '').trim()
@@ -949,6 +986,8 @@ localeReload: true
 .iv__saved-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
 .iv__saved-btn { padding: 0.3rem 0.65rem; font-size: 0.75rem; }
 .iv__saved-badge { font-family: var(--font-mono); font-size: 0.72rem; color: var(--syn-cyan, #22d3ee); padding: 0 0.3rem; }
+.iv__unsaved { margin: 0; padding: 0.6rem 0.9rem; border: 1px solid var(--syn-amber, #fbbf24); border-radius: var(--radius-md, 8px); font-family: var(--font-body); font-size: 0.85rem; line-height: 1.5; color: var(--term-fg); }
+.iv__unsaved[hidden] { display: none; }
 
 .iv {
   display: flex;

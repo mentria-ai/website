@@ -22,6 +22,10 @@ localeReload: true
 {% include "terminal-frame-open.njk" %}
 <section class="totp" id="totp">
   <div class="totp-status m-status" id="totp-status" role="status" aria-live="polite"></div>
+  <p class="totp-unsaved" id="totp-unsaved" role="status" aria-live="polite" hidden>
+    <span data-unsaved="blocked" hidden>{{ "tool.totp.unsaved_blocked" | t }}</span>
+    <span data-unsaved="full" hidden>{{ "tool.totp.unsaved_full" | t }}</span>
+  </p>
   <span id="totp-copy-hint" class="sr-only">{{ "tool.totp.copy_code" | t }}</span>
 
   <div class="totp-locked" id="totp-locked" hidden>
@@ -81,6 +85,7 @@ localeReload: true
     <div class="totp-modal__backdrop" data-close></div>
     <div class="totp-modal__card m-modal__card">
       <h3 class="totp-modal__h">{{ "tool.totp.add_title" | t }}</h3>
+      <p class="totp-modal__warn" id="totp-add-unsaved" hidden>{{ "tool.totp.add_unsaved" | t }}</p>
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-scan-btn">{{ "tool.totp.scan_button" | t }}</button>
       <p class="totp-modal__hint">{{ "tool.totp.scan_hint" | t }}</p>
       <div class="totp-scanner" id="totp-scanner" hidden>
@@ -116,6 +121,7 @@ localeReload: true
     <div class="totp-modal__backdrop" data-close></div>
     <div class="totp-modal__card m-modal__card">
       <h3 class="totp-modal__h">{{ "tool.totp.import_title" | t }}</h3>
+      <p class="totp-modal__warn" id="totp-import-unsaved" hidden>{{ "tool.totp.add_unsaved" | t }}</p>
       <p class="totp-modal__p" id="totp-import-lede"></p>
       <ul class="totp-import-list" id="totp-import-list"></ul>
       <p class="totp-modal__p" id="totp-import-batch" hidden></p>
@@ -208,6 +214,7 @@ localeReload: true
   .totp-clock { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--syn-amber, #fbbf24); border-radius: var(--radius-md, 8px); font-size: 13px; line-height: 1.45; color: var(--term-fg); }
   .totp-clock[hidden] { display: none; }
   .totp-clock__msg { margin: 0; flex: 1 1 240px; }
+  .totp-unsaved { margin: 0; padding: 10px 12px; border: 1px solid var(--syn-amber, #fbbf24); border-radius: var(--radius-md, 8px); font-size: 13px; line-height: 1.45; color: var(--term-fg); }
   .totp-empty { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--term-muted); text-align: center; padding: var(--space-5); }
 
   .totp-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: var(--radius-md); }
@@ -300,6 +307,12 @@ localeReload: true
     copyFailed:               {{ ('common.copy_failed'                  | t) | dump | safe }},
     backup_required:          {{ ('tool.totp.backup_required'          | t) | dump | safe }},
     backup_done:              {{ ('tool.totp.backup_done'              | t) | dump | safe }},
+    backup_button:            {{ ('tool.totp.backup_button'            | t) | dump | safe }},
+    backup_gate_title:        {{ ('tool.totp.backup_gate_title'        | t) | dump | safe }},
+    backup_gate_lede:         {{ ('tool.totp.backup_gate_lede'         | t) | dump | safe }},
+    backup_gate_confirm:      {{ ('tool.totp.backup_gate_confirm'      | t) | dump | safe }},
+    backup_unsaved_title:     {{ ('tool.totp.backup_unsaved_title'     | t) | dump | safe }},
+    backup_unsaved_lede:      {{ ('tool.totp.backup_unsaved_lede'      | t) | dump | safe }},
     scan_unsupported:         {{ ('tool.totp.scan_unsupported'         | t) | dump | safe }},
     scan_denied:              {{ ('tool.totp.scan_denied'              | t) | dump | safe }},
     scan_no_camera:           {{ ('tool.totp.scan_no_camera'           | t) | dump | safe }},
@@ -598,14 +611,43 @@ localeReload: true
     return false;
   }
 
+  let vaultUnsaved = null;
+
+  function storageTrouble() {
+    const S = window.MentriaStore;
+    if (S && typeof S.status === 'function') {
+      try {
+        const s = S.status();
+        if (s === 'ok') return null;
+        if (s === 'blocked' || s === 'full') return s;
+      } catch (_) {}
+    }
+    try { window.localStorage.getItem('mentria.store.' + NS + '.' + VAULT_KEY); return null; } catch (_) { return 'blocked'; }
+  }
+
+  function showUnsaved(why) {
+    const box = $('totp-unsaved');
+    box.hidden = !why;
+    box.querySelectorAll('[data-unsaved]').forEach((s) => { s.hidden = s.dataset.unsaved !== why; });
+  }
+
+  function warnIfUnsaved(id) {
+    $(id).hidden = !(vaultUnsaved || storageTrouble());
+  }
+
   function loadVault() { return window.MentriaStore.get(NS, VAULT_KEY); }
-  function saveVault(v) { window.MentriaStore.set(NS, VAULT_KEY, v); }
+  function saveVault(v) {
+    const ok = !!window.MentriaStore.set(NS, VAULT_KEY, v);
+    vaultUnsaved = ok ? null : (storageTrouble() === 'blocked' ? 'blocked' : 'full');
+    showUnsaved(vaultUnsaved);
+    return ok;
+  }
 
   async function reEncryptSecrets() {
     const json = JSON.stringify(state.accounts);
     const env = await encryptWith(state.masterKey, new TextEncoder().encode(json));
     state.vault.secrets = env;
-    saveVault(state.vault);
+    return saveVault(state.vault);
   }
 
   async function decryptSecrets() {
@@ -884,7 +926,7 @@ localeReload: true
       const wrap = await encryptWith(wrapKey, rawMaster);
       state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
     }
-    saveVault(state.vault);
+    return saveVault(state.vault);
   }
 
   const scanner = { detector: null, useJsQR: false, stream: null, rafId: 0, scanning: false, lastDetect: 0, canvas: null, ctx: null };
@@ -1087,8 +1129,7 @@ localeReload: true
   $('totp-prf-enroll-btn').addEventListener('click', async () => {
     $('totp-prf-enroll-btn').disabled = true;
     try {
-      await enrollPrf();
-      setStatus(COPY.prf_enroll_done, 'ok');
+      if (await enrollPrf()) setStatus(COPY.prf_enroll_done, 'ok');
       $('totp-prf-enroll-btn').hidden = true;
     } catch (err) {
       setStatus(COPY.prf_enroll_failed + ' — ' + (err && err.message || err), 'err');
@@ -1126,6 +1167,7 @@ localeReload: true
     $('totp-issuer').value = '';
     $('totp-account').value = '';
     $('totp-secret').value = '';
+    warnIfUnsaved('totp-add-unsaved');
     addModal.open();
     startScanner({ silentOnFail: true });
   });
@@ -1194,6 +1236,7 @@ localeReload: true
     batch.hidden = !(result.batchSize > 1 && result.batchIndex + 1 < result.batchSize);
     batch.textContent = COPY.import_batch.replace('{i}', String(result.batchIndex + 1)).replace('{n}', String(result.batchSize));
     pendingImport = rows;
+    warnIfUnsaved('totp-import-unsaved');
     importModal.open();
   }
 
@@ -1204,15 +1247,16 @@ localeReload: true
     importModal.close();
     if (state.accounts.length === 0) {
       pendingAdd = chosen;
-      openBackupModal(true);
+      openBackupModal('gate');
       return;
     }
     state.accounts = state.accounts.concat(chosen);
-    await reEncryptSecrets();
+    const kept = await reEncryptSecrets();
     window.MentriaStore.requestPersist();
     renderList();
     tick();
     setStatus(COPY.import_done.replace('{n}', String(chosen.length)), 'ok');
+    if (!kept) openBackupModal('unsaved');
   });
 
   $('totp-save-btn').addEventListener('click', async () => {
@@ -1261,16 +1305,17 @@ localeReload: true
     if (state.accounts.length === 0) {
       pendingAdd = account;
       addModal.close();
-      openBackupModal(true);
+      openBackupModal('gate');
       return;
     }
     state.accounts.push(account);
-    await reEncryptSecrets();
+    const kept = await reEncryptSecrets();
     window.MentriaStore.requestPersist();
     addModal.close();
     setStatus('');
     renderList();
     tick();
+    if (!kept) openBackupModal('unsaved');
   });
 
   let exportAcc = null;
@@ -1373,7 +1418,11 @@ localeReload: true
   new MutationObserver(() => { if ($('totp-export-modal').hidden && exportAcc) closeExport(); })
     .observe($('totp-export-modal'), { attributes: true, attributeFilter: ['hidden'] });
 
-  function openBackupModal(forFirstSave) {
+  function openBackupModal(mode) {
+    const unsaved = mode === 'unsaved';
+    $('totp-backup-title').textContent = unsaved ? COPY.backup_unsaved_title : COPY.backup_gate_title;
+    $('totp-backup-lede').textContent = unsaved ? COPY.backup_unsaved_lede : COPY.backup_gate_lede;
+    $('totp-backup-confirm-btn').textContent = unsaved ? COPY.backup_button : COPY.backup_gate_confirm;
     $('totp-backup-pass').value = '';
     backupModal.open();
     $('totp-backup-pass').focus();
@@ -1414,7 +1463,7 @@ localeReload: true
 
   $('totp-backup-btn').addEventListener('click', () => {
     pendingAdd = null;
-    openBackupModal(false);
+    openBackupModal('manual');
   });
 
   $('totp-list').addEventListener('click', async (e) => {
@@ -1446,6 +1495,7 @@ localeReload: true
   function init() {
     if (!window.MentriaStore) { setStatus('storage unavailable', 'err'); return; }
     state.vault = loadVault();
+    if (storageTrouble() === 'blocked') showUnsaved('blocked');
     showLocked();
   }
 

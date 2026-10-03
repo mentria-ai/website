@@ -54,6 +54,10 @@ localeReload: true
         <button class="qn-action-btn m-btn m-btn--danger" id="qn-delete-btn" title="{{ 'tool.quick-notes.delete_title' | t }}">{{ "tool.quick-notes.delete_btn" | t }}</button>
       </div>
     </div>
+    <p class="qn-unsaved" id="qn-unsaved" role="status" aria-live="polite" hidden>
+      <span data-unsaved="blocked" hidden>{{ "tool.quick-notes.unsaved_blocked" | t }}</span>
+      <span data-unsaved="full" hidden>{{ "tool.quick-notes.unsaved_full" | t }}</span>
+    </p>
     <textarea
       class="qn-editor__textarea"
       id="qn-textarea"
@@ -98,7 +102,8 @@ localeReload: true
     lockFailed:        {{ ("tool.quick-notes.lock_failed"        | t) | dump | safe }},
     unlockFailed:      {{ ("tool.quick-notes.unlock_failed"      | t) | dump | safe }},
     prfUnsupported:    {{ ("tool.quick-notes.prf_unsupported"    | t) | dump | safe }},
-    countSummary:      {{ ("tool.quick-notes.count_summary"      | t) | dump | safe }}
+    countSummary:      {{ ("tool.quick-notes.count_summary"      | t) | dump | safe }},
+    toMdpdfFailed:     {{ ("tool.quick-notes.to_mdpdf_failed"    | t) | dump | safe }}
   };
 
   const STORAGE_KEY = 'mentria-quick-notes';
@@ -110,6 +115,7 @@ localeReload: true
   const textarea    = document.getElementById('qn-textarea');
   const countsEl    = document.getElementById('qn-counts');
   const savedEl     = document.getElementById('qn-saved');
+  const unsavedEl   = document.getElementById('qn-unsaved');
   const exportBtn   = document.getElementById('qn-export-btn');
   const shareBtn    = document.getElementById('qn-share-btn');
   const MDPDF_URL = {{ ("/tools/markdown-pdf/" | localeUrl(lang)) | dump | safe }};
@@ -139,15 +145,46 @@ localeReload: true
   }
 
   let persistingSelf = false;
+  let unsavedWhy = null;
+
+  function storageTrouble() {
+    const S = window.MentriaStore;
+    if (S && typeof S.status === 'function') {
+      try {
+        const s = S.status();
+        if (s === 'ok') return null;
+        if (s === 'blocked' || s === 'full') return s;
+      } catch (_) {}
+    }
+    try { window.localStorage.getItem(STORAGE_KEY); return null; } catch (_) { return 'blocked'; }
+  }
+
+  function showUnsaved(why) {
+    const was = unsavedWhy;
+    unsavedWhy = why || null;
+    if (unsavedWhy === was) return;
+    unsavedEl.hidden = !unsavedWhy;
+    unsavedEl.querySelectorAll('[data-unsaved]').forEach((s) => { s.hidden = s.dataset.unsaved !== unsavedWhy; });
+    if (unsavedWhy) savedEl.textContent = '';
+    else if (was) {
+      const note = getNote(activeId);
+      updateSavedLabel(note && note.updatedAt);
+    }
+  }
 
   function persist() {
     persistingSelf = true;
+    let ok = false;
     try {
-      if (window.MentriaStore) return window.MentriaStore.set('quick_notes', 'blob', notes);
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); return true; } catch (_) { return false; }
+      if (window.MentriaStore) ok = window.MentriaStore.set('quick_notes', 'blob', notes);
+      else {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); ok = true; } catch (_) {}
+      }
     } finally {
       persistingSelf = false;
     }
+    showUnsaved(ok ? null : (storageTrouble() === 'blocked' ? 'blocked' : 'full'));
+    return ok;
   }
 
   function reconcileExternal() {
@@ -492,7 +529,7 @@ localeReload: true
   }
 
   function updateSavedLabel(ts) {
-    if (!ts) { savedEl.textContent = ''; return; }
+    if (!ts || unsavedWhy) { savedEl.textContent = ''; return; }
     const d = new Date(ts);
     const now = new Date();
     const lang = document.documentElement.lang || 'en';
@@ -679,7 +716,10 @@ localeReload: true
     const title = titleInput.value.trim();
     const text = title ? '# ' + title + '\n\n' + body : body;
     if (!text.trim()) return;
-    if (window.MentriaStore) window.MentriaStore.set('handoff', 'md', { text, ts: Date.now() });
+    if (window.MentriaStore && !window.MentriaStore.set('handoff', 'md', { text, ts: Date.now() })) {
+      MentriaUI.toast(COPY.toMdpdfFailed, { duration: 6000 });
+      return;
+    }
     location.href = MDPDF_URL;
   });
   lockBtn.addEventListener('click', handleLockClick);
@@ -759,6 +799,7 @@ localeReload: true
   }
 
   load();
+  if (!unsavedWhy && storageTrouble() === 'blocked') showUnsaved('blocked');
   drainInbox();
   if (ingestSharedContent()) {
     selectNote(activeId);
@@ -774,7 +815,7 @@ localeReload: true
 .qn-print { display: none; }
 
 @media print {
-  .hero, .qn-sidebar, .qn-editor__titlebar, .qn-editor__textarea, .qn-editor__statusbar, .qn-locked { display: none !important; }
+  .hero, .qn-sidebar, .qn-editor__titlebar, .qn-unsaved, .qn-editor__textarea, .qn-editor__statusbar, .qn-locked { display: none !important; }
   .qn-tool { display: block !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; background: none !important; }
   .qn-editor { display: block !important; }
   .qn-print { display: block; color: #111; }
@@ -987,6 +1028,20 @@ localeReload: true
   gap: 0.4rem;
   flex-shrink: 0;
 }
+
+.qn-unsaved {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--term-border);
+  border-left: 3px solid var(--syn-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.07);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--term-fg);
+}
+.qn-unsaved[hidden] { display: none; }
 
 .qn-action-btn {
   padding: 0.35rem 0.75rem;

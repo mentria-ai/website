@@ -59,6 +59,10 @@ localeReload: true
     </button>
   </div>
   <div class="mp__activity no-print" id="mp-activity"></div>
+  <p class="mp__unsaved no-print" id="mp-unsaved" role="status" aria-live="polite" hidden>
+    <span data-unsaved="blocked" hidden>{{ "tool.markdown-pdf.unsaved_blocked" | t }}</span>
+    <span data-unsaved="full" hidden>{{ "tool.markdown-pdf.unsaved_full" | t }}</span>
+  </p>
 
   <div class="mp__panes">
     <section class="mp__pane mp__pane--editor" data-tab="edit">
@@ -113,6 +117,7 @@ const inputEl     = document.getElementById('mp-input');
 const previewEl   = document.getElementById('mp-preview');
 const countsEl    = document.getElementById('mp-counts');
 const savedEl     = document.getElementById('mp-saved');
+const unsavedEl   = document.getElementById('mp-unsaved');
 const downloadBtn = document.getElementById('mp-download');
 const exportBtn   = document.getElementById('mp-export');
 const shareBtn    = document.getElementById('mp-share');
@@ -181,12 +186,35 @@ function updateCounts() {
 }
 
 /* ── Persistence ────────────────────────────────────────────────── */
+function storageTrouble() {
+  const S = window.MentriaStore;
+  if (S && typeof S.status === 'function') {
+    try {
+      const s = S.status();
+      if (s === 'ok') return null;
+      if (s === 'blocked' || s === 'full') return s;
+    } catch (_) {}
+  }
+  try { window.localStorage.getItem(LS_KEY); return null; } catch (_) { return 'blocked'; }
+}
+
+function showUnsaved(why) {
+  unsavedEl.hidden = !why;
+  unsavedEl.querySelectorAll('[data-unsaved]').forEach((s) => { s.hidden = s.dataset.unsaved !== why; });
+}
+
 const saver = MentriaUI.debouncedSaver(() => {
+  let ok = false;
   try {
-    if (window.MentriaStore) window.MentriaStore.set('tools', 'mdpdf_content', inputEl.value);
-    else localStorage.setItem(LS_KEY, inputEl.value);
-    flashSaved();
+    if (window.MentriaStore) ok = window.MentriaStore.set('tools', 'mdpdf_content', inputEl.value);
+    else { localStorage.setItem(LS_KEY, inputEl.value); ok = true; }
   } catch (_) {}
+  showUnsaved(ok ? null : (storageTrouble() === 'blocked' ? 'blocked' : 'full'));
+  if (ok) flashSaved();
+  else {
+    clearTimeout(flashTimer);
+    savedEl.classList.remove('is-visible');
+  }
 }, 500);
 
 let flashTimer = null;
@@ -515,6 +543,7 @@ tabPreview.addEventListener('click', () => setTab('preview'));
 /* ── Init ───────────────────────────────────────────────────────── */
 loadInitial();
 render();
+if (storageTrouble() === 'blocked') showUnsaved('blocked');
 
 (async function importHandoff() {
   if (!window.MentriaStore) return;
@@ -702,6 +731,20 @@ if ('launchQueue' in window) {
   transition: opacity 0.3s ease;
 }
 .mp__saved.is-visible { opacity: 1; }
+
+.mp__unsaved {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+  border-left: 3px solid var(--syn-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.07);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--term-fg);
+}
+.mp__unsaved[hidden] { display: none; }
 
 /* Editor */
 .mp__input {

@@ -147,8 +147,9 @@ localeReload: true
   var GEO_OPTS = { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 };
   var ACC_MAX = 25;
   var ACC_GOOD = 10;
-  var DT_MIN = 0.5;
-  var DT_MAX = 10;
+  var MIN_NOISE_M = 3;
+  var WINDOW_MS = 5000;
+  var GAP_MAX_S = 60;
   var STILL_KMH = 0.5;
   var MOVING_KMH = 1;
   var MAX_PLAUSIBLE_MS = 111.11;
@@ -229,7 +230,10 @@ localeReload: true
   var tickTimer = null;
   var wakeLock = null;
   var currentKmh = 0;
-  var lastFix = null;
+  var anchor = null;
+  var prevFine = null;
+  var recent = [];
+  var outliers = 0;
   var lastFixAt = 0;
   var dirty = false;
   var lastPersistAt = 0;
@@ -308,7 +312,8 @@ localeReload: true
     distEl.textContent = trip.distance > 0 ? fmtDistance(trip.distance) : fmtDistance(0);
     movingEl.textContent = fmtClock(trip.movingMs);
     if (trip.movingMs >= 1000 && trip.distance > 0) {
-      avgEl.textContent = fmtSpeed((trip.distance / (trip.movingMs / 1000)) * 3.6);
+      var avgKmh = (trip.distance / (trip.movingMs / 1000)) * 3.6;
+      avgEl.textContent = fmtSpeed(trip.maxKmh > 0 ? Math.min(avgKmh, trip.maxKmh) : avgKmh);
     } else {
       avgEl.textContent = DASH;
     }
@@ -327,49 +332,84 @@ localeReload: true
     persistTrip();
   }
 
+  function forgetFixes() {
+    anchor = null;
+    prevFine = null;
+    recent = [];
+    outliers = 0;
+  }
+
+  function windowSpeed(fix) {
+    var first = recent[0];
+    if (!first) return null;
+    var span = (fix.t - first.t) / 1000;
+    if (span < 1.5) return null;
+    var d = haversine(first.lat, first.lon, fix.lat, fix.lon);
+    return d > 1.5 * Math.max(first.acc, fix.acc, MIN_NOISE_M) ? d / span : 0;
+  }
+
   function onPosition(pos) {
     var c = pos && pos.coords;
     if (!c) return;
     var tMs = (typeof pos.timestamp === 'number' && isFinite(pos.timestamp)) ? pos.timestamp : Date.now();
     var acc = (typeof c.accuracy === 'number' && isFinite(c.accuracy)) ? c.accuracy : null;
     var fine = acc !== null && acc <= ACC_MAX;
+    var reported = (typeof c.speed === 'number' && isFinite(c.speed) && c.speed >= 0) ? c.speed : null;
+    lastFixAt = Date.now();
 
-    var segOk = false;
-    var segDt = 0;
-    var segDist = 0;
-    if (lastFix !== null) {
-      var dt = (tMs - lastFix.t) / 1000;
-      if (dt >= DT_MIN && dt <= DT_MAX && fine && lastFix.fine) {
-        var d = haversine(lastFix.lat, lastFix.lon, c.latitude, c.longitude);
-        if (d / dt <= MAX_PLAUSIBLE_MS) {
-          segOk = true;
-          segDt = dt;
-          segDist = d;
-        }
+    var mps = reported;
+    if (fine && !(prevFine && tMs <= prevFine.t)) {
+      var fix = { t: tMs, lat: c.latitude, lon: c.longitude, acc: acc };
+      var outlier = false;
+      var impossible = false;
+      if (prevFine) {
+        var dtp = (tMs - prevFine.t) / 1000;
+        var beyond = Math.max(0, haversine(prevFine.lat, prevFine.lon, fix.lat, fix.lon) - Math.max(acc, prevFine.acc));
+        var implied = beyond / dtp;
+        var known = reported !== null || (recent.length > 1 && prevFine.t - recent[0].t >= 1500);
+        var ref = reported !== null ? reported : currentKmh / 3.6;
+        impossible = implied > MAX_PLAUSIBLE_MS;
+        outlier = impossible || (known && dtp < 5 && implied > ref + 12 && implied > 2 * ref + 3);
       }
+      if (outlier && outliers < 2) {
+        outliers++;
+      } else {
+        if (impossible) forgetFixes();
+        outliers = 0;
+        var dti = prevFine ? (tMs - prevFine.t) / 1000 : 0;
+        recent.push(fix);
+        while (recent.length > 1 && tMs - recent[0].t > WINDOW_MS) recent.shift();
+        if (mps === null) {
+          var ws = windowSpeed(fix);
+          if (ws !== null) mps = ws;
+        }
+        var still = reported !== null && reported * 3.6 < STILL_KMH;
+        if (!anchor || still) {
+          anchor = fix;
+        } else {
+          var da = haversine(anchor.lat, anchor.lon, fix.lat, fix.lon);
+          var dta = (tMs - anchor.t) / 1000;
+          if (da > 2 * Math.max(anchor.acc, acc, MIN_NOISE_M) && dta > 0 && da / dta <= MAX_PLAUSIBLE_MS) {
+            trip.distance += da;
+            anchor = fix;
+            dirty = true;
+          }
+        }
+        if (mps !== null) currentKmh = mps * 3.6 < STILL_KMH ? 0 : mps * 3.6;
+        if (dti > 0 && dti <= GAP_MAX_S && currentKmh >= MOVING_KMH) {
+          trip.movingMs += dti * 1000;
+          dirty = true;
+        }
+        var spanOk = reported !== null || (recent.length > 1 && tMs - recent[0].t >= 3000);
+        if (spanOk && currentKmh > trip.maxKmh) {
+          trip.maxKmh = currentKmh;
+          dirty = true;
+        }
+        prevFine = fix;
+      }
+    } else if (mps !== null) {
+      currentKmh = mps * 3.6 < STILL_KMH ? 0 : mps * 3.6;
     }
-
-    var mps = null;
-    if (typeof c.speed === 'number' && isFinite(c.speed) && c.speed >= 0) mps = c.speed;
-    else if (segOk) mps = segDist / segDt;
-
-    if (mps !== null) {
-      var kmh = mps * 3.6;
-      currentKmh = kmh < STILL_KMH ? 0 : kmh;
-      lastFixAt = Date.now();
-    }
-
-    if (segOk) {
-      trip.distance += segDist;
-      if (currentKmh >= MOVING_KMH) trip.movingMs += segDt * 1000;
-      dirty = true;
-    }
-    if (fine && currentKmh > trip.maxKmh) {
-      trip.maxKmh = currentKmh;
-      dirty = true;
-    }
-
-    lastFix = { t: tMs, lat: c.latitude, lon: c.longitude, fine: fine };
 
     if (acc === null) setChip('wait');
     else setChip(acc <= ACC_GOOD ? 'good' : (acc <= ACC_MAX ? 'ok' : 'poor'), acc);
@@ -437,7 +477,7 @@ localeReload: true
   function beginTracking() {
     showView('live');
     tracking = true;
-    lastFix = null;
+    forgetFixes();
     lastFixAt = 0;
     currentKmh = 0;
     setChip('wait');
@@ -466,7 +506,7 @@ localeReload: true
     if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
     syncWakeLock();
     persistTrip();
-    lastFix = null;
+    forgetFixes();
     lastFixAt = 0;
     currentKmh = 0;
     toggleBtn.textContent = COPY.startBtn;

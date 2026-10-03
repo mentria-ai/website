@@ -454,6 +454,13 @@
     };
   }
 
+  function sensorsGranted(names) {
+    if (!navigator.permissions || !navigator.permissions.query) return Promise.resolve(false);
+    return Promise.all(names.map(function (name) {
+      return navigator.permissions.query({ name: name }).then(function (r) { return r.state === 'granted'; });
+    })).then(function (all) { return all.every(Boolean); }, function () { return false; });
+  }
+
   function debouncedSaver(fn, ms) {
     var delay = ms || 500;
     var timer = null;
@@ -733,6 +740,7 @@
     status: status,
     segmented: segmented,
     debouncedSaver: debouncedSaver,
+    sensorsGranted: sensorsGranted,
     downloadFile: downloadFile,
     canShareFile: canShareFile,
     shareFile: shareFile,

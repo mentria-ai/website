@@ -430,7 +430,10 @@ localeReload: true
     updateCalBadge();
     if (!window.isSecureContext) { showPanel('insecure'); return; }
     if (typeof DeviceMotionEvent === 'undefined') { showPanel('unsupported'); return; }
-    if (typeof DeviceMotionEvent.requestPermission === 'function') { showPanel('perm'); return; }
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      MentriaUI.sensorsGranted(['accelerometer']).then(function (ok) { if (ok) startSensor(); else showPanel('perm'); });
+      return;
+    }
     startSensor();
   }
 
@@ -498,7 +501,16 @@ localeReload: true
     }
   });
 
-  window.addEventListener('pagehide', stopSensor);
+  var resumeOnShow = false;
+  window.addEventListener('pagehide', function () {
+    resumeOnShow = active;
+    stopSensor();
+  });
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted || !resumeOnShow) return;
+    resumeOnShow = false;
+    startSensor();
+  });
 
   measureViewport();
   boot();

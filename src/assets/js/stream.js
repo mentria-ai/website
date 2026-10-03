@@ -15,7 +15,11 @@
   var prefix = T.prefix || '';
   var lang = document.documentElement.lang || 'en';
   var BUDGET = 10, MAX_REVIEWS = 5, MAX_PACKS = 6, PAGE = 24;
+  var plural = (function () {
+    try { var rules = new Intl.PluralRules(lang); return function (n) { return rules.select(n); }; } catch (_) { return function (n) { return n === 1 ? 'one' : 'other'; }; }
+  })();
   var t = function (k, vars) {
+    if (vars && typeof vars.n === 'number' && plural(vars.n) === 'one' && (T[k + '_one'] != null || L[k + '_one'] != null)) k = k + '_one';
     var s = T[k] != null ? T[k] : (L[k] != null ? L[k] : k);
     if (vars) Object.keys(vars).forEach(function (v) { s = s.split('{' + v + '}').join(String(vars[v])); });
     return s;

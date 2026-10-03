@@ -36,7 +36,7 @@ eleventyComputed:
       <div class="feed-card__gradient"></div>
       <div class="stream-chip stream-chip--{{ pack.collection }}">{% if pack.collection == "source" %}Source{% else %}Deep Cuts{% endif %}</div>
       <div class="feed-card__info">
-        <p class="feed-card__caption">{% if pack.collection == "source" %}Source{% else %}Deep Cuts{% endif %} · {{ ("learn.cards_n" | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</p>
+        <p class="feed-card__caption">{% if pack.collection == "source" %}Source{% else %}Deep Cuts{% endif %} · {{ (("learn.cards_n_one" if pack.cards.length == 1 else "learn.cards_n") | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</p>
         <h2 class="feed-card__title">{{ pack.title | tloc(locale.code) }}</h2>
         <a class="pack-btn pack-btn--primary stream-card__cta" href="{{ locale.pathPrefix }}/learn/{{ pack.id }}/">{{ "stream.open" | t }}</a>
       </div>
@@ -67,6 +67,7 @@ eleventyComputed:
     done_title: {{ ("stream.done_title" | t) | dump | safe }},
     done_text: {{ ("stream.done_text" | t) | dump | safe }},
     cards_n: {{ ("learn.cards_n" | t) | dump | safe }},
+    cards_n_one: {{ ("learn.cards_n_one" | t) | dump | safe }},
     minutes_n: {{ ("learn.minutes_n" | t) | dump | safe }},
     progress_n: {{ ("learn.progress_n" | t) | dump | safe }},
     browse: {{ ("stream.browse" | t) | dump | safe }},

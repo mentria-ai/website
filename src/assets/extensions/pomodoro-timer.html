@@ -2,7 +2,7 @@
 {
   "id": "pomodoro-timer",
   "name": "Pomodoro Timer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "icon": "🍅",
   "author": "Mentria",
   "description": "In-page focus timer with work and break phases. State survives reloads.",
@@ -94,13 +94,43 @@
       toggleEl.textContent = s.running ? 'Pause' : 'Start';
     }
 
-    function advance() {
-      if (s.phase === 'work') { s.done += 1; s.phase = 'break'; } else { s.phase = 'work'; }
+    var audio = null;
+    function wakeAudio() {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      try {
+        if (!audio) audio = new Ctx();
+        if (audio.state === 'suspended') audio.resume();
+      } catch (e) { audio = null; }
+    }
+    function chime() {
+      if (navigator.vibrate) { try { navigator.vibrate([200, 120, 200]); } catch (e) {} }
+      if (!audio) return;
+      try {
+        var t = audio.currentTime;
+        [880, 660, 880].forEach(function (f, i) {
+          var o = audio.createOscillator();
+          var g = audio.createGain();
+          o.frequency.value = f;
+          g.gain.setValueAtTime(0.0001, t + i * 0.22);
+          g.gain.exponentialRampToValueAtTime(0.25, t + i * 0.22 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.22 + 0.2);
+          o.connect(g);
+          g.connect(audio.destination);
+          o.start(t + i * 0.22);
+          o.stop(t + i * 0.22 + 0.21);
+        });
+      } catch (e) {}
+    }
+
+    function advance(skipped) {
+      if (s.phase === 'work') { if (!skipped) s.done += 1; s.phase = 'break'; } else { s.phase = 'work'; }
       s.remaining = total();
       s.running = false;
       s.endsAt = 0;
       save();
       render();
+      if (!skipped) chime();
       notify(s.phase === 'break' ? 'Break time 🍵' : 'Back to focus 🍅');
     }
 
@@ -111,6 +141,7 @@
     }
 
     function start() {
+      wakeAudio();
       if (s.remaining <= 0) s.remaining = total();
       s.endsAt = Date.now() + s.remaining * 1000;
       s.running = true;
@@ -129,11 +160,13 @@
     document.getElementById('reset').addEventListener('click', function () {
       s.running = false; s.endsAt = 0; s.remaining = total(); save(); render();
     });
-    document.getElementById('skip').addEventListener('click', advance);
+    document.getElementById('skip').addEventListener('click', function () { advance(true); });
 
     function onSetting() {
       s.work = Math.min(180, Math.max(1, parseInt(workEl.value, 10) || 25));
       s.brk = Math.min(60, Math.max(1, parseInt(breakEl.value, 10) || 5));
+      workEl.value = s.work;
+      breakEl.value = s.brk;
       if (!s.running) s.remaining = total();
       save(); render();
     }

@@ -459,11 +459,59 @@ try {
           }).catch(function () { built = null; });
           return built;
         }
+        var inerted = [];
+        function onEntry() { return !!(history.state && history.state.tools); }
+        function trigger() {
+          var list = document.querySelectorAll('[data-tools-open]');
+          for (var i = 0; i < list.length; i++) if (list[i].getClientRects().length) return list[i];
+          return null;
+        }
+        function shield(on) {
+          for (var i = 0; i < inerted.length; i++) inerted[i].removeAttribute('inert');
+          inerted = [];
+          if (!on) return;
+          var floor = parseInt(getComputedStyle(popup).zIndex, 10) || 0;
+          var kids = document.body.children;
+          for (var j = 0; j < kids.length; j++) {
+            var k = kids[j];
+            if (k === popup || k.hasAttribute('inert') || k.hasAttribute('popover')) continue;
+            if (['SCRIPT', 'STYLE', 'LINK', 'TEMPLATE', 'NOSCRIPT'].indexOf(k.tagName) !== -1) continue;
+            if ((parseInt(getComputedStyle(k).zIndex, 10) || 0) >= floor) continue;
+            k.setAttribute('inert', '');
+            inerted.push(k);
+          }
+        }
+        function tabbables() {
+          var list = popup.querySelectorAll('a[href], button, input, select, textarea, summary, [tabindex]');
+          var out = [];
+          for (var i = 0; i < list.length; i++) {
+            var el = list[i];
+            if (el.tabIndex < 0 || el.disabled || el.hidden || !el.getClientRects().length) continue;
+            out.push(el);
+          }
+          return out;
+        }
+        function trapTab(e) {
+          if (e.key !== 'Tab' || e.defaultPrevented || popup.hidden || popup.closest('[inert]')) return;
+          var a = document.activeElement;
+          var inside = !!a && a !== panel && popup.contains(a);
+          if (!inside && a && a !== document.body && a !== panel) return;
+          var f = tabbables();
+          if (!f.length) return;
+          var first = f[0], last = f[f.length - 1];
+          if (!inside) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+          else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+        }
         function open(fromHash) {
-          prevFocus = document.activeElement;
+          if (!popup.hidden) return;
+          var was = document.activeElement;
+          prevFocus = (was && was !== document.body && !popup.contains(was)) ? was : trigger();
           popup.hidden = false;
           document.body.classList.add('is-tools-open');
-          if (!fromHash) history.pushState({ tools: true }, '', '#tools');
+          shield(true);
+          document.addEventListener('keydown', trapTab);
+          if (!fromHash && !onEntry()) history.pushState({ tools: true }, '', '#tools');
           if (find && find.value) { find.value = ''; find.dispatchEvent(new Event('input')); }
           panel.scrollTop = 0;
           popup.scrollTop = 0;
@@ -485,20 +533,40 @@ try {
           if (popup.hidden) return;
           popup.hidden = true;
           document.body.classList.remove('is-tools-open');
-          if (!fromPop && history.state && history.state.tools) history.back();
-          if (prevFocus && prevFocus.focus) { try { prevFocus.focus(); } catch (_) {} }
+          document.removeEventListener('keydown', trapTab);
+          shield(false);
+          if (!fromPop && onEntry()) history.back();
+          var to = prevFocus;
+          prevFocus = null;
+          if (to && to.focus && document.contains(to)) { try { to.focus(); } catch (_) {} }
         }
         document.addEventListener('click', function (e) {
+          var plain = e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
           var a = e.target.closest && e.target.closest('[data-tools-open]');
-          if (a && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); if (popup.hidden) open(); else close(); return; }
+          if (a && plain) { e.preventDefault(); if (popup.hidden) open(); else close(); return; }
           var c = e.target.closest && e.target.closest('[data-tools-close]');
           if (c) { e.preventDefault(); close(); return; }
           var link = e.target.closest && e.target.closest('a[href]');
-          if (link && popup.contains(link) && !popup.hidden) close(true);
+          if (!link || popup.hidden || !popup.contains(link) || !plain || e.defaultPrevented) return;
+          if ((link.target && link.target !== '_self') || link.hasAttribute('download')) return;
+          close(true);
         });
-        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !popup.hidden) { e.preventDefault(); close(); } });
-        window.addEventListener('popstate', function () { if (!(history.state && history.state.tools)) close(true); else open(true); });
-        if (location.hash === '#tools') { history.replaceState({ tools: true }, '', '#tools'); open(true); }
+        document.addEventListener('keydown', function (e) {
+          if (e.key !== 'Escape' || e.isComposing || e.keyCode === 229 || e.defaultPrevented) return;
+          if (popup.hidden || popup.closest('[inert]')) return;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          close();
+        });
+        window.addEventListener('popstate', function () { if (!onEntry()) close(true); else open(true); });
+        window.addEventListener('pageshow', function (e) { if (e.persisted && onEntry() && popup.hidden) open(true); });
+        if (location.hash === '#tools') {
+          if (!onEntry()) {
+            history.replaceState(history.state, '', location.pathname + location.search);
+            history.pushState({ tools: true }, '', '#tools');
+          }
+          open(true);
+        }
       })();
 } catch (e) { console.error(e); }
 try {

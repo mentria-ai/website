@@ -1255,7 +1255,9 @@ body.pwa-sheet-open { overflow: hidden; }
   .pwa-install-banner__desc { font-size: 11px; }
 }
 
-.launcher__recents .launch-tile {
+.launcher__pinned .launch-tile,
+.launcher__recents .launch-tile,
+body.is-tools-open .terminal-frame {
   view-transition-name: none !important;
 }
 

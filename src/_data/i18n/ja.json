@@ -1294,6 +1294,7 @@
       "delete_confirm": "{name} を削除しますか?",
       "delete_label": "{name} を削除",
       "copied": "コピー済み",
+      "copy_code": "コードをコピー",
       "empty_state": "アカウントがまだありません。「アカウント追加」で開始してください。",
       "lock_button": "ロック",
       "backup_button": "バックアップを保存",

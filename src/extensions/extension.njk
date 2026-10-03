@@ -33,7 +33,7 @@ eleventyComputed:
 <section class="xr xs-run{% if ext.kind == 'app' %} xr--app{% endif %}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}" data-install-quiet>
   <p class="xr__error" id="xr-error" hidden></p>
   <p class="xr__missing" id="xs-offline" hidden>{{ "store.offline_needs_install" | t }}</p>
-  <iframe class="xr__frame" id="xr-frame" title="{{ ext.name }}" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay" allowfullscreen></iframe>
+  <iframe class="xr__frame" id="xr-frame" title="{{ ext.name }}" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay"></iframe>
 </section>
 {% include "terminal-frame-close.njk" %}
 

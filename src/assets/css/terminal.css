@@ -398,6 +398,7 @@ html.is-fullscreen-tool body .terminal-frame--fullscreen .iv__actions {
   html.is-fullscreen-tool body .iv__table td {
     display: block;
     width: 100%;
+    min-width: 0;
   }
   html.is-fullscreen-tool body .iv__table thead { display: none; }
   html.is-fullscreen-tool body .iv__table tbody tr {

@@ -1294,6 +1294,7 @@
       "delete_confirm": "Excluir {name}?",
       "delete_label": "Excluir {name}",
       "copied": "copiado",
+      "copy_code": "Copiar código",
       "empty_state": "Ainda sem contas. Clique em \"Adicionar conta\" para começar.",
       "lock_button": "Bloquear",
       "backup_button": "Baixar backup",

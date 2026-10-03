@@ -190,6 +190,7 @@ localeReload: true
 
   <div class="modal-bg" id="end-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="end-title" aria-describedby="end-reason" tabindex="-1">
+      <button type="button" class="modal-x" id="btn-end-close" aria-label="{{ 'common.close' | t }}">{% include "icon-x.njk" %}</button>
       <div class="eyebrow" id="end-eyebrow">checkmate</div>
       <h2 id="end-title">White wins</h2>
       <p id="end-reason">by checkmate</p>
@@ -313,7 +314,9 @@ localeReload: true
 
   .chess-app .modal-bg { position: fixed; inset: 0; background: rgba(8,9,12,0.78); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 200; }
   .chess-app .modal-bg.show { display: flex; }
-  .chess-app .modal { background: var(--term-bg-raised); border: 1px solid var(--syn-pink); border-radius: 12px; padding: 28px 32px; max-width: 360px; box-shadow: 0 0 40px rgba(244,114,182,0.25); text-align: center; }
+  .chess-app .modal { position: relative; background: var(--term-bg-raised); border: 1px solid var(--syn-pink); border-radius: 12px; padding: 28px 32px; min-width: min(280px, calc(100vw - 32px)); max-width: 360px; box-shadow: 0 0 40px rgba(244,114,182,0.25); text-align: center; }
+  .chess-app .modal-x { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; padding: 0; background: transparent; border: 1px solid var(--term-border); border-radius: 6px; color: var(--term-muted); font-size: 14px; cursor: pointer; }
+  .chess-app .modal-x:hover, .chess-app .modal-x:focus-visible { color: var(--syn-cyan); border-color: var(--syn-cyan); outline: none; }
   .chess-app .modal .eyebrow { font-size: 10px; letter-spacing: 0.2em; color: var(--syn-pink); text-transform: uppercase; font-weight: 600; }
   .chess-app .modal h2 { margin: 8px 0 6px; font-size: 22px; color: var(--term-fg-strong); font-weight: 700; }
   .chess-app .modal p { color: var(--term-muted); font-size: 12px; margin: 0 0 18px; }

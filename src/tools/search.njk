@@ -74,6 +74,7 @@ localeReload: true
   const LANG = {{ (lang | default("en")) | dump | safe }};
   const LOCALE_PREFIX = {{ (locale.pathPrefix | default("")) | dump | safe }};
   const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
+  const MARKDOWN_SRC = '/assets/js/markdown.js?v={{ buildHash }}';
 
   const $input   = document.getElementById('sx-input');
   const $count   = document.getElementById('sx-count');
@@ -99,6 +100,7 @@ localeReload: true
   let aiAbort = null;
   let aiLoad = null;
   let aiKey = '';
+  let mdLoad = null;
 
   function normalize(s) {
     return (s || '').toString().toLowerCase()
@@ -328,6 +330,29 @@ localeReload: true
     $aiBtn.disabled = false;
   }
 
+  function loadMarkdown() {
+    if (!mdLoad) {
+      mdLoad = new Promise((resolve) => {
+        if (typeof window.renderMarkdown === 'function') { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = MARKDOWN_SRC;
+        s.onload = () => resolve();
+        s.onerror = () => resolve();
+        document.head.appendChild(s);
+      }).then(() => window.renderMarkdownReady).catch(() => {});
+    }
+    return mdLoad;
+  }
+
+  function showSummary(text) {
+    const clean = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    if (typeof window.renderMarkdown !== 'function') { $aiBody.textContent = clean; return; }
+    const tpl = document.createElement('template');
+    tpl.innerHTML = window.renderMarkdown(clean);
+    tpl.content.querySelectorAll('img').forEach((n) => n.remove());
+    $aiBody.replaceChildren(tpl.content);
+  }
+
   function loadEngine() {
     if (aiEngine && !aiEngine.cached) return Promise.resolve(aiEngine);
     if (!aiLoad) {
@@ -359,11 +384,14 @@ localeReload: true
     aiAbort = ctl;
     $aiBtn.disabled = true;
     $aiBody.textContent = COPY.aiThinking;
+    const mdReady = loadMarkdown();
     if (!aiStrip) { try { const A = await import('/assets/js/mentria-activity.js'); aiStrip = A.createActivityStrip($aiAct, { panel: false }); } catch (_) {} }
 
     try {
       if (epoch !== aiEpoch) return;
       const engine = await loadEngine();
+      if (epoch !== aiEpoch) return;
+      await Promise.race([mdReady, new Promise((r) => setTimeout(r, 4000))]);
       if (epoch !== aiEpoch) return;
 
       const top = lastResults.slice(0, 5).map((r, i) =>
@@ -377,7 +405,11 @@ localeReload: true
         { role: 'user', content: 'Query: ' + $input.value.trim() + '\n\nTop results:\n' + top }
       ];
 
-      let buffer = '', nTok = 0;
+      let buffer = '', nTok = 0, painting = false;
+      const paint = () => {
+        painting = false;
+        if (epoch === aiEpoch) showSummary(buffer);
+      };
       $aiBody.textContent = '';
       await engine.generate({
         messages, maxTokens: 96,
@@ -390,9 +422,10 @@ localeReload: true
           if (/^<\|[^|]*\|>$/.test(event.token)) return;
           buffer += event.token;
           if (aiStrip) aiStrip.token(++nTok);
-          $aiBody.textContent = buffer.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+          if (!painting) { painting = true; requestAnimationFrame(paint); }
         }
       });
+      if (epoch === aiEpoch) showSummary(buffer);
       if (aiStrip && epoch === aiEpoch) aiStrip.done({ tokens: nTok });
     } catch (err) {
       if (epoch !== aiEpoch) return;
@@ -560,6 +593,21 @@ localeReload: true
   min-height: 1.55em;
 }
 .sx__ai-body:empty::before { content: ''; }
+.sx__ai-body p { margin: 0 0 0.4rem; }
+.sx__ai-body p:last-child { margin-bottom: 0; }
+.sx__ai-body ul,
+.sx__ai-body ol { margin: 0.3rem 0; padding-left: 1.2rem; }
+.sx__ai-body li { margin: 0.1rem 0; }
+.sx__ai-body li > p { margin: 0; }
+.sx__ai-body h1,
+.sx__ai-body h2,
+.sx__ai-body h3 { margin: 0.3rem 0 0.2rem; font-size: 0.9rem; color: var(--syn-purple); }
+.sx__ai-body strong { font-weight: 700; color: var(--term-fg-strong, var(--term-fg)); }
+.sx__ai-body em { font-style: italic; }
+.sx__ai-body code { font-family: var(--font-mono); background: rgba(255,255,255,0.06); padding: 0.05em 0.3em; border-radius: 3px; }
+.sx__ai-body pre { margin: 0.3rem 0; padding: 0.5rem 0.7rem; overflow-x: auto; background: rgba(255,255,255,0.04); border-radius: 4px; }
+.sx__ai-body pre code { background: none; padding: 0; }
+.sx__ai-body a { color: var(--syn-cyan); }
 
 .sx__count {
   font-family: var(--font-mono); font-size: 0.78rem;

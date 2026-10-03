@@ -22,9 +22,11 @@ const DEFAULT_COPY = {
   stop: 'Stop',
   stoppedTitle: 'Stopped',
   stoppedHint: 'Try a smaller model, or come back later.',
+  stoppedHintLater: 'You can start again later.',
   tryTier: 'Try {name}',
   failedTitle: '{name} didn’t run on this device',
-  failedHint: 'You can try a smaller model or skip for now.'
+  failedHint: 'You can try a smaller model or skip for now.',
+  failedHintLater: 'You can skip for now and try again later.'
 };
 
 function i18nReady(ms) {
@@ -98,7 +100,7 @@ function overlay() {
   card.append(title, strip, detail, hint, actions);
   el.appendChild(card);
   document.body.appendChild(el);
-  gateStrip = createActivityStrip(strip, { panel: false });
+  gateStrip = createActivityStrip(strip, { panel: false, announce: false });
   return el;
 }
 
@@ -168,10 +170,13 @@ function showCheck(candidate, ctl, cached) {
   actions.classList.add('mm-gate__actions--row');
   actions.hidden = false;
   const dismiss = () => { ctl.background(); };
-  actions.appendChild(button(t('continueBg'), 'mm-gate__btn--ghost', dismiss));
+  const primary = button(t('continueBg'), 'mm-gate__btn--ghost', dismiss);
+  actions.appendChild(primary);
   actions.appendChild(button(t('stop'), 'mm-gate__btn--stop', () => ctl.stop()));
   el.hidden = false;
-  return trapFocus(el, actions, dismiss);
+  const release = trapFocus(el, actions, dismiss);
+  primary.focus();
+  return release;
 }
 
 function offerChoice(choices, titleText, detailNodes, labelFor) {
@@ -268,6 +273,27 @@ async function validateRun(engine, candidate) {
   }
 }
 
+async function adapterCached(url) {
+  try {
+    const c = await caches.open('mentria-models');
+    const sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return !!((await c.match(url + sep + 'mentria_seg=meta')) || (await c.match(url)));
+  } catch (_) { return false; }
+}
+
+function trackAdapters(engine) {
+  if (!engine || typeof engine.swapAdapter !== 'function') return () => null;
+  const swapAdapter = engine.swapAdapter.bind(engine);
+  let current = null;
+  engine.swapAdapter = async (spec) => {
+    if (!spec || !spec.weightsUrl) return swapAdapter(spec);
+    const tag = { name: spec.name || '', cached: await adapterCached(String(spec.weightsUrl)) };
+    current = tag;
+    try { return await swapAdapter(spec); } finally { if (current === tag) current = null; }
+  };
+  return () => current;
+}
+
 function requestPersistentStorage() {
   try {
     if (window.MentriaStore && window.MentriaStore.requestPersist) { window.MentriaStore.requestPersist(); return; }
@@ -294,7 +320,13 @@ export async function ensureModel(engineFactory, opts) {
     if (stopped) throw new Error('stopped');
     const e = engineFactory();
     lastEngine = e;
-    e.onProgress = (p) => { if (gateStrip) gateStrip.onProgress(p); if (onProgress) onProgress(p); };
+    const swapping = trackAdapters(e);
+    e.onProgress = (p) => {
+      const tag = p && (p.stage === 'download' || p.stage === 'upload') ? swapping() : null;
+      if (tag) p = Object.assign({}, p, { adapter: tag });
+      else if (gateStrip) gateStrip.onProgress(p);
+      if (onProgress) onProgress(p);
+    };
     return e;
   };
 
@@ -357,11 +389,11 @@ export async function ensureModel(engineFactory, opts) {
       stopReject(new Error('stopped'));
     }
   };
-  release = showCheck(candidate, ctl, cached);
   if (!cached && typeof window.mentriaConfirmHeavyDownload === 'function') {
     const ok = await window.mentriaConfirmHeavyDownload();
-    if (!ok) { release(); hide(); throw new Error('download-postponed'); }
+    if (!ok) { hide(); throw new Error('download-postponed'); }
   }
+  release = showCheck(candidate, ctl, cached);
   requestPersistentStorage();
   try {
     const P2P = await import('/assets/js/mentria-p2p-models.js');
@@ -405,9 +437,10 @@ export async function ensureModel(engineFactory, opts) {
     if (el) el.hidden = false;
     const smaller = await smallerChoices(candidate);
     const wasStopped = stopped || (e && e.message === 'stopped');
+    const later = !smaller.length;
     const nodes = wasStopped
-      ? [span('mm-gate__hint', t('stoppedHint'))]
-      : [span('mm-gate__pitch', String(e && e.message || t('failed'))), span('mm-gate__hint', t('failedHint'))];
+      ? [span('mm-gate__hint', t(later ? 'stoppedHintLater' : 'stoppedHint'))]
+      : [span('mm-gate__pitch', String(e && e.message || t('failed'))), span('mm-gate__hint', t(later ? 'failedHintLater' : 'failedHint'))];
     const pick = await offerChoice(smaller, wasStopped ? t('stoppedTitle') : t('failedTitle', { name: tierName(candidate) }), nodes, (id) => t('tryTier', { name: tierName(id) }));
     if (pick && pick !== 'postpone') {
       Tiers.setUserTier(pick);

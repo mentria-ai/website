@@ -720,6 +720,7 @@ localeReload: true
     state.masterKey = null;
     state.accounts = [];
     lastCodes.clear();
+    $('totp-list').replaceChildren();
     showLocked();
     setStatus('', null);
   }

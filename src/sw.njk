@@ -597,7 +597,8 @@ self.addEventListener('fetch', event => {
           const alt = await caches.match(stripped, { ignoreSearch: true });
           if (alt) return alt;
         }
-        const offline = await precache.match('/offline/', { ignoreSearch: true });
+        const lp = url.pathname.match(/^\/(es|fr|ja|pt-br)(\/|$)/);
+        const offline = (lp && await caches.match('/' + lp[1] + '/offline/', { ignoreSearch: true })) || await precache.match('/offline/', { ignoreSearch: true });
         if (offline) return offline;
       }
       throw err;

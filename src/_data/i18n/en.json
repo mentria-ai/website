@@ -1152,7 +1152,9 @@
       "ph_input": "Search…",
       "result_count_one": "{n} result",
       "result_count_many": "{n} results",
+      "show_more": "Show more",
       "no_results": "No results. Try a different keyword.",
+      "no_results_filter": "No results under this filter. Try All.",
       "offline_partial": "Offline · searching tools only. Posts and chapters need a connection.",
       "empty_hint": "Type a tool name, a feature, or describe what you're looking for.",
       "ai_summary_label": "AI summary",
@@ -1162,7 +1164,10 @@
       "type_all": "All",
       "type_tool": "Tools",
       "type_post": "Posts",
-      "type_chapter": "Chapters"
+      "type_chapter": "Chapters",
+      "label_tool": "Tool",
+      "label_post": "Post",
+      "label_chapter": "Chapter"
     },
     "common": {
       "controls": "Controls"

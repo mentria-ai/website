@@ -1152,7 +1152,9 @@
       "ph_input": "検索…",
       "result_count_one": "{n} 件",
       "result_count_many": "{n} 件",
+      "show_more": "さらに表示",
       "no_results": "結果なし。別のキーワードをお試しください。",
+      "no_results_filter": "このフィルターでは結果がありません。「すべて」をお試しください。",
       "offline_partial": "オフライン · ツールのみ検索中。投稿とチャプターの検索には接続が必要です。",
       "empty_hint": "ツール名、機能、または探しているものを入力してください。",
       "ai_summary_label": "AI要約",
@@ -1162,7 +1164,10 @@
       "type_all": "すべて",
       "type_tool": "ツール",
       "type_post": "投稿",
-      "type_chapter": "チャプター"
+      "type_chapter": "チャプター",
+      "label_tool": "ツール",
+      "label_post": "投稿",
+      "label_chapter": "チャプター"
     },
     "common": {
       "controls": "操作"

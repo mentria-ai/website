@@ -1152,7 +1152,9 @@
       "ph_input": "Buscar…",
       "result_count_one": "{n} resultado",
       "result_count_many": "{n} resultados",
+      "show_more": "Mostrar mais",
       "no_results": "Sem resultados. Tente outra palavra-chave.",
+      "no_results_filter": "Sem resultados com este filtro. Tente Tudo.",
       "offline_partial": "Offline · buscando só ferramentas. Posts e capítulos precisam de conexão.",
       "empty_hint": "Digite o nome de uma ferramenta, uma funcionalidade ou descreva o que procura.",
       "ai_summary_label": "Resumo IA",
@@ -1162,7 +1164,10 @@
       "type_all": "Tudo",
       "type_tool": "Ferramentas",
       "type_post": "Posts",
-      "type_chapter": "Capítulos"
+      "type_chapter": "Capítulos",
+      "label_tool": "Ferramenta",
+      "label_post": "Post",
+      "label_chapter": "Capítulo"
     },
     "common": {
       "controls": "Controles"

@@ -67,7 +67,7 @@ localeReload: true
     <h2 class="tools-group__h" id="tools-g-extensions"><a class="tools-group__link" href="{{ locale.pathPrefix }}/extensions/">{{ "tool.ext_gallery.title" | t }}</a></h2>
     <div class="tools-grid">
         {% for e in extensions %}
-        <a class="tool-tile" data-slug="ext-{{ e.id }}" data-shelf="tools" href="{{ locale.pathPrefix }}/extensions/{{ e.id }}/">
+        <a class="tool-tile" data-slug="ext-{{ e.id }}" data-shelf="{{ 'games' if e.schemaCategory == 'GameApplication' else 'tools' }}" href="{{ locale.pathPrefix }}/extensions/{{ e.id }}/">
             <span class="tool-tile__icon{% if not e.iconIsImage %} tool-tile__icon--emoji{% endif %}" aria-hidden="true">{% if e.iconIsImage %}<img src="{{ e.icon }}" alt="" width="40" height="40">{% else %}{{ e.icon }}{% endif %}</span>
             <span class="tool-tile__text">
                 <span class="tool-tile__name">{{ e.name }}</span>
@@ -127,6 +127,7 @@ localeReload: true
   var filters = document.getElementById('tools-filters');
   var q = document.getElementById('tools-q');
   if (!filters || !q) return;
+  var root = document.documentElement;
   var tiles = Array.prototype.slice.call(document.querySelectorAll('.tools-group:not(.tools-group--recent) .tool-tile'));
   var groups = Array.prototype.slice.call(document.querySelectorAll('.tools-group:not(.tools-group--recent)'));
   var recent = document.getElementById('tools-recent');
@@ -136,7 +137,17 @@ localeReload: true
   var valid = { all: 1, tools: 1, games: 1, ai: 1 };
   var shelf = 'all';
   function norm(v) { return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
-  var text = tiles.map(function (t) { return norm(t.textContent); });
+  var labels = {};
+  Array.prototype.forEach.call(filters.querySelectorAll('[data-shelf]'), function (b) { labels[b.getAttribute('data-shelf')] = b.textContent; });
+  var text = tiles.map(function (t) {
+    var g = t.closest('.tools-group');
+    var h = g && g.querySelector('.tools-group__h');
+    return norm([t.textContent, h ? h.textContent : '', labels[t.getAttribute('data-shelf')] || ''].join(' '));
+  });
+  function usable(t) {
+    var need = t.getAttribute('data-requires');
+    return !need || !root.classList.contains('mentria-no-' + need);
+  }
 
   function buildRecent() {
     var usage = {};
@@ -147,20 +158,20 @@ localeReload: true
     tiles.forEach(function (t) { bySlug[t.getAttribute('data-slug')] = t; });
     var slugs = Object.keys(usage).filter(function (s) { return bySlug[s]; }).sort(function (a, b) { return score(usage[b]) - score(usage[a]); }).slice(0, 6);
     slugs.forEach(function (s) { recentGrid.appendChild(bySlug[s].cloneNode(true)); });
-    return slugs.length > 0;
   }
-  var hasRecent = buildRecent();
+  buildRecent();
 
   function apply() {
     var v = norm(q.value);
     var hits = 0;
     tiles.forEach(function (t, i) {
-      var ok = (shelf === 'all' || t.getAttribute('data-shelf') === shelf) && (!v || text[i].indexOf(v) >= 0);
+      var ok = usable(t) && (shelf === 'all' || t.getAttribute('data-shelf') === shelf) && (!v || text[i].indexOf(v) >= 0);
       t.hidden = !ok;
       if (ok) hits++;
     });
     groups.forEach(function (g) { g.hidden = !g.querySelector('.tool-tile:not([hidden])'); });
-    recent.hidden = !hasRecent || !!v || shelf !== 'all';
+    Array.prototype.forEach.call(recentGrid.children, function (t) { t.hidden = !usable(t); });
+    recent.hidden = !!v || shelf !== 'all' || !recentGrid.querySelector('.tool-tile:not([hidden])');
     none.hidden = !v || hits > 0;
     none.textContent = none.hidden ? '' : NO_MATCH.split('{q}').join(q.value.trim());
     Array.prototype.forEach.call(filters.querySelectorAll('[data-shelf]'), function (b) {
@@ -169,20 +180,31 @@ localeReload: true
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
   }
-  function setShelf(s) {
-    shelf = valid[s] ? s : 'all';
+  function syncUrl() {
     var url = new URL(location.href);
     if (shelf !== 'all') url.searchParams.set('shelf', shelf); else url.searchParams.delete('shelf');
-    history.replaceState(null, '', url);
+    var v = q.value.trim();
+    if (v) url.searchParams.set('q', v); else url.searchParams.delete('q');
+    history.replaceState(history.state, '', url);
+  }
+  function update() {
     apply();
+    syncUrl();
+  }
+  function setShelf(s) {
+    shelf = valid[s] ? s : 'all';
+    update();
   }
   filters.addEventListener('click', function (e) {
     var b = e.target.closest('[data-shelf]');
     if (b) setShelf(b.getAttribute('data-shelf'));
   });
   var timer = 0;
-  q.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(apply, 100); });
-  q.addEventListener('keydown', function (e) { if (e.key === 'Escape' && q.value) { q.value = ''; apply(); } });
-  setShelf(new URLSearchParams(location.search).get('shelf') || 'all');
+  q.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(update, 100); });
+  q.addEventListener('keydown', function (e) { if (e.key === 'Escape' && q.value) { clearTimeout(timer); q.value = ''; update(); } });
+  var params = new URLSearchParams(location.search);
+  q.value = params.get('q') || '';
+  setShelf(params.get('shelf') || 'all');
+  if (window.MutationObserver) new MutationObserver(apply).observe(root, { attributes: true, attributeFilter: ['class'] });
 })();
 </script>

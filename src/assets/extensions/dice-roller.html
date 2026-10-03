@@ -2,7 +2,7 @@
 {
   "id": "dice-roller",
   "name": "Dice Roller",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "icon": "🎲",
   "author": "Mentria",
   "description": "Roll dice with standard notation and pick randomly from a list.",
@@ -43,20 +43,20 @@
   .out small { display: block; color: var(--ext-muted); margin-top: 0.3rem; font-size: 0.72rem; word-break: break-word; }
 </style>
 <div class="wrap">
-  <h1>🎲 Dice Roller</h1>
+  <h1>🎲 <span data-t="title"></span></h1>
   <div class="quick" id="quick"></div>
   <div class="roll-row">
-    <input id="notation" type="text" value="2d6" spellcheck="false" aria-label="Dice notation" placeholder="2d6+1">
-    <button class="primary" id="roll" type="button">Roll</button>
+    <input id="notation" type="text" value="2d6" spellcheck="false" data-t-label="notation" placeholder="2d6+1">
+    <button class="primary" id="roll" type="button" data-t="roll"></button>
   </div>
   <div class="out" aria-live="polite">
     <b id="total">—</b>
     <small id="breakdown"></small>
   </div>
 
-  <h2>Random picker</h2>
-  <textarea id="items" spellcheck="false" placeholder="one option per line" aria-label="Options to pick from"></textarea>
-  <button id="pick" type="button">Pick one</button>
+  <h2 data-t="picker"></h2>
+  <textarea id="items" spellcheck="false" data-t-ph="itemsPh" data-t-label="items"></textarea>
+  <button id="pick" type="button" data-t="pick"></button>
   <div class="out" aria-live="polite">
     <b id="picked">—</b>
   </div>
@@ -70,6 +70,58 @@
       var map = { accent: '--ext-accent', bg: '--ext-bg', fg: '--ext-fg', muted: '--ext-muted', fontMono: '--ext-font' };
       Object.keys(map).forEach(function (k) { if (m.theme[k]) r.style.setProperty(map[k], m.theme[k]); });
     }
+
+    var LOCS = ['en', 'es', 'fr', 'ja', 'pt-BR'];
+    var STR = {
+      en: {
+        title: 'Dice Roller', notation: 'Dice notation', roll: 'Roll',
+        hint: 'try e.g. 2d6 or 1d20+3', limits: 'up to {dice} dice with up to {sides} sides',
+        picker: 'Random picker', items: 'Options to pick from', itemsPh: 'one option per line', pick: 'Pick one'
+      },
+      es: {
+        title: 'Lanzador de dados', notation: 'Notación de dados', roll: 'Tirar',
+        hint: 'prueba con 2d6 o 1d20+3', limits: 'hasta {dice} dados de hasta {sides} caras',
+        picker: 'Sorteo', items: 'Opciones para el sorteo', itemsPh: 'una opción por línea', pick: 'Elegir una'
+      },
+      fr: {
+        title: 'Lanceur de dés', notation: 'Notation des dés', roll: 'Lancer',
+        hint: 'essayez par exemple 2d6 ou 1d20+3', limits: 'jusqu’à {dice} dés, chacun à {sides} faces au maximum',
+        picker: 'Tirage au sort', items: 'Options du tirage', itemsPh: 'une option par ligne', pick: 'Tirer au sort'
+      },
+      ja: {
+        title: 'ダイスローラー', notation: 'ダイスの記法', roll: '振る',
+        hint: '2d6 や 1d20+3 のように入力してください', limits: 'ダイスは{dice}個まで、面の数は{sides}までです',
+        picker: 'ランダム抽選', items: '抽選する候補', itemsPh: '1行に1つずつ候補を入力', pick: '1つ選ぶ'
+      },
+      'pt-BR': {
+        title: 'Rolador de dados', notation: 'Notação de dados', roll: 'Rolar',
+        hint: 'tente, por exemplo, 2d6 ou 1d20+3', limits: 'até {dice} dados de até {sides} faces',
+        picker: 'Sorteio', items: 'Opções para sortear', itemsPh: 'uma opção por linha', pick: 'Sortear uma'
+      }
+    };
+    var MAX_DICE = 100, MAX_SIDES = 1000;
+
+    var L = 'en', NF0;
+    function pickLoc(c) {
+      c = String(c || 'en');
+      if (LOCS.indexOf(c) >= 0) return c;
+      var b = c.slice(0, 2).toLowerCase();
+      if (b === 'pt') return 'pt-BR';
+      return LOCS.indexOf(b) >= 0 ? b : 'en';
+    }
+    function setLocale(c) {
+      L = pickLoc(c);
+      document.documentElement.lang = L;
+      NF0 = new Intl.NumberFormat(L, { maximumFractionDigits: 0 });
+    }
+    function t(k, v, loc) {
+      var d = STR[loc || L];
+      var s = d && d[k] != null ? d[k] : STR.en[k];
+      if (s == null) return k;
+      if (v) s = s.replace(/\{(\w+)\}/g, function (a, b) { return v[b] == null ? a : String(v[b]); });
+      return s;
+    }
+    function num(n) { return NF0.format(n); }
 
     function rnd(n) {
       if (window.crypto && crypto.getRandomValues) {
@@ -89,18 +141,38 @@
     if (saved.notation) notationEl.value = saved.notation;
     if (saved.items) itemsEl.value = saved.items;
 
+    var res = null;
+
+    function view(loc, f) {
+      if (!res) return { total: '—', breakdown: '' };
+      if (res.err) return { total: '—', breakdown: t(res.err, { dice: f(MAX_DICE), sides: f(MAX_SIDES) }, loc) };
+      return { total: f(res.total), breakdown: '[' + res.rolls.map(f).join(', ') + ']' + (res.mod ? (res.mod > 0 ? ' +' : ' ') + f(res.mod) : '') };
+    }
+
+    function paint() {
+      var v = view(L, num);
+      totalEl.textContent = v.total;
+      breakdownEl.textContent = v.breakdown;
+    }
+
+    function render() {
+      document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = t(el.getAttribute('data-t')); });
+      document.querySelectorAll('[data-t-label]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-t-label'))); });
+      document.querySelectorAll('[data-t-ph]').forEach(function (el) { el.setAttribute('placeholder', t(el.getAttribute('data-t-ph'))); });
+      paint();
+    }
+
     function roll() {
       var mch = notationEl.value.replace(/\s+/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i);
       var count = mch ? parseInt(mch[1] || '1', 10) : 0;
       var sides = mch ? parseInt(mch[2], 10) : 0;
-      if (!mch || count < 1 || sides < 1) { totalEl.textContent = '—'; breakdownEl.textContent = 'try e.g. 2d6 or 1d20+3'; return; }
-      if (count > 100 || sides > 1000) { totalEl.textContent = '—'; breakdownEl.textContent = 'up to 100 dice with up to 1000 sides'; return; }
+      if (!mch || count < 1 || sides < 1) { res = { err: 'hint' }; paint(); return; }
+      if (count > MAX_DICE || sides > MAX_SIDES) { res = { err: 'limits' }; paint(); return; }
       var mod = parseInt(mch[3] || '0', 10);
       var rolls = [], sum = 0;
       for (var i = 0; i < count; i++) { var v = rnd(sides) + 1; rolls.push(v); sum += v; }
-      var total = sum + mod;
-      totalEl.textContent = String(total);
-      breakdownEl.textContent = '[' + rolls.join(', ') + ']' + (mod ? (mod > 0 ? ' +' + mod : ' ' + mod) : '');
+      res = { rolls: rolls, mod: mod, total: sum + mod };
+      paint();
       storage.set('state', { notation: notationEl.value, items: itemsEl.value });
     }
 
@@ -125,7 +197,7 @@
         if (!/^\d*d\d+([+-]\d+)?$/i.test(notation)) throw new Error('use dice notation like 2d6 or 1d20+3');
         notationEl.value = notation;
         roll();
-        return { total: totalEl.textContent, breakdown: breakdownEl.textContent };
+        return view('en', String);
       }, { description: 'Roll dice with standard notation (for example 2d6 or 1d20+3); the roll is shown in the tool.', parameters: { type: 'object', properties: { notation: { type: 'string' } }, required: ['notation'] }, ai: true });
     }).catch(function () {});
 
@@ -134,6 +206,13 @@
     document.getElementById('pick').addEventListener('click', pick);
     itemsEl.addEventListener('change', function () { storage.set('state', { notation: notationEl.value, items: itemsEl.value }); });
 
+    if (typeof m.onLocaleChange === 'function') m.onLocaleChange(function (code) {
+      setLocale(code);
+      render();
+    });
+
+    setLocale(m.locale || document.documentElement.lang || navigator.language);
+    render();
     if (m.args && m.args.cmd === 'roll' && m.args.args) {
       notationEl.value = String(m.args.args).trim();
     }

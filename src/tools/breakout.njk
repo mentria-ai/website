@@ -1320,10 +1320,10 @@ canvas {
   }
 
   function updateHUD() {
-    elScore.textContent = State.score.toLocaleString();
+    elScore.textContent = State.score.toLocaleString(document.documentElement.lang || undefined);
     elLevel.textContent = String(State.level).padStart(2, '0');
     elLives.textContent = State.lives > 0 ? '♥ '.repeat(State.lives).trim() : '—';
-    elHigh.textContent = State.high.toLocaleString();
+    elHigh.textContent = State.high.toLocaleString(document.documentElement.lang || undefined);
   }
 
   let touchUIKey = '';
@@ -1394,8 +1394,8 @@ canvas {
     } else if (kind === 'gameover') {
       const desc = T.gameoverDesc
         .replace('{level}', String(State.level))
-        .replace('{score}', State.score.toLocaleString())
-        .replace('{high}', State.high.toLocaleString());
+        .replace('{score}', State.score.toLocaleString(document.documentElement.lang || undefined))
+        .replace('{high}', State.high.toLocaleString(document.documentElement.lang || undefined));
       elModalDyn.innerHTML =
         '<p class="eyebrow" style="color:var(--syn-pink)">&gt; ' + esc(T.eyebrowOver) + '</p>' +
         '<h2>' + esc(T.gameOver) + '</h2>' +

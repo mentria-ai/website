@@ -1,5 +1,5 @@
 import * as U from './ui.js';
-import { decimalsFor, convertMinor, rateE6From, normalizeNumber, localeSeparators, minorToDecimal, toMinor } from './money.js';
+import { decimalsFor, convertMinor, normalizeNumber, localeSeparators, minorToDecimal, toMinor, trimDecimal, decimalToInput } from './money.js';
 import { isISODate, weekday, weekdayNames } from './dates.js';
 import { parseEntry, aiPrompt, parseAiJson } from './nl.js';
 import { payeeKey } from './ledger.js';
@@ -25,12 +25,15 @@ export function nlContext(L) {
 }
 
 function decimalChar() { return localeSeparators(U.locale()).decimal; }
+function fieldText(dec) { return decimalToInput(dec, U.locale()); }
+function fromField(text) { return normalizeNumber(text, U.locale()) || ''; }
 
-function minorFromTyped(str, ccy) {
+export function minorFromTyped(str, ccy) {
   if (!str) return null;
-  const dec = normalizeNumber(str, U.locale());
-  if (dec == null) return null;
-  try { return Math.abs(toMinor(dec, decimalsFor(ccy))); } catch (_) { return null; }
+  try {
+    const m = toMinor(str, ccy);
+    return m == null ? null : Math.abs(m);
+  } catch (_) { return null; }
 }
 
 export function openEntry(ctx, opts) {
@@ -66,7 +69,7 @@ export function openEntry(ctx, opts) {
     st.tags = existing.tags || [];
     st.cleared = !!existing.cleared;
     if (Array.isArray(existing.lines) && existing.lines.length) st.lines = existing.lines.map((ln) => ({ category: ln.category, typed: minorToDecimal(Math.abs(ln.amount_minor || 0), decimalsFor(existing.currency || base)), note: ln.note || '' }));
-    if (existing.fx_rate_e6) st.fxTyped = minorToDecimal(existing.fx_rate_e6, 6).replace(/0+$/, '').replace(/\.$/, '');
+    if (existing.fx_rate_e6) st.fxTyped = trimDecimal(minorToDecimal(existing.fx_rate_e6, 6));
   }
   if (existingXfer) {
     st.account = existingXfer.from_account;
@@ -123,7 +126,7 @@ export function openEntry(ctx, opts) {
     amountEl.textContent = m == null ? U.money(0, ccy) : U.money(m, ccy);
     amountEl.classList.toggle('is-in', st.mode === 'in');
     ccyChip.textContent = ccy;
-    if (document.activeElement !== amountInput) amountInput.value = st.typed ? st.typed.replace('.', decimalChar()) : '';
+    if (document.activeElement !== amountInput) amountInput.value = fieldText(st.typed);
   }
 
   function catList() {
@@ -171,7 +174,7 @@ export function openEntry(ctx, opts) {
     const to = U.select([{ value: '', label: t('entry.pick_account'), disabled: true }].concat(acctOptions(st.account)), st.toAccount || '', { onchange: (e) => { st.toAccount = e.target.value; refreshAll(); } });
     const kids = [U.field(t('entry.from'), from), U.field(t('entry.to'), to)];
     if (st.toAccount && acctCcy(st.toAccount) !== acctCcy(st.account)) {
-      const rec = U.moneyField({ value: st.toTyped ? st.toTyped.replace('.', decimalChar()) : '', placeholder: '0', oninput: (e) => { st.toTyped = normalizeNumber(e.target.value, U.locale()) || ''; } });
+      const rec = U.moneyField({ value: fieldText(st.toTyped), placeholder: '0', oninput: (e) => { st.toTyped = fromField(e.target.value); } });
       kids.push(U.field(t('entry.received', { ccy: acctCcy(st.toAccount) }), rec, t('entry.received_hint'), 'ff--wide'));
     }
     xferWrap.replaceChildren(h('div', { class: 'ff-grid', style: { margin: '8px 0 4px' } }, ...kids));
@@ -212,7 +215,7 @@ export function openEntry(ctx, opts) {
     kids.push(grid);
     if (ccy !== base) {
       const known = L.rateE6(ccy, base, st.date);
-      const fx = U.moneyField({ value: st.fxTyped || (known ? minorToDecimal(known, 6).replace(/0+$/, '').replace(/\.$/, '') : ''), placeholder: '0.00', oninput: (e) => { st.fxTyped = normalizeNumber(e.target.value, U.locale()) || ''; } });
+      const fx = U.moneyField({ value: fieldText(st.fxTyped || (known ? trimDecimal(minorToDecimal(known, 6)) : '')), placeholder: fieldText('0.00'), oninput: (e) => { st.fxTyped = fromField(e.target.value); } });
       grid.append(U.field(t('entry.fx', { from: ccy, to: base }), fx, known ? t('entry.fx_known') : t('entry.fx_needed'), 'ff--wide'));
       if (!known) moreWrap.open = true;
     }
@@ -232,7 +235,7 @@ export function openEntry(ctx, opts) {
       st.lines.forEach((ln, i) => {
         splitBox.append(h('div', { class: 'fsplit' },
           U.select(opts, ln.category || '', { onchange: (e) => { ln.category = e.target.value || null; } }),
-          U.moneyField({ value: ln.typed ? ln.typed.replace('.', decimalChar()) : '', placeholder: '0', oninput: (e) => { ln.typed = normalizeNumber(e.target.value, U.locale()) || ''; updateSplitSum(); } }),
+          U.moneyField({ value: fieldText(ln.typed), placeholder: '0', oninput: (e) => { ln.typed = fromField(e.target.value); updateSplitSum(); } }),
           h('button', { type: 'button', class: 'fb fb--ghost fb--icon', 'aria-label': t('common.remove'), onclick: () => { st.lines.splice(i, 1); if (st.lines.length < 2) st.lines = null; renderSplit(); } }, icon('close'))
         ));
       });
@@ -331,7 +334,7 @@ export function openEntry(ctx, opts) {
     aiBtn.disabled = false;
   });
 
-  amountInput.addEventListener('input', () => { st.typed = normalizeNumber(amountInput.value, U.locale()) || ''; st.touched.add('amount'); amountEl.textContent = ''; });
+  amountInput.addEventListener('input', () => { st.typed = fromField(amountInput.value); st.touched.add('amount'); amountEl.textContent = ''; });
   amountInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); save(false); } });
 
   function refreshAll() {
@@ -428,7 +431,7 @@ export function openEntry(ctx, opts) {
         tags: st.tags || [], lines, cleared: !!st.cleared, kind: sign > 0 ? 'income' : 'expense'
       };
       if (ccy !== base) {
-        let rate = st.fxTyped ? rateE6From(st.fxTyped) : L.rateE6(ccy, base, st.date);
+        const rate = st.fxTyped ? minorFromTyped(st.fxTyped, 6) : L.rateE6(ccy, base, st.date);
         if (!rate) { err.textContent = t('entry.err_fx', { from: ccy, to: base }); moreWrap.open = true; renderMore(); return; }
         fields.fx_rate_e6 = rate;
         fields.base_minor = convertMinor(sign * m, ccy, base, rate);

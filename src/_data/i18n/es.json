@@ -3914,6 +3914,14 @@
         "added": "Cuenta añadida",
         "saved": "Cuenta guardada",
         "deleted": "Cuenta eliminada",
+        "delete_bills": {
+          "one": "También se eliminará su factura {names}. Para conservarla, muévela antes a otra cuenta.",
+          "other": "También se eliminarán sus {n} facturas ({names}). Para conservarlas, muévelas antes a otra cuenta."
+        },
+        "deleted_bills": {
+          "one": "Cuenta y su factura eliminadas",
+          "other": "Cuenta y {n} facturas eliminadas"
+        },
         "name": "Nombre",
         "name_ph": "p. ej. Cuenta del día a día",
         "type_label": "Tipo",
@@ -4052,6 +4060,7 @@
         "base_hint": "Si la cambias, los totales se recalculan con tus tipos de cambio.",
         "base_title": "¿Cambiar la moneda principal a {ccy}?",
         "base_body": "Los totales, presupuestos e informes usarán {ccy}. Los movimientos en otras monedas se convierten con tus tipos de cambio; los que no tengan tipo de cambio quedarán fuera de los totales hasta que añadas uno.",
+        "base_no_rate": "Aún no hay un tipo de cambio entre {from} y {ccy}, así que los presupuestos, las metas y los límites conservan sus cifras actuales. Añade antes un tipo de cambio para convertirlos.",
         "base_ok": "Cambiar",
         "base_done": "La moneda principal ahora es {ccy}",
         "base_missing": {

@@ -1,6 +1,6 @@
 import * as U from '../ui.js';
 import { donut, legend } from '../charts.js';
-import { toMinor, minorToDecimal, decimalsFor, qtyTimesPrice, normalizeNumber, isCurrency, convertMinor } from '../money.js';
+import { toMinor, minorToDecimal, decimalsFor, qtyTimesPrice, normalizeNumber, isCurrency, convertMinor, trimDecimal, decimalToInput, formatDecimal } from '../money.js';
 import { isISODate, addMonths, diffDays } from '../dates.js';
 import { ASSET_CLASSES, accountGroup, INVEST_TYPES } from '../ledger.js';
 import { xirr, depositValue, maturityValue, amortize, loanOutstanding, emi, runLots } from '../invest.js';
@@ -11,8 +11,19 @@ const TYPES = ['buy', 'sell', 'dividend', 'dividend_reinvest', 'interest', 'fee'
 const INST_TYPES = ['stock', 'etf', 'fund', 'bond', 'crypto', 'metal', 'other'];
 const CLASS_COLORS = { equity: '#6ef3c5', bond: '#22d3ee', cash: '#8896a8', metal: '#fbbf24', crypto: '#a78bfa', real_estate: '#ff9500', other: '#f472b6', debt: '#f472b6' };
 
-function dec(str) { return normalizeNumber(str, U.locale()); }
-function qtyText(q, scale) { return minorToDecimal(q, scale).replace(/\.?0+$/, ''); }
+function qtyText(q, scale) { return formatDecimal(trimDecimal(minorToDecimal(q, scale)), U.locale()); }
+function priceText(p) { return formatDecimal(trimDecimal(minorToDecimal(p, 4)), U.locale()); }
+function pctInput(bp) { return decimalToInput(String((bp || 0) / 100), U.locale()); }
+
+export function numberInput(minor, scale) {
+  return minor ? decimalToInput(trimDecimal(minorToDecimal(minor, scale)), U.locale()) : '';
+}
+
+export function numberFromInput(text, scale) {
+  const d = normalizeNumber(text, U.locale());
+  if (d == null) return null;
+  try { return toMinor(d, scale); } catch (_) { return null; }
+}
 
 function instrumentSheet(ctx, inst, onSaved) {
   const L = ctx.ledger;
@@ -55,9 +66,9 @@ export function activitySheet(ctx, act, preset) {
   const newInst = h('button', { type: 'button', class: 'fb fb--sm', onclick: () => { sh.close(); instrumentSheet(ctx, null, (id) => activitySheet(ctx, null, Object.assign({}, p, { instrument: id, type: type.value, account: acct.value }))); } }, icon('plus'), t('invest.new_inst'));
   const date = h('input', { class: 'fi', type: 'date', value: a.date || L.today() });
   const inst0 = () => L.get('instrument', instSel.value) || { qty_scale: 4, currency: L.base() };
-  const qty = U.moneyField({ value: a.qty ? qtyText(a.qty, inst0().qty_scale || 4) : '', placeholder: '0' });
-  const price = U.moneyField({ value: a.price_e4 ? minorToDecimal(a.price_e4, 4).replace(/\.?0+$/, '') : '', placeholder: '0.00' });
-  const amount = U.moneyField({ value: a.amount_minor ? U.amountToInput(a.amount_minor, inst0().currency) : '', placeholder: '0.00' });
+  const qty = U.moneyField({ value: numberInput(a.qty, inst0().qty_scale || 4), placeholder: '0' });
+  const price = U.moneyField({ value: numberInput(a.price_e4, 4), placeholder: decimalToInput('0.00', U.locale()) });
+  const amount = U.moneyField({ value: a.amount_minor ? U.amountToInput(a.amount_minor, inst0().currency) : '', placeholder: decimalToInput('0.00', U.locale()) });
   const fee = U.moneyField({ value: a.fee_minor ? U.amountToInput(a.fee_minor, inst0().currency) : '', placeholder: '0' });
   const tax = U.moneyField({ value: a.tax_withheld_minor ? U.amountToInput(a.tax_withheld_minor, inst0().currency) : '', placeholder: '0' });
   const num = h('input', { class: 'fi', type: 'number', min: '1', value: String((a.split && a.split.num) || 2) });
@@ -71,10 +82,10 @@ export function activitySheet(ctx, act, preset) {
   const err = h('p', { class: 'ff__err', role: 'alert' });
   const autoAmount = () => {
     const i = inst0();
-    const q = dec(qty.value);
-    const pr = dec(price.value);
-    if (q && pr && !amount.dataset.touched) {
-      try { amount.value = U.amountToInput(qtyTimesPrice(toMinor(q, i.qty_scale || 4), i.qty_scale || 4, toMinor(pr, 4), decimalsFor(i.currency)), i.currency); } catch (_) {}
+    const q = numberFromInput(qty.value, i.qty_scale || 4);
+    const pr = numberFromInput(price.value, 4);
+    if (q > 0 && pr > 0 && !amount.dataset.touched) {
+      try { amount.value = U.amountToInput(qtyTimesPrice(q, i.qty_scale || 4, pr, decimalsFor(i.currency)), i.currency); } catch (_) {}
     }
   };
   qty.addEventListener('input', autoAmount);
@@ -93,7 +104,7 @@ export function activitySheet(ctx, act, preset) {
     const i = inst0();
     lotsBox.append(h('span', { class: 'ff__label' }, t('invest.pick_lots')));
     for (const lot of run.lots) {
-      const inp = U.moneyField({ placeholder: '0', oninput: (e) => { const d = dec(e.target.value); lotPicks.set(lot.id, d ? toMinor(d, i.qty_scale || 4) : 0); } });
+      const inp = U.moneyField({ placeholder: '0', oninput: (e) => { lotPicks.set(lot.id, numberFromInput(e.target.value, i.qty_scale || 4) || 0); } });
       lotsBox.append(h('div', { class: 'fsplit' }, h('span', { class: 'fsmall' }, U.date(lot.date) + ' · ' + qtyText(lot.qty, i.qty_scale || 4)), inp, h('span')));
     }
   };
@@ -138,8 +149,8 @@ export function activitySheet(ctx, act, preset) {
     const ccy = inst.currency || L.base();
     const out = { date: date.value, instrument: inst.id, account: acct.value, type: tp, note: note.value.trim().slice(0, 200) };
     try {
-      if (!fields.qty.hidden) { const q = dec(qty.value); if (!q || Number(q) <= 0) { err.textContent = t('invest.err_qty'); return; } out.qty = toMinor(q, scale); }
-      if (!fields.price.hidden && dec(price.value)) out.price_e4 = toMinor(dec(price.value), 4);
+      if (!fields.qty.hidden) { const q = numberFromInput(qty.value, scale); if (!q || q <= 0) { err.textContent = t('invest.err_qty'); return; } out.qty = q; }
+      if (!fields.price.hidden) { const pr = numberFromInput(price.value, 4); if (pr > 0) out.price_e4 = pr; }
       if (!fields.amount.hidden) {
         const m = U.parseAmount(amount.value, ccy);
         if ((m == null || m === 0) && tp !== 'transfer_in' && tp !== 'transfer_out') { err.textContent = t('entry.err_amount'); return; }
@@ -185,9 +196,9 @@ function pricesSheet(ctx) {
   for (const id of ids) {
     const inst = L.get('instrument', id);
     const hd = held.find((x) => x.instrument === id);
-    const inp = U.moneyField({ placeholder: hd.price ? minorToDecimal(hd.price.price_e4, 4).replace(/\.?0+$/, '') : '0', style: { maxWidth: '140px' } });
+    const inp = U.moneyField({ placeholder: hd.price ? numberInput(hd.price.price_e4, 4) : '0', style: { maxWidth: '140px' } });
     inputs.set(id, inp);
-    tb.append(h('tr', null, h('td', null, inst.name), h('td', { class: 'n' }, hd.price ? minorToDecimal(hd.price.price_e4, 4).replace(/\.?0+$/, '') + ' ' + (inst.currency || '') + ' · ' + U.date(hd.price.date, 'dayMonth') : '—'), h('td', null, inp)));
+    tb.append(h('tr', null, h('td', null, inst.name), h('td', { class: 'n' }, hd.price ? priceText(hd.price.price_e4) + ' ' + (inst.currency || '') + ' · ' + U.date(hd.price.date, 'dayMonth') : '—'), h('td', null, inp)));
   }
   tbl.append(tb);
   const save = h('button', { type: 'button', class: 'fb fb--primary' }, t('common.save'));
@@ -196,9 +207,9 @@ function pricesSheet(ctx) {
     if (!isISODate(date.value)) return;
     const ops = [];
     for (const [id, inp] of inputs) {
-      const d = dec(inp.value);
-      if (!d || Number(d) <= 0) continue;
-      ops.push(...ctx.save('price', id + ':' + date.value, { instrument: id, date: date.value, price_e4: toMinor(d, 4), source: 'manual' }));
+      const p = numberFromInput(inp.value, 4);
+      if (!p || p <= 0) continue;
+      ops.push(...ctx.save('price', id + ':' + date.value, { instrument: id, date: date.value, price_e4: p, source: 'manual' }));
     }
     sh.close();
     ctx.commit(ops, U.tp('invest.prices_saved', ops.length));
@@ -217,7 +228,7 @@ function holdingSheet(ctx, hd) {
       h('div', { class: 'fstat' }, h('span', { class: 'fstat__label' }, t('invest.xirr')), h('span', { class: 'fmid' }, hd.xirr == null ? '—' : U.pct(hd.xirr, 1)))),
     U.leader(t('invest.qty'), qtyText(hd.qty, hd.qty_scale)),
     U.leader(t('invest.cost'), U.money(hd.cost, ccy)),
-    hd.price ? U.leader(t('invest.price'), minorToDecimal(hd.price.price_e4, 4).replace(/\.?0+$/, '') + ' ' + ccy + ' · ' + U.date(hd.price.date) + (hd.price.carried ? ' · ' + t('invest.stale') : '')) : null,
+    hd.price ? U.leader(t('invest.price'), priceText(hd.price.price_e4) + ' ' + ccy + ' · ' + U.date(hd.price.date) + (hd.price.carried ? ' · ' + t('invest.stale') : '')) : null,
     hd.income ? U.leader(t('invest.income'), U.money(hd.income, ccy)) : null,
     hd.errors.length ? h('div', { class: 'fbanner fbanner--pink' }, icon('alert'), h('span', null, t('invest.short_sell'))) : null,
     hd.lots.length ? h('div', null, h('span', { class: 'ff__label' }, t('invest.lots')), ...hd.lots.map((l) => U.leader(U.date(l.date) + ' · ' + qtyText(l.qty, hd.qty_scale), U.money(l.cost, ccy)))) : null,
@@ -298,12 +309,12 @@ function depositSheet(ctx, dep) {
   const acct = U.select(accts.map((x) => ({ value: x.id, label: x.name })), d.account);
   const principal = U.moneyField({ value: d.principal_minor ? U.amountToInput(d.principal_minor, ccyOf(d.account)) : '' });
   const inst = U.moneyField({ value: d.instalment_minor ? U.amountToInput(d.instalment_minor, ccyOf(d.account)) : '' });
-  const rate = U.input({ value: String((d.rate_bp || 0) / 100), inputmode: 'decimal' });
+  const rate = U.input({ value: pctInput(d.rate_bp), inputmode: 'decimal' });
   const start = h('input', { class: 'fi', type: 'date', value: d.start });
   const mat = h('input', { class: 'fi', type: 'date', value: d.maturity || '' });
   const comp = U.select(['quarterly', 'monthly', 'annual', 'daily', 'simple'].map((k) => ({ value: k, label: t('invest.comp.' + k) })), d.compounding);
   const payout = U.select(['cumulative', 'monthly', 'quarterly', 'annual'].map((k) => ({ value: k, label: t('invest.payout.' + k) })), d.payout || 'cumulative');
-  const wh = U.input({ value: String((d.withholding_bp || 0) / 100), inputmode: 'decimal' });
+  const wh = U.input({ value: pctInput(d.withholding_bp), inputmode: 'decimal' });
   const pF = U.field(t('invest.principal'), principal);
   const iF = U.field(t('invest.instalment'), inst);
   const syncK = () => { pF.hidden = kind.value === 'recurring'; iF.hidden = kind.value !== 'recurring'; };
@@ -354,7 +365,7 @@ function loanSheet(ctx, loan) {
   const ccyOf = (id) => ((L.get('account', id) || {}).currency) || L.base();
   const acct = U.select(accts.map((x) => ({ value: x.id, label: x.name })), l.account);
   const principal = U.moneyField({ value: l.principal_minor ? U.amountToInput(l.principal_minor, ccyOf(l.account)) : '' });
-  const rate = U.input({ value: String((l.rate_bp || 0) / 100), inputmode: 'decimal' });
+  const rate = U.input({ value: pctInput(l.rate_bp), inputmode: 'decimal' });
   const start = h('input', { class: 'fi', type: 'date', value: l.start });
   const tenure = h('input', { class: 'fi', type: 'number', min: '1', max: '600', value: String(l.tenure_months || 240) });
   const emiIn = U.moneyField({ value: l.emi_minor ? U.amountToInput(l.emi_minor, ccyOf(l.account)) : '', placeholder: t('invest.emi_auto') });

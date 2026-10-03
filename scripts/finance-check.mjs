@@ -91,6 +91,151 @@ test('money: convert and allocate', () => {
   assert.deepEqual(M.allocate(-1000, [1, 1, 1]).reduce((a, b) => a + b, 0), -1000);
 });
 
+const UI = await mod('ui.js');
+const EN = await mod('entry.js');
+const VI = await mod('views/invest.js');
+const VA = await mod('views/accounts.js');
+const VS = await mod('views/settings.js');
+const NUM_LOCALES = ['en-US', 'es-ES', 'fr-FR', 'pt-BR', 'ja-JP'];
+const commaLocale = (loc) => M.localeSeparators(loc).decimal === ',';
+const withLocale = (loc, fn) => { UI.setNumberLocale(loc); try { fn(); } finally { UI.setNumberLocale(null); } };
+
+test('numbers: entry amounts keep three decimals through prefill and save', () => {
+  for (const loc of NUM_LOCALES) withLocale(loc, () => {
+    for (const [minor, ccy] of [[12345, 'KWD'], [12345000, 'KWD'], [5, 'KWD'], [46249, 'EUR'], [123456, 'EUR'], [1500, 'JPY']]) {
+      const typed = M.minorToDecimal(minor, ccy);
+      assert.equal(EN.minorFromTyped(typed, ccy), minor, loc + ' unchanged ' + typed);
+      const shown = M.decimalToInput(typed, loc);
+      assert.equal(EN.minorFromTyped(M.normalizeNumber(shown, loc), ccy), minor, loc + ' retyped ' + shown);
+    }
+  });
+  withLocale('es-ES', () => assert.equal(EN.minorFromTyped('12.345', 'KWD'), 12345));
+});
+
+test('numbers: prefilled text reads back unchanged in every number format', () => {
+  const formats = ['en-US', 'en-GB', 'en-IN', 'en-CA', 'en-AU', 'es-ES', 'es-MX', 'fr-FR', 'fr-CA', 'de-DE', 'de-CH', 'it-IT', 'pt-BR', 'pt-PT', 'ja-JP', 'nl-NL', 'sv-SE', 'pl-PL', 'tr-TR', 'hi-IN', 'zh-CN', 'ko-KR'];
+  for (const loc of formats) {
+    for (const d of ['12.345', '0.925', '1234.5678', '1.5', '100', '12345678.12345678']) assert.equal(M.normalizeNumber(M.decimalToInput(d, loc), loc), d, loc + ' ' + d);
+  }
+});
+
+test('numbers: typed amounts follow the locale, grouping included', () => {
+  const cases = {
+    'en-US': [['12.345', 'KWD', 12345], ['1,234.56', 'EUR', 123456], ['1,234.567', 'KWD', 1234567], ['0,925', 6, 925000]],
+    'ja-JP': [['12.345', 'KWD', 12345], ['1,234.56', 'USD', 123456], ['1,234', 'JPY', 1234]],
+    'es-ES': [['12,345', 'KWD', 12345], ['1.234,56', 'EUR', 123456], ['1.234,567', 'KWD', 1234567], ['0,925', 6, 925000], ['0.925', 6, 925000]],
+    'pt-BR': [['12,345', 'KWD', 12345], ['1.234,56', 'BRL', 123456], ['10,125', 4, 101250]],
+    'fr-FR': [['12,345', 'KWD', 12345], ['1 234,56', 'EUR', 123456], ['1\u202f234,56', 'EUR', 123456], ['1\u00a0234,56', 'EUR', 123456]]
+  };
+  for (const [loc, list] of Object.entries(cases)) withLocale(loc, () => {
+    for (const [text, ccy, minor] of list) assert.equal(EN.minorFromTyped(M.normalizeNumber(text, loc), ccy), minor, loc + ' ' + text);
+  });
+  assert.equal(M.normalizeNumber('1.234', 'es-ES'), '1234');
+  assert.equal(M.normalizeNumber('1,234', 'en-US'), '1234');
+});
+
+test('numbers: exchange rates prefill in the locale and survive an edit', () => {
+  for (const loc of NUM_LOCALES) withLocale(loc, () => {
+    const pre = M.trimDecimal(M.minorToDecimal(925000, 6));
+    assert.equal(pre, '0.925');
+    assert.equal(EN.minorFromTyped(pre, 6), 925000);
+    const shown = M.decimalToInput(pre, loc);
+    assert.equal(shown, commaLocale(loc) ? '0,925' : '0.925');
+    const edited = shown.slice(0, -1) + '6';
+    const rate = EN.minorFromTyped(M.normalizeNumber(edited, loc), 6);
+    assert.equal(rate, 926000, loc);
+    assert.equal(M.convertMinor(1000, 'USD', 'EUR', rate), 926);
+  });
+  assert.equal(M.trimDecimal('100.0000'), '100');
+  assert.equal(M.trimDecimal('1.000000'), '1');
+  assert.equal(M.trimDecimal('120'), '120');
+});
+
+test('numbers: rates and quantities display in the locale', () => {
+  const want = { 'en-US': ['0.925', '1,234,567.5'], 'ja-JP': ['0.925', '1,234,567.5'], 'es-ES': ['0,925', '1.234.567,5'], 'pt-BR': ['0,925', '1.234.567,5'], 'fr-FR': ['0,925', '1\u202f234\u202f567,5'] };
+  for (const [loc, [small, big]] of Object.entries(want)) {
+    assert.equal(M.formatDecimal('0.925', loc), small, loc);
+    assert.equal(M.formatDecimal('1234567.5', loc), big, loc);
+  }
+});
+
+test('numbers: investment quantity and price survive editing in every locale', () => {
+  for (const loc of NUM_LOCALES) withLocale(loc, () => {
+    for (const [q, scale] of [[101250, 4], [12345678, 4], [12345678, 8], [10000, 4], [1, 8]]) {
+      const shown = VI.numberInput(q, scale);
+      assert.equal(VI.numberFromInput(shown, scale), q, loc + ' qty ' + shown);
+    }
+    const qty = VI.numberInput(101250, 4);
+    const price = VI.numberInput(456780, 4);
+    assert.equal(qty, commaLocale(loc) ? '10,125' : '10.125');
+    assert.equal(price, commaLocale(loc) ? '45,678' : '45.678');
+    assert.equal(M.qtyTimesPrice(VI.numberFromInput(qty, 4), 4, VI.numberFromInput(price, 4), 2), 46249);
+  });
+  withLocale('es-ES', () => assert.equal(VI.numberFromInput('1.234,5', 4), 12345000));
+  withLocale('pt-BR', () => assert.equal(VI.numberFromInput('1.234,5', 4), 12345000));
+  withLocale('fr-FR', () => assert.equal(VI.numberFromInput('1 234,5', 4), 12345000));
+  withLocale('en-US', () => assert.equal(VI.numberFromInput('1,234.5', 4), 12345000));
+  withLocale('ja-JP', () => assert.equal(VI.numberFromInput('1,234.5', 4), 12345000));
+});
+
+test('numbers: a typed minus sign makes a balance negative', () => {
+  withLocale('en-US', () => {
+    assert.equal(VA.signedAmount('-500', 'USD', false), -50000);
+    assert.equal(VA.signedAmount('500', 'USD', true), -50000);
+    assert.equal(VA.signedAmount('-500', 'USD', true), -50000);
+    assert.equal(VA.signedAmount('500', 'USD', false), 50000);
+    assert.equal(VA.signedAmount('abc', 'USD', false), null);
+  });
+  withLocale('es-ES', () => assert.equal(VA.signedAmount('-1.234,56', 'EUR', false), -123456));
+  withLocale('fr-FR', () => assert.equal(VA.signedAmount('-1 234,56', 'EUR', false), -123456));
+});
+
+test('numbers: deleting an account also removes its bills', () => {
+  const L0 = { schedules: () => [{ id: 's1', account: 'card' }, { id: 's2', account: 'cash' }, { id: 's3', account: 'card', active: false }] };
+  const ctx = { ledger: L0, remove: (e, id) => [{ e, id, f: '~' }] };
+  assert.deepEqual(VA.accountBills(L0, 'card').map((s) => s.id), ['s1', 's3']);
+  assert.deepEqual(VA.deleteAccountOps(ctx, 'card').map((o) => o.e + ':' + o.id), ['account:card', 'schedule:s1', 'schedule:s3']);
+  assert.deepEqual(VA.deleteAccountOps(ctx, 'other').map((o) => o.e + ':' + o.id), ['account:other']);
+});
+
+test('numbers: switching the main currency converts budgets and limits', () => {
+  const usdInr = Math.round(1e12 / 12000);
+  const L0 = {
+    today: () => '2026-10-03',
+    settings: () => ({ buffer_minor: 100000, confirm_above_minor: 5000 }),
+    rateE6: (from, to) => (from === 'USD' && to === 'INR' ? usdInr : null),
+    list: (e) => ({
+      category: [{ id: 'groc', budget_default_minor: 50000 }, { id: 'none', budget_default_minor: null }],
+      budget: [{ id: 'groc:2026-09', month: '2026-09', amount_minor: 40000 }],
+      goal: [{ id: 'g', target_minor: 1000000, saved_minor: 0 }],
+      planned_change: [{ id: 'p', change_kind: 'absolute', value: -20000 }, { id: 'q', change_kind: 'percent', value: 1000 }]
+    }[e] || [])
+  };
+  const out = VS.rebaseLimits(L0, 'USD', 'INR');
+  assert.equal(out.missing, 0);
+  assert.deepEqual(out.settings, { buffer_minor: 8333333, confirm_above_minor: 416667 });
+  const rec = Object.fromEntries(out.records.map(([e, id, f]) => [e + ':' + id, f]));
+  assert.deepEqual(rec['category:groc'], { budget_default_minor: 4166667 });
+  assert.deepEqual(rec['budget:groc:2026-09'], { amount_minor: 3333333 });
+  assert.deepEqual(rec['goal:g'], { target_minor: 83333333, saved_minor: 0 });
+  assert.deepEqual(rec['planned_change:p'], { value: -1666667 });
+  assert.equal(rec['planned_change:q'], undefined);
+  assert.equal(rec['category:none'], undefined);
+  const spent = -M.convertMinor(-10000, 'USD', 'INR', usdInr);
+  assert.equal(Math.round((spent / rec['category:groc'].budget_default_minor) * 100), 20);
+  const none = VS.rebaseLimits(Object.assign({}, L0, { rateE6: () => null }), 'USD', 'INR');
+  assert.ok(none.missing > 0);
+  assert.equal(none.settings.buffer_minor, 100000);
+});
+
+test('numbers: XIRR gives no yearly figure for same-day flows', () => {
+  assert.throws(() => V.xirr([{ date: '2026-10-03', amount: -46249 }, { date: '2026-10-03', amount: 46249 }]));
+  const hs = V.holdingsFor({ instruments: [{ id: 'i', name: 'Fondo', currency: 'EUR', qty_scale: 4 }], accounts: [{ id: 'b', currency: 'EUR' }], prices: [], activities: [{ id: 'a', date: '2026-10-03', type: 'buy', account: 'b', instrument: 'i', qty: 101250, price_e4: 456780, amount_minor: 46249 }] }, '2026-10-03');
+  assert.equal(hs[0].value, 46249);
+  assert.equal(hs[0].xirr, null);
+  assert.ok(Math.abs(V.xirr([{ date: '2026-10-02', amount: -1000 }, { date: '2026-10-03', amount: 1000 }])) < 1e-9);
+});
+
 test('dates: month math clamps and never drifts', () => {
   assert.equal(D.addMonths('2024-01-31', 1), '2024-02-29');
   assert.equal(D.addMonths('2023-01-31', 1), '2023-02-28');

@@ -4,7 +4,7 @@ import * as db from '../db.js';
 import { convertMinor, isCurrency } from '../money.js';
 import { COMMON_CCY } from '../defaults.js';
 import { exportPayload, encryptExport, readFileJson, decryptExport, mergeInto, plainExport, storageSummary } from '../backup.js';
-import { localTimeZone } from '../dates.js';
+import { localTimeZone, monthEnd, isISODate } from '../dates.js';
 import { remindersSupported, remindersAllowed, enableReminders, armReminders } from '../reminders.js';
 
 const { h, t, icon } = U;
@@ -14,12 +14,39 @@ function section(title, ...kids) {
   return h('section', { class: 'fcard', style: { marginBottom: '14px' } }, h('h2', { class: 'fcard__title', style: { marginBottom: '12px' } }, title), h('div', { class: 'fstack' }, ...kids));
 }
 
+export function rebaseLimits(L, prev, next) {
+  const today = L.today();
+  const s = L.settings();
+  const out = { settings: {}, records: [], missing: 0 };
+  const conv = (minor, date) => {
+    if (!minor) return minor;
+    const r = L.rateE6(prev, next, date && date < today ? date : today);
+    if (!r) { out.missing++; return minor; }
+    return convertMinor(minor, prev, next, r);
+  };
+  for (const k of ['buffer_minor', 'confirm_above_minor']) if (s[k]) out.settings[k] = conv(s[k]);
+  for (const c of L.list('category')) if (c.budget_default_minor) out.records.push(['category', c.id, { budget_default_minor: conv(c.budget_default_minor) }]);
+  for (const b of L.list('budget')) {
+    if (!b.amount_minor) continue;
+    const end = isISODate(b.month + '-01') ? monthEnd(b.month + '-01') : today;
+    out.records.push(['budget', b.id, { amount_minor: conv(b.amount_minor, end) }]);
+  }
+  for (const g of L.list('goal')) if (g.target_minor || g.saved_minor) out.records.push(['goal', g.id, { target_minor: conv(g.target_minor || 0), saved_minor: conv(g.saved_minor || 0) }]);
+  for (const c of L.list('planned_change')) if (c.change_kind === 'absolute' && c.value) out.records.push(['planned_change', c.id, { value: conv(c.value) }]);
+  return out;
+}
+
 async function changeBase(ctx, next) {
   const L = ctx.ledger;
-  if (next === L.base() || !isCurrency(next)) return;
-  const ok = await U.confirmDialog({ title: t('settings.base_title', { ccy: next }), body: t('settings.base_body', { ccy: next }), ok: t('settings.base_ok') });
+  const prev = L.base();
+  if (next === prev || !isCurrency(next)) return;
+  const limits = rebaseLimits(L, prev, next);
+  const head = t('settings.base_body', { ccy: next });
+  const body = limits.missing ? head + (head.endsWith('。') ? '' : ' ') + t('settings.base_no_rate', { from: prev, ccy: next }) : head;
+  const ok = await U.confirmDialog({ title: t('settings.base_title', { ccy: next }), body, ok: t('settings.base_ok') });
   if (!ok) { ctx.rerender(); return; }
-  const ops = ctx.save('settings', 'main', { base_currency: next });
+  const ops = ctx.save('settings', 'main', Object.assign({ base_currency: next }, limits.settings));
+  for (const [e, id, fields] of limits.records) ops.push(...ctx.engine.updateOps(e, id, fields));
   let missing = 0;
   for (const tx of L.list('transaction')) {
     const ccy = tx.currency || L.base();

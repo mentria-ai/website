@@ -1,7 +1,7 @@
 import * as U from '../ui.js';
 import { ACCOUNT_TYPES, INVEST_TYPES, accountGroup } from '../ledger.js';
 import { COMMON_CCY } from '../defaults.js';
-import { isCurrency, rateE6From, minorToDecimal, normalizeNumber } from '../money.js';
+import { isCurrency, rateE6From, minorToDecimal, normalizeNumber, trimDecimal, decimalToInput, formatDecimal } from '../money.js';
 import { isISODate } from '../dates.js';
 
 const { h, t, icon } = U;
@@ -16,6 +16,34 @@ function ccyOptions(L, selected) {
   return Array.from(set).map((c) => ({ value: c, label: c + (names ? ' · ' + names.of(c) : '') }));
 }
 
+export function signedAmount(text, ccy, owed) {
+  const v = U.parseAmount(text, ccy);
+  if (v == null) return null;
+  return v < 0 || owed ? -Math.abs(v) : Math.abs(v);
+}
+
+function syncOwed(input, box, ccy) {
+  input.addEventListener('change', () => {
+    const c = ccy();
+    const v = U.parseAmount(input.value, c);
+    if (v == null || v >= 0) return;
+    box.checked = true;
+    input.value = U.amountToInput(v, c);
+  });
+}
+
+export function accountBills(L, id) {
+  return L.schedules(true).filter((s) => s.account === id);
+}
+
+export function deleteAccountOps(ctx, id) {
+  const ops = ctx.remove('account', id);
+  for (const s of accountBills(ctx.ledger, id)) ops.push(...ctx.remove('schedule', s.id));
+  return ops;
+}
+
+function rateText(r6) { return formatDecimal(trimDecimal(minorToDecimal(r6, 6)), U.locale()); }
+
 export function accountSheet(ctx, id) {
   const L = ctx.ledger;
   const a = id ? L.get('account', id) : null;
@@ -25,6 +53,8 @@ export function accountSheet(ctx, id) {
   const ccy = U.select(ccyOptions(L, st.currency), st.currency);
   const opening = U.moneyField({ value: st.opening_minor ? U.amountToInput(st.opening_minor, st.currency) : '', placeholder: '0' });
   const openNeg = U.checkbox(t('accounts.opening_owed'), (st.opening_minor || 0) < 0, () => {});
+  const openBox = openNeg.querySelector('input');
+  syncOwed(opening, openBox, () => ccy.value);
   const openDate = h('input', { class: 'fi', type: 'date', value: st.opening_date || L.today() });
   const inst = U.input({ value: st.institution || '', maxlength: '60' });
   const last4 = U.input({ value: st.number_hint || '', maxlength: '4', inputmode: 'numeric', placeholder: '1234' });
@@ -47,10 +77,14 @@ export function accountSheet(ctx, id) {
   const del = a ? h('button', { type: 'button', class: 'fb fb--danger fb--icon', 'aria-label': t('common.delete'), onclick: async () => {
     const used = (L.rowsByAccount().get(a.id) || []).length;
     if (used) { err.textContent = U.tp('accounts.in_use', used); return; }
-    const ok = await U.confirmDialog({ title: t('accounts.delete_title'), body: t('accounts.delete_body', { name: a.name }), ok: t('common.delete'), danger: true });
+    const bills = accountBills(L, a.id);
+    const names = bills.slice(0, 3).map((s) => s.name || '—').join(', ') + (bills.length > 3 ? ', …' : '');
+    const head = t('accounts.delete_body', { name: a.name });
+    const body = bills.length ? head + (head.endsWith('。') ? '' : ' ') + U.tp('accounts.delete_bills', bills.length, { names }) : head;
+    const ok = await U.confirmDialog({ title: t('accounts.delete_title'), body, ok: t('common.delete'), danger: true });
     if (!ok) return;
     sh.close();
-    ctx.commit(ctx.remove('account', a.id), t('accounts.deleted'));
+    ctx.commit(deleteAccountOps(ctx, a.id), bills.length ? U.tp('accounts.deleted_bills', bills.length) : t('accounts.deleted'));
   } }, icon('trash')) : null;
   const sh = U.sheet({ title: a ? t('accounts.edit') : t('accounts.add'), body, foot: [del, h('button', { type: 'button', class: 'fb', onclick: () => sh.close() }, t('common.cancel')), save].filter(Boolean), focus: a ? null : name });
   save.addEventListener('click', () => {
@@ -58,9 +92,8 @@ export function accountSheet(ctx, id) {
     if (!nm) { err.textContent = t('accounts.err_name'); name.focus(); return; }
     if (!isCurrency(ccy.value)) { err.textContent = t('accounts.err_ccy'); return; }
     if (!isISODate(openDate.value)) { err.textContent = t('entry.err_date'); return; }
-    let ob = opening.value.trim() ? U.parseAmount(opening.value, ccy.value) : 0;
+    const ob = opening.value.trim() ? signedAmount(opening.value, ccy.value, openBox.checked) : 0;
     if (ob == null) { err.textContent = t('entry.err_amount'); return; }
-    ob = Math.abs(ob) * (openNeg.querySelector('input').checked ? -1 : 1);
     const fields = {
       name: nm.slice(0, 60), type: type.value, currency: ccy.value, opening_minor: ob, opening_date: openDate.value,
       institution: inst.value.trim().slice(0, 60), number_hint: last4.value.replace(/\D/g, '').slice(-4), lot_method: lot.value,
@@ -78,6 +111,8 @@ function reconcileSheet(ctx, a) {
   const cur = L.balance(a.id);
   const inp = U.moneyField({ placeholder: U.amountToInput(cur, a.currency) });
   const neg = U.checkbox(t('accounts.balance_negative'), cur < 0, () => {});
+  const negBox = neg.querySelector('input');
+  syncOwed(inp, negBox, () => a.currency);
   const err = h('p', { class: 'ff__err', role: 'alert' });
   const save = h('button', { type: 'button', class: 'fb fb--primary' }, t('accounts.reconcile_go'));
   const sh = U.sheet({
@@ -86,9 +121,8 @@ function reconcileSheet(ctx, a) {
     foot: [h('button', { type: 'button', class: 'fb', onclick: () => sh.close() }, t('common.cancel')), save], focus: inp
   });
   save.addEventListener('click', () => {
-    let v = U.parseAmount(inp.value, a.currency);
+    const v = signedAmount(inp.value, a.currency, negBox.checked);
     if (v == null) { err.textContent = t('entry.err_amount'); return; }
-    v = Math.abs(v) * (neg.querySelector('input').checked ? -1 : 1);
     const diff = v - cur;
     sh.close();
     if (!diff) { U.toast(t('accounts.reconciled_same')); return; }
@@ -187,15 +221,16 @@ function fxTab(ctx) {
   for (const a of L.accounts(true)) if (a.currency !== base) used.add(a.currency);
   for (const r of L.list('fx_rate')) { if (r.quote === base) used.add(r.base); }
   const from = U.select(ccyOptions(L, Array.from(used)[0] || 'USD').filter((o) => o.value !== base), Array.from(used)[0] || (base === 'USD' ? 'EUR' : 'USD'));
-  const rate = U.moneyField({ placeholder: '0.00' });
+  const rate = U.moneyField({ placeholder: decimalToInput('0.00', U.locale()) });
   const date = h('input', { class: 'fi', type: 'date', value: L.today() });
   const err = h('p', { class: 'ff__err', role: 'alert' });
   const add = h('button', { type: 'button', class: 'fb fb--primary' }, t('accounts.fx_add'));
   add.addEventListener('click', () => {
     const dec = normalizeNumber(rate.value, U.locale());
-    if (!dec || Number(dec) <= 0) { err.textContent = t('entry.err_amount'); return; }
+    let r6 = null;
+    try { r6 = dec ? rateE6From(dec) : null; } catch (_) {}
+    if (!r6 || r6 <= 0) { err.textContent = t('entry.err_amount'); return; }
     if (!isISODate(date.value)) { err.textContent = t('entry.err_date'); return; }
-    const r6 = rateE6From(dec);
     ctx.commit(ctx.save('fx_rate', 'fx:' + from.value + base + ':' + date.value, { base: from.value, quote: base, date: date.value, rate_e6: r6, source: 'manual' }), t('accounts.fx_saved'));
   });
   node.append(h('div', { class: 'fcard', style: { marginBottom: '16px' } },
@@ -204,11 +239,11 @@ function fxTab(ctx) {
   for (const c of used) {
     const hist = L.list('fx_rate').filter((r) => (r.base === c && r.quote === base) || (r.base === base && r.quote === c)).sort((a, b) => (a.date < b.date ? 1 : -1));
     const cur = L.rateE6(c, base);
-    node.append(h('div', { class: 'fsection' }, h('h2', null, c + ' → ' + base), h('span', { class: 'fnum ' + (cur ? '' : 'amt--warn') }, cur ? '1 ' + c + ' = ' + minorToDecimal(cur, 6).replace(/0+$/, '').replace(/\.$/, '') + ' ' + base : t('accounts.no_rate'))));
+    node.append(h('div', { class: 'fsection' }, h('h2', null, c + ' → ' + base), h('span', { class: 'fnum ' + (cur ? '' : 'amt--warn') }, cur ? '1 ' + c + ' = ' + rateText(cur) + ' ' + base : t('accounts.no_rate'))));
     for (const r of hist.slice(0, 6)) {
       const disp = r.base === c ? r.rate_e6 : Math.round(1e12 / r.rate_e6);
       node.append(h('div', { class: 'frow frow--static' }, U.mono(c, U.colorFor(c), true), h('span', { class: 'frow__main' }, h('span', { class: 'frow__title' }, U.date(r.date)), h('span', { class: 'frow__meta' }, t('accounts.fx_source.' + (r.source || 'manual')))),
-        h('span', { class: 'fb-row' }, h('span', { class: 'fnum' }, minorToDecimal(disp, 6).replace(/0+$/, '').replace(/\.$/, '')), h('button', { type: 'button', class: 'fb fb--ghost fb--icon', 'aria-label': t('common.delete'), onclick: () => ctx.commit(ctx.remove('fx_rate', r.id), t('accounts.fx_deleted')) }, icon('trash')))));
+        h('span', { class: 'fb-row' }, h('span', { class: 'fnum' }, rateText(disp)), h('button', { type: 'button', class: 'fb fb--ghost fb--icon', 'aria-label': t('common.delete'), onclick: () => ctx.commit(ctx.remove('fx_rate', r.id), t('accounts.fx_deleted')) }, icon('trash')))));
     }
   }
   return node;

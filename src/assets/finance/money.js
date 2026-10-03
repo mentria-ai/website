@@ -58,6 +58,15 @@ export function minorToDecimal(minor, currencyOrDecimals) {
   return (neg ? '-' : '') + out;
 }
 
+export function trimDecimal(dec) {
+  const s = String(dec == null ? '' : dec);
+  if (s.indexOf('.') < 0) return s;
+  let end = s.length;
+  while (end > 0 && s[end - 1] === '0') end--;
+  if (s[end - 1] === '.') end--;
+  return s.slice(0, end);
+}
+
 export function minorToNumber(minor, currency) {
   return minor / 10 ** decimalsFor(currency);
 }
@@ -112,6 +121,21 @@ export function localeSeparators(locale) {
   } catch (_) { return { group: ',', decimal: '.' }; }
 }
 
+export function decimalToInput(dec, locale) {
+  const s = String(dec == null ? '' : dec);
+  const d = localeSeparators(locale).decimal;
+  return d === '.' ? s : s.replace('.', d);
+}
+
+export function formatDecimal(dec, locale) {
+  const s = String(dec == null ? '' : dec);
+  const m = s.match(/^(-?)(\d+)(?:\.(\d+))?$/);
+  if (!m) return s;
+  let head = m[2];
+  try { head = new Intl.NumberFormat(locale || undefined).format(BigInt(m[2])); } catch (_) {}
+  return (m[1] ? '-' : '') + head + (m[3] ? localeSeparators(locale).decimal + m[3] : '');
+}
+
 const SYMBOLS = { '$': 'USD', '€': 'EUR', '£': 'GBP', '¥': 'JPY', '₹': 'INR', '₩': 'KRW', '₽': 'RUB', '₺': 'TRY', '₫': 'VND', '₦': 'NGN', '₱': 'PHP', '฿': 'THB', '₪': 'ILS', '₴': 'UAH', 'R$': 'BRL', 'A$': 'AUD', 'C$': 'CAD', 'HK$': 'HKD', 'S$': 'SGD', 'NZ$': 'NZD', 'zł': 'PLN', 'kr': null, 'Fr': 'CHF', 'Rs': 'INR' };
 
 export function detectCurrency(text) {
@@ -143,9 +167,11 @@ export function normalizeNumber(raw, locale, style) {
     const ch = lastDot >= 0 ? '.' : ',';
     const count = s.split(ch).length - 1;
     const tail = s.slice(s.lastIndexOf(ch) + 1).replace(/\s/g, '');
+    const head = s.slice(0, s.indexOf(ch)).replace(/\s/g, '');
     if (count > 1) decimalChar = null;
+    else if (!head || head[0] === '0') decimalChar = ch;
     else if (tail.length === 3 && sep.group === ch && sep.decimal !== ch) decimalChar = null;
-    else if (tail.length === 3 && /^\d{1,3}$/.test(s.slice(0, s.indexOf(ch)).replace(/\s/g, '')) && sep.decimal !== ch) decimalChar = null;
+    else if (tail.length === 3 && /^\d{1,3}$/.test(head) && sep.decimal !== ch) decimalChar = null;
     else decimalChar = ch;
   }
   let intPart = s;

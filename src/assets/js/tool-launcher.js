@@ -76,6 +76,7 @@
       slot.appendChild(btn);
     });
     renderPinned();
+    document.addEventListener('mentria:localechange', renderPinned);
   }
 
   function renderRecents() {

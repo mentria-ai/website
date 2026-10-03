@@ -29,6 +29,10 @@
     if (!l.prefix) return p || '/';
     return p.slice(l.prefix.length) || '/';
   }
+  function englishOnly(p) {
+    var list = window.MENTRIA_EN_ONLY;
+    return !!(list && list.indexOf(basePath(p)) >= 0);
+  }
   function urlForLocale(code, p) {
     var l = byCode(code);
     if (!l) return p;
@@ -130,6 +134,7 @@
       var u;
       try { u = new URL(href, location.origin); } catch (_) { continue; }
       if (u.pathname !== '/' && u.pathname.slice(-1) !== '/') continue;
+      if (englishOnly(u.pathname)) continue;
       a.setAttribute('href', urlForLocale(code, u.pathname) + u.search + u.hash);
     }
   }
@@ -246,6 +251,13 @@
   function setLocale(code, opts) {
     opts = opts || {};
     if (!byCode(code) || code === currentCode || code === pending) return;
+    if (document.documentElement.hasAttribute('data-locale-reload')) {
+      if (opts.fromRemote) return;
+      try { localStorage.setItem(STORE_KEY, code); } catch (_) {}
+      if (bc) { try { bc.postMessage({ type: 'locale', code: code }); } catch (_) {} }
+      location.replace(urlForLocale(code, location.pathname) + location.search + location.hash);
+      return;
+    }
     pending = code;
     getDict(code).then(function (dict) {
       if (pending === code) pending = null;
@@ -254,7 +266,9 @@
       if (!vt) run();
       currentCode = code;
       scheduleLocaleShells(code);
-      try { history.replaceState(history.state, '', urlForLocale(code, location.pathname) + location.search + location.hash); } catch (_) {}
+      if (window.MENTRIA_PAGE_LOCALIZED !== false) {
+        try { history.replaceState(history.state, '', urlForLocale(code, location.pathname) + location.search + location.hash); } catch (_) {}
+      }
       try { localStorage.setItem(STORE_KEY, code); } catch (_) {}
       if (!opts.fromRemote && bc) { try { bc.postMessage({ type: 'locale', code: code }); } catch (_) {} }
       var done = (vt && vt.updateCallbackDone) ? vt.updateCallbackDone : Promise.resolve();
@@ -283,6 +297,8 @@
     var code = a.getAttribute('hreflang');
     if (!code || !byCode(code)) return;
     e.preventDefault();
+    var menu = a.closest('details');
+    if (menu) menu.open = false;
     setLocale(code, {});
   });
 

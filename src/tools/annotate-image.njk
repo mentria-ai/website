@@ -165,6 +165,28 @@ eleventyComputed:
 
   function setStatus(state, text){ dot.className = 'an-status-dot an-status-dot--' + state; statusText.textContent = text; }
 
+  document.addEventListener('mentria:localechange', () => {
+    const i18n = window.MentriaI18n;
+    if (!i18n || typeof i18n.t !== 'function') return;
+    const shown = statusText.textContent;
+    const before = Object.assign({}, COPY);
+    const pick = (key) => { const v = i18n.t('tool.annotate-image.' + key); return typeof v === 'string' ? v : null; };
+    ['status_idle', 'status_loading', 'status_ready', 'status_generating', 'err_no_webgpu', 'err_load', 'err_device_lost', 'empty_response', 'copy', 'copied', 'bad_file', 'sys_prompt'].forEach((key) => {
+      const v = pick(key);
+      if (v != null) COPY[key.replace(/_([a-z])/g, (m, c) => c.toUpperCase())] = v;
+    });
+    Object.keys(COPY.labels).forEach((mode) => {
+      const label = pick('mode_' + mode);
+      const prompt = pick('prompt_' + mode);
+      if (label != null) COPY.labels[mode] = label;
+      if (prompt != null) COPY.prompts[mode] = prompt;
+    });
+    const was = Object.keys(before).find((key) => typeof before[key] === 'string' && before[key] === shown);
+    if (was) statusText.textContent = COPY[was];
+    const mode = resultLabel.getAttribute('data-mode');
+    if (mode && COPY.labels[mode]) resultLabel.textContent = COPY.labels[mode];
+  });
+
   if (!navigator.gpu){ setStatus('error', COPY.errNoWebgpu); drop.style.pointerEvents = 'none'; drop.style.opacity = '0.5'; return; }
 
   let MentriaEngine = null, engine = null, loaded = false, loadingPromise = null, generating = false;
@@ -235,6 +257,7 @@ eleventyComputed:
     setStatus('generating', COPY.statusGenerating);
     resultWrap.hidden = false;
     resultLabel.textContent = COPY.labels[mode] || '';
+    resultLabel.setAttribute('data-mode', mode);
     if (window.renderMarkdownReady){ try { await window.renderMarkdownReady; } catch(_){} }
     let full = '', pending = false, nTok = 0;
     const paint = () => {

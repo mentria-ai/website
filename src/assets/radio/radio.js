@@ -559,6 +559,28 @@ class MentriaRadio {
     this.el.statusText.textContent = text;
   }
 
+  relabel() {
+    const i18n = window.MentriaI18n;
+    if (!i18n || typeof i18n.t !== "function") return;
+    const before = Object.assign({}, COPY);
+    Object.keys(COPY).forEach((key) => {
+      const name = key === "trackCountFmt" ? "track_count_format" : key.replace(/[A-Z]/g, (c) => "_" + c.toLowerCase());
+      const value = i18n.t("tool.radio." + name);
+      if (typeof value === "string") COPY[key] = value;
+    });
+    const shown = this.el.statusText.textContent;
+    const statusKey = Object.keys(before).find((key) => before[key] === shown);
+    if (statusKey) this.el.statusText.textContent = COPY[statusKey];
+    if (this.catalog.length) this.el.trackCount.textContent = COPY.trackCountFmt.replace("{n}", this.catalog.length);
+    this.renderLiked();
+    if (this.el.sleepSeg) {
+      Array.prototype.forEach.call(this.el.sleepSeg.querySelectorAll("button[data-value]"), (b) => {
+        const v = Number(b.dataset.value);
+        if (v > 0) b.setAttribute("aria-label", (COPY.sleepMinutes || "{n}").replace("{n}", String(v)));
+      });
+    }
+  }
+
   // ── UI binding ────────────────────────────────────
 
   bindUI() {
@@ -589,6 +611,7 @@ class MentriaRadio {
     if (this.el.retry) {
       this.el.retry.addEventListener("click", () => this.loadCatalogAndInit());
     }
+    document.addEventListener("mentria:localechange", () => this.relabel());
 
     if (window.MentriaStore) {
       const saved = window.MentriaStore.get("tools", "radio_volume");

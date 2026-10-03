@@ -166,6 +166,55 @@ eleventyComputed:
       if (current !== 'UTC' && !LEGACY[current]) LEGACY[current] = old;
     });
     const DEFAULTS = ['America/New_York', 'Europe/London', 'Asia/Tokyo'];
+    const ALIASES = {
+      'America/Los_Angeles': 'san francisco seattle san diego las vegas portland sacramento san jose oakland silicon valley pst pdt pacific',
+      'America/Denver': 'salt lake city albuquerque boise mst mdt mountain',
+      'America/Phoenix': 'tucson arizona',
+      'America/Chicago': 'dallas houston austin san antonio minneapolis st louis saint louis kansas city new orleans nashville milwaukee cst cdt central',
+      'America/New_York': 'boston washington dc philadelphia miami atlanta orlando pittsburgh baltimore charlotte cleveland est edt eastern',
+      'America/Toronto': 'ottawa montreal quebec',
+      'America/Vancouver': 'victoria',
+      'America/Mexico_City': 'guadalajara monterrey',
+      'America/Sao_Paulo': 'rio de janeiro brasilia belo horizonte brt',
+      'America/Argentina/Buenos_Aires': 'argentina cordoba rosario',
+      'America/Anchorage': 'alaska akst akdt',
+      'Pacific/Honolulu': 'hawaii hst',
+      'Europe/London': 'manchester birmingham edinburgh glasgow liverpool bristol leeds gmt bst uk britain england',
+      'Europe/Dublin': 'ireland cork',
+      'Europe/Paris': 'lyon marseille toulouse nice cet cest france',
+      'Europe/Berlin': 'munich hamburg frankfurt cologne stuttgart dusseldorf germany',
+      'Europe/Madrid': 'barcelona valencia seville spain',
+      'Europe/Rome': 'milan naples turin florence venice italy',
+      'Europe/Amsterdam': 'rotterdam the hague netherlands',
+      'Europe/Zurich': 'geneva basel bern switzerland',
+      'Europe/Moscow': 'saint petersburg st petersburg msk',
+      'Europe/Athens': 'eet greece',
+      'Europe/Istanbul': 'ankara turkey',
+      'Asia/Kolkata': 'mumbai bombay delhi new delhi bangalore bengaluru chennai hyderabad pune ahmedabad jaipur kochi goa ist india',
+      'Asia/Shanghai': 'beijing shenzhen guangzhou chengdu wuhan hangzhou xian china',
+      'Asia/Tokyo': 'osaka kyoto yokohama nagoya sapporo fukuoka jst japan',
+      'Asia/Seoul': 'busan incheon kst korea',
+      'Asia/Dubai': 'abu dhabi sharjah gst uae',
+      'Asia/Karachi': 'lahore islamabad pkt pakistan',
+      'Asia/Dhaka': 'chittagong bangladesh',
+      'Asia/Jakarta': 'bandung surabaya wib indonesia',
+      'Asia/Manila': 'cebu quezon city pht philippines',
+      'Asia/Ho_Chi_Minh': 'saigon hanoi vietnam',
+      'Asia/Bangkok': 'phuket chiang mai thailand',
+      'Asia/Singapore': 'sgt',
+      'Asia/Hong_Kong': 'hkt',
+      'Asia/Riyadh': 'jeddah mecca medina saudi arabia',
+      'Asia/Jerusalem': 'tel aviv israel',
+      'Africa/Lagos': 'abuja nigeria wat',
+      'Africa/Johannesburg': 'cape town durban pretoria sast south africa',
+      'Africa/Nairobi': 'mombasa kenya eat',
+      'Africa/Cairo': 'alexandria giza egypt',
+      'Australia/Sydney': 'canberra aest aedt',
+      'Australia/Brisbane': 'gold coast queensland',
+      'Australia/Perth': 'awst',
+      'Pacific/Auckland': 'wellington christchurch nzst nzdt new zealand',
+      'UTC': 'utc gmt zulu coordinated universal time'
+    };
     const FALLBACK = [
       'Pacific/Pago_Pago', 'Pacific/Honolulu', 'Pacific/Marquesas', 'America/Anchorage', 'America/Los_Angeles',
       'America/Denver', 'America/Phoenix', 'America/Chicago', 'America/Mexico_City', 'America/New_York',
@@ -399,12 +448,28 @@ eleventyComputed:
       return hay.indexOf(token) === 0 || hay.indexOf(' ' + token) >= 0;
     }
 
+    let aliasByKey = null;
+    function aliasFor(key) {
+      if (!aliasByKey) {
+        aliasByKey = {};
+        Object.keys(ALIASES).forEach((zone) => {
+          if (!isValidZone(zone)) return;
+          const k = zoneKey(zone);
+          aliasByKey[k] = (aliasByKey[k] ? aliasByKey[k] + ' ' : '') + ALIASES[zone];
+        });
+      }
+      return aliasByKey[key] || '';
+    }
+
     function scoreEntry(entry, tokens) {
       let score = 0;
+      const alias = entry.aliasNorm ? ' ' + entry.aliasNorm + ' ' : '';
       for (let i = 0; i < tokens.length; i++) {
         const token = tokens[i];
-        if (entry.cityNorm.indexOf(token) === 0) score += 6;
+        if (alias && alias.indexOf(' ' + token + ' ') >= 0) score += 7;
+        else if (entry.cityNorm.indexOf(token) === 0) score += 6;
         else if (wordStart(entry.cityNorm, token)) score += 5;
+        else if (alias && wordStart(entry.aliasNorm, token)) score += 4;
         else if (entry.cityNorm.indexOf(token) >= 0) score += 3;
         else if (wordStart(entry.hayNorm, token)) score += 2;
         else if (entry.hayNorm.indexOf(token) >= 0) score += 1;
@@ -474,6 +539,7 @@ eleventyComputed:
         out.push({
           id: id, key: key, city: city, sub: sub, region: region, name: name, off: off, offLabel: offLabel,
           cityNorm: normalizeText(city),
+          aliasNorm: normalizeText(aliasFor(key)),
           hayNorm: normalizeText([city, sub, region, regionRaw, key, ids[i], name, generic, offLabel].join(' '))
         });
       }
@@ -489,7 +555,7 @@ eleventyComputed:
     }
 
     function searchEntries(entries, query, limit, lang) {
-      const whole = normalizeText(query);
+      const whole = normalizeText(query).replace(/\bgmt(?=[+\-\u2212])/g, 'utc');
       if (!whole) return [];
       const tokens = whole.split(' ');
       const coll = makeCollator(lang);

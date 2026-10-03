@@ -2,7 +2,7 @@
 {
   "id": "dice-roller",
   "name": "Dice Roller",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "icon": "🎲",
   "author": "Mentria",
   "description": "Roll dice with standard notation and pick randomly from a list.",
@@ -90,10 +90,11 @@
     if (saved.items) itemsEl.value = saved.items;
 
     function roll() {
-      var mch = notationEl.value.trim().match(/^(\d*)d(\d+)([+-]\d+)?$/i);
-      if (!mch) { totalEl.textContent = '—'; breakdownEl.textContent = 'try e.g. 2d6 or 1d20+3'; return; }
-      var count = Math.min(100, parseInt(mch[1] || '1', 10) || 1);
-      var sides = Math.min(1000, parseInt(mch[2], 10));
+      var mch = notationEl.value.replace(/\s+/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i);
+      var count = mch ? parseInt(mch[1] || '1', 10) : 0;
+      var sides = mch ? parseInt(mch[2], 10) : 0;
+      if (!mch || count < 1 || sides < 1) { totalEl.textContent = '—'; breakdownEl.textContent = 'try e.g. 2d6 or 1d20+3'; return; }
+      if (count > 100 || sides > 1000) { totalEl.textContent = '—'; breakdownEl.textContent = 'up to 100 dice with up to 1000 sides'; return; }
       var mod = parseInt(mch[3] || '0', 10);
       var rolls = [], sum = 0;
       for (var i = 0; i < count; i++) { var v = rnd(sides) + 1; rolls.push(v); sum += v; }

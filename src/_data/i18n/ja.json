@@ -4956,6 +4956,7 @@
     "list_label": "検索結果",
     "no_results": "一致するものがありません",
     "recents": "最近使ったもの",
+    "pages": "ページ",
     "open": "コマンドパレットを開く（⌘K）",
     "app_bar": "アプリナビゲーション",
     "extensions": "拡張機能",
@@ -4969,6 +4970,11 @@
     "act_flip": "コインを投げる",
     "act_heads": "表",
     "act_tails": "裏",
+    "kw_note": "メモ, ノート",
+    "kw_timer": "タイマー",
+    "kw_flip": "コイン, コイントス",
+    "hint_note": "メモの内容を入力してください",
+    "hint_timer": "5m、90s、1h のように時間を入力してください",
     "search_site": "サイト内で「{q}」を検索"
   },
   "widgets": {

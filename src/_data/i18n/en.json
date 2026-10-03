@@ -4956,6 +4956,7 @@
     "list_label": "Search results",
     "no_results": "No matches",
     "recents": "Recent",
+    "pages": "Pages",
     "open": "Open command palette (⌘K)",
     "app_bar": "App navigation",
     "extensions": "Extensions",
@@ -4969,6 +4970,11 @@
     "act_flip": "Flip a coin",
     "act_heads": "Heads",
     "act_tails": "Tails",
+    "kw_note": "note, memo",
+    "kw_timer": "timer",
+    "kw_flip": "flip, coin, toss",
+    "hint_note": "Type your note",
+    "hint_timer": "Type a time, like 5m, 90s or 1h",
     "search_site": "Search the site for “{q}”"
   },
   "widgets": {

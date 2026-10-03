@@ -107,10 +107,20 @@ function sourceUrls(id) {
 }
 async function fetchSource(id) {
   let lastErr = null;
+  let best = null;
+  let bestVersion = null;
   for (const u of sourceUrls(id)) {
-    try { const r = await fetch(u, { cache: 'no-store' }); if (!r.ok) throw new Error(String(r.status)); return await r.text(); } catch (e) { lastErr = e; }
+    try {
+      const r = await fetch(u, { cache: 'no-store' });
+      if (!r.ok) throw new Error(String(r.status));
+      const text = await r.text();
+      let version = null;
+      try { version = X.inspect(text).manifest.version; } catch (_) {}
+      if (best === null || (version && (!bestVersion || X.compareVersions(version, bestVersion) > 0))) { best = text; bestVersion = version; }
+    } catch (e) { lastErr = e; }
   }
-  throw lastErr || new Error('unavailable');
+  if (best === null) throw lastErr || new Error('unavailable');
+  return best;
 }
 
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
@@ -371,7 +381,7 @@ async function galInstall(entry, card, b) {
       render();
       announceInstall(X.getEntry(entry.id));
     } catch (e) {
-      if (created) X.remove(entry.id);
+      if (created) X.remove(entry.id, { keepData: true });
       b.disabled = false;
       galStatus(card, COPY.galFailed);
     }

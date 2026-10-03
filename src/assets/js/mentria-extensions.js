@@ -232,12 +232,15 @@ export function setEnabled(id, enabled) {
   return store().set(NS, 'registry', registry);
 }
 
-export function remove(id) {
+export function remove(id, opts) {
   if (!getEntry(id)) return false;
   const srcOk = getSource(id) == null ? true : store().remove(NS, 'src.' + id);
   removeFiles(id).catch(() => {});
-  store().clear(DATA_NS_PREFIX + id);
-  clearDb(id);
+  if (!(opts && opts.keepData)) {
+    store().clear(DATA_NS_PREFIX + id);
+    clearDb(id);
+    if (id !== 'db' && id !== 'files') { try { indexedDB.deleteDatabase('mentria-ext-' + id); } catch (_) {} }
+  }
   const registry = getRegistry().filter((e) => e.manifest.id !== id);
   const regOk = registry.length
     ? store().set(NS, 'registry', registry)

@@ -135,6 +135,7 @@ export function createInput(stageEl, canvas, opts) {
     reloadPressed: false,
     restartPressed: false,
     pausePressed: false,
+    lockPause: false,
     lookDx: 0,
     lookDy: 0
   };
@@ -150,6 +151,7 @@ export function createInput(stageEl, canvas, opts) {
   let pendingReload = false;
   let pendingRestart = false;
   let pendingPause = false;
+  let pendingLockPause = false;
 
   let mouseDx = 0;
   let mouseDy = 0;
@@ -335,7 +337,7 @@ export function createInput(stageEl, canvas, opts) {
     mouseDx = 0;
     mouseDy = 0;
     if (expected) return;
-    pendingPause = true;
+    pendingLockPause = true;
     if (lockLostCb) {
       try { lockLostCb(); } catch (_) {}
     }
@@ -1049,6 +1051,7 @@ export function createInput(stageEl, canvas, opts) {
     intents.reloadPressed = pendingReload;
     intents.restartPressed = pendingRestart;
     intents.pausePressed = pendingPause;
+    intents.lockPause = pendingLockPause;
     intents.lookDx = lookDx;
     intents.lookDy = lookDy;
 
@@ -1056,6 +1059,7 @@ export function createInput(stageEl, canvas, opts) {
     pendingReload = false;
     pendingRestart = false;
     pendingPause = false;
+    pendingLockPause = false;
 
     return intents;
   }

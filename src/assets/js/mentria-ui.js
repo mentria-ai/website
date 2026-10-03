@@ -725,6 +725,21 @@
     windowMenu(dots);
   }, true);
 
+  var helpReturn = new WeakMap();
+  document.addEventListener('toggle', function (e) {
+    var pop = e.target;
+    if (!pop || !pop.matches || !pop.matches('.game-help[popover]')) return;
+    if (e.newState === 'open') {
+      helpReturn.set(pop, document.activeElement);
+      var closeBtn = pop.querySelector('[popovertargetaction="hide"]');
+      if (closeBtn) { try { closeBtn.focus({ preventScroll: true }); } catch (_) {} }
+    } else {
+      var back = helpReturn.get(pop);
+      helpReturn.delete(pop);
+      if (back && back !== document.body && document.contains(back) && back.focus) { try { back.focus({ preventScroll: true }); } catch (_) {} }
+    }
+  }, true);
+
   window.MentriaUI = {
     copyButton: copyButton,
     toast: toast,

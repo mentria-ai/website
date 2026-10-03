@@ -504,7 +504,9 @@ export function createUI(stage, copyIn, opts = {}) {
     const portrait = r.height > r.width * 1.05 && coarsePointer();
     if (!portrait) rotateDismissed = false;
     rotatePortrait = portrait;
+    const wasHidden = rotateEl.hidden;
     rotateEl.hidden = !portrait || rotateDismissed;
+    if (wasHidden && !rotateEl.hidden) requestPause();
   }
   syncRotateText();
   rotateEl.addEventListener('click', function () {

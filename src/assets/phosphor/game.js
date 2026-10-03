@@ -82,7 +82,7 @@ const levels = { master: 0.8, sfx: 0.9, ambient: 0.5 };
 const localIntents = {
   forward: 0, strafe: 0, jumpPressed: false, crouchHeld: false, sprintHeld: false,
   fireHeld: false, adsHeld: false, reloadPressed: false, restartPressed: false,
-  pausePressed: false, lookDx: 0, lookDy: 0
+  pausePressed: false, lockPause: false, lookDx: 0, lookDy: 0
 };
 
 const completeEv = { t: 'run_complete', medal: null };
@@ -344,6 +344,7 @@ function copyIntents(src) {
     d.reloadPressed = false;
     d.restartPressed = false;
     d.pausePressed = false;
+    d.lockPause = false;
     d.lookDx = 0;
     d.lookDy = 0;
     return d;
@@ -358,6 +359,7 @@ function copyIntents(src) {
   d.reloadPressed = !!src.reloadPressed;
   d.restartPressed = !!src.restartPressed;
   d.pausePressed = !!src.pausePressed;
+  d.lockPause = !!src.lockPause;
   d.lookDx = num(src.lookDx, 0);
   d.lookDy = num(src.lookDy, 0);
   return d;
@@ -1989,7 +1991,8 @@ function frame(now) {
   else if (state !== 'ready') menuAxis = 0;
 
   if (it.restartPressed && (state === 'playing' || state === 'paused' || state === 'complete')) resetRun();
-  if (it.pausePressed && !startedNow) {
+  if (it.lockPause && state === 'playing') pauseGame(null);
+  else if (it.pausePressed && !startedNow) {
     if (state === 'playing') pauseGame(null);
     else if (state === 'paused' && !devOpen) resumeGame();
   }

@@ -223,7 +223,9 @@ html.is-fullscreen-tool body {
   height: 100dvh;
 }
 html.is-fullscreen-tool body .site-header,
-html.is-fullscreen-tool body .pwa-install,
+html.is-fullscreen-tool body .skip-link,
+html.is-fullscreen-tool body .pwa-install-banner,
+html.is-fullscreen-tool body:has(.terminal-frame--fullscreen) .related-tools,
 html.is-fullscreen-tool body .lang-switcher { display: none !important; }
 
 @media (max-width: 640px) {

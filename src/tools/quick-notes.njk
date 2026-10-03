@@ -157,13 +157,19 @@ localeReload: true
     const del = S.get('quick_notes', 'deleted');
     const deleted = (del && typeof del === 'object') ? del : {};
     const byId = new Map(notes.map(n => [n.id, n]));
+    const editing = saver.pending();
     let changed = false;
+    let activeChanged = false;
     for (const e of ext) {
       if (!e || !e.id || typeof e.body !== 'string') continue;
       if (deleted[String(e.id)] && e.id !== activeId) continue;
       const l = byId.get(e.id);
       if (!l) { byId.set(e.id, e); changed = true; }
-      else if ((e.updatedAt || 0) > (l.updatedAt || 0) && e.id !== activeId) { byId.set(e.id, e); changed = true; }
+      else if ((e.updatedAt || 0) > (l.updatedAt || 0) && (e.id !== activeId || !editing)) {
+        byId.set(e.id, e);
+        changed = true;
+        if (e.id === activeId) activeChanged = true;
+      }
     }
     for (const n of [...byId.values()]) {
       if (deleted[String(n.id)] && n.id !== activeId) { byId.delete(n.id); changed = true; }
@@ -173,6 +179,14 @@ localeReload: true
     if (activeId && !notes.some(n => n.id === activeId)) {
       if (notes.length) selectNote(notes[0].id);
       else createNote();
+    } else if (activeChanged) {
+      const focused = document.activeElement === textarea;
+      const start = textarea.selectionStart, end = textarea.selectionEnd;
+      Promise.resolve(renderEditor()).then(() => {
+        if (!focused) return;
+        const len = textarea.value.length;
+        textarea.setSelectionRange(Math.min(start, len), Math.min(end, len));
+      });
     }
     renderList();
   }

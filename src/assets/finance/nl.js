@@ -11,6 +11,8 @@ function wordsOf(list) {
 function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 const CJK = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/;
+const KANA_WORD = /^[\u3041-\u309f]+$/;
+const KANA_CHAR = /[\u3041-\u309f]/;
 
 function minLen(name) { return CJK.test(name) ? 2 : 3; }
 
@@ -28,6 +30,14 @@ function stripWord(text, word) {
   }
   try { return text.replace(new RegExp('(^|[^\\p{L}\\p{N}])' + escapeRe(word) + '(?=$|[^\\p{L}\\p{N}])', 'iu'), '$1 '); }
   catch (_) { return text; }
+}
+
+function stripFiller(text, word) {
+  if (!KANA_WORD.test(word)) return stripWord(text, word);
+  for (let i = text.indexOf(word); i >= 0; i = text.indexOf(word, i + 1)) {
+    if (!KANA_CHAR.test(text.charAt(i - 1)) && !KANA_CHAR.test(text.charAt(i + word.length))) return text.slice(0, i) + ' ' + text.slice(i + word.length);
+  }
+  return text;
 }
 
 export function findAmounts(text, locale) {
@@ -129,7 +139,7 @@ export function parseEntry(text, ctx) {
   for (const c of cats) {
     if (c.name && c.name.length >= minLen(c.name) && hasWord(rest, c.name)) { out.category = c.id; if (c.kind === 'income') out.income = true; rest = stripWord(rest, c.name); break; }
   }
-  for (const w of wordsOf(W.income).concat(wordsOf(W.filler))) rest = stripWord(rest, w);
+  for (const w of wordsOf(W.income).concat(wordsOf(W.filler)).sort((a, b) => b.length - a.length)) rest = stripFiller(rest, w);
   for (const a of amounts) rest = rest.replace(a.text, ' ');
   const payees = (ctx.payees || []).slice().sort((a, b) => b.length - a.length);
   let payee = payees.find((p) => p.length >= minLen(p) && hasWord(rest, p));

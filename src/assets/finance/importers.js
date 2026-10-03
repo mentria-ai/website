@@ -67,7 +67,8 @@ const ROLE_RE = {
   drcr: /^(drcr|crdr|type|debitcredit|dc|sign|indicator)$/,
   balance: /(balance|closing|saldo|solde|runningbal)/,
   ref: /(chq|cheque|check|refno|utr|rrn|transactionid|fitid|^id$|^ref$|referenceno)/,
-  currency: /^(currency|ccy|curr|devise|moneda|moeda|wahrung)$/
+  currency: /^(currency|ccy|curr|devise|moneda|moeda|wahrung)$/,
+  note: /^(note|notes|nota|notas|memo|memos|remarque|remarques|commentaire|commentaires|comment|comments|observacao|observacoes|notiz|notizen|bemerkung)$/
 };
 
 function norm(h) { return String(h || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, ''); }
@@ -93,7 +94,7 @@ export function guessRoles(header) {
   const roles = {};
   header.forEach((cell, i) => {
     const n = norm(cell);
-    for (const role of ['date', 'debit', 'credit', 'drcr', 'balance', 'currency', 'ref', 'amount', 'payee']) {
+    for (const role of ['date', 'debit', 'credit', 'drcr', 'balance', 'currency', 'ref', 'amount', 'payee', 'note']) {
       if (roles[role] != null) continue;
       if (ROLE_RE[role].test(n)) {
         if (role === 'payee' && (ROLE_RE.balance.test(n) || ROLE_RE.ref.test(n) && !/(desc|narr|memo|partic)/.test(n))) continue;
@@ -169,9 +170,33 @@ export function cleanPayee(text) {
   return words.map(titleCase).join(' ').replace(/^[,;:\-\s]+|[,;:\-\s]+$/g, '').slice(0, 80);
 }
 
+const FORMULA_GUARD = /^'[=+\-@\t\r]/;
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+const DOT_NUMBER = /^-?\d+(\.\d+)?$/;
+const CCY_CODE = /^[A-Z]{3}$/;
+
+export function unescapeCell(v) {
+  const str = v == null ? '' : String(v);
+  return FORMULA_GUARD.test(str) ? str.slice(1) : str;
+}
+
+export function financeExport(rows, labels) {
+  const head = (rows && rows[0]) || [];
+  if (head.length < 10 || ISO_DAY.test(String(head[0] || '').trim())) return null;
+  const lab = (labels || []).map((x) => String(x || '').trim().toLowerCase());
+  const named = lab.length >= 10 && lab.slice(0, 10).every((x, i) => x && x === String(head[i] || '').trim().toLowerCase());
+  const body = rows.slice(1, 201).filter((r) => r.some((c) => String(c || '').trim()));
+  const shaped = body.length > 0 && body.every((r) => ISO_DAY.test(r[0] || '') && DOT_NUMBER.test(r[5] || '') && CCY_CODE.test(r[6] || '') && (!r[7] || DOT_NUMBER.test(r[7])) && CCY_CODE.test(r[8] || ''));
+  if (!named && !shaped) return null;
+  return { headerIdx: 0, shaped, roles: { date: 0, account: 1, payee: 2, category: 3, note: 4, amount: 5, currency: 6, tags: 9, type: head.length > 10 ? 10 : null } };
+}
+
 export function csvToRows(rows, opts) {
   const o = opts || {};
   const r = o.roles || {};
+  const fin = !!o.finance;
+  const cell = (row, idx) => (idx == null ? '' : fin ? unescapeCell(String(row[idx] || '').trim()) : String(row[idx] || '').trim());
+  const xferLabel = String(o.transferLabel || '').trim().toLowerCase();
   const out = [];
   const errors = [];
   const data = rows.slice((o.headerIdx == null ? -1 : o.headerIdx) + 1);
@@ -199,13 +224,19 @@ export function csvToRows(rows, opts) {
       amount = num(r.amount);
     }
     if (amount && o.invert) amount = amount.startsWith('-') ? amount.slice(1) : '-' + amount;
-    const payeeRaw = r.payee != null ? row[r.payee] || '' : '';
+    const payeeRaw = fin ? cell(row, r.payee) : r.payee != null ? row[r.payee] || '' : '';
     const item = {
       line: i + 1 + (o.headerIdx == null ? 0 : o.headerIdx + 1),
-      date, amount, payee: cleanPayee(payeeRaw), memo: String(payeeRaw || '').slice(0, 300),
+      date, amount, payee: fin ? payeeRaw.slice(0, 120) : cleanPayee(payeeRaw), memo: String(payeeRaw || '').slice(0, 300),
+      note: cell(row, r.note).slice(0, 300),
       ref: r.ref != null ? String(row[r.ref] || '').trim() : '', balance: num(r.balance),
       currency: r.currency != null && isCurrency(String(row[r.currency] || '').trim().toUpperCase()) ? String(row[r.currency]).trim().toUpperCase() : null
     };
+    if (fin) {
+      item.category = cell(row, r.category);
+      item.tags = cell(row, r.tags).split(',').map((x) => x.trim()).filter(Boolean).slice(0, 12);
+      item.transfer = !!xferLabel && cell(row, r.type).toLowerCase() === xferLabel;
+    }
     if (!date) errors.push({ line: item.line, reason: 'date', raw: dateRaw });
     else if (!amount || Number(amount) === 0) errors.push({ line: item.line, reason: 'amount', raw: row.join(' | ').slice(0, 80) });
     else out.push(item);

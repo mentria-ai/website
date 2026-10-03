@@ -3622,7 +3622,8 @@
         "undone": "Undone",
         "dismiss": "Dismiss",
         "later": "Later",
-        "working": "Working…"
+        "working": "Working…",
+        "progress": "Progress"
       },
       "errors": {
         "no_js": "Finance needs JavaScript to run.",
@@ -3926,7 +3927,11 @@
         "currency": "Currency",
         "base_amount": "Amount in main currency",
         "base_currency": "Main currency",
-        "tags": "Tags"
+        "tags": "Tags",
+        "type": "Type",
+        "type_expense": "Expense",
+        "type_income": "Income",
+        "type_transfer": "Transfer"
       },
       "accounts": {
         "tab_accounts": "Accounts",
@@ -4423,6 +4428,7 @@
         "too_big": "That file is larger than 12 MB. Export a shorter date range.",
         "mapping": "Columns",
         "preset_used": "Saved layout",
+        "finance_found": "This is a Finance export. Payees, notes, categories and tags are kept as they were exported.",
         "amount_mode": "Amounts are",
         "mode": {
           "amount": "One column with signs",
@@ -4433,6 +4439,7 @@
         "role": {
           "date": "Date",
           "payee": "Description",
+          "note": "Note",
           "amount": "Amount",
           "debit": "Money out",
           "credit": "Money in",
@@ -4465,6 +4472,10 @@
         "skipped_rows": {
           "one": "{n} row skipped",
           "other": "{n} rows skipped"
+        },
+        "xfer_skipped": {
+          "one": "{n} transfer row skipped. Transfers between accounts can't be rebuilt from a CSV file; restore from a backup file to keep them.",
+          "other": "{n} transfer rows skipped. Transfers between accounts can't be rebuilt from a CSV file; restore from a backup file to keep them."
         },
         "err_date": "Row {line}: no valid date ({raw})",
         "err_amount": "Row {line}: no amount ({raw})",

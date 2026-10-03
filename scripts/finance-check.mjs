@@ -562,6 +562,91 @@ test('nl: parses amounts, dates and payees', () => {
   assert.deepEqual(N.parseAiJson('Sure! {"payee":"X","amount":2,}'), { payee: 'X', amount: 2 });
 });
 
+const UIFIX = {
+  fs: await import('node:fs'),
+  ui: await mod('ui.js'),
+  ledgerView: await mod('views/ledger.js'),
+  copy: (loc) => JSON.parse(UIFIX.fs.readFileSync(resolve(here, '../src/_data/i18n/' + loc + '.json'), 'utf8')).tool.finance
+};
+
+test('ui fixes: Japanese quick add keeps kana inside payee names', () => {
+  const ctx = { today: '2026-10-03', locale: 'ja-JP', words: UIFIX.copy('ja').nl, accounts: [{ id: 'a1', name: '現金' }], categories: [{ id: 'c1', name: '食費', kind: 'expense' }], payees: [] };
+  const want = [['とんかつ 900', 'とんかつ', '900', null], ['おにぎり 150', 'おにぎり', '150', null], ['のり弁 500 昨日', 'のり弁', '500', '2026-10-02'], ['はなまるうどん 600', 'はなまるうどん', '600', null], ['ほっともっと 480', 'ほっともっと', '480', null], ['からあげ 300', 'からあげ', '300', null], ['昨日のランチ 800', 'ランチ', '800', '2026-10-02'], ['スーパーで支払った 1200', 'スーパー', '1200', null], ['コンビニで850円', 'コンビニ', '850', null]];
+  for (const [text, payee, amount, date] of want) {
+    const r = N.parseEntry(text, ctx);
+    assert.deepEqual([r.payee, r.amount, r.date], [payee, amount, date], text);
+  }
+  const j = N.parseEntry('一昨日現金で食費1,200円', ctx);
+  assert.deepEqual([j.date, j.account, j.category, j.amount], ['2026-10-01', 'a1', 'c1', '1200']);
+});
+
+test('ui fixes: quick add reads amounts and dates in every locale', () => {
+  const cases = [
+    ['en', 'en-US', 'coffee 4.50 yesterday', ['Coffee', '4.50', null, '2026-10-02']],
+    ['en', 'en-US', 'Uber $12.40 on 28 Sep', ['Uber', '12.40', 'USD', '2026-09-28']],
+    ['es', 'es-ES', 'Mercadona 45,30 € anteayer', ['Mercadona', '45.30', 'EUR', '2026-10-01']],
+    ['es', 'es-ES', 'gasté 20 en el super', ['Super', '20', null, null]],
+    ['fr', 'fr-FR', 'boulangerie 12,40 € hier', ['Boulangerie', '12.40', 'EUR', '2026-10-02']],
+    ['pt-BR', 'pt-BR', 'padaria R$ 15,90 ontem', ['Padaria', '15.90', 'BRL', '2026-10-02']],
+    ['ja', 'ja-JP', 'はま寿司 1500 一昨日', ['はま寿司', '1500', null, '2026-10-01']]
+  ];
+  for (const [loc, locale, text, want] of cases) {
+    const r = N.parseEntry(text, { today: '2026-10-03', locale, words: UIFIX.copy(loc).nl, accounts: [], categories: [], payees: [] });
+    assert.deepEqual([r.payee, r.amount, r.currency, r.date], want, loc + ' ' + text);
+  }
+});
+
+test('ui fixes: CSV cells that start a formula are exported as text', () => {
+  const out = UIFIX.ui.csv([['=1+2', '@SUM(1,1)', '+44 20 7946 0000', '-x', '\tcmd', '-12.50', -3, '12.5%', 'plain', '=HYPERLINK("http://x.example","click")']]);
+  assert.equal(out, '﻿' + "'=1+2,\"'@SUM(1,1)\",'+44 20 7946 0000,'-x,\"'\tcmd\",-12.50,-3,12.5%,plain,\"'=HYPERLINK(\"\"http://x.example\"\",\"\"click\"\")\"");
+});
+
+test('ui fixes: a Finance CSV export imports back with notes, payees and transfers', () => {
+  const accounts = { cash: { id: 'cash', name: 'Cash', currency: 'USD' }, bank: { id: 'bank', name: 'Bank account', currency: 'USD' } };
+  const cats = new Map([['gifts', { id: 'gifts', name: 'Gifts', kind: 'expense' }], ['salary', { id: 'salary', name: 'Salary', kind: 'income' }]]);
+  const L = { base: () => 'USD', categoryMap: () => cats, get: (e, id) => (e === 'account' ? accounts[id] || null : null) };
+  const row = (o) => Object.assign({ kind: 'txn', currency: 'USD', category: null, payee: '', note: '', tags: [], lines: null }, o, { base: o.amount });
+  const rows = [
+    row({ id: 't1', date: '2026-10-01', account: 'cash', amount: -1234, category: 'gifts', payee: 'Corner Shop', note: 'birthday, "big" one', tags: ['family', 'gift ideas'] }),
+    row({ id: 't2', date: '2026-10-01', account: 'bank', amount: 250000, category: 'salary', payee: 'ACME Corp' }),
+    row({ id: 't3', date: '2026-10-02', account: 'cash', amount: -99, payee: '=HYPERLINK("http://x.example","click")', note: '@SUM(1,1)' }),
+    row({ kind: 'xfer', leg: 'out', id: 'x1', date: '2026-10-02', account: 'cash', other: 'bank', amount: -5000 }),
+    row({ kind: 'xfer', leg: 'in', id: 'x1', date: '2026-10-02', account: 'bank', other: 'cash', amount: 5000 })
+  ];
+  for (const loc of ['en', 'ja']) {
+    UIFIX.ui.setCopy(UIFIX.copy(loc));
+    const text = UIFIX.ui.csv(UIFIX.ledgerView.exportRows(L, rows));
+    assert.ok(text.includes(',-12.34,USD,') && text.includes('"\'=HYPERLINK('), loc);
+    const parsed = I.parseCsv(text);
+    const fin = I.financeExport(parsed.rows, UIFIX.ledgerView.csvHeader());
+    assert.ok(fin && fin.shaped && fin.roles.note === 4 && fin.roles.type === 10, loc);
+    const res = I.csvToRows(parsed.rows, { headerIdx: fin.headerIdx, roles: fin.roles, mode: 'amount', numberStyle: { group: ',', decimal: '.' }, finance: true, transferLabel: UIFIX.ui.t('csv.type_transfer') });
+    assert.equal(res.errors.length, 0, loc);
+    const got = res.items.map((x) => [x.date, x.payee, x.note, x.category, x.amount, x.transfer]);
+    assert.deepEqual(got.slice(0, 3), [
+      ['2026-10-01', 'Corner Shop', 'birthday, "big" one', cats.get('gifts').name, '-12.34', false],
+      ['2026-10-01', 'ACME Corp', '', cats.get('salary').name, '2500.00', false],
+      ['2026-10-02', '=HYPERLINK("http://x.example","click")', '@SUM(1,1)', '', '-0.99', false]
+    ], loc);
+    assert.deepEqual(got.slice(3).map((x) => [x[4], x[5]]), [['-50.00', true], ['50.00', true]], loc);
+    assert.deepEqual(res.items[0].tags, ['family', 'gift ideas'], loc);
+  }
+  UIFIX.ui.setCopy(UIFIX.copy('es'));
+  const es = I.parseCsv(UIFIX.ui.csv(UIFIX.ledgerView.exportRows(L, rows)));
+  UIFIX.ui.setCopy(UIFIX.copy('en'));
+  assert.ok(I.financeExport(es.rows, UIFIX.ledgerView.csvHeader()), 'an export from another language is still recognised');
+  UIFIX.ui.setCopy({});
+  const bank = I.parseCsv('Date,Description,Amount,Notes,Balance,Currency,A,B,C,D\n2024-03-05,STARBUCKS #123,-4.50,team coffee,10.00,USD,,,,\n');
+  assert.equal(I.financeExport(bank.rows, []), null);
+  const roles = I.guessRoles(bank.rows[0]);
+  assert.equal(roles.payee, 1);
+  assert.equal(roles.note, 3);
+  const plain = I.csvToRows(bank.rows, { headerIdx: 0, roles, mode: 'amount', dayFirst: false });
+  assert.deepEqual([plain.items[0].payee, plain.items[0].note], ['Starbucks', 'team coffee']);
+  assert.equal(I.unescapeCell("'=1+2"), '=1+2');
+  assert.equal(I.unescapeCell("'quoted"), "'quoted");
+});
+
 test('recurring: finds a monthly stream and ignores noise', () => {
   const rows = [];
   for (let m = 1; m <= 6; m++) rows.push({ kind: 'txn', id: 'n' + m, date: '2026-0' + m + '-0' + (m % 2 ? 5 : 6), amount: -1099, payee: 'NETFLIX.COM 8829', account: 'a', currency: 'USD' });

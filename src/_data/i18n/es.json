@@ -3622,7 +3622,8 @@
         "undone": "Deshecho",
         "dismiss": "Descartar",
         "later": "Más tarde",
-        "working": "Procesando…"
+        "working": "Procesando…",
+        "progress": "Progreso"
       },
       "errors": {
         "no_js": "Finanzas necesita JavaScript para funcionar.",
@@ -3926,7 +3927,11 @@
         "currency": "Moneda",
         "base_amount": "Importe en moneda principal",
         "base_currency": "Moneda principal",
-        "tags": "Etiquetas"
+        "tags": "Etiquetas",
+        "type": "Tipo",
+        "type_expense": "Gasto",
+        "type_income": "Ingreso",
+        "type_transfer": "Transferencia"
       },
       "accounts": {
         "tab_accounts": "Cuentas",
@@ -4423,6 +4428,7 @@
         "too_big": "Ese archivo pesa más de 12 MB. Exporta un rango de fechas más corto.",
         "mapping": "Columnas",
         "preset_used": "Formato guardado",
+        "finance_found": "Es una exportación de Finanzas. Los beneficiarios, las notas, las categorías y las etiquetas se conservan tal como se exportaron.",
         "amount_mode": "Formato de los importes",
         "mode": {
           "amount": "Una columna con signo",
@@ -4433,6 +4439,7 @@
         "role": {
           "date": "Fecha",
           "payee": "Descripción",
+          "note": "Nota",
           "amount": "Importe",
           "debit": "Salidas",
           "credit": "Entradas",
@@ -4465,6 +4472,10 @@
         "skipped_rows": {
           "one": "{n} fila omitida",
           "other": "{n} filas omitidas"
+        },
+        "xfer_skipped": {
+          "one": "{n} fila de transferencia omitida. Las transferencias entre cuentas no se pueden reconstruir desde un archivo CSV; restaura desde un archivo de copia de seguridad para conservarlas.",
+          "other": "{n} filas de transferencia omitidas. Las transferencias entre cuentas no se pueden reconstruir desde un archivo CSV; restaura desde un archivo de copia de seguridad para conservarlas."
         },
         "err_date": "Fila {line}: no hay una fecha válida ({raw})",
         "err_amount": "Fila {line}: no hay importe ({raw})",

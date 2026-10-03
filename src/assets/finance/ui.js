@@ -239,7 +239,7 @@ export function checkbox(label, checked, onChange) {
 export function bar(value, total, opts) {
   const o = opts || {};
   const ratio = total > 0 ? value / total : 0;
-  const el = h('div', { class: 'fbar' + (ratio > 1 ? ' is-over' : ratio > (o.warnAt || 0.9) ? ' is-warn' : ''), role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(Math.round(Math.min(ratio, 9.99) * 100)) });
+  const el = h('div', { class: 'fbar' + (ratio > 1 ? ' is-over' : ratio > (o.warnAt || 0.9) ? ' is-warn' : ''), role: 'progressbar', 'aria-label': o.label || t('common.progress'), 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(Math.round(Math.min(ratio, 9.99) * 100)) });
   el.append(h('i', { style: { width: Math.max(0, Math.min(1, ratio)) * 100 + '%', background: o.color || null } }));
   if (o.marker != null && o.marker >= 0 && o.marker <= 1) el.append(h('b', { style: { left: o.marker * 100 + '%' } }));
   return el;
@@ -270,6 +270,7 @@ export function sheet(opts) {
     closed = true;
     sheetStack = sheetStack.filter((x) => x !== api);
     try { dlg.close(); } catch (_) {}
+    if (toastEl && dlg.contains(toastEl)) toastHost().append(toastEl);
     dlg.remove();
     if (isTouch() && document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (o.onClose) o.onClose(result);
@@ -318,17 +319,18 @@ export function promptDialog(opts) {
 
 let toastEl = null;
 let toastTimer = null;
+function toastHost() {
+  const top = sheetStack.length ? sheetStack[sheetStack.length - 1].el : null;
+  return top && top.open ? top : document.getElementById('fin') || document.body;
+}
 export function toast(msg, opts) {
   const o = opts || {};
   if (toastEl) toastEl.remove();
   clearTimeout(toastTimer);
-  const root = document.getElementById('fin') || document.body;
   toastEl = h('div', { class: 'ftoast', role: 'status', 'aria-live': 'polite' }, h('span', null, msg));
   if (o.undo) toastEl.append(h('button', { type: 'button', onclick: () => { const u = o.undo; dismiss(); u(); } }, t('common.undo')));
   if (o.action) toastEl.append(h('button', { type: 'button', onclick: () => { const a = o.action.run; dismiss(); a(); } }, o.action.label));
-  root.append(toastEl);
-  const top = document.querySelector('dialog[open]');
-  if (top) top.append(toastEl);
+  toastHost().append(toastEl);
   toastTimer = setTimeout(dismiss, o.ms || (o.undo ? 6000 : 2800));
   function dismiss() { clearTimeout(toastTimer); if (toastEl) { toastEl.remove(); toastEl = null; } }
 }
@@ -357,12 +359,16 @@ export async function shareOrDownload(name, blob, title) {
   return 'downloaded';
 }
 
+const FORMULA_START = /^[=+\-@\t\r]/;
+const PLAIN_NUMBER = /^-?\d+(\.\d+)?%?$/;
+
 export function csv(rows) {
   const esc = (v) => {
-    const str = v == null ? '' : String(v);
-    return /[",\n\r;]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
+    let str = v == null ? '' : String(v);
+    if (typeof v !== 'number' && FORMULA_START.test(str) && !PLAIN_NUMBER.test(str)) str = "'" + str;
+    return /[",\n\r;\t]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
   };
-  return '﻿' + rows.map((r) => r.map(esc).join(',')).join('\r\n');
+  return '\ufeff' + rows.map((r) => r.map(esc).join(',')).join('\r\n');
 }
 
 export function debounce(fn, ms) {

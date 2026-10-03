@@ -4978,6 +4978,7 @@
     "import_hint": "Qualquer ferramenta que escreva JSON pode criar um pacote, inclusive um assistente de IA a partir de um livro ou das suas anotações.",
     "try_example": "Testar o pacote de exemplo",
     "importing": "Importando…",
+    "import_url_confirm": "Importar um pacote de {host}? Importe apenas pacotes de fontes confiáveis.",
     "imported": "“{title}” importado.",
     "replaced": "“{title}” atualizado.",
     "import_failed": "Não foi possível importar:",

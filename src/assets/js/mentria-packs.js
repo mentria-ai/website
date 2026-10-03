@@ -35,6 +35,12 @@
     try { return new Blob([JSON.stringify(obj)]).size; } catch (_) { return JSON.stringify(obj).length; }
   }
 
+  function safeCover(u) {
+    if (typeof u !== 'string' || !u || u.length > 4096 || /[\s"'<>`]/.test(u)) return null;
+    if (/^data:image\/(png|jpe?g|gif|webp|avif);base64,/i.test(u) || /^https:\/\//i.test(u)) return u;
+    return /^[a-z][a-z0-9+.-]*:/i.test(u) || /^\/\//.test(u) ? null : u;
+  }
+
   function validate(pack) {
     var errors = [], warnings = [];
     var err = function (m) { errors.push(m); };
@@ -256,7 +262,7 @@
         var courses = getCourses();
         var prev = courses[course.id];
         courses[course.id] = {
-          id: course.id, version: course.version || 1, title: course.title, subtitle: course.subtitle || null, cover: course.cover || (packs[0] && packs[0].cover) || null,
+          id: course.id, version: course.version || 1, title: course.title, subtitle: course.subtitle || null, cover: safeCover(course.cover) || (packs[0] && safeCover(packs[0].cover)) || null,
           packs: packs.map(function (p) { return p.id; }), added: prev ? prev.added : Date.now(), updated: Date.now(), source: (meta && meta.source) || 'import'
         };
         saveCourses(courses);
@@ -315,7 +321,7 @@
     if (!v.ok) return Promise.reject(Object.assign(new Error(v.errors[0]), { errors: v.errors }));
     var p = normalize(pack);
     var row = {
-      id: p.id, version: p.version, title: p.title, subtitle: p.subtitle || null, cover: p.cover || null,
+      id: p.id, version: p.version, title: p.title, subtitle: p.subtitle || null, cover: safeCover(p.cover),
       cards: p.cards.length, bytes: v.bytes, added: Date.now(), source: (meta && meta.source) || 'import', from: (meta && meta.from) || null, pack: p,
       course: (meta && meta.course) || p.course || null
     };

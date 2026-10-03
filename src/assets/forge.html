@@ -215,6 +215,7 @@ function stats() {
 function reply(msg) { try { parent.postMessage(Object.assign({ source: 'mentria-forge-frame' }, msg), '*'); } catch (e) {} }
 
 window.addEventListener('message', async (e) => {
+  if (window.origin !== 'null' || window.parent === window || e.source !== window.parent) return;
   const m = e.data;
   if (!m || m.source !== 'mentria-forge' || m.type !== 'load' || typeof m.body !== 'string') return;
   const url = URL.createObjectURL(new Blob([m.body], { type: 'text/javascript' }));

@@ -4978,6 +4978,7 @@
     "import_hint": "JSON を書けるツールならパックを作れます。本やメモをもとに AI アシスタントに作らせることもできます。",
     "try_example": "サンプルパックを試す",
     "importing": "取り込み中…",
+    "import_url_confirm": "{host} からパックを取り込みますか？信頼できる提供元のパックだけを取り込んでください。",
     "imported": "「{title}」を取り込みました。",
     "replaced": "「{title}」を更新しました。",
     "import_failed": "取り込めませんでした:",

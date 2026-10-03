@@ -361,8 +361,8 @@
       const wActive = State.cursor === i+1 || (State.cursor < 0 && i+1 === State.history.length);
       const bActive = b && (State.cursor === i+2 || (State.cursor < 0 && i+2 === State.history.length));
       row.innerHTML = `<span class="n">${(i/2)+1}.</span>
-        <span class="m ${wActive?'cur':''}" data-step="${i+1}">${w.san}</span>
-        ${b ? `<span class="m ${bActive?'cur':''}" data-step="${i+2}">${b.san}</span>` : '<span></span>'}`;
+        <span class="m ${wActive?'cur':''}" data-step="${i+1}">${escapeHtml(w.san)}</span>
+        ${b ? `<span class="m ${bActive?'cur':''}" data-step="${i+2}">${escapeHtml(b.san)}</span>` : '<span></span>'}`;
       t.appendChild(row);
     }
     t.querySelectorAll('.m[data-step]').forEach(el => { el.onclick = () => scrubTo(+el.dataset.step); });
@@ -774,8 +774,13 @@
       if (!m || typeof m !== 'object') return;
       if (m.kind === 'move'){ doMove({ ...m.move, fromPeer: true }); }
       else if (m.kind === 'chat'){ appendChat('peer', m.text); }
-      else if (m.kind === 'resign'){ State.over = { type:'resigned', winner: m.winner || P2P.color }; showEnd(State.over); }
-      else if (m.kind === 'sync'){ State.pos = m.pos; State.history = m.history || []; State.over = null; closeEndDialog(); render(); }
+      else if (m.kind === 'resign'){ State.over = { type:'resigned', winner: (m.winner === 'w' || m.winner === 'b') ? m.winner : P2P.color }; showEnd(State.over); }
+      else if (m.kind === 'sync'){
+        if (!m.pos || typeof m.pos !== 'object') return;
+        State.pos = m.pos;
+        State.history = Array.isArray(m.history) ? m.history.filter((h) => h && typeof h.san === 'string' && h.san.length <= 12).slice(0, 2000) : [];
+        State.over = null; closeEndDialog(); render();
+      }
     }
   };
   function appendChat(who, text){

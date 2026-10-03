@@ -62,6 +62,8 @@
     "cache_clear": "Vaciar caché",
     "cache_clearing": "Vaciando…",
     "cache_cleared": "Listo — recargando…",
+    "cache_clear_confirm": "¿Vaciar las páginas e imágenes del sitio en caché y recargar? Se vuelven a descargar, así que necesitas conexión.\n\nLos modelos de IA descargados, las extensiones instaladas, la radio sin conexión y tus datos se quedan en este dispositivo. Puedes eliminarlos en Archivos.",
+    "cache_clear_offline": "Estás sin conexión. Vacía la caché cuando vuelvas a tener conexión, porque el sitio necesita descargar sus páginas de nuevo.",
     "data_section_title": "Tus datos",
     "advanced_title": "Ajustes avanzados",
     "advanced_sub": "Copias de seguridad, identidad y sincronización de dispositivos",

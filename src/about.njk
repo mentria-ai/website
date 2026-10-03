@@ -554,16 +554,42 @@ localeReload: true
     var btn = document.getElementById('about-clear');
     if (!btn) return;
     var COPY = {
-      idle:     {{ ("about.cache_clear"    | t) | dump | safe }},
-      clearing: {{ ("about.cache_clearing" | t) | dump | safe }},
-      cleared:  {{ ("about.cache_cleared"  | t) | dump | safe }}
+      idle:     {{ ("about.cache_clear"         | t) | dump | safe }},
+      clearing: {{ ("about.cache_clearing"      | t) | dump | safe }},
+      cleared:  {{ ("about.cache_cleared"       | t) | dump | safe }},
+      confirm:  {{ ("about.cache_clear_confirm" | t) | dump | safe }},
+      offline:  {{ ("about.cache_clear_offline" | t) | dump | safe }}
     };
+    var SITE_CACHES = ['mentria-cache-', 'mentria-locale-', 'mentria-decks-', 'mentria-deck-art'];
+    function isSiteCache(name) {
+      return SITE_CACHES.some(function (p) { return name.indexOf(p) === 0; });
+    }
     function setLabel(t) { var l = btn.querySelector('.about-refresh__label'); if (l) l.textContent = t; }
+    function reachable() {
+      if (navigator.onLine === false) return Promise.resolve(false);
+      var probe = fetch('/assets/release.json?_=' + Date.now(), { cache: 'no-store' }).then(function () { return true; }, function () { return false; });
+      var slow = new Promise(function (r) { setTimeout(function () { r(false); }, 6000); });
+      return Promise.race([probe, slow]);
+    }
+    function tell(msg) { if (window.mentriaAlert) window.mentriaAlert(msg); }
+    var asking = false;
     btn.addEventListener('click', async function () {
-      if (btn.disabled) return;
+      if (btn.disabled || asking) return;
+      if (navigator.onLine === false) { tell(COPY.offline); return; }
+      asking = true;
+      var ok = window.mentriaConfirm ? await window.mentriaConfirm(COPY.confirm, { danger: true }) : false;
+      asking = false;
+      if (!ok) return;
       btn.disabled = true;
       btn.classList.add('is-busy');
       setLabel(COPY.clearing);
+      if (!(await reachable())) {
+        btn.disabled = false;
+        btn.classList.remove('is-busy');
+        setLabel(COPY.idle);
+        tell(COPY.offline);
+        return;
+      }
       try {
         if ('serviceWorker' in navigator) {
           var regs = await navigator.serviceWorker.getRegistrations();
@@ -571,7 +597,7 @@ localeReload: true
         }
         if (window.caches) {
           var keys = await caches.keys();
-          await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+          await Promise.all(keys.filter(isSiteCache).map(function (k) { return caches.delete(k); }));
         }
       } catch (_) {}
       setLabel(COPY.cleared);

@@ -62,6 +62,8 @@
     "cache_clear": "Vider le cache",
     "cache_clearing": "Vidage…",
     "cache_cleared": "Vidé — rechargement…",
+    "cache_clear_confirm": "Vider les pages et images du site en cache, puis recharger ? Elles seront téléchargées à nouveau, une connexion est donc nécessaire.\n\nLes modèles d’IA téléchargés, les extensions installées, la radio hors ligne et vos données restent sur cet appareil. Vous pouvez les supprimer dans Fichiers.",
+    "cache_clear_offline": "Vous êtes hors ligne. Videz le cache quand vous serez de nouveau en ligne, car le site doit télécharger ses pages à nouveau.",
     "data_section_title": "Vos données",
     "advanced_title": "Paramètres avancés",
     "advanced_sub": "Sauvegardes, identité et synchronisation des appareils",

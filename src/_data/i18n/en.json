@@ -62,6 +62,8 @@
     "cache_clear": "Clear cache",
     "cache_clearing": "Clearing…",
     "cache_cleared": "Cleared — reloading…",
+    "cache_clear_confirm": "Clear the site’s cached pages and images and reload? They download again, so you need a connection.\n\nDownloaded AI models, installed extensions, offline radio and your data stay on this device. You can delete those in Files.",
+    "cache_clear_offline": "You’re offline. Clear the cache once you’re back online, because the site needs to download its pages again.",
     "data_section_title": "Your data",
     "advanced_title": "Advanced settings",
     "advanced_sub": "Backups, identity and device sync",

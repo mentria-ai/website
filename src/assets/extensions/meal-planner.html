@@ -2,14 +2,14 @@
 {
   "id": "meal-planner",
   "name": "Meal Planner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icon": "🍲",
   "author": "Mentria",
   "description": "Plan the week's meals, keep a recipe box, get a shopping list grouped by aisle and use up what's in your pantry. Nutrition estimates from USDA data.",
   "permissions": ["storage", "share"],
   "mounts": {
     "tool": {},
-    "widget": { "key": "today", "label": "Today’s meals" }
+    "widget": { "key": "today", "label": "Meal Planner" }
   }
 }
 </script>
@@ -2119,7 +2119,8 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.62)}
     listCache = {};
     if (S.sub && S.sub.type === 'recipe' && !getRecipe(S.sub.id)) S.sub = null;
     render();
-    updateWidget();
+    if (sget('today') != null) updateWidget();
+    else lastSnap = '';
   }
   var reloadTimer = null;
   window.addEventListener('storage', function (e) {
@@ -2151,8 +2152,22 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.62)}
     window.scrollTo(0, Math.max(0, window.scrollY + r.top - off - 8));
   }
   setTimeout(scrollToToday, 60);
-  function fetchJson(u) { return fetch(u).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }); }
-  Promise.all([fetchJson(BASE + 'foods.json'), fetchJson(BASE + 'recipes.json')]).then(function (res) {
+  function netJson(u) { return fetch(u).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }); }
+  function keptJson(u) {
+    try {
+      return caches.match(u).then(function (r) { if (!r) throw new Error('not cached'); return r.json(); });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  function loadJson(names) {
+    var urls = names.map(function (n) { return BASE + n; });
+    function net() { return Promise.all(urls.map(netJson)); }
+    function kept() { return Promise.all(urls.map(keptJson)); }
+    if (navigator.onLine === false) return kept().catch(net);
+    return net().catch(function (err) { return kept().catch(function () { throw err; }); });
+  }
+  loadJson(['foods.json', 'recipes.json']).then(function (res) {
     initFoods(res[0]);
     initStarters(res[1]);
     S.ready = true;
@@ -2160,7 +2175,7 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.62)}
     if (!dlgEl.open) render();
     lastSnap = '';
     updateWidget();
-    fetchJson(BASE + 'synonyms.json').then(initSynonyms, function () {});
+    loadJson(['synonyms.json']).then(function (r) { initSynonyms(r[0]); }, function () {});
   }).catch(function () {
     S.failed = true;
     showErr(t('loadFail'), 'load');

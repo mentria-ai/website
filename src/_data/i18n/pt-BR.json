@@ -62,6 +62,8 @@
     "cache_clear": "Limpar cache",
     "cache_clearing": "Limpando…",
     "cache_cleared": "Pronto — recarregando…",
+    "cache_clear_confirm": "Limpar as páginas e imagens do site em cache e recarregar? Elas são baixadas de novo, então você precisa de conexão.\n\nOs modelos de IA baixados, as extensões instaladas, o rádio offline e seus dados continuam neste aparelho. Você pode excluí-los em Arquivos.",
+    "cache_clear_offline": "Você está offline. Limpe o cache quando estiver online de novo, porque o site precisa baixar as páginas outra vez.",
     "data_section_title": "Seus dados",
     "advanced_title": "Configurações avançadas",
     "advanced_sub": "Backups, identidade e sincronização de dispositivos",

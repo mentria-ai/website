@@ -65,7 +65,7 @@ localeReload: true
         <div class="side-label">{{ "tool.ludo.players" | t }}</div>
         <div class="players-list" id="players-list"></div>
       </div>
-      <div class="side-sec">
+      <div class="side-sec side-sec--dice">
         <div class="side-label">{{ "tool.ludo.dice" | t }}</div>
         <div class="dice-area">
           <button class="die" id="die" type="button" aria-label="{{ 'tool.ludo.die_label' | t }}"></button>
@@ -225,7 +225,17 @@ localeReload: true
   .ludo-app .modal .winchip .chip { width: 16px; height: 16px; border-radius: 5px; box-shadow: 0 0 10px currentColor; }
   .ludo-app .modal .btn { width: 100%; }
 
-  @media (max-width: 560px) { .ludo-app .die { width: 60px; height: 60px; } }
+  @media (max-width: 760px) {
+    .ludo-app .side-sec--dice { order: -1; }
+    .ludo-app .dice-area { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+    .ludo-app .dice-area .roll-btn { flex: 1 1 0; width: auto; max-width: 320px; }
+    .ludo-app .dice-area .status-line { flex-basis: 100%; }
+  }
+  @media (max-width: 560px) {
+    .ludo-app .controls { gap: 8px; }
+    .ludo-app .die { width: 60px; height: 60px; }
+    .ludo-app .ludo-help__badge { display: none; }
+  }
 
   .ludo-app .ludo-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
   .ludo-app .ludo-choose { flex-wrap: wrap; gap: 8px; padding: 12px 4px 0; }
@@ -386,7 +396,8 @@ localeReload: true
     const data = {
       mode: State.mode, numPlayers: State.numPlayers, active: State.active,
       tokens: State.tokens, turnIdx: State.turnIdx, sixStreak: State.sixStreak,
-      finishers: State.finishers
+      finishers: State.finishers,
+      rolled: State.rolled, dice: State.rolled ? State.dice : 0
     };
     try {
       if (window.MentriaStore) window.MentriaStore.set('games', 'ludo', data);
@@ -412,6 +423,8 @@ localeReload: true
       State.turnIdx = (d.turnIdx >= 0 && d.turnIdx < d.active.length) ? d.turnIdx : 0;
       State.sixStreak = d.sixStreak || 0;
       State.finishers = Array.isArray(d.finishers) ? d.finishers : [];
+      State.rolled = d.rolled === true && [1,2,3,4,5,6].includes(d.dice);
+      State.dice = State.rolled ? d.dice : 0;
       return true;
     } catch(e){ return false; }
   }
@@ -447,8 +460,9 @@ localeReload: true
     countSeg.set(State.numPlayers);
     State.cursor = 0; State.modal = null; State.forfeit = false;
     document.getElementById('overlay').classList.remove('show');
-    renderPlayers(); draw(); updateDie(0); setStatus(); updateRollBtn();
-    maybeAITurn();
+    renderPlayers(); draw(); setStatus(); updateRollBtn();
+    if (State.rolled){ updateDie(State.dice, curPlayer()); resolveRoll(curPlayer()); }
+    else { updateDie(0); maybeAITurn(); }
   }
 
   function tokenCell(p, pos){
@@ -647,15 +661,16 @@ localeReload: true
     if (toPos > 50) return null;
     const absIdx = (STARTS[p]+toPos)%52;
     if (SAFE.has(absIdx)) return null;
+    const hits = [];
     for (const op of State.active){
       if (op === p) continue;
       for (let t=0;t<4;t++){
         const opos = State.tokens[op][t];
         if (opos<0 || opos>50) continue;
-        if ((STARTS[op]+opos)%52 === absIdx) return {op,t};
+        if ((STARTS[op]+opos)%52 === absIdx) hits.push({op,t});
       }
     }
-    return null;
+    return hits.length ? hits : null;
   }
 
   function rollLocked(){ return now() < rollLockUntil; }
@@ -747,6 +762,11 @@ localeReload: true
   function finishRoll(p, d){
     State.dice = d; State.rolled = true; State.cursor = 0;
     if (d === 6) State.sixStreak++; else State.sixStreak = 0;
+    save();
+    resolveRoll(p);
+  }
+  function resolveRoll(p){
+    const d = State.dice;
     if (State.sixStreak >= 3){
       State.forfeit = true;
       showToast(COPY.tripleSix); setStatus(COPY.tripleSix); updateRollBtn();
@@ -774,7 +794,7 @@ localeReload: true
     let best = moves[0], bestScore = -1e9;
     for (const m of moves){
       let s = 0;
-      if (m.cap) s += 100;
+      if (m.cap) s += 100 * m.cap.length;
       if (m.to === 56) s += 80;
       if (m.from === -1) s += 40;
       if (m.to >= 51) s += 25;
@@ -810,11 +830,12 @@ localeReload: true
     const p = m.p, t = m.t;
     let captured = false;
     if (m.cap){
-      const cxy = tokenXY(m.cap.op, State.tokens[m.cap.op][m.cap.t], m.cap.t);
-      State.tokens[m.cap.op][m.cap.t] = -1;
+      const first = m.cap[0];
+      const cxy = tokenXY(first.op, State.tokens[first.op][first.t], first.t);
+      for (const c of m.cap) State.tokens[c.op][c.t] = -1;
       captured = true;
-      addFx(cxy[0], cxy[1], COLORS[m.cap.op]);
-      showToast(COPY.capture.replace('{p}', PNAMES[p]).replace('{o}', PNAMES[m.cap.op]));
+      addFx(cxy[0], cxy[1], COLORS[first.op]);
+      showToast(COPY.capture.replace('{p}', PNAMES[p]).replace('{o}', PNAMES[first.op]));
     }
     const reachedHome = (State.tokens[p][t] === 56);
     if (reachedHome) addFx((CENTER[1]+0.5)*CELL, (CENTER[0]+0.5)*CELL, COLORS[p]);
@@ -913,10 +934,13 @@ localeReload: true
       <span style="color:var(--term-muted)">${who}</span></div>
       <button class="btn primary" id="m-new">${COPY.newGame}</button>`;
     document.getElementById('overlay').classList.add('show');
-    document.getElementById('m-new').onclick = newGame;
+    const mNew = document.getElementById('m-new');
+    mNew.onclick = newGame;
     renderPlayers();
-    updateTurn();
+    setStatus(COPY.actOver);
     updateRollBtn();
+    const a = document.activeElement;
+    if (!State.helpOpen && (!a || a === document.body || (app && app.contains(a)))) mNew.focus();
   }
 
   function showToast(msg){
@@ -1074,6 +1098,7 @@ localeReload: true
   if (app) app.addEventListener('pointerdown', () => { markMethod('touch'); }, true);
 
   document.addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
     const el = e.target;
     const closest = (sel) => (el && el.closest) ? el.closest(sel) : null;
     if (State.helpOpen){
@@ -1101,6 +1126,8 @@ localeReload: true
     if (e.code !== 'Space' && e.key !== 'Enter') return;
     if (e.repeat) return;
     if (closest('button, a')) return;
+    if (State.modal === 'rules'){ e.preventDefault(); markMethod('keyboard'); closeBoardModal(); return; }
+    if (State.over){ e.preventDefault(); markMethod('keyboard'); newGame(); return; }
     if (canRollNow()){ e.preventDefault(); markMethod('keyboard'); rollDice(); return; }
     if (awaitingChoice()){ e.preventDefault(); markMethod('keyboard'); confirmCursor(); }
   });

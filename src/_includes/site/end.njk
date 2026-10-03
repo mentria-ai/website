@@ -374,23 +374,17 @@ try {
 } catch (e) { console.error(e); }
 try {
       window.mentriaConfirmHeavyDownload = async function () {
-        try {
-          if ('caches' in window) {
-            var tierShards = [
-              'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/qwen3.5-0.8b-q4-tied.safetensors',
-              'https://huggingface.co/mentriaai/Qwen3.5-2B-mentria/resolve/main/qwen3.5-2b-q4-tied.safetensors',
-              'https://huggingface.co/mentriaai/Qwen3.5-4B-mentria/resolve/main/qwen3.5-4b-q4-tied-00001-of-00002.safetensors'
-            ];
-            for (var i = 0; i < tierShards.length; i++) {
-              var hit = await caches.match(tierShards[i]);
-              if (hit) return true;
-            }
-          }
-        } catch (_) {}
         var c = navigator.connection;
         if (!c) return true;
         var slow = c.saveData === true || ['slow-2g', '2g', '3g'].indexOf(c.effectiveType) !== -1;
         if (!slow) return true;
+        try {
+          if ('caches' in window) {
+            var tiers = await import('/assets/js/mentria-tiers.js');
+            var id = await tiers.effectiveTier();
+            if (id && await tiers.isTierCached(id)) return true;
+          }
+        } catch (_) {}
         if (typeof window.mentriaConfirm === 'function') {
           return window.mentriaConfirm({{ ("common.heavy_download" | t) | dump | safe }});
         }

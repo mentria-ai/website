@@ -13,6 +13,7 @@ eleventyComputed:
 {% set terminalTitle = "…" %}
 {% set terminalBackHref = locale.pathPrefix + "/tools/extensions/" %}
 {% include "terminal-frame-open.njk" %}
+<h1 class="sr-only" id="xr-h1">{{ "tools.extensions.title" | t }}</h1>
 <section class="xr" data-prefix="{{ locale.pathPrefix }}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}" data-install-quiet>
   <p class="xr__error" id="xr-error" hidden></p>
   <p class="xr__missing" id="xr-missing" hidden>{{ "tool.extensions.run_not_installed" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
@@ -46,6 +47,8 @@ if (!entry || !entry.enabled || (!app && !source)) {
   const filename = document.querySelector('.terminal-frame__filename');
   if (filename) filename.textContent = m.icon && !/^data:/.test(m.icon) ? m.icon + ' ' + m.name : m.name;
   document.title = m.name + ' · Mentria';
+  const xrH1 = document.getElementById('xr-h1');
+  if (xrH1) xrH1.textContent = m.name;
   if (app) root.classList.add('xr--app');
   H.mountExtension(frame, {
     manifest: m,

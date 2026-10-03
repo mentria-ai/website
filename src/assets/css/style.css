@@ -872,7 +872,8 @@ html.is-standalone .m-mini-dock { --mini-base: calc(var(--app-bar-h, 52px) + 12p
 }
 .hero .tldr__summary { display: flex; width: fit-content; }
 
-html.app-chrome body:has(.terminal-frame) .hero { display: none; }
+html.app-chrome body:has(.terminal-frame) .hero:not(.hero--peek) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+html.app-chrome body:has(.terminal-frame) .hero:not(.hero--peek) *:not(h1):not(:has(h1)):not(h1 *) { display: none; }
 html.app-chrome body:has(.terminal-frame) main { padding-top: 0.75rem; }
 html.app-chrome body:has(.terminal-frame) .terminal-frame { margin-top: 0; }
 

@@ -943,7 +943,8 @@
       "preview_region_aria": "Aperçu du rendu",
       "tab_hint": "Tab insère des espaces. Appuyez sur Échap puis Tab pour quitter l’éditeur.",
       "remote_img_blocked": "image distante bloquée : {src}",
-      "import_note_confirm": "Remplacer votre brouillon Markdown actuel par la note de Notes Rapides ?"
+      "import_note_confirm": "Remplacer votre brouillon Markdown actuel par la note de Notes Rapides ?",
+      "sample": "# Bienvenue dans Markdown → PDF\n\nVoici une courte démo pour voir comment votre document sera imprimé.\n**Modifiez à gauche**, regardez l’aperçu à droite, puis cliquez sur **Télécharger le PDF** quand le résultat vous convient.\n\n## Fonctionnalités\n\n- Markdown façon GitHub : tableaux, listes de tâches, texte barré\n- Blocs de code soignés\n- Aperçu en direct rapide\n- Enregistrement automatique dans votre navigateur\n\n### Code\n\n```js\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n```\n\n### Tableau\n\n| Fonction         | État      |\n| ---------------- | :-------: |\n| Tableaux         | ✓         |\n| Listes           | ✓         |\n| Blocs de code    | ✓         |\n| Formules (KaTeX) | plus tard |\n\n### Liste de tâches\n\n- [x] Tapez un peu de markdown\n- [x] Regardez l’aperçu se mettre à jour\n- [ ] Cliquez sur **Télécharger le PDF**\n\n> Astuce : dans la boîte d’impression, choisissez **Enregistrer au format PDF** comme destination, laissez les marges sur *Par défaut* et désactivez les en-têtes et pieds de page pour un résultat plus net.\n\n---\n\nCréé avec [Mentria](https://mentria.ai).\n"
     },
     "quote": {
       "tldr_heading": "Qu'est-ce que Citation Motivante ?",

@@ -231,7 +231,8 @@ html.is-fullscreen-tool body .lang-switcher { display: none !important; }
   html.is-fullscreen-tool body .terminal-frame--fullscreen .terminal-frame__titlebar { padding: 0.5rem 0.75rem; }
 }
 
-html.is-fullscreen-tool body .game-page > .hero { display: none; }
+html.is-fullscreen-tool body .game-page > .hero { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+html.is-fullscreen-tool body .game-page > .hero *:not(h1):not(:has(h1)):not(h1 *) { display: none; }
 html.is-fullscreen-tool body .game-page .terminal-frame__body { padding: 0; gap: 0; }
 html.is-fullscreen-tool body .game-page .canvas-wrap,
 html.is-fullscreen-tool body .game-page .board-wrap,

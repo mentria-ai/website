@@ -943,7 +943,8 @@
       "preview_region_aria": "Pré-visualização renderizada",
       "tab_hint": "Tab insere espaços. Pressione Escape e depois Tab para sair do editor.",
       "remote_img_blocked": "imagem remota bloqueada: {src}",
-      "import_note_confirm": "Substituir seu rascunho de Markdown atual pela nota do Notas Rápidas?"
+      "import_note_confirm": "Substituir seu rascunho de Markdown atual pela nota do Notas Rápidas?",
+      "sample": "# Boas-vindas ao Markdown → PDF\n\nEsta é uma demonstração rápida para você ver como o documento vai ser impresso.\n**Edite à esquerda**, veja a prévia à direita e clique em **Baixar PDF** quando estiver tudo certo.\n\n## Recursos\n\n- Markdown no estilo do GitHub: tabelas, listas de tarefas e tachado\n- Blocos de código bem formatados\n- Prévia ao vivo e rápida\n- Salvo automaticamente no seu navegador\n\n### Código\n\n```js\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n```\n\n### Tabela\n\n| Recurso          | Status   |\n| ---------------- | :------: |\n| Tabelas          | ✓        |\n| Listas           | ✓        |\n| Blocos de código | ✓        |\n| Fórmulas (KaTeX) | em breve |\n\n### Lista de tarefas\n\n- [x] Digite um pouco de markdown\n- [x] Veja a prévia ser atualizada\n- [ ] Clique em **Baixar PDF**\n\n> Dica: na janela de impressão, escolha **Salvar como PDF** como destino, deixe as margens em *Padrão* e desative cabeçalhos e rodapés para um resultado mais limpo.\n\n---\n\nFeito com [Mentria](https://mentria.ai).\n"
     },
     "quote": {
       "tldr_heading": "O que é Frase Motivacional?",

@@ -83,15 +83,15 @@ eleventyComputed:
     <div class="iv__meta">
       <div class="iv__meta-left">
         <p>
-          <span class="iv__meta-label">{{ "tool.invoice.meta_invoice_no" | t }}</span>
+          <label class="iv__meta-label" for="invnoInp">{{ "tool.invoice.meta_invoice_no" | t }}</label>
           <input class="iv__meta-input m-input" type="text" id="invnoInp" placeholder="{{ 'tool.invoice.ph_invno' | t }}">
         </p>
         <p>
-          <span class="iv__meta-label">{{ "tool.invoice.meta_invoice_date" | t }}</span>
+          <label class="iv__meta-label" for="invoiceDate">{{ "tool.invoice.meta_invoice_date" | t }}</label>
           <input class="iv__meta-input iv__meta-input--date m-input" type="date" id="invoiceDate">
         </p>
         <p class="no-print">
-          <span class="iv__meta-label">{{ "tool.invoice.meta_currency" | t }}</span>
+          <label class="iv__meta-label" for="currencyInp">{{ "tool.invoice.meta_currency" | t }}</label>
           <select class="iv__meta-input m-input" id="currencyInp">
             <option value="₹">INR ₹</option>
             <option value="€">EUR €</option>

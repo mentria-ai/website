@@ -48,6 +48,7 @@ eleventyComputed:
 .sk-help__text { margin: 0 0 0.35rem; color: var(--term-fg); font-size: 0.8rem; line-height: 1.5; }
 .sk-help__note { margin: 0.4rem 0 0; color: var(--term-muted); font-size: 0.74rem; line-height: 1.55; }
 @media (prefers-reduced-motion: reduce) { .sk-ov__bar i { animation: none; width: 100%; } }
+.app-h1 { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 </style>
 
 
@@ -85,6 +86,7 @@ eleventyComputed:
   <p class="sk-help__note">{{ "tool.fpv-drone.help.note" | t }}</p>
 </div>
 
+<h1 class="app-h1">{{ "tools.fpv-drone.title" | t }}</h1>
 <div class="sk-wrap">
   <div class="sk-stage" id="sk-stage" tabindex="-1" data-install-quiet>
     <canvas class="sk-canvas" id="sk-canvas"></canvas>

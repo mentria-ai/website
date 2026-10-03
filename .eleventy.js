@@ -301,6 +301,12 @@ module.exports = function(eleventyConfig) {
     return new Date().getFullYear();
   });
 
+  eleventyConfig.addFilter("emph", function (value) {
+    return String(value == null ? "" : value)
+      .replace(/\*\*(?!\s)([^*\n]+?)(?<!\s)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[^\w*])\*(?!\s)([^*\n]+?)(?<!\s)\*(?![\w*])/g, "$1<em>$2</em>");
+  });
+
   eleventyConfig.addFilter("tloc", function(value, lang) {
     if (value == null) return "";
     if (typeof value === "string") return value;
@@ -336,10 +342,10 @@ module.exports = function(eleventyConfig) {
       next();
     }]
   });
-  eleventyConfig.ignores.add("src/assets/extensions/*.html");
-  eleventyConfig.ignores.add("src/assets/learn/*.html");
+  eleventyConfig.ignores.add("src/assets/**");
   // Passthrough copy for PWA files (sw.js is now a Nunjucks template)
   eleventyConfig.addPassthroughCopy({ "src/manifest.json": "manifest.json" });
+  eleventyConfig.addPassthroughCopy({ "src/favicon.ico": "favicon.ico" });
   eleventyConfig.addPassthroughCopy({ "src/_data/i18n": "assets/i18n" });
 
   const PH0 = "\uF000", PH1 = "\uF001";

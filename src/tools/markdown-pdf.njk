@@ -62,7 +62,7 @@ eleventyComputed:
   <div class="mp__panes">
     <section class="mp__pane mp__pane--editor" data-tab="edit">
       <header class="mp__pane-header no-print">
-        <span class="mp__pane-label">{{ "tool.markdown-pdf.pane_markdown" | t }}</span>
+        <label class="mp__pane-label" for="mp-input">{{ "tool.markdown-pdf.pane_markdown" | t }}</label>
       </header>
       <textarea
         class="mp__input"
@@ -123,47 +123,7 @@ const previewPane = document.querySelector('.mp__pane--preview');
 
 const LS_KEY = 'mentria-mdpdf-content';
 
-const SAMPLE = `# Welcome to Markdown → PDF
-
-This is a quick demo so you can see how your document will print.
-**Edit on the left**, see the preview on the right, and click **Download PDF** when you're happy.
-
-## Features
-
-- GitHub-Flavored Markdown — tables, task lists, strikethrough
-- Clean code blocks
-- Fast live preview, debounced
-- Auto-saved to your browser
-
-### Code
-
-\`\`\`js
-function greet(name) {
-  return \`Hello, \${name}!\`;
-}
-\`\`\`
-
-### Table
-
-| Feature      | Status |
-| ------------ | :----: |
-| Tables       | ✓      |
-| Lists        | ✓      |
-| Code blocks  | ✓      |
-| Math (KaTeX) | later  |
-
-### Task list
-
-- [x] Type some markdown
-- [x] Watch the preview update
-- [ ] Hit **Download PDF**
-
-> Tip: in the print dialog, choose **Save as PDF** as the destination, set margins to *Default*, and turn off headers/footers for the cleanest result.
-
----
-
-Made with [Mentria](https://mentria.ai).
-`;
+const SAMPLE = {{ ("tool.markdown-pdf.sample" | traw) | dump | safe }};
 
 if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
 if (typeof window.renderMarkdown !== 'function') {

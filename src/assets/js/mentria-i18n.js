@@ -290,6 +290,10 @@
     set: function (code) { setLocale(code, {}); },
     locale: function () { return currentCode; },
     t: function (key) { return activeDict ? lookup(activeDict, key) : null; },
+    ready: function () {
+      if (currentCode === 'en' || activeDict) return Promise.resolve();
+      return getDict(currentCode).then(function (dict) { if (!activeDict) activeDict = dict; }, function () {});
+    },
     cacheShells: function (code) { return cacheLocaleShells(code || currentCode); }
   };
 

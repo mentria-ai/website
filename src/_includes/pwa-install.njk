@@ -4,10 +4,10 @@
   steps. Hidden when already installed (display-mode: standalone) or on
   unsupported browsers (Firefox, etc).
 -->
-<div id="pwaInstallBanner" class="pwa-install-banner" hidden>
+<aside id="pwaInstallBanner" class="pwa-install-banner" aria-labelledby="pwaInstallBannerTitle" hidden>
   <img src="/assets/img/icon-192x192.png" alt="" class="pwa-install-banner__icon" width="40" height="40">
   <div class="pwa-install-banner__body">
-    <div class="pwa-install-banner__title">{{ "pwa.banner_title" | t }}</div>
+    <div class="pwa-install-banner__title" id="pwaInstallBannerTitle">{{ "pwa.banner_title" | t }}</div>
     <div class="pwa-install-banner__desc"><span class="pwa-install-banner__desc-inner">{{ "pwa.banner_desc" | t }}</span></div>
   </div>
   <button type="button" id="pwaInstallBannerBtn" class="pwa-install-banner__cta">{{ "pwa.install_btn" | t }}</button>
@@ -17,7 +17,7 @@
       <line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
   </button>
-</div>
+</aside>
 
 <div id="pwaInstallSheet" class="pwa-install-sheet" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pwaInstallSheetTitle">
   <div class="pwa-install-sheet__backdrop" data-close="1"></div>

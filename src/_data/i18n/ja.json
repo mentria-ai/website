@@ -3645,6 +3645,7 @@
         "locked": "ロック中",
         "open": "開いて今月の状況を確認",
         "spent": "支出 {amount} · {month}",
+        "spent_of": "予算 {budget} のうち {spent} · {month}",
         "next": "次回：{name} {amount}（{date}）",
         "no_upcoming": "今後 2 週間の支払い予定はありません"
       },
@@ -3828,6 +3829,8 @@
         "budgets": "予算",
         "set_budgets": "予算を設定",
         "of_budget": "予算 {budget} の {pct}",
+        "budget_part": "予算 {budget} のうち {spent} · {pct}",
+        "outside_budgets": "予算外 {amount}",
         "no_budget": "今月の予算は設定されていません。",
         "ribbon_label": "今月の日ごとの支出と、予算ペースに対する累計",
         "income": "収入",
@@ -3863,6 +3866,10 @@
         "conflicts": {
           "one": "2 台のデバイスで同時に行われた編集が {n} 件あります。確認してください。",
           "other": "2 台のデバイスで同時に行われた編集が {n} 件あります。確認してください。"
+        },
+        "orphans": {
+          "one": "{name} の口座が削除されたため、自動で記録されません。",
+          "other": "{n} 件の支払いの口座が削除されたため、自動で記録されません。"
         },
         "review": "確認",
         "fx_banner": "{list} の為替レートを追加すると、{base} の合計に含められます。",
@@ -4261,6 +4268,9 @@
         "trial_ends": "無料体験は{date}まで",
         "trial_short": "体験中",
         "stopped": "停止済み",
+        "no_account": "口座なし",
+        "no_account_meta": "口座は削除済み",
+        "account_gone": "この支払いの口座は削除されました。別の口座を選んでください。",
         "show_stopped": "停止済みも表示",
         "next_on": "次回：{date}",
         "ended": "終了",

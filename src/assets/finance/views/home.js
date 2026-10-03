@@ -8,11 +8,14 @@ import { uncategorizedCount, openCategorize } from '../categorize.js';
 
 const { h, t, icon } = U;
 
-function ribbon(L, key, budget) {
+function ribbon(L, key, budget, paceByDay) {
   const p = parts(key + '-01');
   const n = daysInMonth(p.y, p.m);
   const today = L.today();
   const ms = L.monthSummary(key);
+  const line = budget && paceByDay ? paceByDay : ms.byDay;
+  let lineTotal = 0;
+  for (const v of line.values()) lineTotal += v;
   const W = 640;
   const H = 96;
   const top = 6;
@@ -20,8 +23,7 @@ function ribbon(L, key, budget) {
   const bw = W / n;
   let maxDay = 0;
   for (const v of ms.byDay.values()) if (v > maxDay) maxDay = v;
-  const total = ms.expense;
-  const scaleTop = Math.max(total, budget || 0, 1);
+  const scaleTop = Math.max(lineTotal, budget || 0, 1);
   const svg = s('svg', { class: 'fribbon', viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': t('home.ribbon_label') });
   let cum = 0;
   let path = '';
@@ -34,7 +36,7 @@ function ribbon(L, key, budget) {
     const x = (d - 1) * bw;
     svg.append(s('rect', { class: 'day' + (date === today ? ' is-today' : future ? ' is-future' : ''), x: (x + bw * 0.18).toFixed(1), y: (top + barArea - bh).toFixed(1), width: (bw * 0.64).toFixed(1), height: bh.toFixed(1), rx: 1.5 }));
     if (!future) {
-      cum += v;
+      cum += line.get(date) || 0;
       const y = top + barArea + 30 - (cum / scaleTop) * (barArea + 24);
       path += (path ? 'L' : 'M') + (x + bw / 2).toFixed(1) + ' ' + Math.max(2, y).toFixed(1);
       if (budget && cum > budget * (d / n) * 1.0001) over = true;
@@ -62,6 +64,7 @@ function heroCard(ctx) {
   const left = n - p.d;
   const budget = bs.total > 0 ? bs.total : null;
   const spent = ms.expense;
+  const used = bs.spent;
   const card = h('section', { class: 'fcard span-2', 'aria-labelledby': 'fin-hero-h' });
   card.append(h('div', { class: 'fcard__head' },
     h('h2', { class: 'fcard__title', id: 'fin-hero-h' }, t('home.spent_in', { month: U.month(key) })),
@@ -69,20 +72,21 @@ function heroCard(ctx) {
   card.append(h('div', { class: 'fbig' }, U.money(spent, base)));
   const sub = h('p', { class: 'fmuted fsmall', style: { marginTop: '6px' } });
   if (budget) {
-    const ratio = spent / budget;
-    sub.append(t('home.of_budget', { budget: U.money(budget, base), pct: U.pct(ratio, 0) }));
-    card.append(sub, h('div', { style: { marginTop: '10px' } }, U.bar(spent, budget, { marker: p.d / n })));
+    const vars = { spent: U.money(used, base), budget: U.money(budget, base), pct: U.pct(used / budget, 0) };
+    sub.append(used === spent ? t('home.of_budget', vars) : t('home.budget_part', vars));
+    if (bs.outside > 0) sub.append(' · ' + t('home.outside_budgets', { amount: U.money(bs.outside, base) }));
+    card.append(sub, h('div', { style: { marginTop: '10px' } }, U.bar(used, budget, { marker: p.d / n })));
   } else {
     sub.append(t('home.no_budget'));
     card.append(sub);
   }
-  card.append(ribbon(L, key, budget));
+  card.append(ribbon(L, key, budget, bs.byDay));
   const perDay = p.d ? Math.round(spent / p.d) : 0;
   const stats = h('div', { class: 'fstats fstats--4', style: { marginTop: '12px' } },
     stat(t('home.income'), U.money(ms.income, base), 'amt--in'),
     stat(t('home.net'), U.signedMoney(ms.income - spent, base), ms.income - spent >= 0 ? 'amt--in' : 'amt--over'),
     stat(t('home.per_day'), U.money(perDay, base)),
-    budget ? stat(t('home.left_per_day', { n: left }), left > 0 ? U.money(Math.max(0, Math.round((budget - spent) / left)), base) : '—', budget - spent < 0 ? 'amt--over' : '') : stat(t('home.days_left'), String(left))
+    budget ? stat(t('home.left_per_day', { n: left }), left > 0 ? U.money(Math.max(0, Math.round((budget - used) / left)), base) : '—', budget - used < 0 ? 'amt--over' : '') : stat(t('home.days_left'), String(left))
   );
   card.append(stats);
   if (ms.unconverted) card.append(h('p', { class: 'ff__hint', style: { marginTop: '8px' } }, U.tp('home.unconverted', ms.unconverted)));
@@ -206,6 +210,8 @@ function banners(ctx) {
   const out = [];
   const conflicts = L.conflicts().length;
   if (conflicts) out.push(h('div', { class: 'fbanner fbanner--pink' }, icon('alert'), h('span', null, U.tp('home.conflicts', conflicts)), h('button', { type: 'button', class: 'fb fb--sm', onclick: () => ctx.go('devices', { tab: 'conflicts' }) }, t('home.review'))));
+  const orphans = L.orphanSchedules();
+  if (orphans.length) out.push(h('div', { class: 'fbanner fbanner--pink' }, icon('alert'), h('span', null, U.tp('home.orphans', orphans.length, { name: orphans[0].name || '' })), h('button', { type: 'button', class: 'fb fb--sm', onclick: () => import('./subs.js').then((m) => m.scheduleSheet(ctx, orphans[0])) }, t('home.review'))));
   const unc = uncategorizedCount(L);
   if (unc >= 5) out.push(h('div', { class: 'fbanner fbanner--mint' }, icon('filter'), h('span', null, U.tp('categorize.banner', unc)), h('button', { type: 'button', class: 'fb fb--sm', onclick: () => openCategorize(ctx) }, t('categorize.sort'))));
   const missing = L.missingRates();
@@ -214,7 +220,8 @@ function banners(ctx) {
   const lastExport = ctx.local.last_export_at;
   const days = L.settings().export_reminder_days || 30;
   const created = (L.get('settings', 'main') || {}).created;
-  const age = lastExport ? diffDays(lastExport.slice(0, 10), L.today()) : created ? diffDays(created.slice(0, 10), L.today()) : 0;
+  const since = L.localDate(lastExport || created);
+  const age = since ? diffDays(since, L.today()) : 0;
   const pairedOthers = L.devices().filter((d) => d.id !== ctx.engine.deviceId).length;
   if (recs >= 50 && age >= (lastExport ? days : 7) && !ctx.viewState.hideExport) {
     out.push(h('div', { class: 'fbanner fbanner--mint' }, icon('download'), h('span', null, pairedOthers ? t('home.export_paired') : t('home.export_nudge')),

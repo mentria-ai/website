@@ -12,7 +12,7 @@ function budgetSheet(ctx, cat, key) {
   const cur = L.budgetFor(cat.id, key);
   const amount = U.moneyField({ value: cur != null ? U.amountToInput(cur, base) : '', placeholder: '0' });
   let scope = monthRec ? 'month' : 'default';
-  const scopeSeg = U.seg([{ value: 'default', label: t('budgets.every_month') }, { value: 'month', label: t('budgets.only_month', { month: U.month(key) }) }], scope, (v) => { scope = v; }, true);
+  const scopeSeg = U.seg([{ value: 'default', label: t('budgets.every_month') }, { value: 'month', label: t('budgets.only_month', { month: U.month(key) }) }], scope, (v) => { scope = v; syncClear(); }, true);
   const roll = U.checkbox(t('budgets.rollover'), !!cat.rollover, () => {});
   const spent = L.monthSummary(key).byCat.get(cat.id) || 0;
   const avg = L.categorySeries([cat.id], 6, addMonthKey(key, -1)).filter((v) => v > 0);
@@ -22,10 +22,12 @@ function budgetSheet(ctx, cat, key) {
   const clear = h('button', { type: 'button', class: 'fb', onclick: () => {
     const ops = [];
     if (monthRec) ops.push(...ctx.remove('budget', monthRec.id));
-    if (cat.budget_default_minor != null) ops.push(...ctx.engine.updateOps('category', cat.id, { budget_default_minor: null }));
+    if (scope === 'default' && cat.budget_default_minor != null) ops.push(...ctx.engine.updateOps('category', cat.id, { budget_default_minor: null, budget_since: null }));
     sh.close();
     ctx.commit(ops, t('budgets.cleared'));
   } }, t('budgets.clear'));
+  const syncClear = () => { clear.disabled = !monthRec && (scope === 'month' || cat.budget_default_minor == null); };
+  syncClear();
   const sh = U.sheet({
     title: t('budgets.edit', { name: cat.name }),
     body: h('div', { class: 'fstack' },
@@ -42,7 +44,11 @@ function budgetSheet(ctx, cat, key) {
     const val = v == null ? null : Math.abs(v);
     if (scope === 'month') ops.push(...ctx.save('budget', cat.id + ':' + key, { category: cat.id, month: key, amount_minor: val }));
     else {
-      ops.push(...ctx.engine.updateOps('category', cat.id, { budget_default_minor: val }));
+      const fields = { budget_default_minor: val };
+      const now = monthKey(L.today());
+      if (val == null) fields.budget_since = null;
+      else if (cat.budget_default_minor == null) fields.budget_since = key < now ? key : now;
+      ops.push(...ctx.engine.updateOps('category', cat.id, fields));
       if (monthRec) ops.push(...ctx.remove('budget', monthRec.id));
     }
     ops.push(...ctx.engine.updateOps('category', cat.id, { rollover: roll.querySelector('input').checked }));
@@ -66,7 +72,7 @@ function budgetsTab(ctx, vs) {
       h('div', { class: 'fstat' }, h('span', { class: 'fstat__label' }, t('budgets.budgeted')), h('span', { class: 'fmid' }, U.money(bs.total, base))),
       h('div', { class: 'fstat' }, h('span', { class: 'fstat__label' }, t('budgets.spent')), h('span', { class: 'fmid' }, U.money(bs.spent, base))),
       h('div', { class: 'fstat' }, h('span', { class: 'fstat__label' }, left >= 0 ? t('budgets.left_label') : t('budgets.over_label')), h('span', { class: 'fmid ' + (left >= 0 ? 'amt--in' : 'amt--over') }, U.money(Math.abs(left), base))),
-      h('div', { class: 'fstat' }, h('span', { class: 'fstat__label' }, t('budgets.unbudgeted')), h('span', { class: 'fmid' }, U.money(Math.max(0, bs.expense - bs.spent), base)))),
+      h('div', { class: 'fstat' }, h('span', { class: 'fstat__label' }, t('budgets.unbudgeted')), h('span', { class: 'fmid' }, U.money(bs.outside, base)))),
     bs.total ? h('div', { style: { marginTop: '12px' } }, U.bar(bs.spent, bs.total, { marker })) : null));
   const prevKey = addMonthKey(key, -1);
   const hasPrev = L.categories().some((c) => L.get('budget', c.id + ':' + prevKey));

@@ -1,6 +1,6 @@
 import * as L from './oplog.js';
-import { convertMinor, decimalsFor } from './money.js';
-import { todayISO, monthKey, addDays, isISODate, occurrences, nextOccurrence, diffDays, addMonthKey } from './dates.js';
+import { convertMinor, decimalsFor, allocate } from './money.js';
+import { todayISO, localDateOf, monthKey, addDays, isISODate, occurrences, nextOccurrence, diffDays, addMonthKey } from './dates.js';
 import { holdingsFor, depositValue, loanOutstanding } from './invest.js';
 
 export const CASH_TYPES = ['cash', 'bank', 'savings', 'ewallet'];
@@ -68,6 +68,7 @@ export class Ledger {
 
   base() { return this.settings().base_currency || 'USD'; }
   today() { return todayISO(this.settings().time_zone || undefined); }
+  localDate(stamp) { return localDateOf(stamp, this.settings().time_zone || undefined); }
 
   accounts(includeClosed) {
     const all = this.cached('accounts', () => this.list('account').sort((a, b) => (a.order || 0) - (b.order || 0) || String(a.name).localeCompare(String(b.name))));
@@ -311,10 +312,9 @@ export class Ledger {
   rowCategories(r) {
     if (r.kind !== 'txn') return [];
     if (r.lines) {
-      return r.lines.map((ln) => {
-        const ratio = r.amount ? (ln.amount_minor || 0) / r.amount : 0;
-        return { category: ln.category || null, amount: ln.amount_minor || 0, base: r.base == null ? null : Math.round(r.base * ratio) };
-      });
+      const amounts = r.lines.map((ln) => ln.amount_minor || 0);
+      const bases = r.base == null ? null : r.base === r.amount ? amounts : allocate(r.base, amounts);
+      return r.lines.map((ln, i) => ({ category: ln.category || null, amount: amounts[i], base: bases ? bases[i] : null }));
     }
     return [{ category: r.category, amount: r.amount, base: r.base }];
   }
@@ -353,11 +353,30 @@ export class Ledger {
     return c && c.budget_default_minor != null ? c.budget_default_minor : null;
   }
 
+  budgetSince(catId) {
+    const c = this.categoryMap().get(catId);
+    const k = c && c.budget_since;
+    return typeof k === 'string' && /^\d{4}-\d{2}$/.test(k) ? k : null;
+  }
+
+  spendByDay(key, catIds) {
+    const out = new Map();
+    for (const r of this.rowsByMonth().get(key) || []) {
+      if (r.kind !== 'txn' || NON_SPEND.has(r.tkind)) continue;
+      for (const part of this.rowCategories(r)) {
+        if (part.base == null || !part.category || !catIds.has(part.category)) continue;
+        out.set(r.date, (out.get(r.date) || 0) - part.base);
+      }
+    }
+    return out;
+  }
+
   budgetSummary(key) {
     return this.cached('budget:' + key, () => {
       const ms = this.monthSummary(key);
       const tree = this.categoryTree('expense');
       const items = [];
+      const counted = new Set();
       let total = 0;
       let spent = 0;
       for (const { group, children } of tree) {
@@ -378,18 +397,28 @@ export class Ledger {
         if (children.length && gb != null) { gHas = true; gBudget = gb; }
         gSpent += children.length ? ms.byCat.get(group.id) || 0 : 0;
         items.push({ group, kids: children.length ? kids : [], budget: gHas ? gBudget : null, spent: gSpent });
-        if (gHas) { total += gBudget; spent += gSpent; }
+        if (gHas) {
+          total += gBudget;
+          spent += gSpent;
+          counted.add(group.id);
+          for (const c of members) counted.add(c.id);
+        }
       }
       const uncategorized = ms.byCat.get('_expense') || 0;
-      return { items, total, spent, uncategorized, expense: ms.expense };
+      return { items, total, spent, uncategorized, expense: ms.expense, outside: Math.max(0, ms.expense - spent), byDay: this.spendByDay(key, counted) };
     });
   }
 
   rolloverFor(catId, key) {
+    const first = this.months()[0];
+    if (!first) return 0;
+    const since = this.budgetSince(catId);
     let carry = 0;
     for (let i = 6; i >= 1; i--) {
       const k = addMonthKey(key, -i);
-      const b = this.budgetFor(catId, k);
+      if (k < first) continue;
+      const rec = this.get('budget', catId + ':' + k);
+      const b = rec && rec.amount_minor != null ? rec.amount_minor : since && k < since ? null : this.budgetFor(catId, k);
       if (b == null) { carry = 0; continue; }
       const s = this.monthSummary(k).byCat.get(catId) || 0;
       carry = Math.max(0, carry + b - s);
@@ -403,20 +432,43 @@ export class Ledger {
   }
 
   scheduleNext(s, after) {
-    if (!s || !s.rule || !isISODate(s.anchor)) return null;
+    if (!s || !isISODate(s.anchor)) return null;
     const a = after || addDays(this.today(), -1);
-    return nextOccurrence(s.rule, s.anchor, a, s.end && s.end.mode !== 'never' ? s.end : null);
+    return nextOccurrence(s.rule || { freq: 'month' }, s.anchor, a, s.end && s.end.mode !== 'never' ? s.end : null);
+  }
+
+  scheduleEnded(s) {
+    return !this.scheduleNext(s);
+  }
+
+  scheduleOrphaned(s) {
+    return !!(s && s.account && !this.exists('account', s.account));
+  }
+
+  orphanSchedules() {
+    return this.schedules().filter((s) => s.auto_post && this.scheduleOrphaned(s) && !this.scheduleEnded(s));
+  }
+
+  autoPostDates(s, today) {
+    if (!s || !s.auto_post || !isISODate(s.anchor) || !s.account || this.scheduleOrphaned(s)) return [];
+    const now = today || this.today();
+    const created = (s.created && this.localDate(s.created)) || s.anchor;
+    const from = created > s.anchor ? created : s.anchor;
+    const floor = addDays(now, -400);
+    const dates = occurrences(s.rule || { freq: 'month' }, s.anchor, from < floor ? floor : from, now, s.end && s.end.mode !== 'never' ? s.end : null);
+    return dates.filter((d) => !this.known('transaction', 'sch:' + s.id + ':' + d));
   }
 
   upcoming(days, from) {
-    const start = from || this.today();
-    const end = addDays(start, days);
+    const today = this.today();
+    const start = from || today;
+    const end = addDays(today, days);
     const out = [];
     for (const s of this.schedules()) {
       const dates = occurrences(s.rule || { freq: 'month' }, s.anchor, start, end, s.end && s.end.mode !== 'never' ? s.end : null);
       for (const d of dates) {
         if (this.known('transaction', 'sch:' + s.id + ':' + d)) continue;
-        out.push({ schedule: s, date: d, amount: s.amount_minor || 0, currency: s.currency || this.base(), days: diffDays(start, d) });
+        out.push({ schedule: s, date: d, amount: s.amount_minor || 0, currency: s.currency || this.base(), days: diffDays(today, d) });
       }
     }
     out.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));

@@ -3645,6 +3645,7 @@
         "locked": "Bloqueado",
         "open": "Abre la app para ver este mes",
         "spent": "{amount} en gastos · {month}",
+        "spent_of": "{spent} de {budget} de presupuesto · {month}",
         "next": "Próximo: {name} {amount} el {date}",
         "no_upcoming": "Sin facturas en las próximas 2 semanas"
       },
@@ -3828,6 +3829,8 @@
         "budgets": "Presupuestos",
         "set_budgets": "Definir presupuestos",
         "of_budget": "de {budget} de presupuesto · {pct}",
+        "budget_part": "{spent} de {budget} de presupuesto · {pct}",
+        "outside_budgets": "{amount} fuera de presupuesto",
         "no_budget": "No hay presupuesto para este mes.",
         "ribbon_label": "Gasto de cada día de este mes, con el total acumulado frente al ritmo de tu presupuesto",
         "income": "Ingresos",
@@ -3863,6 +3866,10 @@
         "conflicts": {
           "one": "{n} cambio hecho en dos dispositivos a la vez necesita revisión.",
           "other": "{n} cambios hechos en dos dispositivos a la vez necesitan revisión."
+        },
+        "orphans": {
+          "one": "Se eliminó la cuenta de {name}, así que ya no se añade automáticamente.",
+          "other": "Se eliminaron las cuentas de {n} facturas, así que ya no se añaden automáticamente."
         },
         "review": "Revisar",
         "fx_banner": "Añade el tipo de cambio de {list} para incluirlas en los totales en {base}.",
@@ -4261,6 +4268,9 @@
         "trial_ends": "la prueba termina el {date}",
         "trial_short": "Prueba",
         "stopped": "Detenida",
+        "no_account": "Sin cuenta",
+        "no_account_meta": "cuenta eliminada",
+        "account_gone": "Su cuenta se eliminó. Elige otra.",
         "show_stopped": "Mostrar detenidas",
         "next_on": "próximo: {date}",
         "ended": "Terminada",

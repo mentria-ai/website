@@ -3645,6 +3645,7 @@
         "locked": "Locked",
         "open": "Open to see this month",
         "spent": "{amount} spent · {month}",
+        "spent_of": "{spent} of {budget} budget · {month}",
         "next": "Next: {name} {amount} on {date}",
         "no_upcoming": "No bills in the next 2 weeks"
       },
@@ -3828,6 +3829,8 @@
         "budgets": "Budgets",
         "set_budgets": "Set budgets",
         "of_budget": "of {budget} budget · {pct}",
+        "budget_part": "{spent} of {budget} budget · {pct}",
+        "outside_budgets": "{amount} outside budgets",
         "no_budget": "No budget set for this month.",
         "ribbon_label": "Spending each day this month, with the running total against your budget pace",
         "income": "Income",
@@ -3863,6 +3866,10 @@
         "conflicts": {
           "one": "{n} edit made on two devices at once needs a look.",
           "other": "{n} edits made on two devices at once need a look."
+        },
+        "orphans": {
+          "one": "The account for {name} was deleted, so it isn't added automatically.",
+          "other": "The accounts for {n} bills were deleted, so they aren't added automatically."
         },
         "review": "Review",
         "fx_banner": "Add exchange rates for {list} to include them in {base} totals.",
@@ -4261,6 +4268,9 @@
         "trial_ends": "trial ends {date}",
         "trial_short": "Trial",
         "stopped": "Stopped",
+        "no_account": "No account",
+        "no_account_meta": "account deleted",
+        "account_gone": "Its account was deleted. Pick another one.",
         "show_stopped": "Show stopped",
         "next_on": "next {date}",
         "ended": "Ended",

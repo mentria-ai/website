@@ -575,6 +575,122 @@ test('recurring: finds a monthly stream and ignores noise', () => {
   assert.equal(s[0].state, 'active');
 });
 
+{
+  const LG = await mod('ledger.js');
+  const sched = (name, fn) => test('schedules and budgets: ' + name, fn);
+  const ledgerOf = (recs, today) => {
+    const st = L.createState();
+    let now = 1_790_000_000_000;
+    const clock = L.createClock('fefefefefefefefe', () => now++);
+    L.applyOps(st, recs.map(([e, id, v]) => ({ t: clock.send(), e, id, f: '*', v })));
+    const led = new LG.Ledger({ state: st });
+    if (today) led.today = () => today;
+    return led;
+  };
+  const bank = ['account', 'a1', { name: 'Bank', type: 'bank', currency: 'USD' }];
+  const bill = (id, v) => ['schedule', id, Object.assign({ name: id, amount_minor: -1000, currency: 'USD', account: 'a1', rule: { freq: 'month', interval: 1 }, end: { mode: 'never' }, auto_post: true, active: true, created: '2026-09-01T12:00:00.000Z' }, v)];
+
+  sched('creation stamps become local dates', () => {
+    assert.equal(D.localDateOf('2026-10-04T03:30:00.000Z', 'America/Los_Angeles'), '2026-10-03');
+    assert.equal(D.localDateOf('2026-11-15T03:15:00.000Z', 'America/Los_Angeles'), '2026-11-14');
+    assert.equal(D.localDateOf('2026-10-02T20:30:00.000Z', 'Asia/Kolkata'), '2026-10-03');
+    assert.equal(D.localDateOf('2026-10-03', 'Asia/Kolkata'), '2026-10-03');
+    assert.equal(D.localDateOf('later', 'UTC'), null);
+  });
+
+  sched('a bill added in the evening west of UTC posts its first date', () => {
+    const make = (tz, created, anchor, today) => {
+      const led = ledgerOf([['settings', 'main', { base_currency: 'USD', time_zone: tz }], bank, bill('gym', { created, anchor })], today);
+      return led.autoPostDates(led.get('schedule', 'gym'));
+    };
+    assert.deepEqual(make('America/Los_Angeles', '2026-10-04T03:30:00.000Z', '2026-10-03', '2026-10-04'), ['2026-10-03']);
+    assert.deepEqual(make('America/Los_Angeles', '2026-11-15T03:15:00.000Z', '2026-11-14', '2026-11-16'), ['2026-11-14']);
+    assert.deepEqual(make('America/Los_Angeles', '2026-10-03T17:00:00.000Z', '2026-10-03', '2026-10-04'), ['2026-10-03']);
+    const early = make('Asia/Kolkata', '2026-10-02T20:30:00.000Z', '2026-10-02', '2026-10-03');
+    const late = make('Asia/Kolkata', '2026-10-03T04:30:00.000Z', '2026-10-02', '2026-10-03');
+    assert.deepEqual(early, []);
+    assert.deepEqual(late, []);
+    assert.deepEqual(make('Asia/Kolkata', '2026-10-02T20:30:00.000Z', '2026-10-03', '2026-10-03'), ['2026-10-03']);
+  });
+
+  sched('bills whose account was deleted are skipped and listed', () => {
+    const led = ledgerOf([bank, bill('gym', { account: 'gone', anchor: '2026-10-05' }), bill('rent', { anchor: '2026-10-05' })], '2026-10-06');
+    assert.deepEqual(led.autoPostDates(led.get('schedule', 'gym')), []);
+    assert.deepEqual(led.autoPostDates(led.get('schedule', 'rent')), ['2026-10-05']);
+    assert.deepEqual(led.orphanSchedules().map((s) => s.id), ['gym']);
+  });
+
+  sched('upcoming counts days from today and keeps overdue bills', () => {
+    const led = ledgerOf([bank, bill('today', { anchor: '2026-10-03', auto_post: false }), bill('tomorrow', { anchor: '2026-10-04', auto_post: false }), bill('late', { anchor: '2026-09-30', auto_post: false })], '2026-10-03');
+    const list = led.upcoming(60, D.addDays('2026-10-03', -7));
+    const days = (id) => list.filter((u) => u.schedule.id === id).map((u) => u.days);
+    assert.deepEqual(days('late'), [-3, 27, 58]);
+    assert.deepEqual(days('today'), [0, 31]);
+    assert.deepEqual(days('tomorrow'), [1, 32]);
+    assert.deepEqual(led.upcoming(14).map((u) => [u.schedule.id, u.days]), [['today', 0], ['tomorrow', 1]]);
+  });
+
+  sched('ended bills are recognised', () => {
+    const led = ledgerOf([bank, bill('course', { anchor: '2026-10-05', end: { mode: 'count', n: 2 } }), bill('phone', { anchor: '2026-10-10' }), bill('lease', { anchor: '2026-01-10', end: { mode: 'date', date: '2026-12-01' } })], '2026-12-20');
+    assert.equal(led.scheduleEnded(led.get('schedule', 'course')), true);
+    assert.equal(led.scheduleEnded(led.get('schedule', 'phone')), false);
+    assert.equal(led.scheduleEnded(led.get('schedule', 'lease')), true);
+  });
+
+  sched('tracking a found subscription keeps its billing day', () => {
+    const rows = [];
+    for (let m = 2; m <= 9; m++) rows.push({ kind: 'txn', id: 'n' + m, date: '2026-0' + m + '-15', amount: -1549, payee: 'NETFLIX.COM 866-579-7172', account: 'a1', currency: 'USD' });
+    const st = RC.detectStreams(rows, { today: '2026-10-18' })[0];
+    assert.equal(st.next, '2026-10-15');
+    assert.equal(RC.nextDue(st, '2026-10-18'), '2026-11-15');
+    assert.equal(RC.nextDue(st, '2026-10-15'), '2026-10-15');
+    assert.equal(RC.nextDue(st, '2026-10-01'), '2026-10-15');
+    assert.equal(RC.nextDue({ next: '2026-09-07', rule: { freq: 'week', interval: 2 } }, '2026-10-03'), '2026-10-05');
+  });
+
+  sched('rollover only carries months the ledger and the budget existed', () => {
+    const groceries = (extra) => ['category', 'g', Object.assign({ name: 'Groceries', kind: 'expense', group: null, rollover: true, budget_default_minor: 50000 }, extra)];
+    const spend = (id, date, minor) => ['transaction', id, { date, amount_minor: -minor, base_minor: -minor, currency: 'USD', account: 'a1', category: 'g' }];
+    const october = [bank, groceries({ budget_since: '2026-10' }), spend('t1', '2026-10-02', 10000)];
+    assert.equal(ledgerOf(october, '2026-10-03').budgetSummary('2026-10').total, 50000);
+    assert.equal(ledgerOf([bank, groceries({}), spend('t1', '2026-10-02', 10000)], '2026-10-03').budgetSummary('2026-10').total, 50000);
+    assert.equal(ledgerOf(october, '2026-11-03').budgetSummary('2026-11').total, 90000);
+    const history = october.concat([spend('t0', '2026-07-10', 5000)]);
+    assert.equal(ledgerOf(history, '2026-10-03').budgetSummary('2026-10').total, 50000);
+    const oneOff = history.concat([['budget', 'g:2026-09', { category: 'g', month: '2026-09', amount_minor: 20000 }]]);
+    assert.equal(ledgerOf(oneOff, '2026-10-03').budgetSummary('2026-10').total, 70000);
+    assert.equal(ledgerOf([bank, groceries({ budget_since: '2026-10' })], '2026-10-03').budgetSummary('2026-10').total, 50000);
+  });
+
+  sched('budget totals compare budgeted spending only', () => {
+    const led = ledgerOf([
+      bank,
+      ['category', 'g', { name: 'Groceries', kind: 'expense', group: null, budget_default_minor: 50000 }],
+      ['category', 'r', { name: 'Rent', kind: 'expense', group: null }],
+      ['transaction', 't1', { date: '2026-10-02', amount_minor: -10000, base_minor: -10000, currency: 'USD', account: 'a1', category: 'g' }],
+      ['transaction', 't2', { date: '2026-10-01', amount_minor: -150000, base_minor: -150000, currency: 'USD', account: 'a1', category: 'r' }]
+    ], '2026-10-03');
+    const bs = led.budgetSummary('2026-10');
+    assert.deepEqual([bs.total, bs.spent, bs.expense, bs.outside], [50000, 10000, 160000, 150000]);
+    assert.deepEqual(Array.from(bs.byDay.entries()), [['2026-10-02', 10000]]);
+  });
+
+  sched('a split in another currency keeps every cent', () => {
+    const led = ledgerOf([
+      ['account', 'eu', { name: 'Euro card', type: 'bank', currency: 'EUR' }],
+      ['category', 'a', { name: 'Groceries', kind: 'expense', group: null }],
+      ['category', 'b', { name: 'Household', kind: 'expense', group: null }],
+      ['category', 'c', { name: 'Clothing', kind: 'expense', group: null }],
+      ['transaction', 't', { date: '2026-10-02', amount_minor: -10000, base_minor: -10853, fx_rate_e6: 1085300, currency: 'EUR', account: 'eu', lines: [{ category: 'a', amount_minor: -3333 }, { category: 'b', amount_minor: -3333 }, { category: 'c', amount_minor: -3334 }] }]
+    ], '2026-10-03');
+    const parts = led.rowCategories(led.rows()[0]);
+    assert.equal(parts.reduce((n, p) => n + p.base, 0), -10853);
+    assert.equal(led.monthSummary('2026-10').expense, 10853);
+    const same = ledgerOf([bank, ['transaction', 't', { date: '2026-10-02', amount_minor: -1000, base_minor: -1000, currency: 'USD', account: 'a1', lines: [{ category: 'x', amount_minor: -333 }, { category: 'y', amount_minor: -667 }] }]], '2026-10-03');
+    assert.deepEqual(same.rowCategories(same.rows()[0]).map((p) => p.base), [-333, -667]);
+  });
+}
+
 test('forecast: zero-volatility Monte Carlo equals the SIP closed form', () => {
   const r = F.simulateGbm({ months: 12, paths: 5, seed: 1, classes: [{ start: 0, contrib: 1000, ret: 0.12, sigma: 0 }] });
   assert.ok(Math.abs(r.fan[12].p50 - V.sipFutureValue(1000, 0.12, 12)) < 1e-6);

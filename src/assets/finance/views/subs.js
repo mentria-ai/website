@@ -1,6 +1,6 @@
 import * as U from '../ui.js';
 import { cycleMonths, isISODate, addDays, diffDays } from '../dates.js';
-import { detectStreams, cycleLabelKey } from '../recurring.js';
+import { detectStreams, cycleLabelKey, nextDue } from '../recurring.js';
 import { payeeKey } from '../ledger.js';
 
 const { h, t, icon } = U;
@@ -30,10 +30,11 @@ export function scheduleSheet(ctx, sch, preset) {
   const base = L.base();
   const s = sch || Object.assign({ name: '', kind: 'subscription', amount_minor: 0, account: L.lastAccount(), category: null, payee: '', rule: { freq: 'month', interval: 1 }, anchor: L.today(), end: { mode: 'never' }, auto_post: true, notify_days: -1, active: true, weekend_shift: 'none' }, preset || {});
   const acctCcy = (id) => ((L.get('account', id) || {}).currency) || base;
+  const orphan = !!sch && L.scheduleOrphaned(sch);
   const name = U.input({ value: s.name || '', maxlength: '60', placeholder: t('subs.name_ph') });
   const kind = U.select(['subscription', 'bill', 'income'].map((k) => ({ value: k, label: t('subs.kind.' + k) })), s.kind || 'subscription');
   const amount = U.moneyField({ value: s.amount_minor ? U.amountToInput(s.amount_minor, acctCcy(s.account)) : '', placeholder: '0' });
-  const acct = U.select(L.accounts().map((a) => ({ value: a.id, label: a.name + (a.currency !== base ? ' · ' + a.currency : '') })), s.account || L.lastAccount());
+  const acct = U.select(L.accounts().map((a) => ({ value: a.id, label: a.name + (a.currency !== base ? ' · ' + a.currency : '') })), orphan ? L.lastAccount() : s.account || L.lastAccount());
   const catSel = U.select([], '');
   const fillCats = () => {
     const kindCat = kind.value === 'income' ? 'income' : 'expense';
@@ -80,7 +81,7 @@ export function scheduleSheet(ctx, sch, preset) {
     title: sch ? t('subs.edit') : t('subs.add'), wide: true,
     body: h('div', { class: 'fstack' },
       h('div', { class: 'ff-grid' }, U.field(t('subs.name'), name), U.field(t('subs.kind_label'), kind)),
-      h('div', { class: 'ff-grid' }, U.field(t('entry.amount'), amount, t('subs.amount_hint')), U.field(t('entry.account'), acct)),
+      h('div', { class: 'ff-grid' }, U.field(t('entry.amount'), amount, t('subs.amount_hint')), U.field(t('entry.account'), acct, orphan ? t('subs.account_gone') : null)),
       h('div', { class: 'ff-grid' }, U.field(t('subs.freq_label'), freq), U.field(sch ? t('subs.next_date') : t('subs.first_date'), anchor)),
       customRow,
       h('div', { class: 'ff-grid' }, U.field(t('entry.category'), catSel), U.field(t('subs.end_label'), endMode)),
@@ -133,7 +134,8 @@ export function scheduleSheet(ctx, sch, preset) {
 
 function record(ctx, u) {
   const sc = u.schedule;
-  ctx.openEntry({ fixedId: 'sch:' + sc.id + ':' + u.date, scheduleId: sc.id, amountMinor: sc.amount_minor, payee: sc.payee || sc.name, category: sc.category, account: sc.account, date: u.date });
+  const account = ctx.ledger.scheduleOrphaned(sc) ? null : sc.account;
+  ctx.openEntry({ fixedId: 'sch:' + sc.id + ':' + u.date, scheduleId: sc.id, amountMinor: sc.amount_minor, payee: sc.payee || sc.name, category: sc.category, account, date: u.date });
 }
 
 function summary(ctx) {
@@ -143,6 +145,7 @@ function summary(ctx) {
   let inc = 0;
   let n = 0;
   for (const s of L.schedules()) {
+    if (L.scheduleEnded(s)) continue;
     const m = L.toBase(Math.round(monthly(s)), s.currency || base);
     if (m == null) continue;
     if ((s.amount_minor || 0) < 0) { out += m; n++; } else inc += m;
@@ -170,12 +173,14 @@ function upcomingTab(ctx) {
     const sc = u.schedule;
     const c = sc.category ? L.categoryMap().get(sc.category) : null;
     const trialSoon = sc.trial_end && diffDays(L.today(), sc.trial_end) >= 0 && diffDays(L.today(), sc.trial_end) <= 7;
+    const orphan = L.scheduleOrphaned(sc);
+    const auto = sc.auto_post && !orphan;
     node.append(h('div', { class: 'frow frow--static' },
       c ? U.mono(c.icon || sc.name, c.color) : U.mono(sc.name, U.colorFor(sc.id)),
-      h('span', { class: 'frow__main' }, h('span', { class: 'frow__title' }, sc.name), h('span', { class: 'frow__meta' }, cycleText(sc.rule) + (sc.auto_post ? ' · ' + t('subs.auto') : '') + (trialSoon ? ' · ' + t('subs.trial_ends', { date: U.date(sc.trial_end, 'dayMonth') }) : ''))),
+      h('span', { class: 'frow__main' }, h('span', { class: 'frow__title' }, sc.name), h('span', { class: 'frow__meta' }, cycleText(sc.rule) + (auto && u.days >= 0 ? ' · ' + t('subs.auto') : '') + (orphan ? ' · ' + t('subs.no_account_meta') : '') + (trialSoon ? ' · ' + t('subs.trial_ends', { date: U.date(sc.trial_end, 'dayMonth') }) : ''))),
       h('span', { class: 'fb-row', style: { flexWrap: 'nowrap' } },
         h('span', { class: 'frow__amt ' + (u.amount > 0 ? 'amt--in' : '') }, U.money(Math.abs(u.amount), u.currency)),
-        !sc.auto_post || u.days < 0 ? h('button', { type: 'button', class: 'fb fb--sm', onclick: () => record(ctx, u) }, t('subs.record')) : null)));
+        !auto || u.days < 0 ? h('button', { type: 'button', class: 'fb fb--sm', onclick: () => record(ctx, u) }, t('subs.record')) : null)));
   }
   return node;
 }
@@ -197,15 +202,17 @@ function allTab(ctx) {
     const pm = Math.round(monthly(s));
     const trial = s.trial_end && s.trial_end >= L.today();
     const last = (s.price_history || []).slice(-1)[0];
+    const cost = !next ? '' : (s.rule && s.rule.freq === 'month' && (s.rule.interval || 1) === 1) ? t('subs.per_year_short', { amount: U.money(Math.abs(s.amount_minor || 0) * 12, ccy) }) : t('subs.per_month_short', { amount: U.money(pm, ccy) });
+    const changed = last ? t('subs.changed', { from: U.money(Math.abs(last.old_minor), ccy), date: U.date(last.date, 'dayMonth') }) : '';
+    const foot = [cost, changed].filter(Boolean).join(' · ');
     grid.append(h('button', { type: 'button', class: 'fcard', style: { textAlign: 'left', cursor: 'pointer', color: 'inherit', display: 'flex', flexDirection: 'column', gap: '10px' }, onclick: () => scheduleSheet(ctx, s) },
       h('div', { style: { display: 'flex', gap: '12px', alignItems: 'center' } }, c ? U.mono(c.icon || s.name, c.color) : U.mono(s.name, U.colorFor(s.id)),
         h('div', { style: { minWidth: 0, flex: 1 } }, h('div', { class: 'frow__title', style: { fontWeight: 600 } }, s.name), h('div', { class: 'frow__meta' }, t('subs.kind.' + (s.kind || 'subscription')) + ' · ' + cycleText(s.rule))),
-        s.active === false ? h('span', { class: 'fpill' }, t('subs.stopped')) : trial ? h('span', { class: 'fpill fpill--amber' }, t('subs.trial_short')) : null),
+        s.active === false ? h('span', { class: 'fpill' }, t('subs.stopped')) : L.scheduleOrphaned(s) ? h('span', { class: 'fpill fpill--amber' }, t('subs.no_account')) : trial ? h('span', { class: 'fpill fpill--amber' }, t('subs.trial_short')) : null),
       h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px' } },
         h('span', { class: 'fmid ' + (s.amount_minor > 0 ? 'amt--in' : '') }, U.money(Math.abs(s.amount_minor || 0), ccy)),
         h('span', { class: 'fsmall fmuted' }, next ? t('subs.next_on', { date: U.date(next, 'dayMonth') }) : t('subs.ended'))),
-      h('div', { class: 'fsmall fmuted' }, (s.rule && s.rule.freq === 'month' && (s.rule.interval || 1) === 1) ? t('subs.per_year_short', { amount: U.money(Math.abs(s.amount_minor || 0) * 12, ccy) }) : t('subs.per_month_short', { amount: U.money(pm, ccy) }),
-        last ? ' · ' + t('subs.changed', { from: U.money(Math.abs(last.old_minor), ccy), date: U.date(last.date, 'dayMonth') }) : '')));
+      foot ? h('div', { class: 'fsmall fmuted' }, foot) : null));
   }
   node.append(grid);
   return node;
@@ -229,7 +236,7 @@ function foundTab(ctx) {
         h('span', { class: 'frow__amt ' + (st.dir === 'in' ? 'amt--in' : '') }, (st.variable ? '≈ ' : '') + U.money(st.amount, ccy)),
         h('button', { type: 'button', class: 'fb fb--sm fb--primary', onclick: () => scheduleSheet(ctx, null, {
           name: st.payee, payee: st.payee, kind: st.dir === 'in' ? 'income' : 'subscription', amount_minor: st.dir === 'in' ? st.amount : -st.amount,
-          account: st.account, category: st.category, rule: Object.assign({}, st.rule), anchor: st.next < L.today() ? L.today() : st.next, auto_post: !st.variable, stream_id: st.id
+          account: st.account, category: st.category, rule: Object.assign({}, st.rule), anchor: nextDue(st, L.today()), auto_post: !st.variable, stream_id: st.id
         }) }, t('subs.track')),
         h('button', { type: 'button', class: 'fb fb--sm fb--ghost', 'aria-label': t('common.dismiss'), onclick: () => ctx.commit(ctx.save('stream', st.id, { state: 'dismissed', payee_key: st.key }), t('subs.dismissed')) }, icon('close')))));
   }

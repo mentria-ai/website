@@ -677,8 +677,8 @@ localeReload: true
 
     state.getSnapshot = () => {
       const title = titleEl.dataset.isDefault === '1' ? '' : (titleEl.textContent || '').trim().slice(0, 60);
-      if (state.countdown) return { mode: 'run', endAt: state.endAt, title };
-      if (state.isPaused && state.totalSeconds > 0) return { mode: 'pause', remaining: state.totalSeconds, title };
+      if (state.countdown) return { mode: 'run', endAt: state.endAt, title, id: state.id };
+      if (state.isPaused && state.totalSeconds > 0) return { mode: 'pause', remaining: state.totalSeconds, title, id: state.id };
       return null;
     };
 

@@ -7,6 +7,9 @@
   var TOOL_KEY = 'mini_tool';
   var POS_KEY = 'mini_pos';
   var MAX_AGE = 12 * 3600000;
+  var RING_FRESH = 60000;
+  var RING_EVERY = 1200;
+  var UNLOCK_EVENTS = ['pointerup', 'touchend', 'click', 'keydown'];
   var SENS = { low: 1.7, med: 1.1, high: 0.7 };
   var STEP_MIN_MS = 300;
   var TOP_GAP = 64;
@@ -14,13 +17,21 @@
   var pill = null;
   var parked = null;
   var tickTimer = 0;
+  var endTimer = 0;
   var listening = false;
   var sawMotion = false;
   var granted = false;
   var probing = false;
   var wakeLock = null;
   var wakePending = false;
-  var wasDone = null;
+  var audio = null;
+  var resuming = false;
+  var unlockOn = false;
+  var unlocked = false;
+  var ringing = null;
+  var ringTimer = 0;
+  var rangAt = 0;
+  var titleBefore = null;
 
   function bare(p) {
     var locs = window.MENTRIA_LOCALES || [];
@@ -50,6 +61,17 @@
     releaseWake();
     clearInterval(tickTimer);
     tickTimer = 0;
+    clearTimeout(endTimer);
+    endTimer = 0;
+    silence();
+    armUnlock(false);
+    if (audio) {
+      var ctx = audio;
+      audio = null;
+      unlocked = false;
+      resuming = false;
+      try { ctx.close().catch(function () {}); } catch (_) {}
+    }
     if (pill) { pill.remove(); pill = null; }
     tidyDock();
   }
@@ -77,6 +99,17 @@
     var m = /^\/tools\/([^/]+)\//.exec(path || '');
     return m ? m[1] : '';
   }
+  function urlTail() {
+    var hash = location.hash;
+    if (hash && new URLSearchParams(hash.slice(1)).has('cmd')) hash = '';
+    return location.search + hash;
+  }
+  function parkedHref(ps) {
+    var tail = typeof ps.tail === 'string' ? ps.tail : '';
+    var first = tail.charAt(0);
+    if (first !== '?' && first !== '#') tail = ps.id ? '?id=' + encodeURIComponent(ps.id) : '';
+    return prefix() + ps.path + tail;
+  }
   function minimizeTool() {
     if (!S) return;
     var id = new URLSearchParams(location.search).get('id') || '';
@@ -84,6 +117,7 @@
     S.set('ui', TOOL_KEY, {
       path: bare(location.pathname),
       id: id,
+      tail: urlTail(),
       name: (nameEl && nameEl.textContent.trim()) || document.title,
       since: Date.now()
     });
@@ -106,12 +140,17 @@
     return ps.name || '';
   }
 
+  function wakeWanted() {
+    if (listening) return true;
+    var ses = S ? S.get('ui', KEY) : null;
+    return !!(ses && ses.kind === 'timer') && timerLive();
+  }
   function holdWake() {
     if (wakeLock || wakePending || !navigator.wakeLock || document.visibilityState !== 'visible') return;
     wakePending = true;
     navigator.wakeLock.request('screen').then(function (lock) {
       wakePending = false;
-      if (!listening) { lock.release().catch(function () {}); return; }
+      if (!wakeWanted()) { lock.release().catch(function () {}); return; }
       wakeLock = lock;
       lock.addEventListener('release', function () { if (wakeLock === lock) wakeLock = null; });
     }).catch(function () { wakePending = false; });
@@ -129,20 +168,183 @@
     var mm = (h ? String(m).padStart(2, '0') : String(m)) + ':' + String(s).padStart(2, '0');
     return h ? h + ':' + mm : mm;
   }
-  function timerView() {
+  function timerList() {
     var list = S ? S.get('tools', 'countdown_active') : null;
-    if (!Array.isArray(list) || !list.length) return null;
-    var now = Date.now();
-    var running = list.filter(function (e) { return e && e.mode === 'run' && typeof e.endAt === 'number'; })
+    return Array.isArray(list) ? list.filter(function (e) { return e && typeof e === 'object'; }) : [];
+  }
+  function runEntries(list) {
+    return list.filter(function (e) { return e.mode === 'run' && typeof e.endAt === 'number'; })
       .sort(function (a, b) { return a.endAt - b.endAt; });
-    if (running.length) {
-      var e = running[0];
-      var left = (e.endAt - now) / 1000;
-      return { value: left > 0 ? fmtClock(left) : (COPY.timesUp || "Time's up"), label: e.title || COPY.timer || 'Timer', done: left <= 0 };
+  }
+  function timerLabel(e) {
+    return (e && e.title) || COPY.timer || 'Timer';
+  }
+  function timerLive() {
+    var now = Date.now();
+    return runEntries(timerList()).some(function (e) { return e.endAt > now; });
+  }
+  function timerView() {
+    var list = timerList();
+    if (!list.length) return null;
+    var now = Date.now();
+    var running = runEntries(list);
+    var shown = null;
+    if (ringing) {
+      shown = running.filter(function (e) { return e.endAt === ringing.endAt; })[0] || null;
+      if (!shown) silence();
     }
-    var paused = list.filter(function (e) { return e && e.mode === 'pause'; })[0];
-    if (paused) return { value: fmtClock(paused.remaining), label: (paused.title || COPY.timer || 'Timer') + ' · ' + (COPY.paused || 'Paused') };
+    if (!shown) shown = running.filter(function (e) { return e.endAt > now; })[0] || running[running.length - 1] || null;
+    if (shown) {
+      var left = (shown.endAt - now) / 1000;
+      return { value: left > 0 ? fmtClock(left) : (COPY.timesUp || "Time's up"), label: timerLabel(shown), done: left <= 0 };
+    }
+    var paused = list.filter(function (e) { return e.mode === 'pause'; })[0];
+    if (paused) return { value: fmtClock(paused.remaining), label: timerLabel(paused) + ' · ' + (COPY.paused || 'Paused') };
     return null;
+  }
+  function dueAlarm(ses) {
+    var now = Date.now();
+    var since = Math.max(typeof ses.rang === 'number' ? ses.rang : 0, rangAt);
+    var hit = null;
+    runEntries(timerList()).forEach(function (e) { if (e.endAt <= now && e.endAt > since) hit = e; });
+    if (!hit) return null;
+    rangAt = hit.endAt;
+    ses.rang = hit.endAt;
+    if (S) S.set('ui', KEY, ses);
+    return now - hit.endAt <= RING_FRESH ? hit : null;
+  }
+  function armEnd() {
+    clearTimeout(endTimer);
+    endTimer = 0;
+    var now = Date.now();
+    var next = runEntries(timerList()).filter(function (e) { return e.endAt > now; })[0];
+    if (!next) return;
+    endTimer = setTimeout(function () {
+      endTimer = 0;
+      render();
+      armEnd();
+    }, Math.min(next.endAt - now + 25, 2147483647));
+  }
+
+  function audioCtx() {
+    if (audio) return audio;
+    var C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    try { audio = new C(); } catch (_) { audio = null; }
+    return audio;
+  }
+  function tones(ctx) {
+    var dur = 0.15, gap = 0.08;
+    for (var i = 0; i < 4; i++) {
+      var t = ctx.currentTime + i * (dur + gap);
+      [[880, 440, 0.4], [1760, 880, 0.2]].forEach(function (p) {
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(p[0], t);
+        osc.frequency.exponentialRampToValueAtTime(p[1], t + dur);
+        g.gain.setValueAtTime(p[2], t);
+        g.gain.exponentialRampToValueAtTime(0.01, t + dur);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + dur);
+      });
+    }
+  }
+  function buzz() {
+    if (!navigator.vibrate || !navigator.userActivation || !navigator.userActivation.hasBeenActive) return;
+    try { navigator.vibrate([200, 100, 200]); } catch (_) {}
+  }
+  function bell() {
+    buzz();
+    var ctx = audioCtx();
+    if (!ctx) return;
+    if (ctx.state === 'running') { tones(ctx); return; }
+    if (resuming) return;
+    resuming = true;
+    ctx.resume().then(function () {
+      if (ctx !== audio) return;
+      resuming = false;
+      if (ringing && ctx.state === 'running') tones(ctx);
+    }, function () { if (ctx === audio) resuming = false; });
+  }
+  function armUnlock(on) {
+    if (on && unlocked) return;
+    if (on === unlockOn) return;
+    unlockOn = on;
+    UNLOCK_EVENTS.forEach(function (type) {
+      if (on) window.addEventListener(type, unlock, true);
+      else window.removeEventListener(type, unlock, true);
+    });
+  }
+  function unlock() {
+    var ctx = audioCtx();
+    if (!ctx) { armUnlock(false); return; }
+    var settle = function () {
+      if (ctx !== audio || ctx.state !== 'running') return;
+      unlocked = true;
+      armUnlock(false);
+      if (!ringing) ctx.suspend().catch(function () {});
+    };
+    if (ctx.state === 'running') { settle(); return; }
+    ctx.resume().then(settle, function () {});
+  }
+  function alarmTitle() {
+    return COPY.alarmTitle || COPY.timesUp || "Time's up";
+  }
+  function notifyEnd(e, label) {
+    if (!document.hidden || !('Notification' in window) || Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.ready.then(function (reg) {
+      return reg.showNotification((COPY.notifTitle || '{label}').split('{label}').join(label), {
+        body: COPY.notifBody || '',
+        icon: '/assets/img/icon-192x192.png',
+        badge: '/assets/img/badge.svg',
+        vibrate: [200, 100, 200],
+        tag: 'mentria-timer-' + (e.id != null ? e.id : 'mini'),
+        renotify: true,
+        requireInteraction: true,
+        data: { url: location.pathname, timerId: e.id != null ? e.id : null },
+        actions: [{ action: 'stop-alarm', title: COPY.stopAlarm || 'Stop alarm' }]
+      });
+    }).catch(function () {});
+  }
+  function liftToast(t) {
+    if (!t || !dock || typeof t.getBoundingClientRect !== 'function') return;
+    var a = t.getBoundingClientRect();
+    var b = dock.getBoundingClientRect();
+    if (a.right <= b.left || a.left >= b.right || a.top >= b.bottom || a.bottom <= b.top - 8) return;
+    var base = parseFloat(getComputedStyle(t).bottom) || 0;
+    t.style.bottom = Math.ceil(base + a.bottom - b.top + 8) + 'px';
+  }
+  function alarm(e) {
+    var label = timerLabel(e);
+    if (window.MentriaUI) liftToast(window.MentriaUI.toast(label + ' · ' + (COPY.timesUp || "Time's up"), { duration: 5000 }));
+    notifyEnd(e, label);
+    if (window.MentriaPush && e.id != null) window.MentriaPush.cancel('ct-' + e.id);
+    if (titleBefore === null) titleBefore = document.title;
+    document.title = alarmTitle();
+    armUnlock(true);
+    clearInterval(ringTimer);
+    bell();
+    ringTimer = setInterval(bell, RING_EVERY);
+  }
+  function silence() {
+    if (!ringing) return;
+    ringing = null;
+    clearInterval(ringTimer);
+    ringTimer = 0;
+    if (audio && audio.state === 'running') audio.suspend().catch(function () {});
+    if (titleBefore !== null) {
+      if (document.title === alarmTitle()) document.title = titleBefore;
+      titleBefore = null;
+    }
+  }
+  function dismiss() {
+    if (!ringing) { stop(); return; }
+    silence();
+    if (timerLive()) render();
+    else stop();
   }
 
   var gravity = 9.81, acEMA = 0, waitingForPeak = true, peaked = false, lastPeakAt = 0;
@@ -233,7 +435,9 @@
 
   function render() {
     var ses = session();
-    if (!ses) { if (pill) { pill.remove(); pill = null; tidyDock(); } return; }
+    if (!ses) { silence(); if (pill) { pill.remove(); pill = null; tidyDock(); } return; }
+    var fresh = ses.kind === 'timer' ? dueAlarm(ses) : null;
+    if (fresh) ringing = fresh;
     var view = ses.kind === 'timer' ? timerView() : stepsView();
     if (!view) { stop(); return; }
     if (pill && pill.getAttribute('data-kind') !== ses.kind) { pill.remove(); pill = null; }
@@ -247,10 +451,14 @@
     var name = (COPY.open || 'Open {name}').replace('{name}', toolName(ses.kind)) + ' · ' + view.value + (view.label ? ' · ' + view.label : '');
     var open = pill.querySelector('.m-mini__open');
     if (open.getAttribute('aria-label') !== name) open.setAttribute('aria-label', name);
+    var close = pill.querySelector('.m-mini__close');
+    var closeName = ringing ? (COPY.stopAlarm || 'Stop alarm') : (COPY.close || 'Close');
+    if (close.getAttribute('aria-label') !== closeName) close.setAttribute('aria-label', closeName);
     if (ses.kind === 'timer') {
-      if (wasDone === false && view.done && window.MentriaUI) window.MentriaUI.toast(view.label + ' · ' + view.value, { duration: 5000 });
-      wasDone = !!view.done;
+      if (timerLive()) holdWake();
+      else releaseWake();
     }
+    if (fresh) alarm(fresh);
   }
   function renderParked() {
     var ps = toolSession();
@@ -363,7 +571,7 @@
       }
       location.href = prefix() + cur.url;
     });
-    pill.append(open, closeButton(stop));
+    pill.append(open, closeButton(dismiss));
     ensureDock().appendChild(pill);
   }
   function buildParked(ps) {
@@ -383,7 +591,7 @@
     open.addEventListener('click', function () {
       var cur = toolSession();
       if (!cur) { renderParked(); return; }
-      location.href = prefix() + cur.path + (cur.id ? '?id=' + encodeURIComponent(cur.id) : '');
+      location.href = parkedHref(cur);
     });
     parked.append(open, closeButton(unpark));
     var host = ensureDock();
@@ -397,7 +605,10 @@
     var ses = session();
     if (!ses) { if (pill) { pill.remove(); pill = null; tidyDock(); } return; }
     if (bare(location.pathname) === ses.url) { stop(); return; }
-    wasDone = null;
+    if (ses.kind === 'timer') {
+      if (timerLive()) armUnlock(true);
+      armEnd();
+    }
     if (ses.kind === 'steps') {
       listen();
       holdWake();
@@ -409,7 +620,7 @@
       }
     }
     render();
-    tickTimer = setInterval(function () { if (document.visibilityState === 'visible') render(); }, 1000);
+    tickTimer = setInterval(function () { if (ses.kind === 'timer' || document.visibilityState === 'visible') render(); }, 1000);
   }
 
   document.addEventListener('click', function (e) {
@@ -422,9 +633,17 @@
     if (document.visibilityState !== 'visible' || !dock) return;
     render();
     renderParked();
-    if (listening) holdWake();
+    if (wakeWanted()) holdWake();
   });
   window.addEventListener('pageshow', function (e) { if (e.persisted) boot(); });
+  window.addEventListener('pagehide', silence);
+  try {
+    if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
+      if (!ringing || !e.data || e.data.type !== 'STOP_ALARM') return;
+      silence();
+      render();
+    });
+  } catch (_) {}
 
   window.MentriaMini = { start: start, stop: stop, leave: leave, active: session, minimizeTool: minimizeTool };
   boot();

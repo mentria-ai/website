@@ -5,6 +5,7 @@
   const META_PREFIX = 'mentria.meta.';
   const LEGACY_PREFIX = 'mentria_';
   const EVENT_NAME = 'mentria:write';
+  const PROBE_KEY = '__mentria_probe__';
 
   let persistCache = null;
 
@@ -25,14 +26,45 @@
     try { global.dispatchEvent(new CustomEvent(EVENT_NAME, { detail })); } catch (_) {}
   };
 
+  const isQuota = (err) => !!err && (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED' || err.code === 22 || err.code === 1014);
+
   const lsAvailable = (() => {
     try {
-      const t = '__mentria_probe__';
-      global.localStorage.setItem(t, t);
-      global.localStorage.removeItem(t);
+      const ls = global.localStorage;
+      if (!ls) return false;
+      ls.getItem(PROBE_KEY);
       return true;
     } catch (_) { return false; }
   })();
+
+  const failReason = (err) => {
+    if (isQuota(err)) return 'full';
+    if (err && err.name === 'SecurityError') return 'blocked';
+    return 'error';
+  };
+
+  let writeState = lsAvailable ? 'ok' : 'blocked';
+  if (lsAvailable) {
+    try {
+      global.localStorage.setItem(PROBE_KEY, PROBE_KEY);
+      global.localStorage.removeItem(PROBE_KEY);
+    } catch (err) {
+      writeState = failReason(err) === 'full' ? 'full' : 'blocked';
+    }
+  }
+
+  const noteWrite = (reason) => {
+    if (reason === 'ok' || reason === 'full' || reason === 'blocked') writeState = reason;
+  };
+
+  const status = () => writeState;
+
+  const storageError = (reason, cause) => {
+    const detail = cause ? ': ' + String(cause.message || cause) : '';
+    const err = new Error((reason === 'blocked' ? 'storage blocked' : reason === 'read' ? 'storage read failed' : 'write failed') + detail);
+    err.reason = reason;
+    return err;
+  };
 
   const get = (ns, key) => {
     if (!lsAvailable) return null;
@@ -74,12 +106,16 @@
   };
 
   const set = (ns, key, value, opts) => {
-    if (!lsAvailable) return false;
     opts = opts || {};
+    if (!lsAvailable) {
+      emit({ ns, key, op: 'error', reason: 'blocked', error: 'storage blocked', remote: !!opts.remote });
+      return false;
+    }
     try {
       const raw = JSON.stringify(value);
       const mtime = (opts && typeof opts.mtime === 'number') ? opts.mtime : Date.now();
       global.localStorage.setItem(fullKey(ns, key), raw);
+      noteWrite('ok');
       writeMeta(ns, key, raw, mtime);
       tombWrite((tombs) => {
         const suffix = ns + '.' + key;
@@ -91,7 +127,9 @@
       if (persistCache !== true) tryPersist();
       return true;
     } catch (err) {
-      emit({ ns, key, op: 'error', error: String(err && err.message || err), remote: !!opts.remote });
+      const reason = failReason(err);
+      noteWrite(reason);
+      emit({ ns, key, op: 'error', reason, error: String(err && err.message || err), remote: !!opts.remote });
       return false;
     }
   };
@@ -232,34 +270,39 @@
   };
 
   const exportAll = () => {
+    if (!lsAvailable) throw storageError('blocked');
     const store = {};
     const legacy = {};
-    if (!lsAvailable) return { version: 1, exportedAt: new Date().toISOString(), store, legacy };
+    let found = 0;
+    let read = 0;
     try {
       for (let i = 0; i < global.localStorage.length; i++) {
         const k = global.localStorage.key(i);
         if (!k) continue;
+        const isStore = k.indexOf(PREFIX) === 0;
+        if (isStore ? isLocalOnly(k.slice(PREFIX.length)) : (k.indexOf(LEGACY_PREFIX) !== 0 || isLocalLegacy(k))) continue;
+        found++;
         const v = global.localStorage.getItem(k);
-        if (k.indexOf(PREFIX) === 0) {
-          const suffix = k.slice(PREFIX.length);
-          if (isLocalOnly(suffix)) continue;
-          store[suffix] = portable(suffix, v);
-        } else if (k.indexOf(LEGACY_PREFIX) === 0) {
-          if (isLocalLegacy(k)) continue;
-          legacy[k] = v;
-        }
+        if (v == null) continue;
+        read++;
+        if (isStore) store[k.slice(PREFIX.length)] = portable(k.slice(PREFIX.length), v);
+        else legacy[k] = v;
       }
-    } catch (_) {}
+    } catch (err) {
+      throw storageError(failReason(err) === 'blocked' ? 'blocked' : 'read', err);
+    }
+    if (found && !read) throw storageError('read');
     return { version: 1, exportedAt: new Date().toISOString(), store, legacy };
   };
 
   const planImport = (payload) => {
+    if (!lsAvailable) throw storageError('blocked');
     const plan = { add: [], same: [], merge: [], replace: [], vaults: [] };
     const store = (payload && payload.store && typeof payload.store === 'object') ? payload.store : {};
     Object.keys(store).forEach((suffix) => {
       if (isLocalOnly(suffix)) return;
       const incoming = adopt(suffix, String(store[suffix]));
-      const local = lsAvailable ? global.localStorage.getItem(PREFIX + suffix) : null;
+      const local = global.localStorage.getItem(PREFIX + suffix);
       if (local == null) { plan.add.push(suffix); return; }
       if (local === incoming) { plan.same.push(suffix); return; }
       if (NOTE_LISTS.indexOf(suffix) >= 0 || DELETE_MAPS.indexOf(suffix) >= 0) { plan.merge.push(suffix); return; }
@@ -269,7 +312,7 @@
     const legacy = (payload && payload.legacy && typeof payload.legacy === 'object') ? payload.legacy : {};
     Object.keys(legacy).forEach((k) => {
       if (k.indexOf(LEGACY_PREFIX) !== 0 || isLocalLegacy(k)) return;
-      const local = lsAvailable ? global.localStorage.getItem(k) : null;
+      const local = global.localStorage.getItem(k);
       if (local == null) plan.add.push(k);
       else if (local === String(legacy[k])) plan.same.push(k);
       else plan.replace.push(k);
@@ -313,6 +356,7 @@
     if (payload.version !== 1) {
       throw new Error('unknown backup version: ' + payload.version);
     }
+    if (!lsAvailable) throw storageError('blocked');
     const store = (payload.store && typeof payload.store === 'object') ? payload.store : {};
     const legacy = (payload.legacy && typeof payload.legacy === 'object') ? payload.legacy : {};
     const skip = Array.isArray(opts.skip) ? opts.skip : [];
@@ -320,12 +364,12 @@
     const restoredMtime = isFinite(backupTime) && backupTime <= Date.now() ? backupTime : Date.now();
 
     const writes = [];
-    const deletedNotes = maxMergeMap(parseJson(lsAvailable ? global.localStorage.getItem(PREFIX + 'quick_notes.deleted') : null), parseJson(store['quick_notes.deleted']), 200);
+    const deletedNotes = maxMergeMap(parseJson(global.localStorage.getItem(PREFIX + 'quick_notes.deleted')), parseJson(store['quick_notes.deleted']), 200);
     Object.keys(store).forEach((suffix) => {
       if (typeof suffix !== 'string' || isLocalOnly(suffix) || skip.indexOf(suffix) >= 0) return;
       let raw = adopt(suffix, String(store[suffix]));
       let mtime = restoredMtime;
-      const local = (mode === 'merge' && lsAvailable) ? global.localStorage.getItem(PREFIX + suffix) : null;
+      const local = mode === 'merge' ? global.localStorage.getItem(PREFIX + suffix) : null;
       if (local != null && local !== raw) {
         if (NOTE_LISTS.indexOf(suffix) >= 0) { raw = JSON.stringify(mergeNotes(parseJson(local), parseJson(raw), deletedNotes)); mtime = Date.now(); }
         else if (DELETE_MAPS.indexOf(suffix) >= 0) { raw = JSON.stringify(maxMergeMap(parseJson(local), parseJson(raw), 200)); mtime = Date.now(); }
@@ -372,8 +416,11 @@
       });
     } catch (err) {
       rollback();
-      throw new Error('write failed: ' + (err && err.message || err));
+      const reason = failReason(err);
+      noteWrite(reason);
+      throw storageError(reason, err);
     }
+    if (writes.length) noteWrite('ok');
     return { restored: writes.length };
   };
 
@@ -415,7 +462,7 @@
   };
 
   global.MentriaStore = {
-    get, set, remove, list, clear: clearNs,
+    get, set, remove, list, clear: clearNs, status,
     getMeta, listNamespaces,
     exportAll, importAll, planImport, areaNames,
     isLocalOnly, isLocalLegacy, adopt, mergeNotes, maxMergeMap,

@@ -162,19 +162,32 @@
     return S.importAll(data, { mode: 'merge', skip });
   }
 
+  function isBlockedError(err) {
+    if (!err) return false;
+    if (err.reason === 'blocked' || err.name === 'SecurityError') return true;
+    return /storage blocked|SecurityError|access is denied|operation is insecure/i.test(String(err.message || err));
+  }
+
   function restoreErrorCode(err) {
     const m = String(err && err.message || err);
     if (/wrong passphrase/.test(m)) return 'pass';
     if (/unknown backup version/.test(m)) return 'newer';
+    if (isBlockedError(err)) return 'blocked';
     if (/write failed|quota/i.test(m)) return 'space';
     if ((err && err.name === 'SyntaxError') || /envelope|unsupported kdf|unsupported hash|missing or oversized|bad salt|bad iv|iteration count|invalid payload|expected base64url/.test(m)) return 'file';
+    return null;
+  }
+
+  function exportErrorCode(err) {
+    if (isBlockedError(err)) return 'blocked';
+    if (err && err.reason === 'read') return 'read';
     return null;
   }
 
   global.MentriaBackup = {
     encryptBackup, decryptBackup, validateEnvelope,
     downloadBackupJson, scorePassphrase,
-    applyRestore, restoreErrorCode,
+    applyRestore, restoreErrorCode, exportErrorCode,
     ITER, ENVELOPE_VERSION
   };
 })(typeof window !== 'undefined' ? window : globalThis);

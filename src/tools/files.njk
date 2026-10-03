@@ -213,7 +213,12 @@ localeReload: true
       file:  {{ ("common.restore_err_file"  | t) | dump | safe }},
       pass:  {{ ("common.restore_err_pass"  | t) | dump | safe }},
       space: {{ ("common.restore_err_space" | t) | dump | safe }},
-      newer: {{ ("common.restore_err_newer" | t) | dump | safe }}
+      newer: {{ ("common.restore_err_newer" | t) | dump | safe }},
+      blocked: {{ ("common.restore_err_blocked" | t) | dump | safe }}
+    },
+    exportErr: {
+      blocked: {{ ("common.backup_err_blocked" | t) | dump | safe }},
+      read:    {{ ("common.backup_err_read"    | t) | dump | safe }}
     },
     passShort:    {{ ("tool.files.status_pass_short" | t) | dump | safe }},
     backupFailed: {{ ("tool.files.status_backup_failed" | t) | dump | safe }},
@@ -943,8 +948,9 @@ localeReload: true
       exportModal.close();
       status.set(COPY.backupDone, 'ok');
     } catch (err) {
+      const ecode = MentriaBackup.exportErrorCode(err);
       strengthEl.dataset.level = 'weak';
-      strengthEl.textContent = COPY.backupFailed.replace('{msg}', String(err && err.message || err));
+      strengthEl.textContent = ecode ? COPY.exportErr[ecode] : COPY.backupFailed.replace('{msg}', String(err && err.message || err));
     } finally {
       btn.disabled = false;
     }

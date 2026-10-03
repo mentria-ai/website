@@ -14,7 +14,8 @@
     "tagline": "クリエイティブスタジオ。ツール & トランスミッション。",
     "description": "ツール、実験、ビジュアル・トランスミッションのクリエイティブスタジオ。",
     "metaTitle": "Mentria — クリエイティブスタジオ",
-    "metaDescription": "ツール、実験、ビジュアル・トランスミッションのクリエイティブスタジオ。職人技で構築。"
+    "metaDescription": "ツール、実験、ビジュアル・トランスミッションのクリエイティブスタジオ。職人技で構築。",
+    "socialImageAlt": "Mentria — ブラウザだけで動くツール、ゲーム、AI"
   },
   "nav": {
     "feed": "フィード",
@@ -298,7 +299,15 @@
     "related_all": "すべてのツール",
     "search_label": "ツールを検索",
     "search_placeholder": "ツールを検索",
-    "no_match": "「{q}」に一致するツールはありません。"
+    "no_match": "「{q}」に一致するツールはありません。",
+    "schema": {
+      "requires_js": "JavaScriptが必要です",
+      "requires_webgpu": "WebGPUが必要です。Chrome 113+、Edge 113+、Firefox 141+、Safari 26+",
+      "feature_browser": "ブラウザだけで動作",
+      "feature_private": "データは端末の外に出ません",
+      "feature_no_key": "APIキーは不要",
+      "feature_offline": "キャッシュ後はオフラインでも動作"
+    }
   },
   "feed_page": {
     "title": "フィード",

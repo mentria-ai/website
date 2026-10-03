@@ -100,8 +100,8 @@ eleventyComputed:
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": {{ ext.name | dump | safe }},
-  "description": {{ (("tool.ext_gallery.desc." + ext.id) | t) | dump | safe }},
+  "name": {{ (ext.name | htmlDecode | striptags) | dump | safe }},
+  "description": {{ ((("tool.ext_gallery.desc." + ext.id) | traw) | htmlDecode | striptags) | dump | safe }},
   "url": "{{ site.siteUrl }}{{ page.url }}",
   "applicationCategory": "{{ ext.schemaCategory }}",
   "operatingSystem": "Web browser",

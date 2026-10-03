@@ -130,7 +130,7 @@
     {%- if not socialImageOverride %}
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Mentria — tools, games and AI that run entirely in your browser">
+    <meta property="og:image:alt" content="{{ 'site.socialImageAlt' | t }}">
     {%- endif %}
     <meta property="og:locale" content="{{ ogLocales[lang | default('en')] or 'en_US' }}">
     {%- if not isPost and not englishOnly %}
@@ -201,7 +201,7 @@
           "@id": "{{ site.siteUrl }}/#website",
           "url": "{{ site.siteUrl }}",
           "name": "{{ site.title }}",
-          "description": "{{ ('site.metaDescription' | t) | default(site.metaDescription) }}",
+          "description": {{ ('site.metaDescription' | traw) | dump | safe }},
           "publisher": { "@id": "{{ site.siteUrl }}/#organization" },
           "inLanguage": "{{ lang | default('en') }}"
         }
@@ -209,7 +209,7 @@
     }
     </script>
 
-    {%- set localePrefix = (locale.pathPrefix | default("")) -%}
+    {%- set localePrefix = ((locale or pair.locale).pathPrefix | default("")) -%}
     {%- set siteCode = ((lang or "en") | lower) if (((lang or "en") | lower) in ["en", "es", "fr", "ja", "pt-br"]) else "en" -%}
     {%- set isHomePage = (page.url == "/" or page.url == localePrefix + "/") -%}
     {%- set inTools = page.url | startsWith(localePrefix + "/tools/") -%}
@@ -217,23 +217,31 @@
     {%- set inFeed = page.url | startsWith(localePrefix + "/feed/") -%}
     {%- set inLearn = page.url | startsWith(localePrefix + "/learn/") -%}
     {%- set isLearnIndex = (page.url == localePrefix + "/learn/") -%}
+    {%- set inExtensions = page.url | startsWith(localePrefix + "/extensions/") -%}
+    {%- set isExtensionIndex = (page.url == localePrefix + "/extensions/") -%}
     {%- set isPost = tags and ("post" in tags) -%}
-    {%- if not isHomePage %}
+    {%- set plainTitle = (title or "") | htmlDecode | striptags -%}
+    {%- if not isHomePage and (inTools or inFeed or inLearn or inExtensions) %}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": {{ ("nav.home" | t) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/" }
+        { "@type": "ListItem", "position": 1, "name": {{ ("nav.home" | traw) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/" }
         {%- if inTools %},
-        { "@type": "ListItem", "position": 2, "name": {{ ("nav.tools" | t) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/tools/" }
+        { "@type": "ListItem", "position": 2, "name": {{ ("nav.tools" | traw) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/tools/" }
         {%- if not isToolIndex %},
-        { "@type": "ListItem", "position": 3, "name": {{ title | dump | safe }}, "item": "{{ pageUrl }}" }
+        { "@type": "ListItem", "position": 3, "name": {{ plainTitle | dump | safe }}, "item": "{{ pageUrl }}" }
         {%- endif %}
         {%- elif inFeed or inLearn %},
-        { "@type": "ListItem", "position": 2, "name": {{ ("learn.title" | t) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/learn/" }
+        { "@type": "ListItem", "position": 2, "name": {{ ("learn.title" | traw) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/learn/" }
         {%- if not isLearnIndex %},
-        { "@type": "ListItem", "position": 3, "name": {{ title | dump | safe }}, "item": "{{ pageUrl }}" }
+        { "@type": "ListItem", "position": 3, "name": {{ plainTitle | dump | safe }}, "item": "{{ pageUrl }}" }
+        {%- endif %}
+        {%- else %},
+        { "@type": "ListItem", "position": 2, "name": {{ ("home.launcher.extensions" | traw) | dump | safe }}, "item": "{{ site.siteUrl }}{{ localePrefix }}/extensions/" }
+        {%- if not isExtensionIndex %},
+        { "@type": "ListItem", "position": 3, "name": {{ ((pair.ext.name or title) | htmlDecode | striptags) | dump | safe }}, "item": "{{ pageUrl }}" }
         {%- endif %}
         {%- endif %}
       ]
@@ -247,8 +255,8 @@
       "@context": "https://schema.org",
       "@type": "Article",
       "mainEntityOfPage": { "@type": "WebPage", "@id": "{{ pageUrl }}" },
-      "headline": {{ title | dump | safe }},
-      "description": {{ (description or "") | dump | safe }},
+      "headline": {{ plainTitle | dump | safe }},
+      "description": {{ ((description or "") | htmlDecode | striptags) | dump | safe }},
       {%- if cover %}
       "image": "{{ site.siteUrl }}{{ cover }}",
       {%- else %}

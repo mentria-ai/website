@@ -8,6 +8,8 @@ permalink: "{{ pair.locale.pathPrefix }}/feed/chapter/{{ pair.chapter.id }}/"
 eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
+  englishOnly: true
+  robots: "{% if not pair.locale.isDefault %}noindex, follow{% endif %}"
   title: "{{ pair.chapter.title }} · Chapter {{ pair.chapter.order }}"
   description: "{{ pair.chapter.subtitle }}"
 ---
@@ -70,12 +72,12 @@ eleventyComputed:
       <div class="deck__actions">
         {% for action in slide.actions %}
           {% if action.type == "open_url" %}
-          <a class="deck__action deck__action--link" href="{{ action.url }}" target="_blank" rel="noopener">
+          <a class="deck__action deck__action--link" href="{{ (action.url | localeUrl(pair.locale.code)) if (action.url | startsWith('/')) else action.url }}" target="_blank" rel="noopener">
             {{ action.label }} →
           </a>
           {% elif action.type == "goto_chapter" %}
           {%- if action.to | chapterExists %}
-          <a class="deck__action deck__action--next" href="/feed/chapter/{{ action.to }}/">
+          <a class="deck__action deck__action--next" href="{{ pair.locale.pathPrefix }}/feed/chapter/{{ action.to }}/">
             {{ action.label }}
           </a>
           {%- else %}

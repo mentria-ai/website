@@ -14,7 +14,8 @@
     "tagline": "estúdio criativo. ferramentas e transmissões.",
     "description": "Um estúdio criativo para ferramentas, experimentos e transmissões visuais.",
     "metaTitle": "Mentria — Estúdio Criativo",
-    "metaDescription": "Um estúdio criativo para ferramentas, experimentos e transmissões visuais. Feito com capricho."
+    "metaDescription": "Um estúdio criativo para ferramentas, experimentos e transmissões visuais. Feito com capricho.",
+    "socialImageAlt": "Mentria — ferramentas, jogos e IA que rodam inteiramente no seu navegador"
   },
   "nav": {
     "feed": "Feed",
@@ -298,7 +299,15 @@
     "related_all": "Todas as ferramentas",
     "search_label": "Buscar ferramentas",
     "search_placeholder": "Buscar ferramentas",
-    "no_match": "Nenhuma ferramenta corresponde a “{q}”."
+    "no_match": "Nenhuma ferramenta corresponde a “{q}”.",
+    "schema": {
+      "requires_js": "Requer JavaScript",
+      "requires_webgpu": "Requer WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
+      "feature_browser": "Roda inteiramente no seu navegador",
+      "feature_private": "Nenhum dado sai do seu dispositivo",
+      "feature_no_key": "Não precisa de chave de API",
+      "feature_offline": "Funciona offline depois de ficar em cache"
+    }
   },
   "feed_page": {
     "title": "Feed",

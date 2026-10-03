@@ -14,7 +14,8 @@
     "tagline": "studio créatif. outils & transmissions.",
     "description": "Un studio créatif d'outils, d'expériences et de transmissions visuelles.",
     "metaTitle": "Mentria — Studio Créatif",
-    "metaDescription": "Un studio créatif d'outils, d'expériences et de transmissions visuelles. Conçu avec soin."
+    "metaDescription": "Un studio créatif d'outils, d'expériences et de transmissions visuelles. Conçu avec soin.",
+    "socialImageAlt": "Mentria — des outils, des jeux et de l'IA qui tournent entièrement dans votre navigateur"
   },
   "nav": {
     "feed": "Fil",
@@ -298,7 +299,15 @@
     "related_all": "Tous les outils",
     "search_label": "Rechercher un outil",
     "search_placeholder": "Rechercher un outil",
-    "no_match": "Aucun outil ne correspond à « {q} »."
+    "no_match": "Aucun outil ne correspond à « {q} ».",
+    "schema": {
+      "requires_js": "Nécessite JavaScript",
+      "requires_webgpu": "Nécessite WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
+      "feature_browser": "Tourne entièrement dans votre navigateur",
+      "feature_private": "Aucune donnée ne quitte votre appareil",
+      "feature_no_key": "Aucune clé d'API requise",
+      "feature_offline": "Fonctionne hors ligne une fois en cache"
+    }
   },
   "feed_page": {
     "title": "Fil",

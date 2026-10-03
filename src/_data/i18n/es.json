@@ -14,7 +14,8 @@
     "tagline": "estudio creativo. herramientas y transmisiones.",
     "description": "Un estudio creativo de herramientas, experimentos y transmisiones visuales.",
     "metaTitle": "Mentria — Estudio Creativo",
-    "metaDescription": "Un estudio creativo de herramientas, experimentos y transmisiones visuales. Hecho con cuidado."
+    "metaDescription": "Un estudio creativo de herramientas, experimentos y transmisiones visuales. Hecho con cuidado.",
+    "socialImageAlt": "Mentria — herramientas, juegos e IA que funcionan por completo en tu navegador"
   },
   "nav": {
     "feed": "Feed",
@@ -298,7 +299,15 @@
     "related_all": "Todas las herramientas",
     "search_label": "Buscar herramientas",
     "search_placeholder": "Buscar herramientas",
-    "no_match": "No hay herramientas que coincidan con «{q}»."
+    "no_match": "No hay herramientas que coincidan con «{q}».",
+    "schema": {
+      "requires_js": "Requiere JavaScript",
+      "requires_webgpu": "Requiere WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
+      "feature_browser": "Funciona por completo en tu navegador",
+      "feature_private": "Ningún dato sale de tu dispositivo",
+      "feature_no_key": "No necesita clave de API",
+      "feature_offline": "Funciona sin conexión una vez en caché"
+    }
   },
   "feed_page": {
     "title": "Feed",

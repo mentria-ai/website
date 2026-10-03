@@ -124,6 +124,9 @@ const state = {
   isInitiator: false,
   applyApproved: false,
   syncedSinceConnect: 0,
+  partner: null,
+  exchanged: false,
+  joinTimer: 0,
   listeners: { state: [], error: [], synced: [] }
 };
 
@@ -138,7 +141,18 @@ const setStatus = (status) => {
   emit('state', { status, code: state.code, peers: state.peers.size, syncedSinceConnect: state.syncedSinceConnect });
 };
 
-const CONFIRM_FALLBACK = 'This device already has data for: {areas}. Pairing will replace it with the other device’s copy — a rescue copy is saved on this device. Continue?';
+const CONFIRM_FALLBACK = 'This device already has its own {areas}. Pairing replaces them with the other device’s copy. Continue?';
+const JOIN_TIMEOUT_MS = 25000;
+
+const areaList = (suffixes) => {
+  try { return window.MentriaStore.areaNames(suffixes).join(', '); } catch (_) { return Array.from(new Set(suffixes.map((k) => k.split('.')[0]))).join(', '); }
+};
+
+const sendToPartner = (payload) => {
+  if (!state.action) return;
+  if (state.partner) state.action.send(payload, state.partner);
+  else state.action.send(payload);
+};
 
 const confirmReplaceText = (areas) => {
   let s = CONFIRM_FALLBACK;
@@ -323,7 +337,7 @@ const sendBack = async (store, meta, legacy, tombs) => {
       meta,
       tombs: tombs || {}
     });
-    state.action.send(payload);
+    sendToPartner(payload);
   } catch (err) {
     emit('error', err);
   }
@@ -350,7 +364,8 @@ const mergeV2 = async (msg, isBack) => {
   const deletions = [];
 
   Object.keys(incoming).forEach((suffix) => {
-    const rawIn = incoming[suffix];
+    if (window.MentriaStore.isLocalOnly(suffix)) return;
+    const rawIn = window.MentriaStore.adopt(suffix, String(incoming[suffix]));
     const rawLocal = localStore[suffix];
     const { ns, key } = splitSuffix(suffix);
     const inMtime = (typeof meta[suffix] === 'number') ? meta[suffix] : null;
@@ -411,7 +426,7 @@ const mergeV2 = async (msg, isBack) => {
   });
 
   if (lwwReplace.length && !state.applyApproved) {
-    const areas = Array.from(new Set(lwwReplace.map((x) => x.suffix.split('.')[0]))).join(', ');
+    const areas = areaList(lwwReplace.map((x) => x.suffix));
     const ok = typeof window.mentriaConfirm === 'function'
       ? await window.mentriaConfirm(confirmReplaceText(areas))
       : false;
@@ -445,7 +460,7 @@ const mergeV2 = async (msg, isBack) => {
   });
 
   Object.keys(incomingLegacy).forEach((k) => {
-    if (typeof k !== 'string' || k.indexOf('mentria_') !== 0) return;
+    if (typeof k !== 'string' || k.indexOf('mentria_') !== 0 || window.MentriaStore.isLocalLegacy(k)) return;
     try {
       if (window.localStorage.getItem(k) != null) return;
       window.localStorage.setItem(k, String(incomingLegacy[k]));
@@ -498,6 +513,7 @@ const handleIncoming = async (payload) => {
   if ((msg.op === 'snapshot' || msg.op === 'snapshot-back') && msg.v === 2 && msg.data) {
     try {
       await mergeV2(msg, msg.op === 'snapshot-back');
+      state.exchanged = true;
     } catch (err) {
       emit('error', new Error('merge failed: ' + err.message));
     }
@@ -507,9 +523,9 @@ const handleIncoming = async (payload) => {
   if (msg.op === 'snapshot' && msg.data) {
     try {
       if (!state.applyApproved) {
-        const conflicts = collectConflicts(msg.data);
+        const conflicts = collectConflicts(msg.data).filter((k) => !window.MentriaStore.isLocalOnly(k) && !window.MentriaStore.isLocalLegacy(k));
         if (conflicts.length) {
-          const areas = Array.from(new Set(conflicts.map((k) => k.split('.')[0]))).join(', ');
+          const areas = areaList(conflicts);
           const ok = typeof window.mentriaConfirm === 'function'
             ? await window.mentriaConfirm(confirmReplaceText(areas))
             : false;
@@ -520,6 +536,7 @@ const handleIncoming = async (payload) => {
       }
       const result = window.MentriaStore.importAll(msg.data, { mode: 'merge' });
       state.syncedSinceConnect += result.restored;
+      state.exchanged = true;
       emit('synced', { restored: result.restored });
     } catch (err) {
       emit('error', new Error('snapshot import failed: ' + err.message));
@@ -527,8 +544,13 @@ const handleIncoming = async (payload) => {
     return;
   }
 
+  if ((msg.op === 'set' || msg.op === 'remove') && typeof msg.ns === 'string' && typeof msg.key === 'string' && window.MentriaStore.isLocalOnly(msg.ns + '.' + msg.key)) return;
   if (msg.op === 'set' && typeof msg.ns === 'string' && typeof msg.key === 'string') {
-    window.MentriaStore.set(msg.ns, msg.key, msg.value, { remote: true, mtime: msg.mtime });
+    let value = msg.value;
+    if (msg.ns === 'identity' && msg.key === 'vault') {
+      try { value = JSON.parse(window.MentriaStore.adopt('identity.vault', JSON.stringify(value))); } catch (_) {}
+    }
+    window.MentriaStore.set(msg.ns, msg.key, value, { remote: true, mtime: msg.mtime });
     state.syncedSinceConnect++;
     emit('synced', { restored: 1 });
     return;
@@ -548,10 +570,16 @@ const onLocalWrite = async (event) => {
   if (d.remote) return;
   if (!d.ns || !d.key) return;
   if (d.op !== 'set' && d.op !== 'remove') return;
+  if (window.MentriaStore.isLocalOnly(d.ns + '.' + d.key)) return;
   try {
     const mtime = (typeof d.mtime === 'number') ? d.mtime : Date.now();
-    const payload = await encryptPayload(state.key, { op: d.op, ns: d.ns, key: d.key, value: d.value, mtime });
-    state.action.send(payload);
+    let value = d.value;
+    if (d.ns === 'identity' && d.key === 'vault' && value && typeof value === 'object' && value.device) {
+      value = Object.assign({}, value);
+      delete value.device;
+    }
+    const payload = await encryptPayload(state.key, { op: d.op, ns: d.ns, key: d.key, value, mtime });
+    sendToPartner(payload);
   } catch (err) {
     emit('error', err);
   }
@@ -562,7 +590,7 @@ const sendSnapshot = async () => {
   try {
     const snap = window.MentriaStore.exportAll();
     const payload = await encryptPayload(state.key, { op: 'snapshot', v: 2, data: snap, meta: buildMeta(snap.store || {}), tombs: loadTombs() });
-    state.action.send(payload);
+    sendToPartner(payload);
   } catch (err) {
     emit('error', err);
   }
@@ -577,6 +605,8 @@ const joinRoomWithCode = async (codeRaw, opts) => {
   state.isInitiator = !!opts.initiator;
   state.applyApproved = false;
   state.syncedSinceConnect = 0;
+  state.partner = null;
+  state.exchanged = false;
   state.peers.clear();
 
   setStatus(opts.initiator ? 'pairing' : 'connecting');
@@ -599,19 +629,40 @@ const joinRoomWithCode = async (codeRaw, opts) => {
   }
 
   state.action = state.room.makeAction('sync');
-  state.action.onMessage = (data, ctx) => handleIncoming(data);
+  state.action.onMessage = (data, ctx) => {
+    const from = ctx && ctx.peerId;
+    if (state.partner && from && from !== state.partner) return;
+    handleIncoming(data);
+  };
 
   state.room.onPeerJoin = (peerId) => {
+    if (state.partner && state.partner !== peerId) return;
+    clearTimeout(state.joinTimer);
+    state.partner = peerId;
     state.peers.add(peerId);
     setStatus('connected');
     if (state.isInitiator) sendSnapshot();
   };
   state.room.onPeerLeave = (peerId) => {
+    if (peerId !== state.partner) return;
     state.peers.delete(peerId);
-    if (state.peers.size === 0) setStatus(state.isInitiator ? 'pairing' : 'connecting');
+    if (state.exchanged) { disconnect(); return; }
+    state.partner = null;
+    setStatus(state.isInitiator ? 'pairing' : 'connecting');
   };
 
   window.addEventListener('mentria:write', onLocalWrite);
+
+  if (!opts.initiator) {
+    clearTimeout(state.joinTimer);
+    state.joinTimer = setTimeout(async () => {
+      if (state.peers.size || state.status !== 'connecting') return;
+      await disconnect();
+      const err = new Error('no-peer');
+      err.code = 'no-peer';
+      emit('error', err);
+    }, JOIN_TIMEOUT_MS);
+  }
 };
 
 const start = async () => {
@@ -693,6 +744,7 @@ const joinWithIdentity = async (secretBytes) => {
 };
 
 const disconnect = async () => {
+  clearTimeout(state.joinTimer);
   window.removeEventListener('mentria:write', onLocalWrite);
   if (state.room) {
     try { await state.room.leave(); } catch (_) {}
@@ -705,6 +757,8 @@ const disconnect = async () => {
   state.key = null;
   state.isInitiator = false;
   state.applyApproved = false;
+  state.partner = null;
+  state.exchanged = false;
   setStatus('idle');
 };
 

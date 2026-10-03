@@ -148,9 +148,33 @@
     return { score, label: 'strong' };
   };
 
+  async function applyRestore(data, copy) {
+    const S = global.MentriaStore;
+    const ask = (msg) => (typeof global.mentriaConfirm === 'function' ? global.mentriaConfirm(msg) : Promise.resolve(false));
+    const plan = S.planImport(data);
+    const skip = [];
+    for (const suffix of plan.vaults) {
+      if (!(await ask(suffix === 'totp.vault' ? copy.totpVault : copy.identityVault))) skip.push(suffix);
+    }
+    if (plan.replace.length && !(await ask(copy.replace.replace('{areas}', S.areaNames(plan.replace).join(', '))))) {
+      skip.push.apply(skip, plan.replace);
+    }
+    return S.importAll(data, { mode: 'merge', skip });
+  }
+
+  function restoreErrorCode(err) {
+    const m = String(err && err.message || err);
+    if (/wrong passphrase/.test(m)) return 'pass';
+    if (/unknown backup version/.test(m)) return 'newer';
+    if (/write failed|quota/i.test(m)) return 'space';
+    if ((err && err.name === 'SyntaxError') || /envelope|unsupported kdf|unsupported hash|missing or oversized|bad salt|bad iv|iteration count|invalid payload|expected base64url/.test(m)) return 'file';
+    return null;
+  }
+
   global.MentriaBackup = {
     encryptBackup, decryptBackup, validateEnvelope,
     downloadBackupJson, scorePassphrase,
+    applyRestore, restoreErrorCode,
     ITER, ENVELOPE_VERSION
   };
 })(typeof window !== 'undefined' ? window : globalThis);

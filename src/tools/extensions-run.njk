@@ -40,7 +40,12 @@ function parseHashArgs() {
 const app = entry && X.isApp(entry);
 const source = entry && entry.enabled && !app ? X.getSource(id) : null;
 if (!entry || !entry.enabled || (!app && !source)) {
-  document.getElementById(entry && !entry.enabled ? 'xr-disabled' : 'xr-missing').hidden = false;
+  const miss = document.getElementById(entry && !entry.enabled ? 'xr-disabled' : 'xr-missing');
+  const label = entry ? entry.manifest.name : id;
+  if (label) miss.prepend(label + ': ');
+  miss.hidden = false;
+  const filename = document.querySelector('.terminal-frame__filename');
+  if (filename) filename.textContent = label || 'extensions';
   frame.remove();
 } else {
   const m = entry.manifest;

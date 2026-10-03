@@ -1110,6 +1110,7 @@
       "trust_prompt": "Install {name} v{version}? It will run with full access to your data on this device. Only install files from people you trust. Permissions: {perms}",
       "update_prompt": "Update {name} {old} → {new}? Saved data is kept.",
       "downgrade_prompt": "Replace {name} {old} with older {new}? Saved data is kept.",
+      "replace_prompt": "Replace {oldName} {old} with {name} {new}? It uses the same ID, so it takes over {oldName}'s saved data and runs with full access to your data on this device. Only continue if you trust the file.",
       "update_perms_added": "New permissions: {perms}.",
       "update_perms_removed": "No longer uses: {perms}.",
       "installed_ok": "installed.",

@@ -58,6 +58,7 @@ const COPY = {
   trustPrompt:   {{ ("tool.extensions.trust_prompt"   | t) | dump | safe }},
   updatePrompt:  {{ ("tool.extensions.update_prompt"  | t) | dump | safe }},
   downgradePrompt: {{ ("tool.extensions.downgrade_prompt" | t) | dump | safe }},
+  replacePrompt: {{ ("tool.extensions.replace_prompt" | t) | dump | safe }},
   permsAdded:    {{ ("tool.extensions.update_perms_added" | t) | dump | safe }},
   permsRemoved:  {{ ("tool.extensions.update_perms_removed" | t) | dump | safe }},
   confirmRemove: {{ ("tool.extensions.confirm_remove" | t) | dump | safe }},
@@ -152,7 +153,7 @@ function announceInstall(entry) {
 async function installFlow(html) {
   clearError();
   try {
-    const entry = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
+    const entry = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, replace: COPY.replacePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
     if (!entry) return;
     showOk(entry.manifest.name + ' ' + COPY.installedOk);
     render();
@@ -389,7 +390,7 @@ async function galInstall(entry, card, b) {
   }
   try {
     const html = entry.html || await fetchSource(entry.id);
-    const result = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
+    const result = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, replace: COPY.replacePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
     if (!result) { b.disabled = false; return; }
     render();
     announceInstall(result);

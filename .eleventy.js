@@ -301,6 +301,12 @@ module.exports = function(eleventyConfig) {
     return new Date().getFullYear();
   });
 
+  eleventyConfig.addFilter("emph", function (value) {
+    return String(value == null ? "" : value)
+      .replace(/\*\*(?!\s)([^*\n]+?)(?<!\s)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[^\w*])\*(?!\s)([^*\n]+?)(?<!\s)\*(?![\w*])/g, "$1<em>$2</em>");
+  });
+
   eleventyConfig.addFilter("tloc", function(value, lang) {
     if (value == null) return "";
     if (typeof value === "string") return value;

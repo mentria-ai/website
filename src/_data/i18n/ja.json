@@ -3622,7 +3622,8 @@
         "undone": "元に戻しました",
         "dismiss": "非表示にする",
         "later": "あとで",
-        "working": "処理中…"
+        "working": "処理中…",
+        "progress": "進捗"
       },
       "errors": {
         "no_js": "家計簿を使うには JavaScript が必要です。",
@@ -3919,7 +3920,11 @@
         "currency": "通貨",
         "base_amount": "基準通貨での金額",
         "base_currency": "基準通貨",
-        "tags": "タグ"
+        "tags": "タグ",
+        "type": "種類",
+        "type_expense": "支出",
+        "type_income": "収入",
+        "type_transfer": "振替"
       },
       "accounts": {
         "tab_accounts": "口座",
@@ -4404,6 +4409,7 @@
         "too_big": "ファイルが 12 MB を超えています。期間を短くしてエクスポートし直してください。",
         "mapping": "列の設定",
         "preset_used": "保存済みのレイアウト",
+        "finance_found": "家計簿からエクスポートしたファイルです。相手先、メモ、カテゴリ、タグはエクスポートしたときのまま取り込みます。",
         "amount_mode": "金額の形式",
         "mode": {
           "amount": "符号付きの 1 列",
@@ -4414,6 +4420,7 @@
         "role": {
           "date": "日付",
           "payee": "内容",
+          "note": "メモ",
           "amount": "金額",
           "debit": "出金",
           "credit": "入金",
@@ -4446,6 +4453,10 @@
         "skipped_rows": {
           "one": "{n} 行をスキップしました",
           "other": "{n} 行をスキップしました"
+        },
+        "xfer_skipped": {
+          "one": "振替の行を {n} 行スキップしました。口座間の振替は CSV ファイルから復元できません。振替も残すには、バックアップファイルから復元してください。",
+          "other": "振替の行を {n} 行スキップしました。口座間の振替は CSV ファイルから復元できません。振替も残すには、バックアップファイルから復元してください。"
         },
         "err_date": "{line} 行目：有効な日付がありません（{raw}）",
         "err_amount": "{line} 行目：金額がありません（{raw}）",

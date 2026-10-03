@@ -44,10 +44,15 @@ export function rowNode(ctx, r, opts) {
     amt);
 }
 
-function filters(ctx, vs) {
+function filters(ctx, vs, list) {
   const L = ctx.ledger;
   const search = U.input({ type: 'search', placeholder: t('ledger.search_ph'), value: vs.q || '', 'aria-label': t('nav.search') });
-  search.addEventListener('input', U.debounce(() => { vs.q = search.value; vs.limit = PAGE; ctx.rerender(); setTimeout(() => { const el = document.querySelector('.fin-page input[type=search]'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 0); }, 250));
+  search.addEventListener('input', U.debounce(() => {
+    if (!search.isConnected || (vs.q || '') === search.value) return;
+    vs.q = search.value;
+    vs.limit = PAGE;
+    list.replaceChildren(dayView(ctx, vs));
+  }, 250));
   const acct = U.select([{ value: '', label: t('ledger.all_accounts') }].concat(L.accounts(true).map((a) => ({ value: a.id, label: a.name }))), vs.account || '', { 'aria-label': t('ledger.account_filter'), onchange: (e) => { vs.account = e.target.value; vs.limit = PAGE; ctx.rerender(); } });
   const catOpts = [{ value: '', label: t('ledger.all_categories') }, { value: '_none', label: t('ledger.uncategorized') }];
   for (const { group, children } of L.categoryTree()) {
@@ -183,22 +188,34 @@ function yearView(ctx, vs) {
   return node;
 }
 
-function exportCsv(ctx, vs) {
-  const L = ctx.ledger;
-  const rows = (vs.q ? L.search(vs.q, 100000) : L.rows()).filter((r) => matchRow(L, r, vs));
+export function csvHeader() {
+  return [t('csv.date'), t('csv.account'), t('csv.payee'), t('csv.category'), t('csv.note'), t('csv.amount'), t('csv.currency'), t('csv.base_amount'), t('csv.base_currency'), t('csv.tags'), t('csv.type')];
+}
+
+export function exportRows(L, rows) {
   const cats = L.categoryMap();
-  const out = [[t('csv.date'), t('csv.account'), t('csv.payee'), t('csv.category'), t('csv.note'), t('csv.amount'), t('csv.currency'), t('csv.base_amount'), t('csv.base_currency'), t('csv.tags')]];
+  const out = [csvHeader()];
   for (const r of rows) {
     const acct = L.get('account', r.account);
     const c = r.category ? cats.get(r.category) : null;
-    out.push([r.date, acct ? acct.name : '', r.kind === 'xfer' ? rowTitle(L, r) : r.payee, c ? c.name : r.lines ? t('ledger.split') : '', r.note, (r.amount / 10 ** U.decimalsOf(r.currency)).toFixed(U.decimalsOf(r.currency)), r.currency, r.base == null ? '' : (r.base / 10 ** U.decimalsOf(L.base())).toFixed(U.decimalsOf(L.base())), L.base(), (r.tags || []).join(' ')]);
+    const type = r.kind === 'xfer' ? t('csv.type_transfer') : r.amount > 0 ? t('csv.type_income') : t('csv.type_expense');
+    out.push([r.date, acct ? acct.name : '', r.kind === 'xfer' ? rowTitle(L, r) : r.payee, c ? c.name : r.lines ? t('ledger.split') : '', r.note, (r.amount / 10 ** U.decimalsOf(r.currency)).toFixed(U.decimalsOf(r.currency)), r.currency, r.base == null ? '' : (r.base / 10 ** U.decimalsOf(L.base())).toFixed(U.decimalsOf(L.base())), L.base(), (r.tags || []).join(', '), type]);
   }
-  U.downloadBlob('mentria-finance-transactions-' + L.today() + '.csv', new Blob([U.csv(out)], { type: 'text/csv;charset=utf-8' }));
+  return out;
+}
+
+function exportCsv(ctx, vs) {
+  const L = ctx.ledger;
+  const rows = (vs.q ? L.search(vs.q, 100000) : L.rows()).filter((r) => matchRow(L, r, vs));
+  U.downloadBlob('mentria-finance-transactions-' + L.today() + '.csv', new Blob([U.csv(exportRows(L, rows))], { type: 'text/csv;charset=utf-8' }));
 }
 
 export function render(ctx) {
   const L = ctx.ledger;
   const vs = ctx.viewState;
+  const prev = document.activeElement;
+  const keep = prev && prev.matches && prev.matches('.fin-page input[type=search]') ? { start: prev.selectionStart, end: prev.selectionEnd, dir: prev.selectionDirection || 'none' } : null;
+  if (keep && prev.value !== (vs.q || '')) { vs.q = prev.value; vs.limit = PAGE; }
   if (!vs.month) vs.month = monthKey(L.today());
   if (!vs.view) vs.view = 'day';
   if (ctx.params.account && vs.paramAccount !== ctx.params.account) { vs.account = ctx.params.account; vs.paramAccount = ctx.params.account; vs.view = 'day'; vs.scope = null; }
@@ -211,7 +228,8 @@ export function render(ctx) {
       h('button', { type: 'button', class: 'fb fb--sm', onclick: () => exportCsv(ctx, vs) }, icon('download'), t('ledger.csv'))));
   node.append(tabs);
   if (vs.view === 'day') {
-    node.append(filters(ctx, vs));
+    const list = h('div', null, dayView(ctx, vs));
+    node.append(filters(ctx, vs, list));
     if (vs.category === '_none') node.append(h('div', { class: 'fb-row', style: { marginBottom: '8px' } }, h('button', { type: 'button', class: 'fb fb--sm', onclick: () => openCategorize(ctx) }, icon('filter'), t('categorize.sort'))));
     if (vs.scope === 'month') node.append(h('div', { class: 'fchips', style: { marginBottom: '8px' } }, h('button', { type: 'button', class: 'fchip is-on', onclick: () => { vs.scope = null; vs.category = ''; ctx.rerender(); } }, U.month(vs.month), ' ', icon('close'))));
     if (vs.account) {
@@ -220,17 +238,21 @@ export function render(ctx) {
         h('div', null, h('div', { class: 'fsmall fmuted' }, a.name), h('div', { class: 'fmid' }, U.money(L.balance(a.id), a.currency))),
         h('button', { type: 'button', class: 'fb fb--sm', onclick: () => ctx.go('accounts', { id: a.id }) }, t('ledger.account_details'))));
     }
-    node.append(dayView(ctx, vs));
+    node.append(list);
   } else if (vs.view === 'month') node.append(monthView(ctx, vs));
   else node.append(yearView(ctx, vs));
   return {
     title: t('nav.ledger'),
     node,
     after: () => {
-      if (ctx.params.q && !vs.focused) {
+      const el = document.querySelector('.fin-page input[type=search]');
+      if (!el) return;
+      if (keep) {
+        el.focus({ preventScroll: true });
+        try { el.setSelectionRange(keep.start, keep.end, keep.dir); } catch (_) {}
+      } else if (ctx.params.q && !vs.focused) {
         vs.focused = true;
-        const el = document.querySelector('.fin-page input[type=search]');
-        if (el) el.focus();
+        el.focus();
       }
     }
   };

@@ -3622,7 +3622,8 @@
         "undone": "Annulé",
         "dismiss": "Ignorer",
         "later": "Plus tard",
-        "working": "En cours…"
+        "working": "En cours…",
+        "progress": "Progression"
       },
       "errors": {
         "no_js": "Finances a besoin de JavaScript pour fonctionner.",
@@ -3919,7 +3920,11 @@
         "currency": "Devise",
         "base_amount": "Montant en devise principale",
         "base_currency": "Devise principale",
-        "tags": "Étiquettes"
+        "tags": "Étiquettes",
+        "type": "Type",
+        "type_expense": "Dépense",
+        "type_income": "Revenu",
+        "type_transfer": "Virement"
       },
       "accounts": {
         "tab_accounts": "Comptes",
@@ -4404,6 +4409,7 @@
         "too_big": "Ce fichier dépasse 12 Mo. Exportez une période plus courte.",
         "mapping": "Colonnes",
         "preset_used": "Format enregistré",
+        "finance_found": "Il s'agit d'un export Finances. Les bénéficiaires, les notes, les catégories et les étiquettes sont conservés tels qu'ils ont été exportés.",
         "amount_mode": "Format des montants",
         "mode": {
           "amount": "Une seule colonne, avec signe",
@@ -4414,6 +4420,7 @@
         "role": {
           "date": "Date",
           "payee": "Libellé",
+          "note": "Note",
           "amount": "Montant",
           "debit": "Sorties",
           "credit": "Entrées",
@@ -4446,6 +4453,10 @@
         "skipped_rows": {
           "one": "{n} ligne ignorée",
           "other": "{n} lignes ignorées"
+        },
+        "xfer_skipped": {
+          "one": "{n} ligne de virement ignorée. Un fichier CSV ne permet pas de reconstituer les virements entre comptes ; restaurez un fichier de sauvegarde pour les conserver.",
+          "other": "{n} lignes de virement ignorées. Un fichier CSV ne permet pas de reconstituer les virements entre comptes ; restaurez un fichier de sauvegarde pour les conserver."
         },
         "err_date": "Ligne {line} : pas de date valide ({raw})",
         "err_amount": "Ligne {line} : pas de montant ({raw})",

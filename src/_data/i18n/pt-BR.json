@@ -3622,7 +3622,8 @@
         "undone": "Desfeito",
         "dismiss": "Dispensar",
         "later": "Depois",
-        "working": "Processando…"
+        "working": "Processando…",
+        "progress": "Progresso"
       },
       "errors": {
         "no_js": "O app Finanças precisa de JavaScript para funcionar.",
@@ -3919,7 +3920,11 @@
         "currency": "Moeda",
         "base_amount": "Valor na moeda principal",
         "base_currency": "Moeda principal",
-        "tags": "Tags"
+        "tags": "Tags",
+        "type": "Tipo",
+        "type_expense": "Despesa",
+        "type_income": "Receita",
+        "type_transfer": "Transferência"
       },
       "accounts": {
         "tab_accounts": "Contas",
@@ -4404,6 +4409,7 @@
         "too_big": "Esse arquivo tem mais de 12 MB. Exporte um período menor.",
         "mapping": "Colunas",
         "preset_used": "Layout salvo",
+        "finance_found": "Este arquivo é uma exportação do app Finanças. Favorecidos, observações, categorias e tags são mantidos como foram exportados.",
         "amount_mode": "Formato dos valores",
         "mode": {
           "amount": "Uma coluna com sinal",
@@ -4414,6 +4420,7 @@
         "role": {
           "date": "Data",
           "payee": "Descrição",
+          "note": "Observação",
           "amount": "Valor",
           "debit": "Saída",
           "credit": "Entrada",
@@ -4446,6 +4453,10 @@
         "skipped_rows": {
           "one": "{n} linha ignorada",
           "other": "{n} linhas ignoradas"
+        },
+        "xfer_skipped": {
+          "one": "{n} linha de transferência ignorada. Transferências entre contas não podem ser recriadas a partir de um arquivo CSV; restaure um arquivo de backup para mantê-las.",
+          "other": "{n} linhas de transferência ignoradas. Transferências entre contas não podem ser recriadas a partir de um arquivo CSV; restaure um arquivo de backup para mantê-las."
         },
         "err_date": "Linha {line}: sem data válida ({raw})",
         "err_amount": "Linha {line}: sem valor ({raw})",

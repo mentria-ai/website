@@ -75,7 +75,7 @@ if (!entry || !entry.enabled || (!app && !source)) {
   .xr { height: min(600px, 70vh); }
 }
 .xr__error, .xr__missing { font-family: var(--font-mono); font-size: 0.8rem; color: var(--syn-pink, #f472b6); padding: 0.6rem 0.8rem; margin: 0; }
-.xr__missing a { color: var(--accent, #6ef3c5); }
+.xr__missing a { color: var(--accent, #6ef3c5); text-decoration: underline; text-underline-offset: 2px; }
 .xr__error[hidden], .xr__missing[hidden] { display: none; }
 @media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
   .terminal-frame:has(.xr--app) { position: fixed; inset: 0; z-index: 9000; margin: 0; max-width: none; border: 0; border-radius: 0; }

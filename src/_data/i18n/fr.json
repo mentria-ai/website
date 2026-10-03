@@ -5,7 +5,7 @@
     "panel_privacy": "Réponse générée par le modèle de cet appareil — rien n'a été envoyé nulle part.",
     "panel_error": "Le modèle local n'a pas pu répondre : ",
     "panel_busy": "Le modèle sur l'appareil est occupé dans un autre onglet. Réessayez dans un instant.",
-    "panel_summarize": "Résumé privé de tes notes en cours",
+    "panel_summarize": "Résumé privé de vos notes en cours",
     "offer_27b": "L'IA de ce site fonctionne mieux avec le modèle 27B sur l'appareil : environ 3,8 Go, téléchargé une fois et conservé sur cet appareil (testé sur Apple Silicon avec 16 Go+ de mémoire et GPU NVIDIA avec 6 Go+). Le télécharger maintenant ? Sinon, un modèle plus petit sera utilisé.",
     "activity_title": "Activité de l'agent · WebMCP",
     "loading_model": "Chargement du modèle sur l'appareil pour une tâche d'IA privée…"
@@ -222,8 +222,8 @@
       "suggestions_label": "Suggestions de commandes",
       "desc_ask": "pose une question à l'IA qui tourne sur cet appareil",
       "ask_thinking": "> question envoyée au modèle qui tourne sur cet appareil…",
-      "ask_download": "> la première utilisation peut télécharger le modèle ; il reste sur ton appareil.",
-      "ask_postponed": "téléchargement du modèle reporté — relance la commande quand tu veux.",
+      "ask_download": "> la première utilisation peut télécharger le modèle ; il reste sur votre appareil.",
+      "ask_postponed": "téléchargement du modèle reporté — relancez la commande quand vous voulez.",
       "ask_busy": "le modèle sur l'appareil est occupé dans un autre onglet — réessayez dans un instant.",
       "ask_error": "le modèle local n'a pas pu répondre : ",
       "ask_unsupported": "le modèle sur l'appareil nécessite un navigateur WebGPU (Chrome ou Edge sur ordinateur, Android récent)."
@@ -311,17 +311,17 @@
     "ai-chat": {
       "title": "Chat IA",
       "lede": "Qwen3.5 fonctionnant localement dans votre navigateur. Pas de serveur, pas de clés API. Prend en charge la vision.",
-      "tldr": "AI Chat exécute Qwen3.5 localement dans ton navigateur via WebGPU. Tes messages et toute image envoyée ne quittent jamais ton appareil — pas de serveur, pas de clé API, pas de compte. Prend en charge l'entrée visuelle. Le modèle se charge au premier clic ; les visites suivantes démarrent instantanément depuis le cache local."
+      "tldr": "AI Chat exécute Qwen3.5 localement dans votre navigateur via WebGPU. Vos messages et toute image envoyée ne quittent jamais votre appareil — pas de serveur, pas de clé API, pas de compte. Prend en charge l'entrée visuelle. Le modèle se charge au premier clic ; les visites suivantes démarrent instantanément depuis le cache local."
     },
     "base64-codec": {
       "title": "Codec Base64",
       "lede": "Encodez et décodez du texte ou des fichiers en Base64. Prend en charge les images, les documents et tout type de fichier. Tout fonctionne localement dans votre navigateur.",
-      "tldr": "Un encodeur et décodeur axé confidentialité pour texte et fichiers. L'encodage et le décodage s'effectuent dans ton navigateur en JavaScript natif — pas d'envoi, pas de serveur. Glisse un fichier ou colle une chaîne Base64, puis copie ou télécharge le résultat. Fonctionne hors ligne, sans limite de taille au-delà de la mémoire du navigateur."
+      "tldr": "Un encodeur et décodeur axé confidentialité pour texte et fichiers. L'encodage et le décodage s'effectuent dans votre navigateur en JavaScript natif — pas d'envoi, pas de serveur. Glissez un fichier ou collez une chaîne Base64, puis copiez ou téléchargez le résultat. Fonctionne hors ligne, sans limite de taille au-delà de la mémoire du navigateur."
     },
     "extensions": {
       "title": "Extensions",
-      "lede": "Installe des extensions privées en un seul fichier qui vivent uniquement sur cet appareil. Elles apparaissent dans ton lanceur et ton terminal — jamais sur le site public.",
-      "tldr": "Une plateforme apporte-ton-propre-outil. Une extension est un fichier HTML avec un manifeste intégré ; installe-la ici et elle obtient une tuile dans ton lanceur, des commandes de terminal optionnelles, et son propre stockage local inclus dans ta sauvegarde chiffrée. Les extensions s'exécutent avec un accès complet sur cet appareil, donc installe uniquement des fichiers de personnes en qui tu as confiance. Rien ne les concerne n'est jamais envoyé."
+      "lede": "Installez des extensions privées en un seul fichier qui vivent uniquement sur cet appareil. Elles apparaissent dans votre lanceur et votre terminal — jamais sur le site public.",
+      "tldr": "Une plateforme où vous apportez vos propres outils. Une extension est un fichier HTML avec un manifeste intégré ; installez-la ici et elle obtient une tuile dans votre lanceur, des commandes de terminal optionnelles, et son propre stockage local inclus dans votre sauvegarde chiffrée. Les extensions s'exécutent avec un accès complet sur cet appareil : n'installez que des fichiers de personnes en qui vous avez confiance. Rien à leur sujet n'est jamais envoyé."
     },
     "coin-flip": {
       "title": "Pile ou Face",
@@ -331,27 +331,27 @@
     "color-picker": {
       "title": "Sélecteur de Couleurs",
       "lede": "Choisissez n'importe quelle couleur, voyez ses valeurs HEX / RGB / HSL, et générez des palettes harmonieuses. Fonctionne hors ligne.",
-      "tldr": "Choisis, prélève et sauvegarde des couleurs entièrement dans ton navigateur. Sortie en HEX, RGB et HSL côte à côte. Les nuanciers enregistrés persistent via localStorage ; rien n'est envoyé. Clique dans le sélecteur, copie n'importe quelle valeur dans le presse-papiers ou compose une petite palette pour le design ou le code. Fonctionne hors ligne."
+      "tldr": "Choisissez, prélevez et sauvegardez des couleurs entièrement dans votre navigateur. Sortie en HEX, RGB et HSL côte à côte. Les nuanciers enregistrés persistent via localStorage ; rien n'est envoyé. Cliquez dans le sélecteur, copiez n'importe quelle valeur dans le presse-papiers ou composez une petite palette pour le design ou le code. Fonctionne hors ligne."
     },
     "countdown-timer": {
       "title": "Compte à Rebours",
       "lede": "Définissez une durée ou choisissez une heure cible. Jusqu'à 4 minuteries indépendantes avec son d'alarme.",
-      "tldr": "Lance jusqu'à quatre minuteurs en parallèle, avec notifications système optionnelles à la fin, même quand l'onglet est masqué. Choisis une durée ou une date et heure cible, nomme chaque minuteur, sauvegarde des préréglages. L'alarme audio et la notification se déclenchent depuis ton navigateur ; rien n'est enregistré ni envoyé à un serveur."
+      "tldr": "Lancez jusqu'à quatre minuteurs en parallèle, avec notifications système optionnelles à la fin, même quand l'onglet est masqué. Choisissez une durée ou une date et heure cible, nommez chaque minuteur, sauvegardez des préréglages. L'alarme audio et la notification se déclenchent depuis votre navigateur ; rien n'est enregistré ni envoyé à un serveur."
     },
     "decision-wheel": {
       "title": "Roue de Décision",
       "lede": "Indécis ? Faites tourner la roue et laissez le destin choisir. Fonctionne hors ligne.",
-      "tldr": "Fais tourner une roue personnalisable pour choisir parmi ta propre liste d'options. Ajoute ou retire des choix à la volée ; le résultat est tiré localement avec le RNG du navigateur. Pas de comptes, pas de traceurs, pas de serveur. Idéal pour choisir un restaurant, attribuer des tâches ou tout ce que tu trancherais sinon à pile ou face."
+      "tldr": "Faites tourner une roue personnalisable pour choisir parmi votre propre liste d'options. Ajoutez ou retirez des choix à la volée ; le résultat est tiré localement avec le RNG du navigateur. Pas de comptes, pas de traceurs, pas de serveur. Idéal pour choisir un restaurant, attribuer des tâches ou tout ce que vous trancheriez sinon à pile ou face."
     },
     "flappy": {
       "title": "Flappy",
       "lede": "Un avion en papier traversant une pile de prompts terminal. Touchez, cliquez ou appuyez sur ESPACE pour battre des ailes. Ne crashez pas le prompt.",
-      "tldr": "Une version navigateur de Flappy Bird à l'esthétique synthwave-terminal. HTML5 Canvas pur — pas d'installation, pas d'inscription, pas de scripts tiers. État du jeu, meilleur score et audio fonctionnent côté client et restent sur ton appareil. Touche, clique ou appuie sur espace pour battre des ailes. Fonctionne hors ligne une fois en cache."
+      "tldr": "Une version navigateur de Flappy Bird à l'esthétique synthwave-terminal. HTML5 Canvas pur — pas d'installation, pas d'inscription, pas de scripts tiers. État du jeu, meilleur score et audio fonctionnent côté client et restent sur votre appareil. Touchez, cliquez ou appuyez sur espace pour battre des ailes. Fonctionne hors ligne une fois en cache."
     },
     "invoice": {
       "title": "Générateur de Factures",
       "lede": "Créez des factures épurées d'une page dans votre navigateur. Auto-enregistrement pendant la saisie. Imprimez en A4 ou exportez en JSON.",
-      "tldr": "Construis des factures A4 propres dans ton navigateur et enregistre-les en PDF via la boîte de dialogue d'impression du navigateur. Ajoute des lignes, devise, coordonnées bancaires, notes ; auto-enregistrement dans localStorage pour ne rien perdre au rechargement. Importe ou exporte la facture entière en JSON. Pas de compte, pas de serveur — chaque octet reste sur ton appareil."
+      "tldr": "Construisez des factures A4 propres dans votre navigateur et enregistrez-les en PDF via la boîte de dialogue d'impression du navigateur. Ajoutez des lignes, devise, coordonnées bancaires, notes ; auto-enregistrement dans localStorage pour ne rien perdre au rechargement. Importez ou exportez la facture entière en JSON. Pas de compte, pas de serveur — chaque octet reste sur votre appareil."
     },
     "markdown-pdf": {
       "title": "Markdown → PDF",
@@ -366,7 +366,7 @@
     "quick-notes": {
       "title": "Notes Rapides",
       "lede": "Un bloc-notes minimaliste qui vit dans votre navigateur. Créez plusieurs notes, sauvegardées à chaque frappe.",
-      "tldr": "Un bloc-notes pensé clavier qui auto-enregistre chaque frappe dans le localStorage du navigateur. Notes multiples, esthétique synthwave sombre. Tes notes ne quittent jamais ton appareil — pas de synchro, pas de comptes, pas de serveur. À utiliser comme brouillon pour tâches, snippets ou pensées à reprendre dans un onglet."
+      "tldr": "Un bloc-notes pensé clavier qui auto-enregistre chaque frappe dans le localStorage du navigateur. Notes multiples, esthétique synthwave sombre. Vos notes ne quittent jamais votre appareil — pas de synchro, pas de comptes, pas de serveur. À utiliser comme brouillon pour tâches, snippets ou pensées à reprendre dans un onglet."
     },
     "activity": {
       "downloading": "téléchargement",
@@ -433,12 +433,12 @@
     "quote": {
       "title": "Citation Motivante",
       "lede": "Citations originales générées par IA, fonctionnant localement dans votre navigateur. Vos données restent sur votre appareil.",
-      "tldr": "Citation Motivante génère des aphorismes originaux avec un modèle Qwen3.5 affiné sur des données de citations sélectionnées, fonctionnant entièrement dans ton navigateur via WebGPU. Pas de serveur, pas de clé API, pas de compte. Le modèle se charge à la première visite et reste en cache localement pour une réutilisation instantanée."
+      "tldr": "Citation Motivante génère des aphorismes originaux avec un modèle Qwen3.5 affiné sur des données de citations sélectionnées, fonctionnant entièrement dans votre navigateur via WebGPU. Pas de serveur, pas de clé API, pas de compte. Le modèle se charge à la première visite et reste en cache localement pour une réutilisation instantanée."
     },
     "radio": {
       "title": "Radio Infinie",
       "lede": "Musique cinématographique épique générée par IA, en streaming infini. Apprend vos goûts localement — vos données restent sur votre appareil.",
-      "tldr": "Musique cinématographique infinie générée par IA, en streaming direct dans ton navigateur. Les pistes proviennent d'un catalogue public et sont lues via l'élément audio HTML5 natif du navigateur (avec un fondu enchaîné entre deux lecteurs) ; ton historique d'écoute et tes 'j'aime' restent sur l'appareil dans IndexedDB pour apprendre tes goûts localement avec le temps. Pas de compte, pas de tracking, pas de personnalisation côté serveur."
+      "tldr": "Musique cinématographique infinie générée par IA, en streaming direct dans votre navigateur. Les pistes proviennent d'un catalogue public et sont lues via l'élément audio HTML5 natif du navigateur (avec un fondu enchaîné entre deux lecteurs) ; votre historique d'écoute et vos « j'aime » restent sur l'appareil dans IndexedDB pour apprendre vos goûts localement avec le temps. Pas de compte, pas de tracking, pas de personnalisation côté serveur."
     },
     "tetris": {
       "title": "Tetris",
@@ -447,13 +447,13 @@
     },
     "search": {
       "title": "Recherche",
-      "lede": "Trouve des outils et des publications du fil. Tape n'importe quelle requête — mot-clé ou langage naturel.",
+      "lede": "Trouvez des outils et des publications du fil. Tapez n'importe quelle requête — mot-clé ou langage naturel.",
       "tldr": "Recherche sur l'ensemble du site appuyée par un index construit à la compilation, couvrant chaque outil et chaque publication en 5 langues. Le mode par défaut est une correspondance floue instantanée par mots-clés sur titres, descriptions et TL;DR — sans téléchargement de modèle, sans serveur. Quand le modèle Qwen3.5 est déjà en cache local (après avoir utilisé AI Chat ou Citation Motivante), un résumé IA optionnel apparaît au-dessus des résultats."
     },
     "step-counter": {
       "title": "Compteur de Pas",
-      "lede": "Compte tes pas en marchant, directement dans le navigateur. Utilise le capteur de mouvement de ton téléphone — rien n'est envoyé.",
-      "tldr": "Un podomètre par session qui lit l'accéléromètre de ton téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lance une session et marche avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Tout le traitement reste dans le navigateur : pas de compte, pas d'envoi, pas de suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé. Les totaux quotidiens restent sur cet appareil, avec un graphique sur 7 jours et des séries d'objectifs. Le mode poche garde l'écran allumé mais tout noir (idéal sur OLED) pour continuer à compter dans la poche ; les courtes interruptions écran verrouillé sont comblées d'après votre cadence et marquées comme estimations."
+      "lede": "Comptez vos pas en marchant, directement dans le navigateur. Utilise le capteur de mouvement de votre téléphone — rien n'est envoyé.",
+      "tldr": "Un podomètre par session qui lit l'accéléromètre de votre téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lancez une session et marchez avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Tout le traitement reste dans le navigateur : pas de compte, pas d'envoi, pas de suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé. Les totaux quotidiens restent sur cet appareil, avec un graphique sur 7 jours et des séries d'objectifs. Le mode poche garde l'écran allumé mais tout noir (idéal sur OLED) pour continuer à compter dans la poche ; les courtes interruptions écran verrouillé sont comblées d'après votre cadence et marquées comme estimations."
     },
     "qr-scanner": {
       "title": "Scanner et générateur de QR codes et codes-barres",
@@ -494,7 +494,7 @@
     "annotate-image": {
       "title": "Annoter une image",
       "lede": "Importez une image et obtenez instantanément une description IA, un texte alternatif, une transcription ou des étiquettes — avec des prompts testés en un toucher. S'exécute localement dans votre navigateur, rien n'est envoyé.",
-      "tldr": "Un compagnon ciblé doté de vision pour AI Chat : dépose une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Bascule entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5 sur l'appareil qu'AI Chat (cache partagé — si tu as déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans ton navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais ton appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis ton gestionnaire de fichiers une fois installé. Copie ou télécharge le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+)."
+      "tldr": "Un compagnon ciblé doté de vision pour AI Chat : déposez une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Basculez entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5 sur l'appareil qu'AI Chat (cache partagé — si vous avez déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans votre navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais votre appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis votre gestionnaire de fichiers une fois installé. Copiez ou téléchargez le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+)."
     },
     "files": {
       "title": "Fichiers",
@@ -690,16 +690,16 @@
       "confirm_delete": "Supprimer « {name} » ? Cela ne peut pas être annulé.",
       "lock_btn": "Verrouiller",
       "remove_lock_btn": "Retirer le verrou",
-      "lock_title": "Chiffrer cette note avec la clé d'accès de ton appareil",
+      "lock_title": "Chiffrer cette note avec la clé d'accès de votre appareil",
       "locked_tag": "Verrouillée",
       "unlock_btn": "Déverrouiller",
       "locked_heading": "Cette note est verrouillée",
-      "locked_body": "Son contenu est chiffré, mais pas le titre. Déverrouille-la avec la clé d'accès de ton appareil pour la voir et la modifier.",
-      "confirm_lock": "Le verrouillage chiffre cette note avec la clé d'accès de ton appareil. Si tu perds cette clé ou effaces les données de ce navigateur, la note sera irrécupérable. Le titre de la note reste visible et n'est PAS chiffré — ne mets pas de secrets dans le titre. La verrouiller ?",
+      "locked_body": "Son contenu est chiffré, mais pas le titre. Déverrouillez-la avec la clé d'accès de votre appareil pour la voir et la modifier.",
+      "confirm_lock": "Le verrouillage chiffre cette note avec la clé d'accès de votre appareil. Si vous perdez cette clé ou effacez les données de ce navigateur, la note sera irrécupérable. Le titre de la note reste visible et n'est PAS chiffré — ne mettez pas de secrets dans le titre. La verrouiller ?",
       "confirm_remove_lock": "Retirer le chiffrement de cette note ? Elle sera de nouveau enregistrée en texte clair.",
       "lock_failed": "Impossible de verrouiller la note — la clé d'accès de l'appareil n'était pas disponible.",
       "unlock_failed": "Impossible de déverrouiller la note — la clé d'accès ne correspondait pas ou n'était pas disponible.",
-      "prf_unsupported": "Ce navigateur ou cet appareil ne peut pas utiliser de clé d'accès pour le chiffrement. Essaie une version récente de Chrome, Edge ou Safari.",
+      "prf_unsupported": "Ce navigateur ou cet appareil ne peut pas utiliser de clé d'accès pour le chiffrement. Essayez une version récente de Chrome, Edge ou Safari.",
       "count_summary": "{words} mots · {chars} caractères",
       "empty_preview": "Vide",
       "to_mdpdf_btn": "→ PDF",
@@ -808,7 +808,7 @@
       "input_seconds": "Secondes",
       "input_until_label": "Compte à rebours jusqu'à",
       "presets_label": "Préréglages :",
-      "err_pick_dt": "Choisis une date et une heure.",
+      "err_pick_dt": "Choisissez une date et une heure.",
       "err_passed": "Cette heure est déjà passée.",
       "err_max_99": "Le compte à rebours maximum est de 99 heures.",
       "err_set_time": "Définis d'abord une heure !",
@@ -820,15 +820,15 @@
       "notif_unsupported": "Le navigateur ne prend pas en charge les notifications.",
       "notif_default": "Sois averti quand un minuteur se termine pendant que l'onglet est masqué.",
       "notif_granted": "Notifications activées — alertes envoyées à la fin en arrière-plan.",
-      "notif_denied": "Notifications bloquées. Autorise-les dans les paramètres du navigateur.",
+      "notif_denied": "Notifications bloquées. Autorisez-les dans les paramètres du navigateur.",
       "notif_enable_btn": "Activer les notifications",
       "notif_test_btn": "Tester",
       "notif_on_title": "Notifications activées",
-      "notif_on_body": "Tu seras averti quand un minuteur se termine en arrière-plan.",
+      "notif_on_body": "Vous serez averti quand un minuteur se termine en arrière-plan.",
       "notif_test_title": "Notification de test",
       "notif_test_body": "Voici à quoi ressemblera l'alerte à la fin du minuteur.",
       "notif_finished_format": "{label} — Terminé",
-      "notif_body_open": "Touche pour revenir au minuteur et arrêter l'alarme.",
+      "notif_body_open": "Touchez pour revenir au minuteur et arrêter l'alarme.",
       "notif_stop_alarm": "Arrêter l'alarme",
       "preset_1min": "1 min",
       "preset_5min": "5 min",
@@ -874,7 +874,7 @@
       "lbl_acc_holder": "Titulaire du compte",
       "lbl_ifsc": "Code IFSC",
       "lbl_bank_name": "Banque",
-      "ph_name": "Ton nom",
+      "ph_name": "Votre nom",
       "ph_addr1": "Adresse ligne 1",
       "ph_addr2": "Adresse ligne 2",
       "ph_phone": "Téléphone",
@@ -910,7 +910,7 @@
       "declaration": "Je déclare solennellement que les informations fournies ci-dessus sont exactes et complètes au mieux de ma connaissance. Je reconnais être seul responsable du respect de toutes les lois fiscales applicables, y compris le dépôt des déclarations et le paiement des impôts auprès du département de l'impôt sur le revenu de l'Inde.",
       "alert_invalid_json": "Fichier JSON invalide.",
       "alert_unknown_format": "Format JSON non reconnu.",
-      "alert_select_json": "Sélectionne un fichier JSON.",
+      "alert_select_json": "Sélectionnez un fichier JSON.",
       "confirm_clear": "Effacer toutes les données enregistrées ? Cette action est irréversible."
     },
     "markdown-pdf": {
@@ -930,14 +930,14 @@
       "ph_input": "# Commence à écrire…",
       "saved": "Enregistré",
       "counts_format": "{words} mots · {chars} caractères",
-      "err_load_lib": "Impossible de charger la bibliothèque markdown. Vérifie ton réseau ou bloqueur.",
-      "alert_invalid_md": "Sélectionne un fichier Markdown (.md).",
-      "confirm_clear": "Effacer l'éditeur ? Ton brouillon auto-enregistré sera perdu.",
+      "err_load_lib": "Impossible de charger la bibliothèque markdown. Vérifiez votre réseau ou votre bloqueur.",
+      "alert_invalid_md": "Sélectionnez un fichier Markdown (.md).",
+      "confirm_clear": "Effacer l'éditeur ? Votre brouillon auto-enregistré sera perdu.",
       "filename_label": "Nom du fichier",
       "filename_placeholder": "clique sur Générer ou tape un nom",
       "btn_ai_generate": "Générer un nom",
       "btn_ai_generating": "Génération…",
-      "ai_unavailable_hint": "Ouvre AI Chat ou Citation Motivante une fois pour activer le nommage IA",
+      "ai_unavailable_hint": "Ouvrez AI Chat ou Citation Motivante une fois pour activer le nommage IA",
       "ai_confirm_download": "Le nommage par IA nécessite un téléchargement unique du modèle (490 Mo ou plus selon le niveau). Continuer ?",
       "btn_ai_loading": "Chargement {pct}%",
       "preview_region_aria": "Aperçu du rendu",
@@ -957,12 +957,12 @@
       "btn_copied": "Copié !",
       "btn_failed": "Échec",
       "err_no_webgpu": "WebGPU non disponible dans ce navigateur",
-      "err_unsupported_body": "Cet outil nécessite WebGPU, que ton navigateur n'expose pas. Essaie la dernière version de Chrome, Edge ou Brave sur ordinateur, ou Safari 26+ sur macOS / iOS 26+.",
+      "err_unsupported_body": "Cet outil nécessite WebGPU, que votre navigateur n'expose pas. Essayez la dernière version de Chrome, Edge ou Brave sur ordinateur, ou Safari 26+ sur macOS / iOS 26+.",
       "err_load_runtime": "Échec du chargement du runtime — vérifie le réseau/bloqueur",
       "err_device_lost": "GPU perdu — recharge pour récupérer",
       "err_load_prefix": "Échec du chargement : ",
-      "err_no_quote": "Impossible de générer une citation. Réessaie.",
-      "err_generation": "Erreur lors de la génération. Réessaie."
+      "err_no_quote": "Impossible de générer une citation. Réessayez.",
+      "err_generation": "Erreur lors de la génération. Réessayez."
     },
     "radio": {
       "float_doc_title": "Radio infinie",
@@ -977,7 +977,7 @@
       "liked_remove": "Retirer {title} des titres aimés",
       "now_playing_label": "EN COURS",
       "up_next_label": "À SUIVRE",
-      "press_play": "Appuie sur lecture pour commencer",
+      "press_play": "Appuyez sur lecture pour commencer",
       "btn_play_aria": "Lecture",
       "btn_skip_aria": "Suivant",
       "btn_like_aria": "J'aime",
@@ -1003,7 +1003,7 @@
       "status_generating": "Génération…",
       "counter": "{n} jetons · {tps} tok/s",
       "status_ready": "Prêt",
-      "status_model_deleted": "Modèle supprimé. Recharge pour le retélécharger.",
+      "status_model_deleted": "Modèle supprimé. Rechargez pour le retélécharger.",
       "tier_label": "Qualité du modèle",
       "tier_fast": "rapide",
       "tier_better": "meilleur",
@@ -1045,14 +1045,14 @@
       "btn_regenerate": "régénérer",
       "stopped": "(interrompu)",
       "input_placeholder": "Message…",
-      "empty_msg": "Envoie un message ou joins une image pour commencer.",
+      "empty_msg": "Envoyez un message ou joignez une image pour commencer.",
       "empty_sub": "Téléchargement du modèle de ~{size} à la première utilisation, ensuite en cache.",
       "img_alt_attached": "Image jointe",
       "img_alt_attached_short": "Jointe",
-      "label_you": "toi",
+      "label_you": "vous",
       "err_no_webgpu": "WebGPU non disponible dans ce navigateur",
-      "err_unsupported_main": "Cet outil nécessite <strong>WebGPU</strong>, que ton navigateur n'expose pas.",
-      "err_unsupported_sub": "Essaie la dernière version de Chrome, Edge ou Brave sur ordinateur, ou Safari 26+ sur macOS / iOS 26+.",
+      "err_unsupported_main": "Cet outil nécessite <strong>WebGPU</strong>, que votre navigateur n'expose pas.",
+      "err_unsupported_sub": "Essayez la dernière version de Chrome, Edge ou Brave sur ordinateur, ou Safari 26+ sur macOS / iOS 26+.",
       "err_load_runtime": "Échec du chargement du runtime — vérifie le réseau/bloqueur",
       "err_device_lost": "GPU perdu — recharge pour récupérer",
       "err_context_full": "La conversation dépasse la mémoire du modèle. Démarrez une nouvelle discussion pour continuer.",
@@ -1102,14 +1102,14 @@
       "share_ok": "envoyé à {n} pair(s)",
       "share_open_comms": "ouverture de comms — utilisez « joindre une extension » pour envoyer",
       "confirm_remove": "Supprimer {name} ? Sa source et ses données seront effacées de cet appareil.",
-      "trust_prompt": "Installer {name} v{version} ? Elle s'exécutera avec un accès complet à tes données sur cet appareil. N'installe que des fichiers de personnes de confiance. Permissions : {perms}",
+      "trust_prompt": "Installer {name} v{version} ? Elle s'exécutera avec un accès complet à vos données sur cet appareil. N'installez que des fichiers de personnes de confiance. Permissions : {perms}",
       "update_prompt": "Mettre à jour {name} {old} → {new} ? Les données sont conservées.",
       "downgrade_prompt": "Remplacer {name} {old} par la version antérieure {new} ? Les données sont conservées.",
       "update_perms_added": "Nouvelles permissions : {perms}.",
       "update_perms_removed": "N'utilise plus : {perms}.",
       "installed_ok": "installée.",
       "installed_where": "{name} installée. Ouvrez-la à tout moment depuis le menu Outils.",
-      "sample_heading": "Essaie l'exemple",
+      "sample_heading": "Essayez l'exemple",
       "sample_install": "installer hello-world",
       "sample_download": "télécharger le fichier",
       "err_prefix": "échec de l'installation :",
@@ -1119,12 +1119,12 @@
       "ph_input": "Rechercher…",
       "result_count_one": "{n} résultat",
       "result_count_many": "{n} résultats",
-      "no_results": "Aucun résultat. Essaie un autre mot-clé.",
-      "empty_hint": "Tape un nom d'outil, une fonctionnalité, ou décris ce que tu cherches.",
+      "no_results": "Aucun résultat. Essayez un autre mot-clé.",
+      "empty_hint": "Tapez un nom d'outil, une fonctionnalité, ou décrivez ce que vous cherchez.",
       "ai_summary_label": "Résumé IA",
       "ai_run_btn": "Générer le résumé IA",
       "ai_thinking": "Génération…",
-      "ai_unavailable": "Ouvre AI Chat ou Citation Motivante une fois pour mettre en cache le modèle — les résumés IA apparaîtront ici ensuite.",
+      "ai_unavailable": "Ouvrez AI Chat ou Citation Motivante une fois pour mettre en cache le modèle — les résumés IA apparaîtront ici ensuite.",
       "type_all": "Tout",
       "type_tool": "Outils",
       "type_post": "Publications",
@@ -1153,17 +1153,17 @@
       "reset_today": "Réinitialiser aujourd'hui",
       "history_label": "7 derniers jours",
       "perm_title": "Accès au mouvement requis",
-      "perm_body": "Ce compteur lit le capteur de mouvement de ton téléphone. Accorde l'accès pour commencer.",
+      "perm_body": "Ce compteur lit le capteur de mouvement de votre téléphone. Accordez l'accès pour commencer.",
       "perm_btn": "Autoriser l'accès au mouvement",
       "denied_title": "Accès au mouvement refusé",
       "denied_body": "Réactive l'accès au mouvement dans les réglages du navigateur, puis recharge la page.",
       "unsupported_title": "Aucun capteur de mouvement",
       "unsupported_body": "Compter les pas nécessite un téléphone ou une tablette avec accéléromètre. Cet appareil n'en expose aucun.",
-      "screen_hint": "Garde l'écran allumé et cet onglet ouvert pendant que tu marches.",
+      "screen_hint": "Gardez l'écran allumé et cet onglet ouvert pendant que vous marchez.",
       "goal_reached": "Objectif quotidien atteint",
       "confirm_reset": "Réinitialiser le compteur de pas d'aujourd'hui à zéro ?",
       "insecure_title": "Connexion sécurisée requise",
-      "insecure_body": "Les capteurs de mouvement ne fonctionnent qu en HTTPS. Ouvre cet outil sur le site en ligne (https://mentria.ai). Un serveur de dev local atteint par IP LAN en HTTP ne peut pas exposer le capteur.",
+      "insecure_body": "Les capteurs de mouvement ne fonctionnent qu'en HTTPS. Ouvrez cet outil sur le site en ligne (https://mentria.ai). Un serveur de dev local atteint par IP LAN en HTTP ne peut pas exposer le capteur.",
       "back_to_stats": "Retour aux statistiques",
       "streak_current": "Série en cours",
       "streak_best": "Meilleure série",
@@ -1177,7 +1177,7 @@
     },
     "qr-scanner": {
       "aria_video": "Aperçu de la caméra en direct",
-      "idle_prompt": "Pointe ta caméra vers un code QR ou un code-barres, ou scanne un fichier image.",
+      "idle_prompt": "Pointez votre caméra vers un code QR ou un code-barres, ou scannez un fichier image.",
       "scanning": "Analyse…",
       "result_label": "Décodé",
       "btn_start_camera": "Démarrer la caméra",
@@ -1187,14 +1187,14 @@
       "btn_copy": "Copier",
       "btn_copied": "Copié",
       "btn_open": "Ouvrir le lien",
-      "note_insecure": "La caméra nécessite une connexion sécurisée (HTTPS). Tu peux quand même scanner un fichier image ci-dessous.",
-      "note_denied": "L'accès à la caméra a été bloqué. Autorise-le dans les paramètres du navigateur, ou scanne une image à la place.",
-      "note_no_camera": "Aucune caméra trouvée sur cet appareil. Tu peux quand même scanner un fichier image.",
-      "note_camera_error": "Impossible de démarrer la caméra. Tu peux quand même scanner un fichier image.",
-      "note_no_match": "Aucun code trouvé dans cette image. Essaie une photo plus nette.",
+      "note_insecure": "La caméra nécessite une connexion sécurisée (HTTPS). Vous pouvez quand même scanner un fichier image ci-dessous.",
+      "note_denied": "L'accès à la caméra a été bloqué. Autorisez-le dans les paramètres du navigateur, ou scannez une image à la place.",
+      "note_no_camera": "Aucune caméra trouvée sur cet appareil. Vous pouvez quand même scanner un fichier image.",
+      "note_camera_error": "Impossible de démarrer la caméra. Vous pouvez quand même scanner un fichier image.",
+      "note_no_match": "Aucun code trouvé dans cette image. Essayez une photo plus nette.",
       "to_totp": "Code d’authentification trouvé. Ouverture de TOTP…",
       "unsupported_title": "Non pris en charge ici",
-      "unsupported_body": "Ce navigateur ne prend pas en charge la détection de codes-barres. Essaie un navigateur Chromium récent comme Chrome ou Edge.",
+      "unsupported_body": "Ce navigateur ne prend pas en charge la détection de codes-barres. Essayez un navigateur Chromium récent comme Chrome ou Edge.",
       "mode_scan": "Scanner",
       "mode_generate": "Générer",
       "gen_prompt": "Collez un lien ou saisissez du texte…",
@@ -1645,7 +1645,7 @@
       "download": "télécharger",
       "new_image": "nouvelle image",
       "drop_title": "dépose, colle ou choisis une image",
-      "drop_sub": "png · jpg · webp · gif — reste sur ton appareil",
+      "drop_sub": "png · jpg · webp · gif — reste sur votre appareil",
       "mode_describe": "Décrire",
       "mode_ocr": "Lire le texte",
       "mode_alt": "Texte alt",
@@ -2312,7 +2312,7 @@
       "status_working": "en cours…",
       "not_supported": "la Console nécessite le modèle 27B local — non pris en charge sur cet appareil",
       "offer_27b": "La Console fonctionne avec le modèle 27B sur l'appareil — environ 3,8 Go, téléchargé une fois et conservé sur cet appareil (testé sur Apple Silicon avec 16 Go+ de mémoire et GPU NVIDIA avec 6 Go+). Le télécharger maintenant ?",
-      "postponed_27b": "le téléchargement du 27B a été reporté — recharge la Console quand tu veux réessayer.",
+      "postponed_27b": "le téléchargement du 27B a été reporté — rechargez la Console quand vous voulez réessayer.",
       "no_webgpu": "WebGPU n'est pas disponible dans ce navigateur",
       "you": "vous",
       "model": "mentria",

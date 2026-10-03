@@ -157,13 +157,26 @@ function render() {
   updateCounts();
 }
 
+const PAGE_LANG = document.documentElement.lang || undefined;
+const wordSegmenter = (() => {
+  try { return new Intl.Segmenter(PAGE_LANG, { granularity: 'word' }); } catch (_) { return null; }
+})();
+function countWords(text) {
+  const t = text.trim();
+  if (!t) return 0;
+  if (!wordSegmenter) return t.split(/\s+/).length;
+  let n = 0;
+  for (const seg of wordSegmenter.segment(t)) if (seg.isWordLike) n++;
+  return n;
+}
+
 function updateCounts() {
   const text = inputEl.value || '';
   const chars = text.length;
-  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const words = countWords(text);
   countsEl.textContent = COPY.countsFmt
-    .replace('{words}', words.toLocaleString())
-    .replace('{chars}', chars.toLocaleString());
+    .replace('{words}', words.toLocaleString(PAGE_LANG))
+    .replace('{chars}', chars.toLocaleString(PAGE_LANG));
 }
 
 /* ── Persistence ────────────────────────────────────────────────── */

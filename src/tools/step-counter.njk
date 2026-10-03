@@ -321,7 +321,7 @@ localeReload: true
       const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       const steps = key === state.date ? state.steps : (state.history[key] || 0);
       const est = key === state.date ? state.estSteps : (state.estHistory[key] || 0);
-      days.push({ key, steps, est, label: d.toLocaleDateString(LANG, { weekday: 'short' }).slice(0, 2) });
+      days.push({ key, steps, est, label: d.toLocaleDateString(LANG, { weekday: 'short' }).replace(/\.$/, '') });
     }
     const max = Math.max(state.goal, ...days.map(d => d.steps + d.est), 1);
     barsEl.innerHTML = '';

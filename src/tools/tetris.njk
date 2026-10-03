@@ -846,10 +846,10 @@ canvas#game {
   window.addEventListener('resize', relayout);
 
   function updateHUD() {
-    $('stat-score').textContent = State.score.toLocaleString();
+    $('stat-score').textContent = State.score.toLocaleString(document.documentElement.lang || undefined);
     $('stat-level').textContent = String(State.level).padStart(2, '0');
     $('stat-lines').textContent = State.lines;
-    $('stat-best').textContent = State.best.toLocaleString();
+    $('stat-best').textContent = State.best.toLocaleString(document.documentElement.lang || undefined);
     $('stat-combo').textContent = State.combo > 1 ? '×' + State.combo : '—';
   }
 
@@ -924,10 +924,10 @@ canvas#game {
       State.best = State.score;
       writeBest(State.best);
     }
-    $('fin-score').textContent = State.score.toLocaleString();
+    $('fin-score').textContent = State.score.toLocaleString(document.documentElement.lang || undefined);
     $('fin-level').textContent = State.level;
     $('fin-lines').textContent = State.lines;
-    $('fin-best').textContent = State.best.toLocaleString();
+    $('fin-best').textContent = State.best.toLocaleString(document.documentElement.lang || undefined);
     $('fin-record').classList.toggle('hidden', !isRecord);
     ovOver.classList.remove('hidden');
     announce([ovOver.querySelector('h2').textContent]

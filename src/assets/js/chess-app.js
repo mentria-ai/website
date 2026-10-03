@@ -168,10 +168,10 @@
     const d = e.data;
     if (d.type !== 'best') return;
     $('stat-depth').textContent = d.depth ?? '—';
-    $('stat-nodes').textContent = (d.nodes||0).toLocaleString();
+    $('stat-nodes').textContent = (d.nodes||0).toLocaleString(document.documentElement.lang || undefined);
     $('stat-time').textContent = (d.time||0) + 'ms';
     const nps = d.time ? Math.round((d.nodes||0)/(d.time/1000)) : 0;
-    $('stat-nps').textContent = nps.toLocaleString();
+    $('stat-nps').textContent = nps.toLocaleString(document.documentElement.lang || undefined);
     const ev = d.eval || 0;
     setEval(State.pos.turn === 'w' ? ev : -ev, d.depth);
     renderLines(d.lines || [], State.pos.turn, d.depth);

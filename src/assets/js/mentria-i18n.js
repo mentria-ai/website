@@ -221,8 +221,11 @@
     return p;
   }
 
-  function scheduleLocaleShells(code) {
+  function scheduleLocaleShells(code, passive) {
     if (code === 'en' || !('caches' in window)) return;
+    var conn = navigator.connection;
+    if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ''))) return;
+    if (passive && !(navigator.serviceWorker && navigator.serviceWorker.controller)) return;
     var run = function () { cacheLocaleShells(code); };
     if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 4000 });
     else setTimeout(run, 1500);
@@ -313,5 +316,5 @@
     cacheShells: function (code) { return cacheLocaleShells(code || currentCode); }
   };
 
-  scheduleLocaleShells(currentCode);
+  scheduleLocaleShells(currentCode, true);
 })();

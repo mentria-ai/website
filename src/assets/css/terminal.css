@@ -826,16 +826,6 @@ html.is-standalone .feed-card__info {
   font-weight: 600;
 }
 
-.feed-card__title {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
-  letter-spacing: 0.05em;
-  text-transform: lowercase;
-  margin: 0 0 0.6rem;
-}
-
 .feed-card__date {
   font-family: var(--font-mono);
   font-size: 0.75rem;

@@ -240,48 +240,6 @@ const recordTomb = (ns, key, mtime) => {
   }
 };
 
-const clearTomb = (ns, key) => {
-  const tombs = loadTombs();
-  const suffix = ns + '.' + key;
-  if (suffix in tombs) {
-    delete tombs[suffix];
-    saveTombs(tombs);
-  }
-};
-
-const tombListener = (event) => {
-  const d = event.detail || {};
-  if (!d.ns || !d.key) return;
-  if (d.op === 'remove') {
-    if (d.remote) return;
-    recordTomb(d.ns, d.key, (typeof d.mtime === 'number') ? d.mtime : Date.now());
-  } else if (d.op === 'set') {
-    clearTomb(d.ns, d.key);
-  }
-};
-
-try { window.addEventListener('mentria:write', tombListener); } catch (_) {}
-
-const maxMergeMap = (a, b, cap) => {
-  const out = {};
-  const add = (m) => {
-    if (!m || typeof m !== 'object') return;
-    Object.keys(m).forEach((k) => {
-      const v = Number(m[k]);
-      if (!isFinite(v)) return;
-      if (!(k in out) || v > out[k]) out[k] = v;
-    });
-  };
-  add(a); add(b);
-  const keys = Object.keys(out);
-  if (cap && keys.length > cap) {
-    const capped = {};
-    keys.sort((x, y) => out[y] - out[x]).slice(0, cap).forEach((k) => { capped[k] = out[k]; });
-    return capped;
-  }
-  return out;
-};
-
 const splitSuffix = (suffix) => {
   const parts = String(suffix).split('.');
   let ns = parts[0];
@@ -310,28 +268,6 @@ const buildMeta = (store) => {
     meta[suffix] = localMtimeOf(ns, key);
   });
   return meta;
-};
-
-const mergeNotes = (localArr, incomingArr, deletedMap) => {
-  const byId = new Map();
-  const consider = (note) => {
-    if (!note || typeof note !== 'object') return;
-    const id = note.id;
-    if (id == null) return;
-    const key = String(id);
-    const del = (deletedMap && typeof deletedMap[key] === 'number') ? deletedMap[key] : null;
-    if (del != null && del > (Number(note.updatedAt) || 0)) return;
-    const existing = byId.get(key);
-    if (!existing) { byId.set(key, note); return; }
-    const eu = Number(existing.updatedAt) || 0;
-    const nu = Number(note.updatedAt) || 0;
-    if (nu > eu) byId.set(key, note);
-  };
-  (Array.isArray(localArr) ? localArr : []).forEach(consider);
-  (Array.isArray(incomingArr) ? incomingArr : []).forEach(consider);
-  const arr = Array.from(byId.values());
-  arr.sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
-  return arr;
 };
 
 const mergePalette = (localArr, localMtime, incomingArr, incomingMtime, deletedMap) => {
@@ -375,6 +311,7 @@ const mergeV2 = async (msg, isBack) => {
   const incomingTombs = (msg.tombs && typeof msg.tombs === 'object') ? msg.tombs : {};
   const summary = { applied: 0, kept: 0, merged: 0, removed: 0, flagged: [] };
 
+  const { mergeNotes, maxMergeMap } = window.MentriaStore;
   const mergedDeletedNotes = maxMergeMap(parseRaw(localStore['quick_notes.deleted']), parseRaw(incoming['quick_notes.deleted']), 200);
   const mergedDeletedColors = maxMergeMap(parseRaw(localStore['tools.color_picker_deleted']), parseRaw(incoming['tools.color_picker_deleted']), 200);
 
@@ -435,7 +372,7 @@ const mergeV2 = async (msg, isBack) => {
 
   Object.keys(incomingTombs).forEach((suffix) => {
     const tm = Number(incomingTombs[suffix]);
-    if (!isFinite(tm)) return;
+    if (!isFinite(tm) || window.MentriaStore.isLocalOnly(suffix)) return;
     const { ns, key } = splitSuffix(suffix);
     const rawLocal = localStore[suffix];
     if (rawLocal != null) {

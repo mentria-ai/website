@@ -159,7 +159,7 @@ localeReload: true
 
 <style>
   .ludo-app .controls { display: flex; align-items: center; gap: 14px; padding: 11px 4px 14px; flex-wrap: wrap; }
-  .ludo-app .ctrl-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
+  .ludo-app .ctrl-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
   .ludo-app .layout { display: grid; grid-template-columns: 1fr 220px; gap: 0; border: 1px solid var(--term-border); border-radius: var(--radius-md); overflow: hidden; }
   @media (max-width: 760px) { .ludo-app .layout { grid-template-columns: 1fr; } }
 
@@ -170,7 +170,7 @@ localeReload: true
   @media (max-width: 760px) { .ludo-app .side { border-left: none; border-top: 1px solid var(--term-border); } }
   .ludo-app .side-sec { padding: 14px; border-bottom: 1px solid var(--term-divider); }
   .ludo-app .side-sec:last-child { border-bottom: none; }
-  .ludo-app .side-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; margin-bottom: 10px; }
+  .ludo-app .side-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; margin-bottom: 10px; }
 
   .ludo-app .players-list { display: flex; flex-direction: column; gap: 6px; }
   .ludo-app .prow { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 8px; border-radius: var(--radius-md); border: 1px solid transparent; transition: all 150ms; }
@@ -251,7 +251,7 @@ localeReload: true
   .ludo-app .ludo-help { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(4,4,6,0.9); }
   .ludo-app .ludo-help[hidden] { display: none; }
   .ludo-app .ludo-help__panel { width: 100%; max-width: 660px; max-height: 88vh; overflow-y: auto; background: var(--term-surface-2); border: 1px solid var(--syn-cyan); border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--elev-3), var(--glow-cyan); }
-  .ludo-app .ludo-help__eyebrow { font-size: 11px; letter-spacing: 0.15em; margin: 0 0 6px; color: var(--syn-cyan); }
+  .ludo-app .ludo-help__eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.15em; margin: 0 0 6px; color: var(--syn-cyan); }
   .ludo-app .ludo-help__title { font-size: 20px; margin: 0; color: var(--term-fg-strong); }
   .ludo-app .ludo-help__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0 18px; }
   @media (max-width: 640px) { .ludo-app .ludo-help__grid { grid-template-columns: 1fr; } }

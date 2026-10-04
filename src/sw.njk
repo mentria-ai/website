@@ -559,7 +559,8 @@ self.addEventListener('fetch', event => {
       }
     }
     const precache = await caches.open(CACHE_NAME);
-    const cached = await precache.match(event.request, { ignoreSearch: true });
+    const loose = event.request.mode === 'navigate' || !url.searchParams.has('v');
+    const cached = await precache.match(event.request) || (loose ? await precache.match(event.request, { ignoreSearch: true }) : null);
     if (cached) return cached;
     if (event.request.mode === 'navigate') {
       const saved = await caches.match(event.request, { ignoreSearch: true });

@@ -485,11 +485,12 @@ module.exports = function(eleventyConfig) {
       return s.split(version).join('"softwareVersion": "' + v + '"');
     }));
     rewrite("sw.js");
+    return fragV;
   }
 
   eleventyConfig.on("eleventy.after", ({ directories, dir }) => {
     const out = (directories && directories.output) || (dir && dir.output) || "build";
-    stabilizeVersions(out);
+    const fragV = stabilizeVersions(out);
     const swPath = path.join(out, "sw.js");
     let sw;
     try { sw = fs.readFileSync(swPath, "utf8"); } catch { return; }
@@ -501,6 +502,7 @@ module.exports = function(eleventyConfig) {
     for (const m of list.matchAll(/'([^']+)'/g)) {
       const url = m[1];
       if (url.indexOf("?") !== -1) continue;
+      if (url.startsWith("/fragments/")) { revisions[url] = fragV; continue; }
       let file = path.join(out, decodeURIComponent(url));
       if (url.endsWith("/")) file = path.join(file, "index.html");
       try { revisions[url] = crypto.createHash("sha1").update(fs.readFileSync(file)).digest("hex").slice(0, 10); } catch {}

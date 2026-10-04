@@ -2,7 +2,7 @@
 {
   "id": "meal-planner",
   "name": "Meal Planner",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "icon": "🍲",
   "author": "Mentria",
   "description": "Plan the week's meals, keep a recipe box, get a shopping list grouped by aisle and use up what's in your pantry. Nutrition estimates from USDA data.",
@@ -1013,11 +1013,11 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.62)}
   }
 
   function norm(s) {
-    s = String(s || '').normalize('NFKC').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').normalize('NFC');
+    s = String(s || '').normalize('NFKC').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC');
     s = s.replace(/[ァ-ヶ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); });
     return s.replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
   }
-  var CJK = /[぀-ヿ㐀-鿿]/;
+  var CJK = /[\u3040-\u30ff\u3400-\u9fff]/;
   var STOP = {};
   'a an fresh chopped finely roughly thinly sliced diced minced grated crushed peeled large small medium big ripe cut into pieces piece cubes cubed halved washed soaked drained rinsed optional for garnish garnishing serving about approx and or the of to taste needed plus extra some few handful handfuls inch inches cm boneless whole un una unos unas puñado punado poignee une uma punhado de del la el los las y o en picado picada picados picadas fresco fresca frescos frescas grande grandes pequeno pequena mediano mediana rallado rallada cortado cortada du des le les et ou frais fraiche hache hachee emince emincee gros grosse petit petite rape rapee coupe coupee do da dos das e em fatiado fatiada ralado medio media'.split(' ').forEach(function (w) { STOP[w] = 1; });
   var MIX = null;
@@ -1132,7 +1132,7 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.62)}
     return isFinite(v) ? v : null;
   }
   function rangeVal(a, b) { var x = pnum(a), y = b != null ? pnum(b) : null; return y != null && x != null ? (x + y) / 2 : x; }
-  function uNorm(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').normalize('NFC').replace(/[.()]/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function uNorm(s) { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC').replace(/[.()]/g, ' ').replace(/\s+/g, ' ').trim(); }
   function takeUnit(rest) {
     var words = rest.split(' ').filter(function (w) { return w; });
     if (!words.length) return null;

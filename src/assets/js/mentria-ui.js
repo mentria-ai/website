@@ -91,7 +91,7 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'm-toast__action';
-    btn.textContent = opts.label || (window.MentriaUICopy && window.MentriaUICopy.undo) || 'Undo';
+    btn.textContent = opts.label || uiCopy('undo', 'common.undo', 'Undo');
     el.appendChild(text);
     el.appendChild(btn);
     document.body.appendChild(el);
@@ -766,6 +766,7 @@
     modal: modal,
     backDismiss: backDismiss,
     toolTitle: toolTitle,
+    localePrefix: localePrefix,
     windowMenu: windowMenu
   };
 })();

@@ -419,7 +419,8 @@ try {
           }
         } catch (_) {}
         if (typeof window.mentriaConfirm === 'function') {
-          return window.mentriaConfirm({{ ("common.heavy_download" | t) | dump | safe }});
+          var heavy = window.MentriaI18n && window.MentriaI18n.t ? window.MentriaI18n.t('common.heavy_download') : null;
+          return window.mentriaConfirm(typeof heavy === 'string' ? heavy : {{ ("common.heavy_download" | t) | dump | safe }});
         }
         return true;
       };
@@ -436,7 +437,10 @@ try {
         btn.type = 'button';
         btn.className = 'tool-share';
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span></span>';
-        btn.querySelector('span').textContent = {{ ("common.share" | t) | dump | safe }};
+        var shareLabel = document.createElement('i18n-t');
+        shareLabel.setAttribute('data-k', 'common.share');
+        shareLabel.textContent = {{ ("common.share" | t) | dump | safe }};
+        btn.querySelector('span').appendChild(shareLabel);
         btn.addEventListener('click', function () {
           var desc = document.querySelector('meta[name="description"]');
           navigator.share({
@@ -837,7 +841,7 @@ try {
             history.back();
             setTimeout(function () { if (!gone && location.pathname === here) location.href = ref.href; }, 800);
           } else {
-            location.href = ((window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.prefix) || '') + '/tools/';
+            location.href = (window.MentriaUI && window.MentriaUI.localePrefix ? window.MentriaUI.localePrefix() : ((window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.prefix) || '')) + '/tools/';
           }
         });
         document.addEventListener('keydown', function (e) {

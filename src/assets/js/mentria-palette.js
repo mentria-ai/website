@@ -700,5 +700,27 @@
     if (e.persisted && isOpen()) close();
   });
 
+  function swapData(code) {
+    var d = data();
+    if (!code || (d && d.locale === code)) return;
+    var L = window.MENTRIA_LOCALES || [];
+    var src = '';
+    for (var i = 0; i < L.length; i++) if (L[i].code === code) src = L[i].palette || '';
+    if (!src) return;
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = s.onerror = function () {
+      s.remove();
+      var I = window.MentriaI18n;
+      var cur = I && typeof I.locale === 'function' ? I.locale() : code;
+      if (cur !== code) swapData(cur);
+    };
+    document.head.appendChild(s);
+  }
+
+  document.addEventListener('mentria:localechange', function (e) {
+    swapData(e.detail && e.detail.code);
+  });
+
   window.MentriaPalette = { open: open, close: close, toggle: toggle };
 })();

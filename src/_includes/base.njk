@@ -24,7 +24,7 @@
       window.MENTRIA_EN_ONLY = {{ englishOnlyUrls | dump | safe }};
       window.MENTRIA_LOCALES = [
         {%- for loc in locales -%}
-        { code: {{ loc.code | dump | safe }}, prefix: {{ loc.pathPrefix | dump | safe }}, name: {{ loc.nativeName | dump | safe }}, isDefault: {{ loc.isDefault | dump | safe }} }{% if not loop.last %},{% endif %}
+        { code: {{ loc.code | dump | safe }}, prefix: {{ loc.pathPrefix | dump | safe }}, name: {{ loc.nativeName | dump | safe }}, isDefault: {{ loc.isDefault | dump | safe }}, dict: "/assets/i18n/{{ loc.code }}.json?v={{ buildHash }}", palette: "/assets/js/site-palette.{{ loc.code | lower }}.js?v={{ buildHash }}" }{% if not loop.last %},{% endif %}
         {%- endfor -%}
       ];
     </script>

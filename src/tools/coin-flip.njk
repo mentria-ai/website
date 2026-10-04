@@ -204,10 +204,13 @@ localeReload: true
 
     var deg = extraTurns * 180;
     flipBtn.disabled = true;
-    coinInner.style.transition = "transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)";
-    coinInner.style.transform = "rotateX(" + deg + "deg)";
+    var settled = false;
+    var safetyTimer = 0;
 
     function settle(e) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(safetyTimer);
       coinInner.removeEventListener("transitionend", settle);
       coinInner.removeEventListener("transitioncancel", settle);
       flipBtn.disabled = false;
@@ -234,8 +237,15 @@ localeReload: true
       resultEl.dataset.outcome = isHeads ? "heads" : "tails";
       flipping = false;
     }
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      settle({ type: "transitionend" });
+      return;
+    }
+    coinInner.style.transition = "transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)";
+    coinInner.style.transform = "rotateX(" + deg + "deg)";
     coinInner.addEventListener("transitionend", settle);
     coinInner.addEventListener("transitioncancel", settle);
+    safetyTimer = setTimeout(function () { settle({ type: "transitionend" }); }, 1200);
   }
 
   function resetSeries() {
@@ -308,6 +318,7 @@ localeReload: true
   background: none;
   border: none;
   padding: 0;
+  font: inherit;
   cursor: pointer;
   perspective: 800px;
   outline: none;

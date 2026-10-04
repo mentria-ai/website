@@ -147,8 +147,9 @@ function scheduleRender() {
 
 function render() {
   const scroll = previewEl.scrollTop;
-  previewEl.innerHTML = window.renderMarkdown ? window.renderMarkdown(inputEl.value || '') : '';
-  previewEl.querySelectorAll('img').forEach((img) => {
+  const tpl = document.createElement('template');
+  tpl.innerHTML = window.renderMarkdown ? window.renderMarkdown(inputEl.value || '') : '';
+  tpl.content.querySelectorAll('img').forEach((img) => {
     const src = img.getAttribute('src') || '';
     let resolved;
     try { resolved = new URL(src, location.href); } catch (_) { return; }
@@ -159,6 +160,7 @@ function render() {
       img.replaceWith(note);
     }
   });
+  previewEl.replaceChildren(tpl.content);
   previewEl.scrollTop = scroll;
   updateCounts();
 }
@@ -247,12 +249,12 @@ function loadInitial() {
 
 /* ── PDF (via browser print) ────────────────────────────────────── */
 function slugify(s) {
-  return String(s || '')
-    .normalize('NFKD').replace(/[̀-ͯ]/g, '')   // strip diacritics
-    .replace(/[^A-Za-z0-9]+/g, '-')
+  const slug = String(s || '')
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '').normalize('NFC')
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '')
-    .toLowerCase()
-    .slice(0, 64) || 'document';
+    .toLowerCase();
+  return Array.from(slug).slice(0, 64).join('') || 'document';
 }
 
 function deriveTitle() {
@@ -448,12 +450,7 @@ function exportMD() {
   const fromInput = (filenameInput.value || '').trim();
   const filename = (fromInput ? slugify(fromInput) : slugify(deriveTitle())) + '.md';
   const blob = new Blob([inputEl.value || ''], { type: 'text/markdown;charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
+  MentriaUI.downloadFile(filename, blob);
 }
 
 async function shareMD() {

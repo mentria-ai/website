@@ -124,6 +124,19 @@ localeReload: true
     embMakernote:  {{ ("tool.exif.emb_makernote"   | t) | dump | safe }},
     embValues:     {{ ("tool.exif.emb_values"      | t) | dump | safe }},
     embCompressed: {{ ("tool.exif.emb_compressed"  | t) | dump | safe }},
+    iccDescription: {{ ("tool.exif.icc_description" | t) | dump | safe }},
+    iccCopyright:  {{ ("tool.exif.icc_copyright"   | t) | dump | safe }},
+    iccVersion:    {{ ("tool.exif.icc_version"     | t) | dump | safe }},
+    iccDeviceClass: {{ ("tool.exif.icc_device_class" | t) | dump | safe }},
+    iccColorSpace: {{ ("tool.exif.icc_color_space" | t) | dump | safe }},
+    iccCreated:    {{ ("tool.exif.icc_created"     | t) | dump | safe }},
+    iccClassScnr:  {{ ("tool.exif.icc_class_scnr"  | t) | dump | safe }},
+    iccClassMntr:  {{ ("tool.exif.icc_class_mntr"  | t) | dump | safe }},
+    iccClassPrtr:  {{ ("tool.exif.icc_class_prtr"  | t) | dump | safe }},
+    iccClassLink:  {{ ("tool.exif.icc_class_link"  | t) | dump | safe }},
+    iccClassSpac:  {{ ("tool.exif.icc_class_spac"  | t) | dump | safe }},
+    iccClassAbst:  {{ ("tool.exif.icc_class_abst"  | t) | dump | safe }},
+    iccClassNmcl:  {{ ("tool.exif.icc_class_nmcl"  | t) | dump | safe }},
     removedLabel:  {{ ("tool.exif.removed_label"   | t) | dump | safe }},
     verifiedClean: {{ ("tool.exif.verified_clean"  | t) | dump | safe }},
     stripUnsupported: {{ ("tool.exif.strip_unsupported" | t) | dump | safe }},
@@ -424,7 +437,7 @@ localeReload: true
     interop: { 0x0001: 'InteroperabilityIndex', 0x0002: 'InteroperabilityVersion' }
   };
   const IPTC_NAMES = { '1:90': 'CodedCharacterSet', '2:0': 'RecordVersion', '2:5': 'ObjectName', '2:7': 'EditStatus', '2:10': 'Urgency', '2:15': 'Category', '2:20': 'SupplementalCategories', '2:25': 'Keywords', '2:40': 'SpecialInstructions', '2:55': 'DateCreated', '2:60': 'TimeCreated', '2:62': 'DigitalCreationDate', '2:63': 'DigitalCreationTime', '2:65': 'OriginatingProgram', '2:70': 'ProgramVersion', '2:80': 'By-line', '2:85': 'By-lineTitle', '2:90': 'City', '2:92': 'Sub-location', '2:95': 'Province-State', '2:100': 'Country-PrimaryLocationCode', '2:101': 'Country-PrimaryLocationName', '2:103': 'OriginalTransmissionReference', '2:105': 'Headline', '2:110': 'Credit', '2:115': 'Source', '2:116': 'CopyrightNotice', '2:118': 'Contact', '2:120': 'Caption-Abstract', '2:122': 'Writer-Editor', '2:135': 'LanguageIdentifier' };
-  const ICC_CLASS = { scnr: 'Input (scanner/camera)', mntr: 'Display', prtr: 'Output (printer)', link: 'Device link', spac: 'Color space', abst: 'Abstract', nmcl: 'Named color' };
+  const ICC_CLASS = { scnr: COPY.iccClassScnr, mntr: COPY.iccClassMntr, prtr: COPY.iccClassPrtr, link: COPY.iccClassLink, spac: COPY.iccClassSpac, abst: COPY.iccClassAbst, nmcl: COPY.iccClassNmcl };
 
   const utf8 = new TextDecoder('utf-8');
   const latin1 = new TextDecoder('latin1');
@@ -601,18 +614,18 @@ localeReload: true
       const off = dv.getUint32(e + 4, false), size = dv.getUint32(e + 8, false);
       if (off + size <= bytes.length) tags[sig(e)] = { off, size };
     }
-    if (tags.desc) { try { const d = iccString(bytes, tags.desc.off, tags.desc.size); if (d) rows.push(['Description', d]); } catch (_) {} }
-    if (tags.cprt) { try { const c = iccString(bytes, tags.cprt.off, tags.cprt.size); if (c) rows.push(['Copyright', c]); } catch (_) {} }
-    rows.push(['Version', bytes[8] + '.' + (bytes[9] >> 4)]);
+    if (tags.desc) { try { const d = iccString(bytes, tags.desc.off, tags.desc.size); if (d) rows.push([COPY.iccDescription, d]); } catch (_) {} }
+    if (tags.cprt) { try { const c = iccString(bytes, tags.cprt.off, tags.cprt.size); if (c) rows.push([COPY.iccCopyright, c]); } catch (_) {} }
+    rows.push([COPY.iccVersion, bytes[8] + '.' + (bytes[9] >> 4)]);
     const cls = sig(12);
-    rows.push(['Device class', (ICC_CLASS[cls] || cls)]);
-    rows.push(['Color space', sig(16)]);
+    rows.push([COPY.iccDeviceClass, (ICC_CLASS[cls] || cls)]);
+    rows.push([COPY.iccColorSpace, sig(16)]);
     rows.push(['PCS', sig(20)]);
     const y = dv.getUint16(24, false), mo = dv.getUint16(26, false), d = dv.getUint16(28, false);
-    if (y) rows.push(['Created', y + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0')]);
+    if (y) rows.push([COPY.iccCreated, y + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0')]);
     const cmm = sig(4);
     if (cmm) rows.push(['CMM', cmm]);
-    rows.push(['Size', fmtBytes(dv.getUint32(0, false))]);
+    rows.push([COPY.fieldSize, fmtBytes(dv.getUint32(0, false))]);
     return rows;
   }
 
@@ -668,9 +681,14 @@ localeReload: true
   }
 
   let embToken = 0;
+  let embThumbUrl = null;
+  function revokeEmbThumb() {
+    if (embThumbUrl) { URL.revokeObjectURL(embThumbUrl); embThumbUrl = null; }
+  }
   async function renderEmbedded(meta) {
     const token = ++embToken;
     embeddedEl.innerHTML = '';
+    revokeEmbThumb();
     if (!meta) return;
     const blocks = [];
     const tiff = meta.tiff;
@@ -696,7 +714,8 @@ localeReload: true
         const img = document.createElement('img');
         img.className = 'ex__emb-thumb';
         img.alt = '';
-        img.src = URL.createObjectURL(tb);
+        embThumbUrl = URL.createObjectURL(tb);
+        img.src = embThumbUrl;
         img.onload = () => { if (img.naturalWidth) det.querySelector('summary').textContent = COPY.embThumb + ' · ' + img.naturalWidth + ' × ' + img.naturalHeight + ' · ' + fmtBytes(tb.size); };
         det.append(note, img);
         blocks.push(det);
@@ -730,7 +749,7 @@ localeReload: true
           if (z >= 0) bytes = await inflate(seg.pngIcc.subarray(z + 2));
         }
         const rows = decodeIcc(bytes);
-        if (rows.length) { const det = detailBlock(COPY.embIcc, rows[0][0] === 'Description' ? rows[0][1] : null); det.appendChild(rowsToDl(rows)); blocks.push(det); }
+        if (rows.length) { const det = detailBlock(COPY.embIcc, rows[0][0] === COPY.iccDescription ? rows[0][1] : null); det.appendChild(rowsToDl(rows)); blocks.push(det); }
       } else if (seg.kind === 'comment' && seg.raw) {
         const text = utf8.decode(seg.raw).replace(/\0+$/, '').trim();
         if (text) { const det = detailBlock(COPY.embComment, fmtBytes(seg.raw.length)); const pre = document.createElement('pre'); pre.className = 'ex__emb-pre'; pre.textContent = text.slice(0, 5000); det.appendChild(pre); blocks.push(det); }
@@ -858,6 +877,7 @@ localeReload: true
     if (!had || had === document.body || reportEl.contains(had)) { try { dropEl.focus({ preventScroll: true }); } catch (_) {} }
     resultEl.hidden = true;
     if (objUrl) { URL.revokeObjectURL(objUrl); objUrl = null; }
+    revokeEmbThumb();
     thumbEl.src = '';
     origBuf = null;
     origFile = null;

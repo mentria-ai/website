@@ -1469,7 +1469,20 @@
       "emb_raw": "Raw XML",
       "emb_makernote": "MakerNote (proprietary, not decoded)",
       "emb_values": "{n} values",
-      "emb_compressed": "compressed"
+      "emb_compressed": "compressed",
+      "icc_description": "Description",
+      "icc_copyright": "Copyright",
+      "icc_version": "Version",
+      "icc_device_class": "Device class",
+      "icc_color_space": "Color space",
+      "icc_created": "Created",
+      "icc_class_scnr": "Input (scanner/camera)",
+      "icc_class_mntr": "Display",
+      "icc_class_prtr": "Output (printer)",
+      "icc_class_link": "Device link",
+      "icc_class_spac": "Color space",
+      "icc_class_abst": "Abstract",
+      "icc_class_nmcl": "Named color"
     },
     "sudoku": {
       "level": "Level",

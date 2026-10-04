@@ -696,5 +696,9 @@
     if (trigger && data()) { e.preventDefault(); open(); }
   });
 
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted && isOpen()) close();
+  });
+
   window.MentriaPalette = { open: open, close: close, toggle: toggle };
 })();

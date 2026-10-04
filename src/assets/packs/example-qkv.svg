@@ -21,25 +21,25 @@
   <rect width="832" height="1472" fill="url(#glowTop)"/>
   <rect width="832" height="1472" fill="url(#glowLow)"/>
 
-  <g font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-weight="700" font-size="92" text-anchor="middle">
+  <g>
     <rect x="67" y="294" width="216" height="324" rx="22" fill="#22d3ee" fill-opacity="0.1" stroke="#22d3ee" stroke-opacity="0.55" stroke-width="2"/>
     <circle cx="165" cy="398" r="40" fill="none" stroke="#22d3ee" stroke-width="10"/>
     <line x1="194" y1="427" x2="224" y2="457" stroke="#22d3ee" stroke-width="12" stroke-linecap="round"/>
-    <text x="175" y="578" fill="#22d3ee">Q</text>
+    <g fill="none" stroke="#22d3ee" stroke-width="12" stroke-linecap="round"><ellipse cx="175" cy="544" rx="27" ry="34"/><line x1="186" y1="563" x2="205" y2="589"/></g>
 
     <rect x="316" y="294" width="216" height="324" rx="22" fill="#fbbf24" fill-opacity="0.1" stroke="#fbbf24" stroke-opacity="0.55" stroke-width="2"/>
     <circle cx="384" cy="408" r="26" fill="none" stroke="#fbbf24" stroke-width="10"/>
     <line x1="410" y1="408" x2="472" y2="408" stroke="#fbbf24" stroke-width="10" stroke-linecap="round"/>
     <line x1="452" y1="408" x2="452" y2="430" stroke="#fbbf24" stroke-width="8" stroke-linecap="round"/>
     <line x1="468" y1="408" x2="468" y2="424" stroke="#fbbf24" stroke-width="8" stroke-linecap="round"/>
-    <text x="424" y="578" fill="#fbbf24">K</text>
+    <g fill="none" stroke="#fbbf24" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"><line x1="402" y1="510" x2="402" y2="578"/><path d="M446 510 L404 549 M414 540 L448 578"/></g>
 
     <rect x="566" y="294" width="216" height="324" rx="22" fill="#6ef3c5" fill-opacity="0.1" stroke="#6ef3c5" stroke-opacity="0.55" stroke-width="2"/>
     <rect x="618" y="366" width="84" height="74" rx="10" fill="#6ef3c5" fill-opacity="0.15" stroke="#6ef3c5" stroke-width="9"/>
     <line x1="618" y1="392" x2="702" y2="392" stroke="#6ef3c5" stroke-width="6" stroke-opacity="0.7"/>
     <line x1="712" y1="403" x2="742" y2="403" stroke="#6ef3c5" stroke-width="9" stroke-linecap="round"/>
     <path d="M732 389 L748 403 L732 417" fill="none" stroke="#6ef3c5" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="674" y="578" fill="#6ef3c5">V</text>
+    <path d="M648 510 L674 578 L700 510" fill="none" stroke="#6ef3c5" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 
   <g fill="none" stroke="#22d3ee" stroke-linecap="round">

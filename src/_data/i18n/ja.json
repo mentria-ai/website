@@ -1469,7 +1469,20 @@
       "emb_raw": "生のXML",
       "emb_makernote": "MakerNote（独自形式、未デコード）",
       "emb_values": "{n}件の値",
-      "emb_compressed": "圧縮"
+      "emb_compressed": "圧縮",
+      "icc_description": "説明",
+      "icc_copyright": "著作権",
+      "icc_version": "バージョン",
+      "icc_device_class": "デバイスクラス",
+      "icc_color_space": "色空間",
+      "icc_created": "作成日",
+      "icc_class_scnr": "入力（スキャナー/カメラ）",
+      "icc_class_mntr": "ディスプレイ",
+      "icc_class_prtr": "出力（プリンター）",
+      "icc_class_link": "デバイスリンク",
+      "icc_class_spac": "色空間",
+      "icc_class_abst": "抽象",
+      "icc_class_nmcl": "名前付きカラー"
     },
     "sudoku": {
       "level": "難易度",

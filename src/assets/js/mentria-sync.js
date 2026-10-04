@@ -69,7 +69,11 @@ const deriveFromCode = async (codeRaw) => {
   return { roomId, key };
 };
 
-const b64Encode = (bytes) => btoa(String.fromCharCode.apply(null, bytes));
+const b64Encode = (bytes) => {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
 const b64Decode = (s) => {
   const bin = atob(s);
   const out = new Uint8Array(bin.length);

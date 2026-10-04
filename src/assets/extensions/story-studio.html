@@ -2,7 +2,7 @@
 {
   "id": "story-studio",
   "name": "Story Studio",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "icon": "📖",
   "author": "Mentria",
   "description": "Build swipeable story decks: generate images on Mentria's render node or import your own, write captions, arrange slides, export the finished deck.",
@@ -152,6 +152,7 @@
 
 <script>
 var m = window.mentria || {};
+if (m.theme && m.theme.fontMono) document.documentElement.style.setProperty('--ext-font', m.theme.fontMono);
 var LOCS = ['en', 'es', 'fr', 'ja', 'pt-BR'];
 var STR = {
   en: {
@@ -1139,7 +1140,7 @@ $('submit').addEventListener('click', async () => {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(zip);
   a.download = 'story-' + bundle.deck.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '-submission.zip';
-  document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+  document.body.appendChild(a); a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1500); a.remove();
   let body = issueBody(sub, true);
   let fits = encodeURIComponent(body).length <= URL_BODY_BUDGET;
   if (!fits) body = issueBody(sub, false);
@@ -1164,7 +1165,7 @@ $('export').addEventListener('click', async () => {
   a.download = 'story-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '.json';
   document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   a.remove();
   setStatus(missing ? 'exportedSkip' : 'exported', 'ok', { n: ready.length, k: missing });
 });

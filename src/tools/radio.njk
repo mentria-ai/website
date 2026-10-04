@@ -32,7 +32,7 @@ eleventyComputed:
   <div class="rd__now">
     <span class="rd__label">{{ "tool.radio.now_playing_label" | t }}</span>
     <div class="rd__now-inner">
-      <img class="rd__art" id="rd-art" src="" alt="" aria-hidden="true">
+      <img class="rd__art" id="rd-art" alt="" aria-hidden="true">
       <div class="rd__track-info">
         <span class="rd__title" id="rd-title" aria-live="polite">{{ "tool.radio.press_play" | t }}</span>
         <span class="rd__mood" id="rd-mood"></span>
@@ -172,7 +172,7 @@ window.RADIO_COPY = {
 .rd__track-count {
   margin-left: auto;
   font-size: 0.65rem;
-  opacity: 0.5;
+  color: var(--term-muted);
 }
 
 .rd__retry {

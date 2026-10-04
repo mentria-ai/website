@@ -102,12 +102,19 @@ export async function exportJSONL(catalog) {
   }
 
   const blob = new Blob([lines.join("\n")], { type: "application/jsonl" });
+  const name = `mentria-radio-prefs-${Date.now()}.jsonl`;
+  if (window.MentriaUI && window.MentriaUI.downloadFile) {
+    window.MentriaUI.downloadFile(name, blob);
+    return;
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `mentria-radio-prefs-${Date.now()}.jsonl`;
+  a.download = name;
   document.body.appendChild(a);
   a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 1500);
 }

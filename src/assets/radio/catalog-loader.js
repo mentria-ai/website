@@ -10,11 +10,3 @@ export async function loadCatalog() {
   cache = await res.json();
   return cache;
 }
-
-export function getCatalog() {
-  return cache;
-}
-
-export function invalidateCache() {
-  cache = null;
-}

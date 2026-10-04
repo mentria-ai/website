@@ -151,6 +151,8 @@
   left: 50%;
   bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
+  width: max-content;
+  max-width: min(calc(100vw - 2rem), 640px);
   background: var(--term-bg-raised);
   border: 1px solid var(--term-border-strong);
   border-radius: var(--radius-md);

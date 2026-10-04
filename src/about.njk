@@ -396,7 +396,7 @@ localeReload: true
   .about-data-field input[type="password"], .about-data-field input[type="file"] { background: var(--term-bg); border: 1px solid var(--term-border); color: var(--term-fg); padding: 7px 9px; border-radius: 5px; font-family: inherit; font-size: 13px; width: 100%; min-width: 0; box-sizing: border-box; }
   .about-data-field input[type="password"]:focus { outline: none; border-color: var(--syn-cyan); }
   .about-data-strength { font-family: var(--font-mono); font-size: 10px; min-height: 14px; letter-spacing: 0.1em; }
-  .about-data-strength[data-level="weak"]   { color: var(--syn-red, #f25fa8); }
+  .about-data-strength[data-level="weak"]   { color: var(--syn-pink); }
   .about-data-strength[data-level="medium"] { color: var(--syn-amber, #f7b015); }
   .about-data-strength[data-level="strong"] { color: var(--syn-green, #34c46a); }
   .about-data-btn { background: transparent; border: 1px solid var(--syn-cyan); color: var(--syn-cyan); padding: 8px 14px; border-radius: 6px; font-family: var(--font-mono); font-size: 12px; cursor: pointer; transition: background 120ms, color 120ms; margin-top: 4px; }
@@ -406,7 +406,7 @@ localeReload: true
   .about-data-btn--ghost:hover:not(:disabled) { background: var(--term-bg-raised); color: var(--syn-cyan); border-color: var(--syn-cyan); }
   .about-data-status { font-family: var(--font-mono); font-size: 11px; min-height: 14px; color: var(--term-muted); }
   .about-data-status[data-tone="ok"]   { color: var(--syn-green, #34c46a); }
-  .about-data-status[data-tone="err"]  { color: var(--syn-red, #f25fa8); }
+  .about-data-status[data-tone="err"]  { color: var(--syn-pink); }
   @media (max-width: 600px) { .about-data-grid { grid-template-columns: 1fr; } }
 
   .about-identity-card { background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
@@ -429,7 +429,7 @@ localeReload: true
   .about-sync-status__label { font-family: var(--font-mono); font-size: 12px; color: var(--term-muted); }
   .about-sync-status__label[data-tone="connected"] { color: var(--syn-green, #34c46a); }
   .about-sync-status__label[data-tone="pairing"]   { color: var(--syn-amber, #f7b015); }
-  .about-sync-status__label[data-tone="err"]       { color: var(--syn-red, #f25fa8); }
+  .about-sync-status__label[data-tone="err"]       { color: var(--syn-pink); }
 
   @media (max-width: 760px) {
     .about-ship-grid { grid-template-columns: repeat(2, 1fr); }

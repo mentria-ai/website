@@ -193,6 +193,10 @@
         tip.dataset.n = b.dataset.n;
         tip.innerHTML = '<strong>' + esc(label) + '</strong>' + (h.body ? ctx.md(h.body) : '');
         tip.hidden = false;
+        var hb = b.getBoundingClientRect(), bb = box.getBoundingClientRect();
+        var top = hb.bottom - bb.top + 14;
+        if (top + tip.offsetHeight > bb.height - 8) top = Math.max(8, hb.top - bb.top - 14 - tip.offsetHeight);
+        tip.style.top = top + 'px';
         var said = tip.textContent.slice(tip.firstChild.textContent.length).trim();
         ctx.live(said ? label + ': ' + said : label);
         seen[j] = true;
@@ -206,14 +210,27 @@
       e.stopPropagation();
       closeTip();
     });
-    wrap.appendChild(tip);
     var o = el('div', 'deck__slide-overlay pack-overlay pack-overlay--thin');
     if (card.title) o.appendChild(el('p', 'pack-overlay__title', esc(ctx.tx(card.title))));
     if (card.caption) o.appendChild(el('p', 'deck__caption', inline(ctx.md(card.caption))));
     if ((card.hotspots || []).length) o.appendChild(el('p', 'pack-overlay__hint', esc(t('hotspot_hint', { n: card.hotspots.length }))));
     var box = el('div', 'pack-image-wrap');
     box.appendChild(wrap);
+    box.appendChild(tip);
     box.appendChild(o);
+    if (img) {
+      var fit = function () {
+        if (!tip.hidden) closeTip();
+        var W = box.clientWidth, H = box.clientHeight, iw = img.naturalWidth, ih = img.naturalHeight;
+        if (!W || !H || !iw || !ih) return;
+        var w = W, h = W * ih / iw;
+        if (h > H) { h = H; w = H * iw / ih; }
+        wrap.style.cssText = 'left:' + ((W - w) / 2) + 'px;top:' + ((H - h) / 2) + 'px;width:' + w + 'px;height:' + h + 'px;right:auto;bottom:auto';
+      };
+      if (img.complete) fit(); else img.addEventListener('load', fit);
+      if (global.ResizeObserver) new global.ResizeObserver(fit).observe(box);
+      else global.addEventListener('resize', fit);
+    }
     return box;
   }
 

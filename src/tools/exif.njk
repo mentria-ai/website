@@ -749,7 +749,7 @@ localeReload: true
           if (z >= 0) bytes = await inflate(seg.pngIcc.subarray(z + 2));
         }
         const rows = decodeIcc(bytes);
-        if (rows.length) { const det = detailBlock(COPY.embIcc, rows[0][0] === 'Description' ? rows[0][1] : null); det.appendChild(rowsToDl(rows)); blocks.push(det); }
+        if (rows.length) { const det = detailBlock(COPY.embIcc, rows[0][0] === COPY.iccDescription ? rows[0][1] : null); det.appendChild(rowsToDl(rows)); blocks.push(det); }
       } else if (seg.kind === 'comment' && seg.raw) {
         const text = utf8.decode(seg.raw).replace(/\0+$/, '').trim();
         if (text) { const det = detailBlock(COPY.embComment, fmtBytes(seg.raw.length)); const pre = document.createElement('pre'); pre.className = 'ex__emb-pre'; pre.textContent = text.slice(0, 5000); det.appendChild(pre); blocks.push(det); }

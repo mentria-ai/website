@@ -5170,6 +5170,7 @@
     "blank_n": "Lacuna {n}",
     "type_here": "digite aqui",
     "hotspot_hint": "{n} pontos para explorar",
+    "hotspot_hint_one": "{n} ponto para explorar",
     "section_stats": "Esta seção: {right} certos, {wrong} para revisar",
     "unsupported": "Este tipo de cartão ainda não é compatível com esta versão.",
     "your_guess": "Seu palpite",

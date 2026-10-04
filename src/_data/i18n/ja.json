@@ -5170,6 +5170,7 @@
     "blank_n": "空欄 {n}",
     "type_here": "ここに入力",
     "hotspot_hint": "{n} か所のスポット",
+    "hotspot_hint_one": "{n} か所のスポット",
     "section_stats": "このセクション: 正解 {right}、復習 {wrong}",
     "unsupported": "このカードの種類はまだこのバージョンでは対応していません。",
     "your_guess": "あなたの予想",

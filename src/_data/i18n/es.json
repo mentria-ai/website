@@ -5170,6 +5170,7 @@
     "blank_n": "Hueco {n}",
     "type_here": "escribe aquí",
     "hotspot_hint": "{n} puntos por explorar",
+    "hotspot_hint_one": "{n} punto por explorar",
     "section_stats": "Esta sección: {right} bien, {wrong} por repasar",
     "unsupported": "Este tipo de tarjeta aún no es compatible con esta versión.",
     "your_guess": "Tu estimación",

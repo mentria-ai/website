@@ -509,14 +509,9 @@ localeReload: true
   const exportJSON = () => {
     const payload = collectPayload();
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
     const inv  = (document.getElementById('invnoInp')?.value || 'draft').replace(/[^A-Za-z0-9_-]/g, '');
     const date = invoiceDateInput.value || localDateStr();
-    a.href = url;
-    a.download = `invoice-${inv || 'draft'}-${date}.json`;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+    MentriaUI.downloadFile(`invoice-${inv || 'draft'}-${date}.json`, blob);
   };
 
   const applyFields = (ids, obj) => {
@@ -875,7 +870,12 @@ localeReload: true
   const printDate = (value) => {
     const [y, m, d] = String(value || '').split('-').map(Number);
     if (!y || !m || !d) return '';
-    return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const ui = document.documentElement.lang || 'en';
+    const nav = (navigator.languages && navigator.languages[0]) || navigator.language || ui;
+    const loc = nav.toLowerCase().startsWith(ui.slice(0, 2).toLowerCase()) ? nav : ui;
+    const opts = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    try { return new Date(y, m - 1, d).toLocaleDateString(loc, opts); }
+    catch (_) { return new Date(y, m - 1, d).toLocaleDateString(undefined, opts); }
   };
   const buildPrintMirrors = () => {
     if (invoiceDateInput) {
@@ -916,6 +916,8 @@ localeReload: true
   exportBtn.addEventListener('click', exportJSON);
   clearBtn.addEventListener('click', async () => {
     if (!(await mentriaConfirm(COPY.confirmClear))) return;
+    clearTimeout(syncTimer);
+    syncTimer = 0;
     if (window.MentriaStore) window.MentriaStore.clear(NS);
     try {
       Object.keys(localStorage)

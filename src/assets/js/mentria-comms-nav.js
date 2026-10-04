@@ -38,16 +38,20 @@
     }
   }
 
-  function syncLocale() {
+  var lastLocale = null;
+
+  function syncLocale(force) {
     if (!global.MentriaPushDB || !global.MentriaPushDB.kvSet) return;
     var loc = null;
     try { loc = global.localStorage.getItem('mentria_lang'); } catch (_) {}
     if (!loc) loc = document.documentElement.getAttribute('lang') || 'en';
-    global.MentriaPushDB.kvSet('locale', loc).catch(function () {});
+    if (!force && loc === lastLocale) return;
+    lastLocale = loc;
+    global.MentriaPushDB.kvSet('locale', loc).catch(function () { lastLocale = null; });
   }
 
-  function refresh() {
-    syncLocale();
+  function refresh(force) {
+    syncLocale(force === true);
     return readPushCount().then(function (n) { pushCount = n; paint(); });
   }
 
@@ -55,9 +59,12 @@
     if (e && e.detail && typeof e.detail.total === 'number') pushCount = e.detail.total;
     paint();
   });
-  global.addEventListener('storage', refresh);
-  global.addEventListener('pageshow', refresh);
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) refresh(); });
+  global.addEventListener('storage', function (e) {
+    if (e.key !== null && e.key !== 'mentria_lang' && e.key !== 'mentria.store.comms.unread') return;
+    refresh();
+  });
+  global.addEventListener('pageshow', function (e) { if (e.persisted) refresh(true); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) refresh(true); });
 
   if (navigator.serviceWorker) {
     navigator.serviceWorker.addEventListener('message', function (e) {

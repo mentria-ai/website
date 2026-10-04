@@ -1,17 +1,21 @@
 {
   "name": "mentria-website",
   "version": "1.0.0",
+  "private": true,
   "description": "Mentria Website - Blog & Tools",
   "scripts": {
     "start": "eleventy --serve",
-    "build": "eleventy",
+    "build": "eleventy --quiet",
     "ext:sync": "node tools/sync-extensions.mjs",
     "pack:check": "node scripts/pack-check.mjs",
     "finance:check": "node scripts/finance-check.mjs"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0"
   },

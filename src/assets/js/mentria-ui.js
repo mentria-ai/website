@@ -1,6 +1,13 @@
 (function () {
   'use strict';
 
+  function copyText(text) {
+    return Promise.resolve().then(function () {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('no-clipboard');
+      return navigator.clipboard.writeText(String(text));
+    }).then(function () { return true; }, function () { return false; });
+  }
+
   function copyButton(el, getValue, opts) {
     if (!el || typeof getValue !== 'function') return el;
     opts = opts || {};
@@ -22,13 +29,10 @@
           busy = false;
         }, restoreMs);
       };
-      Promise.resolve()
-        .then(function () {
-          if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('no-clipboard');
-          return navigator.clipboard.writeText(value);
-        })
-        .then(function () { settle(copiedText, 'is-copied'); })
-        .catch(function () { settle(failedText, 'is-failed'); });
+      copyText(value).then(function (ok) {
+        if (ok) settle(copiedText, 'is-copied');
+        else settle(failedText, 'is-failed');
+      });
     });
     return el;
   }
@@ -91,7 +95,7 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'm-toast__action';
-    btn.textContent = opts.label || (window.MentriaUICopy && window.MentriaUICopy.undo) || 'Undo';
+    btn.textContent = opts.label || uiCopy('undo', 'common.undo', 'Undo');
     el.appendChild(text);
     el.appendChild(btn);
     document.body.appendChild(el);
@@ -535,12 +539,6 @@
     return fallback;
   }
 
-  // ── Back-dismiss ───────────────────────────────────────────────
-  // Let the system Back button/gesture (Android, installed PWA) close the
-  // topmost overlay instead of navigating away. Overlays call
-  // backDismiss(closeFn) when they open and .release() on their own close.
-  // Prefers the CloseWatcher API; falls back to a guarded history-entry stack
-  // (contentless sentinel entries, so pushes and pops always balance).
   var HAS_CLOSE_WATCHER = typeof window.CloseWatcher === 'function';
   var backStack = [];
   var backGuard = false;
@@ -592,6 +590,7 @@
       ).filter(function (n) { return !n.disabled && !n.hidden && n.type !== 'hidden'; });
     }
     function onKey(e) {
+      if (e.target && e.target.closest && e.target.closest('[popover]')) return;
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); return; }
       if (e.key !== 'Tab') return;
       var f = focusable();
@@ -607,7 +606,7 @@
       prevFocus = document.activeElement;
       el.hidden = false;
       inerted = Array.prototype.slice.call(document.body.children).filter(function (c) {
-        return c !== el && !c.hasAttribute('inert');
+        return c !== el && !c.hasAttribute('inert') && !c.hasAttribute('popover');
       });
       inerted.forEach(function (c) { c.setAttribute('inert', ''); });
       document.addEventListener('keydown', onKey);
@@ -743,6 +742,7 @@
   }, true);
 
   window.MentriaUI = {
+    copyText: copyText,
     copyButton: copyButton,
     toast: toast,
     undoToast: undoToast,
@@ -765,6 +765,7 @@
     modal: modal,
     backDismiss: backDismiss,
     toolTitle: toolTitle,
+    localePrefix: localePrefix,
     windowMenu: windowMenu
   };
 })();

@@ -26,8 +26,15 @@
     if (v[lang]) return v[lang];
     var base = String(lang).split('-')[0];
     if (v[base]) return v[base];
-    if (v.en) return v.en;
     var k = Object.keys(v);
+    var near = function (code) {
+      code = code.toLowerCase();
+      for (var i = 0; i < k.length; i++) if (k[i].toLowerCase() === code && v[k[i]]) return v[k[i]];
+      return '';
+    };
+    var hit = near(String(lang)) || near(base);
+    if (hit) return hit;
+    if (v.en) return v.en;
     return k.length ? v[k[0]] : '';
   }
 
@@ -44,6 +51,8 @@
     if (/^data:image\/(png|jpe?g|gif|webp|avif);base64,/i.test(u) || /^https:\/\//i.test(u)) return u;
     return /^[a-z][a-z0-9+.-]*:/i.test(u) || /^\/\//.test(u) ? null : u;
   }
+
+  function blanksIn(s) { return (String(s || '').match(/\{\{[^}]*\}\}/g) || []).length; }
 
   function validate(pack) {
     var errors = [], warnings = [];
@@ -123,10 +132,16 @@
         case 'cloze':
           if (!isText(c.text)) err(at + '.text: text with {{blank}} markers');
           else {
-            var n = (text(c.text, 'en').match(/\{\{[^}]*\}\}/g) || []).length;
+            var n = blanksIn(text(c.text, 'en'));
             if (!n) err(at + '.text: needs at least one {{blank}}');
             if (!Array.isArray(c.answers) || c.answers.length !== n) err(at + '.answers: one per blank (' + n + ')');
-            else c.answers.forEach(function (a, j) { if (!isText(a) && !(Array.isArray(a) && a.length && a.every(isText))) err(at + '.answers[' + j + ']: text or array of accepted texts'); });
+            else {
+              c.answers.forEach(function (a, j) { if (!isText(a) && !(Array.isArray(a) && a.length && a.every(isText))) err(at + '.answers[' + j + ']: text or array of accepted texts'); });
+              if (typeof c.text === 'object') Object.keys(c.text).forEach(function (code) {
+                var m = blanksIn(c.text[code]);
+                if (m !== n) warn(at + '.text.' + code + ': one blank per answer (' + n + '), found ' + m);
+              });
+            }
           }
           if (c.chips != null && (!Array.isArray(c.chips) || !c.chips.every(isText))) err(at + '.chips: array of text');
           break;
@@ -494,10 +509,13 @@
   }
   function recordAnswer(id, cardId, right, extra) {
     var p = getProgress(id), c = p.cards[cardId] || { n: 0, s: 0 };
+    var early = right && c.d && c.d > Date.now();
     c.n = (c.n || 0) + 1;
     c.r = right ? 'right' : 'wrong';
-    c.s = right ? Math.min((c.s || 0) + 1, INTERVALS.length - 1) : 0;
-    c.d = localDaysFromNow(INTERVALS[c.s]);
+    if (!early) {
+      c.s = right ? Math.min((c.s || 0) + 1, INTERVALS.length - 1) : 0;
+      c.d = localDaysFromNow(INTERVALS[c.s]);
+    }
     c.t = Date.now();
     if (extra && typeof extra.distance === 'number') c.g = extra.distance;
     touchDay(c);

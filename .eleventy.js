@@ -6,17 +6,14 @@ const toolsCatalog = require("./src/_data/tools.js");
 const chapterCatalog = require("./src/_data/chapter_list.json");
 
 module.exports = function(eleventyConfig) {
-  // Inject short git commit hash as a global data value for cache busting
-  const buildHash = (() => {
+  const readBuildHash = () => {
     try {
       return execSync("git rev-parse --short HEAD").toString().trim();
     } catch {
       return Date.now().toString(36);
     }
-  })();
-  eleventyConfig.addGlobalData("buildHash", buildHash);
-  eleventyConfig.addGlobalData("releaseTag", process.env.RELEASE_TAG || "");
-  eleventyConfig.addGlobalData("englishOnlyUrls", (() => {
+  };
+  const readEnglishOnlyUrls = () => {
     const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
       if (entry.isDirectory()) return entry.name === "assets" || entry.name.startsWith("_") ? [] : walk(path.join(dir, entry.name));
       return /\.(njk|md)$/.test(entry.name) ? [path.join(dir, entry.name)] : [];
@@ -29,7 +26,12 @@ module.exports = function(eleventyConfig) {
       if (link) urls.push(link[1].trim().replace(/index\.html$/, ""));
     }
     return urls.sort();
-  })());
+  };
+  let buildHash = readBuildHash();
+  let englishOnlyUrls = readEnglishOnlyUrls();
+  eleventyConfig.addGlobalData("buildHash", () => buildHash);
+  eleventyConfig.addGlobalData("releaseTag", process.env.RELEASE_TAG || "");
+  eleventyConfig.addGlobalData("englishOnlyUrls", () => englishOnlyUrls);
 
   // Inline SVG sprite content so it can be injected directly into the HTML.
   // iOS Safari PWA has a sticky cache layer for external `<use href="X.svg#id">`
@@ -79,21 +81,30 @@ module.exports = function(eleventyConfig) {
     return fs.readdirSync(dir).filter((name) => name.endsWith(".mjs")).sort().map((name) => "/assets/mentria/dist/" + name);
   })());
 
-  // ── i18n: load locales + dictionaries once at startup ──────────
-  // Layout: src/_data/i18n/<code>.json. Same key tree across all files;
-  // missing keys fall back to English.
   const I18N_DIR = path.join(__dirname, "src", "_data", "i18n");
   const DEFAULT_LANG = "en";
   const localesData = require("./src/_data/locales.js");
   const dictionaries = {};
-  for (const file of fs.readdirSync(I18N_DIR)) {
-    if (!file.endsWith(".json")) continue;
-    const code = file.replace(/\.json$/, "");
-    dictionaries[code] = JSON.parse(fs.readFileSync(path.join(I18N_DIR, file), "utf8"));
-  }
-  if (!dictionaries[DEFAULT_LANG]) {
-    throw new Error(`Missing default i18n dictionary: src/_data/i18n/${DEFAULT_LANG}.json`);
-  }
+  const loadDictionaries = () => {
+    const next = {};
+    for (const file of fs.readdirSync(I18N_DIR)) {
+      if (!file.endsWith(".json")) continue;
+      next[file.replace(/\.json$/, "")] = JSON.parse(fs.readFileSync(path.join(I18N_DIR, file), "utf8"));
+    }
+    if (!next[DEFAULT_LANG]) {
+      throw new Error(`Missing default i18n dictionary: src/_data/i18n/${DEFAULT_LANG}.json`);
+    }
+    for (const code of Object.keys(dictionaries)) delete dictionaries[code];
+    Object.assign(dictionaries, next);
+  };
+  loadDictionaries();
+  let builds = 0;
+  eleventyConfig.on("eleventy.before", () => {
+    if (builds++ === 0) return;
+    buildHash = readBuildHash();
+    englishOnlyUrls = readEnglishOnlyUrls();
+    loadDictionaries();
+  });
 
   function lookupKey(dict, key) {
     return key.split(".").reduce((o, k) => (o == null ? undefined : o[k]), dict);
@@ -121,16 +132,19 @@ module.exports = function(eleventyConfig) {
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
+  function missingKey(key, lang) {
+    if (process.env.CI) throw new Error(`[i18n] Missing key: ${key} (lang=${lang})`);
+    console.warn(`[i18n] Missing key: ${key} (lang=${lang})`);
+    return key;
+  }
+
   // {{ "nav.tools" | t }} — uses the page's `lang`, fallback to English.
   // The output is wrapped in invisible sentinels so the build transform can
   // turn every translation into a client-switchable marker.
   eleventyConfig.addFilter("t", function (key) {
     const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
     const str = tResolve(lang, key);
-    if (str == null) {
-      console.warn(`[i18n] Missing key: ${key} (lang=${lang})`);
-      return key;
-    }
+    if (str == null) return missingKey(key, lang);
     return I18N_S0 + key + I18N_S1 + str + I18N_S2;
   });
 
@@ -165,22 +179,19 @@ module.exports = function(eleventyConfig) {
     return `<i18n-t data-k="${escAttr(key)}" data-vars="${escAttr(varName + "=" + varKey)}">${escAttr(text)}</i18n-t>`;
   });
 
-  eleventyConfig.addShortcode("tbrand", function (key, word, href) {
-    const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
-    const base = tResolve(lang, key);
-    const linked = escAttr(base == null ? key : base).split(word).join(`<a href="${escAttr(href)}">${escAttr(word)}</a>`);
-    return `<i18n-t data-k="${escAttr(key)}" data-html data-brand="${escAttr(word)}">${linked}</i18n-t>`;
+  eleventyConfig.addFilter("tlang", function (key, lang) {
+    const str = tResolve(lang, key);
+    return str == null ? missingKey(key, lang) : str;
   });
 
-  // {{ "/tools/" | localeUrl(lang) }} — prefixes path with the locale's
-  // pathPrefix, returns it unchanged for the default locale.
   eleventyConfig.addTransform("hoistBodyStyles", function (content) {
     if (!this.page.outputPath || !this.page.outputPath.endsWith(".html")) return content;
     const headEnd = content.indexOf("</head>");
     if (headEnd === -1) return content;
     const bodyPart = content.slice(headEnd);
     const styles = [];
-    const cleanedBody = bodyPart.replace(/<style>[\s\S]*?<\/style>/g, m => {
+    const cleanedBody = bodyPart.replace(/<script\b[^>]*>[\s\S]*?<\/script>|<style>[\s\S]*?<\/style>/g, m => {
+      if (m.startsWith("<script")) return m;
       styles.push(m);
       return "";
     });
@@ -311,10 +322,6 @@ module.exports = function(eleventyConfig) {
     }
   });
 
-  eleventyConfig.addFilter("year", function() {
-    return new Date().getFullYear();
-  });
-
   eleventyConfig.addFilter("emph", function (value) {
     return String(value == null ? "" : value)
       .replace(/\*\*(?!\s)([^*\n]+?)(?<!\s)\*\*/g, "<strong>$1</strong>")
@@ -340,14 +347,6 @@ module.exports = function(eleventyConfig) {
     }
   });
 
-  eleventyConfig.addFilter("chronoFeed", function(feed) {
-    if (!Array.isArray(feed)) return feed;
-    return feed
-      .map((card, i) => ({ card, i, key: String((card && card.date) || "") }))
-      .sort((a, b) => (a.key < b.key ? 1 : a.key > b.key ? -1 : a.i - b.i))
-      .map((x) => x.card);
-  });
-
   // Passthrough copy for assets
   eleventyConfig.addPassthroughCopy("src/assets");
   eleventyConfig.setServerOptions({
@@ -360,7 +359,6 @@ module.exports = function(eleventyConfig) {
   // Passthrough copy for PWA files (sw.js is now a Nunjucks template)
   eleventyConfig.addPassthroughCopy({ "src/manifest.json": "manifest.json" });
   eleventyConfig.addPassthroughCopy({ "src/favicon.ico": "favicon.ico" });
-  eleventyConfig.addPassthroughCopy({ "src/_data/i18n": "assets/i18n" });
 
   const PH0 = "\uF000", PH1 = "\uF001";
   const SENT_RE = new RegExp(I18N_S0 + "([^" + I18N_S1 + "]*)" + I18N_S1 + "([\\s\\S]*?)" + I18N_S2, "g");
@@ -485,11 +483,24 @@ module.exports = function(eleventyConfig) {
       return s.split(version).join('"softwareVersion": "' + v + '"');
     }));
     rewrite("sw.js");
+    return fragV;
+  }
+
+  function writeClientDictionaries(out) {
+    const dir = path.join(out, "assets", "i18n");
+    fs.mkdirSync(dir, { recursive: true });
+    for (const file of fs.readdirSync(I18N_DIR)) {
+      if (!file.endsWith(".json")) continue;
+      const dict = JSON.parse(fs.readFileSync(path.join(I18N_DIR, file), "utf8"));
+      if (dict.tool) delete dict.tool.finance;
+      fs.writeFileSync(path.join(dir, file), JSON.stringify(dict));
+    }
   }
 
   eleventyConfig.on("eleventy.after", ({ directories, dir }) => {
     const out = (directories && directories.output) || (dir && dir.output) || "build";
-    stabilizeVersions(out);
+    writeClientDictionaries(out);
+    const fragV = stabilizeVersions(out);
     const swPath = path.join(out, "sw.js");
     let sw;
     try { sw = fs.readFileSync(swPath, "utf8"); } catch { return; }
@@ -501,6 +512,7 @@ module.exports = function(eleventyConfig) {
     for (const m of list.matchAll(/'([^']+)'/g)) {
       const url = m[1];
       if (url.indexOf("?") !== -1) continue;
+      if (url.startsWith("/fragments/")) { revisions[url] = fragV; continue; }
       let file = path.join(out, decodeURIComponent(url));
       if (url.endsWith("/")) file = path.join(file, "index.html");
       try { revisions[url] = crypto.createHash("sha1").update(fs.readFileSync(file)).digest("hex").slice(0, 10); } catch {}

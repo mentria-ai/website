@@ -452,11 +452,11 @@ localeReload: true
 
   // ── Boot ────────────────────────────────────────────────────────
   setType(new URLSearchParams(location.search).get('type'));
-  const feedIndexP = fetch('/search-index-feed.json')
+  const feedIndexP = fetch('/search-index-feed.' + LANG + '.json')
     .then(r => (r.ok ? r.json() : []))
     .catch(() => { $offline.hidden = false; return []; });
 
-  fetch('/search-index.json').then(r => r.json()).then(idx => {
+  fetch('/search-index.' + LANG + '.json').then(r => r.json()).then(idx => {
     INDEX = idx;
     const params = new URLSearchParams(location.search);
     const initial = params.get('q') || '';

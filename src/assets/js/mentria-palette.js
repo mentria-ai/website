@@ -647,6 +647,7 @@
 
   function blockingOverlayOpen() {
     var dlg = document.getElementById('m-dialog');
+    if (dlg && dlg.hasAttribute('data-open')) return true;
     try { if (dlg && dlg.matches(':popover-open')) return true; } catch (_) {}
     if (root && root.closest && root.closest('[inert]')) return true;
     return false;
@@ -693,6 +694,32 @@
   document.addEventListener('click', function (e) {
     var trigger = e.target.closest ? e.target.closest('[data-palette-open]') : null;
     if (trigger && data()) { e.preventDefault(); open(); }
+  });
+
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted && isOpen()) close();
+  });
+
+  function swapData(code) {
+    var d = data();
+    if (!code || (d && d.locale === code)) return;
+    var L = window.MENTRIA_LOCALES || [];
+    var src = '';
+    for (var i = 0; i < L.length; i++) if (L[i].code === code) src = L[i].palette || '';
+    if (!src) return;
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = s.onerror = function () {
+      s.remove();
+      var I = window.MentriaI18n;
+      var cur = I && typeof I.locale === 'function' ? I.locale() : code;
+      if (cur !== code) swapData(cur);
+    };
+    document.head.appendChild(s);
+  }
+
+  document.addEventListener('mentria:localechange', function (e) {
+    swapData(e.detail && e.detail.code);
   });
 
   window.MentriaPalette = { open: open, close: close, toggle: toggle };

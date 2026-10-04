@@ -12,7 +12,7 @@ description: How to write a learning pack for mentria.ai. One JSON file, nine ca
   <p>A pack is one JSON file. mentria plays it as cards you read, answer and come back to. Anything that writes JSON can make one, including an AI assistant working from a book or your notes.</p>
 </section>
 
-<link rel="stylesheet" href="/assets/css/learn.css">
+<link rel="stylesheet" href="/assets/css/learn.css?v={{ buildHash }}">
 
 <div class="prose learn-format">
 
@@ -61,7 +61,7 @@ Save it as `something.mentria.json` and import it on the [Learn page](/learn/), 
 | `sections` | no | ordered groups of card ids. Every card should be in exactly one section. Without sections the pack is one section in card order. |
 | `cards` | yes | at least one card, at most 2000 |
 
-Any text field can be a string or a map of language codes to strings, for example `{ "en": "Hello", "fr": "Bonjour" }`. Text fields accept Markdown.
+Any text field can be a string or a map of language codes to strings, for example `{ "en": "Hello", "fr": "Bonjour" }`. The site's languages are `en`, `es`, `fr`, `ja` and `pt-BR`. Text fields accept Markdown.
 
 ## Cards
 

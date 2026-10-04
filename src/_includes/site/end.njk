@@ -1,7 +1,6 @@
 try {
 (function () {
   if (window.self !== window.top) return;
-  // Skip entirely if already installed (detected pre-paint in base.njk).
   if (document.documentElement.classList.contains('is-standalone')) return;
   if (document.documentElement.classList.contains('feed-layout')) return;
   if (!document.documentElement.classList.contains('app-chrome')) return;
@@ -10,29 +9,25 @@ try {
   var INSTALLED_KEY = 'mentria_pwa_installed_at';
   var SEEN_KEY      = 'mentria_pwa_install_seen';
   var SEEN_CAP      = 3;
-  var DISMISS_MS    = 7 * 24 * 60 * 60 * 1000; // 7 days
-  var SHOW_DELAY    = 3000;                     // 3s on first visit
+  var DISMISS_MS    = 7 * 24 * 60 * 60 * 1000;
+  var SHOW_DELAY    = 3000;
 
   var ls = null;
   try { ls = window.localStorage; ls.getItem('__probe__'); } catch (_) { ls = null; }
 
-  // Already installed (any prior session)? skip permanently.
   if (ls && ls.getItem(INSTALLED_KEY)) return;
 
-  // Respect prior dismissal.
   var dismissed = ls ? parseInt(ls.getItem(DISMISS_KEY), 10) : 0;
   if (dismissed && (Date.now() - dismissed) < DISMISS_MS) return;
 
-  // ── Platform detection ─────────────────────────────────────
   var ua = navigator.userAgent;
-  var isIos = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  var isIos = (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   var isMac = /Macintosh/.test(ua);
   var isSafari = /^((?!chrome|android).)*safari/i.test(ua);
   var isChromeLike = /Chrome|CriOS|EdgA?|OPR/.test(ua);
   var isApplePlatform = isIos || (isMac && isSafari && !isChromeLike);
   var canInstall = isChromeLike || isApplePlatform;
 
-  // Firefox / unsupported: silently skip — no nag.
   if (!canInstall) return;
 
   var banner       = document.getElementById('pwaInstallBanner');
@@ -46,13 +41,11 @@ try {
 
   var deferredPrompt = null;
 
-  // beforeinstallprompt: only fires on eligible Chrome-family browsers
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredPrompt = e;
   });
 
-  // appinstalled: hide everything, don't nag again
   window.addEventListener('appinstalled', function () {
     banner.hidden = true;
     banner.classList.remove('pwa-install-banner--visible');
@@ -60,9 +53,6 @@ try {
     if (ls) { try { ls.setItem(INSTALLED_KEY, String(Date.now())); ls.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {} }
   });
 
-  // Belt-and-suspenders: Chromium exposes getInstalledRelatedApps(); if it
-  // reports this site's PWA already installed (even from a previous browser
-  // session with localStorage cleared), hide the banner and persist the flag.
   if (navigator.getInstalledRelatedApps) {
     navigator.getInstalledRelatedApps().then(function (apps) {
       if (apps && apps.length) {
@@ -104,7 +94,7 @@ try {
       try { ls.setItem(SEEN_KEY, String(seen)); } catch (_) {}
     }
     banner.hidden = false;
-    void banner.offsetHeight; // reflow so the slide-in transition runs
+    void banner.offsetHeight;
     banner.classList.add('pwa-install-banner--visible');
     setupDescMarquee();
   }
@@ -147,7 +137,7 @@ try {
     if (closeBtn) closeBtn.focus();
     var noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!sheetVideo.hidden && !noMotion) {
-      sheetVideo.play().catch(function () { /* autoplay blocked — ignore */ });
+      sheetVideo.play().catch(function () {});
     }
   }
 
@@ -162,15 +152,11 @@ try {
     sheetOpener = null;
   }
 
-  // Inline SVG icons for the iOS step strings — small enough to sit
-  // inline with the text without breaking the line.
   var SHARE_SVG =
     '<svg class="pwa-inline-icon" width="14" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
   var ADD_SVG =
     '<svg class="pwa-inline-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
 
-  // Localized strings for sheet content — emitted from the template so
-  // the JS doesn't have to know the active language.
   var COPY = {
     iosTitle:    {{ ("pwa.sheet_title_ios"   | t) | dump | safe }},
     macosTitle:  {{ ("pwa.sheet_title_macos" | t) | dump | safe }},
@@ -190,7 +176,7 @@ try {
     var stepsHtml = '';
     var noteHtml  = '';
     var title     = '';
-    var showVideo = true; // single Mentria install video — works for any platform
+    var showVideo = true;
 
     if (isIos) {
       title = COPY.iosTitle;
@@ -207,7 +193,6 @@ try {
         '<li>' + COPY.macosStep3 + '</li>';
       noteHtml = COPY.note;
     } else {
-      // Chrome-family fallback if beforeinstallprompt never fired
       title = COPY.chromeTitle;
       stepsHtml =
         '<li>' + COPY.chromeStep1 + '</li>' +
@@ -227,11 +212,9 @@ try {
     }
   }
 
-  // ── Wire up interactions ───────────────────────────────────
   bannerBtn.addEventListener('click', function () {
     if (ls) ls.removeItem(SEEN_KEY);
     if (deferredPrompt) {
-      // Chrome-family with native prompt ready — trigger directly.
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then(function (result) {
         deferredPrompt = null;
@@ -258,7 +241,6 @@ try {
     }
   });
 
-  // First-paint grace: 3-second delay so users orient before we pop a CTA.
   setTimeout(showBanner, SHOW_DELAY);
 
   document.addEventListener('mentria:localechange', function () {
@@ -278,10 +260,27 @@ try {
 try {
       (function () {
         var dlg = document.getElementById('m-dialog');
-        if (!dlg || typeof dlg.showPopover !== 'function') {
-          window.mentriaConfirm = function (m) { return Promise.resolve(window.confirm(m)); };
-          window.mentriaAlert = function (m) { window.alert(m); return Promise.resolve(); };
-          return;
+        if (!dlg) return;
+        var native = typeof dlg.showPopover === 'function';
+        var scrim = null;
+        if (!native) dlg.hidden = true;
+        function isShown() { return native ? dlg.matches(':popover-open') : !dlg.hidden; }
+        function reveal() {
+          if (native) { dlg.showPopover(); return; }
+          scrim = document.createElement('div');
+          scrim.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483646;background:rgba(0,0,0,.55)';
+          document.body.appendChild(scrim);
+          dlg.style.cssText = 'position:fixed;top:50%;left:50%;right:auto;bottom:auto;margin:0;transform:translate(-50%,-50%);z-index:2147483647;display:flex;flex-direction:column;gap:1.25rem;opacity:1;max-height:calc(100vh - 2rem);overflow:auto';
+          dlg.setAttribute('data-open', '');
+          dlg.hidden = false;
+        }
+        function conceal() {
+          if (native) { dlg.hidePopover(); return; }
+          dlg.hidden = true;
+          dlg.removeAttribute('data-open');
+          dlg.style.cssText = '';
+          if (scrim && scrim.parentNode) scrim.parentNode.removeChild(scrim);
+          scrim = null;
         }
         var msgEl = document.getElementById('m-dialog-msg');
         var okBtn = document.getElementById('m-dialog-ok');
@@ -309,7 +308,7 @@ try {
         function settle(result) {
           var r = resolver; resolver = null;
           if (backHandle) { backHandle.release(); backHandle = null; }
-          if (dlg.matches(':popover-open')) dlg.hidePopover();
+          if (isShown()) conceal();
           document.removeEventListener('keydown', trapKey, true);
           var o = opener; opener = null;
           if (o && document.contains(o)) { try { o.focus(); } catch (_) {} }
@@ -329,7 +328,7 @@ try {
           cancelBtn.hidden = (item.mode === 'alert');
           okBtn.textContent = (item.mode === 'alert') ? okLabel : confirmLabel;
           safeBtn = (item.mode === 'confirm' && item.opts && item.opts.danger) ? cancelBtn : okBtn;
-          dlg.showPopover();
+          reveal();
           document.addEventListener('keydown', trapKey, true);
           backHandle = (window.MentriaUI && window.MentriaUI.backDismiss)
             ? window.MentriaUI.backDismiss(function () { settle(false); }) : null;
@@ -351,7 +350,7 @@ try {
           var cf = window.MentriaI18n.t('common.dialog.confirm');
           if (ok != null) okLabel = ok;
           if (cf != null) confirmLabel = cf;
-          if (dlg.matches(':popover-open')) okBtn.textContent = cancelBtn.hidden ? okLabel : confirmLabel;
+          if (isShown()) okBtn.textContent = cancelBtn.hidden ? okLabel : confirmLabel;
         });
       })();
 } catch (e) { console.error(e); }
@@ -402,7 +401,8 @@ try {
           }
         } catch (_) {}
         if (typeof window.mentriaConfirm === 'function') {
-          return window.mentriaConfirm({{ ("common.heavy_download" | t) | dump | safe }});
+          var heavy = window.MentriaI18n && window.MentriaI18n.t ? window.MentriaI18n.t('common.heavy_download') : null;
+          return window.mentriaConfirm(typeof heavy === 'string' ? heavy : {{ ("common.heavy_download" | t) | dump | safe }});
         }
         return true;
       };
@@ -419,7 +419,10 @@ try {
         btn.type = 'button';
         btn.className = 'tool-share';
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span></span>';
-        btn.querySelector('span').textContent = {{ ("common.share" | t) | dump | safe }};
+        var shareLabel = document.createElement('i18n-t');
+        shareLabel.setAttribute('data-k', 'common.share');
+        shareLabel.textContent = {{ ("common.share" | t) | dump | safe }};
+        btn.querySelector('span').appendChild(shareLabel);
         btn.addEventListener('click', function () {
           var desc = document.querySelector('meta[name="description"]');
           navigator.share({
@@ -463,13 +466,21 @@ try {
             }
             var rv = body.querySelectorAll('.reveal');
             for (var i = 0; i < rv.length; i++) rv[i].classList.add('revealed');
-            ['/assets/js/tool-launcher.js?v={{ buildHash }}', '/assets/js/mentria-ext-launch.js'].forEach(function (src) {
+            ['/assets/js/tool-launcher.js?v={{ buildHash }}', '/assets/js/mentria-ext-launch.js?v={{ buildHash }}'].forEach(function (src) {
               var s = document.createElement('script'); s.src = src; s.defer = true; document.body.appendChild(s);
             });
           }).catch(function () { built = null; });
           return built;
         }
         var inerted = [];
+        function expanded(on) {
+          var list = document.querySelectorAll('[data-tools-open]');
+          for (var i = 0; i < list.length; i++) {
+            list[i].setAttribute('aria-haspopup', 'dialog');
+            list[i].setAttribute('aria-expanded', on ? 'true' : 'false');
+          }
+        }
+        expanded(false);
         function onEntry() { return !!(history.state && history.state.tools); }
         function trigger() {
           var list = document.querySelectorAll('[data-tools-open]');
@@ -519,6 +530,7 @@ try {
           prevFocus = (was && was !== document.body && !popup.contains(was)) ? was : trigger();
           popup.hidden = false;
           document.body.classList.add('is-tools-open');
+          expanded(true);
           shield(true);
           document.addEventListener('keydown', trapTab);
           if (!fromHash && !onEntry()) history.pushState({ tools: true }, '', '#tools');
@@ -543,6 +555,7 @@ try {
           if (popup.hidden) return;
           popup.hidden = true;
           document.body.classList.remove('is-tools-open');
+          expanded(false);
           document.removeEventListener('keydown', trapTab);
           shield(false);
           if (!fromPop && onEntry()) history.back();
@@ -820,7 +833,7 @@ try {
             history.back();
             setTimeout(function () { if (!gone && location.pathname === here) location.href = ref.href; }, 800);
           } else {
-            location.href = ((window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.prefix) || '') + '/tools/';
+            location.href = (window.MentriaUI && window.MentriaUI.localePrefix ? window.MentriaUI.localePrefix() : ((window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.prefix) || '')) + '/tools/';
           }
         });
         document.addEventListener('keydown', function (e) {
@@ -902,4 +915,48 @@ try {
         timerTool: {{ ("tools.countdown-timer.title" | t) | dump | safe }},
         stepsTool: {{ ("tools.step-counter.title" | t) | dump | safe }}
       };
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        var ring = document.querySelector('[data-week-ring]');
+        if (!ring || !window.MentriaStore) return;
+        var segs = ring.querySelectorAll('.week-ring__seg');
+        var tipTimer = 0;
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+        function key(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+        function explain(n) {
+          var tip = ring.getAttribute('data-toast');
+          if (!tip || !window.MentriaUI || ring.offsetParent === null || window.MentriaStore.get('ui', 'week_ring_told')) return;
+          var r = ring.getBoundingClientRect();
+          if (!r.width || r.bottom <= 0 || r.top >= innerHeight) return;
+          var hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          if (!hit || !ring.contains(hit)) return;
+          window.MentriaStore.set('ui', 'week_ring_told', true);
+          window.MentriaUI.toast(tip.split('{n}').join(String(n)), { duration: 6000 });
+        }
+        function paint() {
+          var days = window.MentriaStore.get('packs', 'days') || {};
+          var d = new Date(), today = key(d), n = 0;
+          var start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+          start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+          for (var i = 0; i < 7 && i < segs.length; i++) {
+            var x = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+            var k = key(x), on = !!days[k];
+            if (on) n++;
+            segs[i].classList.toggle('is-on', on);
+            segs[i].classList.toggle('is-today', k === today);
+          }
+          var labelN = ring.getAttribute('data-label-n') || '';
+          if (labelN) { var l = labelN.split('{n}').join(String(n)); ring.setAttribute('aria-label', l); ring.setAttribute('title', l); }
+          clearTimeout(tipTimer);
+          if (n) tipTimer = setTimeout(function () { explain(n); }, 1500);
+        }
+        paint();
+        window.addEventListener('mentria:write', function (e) {
+          var d = (e && e.detail) || {};
+          if (!d.ns || d.ns === 'packs') paint();
+        });
+        document.addEventListener('mentria:localechange', paint);
+        window.addEventListener('pageshow', function (e) { if (e.persisted) paint(); });
+      })();
 } catch (e) { console.error(e); }

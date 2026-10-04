@@ -39,11 +39,12 @@ async function startPairing(ctx) {
   const qrBox = h('div', { class: 'fqr' });
   const approve = h('button', { type: 'button', class: 'fb fb--primary', hidden: true }, t('devices.approve'));
   let session = null;
+  let closed = false;
   const sh = U.sheet({
     title: t('devices.add'),
     body: h('div', { class: 'fstack' }, h('p', { class: 'fmuted fsmall' }, t('devices.add_body')), codeEl, qrBox, status, h('p', { class: 'ff__hint' }, t('devices.add_hint'))),
     foot: [h('button', { type: 'button', class: 'fb', onclick: () => sh.close() }, t('common.cancel')), approve],
-    onClose: () => { if (session) session.cancel(); },
+    onClose: () => { closed = true; if (session) session.cancel(); },
     sticky: true
   });
   try {
@@ -57,6 +58,7 @@ async function startPairing(ctx) {
         else if (reason === 'expired') { status.textContent = t('pair.expired'); approve.hidden = true; }
       }
     });
+    if (closed) { session.cancel(); return; }
     codeEl.replaceChildren(...session.code.split('-').map((g) => h('span', null, g)));
     try { qrBox.replaceChildren(await qrCanvas('mentria-finance://pair/' + session.code.replace(/-/g, ''))); } catch (_) { qrBox.remove(); }
   } catch (e) {
@@ -87,22 +89,28 @@ function conflictsPanel(ctx) {
   node.append(h('p', { class: 'fmuted fsmall', style: { marginBottom: '10px', maxWidth: '64ch' } }, t('devices.conflicts_body')));
   if (!list.length) { node.append(U.empty(t('devices.no_conflicts'))); return node; }
   list.slice().reverse().forEach((c) => {
-    const idx = list.indexOf(c);
     const rec = L.get(c.e, c.id);
     const title = rec ? (rec.payee || rec.name || rec.note || c.id) : t('devices.deleted_record');
     const show = (v) => { const s = typeof v === 'string' ? v : canonical(v); return s.length > 60 ? s.slice(0, 57) + '…' : s; };
+    const drop = () => {
+      for (const b of actions.querySelectorAll('button')) b.disabled = true;
+      const all = ctx.ledger.state.conflicts;
+      const i = all.indexOf(c);
+      if (i >= 0) all.splice(i, 1);
+      return ctx.engine.saveConflicts();
+    };
+    const actions = h('div', { class: 'fb-row fb-row--end', style: { marginTop: '8px' } },
+      h('button', { type: 'button', class: 'fb fb--sm', onclick: async () => { try { await drop(); } finally { ctx.rerender(); } } }, t('devices.keep')),
+      rec ? h('button', { type: 'button', class: 'fb fb--sm fb--primary', onclick: async () => {
+        const ops = ctx.engine.updateOps(c.e, c.id, { [c.f]: c.lose.v });
+        await drop();
+        ctx.commit(ops, t('devices.switched'));
+      } }, t('devices.use_other')) : null);
     node.append(h('div', { class: 'fcard', style: { marginBottom: '10px' } },
       h('div', { class: 'fcard__head' }, h('h3', { class: 'fcard__title' }, t('devices.entity.' + c.e) + ' · ' + title), h('span', { class: 'fsmall fmuted' }, c.f)),
       U.leader(t('devices.kept'), show(c.win.v)),
       U.leader(t('devices.other'), show(c.lose.v)),
-      h('div', { class: 'fb-row fb-row--end', style: { marginTop: '8px' } },
-        h('button', { type: 'button', class: 'fb fb--sm', onclick: async () => { ctx.ledger.state.conflicts.splice(idx, 1); await ctx.engine.saveConflicts(); ctx.rerender(); } }, t('devices.keep')),
-        rec ? h('button', { type: 'button', class: 'fb fb--sm fb--primary', onclick: async () => {
-          const ops = ctx.engine.updateOps(c.e, c.id, { [c.f]: c.lose.v });
-          ctx.ledger.state.conflicts.splice(idx, 1);
-          await ctx.engine.saveConflicts();
-          ctx.commit(ops, t('devices.switched'));
-        } }, t('devices.use_other')) : null)));
+      actions));
   });
   return node;
 }

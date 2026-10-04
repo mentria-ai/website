@@ -23,14 +23,14 @@ export function accountGroup(type) {
 }
 
 export function payeeKey(text) {
-  const s = String(text || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '');
+  const s = String(text || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
   const tokens = s.split(/[\s/\-*_|#:;,.()[\]{}]+/).filter(Boolean);
   const keep = tokens.filter((t) => {
     if (/^[\dx*]{4,}$/.test(t)) return false;
     if (/\d/.test(t) && t.length > 5) return false;
     if (/^\d+$/.test(t)) return false;
     if (/^(upi|neft|imps|rtgs|pos|ach|sepa|dd|so|tfr|trf|ref|txn|inr|usd|eur|gbp|vps|card|debit|credit|purchase|payment|pmt|www|com|in|ltd|inc|llc|gmbh|pvt|co)$/.test(t)) return false;
-    return /[a-zÀ-￿]/.test(t) && t.length > 1;
+    return /[a-z\u00c0-\uffff]/.test(t) && t.length > 1;
   });
   return keep.slice(0, 3).join(' ').slice(0, 48);
 }

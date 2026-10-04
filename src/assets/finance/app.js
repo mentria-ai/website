@@ -113,7 +113,7 @@ function ctx() {
     local: app.local,
     route: app.route,
     params: app.params,
-    writer: !app.engine.readOnly,
+    writer: !!app.engine && !app.engine.readOnly,
     viewState: (app.viewState[app.route] = app.viewState[app.route] || {}),
     go,
     rerender: () => render(),
@@ -263,7 +263,10 @@ function updateWidget() {
   } else if (open) {
     snap = { text: t('app.name'), detail: t('widget.open') };
   }
-  try { S.set('extdata.finance', 'widget', snap); } catch (_) {}
+  try {
+    if (JSON.stringify(S.get('extdata.finance', 'widget')) === JSON.stringify(snap)) return;
+    S.set('extdata.finance', 'widget', snap);
+  } catch (_) {}
 }
 
 async function autoPost() {
@@ -333,7 +336,12 @@ export async function openSession(session) {
   const engine = new Engine({ root: session.root, keys: session.keys, deviceId, deviceName });
   engine.attachTabs();
   const isWriter = await engine.acquireWriter();
-  await engine.load();
+  try {
+    await engine.load();
+  } catch (e) {
+    engine.close();
+    throw e;
+  }
   if (!isWriter) engine.waitForWriter();
   app.engine = engine;
   app.ledger = new Ledger(engine);
@@ -423,9 +431,9 @@ function runCommand(a) {
 }
 
 let lockTimer = null;
+function bumpActivity() { app.lastActive = Date.now(); }
 function armTimers() {
-  const bump = () => { app.lastActive = Date.now(); };
-  for (const ev of ['pointerdown', 'keydown', 'wheel', 'touchstart']) window.addEventListener(ev, bump, { passive: true });
+  for (const ev of ['pointerdown', 'keydown', 'wheel', 'touchstart']) window.addEventListener(ev, bumpActivity, { passive: true });
   clearInterval(lockTimer);
   lockTimer = setInterval(() => {
     const mins = app.local.auto_lock_min;
@@ -497,7 +505,7 @@ export async function boot() {
   try {
     await db.open();
   } catch (e) {
-    app.root.replaceChildren(h('div', { class: 'flock' }, h('div', { class: 'flock__inner' }, h('h1', null, t('app.name')), h('p', { class: 'flock__lede' }, t('errors.no_storage') + ' ' + String(e && e.message || e)))));
+    app.root.replaceChildren(h('main', { class: 'flock' }, h('div', { class: 'flock__inner' }, h('h1', null, t('app.name')), h('p', { class: 'flock__lede' }, t('errors.no_storage') + ' ' + String(e && e.message || e)))));
     return;
   }
   await start();

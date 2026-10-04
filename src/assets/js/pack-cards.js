@@ -17,6 +17,11 @@
   }
   function norm(s) { return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.,;:!?'"’]/g, ''); }
   function inline(html) { return html.replace(/^<p>|<\/p>\s*$/g, ''); }
+  function plain(html) {
+    var tpl = document.createElement('template');
+    tpl.innerHTML = html;
+    return tpl.content.textContent.trim();
+  }
 
   function Ctx(opts) {
     this.pack = opts.pack;
@@ -46,7 +51,7 @@
     if (card.image) {
       var img = el('img', 'deck__slide-img');
       img.src = card.image;
-      img.alt = ctx.tx(card.caption || card.title || '');
+      img.alt = card.caption ? plain(ctx.md(card.caption)) : ctx.tx(card.title || '');
       img.loading = 'lazy';
       img.decoding = 'async';
       img.addEventListener('error', function () { img.classList.add('is-broken'); });
@@ -164,7 +169,21 @@
     var t = ctx.t;
     var wrap = el('div', 'pack-image');
     var img = slide.querySelector('.deck__slide-img');
-    if (img) { img.classList.remove('deck__slide-img'); img.classList.add('pack-image__img'); img.addEventListener('error', function () { img.classList.add('is-broken'); }); wrap.appendChild(img); }
+    if (img) {
+      img.classList.remove('deck__slide-img');
+      img.classList.add('pack-image__img');
+      img.addEventListener('error', function () {
+        img.classList.add('deck__slide-img');
+        Array.prototype.forEach.call(wrap.querySelectorAll('.pack-hotspot'), function (b) {
+          b.textContent = b.getAttribute('aria-label');
+          b.style.color = '#fff';
+          b.style.font = '600 0.9rem/1.2 var(--font-body, sans-serif)';
+          b.style.padding = '4px';
+          b.style.overflowWrap = 'anywhere';
+        });
+      });
+      wrap.appendChild(img);
+    }
     var tip = el('div', 'pack-hotspot-tip');
     tip.hidden = true;
     tip.id = 'pack-tip-' + (++tipSeq);
@@ -257,11 +276,16 @@
     p.appendChild(b);
   }
 
+  function guessExtra(slide) {
+    var g = slide && slide.dataset.guessDistance;
+    return g ? { distance: +g } : undefined;
+  }
+
   function done(p, card, ctx, right) {
     var slide = p.closest('.pack-slide');
     if (slide && slide.dataset.answered) return;
     if (slide) slide.dataset.answered = '1';
-    ctx.onAnswer(card, right);
+    ctx.onAnswer(card, right, guessExtra(slide));
   }
 
   function refocus(p, had, target) {
@@ -416,17 +440,16 @@
     }
     function grade() {
       if (graded) return;
+      var vals = blanks.map(function (b) { return useChips ? (b.dataset.val || '') : b.value; });
+      if (!vals.some(Boolean)) return;
       var hadFocus = p.contains(document.activeElement);
-      var allRight = true, anyFilled = false;
+      var allRight = true;
       blanks.forEach(function (b, i) {
-        var val = useChips ? (b.dataset.val || '') : b.value;
-        if (val) anyFilled = true;
-        var ok = answers[i].some(function (a) { return norm(a) === norm(val); });
+        var ok = answers[i].some(function (a) { return norm(a) === norm(vals[i]); });
         b.classList.toggle('is-correct', ok);
         b.classList.toggle('is-wrong', !ok);
         if (!ok) { allRight = false; b.title = answers[i][0]; }
       });
-      if (!anyFilled) return;
       graded = true;
       blanks.forEach(function (b) { b.disabled = true; });
       if (chipsWrap) Array.prototype.forEach.call(chipsWrap.children, function (c) { c.disabled = true; });
@@ -468,6 +491,13 @@
     return p;
   }
 
+  function rangeStep(g) {
+    var span = g.max - g.min;
+    if (span >= 100) return Math.round(span / 100);
+    if (Number.isInteger(g.min) && Number.isInteger(g.max) && Number.isInteger(g.answer)) return 1;
+    return Math.pow(10, Math.floor(Math.log10(span / 100)));
+  }
+
   function renderGuess(card, ctx) {
     var t = ctx.t, g = card.guess;
     var veil = el('div', 'pack-guess');
@@ -488,7 +518,7 @@
     } else if (g.kind === 'range') {
       var row = el('div', 'pack-range');
       input = el('input', 'pack-range__input');
-      input.type = 'range'; input.min = g.min; input.max = g.max; input.step = g.step || Math.max(1, Math.round((g.max - g.min) / 100));
+      input.type = 'range'; input.min = g.min; input.max = g.max; input.step = g.step || rangeStep(g);
       input.value = String(g.min + (g.max - g.min) / 2);
       var out = el('output', 'pack-range__out', esc(input.value + (g.unit ? ' ' + g.unit : '')));
       input.addEventListener('input', function () { out.textContent = input.value + (g.unit ? ' ' + g.unit : ''); });
@@ -551,6 +581,10 @@
       box.appendChild(show);
       refocus(veil, had, show);
       var slide = veil.closest('.pack-slide');
+      if (P.INTERACTIVE[card.type] || card.type === 'canvas') {
+        if (slide && distance != null) slide.dataset.guessDistance = String(distance);
+        return;
+      }
       if (slide) slide.dataset.answered = '1';
       ctx.onAnswer(card, right, { distance: distance });
     }
@@ -732,18 +766,29 @@
     cont.addEventListener('click', function () { ctx.onContinue(card); });
     bar.appendChild(cont);
     wrap.appendChild(bar);
-    window.addEventListener('message', function (e) {
+    var onMessage = function (e) {
       if (!e.data || e.data.mentriaCanvas !== token || e.source !== frame.contentWindow) return;
       if (e.data.type === 'done') {
         var slide = wrap.closest('.pack-slide');
-        if (slide && !slide.dataset.answered) { slide.dataset.answered = '1'; ctx.onAnswer(card, e.data.right !== false); }
+        if (slide && !slide.dataset.answered) { slide.dataset.answered = '1'; ctx.onAnswer(card, e.data.right !== false, guessExtra(slide)); }
         hint.textContent = e.data.right === false ? t('wrong') : t('correct');
         hint.className = 'pack-canvas__hint ' + (e.data.right === false ? 'is-wrong' : 'is-right');
       } else if (e.data.type === 'next') ctx.onContinue(card);
       else if (e.data.type === 'notify') hint.textContent = e.data.text;
       else if (e.data.type === 'error') { hint.textContent = e.data.text; hint.className = 'pack-canvas__hint is-wrong'; }
-    });
+    };
+    window.addEventListener('message', onMessage);
+    canvases.push({ wrap: wrap, off: function () { window.removeEventListener('message', onMessage); } });
     return wrap;
+  }
+
+  var canvases = [];
+  function release(root) {
+    canvases = canvases.filter(function (c) {
+      if (!root.contains(c.wrap)) return true;
+      c.off();
+      return false;
+    });
   }
 
   var enginePromise = null;
@@ -840,5 +885,5 @@
     return p;
   }
 
-  global.MentriaPackCards = { render: render, Ctx: Ctx, esc: esc, el: el };
+  global.MentriaPackCards = { render: render, release: release, Ctx: Ctx, esc: esc, el: el };
 })(typeof window !== 'undefined' ? window : globalThis);

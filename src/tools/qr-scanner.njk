@@ -326,6 +326,7 @@ localeReload: true
   let detector = null;
   let useJsQR = false;
   let stream = null;
+  let camGen = 0;
   let rafId = 0;
   let lastDetect = 0;
   let scanning = false;
@@ -397,6 +398,7 @@ localeReload: true
   }
 
   function stopCamera() {
+    camGen++;
     scanning = false;
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
@@ -834,23 +836,32 @@ localeReload: true
       showNote(COPY.noteNoCamera);
       return;
     }
+    const gen = ++camGen;
+    let opened;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
+      opened = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
       });
     } catch (err) {
+      if (gen !== camGen) return;
       const name = err && err.name;
       if (name === 'NotAllowedError' || name === 'SecurityError') showNote(COPY.noteDenied);
       else if (name === 'NotFoundError' || name === 'OverconstrainedError') showNote(COPY.noteNoCamera);
       else showNote(COPY.noteCameraErr);
       return;
     }
+    if (gen !== camGen || document.hidden) {
+      opened.getTracks().forEach(t => t.stop());
+      return;
+    }
+    stream = opened;
     video.srcObject = stream;
     setupTrack();
     missCount = 0;
     scanning = true;
     setState('scanning');
     try { await video.play(); } catch (_) {}
+    if (gen !== camGen) return;
     lastDetect = 0;
     rafId = requestAnimationFrame(scanLoop);
   }

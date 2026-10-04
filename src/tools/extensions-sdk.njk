@@ -140,7 +140,7 @@ eleventyComputed:
       </tbody>
     </table>
   </div>
-  <p class="sdk__note">The run frame is granted the feature policy <code>bluetooth; usb; serial; camera; microphone</code>, so those Web APIs work from inside an extension when the browser and user allow them.</p>
+  <p class="sdk__note">The run frame is granted the feature policy <code>bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay</code>, so those Web APIs work from inside an extension when the browser and user allow them.</p>
 
   <h3 class="sdk__h3">Storage</h3>
   <p>Each extension owns a private namespace, <code>extdata.&lt;id&gt;</code>, reachable only through <code>window.mentria.storage</code>. It is backed by the browser's <code>localStorage</code> (via MentriaStore), so reads and writes are synchronous and every value must be JSON-serializable.</p>

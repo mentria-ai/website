@@ -2,7 +2,7 @@ import { normalizeNumber, isCurrency } from './money.js';
 import { parseDateLoose, isISODate, iso } from './dates.js';
 
 export function detectFormat(text, name) {
-  const head = String(text || '').slice(0, 2000).replace(/^﻿/, '');
+  const head = String(text || '').slice(0, 2000).replace(/^\ufeff/, '');
   if (/^\s*OFXHEADER:/i.test(head) || /<OFX>/i.test(head)) return 'ofx';
   if (/^\s*!(Type|Account|Option)/im.test(head)) return 'qif';
   if (/urn:iso:std:iso:20022:tech:xsd:camt\.05[234]/i.test(head) || /<BkToCstmrStmt>/i.test(head)) return 'camt';
@@ -42,7 +42,7 @@ function logicalLines(text) {
 }
 
 export function parseCsv(text) {
-  const clean = String(text || '').replace(/^﻿/, '');
+  const clean = String(text || '').replace(/^\ufeff/, '');
   const lines = logicalLines(clean).filter((l) => l.trim() !== '');
   const sample = lines.slice(0, 40);
   let best = { d: ',', score: -1 };
@@ -71,7 +71,7 @@ const ROLE_RE = {
   note: /^(note|notes|nota|notas|memo|memos|remarque|remarques|commentaire|commentaires|comment|comments|observacao|observacoes|notiz|notizen|bemerkung)$/
 };
 
-function norm(h) { return String(h || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, ''); }
+function norm(h) { return String(h || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, ''); }
 
 export function guessHeader(rows) {
   let best = { idx: 0, score: -1 };

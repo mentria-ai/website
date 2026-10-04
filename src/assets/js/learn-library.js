@@ -51,6 +51,14 @@
     badge.textContent = text;
   }
 
+  function blankCover(img) {
+    var li = img.closest('.learn-tile');
+    var blank = document.createElement('span');
+    blank.className = 'learn-tile__cover learn-tile__cover--blank';
+    img.replaceWith(blank);
+    if (window.MentriaBackdrop && li) window.MentriaBackdrop.apply(blank, 'tile/' + li.dataset.packId, { square: true });
+  }
+
   function tile(row) {
     var li = document.createElement('li');
     li.className = 'learn-tile learn-tile--mine';
@@ -165,9 +173,7 @@
       var p = P.getProgress(li.dataset.packId);
       var seen = P.doneCount(p);
       if (!seen) return;
-      var meta = li.querySelector('.learn-tile__meta');
-      var m = meta && meta.textContent.match(/^(\d+)/);
-      var total = m ? +m[1] : 0;
+      var total = +li.dataset.cards || 0;
       var bar = li.querySelector('.learn-tile__progress');
       if (!bar || !total) return;
       bar.hidden = false;
@@ -338,7 +344,16 @@
       P.importUrl(packUrl).then(handleResult, handleError);
     });
   }
-  window.addEventListener('mentria:packs', refresh);
+  var refreshTimer = 0;
+  window.addEventListener('mentria:packs', function () {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(refresh, 80);
+  });
+  document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (img && img.tagName === 'IMG' && img.classList.contains('learn-tile__cover')) blankCover(img);
+  }, true);
+  Array.prototype.forEach.call(document.querySelectorAll('img.learn-tile__cover.is-broken'), blankCover);
   window.addEventListener('pageshow', function (e) {
     if (!e.persisted) return;
     nativeProgress();

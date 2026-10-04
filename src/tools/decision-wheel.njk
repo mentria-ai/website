@@ -28,8 +28,8 @@ localeReload: true
       <div class="dw__pointer" aria-hidden="true">
         <svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 28L0 0h20z" fill="var(--syn-cyan)"/></svg>
       </div>
-      <div class="dw__wheel" id="dw-wheel" role="img" aria-label="{{ 'tool.decision-wheel.aria_wheel' | t }}">
-        <div class="dw__segments" id="dw-segments"></div>
+      <div class="dw__wheel" id="dw-wheel">
+        <div class="dw__segments" id="dw-segments" role="img" aria-label="{{ 'tool.decision-wheel.aria_wheel' | t }}"></div>
         <button class="dw__hub" id="dw-hub" type="button" aria-label="{{ 'tool.decision-wheel.aria_spin' | t }}"></button>
       </div>
     </div>
@@ -75,6 +75,7 @@ localeReload: true
     errMax: {{ ("tool.decision-wheel.err_max" | t) | dump | safe }},
     btnRemove: {{ ("tool.decision-wheel.btn_remove" | t) | dump | safe }},
     linkCopied: {{ ("tool.decision-wheel.link_copied" | t) | dump | safe }},
+    copyFailed: {{ ("common.copy_failed" | t) | dump | safe }},
     useShared: {{ ("tool.decision-wheel.use_shared" | t) | dump | safe }}
   };
   const DEFAULTS = [COPY.yes, COPY.no, COPY.upto, COPY.wait];
@@ -227,10 +228,11 @@ localeReload: true
     catch (_) { return Math.random(); }
   }
 
-  let rotation = 0;
+  let rotation = rand() * 360;
   let velocity = 0;
   let animating = false;
   let lastActiveIndex = -1;
+  let lastFrame = 0;
   const FRICTION = 0.985;
   const STOP_THRESHOLD = 0.3;
 
@@ -258,10 +260,12 @@ localeReload: true
     if (navigator.vibrate) { try { navigator.vibrate(30); } catch (_) {} }
   }
 
-  function tick() {
+  function tick(ts) {
     if (!animating) return;
-    velocity *= FRICTION;
-    rotation += velocity;
+    const dt = lastFrame && ts > lastFrame ? Math.min(4, (ts - lastFrame) / (1000 / 60)) : 1;
+    lastFrame = ts;
+    velocity *= Math.pow(FRICTION, dt);
+    rotation += velocity * dt;
     wheel.style.transform = "rotate(" + rotation + "deg)";
     highlightSegment(getSegmentAtPointer());
     if (velocity < STOP_THRESHOLD) {
@@ -292,6 +296,7 @@ localeReload: true
     wheel.classList.add("dw__wheel--spinning");
     if (!animating) {
       animating = true;
+      lastFrame = 0;
       requestAnimationFrame(tick);
     }
   }
@@ -300,7 +305,7 @@ localeReload: true
 
   document.getElementById("dw-option-share").addEventListener("click", () => {
     const url = location.origin + location.pathname + "?" + options.map((o) => "o=" + encodeURIComponent(o)).join("&");
-    navigator.clipboard.writeText(url).then(() => { if (window.MentriaUI) MentriaUI.toast(COPY.linkCopied); }).catch(() => {});
+    if (window.MentriaUI) MentriaUI.copyText(url).then((ok) => { MentriaUI.toast(ok ? COPY.linkCopied : COPY.copyFailed); });
   });
 
   const sharedOpts = new URLSearchParams(location.search).getAll("o").map((s) => s.trim().slice(0, 24)).filter(Boolean);
@@ -344,6 +349,7 @@ localeReload: true
   });
   if (hubBtn) hubBtn.addEventListener("click", spin);
 
+  wheel.style.transform = "rotate(" + rotation + "deg)";
   buildWheel();
   renderOptions();
 })();

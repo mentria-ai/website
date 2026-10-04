@@ -3,6 +3,21 @@
   if (window.self !== window.top) return;
   var S = window.MentriaStore;
   var COPY = window.MentriaMiniCopy || {};
+  var COPY_KEYS = {
+    open: 'common.mini.open',
+    close: 'common.mini.close',
+    timer: 'common.mini.timer',
+    timesUp: 'common.mini.times_up',
+    alarmTitle: 'tool.countdown-timer.title_alarm',
+    stopAlarm: 'tool.countdown-timer.notif_stop_alarm',
+    notifTitle: 'tool.countdown-timer.notif_finished_format',
+    notifBody: 'tool.countdown-timer.notif_body_open',
+    paused: 'common.mini.paused',
+    steps: 'common.mini.steps',
+    tapResume: 'common.mini.tap_resume',
+    timerTool: 'tools.countdown-timer.title',
+    stepsTool: 'tools.step-counter.title'
+  };
   var KEY = 'mini';
   var TOOL_KEY = 'mini_tool';
   var POS_KEY = 'mini_pos';
@@ -32,6 +47,14 @@
   var ringTimer = 0;
   var rangAt = 0;
   var titleBefore = null;
+  var titleShown = null;
+
+  function copy(name, fallback) {
+    var I = window.MentriaI18n;
+    var v = I && typeof I.t === 'function' && COPY_KEYS[name] ? I.t(COPY_KEYS[name]) : null;
+    if (typeof v === 'string' && v) return v;
+    return COPY[name] || fallback;
+  }
 
   function bare(p) {
     var locs = window.MENTRIA_LOCALES || [];
@@ -42,6 +65,7 @@
     return p;
   }
   function prefix() {
+    if (window.MentriaUI && window.MentriaUI.localePrefix) return window.MentriaUI.localePrefix();
     return (window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.prefix) || '';
   }
 
@@ -177,7 +201,7 @@
       .sort(function (a, b) { return a.endAt - b.endAt; });
   }
   function timerLabel(e) {
-    return (e && e.title) || COPY.timer || 'Timer';
+    return (e && e.title) || copy('timer', 'Timer');
   }
   function timerLive() {
     var now = Date.now();
@@ -196,10 +220,10 @@
     if (!shown) shown = running.filter(function (e) { return e.endAt > now; })[0] || running[running.length - 1] || null;
     if (shown) {
       var left = (shown.endAt - now) / 1000;
-      return { value: left > 0 ? fmtClock(left) : (COPY.timesUp || "Time's up"), label: timerLabel(shown), done: left <= 0 };
+      return { value: left > 0 ? fmtClock(left) : copy('timesUp', "Time's up"), label: timerLabel(shown), done: left <= 0 };
     }
     var paused = list.filter(function (e) { return e.mode === 'pause'; })[0];
-    if (paused) return { value: fmtClock(paused.remaining), label: timerLabel(paused) + ' · ' + (COPY.paused || 'Paused') };
+    if (paused) return { value: fmtClock(paused.remaining), label: timerLabel(paused) + ' · ' + copy('paused', 'Paused') };
     return null;
   }
   function dueAlarm(ses) {
@@ -291,13 +315,13 @@
     ctx.resume().then(settle, function () {});
   }
   function alarmTitle() {
-    return COPY.alarmTitle || COPY.timesUp || "Time's up";
+    return copy('alarmTitle', copy('timesUp', "Time's up"));
   }
   function notifyEnd(e, label) {
     if (!document.hidden || !('Notification' in window) || Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return;
     navigator.serviceWorker.ready.then(function (reg) {
-      return reg.showNotification((COPY.notifTitle || '{label}').split('{label}').join(label), {
-        body: COPY.notifBody || '',
+      return reg.showNotification(copy('notifTitle', '{label}').split('{label}').join(label), {
+        body: copy('notifBody', ''),
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',
         vibrate: [200, 100, 200],
@@ -305,7 +329,7 @@
         renotify: true,
         requireInteraction: true,
         data: { url: location.pathname, timerId: e.id != null ? e.id : null },
-        actions: [{ action: 'stop-alarm', title: COPY.stopAlarm || 'Stop alarm' }]
+        actions: [{ action: 'stop-alarm', title: copy('stopAlarm', 'Stop alarm') }]
       });
     }).catch(function () {});
   }
@@ -319,11 +343,12 @@
   }
   function alarm(e) {
     var label = timerLabel(e);
-    if (window.MentriaUI) liftToast(window.MentriaUI.toast(label + ' · ' + (COPY.timesUp || "Time's up"), { duration: 5000 }));
+    if (window.MentriaUI) liftToast(window.MentriaUI.toast(label + ' · ' + copy('timesUp', "Time's up"), { duration: 5000 }));
     notifyEnd(e, label);
     if (window.MentriaPush && e.id != null) window.MentriaPush.cancel('ct-' + e.id);
     if (titleBefore === null) titleBefore = document.title;
-    document.title = alarmTitle();
+    titleShown = alarmTitle();
+    document.title = titleShown;
     armUnlock(true);
     clearInterval(ringTimer);
     bell();
@@ -336,7 +361,7 @@
     ringTimer = 0;
     if (audio && audio.state === 'running') audio.suspend().catch(function () {});
     if (titleBefore !== null) {
-      if (document.title === alarmTitle()) document.title = titleBefore;
+      if (document.title === titleShown) document.title = titleBefore;
       titleBefore = null;
     }
   }
@@ -403,14 +428,14 @@
   function stepsView() {
     var st = stepState();
     var n = st && st.date === todayKey() ? (st.steps || 0) : 0;
-    var fmt = COPY.steps || '{n} steps';
+    var fmt = copy('steps', '{n} steps');
     var lang = document.documentElement.lang || undefined;
     var paused = needsGesture() && !sawMotion && !granted && !probing;
-    return { value: fmt.replace('{n}', n.toLocaleString(lang)), label: paused ? (COPY.tapResume || 'Tap to keep counting') : '', paused: paused };
+    return { value: fmt.replace('{n}', n.toLocaleString(lang)), label: paused ? copy('tapResume', 'Tap to keep counting') : '', paused: paused };
   }
 
   function toolName(kind) {
-    return kind === 'timer' ? (COPY.timerTool || 'Countdown Timer') : (COPY.stepsTool || 'Step Counter');
+    return kind === 'timer' ? copy('timerTool', 'Countdown Timer') : copy('stepsTool', 'Step Counter');
   }
   function setText(el, text) {
     if (el.textContent !== text) el.textContent = text;
@@ -427,7 +452,7 @@
     var close = document.createElement('button');
     close.type = 'button';
     close.className = 'm-mini__close';
-    close.setAttribute('aria-label', COPY.close || 'Close');
+    close.setAttribute('aria-label', copy('close', 'Close'));
     close.textContent = '×';
     close.addEventListener('click', onClose);
     return close;
@@ -442,17 +467,19 @@
     if (!view) { stop(); return; }
     if (pill && pill.getAttribute('data-kind') !== ses.kind) { pill.remove(); pill = null; }
     if (!pill) build(ses);
+    var groupName = toolName(ses.kind);
+    if (pill.getAttribute('aria-label') !== groupName) pill.setAttribute('aria-label', groupName);
     setText(pill.querySelector('.m-mini__value'), view.value);
     var label = pill.querySelector('.m-mini__label');
     setText(label, view.label || '');
     label.hidden = !view.label;
     pill.classList.toggle('is-done', !!view.done);
     pill.classList.toggle('is-paused', !!view.paused);
-    var name = (COPY.open || 'Open {name}').replace('{name}', toolName(ses.kind)) + ' · ' + view.value + (view.label ? ' · ' + view.label : '');
+    var name = copy('open', 'Open {name}').replace('{name}', toolName(ses.kind)) + ' · ' + view.value + (view.label ? ' · ' + view.label : '');
     var open = pill.querySelector('.m-mini__open');
     if (open.getAttribute('aria-label') !== name) open.setAttribute('aria-label', name);
     var close = pill.querySelector('.m-mini__close');
-    var closeName = ringing ? (COPY.stopAlarm || 'Stop alarm') : (COPY.close || 'Close');
+    var closeName = ringing ? copy('stopAlarm', 'Stop alarm') : copy('close', 'Close');
     if (close.getAttribute('aria-label') !== closeName) close.setAttribute('aria-label', closeName);
     if (ses.kind === 'timer') {
       if (timerLive()) holdWake();
@@ -470,8 +497,11 @@
     setText(parked.querySelector('.m-mini__value'), name);
     parked.setAttribute('aria-label', name);
     var open = parked.querySelector('.m-mini__open');
-    var label = (COPY.open || 'Open {name}').replace('{name}', name);
+    var label = copy('open', 'Open {name}').replace('{name}', name);
     if (open.getAttribute('aria-label') !== label) open.setAttribute('aria-label', label);
+    var close = parked.querySelector('.m-mini__close');
+    var closeName = copy('close', 'Close');
+    if (close.getAttribute('aria-label') !== closeName) close.setAttribute('aria-label', closeName);
   }
 
   function applyPos() {
@@ -634,6 +664,11 @@
     render();
     renderParked();
     if (wakeWanted()) holdWake();
+  });
+  document.addEventListener('mentria:localechange', function () {
+    if (!dock) return;
+    render();
+    renderParked();
   });
   window.addEventListener('pageshow', function (e) { if (e.persisted) boot(); });
   window.addEventListener('pagehide', silence);

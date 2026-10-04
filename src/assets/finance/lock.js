@@ -18,7 +18,7 @@ function standalone() {
 
 function frame(root, ...kids) {
   const inner = h('div', { class: 'flock__inner' }, ...kids);
-  root.replaceChildren(h('div', { class: 'flock' }, inner));
+  root.replaceChildren(h('main', { class: 'flock' }, inner));
   return inner;
 }
 
@@ -207,28 +207,36 @@ function unlockScreen(root, opts) {
     if (!pass.value) return;
     busy(go, true, t('lock.unlocking'));
     err.textContent = '';
+    let s;
     try {
-      const s = mode === 'pass' ? await V.unlockPass(pass.value) : await V.unlockRecovery(pass.value);
-      pass.value = '';
-      if (mode === 'recovery') s.afterRecovery = true;
-      opened(s);
+      s = mode === 'pass' ? await V.unlockPass(pass.value) : await V.unlockRecovery(pass.value);
     } catch (e) {
       busy(go, false);
       const m = String((e && e.message) || e);
       err.textContent = m === 'bad-pass' ? t('lock.bad_pass') : m === 'bad-code' ? t('lock.bad_code') : m === 'wrong-key' ? t('lock.wrong_key') : t('lock.failed') + ' ' + m;
       pass.select();
+      return;
     }
+    pass.value = '';
+    if (mode === 'recovery') s.afterRecovery = true;
+    try { await opened(s); } catch (e) { openFailed(go, e); }
   };
   const opened = async (s) => {
     await opts.onOpen(s);
     if (s.afterRecovery) setTimeout(() => askNewPass(s), 400);
   };
+  const openFailed = (btn, e) => {
+    busy(btn, false);
+    err.textContent = t('lock.failed') + ' ' + String((e && e.message) || e);
+  };
   go.addEventListener('click', attempt);
   pass.addEventListener('keydown', (e) => { if (e.key === 'Enter') attempt(); });
   const pkBtn = st.prf.length ? h('button', { type: 'button', class: 'fb fb--block', onclick: async () => {
     busy(pkBtn, true, t('lock.unlocking'));
-    try { opened(await V.unlockPrf()); }
-    catch (e) { busy(pkBtn, false); err.textContent = e && e.name === 'NotAllowedError' ? t('lock.passkey_cancelled') : t('lock.passkey_failed'); }
+    let s;
+    try { s = await V.unlockPrf(); }
+    catch (e) { busy(pkBtn, false); err.textContent = e && e.name === 'NotAllowedError' ? t('lock.passkey_cancelled') : t('lock.passkey_failed'); return; }
+    try { await opened(s); } catch (e) { openFailed(pkBtn, e); }
   } }, icon('passkey'), t('lock.passkey')) : null;
   const inboxCount = h('span', { class: 'fmuted fsmall' });
   db.allInbox().then((list) => { if (list.length) inboxCount.textContent = U.tp('lock.inbox_waiting', list.length); }).catch(() => {});
@@ -257,9 +265,14 @@ function askNewPass(session) {
     const sc = V.scorePassphrase(p1.value);
     if (!sc.ok) { err.textContent = t('setup.pass_rule'); return; }
     if (p1.value !== p2.value) { err.textContent = t('setup.pass_mismatch'); return; }
-    await V.changePassphrase(session.root, p1.value);
-    const app = await import('./app.js');
-    await app.publishWrap('pass');
+    try {
+      await V.changePassphrase(session.root, p1.value);
+      const app = await import('./app.js');
+      await app.publishWrap('pass');
+    } catch (e) {
+      err.textContent = t('errors.write') + ' ' + String((e && e.message) || e);
+      return;
+    }
     sh.close();
     U.toast(t('settings.pass_changed'));
   });
@@ -294,7 +307,7 @@ function quickAddLocked(opts, countEl) {
 async function eraseDevice(root, opts) {
   const ok = await U.confirmDialog({ title: t('lock.erase_title'), body: t('lock.erase_body'), ok: t('lock.erase_ok'), danger: true });
   if (!ok) return;
-  await db.wipe();
+  try { await db.wipe(); } catch (e) { U.toast(t('errors.write') + ' ' + String((e && e.message) || e), { ms: 7000 }); return; }
   try { if (window.MentriaStore) window.MentriaStore.remove('extdata.finance', 'widget'); } catch (_) {}
   showLock(root, Object.assign({}, opts, { status: await V.status() }));
 }

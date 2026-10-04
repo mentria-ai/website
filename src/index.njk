@@ -32,7 +32,7 @@ eleventyComputed:
   <div id="stream-tail">
     {% for pack in packs | head(40) %}
     <section class="feed-card stream-card stream-card--cover" data-pack-id="{{ pack.id }}"{% if pack.cover %} style="--feed-card-bg: url('{{ pack.cover }}')"{% endif %}>
-      {% if pack.cover %}<img class="feed-card__media" src="{{ pack.cover }}" alt="" loading="{{ 'eager' if loop.first else 'lazy' }}" decoding="async">{% else %}<div class="feed-card__color-bg stream-card__blank"></div>{% endif %}
+      {% if pack.cover %}<img class="feed-card__media" src="{{ pack.cover }}" alt="" loading="lazy" decoding="async" onerror="this.classList.add('is-broken')">{% else %}<div class="feed-card__color-bg stream-card__blank"></div>{% endif %}
       <div class="feed-card__gradient"></div>
       <div class="stream-chip stream-chip--{{ pack.collection }}">{% if pack.collection == "source" %}Source{% else %}Deep Cuts{% endif %}</div>
       <div class="feed-card__info">

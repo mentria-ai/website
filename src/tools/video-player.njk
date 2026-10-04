@@ -134,7 +134,9 @@ let subsOffset = 0;
 let lastSave = 0;
 let resumeTimer = 0;
 let folderName = '';
+let playSeq = 0;
 const thumbUrls = new Map();
+const thumbJobs = new Map();
 const origCues = new WeakMap();
 
 function pref() {
@@ -158,14 +160,21 @@ function titleOf(entry) {
   return M.baseName(entry.name);
 }
 
-async function thumbUrl(entry) {
-  if (thumbUrls.has(entry.fp)) return thumbUrls.get(entry.fp);
-  let blob = await M.cachedThumb(entry.fp);
-  if (!blob && M.fileFor(entry.fp)) blob = await M.videoThumb(entry);
-  if (!blob) return '';
-  const url = URL.createObjectURL(blob);
-  thumbUrls.set(entry.fp, url);
-  return url;
+function thumbUrl(entry) {
+  if (thumbUrls.has(entry.fp)) return Promise.resolve(thumbUrls.get(entry.fp));
+  if (thumbJobs.has(entry.fp)) return thumbJobs.get(entry.fp);
+  const job = (async () => {
+    let blob = await M.cachedThumb(entry.fp);
+    if (!blob && M.fileFor(entry.fp)) blob = await M.videoThumb(entry);
+    if (!blob) return '';
+    const url = URL.createObjectURL(blob);
+    thumbUrls.set(entry.fp, url);
+    return url;
+  })();
+  thumbJobs.set(entry.fp, job);
+  const done = () => { if (thumbJobs.get(entry.fp) === job) thumbJobs.delete(entry.fp); };
+  job.then(done, done);
+  return job;
 }
 
 function itemNode(entry, opts) {
@@ -327,9 +336,10 @@ function clearTracks() {
   sel.value = '';
 }
 
-async function addTrack(file, label, show) {
+async function addTrack(file, label, show, seq) {
   let vtt;
   try { vtt = M.toVtt(await M.readText(file)); } catch (_) { vtt = ''; }
+  if (seq && seq !== playSeq) return false;
   if (vtt.indexOf('-->') === -1) { toast(fill(C.subsBad, { name: file.name })); return false; }
   const url = URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }));
   subsUrls.push(url);
@@ -374,6 +384,7 @@ async function play(index, autoplay) {
   const entry = items[index];
   const file = M.fileFor(entry.fp);
   if (!file) { toast(C.pickAgain); return; }
+  const seq = ++playSeq;
   current = index;
   markCurrent();
   notice('');
@@ -385,13 +396,27 @@ async function play(index, autoplay) {
   video.playbackRate = Number(pref().speed) || 1;
   $('vp-title').textContent = titleOf(entry);
   document.title = titleOf(entry) + ' · Mentria';
+  const cachedArt = thumbUrls.get(entry.fp) || '';
+  setSession(entry, cachedArt);
+  if (autoplay) {
+    M.playbackAudioSession();
+    video.play().catch(() => {});
+  }
   const matched = subsFor(entry);
-  for (let i = 0; i < matched.length; i++) await addTrack(matched[i][0], matched[i][1], i === 0);
+  for (let i = 0; i < matched.length; i++) {
+    await addTrack(matched[i][0], matched[i][1], i === 0, seq);
+    if (seq !== playSeq) return;
+  }
   M.preflight(file).then((pf) => {
-    if (pf.issues.indexOf('dolby') !== -1) notice(C.warnDolby);
+    if (seq === playSeq && pf.issues.indexOf('dolby') !== -1) notice(C.warnDolby);
     entry.preflight = pf;
   });
-  const art = await thumbUrl(entry);
+  if (cachedArt) return;
+  const art = await thumbUrl(entry).catch(() => '');
+  if (art && seq === playSeq) setSession(entry, art);
+}
+
+function setSession(entry, art) {
   M.setSession({
     title: titleOf(entry),
     artist: entry.folderName || folderName || '',
@@ -406,10 +431,6 @@ async function play(index, autoplay) {
       seekto: (d) => { if (d && typeof d.seekTime === 'number') video.currentTime = d.seekTime; }
     }
   });
-  if (autoplay) {
-    M.playbackAudioSession();
-    video.play().catch(() => {});
-  }
 }
 
 function seekBy(sec) {

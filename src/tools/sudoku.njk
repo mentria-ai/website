@@ -1119,6 +1119,7 @@ localeReload: true
   errSeg.set(State.errMode);
   window.addEventListener('pagehide', save);
   document.addEventListener('visibilitychange', () => { if (document.hidden) { setPaused(true, true); save(); } });
-  maybeAutoHelp();
+  if (document.readyState === 'complete') maybeAutoHelp();
+  else window.addEventListener('load', () => requestAnimationFrame(maybeAutoHelp), { once: true });
 })();
 </script>

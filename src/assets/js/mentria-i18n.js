@@ -117,7 +117,10 @@
 
   function updateSwitcher(code) {
     var loc = byCode(code), cur = document.querySelector('.lang-switcher__current');
-    if (cur && loc) cur.textContent = loc.name;
+    if (cur && loc) { cur.textContent = loc.name; cur.setAttribute('lang', loc.code); }
+    var summary = document.querySelector('.lang-switcher summary');
+    var label = activeDict ? lookup(activeDict, 'lang_switcher.current_label') : null;
+    if (summary && loc && label != null) summary.setAttribute('aria-label', label + ': ' + loc.name);
     var items = document.querySelectorAll('.lang-switcher__item');
     for (var i = 0; i < items.length; i++) {
       items[i].classList.toggle('is-active', items[i].getAttribute('hreflang') === code);
@@ -151,12 +154,20 @@
     rewriteLinks(code);
   }
 
+  function dictUrl(code) {
+    var l = byCode(code);
+    return (l && l.dict) || DICT_BASE + code + '.json';
+  }
+
   var cache = {};
   function getDict(code) {
     if (!cache[code]) {
-      cache[code] = fetch(DICT_BASE + code + '.json').then(function (r) {
+      cache[code] = fetch(dictUrl(code)).then(function (r) {
         if (!r.ok) throw new Error('dict ' + code);
         return r.json();
+      }).catch(function (e) {
+        delete cache[code];
+        throw e;
       });
     }
     return cache[code];
@@ -199,10 +210,10 @@
         if (done) return;
         var chain = Promise.resolve();
         var lower = code.toLowerCase();
-        var routes = shellRoutes(loc.prefix).concat([DICT_BASE + code + '.json', '/fragments/tools-popup.' + code + '.html?v=' + i18nBuild(), '/assets/js/site-palette.' + lower + '.js', '/assets/js/site-end.' + lower + '.js']);
+        var routes = shellRoutes(loc.prefix).concat([dictUrl(code), '/fragments/tools-popup.' + code + '.html?v=' + i18nBuild(), '/assets/js/site-palette.' + lower + '.js', '/assets/js/site-end.' + lower + '.js']);
         routes.forEach(function (route) {
           chain = chain.then(function () {
-            return fetch(route).then(function (resp) {
+            return fetch(route, { cache: 'no-cache' }).then(function (resp) {
               if (resp && resp.ok) return shell.put(route, resp.clone());
             }).catch(function () {});
           });
@@ -221,8 +232,11 @@
     return p;
   }
 
-  function scheduleLocaleShells(code) {
+  function scheduleLocaleShells(code, passive) {
     if (code === 'en' || !('caches' in window)) return;
+    var conn = navigator.connection;
+    if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ''))) return;
+    if (passive && !(navigator.serviceWorker && navigator.serviceWorker.controller)) return;
     var run = function () { cacheLocaleShells(code); };
     if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 4000 });
     else setTimeout(run, 1500);
@@ -313,5 +327,5 @@
     cacheShells: function (code) { return cacheLocaleShells(code || currentCode); }
   };
 
-  scheduleLocaleShells(currentCode);
+  scheduleLocaleShells(currentCode, true);
 })();

@@ -533,14 +533,14 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 </style>
 
 <script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
-<script src="/assets/js/qrcode.js?v={{ buildHash }}"></script>
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 <script type="module">
 import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/assets/vendor/trystero-nostr.js';
 import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
-import '/assets/js/mentria-packs.js';
+
+const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
 const RELAY = 'wss://relay.mentria.ai';
 const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
@@ -1614,7 +1614,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         importBtn.addEventListener('click', async () => {
           importBtn.disabled = true;
           try {
-            const res = await window.MentriaPacks.importText(text, { source: 'contact', from: who });
+            const P = await loadPacks();
+            const res = await P.importText(text, { source: 'contact', from: who });
             importBtn.replaceWith(Object.assign(document.createElement('a'), { href: '/learn/play/?id=' + encodeURIComponent(res.row.id), textContent: 'open' }));
             label.textContent = (res.replaced ? 'updated' : 'imported') + ' \u2713 ';
           } catch (e) { sys('import failed: ' + ((e && e.errors && e.errors[0]) || e.message)); importBtn.disabled = false; }
@@ -1896,7 +1897,7 @@ attachPackBtn.addEventListener('click', async () => {
         : 'nobody is connected to this room yet.');
       return;
     }
-    const P = window.MentriaPacks;
+    const P = await loadPacks().catch(() => null);
     const rows = P ? await P.list() : [];
     if (!rows.length) { sys('no imported packs to share. Packs you import on /learn/ show up here.'); return; }
     const chosen = await pickExtension(rows.map((r) => ({ id: r.id, name: P.text(r.title), version: String(r.version), icon: '' })));
@@ -2638,10 +2639,26 @@ els.idName.addEventListener('change', () => {
   refreshMyCode();
 });
 
+let qrLoading = null;
+const loadQr = () => {
+  if (window.qrcodegen) return Promise.resolve(true);
+  if (!qrLoading) {
+    qrLoading = new Promise((resolve) => {
+      const s = document.createElement('script');
+      s.src = '/assets/js/qrcode.js?v={{ buildHash }}';
+      s.onload = () => resolve(!!window.qrcodegen);
+      s.onerror = () => { qrLoading = null; s.remove(); resolve(false); };
+      document.head.appendChild(s);
+    });
+  }
+  return qrLoading;
+};
+
 const refreshMyCode = () => {
   if (els.idCard.hidden || !myId) return;
   const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken);
   els.idCode.textContent = code;
+  if (!window.qrcodegen) { loadQr().then((ok) => { if (ok) refreshMyCode(); }); return; }
   try {
     const qr = qrcodegen.QrCode.encodeText(code, qrcodegen.QrCode.Ecc.LOW);
     const border = 2, px = 4, dim = qr.size + border * 2;

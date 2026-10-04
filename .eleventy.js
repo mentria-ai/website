@@ -188,7 +188,8 @@ module.exports = function(eleventyConfig) {
     if (headEnd === -1) return content;
     const bodyPart = content.slice(headEnd);
     const styles = [];
-    const cleanedBody = bodyPart.replace(/<style>[\s\S]*?<\/style>/g, m => {
+    const cleanedBody = bodyPart.replace(/<script\b[^>]*>[\s\S]*?<\/script>|<style>[\s\S]*?<\/style>/g, m => {
+      if (m.startsWith("<script")) return m;
       styles.push(m);
       return "";
     });

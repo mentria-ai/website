@@ -249,9 +249,14 @@ localeReload: true
       item.setAttribute('role', 'button');
       item.tabIndex = 0;
       item.setAttribute('aria-label', COPY.selectSwatchTitle.replace('{color}', c));
-      item.innerHTML =
-        '<div class="cp__palette-swatch" style="background:' + c + '" title="' + COPY.selectSwatchTitle.replace('{color}', c) + '"></div>' +
-        '<span class="cp__palette-label">' + c + '</span>';
+      const sw = document.createElement('div');
+      sw.className = 'cp__palette-swatch';
+      sw.style.background = c;
+      sw.title = COPY.selectSwatchTitle.replace('{color}', c);
+      const label = document.createElement('span');
+      label.className = 'cp__palette-label';
+      label.textContent = c;
+      item.append(sw, label);
       const activate = () => {
         copyText(c);
         if (i !== 0) setColor(c);
@@ -279,7 +284,8 @@ localeReload: true
   /* ── Saved colors ──────────────────────────────────── */
   function loadSaved() {
     const v = MentriaUI.migrateStore('tools', 'color_picker_palette', STORAGE_KEY, []);
-    return Array.isArray(v) ? v : [];
+    if (!Array.isArray(v)) return [];
+    return v.filter(c => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c)).map(c => c.toLowerCase());
   }
 
   function saveSaved(arr) {
@@ -319,10 +325,20 @@ localeReload: true
     saved.forEach((c, i) => {
       const el = document.createElement('div');
       el.className = 'cp__saved-item';
-      el.innerHTML =
-        '<div class="cp__saved-swatch" role="button" tabindex="0" style="background:' + c + '" title="' + c + '" aria-label="' + COPY.selectSwatchTitle.replace('{color}', c) + '"></div>' +
-        '<button class="cp__saved-remove" title="' + COPY.removeTitle + '" aria-label="' + COPY.removeTitle + '" data-index="' + i + '">&times;</button>';
-      const sw = el.querySelector('.cp__saved-swatch');
+      const sw = document.createElement('div');
+      sw.className = 'cp__saved-swatch';
+      sw.setAttribute('role', 'button');
+      sw.tabIndex = 0;
+      sw.style.background = c;
+      sw.title = c;
+      sw.setAttribute('aria-label', COPY.selectSwatchTitle.replace('{color}', c));
+      const rm = document.createElement('button');
+      rm.className = 'cp__saved-remove';
+      rm.title = COPY.removeTitle;
+      rm.setAttribute('aria-label', COPY.removeTitle);
+      rm.dataset.index = String(i);
+      rm.textContent = '×';
+      el.append(sw, rm);
       sw.addEventListener('click', () => setColor(c));
       sw.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setColor(c); }
@@ -330,7 +346,8 @@ localeReload: true
       const removeColor = async () => {
         if (!(await window.mentriaConfirm(COPY.confirmRemove.replace('{color}', c)))) return;
         const arr = loadSaved();
-        arr.splice(i, 1);
+        const at = arr.indexOf(c);
+        if (at !== -1) arr.splice(at, 1);
         saveSaved(arr);
         recordColorDeletion(c);
         renderSaved();
@@ -338,7 +355,7 @@ localeReload: true
         if (items.length) items[Math.min(i, items.length - 1)].focus();
         else document.getElementById('cp-save').focus();
       };
-      el.querySelector('.cp__saved-remove').addEventListener('click', e => { e.stopPropagation(); removeColor(); });
+      rm.addEventListener('click', e => { e.stopPropagation(); removeColor(); });
       el.addEventListener('contextmenu', e => { e.preventDefault(); removeColor(); });
       savedList.appendChild(el);
     });
@@ -419,6 +436,14 @@ localeReload: true
   // Palette harmony buttons
   document.querySelectorAll('.cp__palette-btn').forEach(btn => {
     btn.addEventListener('click', () => generatePalette(btn.dataset.harmony));
+  });
+
+  window.addEventListener('storage', e => {
+    if (e.key === null || e.key === 'mentria.store.tools.color_picker_palette' || e.key === STORAGE_KEY) renderSaved();
+  });
+  window.addEventListener('mentria:write', e => {
+    const d = (e && e.detail) || {};
+    if (d.remote && d.ns === 'tools' && d.key === 'color_picker_palette') renderSaved();
   });
 
   /* ── Init ──────────────────────────────────────────── */

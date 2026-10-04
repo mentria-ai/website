@@ -369,7 +369,6 @@ module.exports = function(eleventyConfig) {
   // Passthrough copy for PWA files (sw.js is now a Nunjucks template)
   eleventyConfig.addPassthroughCopy({ "src/manifest.json": "manifest.json" });
   eleventyConfig.addPassthroughCopy({ "src/favicon.ico": "favicon.ico" });
-  eleventyConfig.addPassthroughCopy({ "src/_data/i18n": "assets/i18n" });
 
   const PH0 = "\uF000", PH1 = "\uF001";
   const SENT_RE = new RegExp(I18N_S0 + "([^" + I18N_S1 + "]*)" + I18N_S1 + "([\\s\\S]*?)" + I18N_S2, "g");
@@ -497,8 +496,20 @@ module.exports = function(eleventyConfig) {
     return fragV;
   }
 
+  function writeClientDictionaries(out) {
+    const dir = path.join(out, "assets", "i18n");
+    fs.mkdirSync(dir, { recursive: true });
+    for (const file of fs.readdirSync(I18N_DIR)) {
+      if (!file.endsWith(".json")) continue;
+      const dict = JSON.parse(fs.readFileSync(path.join(I18N_DIR, file), "utf8"));
+      if (dict.tool) delete dict.tool.finance;
+      fs.writeFileSync(path.join(dir, file), JSON.stringify(dict));
+    }
+  }
+
   eleventyConfig.on("eleventy.after", ({ directories, dir }) => {
     const out = (directories && directories.output) || (dir && dir.output) || "build";
+    writeClientDictionaries(out);
     const fragV = stabilizeVersions(out);
     const swPath = path.join(out, "sw.js");
     let sw;

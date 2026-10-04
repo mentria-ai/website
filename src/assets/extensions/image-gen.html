@@ -2,7 +2,7 @@
 {
   "id": "image-gen",
   "name": "Image Generator",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "icon": "🎨",
   "author": "Mentria",
   "description": "Text-to-image on Mentria's shared z-image-turbo render node. Type a prompt, wait your turn, get an image.",
@@ -646,7 +646,8 @@ render();
 
 await room.start();
 await hello();
-setInterval(() => { if (!online && !myJob) hello(); }, 30000);
+setInterval(() => { if (!online && !myJob && !document.hidden) hello(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!online && !myJob && !document.hidden) hello(); });
 
 if (m.args && m.args.cmd === 'imagine' && m.args.args) {
   els.prompt.value = m.args.args;

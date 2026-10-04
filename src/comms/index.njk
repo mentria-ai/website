@@ -252,23 +252,18 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__onboard,.comms__lock{margin-top:auto;margin-bottom:auto}
 .comms [hidden]{display:none !important}
 .comms__onboard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;padding:2.5rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px}
-.comms__onboard[hidden]{display:none}
 .comms__onboard-step{display:flex;flex-direction:column;align-items:center;gap:.9rem;width:100%;max-width:30rem}
-.comms__onboard-step[hidden]{display:none}
 .comms__onboard-h{margin:0;font-size:1.05rem;color:var(--accent,#6ef3c5);letter-spacing:.02em;line-height:1.4;text-transform:none}
 .comms__onboard-p{margin:0;color:#c3ccd6;font-size:.85rem;line-height:1.65;max-width:26rem}
 .comms__onboard-fine{margin:0;color:#7a838d;font-size:.75rem;line-height:1.5}
 .comms__onboard-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
-.comms__onboard-err[hidden]{display:none}
 .comms__onboard-actions{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
 .comms__btn--big{padding:.7rem 1.6rem;font-size:.92rem;min-height:44px}
 .comms__input--big{max-width:18rem;text-align:center;padding:.6rem .8rem;font-size:.95rem;flex:none;width:100%}
 .comms__recovery{display:block;width:100%;max-width:24rem;background:#0a0d10;border:1px dashed var(--accent,#6ef3c5);border-radius:6px;padding:.7rem;color:var(--accent,#6ef3c5);font-size:.95rem;letter-spacing:.12em;word-break:break-all;line-height:1.6}
 .comms__lock{display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:2rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px;text-align:center}
-.comms__lock[hidden]{display:none}
 .comms__lock-h{margin:0;color:#c3ccd6;font-size:.95rem}
 .comms__lock-waiting{margin:0;color:var(--accent,#6ef3c5);font-size:.8rem}
-.comms__lock-waiting[hidden]{display:none}
 .comms__lock-alt{width:100%;max-width:24rem;color:#7a838d;font-size:.78rem}
 .comms__lock-alt summary{cursor:pointer;list-style:none;padding:.3rem}
 .comms__lock-alt summary::-webkit-details-marker{display:none}
@@ -276,14 +271,10 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__lock-row{display:none;gap:.5rem;margin-top:.6rem}
 .comms__lock-alt[open] .comms__lock-row{display:flex}
 .comms__app{display:flex;flex-direction:column;gap:.75rem}
-.comms__app[hidden]{display:none}
-.comms__topline{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
 .comms__id-row--you{flex:1;min-width:13rem}
-.comms__btn--gear{min-width:2.4rem;padding:.4rem .6rem;font-size:1rem;line-height:1}
 .comms__contacts-head{display:flex;gap:.5rem;align-items:center}
 .comms__contacts-head .comms__lbl{flex:1}
 .comms__adv{display:flex;flex-direction:column;gap:.75rem;background:#0a0d10;border:1px dashed #2a3138;border-radius:8px;padding:.85rem}
-.comms__adv[hidden]{display:none}
 .comms__relay{display:flex;align-items:center;gap:.55rem;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
 .comms__relay svg{color:#8b97a3;transition:color .25s}
 .comms__relay[aria-checked="true"] svg{color:var(--accent,#6ef3c5)}
@@ -301,12 +292,9 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 @media (max-width:640px){
   .comms__onboard{padding:1.75rem 1rem}
   .comms__onboard-h{font-size:1rem}
-  .comms__topline{gap:.5rem}
 }
-.comms__bar{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
 .comms__room{display:flex;gap:.5rem;align-items:center;flex:1;min-width:14rem}
-.comms__meta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
-.comms__lbl{color:var(--muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
+.comms__lbl{color:var(--term-muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
 .comms__input{background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.45rem .6rem;border-radius:6px;font-family:inherit;font-size:.9rem;flex:1;min-width:6rem}
 .comms__input:focus{outline:none;border-color:var(--accent,#6ef3c5)}
 .comms__btn{background:transparent;border:1px solid var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);padding:.4rem .8rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer;text-transform:lowercase;letter-spacing:.05em}
@@ -315,7 +303,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__btn--ghost{border-color:#3a4148;color:#9ba6b1}
 
 .comms__badge{background:#1a1f24;border:1px solid #2a3138;color:#9ba6b1;padding:.3rem .55rem;border-radius:4px;font-size:.75rem;text-transform:lowercase;letter-spacing:.05em}
-.comms__badge--peers{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
 .comms__badge--offline{border-color:#e05c5c;color:#e05c5c}
 .comms__send--offline{opacity:.55}
 .comms__line--pending .comms__what{color:#9ba6b1}
@@ -342,7 +329,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__what blockquote { margin: .35em 0 0; padding-left: .7em; border-left: 2px solid rgba(127,127,127,.4); }
 .comms__what--sys{color:#7a838d;font-style:italic}
 .comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
-.comms__drop{display:block;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;text-align:center;color:#7a838d;font-size:.82rem;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
 
 .comms__drop--hot{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);background:rgba(110,243,197,.04)}
 .comms__prog{display:inline-block;width:96px;height:6px;background:#1a1f24;border-radius:3px;overflow:hidden;margin:0 .4rem;vertical-align:middle}
@@ -350,22 +336,19 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__thumb{display:block;margin-top:.4rem;max-width:240px;max-height:180px;border:1px solid #2a3138;border-radius:4px;cursor:zoom-in}
 .comms__peerlist{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;padding:.2rem 0}
 .comms__chip{font-family:var(--font-mono);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;border:1px solid currentColor;line-height:1;letter-spacing:.05em;text-transform:lowercase}
-.comms__time{color:#5a636d;font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
+.comms__time{color:var(--term-subtle);font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
 .comms__btn--mute{min-width:5.5rem}
 .comms__btn--mute[aria-pressed="true"]{color:#7a838d;border-color:#3a4148}
-.comms__badge--eph{border-color:#d9a84e;color:#d9a84e;cursor:help}
-.comms__badge--enc{border-color:#9b6fd4;color:#9b6fd4;cursor:help}
 .comms__send{display:flex;gap:.5rem;align-items:center}
 .comms__input--msg{min-width:0}
 .comms__picker{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem}
-.comms__picker[hidden]{display:none}
 .comms__picker-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
 .comms__picker-card{position:relative;z-index:1;background:#0d1014;border:1px solid #2a3138;border-radius:8px;padding:1rem;width:100%;max-width:24rem;max-height:80vh;overflow:auto;display:flex;flex-direction:column;gap:.7rem}
 .comms__picker-h{margin:0;font-size:.9rem;color:var(--accent,#6ef3c5);text-transform:lowercase;letter-spacing:.05em}
 .comms__picker-list{display:flex;flex-direction:column;gap:.4rem}
 .comms__picker-item{display:flex;justify-content:space-between;align-items:center;gap:.7rem;width:100%;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.5rem .7rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer}
 
-.comms__picker-ver{color:var(--muted);font-size:.75rem;flex:none}
+.comms__picker-ver{color:var(--term-muted);font-size:.75rem;flex:none}
 .comms__picker-actions{display:flex;justify-content:flex-end}
 .comms__id-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.5rem .75rem}
 .comms__id-note{color:#7a838d;font-size:.78rem}
@@ -395,7 +378,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__btn:hover:not(:disabled){background:var(--accent,#6ef3c5);color:#0a0d10}
 .comms__btn--ghost:hover{background:#3a4148;color:#e6edf3}
 .comms__btn--danger:hover:not(:disabled){background:#e5534b;color:#0a0d10}
-.comms__drop:hover{border-color:#3a424a;color:#9ba6b1}
 .comms__contact:hover{background:#10151a}
 .comms__contact:hover .comms__rowbtn{opacity:1}
 .comms__rowbtn:hover{color:#e5534b}
@@ -408,9 +390,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 
 .comms__badge{display:inline-flex;align-items:center;gap:.3rem}
 .comms__add{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;padding-top:.6rem;border-top:1px solid #14181d}
-.comms__add[hidden]{display:none}
 .comms__scan{display:flex;flex-direction:column;gap:.5rem;align-items:flex-start}
-.comms__scan[hidden]{display:none}
 .comms__scan-video{width:100%;max-width:18rem;border-radius:8px;border:1px solid #2a3138;background:#000;aspect-ratio:1;object-fit:cover}
 @media (max-width:640px){
   .comms__btn--icon .comms__btn-t{display:none}
@@ -418,13 +398,12 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 }
 .comms__contact:last-child{border-bottom:none}
 .comms__contact-name{color:#e6edf3;font-size:.85rem}
-.comms__contact-fp{color:#5a636d;font-size:.7rem}
-.comms__rooms-head{color:#5a636d;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 0 .15rem}
+.comms__contact-fp{color:var(--term-subtle);font-size:.7rem}
+.comms__rooms-head{color:var(--term-subtle);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 0 .15rem}
 .comms__avatar--room{display:inline-flex;align-items:center;justify-content:center;color:#9b6fd4}
 .comms__roomrow--current .comms__contact-name{color:var(--accent,#6ef3c5)}
 .comms__room-rename{max-width:12rem;padding:.15rem .4rem;font-size:.85rem}
 .comms__rowbtn--text{font-size:.72rem;letter-spacing:.04em;padding:.15rem .4rem;opacity:.7}
-.comms__contact-spacer{flex:1}
 .comms__chip-add{margin-left:.3rem;border:none;background:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0}
 .comms__btn--danger{border-color:#e5534b;color:#e5534b}
 
@@ -437,19 +416,18 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__tile-voice{color:var(--accent,#6ef3c5);font-size:1.3rem}
 
 .comms__upgrade{display:flex;align-items:center;gap:.6rem .9rem;flex-wrap:wrap;padding:.6rem .8rem;margin-bottom:.6rem;border:1px solid rgba(110,243,197,.35);border-radius:8px;background:rgba(110,243,197,.06)}
-.comms__upgrade[hidden]{display:none}
 .comms__upgrade-text{flex:1 1 14rem;color:#c3ccd6;font-size:.82rem}
 .comms__upgrade-actions{display:flex;gap:.5rem;flex-wrap:wrap}
 .comms__app--chat .comms__upgrade{display:none}
 .comms__profile{display:flex;align-items:center;gap:.6rem}
 .comms__profile-spacer{flex:1}
-.comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
+.comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);justify-content:start;grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
 .comms__id-row--you .comms__avatar{grid-area:av}
 .comms__id-row--you .comms__input{grid-area:input;width:100%}
 .comms__id-row--you .comms__badge--fp{grid-area:fp;justify-self:start}
 .comms__avatar{width:2.3rem;height:2.3rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex:none;user-select:none}
 .comms__avatar--me{width:2.1rem;height:2.1rem}
-.comms__badge--fp{border:0;background:transparent;color:#5a636d;padding:0;font-size:.7rem}
+.comms__badge--fp{border:0;background:transparent;color:var(--term-subtle);padding:0;font-size:.7rem}
 .comms__app--people #comms-chathead{display:none}
 .comms__app--people .comms__chatbody{display:none}
 .comms__app--people .comms__send{display:none}
@@ -474,7 +452,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__line--me{align-items:flex-end}
 .comms__line--sys{align-items:center}
 .comms__who{min-width:0;font-size:.68rem;letter-spacing:.04em;padding:0 .45rem}
-.comms__who--me{color:#5a636d;font-size:.62rem}
+.comms__who--me{color:var(--term-subtle);font-size:.62rem}
 .comms__what{flex:none;width:fit-content;max-width:min(52ch,84%);background:#161c23;border-radius:14px 14px 14px 5px;padding:.5rem .75rem;line-height:1.45}
 .comms__line--me .comms__what{background:#12352a;border-radius:14px 14px 5px 14px}
 .comms__line--sys .comms__what{background:#10151a;border:1px solid #171d24;border-radius:999px;padding:.28rem .75rem;font-size:.72rem;color:#6a737d;font-style:normal;text-align:center;max-width:94%}
@@ -508,7 +486,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__chev{color:#3a4148;flex:none;display:flex;align-items:center}
 .comms__contacts-empty{padding:.65rem .3rem}
 .comms__notif{display:flex;align-items:center;gap:.6rem;background:rgba(110,243,197,.05);border:1px solid rgba(110,243,197,.25);border-radius:10px;padding:.55rem .75rem}
-.comms__notif[hidden]{display:none}
 .comms__notif-text{flex:1;color:#c3ccd6;font-size:.78rem;line-height:1.45}
 .comms__app--chat .comms__notif{display:none}
 .comms__addopt{display:flex;align-items:center;gap:.65rem;width:100%;background:#0a0d10;border:1px solid #2a3138;border-radius:12px;padding:.75rem .85rem;color:#e6edf3;font:inherit;font-size:.88rem;cursor:pointer;min-height:48px;transition:border-color .15s}

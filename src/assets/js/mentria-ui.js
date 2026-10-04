@@ -535,12 +535,6 @@
     return fallback;
   }
 
-  // ── Back-dismiss ───────────────────────────────────────────────
-  // Let the system Back button/gesture (Android, installed PWA) close the
-  // topmost overlay instead of navigating away. Overlays call
-  // backDismiss(closeFn) when they open and .release() on their own close.
-  // Prefers the CloseWatcher API; falls back to a guarded history-entry stack
-  // (contentless sentinel entries, so pushes and pops always balance).
   var HAS_CLOSE_WATCHER = typeof window.CloseWatcher === 'function';
   var backStack = [];
   var backGuard = false;

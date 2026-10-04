@@ -22,6 +22,7 @@ try {
 
   var ua = navigator.userAgent;
   var isIos = (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isIpad = (/iPad/.test(ua) && !window.MSStream) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   var isMac = /Macintosh/.test(ua);
   var isSafari = /^((?!chrome|android).)*safari/i.test(ua);
   var isChromeLike = /Chrome|CriOS|EdgA?|OPR/.test(ua);
@@ -159,11 +160,13 @@ try {
 
   var COPY = {
     iosTitle:    {{ ("pwa.sheet_title_ios"   | t) | dump | safe }},
+    ipadTitle:   {{ ("pwa.sheet_title_ipad"  | t) | dump | safe }},
     macosTitle:  {{ ("pwa.sheet_title_macos" | t) | dump | safe }},
     chromeTitle: {{ ("pwa.sheet_title_chrome"| t) | dump | safe }},
     iosStep1:    {{ ("pwa.ios_step1"  | t) | dump | safe }},
     iosStep2:    {{ ("pwa.ios_step2"  | t) | dump | safe }},
     iosStep3:    {{ ("pwa.ios_step3"  | t) | dump | safe }},
+    ipadStep1:   {{ ("pwa.ipad_step1" | t) | dump | safe }},
     macosStep1:  {{ ("pwa.macos_step1"| t) | dump | safe }},
     macosStep2:  {{ ("pwa.macos_step2"| t) | dump | safe }},
     macosStep3:  {{ ("pwa.macos_step3"| t) | dump | safe }},
@@ -179,9 +182,9 @@ try {
     var showVideo = true;
 
     if (isIos) {
-      title = COPY.iosTitle;
+      title = isIpad ? COPY.ipadTitle : COPY.iosTitle;
       stepsHtml =
-        '<li>' + COPY.iosStep1 + ' ' + SHARE_SVG + '</li>' +
+        '<li>' + (isIpad ? COPY.ipadStep1 : COPY.iosStep1) + ' ' + SHARE_SVG + '</li>' +
         '<li>' + COPY.iosStep2 + ' ' + ADD_SVG + '</li>' +
         '<li>' + COPY.iosStep3 + '</li>';
       noteHtml = COPY.note;
@@ -247,8 +250,8 @@ try {
     if (!window.MentriaI18n || !window.MentriaI18n.t) return;
     var t = window.MentriaI18n.t;
     var map = {
-      iosTitle: 'pwa.sheet_title_ios', macosTitle: 'pwa.sheet_title_macos', chromeTitle: 'pwa.sheet_title_chrome',
-      iosStep1: 'pwa.ios_step1', iosStep2: 'pwa.ios_step2', iosStep3: 'pwa.ios_step3',
+      iosTitle: 'pwa.sheet_title_ios', ipadTitle: 'pwa.sheet_title_ipad', macosTitle: 'pwa.sheet_title_macos', chromeTitle: 'pwa.sheet_title_chrome',
+      iosStep1: 'pwa.ios_step1', iosStep2: 'pwa.ios_step2', iosStep3: 'pwa.ios_step3', ipadStep1: 'pwa.ipad_step1',
       macosStep1: 'pwa.macos_step1', macosStep2: 'pwa.macos_step2', macosStep3: 'pwa.macos_step3',
       chromeStep1: 'pwa.chrome_step1', chromeStep2: 'pwa.chrome_step2', note: 'pwa.note'
     };

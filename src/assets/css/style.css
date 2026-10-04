@@ -163,7 +163,7 @@ i18n-t {
   --duration-slow: 450ms;
 
   /* Fonts */
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-mono: 'JetBrains Mono', Menlo, 'Courier New', monospace;
   --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -176,6 +176,8 @@ i18n-t {
 .game-page .terminal-frame__body { padding: 0; }
 
 *, *::before, *::after { box-sizing: border-box; }
+button, input, select, textarea { font-family: inherit; }
+code, kbd, samp, pre { font-family: var(--font-mono); }
 
 html {
   /* Don't let iOS bloat headings on rotation. */
@@ -1570,7 +1572,7 @@ html:has(.pwa-install-banner--visible) .m-update { bottom: calc(88px + env(safe-
 .tools-popup__find { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 0.6rem; height: 44px; padding: 0 0.85rem; box-sizing: border-box; border: 1px solid var(--term-border-strong); border-radius: 12px; background: var(--term-bg); color: var(--term-muted); cursor: text; }
 .tools-popup__find:focus-within { border-color: var(--syn-cyan); }
 .tools-popup__find-icon { flex: 0 0 auto; }
-.tools-popup__input { flex: 1 1 auto; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent; color: var(--term-fg-strong); font-family: var(--font-body); font-size: 1rem; outline: none; }
+.tools-popup__input { flex: 1 1 auto; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent; color: var(--term-fg-strong); font-family: var(--font-mono); font-size: 1rem; outline: none; }
 .tools-popup__input::placeholder { color: var(--term-subtle); }
 .tools-popup__close { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--term-border-strong); border-radius: 12px; background: transparent; color: var(--term-muted); cursor: pointer; }
 .tools-popup__close:hover, .tools-popup__close:focus-visible { color: var(--term-fg); border-color: var(--term-fg); }

@@ -2069,6 +2069,34 @@ const topicToFp = new Map();
 const topicToRoom = new Map();
 const seenInboxIds = new Set();
 let unreadMap = {};
+const unreadFloor = new Map();
+let unreadFlush = null;
+
+const queueUnreadFlush = (render) => {
+  if (!unreadFlush) {
+    unreadFlush = { render: false };
+    setTimeout(() => {
+      const f = unreadFlush;
+      unreadFlush = null;
+      try { CID.setUnread(unreadMap); } catch (_) {}
+      if (f.render) { renderContacts(); syncOsBadge(); }
+    }, 80);
+  }
+  if (render) unreadFlush.render = true;
+};
+
+const unreadFloorOf = (k, fallback) => {
+  if (unreadFloor.has(k)) return unreadFloor.get(k);
+  return unreadMap[k] ? (unreadMap[k].lastTs || 0) : (fallback || 0);
+};
+
+const countUnread = (k, ts) => {
+  const e = unreadMap[k] || { n: 0, lastTs: 0 };
+  e.n = (e.n || 0) + 1;
+  e.lastTs = Math.max(e.lastTs || 0, ts);
+  unreadMap[k] = e;
+  queueUnreadFlush(true);
+};
 
 let sideOpens = 0;
 
@@ -2149,6 +2177,9 @@ const subscribeUnread = async () => {
   for (const r of savedRooms()) { const topic = CHAT_TOPIC_PREFIX + r.room; topicToRoom.set(topic, r); topics.push(topic); }
   if (unreadSubId) await sideSend(JSON.stringify(['CLOSE', unreadSubId]));
   if (!topics.length) { unreadSubId = null; return; }
+  unreadFloor.clear();
+  topicToFp.forEach((fp) => unreadFloor.set(fp, (unreadMap[fp] && unreadMap[fp].lastTs) || 0));
+  topicToRoom.forEach((r) => { const k = roomUnreadKey(r.room); unreadFloor.set(k, unreadMap[k] ? (unreadMap[k].lastTs || 0) : (r.lastSeen || 0)); });
   unreadSubId = 'mu-' + Math.random().toString(36).slice(2);
   const since = Math.floor(Date.now() / 1000) - HISTORY_LOOKBACK_SEC;
   await sideSend(JSON.stringify(['REQ', unreadSubId, { kinds: [CHAT_KIND], '#x': topics, since, limit: 300 }]));
@@ -2213,12 +2244,12 @@ const handleSideMsg = async (msgEvent) => {
       const k = roomUnreadKey(savedRoom.room);
       if (currentRoomName === savedRoom.room) {
         unreadMap[k] = { n: 0, lastTs: Math.max(ts, Date.now()) };
-        try { CID.setUnread(unreadMap); } catch (_) {}
+        unreadFloor.set(k, Date.now());
+        queueUnreadFlush(false);
         return;
       }
       if (content && typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
-      const entry = unreadMap[k] || { n: 0, lastTs: savedRoom.lastSeen || 0 };
-      if (ts <= entry.lastTs) return;
+      if (ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
       let preview = null;
       if (content && content.enc) {
         try {
@@ -2229,12 +2260,8 @@ const handleSideMsg = async (msgEvent) => {
           preview = unpacked ? unpacked.text : null;
         } catch (_) {}
       }
-      entry.n = (entry.n || 0) + 1;
-      entry.lastTs = ts;
-      unreadMap[k] = entry;
-      try { CID.setUnread(unreadMap); } catch (_) {}
-      renderContacts();
-      syncOsBadge();
+      if (currentRoomName === savedRoom.room || ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
+      countUnread(k, ts);
       notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: '/comms/' + formatHash(savedRoom.room, savedRoom.key) });
       return;
     }
@@ -2243,25 +2270,22 @@ const handleSideMsg = async (msgEvent) => {
       seen.n = 0;
       seen.lastTs = Math.max(seen.lastTs || 0, ts, Date.now());
       unreadMap[fp] = seen;
-      try { CID.setUnread(unreadMap); } catch (_) {}
+      unreadFloor.set(fp, Date.now());
+      queueUnreadFlush(false);
       return;
     }
     if (content && typeof content.cmid === 'string') {
       if (content.cmid.startsWith(selfId + ':')) return;
       if (sentCmidsFor(fp).includes(content.cmid)) return;
     }
-    const entry = unreadMap[fp] || { n: 0, lastTs: 0 };
-    if (ts <= entry.lastTs) return;
-    entry.n = (entry.n || 0) + 1;
-    unreadMap[fp] = entry;
-    try { CID.setUnread(unreadMap); } catch (_) {}
-    renderContacts();
-    syncOsBadge();
+    if (ts <= unreadFloorOf(fp, 0)) return;
+    countUnread(fp, ts);
   }
 };
 
 const clearUnreadFor = (fp) => {
   unreadMap[fp] = { n: 0, lastTs: Date.now() };
+  unreadFloor.set(fp, Date.now());
   try { CID.setUnread(unreadMap); } catch (_) {}
   syncOsBadge();
 };
@@ -3001,6 +3025,7 @@ const renderContactsBase = () => {
     els.contactList.append(empty);
     return;
   }
+  const missedMap = getMissed();
   contacts.forEach((c) => {
     const row = document.createElement('div');
     row.className = 'comms__contact';
@@ -3021,7 +3046,7 @@ const renderContactsBase = () => {
     sub.textContent = c.fp;
     mid.append(name, sub);
     row.append(av, mid);
-    const missed = getMissed()[c.fp];
+    const missed = missedMap[c.fp];
     if (missed && missed.n > 0) {
       const mc = document.createElement('span');
       mc.className = 'comms__missed';

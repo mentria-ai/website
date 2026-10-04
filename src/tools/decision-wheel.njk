@@ -75,6 +75,7 @@ localeReload: true
     errMax: {{ ("tool.decision-wheel.err_max" | t) | dump | safe }},
     btnRemove: {{ ("tool.decision-wheel.btn_remove" | t) | dump | safe }},
     linkCopied: {{ ("tool.decision-wheel.link_copied" | t) | dump | safe }},
+    copyFailed: {{ ("common.copy_failed" | t) | dump | safe }},
     useShared: {{ ("tool.decision-wheel.use_shared" | t) | dump | safe }}
   };
   const DEFAULTS = [COPY.yes, COPY.no, COPY.upto, COPY.wait];
@@ -300,7 +301,7 @@ localeReload: true
 
   document.getElementById("dw-option-share").addEventListener("click", () => {
     const url = location.origin + location.pathname + "?" + options.map((o) => "o=" + encodeURIComponent(o)).join("&");
-    navigator.clipboard.writeText(url).then(() => { if (window.MentriaUI) MentriaUI.toast(COPY.linkCopied); }).catch(() => {});
+    if (window.MentriaUI) MentriaUI.copyText(url).then((ok) => { MentriaUI.toast(ok ? COPY.linkCopied : COPY.copyFailed); });
   });
 
   const sharedOpts = new URLSearchParams(location.search).getAll("o").map((s) => s.trim().slice(0, 24)).filter(Boolean);

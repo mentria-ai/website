@@ -1,6 +1,13 @@
 (function () {
   'use strict';
 
+  function copyText(text) {
+    return Promise.resolve().then(function () {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('no-clipboard');
+      return navigator.clipboard.writeText(String(text));
+    }).then(function () { return true; }, function () { return false; });
+  }
+
   function copyButton(el, getValue, opts) {
     if (!el || typeof getValue !== 'function') return el;
     opts = opts || {};
@@ -22,13 +29,10 @@
           busy = false;
         }, restoreMs);
       };
-      Promise.resolve()
-        .then(function () {
-          if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('no-clipboard');
-          return navigator.clipboard.writeText(value);
-        })
-        .then(function () { settle(copiedText, 'is-copied'); })
-        .catch(function () { settle(failedText, 'is-failed'); });
+      copyText(value).then(function (ok) {
+        if (ok) settle(copiedText, 'is-copied');
+        else settle(failedText, 'is-failed');
+      });
     });
     return el;
   }
@@ -738,6 +742,7 @@
   }, true);
 
   window.MentriaUI = {
+    copyText: copyText,
     copyButton: copyButton,
     toast: toast,
     undoToast: undoToast,

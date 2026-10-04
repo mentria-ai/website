@@ -117,6 +117,7 @@ localeReload: true
     removeTitle:       {{ ("tool.color-picker.title_remove"        | t) | dump | safe }},
     toastCopied:       {{ ("tool.color-picker.toast_copied"        | t) | dump | safe }},
     linkCopied:        {{ ("tool.color-picker.link_copied"         | t) | dump | safe }},
+    copyFailed:        {{ ("common.copy_failed"                    | t) | dump | safe }},
     toastSaved:        {{ ("tool.color-picker.toast_saved"         | t) | dump | safe }},
     toastAlreadySaved: {{ ("tool.color-picker.toast_already_saved" | t) | dump | safe }},
     confirmRemove:     {{ ("tool.color-picker.confirm_remove"      | t) | dump | safe }}
@@ -271,9 +272,9 @@ localeReload: true
 
   /* ── Copy helper ───────────────────────────────────── */
   function copyText(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      MentriaUI.toast(COPY.toastCopied.replace('{color}', text));
-    }).catch(() => {});
+    MentriaUI.copyText(text).then((ok) => {
+      MentriaUI.toast(ok ? COPY.toastCopied.replace('{color}', text) : COPY.copyFailed);
+    });
   }
 
   /* ── Saved colors ──────────────────────────────────── */
@@ -424,7 +425,7 @@ localeReload: true
   /* ── Init ──────────────────────────────────────────── */
   document.getElementById('cp-link').addEventListener('click', () => {
     const url = location.origin + location.pathname + '?c=' + currentHex.slice(1);
-    navigator.clipboard.writeText(url).then(() => { MentriaUI.toast(COPY.linkCopied); }).catch(() => {});
+    MentriaUI.copyText(url).then((ok) => { MentriaUI.toast(ok ? COPY.linkCopied : COPY.copyFailed); });
   });
 
   const init = () => {

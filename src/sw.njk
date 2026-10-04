@@ -2,6 +2,7 @@
 permalink: /sw.js
 eleventyExcludeFromCollections: true
 ---
+{% set localeAlt = locales | selectattr("pathPrefix") | sort(false, true, "pathPrefix") | join("|", "pathPrefix") | replace("/", "") -%}
 importScripts('/assets/js/mentria-push-db.js?v={{ buildHash }}');
 const CACHE_NAME = 'mentria-cache-{{ buildHash }}';
 const MODELS_CACHE = 'mentria-models';
@@ -14,9 +15,10 @@ const EXT_DATA_CACHE = 'mentria-ext-data';
 const EXT_FILES_CACHE = 'mentria-ext-files';
 const DECKS_LIMIT = 60;
 const ART_LIMIT = 200;
-const FEED_PAGE = /^\/((es|fr|ja|pt-br)\/)?(feed\/|learn\/[^/]+\/)/;
+const FEED_PAGE = /^\/(({{ localeAlt }})\/)?(feed\/|learn\/[^/]+\/)/;
 const PACK_JSON = /^\/learn\/[^/]+\/pack\.json$/;
-const PACK_PAGE = /^\/(?:(?:es|fr|ja|pt-br)\/)?learn\/([^/]+)\/$/;
+const PACK_PAGE = /^\/(?:(?:{{ localeAlt }})\/)?learn\/(?!play\/|format\/)([^/]+)\/$/;
+const LOCALE_PATH = /^\/({{ localeAlt }})(\/|$)/;
 const ASSETS = [
   '/',
   '/assets/css/style.css',
@@ -129,6 +131,7 @@ const ASSETS = [
   '/tools/exif/',
   '/tools/files/',
   '/search-index.json',
+  '/assets/packs/example-qkv.svg',
   '/assets/img/badge.svg',
   '/assets/img/icon-192x192.png',
   '/assets/img/favicon-96x96.png',
@@ -600,12 +603,12 @@ self.addEventListener('fetch', event => {
       if (event.request.mode === 'navigate') {
         const localized = await caches.match(event.request, { ignoreSearch: true });
         if (localized) return localized;
-        const stripped = url.pathname.replace(/^\/(es|fr|ja|pt-br)(\/|$)/, '/');
+        const stripped = url.pathname.replace(LOCALE_PATH, '/');
         if (stripped !== url.pathname) {
           const alt = await caches.match(stripped, { ignoreSearch: true });
           if (alt) return alt;
         }
-        const lp = url.pathname.match(/^\/(es|fr|ja|pt-br)(\/|$)/);
+        const lp = url.pathname.match(LOCALE_PATH);
         const offline = (lp && await caches.match('/' + lp[1] + '/offline/', { ignoreSearch: true })) || await precache.match('/offline/', { ignoreSearch: true });
         if (offline) return offline;
       }

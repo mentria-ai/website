@@ -514,11 +514,14 @@ self.addEventListener('fetch', event => {
     event.respondWith((async () => {
       const cache = await caches.open(ART_CACHE);
       const cached = await cache.match(event.request.url, { ignoreVary: true });
-      const network = fetch(event.request.url, { mode: 'cors' }).then(resp => {
-        if (resp && resp.ok) stashCapped(ART_CACHE, event.request.url, resp.clone(), ART_LIMIT);
+      if (cached) return cached;
+      try {
+        const resp = await fetch(event.request.url, { mode: 'cors' });
+        if (resp && resp.ok) event.waitUntil(stashCapped(ART_CACHE, event.request.url, resp.clone(), ART_LIMIT).catch(() => {}));
         return resp;
-      }).catch(() => cached || fetch(event.request));
-      return cached || network;
+      } catch (_) {
+        return fetch(event.request);
+      }
     })());
     return;
   }
@@ -577,12 +580,12 @@ self.addEventListener('fetch', event => {
     try {
       const resp = await fetch(event.request);
       if (resp && resp.ok && event.request.mode === 'navigate' && FEED_PAGE.test(url.pathname)) {
-        stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT);
+        event.waitUntil(stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT).catch(() => {}));
         const pack = url.pathname.match(PACK_PAGE);
         if (pack) event.waitUntil(warmPack(pack[1]));
       }
       if (resp && resp.ok && PACK_JSON.test(url.pathname)) {
-        stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT);
+        event.waitUntil(stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT).catch(() => {}));
       }
       if (resp && resp.ok && (url.pathname.startsWith('/assets/fonts/') || url.pathname === '/search-index-feed.json')) {
         const copy = resp.clone();

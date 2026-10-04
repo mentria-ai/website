@@ -121,16 +121,19 @@ module.exports = function(eleventyConfig) {
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
+  function missingKey(key, lang) {
+    if (process.env.CI) throw new Error(`[i18n] Missing key: ${key} (lang=${lang})`);
+    console.warn(`[i18n] Missing key: ${key} (lang=${lang})`);
+    return key;
+  }
+
   // {{ "nav.tools" | t }} — uses the page's `lang`, fallback to English.
   // The output is wrapped in invisible sentinels so the build transform can
   // turn every translation into a client-switchable marker.
   eleventyConfig.addFilter("t", function (key) {
     const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
     const str = tResolve(lang, key);
-    if (str == null) {
-      console.warn(`[i18n] Missing key: ${key} (lang=${lang})`);
-      return key;
-    }
+    if (str == null) return missingKey(key, lang);
     return I18N_S0 + key + I18N_S1 + str + I18N_S2;
   });
 

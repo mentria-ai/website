@@ -278,10 +278,27 @@ try {
 try {
       (function () {
         var dlg = document.getElementById('m-dialog');
-        if (!dlg || typeof dlg.showPopover !== 'function') {
-          window.mentriaConfirm = function (m) { return Promise.resolve(window.confirm(m)); };
-          window.mentriaAlert = function (m) { window.alert(m); return Promise.resolve(); };
-          return;
+        if (!dlg) return;
+        var native = typeof dlg.showPopover === 'function';
+        var scrim = null;
+        if (!native) dlg.hidden = true;
+        function isShown() { return native ? dlg.matches(':popover-open') : !dlg.hidden; }
+        function reveal() {
+          if (native) { dlg.showPopover(); return; }
+          scrim = document.createElement('div');
+          scrim.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483646;background:rgba(0,0,0,.55)';
+          document.body.appendChild(scrim);
+          dlg.style.cssText = 'position:fixed;top:50%;left:50%;right:auto;bottom:auto;margin:0;transform:translate(-50%,-50%);z-index:2147483647;display:flex;flex-direction:column;gap:1.25rem;opacity:1;max-height:calc(100vh - 2rem);overflow:auto';
+          dlg.setAttribute('data-open', '');
+          dlg.hidden = false;
+        }
+        function conceal() {
+          if (native) { dlg.hidePopover(); return; }
+          dlg.hidden = true;
+          dlg.removeAttribute('data-open');
+          dlg.style.cssText = '';
+          if (scrim && scrim.parentNode) scrim.parentNode.removeChild(scrim);
+          scrim = null;
         }
         var msgEl = document.getElementById('m-dialog-msg');
         var okBtn = document.getElementById('m-dialog-ok');
@@ -309,7 +326,7 @@ try {
         function settle(result) {
           var r = resolver; resolver = null;
           if (backHandle) { backHandle.release(); backHandle = null; }
-          if (dlg.matches(':popover-open')) dlg.hidePopover();
+          if (isShown()) conceal();
           document.removeEventListener('keydown', trapKey, true);
           var o = opener; opener = null;
           if (o && document.contains(o)) { try { o.focus(); } catch (_) {} }
@@ -329,7 +346,7 @@ try {
           cancelBtn.hidden = (item.mode === 'alert');
           okBtn.textContent = (item.mode === 'alert') ? okLabel : confirmLabel;
           safeBtn = (item.mode === 'confirm' && item.opts && item.opts.danger) ? cancelBtn : okBtn;
-          dlg.showPopover();
+          reveal();
           document.addEventListener('keydown', trapKey, true);
           backHandle = (window.MentriaUI && window.MentriaUI.backDismiss)
             ? window.MentriaUI.backDismiss(function () { settle(false); }) : null;
@@ -351,7 +368,7 @@ try {
           var cf = window.MentriaI18n.t('common.dialog.confirm');
           if (ok != null) okLabel = ok;
           if (cf != null) confirmLabel = cf;
-          if (dlg.matches(':popover-open')) okBtn.textContent = cancelBtn.hidden ? okLabel : confirmLabel;
+          if (isShown()) okBtn.textContent = cancelBtn.hidden ? okLabel : confirmLabel;
         });
       })();
 } catch (e) { console.error(e); }

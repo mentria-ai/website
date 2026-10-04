@@ -592,6 +592,7 @@
       ).filter(function (n) { return !n.disabled && !n.hidden && n.type !== 'hidden'; });
     }
     function onKey(e) {
+      if (e.target && e.target.closest && e.target.closest('[popover]')) return;
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); return; }
       if (e.key !== 'Tab') return;
       var f = focusable();
@@ -607,7 +608,7 @@
       prevFocus = document.activeElement;
       el.hidden = false;
       inerted = Array.prototype.slice.call(document.body.children).filter(function (c) {
-        return c !== el && !c.hasAttribute('inert');
+        return c !== el && !c.hasAttribute('inert') && !c.hasAttribute('popover');
       });
       inerted.forEach(function (c) { c.setAttribute('inert', ''); });
       document.addEventListener('keydown', onKey);

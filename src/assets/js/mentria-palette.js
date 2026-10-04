@@ -647,6 +647,7 @@
 
   function blockingOverlayOpen() {
     var dlg = document.getElementById('m-dialog');
+    if (dlg && dlg.hasAttribute('data-open')) return true;
     try { if (dlg && dlg.matches(':popover-open')) return true; } catch (_) {}
     if (root && root.closest && root.closest('[inert]')) return true;
     return false;

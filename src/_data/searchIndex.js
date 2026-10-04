@@ -45,9 +45,10 @@ function readPosts() {
 }
 
 module.exports = function () {
-  const items = [];
+  const byLang = {};
   const posts = readPosts();
   for (const loc of locales) {
+    const items = [];
     const t = key => lookup(dicts[loc.code], key) ?? lookup(dicts.en, key) ?? null;
     const tags = keys => Array.from(new Set(keys.map(t).filter(v => typeof v === "string" && v))).join(" ");
     for (const tool of tools) {
@@ -102,6 +103,7 @@ module.exports = function () {
         category: "post"
       });
     }
+    byLang[loc.code] = items;
   }
-  return items;
+  return byLang;
 };

@@ -19,6 +19,7 @@ const FEED_PAGE = /^\/(({{ localeAlt }})\/)?(feed\/|learn\/[^/]+\/)/;
 const PACK_JSON = /^\/learn\/[^/]+\/pack\.json$/;
 const PACK_PAGE = /^\/(?:(?:{{ localeAlt }})\/)?learn\/(?!play\/|format\/)([^/]+)\/$/;
 const LOCALE_PATH = /^\/({{ localeAlt }})(\/|$)/;
+const FEED_INDEX = /^\/search-index-feed\.[A-Za-z-]+\.json$/;
 const ASSETS = [
   '/',
   '/assets/css/style.css',
@@ -130,7 +131,9 @@ const ASSETS = [
   '/tools/totp/',
   '/tools/exif/',
   '/tools/files/',
-  '/search-index.json',
+{%- for l in locales %}
+  '/search-index.{{ l.code }}.json',
+{%- endfor %}
   '/assets/packs/example-qkv.svg',
   '/assets/img/badge.svg',
   '/assets/img/icon-192x192.png',
@@ -589,7 +592,7 @@ self.addEventListener('fetch', event => {
       if (resp && resp.ok && PACK_JSON.test(url.pathname)) {
         event.waitUntil(stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT).catch(() => {}));
       }
-      if (resp && resp.ok && (url.pathname.startsWith('/assets/fonts/') || url.pathname === '/search-index-feed.json')) {
+      if (resp && resp.ok && (url.pathname.startsWith('/assets/fonts/') || FEED_INDEX.test(url.pathname))) {
         const copy = resp.clone();
         event.waitUntil(precache.put(event.request, copy).catch(() => {}));
       }

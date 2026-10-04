@@ -42,11 +42,13 @@ function deckItem(deck, kind, loc) {
 }
 
 module.exports = function () {
-  const items = [];
+  const byLang = {};
   for (const loc of locales) {
+    const items = [];
     for (const deck of deepcuts) items.push(deckItem(deck, "deepcuts", loc));
     for (const deck of source) items.push(deckItem(deck, "source", loc));
     for (const deck of stories) items.push(deckItem(deck, "story", loc));
+    byLang[loc.code] = items;
   }
-  return items;
+  return byLang;
 };

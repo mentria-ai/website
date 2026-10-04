@@ -1054,7 +1054,7 @@ eleventyComputed:
     writeState(res.state);
     const entry = { x: res.state.text, v: res.value };
     if (res.usedAngle) entry.a = angle;
-    history = engine.pushHistory(history, entry);
+    history = engine.pushHistory(readHistory(), entry);
     saveHistory();
     renderHistory();
     refresh();
@@ -1414,17 +1414,26 @@ eleventyComputed:
     focusInput(true);
   });
 
-  window.addEventListener('mentria:write', (e) => {
-    const d = (e && e.detail) || {};
-    if (d.ns !== 'tools' || !d.remote) return;
-    if (d.key === HISTORY_KEY) {
+  function onExternalWrite(key) {
+    if (key === HISTORY_KEY) {
       history = readHistory();
       renderHistory();
-    } else if (d.key === ANGLE_KEY) {
+    } else if (key === ANGLE_KEY) {
       const next = readAngle();
       if (angleSeg) angleSeg.set(next);
       setAngle(next, false);
     }
+  }
+
+  window.addEventListener('mentria:write', (e) => {
+    const d = (e && e.detail) || {};
+    if (d.ns !== 'tools' || !d.remote) return;
+    onExternalWrite(d.key);
+  });
+
+  window.addEventListener('storage', (e) => {
+    const prefix = 'mentria.store.tools.';
+    if (e.key && e.key.indexOf(prefix) === 0) onExternalWrite(e.key.slice(prefix.length));
   });
 
   document.addEventListener('mentria:localechange', () => {

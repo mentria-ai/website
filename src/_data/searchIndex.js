@@ -18,35 +18,8 @@ function lookup(dict, key) {
   return key.split(".").reduce((o, k) => (o == null ? undefined : o[k]), dict);
 }
 
-function readPosts() {
-  const FEED_DIR = path.join(__dirname, "..", "feed");
-  const out = [];
-  if (!fs.existsSync(FEED_DIR)) return out;
-  for (const file of fs.readdirSync(FEED_DIR)) {
-    if (!file.endsWith(".md")) continue;
-    const content = fs.readFileSync(path.join(FEED_DIR, file), "utf8");
-    const m = content.match(/^---\n([\s\S]*?)\n---/);
-    if (!m) continue;
-    const front = m[1];
-    if (!/tags:[\s\S]*?post/m.test(front)) continue;
-    const get = k => {
-      const r = front.match(new RegExp(`^${k}:\\s*(.+)$`, "m"));
-      return r ? r[1].trim().replace(/^["']|["']$/g, "") : "";
-    };
-    const slug = file.replace(/\.md$/, "");
-    out.push({
-      title: get("title"),
-      description: get("description"),
-      url: get("permalink") || `/feed/${slug}/`,
-      slug
-    });
-  }
-  return out;
-}
-
 module.exports = function () {
   const byLang = {};
-  const posts = readPosts();
   for (const loc of locales) {
     const items = [];
     const t = key => lookup(dicts[loc.code], key) ?? lookup(dicts.en, key) ?? null;
@@ -89,18 +62,6 @@ module.exports = function () {
         description: ch.subtitle || "",
         tldr: (ch.concept_tags || []).join(" "),
         category: "chapter"
-      });
-    }
-    for (const post of posts) {
-      items.push({
-        type: "post",
-        lang: loc.code,
-        slug: post.slug,
-        url: post.url,
-        title: post.title,
-        description: post.description,
-        tldr: "",
-        category: "post"
       });
     }
     byLang[loc.code] = items;

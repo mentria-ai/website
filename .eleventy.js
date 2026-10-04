@@ -184,15 +184,6 @@ module.exports = function(eleventyConfig) {
     return str == null ? missingKey(key, lang) : str;
   });
 
-  eleventyConfig.addShortcode("tbrand", function (key, word, href) {
-    const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
-    const base = tResolve(lang, key);
-    const linked = escAttr(base == null ? key : base).split(word).join(`<a href="${escAttr(href)}">${escAttr(word)}</a>`);
-    return `<i18n-t data-k="${escAttr(key)}" data-html data-brand="${escAttr(word)}">${linked}</i18n-t>`;
-  });
-
-  // {{ "/tools/" | localeUrl(lang) }} — prefixes path with the locale's
-  // pathPrefix, returns it unchanged for the default locale.
   eleventyConfig.addTransform("hoistBodyStyles", function (content) {
     if (!this.page.outputPath || !this.page.outputPath.endsWith(".html")) return content;
     const headEnd = content.indexOf("</head>");
@@ -331,10 +322,6 @@ module.exports = function(eleventyConfig) {
     }
   });
 
-  eleventyConfig.addFilter("year", function() {
-    return new Date().getFullYear();
-  });
-
   eleventyConfig.addFilter("emph", function (value) {
     return String(value == null ? "" : value)
       .replace(/\*\*(?!\s)([^*\n]+?)(?<!\s)\*\*/g, "<strong>$1</strong>")
@@ -358,14 +345,6 @@ module.exports = function(eleventyConfig) {
     } catch (e) {
       return '<code class="deck__eq-raw">' + String(tex) + "</code>";
     }
-  });
-
-  eleventyConfig.addFilter("chronoFeed", function(feed) {
-    if (!Array.isArray(feed)) return feed;
-    return feed
-      .map((card, i) => ({ card, i, key: String((card && card.date) || "") }))
-      .sort((a, b) => (a.key < b.key ? 1 : a.key > b.key ? -1 : a.i - b.i))
-      .map((x) => x.card);
   });
 
   // Passthrough copy for assets

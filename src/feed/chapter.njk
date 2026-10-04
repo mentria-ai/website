@@ -12,6 +12,7 @@ eleventyComputed:
   robots: "{% if not pair.locale.isDefault %}noindex, follow{% endif %}"
   title: "{{ pair.chapter.title }} · Chapter {{ pair.chapter.order }}"
   description: "{{ pair.chapter.subtitle }}"
+  preloadImage: "{% set s = pair.chapter.slides[0] %}{% if s.image and s.image_status != 'pending' %}{{ s.image }}{% endif %}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 

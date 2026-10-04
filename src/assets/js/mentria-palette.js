@@ -28,6 +28,11 @@
     return String(v == null ? '' : v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 
+  function clip(s, n, more) {
+    var chars = Array.from(String(s));
+    return chars.length > n ? chars.slice(0, n).join('') + (more || '') : String(s);
+  }
+
   function kwString(kw) {
     if (kw == null) return '';
     if (Object.prototype.toString.call(kw) === '[object Array]') return kw.join(' ');
@@ -64,7 +69,7 @@
           var desc = typeof c.description === 'string' ? c.description : '';
           out.push({
             title: c.name + ' · ' + name,
-            hint: desc.slice(0, 80),
+            hint: clip(desc, 80),
             href: prefix + '/tools/extensions/run/?id=' + encodeURIComponent(id) + '#cmd=' + encodeURIComponent(c.name),
             titleN: norm(c.name + ' ' + name),
             hayN: norm(c.name + ' ' + name + ' ' + desc),
@@ -374,7 +379,7 @@
     if (qN) {
       renderResults(qN, used);
       var sq = String(query || '').trim();
-      var shown = sq.length > 40 ? sq.slice(0, 40) + '…' : sq;
+      var shown = clip(sq, 40, '…');
       listEl.appendChild(makeOption({
         title: fmtLabel(labels.searchSite || 'Search the site for “{q}”', { q: shown }),
         hint: '',
@@ -497,7 +502,7 @@
       var text = cmd.note;
       out.push({
         id: 'note',
-        title: fmtLabel(labels.actNote || 'Save note: \u201c{text}\u201d', { text: text.length > 40 ? text.slice(0, 40) + '\u2026' : text }),
+        title: fmtLabel(labels.actNote || 'Save note: \u201c{text}\u201d', { text: clip(text, 40, '\u2026') }),
         hint: '',
         action: function () {
           if (saveQuickNote(text)) { toast(labels.actNoteDone || 'Note saved'); close(); }

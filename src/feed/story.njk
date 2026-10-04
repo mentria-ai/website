@@ -11,6 +11,7 @@ eleventyComputed:
   title: "{{ pair.deck.subtitle | tloc(pair.locale.code) }} · Mentria"
   description: "{{ pair.deck.subtitle | tloc(pair.locale.code) }}"
   socialImageOverride: "{{ pair.deck.cover_image }}"
+  preloadImage: "{% set s = pair.deck.slides[0] %}{% if s.image and s.image_status != 'pending' %}{{ s.image }}{% endif %}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 

@@ -70,7 +70,7 @@
 .prose p, .prose li { color: rgba(230, 237, 243, 0.86); }
 .prose a { color: var(--syn-cyan); text-decoration: underline; text-underline-offset: 0.2em; }
 .prose code { font-family: var(--font-mono); font-size: 0.86em; background: rgba(255, 255, 255, 0.08); padding: 0.05em 0.35em; border-radius: 4px; }
-.prose pre { overflow-x: auto; padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--term-border); background: var(--term-bg-raised); font-size: 0.82rem; line-height: 1.5; }
+.prose pre { overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--term-border); background: var(--term-bg-raised); font-size: 0.82rem; line-height: 1.5; }
 .prose pre code { background: none; padding: 0; font-size: inherit; }
 .prose table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; font-size: 0.9rem; display: block; overflow-x: auto; }
 .prose th, .prose td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--term-border); }

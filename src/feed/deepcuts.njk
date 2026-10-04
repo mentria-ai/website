@@ -33,6 +33,7 @@ eleventyComputed:
     {%- endfor -%}
     {{ (desc or (pair.edition.subtitle | tloc(pair.locale.code))) | safe }}
   socialImageOverride: "{{ pair.edition.cover_image }}"
+  preloadImage: "{% set s = pair.edition.slides[0] %}{% if s.image and s.image_status != 'pending' %}{{ s.image }}{% endif %}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 

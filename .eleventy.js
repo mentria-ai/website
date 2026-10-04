@@ -6,17 +6,14 @@ const toolsCatalog = require("./src/_data/tools.js");
 const chapterCatalog = require("./src/_data/chapter_list.json");
 
 module.exports = function(eleventyConfig) {
-  // Inject short git commit hash as a global data value for cache busting
-  const buildHash = (() => {
+  const readBuildHash = () => {
     try {
       return execSync("git rev-parse --short HEAD").toString().trim();
     } catch {
       return Date.now().toString(36);
     }
-  })();
-  eleventyConfig.addGlobalData("buildHash", buildHash);
-  eleventyConfig.addGlobalData("releaseTag", process.env.RELEASE_TAG || "");
-  eleventyConfig.addGlobalData("englishOnlyUrls", (() => {
+  };
+  const readEnglishOnlyUrls = () => {
     const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
       if (entry.isDirectory()) return entry.name === "assets" || entry.name.startsWith("_") ? [] : walk(path.join(dir, entry.name));
       return /\.(njk|md)$/.test(entry.name) ? [path.join(dir, entry.name)] : [];
@@ -29,7 +26,12 @@ module.exports = function(eleventyConfig) {
       if (link) urls.push(link[1].trim().replace(/index\.html$/, ""));
     }
     return urls.sort();
-  })());
+  };
+  let buildHash = readBuildHash();
+  let englishOnlyUrls = readEnglishOnlyUrls();
+  eleventyConfig.addGlobalData("buildHash", () => buildHash);
+  eleventyConfig.addGlobalData("releaseTag", process.env.RELEASE_TAG || "");
+  eleventyConfig.addGlobalData("englishOnlyUrls", () => englishOnlyUrls);
 
   // Inline SVG sprite content so it can be injected directly into the HTML.
   // iOS Safari PWA has a sticky cache layer for external `<use href="X.svg#id">`
@@ -79,21 +81,30 @@ module.exports = function(eleventyConfig) {
     return fs.readdirSync(dir).filter((name) => name.endsWith(".mjs")).sort().map((name) => "/assets/mentria/dist/" + name);
   })());
 
-  // ── i18n: load locales + dictionaries once at startup ──────────
-  // Layout: src/_data/i18n/<code>.json. Same key tree across all files;
-  // missing keys fall back to English.
   const I18N_DIR = path.join(__dirname, "src", "_data", "i18n");
   const DEFAULT_LANG = "en";
   const localesData = require("./src/_data/locales.js");
   const dictionaries = {};
-  for (const file of fs.readdirSync(I18N_DIR)) {
-    if (!file.endsWith(".json")) continue;
-    const code = file.replace(/\.json$/, "");
-    dictionaries[code] = JSON.parse(fs.readFileSync(path.join(I18N_DIR, file), "utf8"));
-  }
-  if (!dictionaries[DEFAULT_LANG]) {
-    throw new Error(`Missing default i18n dictionary: src/_data/i18n/${DEFAULT_LANG}.json`);
-  }
+  const loadDictionaries = () => {
+    const next = {};
+    for (const file of fs.readdirSync(I18N_DIR)) {
+      if (!file.endsWith(".json")) continue;
+      next[file.replace(/\.json$/, "")] = JSON.parse(fs.readFileSync(path.join(I18N_DIR, file), "utf8"));
+    }
+    if (!next[DEFAULT_LANG]) {
+      throw new Error(`Missing default i18n dictionary: src/_data/i18n/${DEFAULT_LANG}.json`);
+    }
+    for (const code of Object.keys(dictionaries)) delete dictionaries[code];
+    Object.assign(dictionaries, next);
+  };
+  loadDictionaries();
+  let builds = 0;
+  eleventyConfig.on("eleventy.before", () => {
+    if (builds++ === 0) return;
+    buildHash = readBuildHash();
+    englishOnlyUrls = readEnglishOnlyUrls();
+    loadDictionaries();
+  });
 
   function lookupKey(dict, key) {
     return key.split(".").reduce((o, k) => (o == null ? undefined : o[k]), dict);

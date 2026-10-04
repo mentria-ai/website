@@ -42,11 +42,12 @@ export const ensureKeypair = async () => {
   const pkcs8 = await crypto.subtle.exportKey('pkcs8', pair.privateKey);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, pkcs8);
-  store().set(NS, KEYS_KEY, {
+  const saved = store().set(NS, KEYS_KEY, {
     v: 1,
     pub: { kty: publicJwk.kty, crv: publicJwk.crv, x: publicJwk.x, y: publicJwk.y },
     wrapped: { iv: b64uEnc(iv), ct: b64uEnc(new Uint8Array(ct)) }
   });
+  if (!saved) throw new Error('storage-full');
   return { publicJwk, privateKey: pair.privateKey };
 };
 
@@ -148,7 +149,7 @@ export const saveRequest = async (payload) => {
     ts: Date.now()
   };
   list.push(entry);
-  store().set(NS, 'requests', list.slice(-20));
+  if (!store().set(NS, 'requests', list.slice(-20))) return null;
   return entry;
 };
 
@@ -200,7 +201,7 @@ export const addContact = async (payload) => {
       addedAt: Date.now()
     });
   }
-  store().set(NS, CONTACTS_KEY, contacts);
+  if (!store().set(NS, CONTACTS_KEY, contacts)) throw new Error('storage-full');
   return contacts.find((c) => c.fp === fp);
 };
 

@@ -89,7 +89,7 @@
   }
   function saveVault(v) {
     if (!global.MentriaStore) throw new Error('storage unavailable');
-    global.MentriaStore.set(NS, KEY, v);
+    if (!global.MentriaStore.set(NS, KEY, v)) throw new Error('storage-full');
   }
 
   function isSetUp() { return !!loadVault(); }
@@ -134,7 +134,7 @@
     if (!vault.kcv || vault.v !== 2) {
       vault.v = 2;
       vault.kcv = await kcvOf(secret);
-      saveVault(vault);
+      try { saveVault(vault); } catch (_) {}
     }
     await acceptSecret(secret, vault);
     return true;
@@ -264,7 +264,7 @@
     const vault = loadVault();
     if (!vault || !vault.prf) return;
     delete vault.prf;
-    saveVault(vault);
+    try { saveVault(vault); } catch (_) {}
   }
 
   function idbOpen() {

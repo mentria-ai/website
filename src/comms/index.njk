@@ -909,7 +909,8 @@ const renderPeerList = () => {
       add.textContent = '+';
       add.title = 'add ' + (prof.name || short(p)) + ' as a contact';
       add.addEventListener('click', async () => {
-        await CID.addContact({ name: prof.name, pub: prof.pub, ring: prof.ring });
+        try { await CID.addContact({ name: prof.name, pub: prof.pub, ring: prof.ring }); }
+        catch (err) { sys('could not add contact: ' + err.message); return; }
         sys(`${displayName(p)} added to contacts.`);
         renderPeerList();
         renderContacts();

@@ -252,23 +252,18 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__onboard,.comms__lock{margin-top:auto;margin-bottom:auto}
 .comms [hidden]{display:none !important}
 .comms__onboard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;padding:2.5rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px}
-.comms__onboard[hidden]{display:none}
 .comms__onboard-step{display:flex;flex-direction:column;align-items:center;gap:.9rem;width:100%;max-width:30rem}
-.comms__onboard-step[hidden]{display:none}
 .comms__onboard-h{margin:0;font-size:1.05rem;color:var(--accent,#6ef3c5);letter-spacing:.02em;line-height:1.4;text-transform:none}
 .comms__onboard-p{margin:0;color:#c3ccd6;font-size:.85rem;line-height:1.65;max-width:26rem}
 .comms__onboard-fine{margin:0;color:#7a838d;font-size:.75rem;line-height:1.5}
 .comms__onboard-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
-.comms__onboard-err[hidden]{display:none}
 .comms__onboard-actions{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
 .comms__btn--big{padding:.7rem 1.6rem;font-size:.92rem;min-height:44px}
 .comms__input--big{max-width:18rem;text-align:center;padding:.6rem .8rem;font-size:.95rem;flex:none;width:100%}
 .comms__recovery{display:block;width:100%;max-width:24rem;background:#0a0d10;border:1px dashed var(--accent,#6ef3c5);border-radius:6px;padding:.7rem;color:var(--accent,#6ef3c5);font-size:.95rem;letter-spacing:.12em;word-break:break-all;line-height:1.6}
 .comms__lock{display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:2rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px;text-align:center}
-.comms__lock[hidden]{display:none}
 .comms__lock-h{margin:0;color:#c3ccd6;font-size:.95rem}
 .comms__lock-waiting{margin:0;color:var(--accent,#6ef3c5);font-size:.8rem}
-.comms__lock-waiting[hidden]{display:none}
 .comms__lock-alt{width:100%;max-width:24rem;color:#7a838d;font-size:.78rem}
 .comms__lock-alt summary{cursor:pointer;list-style:none;padding:.3rem}
 .comms__lock-alt summary::-webkit-details-marker{display:none}
@@ -276,14 +271,10 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__lock-row{display:none;gap:.5rem;margin-top:.6rem}
 .comms__lock-alt[open] .comms__lock-row{display:flex}
 .comms__app{display:flex;flex-direction:column;gap:.75rem}
-.comms__app[hidden]{display:none}
-.comms__topline{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
 .comms__id-row--you{flex:1;min-width:13rem}
-.comms__btn--gear{min-width:2.4rem;padding:.4rem .6rem;font-size:1rem;line-height:1}
 .comms__contacts-head{display:flex;gap:.5rem;align-items:center}
 .comms__contacts-head .comms__lbl{flex:1}
 .comms__adv{display:flex;flex-direction:column;gap:.75rem;background:#0a0d10;border:1px dashed #2a3138;border-radius:8px;padding:.85rem}
-.comms__adv[hidden]{display:none}
 .comms__relay{display:flex;align-items:center;gap:.55rem;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
 .comms__relay svg{color:#8b97a3;transition:color .25s}
 .comms__relay[aria-checked="true"] svg{color:var(--accent,#6ef3c5)}
@@ -301,12 +292,9 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 @media (max-width:640px){
   .comms__onboard{padding:1.75rem 1rem}
   .comms__onboard-h{font-size:1rem}
-  .comms__topline{gap:.5rem}
 }
-.comms__bar{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
 .comms__room{display:flex;gap:.5rem;align-items:center;flex:1;min-width:14rem}
-.comms__meta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
-.comms__lbl{color:var(--muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
+.comms__lbl{color:var(--term-muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
 .comms__input{background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.45rem .6rem;border-radius:6px;font-family:inherit;font-size:.9rem;flex:1;min-width:6rem}
 .comms__input:focus{outline:none;border-color:var(--accent,#6ef3c5)}
 .comms__btn{background:transparent;border:1px solid var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);padding:.4rem .8rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer;text-transform:lowercase;letter-spacing:.05em}
@@ -315,7 +303,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__btn--ghost{border-color:#3a4148;color:#9ba6b1}
 
 .comms__badge{background:#1a1f24;border:1px solid #2a3138;color:#9ba6b1;padding:.3rem .55rem;border-radius:4px;font-size:.75rem;text-transform:lowercase;letter-spacing:.05em}
-.comms__badge--peers{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
 .comms__badge--offline{border-color:#e05c5c;color:#e05c5c}
 .comms__send--offline{opacity:.55}
 .comms__line--pending .comms__what{color:#9ba6b1}
@@ -342,7 +329,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__what blockquote { margin: .35em 0 0; padding-left: .7em; border-left: 2px solid rgba(127,127,127,.4); }
 .comms__what--sys{color:#7a838d;font-style:italic}
 .comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
-.comms__drop{display:block;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;text-align:center;color:#7a838d;font-size:.82rem;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
 
 .comms__drop--hot{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);background:rgba(110,243,197,.04)}
 .comms__prog{display:inline-block;width:96px;height:6px;background:#1a1f24;border-radius:3px;overflow:hidden;margin:0 .4rem;vertical-align:middle}
@@ -350,22 +336,19 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__thumb{display:block;margin-top:.4rem;max-width:240px;max-height:180px;border:1px solid #2a3138;border-radius:4px;cursor:zoom-in}
 .comms__peerlist{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;padding:.2rem 0}
 .comms__chip{font-family:var(--font-mono);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;border:1px solid currentColor;line-height:1;letter-spacing:.05em;text-transform:lowercase}
-.comms__time{color:#5a636d;font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
+.comms__time{color:var(--term-subtle);font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
 .comms__btn--mute{min-width:5.5rem}
 .comms__btn--mute[aria-pressed="true"]{color:#7a838d;border-color:#3a4148}
-.comms__badge--eph{border-color:#d9a84e;color:#d9a84e;cursor:help}
-.comms__badge--enc{border-color:#9b6fd4;color:#9b6fd4;cursor:help}
 .comms__send{display:flex;gap:.5rem;align-items:center}
 .comms__input--msg{min-width:0}
 .comms__picker{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem}
-.comms__picker[hidden]{display:none}
 .comms__picker-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
 .comms__picker-card{position:relative;z-index:1;background:#0d1014;border:1px solid #2a3138;border-radius:8px;padding:1rem;width:100%;max-width:24rem;max-height:80vh;overflow:auto;display:flex;flex-direction:column;gap:.7rem}
 .comms__picker-h{margin:0;font-size:.9rem;color:var(--accent,#6ef3c5);text-transform:lowercase;letter-spacing:.05em}
 .comms__picker-list{display:flex;flex-direction:column;gap:.4rem}
 .comms__picker-item{display:flex;justify-content:space-between;align-items:center;gap:.7rem;width:100%;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.5rem .7rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer}
 
-.comms__picker-ver{color:var(--muted);font-size:.75rem;flex:none}
+.comms__picker-ver{color:var(--term-muted);font-size:.75rem;flex:none}
 .comms__picker-actions{display:flex;justify-content:flex-end}
 .comms__id-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.5rem .75rem}
 .comms__id-note{color:#7a838d;font-size:.78rem}
@@ -395,7 +378,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__btn:hover:not(:disabled){background:var(--accent,#6ef3c5);color:#0a0d10}
 .comms__btn--ghost:hover{background:#3a4148;color:#e6edf3}
 .comms__btn--danger:hover:not(:disabled){background:#e5534b;color:#0a0d10}
-.comms__drop:hover{border-color:#3a424a;color:#9ba6b1}
 .comms__contact:hover{background:#10151a}
 .comms__contact:hover .comms__rowbtn{opacity:1}
 .comms__rowbtn:hover{color:#e5534b}
@@ -408,9 +390,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 
 .comms__badge{display:inline-flex;align-items:center;gap:.3rem}
 .comms__add{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;padding-top:.6rem;border-top:1px solid #14181d}
-.comms__add[hidden]{display:none}
 .comms__scan{display:flex;flex-direction:column;gap:.5rem;align-items:flex-start}
-.comms__scan[hidden]{display:none}
 .comms__scan-video{width:100%;max-width:18rem;border-radius:8px;border:1px solid #2a3138;background:#000;aspect-ratio:1;object-fit:cover}
 @media (max-width:640px){
   .comms__btn--icon .comms__btn-t{display:none}
@@ -418,13 +398,12 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 }
 .comms__contact:last-child{border-bottom:none}
 .comms__contact-name{color:#e6edf3;font-size:.85rem}
-.comms__contact-fp{color:#5a636d;font-size:.7rem}
-.comms__rooms-head{color:#5a636d;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 0 .15rem}
+.comms__contact-fp{color:var(--term-subtle);font-size:.7rem}
+.comms__rooms-head{color:var(--term-subtle);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 0 .15rem}
 .comms__avatar--room{display:inline-flex;align-items:center;justify-content:center;color:#9b6fd4}
 .comms__roomrow--current .comms__contact-name{color:var(--accent,#6ef3c5)}
 .comms__room-rename{max-width:12rem;padding:.15rem .4rem;font-size:.85rem}
 .comms__rowbtn--text{font-size:.72rem;letter-spacing:.04em;padding:.15rem .4rem;opacity:.7}
-.comms__contact-spacer{flex:1}
 .comms__chip-add{margin-left:.3rem;border:none;background:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0}
 .comms__btn--danger{border-color:#e5534b;color:#e5534b}
 
@@ -437,19 +416,18 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__tile-voice{color:var(--accent,#6ef3c5);font-size:1.3rem}
 
 .comms__upgrade{display:flex;align-items:center;gap:.6rem .9rem;flex-wrap:wrap;padding:.6rem .8rem;margin-bottom:.6rem;border:1px solid rgba(110,243,197,.35);border-radius:8px;background:rgba(110,243,197,.06)}
-.comms__upgrade[hidden]{display:none}
 .comms__upgrade-text{flex:1 1 14rem;color:#c3ccd6;font-size:.82rem}
 .comms__upgrade-actions{display:flex;gap:.5rem;flex-wrap:wrap}
 .comms__app--chat .comms__upgrade{display:none}
 .comms__profile{display:flex;align-items:center;gap:.6rem}
 .comms__profile-spacer{flex:1}
-.comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
+.comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);justify-content:start;grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
 .comms__id-row--you .comms__avatar{grid-area:av}
 .comms__id-row--you .comms__input{grid-area:input;width:100%}
 .comms__id-row--you .comms__badge--fp{grid-area:fp;justify-self:start}
 .comms__avatar{width:2.3rem;height:2.3rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex:none;user-select:none}
 .comms__avatar--me{width:2.1rem;height:2.1rem}
-.comms__badge--fp{border:0;background:transparent;color:#5a636d;padding:0;font-size:.7rem}
+.comms__badge--fp{border:0;background:transparent;color:var(--term-subtle);padding:0;font-size:.7rem}
 .comms__app--people #comms-chathead{display:none}
 .comms__app--people .comms__chatbody{display:none}
 .comms__app--people .comms__send{display:none}
@@ -474,7 +452,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__line--me{align-items:flex-end}
 .comms__line--sys{align-items:center}
 .comms__who{min-width:0;font-size:.68rem;letter-spacing:.04em;padding:0 .45rem}
-.comms__who--me{color:#5a636d;font-size:.62rem}
+.comms__who--me{color:var(--term-subtle);font-size:.62rem}
 .comms__what{flex:none;width:fit-content;max-width:min(52ch,84%);background:#161c23;border-radius:14px 14px 14px 5px;padding:.5rem .75rem;line-height:1.45}
 .comms__line--me .comms__what{background:#12352a;border-radius:14px 14px 5px 14px}
 .comms__line--sys .comms__what{background:#10151a;border:1px solid #171d24;border-radius:999px;padding:.28rem .75rem;font-size:.72rem;color:#6a737d;font-style:normal;text-align:center;max-width:94%}
@@ -490,7 +468,10 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contacts-head{padding:0 .1rem}
 .comms__contact{gap:.65rem;padding:.55rem .45rem;border-bottom:1px solid #12161b;cursor:pointer;border-radius:10px;flex-wrap:nowrap;min-height:52px}
 
-.comms__contact:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:-2px}
+.comms__contact-open{display:flex;flex:1;min-width:0;align-items:center;background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.comms__contact-open:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:2px}
+.comms__contact:has(> .comms__contact-open:focus-visible){outline:2px solid var(--accent,#6ef3c5);outline-offset:-2px}
+.comms__contact:has(> .comms__contact-open:focus-visible) .comms__contact-open{outline:none}
 .comms__contact--req{cursor:default}
 .comms__contact--req:hover{background:rgba(110,243,197,.05)}
 .comms__contact-mid{display:flex;flex-direction:column;gap:.12rem;flex:1;min-width:0}
@@ -505,7 +486,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__chev{color:#3a4148;flex:none;display:flex;align-items:center}
 .comms__contacts-empty{padding:.65rem .3rem}
 .comms__notif{display:flex;align-items:center;gap:.6rem;background:rgba(110,243,197,.05);border:1px solid rgba(110,243,197,.25);border-radius:10px;padding:.55rem .75rem}
-.comms__notif[hidden]{display:none}
 .comms__notif-text{flex:1;color:#c3ccd6;font-size:.78rem;line-height:1.45}
 .comms__app--chat .comms__notif{display:none}
 .comms__addopt{display:flex;align-items:center;gap:.65rem;width:100%;background:#0a0d10;border:1px solid #2a3138;border-radius:12px;padding:.75rem .85rem;color:#e6edf3;font:inherit;font-size:.88rem;cursor:pointer;min-height:48px;transition:border-color .15s}
@@ -530,14 +510,14 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 </style>
 
 <script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
-<script src="/assets/js/qrcode.js?v={{ buildHash }}"></script>
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 <script type="module">
 import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/assets/vendor/trystero-nostr.js';
 import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
-import '/assets/js/mentria-packs.js';
+
+const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
 const RELAY = 'wss://relay.mentria.ai';
 const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
@@ -752,6 +732,8 @@ const callTiles = new Map();
 const pendingStreams = new Map();
 let myId = null;
 let myFp = null;
+let myLegacyFp = null;
+const legacyFps = new Map();
 let ringToken = null;
 let currentDmContact = null;
 let lastRingSentAt = 0;
@@ -852,8 +834,8 @@ const short = (id) => id ? id.slice(0, 6) : 'unknown';
 
 const displayName = (peerId) => {
   const prof = peerProfiles.get(peerId);
-  if (prof && prof.fp) {
-    const contact = CID.getContacts().find((c) => c.fp === prof.fp);
+  if (prof && prof.pub) {
+    const contact = CID.contactByPub(prof.pub);
     if (contact && contact.name) return contact.name;
   }
   if (prof && prof.name) return prof.name;
@@ -902,14 +884,15 @@ const renderPeerList = () => {
     chip.textContent = displayName(p);
     const prof = peerProfiles.get(p);
     chip.title = prof && prof.fp ? 'fingerprint ' + prof.fp : p;
-    if (prof && prof.pub && prof.fp && !CID.getContacts().some((c) => c.fp === prof.fp)) {
+    if (prof && prof.pub && prof.fp && !CID.contactByPub(prof.pub)) {
       const add = document.createElement('button');
       add.type = 'button';
       add.className = 'comms__chip-add';
       add.textContent = '+';
       add.title = 'add ' + (prof.name || short(p)) + ' as a contact';
       add.addEventListener('click', async () => {
-        await CID.addContact({ name: prof.name, pub: prof.pub, ring: prof.ring });
+        try { await CID.addContact({ name: prof.name, pub: prof.pub, ring: prof.ring }); }
+        catch (err) { sys('could not add contact: ' + err.message); return; }
         sys(`${displayName(p)} added to contacts.`);
         renderPeerList();
         renderContacts();
@@ -924,6 +907,9 @@ const hhmmOf = (ts) => {
   const d = ts ? new Date(ts) : new Date();
   return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 };
+
+let logPinned = true;
+els.log.addEventListener('scroll', () => { logPinned = els.log.scrollHeight - els.log.scrollTop - els.log.clientHeight < 80; }, { passive: true });
 
 const renderLine = (who, what, opts = {}) => {
   const line = document.createElement('div');
@@ -961,7 +947,7 @@ const renderLine = (who, what, opts = {}) => {
   }
   if (ref) els.log.insertBefore(line, ref);
   else els.log.append(line);
-  els.log.scrollTop = els.log.scrollHeight;
+  if (logPinned || (opts.me && typeof opts.ts !== 'number')) els.log.scrollTop = els.log.scrollHeight;
   return { line, what: t };
 };
 
@@ -1034,13 +1020,16 @@ const refreshShareUrl = (roomName, b64Key) => {
   els.share.hidden = false;
 };
 
+const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp || m.sfp === myLegacyFp));
+const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
+
 const renderRemoteChat = (item, opts = {}) => {
-  if (item.sfp && myFp && item.sfp === myFp) {
+  if (sentByMe(item)) {
     renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
     return;
   }
   let who = displayName(item.senderId);
-  if (currentDmContact && item.sfp && currentDmContact.fp === item.sfp) who = currentDmContact.name || who;
+  if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
   renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
   if (!opts.silent) {
     playPing(880);
@@ -1049,15 +1038,15 @@ const renderRemoteChat = (item, opts = {}) => {
   }
 };
 
-const packChatPlain = (text, extra) => JSON.stringify(Object.assign({ v: 2, t: text, sfp: myFp || undefined }, extra || {}));
+const packChatPlain = (text, extra) => JSON.stringify(Object.assign({ v: 2, t: text, sfp: myLegacyFp || undefined, sfp2: (myFp && myFp !== myLegacyFp) ? myFp : undefined }, extra || {}));
 const unpackChatPlain = (raw) => {
   try {
     const o = JSON.parse(raw);
     if (o && o.v === 2 && typeof o.t === 'string') {
-      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null };
+      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, sfp2: typeof o.sfp2 === 'string' ? o.sfp2 : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null };
     }
   } catch (_) {}
-  return { text: raw, sfp: null, ctl: null };
+  return { text: raw, sfp: null, sfp2: null, ctl: null };
 };
 
 const handleNostrMsg = async (msgEvent) => {
@@ -1069,13 +1058,14 @@ const handleNostrMsg = async (msgEvent) => {
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     if (!content || !content.cmid || seenCmids.has(content.cmid)) return;
-    let text, sfp = null;
+    let text, sfp = null, sfp2 = null;
     if (content.enc) {
       if (!chatKey) return;
       try {
         const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
         text = unpacked.text;
         sfp = unpacked.sfp;
+        sfp2 = unpacked.sfp2;
         if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
       } catch { return; }
     } else if (typeof content.text === 'string') {
@@ -1088,7 +1078,7 @@ const handleNostrMsg = async (msgEvent) => {
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp };
+    const item = { senderId, text, ts, sfp, sfp2 };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1383,6 +1373,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   currentDmContact = null;
   if (leavingDm) clearUnreadFor(leavingDm.fp);
   els.log.innerHTML = '';
+  logPinned = true;
   roomJoinedAt = Date.now();
   els.status.textContent = 'connecting…';
   els.peers.hidden = true;
@@ -1473,8 +1464,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     if (kind === 'ring') {
       if (call.active) return;
       const prof = peerProfiles.get(ctx.peerId);
-      const byFp = prof && prof.fp ? CID.getContacts().find((c) => c.fp === prof.fp) : null;
-      const caller = (byFp && byFp.name) || displayName(ctx.peerId);
+      const known = prof && prof.pub ? CID.contactByPub(prof.pub) : null;
+      const caller = (known && known.name) || displayName(ctx.peerId);
       els.ringText.textContent = `${caller} is calling`;
       els.ring.hidden = false;
       call.ringDeadline = Date.now() + 30000;
@@ -1511,11 +1502,11 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     const known = peerProfiles.get(ctx.peerId);
     peerProfiles.set(ctx.peerId, prof);
     if (prof.fp && prof.ring && prof.pub) {
-      const existing = CID.getContacts().find((c) => c.fp === prof.fp);
+      const existing = CID.contactByPub(prof.pub);
       if (existing && existing.ring !== prof.ring) {
         try {
           await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring });
-          if (currentDmContact && currentDmContact.fp === prof.fp) currentDmContact.ring = prof.ring;
+          if (currentDmContact && currentDmContact.fp === existing.fp) currentDmContact.ring = prof.ring;
         } catch (_) {}
       }
     }
@@ -1527,28 +1518,35 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   chatAction.onMessage = async (data, ctx) => {
     const cmid = data && data.cmid;
     if (cmid && seenCmids.has(cmid)) return;
-    let text, sfp = null;
+    let text, sfp = null, sfp2 = null;
     if (data && data.enc) {
       if (!chatKey) return;
       try {
         const unpacked = unpackChatPlain(await decryptText(chatKey, data.enc));
         text = unpacked.text;
         sfp = unpacked.sfp;
+        sfp2 = unpacked.sfp2;
         if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
       } catch { return; }
     } else {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
-    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp });
+    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2 });
     playPing(880);
   };
 
   const incoming = new Map();
   metaAction = room.makeAction('fmeta');
   metaAction.onMessage = (meta, ctx) => {
-    const line = renderLine(displayName(ctx.peerId), '', { peerId: ctx.peerId, quiet: true, html: progressHTML('receiving', meta.name, meta.size, 0) });
-    incoming.set(ctx.peerId + ':' + meta.id, { meta, chunks: [], received: 0, line });
+    if (!meta || typeof meta !== 'object') return;
+    const size = Number(meta.size);
+    if (!Number.isFinite(size) || size < 0 || size > MAX_FILE) return;
+    let open = 0;
+    incoming.forEach((_, k) => { if (k.startsWith(ctx.peerId + ':')) open++; });
+    if (open >= 4) return;
+    const line = renderLine(displayName(ctx.peerId), '', { peerId: ctx.peerId, quiet: true, html: progressHTML('receiving', meta.name, size, 0) });
+    incoming.set(ctx.peerId + ':' + meta.id, { meta, size, chunks: [], received: 0, line, paint: 0 });
   };
 
   chunkAction = room.makeAction('fchunk');
@@ -1557,10 +1555,27 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     const key = ctx.peerId + ':' + m.id;
     const entry = incoming.get(key);
     if (!entry) return;
+    const bytes = (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) ? data.byteLength : -1;
+    const received = entry.received + bytes;
+    if (bytes < 0 || received > entry.size || received > MAX_FILE) {
+      incoming.delete(key);
+      entry.chunks = [];
+      if (entry.paint) cancelAnimationFrame(entry.paint);
+      entry.line.line.removeAttribute('aria-live');
+      entry.line.what.innerHTML = `transfer interrupted — <strong>${escapeHtml(entry.meta.name)}</strong>`;
+      return;
+    }
     entry.chunks.push(data);
-    entry.received += (data.byteLength || data.size || 0);
-    entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.meta.size, entry.received);
+    entry.received = received;
+    if (!entry.paint) {
+      entry.paint = requestAnimationFrame(() => {
+        entry.paint = 0;
+        if (incoming.get(key) === entry) entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.size, entry.received);
+      });
+    }
     if (m.done) {
+      if (entry.paint) { cancelAnimationFrame(entry.paint); entry.paint = 0; }
+      entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.size, entry.received);
       entry.line.line.removeAttribute('aria-live');
       const safeType = /^image\/(png|jpeg|gif|webp|avif|bmp)$/i.test(entry.meta.type || '') ? entry.meta.type : 'application/octet-stream';
       const blob = new Blob(entry.chunks, { type: safeType });
@@ -1576,7 +1591,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         importBtn.addEventListener('click', async () => {
           importBtn.disabled = true;
           try {
-            const res = await window.MentriaPacks.importText(text, { source: 'contact', from: who });
+            const P = await loadPacks();
+            const res = await P.importText(text, { source: 'contact', from: who });
             importBtn.replaceWith(Object.assign(document.createElement('a'), { href: '/learn/play/?id=' + encodeURIComponent(res.row.id), textContent: 'open' }));
             label.textContent = (res.replaced ? 'updated' : 'imported') + ' \u2713 ';
           } catch (e) { sys('import failed: ' + ((e && e.errors && e.errors[0]) || e.message)); importBtn.disabled = false; }
@@ -1718,8 +1734,10 @@ const sendOne = async (file, extra) => {
   await metaAction.send(Object.assign({ id, name: file.name, size: file.size, type: file.type }, extra || {}));
   const buf = await file.arrayBuffer();
   let sent = 0;
+  let paint = 0;
   for (let offset = 0; offset < buf.byteLength; offset += CHUNK) {
     if (peers.size === 0) {
+      if (paint) cancelAnimationFrame(paint);
       line.line.removeAttribute('aria-live');
       line.what.innerHTML = `send interrupted — <strong>${escapeHtml(file.name)}</strong>: everyone left the room`;
       throw new Error('all peers left during send');
@@ -1728,8 +1746,9 @@ const sendOne = async (file, extra) => {
     const done = offset + CHUNK >= buf.byteLength;
     await chunkAction.send(slice, { metadata: { id, done } });
     sent += slice.byteLength;
-    line.what.innerHTML = progressHTML('sending', file.name, file.size, sent);
+    if (!paint) paint = requestAnimationFrame(() => { paint = 0; line.what.innerHTML = progressHTML('sending', file.name, file.size, sent); });
   }
+  if (paint) cancelAnimationFrame(paint);
   const previewUrl = trackObjectUrl(file);
   const n = peers.size;
   line.line.removeAttribute('aria-live');
@@ -1855,7 +1874,7 @@ attachPackBtn.addEventListener('click', async () => {
         : 'nobody is connected to this room yet.');
       return;
     }
-    const P = window.MentriaPacks;
+    const P = await loadPacks().catch(() => null);
     const rows = P ? await P.list() : [];
     if (!rows.length) { sys('no imported packs to share. Packs you import on /learn/ show up here.'); return; }
     const chosen = await pickExtension(rows.map((r) => ({ id: r.id, name: P.text(r.title), version: String(r.version), icon: '' })));
@@ -1933,6 +1952,15 @@ const stopRinging = () => {
   els.ring.hidden = true;
 };
 
+const resetCallButtons = () => {
+  els.callMic.classList.remove('is-off');
+  els.callMic.setAttribute('aria-pressed', 'true');
+  els.callMic.title = 'mic on — tap to mute';
+  els.callCam.classList.add('is-off');
+  els.callCam.setAttribute('aria-pressed', 'false');
+  els.callCam.title = 'camera off — tap to turn on';
+};
+
 const getLocalMedia = (video) => navigator.mediaDevices.getUserMedia({
   audio: { echoCancellation: true, noiseSuppression: true },
   video: video ? { width: { ideal: 640 }, height: { ideal: 480 } } : false
@@ -1962,12 +1990,7 @@ const startCall = async (answering) => {
   call.local = local;
   call.videoOn = false;
   call.micOff = false;
-  els.callCam.setAttribute('aria-pressed', 'false');
-  els.callCam.title = 'camera off — tap to turn on';
-  els.callCam.setAttribute('aria-pressed', 'false');
-  els.callMic.setAttribute('aria-pressed', 'true');
-  els.callMic.title = 'mic on — tap to mute';
-  els.callMic.setAttribute('aria-pressed', 'false');
+  resetCallButtons();
   room.addStream(local);
   addTile('you', local, { local: true, label: myProfile.name || 'you' });
   pendingStreams.forEach((stream, peerId) => addTile(peerId, stream, { label: displayName(peerId) }));
@@ -1989,6 +2012,7 @@ const endCall = (silent) => {
   if (call.local) call.local.getTracks().forEach((t) => t.stop());
   call.local = null;
   call.active = false;
+  resetCallButtons();
   callTiles.forEach((t) => t.tile.remove());
   callTiles.clear();
   pendingStreams.clear();
@@ -2022,7 +2046,6 @@ els.callCam.addEventListener('click', async () => {
     addTile('you', next, { local: true, label: myProfile.name || 'you' });
     els.callCam.title = call.videoOn ? 'camera on — tap to turn off' : 'camera off — tap to turn on';
     els.callCam.classList.toggle('is-off', !call.videoOn);
-    els.callCam.setAttribute('aria-pressed', String(call.videoOn));
     els.callCam.setAttribute('aria-pressed', String(call.videoOn));
   } catch (err) {
     sys('camera unavailable: ' + err.message);
@@ -2061,6 +2084,34 @@ const topicToFp = new Map();
 const topicToRoom = new Map();
 const seenInboxIds = new Set();
 let unreadMap = {};
+const unreadFloor = new Map();
+let unreadFlush = null;
+
+const queueUnreadFlush = (render) => {
+  if (!unreadFlush) {
+    unreadFlush = { render: false };
+    setTimeout(() => {
+      const f = unreadFlush;
+      unreadFlush = null;
+      try { CID.setUnread(unreadMap); } catch (_) {}
+      if (f.render) { renderContacts(); syncOsBadge(); }
+    }, 80);
+  }
+  if (render) unreadFlush.render = true;
+};
+
+const unreadFloorOf = (k, fallback) => {
+  if (unreadFloor.has(k)) return unreadFloor.get(k);
+  return unreadMap[k] ? (unreadMap[k].lastTs || 0) : (fallback || 0);
+};
+
+const countUnread = (k, ts) => {
+  const e = unreadMap[k] || { n: 0, lastTs: 0 };
+  e.n = (e.n || 0) + 1;
+  e.lastTs = Math.max(e.lastTs || 0, ts);
+  unreadMap[k] = e;
+  queueUnreadFlush(true);
+};
 
 let sideOpens = 0;
 
@@ -2141,6 +2192,9 @@ const subscribeUnread = async () => {
   for (const r of savedRooms()) { const topic = CHAT_TOPIC_PREFIX + r.room; topicToRoom.set(topic, r); topics.push(topic); }
   if (unreadSubId) await sideSend(JSON.stringify(['CLOSE', unreadSubId]));
   if (!topics.length) { unreadSubId = null; return; }
+  unreadFloor.clear();
+  topicToFp.forEach((fp) => unreadFloor.set(fp, (unreadMap[fp] && unreadMap[fp].lastTs) || 0));
+  topicToRoom.forEach((r) => { const k = roomUnreadKey(r.room); unreadFloor.set(k, unreadMap[k] ? (unreadMap[k].lastTs || 0) : (r.lastSeen || 0)); });
   unreadSubId = 'mu-' + Math.random().toString(36).slice(2);
   const since = Math.floor(Date.now() / 1000) - HISTORY_LOOKBACK_SEC;
   await sideSend(JSON.stringify(['REQ', unreadSubId, { kinds: [CHAT_KIND], '#x': topics, since, limit: 300 }]));
@@ -2164,7 +2218,8 @@ const handleSideMsg = async (msgEvent) => {
       let callerFp = null;
       try { callerFp = await CID.fingerprint(payload.pub); } catch (_) {}
       if (!callerFp) return;
-      const known = CID.getContacts().find((c) => c.fp === callerFp);
+      const known = CID.contactByPub(payload.pub);
+      if (known) callerFp = known.fp;
       const who = (known && known.name) || payload.name || 'someone';
       if (currentDmContact && currentDmContact.fp === callerFp && peers.size > 0) return;
       markMissedCall(callerFp, payload.ts);
@@ -2173,15 +2228,11 @@ const handleSideMsg = async (msgEvent) => {
       sys(`${who} tried to call you.`);
       return;
     }
-    let existingFp = null;
-    try { existingFp = await CID.fingerprint(payload.pub); } catch (_) {}
-    if (existingFp && CID.getContacts().some((c) => c.fp === existingFp)) {
+    const existing = CID.contactByPub(payload.pub);
+    if (existing) {
       try {
-        await CID.addContact(payload);
-        if (currentDmContact && currentDmContact.fp === existingFp) {
-          const fresh = freshContact(existingFp);
-          if (fresh) currentDmContact = fresh;
-        }
+        const updated = await CID.addContact(payload);
+        if (currentDmContact && currentDmContact.fp === existing.fp && updated) currentDmContact = updated;
         renderContacts();
         updatePushStatus();
       } catch (_) {}
@@ -2208,28 +2259,24 @@ const handleSideMsg = async (msgEvent) => {
       const k = roomUnreadKey(savedRoom.room);
       if (currentRoomName === savedRoom.room) {
         unreadMap[k] = { n: 0, lastTs: Math.max(ts, Date.now()) };
-        try { CID.setUnread(unreadMap); } catch (_) {}
+        unreadFloor.set(k, Date.now());
+        queueUnreadFlush(false);
         return;
       }
       if (content && typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
-      const entry = unreadMap[k] || { n: 0, lastTs: savedRoom.lastSeen || 0 };
-      if (ts <= entry.lastTs) return;
+      if (ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
       let preview = null;
       if (content && content.enc) {
         try {
           const key = await roomCryptoKey(savedRoom);
           const unpacked = key ? unpackChatPlain(await decryptText(key, content.enc)) : null;
           if (unpacked && unpacked.ctl) return;
-          if (unpacked && unpacked.sfp && myFp && unpacked.sfp === myFp) return;
+          if (unpacked && sentByMe(unpacked)) return;
           preview = unpacked ? unpacked.text : null;
         } catch (_) {}
       }
-      entry.n = (entry.n || 0) + 1;
-      entry.lastTs = ts;
-      unreadMap[k] = entry;
-      try { CID.setUnread(unreadMap); } catch (_) {}
-      renderContacts();
-      syncOsBadge();
+      if (currentRoomName === savedRoom.room || ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
+      countUnread(k, ts);
       notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: '/comms/' + formatHash(savedRoom.room, savedRoom.key) });
       return;
     }
@@ -2238,25 +2285,22 @@ const handleSideMsg = async (msgEvent) => {
       seen.n = 0;
       seen.lastTs = Math.max(seen.lastTs || 0, ts, Date.now());
       unreadMap[fp] = seen;
-      try { CID.setUnread(unreadMap); } catch (_) {}
+      unreadFloor.set(fp, Date.now());
+      queueUnreadFlush(false);
       return;
     }
     if (content && typeof content.cmid === 'string') {
       if (content.cmid.startsWith(selfId + ':')) return;
       if (sentCmidsFor(fp).includes(content.cmid)) return;
     }
-    const entry = unreadMap[fp] || { n: 0, lastTs: 0 };
-    if (ts <= entry.lastTs) return;
-    entry.n = (entry.n || 0) + 1;
-    unreadMap[fp] = entry;
-    try { CID.setUnread(unreadMap); } catch (_) {}
-    renderContacts();
-    syncOsBadge();
+    if (ts <= unreadFloorOf(fp, 0)) return;
+    countUnread(fp, ts);
   }
 };
 
 const clearUnreadFor = (fp) => {
   unreadMap[fp] = { n: 0, lastTs: Date.now() };
+  unreadFloor.set(fp, Date.now());
   try { CID.setUnread(unreadMap); } catch (_) {}
   syncOsBadge();
 };
@@ -2510,6 +2554,8 @@ const initIdentity = async () => {
   try {
     myId = await CID.ensureKeypair();
     myFp = await CID.fingerprint(myId.publicJwk);
+    myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
+    try { await CID.migrateFingerprints(); } catch (_) {}
     myProfile = CID.getProfile();
     els.idName.value = myProfile.name;
     els.idFp.textContent = myFp;
@@ -2570,10 +2616,26 @@ els.idName.addEventListener('change', () => {
   refreshMyCode();
 });
 
+let qrLoading = null;
+const loadQr = () => {
+  if (window.qrcodegen) return Promise.resolve(true);
+  if (!qrLoading) {
+    qrLoading = new Promise((resolve) => {
+      const s = document.createElement('script');
+      s.src = '/assets/js/qrcode.js?v={{ buildHash }}';
+      s.onload = () => resolve(!!window.qrcodegen);
+      s.onerror = () => { qrLoading = null; s.remove(); resolve(false); };
+      document.head.appendChild(s);
+    });
+  }
+  return qrLoading;
+};
+
 const refreshMyCode = () => {
   if (els.idCard.hidden || !myId) return;
   const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken);
   els.idCode.textContent = code;
+  if (!window.qrcodegen) { loadQr().then((ok) => { if (ok) refreshMyCode(); }); return; }
   try {
     const qr = qrcodegen.QrCode.encodeText(code, qrcodegen.QrCode.Ecc.LOW);
     const border = 2, px = 4, dim = qr.size + border * 2;
@@ -2835,6 +2897,7 @@ const openDmWith = async (c) => {
   setView('chat');
   try {
     const { roomName, b64Key } = await CID.deriveDm(myId.privateKey, c.pub);
+    if (!legacyFps.has(c.fp)) legacyFps.set(c.fp, await CID.legacyFingerprint(c.pub));
     els.room.value = roomName;
     clearUnreadFor(c.fp);
     clearMissedCall(c.fp);
@@ -2863,11 +2926,12 @@ const renderRoomsSection = () => {
   for (const r of list) {
     const row = document.createElement('div');
     row.className = 'comms__contact comms__roomrow' + (currentRoomName === r.room ? ' comms__roomrow--current' : '');
-    row.tabIndex = 0;
-    row.setAttribute('role', 'button');
     const av = document.createElement('span');
     av.className = 'comms__avatar comms__avatar--room';
     av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'comms__contact-open';
     const mid = document.createElement('span');
     mid.className = 'comms__contact-mid';
     const name = document.createElement('span');
@@ -2877,7 +2941,8 @@ const renderRoomsSection = () => {
     sub.className = 'comms__contact-fp';
     sub.textContent = 'encrypted room · ' + short(r.room);
     mid.append(name, sub);
-    row.append(av, mid);
+    openBtn.append(mid);
+    row.append(av, openBtn);
     const unread = (unreadMap[roomUnreadKey(r.room)] || {}).n || 0;
     if (unread > 0 && currentRoomName !== r.room) {
       const badge = document.createElement('span');
@@ -2888,7 +2953,6 @@ const renderRoomsSection = () => {
     }
     const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
     row.addEventListener('click', open);
-    row.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     const bell = document.createElement('button');
     bell.type = 'button';
     const alertsOn = !!r.notify;
@@ -2913,10 +2977,15 @@ const renderRoomsSection = () => {
       input.maxLength = 40;
       input.value = r.label || r.room;
       input.setAttribute('aria-label', 'room name');
-      const done = (save) => { if (save) renameRoom(r.room, input.value); renderContacts(); };
-      input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') done(false); });
+      let finished = false;
+      const done = (save) => { if (finished) return; finished = true; if (save) renameRoom(r.room, input.value); renderContacts(); };
+      input.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Escape') ev.stopPropagation();
+        if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') { ev.preventDefault(); done(false); }
+      });
       input.addEventListener('blur', () => done(true));
       input.addEventListener('click', (ev) => ev.stopPropagation());
+      openBtn.replaceWith(mid);
       name.replaceWith(input);
       input.focus();
       input.select();
@@ -2993,16 +3062,19 @@ const renderContactsBase = () => {
     els.contactList.append(empty);
     return;
   }
+  const missedMap = getMissed();
   contacts.forEach((c) => {
     const row = document.createElement('div');
     row.className = 'comms__contact';
-    row.setAttribute('role', 'button');
-    row.setAttribute('tabindex', '0');
     row.dataset.fp = c.fp;
-    row.setAttribute('aria-label', 'chat with ' + (c.name || c.fp));
     const av = document.createElement('span');
     av.className = 'comms__avatar';
+    av.setAttribute('aria-hidden', 'true');
     paintAvatar(av, c.name, c.fp);
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'comms__contact-open';
+    openBtn.setAttribute('aria-label', 'chat with ' + (c.name || c.fp));
     const mid = document.createElement('span');
     mid.className = 'comms__contact-mid';
     const name = document.createElement('span');
@@ -3012,8 +3084,9 @@ const renderContactsBase = () => {
     sub.className = 'comms__contact-fp';
     sub.textContent = c.fp;
     mid.append(name, sub);
-    row.append(av, mid);
-    const missed = getMissed()[c.fp];
+    openBtn.append(mid);
+    row.append(av, openBtn);
+    const missed = missedMap[c.fp];
     if (missed && missed.n > 0) {
       const mc = document.createElement('span');
       mc.className = 'comms__missed';
@@ -3049,9 +3122,6 @@ const renderContactsBase = () => {
     chev.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-chev"></use></svg>';
     row.append(rm, chev);
     row.addEventListener('click', () => openDmWith(c));
-    row.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDmWith(c); }
-    });
     els.contactList.append(row);
   });
 };

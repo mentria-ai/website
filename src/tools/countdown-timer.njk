@@ -1039,6 +1039,7 @@ localeReload: true
   background: none;
   border: none;
   color: rgba(255,255,255,0.3);
+  font-family: inherit;
   font-size: 1.4rem;
   cursor: pointer;
   line-height: 1;
@@ -1075,7 +1076,8 @@ localeReload: true
   width: 100%;
 }
 .ct-widget__display {
-  font-family: 'Courier New', 'Lucida Console', monospace;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 700;
   color: var(--syn-orange);

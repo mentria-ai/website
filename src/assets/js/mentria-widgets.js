@@ -6,8 +6,31 @@
 
   var store = window.MentriaStore || null;
   var palette = window.MENTRIA_PALETTE_DATA || {};
-  var prefix = (palette && typeof palette.prefix === 'string') ? palette.prefix : '';
-  var lang = document.documentElement.lang || (palette && palette.locale) || 'en';
+
+  function prefix() {
+    var I = window.MentriaI18n;
+    var code = I && typeof I.locale === 'function' ? I.locale() : '';
+    var L = window.MENTRIA_LOCALES || [];
+    for (var i = 0; i < L.length; i++) {
+      if (L[i].code === code) return L[i].prefix || '';
+    }
+    return (palette && typeof palette.prefix === 'string') ? palette.prefix : '';
+  }
+
+  function lang() {
+    return document.documentElement.lang || (palette && palette.locale) || 'en';
+  }
+
+  var KEYS = {
+    'steps': 'widgets.steps_label',
+    'steps-goal': 'widgets.steps_of_goal',
+    'notes': 'widgets.notes_label',
+    'notes-count': 'widgets.notes_count',
+    'notes-count-one': 'widgets.notes_count_one',
+    'untitled': 'widgets.untitled',
+    'storage': 'widgets.storage_label',
+    'storage-used': 'widgets.storage_used'
+  };
 
   var FALLBACK = {
     'steps': 'Steps',
@@ -21,26 +44,32 @@
   };
 
   function label(name) {
-    var v = band.getAttribute('data-label-' + name) || '';
+    var I = window.MentriaI18n;
+    var v = I && typeof I.t === 'function' ? I.t(KEYS[name]) : null;
+    if (typeof v !== 'string' || !v) v = band.getAttribute('data-label-' + name) || '';
     if (!v || v.indexOf('widgets.') === 0) return FALLBACK[name];
     return v;
   }
 
-  var T = {
-    steps: label('steps'),
-    stepsGoal: label('steps-goal'),
-    notes: label('notes'),
-    notesCount: label('notes-count'),
-    notesCountOne: label('notes-count-one'),
-    untitled: label('untitled'),
-    storage: label('storage'),
-    storageUsed: label('storage-used')
-  };
+  function readLabels() {
+    return {
+      steps: label('steps'),
+      stepsGoal: label('steps-goal'),
+      notes: label('notes'),
+      notesCount: label('notes-count'),
+      notesCountOne: label('notes-count-one'),
+      untitled: label('untitled'),
+      storage: label('storage'),
+      storageUsed: label('storage-used')
+    };
+  }
+
+  var T = readLabels();
 
   var ORDER = { steps: 0, notes: 1, storage: 2 };
 
   function fmtNum(n) {
-    try { return Number(n).toLocaleString(lang); } catch (_) { return String(n); }
+    try { return Number(n).toLocaleString(lang()); } catch (_) { return String(n); }
   }
 
   function fmtBytes(bytes) {
@@ -79,6 +108,11 @@
     band.appendChild(el);
   }
 
+  function link(el, href) {
+    var want = prefix() + href;
+    if (el.getAttribute('href') !== want) el.setAttribute('href', want);
+  }
+
   function upsert(kind, href, html) {
     var el = band.querySelector('.widget[data-kind="' + kind + '"]');
     var created = false;
@@ -86,10 +120,10 @@
       el = document.createElement('a');
       el.className = 'widget widget--' + kind;
       el.setAttribute('data-kind', kind);
-      el.href = prefix + href;
       place(el);
       created = true;
     }
+    link(el, href);
     el.innerHTML = html;
     return { el: el, created: created };
   }
@@ -218,11 +252,11 @@
       el = document.createElement('a');
       el.className = 'widget widget--ext';
       el.setAttribute('data-kind', 'ext:' + ext.id);
-      el.href = prefix + '/tools/extensions/run/?id=' + encodeURIComponent(ext.id);
       place(el);
       extEls[ext.id] = el;
       created = true;
     }
+    link(el, '/tools/extensions/run/?id=' + encodeURIComponent(ext.id));
     while (el.firstChild) el.removeChild(el.firstChild);
 
     var top = document.createElement('span');
@@ -315,6 +349,15 @@
       }
     });
   }
+
+  document.addEventListener('mentria:localechange', function () {
+    T = readLabels();
+    renderSteps(false);
+    renderNotes(false);
+    renderExts(false);
+    updateVisibility();
+    renderStorage();
+  });
 
   renderSteps(false);
   renderNotes(false);

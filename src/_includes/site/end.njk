@@ -491,6 +491,14 @@ try {
           return built;
         }
         var inerted = [];
+        function expanded(on) {
+          var list = document.querySelectorAll('[data-tools-open]');
+          for (var i = 0; i < list.length; i++) {
+            list[i].setAttribute('aria-haspopup', 'dialog');
+            list[i].setAttribute('aria-expanded', on ? 'true' : 'false');
+          }
+        }
+        expanded(false);
         function onEntry() { return !!(history.state && history.state.tools); }
         function trigger() {
           var list = document.querySelectorAll('[data-tools-open]');
@@ -540,6 +548,7 @@ try {
           prevFocus = (was && was !== document.body && !popup.contains(was)) ? was : trigger();
           popup.hidden = false;
           document.body.classList.add('is-tools-open');
+          expanded(true);
           shield(true);
           document.addEventListener('keydown', trapTab);
           if (!fromHash && !onEntry()) history.pushState({ tools: true }, '', '#tools');
@@ -564,6 +573,7 @@ try {
           if (popup.hidden) return;
           popup.hidden = true;
           document.body.classList.remove('is-tools-open');
+          expanded(false);
           document.removeEventListener('keydown', trapTab);
           shield(false);
           if (!fromPop && onEntry()) history.back();

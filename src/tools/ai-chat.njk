@@ -658,6 +658,7 @@ function runApp(MentriaEngine, Tiers) {
     canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(bitmap, 0, 0, w, h);
+    if (bitmap.close) bitmap.close();
     const { data } = ctx.getImageData(0, 0, w, h);
     const rgbHwc = new Uint8Array(w * h * 3);
     for (let i = 0, j = 0; i < data.length; i += 4, j += 3) {
@@ -1342,7 +1343,6 @@ function runApp(MentriaEngine, Tiers) {
       systemMessage.content = systemPromptFor(currentTier);
       syncThinkToggle();
       syncSearchToggle();
-      try { await navigator.storage?.persist?.(); } catch (_) {}
       syncTierSelector();
       updateEmptySub();
       strip.done({ tokens: 0, prime: COPY.statusReady, linger: 1200 });
@@ -1889,7 +1889,10 @@ function runApp(MentriaEngine, Tiers) {
           indexedDB.deleteDatabase(db.name);
         }
       }
-      try { await engine?.unload(); } catch {}
+      const old = engine;
+      try { await old?.unload(); } catch {}
+      try { old?.terminate(); } catch {}
+      if (old && window.__mentriaEngine === old) window.__mentriaEngine = null;
       engine = null;
       prefixCache = null;
       messages = [systemMessage];

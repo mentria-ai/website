@@ -14,12 +14,58 @@ const BOOTSTRAP = '<scr' + 'ipt>' +
   'document.addEventListener("securitypolicyviolation", (e) => { if (/^(https?|wss?):/.test(e.blockedURI || "")) window.parent.__mentriaExtReportBlocked(e.blockedURI); });' +
   '</scr' + 'ipt>';
 
+let fontFaces = '';
+
+function siteFontFaces() {
+  if (fontFaces) return fontFaces;
+  let css = '';
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules;
+    try { rules = sheet.cssRules; } catch (_) { continue; }
+    for (const rule of Array.from(rules)) if (rule instanceof CSSFontFaceRule) css += rule.cssText;
+  }
+  fontFaces = css;
+  return css;
+}
+
 function toast(msg) {
+  const text = String(msg).slice(0, 120);
+  if (window.MentriaUI && typeof window.MentriaUI.toast === 'function') { window.MentriaUI.toast(text); return; }
   const t = document.createElement('div');
-  t.textContent = String(msg).slice(0, 120);
-  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent,#6ef3c5);color:#0b0e11;font-family:var(--font-mono);font-size:0.78rem;font-weight:700;padding:8px 16px;border-radius:16px;z-index:50;';
+  t.textContent = text;
+  t.setAttribute('role', 'status');
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent,#6ef3c5);color:#0b0e11;font-family:var(--font-mono);font-size:0.78rem;font-weight:700;padding:8px 16px;border-radius:16px;z-index:10000;';
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2200);
+}
+
+let localeSubs = [];
+const wired = new WeakMap();
+
+function eventLocale(e) {
+  return (e && e.detail && e.detail.code) || document.documentElement.lang || 'en';
+}
+
+document.addEventListener('mentria:localechange', (e) => {
+  const code = eventLocale(e);
+  for (const fn of localeSubs.slice()) { try { fn(code); } catch (_) {} }
+});
+
+function wireFrame(frame) {
+  let state = wired.get(frame);
+  if (state) return state;
+  state = { app: null, focus: true };
+  wired.set(frame, state);
+  frame.addEventListener('load', () => {
+    if (!state.focus) return;
+    try { frame.focus({ preventScroll: true }); } catch (_) {}
+  });
+  document.addEventListener('mentria:localechange', (e) => {
+    if (!state.app) return;
+    const next = localePrefix(eventLocale(e)) + state.app;
+    if (frame.getAttribute('src') !== next) frame.src = next;
+  });
+  return state;
 }
 
 export function mountExtension(frame, opts) {
@@ -33,14 +79,15 @@ export function mountExtension(frame, opts) {
     muted: cs.getPropertyValue('--term-muted').trim(),
     fontMono: cs.getPropertyValue('--font-mono').trim()
   });
+  const subs = [];
+  localeSubs = subs;
   window.__mentriaExtHost = Object.freeze({
     manifest: Object.freeze(JSON.parse(JSON.stringify(m))),
     storage: dataApiFor(id),
     db: dbApiFor(id),
     get locale() { return document.documentElement.lang || 'en'; },
     onLocaleChange: (fn) => {
-      if (typeof fn !== 'function') return;
-      document.addEventListener('mentria:localechange', (e) => { try { fn((e.detail && e.detail.code) || document.documentElement.lang || 'en'); } catch (_) {} });
+      if (typeof fn === 'function') subs.push(fn);
     },
     theme,
     args: opts.args || null,
@@ -57,15 +104,12 @@ export function mountExtension(frame, opts) {
     const tpl = opts.blockedTemplate || '{name}: {host}';
     if (typeof opts.onError === 'function') opts.onError(Array.from(blockedHosts).map((h) => tpl.replace('{name}', m.name).replace('{host}', h)).join(' '));
   };
-  if (opts.focus !== false) frame.addEventListener('load', () => { try { frame.focus({ preventScroll: true }); } catch (_) {} });
+  const state = wireFrame(frame);
+  state.focus = opts.focus !== false;
+  state.app = m.app || null;
   if (m.app) {
     frame.src = (opts.prefix || '') + m.app;
-    document.addEventListener('mentria:localechange', (e) => {
-      const code = (e.detail && e.detail.code) || document.documentElement.lang || 'en';
-      const next = localePrefix(code) + m.app;
-      if (frame.getAttribute('src') !== next) frame.src = next;
-    });
   } else {
-    frame.srcdoc = BOOTSTRAP + opts.source;
+    frame.srcdoc = BOOTSTRAP + '<style>' + siteFontFaces() + '</style>' + opts.source;
   }
 }

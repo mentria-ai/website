@@ -1,7 +1,3 @@
-/**
- * Audio player using <audio> elements instead of fetch() + Web Audio API.
- * This avoids CORS issues with GitHub Release asset URLs.
- */
 export class RadioPlayer {
   constructor() {
     this._a = null;

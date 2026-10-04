@@ -37,6 +37,7 @@ async function join(appId, roomId) {
 export function syncController(getCtx) {
   let room = null;
   let joining = false;
+  let gen = 0;
   let actHello = null;
   let actPages = null;
   let week = null;
@@ -72,11 +73,15 @@ export function syncController(getCtx) {
     const c = getCtx();
     if (!c.engine || c.engine.closed || room || joining) return;
     if (!others(c).length) { emit(); return; }
+    const my = gen;
     joining = true;
     try {
       week = Math.floor(Date.now() / WEEK);
       const roomId = await C.weeklyRoom(c.engine.keys.roomSeed);
-      room = await join('mentria-finance', roomId);
+      if (my !== gen) return;
+      const joined = await join('mentria-finance', roomId);
+      if (my !== gen) { try { joined.leave(); } catch (_) {} return; }
+      room = joined;
       actHello = room.makeAction('hello');
       actPages = room.makeAction('pages');
       actHello.onMessage = async (data, ctx) => {
@@ -116,14 +121,16 @@ export function syncController(getCtx) {
         if (Math.floor(Date.now() / WEEK) !== week) { stop(); start(); }
       }, 10 * 60 * 1000);
     } catch (e) {
-      room = null;
+      if (my === gen) room = null;
     } finally {
-      joining = false;
+      if (my === gen) joining = false;
       emit();
     }
   }
 
   function stop() {
+    gen++;
+    joining = false;
     clearInterval(weekTimer);
     if (engineRef) { engineRef.removeEventListener('page', onLocalPage); engineRef = null; }
     if (room) { try { room.leave(); } catch (_) {} }

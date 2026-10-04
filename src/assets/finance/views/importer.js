@@ -20,7 +20,7 @@ async function readFile(ctx, vs, file) {
   if (file.size > MAX_BYTES) { U.toast(t('import.too_big')); return; }
   const buf = new Uint8Array(await file.arrayBuffer());
   let text = new TextDecoder('utf-8').decode(buf);
-  if (/�/.test(text.slice(0, 4000))) { try { text = new TextDecoder('windows-1252').decode(buf); } catch (_) {} }
+  if (/\ufffd/.test(text.slice(0, 4000))) { try { text = new TextDecoder('windows-1252').decode(buf); } catch (_) {} }
   resetFile(vs);
   vs.name = file.name;
   vs.bytes = file.size;

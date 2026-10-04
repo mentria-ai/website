@@ -2,7 +2,7 @@
 {
   "id": "story-studio",
   "name": "Story Studio",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "icon": "📖",
   "author": "Mentria",
   "description": "Build swipeable story decks: generate images on Mentria's render node or import your own, write captions, arrange slides, export the finished deck.",
@@ -1203,5 +1203,6 @@ document.addEventListener('keydown', (e) => {
 renderList();
 await room.start();
 hello();
-setInterval(hello, 30000);
+setInterval(() => { if (!document.hidden) hello(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) hello(); });
 </script>

@@ -10,6 +10,7 @@ import {
 const ART_BASE = "https://mentria-ai.github.io/radio-catalog/";
 const RESUME_KEY = "mentria-radio-resume";
 const RESUME_MAX_AGE = 12 * 3600000;
+const SESSION_CONTEXTS = 20;
 
 const COPY = window.RADIO_COPY || {
   ready: "Ready",
@@ -84,8 +85,6 @@ class MentriaRadio {
     this.sleepControl = null;
   }
 
-  // ── Init ──────────────────────────────────────────
-
   async init() {
     this.bindUI();
     await this.loadCatalogAndInit();
@@ -148,8 +147,6 @@ class MentriaRadio {
     return !!(probe.canPlayType && (probe.canPlayType('audio/ogg; codecs="opus"') || probe.canPlayType("audio/ogg; codecs=opus")));
   }
 
-  // ── Transport ─────────────────────────────────────
-
   syncTransport(playing) {
     this.el.play.innerHTML = playing ? PAUSE_SVG : PLAY_SVG;
     this.el.play.classList.toggle("playing", playing);
@@ -191,8 +188,6 @@ class MentriaRadio {
     this.setStatus("playing", COPY.playing);
     this.startProgressTimer();
   }
-
-  // ── Playback ──────────────────────────────────────
 
   play() {
     const seq = ++this.seq;
@@ -539,9 +534,7 @@ class MentriaRadio {
       skipped,
     };
 
-    const contexts = existing.session_contexts
-      ? [...existing.session_contexts, sessionContext]
-      : [sessionContext];
+    const contexts = [...(existing.session_contexts || []), sessionContext].slice(-SESSION_CONTEXTS);
 
     this.preferences[trackId] = await this.savePreference(trackId, {
       listened_ratio: listenedRatio,
@@ -550,8 +543,6 @@ class MentriaRadio {
       session_contexts: contexts,
     });
   }
-
-  // ── Progress timer ────────────────────────────────
 
   startProgressTimer() {
     this.stopProgressTimer();
@@ -583,8 +574,6 @@ class MentriaRadio {
     }
   }
 
-  // ── UI updates ────────────────────────────────────
-
   updateNowPlaying() {
     if (!this.currentTrack) return;
 
@@ -596,16 +585,13 @@ class MentriaRadio {
     this.el.progressFill.style.width = "0%";
     if (this.el.progress) this.el.progress.setAttribute("aria-valuenow", "0");
 
-    // Album art
     const artFile = this.currentTrack.art;
     if (artFile) {
       this.el.art.src = ART_BASE + artFile;
-      this.el.art.alt = this.currentTrack.mood;
     } else {
-      this.el.art.src = "";
+      this.el.art.removeAttribute("src");
     }
 
-    // Media Session API — shows track info in OS media widgets
     if ("mediaSession" in navigator) {
       const artUrl = artFile ? ART_BASE + artFile : "";
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -715,13 +701,12 @@ class MentriaRadio {
     this.loadAndPlay(track, ++this.seq);
   }
 
-  // ── UI binding ────────────────────────────────────
-
   bindUI() {
     this.el.play.addEventListener("click", () => this.togglePlayback());
 
     this.el.skip.addEventListener("click", () => this.skip());
     this.el.like.addEventListener("click", () => this.toggleLike());
+    this.el.art.addEventListener("error", () => this.el.art.removeAttribute("src"));
     if (this.el.float && window.MentriaUI && window.MentriaUI.floatSupported && window.MentriaUI.floatSupported()) {
       this.el.float.hidden = false;
       this.el.float.addEventListener("click", () => this.floatPlayer());
@@ -761,7 +746,6 @@ class MentriaRadio {
       if (window.MentriaStore) window.MentriaStore.set("tools", "radio_volume", Number(this.el.volume.value));
     });
 
-    // Ctrl+Shift+E → export JSONL
     document.addEventListener("keydown", (e) => {
       if (e.ctrlKey && e.shiftKey && e.key === "E") {
         e.preventDefault();
@@ -770,8 +754,6 @@ class MentriaRadio {
     });
   }
 }
-
-// ── Bootstrap ─────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", () => {
   new MentriaRadio().init();

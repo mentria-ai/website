@@ -24,6 +24,14 @@ function store() {
   return window.MentriaStore;
 }
 
+function storageError() {
+  let blocked = false;
+  try { blocked = store().status() === 'blocked'; } catch (_) {}
+  return blocked
+    ? codedError('storage-blocked', 'storage blocked — allow site data for this site')
+    : codedError('storage-full', 'storage full — remove an extension or free space');
+}
+
 export function parseManifest(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const el = doc.querySelector('script#mentria-ext[type="application/json"]');
@@ -110,7 +118,7 @@ export function install(html, manifest) {
   validateManifest(manifest, size);
   const prevSource = store().get(NS, 'src.' + manifest.id);
   const ok = store().set(NS, 'src.' + manifest.id, html);
-  if (!ok) throw codedError('storage-full', 'storage full — remove an extension or free space');
+  if (!ok) throw storageError();
   const prev = getEntry(manifest.id);
   const registry = getRegistry().filter((e) => e.manifest.id !== manifest.id);
   const entry = {
@@ -122,9 +130,10 @@ export function install(html, manifest) {
   };
   registry.push(entry);
   if (!store().set(NS, 'registry', registry)) {
+    const err = storageError();
     if (prevSource != null) store().set(NS, 'src.' + manifest.id, prevSource);
     else store().remove(NS, 'src.' + manifest.id);
-    throw codedError('storage-full', 'storage full — remove an extension or free space');
+    throw err;
   }
   return entry;
 }
@@ -147,7 +156,7 @@ export function installApp(manifest) {
     size: 0
   };
   registry.push(entry);
-  if (!store().set(NS, 'registry', registry)) throw codedError('storage-full', 'storage full — remove an extension or free space');
+  if (!store().set(NS, 'registry', registry)) throw storageError();
   return entry;
 }
 
@@ -197,6 +206,7 @@ export async function downloadFiles(id, files, extra, onProgress) {
   const total = list.reduce((n, f) => n + weight(f), 0) || 1;
   let done = 0;
   let failed = null;
+  const fetched = [];
   const queue = list.slice();
   const report = () => { if (onProgress) { try { onProgress(Math.min(1, done / total)); } catch (_) {} } };
   async function worker() {
@@ -209,6 +219,7 @@ export async function downloadFiles(id, files, extra, onProgress) {
           if (!resp.ok) throw codedError('download-failed', f.u + ' (' + resp.status + ')', { url: f.u, status: resp.status });
           const body = await resp.arrayBuffer();
           await cache.put(f.u, new Response(body, { status: resp.status, statusText: resp.statusText, headers: { 'content-type': resp.headers.get('content-type') || 'application/octet-stream' } }));
+          fetched.push(f.u);
         }
       } catch (e) {
         failed = e;
@@ -220,9 +231,17 @@ export async function downloadFiles(id, files, extra, onProgress) {
   }
   report();
   await Promise.all([worker(), worker(), worker(), worker()]);
-  if (failed) throw failed;
+  const dropFetched = async () => {
+    try { await prune(id, fetched, new Set(((prev && prev.list) || []).map((f) => f.u))); } catch (_) {}
+  };
+  if (failed) {
+    await dropFetched();
+    throw failed;
+  }
   if (!store().set(NS, FILES_KEY + id, { complete: true, at: new Date().toISOString(), list: list.map((f) => ({ u: f.u, h: f.h })) })) {
-    throw codedError('storage-full', 'storage full — remove an extension or free space');
+    const err = storageError();
+    await dropFetched();
+    throw err;
   }
   if (prev && Array.isArray(prev.list)) await prune(id, prev.list.map((f) => f.u), new Set(list.map((f) => f.u)));
   return list.length;

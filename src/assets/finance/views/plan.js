@@ -216,7 +216,7 @@ function cashTab(ctx) {
   const tb = h('tbody');
   cf.keys.forEach((k, i) => tb.append(h('tr', null, h('td', null, U.month(k, true)), h('td', { class: 'n' }, U.signedMoney(Math.round(cf.sched[i]), base, { compact: true })), h('td', { class: 'n' }, U.money(Math.round(cf.disc[i]), base, { compact: true })), h('td', { class: 'n amt--in' }, U.money(Math.round(cf.inc[i]), base, { compact: true })), h('td', { class: 'n ' + (cf.fan[i].p50 < buffer ? 'amt--over' : '') }, U.money(Math.round(cf.fan[i].p50), base, { compact: true })))));
   tbl.append(tb);
-  node.append(h('div', { class: 'ftable-wrap', style: { marginTop: '14px' } }, tbl));
+  node.append(h('div', { class: 'ftable-wrap', tabindex: '0', role: 'region', 'aria-label': t('plan.cash_chart'), style: { marginTop: '14px' } }, tbl));
   node.append(h('div', { class: 'fsection' }, h('h2', null, t('plan.changes')), h('button', { type: 'button', class: 'fb fb--sm', onclick: () => changeSheet(ctx, null) }, icon('plus'), t('plan.add_change'))));
   const changes = L.list('planned_change');
   if (!changes.length) node.append(h('p', { class: 'fmuted fsmall' }, t('plan.changes_empty')));
@@ -254,7 +254,7 @@ function spendTab(ctx) {
   }
   tb.append(h('tr', { class: 'is-total' }, h('td', null, t('plan.total')), h('td', null, ''), h('td', { class: 'n' }, U.money(Math.round(tot), base)), h('td', null, ''), h('td', null, '')));
   tbl.append(tb);
-  node.append(h('div', { class: 'ftable-wrap' }, tbl));
+  node.append(h('div', { class: 'ftable-wrap', tabindex: '0', role: 'region', 'aria-label': t('plan.tab_spend') }, tbl));
   return node;
 }
 

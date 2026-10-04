@@ -490,7 +490,10 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contacts-head{padding:0 .1rem}
 .comms__contact{gap:.65rem;padding:.55rem .45rem;border-bottom:1px solid #12161b;cursor:pointer;border-radius:10px;flex-wrap:nowrap;min-height:52px}
 
-.comms__contact:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:-2px}
+.comms__contact-open{display:flex;flex:1;min-width:0;align-items:center;background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.comms__contact-open:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:2px}
+.comms__contact:has(> .comms__contact-open:focus-visible){outline:2px solid var(--accent,#6ef3c5);outline-offset:-2px}
+.comms__contact:has(> .comms__contact-open:focus-visible) .comms__contact-open{outline:none}
 .comms__contact--req{cursor:default}
 .comms__contact--req:hover{background:rgba(110,243,197,.05)}
 .comms__contact-mid{display:flex;flex-direction:column;gap:.12rem;flex:1;min-width:0}
@@ -2895,11 +2898,12 @@ const renderRoomsSection = () => {
   for (const r of list) {
     const row = document.createElement('div');
     row.className = 'comms__contact comms__roomrow' + (currentRoomName === r.room ? ' comms__roomrow--current' : '');
-    row.tabIndex = 0;
-    row.setAttribute('role', 'button');
     const av = document.createElement('span');
     av.className = 'comms__avatar comms__avatar--room';
     av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'comms__contact-open';
     const mid = document.createElement('span');
     mid.className = 'comms__contact-mid';
     const name = document.createElement('span');
@@ -2909,7 +2913,8 @@ const renderRoomsSection = () => {
     sub.className = 'comms__contact-fp';
     sub.textContent = 'encrypted room · ' + short(r.room);
     mid.append(name, sub);
-    row.append(av, mid);
+    openBtn.append(mid);
+    row.append(av, openBtn);
     const unread = (unreadMap[roomUnreadKey(r.room)] || {}).n || 0;
     if (unread > 0 && currentRoomName !== r.room) {
       const badge = document.createElement('span');
@@ -2920,7 +2925,6 @@ const renderRoomsSection = () => {
     }
     const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
     row.addEventListener('click', open);
-    row.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     const bell = document.createElement('button');
     bell.type = 'button';
     const alertsOn = !!r.notify;
@@ -2945,10 +2949,15 @@ const renderRoomsSection = () => {
       input.maxLength = 40;
       input.value = r.label || r.room;
       input.setAttribute('aria-label', 'room name');
-      const done = (save) => { if (save) renameRoom(r.room, input.value); renderContacts(); };
-      input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') done(false); });
+      let finished = false;
+      const done = (save) => { if (finished) return; finished = true; if (save) renameRoom(r.room, input.value); renderContacts(); };
+      input.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Escape') ev.stopPropagation();
+        if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') { ev.preventDefault(); done(false); }
+      });
       input.addEventListener('blur', () => done(true));
       input.addEventListener('click', (ev) => ev.stopPropagation());
+      openBtn.replaceWith(mid);
       name.replaceWith(input);
       input.focus();
       input.select();
@@ -3029,13 +3038,15 @@ const renderContactsBase = () => {
   contacts.forEach((c) => {
     const row = document.createElement('div');
     row.className = 'comms__contact';
-    row.setAttribute('role', 'button');
-    row.setAttribute('tabindex', '0');
     row.dataset.fp = c.fp;
-    row.setAttribute('aria-label', 'chat with ' + (c.name || c.fp));
     const av = document.createElement('span');
     av.className = 'comms__avatar';
+    av.setAttribute('aria-hidden', 'true');
     paintAvatar(av, c.name, c.fp);
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'comms__contact-open';
+    openBtn.setAttribute('aria-label', 'chat with ' + (c.name || c.fp));
     const mid = document.createElement('span');
     mid.className = 'comms__contact-mid';
     const name = document.createElement('span');
@@ -3045,7 +3056,8 @@ const renderContactsBase = () => {
     sub.className = 'comms__contact-fp';
     sub.textContent = c.fp;
     mid.append(name, sub);
-    row.append(av, mid);
+    openBtn.append(mid);
+    row.append(av, openBtn);
     const missed = missedMap[c.fp];
     if (missed && missed.n > 0) {
       const mc = document.createElement('span');
@@ -3082,9 +3094,6 @@ const renderContactsBase = () => {
     chev.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-chev"></use></svg>';
     row.append(rm, chev);
     row.addEventListener('click', () => openDmWith(c));
-    row.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDmWith(c); }
-    });
     els.contactList.append(row);
   });
 };

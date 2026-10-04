@@ -1272,6 +1272,8 @@ localeReload: true
   if (load()) resume();
   else { modeSeg.set(State.mode); countSeg.set(State.numPlayers); newGame(); }
 
-  if (!prefGet('ludo_help_seen')) openHelp();
+  const autoHelp = () => { if (!prefGet('ludo_help_seen')) openHelp(); };
+  if (document.readyState === 'complete') autoHelp();
+  else window.addEventListener('load', () => requestAnimationFrame(autoHelp), { once: true });
 })();
 </script>

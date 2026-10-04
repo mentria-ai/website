@@ -21,7 +21,7 @@
 
   if (typeof DeviceMotionEvent === 'undefined') {
     settle(false);
-  } else if (typeof DeviceMotionEvent.requestPermission === 'function') {
+  } else if (typeof DeviceMotionEvent.requestPermission === 'function' && navigator.maxTouchPoints > 0) {
     settle(true);
   } else {
     var done = false;

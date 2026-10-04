@@ -25,7 +25,7 @@ try {
 
   // ── Platform detection ─────────────────────────────────────
   var ua = navigator.userAgent;
-  var isIos = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  var isIos = (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   var isMac = /Macintosh/.test(ua);
   var isSafari = /^((?!chrome|android).)*safari/i.test(ua);
   var isChromeLike = /Chrome|CriOS|EdgA?|OPR/.test(ua);

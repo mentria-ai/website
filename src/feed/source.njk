@@ -10,6 +10,7 @@ eleventyComputed:
   lang: "{{ pair.locale.code }}"
   title: "{{ pair.deck.subtitle | tloc(pair.locale.code) }} · Source"
   socialImageOverride: "{{ pair.deck.cover_image }}"
+  preloadImage: "{% set s = pair.deck.slides[0] %}{% if s.image and s.image_status != 'pending' %}{{ s.image }}{% endif %}"
   description: |-
     {%- set ja = pair.locale.code == "ja" -%}
     {%- set minLen = 50 if ja else 110 -%}

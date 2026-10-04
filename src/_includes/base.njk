@@ -104,7 +104,7 @@
     {% set metaDescription = (description | default(("site.metaDescription" | t))) | htmlDecode %}
     {% set socialImage = socialImageOverride or (site.siteUrl ~ (site.socialImage | default('/assets/img/icon-512x512.png'))) %}
     {% set isPost = tags and ('post' in tags) %}
-    {% set ogLocales = { 'en': 'en_US', 'es': 'es_ES', 'fr': 'fr_FR', 'ja': 'ja_JP', 'pt-BR': 'pt_BR' } %}
+    {% macro ogLocale(code) %}{% set region = { 'en': 'US', 'ja': 'JP' }[code] %}{{ code | replace('-', '_') if '-' in code else code ~ '_' ~ (region or code | upper) }}{% endmacro %}
     <title>{{ metaTitle }}</title>
     <meta name="description" content="{{ metaDescription }}">
     <meta name="keywords" content="{{ site.keywords }}">
@@ -124,11 +124,15 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="{{ 'site.socialImageAlt' | t }}">
+    {%- elif deckLayout %}
+    <meta property="og:image:width" content="832">
+    <meta property="og:image:height" content="1472">
+    <meta property="og:image:alt" content="{{ (title or '') | htmlDecode | striptags }}">
     {%- endif %}
-    <meta property="og:locale" content="{{ ogLocales[lang | default('en')] or 'en_US' }}">
+    <meta property="og:locale" content="{{ ogLocale(lang | default('en')) if (lang | default('en')) | findLocale else 'en_US' }}">
     {%- if not isPost and not englishOnly %}
     {%- for loc in locales %}{% if loc.code != (lang | default('en')) %}
-    <meta property="og:locale:alternate" content="{{ ogLocales[loc.code] }}">
+    <meta property="og:locale:alternate" content="{{ ogLocale(loc.code) }}">
     {%- endif %}{% endfor %}
     {%- endif %}
     {%- if isPost %}
@@ -160,6 +164,10 @@
     {%- endif %}
     <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/jbm-latin.woff2"   as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/mentrialogofont.woff2" as="font" type="font/woff2" crossorigin>
+    {%- if preloadImage %}
+    <link rel="preload" as="image" href="{{ preloadImage }}" fetchpriority="high">
+    {%- endif %}
 
     <link rel="stylesheet" href="/assets/css/style.css?v={{ buildHash }}">
     <link rel="stylesheet" href="/assets/css/mentria-ui.css?v={{ buildHash }}">
@@ -202,7 +210,8 @@
     </script>
 
     {%- set localePrefix = ((locale or pair.locale).pathPrefix | default("")) -%}
-    {%- set siteCode = ((lang or "en") | lower) if (((lang or "en") | lower) in ["en", "es", "fr", "ja", "pt-br"]) else "en" -%}
+    {%- set siteLocale = (lang or "en") | findLocale -%}
+    {%- set siteCode = (siteLocale.code | lower) if siteLocale else "en" -%}
     {%- set isHomePage = (page.url == "/" or page.url == localePrefix + "/") -%}
     {%- set inTools = page.url | startsWith(localePrefix + "/tools/") -%}
     {%- set isToolIndex = (page.url == localePrefix + "/tools/") -%}

@@ -1566,7 +1566,7 @@ html:has(.pwa-install-banner--visible) .m-update { bottom: calc(88px + env(safe-
 .tools-popup { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: flex-start; justify-content: center; padding: 4.5rem 1rem 1rem; overflow-y: auto; }
 .tools-popup[hidden] { display: none; }
 .tools-popup__scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, .72); }
-.tools-popup__panel { --tp-bar-h: calc(44px + 1.5rem + 1px); position: relative; width: min(760px, 100%); max-height: calc(100dvh - 5.5rem); overflow-y: auto; padding: 0 1.25rem 1.5rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-lg, 14px); background: var(--term-bg-raised); box-shadow: var(--elev-3); scrollbar-width: thin; }
+.tools-popup__panel { --tp-bar-h: calc(44px + 1.5rem + 1px); position: relative; width: min(760px, 100%); max-height: calc(100dvh - 5.5rem); overflow-y: auto; padding: 0 1.25rem 1.5rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-lg); background: var(--term-bg-raised); box-shadow: var(--elev-3); scrollbar-width: thin; }
 .tools-popup__panel:focus { outline: none; }
 .tools-popup__bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 0.5rem; margin: 0 -1.25rem 0.25rem; padding: 0.75rem 1.25rem; background: var(--term-bg-raised); border-bottom: 1px solid var(--term-border); }
 .tools-popup__find { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 0.6rem; height: 44px; padding: 0 0.85rem; box-sizing: border-box; border: 1px solid var(--term-border-strong); border-radius: 12px; background: var(--term-bg); color: var(--term-muted); cursor: text; }

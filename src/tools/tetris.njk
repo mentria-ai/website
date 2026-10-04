@@ -28,7 +28,7 @@ localeReload: true
   <div class="help-head">
     <p class="game-help-title">{{ "tool.tetris.controls_title" | t }}</p>
     <span class="help-badge" id="input-badge" hidden></span>
-    <button type="button" class="help-close" popovertarget="tetris-help" popovertargetaction="hide" aria-label="{{ 'tool.tetris.close' | t }}">{% include "icon-x.njk" %}</button>
+    <button type="button" class="game-help-x" popovertarget="tetris-help" popovertargetaction="hide" aria-label="{{ 'tool.tetris.close' | t }}">{% include "icon-x.njk" %}</button>
   </div>
 
   <section class="help-sec" id="help-kb" data-input="keyboard">
@@ -276,12 +276,6 @@ canvas#game {
   background: var(--cyan-8); border: 1px solid var(--cyan-30); color: var(--syn-cyan);
 }
 .help-badge[hidden] { display: none; }
-.help-close {
-  appearance: none; background: transparent; border: 1px solid var(--term-border);
-  border-radius: var(--radius-sm); color: var(--term-muted);
-  width: 24px; height: 24px; line-height: 1; cursor: pointer; font-size: 11px; padding: 0;
-}
-.help-close:hover { color: var(--syn-cyan); border-color: var(--cyan-30); }
 
 .help-sec { margin-bottom: 12px; padding: 8px 9px; border: 1px solid transparent; border-radius: var(--radius-md); transition: border-color 160ms ease, background 160ms ease; }
 .help-sec.is-active { border-color: var(--cyan-30); background: var(--cyan-8); }
@@ -705,6 +699,7 @@ canvas#game {
   }
 
   function toggleGhost() {
+    settleUntil = performance.now() + 600;
     State.ghost = !State.ghost;
     writePref('tetris_ghost', State.ghost);
     syncGhostUi();
@@ -959,6 +954,9 @@ canvas#game {
     updateHUD();
   }
 
+  let wasLive = true;
+  let idleDrawnAt = 0;
+  let settleUntil = 0;
   function loop(now) {
     try {
       if (!State.lastTime) State.lastTime = now;
@@ -988,7 +986,13 @@ canvas#game {
           }
         }
       }
-      render();
+      const live = State.running && !State.paused && !State.over;
+      if (wasLive && !live) settleUntil = now + 600;
+      if (live || now < settleUntil || now - idleDrawnAt >= 250) {
+        idleDrawnAt = now;
+        render();
+      }
+      wasLive = live;
     } catch (err) {
       console.error('loop error', err);
     }

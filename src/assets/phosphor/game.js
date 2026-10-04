@@ -133,6 +133,9 @@ let killFlashUntil = 0;
 let fpsFrames = 0;
 let fpsWindowStart = 0;
 let fpsValue = 0;
+let menuSkip = false;
+let menuDt = 0;
+let audioSleepTimer = 0;
 let devOpen = false;
 let touchDevice = false;
 let touchUiOn = false;
@@ -968,12 +971,20 @@ function resetRunCore() {
   newRun();
 }
 
+function sleepAudioSoon() {
+  clearTimeout(audioSleepTimer);
+  audioSleepTimer = setTimeout(() => {
+    if (state === 'paused' || state === 'ready') call(audio, 'sleep');
+  }, 400);
+}
+
 function resetRun() {
   if (!worldReady) return;
   resetRunCore();
   if (state !== 'playing') {
     setState('playing');
     if (!touchDevice) call(input, 'requestPointerLock');
+    call(audio, 'unlock');
     call(audio, 'startAmbient');
   }
 }
@@ -981,6 +992,7 @@ function resetRun() {
 function backToSelect() {
   if (state !== 'paused' && state !== 'complete') return;
   call(audio, 'stopAmbient');
+  sleepAudioSoon();
   if (touchUiOn) {
     call(input, 'enableTouchUI', false);
     touchUiOn = false;
@@ -995,6 +1007,7 @@ function pauseGame(note) {
   setState('paused');
   call(input, 'exitPointerLock');
   call(audio, 'stopAmbient');
+  sleepAudioSoon();
 }
 
 function resumeGame() {
@@ -1424,6 +1437,7 @@ function onResize() {
   }
   hudCache.gap = -1;
   call(renderer, 'resize');
+  menuSkip = true;
 }
 
 function fullscreenSupported() {
@@ -2043,7 +2057,14 @@ function frame(now) {
     call(audio, 'setListener', scene.camera.pos, scene.camera.yaw, sp);
   }
 
-  if (worldReady) call(renderer, 'render', scene, dt);
+  if (worldReady) {
+    menuDt += dt;
+    menuSkip = state !== 'playing' && !menuSkip;
+    if (!menuSkip) {
+      call(renderer, 'render', scene, menuDt);
+      menuDt = 0;
+    }
+  }
   if (settings.gfx === 'enhanced' && call(renderer, 'getGraphics') === 'classic') {
     settings.gfx = 'classic';
     if (dom.stage) dom.stage.classList.remove('is-gfx-enhanced');
@@ -2132,11 +2153,9 @@ function wireUi() {
   document.addEventListener('fullscreenchange', onResize);
   document.addEventListener('webkitfullscreenchange', onResize);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      if (state === 'playing') pauseGame(null);
-      return;
-    }
-    if (state === 'playing' || state === 'paused') call(audio, 'unlock');
+    if (!document.hidden) return;
+    if (state === 'playing') pauseGame(null);
+    call(audio, 'sleep');
   });
 }
 

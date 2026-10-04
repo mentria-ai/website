@@ -1118,7 +1118,7 @@ localeReload: true
   if (load()) resume(); else { diffSeg.set(State.diff); newGame(); }
   errSeg.set(State.errMode);
   window.addEventListener('pagehide', save);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { setPaused(true, true); save(); } });
   if (document.readyState === 'complete') maybeAutoHelp();
   else window.addEventListener('load', () => requestAnimationFrame(maybeAutoHelp), { once: true });
 })();

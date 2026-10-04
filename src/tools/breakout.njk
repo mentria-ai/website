@@ -25,7 +25,7 @@ localeReload: true
 {% include "terminal-frame-open.njk" %}
 
 <div id="breakout-help" popover class="game-help brk__help">
-  <button type="button" class="game-help-x" popovertarget="breakout-help" popovertargetaction="hide" aria-label="{{ 'common.close' | t }}">✕</button>
+  <button type="button" class="game-help-x" popovertarget="breakout-help" popovertargetaction="hide" aria-label="{{ 'common.close' | t }}">{% include "icon-x.njk" %}</button>
   <p class="game-help-title">{{ "tool.breakout.controls_title" | t }}</p>
 
   <div class="brk__method" data-brk-method="touch" data-input="touch">
@@ -1342,7 +1342,7 @@ canvas {
     const now = performance.now();
     let key = '';
     for (let i = 0; i < activeEffects.length; i++) key += activeEffects[i].kind.id + ',';
-    if (key === trayKey && now - trayAt < 150) return;
+    if (key === trayKey && (!key || now - trayAt < 150)) return;
     trayKey = key;
     trayAt = now;
 
@@ -1428,13 +1428,20 @@ canvas {
   let last = performance.now();
   let acc = 0;
   const STEP = 1000 / 60;
+  let wasLive = true;
+  let idleDrawnAt = 0;
   function loop(now) {
     acc += now - last;
     last = now;
     if (acc > 250) acc = STEP;
     let steps = 0;
     while (acc >= STEP && steps < 6) { update(); acc -= STEP; steps++; }
-    render();
+    const live = State.running && !State.paused;
+    if (live || wasLive || now - idleDrawnAt >= 250) {
+      idleDrawnAt = now;
+      render();
+    }
+    wasLive = live;
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);

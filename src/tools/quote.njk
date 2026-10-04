@@ -124,6 +124,8 @@ function runApp(MentriaEngine) {
   let engine = null;
   let generating = false;
   let loading = null;
+  let blocked = false;
+  let onlineRetry = false;
 
 
   function onEngineProgress(p) { if (strip) strip.onProgress(p); }
@@ -142,8 +144,19 @@ function runApp(MentriaEngine) {
     return loading;
   }
 
+  function retryWhenOnline() {
+    if (onlineRetry) return;
+    onlineRetry = true;
+    window.addEventListener('online', () => {
+      onlineRetry = false;
+      if (engine || loading || generating) return;
+      loadModel().then(() => { if (engine && !generating) generateQuote(); });
+    }, { once: true });
+  }
+
   /* Load engine + model */
   async function startModel() {
+    blocked = false;
     setStatus('loading', COPY.statusLoadingModel);
     await ensureStrip();
     try {
@@ -183,9 +196,14 @@ function runApp(MentriaEngine) {
     } catch (err) {
       if (strip) strip.hide();
       console.error('Model load error:', err);
-      if (err && err.message === 'download-postponed') setStatus('idle', COPY.downloadPostponed);
-      else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) showUnsupportedError(COPY.errNoWebGpu);
-      else setStatus('error', navigator.onLine === false ? COPY.modelOffline : COPY.errLoadPrefix + (err.message || err));
+      if (err && err.message === 'download-postponed') { blocked = true; setStatus('idle', COPY.downloadPostponed); }
+      else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) { blocked = true; showUnsupportedError(COPY.errNoWebGpu); }
+      else {
+        const offline = navigator.onLine === false;
+        setStatus('error', offline ? COPY.modelOffline : COPY.errLoadPrefix + (err.message || err));
+        newBtn.disabled = generating;
+        if (offline) retryWhenOnline();
+      }
     }
   }
 
@@ -198,6 +216,7 @@ function runApp(MentriaEngine) {
     const eng = engine;
     if (!eng) {
       generating = false;
+      newBtn.disabled = blocked;
       return;
     }
     copyBtn.style.display = 'none';

@@ -348,7 +348,7 @@ export async function ensureModel(engineFactory, opts) {
     const c = await Tiers.effectiveTier({ cachedOnly: true });
     if (!c) throw new Error('model-not-cached');
     tellTier(c, true);
-    const res = await Tiers.loadWithFallback(makeEngine, c, { vision, onFallback: (from, to) => tellTier(to, true) });
+    const res = await Tiers.loadWithFallback(makeEngine, c, { vision, onlyCached: true, onFallback: (from, to) => tellTier(to, true) });
     return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
   }
 
@@ -408,6 +408,7 @@ export async function ensureModel(engineFactory, opts) {
     const res = await Promise.race([
       Tiers.loadWithFallback(makeEngine, candidate, {
         vision,
+        aborted: () => stopped,
         validate: (engine) => validateRun(engine, candidate),
         onFallback: (from, to) => {
           const el = document.getElementById('mm-gate');

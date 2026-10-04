@@ -184,21 +184,25 @@ window.addEventListener('pagehide', () => {
 export async function imageToRgb(source, maxSide) {
   if (source && source.rgbHwc && source.w && source.h) return { rgbHwc: source.rgbHwc, h: source.h, w: source.w };
   const limit = maxSide || IMAGE_MAX_SIDE;
-  let bitmap = source;
-  if (typeof Blob !== 'undefined' && source instanceof Blob) bitmap = await createImageBitmap(source);
-  const sw = bitmap.videoWidth || bitmap.naturalWidth || bitmap.width;
-  const sh = bitmap.videoHeight || bitmap.naturalHeight || bitmap.height;
-  if (!sw || !sh) throw new Error('image-empty');
-  const scale = Math.min(1, limit / Math.max(sw, sh));
-  const w = Math.max(1, Math.round(sw * scale));
-  const h = Math.max(1, Math.round(sh * scale));
-  const canvas = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : Object.assign(document.createElement('canvas'), { width: w, height: h });
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  ctx.drawImage(bitmap, 0, 0, w, h);
-  const data = ctx.getImageData(0, 0, w, h).data;
-  const rgbHwc = new Uint8Array(w * h * 3);
-  for (let i = 0, j = 0; i < data.length; i += 4, j += 3) { rgbHwc[j] = data[i]; rgbHwc[j + 1] = data[i + 1]; rgbHwc[j + 2] = data[i + 2]; }
-  return { rgbHwc: rgbHwc, h: h, w: w };
+  const owned = typeof Blob !== 'undefined' && source instanceof Blob;
+  const bitmap = owned ? await createImageBitmap(source) : source;
+  try {
+    const sw = bitmap.videoWidth || bitmap.naturalWidth || bitmap.width;
+    const sh = bitmap.videoHeight || bitmap.naturalHeight || bitmap.height;
+    if (!sw || !sh) throw new Error('image-empty');
+    const scale = Math.min(1, limit / Math.max(sw, sh));
+    const w = Math.max(32, Math.round(sw * scale / 32) * 32);
+    const h = Math.max(32, Math.round(sh * scale / 32) * 32);
+    const canvas = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : Object.assign(document.createElement('canvas'), { width: w, height: h });
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h).data;
+    const rgbHwc = new Uint8Array(w * h * 3);
+    for (let i = 0, j = 0; i < data.length; i += 4, j += 3) { rgbHwc[j] = data[i]; rgbHwc[j + 1] = data[i + 1]; rgbHwc[j + 2] = data[i + 2]; }
+    return { rgbHwc: rgbHwc, h: h, w: w };
+  } finally {
+    if (owned && bitmap.close) bitmap.close();
+  }
 }
 
 function loadLocalModel(needVision) {
@@ -235,7 +239,6 @@ function loadLocalModel(needVision) {
         ]);
       } catch (_) {}
       const res = await Tiers.loadWithFallback(make, tier, { vision: !!needVision });
-      try { if (Tiers.setValidatedTier) Tiers.setValidatedTier(res.tier || tier); } catch (_) {}
       hostWith(localGenerate, () => false, res.tier || tier, !!needVision);
       return { engine: res.engine, maxSeq: res.maxSeq || 2048, tier: res.tier || tier, vision: !!needVision };
     })();
@@ -246,6 +249,7 @@ function loadLocalModel(needVision) {
 
 let activeAdapter = null;
 let remoteAdapter = null;
+let validatedEngine = null;
 export function activeAdapterName() { return activeAdapter != null ? activeAdapter : remoteAdapter; }
 let adapterOp = Promise.resolve();
 function ensureAdapter(engine, tier, adapter) {
@@ -303,6 +307,10 @@ async function localGenerate(system, user, maxTokens, onToken, image, adapter, s
   if (prefix) params.assistantPrefix = prefix;
   await engine.generate(params, (ev) => {
     if (typeof ev.token === 'string') {
+      if (validatedEngine !== engine) {
+        validatedEngine = engine;
+        tiers().then((T) => { if (T.setValidatedTier) T.setValidatedTier(tier); }).catch(() => {});
+      }
       if (/^<\|[^|]*\|>$/.test(ev.token)) return;
       out += ev.token;
       if (onToken) { try { onToken(ev.token, out); } catch (_) {} }

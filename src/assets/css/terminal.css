@@ -491,6 +491,9 @@ html.is-fullscreen-tool body .terminal-frame--fullscreen .qn-editor__textarea {
 }
 .game-help-x {
   float: right;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin: -0.3rem -0.35rem 0 0.6rem;
   appearance: none;
   background: transparent;

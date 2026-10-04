@@ -25,7 +25,7 @@ localeReload: true
 {% include "terminal-frame-open.njk" %}
 
 <div id="minesweeper-help" popover class="game-help ms-help">
-  <button type="button" class="ms-help__close" popovertarget="minesweeper-help" popovertargetaction="hide" aria-label="{{ 'tool.minesweeper.help_close' | t }}">{% include "icon-x.njk" %}</button>
+  <button type="button" class="game-help-x" popovertarget="minesweeper-help" popovertargetaction="hide" aria-label="{{ 'tool.minesweeper.help_close' | t }}">{% include "icon-x.njk" %}</button>
   <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
 
   <p class="ms-help__badge">
@@ -446,20 +446,7 @@ main { max-width: 1100px; }
 .ms-modal__btn { min-height: 44px; padding-inline: 20px; }
 
 .ms-help { max-width: min(430px, calc(100vw - 1.5rem)); position: relative; }
-.ms-help__close {
-  position: absolute;
-  top: 6px; right: 6px;
-  width: 32px; height: 32px;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: transparent;
-  border: 1px solid var(--term-border);
-  border-radius: 50%;
-  color: var(--term-muted);
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-}
-.ms-help__close:hover { color: var(--syn-cyan); border-color: var(--cyan-30); }
+.ms-help .game-help-x { position: absolute; top: 6px; right: 6px; margin: 0; }
 .ms-help__badge {
   display: flex; align-items: center; gap: 8px;
   margin: 0 0 14px;

@@ -1,6 +1,10 @@
 ---
-permalink: /search-index-feed.json
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "/search-index-feed.{{ locale.code }}.json"
 eleventyExcludeFromCollections: true
 layout: null
 ---
-{{ searchFeedIndex | dump | safe }}
+{{ searchFeedIndex[locale.code] | dump | safe }}

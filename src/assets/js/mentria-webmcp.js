@@ -110,7 +110,8 @@ async function register(t) {
 function sync() { for (const t of MentriaBus.listTools({ ai: true })) register(t); registerSummarize(); }
 
 async function searchSite(query) {
-  const res = await fetch('/search-index.json');
+  const res = await fetch('/search-index.' + PAGE_LANG + '.json');
+  if (!res.ok) return [];
   const idx = await res.json();
   const terms = String(query).toLowerCase().split(/\s+/).filter(Boolean);
   if (!terms.length) return [];

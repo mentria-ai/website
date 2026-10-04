@@ -929,7 +929,7 @@ localeReload: true
     return saveVault(state.vault);
   }
 
-  const scanner = { detector: null, useJsQR: false, stream: null, rafId: 0, scanning: false, lastDetect: 0, canvas: null, ctx: null };
+  const scanner = { detector: null, useJsQR: false, stream: null, rafId: 0, scanning: false, lastDetect: 0, canvas: null, ctx: null, gen: 0 };
 
   function loadScript(src) {
     return new Promise((res, rej) => {
@@ -972,6 +972,7 @@ localeReload: true
   }
 
   function stopScanner() {
+    scanner.gen++;
     scanner.scanning = false;
     if (scanner.rafId) { cancelAnimationFrame(scanner.rafId); scanner.rafId = 0; }
     if (scanner.stream) { scanner.stream.getTracks().forEach((t) => t.stop()); scanner.stream = null; }
@@ -1013,6 +1014,8 @@ localeReload: true
 
   async function startScanner(opts) {
     opts = opts || {};
+    stopScanner();
+    const gen = scanner.gen;
     showScanNote('');
     $('totp-scanner').hidden = false;
     if (!window.isSecureContext) {
@@ -1026,14 +1029,17 @@ localeReload: true
       return false;
     }
     const ok = await initDetector();
+    if (gen !== scanner.gen) return false;
     if (!ok) {
       if (!opts.silentOnFail) showScanNote(COPY.scan_unsupported);
       else $('totp-scanner').hidden = true;
       return false;
     }
+    let opened;
     try {
-      scanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      opened = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
     } catch (err) {
+      if (gen !== scanner.gen) return false;
       const name = err && err.name;
       if (opts.silentOnFail && (name === 'NotAllowedError' || name === 'SecurityError' || name === 'NotFoundError')) {
         $('totp-scanner').hidden = true;
@@ -1044,9 +1050,16 @@ localeReload: true
       else showScanNote(String(err && err.message || err));
       return false;
     }
+    if (gen !== scanner.gen || document.hidden || $('totp-add-modal').hidden) {
+      opened.getTracks().forEach((t) => t.stop());
+      if (gen === scanner.gen) stopScanner();
+      return false;
+    }
+    scanner.stream = opened;
     const video = $('totp-scanner-video');
     video.srcObject = scanner.stream;
     try { await video.play(); } catch (_) {}
+    if (gen !== scanner.gen) return false;
     scanner.scanning = true;
     scanner.lastDetect = 0;
     scanner.rafId = requestAnimationFrame(scanLoop);

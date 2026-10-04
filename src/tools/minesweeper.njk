@@ -766,6 +766,7 @@ main { max-width: 1100px; }
   function isDialogOpen() {
     if (asking) return true;
     const dlg = document.getElementById('m-dialog');
+    if (dlg && dlg.hasAttribute('data-open')) return true;
     try { return !!(dlg && dlg.matches(':popover-open')); } catch (_) { return false; }
   }
 

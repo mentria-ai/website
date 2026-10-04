@@ -3,18 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
-    {# Disable user pinch-to-zoom + iOS focus auto-zoom. The site has
-       multi-tap interactions (CLI input, game touch controls, install
-       sheet, language switcher) that iOS otherwise hijacks for zoom
-       gestures. maximum-scale=1.0 + user-scalable=no together cover the
-       older iOS versions that occasionally ignore one or the other.
-       The CSS also forces 16px on inputs to prevent the focus-zoom
-       that fires even when scaling is locked. #}
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta http-equiv="origin-trial" content="AvrrtV9qfu43567NDhfTp/wlKgPoCTk66lxx5aB8pgWBholGgP+VKLTWt/60cXLHNH9JlbDBJsUgEHTXF1OE/A0AAABKeyJvcmlnaW4iOiJodHRwczovL21lbnRyaWEuYWk6NDQzIiwiZmVhdHVyZSI6IldlYk1DUCIsImV4cGlyeSI6MTc5NDg3MzYwMH0=">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cdn.mentria.ai https://mentria-ai.github.io; media-src 'self' blob: https://cdn.mentria.ai https://mentria-ai.github.io; font-src 'self'; connect-src 'self' blob: data: http://localhost:* http://127.0.0.1:* https://cdn.mentria.ai https://mentria-ai.github.io https://huggingface.co https://*.huggingface.co https://*.hf.co https://relay.mentria.ai wss://relay.mentria.ai; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+    {% include "site/csp.njk" %}
     {%- if usesThree %}
-    <script type="importmap">{"imports":{"three":"/assets/vendor/three-0.186.0/build/three.module.min.js","three/addons/":"/assets/vendor/three-0.186.0/examples/jsm/","/assets/vendor/three-0.186.0/build/three.core.js":"/assets/vendor/three-0.186.0/build/three.core.min.js"}}</script>
+    {% include "site/importmap.njk" %}
     {%- endif %}
     <script type="speculationrules">
       { "prefetch": [{ "source": "document", "where": { "href_matches": "/*" }, "eagerness": "moderate" }] }
@@ -24,7 +17,7 @@
       window.MENTRIA_EN_ONLY = {{ englishOnlyUrls | dump | safe }};
       window.MENTRIA_LOCALES = [
         {%- for loc in locales -%}
-        { code: {{ loc.code | dump | safe }}, prefix: {{ loc.pathPrefix | dump | safe }}, name: {{ loc.nativeName | dump | safe }}, isDefault: {{ loc.isDefault | dump | safe }} }{% if not loop.last %},{% endif %}
+        { code: {{ loc.code | dump | safe }}, prefix: {{ loc.pathPrefix | dump | safe }}, name: {{ loc.nativeName | dump | safe }}, isDefault: {{ loc.isDefault | dump | safe }}, dict: "/assets/i18n/{{ loc.code }}.json?v={{ buildHash }}", palette: "/assets/js/site-palette.{{ loc.code | lower }}.js?v={{ buildHash }}" }{% if not loop.last %},{% endif %}
         {%- endfor -%}
       ];
     </script>
@@ -155,7 +148,6 @@
     <link rel="icon" href="/assets/img/favicon-96x96.png" type="image/png">
     <link rel="apple-touch-icon" href="/assets/img/icon-192x192.png">
 
-    {#- Reciprocal hreflang matrix — one alternate per supported locale -#}
     {%- if not isPost and not englishOnly %}
     {%- for loc in locales %}
     <link rel="alternate" hreflang="{{ loc.code }}" href="{{ site.siteUrl }}{{ page.url | switchLocale(loc.code) }}">
@@ -219,7 +211,6 @@
     {%- set isLearnIndex = (page.url == localePrefix + "/learn/") -%}
     {%- set inExtensions = page.url | startsWith(localePrefix + "/extensions/") -%}
     {%- set isExtensionIndex = (page.url == localePrefix + "/extensions/") -%}
-    {%- set isPost = tags and ("post" in tags) -%}
     {%- set plainTitle = (title or "") | htmlDecode | striptags -%}
     {%- if not isHomePage and (inTools or inFeed or inLearn or inExtensions) %}
     <script type="application/ld+json">
@@ -273,50 +264,6 @@
 </head>
 <body class="scanlines">
     <script src="/assets/js/mentria-store.js?v={{ buildHash }}"></script>
-    <script>
-      (function () {
-        function init() {
-        var ring = document.querySelector('[data-week-ring]');
-        if (!ring || !window.MentriaStore) return;
-        var segs = ring.querySelectorAll('.week-ring__seg');
-        function pad(n) { return (n < 10 ? '0' : '') + n; }
-        function key(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-        function paint() {
-          var days = window.MentriaStore.get('packs', 'days') || {};
-          var d = new Date(), today = key(d), n = 0;
-          var start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-          start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
-          for (var i = 0; i < 7 && i < segs.length; i++) {
-            var x = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
-            var k = key(x), on = !!days[k];
-            if (on) n++;
-            segs[i].classList.toggle('is-on', on);
-            segs[i].classList.toggle('is-today', k === today);
-          }
-          var labelN = ring.getAttribute('data-label-n') || '';
-          if (labelN) { var l = labelN.split('{n}').join(String(n)); ring.setAttribute('aria-label', l); ring.setAttribute('title', l); }
-          clearTimeout(tipTimer);
-          if (n) tipTimer = setTimeout(function () { explain(n); }, 1500);
-        }
-        var tipTimer = 0;
-        function explain(n) {
-          var tip = ring.getAttribute('data-toast');
-          if (!tip || !window.MentriaUI || ring.offsetParent === null || window.MentriaStore.get('ui', 'week_ring_told')) return;
-          var r = ring.getBoundingClientRect();
-          if (!r.width || r.bottom <= 0 || r.top >= innerHeight) return;
-          var hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-          if (!hit || !ring.contains(hit)) return;
-          window.MentriaStore.set('ui', 'week_ring_told', true);
-          window.MentriaUI.toast(tip.split('{n}').join(String(n)), { duration: 6000 });
-        }
-        paint();
-        window.addEventListener('mentria:write', paint);
-        document.addEventListener('mentria:localechange', paint);
-        window.addEventListener('pageshow', function (e) { if (e.persisted) paint(); });
-        }
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-      })();
-    </script>
     <script src="/assets/js/mentria-caps.js?v={{ buildHash }}"></script>
     <script src="/assets/js/mentria-ui.js?v={{ buildHash }}"></script>
     <script src="/assets/js/mentria-backup.js?v={{ buildHash }}" defer></script>
@@ -382,7 +329,7 @@
         </span>
         <span class="app-bar__t">{{ 'nav.comms' | t }}</span>
       </a>
-      <button type="button" class="app-bar__item" data-palette-open aria-label="{{ 'palette.open' | t }}">
+      <button type="button" class="app-bar__item" data-palette-open>
         <svg class="app-bar__i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
         <span class="app-bar__t">{{ 'nav.search' | t }}</span>
       </button>

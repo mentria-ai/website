@@ -184,8 +184,9 @@
     return Array.from(seen).sort();
   };
 
-  const clearNs = (ns) => {
+  const clearNs = (ns, opts) => {
     if (!lsAvailable) return 0;
+    opts = opts || {};
     const nsPrefix = PREFIX + ns + '.';
     const metaNsPrefix = META_PREFIX + ns + '.';
     const victims = [];
@@ -200,13 +201,26 @@
       victims.forEach((k) => global.localStorage.removeItem(k));
       metaVictims.forEach((k) => global.localStorage.removeItem(k));
     } catch (_) {}
-    victims.forEach((k) => emit({ ns, key: k.slice(nsPrefix.length), op: 'remove' }));
+    if (victims.length && !opts.remote) {
+      tombWrite((tombs) => {
+        const m = Date.now();
+        let changed = false;
+        victims.forEach((k) => {
+          const suffix = k.slice(PREFIX.length);
+          if ((suffix in tombs) && tombs[suffix] >= m) return;
+          tombs[suffix] = m;
+          changed = true;
+        });
+        return changed;
+      });
+    }
+    victims.forEach((k) => emit({ ns, key: k.slice(nsPrefix.length), op: 'remove', remote: !!opts.remote }));
     return victims.length;
   };
 
-  const LOCAL_KEYS = ['tools.ruler_calibration', 'tools.decibel_settings', 'tools.countdown_active', 'ui.mini', 'handoff.md', 'comms.ring_token', 'comms.selftest_token', 'comms.ring_announced'];
+  const LOCAL_KEYS = ['tools.ruler_calibration', 'tools.decibel_settings', 'tools.countdown_active', 'ui.mini', 'ui.mini_tool', 'ui.mini_pos', 'handoff.md', 'comms.ring_token', 'comms.selftest_token', 'comms.ring_announced'];
   const LOCAL_KEY_PREFIXES = ['ui.fullscreen.'];
-  const LOCAL_LEGACY = ['mentria_lang', 'mentria_lang_redirected_at', 'mentria_seen', 'mentria_caps'];
+  const LOCAL_LEGACY = ['mentria_lang', 'mentria_lang_redirected_at', 'mentria_seen', 'mentria_caps', 'mentria_pwa_installed_at', 'mentria_pwa_install_dismissed_at', 'mentria_pwa_install_seen'];
   const VAULTS = ['totp.vault', 'identity.vault'];
   const NOTE_LISTS = ['quick_notes.blob', 'quick_notes.inbox'];
   const DELETE_MAPS = ['quick_notes.deleted', 'tools.color_picker_deleted'];
@@ -263,10 +277,10 @@
       });
     });
     const keys = Object.keys(out);
-    if (cap && keys.length > cap) {
-      keys.sort((x, y) => out[x] - out[y]).slice(0, keys.length - cap).forEach((k) => { delete out[k]; });
-    }
-    return out;
+    if (!cap || keys.length <= cap) return out;
+    const capped = {};
+    keys.sort((x, y) => out[y] - out[x]).slice(0, cap).forEach((k) => { capped[k] = out[k]; });
+    return capped;
   };
 
   const exportAll = () => {
@@ -424,7 +438,8 @@
     return { restored: writes.length };
   };
 
-  const tryPersist = async () => {
+  let persistAsk = null;
+  const tryPersist = () => persistAsk || (persistAsk = (async () => {
     if (persistCache !== null) return persistCache;
     if (!global.navigator || !global.navigator.storage || !global.navigator.storage.persist) {
       persistCache = false;
@@ -440,7 +455,7 @@
       persistCache = false;
       return false;
     }
-  };
+  })());
 
   const requestPersist = tryPersist;
 

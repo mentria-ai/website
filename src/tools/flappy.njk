@@ -25,7 +25,7 @@ localeReload: true
 {% include "terminal-frame-open.njk" %}
 
 <div id="flappy-help" popover class="game-help">
-  <button type="button" class="game-help-x" popovertarget="flappy-help" popovertargetaction="hide" aria-label="{{ 'common.close' | t }}">✕</button>
+  <button type="button" class="game-help-x" popovertarget="flappy-help" popovertargetaction="hide" aria-label="{{ 'common.close' | t }}">{% include "icon-x.njk" %}</button>
   <p class="game-help-title">{{ "tool.flappy.controls" | t }}</p>
   <ul class="flappy__ctl-list">
     <li class="flappy__ctl" data-method="touch">

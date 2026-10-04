@@ -168,6 +168,7 @@ localeReload: true
     let currentDataUri  = '';
     let currentRawB64   = '';
     let decodedBlob     = null;
+    let decodedUrl      = null;
     let decodedFilename = 'decoded-file';
 
     function formatBytes(bytes) {
@@ -225,7 +226,7 @@ localeReload: true
       const raw = inputEl.value;
       if (!raw) { showStatus(textStatus, COPY.statusNothingEncode, 'err'); return; }
       try {
-        const encoded = btoa(unescape(encodeURIComponent(raw)));
+        const encoded = bytesToB64(new TextEncoder().encode(raw));
         outputEl.value = encoded;
         showStatus(textStatus, COPY.statusEncoded.replace('{size}', formatBytes(encoded.length)), 'ok');
       } catch (e) {
@@ -233,6 +234,19 @@ localeReload: true
         showStatus(textStatus, COPY.statusEncodeFailed.replace('{reason}', e.message), 'err');
       }
     });
+
+    function bytesToB64(bytes) {
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      return btoa(bin);
+    }
+
+    function b64ToBytes(str) {
+      const bin = atob(normalizeB64(str));
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
 
     function normalizeB64(str) {
       let v = str.replace(/\s+/g, '');
@@ -265,7 +279,7 @@ localeReload: true
       if (dataUriMatch) raw = dataUriMatch[1];
       let bytes;
       try {
-        bytes = Uint8Array.from(atob(normalizeB64(raw)), c => c.charCodeAt(0));
+        bytes = b64ToBytes(raw);
       } catch (e) {
         outputEl.value = '';
         showStatus(textStatus, COPY.statusDecodeFailedInv, 'err');
@@ -300,7 +314,7 @@ localeReload: true
       const v = text.replace(/\s+/g, '');
       if (v.length < 16 || !/^[A-Za-z0-9+/_-]+={0,2}$/.test(v)) return false;
       try {
-        new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(atob(normalizeB64(v)), c => c.charCodeAt(0)));
+        new TextDecoder('utf-8', { fatal: true }).decode(b64ToBytes(v));
         return true;
       } catch (_) {
         return false;
@@ -335,6 +349,7 @@ localeReload: true
 
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length) handleFile(fileInput.files[0]);
+      fileInput.value = '';
     });
 
     let previewUrl = null;
@@ -418,6 +433,7 @@ localeReload: true
     function clearDecoded() {
       decodedBlob = null;
       decodePreview.innerHTML = '';
+      if (decodedUrl) { URL.revokeObjectURL(decodedUrl); decodedUrl = null; }
       downloadBtn.disabled = true;
     }
 
@@ -449,17 +465,17 @@ localeReload: true
       }
 
       try {
-        const binary = atob(normalizeB64(b64));
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const bytes = b64ToBytes(b64);
         if (!dataUriMatch) mime = sniffMime(bytes) || mime;
         decodedBlob = new Blob([bytes], { type: mime });
         decodedFilename = 'decoded-file.' + mimeToExt(mime);
 
         decodePreview.innerHTML = '';
+        if (decodedUrl) { URL.revokeObjectURL(decodedUrl); decodedUrl = null; }
         if (isImageMime(mime)) {
           const img = document.createElement('img');
-          img.src = val.startsWith('data:') ? val : 'data:' + mime + ';base64,' + normalizeB64(b64);
+          decodedUrl = URL.createObjectURL(decodedBlob);
+          img.src = decodedUrl;
           img.alt = COPY.decodedAlt;
           img.className = 'b64-preview-img';
           decodePreview.appendChild(img);

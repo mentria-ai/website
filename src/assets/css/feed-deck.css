@@ -267,7 +267,6 @@ html.feed-layout body { overflow: hidden; }
 .deck__action:hover { background: rgba(0, 0, 0, 0.7); }
 .deck__action:active { transform: scale(0.97); }
 
-.deck__action--expand .deck__action-icon { color: var(--syn-cyan, #22d3ee); }
 .deck__action--next {
   background: var(--syn-cyan, #22d3ee);
   color: #000;
@@ -331,7 +330,6 @@ html.feed-layout body { overflow: hidden; }
 }
 .deck__slide-img.is-broken { visibility: hidden; }
 .deck__slide:has(.deck__slide-img.is-broken) { background: radial-gradient(120% 70% at 50% 18%, rgba(34, 211, 238, 0.16), transparent 62%), radial-gradient(90% 60% at 80% 85%, rgba(244, 114, 182, 0.1), transparent 60%), linear-gradient(160deg, #0f172a, #1e293b); }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 .deck__action--soon {
   display: inline-block;

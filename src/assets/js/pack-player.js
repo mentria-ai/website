@@ -8,11 +8,15 @@
   var esc = C.esc, el = C.el;
   var T = window.MENTRIA_LEARN_I18N || {};
   var t = function (k, vars) {
+    if (vars && typeof vars.n === 'number' && plural(vars.n) === 'one' && T[k + '_one']) k = k + '_one';
     var s = T[k] || k;
     if (vars) Object.keys(vars).forEach(function (v) { s = s.split('{' + v + '}').join(String(vars[v])); });
     return s;
   };
   var lang = document.documentElement.lang || 'en';
+  var plural = (function () {
+    try { var rules = new Intl.PluralRules(lang); return function (n) { return rules.select(n); }; } catch (_) { return function (n) { return n === 1 ? 'one' : 'other'; }; }
+  })();
   var tx = function (v) { return P.text(v, lang); };
   var localePrefix = root.dataset.prefix || '';
   var libraryHref = localePrefix + '/learn/';
@@ -163,6 +167,7 @@
   }
 
   function renderAll() {
+    C.release(stage);
     stage.innerHTML = '';
     progressBar.innerHTML = '';
     slides = []; segs = [];
@@ -252,6 +257,8 @@
       up.innerHTML = (nextInfo.cover ? '<img class="pack-next__img" src="' + esc(nextInfo.cover) + '" alt="" loading="lazy" decoding="async">' : '') +
         '<span class="pack-next__text"><span class="pack-next__k">' + esc(t('next_pack')) + '</span><span class="pack-next__t">' + esc(tx(nextInfo.title)) + '</span></span>' +
         '<span class="pack-next__go" aria-hidden="true">→</span>';
+      var cover = up.querySelector('.pack-next__img');
+      if (cover) cover.addEventListener('error', function () { cover.remove(); });
       up.hidden = false;
       again.className = 'pack-btn';
     }

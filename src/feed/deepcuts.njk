@@ -79,7 +79,7 @@ eleventyComputed:
       <span class="deck__placeholder-tag">{{ slide.story_type }}</span>
     </div>
     {% else %}
-    <img class="deck__slide-img" src="{{ slide.image }}" onerror="this.classList.add('is-broken')" alt="{{ slide.caption | tloc(pair.locale.code) }}" loading="lazy">
+    <img class="deck__slide-img" src="{{ slide.image }}" onerror="this.classList.add('is-broken')" alt="{{ slide.caption | tloc(pair.locale.code) | striptags }}" loading="{{ 'eager' if loop.first else 'lazy' }}"{% if loop.first %} fetchpriority="high"{% endif %}>
     {% endif %}
 
     <div class="deck__slide-overlay">

@@ -72,9 +72,9 @@ localeReload: true
     </div>
     <ul class="learn-grid learn-grid--native" data-collection="{{ g.key }}">
         {% for pack in packs %}{% if pack.collection == g.key %}
-        <li class="learn-tile" data-pack-id="{{ pack.id }}">
+        <li class="learn-tile" data-pack-id="{{ pack.id }}" data-cards="{{ pack.cards.length }}">
             <a class="learn-tile__link" href="{{ locale.pathPrefix }}/learn/{{ pack.id }}/">
-                {% if pack.cover %}<img class="learn-tile__cover" src="{{ pack.cover }}" alt="" loading="lazy" decoding="async">{% else %}<span class="learn-tile__cover learn-tile__cover--blank"></span>{% endif %}
+                {% if pack.cover %}<img class="learn-tile__cover" src="{{ pack.cover }}" alt="" loading="lazy" decoding="async" onerror="this.classList.add('is-broken')">{% else %}<span class="learn-tile__cover learn-tile__cover--blank"></span>{% endif %}
                 <span class="learn-tile__body">
                     <span class="learn-tile__title">{{ pack.title | tloc(locale.code) }}</span>
                     <span class="learn-tile__meta">{{ (("learn.cards_n_one" if pack.cards.length == 1 else "learn.cards_n") | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</span>

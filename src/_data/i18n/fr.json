@@ -5183,6 +5183,7 @@
     "blank_n": "Trou {n}",
     "type_here": "écrivez ici",
     "hotspot_hint": "{n} zones à explorer",
+    "hotspot_hint_one": "{n} zone à explorer",
     "section_stats": "Cette section : {right} justes, {wrong} à revoir",
     "unsupported": "Ce type de carte n’est pas encore pris en charge dans cette version.",
     "your_guess": "Votre estimation",

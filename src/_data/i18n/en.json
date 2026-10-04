@@ -5183,6 +5183,7 @@
     "blank_n": "Blank {n}",
     "type_here": "type here",
     "hotspot_hint": "{n} spots to explore",
+    "hotspot_hint_one": "{n} spot to explore",
     "section_stats": "This section: {right} right, {wrong} to review",
     "unsupported": "This card type is not supported in this version yet.",
     "your_guess": "Your guess",

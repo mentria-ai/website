@@ -216,7 +216,7 @@ export function render(ctx) {
     const tb = h('tbody');
     for (const g of est.realized) tb.append(h('tr', null, h('td', null, U.date(g.date, 'dayMonth')), h('td', null, g.instrument), h('td', { class: 'n' }, m(g.proceeds)), h('td', { class: 'n' }, m(g.cost)), h('td', { class: 'n ' + (g.gain >= 0 ? 'amt--in' : 'amt--over') }, U.signedMoney(g.gain, ccy)), h('td', null, t('taxes.term_' + g.term))));
     tbl.append(tb);
-    node.append(h('div', { class: 'ftable-wrap' }, tbl));
+    node.append(h('div', { class: 'ftable-wrap', tabindex: '0', role: 'region', 'aria-label': t('taxes.realized') }, tbl));
   }
   const harvest = T.harvestCandidates(L, prof);
   if (harvest.length) {

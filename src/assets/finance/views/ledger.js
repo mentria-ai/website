@@ -184,7 +184,7 @@ function yearView(ctx, vs) {
     tb.append(h('tr', { style: { cursor: 'pointer' }, onclick: () => { vs.month = k; vs.view = 'month'; ctx.rerender(); } }, h('td', null, U.month(k)), h('td', { class: 'n amt--in' }, U.money(data[i].income, base)), h('td', { class: 'n' }, U.money(data[i].expense, base)), h('td', { class: 'n ' + (data[i].net >= 0 ? 'amt--in' : 'amt--over') }, U.signedMoney(data[i].net, base))));
   });
   tbl.append(tb);
-  node.append(h('div', { class: 'ftable-wrap', style: { marginTop: '14px' } }, tbl));
+  node.append(h('div', { class: 'ftable-wrap', tabindex: '0', role: 'region', 'aria-label': t('ledger.year_chart'), style: { marginTop: '14px' } }, tbl));
   return node;
 }
 

@@ -234,10 +234,21 @@ localeReload: true
     return s;
   }
 
+  let saveTimer = null;
   function persist() {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
     if (window.MentriaStore) window.MentriaStore.set('tools', 'step_counter', state);
     else try { localStorage.setItem(LS, JSON.stringify(state)); } catch (_) {}
   }
+
+  function persistSoon() {
+    if (saveTimer) return;
+    saveTimer = setTimeout(persist, 2000);
+  }
+  function flushSave() {
+    if (saveTimer) persist();
+  }
+  window.addEventListener('pagehide', flushSave);
 
   function rolloverIfNeeded() {
     const key = todayKey();
@@ -312,7 +323,14 @@ localeReload: true
     distEl.textContent = fmtDistance(total);
   }
 
+  let historyTimer = null;
+  function renderHistorySoon() {
+    if (historyTimer) return;
+    historyTimer = setTimeout(renderHistory, 5000);
+  }
+
   function renderHistory() {
+    if (historyTimer) { clearTimeout(historyTimer); historyTimer = null; }
     const days = [];
     const now = new Date();
     for (let i = 6; i >= 0; i--) {
@@ -409,11 +427,13 @@ localeReload: true
     const now = Date.now();
     stepTimes.push(now);
     if (stepTimes.length > 240) stepTimes.shift();
+    const reached = wasUnderGoal && state.steps + state.estSteps >= state.goal;
     renderCount();
-    renderHistory();
-    persist();
+    if (reached) renderHistory();
+    else renderHistorySoon();
+    persistSoon();
     if (pocketOn) renderPocket();
-    if (wasUnderGoal && state.steps + state.estSteps >= state.goal && navigator.vibrate) {
+    if (reached && navigator.vibrate) {
       navigator.vibrate([120, 60, 120, 60, 200]);
     }
   }
@@ -483,6 +503,7 @@ localeReload: true
   }
 
   function stopTracking(silent) {
+    flushSave();
     running = false;
     sessionElapsed += sessionStart ? Date.now() - sessionStart : 0;
     sessionStart = 0;
@@ -611,6 +632,7 @@ localeReload: true
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') {
+      flushSave();
       markGapStart();
       return;
     }

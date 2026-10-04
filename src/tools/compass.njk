@@ -148,6 +148,7 @@ localeReload: true
   var rawHeading = 0;
   var display = 0;
   var shownDeg = -1;
+  var shownRot = '';
   var accuracy = null;
   var deltas = [];
   var calibUntil = 0;
@@ -237,7 +238,11 @@ localeReload: true
   }
 
   function render() {
-    roseEl.style.transform = 'rotate(' + (-display).toFixed(2) + 'deg)';
+    var rot = 'rotate(' + (-display).toFixed(2) + 'deg)';
+    if (rot !== shownRot) {
+      shownRot = rot;
+      roseEl.style.transform = rot;
+    }
     var deg = Math.round(norm360(display)) % 360;
     if (deg === shownDeg) return;
     shownDeg = deg;

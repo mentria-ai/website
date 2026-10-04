@@ -153,6 +153,7 @@ localeReload: true
   var PEAK_HOLD_MS = 2000;
   var PEAK_DECAY_PER_S = 20;
   var SR_INTERVAL_MS = 2000;
+  var TEXT_INTERVAL_MS = 100;
   var OFFSET_MIN = 70;
   var OFFSET_MAX = 110;
   var OFFSET_DEFAULT = 90;
@@ -182,6 +183,7 @@ localeReload: true
   var calInput = $('db-cal');
   var calValueEl = $('db-cal-value');
   var refRows = Array.prototype.slice.call(document.querySelectorAll('.db__ref-row'));
+  var refDbs = refRows.map(function (row) { return parseFloat(row.getAttribute('data-db')); });
 
   var offset = OFFSET_DEFAULT;
 
@@ -222,6 +224,9 @@ localeReload: true
   var lastSrAt = 0;
   var currentRefRow = null;
   var currentLevel = '';
+  var lastTextAt = 0;
+  var lastFill = '';
+  var lastPeak = '';
 
   function toDisplay(dbfs) {
     var v = dbfs + offset;
@@ -241,8 +246,21 @@ localeReload: true
     return 'harmful';
   }
 
+  var NF0, NF1;
+  try {
+    NF0 = new Intl.NumberFormat(LANG);
+    NF1 = new Intl.NumberFormat(LANG, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  } catch (_) {
+    NF0 = new Intl.NumberFormat();
+    NF1 = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  }
+
   function fmt1(v) {
-    return v.toLocaleString(LANG, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    return NF1.format(v);
+  }
+
+  function setText(node, s) {
+    if (node.textContent !== s) node.textContent = s;
   }
 
   function powerToDbfs(power) {
@@ -262,16 +280,16 @@ localeReload: true
   }
 
   function renderStats() {
-    statMinEl.textContent = statMinDbfs === null ? '—' : fmt1(toDisplay(statMinDbfs));
-    statPeakEl.textContent = statPeakDbfs === null ? '—' : fmt1(toDisplay(statPeakDbfs));
-    statAvgEl.textContent = statFrames === 0 ? '—' : fmt1(toDisplay(powerToDbfs(statPowerSum / statFrames)));
+    setText(statMinEl, statMinDbfs === null ? '—' : fmt1(toDisplay(statMinDbfs)));
+    setText(statPeakEl, statPeakDbfs === null ? '—' : fmt1(toDisplay(statPeakDbfs)));
+    setText(statAvgEl, statFrames === 0 ? '—' : fmt1(toDisplay(powerToDbfs(statPowerSum / statFrames))));
   }
 
   function highlightRef(v) {
     var best = null;
     var bestDist = Infinity;
     for (var i = 0; i < refRows.length; i++) {
-      var d = Math.abs(parseFloat(refRows[i].getAttribute('data-db')) - v);
+      var d = Math.abs(refDbs[i] - v);
       if (d < bestDist) { bestDist = d; best = refRows[i]; }
     }
     if (best === currentRefRow) return;
@@ -288,10 +306,22 @@ localeReload: true
   function render(now, fast, slow) {
     var v = toDisplay(fast);
     var sv = toDisplay(slow);
-    valueEl.textContent = Math.round(v).toLocaleString(LANG);
-    slowEl.textContent = fmt1(sv);
-    fillEl.style.clipPath = 'inset(' + (100 - toPercent(v)).toFixed(2) + '% 0 0 0)';
-    peakEl.style.bottom = toPercent(toDisplay(peakDbfs === null ? fast : peakDbfs)) + '%';
+    if (now - lastTextAt >= TEXT_INTERVAL_MS) {
+      lastTextAt = now;
+      setText(valueEl, NF0.format(Math.round(v)));
+      setText(slowEl, fmt1(sv));
+      renderStats();
+    }
+    var fill = 'inset(' + (100 - toPercent(v)).toFixed(2) + '% 0 0 0)';
+    if (fill !== lastFill) {
+      lastFill = fill;
+      fillEl.style.clipPath = fill;
+    }
+    var peak = toPercent(toDisplay(peakDbfs === null ? fast : peakDbfs)) + '%';
+    if (peak !== lastPeak) {
+      lastPeak = peak;
+      peakEl.style.bottom = peak;
+    }
 
     var lvl = levelOf(v);
     if (lvl !== currentLevel) {
@@ -300,12 +330,11 @@ localeReload: true
       levelEl.textContent = lvl === 'calm' ? COPY.levelCalm : (lvl === 'loud' ? COPY.levelLoud : COPY.levelHarmful);
     }
 
-    renderStats();
     highlightRef(sv);
 
     if (now - lastSrAt >= SR_INTERVAL_MS) {
       lastSrAt = now;
-      srEl.textContent = COPY.liveAria.replace('{db}', Math.round(v).toLocaleString(LANG));
+      srEl.textContent = COPY.liveAria.replace('{db}', NF0.format(Math.round(v)));
     }
   }
 
@@ -465,6 +494,7 @@ localeReload: true
       peakAt = 0;
       lastFrameAt = 0;
       lastSrAt = 0;
+      lastTextAt = 0;
       currentLevel = '';
       renderStats();
 

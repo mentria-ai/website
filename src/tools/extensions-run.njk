@@ -18,7 +18,7 @@ eleventyComputed:
   <p class="xr__error" id="xr-error" hidden></p>
   <p class="xr__missing" id="xr-missing" hidden>{{ "tool.extensions.run_not_installed" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
   <p class="xr__missing" id="xr-disabled" hidden>{{ "tool.extensions.run_disabled" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
-  <iframe class="xr__frame" id="xr-frame" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay"></iframe>
+  <iframe class="xr__frame" id="xr-frame" title="{{ 'tools.extensions.title' | t }}" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay"></iframe>
 </section>
 {% include "terminal-frame-close.njk" %}
 
@@ -63,6 +63,7 @@ if (!entry || !entry.enabled || (!app && !source)) {
   document.title = title;
   const xrH1 = document.getElementById('xr-h1');
   if (xrH1) xrH1.textContent = m.name;
+  frame.title = m.name;
   if (app) root.classList.add('xr--app');
   document.addEventListener('mentria:localechange', (e) => {
     const code = (e && e.detail && e.detail.code) || document.documentElement.lang;

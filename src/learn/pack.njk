@@ -24,10 +24,4 @@ eleventyComputed:
 
 <script type="application/json" id="pack-data">{{ (pair.pack | dump) | replace("</", "<\\/") | safe }}</script>
 {% if pair.next %}<script type="application/json" id="pack-next">{{ ({ id: pair.next.id, title: (pair.next.title | tloc(pair.locale.code)), cover: pair.next.cover, cards: pair.next.cards, minutes: pair.next.minutes } | dump) | replace("</", "<\\/") | safe }}</script>{% endif %}
-{% include "learn-i18n.njk" %}
-<script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
-<script src="/assets/js/mentria-backdrop.js?v={{ buildHash }}"></script>
-<script src="/assets/js/mentria-packs.js?v={{ buildHash }}"></script>
-<script src="/assets/js/pack-cards.js?v={{ buildHash }}"></script>
-<script src="/assets/js/share-card.js?v={{ buildHash }}"></script>
-<script src="/assets/js/pack-player.js?v={{ buildHash }}" defer></script>
+{% include "pack-player-scripts.njk" %}

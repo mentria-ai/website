@@ -57,9 +57,10 @@ function channel() {
       const name = canonical(d.name);
       const local = providers.get(name);
       if (!local) return;
-      Promise.resolve().then(() => local.handler(d.payload)).then(
-        (value) => bc.postMessage({ t: 'res', id: d.id, ok: true, value }),
-        (err) => bc.postMessage({ t: 'res', id: d.id, ok: false, error: { name: err.name, message: err.message } })
+      const fail = (err) => bc.postMessage({ t: 'res', id: d.id, ok: false, error: { name: String((err && err.name) || 'Error'), message: String((err && err.message) || err || 'remote error') } });
+      Promise.resolve().then(() => { checkArgs(name, local.descriptor, d.payload); return local.handler(d.payload); }).then(
+        (value) => { try { bc.postMessage({ t: 'res', id: d.id, ok: true, value }); } catch (err) { fail(err); } },
+        fail
       );
     }
   };
@@ -78,7 +79,7 @@ function provide(name, handler, descriptor) {
   try { window.dispatchEvent(new CustomEvent('mentria:bus:provide', { detail: { name } })); } catch (_) {}
   const ch = channel();
   if (ch && descriptor && (descriptor.ai === true || descriptor.ai === 'confirm')) ch.postMessage({ t: 'announce', name, descriptor });
-  return () => { if ((providers.get(name) || {}).handler === handler) providers.delete(name); };
+  return () => { if ((providers.get(name) || {}).handler === handler) unprovide(name); };
 }
 
 function unprovide(name) { providers.delete(name); const ch = channel(); if (ch) ch.postMessage({ t: 'retract', name }); }

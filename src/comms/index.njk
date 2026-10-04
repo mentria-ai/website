@@ -786,7 +786,11 @@ const newCmid = () => selfId + ':' + Math.random().toString(36).slice(2);
 
 let chatKey = null;
 
-const b64encode = (bytes) => btoa(String.fromCharCode(...bytes));
+const b64encode = (bytes) => {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
 const b64decode = (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
 const b64urlEncode = (bytes) => b64encode(bytes).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
 const b64urlDecode = (str) => {

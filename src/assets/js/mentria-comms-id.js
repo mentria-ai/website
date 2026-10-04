@@ -2,6 +2,7 @@ const NS = 'comms';
 const KEYS_KEY = 'idkeys';
 const PROFILE_KEY = 'profile';
 const CONTACTS_KEY = 'contacts';
+const FP_ALPHA = 'abcdefghjkmnpqrstuvwxyz234567890';
 
 const te = new TextEncoder();
 
@@ -51,17 +52,28 @@ export const ensureKeypair = async () => {
   return { publicJwk, privateKey: pair.privateKey };
 };
 
-export const fingerprint = async (pubJwk) => {
+const fpSymbols = async (pubJwk) => {
   const digest = await crypto.subtle.digest('SHA-256', te.encode('mentria-id-v1|' + pubJwk.x + '|' + pubJwk.y));
   const bytes = new Uint8Array(digest).slice(0, 5);
-  const alpha = 'abcdefghjkmnpqrstuvwxyz23456789';
-  let bits = 0, value = 0, out = '';
+  const out = [];
+  let bits = 0, value = 0;
   for (let i = 0; i < bytes.length; i++) {
     value = (value << 8) | bytes[i]; bits += 8;
-    while (bits >= 5) { out += alpha[(value >>> (bits - 5)) & 0x1f]; bits -= 5; }
+    while (bits >= 5) { out.push((value >>> (bits - 5)) & 0x1f); bits -= 5; }
   }
-  return out.slice(0, 4) + '-' + out.slice(4, 8);
+  return out;
 };
+
+const fpFrom = (symbols, legacy) => {
+  const s = symbols.map((v) => (legacy && v === 31 ? 'undefined' : FP_ALPHA[v])).join('');
+  return s.slice(0, 4) + '-' + s.slice(4, 8);
+};
+
+export const fingerprint = async (pubJwk) => fpFrom(await fpSymbols(pubJwk), false);
+
+export const legacyFingerprint = async (pubJwk) => fpFrom(await fpSymbols(pubJwk), true);
+
+const samePub = (a, b) => !!(a && b && a.x === b.x && a.y === b.y);
 
 export const deriveDm = async (privateKey, theirPubJwk) => {
   const theirKey = await crypto.subtle.importKey(
@@ -137,9 +149,9 @@ export const getRequests = () => {
 
 export const saveRequest = async (payload) => {
   const fp = await fingerprint(payload.pub);
-  if (getContacts().some((c) => c.fp === fp)) return null;
+  if (getContacts().some((c) => samePub(c.pub, payload.pub))) return null;
   const list = getRequests();
-  if (list.some((r) => r.fp === fp)) return null;
+  if (list.some((r) => samePub(r.pub, payload.pub))) return null;
   const entry = {
     fp,
     name: String(payload.name || '').slice(0, 32),
@@ -184,25 +196,87 @@ export const getContacts = () => {
   return Array.isArray(c) ? c : [];
 };
 
+export const contactByPub = (pub) => getContacts().find((c) => samePub(c.pub, pub)) || null;
+
 export const addContact = async (payload) => {
   if (!payload || !payload.pub || !payload.pub.x || !payload.pub.y) throw new Error('bad contact code');
   const fp = await fingerprint(payload.pub);
   const contacts = getContacts();
-  const existing = contacts.find((c) => c.fp === fp);
-  if (existing) {
-    existing.name = String(payload.name || existing.name || '').slice(0, 32);
-    if (payload.ring) existing.ring = String(payload.ring).slice(0, 64);
+  let entry = contacts.find((c) => samePub(c.pub, payload.pub));
+  if (entry) {
+    entry.name = String(payload.name || entry.name || '').slice(0, 32);
+    if (payload.ring) entry.ring = String(payload.ring).slice(0, 64);
   } else {
-    contacts.push({
+    entry = {
       fp,
       name: String(payload.name || '').slice(0, 32),
       pub: { x: payload.pub.x, y: payload.pub.y },
       ring: payload.ring ? String(payload.ring).slice(0, 64) : undefined,
       addedAt: Date.now()
-    });
+    };
+    contacts.push(entry);
   }
   if (!store().set(NS, CONTACTS_KEY, contacts)) throw new Error('storage-full');
-  return contacts.find((c) => c.fp === fp);
+  return entry;
+};
+
+const pubKey = (pub) => pub.x + '|' + pub.y;
+const hasPub = (item) => !!(item && item.pub && item.pub.x && item.pub.y);
+const has = (map, k) => Object.prototype.hasOwnProperty.call(map, k);
+const maxOf = (a, b, k) => Math.max((a && a[k]) || 0, (b && b[k]) || 0);
+const MERGE = {
+  unread: (a, b) => ({ n: maxOf(a, b, 'n'), lastTs: maxOf(a, b, 'lastTs') }),
+  missed: (a, b) => ({ n: maxOf(a, b, 'n'), ts: maxOf(a, b, 'ts') }),
+  sentlog: (a, b) => Array.from(new Set([].concat(Array.isArray(b) ? b : [], Array.isArray(a) ? a : []))).slice(-300)
+};
+
+export const migrateFingerprints = async () => {
+  const contacts = getContacts();
+  const requests = getRequests();
+  const fps = new Map();
+  for (const item of contacts.concat(requests)) {
+    if (!hasPub(item) || fps.has(pubKey(item.pub))) continue;
+    const symbols = await fpSymbols(item.pub);
+    fps.set(pubKey(item.pub), { fp: fpFrom(symbols, false), old: fpFrom(symbols, true) });
+  }
+  const moves = new Map();
+  const fixList = (list) => {
+    const out = [];
+    let changed = false;
+    for (const item of list) {
+      const f = hasPub(item) ? fps.get(pubKey(item.pub)) : null;
+      if (!f) { out.push(item); continue; }
+      [item.fp, f.old].forEach((from) => { if (typeof from === 'string' && from !== f.fp) moves.set(from, f.fp); });
+      const twin = out.find((o) => hasPub(o) && samePub(o.pub, item.pub));
+      if (twin) {
+        if (!twin.name && item.name) twin.name = item.name;
+        if (!twin.ring && item.ring) twin.ring = item.ring;
+        changed = true;
+        continue;
+      }
+      if (item.fp !== f.fp) { item.fp = f.fp; changed = true; }
+      out.push(item);
+    }
+    return { out, changed };
+  };
+  const fixedContacts = fixList(contacts);
+  const fixedRequests = fixList(requests);
+  if (fixedContacts.changed && !store().set(NS, CONTACTS_KEY, fixedContacts.out)) return;
+  if (fixedRequests.changed) store().set(NS, 'requests', fixedRequests.out);
+  fixedContacts.out.concat(fixedRequests.out).forEach((item) => { if (item && item.fp) moves.delete(item.fp); });
+  if (!moves.size) return;
+  for (const key of Object.keys(MERGE)) {
+    const map = store().get(NS, key);
+    if (!map || typeof map !== 'object' || Array.isArray(map)) continue;
+    let changed = false;
+    moves.forEach((to, from) => {
+      if (!has(map, from)) return;
+      map[to] = has(map, to) ? MERGE[key](map[to], map[from]) : map[from];
+      delete map[from];
+      changed = true;
+    });
+    if (changed) store().set(NS, key, map);
+  }
 };
 
 export const removeContact = (fp) => {

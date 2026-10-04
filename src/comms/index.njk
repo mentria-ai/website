@@ -752,6 +752,8 @@ const callTiles = new Map();
 const pendingStreams = new Map();
 let myId = null;
 let myFp = null;
+let myLegacyFp = null;
+const legacyFps = new Map();
 let ringToken = null;
 let currentDmContact = null;
 let lastRingSentAt = 0;
@@ -852,8 +854,8 @@ const short = (id) => id ? id.slice(0, 6) : 'unknown';
 
 const displayName = (peerId) => {
   const prof = peerProfiles.get(peerId);
-  if (prof && prof.fp) {
-    const contact = CID.getContacts().find((c) => c.fp === prof.fp);
+  if (prof && prof.pub) {
+    const contact = CID.contactByPub(prof.pub);
     if (contact && contact.name) return contact.name;
   }
   if (prof && prof.name) return prof.name;
@@ -902,7 +904,7 @@ const renderPeerList = () => {
     chip.textContent = displayName(p);
     const prof = peerProfiles.get(p);
     chip.title = prof && prof.fp ? 'fingerprint ' + prof.fp : p;
-    if (prof && prof.pub && prof.fp && !CID.getContacts().some((c) => c.fp === prof.fp)) {
+    if (prof && prof.pub && prof.fp && !CID.contactByPub(prof.pub)) {
       const add = document.createElement('button');
       add.type = 'button';
       add.className = 'comms__chip-add';
@@ -1035,13 +1037,16 @@ const refreshShareUrl = (roomName, b64Key) => {
   els.share.hidden = false;
 };
 
+const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp || m.sfp === myLegacyFp));
+const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
+
 const renderRemoteChat = (item, opts = {}) => {
-  if (item.sfp && myFp && item.sfp === myFp) {
+  if (sentByMe(item)) {
     renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
     return;
   }
   let who = displayName(item.senderId);
-  if (currentDmContact && item.sfp && currentDmContact.fp === item.sfp) who = currentDmContact.name || who;
+  if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
   renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
   if (!opts.silent) {
     playPing(880);
@@ -1050,15 +1055,15 @@ const renderRemoteChat = (item, opts = {}) => {
   }
 };
 
-const packChatPlain = (text, extra) => JSON.stringify(Object.assign({ v: 2, t: text, sfp: myFp || undefined }, extra || {}));
+const packChatPlain = (text, extra) => JSON.stringify(Object.assign({ v: 2, t: text, sfp: myLegacyFp || undefined, sfp2: (myFp && myFp !== myLegacyFp) ? myFp : undefined }, extra || {}));
 const unpackChatPlain = (raw) => {
   try {
     const o = JSON.parse(raw);
     if (o && o.v === 2 && typeof o.t === 'string') {
-      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null };
+      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, sfp2: typeof o.sfp2 === 'string' ? o.sfp2 : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null };
     }
   } catch (_) {}
-  return { text: raw, sfp: null, ctl: null };
+  return { text: raw, sfp: null, sfp2: null, ctl: null };
 };
 
 const handleNostrMsg = async (msgEvent) => {
@@ -1070,13 +1075,14 @@ const handleNostrMsg = async (msgEvent) => {
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     if (!content || !content.cmid || seenCmids.has(content.cmid)) return;
-    let text, sfp = null;
+    let text, sfp = null, sfp2 = null;
     if (content.enc) {
       if (!chatKey) return;
       try {
         const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
         text = unpacked.text;
         sfp = unpacked.sfp;
+        sfp2 = unpacked.sfp2;
         if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
       } catch { return; }
     } else if (typeof content.text === 'string') {
@@ -1089,7 +1095,7 @@ const handleNostrMsg = async (msgEvent) => {
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp };
+    const item = { senderId, text, ts, sfp, sfp2 };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1474,8 +1480,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     if (kind === 'ring') {
       if (call.active) return;
       const prof = peerProfiles.get(ctx.peerId);
-      const byFp = prof && prof.fp ? CID.getContacts().find((c) => c.fp === prof.fp) : null;
-      const caller = (byFp && byFp.name) || displayName(ctx.peerId);
+      const known = prof && prof.pub ? CID.contactByPub(prof.pub) : null;
+      const caller = (known && known.name) || displayName(ctx.peerId);
       els.ringText.textContent = `${caller} is calling`;
       els.ring.hidden = false;
       call.ringDeadline = Date.now() + 30000;
@@ -1512,11 +1518,11 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     const known = peerProfiles.get(ctx.peerId);
     peerProfiles.set(ctx.peerId, prof);
     if (prof.fp && prof.ring && prof.pub) {
-      const existing = CID.getContacts().find((c) => c.fp === prof.fp);
+      const existing = CID.contactByPub(prof.pub);
       if (existing && existing.ring !== prof.ring) {
         try {
           await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring });
-          if (currentDmContact && currentDmContact.fp === prof.fp) currentDmContact.ring = prof.ring;
+          if (currentDmContact && currentDmContact.fp === existing.fp) currentDmContact.ring = prof.ring;
         } catch (_) {}
       }
     }
@@ -1528,20 +1534,21 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   chatAction.onMessage = async (data, ctx) => {
     const cmid = data && data.cmid;
     if (cmid && seenCmids.has(cmid)) return;
-    let text, sfp = null;
+    let text, sfp = null, sfp2 = null;
     if (data && data.enc) {
       if (!chatKey) return;
       try {
         const unpacked = unpackChatPlain(await decryptText(chatKey, data.enc));
         text = unpacked.text;
         sfp = unpacked.sfp;
+        sfp2 = unpacked.sfp2;
         if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
       } catch { return; }
     } else {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
-    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp });
+    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2 });
     playPing(880);
   };
 
@@ -2165,7 +2172,8 @@ const handleSideMsg = async (msgEvent) => {
       let callerFp = null;
       try { callerFp = await CID.fingerprint(payload.pub); } catch (_) {}
       if (!callerFp) return;
-      const known = CID.getContacts().find((c) => c.fp === callerFp);
+      const known = CID.contactByPub(payload.pub);
+      if (known) callerFp = known.fp;
       const who = (known && known.name) || payload.name || 'someone';
       if (currentDmContact && currentDmContact.fp === callerFp && peers.size > 0) return;
       markMissedCall(callerFp, payload.ts);
@@ -2174,15 +2182,11 @@ const handleSideMsg = async (msgEvent) => {
       sys(`${who} tried to call you.`);
       return;
     }
-    let existingFp = null;
-    try { existingFp = await CID.fingerprint(payload.pub); } catch (_) {}
-    if (existingFp && CID.getContacts().some((c) => c.fp === existingFp)) {
+    const existing = CID.contactByPub(payload.pub);
+    if (existing) {
       try {
-        await CID.addContact(payload);
-        if (currentDmContact && currentDmContact.fp === existingFp) {
-          const fresh = freshContact(existingFp);
-          if (fresh) currentDmContact = fresh;
-        }
+        const updated = await CID.addContact(payload);
+        if (currentDmContact && currentDmContact.fp === existing.fp && updated) currentDmContact = updated;
         renderContacts();
         updatePushStatus();
       } catch (_) {}
@@ -2221,7 +2225,7 @@ const handleSideMsg = async (msgEvent) => {
           const key = await roomCryptoKey(savedRoom);
           const unpacked = key ? unpackChatPlain(await decryptText(key, content.enc)) : null;
           if (unpacked && unpacked.ctl) return;
-          if (unpacked && unpacked.sfp && myFp && unpacked.sfp === myFp) return;
+          if (unpacked && sentByMe(unpacked)) return;
           preview = unpacked ? unpacked.text : null;
         } catch (_) {}
       }
@@ -2511,6 +2515,8 @@ const initIdentity = async () => {
   try {
     myId = await CID.ensureKeypair();
     myFp = await CID.fingerprint(myId.publicJwk);
+    myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
+    try { await CID.migrateFingerprints(); } catch (_) {}
     myProfile = CID.getProfile();
     els.idName.value = myProfile.name;
     els.idFp.textContent = myFp;
@@ -2836,6 +2842,7 @@ const openDmWith = async (c) => {
   setView('chat');
   try {
     const { roomName, b64Key } = await CID.deriveDm(myId.privateKey, c.pub);
+    if (!legacyFps.has(c.fp)) legacyFps.set(c.fp, await CID.legacyFingerprint(c.pub));
     els.room.value = roomName;
     clearUnreadFor(c.fp);
     clearMissedCall(c.fp);

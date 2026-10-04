@@ -27,7 +27,7 @@ localeReload: true
 <div id="chess-help" popover class="game-help chess-help">
   <div class="chess-help__bar">
     <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
-    <button type="button" class="chess-help__x" id="chess-help-close" aria-label="{{ 'tool.chess.help_close' | t }}">{% include "icon-x.njk" %}</button>
+    <button type="button" class="game-help-x" id="chess-help-close" popovertarget="chess-help" popovertargetaction="hide" aria-label="{{ 'tool.chess.help_close' | t }}">{% include "icon-x.njk" %}</button>
   </div>
   <div class="chess-help__methods">
     <section class="chess-help__method" data-method="pointer" data-input="pointer">
@@ -331,8 +331,6 @@ localeReload: true
   .chess-help--fallback.is-open { display: block; }
   .chess-help__bar { display: flex; align-items: center; gap: 10px; margin-bottom: 0.7rem; }
   .chess-help__bar .game-help-title { margin: 0; flex: 1; }
-  .chess-help__x { width: 24px; height: 24px; padding: 0; background: transparent; border: 1px solid var(--term-border); border-radius: 6px; color: var(--term-muted); font-family: var(--font-mono); font-size: 11px; line-height: 1; cursor: pointer; }
-  .chess-help__x:hover, .chess-help__x:focus-visible { color: var(--syn-cyan); border-color: var(--syn-cyan); outline: none; }
   .chess-help__methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: start; }
   .chess-help__method { border: 1px solid var(--term-divider); border-radius: 8px; padding: 10px 12px; }
   .chess-help__method.is-active { border-color: var(--cyan-30); background: var(--cyan-8); }

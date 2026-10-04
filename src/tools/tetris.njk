@@ -699,6 +699,7 @@ canvas#game {
   }
 
   function toggleGhost() {
+    settleUntil = performance.now() + 600;
     State.ghost = !State.ghost;
     writePref('tetris_ghost', State.ghost);
     syncGhostUi();
@@ -953,6 +954,9 @@ canvas#game {
     updateHUD();
   }
 
+  let wasLive = true;
+  let idleDrawnAt = 0;
+  let settleUntil = 0;
   function loop(now) {
     try {
       if (!State.lastTime) State.lastTime = now;
@@ -982,7 +986,13 @@ canvas#game {
           }
         }
       }
-      render();
+      const live = State.running && !State.paused && !State.over;
+      if (wasLive && !live) settleUntil = now + 600;
+      if (live || now < settleUntil || now - idleDrawnAt >= 250) {
+        idleDrawnAt = now;
+        render();
+      }
+      wasLive = live;
     } catch (err) {
       console.error('loop error', err);
     }

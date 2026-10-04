@@ -1054,7 +1054,8 @@ eleventyComputed:
     writeState(res.state);
     const entry = { x: res.state.text, v: res.value };
     if (res.usedAngle) entry.a = angle;
-    history = engine.pushHistory(readHistory(), entry);
+    const stored = store && typeof store.status === 'function' && store.status() === 'ok';
+    history = engine.pushHistory(stored ? readHistory() : history, entry);
     saveHistory();
     renderHistory();
     refresh();

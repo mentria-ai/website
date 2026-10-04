@@ -1,23 +1,39 @@
 (function (global) {
   'use strict';
   var DB = 'mentria-push', STORE = 'pending', VER = 1;
+  var dbp = null;
   function open() {
-    return new Promise(function (resolve, reject) {
+    if (dbp) return dbp;
+    var p = new Promise(function (resolve, reject) {
       var req = global.indexedDB.open(DB, VER);
       req.onupgradeneeded = function () {
         var db = req.result;
         if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'scheduleId' });
       };
-      req.onsuccess = function () { resolve(req.result); };
-      req.onerror = function () { reject(req.error); };
+      req.onsuccess = function () {
+        var db = req.result;
+        db.onversionchange = function () { db.close(); if (dbp === p) dbp = null; };
+        db.onclose = function () { if (dbp === p) dbp = null; };
+        resolve(db);
+      };
+      req.onerror = function () { if (dbp === p) dbp = null; reject(req.error); };
+    });
+    dbp = p;
+    return p;
+  }
+  function run(db, mode, fn) {
+    return new Promise(function (resolve, reject) {
+      var t = db.transaction(STORE, mode), s = t.objectStore(STORE), out = fn(s);
+      t.oncomplete = function () { resolve(out && out.result !== undefined ? out.result : undefined); };
+      t.onerror = function () { reject(t.error); };
     });
   }
   function tx(mode, fn) {
     return open().then(function (db) {
-      return new Promise(function (resolve, reject) {
-        var t = db.transaction(STORE, mode), s = t.objectStore(STORE), out = fn(s);
-        t.oncomplete = function () { resolve(out && out.result !== undefined ? out.result : undefined); };
-        t.onerror = function () { reject(t.error); };
+      return run(db, mode, fn).catch(function (err) {
+        if (!err || err.name !== 'InvalidStateError') throw err;
+        dbp = null;
+        return open().then(function (fresh) { return run(fresh, mode, fn); });
       });
     });
   }

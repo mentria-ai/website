@@ -124,7 +124,7 @@ const STATE_KEY = 'music_player';
 const LISTS_KEY = 'music_playlists';
 const ROW_H = 60;
 const QUEUE_CAP = 500;
-const MARKS = /[̀-ͯ]/g;
+const MARKS = /[\u0300-\u036f]/g;
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 
 let all = [];

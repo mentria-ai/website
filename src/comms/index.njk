@@ -1562,8 +1562,14 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const incoming = new Map();
   metaAction = room.makeAction('fmeta');
   metaAction.onMessage = (meta, ctx) => {
-    const line = renderLine(displayName(ctx.peerId), '', { peerId: ctx.peerId, quiet: true, html: progressHTML('receiving', meta.name, meta.size, 0) });
-    incoming.set(ctx.peerId + ':' + meta.id, { meta, chunks: [], received: 0, line });
+    if (!meta || typeof meta !== 'object') return;
+    const size = Number(meta.size);
+    if (!Number.isFinite(size) || size < 0 || size > MAX_FILE) return;
+    let open = 0;
+    incoming.forEach((_, k) => { if (k.startsWith(ctx.peerId + ':')) open++; });
+    if (open >= 4) return;
+    const line = renderLine(displayName(ctx.peerId), '', { peerId: ctx.peerId, quiet: true, html: progressHTML('receiving', meta.name, size, 0) });
+    incoming.set(ctx.peerId + ':' + meta.id, { meta, size, chunks: [], received: 0, line, paint: 0 });
   };
 
   chunkAction = room.makeAction('fchunk');
@@ -1572,10 +1578,27 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     const key = ctx.peerId + ':' + m.id;
     const entry = incoming.get(key);
     if (!entry) return;
+    const bytes = (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) ? data.byteLength : -1;
+    const received = entry.received + bytes;
+    if (bytes < 0 || received > entry.size || received > MAX_FILE) {
+      incoming.delete(key);
+      entry.chunks = [];
+      if (entry.paint) cancelAnimationFrame(entry.paint);
+      entry.line.line.removeAttribute('aria-live');
+      entry.line.what.innerHTML = `transfer interrupted — <strong>${escapeHtml(entry.meta.name)}</strong>`;
+      return;
+    }
     entry.chunks.push(data);
-    entry.received += (data.byteLength || data.size || 0);
-    entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.meta.size, entry.received);
+    entry.received = received;
+    if (!entry.paint) {
+      entry.paint = requestAnimationFrame(() => {
+        entry.paint = 0;
+        if (incoming.get(key) === entry) entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.size, entry.received);
+      });
+    }
     if (m.done) {
+      if (entry.paint) { cancelAnimationFrame(entry.paint); entry.paint = 0; }
+      entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.size, entry.received);
       entry.line.line.removeAttribute('aria-live');
       const safeType = /^image\/(png|jpeg|gif|webp|avif|bmp)$/i.test(entry.meta.type || '') ? entry.meta.type : 'application/octet-stream';
       const blob = new Blob(entry.chunks, { type: safeType });
@@ -1733,8 +1756,10 @@ const sendOne = async (file, extra) => {
   await metaAction.send(Object.assign({ id, name: file.name, size: file.size, type: file.type }, extra || {}));
   const buf = await file.arrayBuffer();
   let sent = 0;
+  let paint = 0;
   for (let offset = 0; offset < buf.byteLength; offset += CHUNK) {
     if (peers.size === 0) {
+      if (paint) cancelAnimationFrame(paint);
       line.line.removeAttribute('aria-live');
       line.what.innerHTML = `send interrupted — <strong>${escapeHtml(file.name)}</strong>: everyone left the room`;
       throw new Error('all peers left during send');
@@ -1743,8 +1768,9 @@ const sendOne = async (file, extra) => {
     const done = offset + CHUNK >= buf.byteLength;
     await chunkAction.send(slice, { metadata: { id, done } });
     sent += slice.byteLength;
-    line.what.innerHTML = progressHTML('sending', file.name, file.size, sent);
+    if (!paint) paint = requestAnimationFrame(() => { paint = 0; line.what.innerHTML = progressHTML('sending', file.name, file.size, sent); });
   }
+  if (paint) cancelAnimationFrame(paint);
   const previewUrl = trackObjectUrl(file);
   const n = peers.size;
   line.line.removeAttribute('aria-live');

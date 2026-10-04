@@ -13,6 +13,7 @@
   const AXIS_DEAD = 0.35;
   const REPEAT_INITIAL_MS = 350;
   const REPEAT_INTERVAL_MS = 110;
+  const DIRS = ['up', 'down', 'left', 'right'];
 
   const state = {
     rafId: 0,
@@ -55,6 +56,7 @@
       s = {
         buttons: new Array(pad.buttons.length).fill(false),
         directions: { up: null, down: null, left: null, right: null },
+        held: { up: false, down: false, left: false, right: false },
         timestamp: 0
       };
       state.pads[pad.index] = s;
@@ -86,12 +88,11 @@
     return y > 0 ? 'down' : 'up';
   }
 
-  function dirsForPad(pad) {
-    const dirs = { up: false, down: false, left: false, right: false };
-    if (pad.buttons[12] && pad.buttons[12].pressed) dirs.up = true;
-    if (pad.buttons[13] && pad.buttons[13].pressed) dirs.down = true;
-    if (pad.buttons[14] && pad.buttons[14].pressed) dirs.left = true;
-    if (pad.buttons[15] && pad.buttons[15].pressed) dirs.right = true;
+  function dirsForPad(pad, dirs) {
+    dirs.up = !!(pad.buttons[12] && pad.buttons[12].pressed);
+    dirs.down = !!(pad.buttons[13] && pad.buttons[13].pressed);
+    dirs.left = !!(pad.buttons[14] && pad.buttons[14].pressed);
+    dirs.right = !!(pad.buttons[15] && pad.buttons[15].pressed);
     if (pad.axes.length >= 2) {
       const d = dirFromAxes(pad.axes[0], pad.axes[1]);
       if (d) dirs[d] = true;
@@ -100,8 +101,9 @@
   }
 
   function processDirections(pad, s, now) {
-    const dirs = dirsForPad(pad);
-    ['up', 'down', 'left', 'right'].forEach((dir) => {
+    const dirs = dirsForPad(pad, s.held);
+    for (let i = 0; i < DIRS.length; i++) {
+      const dir = DIRS[i];
       const wasHeld = !!s.directions[dir];
       const heldNow = dirs[dir];
       if (heldNow && !wasHeld) {
@@ -118,7 +120,7 @@
       } else if (!heldNow && wasHeld) {
         s.directions[dir] = null;
       }
-    });
+    }
   }
 
   function tick(now) {
@@ -175,7 +177,7 @@
   function ensureToast() {
     if (toastEl) return toastEl;
     if (!global.document || !global.document.body) return null;
-    const css = '#mentria-gamepad-toast{position:fixed;bottom:18px;left:50%;transform:translate(-50%,40px);z-index:99999;background:rgba(10,10,12,0.92);color:#67e8f9;border:1px solid #67e8f9;border-radius:999px;padding:8px 14px;font:600 12px/1 ui-monospace,Menlo,monospace;letter-spacing:.04em;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:transform .25s cubic-bezier(.22,1,.36,1),opacity .25s ease;backdrop-filter:blur(8px);box-shadow:0 6px 22px rgba(0,0,0,.4),0 0 18px rgba(103,232,249,.18)}#mentria-gamepad-toast.is-visible{opacity:1;transform:translate(-50%,0)}#mentria-gamepad-toast .dot{width:7px;height:7px;border-radius:50%;background:#34c46a;box-shadow:0 0 8px rgba(52,196,106,.7)}#mentria-gamepad-toast.is-disconnect{color:#f7b015;border-color:#f7b015;box-shadow:0 6px 22px rgba(0,0,0,.4),0 0 18px rgba(247,176,21,.18)}#mentria-gamepad-toast.is-disconnect .dot{background:#f7b015;box-shadow:0 0 8px rgba(247,176,21,.7)}';
+    const css = '#mentria-gamepad-toast{position:fixed;bottom:18px;left:50%;transform:translate(-50%,40px);z-index:99999;background:rgba(10,10,12,0.92);color:#67e8f9;border:1px solid #67e8f9;border-radius:999px;padding:8px 14px;font:600 12px/1 var(--font-mono,ui-monospace,monospace);letter-spacing:.04em;white-space:nowrap;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:transform .25s cubic-bezier(.22,1,.36,1),opacity .25s ease;backdrop-filter:blur(8px);box-shadow:0 6px 22px rgba(0,0,0,.4),0 0 18px rgba(103,232,249,.18)}#mentria-gamepad-toast.is-visible{opacity:1;transform:translate(-50%,0)}#mentria-gamepad-toast .dot{width:7px;height:7px;border-radius:50%;background:#34c46a;box-shadow:0 0 8px rgba(52,196,106,.7)}#mentria-gamepad-toast.is-disconnect{color:#f7b015;border-color:#f7b015;box-shadow:0 6px 22px rgba(0,0,0,.4),0 0 18px rgba(247,176,21,.18)}#mentria-gamepad-toast.is-disconnect .dot{background:#f7b015;box-shadow:0 0 8px rgba(247,176,21,.7)}';
     const style = global.document.createElement('style');
     style.id = 'mentria-gamepad-toast-style';
     style.textContent = css;

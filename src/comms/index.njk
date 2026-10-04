@@ -2225,8 +2225,8 @@ const handleSideMsg = async (msgEvent) => {
       const known = CID.contactByPub(payload.pub);
       if (known) callerFp = known.fp;
       const who = (known && known.name) || payload.name || 'someone';
-      if (currentDmContact && currentDmContact.fp === callerFp && peers.size > 0) return;
-      markMissedCall(callerFp, payload.ts);
+      if (currentDmContact && currentDmContact.fp === callerFp && peers.size > 0) { markMissedCall(callerFp, payload.ts, ev.id, true); return; }
+      if (!markMissedCall(callerFp, payload.ts, ev.id)) return;
       renderContacts();
       playPing(660);
       sys(`${who} tried to call you.`);
@@ -2422,15 +2422,26 @@ const getMissed = () => {
   try { const m = MentriaStore.get('comms', 'missed'); return (m && typeof m === 'object') ? m : {}; }
   catch (_) { return {}; }
 };
-const markMissedCall = (fp, ts) => {
+const markMissedCall = (fp, ts, id, seen) => {
   const m = getMissed();
-  m[fp] = { n: ((m[fp] && m[fp].n) || 0) + 1, ts: ts || Date.now() };
+  const e = (m[fp] && Array.isArray(m[fp].ids)) ? m[fp] : { n: 0, ids: [] };
+  if (id && e.ids.includes(id)) return false;
+  if (id) e.ids = e.ids.concat(id).slice(-50);
+  if (!seen) { e.n = (e.n || 0) + 1; e.ts = ts || Date.now(); }
+  m[fp] = e;
   try { MentriaStore.set('comms', 'missed', m); } catch (_) {}
+  return !seen;
 };
 const clearMissedCall = (fp) => {
   const m = getMissed();
-  if (!m[fp]) return;
-  delete m[fp];
+  const e = m[fp];
+  if (!e) return;
+  if (Array.isArray(e.ids) && e.ids.length) {
+    if (!e.n) return;
+    e.n = 0;
+  } else {
+    delete m[fp];
+  }
   try { MentriaStore.set('comms', 'missed', m); } catch (_) {}
 };
 

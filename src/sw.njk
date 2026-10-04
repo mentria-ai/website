@@ -236,11 +236,9 @@ self.addEventListener('activate', event => {
 });
 
 const NOTIF_STRINGS = {
-  en:      { one: 'New message',  many: (n) => n + ' new messages',     ring: 'Someone is trying to reach you.' },
-  es:      { one: 'Nuevo mensaje', many: (n) => n + ' mensajes nuevos', ring: 'Alguien intenta comunicarse contigo.' },
-  fr:      { one: 'Nouveau message', many: (n) => n + ' nouveaux messages', ring: 'Quelqu\'un essaie de vous joindre.' },
-  ja:      { one: '新着メッセージ', many: (n) => '新着メッセージ ' + n + ' 件', ring: '誰かがあなたに連絡しようとしています。' },
-  'pt-BR': { one: 'Nova mensagem', many: (n) => n + ' novas mensagens', ring: 'Alguém está tentando falar com você.' }
+{%- for l in locales %}
+  {{ l.code | dump | safe }}: { one: {{ "pwa.notif_message_one" | tlang(l.code) | dump | safe }}, many: {{ "pwa.notif_message_many" | tlang(l.code) | dump | safe }}, ring: {{ "pwa.notif_ring" | tlang(l.code) | dump | safe }}, reminder: {{ "pwa.notif_reminder" | tlang(l.code) | dump | safe }} }{% if not loop.last %},{% endif %}
+{%- endfor %}
 };
 
 async function notifStrings() {
@@ -284,7 +282,7 @@ self.addEventListener('push', event => {
       } catch (_) {}
       const S = await notifStrings();
       await self.registration.showNotification('comms', {
-        body: n > 1 ? S.many(n) : S.one,
+        body: n > 1 ? S.many.replace('{n}', n) : S.one,
         tag: 'comms-msg',
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',
@@ -312,8 +310,9 @@ self.addEventListener('push', event => {
       });
       try { await self.MentriaPushDB.deletePending(scheduleId); } catch (_) {}
     } else {
+      const S = await notifStrings();
       await self.registration.showNotification(fallback, {
-        body: 'You have a reminder.',
+        body: S.reminder,
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',
         data: { url: '/' }
@@ -617,8 +616,6 @@ self.addEventListener('fetch', event => {
   })());
 });
 
-// Notification click → focus the originating tool tab. Action buttons
-// post a typed message back to the page so it can react (e.g. stop alarm).
 self.addEventListener('notificationclick', event => {
   const action  = event.action;
   const data    = event.notification.data || {};
@@ -629,12 +626,14 @@ self.addEventListener('notificationclick', event => {
 
   event.waitUntil((async () => {
     const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    // Prefer a client already on the same path; fall back to any open client
-    let client = all.find(c => {
-      try { return new URL(c.url).pathname === target; } catch { return false; }
-    }) || all[0];
+    const pageOf = (u) => {
+      try { return new URL(u, self.location.origin).pathname.replace(LOCALE_PATH, '/'); } catch (_) { return null; }
+    };
+    const want = pageOf(target);
+    const onTarget = all.find(c => pageOf(c.url) === want);
 
     if (action === 'stop-alarm') {
+      const client = onTarget || all[0];
       if (client) {
         client.postMessage({ type: 'STOP_ALARM', timerId });
         try { await client.focus(); } catch (_) {}
@@ -642,11 +641,15 @@ self.addEventListener('notificationclick', event => {
       return;
     }
 
-    // Default click: focus existing tab or open the tool fresh.
-    if (client) {
-      try { await client.focus(); } catch (_) {}
-    } else if (self.clients.openWindow) {
-      await self.clients.openWindow(target);
+    if (onTarget) {
+      try { await onTarget.focus(); } catch (_) {}
+      return;
+    }
+    if (self.clients.openWindow) {
+      try { await self.clients.openWindow(target); return; } catch (_) {}
+    }
+    if (all[0]) {
+      try { await all[0].focus(); } catch (_) {}
     }
   })());
 });

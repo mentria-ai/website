@@ -168,6 +168,11 @@ module.exports = function(eleventyConfig) {
     return `<i18n-t data-k="${escAttr(key)}" data-vars="${escAttr(varName + "=" + varKey)}">${escAttr(text)}</i18n-t>`;
   });
 
+  eleventyConfig.addFilter("tlang", function (key, lang) {
+    const str = tResolve(lang, key);
+    return str == null ? missingKey(key, lang) : str;
+  });
+
   eleventyConfig.addShortcode("tbrand", function (key, word, href) {
     const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
     const base = tResolve(lang, key);

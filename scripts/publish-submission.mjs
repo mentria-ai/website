@@ -63,8 +63,9 @@ async function download(u) {
 const stories = JSON.parse(fs.readFileSync('src/_data/stories.json', 'utf8'));
 const feed = JSON.parse(fs.readFileSync('src/_data/feed.json', 'utf8'));
 const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'story';
+const pending = new Set(String(process.env.PENDING_IDS || '').split('\n').map((s) => s.trim()).filter(Boolean));
 let sid = 'story-' + slug;
-for (let n = 2; stories.some((d) => d.id === sid); n++) sid = 'story-' + slug + '-' + n;
+for (let n = 2; stories.some((d) => d.id === sid) || pending.has(sid); n++) sid = 'story-' + slug + '-' + n;
 const outDir = path.join('out', sid);
 fs.mkdirSync(outDir, { recursive: true });
 

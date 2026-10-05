@@ -77,12 +77,13 @@ const STYLE = [
   '[data-gk-touch] .sk-osd__bl{top:calc(var(--sk-st) + 98px);left:calc(var(--sk-sl) + 14px);right:auto}',
   '[data-gk-touch] .sk-osd__big{font-size:clamp(16px,6.2cqw,24px)}',
   '[data-gk-touch] .sk-osd__coach{top:calc(var(--sk-st) + 204px);max-width:88cqw}}',
-  '@container (orientation: portrait) and (max-width: 560px){[data-gk-touch] .sk-osd__row{font-size:clamp(11px,3.8cqw,16px)}',
-  '[data-gk-touch] .sk-osd__tr{top:calc(var(--sk-st) + 106px);right:calc(var(--sk-sr) + 14px);bottom:auto;left:auto;transform:none;flex-direction:column;gap:4px;font-size:clamp(10px,3.4cqw,13px)}',
-  '[data-gk-touch] .sk-osd__tc{top:calc(var(--sk-st) + 164px)}',
+  '@container (orientation: portrait) and (max-width: 560px){[data-gk-touch] .sk-osd>*{--sk-btns:calc(68px*var(--sk-gs,.78) + max(44px,46px*var(--sk-gs,.78)))}',
+  '[data-gk-touch] .sk-osd__row{font-size:clamp(11px,3.6cqw,16px)}',
+  '[data-gk-touch] .sk-osd__tr{top:calc(var(--sk-st) + var(--sk-btns) + 9px);right:calc(var(--sk-sr) + 14px);bottom:auto;left:auto;transform:none;flex-direction:column;gap:4px;font-size:clamp(10px,3.4cqw,13px)}',
+  '[data-gk-touch] .sk-osd__tc{top:calc(var(--sk-st) + var(--sk-btns) + 67px)}',
   '[data-gk-touch] .sk-osd__split{line-height:1}',
-  '[data-gk-touch] .sk-osd__flash{top:calc(var(--sk-st) + 240px)}',
-  '[data-gk-touch] .sk-osd__coach{top:auto;bottom:calc(var(--sk-sb) + 152px);left:0;right:0;margin:0 auto;width:-webkit-fit-content;width:fit-content;transform:none}}',
+  '[data-gk-touch] .sk-osd__flash{top:calc(var(--sk-st) + var(--sk-btns) + 143px)}',
+  '[data-gk-touch] .sk-osd__coach{top:auto;bottom:calc(var(--sk-sb) + 168px*var(--sk-gs,.78) + 21px);left:0;right:0;margin:0 auto;width:-webkit-fit-content;width:fit-content;transform:none}}',
   '.sk-osd[data-kind="freestyle"] .sk-osd__race{display:none}',
   '.sk-osd[data-kind="race"] .sk-osd__free{display:none}',
   '.sk-osd[data-view="chase"] .sk-osd__cross,.sk-osd[data-view="chase"] .sk-osd__fpm{display:none}',
@@ -283,6 +284,16 @@ export function createHud(stage, copyIn) {
   let markState = '';
   let horizonOn = false;
   let fpmOn = false;
+  let touchEl = null;
+
+  function syncTouchScale() {
+    if (!touchEl || !touchEl.isConnected) touchEl = stage.querySelector('.gk-touch');
+    const s = touchEl ? touchEl.style.getPropertyValue('--gk-s') : '';
+    if (s === cache.gs) return;
+    cache.gs = s;
+    if (s) root.style.setProperty('--sk-gs', s);
+    else root.style.removeProperty('--sk-gs');
+  }
 
   function applyCopy() {
     setText(timeK, cache, 'timeK', copy.time || '');
@@ -324,6 +335,7 @@ export function createHud(stage, copyIn) {
     if (slow) readoutClock = 1 / 15;
     setText(timeV, cache, 'time', formatTime(d.time || 0));
     if (slow) {
+      syncTouchScale();
       setText(gateV, cache, 'gate', (d.gate || 0) + '/' + (d.gates || 0));
       setText(ringV, cache, 'ring', (d.rings || 0) + '/' + (d.ringsTotal || 0));
       setText(spdV, cache, 'spd', String(Math.round(d.speedKmh || 0)));

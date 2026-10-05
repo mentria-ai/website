@@ -241,32 +241,6 @@
     "send_failed": "No se pudo enviar a {tool}"
   },
   "home": {
-    "cli": {
-      "welcomeCmd": "$ welcome --to mentria",
-      "welcomeOut1": "estudio creativo. herramientas y transmisiones.",
-      "welcomeOut2": "escribe 'help' para ver comandos, o simplemente haz una pregunta.",
-      "placeholder": "escribe un comando...",
-      "help_heading": "Comandos disponibles:",
-      "desc_help": "lista los comandos disponibles",
-      "desc_tools": "explora las herramientas",
-      "desc_feed": "ver el feed",
-      "desc_search": "busca en el sitio (p. ej. `search base64`)",
-      "desc_about": "acerca de mentria",
-      "desc_clear": "limpia la terminal",
-      "not_found": "comando no encontrado: {name}. escribe 'help' para ver los comandos.",
-      "scrolling_tools": "> desplazando a las herramientas...",
-      "opening_tools": "> abriendo herramientas...",
-      "navigating_to": "> navegando a {dest}...",
-      "about_line": "> mentria — un estudio creativo de herramientas, experimentos y transmisiones visuales. est. 2025.",
-      "suggestions_label": "Sugerencias de comandos",
-      "desc_ask": "pregunta a la IA que corre en este dispositivo",
-      "ask_thinking": "> preguntando al modelo que corre en este dispositivo…",
-      "ask_download": "> el primer uso puede descargar el modelo; se queda en tu dispositivo.",
-      "ask_postponed": "descarga del modelo pospuesta — vuelve a ejecutar el comando cuando quieras.",
-      "ask_busy": "el modelo en el dispositivo está ocupado en otra pestaña — inténtalo de nuevo en un momento.",
-      "ask_error": "el modelo local no pudo responder: ",
-      "ask_unsupported": "el modelo del dispositivo necesita un navegador con WebGPU (Chrome o Edge de escritorio, Android reciente)."
-    },
     "tools_heading": "Herramientas",
     "launch_tool": "Abrir herramienta →",
     "launcher": {

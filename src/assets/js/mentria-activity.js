@@ -453,6 +453,10 @@ export function createActivityStrip(host, opts = {}) {
   };
 
   retryBtn.addEventListener('click', (e) => { e.stopPropagation(); if (state.onRetry) state.onRetry(); });
+  document.addEventListener('mentria:localechange', () => {
+    if (tapBtn) tapBtn.setAttribute('aria-label', tr('details'));
+    if (srEl && state.phase === 'answering') srEl.textContent = tr('answering');
+  });
 
   function renderPanel() {
     if (!panelEl || panelEl.hidden) return;

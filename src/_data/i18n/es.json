@@ -1865,7 +1865,8 @@
     },
     "extensions-sdk": {
       "heading_start": "Inicio rápido",
-      "heading_reference": "Referencia"
+      "heading_reference": "Referencia",
+      "english_only": "La siguiente guía solo está disponible en inglés."
     },
     "ext_gallery": {
       "title": "Galería de extensiones",
@@ -5132,7 +5133,7 @@
     "import_file": "Elegir un archivo de paquete",
     "drop_hint": "o suelta aquí un paquete .json",
     "import_url": "Descargar",
-    "url_placeholder": "https://ejemplo.com/paquete.mentria.json",
+    "url_placeholder": "https://mentria.ai/…/paquete.mentria.json",
     "import_paste": "Pegar el JSON del paquete",
     "paste_placeholder": "{ \"id\": \"...\", \"title\": \"...\", \"cards\": [ ... ] }",
     "import_hint": "Cualquier herramienta que escriba JSON puede crear un paquete, incluido un asistente de IA a partir de un libro o tus apuntes.",
@@ -5150,6 +5151,8 @@
     "import_err_invalid": "no sigue el formato de paquetes.",
     "import_err_network": "la descarga falló. Revisa el enlace y tu conexión.",
     "import_err_url": "usa un enlace que empiece por https://.",
+    "import_host_blocked": "Solo se pueden importar enlaces de {site}, y este apunta a {host}. En su lugar, descarga el archivo del paquete e impórtalo desde tu dispositivo.",
+    "import_course_host_blocked": "Este curso enlaza paquetes de {host}, y solo se pueden importar enlaces de {site}. En su lugar, descarga esos archivos de paquete e impórtalos desde tu dispositivo.",
     "import_err_other": "algo salió mal.",
     "import_err_storage_full": "no hay espacio suficiente en este dispositivo. Libera espacio y vuelve a intentarlo.",
     "import_err_storage_blocked": "este navegador bloquea el almacenamiento de este sitio, así que no se pueden guardar paquetes. Permite las cookies y los datos de este sitio y vuelve a intentarlo.",

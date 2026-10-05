@@ -18,7 +18,9 @@ description: How to write a learning pack for mentria.ai. One JSON file, nine ca
 
 ## The file
 
-Save it as `something.mentria.json` and import it on the [Learn page](/learn/), drop it there, or open `https://mentria.ai/learn/?pack=<url>` where the URL points at a file served over HTTPS. Packs stay on the device that imported them. Nothing is uploaded.
+Save it as `something.mentria.json` and import it on the [Learn page](/learn/), or drop it there. Packs stay on the device that imported them. Nothing is uploaded.
+
+A pack can also come from a link, pasted on the Learn page or opened as `https://mentria.ai/learn/?pack=<url>`, but only when the link points at mentria.ai, `cdn.mentria.ai`, `mentria-ai.github.io` or Hugging Face (`huggingface.co`, `*.hf.co`) over HTTPS. The site's content security policy blocks every other host, so the Learn page refuses those links and says so instead of fetching them. A pack kept anywhere else travels as a file: download it, then import it from your device.
 
 ```json
 {
@@ -26,7 +28,7 @@ Save it as `something.mentria.json` and import it on the [Learn page](/learn/), 
   "version": 1,
   "title": "Attention in four cards",
   "subtitle": "How a token decides what to look at.",
-  "cover": "https://example.com/cover.webp",
+  "cover": "data:image/webp;base64,…",
   "author": { "name": "you" },
   "language": "en",
   "tags": ["ai"],
@@ -37,7 +39,7 @@ Save it as `something.mentria.json` and import it on the [Learn page](/learn/), 
   ],
   "cards": [
     { "id": "c1", "type": "slide", "caption": "Every word gets to look at every other word.", "body": "One move, called **attention**, is under almost everything a model does." },
-    { "id": "c2", "type": "image", "image": "https://example.com/parts.webp", "caption": "Tap the three parts.",
+    { "id": "c2", "type": "image", "image": "data:image/webp;base64,…", "caption": "Tap the three parts.",
       "hotspots": [ { "x": 8, "y": 20, "w": 26, "h": 22, "label": "Query", "body": "What this token is looking for." } ] },
     { "id": "c3", "type": "mcq", "question": "What does the **query** represent?",
       "choices": [
@@ -56,7 +58,7 @@ Save it as `something.mentria.json` and import it on the [Learn page](/learn/), 
 | `id` | yes | letters, digits, dots, dashes and underscores, starting with a letter or digit, up to 100 characters. Stable across versions. Importing the same id again replaces the pack. |
 | `version` | no | integer, default 1. Bump it when you edit. |
 | `title` | yes | text |
-| `subtitle`, `cover`, `author`, `language`, `tags`, `minutes` | no | `cover` is a URL or data URI. `minutes` is an estimate; it is computed from the card count when missing. |
+| `subtitle`, `cover`, `author`, `language`, `tags`, `minutes` | no | `cover` is a data URI or an image URL; see Limits for the hosts that load. `minutes` is an estimate; it is computed from the card count when missing. |
 | `modes` | no | subset of `read`, `quiz`, `review`, `budget`. Default is all four. |
 | `sections` | no | ordered groups of card ids. Every card should be in exactly one section. Without sections the pack is one section in card order. |
 | `cards` | yes | at least one card, at most 2000 |
@@ -118,16 +120,16 @@ A syllabus is a course: one JSON file that carries several packs in order. Impor
   "version": 1,
   "title": "Signals and systems",
   "subtitle": "Twelve weeks, one pack per lecture.",
-  "cover": "https://example.com/cover.webp",
+  "cover": "data:image/webp;base64,…",
   "packs": [
     { "id": "signals-101-w01", "title": "Week 1: what a signal is", "cards": [ ... ] },
     { "id": "signals-101-w02", "title": "Week 2: sampling", "cards": [ ... ] },
-    "https://example.com/signals-101-w03.mentria.json"
+    "https://huggingface.co/datasets/you/signals-101/resolve/main/signals-101-w03.mentria.json"
   ]
 }
 ```
 
-Each entry in `packs` is a full pack or an HTTPS URL to one. A course may hold up to 200 packs. Re-importing a course with the same id updates its packs in place and keeps your progress on cards whose ids did not change.
+Each entry in `packs` is a full pack or an HTTPS link to one on the hosts listed under The file. A course that links anywhere else is refused on import, so put those packs in the course itself. A course may hold up to 200 packs. Re-importing a course with the same id updates its packs in place and keeps your progress on cards whose ids did not change.
 
 To assemble a course from a folder of pack files, run the course script from the [site's source repository](https://github.com/mentria-ai/website):
 
@@ -149,7 +151,7 @@ It prints the outline and every problem it finds, for a single pack or a whole c
 
 ## Limits
 
-A pack may be at most 25 MB as JSON. Images should be small WebP files or hosted URLs. Pack, course, section and card ids must match `[A-Za-z0-9][A-Za-z0-9._-]{0,99}`: letters, digits, dots, dashes and underscores, starting with a letter or digit, at most 100 characters.
+A pack may be at most 25 MB as JSON. Images (`cover` and card `image`) load only from mentria.ai, `cdn.mentria.ai`, `mentria-ai.github.io` or a data URI; the security policy blocks images on every other host, Hugging Face included, so embed small WebP files as data URIs. Pack, course, section and card ids must match `[A-Za-z0-9][A-Za-z0-9._-]{0,99}`: letters, digits, dots, dashes and underscores, starting with a letter or digit, at most 100 characters.
 
 ## Sharing
 

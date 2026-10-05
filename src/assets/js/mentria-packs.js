@@ -8,6 +8,9 @@
   var ID_RE = /^[a-z0-9][a-z0-9._-]{0,99}$/i;
   var ID_RULE = 'letters, digits, dots, dashes and underscores, starting with a letter or digit; 1-100 chars';
   var DB = 'mentria-packs', STORE = 'packs', VER = 1;
+  var CONNECT_HOSTS = ['cdn.mentria.ai', 'mentria-ai.github.io', 'relay.mentria.ai', 'huggingface.co'];
+  var CONNECT_SUFFIXES = ['.huggingface.co', '.hf.co'];
+  var LINK_RULE = 'links must point to mentria.ai, cdn.mentria.ai, mentria-ai.github.io or huggingface.co';
 
   function isText(v) {
     if (typeof v === 'string') return true;
@@ -250,8 +253,22 @@
   function isCourse(obj) {
     return !!(obj && typeof obj === 'object' && !Array.isArray(obj) && (obj.kind === 'course' || (Array.isArray(obj.packs) && !obj.cards)));
   }
+  function siteUrl() {
+    var l = global.location;
+    return l && (l.protocol === 'https:' || l.protocol === 'http:') ? l.href : 'https://mentria.ai/';
+  }
+  function linkProblem(url) {
+    var site = new URL(siteUrl()), u;
+    try { u = new URL(url, site); } catch (_) { return fail('url', 'bad url'); }
+    if (u.origin === site.origin) return null;
+    var h = u.hostname, local = h === 'localhost' || h === '127.0.0.1';
+    if (u.protocol !== 'https:' && !local) return fail('url', 'https only');
+    if (local) return null;
+    if (!u.port && (CONNECT_HOSTS.indexOf(h) >= 0 || CONNECT_SUFFIXES.some(function (end) { return h.length > end.length && h.slice(-end.length) === end; }))) return null;
+    return fail('host', h + ' is not an allowed host; ' + LINK_RULE, { host: h });
+  }
   function validateCourse(course) {
-    var errors = [], warnings = [];
+    var errors = [], warnings = [], blocked = null;
     if (!isCourse(course)) { errors.push('not a course'); return { ok: false, errors: errors, warnings: warnings }; }
     if (typeof course.id !== 'string' || !ID_RE.test(course.id)) errors.push('id: ' + ID_RULE);
     if (!isText(course.title)) errors.push('title: required text');
@@ -260,14 +277,19 @@
       if (course.packs.length > 200) errors.push('packs: at most 200');
       var seen = {};
       course.packs.forEach(function (p, i) {
-        if (typeof p === 'string') { if (!/^https:\/\//.test(p) && !/^\/learn\//.test(p)) errors.push('packs[' + i + ']: https URL or an object'); return; }
+        if (typeof p === 'string') {
+          var bad = /^https:\/\//.test(p) || /^\/learn\//.test(p) ? linkProblem(p) : fail('url', 'https URL or an object');
+          if (bad) errors.push('packs[' + i + ']: ' + bad.message);
+          if (bad && bad.code === 'host' && !blocked) blocked = { host: bad.host, message: 'packs[' + i + ']: ' + bad.message };
+          return;
+        }
         var v = validate(p);
         if (!v.ok) errors.push('packs[' + i + '] (' + (p && p.id) + '): ' + v.errors[0]);
         v.warnings.forEach(function (w) { warnings.push('packs[' + i + ']: ' + w); });
         if (p && p.id) { if (seen[p.id]) errors.push('packs[' + i + ']: duplicate pack id ' + p.id); seen[p.id] = true; }
       });
     }
-    return { ok: !errors.length, errors: errors, warnings: warnings };
+    return { ok: !errors.length, errors: errors, warnings: warnings, blocked: blocked };
   }
   function getCourses() {
     var c = global.MentriaStore ? global.MentriaStore.get('packs', 'courses') : null;
@@ -296,6 +318,7 @@
   }
   function importCourse(course, meta) {
     var v = validateCourse(course);
+    if (v.blocked) return Promise.reject(fail('course_host', v.blocked.message, { host: v.blocked.host }));
     if (!v.ok) return Promise.reject(fail('invalid', v.errors[0], { errors: v.errors }));
     return Promise.all(course.packs.map(function (p) { return typeof p === 'string' ? fetchPack(p) : Promise.resolve(p); })).then(function (packs) {
       var order = 0, results = [];
@@ -436,9 +459,9 @@
     return file.text().then(function (t) { return importAny(parse(t), Object.assign({ from: file.name }, meta || {})); });
   }
   function importUrl(url, meta) {
-    var u;
-    try { u = new URL(url, global.location && global.location.href); } catch (_) { return Promise.reject(fail('url', 'bad url')); }
-    if (u.protocol !== 'https:' && u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') return Promise.reject(fail('url', 'https only'));
+    var bad = linkProblem(url);
+    if (bad) return Promise.reject(bad);
+    var u = new URL(url, siteUrl());
     return fetch(u.href, { mode: 'cors' }).catch(function (e) { throw fail('network', e && e.message); }).then(function (r) {
       if (!r.ok) throw fail('network', 'fetch failed: ' + r.status, { status: r.status });
       var len = +r.headers.get('content-length') || 0;
@@ -545,7 +568,7 @@
     answerable: answerable, isDue: isDue, isDone: isDone, doneCount: doneCount,
     isCourse: isCourse, validateCourse: validateCourse, importCourse: importCourse, importAny: importAny, getCourses: getCourses, removeCourse: removeCourse, courseOf: courseOf,
     put: put, get: get, list: list, remove: remove,
-    importText: importText, importFile: importFile, importUrl: importUrl,
+    importText: importText, importFile: importFile, importUrl: importUrl, linkProblem: linkProblem,
     getProgress: getProgress, recordSeen: recordSeen, recordAnswer: recordAnswer, setMode: setMode, resetProgress: resetProgress, summary: summary, progressSaved: progressSaved,
     dayKey: dayKey, getDays: getDays, week: week
   };

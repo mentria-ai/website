@@ -270,6 +270,7 @@ localeReload: true
 
   <div class="about-end reveal">
     <span class="about-build about-copyright" id="about-copyright">{{ "about.copyright" | t }}</span>
+    <span class="about-build"><a class="h" href="{{ '/image-use/' | localeUrl(lang) }}">{{ "about.image_use" | t }}</a></span>
   </div>
 
 </div>
@@ -334,7 +335,7 @@ localeReload: true
   .about-actions__group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .about-actions a { color: var(--term-fg); text-decoration: none; transition: color 120ms; }
   .about-actions a:hover { color: var(--syn-cyan); }
-  .about-end { margin-top: 60px; padding: 24px 0; border-top: 1px solid var(--term-border); display: flex; justify-content: center; align-items: center; font-size: 12px; color: var(--term-muted); }
+  .about-end { margin-top: 60px; padding: 24px 0; border-top: 1px solid var(--term-border); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; font-size: 12px; color: var(--term-muted); }
   .about-socials { display: flex; gap: 10px; }
   .about-socials a { display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center; border: 1px solid var(--term-border); border-radius: 8px; transition: all 150ms; }
   .about-socials a:hover { border-color: var(--cyan-30); color: var(--syn-cyan); box-shadow: var(--glow-cyan-soft); }

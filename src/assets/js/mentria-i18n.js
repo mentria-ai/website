@@ -209,17 +209,18 @@
       return shell.match(marker).then(function (done) {
         if (done) return;
         var chain = Promise.resolve();
+        var missed = false;
         var lower = code.toLowerCase();
         var routes = shellRoutes(loc.prefix).concat([dictUrl(code), '/fragments/tools-popup.' + code + '.html?v=' + i18nBuild(), '/assets/js/site-palette.' + lower + '.js', '/assets/js/site-end.' + lower + '.js']);
         routes.forEach(function (route) {
           chain = chain.then(function () {
             return fetch(route, { cache: 'no-cache' }).then(function (resp) {
               if (resp && resp.ok) return shell.put(route, resp.clone());
-            }).catch(function () {});
+            }, function () { missed = true; }).catch(function () {});
           });
         });
         return chain
-          .then(function () { return shell.put(marker, new Response('1')); })
+          .then(function () { if (!missed) return shell.put(marker, new Response('1')); })
           .then(function () { return caches.keys(); })
           .then(function (keys) {
             return Promise.all(keys.map(function (key) {

@@ -934,7 +934,7 @@ localeReload: true
   printBtn.addEventListener('click', () => window.print());
   exportBtn.addEventListener('click', exportJSON);
   clearBtn.addEventListener('click', async () => {
-    if (!(await mentriaConfirm(COPY.confirmClear))) return;
+    if (!(await mentriaConfirm(COPY.confirmClear, { danger: true }))) return;
     clearTimeout(syncTimer);
     syncTimer = 0;
     if (window.MentriaStore) window.MentriaStore.clear(NS);

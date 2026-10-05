@@ -64,22 +64,22 @@ localeReload: true
     <div class="ct-widget__inputs" data-panel="duration">
       <div class="ct-input-grp">
         <label>{{ "tool.countdown-timer.input_hours" | t }}</label>
-        <input class="m-input" type="number" data-input="hours" min="0" max="99" value="0" />
+        <input class="m-input" type="number" data-field="hours" min="0" max="99" value="0" />
       </div>
       <div class="ct-input-grp">
         <label>{{ "tool.countdown-timer.input_minutes" | t }}</label>
-        <input class="m-input" type="number" data-input="mins" min="0" max="59" value="0" />
+        <input class="m-input" type="number" data-field="mins" min="0" max="59" value="0" />
       </div>
       <div class="ct-input-grp">
         <label>{{ "tool.countdown-timer.input_seconds" | t }}</label>
-        <input class="m-input" type="number" data-input="secs" min="0" max="59" value="0" />
+        <input class="m-input" type="number" data-field="secs" min="0" max="59" value="0" />
       </div>
     </div>
 
     <div class="ct-widget__inputs ct-widget__inputs--hidden" data-panel="datetime">
       <div class="ct-input-grp ct-input-grp--wide">
         <label>{{ "tool.countdown-timer.input_until_label" | t }}</label>
-        <input class="m-input" type="datetime-local" data-input="datetime" />
+        <input class="m-input" type="datetime-local" data-field="datetime" />
       </div>
       <div class="ct-widget__dt-error" data-role="dt-error"></div>
     </div>
@@ -426,16 +426,16 @@ localeReload: true
     const displayWrap = $('.ct-widget__display');
     const panelDuration = $('[data-panel="duration"]');
     const panelDatetime = $('[data-panel="datetime"]');
-    const inputH = $('[data-input="hours"]');
-    const inputM = $('[data-input="mins"]');
-    const inputS = $('[data-input="secs"]');
-    const inputDT = $('[data-input="datetime"]');
+    const inputH = $('[data-field="hours"]');
+    const inputM = $('[data-field="mins"]');
+    const inputS = $('[data-field="secs"]');
+    const inputDT = $('[data-field="datetime"]');
     const dtError = $('[data-role="dt-error"]');
     [inputH, inputM, inputS, inputDT].forEach((inp) => {
       const grp = inp.closest('.ct-input-grp');
       const label = grp && grp.querySelector('label');
       if (!label) return;
-      const fid = 'ct' + id + '-' + inp.dataset.input;
+      const fid = 'ct' + id + '-' + inp.dataset.field;
       inp.id = fid;
       label.htmlFor = fid;
     });
@@ -915,7 +915,7 @@ localeReload: true
     }
     if (!w) return;
     const setInput = (name, v) => {
-      const el = w.querySelector('[data-input="' + name + '"]');
+      const el = w.querySelector('[data-field="' + name + '"]');
       if (el) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
     };
     setInput('hours', Math.floor(secs / 3600));

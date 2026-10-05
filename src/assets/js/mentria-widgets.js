@@ -320,22 +320,8 @@
     return null;
   }
 
-  var cli = document.querySelector('.cli__input');
-  var filterActive = false;
-
   function updateVisibility() {
-    var has = band.querySelector('.widget') != null;
-    band.hidden = !has || filterActive;
-  }
-
-  function syncFilter() {
-    filterActive = !!(cli && cli.value && cli.value.trim());
-    updateVisibility();
-  }
-
-  if (cli) {
-    cli.addEventListener('input', syncFilter);
-    cli.addEventListener('keydown', function (e) { if (e.key === 'Enter') setTimeout(syncFilter, 0); });
+    band.hidden = band.querySelector('.widget') == null;
   }
 
   if (store) {
@@ -362,6 +348,6 @@
   renderSteps(false);
   renderNotes(false);
   renderExts(false);
-  syncFilter();
+  updateVisibility();
   renderStorage();
 })();

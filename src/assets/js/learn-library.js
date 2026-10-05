@@ -276,10 +276,12 @@
     refresh();
   }
   var ERRS = { empty: 'import_err_empty', json: 'import_err_json', kind: 'import_err_kind', size: 'import_err_size', invalid: 'import_err_invalid', network: 'import_err_network', url: 'import_err_url' };
+  var HOST_ERRS = { host: 'import_host_blocked', course_host: 'import_course_host_blocked' };
   function storageBlocked() {
     try { return !window.localStorage || !window.indexedDB; } catch (_) { return true; }
   }
   function handleError(e) {
+    if (e && Object.prototype.hasOwnProperty.call(HOST_ERRS, e.code)) { say(t(HOST_ERRS[e.code], { host: e.host, site: location.hostname }), 'error'); return; }
     var code = e && Object.prototype.hasOwnProperty.call(ERRS, e.code) ? e.code : '';
     var key = code ? ERRS[code] : 'import_err_other';
     if (!code && e && e.name === 'QuotaExceededError') key = 'import_err_storage_full';
@@ -332,17 +334,25 @@
   });
   var params = new URLSearchParams(location.search);
   var packUrl = params.get('pack');
+  var revealStatus = false;
   if (packUrl) {
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
-    var host = packUrl;
-    try { host = new URL(packUrl, location.href).host; } catch (_) {}
-    var ask = window.mentriaConfirm ? window.mentriaConfirm(t('import_url_confirm', { host: host })) : Promise.resolve(false);
-    Promise.resolve(ask).then(function (ok) {
-      if (!ok) return;
+    var refused = P.linkProblem(packUrl);
+    if (refused) {
       if (importBox && importBox.hidden) toggle.click();
-      say(t('importing'));
-      P.importUrl(packUrl).then(handleResult, handleError);
-    });
+      handleError(refused);
+      revealStatus = !!status;
+    } else {
+      var host = packUrl;
+      try { host = new URL(packUrl, location.href).host; } catch (_) {}
+      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('import_url_confirm', { host: host })) : Promise.resolve(false);
+      Promise.resolve(ask).then(function (ok) {
+        if (!ok) return;
+        if (importBox && importBox.hidden) toggle.click();
+        say(t('importing'));
+        P.importUrl(packUrl).then(handleResult, handleError);
+      });
+    }
   }
   var refreshTimer = 0;
   window.addEventListener('mentria:packs', function () {
@@ -361,5 +371,5 @@
   });
   nativeProgress();
   shelves();
-  refresh();
+  refresh().then(function () { if (revealStatus) status.scrollIntoView({ block: 'center' }); });
 })();

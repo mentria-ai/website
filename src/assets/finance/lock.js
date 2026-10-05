@@ -223,7 +223,7 @@ function unlockScreen(root, opts) {
   };
   const opened = async (s) => {
     await opts.onOpen(s);
-    if (s.afterRecovery) setTimeout(() => askNewPass(s), 400);
+    if (s.afterRecovery) setTimeout(() => askNewPass(s, opts), 400);
   };
   const openFailed = (btn, e) => {
     busy(btn, false);
@@ -255,7 +255,7 @@ function unlockScreen(root, opts) {
   } else if (!st.prf.length) setTimeout(() => pass.focus(), 50);
 }
 
-function askNewPass(session) {
+function askNewPass(session, opts) {
   const p1 = passInput({ placeholder: t('setup.pass_ph') });
   const p2 = passInput({ placeholder: t('setup.pass_again') });
   const err = errLine();
@@ -267,8 +267,7 @@ function askNewPass(session) {
     if (p1.value !== p2.value) { err.textContent = t('setup.pass_mismatch'); return; }
     try {
       await V.changePassphrase(session.root, p1.value);
-      const app = await import('./app.js');
-      await app.publishWrap('pass');
+      if (opts.publishWrap) await opts.publishWrap('pass');
     } catch (e) {
       err.textContent = t('errors.write') + ' ' + String((e && e.message) || e);
       return;

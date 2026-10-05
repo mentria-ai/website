@@ -28,9 +28,25 @@ async function getIce() {
   return iceCache;
 }
 
-async function join(appId, roomId) {
+const leaving = new Set();
+
+function nextTask() {
+  return new Promise((done) => setTimeout(done, 0));
+}
+
+function leaveRoom(r) {
+  if (!r) return Promise.resolve();
+  const p = Promise.resolve().then(() => r.leave()).catch(() => {}).then(nextTask);
+  leaving.add(p);
+  p.then(() => leaving.delete(p));
+  return p;
+}
+
+async function join(appId, roomId, live) {
   const T = await import(TRYSTERO);
   const ice = await getIce();
+  while (leaving.size) await Promise.all(Array.from(leaving));
+  if (live && !live()) return null;
   return T.joinRoom({ appId, relayConfig: { urls: [RELAY] }, rtcConfig: { iceServers: ice } }, roomId);
 }
 
@@ -38,7 +54,6 @@ export function syncController(getCtx) {
   let room = null;
   let joining = false;
   let gen = 0;
-  let actHello = null;
   let actPages = null;
   let week = null;
   let weekTimer = null;
@@ -53,54 +68,60 @@ export function syncController(getCtx) {
     return c.ledger.devices().filter((d) => d.id !== c.engine.deviceId);
   }
 
-  async function hello(c) {
-    return C.encryptJson(c.engine.keys.sync, { device: c.engine.deviceId, name: c.engine.deviceName || '', summary: c.engine.summary(), t: Date.now() }, 'mentria-finance|hello');
+  async function hello(c, ask) {
+    return C.encryptJson(c.engine.keys.sync, { device: c.engine.deviceId, name: c.engine.deviceName || '', summary: c.engine.summary(), t: Date.now(), ask: !!ask }, 'mentria-finance|hello');
   }
 
-  async function sendPages(pid, pages) {
+  async function sendPages(act, pid, pages, live) {
     for (let i = 0; i < pages.length; i += BATCH) {
+      if (!live()) return;
       const batch = pages.slice(i, i + BATCH).map(pageToWire);
-      try { await actPages.send({ pages: batch }, { target: pid }); } catch (_) { return; }
+      try { await act.send({ pages: batch }, { target: pid }); } catch (_) { return; }
     }
   }
 
   const onLocalPage = (e) => {
     const page = e.detail;
+    if (!actPages) return;
     for (const [pid, p] of peers) if (p.verified) actPages.send({ pages: [pageToWire(page)] }, { target: pid }).catch(() => {});
   };
 
   async function start() {
     const c = getCtx();
-    if (!c.engine || c.engine.closed || room || joining) return;
+    if (!c.engine || c.engine.closed || c.sync !== api || room || joining) return;
     if (!others(c).length) { emit(); return; }
     const my = gen;
+    const live = () => my === gen;
     joining = true;
+    emit();
     try {
       week = Math.floor(Date.now() / WEEK);
       const roomId = await C.weeklyRoom(c.engine.keys.roomSeed);
-      if (my !== gen) return;
-      const joined = await join('mentria-finance', roomId);
-      if (my !== gen) { try { joined.leave(); } catch (_) {} return; }
+      if (!live()) return;
+      const joined = await join('mentria-finance', roomId, live);
+      if (!joined) return;
+      if (!live()) { leaveRoom(joined); return; }
       room = joined;
-      actHello = room.makeAction('hello');
-      actPages = room.makeAction('pages');
+      const actHello = room.makeAction('hello');
+      const actRoomPages = room.makeAction('pages');
+      actPages = actRoomPages;
       actHello.onMessage = async (data, ctx) => {
         const cc = getCtx();
-        if (!cc.engine || cc.engine.closed) return;
+        if (!live() || !cc.engine || cc.engine.closed) return;
         let m;
         try { m = await C.decryptJson(cc.engine.keys.sync, data, 'mentria-finance|hello'); } catch (_) { return; }
-        if (!m || typeof m.device !== 'string' || m.device === cc.engine.deviceId) return;
+        if (!live() || !m || typeof m.device !== 'string' || m.device === cc.engine.deviceId) return;
         const known = peers.get(ctx.peerId);
         peers.set(ctx.peerId, { device: m.device, name: String(m.name || '').slice(0, 60), verified: true });
-        if (!known) { try { actHello.send(await hello(cc), { target: ctx.peerId }); } catch (_) {} }
+        if (!known || m.ask) { try { actHello.send(await hello(cc), { target: ctx.peerId }); } catch (_) {} }
         emit();
         const pages = await cc.engine.pagesFor(m.summary || {});
-        if (pages.length) await sendPages(ctx.peerId, pages);
+        if (pages.length) await sendPages(actRoomPages, ctx.peerId, pages, live);
       };
-      actPages.onMessage = async (data, ctx) => {
+      actRoomPages.onMessage = async (data, ctx) => {
         const cc = getCtx();
         const p = peers.get(ctx.peerId);
-        if (!p || !p.verified || !cc.engine || cc.engine.closed) return;
+        if (!live() || !p || !p.verified || !cc.engine || cc.engine.closed) return;
         const list = Array.isArray(data && data.pages) ? data.pages.map(pageFromWire).filter(Boolean) : [];
         if (!list.length) return;
         await cc.engine.receive(list);
@@ -110,20 +131,20 @@ export function syncController(getCtx) {
       };
       room.onPeerJoin = async (pid) => {
         const cc = getCtx();
-        if (!cc.engine || cc.engine.closed) return;
-        try { actHello.send(await hello(cc), { target: pid }); } catch (_) {}
+        if (!live() || !cc.engine || cc.engine.closed) return;
+        try { actHello.send(await hello(cc, true), { target: pid }); } catch (_) {}
       };
-      room.onPeerLeave = (pid) => { peers.delete(pid); emit(); };
+      room.onPeerLeave = (pid) => { if (!live()) return; peers.delete(pid); emit(); };
       engineRef = c.engine;
       engineRef.addEventListener('page', onLocalPage);
       clearInterval(weekTimer);
       weekTimer = setInterval(() => {
-        if (Math.floor(Date.now() / WEEK) !== week) { stop(); start(); }
+        if (Math.floor(Date.now() / WEEK) !== week) restart();
       }, 10 * 60 * 1000);
     } catch (e) {
-      if (my === gen) room = null;
+      if (live() && room) { const r = room; room = null; actPages = null; leaveRoom(r); }
     } finally {
-      if (my === gen) joining = false;
+      if (live()) joining = false;
       emit();
     }
   }
@@ -133,20 +154,29 @@ export function syncController(getCtx) {
     joining = false;
     clearInterval(weekTimer);
     if (engineRef) { engineRef.removeEventListener('page', onLocalPage); engineRef = null; }
-    if (room) { try { room.leave(); } catch (_) {} }
+    const r = room;
     room = null;
+    actPages = null;
     peers.clear();
     emit();
+    return leaveRoom(r);
+  }
+
+  async function restart() {
+    const left = stop();
+    const my = gen;
+    await left;
+    if (my === gen) await start();
   }
 
   api.start = start;
   api.stop = stop;
-  api.poke = () => { if (!room) start(); };
-  api.restart = () => { stop(); start(); };
+  api.poke = () => { if (!room && !joining) start(); };
+  api.restart = restart;
   api.peers = () => Array.from(peers.values());
   api.status = () => {
     const live = Array.from(peers.values()).some((p) => p.verified);
-    return { state: live ? 'live' : room ? 'waiting' : 'local', peers: api.peers(), lastSync };
+    return { state: live ? 'live' : room || joining ? 'waiting' : 'local', peers: api.peers(), lastSync };
   };
   db.getMeta('last_sync_at').then((v) => { if (v && !lastSync) lastSync = v; }).catch(() => {});
 
@@ -165,7 +195,7 @@ export function syncController(getCtx) {
       if (finished) return;
       finished = true;
       clearTimeout(timer);
-      try { r.leave(); } catch (_) {}
+      leaveRoom(r);
       if (opts.onEnd) opts.onEnd(reason);
     }
     r.onPeerJoin = async (pid) => {
@@ -185,8 +215,7 @@ export function syncController(getCtx) {
         const now = new Date().toISOString();
         await cc.commit(cc.engine.createOps('device', m.device, { name: String(m.name || '').slice(0, 60), created: now, last_seen: now }));
         finish('done');
-        stop();
-        start();
+        api.poke();
       }
     };
     return {
@@ -220,7 +249,7 @@ export async function pairJoin(code, opts) {
     if (finished) return;
     finished = true;
     clearTimeout(timer);
-    setTimeout(() => { try { r.leave(); } catch (_) {} }, 1500);
+    setTimeout(() => leaveRoom(r), 1500);
     if (opts.onEnd) opts.onEnd(reason);
   }
   r.onPeerJoin = async (pid) => {

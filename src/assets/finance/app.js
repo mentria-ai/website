@@ -494,7 +494,8 @@ async function start() {
     status: st,
     local: app.local,
     onOpen: (session) => openSession(session),
-    saveLocal
+    saveLocal,
+    publishWrap
   });
 }
 

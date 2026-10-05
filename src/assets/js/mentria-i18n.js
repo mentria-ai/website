@@ -277,8 +277,12 @@
     getDict(code).then(function (dict) {
       if (pending === code) pending = null;
       var run = function () { apply(dict, code); };
-      var vt = document.startViewTransition ? document.startViewTransition(run) : null;
+      var vt = (document.startViewTransition && !document.hidden) ? document.startViewTransition(run) : null;
       if (!vt) run();
+      else {
+        if (vt.ready) vt.ready.catch(function () {});
+        if (vt.finished) vt.finished.catch(function () {});
+      }
       currentCode = code;
       scheduleLocaleShells(code);
       if (window.MENTRIA_PAGE_LOCALIZED !== false) {

@@ -222,8 +222,9 @@ function itemNode(entry, opts) {
     if (url) { img.src = url; img.hidden = false; }
     if (!entry.duration) {
       const fresh = await M.getEntry(entry.fp);
-      if (fresh && fresh.duration) { entry.duration = fresh.duration; updateItem(li, entry); }
+      if (fresh && fresh.duration) entry.duration = fresh.duration;
     }
+    if (entry.duration) updateItem(li, entry);
   });
   return li;
 }

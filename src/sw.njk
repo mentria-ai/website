@@ -72,6 +72,9 @@ const ASSETS = [
   '/tools/annotate-image/',
   '/tools/quote/',
   '/offline/',
+{%- for l in locales | selectattr("pathPrefix") %}
+  '{{ l.pathPrefix }}/offline/',
+{%- endfor %}
   '/share/',
   '/fragments/tools-popup.en.html',
   '/tools/radio/',

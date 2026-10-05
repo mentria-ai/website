@@ -44,8 +44,9 @@ eleventyExcludeFromSitemap: true
   const score = (slug) => { const e = usage[slug]; return e ? (e.count || 0) + 6 / (1 + (now - (e.last || 0)) / 86400000) : 0; };
   let hasModel = false;
   try {
-    for (const name of await caches.keys()) {
-      if (name.indexOf('mentria-models') === 0 && (await (await caches.open(name)).keys()).length) { hasModel = true; break; }
+    const tiers = await import('/assets/js/mentria-tiers.js');
+    for (const id of tiers.TIER_CHAIN) {
+      if (await tiers.isTierCached(id)) { hasModel = true; break; }
     }
   } catch (_) {}
   const found = [];

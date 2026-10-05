@@ -160,7 +160,7 @@ html.is-fullscreen-tool body .terminal-frame--fullscreen .b64 {
   max-width: none !important;
   width: 100%;
 }
-@media (min-width: 721px) {
+@media screen and (min-width: 721px) {
   html.is-fullscreen-tool body .terminal-frame--fullscreen .b64 {
     gap: 1.5rem;
   }
@@ -210,6 +210,21 @@ html.is-fullscreen-tool body .lang-switcher { display: none !important; }
 @media (max-width: 640px) {
   html.is-fullscreen-tool body .terminal-frame--fullscreen .terminal-frame__body { padding: 0.75rem; }
   html.is-fullscreen-tool body .terminal-frame--fullscreen .terminal-frame__titlebar { padding: 0.5rem 0.75rem; }
+}
+
+@media print {
+  html.is-fullscreen-tool body {
+    overflow: visible;
+    height: auto;
+  }
+  html.is-fullscreen-tool body .terminal-frame--fullscreen {
+    position: static;
+    display: block;
+  }
+  html.is-fullscreen-tool body .terminal-frame--fullscreen .terminal-frame__body {
+    display: block;
+    overflow: visible;
+  }
 }
 
 html.is-fullscreen-tool body .game-page > .hero { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

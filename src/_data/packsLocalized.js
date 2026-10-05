@@ -1,5 +1,11 @@
 const locales = require("./locales.js");
 const packs = require("./packs.js");
+const source = require("./source.json");
+const deepcuts = require("./deepcuts.json");
+
+const deckPaths = {};
+source.forEach((d) => { deckPaths["source-" + d.id] = "/feed/source/" + d.id + "/"; });
+deepcuts.forEach((d) => { deckPaths["deepcuts-" + d.id] = "/feed/deepcuts/" + d.id + "/"; });
 
 const nextOf = {};
 const byCollection = {};
@@ -34,4 +40,9 @@ function forLocale(pack, code) {
   };
 }
 
-module.exports = locales.flatMap((locale) => packs.map((pack) => ({ locale, pack: forLocale(pack, locale.code), next: nextOf[pack.id] || null })));
+module.exports = locales.flatMap((locale) => packs.map((pack) => ({
+  locale,
+  pack: forLocale(pack, locale.code),
+  next: nextOf[pack.id] || null,
+  deckPath: deckPaths[pack.id] ? locale.pathPrefix + deckPaths[pack.id] : null
+})));

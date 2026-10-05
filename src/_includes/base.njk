@@ -147,12 +147,12 @@
     <meta name="twitter:image" content="{{ socialImage }}">
 
     {%- if 'noindex' not in (robots or '') %}
-    <link rel="canonical" href="{{ pageUrl }}">
+    <link rel="canonical" href="{{ (baseUrl ~ canonicalPath) if canonicalPath else pageUrl }}">
     {%- endif %}
     <link rel="icon" href="/assets/img/favicon-96x96.png" type="image/png">
     <link rel="apple-touch-icon" href="/assets/img/icon-192x192.png">
 
-    {%- if not isPost and not englishOnly %}
+    {%- if not isPost and not englishOnly and not canonicalPath %}
     {%- for loc in locales %}
     <link rel="alternate" hreflang="{{ loc.code }}" href="{{ site.siteUrl }}{{ page.url | switchLocale(loc.code) }}">
     {%- endfor %}

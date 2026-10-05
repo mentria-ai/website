@@ -5265,6 +5265,8 @@
     "installed_offline": "Instalada · funciona sin conexión",
     "remove": "Quitar",
     "remove_confirm": "¿Quitar {name}? También se borran sus datos guardados en este dispositivo.",
+    "removed": "{name} ya no está en este dispositivo. También se borraron sus datos guardados.",
+    "run_again": "Ejecutar de nuevo",
     "install_failed": "No se pudo descargar todo. Revisa tu conexión e inténtalo de nuevo.",
     "install_blocked": "Este navegador bloquea el almacenamiento de este sitio, así que no se puede instalar la extensión. Permite las cookies y los datos de este sitio y vuelve a intentarlo.",
     "install_full": "No hay espacio suficiente en este dispositivo para instalarla. Libera espacio o quita una extensión y vuelve a intentarlo.",

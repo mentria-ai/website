@@ -5265,6 +5265,8 @@
     "installed_offline": "Instalada · funciona offline",
     "remove": "Remover",
     "remove_confirm": "Remover {name}? Os dados salvos neste aparelho também serão apagados.",
+    "removed": "{name} não está mais neste aparelho. Os dados salvos também foram apagados.",
+    "run_again": "Executar de novo",
     "install_failed": "Não foi possível baixar tudo. Verifique sua conexão e tente de novo.",
     "install_blocked": "Este navegador está bloqueando o armazenamento deste site, então não dá para instalar a extensão. Permita cookies e dados deste site e tente de novo.",
     "install_full": "Não há espaço suficiente neste aparelho para instalar. Libere espaço ou remova uma extensão e tente de novo.",

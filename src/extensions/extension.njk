@@ -33,6 +33,10 @@ eleventyComputed:
 <section class="xr xs-run{% if ext.kind == 'app' %} xr--app{% endif %}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}" data-install-quiet>
   <p class="xr__error" id="xr-error" hidden></p>
   <p class="xr__missing" id="xs-offline" hidden>{{ "store.offline_needs_install" | t }}</p>
+  <div class="xs-stopped" id="xs-stopped" hidden>
+    <p class="xs-stopped__text" id="xs-stopped-text">{% tvar "store.removed", "name", ext.name %}</p>
+    <button type="button" class="m-btn m-btn--ghost" id="xs-run-again" aria-describedby="xs-stopped-text">{{ "store.run_again" | t }}</button>
+  </div>
   <iframe class="xr__frame" id="xr-frame" title="{{ ext.name }}" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay"></iframe>
 </section>
 {% include "terminal-frame-close.njk" %}
@@ -135,10 +139,13 @@ const progressEl = document.getElementById('xs-progress');
 const fillEl = document.getElementById('xs-progress-fill');
 const progressText = document.getElementById('xs-progress-text');
 const installErr = document.getElementById('xs-install-error');
-const frame = document.getElementById('xr-frame');
+let frame = document.getElementById('xr-frame');
+const frameModel = frame.cloneNode(false);
 const runRoot = document.querySelector('.xs-run');
 const runErr = document.getElementById('xr-error');
 const offlineEl = document.getElementById('xs-offline');
+const stoppedEl = document.getElementById('xs-stopped');
+const runAgainBtn = document.getElementById('xs-run-again');
 let X;
 let H;
 let lastPct = 0;
@@ -263,6 +270,7 @@ async function install() {
     await X.downloadFiles(D.id, pkg.files, extraUrls(), showProgress);
     progressEl.hidden = true;
     await showState();
+    runAgain();
     if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast((stateEl.hidden ? plainStateEl : stateEl).textContent);
   } catch (e) {
     if (created) X.remove(D.id, { keepData: true });
@@ -276,12 +284,32 @@ async function install() {
   }
 }
 
+function stopRunning() {
+  frame.remove();
+  frame = frameModel.cloneNode(false);
+  runErr.hidden = true;
+  offlineEl.hidden = true;
+  stoppedEl.hidden = false;
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+function runAgain() {
+  if (stoppedEl.hidden) return;
+  stoppedEl.hidden = true;
+  runRoot.appendChild(frame);
+  start();
+}
+
 async function removeExtension() {
   const name = (D.manifest && D.manifest.name) || D.id;
   const ok = window.mentriaConfirm ? await window.mentriaConfirm(C.removeConfirm.replace('{name}', name)) : false;
   if (!ok) return;
+  removeBtn.disabled = true;
+  await stopRunning();
   X.remove(D.id);
-  showState();
+  removeBtn.disabled = false;
+  await showState();
+  runAgainBtn.focus({ preventScroll: true });
 }
 
 async function refreshInstalled() {
@@ -289,16 +317,19 @@ async function refreshInstalled() {
   if (!entry || !navigator.onLine) return;
   try {
     const pkg = await X.fetchPackage(D.id);
+    if (!installedEntry()) return;
     if (pkg.kind === 'app' && pkg.manifest && pkg.manifest.version !== entry.manifest.version) X.installApp(pkg.manifest);
     else if (pkg.kind !== 'app') {
       const res = await fetch('/assets/extensions/' + D.id + '.html', { cache: 'no-store' });
       if (res.ok) {
         const html = await res.text();
         const m = X.inspect(html).manifest;
+        if (!installedEntry()) return;
         if (X.compareVersions(m.version, entry.manifest.version) > 0) X.install(html, m);
       }
     }
     await X.downloadFiles(D.id, pkg.files, extraUrls());
+    if (!installedEntry()) { await X.removeFiles(D.id); return; }
     showState();
   } catch (_) {}
 }
@@ -307,6 +338,7 @@ if (X) {
   showState();
   installBtn.addEventListener('click', install);
   removeBtn.addEventListener('click', removeExtension);
+  runAgainBtn.addEventListener('click', runAgain);
   await start();
   refreshInstalled();
 }
@@ -317,6 +349,8 @@ if (X) {
 .xs-run .xr__frame { flex: 1; width: 100%; border: 0; min-height: 0; background: transparent; }
 .xs-run .xr__error, .xs-run .xr__missing { font-family: var(--font-mono); font-size: 0.8rem; color: var(--syn-pink, #f472b6); padding: 0.6rem 0.8rem; margin: 0; }
 .xs-run .xr__missing { color: var(--term-muted); }
+.xs-run .xs-stopped { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 1.5rem 1rem; text-align: center; }
+.xs-run .xs-stopped__text { max-width: 44ch; margin: 0; font-size: 0.95rem; line-height: 1.55; color: var(--term-muted); }
 .xs-run [hidden] { display: none; }
 .xs-bar { margin-top: 1rem; }
 .xs-bar .xs-head__actions { margin-top: 0; }

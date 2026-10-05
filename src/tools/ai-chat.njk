@@ -210,7 +210,7 @@ function counterReset() { counterN = 0; counterFirst = 0; counterLast = 0; count
 function renderCounter() {
   if (!counterN) return;
   const secs = (counterLast - counterFirst) / 1000;
-  const tps = counterN > 1 && secs > 0.05 ? ((counterN - 1) / secs).toFixed(1) : '';
+  const tps = counterN > 1 && secs > 0.05 ? ((counterN - 1) / secs).toLocaleString(document.documentElement.lang || undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '';
   counterEl.textContent = COPY.counter.replace('{n}', String(counterN)).replace('{tps}', tps || '…');
   counterEl.hidden = false;
 }

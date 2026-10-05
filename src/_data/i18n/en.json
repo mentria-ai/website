@@ -1456,6 +1456,7 @@
       "strip_unsupported": "Stripping supports JPEG, PNG and WebP — this format is view-only.",
       "err_read": "Couldn't read that file — is it an image?",
       "seg_exif": "EXIF data",
+      "seg_orientation": "Rotation tag (kept)",
       "seg_xmp": "XMP data",
       "seg_iptc": "IPTC data",
       "seg_icc": "Color profile",

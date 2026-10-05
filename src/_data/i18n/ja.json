@@ -1456,6 +1456,7 @@
       "strip_unsupported": "削除に対応しているのはJPEG・PNG・WebPです。この形式は表示のみ。",
       "err_read": "ファイルを読み込めませんでした。画像ファイルですか？",
       "seg_exif": "EXIFデータ",
+      "seg_orientation": "回転タグ（保持）",
       "seg_xmp": "XMPデータ",
       "seg_iptc": "IPTCデータ",
       "seg_icc": "カラープロファイル",

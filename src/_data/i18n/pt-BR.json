@@ -1456,6 +1456,7 @@
       "strip_unsupported": "A limpeza funciona com JPEG, PNG e WebP — este formato é somente leitura.",
       "err_read": "Não foi possível ler o arquivo — é uma imagem?",
       "seg_exif": "Dados EXIF",
+      "seg_orientation": "Marca de rotação (mantida)",
       "seg_xmp": "Dados XMP",
       "seg_iptc": "Dados IPTC",
       "seg_icc": "Perfil de cores",

@@ -5265,6 +5265,8 @@
     "installed_offline": "Installed · works offline",
     "remove": "Remove",
     "remove_confirm": "Remove {name}? Its saved data on this device is deleted too.",
+    "removed": "{name} is no longer on this device. Its saved data was deleted too.",
+    "run_again": "Run again",
     "install_failed": "Couldn't download everything. Check your connection and try again.",
     "install_blocked": "This browser is blocking storage for this site, so the extension can't be installed. Allow cookies and site data for this site, then try again.",
     "install_full": "There isn't enough storage on this device to install it. Free up space or remove an extension, then try again.",

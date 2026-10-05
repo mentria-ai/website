@@ -571,11 +571,7 @@ try {
           var a = e.target.closest && e.target.closest('[data-tools-open]');
           if (a && plain) { e.preventDefault(); if (popup.hidden) open(); else close(); return; }
           var c = e.target.closest && e.target.closest('[data-tools-close]');
-          if (c) { e.preventDefault(); close(); return; }
-          var link = e.target.closest && e.target.closest('a[href]');
-          if (!link || popup.hidden || !popup.contains(link) || !plain || e.defaultPrevented) return;
-          if ((link.target && link.target !== '_self') || link.hasAttribute('download')) return;
-          close(true);
+          if (c) { e.preventDefault(); close(); }
         });
         document.addEventListener('keydown', function (e) {
           if (e.key !== 'Escape' || e.isComposing || e.keyCode === 229 || e.defaultPrevented) return;

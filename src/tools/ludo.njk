@@ -177,7 +177,7 @@ localeReload: true
   .ludo-app .prow.active { border-color: var(--cyan-30); background: rgba(255,255,255,0.025); box-shadow: var(--glow-cyan); }
   .ludo-app .prow .chip { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 6px currentColor; }
   .ludo-app .prow .pname { color: var(--term-fg); font-weight: 600; }
-  .ludo-app .prow .ptag { font-size: 9px; color: var(--term-subtle); letter-spacing: 0.1em; text-transform: uppercase; }
+  .ludo-app .prow .ptag { font-family: var(--font-mono); font-size: 9px; color: var(--term-subtle); letter-spacing: 0.1em; text-transform: uppercase; }
   .ludo-app .prow .phome { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--term-muted); }
   .ludo-app .prow.done .pname { text-decoration: line-through; opacity: 0.6; }
 
@@ -202,11 +202,12 @@ localeReload: true
   .ludo-app .ludo-turn.is-live .ludo-turn__dot { animation: ld-pulse 1.6s ease-in-out infinite; }
   @keyframes ld-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.42;transform:scale(0.8)} }
   .ludo-app .ludo-turn__name { font-weight: 700; color: var(--term-fg-strong); }
-  .ludo-app .ludo-turn__tag { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--term-subtle); }
+  .ludo-app .ludo-turn__tag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--term-subtle); }
   .ludo-app .ludo-turn__act { color: var(--term-muted); }
   .ludo-app .ludo-turn__die { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--syn-cyan); font-weight: 700; letter-spacing: 0.04em; }
 
   .ludo-app .ludo-opt { display: flex; align-items: center; gap: 9px; min-height: 44px; cursor: pointer; font-size: 12px; color: var(--term-fg); }
+  .ludo-app .ludo-opt__txt { font-family: var(--font-mono); }
   .ludo-app .ludo-opt input { width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--syn-cyan); cursor: pointer; }
   .ludo-app .ludo-opt__hint { margin: 0; font-size: 10px; line-height: 1.5; color: var(--term-subtle); }
 

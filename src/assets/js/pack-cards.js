@@ -138,6 +138,19 @@
     return { lead: lead, rest: rest };
   }
 
+  function foldIfLong(body, more) {
+    var done = false;
+    var ro = null;
+    var check = function () {
+      if (done || !body.offsetHeight) return;
+      done = true;
+      if (ro) ro.disconnect();
+      if (body.scrollHeight > global.innerHeight * 0.45) { body.classList.add('is-collapsed'); more.hidden = false; }
+    };
+    if (global.ResizeObserver) { ro = new global.ResizeObserver(check); ro.observe(body); }
+    else global.setTimeout(check, 0);
+  }
+
   function renderSlide(card, ctx) {
     var t = ctx.t;
     var o = el('div', 'deck__slide-overlay pack-overlay');
@@ -149,9 +162,9 @@
       var body = el('div', 'deck__body pack-body', parts ? ctx.md(parts.lead) + '<div class="pack-body__rest">' + ctx.md(parts.rest) + '</div>' : ctx.md(card.body));
       o.appendChild(body);
       if (parts) {
-        body.classList.add('is-collapsed');
         var more = el('button', 'deck__more pack-more', esc(t('more')));
         more.type = 'button';
+        more.hidden = true;
         more.setAttribute('aria-expanded', 'false');
         more.addEventListener('click', function () {
           var open = body.classList.toggle('is-collapsed');
@@ -159,6 +172,7 @@
           more.setAttribute('aria-expanded', open ? 'false' : 'true');
         });
         o.appendChild(more);
+        foldIfLong(body, more);
       }
     }
     return o;

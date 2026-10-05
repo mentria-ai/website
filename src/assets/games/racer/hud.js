@@ -111,8 +111,13 @@ const HUD_CSS = [
   '@container (max-height: 430px){.nrh-map{width:calc(118*var(--nrh-u));height:calc(118*var(--nrh-u))}',
   '.nrh-toasts{top:17%}}',
   '.nrh.is-touch .nrh-speedo{bottom:calc(var(--nrh-safe-b) + 6px)}',
-  '@container (orientation: portrait){.nrh>*{--nrh-u:clamp(.62px,calc(100cqw/440),1px)}',
-  '.nrh.is-touch .nrh-speedo{bottom:calc(var(--nrh-safe-b) + 150px)}}',
+  '@container (orientation: portrait){.nrh>*{--nrh-u:clamp(.62px,calc(100cqw/440),1px);--nrh-band:max(34px + 217*var(--nrh-u),148px + 84*var(--nrh-u))}',
+  '.nrh.is-touch .nrh-speedo{bottom:calc(var(--nrh-safe-b) + 150px)}',
+  '.nrh-banner{top:calc(var(--nrh-safe-t) + var(--nrh-band))}',
+  '.nrh-toasts{top:calc(var(--nrh-safe-t) + var(--nrh-band) + 30*var(--nrh-u) + 32px)}',
+  '.nrh-wrong{top:50%}}',
+  '@container (orientation: portrait) and (max-width: 560px){.nrh-tr{top:calc(var(--nrh-safe-t) + 60px);right:calc(var(--nrh-safe-r) + 14px)}',
+  '.nrh.is-touch .nrh-tr{top:calc(var(--nrh-safe-t) + 106px)}}',
   '@media (prefers-reduced-motion: reduce){.nrh-pos__n.is-pop,.nrh-nitro.is-full .nrh-nitro__fill,.nrh-wrong.is-on{animation:none}',
   '.nrh-toast,.nrh-banner{transition:opacity .2s linear}}'
 ].join('');

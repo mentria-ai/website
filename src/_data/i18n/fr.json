@@ -1865,7 +1865,8 @@
     },
     "extensions-sdk": {
       "heading_start": "Démarrage rapide",
-      "heading_reference": "Référence"
+      "heading_reference": "Référence",
+      "english_only": "Le guide ci-dessous n’est disponible qu’en anglais."
     },
     "ext_gallery": {
       "title": "Galerie d'extensions",

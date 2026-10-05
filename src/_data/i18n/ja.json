@@ -1865,7 +1865,8 @@
     },
     "extensions-sdk": {
       "heading_start": "クイックスタート",
-      "heading_reference": "リファレンス"
+      "heading_reference": "リファレンス",
+      "english_only": "以下のガイドは英語版のみです。"
     },
     "ext_gallery": {
       "title": "拡張機能ギャラリー",

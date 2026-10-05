@@ -20,6 +20,7 @@ eleventyComputed:
 {% set terminalTitle = "sdk.md" %}
 {% include "terminal-frame-open.njk" %}
 <section class="sdk">
+  <p class="sdk__lang" role="note">{{ "tool.extensions-sdk.english_only" | t }}</p>
   <p class="sdk__lead">A Mentria extension is a single <code>.html</code> file — markup, styles and script in one document. There is no build step, no bundler and no upload: the file lives only on your device, in local storage, and runs on the site the moment you install it.</p>
 
   <div class="sdk__callout" role="note">
@@ -206,6 +207,8 @@ eleventyComputed:
 .sdk { font-family: var(--font-mono, 'JetBrains Mono', monospace); width: 100%; max-width: 900px; margin: 0 auto; padding: 0.5rem 0.25rem; color: var(--term-fg); line-height: 1.65; }
 .sdk p { margin: 0.75rem 0; }
 .sdk__lead { font-size: 1rem; color: var(--term-fg); }
+.sdk__lang { padding: 0.5rem 0.8rem; border: 1px solid var(--term-border, #2a3138); border-left: 3px solid var(--syn-cyan, #22d3ee); border-radius: 6px; background: var(--term-bg-raised, #0d0f12); font-size: 0.85rem; color: var(--term-fg); }
+html:lang(en) .sdk__lang { display: none; }
 .sdk code { background: var(--term-bg-raised, #0d0f12); border: 1px solid var(--term-border, #2a3138); border-radius: 4px; padding: 0.05em 0.35em; font-size: 0.85em; color: var(--accent, #6ef3c5); }
 .sdk a { color: var(--accent, #6ef3c5); }
 .sdk__callout { border: 1px solid var(--term-border, #2a3138); border-left: 3px solid var(--syn-pink, #f472b6); border-radius: 8px; background: var(--term-bg-raised, #0d0f12); padding: 0.9rem 1.1rem; margin: 1.25rem 0; }

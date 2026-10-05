@@ -2928,6 +2928,7 @@
       "aria_compare": "Comparar antes y después: {name}",
       "aria_remove": "Quitar {name}",
       "aria_split": "Divisor entre antes y después",
+      "aria_zoom_reset": "Restablecer el zoom",
       "label_before": "Antes",
       "label_after": "Después",
       "alt_before": "Original: {name}",

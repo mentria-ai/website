@@ -1180,7 +1180,7 @@ localeReload: true
     });
 
     pkRemoveBtn.addEventListener('click', async function () {
-      var ok = await window.mentriaConfirm(COPY.passkeyRemoveConfirm);
+      var ok = await window.mentriaConfirm(COPY.passkeyRemoveConfirm, { danger: true });
       if (!ok) return;
       window.MentriaIdentity.removePasskey();
       refresh();

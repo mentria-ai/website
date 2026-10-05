@@ -1586,7 +1586,7 @@ html.rl-ov-on .app-bar { display: none !important; }
   });
 
   clearBtn.addEventListener('click', function () {
-    var ask = window.mentriaConfirm ? window.mentriaConfirm(COPY.confirmClear) : Promise.resolve(true);
+    var ask = window.mentriaConfirm ? window.mentriaConfirm(COPY.confirmClear, { danger: true }) : Promise.resolve(true);
     Promise.resolve(ask).then(function (ok) {
       if (!ok) return;
       clearCalibration();

@@ -305,7 +305,7 @@ function row(entry) {
     }
   });
   const rem = btn(COPY.btnRemove, async () => {
-    if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name })))) return;
+    if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name }), { danger: true }))) return;
     X.remove(m.id); render();
   });
   if (X.isApp(entry)) actions.append(toggle, open, rem);

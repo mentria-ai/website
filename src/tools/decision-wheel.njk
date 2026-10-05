@@ -315,7 +315,7 @@ localeReload: true
       const useShared = () => { options = sharedOpts; customized = true; applyChange(); };
       const offer = () => {
         if (!customized) useShared();
-        else if (window.mentriaConfirm) window.mentriaConfirm(COPY.useShared.replace("{list}", sharedOpts.join(", "))).then((ok) => { if (ok) useShared(); });
+        else if (window.mentriaConfirm) window.mentriaConfirm(COPY.useShared.replace("{list}", sharedOpts.join(", ")), { danger: true }).then((ok) => { if (ok) useShared(); });
       };
       if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", offer, { once: true });
       else offer();

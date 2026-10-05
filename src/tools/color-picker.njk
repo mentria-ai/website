@@ -345,7 +345,7 @@ localeReload: true
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setColor(c); }
       });
       const removeColor = async () => {
-        if (!(await window.mentriaConfirm(COPY.confirmRemove.replace('{color}', c)))) return;
+        if (!(await window.mentriaConfirm(COPY.confirmRemove.replace('{color}', c), { danger: true }))) return;
         const arr = loadSaved();
         const at = arr.indexOf(c);
         if (at !== -1) arr.splice(at, 1);

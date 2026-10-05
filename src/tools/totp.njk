@@ -1496,7 +1496,7 @@ localeReload: true
       const acc = state.accounts.find((a) => a.id === row.dataset.id);
       if (!acc) return;
       const name = ((acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '')).trim();
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(COPY.delete_confirm.replace(/{name}/g, name)) : Promise.resolve(confirm(COPY.delete_confirm.replace(/{name}/g, name))));
+      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(COPY.delete_confirm.replace(/{name}/g, name), { danger: true }) : Promise.resolve(false));
       if (!ok) return;
       state.accounts = state.accounts.filter((a) => a.id !== row.dataset.id);
       await reEncryptSecrets();

@@ -760,7 +760,7 @@ function removeFromPlaylist(id, index) {
 }
 
 async function deletePlaylist(pl) {
-  if (!(await window.mentriaConfirm(fill(C.delete_confirm, { name: pl.name })))) return;
+  if (!(await window.mentriaConfirm(fill(C.delete_confirm, { name: pl.name }), { danger: true }))) return;
   saveLists(lists().filter((p) => p.id !== pl.id));
   detail = null;
   render();

@@ -1406,7 +1406,7 @@ eleventyComputed:
 
   clearBtn.addEventListener('click', async () => {
     if (!history.length) return;
-    const ok = typeof window.mentriaConfirm === 'function' ? await window.mentriaConfirm(COPY.confirm_clear) : true;
+    const ok = typeof window.mentriaConfirm === 'function' ? await window.mentriaConfirm(COPY.confirm_clear, { danger: true }) : true;
     if (!ok) return;
     history = [];
     saveHistory();

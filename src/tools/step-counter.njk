@@ -580,7 +580,7 @@ localeReload: true
     renderSettings();
   });
   resetBtn.addEventListener('click', async () => {
-    if (!(await mentriaConfirm(COPY.confirmReset))) return;
+    if (!(await mentriaConfirm(COPY.confirmReset, { danger: true }))) return;
     state.steps = 0;
     state.estSteps = 0;
     stepTimes = [];

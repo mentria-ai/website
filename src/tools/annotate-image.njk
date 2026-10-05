@@ -428,7 +428,7 @@ eleventyComputed:
     dropInner.focus();
   });
   deleteBtn.addEventListener('click', async () => {
-    if (!(await window.mentriaConfirm(COPY.confirmDelete))) return;
+    if (!(await window.mentriaConfirm(COPY.confirmDelete, { danger: true }))) return;
     try { if (window.caches){ const keys = await caches.keys(); await Promise.all(keys.filter(k => k === 'mentria-models' || k.startsWith('mentria-models-')).map(k => caches.delete(k))); } } catch(_){}
     location.reload();
   });

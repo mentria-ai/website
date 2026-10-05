@@ -150,7 +150,7 @@
 
   async function applyRestore(data, copy) {
     const S = global.MentriaStore;
-    const ask = (msg) => (typeof global.mentriaConfirm === 'function' ? global.mentriaConfirm(msg) : Promise.resolve(false));
+    const ask = (msg) => (typeof global.mentriaConfirm === 'function' ? global.mentriaConfirm(msg, { danger: true }) : Promise.resolve(false));
     const plan = S.planImport(data);
     const skip = [];
     for (const suffix of plan.vaults) {

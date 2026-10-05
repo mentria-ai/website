@@ -1088,7 +1088,7 @@ localeReload: true
   async function confirmRestart(){
     if (!gameInProgress()) return true;
     if (typeof window.mentriaConfirm !== 'function') return true;
-    return await window.mentriaConfirm(COPY.confirmRestart);
+    return await window.mentriaConfirm(COPY.confirmRestart, { danger: true });
   }
 
   const modeSeg = MentriaUI.segmented(document.getElementById('mode-seg'), (value) => {

@@ -662,7 +662,7 @@ localeReload: true
     const msg = bucket.name === 'mentria-identity' ? COPY.confirmDeleteIdentity
       : bucket.name === 'mentria-packs' ? COPY.confirmDeletePacks
       : COPY.confirmDeleteDb.replace('{name}', label);
-    if (!(await window.mentriaConfirm(msg))) return;
+    if (!(await window.mentriaConfirm(msg, { danger: true }))) return;
     const res = await deleteDb(bucket.name);
     if (res === 'blocked') { status.set(COPY.dbBlocked, 'err'); return; }
     status.set(COPY.statusDeleted.replace('{name}', label), 'ok');
@@ -672,12 +672,12 @@ localeReload: true
 
   async function clearCacheBucket(bucket) {
     if (isModelCache(bucket.name)) {
-      if (!(await window.mentriaConfirm(COPY.confirmDeleteModels))) return;
+      if (!(await window.mentriaConfirm(COPY.confirmDeleteModels, { danger: true }))) return;
       try { const names = await caches.keys(); await Promise.all(names.filter(isModelCache).map((nm) => caches.delete(nm))); } catch (_) {}
       status.set(COPY.statusDeleted.replace('{name}', COPY.cacheModels), 'ok');
     } else {
       const label = cacheLabel(bucket.name);
-      if (!(await window.mentriaConfirm(COPY.confirmClearCache.replace('{name}', label)))) return;
+      if (!(await window.mentriaConfirm(COPY.confirmClearCache.replace('{name}', label), { danger: true }))) return;
       try { await caches.delete(bucket.name); } catch (_) {}
       status.set(COPY.statusCleared.replace('{name}', label), 'ok');
     }
@@ -776,7 +776,7 @@ localeReload: true
       return;
     }
     if (action === 'cdelete') {
-      const ok = await window.mentriaConfirm(COPY.confirmDelete.replace('{name}', en.tail.slice(0, 40)));
+      const ok = await window.mentriaConfirm(COPY.confirmDelete.replace('{name}', en.tail.slice(0, 40)), { danger: true });
       if (!ok) return;
       try {
         const c = await caches.open(cv.name);
@@ -864,7 +864,7 @@ localeReload: true
     const guarded = bucket.id === 'totp' || bucket.id === 'identity';
     if (guarded) {
       const msg = bucket.id === 'totp' ? COPY.confirmDeleteTotp.replace('{name}', key) : COPY.confirmDelete.replace('{name}', key);
-      if (!(await window.mentriaConfirm(msg))) return;
+      if (!(await window.mentriaConfirm(msg, { danger: true }))) return;
     }
     let saved = null;
     if (bucket.kind === 'legacy') {

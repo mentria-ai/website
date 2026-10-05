@@ -24,12 +24,14 @@ export async function confirmInstall(html, opts) {
   const ins = X.inspect(html);
   const m = ins.manifest;
   let msg;
+  let danger = false;
   if (ins.existing) {
     const prev = ins.existing.manifest;
     const renamed = !!(prev.name && m.name && prev.name !== m.name);
     const order = X.compareVersions(m.version, prev.version);
     const tpl = renamed ? copy.replace : (order < 0 ? copy.downgrade : (order === 0 ? copy.reinstall : copy.update));
     msg = fmt(tpl, { name: m.name, oldName: prev.name, old: prev.version, new: m.version });
+    danger = renamed || order < 0;
     const prevPerms = prev.permissions || [];
     const nextPerms = m.permissions || [];
     const added = nextPerms.filter((p) => !prevPerms.includes(p));
@@ -41,7 +43,7 @@ export async function confirmInstall(html, opts) {
   }
   if (opts.from) msg = fmt(copy.from, { from: opts.from }) + msg;
   if (ins.warnLarge) msg += ' ' + fmt(copy.large, { kb: Math.round(ins.size / 1024) });
-  const ok = await (typeof window !== 'undefined' && window.mentriaConfirm ? window.mentriaConfirm(msg) : Promise.resolve(false));
+  const ok = await (typeof window !== 'undefined' && window.mentriaConfirm ? window.mentriaConfirm(msg, { danger }) : Promise.resolve(false));
   if (!ok) return null;
   return X.install(html, m);
 }

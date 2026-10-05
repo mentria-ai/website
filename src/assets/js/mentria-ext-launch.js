@@ -60,27 +60,6 @@
         pages.appendChild(section);
       }
     }
-
-    if (window.MentriaCLI) {
-      entries.forEach(function (e) {
-        var m = e.manifest;
-        var cmds = (m.mounts && m.mounts.commands) || [];
-        cmds.forEach(function (c) {
-          var ok = window.MentriaCLI.register(c.name, {
-            description: c.description + ' (' + m.name + ')',
-            usage: c.usage,
-            argv: true,
-            run: function (args) {
-              var dest = prefix + '/tools/extensions/run/?id=' + encodeURIComponent(m.id) +
-                '#cmd=' + encodeURIComponent(c.name) + '&args=' + encodeURIComponent(args || '');
-              setTimeout(function () { window.location.href = dest; }, 0);
-              return { lines: ['> opening ' + m.name + '...'], type: 'result' };
-            }
-          });
-          if (!ok) console.warn('[mentria-ext] command skipped (collision): ' + c.name);
-        });
-      });
-    }
   }).catch(function (err) {
     console.warn('[mentria-ext] launch integration failed:', err);
   });

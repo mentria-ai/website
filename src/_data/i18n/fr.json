@@ -241,32 +241,6 @@
     "send_failed": "Impossible d’envoyer vers {tool}"
   },
   "home": {
-    "cli": {
-      "welcomeCmd": "$ welcome --to mentria",
-      "welcomeOut1": "studio créatif. outils & transmissions.",
-      "welcomeOut2": "tape 'help' pour les commandes, ou pose simplement une question.",
-      "placeholder": "tapez une commande...",
-      "help_heading": "Commandes disponibles :",
-      "desc_help": "liste les commandes disponibles",
-      "desc_tools": "parcourir les outils",
-      "desc_feed": "voir le fil",
-      "desc_search": "rechercher sur le site (ex. `search base64`)",
-      "desc_about": "à propos de mentria",
-      "desc_clear": "effacer le terminal",
-      "not_found": "commande introuvable : {name}. tapez 'help' pour voir les commandes.",
-      "scrolling_tools": "> défilement vers les outils...",
-      "opening_tools": "> ouverture des outils...",
-      "navigating_to": "> navigation vers {dest}...",
-      "about_line": "> mentria — un studio créatif d’outils, d’expériences et de transmissions visuelles. est. 2025.",
-      "suggestions_label": "Suggestions de commandes",
-      "desc_ask": "pose une question à l'IA qui tourne sur cet appareil",
-      "ask_thinking": "> question envoyée au modèle qui tourne sur cet appareil…",
-      "ask_download": "> la première utilisation peut télécharger le modèle ; il reste sur votre appareil.",
-      "ask_postponed": "téléchargement du modèle reporté — relancez la commande quand vous voulez.",
-      "ask_busy": "le modèle sur l'appareil est occupé dans un autre onglet — réessayez dans un instant.",
-      "ask_error": "le modèle local n'a pas pu répondre : ",
-      "ask_unsupported": "le modèle sur l'appareil nécessite un navigateur WebGPU (Chrome ou Edge sur ordinateur, Android récent)."
-    },
     "tools_heading": "Outils",
     "launch_tool": "Ouvrir l'outil →",
     "launcher": {

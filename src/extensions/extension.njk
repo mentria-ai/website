@@ -302,7 +302,7 @@ function runAgain() {
 
 async function removeExtension() {
   const name = (D.manifest && D.manifest.name) || D.id;
-  const ok = window.mentriaConfirm ? await window.mentriaConfirm(C.removeConfirm.replace('{name}', name)) : false;
+  const ok = window.mentriaConfirm ? await window.mentriaConfirm(C.removeConfirm.replace('{name}', name), { danger: true }) : false;
   if (!ok) return;
   removeBtn.disabled = true;
   await stopRunning();

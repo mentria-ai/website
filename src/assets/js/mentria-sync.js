@@ -189,7 +189,7 @@ const saveRescue = () => {
 const approveReplace = (suffixes) => {
   if (!state.approval) {
     const decision = new Promise((resolve) => {
-      resolve(typeof window.mentriaConfirm === 'function' ? window.mentriaConfirm(confirmReplaceText(areaList(suffixes))) : false);
+      resolve(typeof window.mentriaConfirm === 'function' ? window.mentriaConfirm(confirmReplaceText(areaList(suffixes)), { danger: true }) : false);
     }).catch(() => false).then((ok) => {
       if (ok) {
         saveRescue();

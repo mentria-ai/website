@@ -473,7 +473,7 @@ async function importMD(file) {
   try { text = await file.text(); } catch (_) { return; }
   const current = inputEl.value || '';
   if (current.trim() && current.trim() !== text.trim() && current !== SAMPLE) {
-    if (!(await window.mentriaConfirm(COPY.importFileConfirm))) return;
+    if (!(await window.mentriaConfirm(COPY.importFileConfirm, { danger: true }))) return;
   }
   inputEl.value = text;
   inputEl.dispatchEvent(new Event('input', { bubbles: true }));
@@ -520,7 +520,7 @@ if (navigator.share) shareBtn.addEventListener('click', shareMD);
 else shareBtn.style.display = 'none';
 aiBtn?.addEventListener('click', runAINameGeneration);
 clearBtn.addEventListener('click', async () => {
-  if (!(await mentriaConfirm(COPY.confirmClear))) return;
+  if (!(await mentriaConfirm(COPY.confirmClear, { danger: true }))) return;
   inputEl.value = '';
   filenameInput.value = '';
   if (window.MentriaStore) window.MentriaStore.remove('tools', 'mdpdf_content');
@@ -550,7 +550,7 @@ if (storageTrouble() === 'blocked') showUnsaved('blocked');
   if (typeof h.text !== 'string' || !h.text.trim() || !(Date.now() - (h.ts || 0) < 600000)) return;
   const current = inputEl.value || '';
   if (current.trim() && current.trim() !== h.text.trim() && current !== SAMPLE) {
-    if (!(await window.mentriaConfirm(COPY.importNoteConfirm))) return;
+    if (!(await window.mentriaConfirm(COPY.importNoteConfirm, { danger: true }))) return;
   }
   inputEl.value = h.text;
   inputEl.dispatchEvent(new Event('input', { bubbles: true }));

@@ -3013,7 +3013,7 @@ const renderRoomsSection = () => {
     rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
     rm.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm('Forget this room on this device? You will need its link to come back.') : Promise.resolve(true));
+      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm('Forget this room on this device? You will need its link to come back.', { danger: true }) : Promise.resolve(true));
       if (!ok) return;
       forgetRoom(r.room);
       delete unreadMap[roomUnreadKey(r.room)];
@@ -3126,7 +3126,7 @@ const renderContactsBase = () => {
     rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
     rm.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm('Remove ' + (c.name || c.fp) + ' from contacts?') : Promise.resolve(true));
+      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm('Remove ' + (c.name || c.fp) + ' from contacts?', { danger: true }) : Promise.resolve(true));
       if (!ok) return;
       CID.removeContact(c.fp);
       renderContacts();

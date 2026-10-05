@@ -1875,7 +1875,7 @@ function runApp(MentriaEngine, Tiers) {
 
   /* ── Delete cached model ─────────────────────────── */
   async function deleteModel() {
-    if (!(await mentriaConfirm(COPY.confirmDelete))) return;
+    if (!(await mentriaConfirm(COPY.confirmDelete, { danger: true }))) return;
     try {
       const keys = await caches.keys();
       for (const key of keys) {

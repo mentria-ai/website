@@ -615,7 +615,7 @@
   }
   async function resign(){
     if (State.over || State.history.length === 0) return;
-    const ok = window.mentriaConfirm ? await window.mentriaConfirm(T.confirm_resign) : true;
+    const ok = window.mentriaConfirm ? await window.mentriaConfirm(T.confirm_resign, { danger: true }) : true;
     if (!ok || State.over || State.history.length === 0) return;
     const loser = State.mode === 'online' ? P2P.color : (State.mode === 'engine' ? State.humanColor : State.pos.turn);
     const winner = loser === 'w' ? 'b' : 'w';
@@ -681,7 +681,7 @@
     const target = State.humanColor==='w' ? T.color_black : T.color_white;
     if (State.history.length > 0){
       const msg = T.confirm_new_color.replace('{color}', target);
-      const ok = window.mentriaConfirm ? await window.mentriaConfirm(msg) : true;
+      const ok = window.mentriaConfirm ? await window.mentriaConfirm(msg, { danger: !State.over }) : true;
       if (!ok) return;
     }
     State.humanColor = State.humanColor === 'w' ? 'b' : 'w';

@@ -12,7 +12,8 @@ eleventyComputed:
   description: "{{ pair.pack.title | tloc(pair.locale.code) }} · {{ pair.pack.subtitle | tloc(pair.locale.code) }}"
   socialImageOverride: "{{ pair.pack.cover }}"
   preloadImage: "{% for c in pair.pack.cards %}{% if c.id == pair.pack.sections[0].cards[0] and c.image %}{{ c.image }}{% endif %}{% endfor %}"
-  robots: "noindex, follow"
+  robots: "{% if not pair.deckPath %}noindex, follow{% endif %}"
+  canonicalPath: "{{ pair.deckPath or '' }}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 <link rel="stylesheet" href="/assets/css/pack.css?v={{ buildHash }}">

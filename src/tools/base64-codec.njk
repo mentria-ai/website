@@ -748,4 +748,11 @@ localeReload: true
     text-align: center;
   }
 }
+
+@media print {
+  .b64-mode-tabs,
+  .b64-dropzone { display: none !important; }
+  .b64-label,
+  .b64-section-title { color: var(--term-fg); }
+}
 </style>

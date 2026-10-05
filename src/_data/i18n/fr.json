@@ -1456,6 +1456,7 @@
       "strip_unsupported": "Le nettoyage prend en charge JPEG, PNG et WebP — ce format est en lecture seule.",
       "err_read": "Impossible de lire ce fichier — est-ce une image ?",
       "seg_exif": "Données EXIF",
+      "seg_orientation": "Balise de rotation (conservée)",
       "seg_xmp": "Données XMP",
       "seg_iptc": "Données IPTC",
       "seg_icc": "Profil colorimétrique",

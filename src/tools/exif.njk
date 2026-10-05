@@ -103,6 +103,7 @@ localeReload: true
     fieldCoords:   {{ ("tool.exif.field_coords"    | t) | dump | safe }},
     fieldAltitude: {{ ("tool.exif.field_altitude"  | t) | dump | safe }},
     segExif:       {{ ("tool.exif.seg_exif"        | t) | dump | safe }},
+    segOrientation: {{ ("tool.exif.seg_orientation" | t) | dump | safe }},
     segXmp:        {{ ("tool.exif.seg_xmp"         | t) | dump | safe }},
     segIptc:       {{ ("tool.exif.seg_iptc"        | t) | dump | safe }},
     segIcc:        {{ ("tool.exif.seg_icc"         | t) | dump | safe }},
@@ -245,6 +246,13 @@ localeReload: true
       }
       return { ifd0, exif, gps, interop, ifd1, dv, base, le };
     } catch (_) { return null; }
+  }
+
+  function isOrientationOnly(tiff) {
+    if (!tiff) return false;
+    const keys = Object.keys(tiff.ifd0 || {});
+    if (keys.length !== 1 || Number(keys[0]) !== 0x0112) return false;
+    return !Object.keys(tiff.exif || {}).length && !Object.keys(tiff.gps || {}).length && !Object.keys(tiff.interop || {}).length && !Object.keys(tiff.ifd1 || {}).length;
   }
 
   function rat(v) {
@@ -803,11 +811,13 @@ localeReload: true
 
     badgesEl.innerHTML = '';
     const segs = (meta && meta.segments) || [];
+    const orientOnly = isOrientationOnly(meta && meta.tiff);
+    const kept = (s) => s.kind === 'icc' || (s.kind === 'exif' && orientOnly);
     let hasIcc = false;
     for (const s of segs) {
       const b = document.createElement('span');
-      b.className = 'ex__badge' + (s.kind === 'icc' ? ' ex__badge--kept' : '');
-      b.textContent = COPY[SEG_LABELS[s.kind]] + ' · ' + fmtBytes(s.bytes);
+      b.className = 'ex__badge' + (kept(s) ? ' ex__badge--kept' : '');
+      b.textContent = (s.kind === 'exif' && orientOnly ? COPY.segOrientation : COPY[SEG_LABELS[s.kind]]) + ' · ' + fmtBytes(s.bytes);
       badgesEl.appendChild(b);
       if (s.kind === 'icc') hasIcc = true;
     }
@@ -815,7 +825,7 @@ localeReload: true
     iccNote.hidden = !hasIcc;
     renderEmbedded(meta);
 
-    const removable = segs.some(s => s.kind !== 'icc');
+    const removable = segs.some(s => !kept(s));
     const canStrip = !!KINDS[origKind];
     cleanEl.hidden = removable || !canStrip;
     stripBtn.hidden = !(canStrip && removable);
@@ -891,7 +901,7 @@ localeReload: true
     const base = dot > 0 ? origName.slice(0, dot) : origName;
     blob.arrayBuffer().then(cleanBuf => {
       const recheck = KINDS[origKind].parse(cleanBuf);
-      const leftover = recheck && recheck.segments.some(s => s.kind !== 'icc' && !(s.kind === 'exif' && out.orientation > 1 && s.bytes === 36));
+      const leftover = recheck && recheck.segments.some(s => s.kind !== 'icc' && !(s.kind === 'exif' && isOrientationOnly(recheck.tiff)));
       const names = removed.map(k => COPY[SEG_LABELS[k]]).join(', ');
       let line = COPY.removedLabel + ': ' + names + ' · ' + fmtBytes(origBuf.byteLength) + ' → ' + fmtBytes(blob.size);
       if (!leftover) line += ' · ' + COPY.verifiedClean;

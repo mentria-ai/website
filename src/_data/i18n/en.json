@@ -2930,6 +2930,7 @@
       "aria_compare": "Compare before and after: {name}",
       "aria_remove": "Remove {name}",
       "aria_split": "Before and after divider",
+      "aria_zoom_reset": "Reset zoom",
       "label_before": "Before",
       "label_after": "After",
       "alt_before": "Original: {name}",

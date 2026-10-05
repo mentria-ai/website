@@ -157,6 +157,7 @@ localeReload: true
     var bySlug = {};
     tiles.forEach(function (t) { bySlug[t.getAttribute('data-slug')] = t; });
     var slugs = Object.keys(usage).filter(function (s) { return bySlug[s]; }).sort(function (a, b) { return score(usage[b]) - score(usage[a]); }).slice(0, 6);
+    recentGrid.textContent = '';
     slugs.forEach(function (s) { recentGrid.appendChild(bySlug[s].cloneNode(true)); });
   }
   buildRecent();
@@ -206,5 +207,10 @@ localeReload: true
   q.value = params.get('q') || '';
   setShelf(params.get('shelf') || 'all');
   if (window.MutationObserver) new MutationObserver(apply).observe(root, { attributes: true, attributeFilter: ['class'] });
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    buildRecent();
+    apply();
+  });
 })();
 </script>

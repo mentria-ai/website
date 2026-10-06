@@ -142,7 +142,12 @@ const TERRAIN_SPLAT_MAIN = `
   float kwN3 = kwFbmTerrain(kwW.xz * 0.0035 + 41.0);
   float kwN4 = kwValueNoise(kwW.xz * 0.37 + 7.3);
   float kwRockW = smoothstep(kwSplat.x - 0.1, kwSplat.x + 0.1, kwSlope + (kwN2 - 0.5) * 0.16 + (kwN1 - 0.5) * 0.12 + (kwN4 - 0.5) * 0.07);
-  if (kwMacro.w > 0.0) kwRockW = max(kwRockW, smoothstep(kwMacro.w - 0.8, kwMacro.w + 1.6, kwW.y + (kwN2 - 0.5) * 3.0 + (kwN4 - 0.5) * 1.2));
+  if (kwMacro.w > 0.0) {
+    vec3 kwFx = cross(dFdx(kwW), dFdy(kwW));
+    float kwFacet = 1.0 - abs(kwFx.y) / max(length(kwFx), 1e-12);
+    float kwFoot = smoothstep(1.6, 2.6, kwW.y + (kwN4 - 0.5) * 0.8);
+    kwRockW = max(max(kwRockW, smoothstep(0.3, 0.45, kwFacet)) * kwFoot, smoothstep(kwMacro.w - 0.8, kwMacro.w + 1.6, kwW.y + (kwN2 - 0.5) * 3.0 + (kwN4 - 0.5) * 1.2));
+  }
   float kwSandW = 1.0 - smoothstep(kwSplat.z - 1.2, kwSplat.z + 1.4, kwW.y + (kwN2 - 0.5) * 2.4);
   float kwDirtW = smoothstep(1.0 - kwSplat.y, 1.0 - kwSplat.y + 0.16, kwN1 * 0.75 + kwN2 * 0.35 + kwSlope * 0.7);
   kwDirtW = max(kwDirtW, smoothstep(0.12, 0.24, kwSlope) * 0.65);
@@ -209,7 +214,8 @@ const TERRAIN_SPLAT_MAIN = `
   kwCol *= kwMacroCol * (1.0 + kwMacroV * kwMacro.x * 0.5);
   kwCol *= 1.0 + (kwN2 - 0.5) * kwMacro.y;
   diffuseColor.rgb *= kwCol;
-  float kwBumpLum = dot(kwCol, vec3(0.3333)) * kwMacro.z * (1.0 - smoothstep(6.0, 40.0, kwDist));
+  float kwTexelPx = min(length(dFdx(kwW)), length(dFdy(kwW))) * float(textureSize(kwGrassMap, 0).x) / min(kwScales.x, kwScales.y);
+  float kwBumpLum = dot(kwCol, vec3(0.3333)) * kwMacro.z * (1.0 - smoothstep(6.0, 40.0, kwDist)) * smoothstep(0.35, 1.0, kwTexelPx);
 `;
 
 export function createTerrain(opts = {}) {

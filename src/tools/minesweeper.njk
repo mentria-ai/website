@@ -625,6 +625,7 @@ main { max-width: 1100px; }
   let cursorIdx = 0;
   let longPressed = false;
   let asking = false;
+  let overlayOpen = false;
   let diffSeg = null;
 
   function announce(msg) {
@@ -763,7 +764,7 @@ main { max-width: 1100px; }
     try { return helpEl.matches(':popover-open'); } catch (_) { return false; }
   }
   function isDialogOpen() {
-    if (asking) return true;
+    if (asking || overlayOpen) return true;
     const dlg = document.getElementById('m-dialog');
     if (dlg && dlg.hasAttribute('data-open')) return true;
     try { return !!(dlg && dlg.matches(':popover-open')); } catch (_) { return false; }
@@ -1347,7 +1348,7 @@ main { max-width: 1100px; }
     const k = e.key;
     if (k === 'Escape') {
       if (isHelpOpen()) return;
-      if (State.paused) setPaused(false);
+      if (State.paused) { e.preventDefault(); setPaused(false); }
       return;
     }
     if (isHelpOpen()) return;
@@ -1394,6 +1395,10 @@ main { max-width: 1100px; }
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && State.started && !State.over && !State.paused) setPaused(true);
+  });
+  document.addEventListener('mentria:overlay', (e) => {
+    overlayOpen = !!(e.detail && e.detail.open);
+    if (overlayOpen && State.started && !State.over && !State.paused) setPaused(true);
   });
   window.addEventListener('pagehide', saveGame);
 

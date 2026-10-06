@@ -20,8 +20,8 @@
     "commands": [
       {
         "name": "fin-add",
-        "usage": "fin-add [what]",
-        "description": "add a transaction, e.g. fin-add coffee 4.50"
+        "usage": "fin-add",
+        "description": "add a transaction"
       },
       {
         "name": "fin-budget",

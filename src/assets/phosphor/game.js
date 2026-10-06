@@ -82,7 +82,8 @@ const levels = { master: 0.8, sfx: 0.9, ambient: 0.5 };
 const localIntents = {
   forward: 0, strafe: 0, jumpPressed: false, crouchHeld: false, sprintHeld: false,
   fireHeld: false, adsHeld: false, reloadPressed: false, restartPressed: false,
-  pausePressed: false, lockPause: false, lookDx: 0, lookDy: 0
+  pausePressed: false, lockPause: false, lookDx: 0, lookDy: 0,
+  navY: 0, padA: false, padB: false
 };
 
 const completeEv = { t: 'run_complete', medal: null };
@@ -157,6 +158,7 @@ let loadSeq = 0;
 let pendingId = '';
 let selIndex = 0;
 let menuAxis = 0;
+let padFocus = null;
 
 let recorder = null;
 let ghostPlayer = null;
@@ -350,6 +352,9 @@ function copyIntents(src) {
     d.lockPause = false;
     d.lookDx = 0;
     d.lookDy = 0;
+    d.navY = 0;
+    d.padA = false;
+    d.padB = false;
     return d;
   }
   d.forward = clamp(num(src.forward, 0), -1, 1);
@@ -365,6 +370,9 @@ function copyIntents(src) {
   d.lockPause = !!src.lockPause;
   d.lookDx = num(src.lookDx, 0);
   d.lookDy = num(src.lookDy, 0);
+  d.navY = clamp(num(src.navY, 0), -1, 1);
+  d.padA = !!src.padA;
+  d.padB = !!src.padB;
   return d;
 }
 
@@ -679,6 +687,8 @@ function showOverlays() {
 function setState(next) {
   if (state === next) return;
   state = next;
+  menuAxis = 2;
+  if (next !== 'paused') setPadFocus(null);
   showOverlays();
 }
 
@@ -879,12 +889,57 @@ function moveSel(delta) {
   pickCourse(courseIds[i]);
 }
 
-function menuNav(it) {
-  const ax = it.forward > MENU_DEAD ? 1 : it.forward < -MENU_DEAD ? -1 : 0;
-  if (ax === menuAxis) return;
+function menuAxisOf(it) {
+  const v = it.forward !== 0 ? it.forward : it.navY;
+  return v > MENU_DEAD ? 1 : v < -MENU_DEAD ? -1 : 0;
+}
+
+function menuStep(it) {
+  const ax = menuAxisOf(it);
+  if (menuAxis === 2) {
+    if (ax === 0) menuAxis = 0;
+    return 0;
+  }
+  if (ax === menuAxis) return 0;
   menuAxis = ax;
+  return ax;
+}
+
+function menuNav(it) {
+  const ax = menuStep(it);
   if (ax === 1) moveSel(-1);
   else if (ax === -1) moveSel(1);
+}
+
+function pauseButtons() {
+  if (!dom.pause || dom.pause.hidden) return [];
+  return Array.prototype.filter.call(dom.pause.querySelectorAll('.ph-stack .ph-btn'), (b) => !b.hidden && !b.disabled && b.getClientRects().length > 0);
+}
+
+function setPadFocus(btn) {
+  if (padFocus && padFocus !== btn) padFocus.classList.remove('is-pad-focus');
+  padFocus = btn || null;
+  if (!padFocus) return;
+  padFocus.classList.add('is-pad-focus');
+  try { padFocus.focus({ preventScroll: true }); } catch (_) {}
+}
+
+function pauseNav(it) {
+  const list = pauseButtons();
+  if (!list.length) return;
+  const ax = menuStep(it);
+  if (ax !== 0) {
+    const at = list.indexOf(padFocus);
+    const cur = at >= 0 ? at : Math.max(0, list.indexOf(dom.resume));
+    setPadFocus(list[(cur + (ax === 1 ? -1 : 1) + list.length) % list.length]);
+  }
+  if (it.padA) {
+    it.jumpPressed = false;
+    const target = list.indexOf(padFocus) >= 0 ? padFocus : (dom.resume || list[0]);
+    if (target) target.click();
+  } else if (it.padB) {
+    resumeGame();
+  }
 }
 
 function setCourseError(on) {
@@ -1953,6 +2008,7 @@ function onKeyDown(e) {
   }
   const tag = e.target && e.target.tagName ? e.target.tagName : '';
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.code === 'Escape' && (state === 'playing' || (state === 'paused' && !devOpen))) e.preventDefault();
   if (e.code === 'Backquote') {
     e.preventDefault();
     toggleDev(!devOpen);
@@ -2002,6 +2058,7 @@ function frame(now) {
     startedNow = state === 'playing';
   }
   if (state === 'ready' && !startedNow) menuNav(it);
+  else if (state === 'paused' && !devOpen) pauseNav(it);
   else if (state !== 'ready') menuAxis = 0;
 
   if (it.restartPressed && (state === 'playing' || state === 'paused' || state === 'complete')) resetRun();
@@ -2156,6 +2213,9 @@ function wireUi() {
     if (!document.hidden) return;
     if (state === 'playing') pauseGame(null);
     call(audio, 'sleep');
+  });
+  document.addEventListener('mentria:overlay', (e) => {
+    if (e.detail && e.detail.open && state === 'playing') pauseGame(null);
   });
 }
 

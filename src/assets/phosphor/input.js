@@ -137,7 +137,10 @@ export function createInput(stageEl, canvas, opts) {
     pausePressed: false,
     lockPause: false,
     lookDx: 0,
-    lookDy: 0
+    lookDy: 0,
+    navY: 0,
+    padA: false,
+    padB: false
   };
 
   const keys = Object.create(null);
@@ -176,6 +179,9 @@ export function createInput(stageEl, canvas, opts) {
   let padAds = false;
   let padLookX = 0;
   let padLookY = 0;
+  let padNavY = 0;
+  let pendingPadA = false;
+  let pendingPadB = false;
 
   let touchUI = false;
   let touchRoot = null;
@@ -430,6 +436,7 @@ export function createInput(stageEl, canvas, opts) {
     padSprint = false;
     padFire = false;
     padAds = false;
+    padNavY = 0;
     padLookX = 0;
     padLookY = 0;
     padL.x = 0;
@@ -494,6 +501,7 @@ export function createInput(stageEl, canvas, opts) {
     padCrouch = padButton(pad, 1);
     padSprint = padL.m >= PAD_SPRINT || padButton(pad, 10) ||
       (padOverride.sprintB >= 0 && padButton(pad, padOverride.sprintB));
+    if (pad.mapping === 'standard') padNavY = (padButton(pad, 12) ? 1 : 0) - (padButton(pad, 13) ? 1 : 0);
 
     const pauseIdx = padOverride.pauseB >= 0 ? padOverride.pauseB : 9;
     let act = padL.m > 0 || padR.m > 0 || rt > PAD_ACT || lt > PAD_ACT;
@@ -506,7 +514,8 @@ export function createInput(stageEl, canvas, opts) {
       if (down && !was) {
         if (i === padOverride.fireB || i === padOverride.adsB || i === padOverride.sprintB) continue;
         if (i === pauseIdx) pendingPause = true;
-        else if (i === 0) pendingJump = true;
+        else if (i === 0) { pendingJump = true; pendingPadA = true; }
+        else if (i === 1) pendingPadB = true;
         else if (i === 2) pendingReload = true;
         else if (i === 3) pendingRestart = true;
       }
@@ -1054,12 +1063,17 @@ export function createInput(stageEl, canvas, opts) {
     intents.lockPause = pendingLockPause;
     intents.lookDx = lookDx;
     intents.lookDy = lookDy;
+    intents.navY = padNavY;
+    intents.padA = pendingPadA;
+    intents.padB = pendingPadB;
 
     pendingJump = false;
     pendingReload = false;
     pendingRestart = false;
     pendingPause = false;
     pendingLockPause = false;
+    pendingPadA = false;
+    pendingPadB = false;
 
     return intents;
   }

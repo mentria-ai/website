@@ -602,6 +602,17 @@
     };
   }
 
+  function overlay(open, kind) {
+    try { document.dispatchEvent(new CustomEvent('mentria:overlay', { detail: { open: !!open, kind: kind || '' } })); } catch (_) {}
+    var frames = document.querySelectorAll('iframe');
+    for (var i = 0; i < frames.length; i++) {
+      try {
+        var w = frames[i].contentWindow;
+        if (w && w.document && typeof w.CustomEvent === 'function') w.document.dispatchEvent(new w.CustomEvent('mentria:overlay', { detail: { open: !!open, kind: kind || '' } }));
+      } catch (_) {}
+    }
+  }
+
   function modal(el) {
     var card = el.querySelector('.m-modal__card') || el;
     if (!card.getAttribute('role')) card.setAttribute('role', 'dialog');
@@ -640,6 +651,7 @@
       backHandle = backDismiss(close);
       var f = focusable();
       if (f.length) f[0].focus();
+      overlay(true, 'modal');
     }
     function close() {
       if (!isOpen) return;
@@ -651,6 +663,7 @@
       inerted = [];
       if (prevFocus && prevFocus.focus) { try { prevFocus.focus(); } catch (e) {} }
       prevFocus = null;
+      overlay(false, 'modal');
     }
     return { open: open, close: close };
   }
@@ -741,8 +754,10 @@
     pushed = !!(history.state && history.state.mOverlay);
   }
 
-  document.addEventListener('pointerdown', function (e) { lastPointer = e.pointerType || ''; }, true);
-  document.addEventListener('keydown', function () { lastPointer = ''; }, true);
+  var tabbed = false;
+  document.addEventListener('pointerdown', function (e) { lastPointer = e.pointerType || ''; tabbed = false; }, true);
+  document.addEventListener('keydown', function (e) { lastPointer = ''; if (e.key === 'Tab') tabbed = true; }, true);
+  function tabFocused() { return tabbed; }
   document.addEventListener('click', function (e) {
     var type = lastPointer;
     lastPointer = '';
@@ -791,9 +806,11 @@
     shareFile: shareFile,
     migrateStore: migrateStore,
     modal: modal,
+    overlay: overlay,
     backDismiss: backDismiss,
     toolTitle: toolTitle,
     localePrefix: localePrefix,
-    windowMenu: windowMenu
+    windowMenu: windowMenu,
+    tabFocused: tabFocused
   };
 })();

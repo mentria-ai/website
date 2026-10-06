@@ -76,6 +76,8 @@ const COPY = {
   confirmRemove: {{ ("tool.extensions.confirm_remove" | t) | dump | safe }},
   installedOk:   {{ ("tool.extensions.installed_ok"   | t) | dump | safe }},
   installedWhere:{{ ("tool.extensions.installed_where" | t) | dump | safe }},
+  updatedTo:     {{ ("tool.extensions.updated_to"     | t) | dump | safe }},
+  removeLabel:   {{ ("store.remove"                   | t) | dump | safe }},
   errPrefix:     {{ ("tool.extensions.err_prefix"     | t) | dump | safe }},
   errNoManifest: {{ ("tool.extensions.err_no_manifest" | t) | dump | safe }},
   errJson:       {{ ("tool.extensions.err_bad_json"   | t) | dump | safe }},
@@ -214,20 +216,25 @@ function fmt(tpl, vars) {
   return tpl.replace(/\{(\w+)\}/g, (s, k) => (vars[k] != null ? vars[k] : s));
 }
 
-function announceInstall(entry) {
+function announceInstall(entry, before) {
   const m = entry && entry.manifest;
-  if (!m || !(m.mounts && m.mounts.tool) || !window.MentriaUI || !window.MentriaUI.toast) return;
+  if (!m || !window.MentriaUI || !window.MentriaUI.toast) return;
+  const prev = before && before.manifest && before.manifest.version;
+  if (prev && prev !== m.version) { window.MentriaUI.toast(fmt(COPY.updatedTo, { name: m.name, version: m.version })); return; }
+  if (!(m.mounts && m.mounts.tool)) return;
   window.MentriaUI.toast(fmt(COPY.installedWhere, { name: m.name }));
 }
 
 async function installFlow(html) {
   clearError();
   try {
+    let before = null;
+    try { before = X.getEntry(X.inspect(html).manifest.id); } catch (_) {}
     const entry = await confirmInstall(html, INSTALL_OPTS);
     if (!entry) return;
     showOk(entry.manifest.name + ' ' + COPY.installedOk);
     render();
-    announceInstall(entry);
+    announceInstall(entry, before);
   } catch (e) { showError(errText(e)); }
 }
 
@@ -305,7 +312,7 @@ function row(entry) {
     }
   });
   const rem = btn(COPY.btnRemove, async () => {
-    if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name }), { danger: true }))) return;
+    if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name }), { danger: true, ok: COPY.removeLabel }))) return;
     X.remove(m.id); render();
   });
   if (X.isApp(entry)) actions.append(toggle, open, rem);
@@ -473,6 +480,7 @@ function galActions(entry, card) {
 async function galInstall(entry, card, b) {
   galStatus(card, '');
   b.disabled = true;
+  const before = X.getEntry(entry.id);
   if (entry.app) {
     let prev = null;
     let created = false;
@@ -484,7 +492,7 @@ async function galInstall(entry, card, b) {
       await X.downloadFiles(entry.id, pkg.files, X.appPages(pkg.app), (f) => galStatus(card, COPY.galInstalling.replace('{pct}', String(Math.round(f * 100)))));
       galStatus(card, '');
       render();
-      announceInstall(X.getEntry(entry.id));
+      announceInstall(X.getEntry(entry.id), before);
     } catch (e) {
       if (created && prev) { try { X.installApp(prev.manifest); } catch (_) {} }
       else if (created) X.remove(entry.id, { keepData: true });
@@ -508,7 +516,7 @@ async function galInstall(entry, card, b) {
     const result = await confirmInstall(html, INSTALL_OPTS);
     if (!result) { b.disabled = false; return; }
     render();
-    announceInstall(result);
+    announceInstall(result, before);
     if (entry.page) X.fetchPackage(entry.id).then((pkg) => X.downloadFiles(entry.id, pkg.files, [PREFIX + '/extensions/' + entry.id + '/'])).catch(() => {});
   } catch (e) {
     b.disabled = false;

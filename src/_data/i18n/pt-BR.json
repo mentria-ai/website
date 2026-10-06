@@ -146,6 +146,16 @@
     "identity_setup_reminder": "Identidade criada. Agora vá em \"Seus dados\" acima e baixe um backup criptografado — restaurá-lo em outro dispositivo dá a ele a mesma identidade.",
     "sync_confirm_replace": "Este aparelho já tem seus próprios dados: {areas}. O pareamento os substitui pela cópia do outro aparelho. Continuar?",
     "sync_no_peer": "Nenhum aparelho respondeu com este código. Confira o código e mantenha a página Sobre aberta no outro aparelho.",
+    "sync_busy": "Este código já está sendo usado por outros dois aparelhos. Crie um código novo no aparelho com o qual você quer parear este.",
+    "sync_vault_totp": "Este aparelho tem o próprio cofre TOTP, e o outro aparelho tem um diferente. Substituir o cofre deste aparelho pelo do outro? As contas TOTP que estão só neste aparelho serão perdidas, e ele passará a abrir com a senha do outro aparelho.",
+    "sync_vault_identity": "Este aparelho tem a própria identidade Mentria, e o outro aparelho tem uma diferente. Substituí-la pela do outro aparelho? A identidade deste aparelho será perdida, e ela passará a abrir com a senha do outro aparelho.",
+    "sync_vault_keep": "Manter a versão deste aparelho",
+    "sync_vault_replace": "Substituir",
+    "sync_rescue_title": "Antes do pareamento",
+    "sync_rescue_text": "O pareamento de {date} substituiu estes dados deste aparelho: {areas}. Você pode recuperar o que ele tinha antes até {until}.",
+    "sync_rescue_button": "Recuperar",
+    "sync_rescue_confirm": "Recuperar o que este aparelho tinha antes do pareamento ({areas})? O que o pareamento trouxe é substituído só neste aparelho.",
+    "sync_rescue_done": "Pronto. Este aparelho voltou a ter o que tinha antes do pareamento ({areas}).",
     "identity_passkey_unlock": "Desbloquear com chave de acesso",
     "identity_passkey_add": "Adicionar uma chave de acesso",
     "identity_passkey_remove": "Remover chave de acesso",
@@ -1173,6 +1183,8 @@
       "run_disabled": "instalada mas desativada — reative em",
       "run_blocked": "{name} tentou acessar {host}. A política de segurança deste site só permite que extensões se conectem aos servidores da Mentria.",
       "run_manager_link": "o gerenciador",
+      "run_gone": "{name} não está instalada neste aparelho.",
+      "run_store_link": "Abra a página dela para instalar de novo",
       "btn_open": "abrir",
       "btn_export": "exportar",
       "btn_remove": "remover",
@@ -1190,6 +1202,7 @@
       "large_note": "({kb} KB — grande para o armazenamento local)",
       "installed_ok": "instalada.",
       "installed_where": "{name} instalada. Abra quando quiser pelo menu Ferramentas.",
+      "updated_to": "{name} foi atualizada para a versão {version}.",
       "sample_heading": "Experimente o exemplo",
       "sample_install": "instalar hello-world",
       "sample_download": "baixar o arquivo",
@@ -1861,7 +1874,12 @@
       "strength_strong": "forte",
       "db_media": "Índice de fotos, vídeos e músicas (miniaturas, datas, onde você parou; pode incluir o local das fotos)",
       "db_ext_local": "Dados de extensões guardados neste dispositivo",
-      "cache_ext_data": "Arquivos de dados de extensões"
+      "cache_ext_data": "Arquivos de dados de extensões",
+      "cache_ext_files": "Arquivos de extensões para uso offline",
+      "cache_locale": "Páginas em {lang} para uso offline",
+      "cache_phosphor": "Gráficos HD do PHOSPHOR",
+      "cache_share": "Itens compartilhados com o Mentria",
+      "cache_radio": "Lista de estações do rádio"
     },
     "extensions-sdk": {
       "heading_start": "Início rápido",
@@ -1892,10 +1910,16 @@
       },
       "cmd": {
         "finance": {
-          "fin-add": "adicionar uma transação, ex.: fin-add café 4,50",
+          "fin-add": "adicionar uma transação",
           "fin-budget": "abrir os orçamentos deste mês",
           "fin-subs": "abrir contas a pagar e assinaturas",
           "fin-tax": "abrir a estimativa de impostos"
+        },
+        "dice-roller": {
+          "roll": "rolar dados"
+        },
+        "pomodoro-timer": {
+          "pomodoro": "começar uma sessão de foco"
         }
       },
       "perm": {

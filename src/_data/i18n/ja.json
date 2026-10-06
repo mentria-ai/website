@@ -146,6 +146,16 @@
     "identity_setup_reminder": "ID を作成しました。上の「あなたのデータ」から暗号化バックアップをダウンロードしてください — 別のデバイスで復元すれば、そのデバイスにも同じ ID が入ります。",
     "sync_confirm_replace": "このデバイスにはすでに独自のデータがあります（{areas}）。ペアリングすると、相手のデバイスのコピーで置き換えられます。続行しますか？",
     "sync_no_peer": "このコードに応答したデバイスはありません。コードを確認し、相手のデバイスで「概要」を開いたままにしてください。",
+    "sync_busy": "このコードはすでに別の2台のデバイスで使われています。ペアリングしたいデバイスで新しいコードを作成してください。",
+    "sync_vault_totp": "このデバイスには独自の TOTP 保管庫があり、相手のデバイスの保管庫とは異なります。このデバイスの保管庫を相手のデバイスのもので置き換えますか？ このデバイスにしかない TOTP アカウントは失われ、相手のデバイスのパスフレーズで開くようになります。",
+    "sync_vault_identity": "このデバイスには独自の Mentria ID があり、相手のデバイスの ID とは異なります。相手のデバイスの ID で置き換えますか？ このデバイスの ID は失われ、相手のデバイスのパスフレーズで開くようになります。",
+    "sync_vault_keep": "このデバイスのものを残す",
+    "sync_vault_replace": "置き換える",
+    "sync_rescue_title": "ペアリング前のデータ",
+    "sync_rescue_text": "{date}のペアリングで、このデバイスの{areas}が置き換えられました。{until}までなら、以前の内容に戻せます。",
+    "sync_rescue_button": "元に戻す",
+    "sync_rescue_confirm": "このデバイスの{areas}をペアリング前の内容に戻しますか？ ペアリングで入ってきた内容は、このデバイスでのみ置き換えられます。",
+    "sync_rescue_done": "完了しました。このデバイスの{areas}はペアリング前の内容に戻りました。",
     "identity_passkey_unlock": "パスキーでロック解除",
     "identity_passkey_add": "パスキーを追加",
     "identity_passkey_remove": "パスキーを削除",
@@ -1173,6 +1183,8 @@
       "run_disabled": "インストール済みですが無効です — 再有効化は",
       "run_blocked": "{name} が {host} に接続しようとしました。このサイトのセキュリティポリシーでは、拡張機能は Mentria のサーバーにしか接続できません。",
       "run_manager_link": "マネージャーへ",
+      "run_gone": "{name} はこの端末にインストールされていません。",
+      "run_store_link": "ページを開いて再インストールする",
       "btn_open": "開く",
       "btn_export": "エクスポート",
       "btn_remove": "削除",
@@ -1190,6 +1202,7 @@
       "large_note": "（{kb} KB — ローカルストレージには大きめです）",
       "installed_ok": "インストールしました。",
       "installed_where": "{name} をインストールしました。ツールメニューからいつでも開けます。",
+      "updated_to": "{name} をバージョン {version} に更新しました。",
       "sample_heading": "サンプルを試す",
       "sample_install": "hello-worldをインストール",
       "sample_download": "ファイルをダウンロード",
@@ -1861,7 +1874,12 @@
       "strength_strong": "強い",
       "db_media": "写真・動画・音楽のインデックス（サムネイル、日付、再生位置。写真の撮影場所を含む場合があります）",
       "db_ext_local": "この端末に保存された拡張機能のデータ",
-      "cache_ext_data": "拡張機能のデータファイル"
+      "cache_ext_data": "拡張機能のデータファイル",
+      "cache_ext_files": "オフライン用の拡張機能ファイル",
+      "cache_locale": "オフライン用の{lang}のページ",
+      "cache_phosphor": "PHOSPHOR の HD グラフィック",
+      "cache_share": "Mentria に共有された項目",
+      "cache_radio": "ラジオの局リスト"
     },
     "extensions-sdk": {
       "heading_start": "クイックスタート",
@@ -1892,10 +1910,16 @@
       },
       "cmd": {
         "finance": {
-          "fin-add": "取引を追加（例：fin-add コーヒー 450）",
+          "fin-add": "取引を追加",
           "fin-budget": "今月の予算を開く",
           "fin-subs": "支払いとサブスクを開く",
           "fin-tax": "税金の見積もりを開く"
+        },
+        "dice-roller": {
+          "roll": "サイコロを振る"
+        },
+        "pomodoro-timer": {
+          "pomodoro": "集中セッションを始める"
         }
       },
       "perm": {

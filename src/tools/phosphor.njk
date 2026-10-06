@@ -208,13 +208,13 @@ localeReload: true
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)); border: 1px solid rgba(255, 255, 255, 0.08);
   transition: background 0.14s ease, border-color 0.14s ease, box-shadow 0.2s ease;
 }
-.ph-ov--pause .ph-stack .ph-btn--primary, .ph-ov--pause .ph-stack .ph-btn:hover, .ph-ov--pause .ph-stack .ph-btn:focus-visible { color: #03130d; outline: none; }
-.ph-ov--pause .ph-stack .ph-btn--primary::before, .ph-ov--pause .ph-stack .ph-btn:hover::before, .ph-ov--pause .ph-stack .ph-btn:focus-visible::before {
+.ph-ov--pause .ph-stack .ph-btn--primary, .ph-ov--pause .ph-stack .ph-btn:hover, .ph-ov--pause .ph-stack .ph-btn:focus-visible, .ph-ov--pause .ph-stack .ph-btn.is-pad-focus { color: #03130d; outline: none; }
+.ph-ov--pause .ph-stack .ph-btn--primary::before, .ph-ov--pause .ph-stack .ph-btn:hover::before, .ph-ov--pause .ph-stack .ph-btn:focus-visible::before, .ph-ov--pause .ph-stack .ph-btn.is-pad-focus::before {
   background: linear-gradient(90deg, #8af7d2, var(--accent)); border-color: var(--accent);
   box-shadow: 0 0 0 1px rgba(110, 243, 197, 0.35), 0 10px 30px rgba(110, 243, 197, 0.22);
 }
-.ph-ov--pause .ph-stack:hover .ph-btn--primary:not(:hover)::before { background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)); border-color: rgba(255, 255, 255, 0.08); box-shadow: none; }
-.ph-ov--pause .ph-stack:hover .ph-btn--primary:not(:hover) { color: #eaf3f0; }
+.ph-ov--pause .ph-stack:hover .ph-btn--primary:not(:hover)::before, .ph-ov--pause .ph-stack:has(.is-pad-focus) .ph-btn--primary:not(.is-pad-focus)::before { background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)); border-color: rgba(255, 255, 255, 0.08); box-shadow: none; }
+.ph-ov--pause .ph-stack:hover .ph-btn--primary:not(:hover), .ph-ov--pause .ph-stack:has(.is-pad-focus) .ph-btn--primary:not(.is-pad-focus) { color: #eaf3f0; }
 .ph-ov--pause .ph-ov__hint { text-align: center; font-size: var(--text-2xs); color: var(--term-muted); }
 .ph-ov--complete {
   align-items: flex-start; text-align: left; gap: 0;

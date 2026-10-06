@@ -340,7 +340,7 @@
     ui: 'layout settings', ai_chat: 'AI chat', ext: 'extensions', extdata: 'extension data', feed: 'feed progress'
   };
 
-  const areaNames = (suffixes) => {
+  const areaNames = (suffixes, names) => {
     const t = (key, fallback) => {
       try {
         const I = global.MentriaI18n;
@@ -355,7 +355,7 @@
       if (ns.indexOf(LEGACY_PREFIX) === 0) ns = /^mentria_(chess|ludo|sudoku|msw)/.test(ns) ? 'games' : 'tools';
       if (ns === 'tool') ns = 'games';
       if (!(ns in AREA_NAMES)) ns = 'other';
-      const name = t('common.data_areas.' + ns, AREA_NAMES[ns] || 'other saved data');
+      const name = (names && typeof names[ns] === 'string' && names[ns]) || t('common.data_areas.' + ns, AREA_NAMES[ns] || 'other saved data');
       if (out.indexOf(name) < 0) out.push(name);
     });
     return out;

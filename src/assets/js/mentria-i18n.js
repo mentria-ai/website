@@ -293,6 +293,7 @@
         if (!ok) { tellOffline(code); return; }
         try { localStorage.setItem(STORE_KEY, code); } catch (_) {}
         if (bc) { try { bc.postMessage({ type: 'locale', code: code }); } catch (_) {} }
+        try { document.dispatchEvent(new CustomEvent('mentria:localereload', { detail: { code: code } })); } catch (_) {}
         location.replace(target);
       });
       return;

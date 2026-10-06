@@ -108,32 +108,45 @@
   }
   renderRecents();
 
-  function norm(v) {
-    return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-  }
   var firstHit = null;
+  function tileBox(tile) {
+    return tile.parentNode && tile.parentNode.classList.contains('launch-slot') ? tile.parentNode : tile;
+  }
   function filter() {
     var raw = find ? find.value.trim() : '';
-    var q = norm(raw);
-    launcher.classList.toggle('is-searching', !!q);
-    var hits = 0;
-    firstHit = null;
+    var entries = [];
     pages.querySelectorAll('.launcher__cat').forEach(function (cat) {
-      var shown = 0;
       cat.querySelectorAll('.launch-tile').forEach(function (tile) {
-        var text = tileName(tile) + ' ' + (tile.getAttribute('data-name') || '') + ' ' + (tile.getAttribute('data-search') || '');
-        var ok = !gated(tile) && (!q || norm(text).indexOf(q) !== -1);
-        var box = tile.parentNode && tile.parentNode.classList.contains('launch-slot') ? tile.parentNode : tile;
-        box.hidden = !ok;
-        if (ok) {
-          shown++;
-          if (!firstHit) firstHit = tile;
-        }
+        var name = tileName(tile) + ' ' + (tile.getAttribute('data-name') || '');
+        entries.push({ cat: cat, tile: tile, item: gated(tile) ? null : [name, tile.getAttribute('data-search') || ''] });
       });
-      cat.hidden = shown === 0;
+    });
+    var UI = window.MentriaUI;
+    var scores = raw && UI && UI.searchRank ? UI.searchRank(raw, entries.map(function (e) { return e.item; })) : null;
+    var q = !!scores;
+    launcher.classList.toggle('is-searching', q);
+    var hits = 0;
+    var best = 0;
+    var stats = new Map();
+    firstHit = null;
+    pages.querySelectorAll('.launcher__cat').forEach(function (cat) { stats.set(cat, { shown: 0, best: 0 }); });
+    entries.forEach(function (e, i) {
+      var score = q ? scores[i] : (e.item ? 1 : 0);
+      var box = tileBox(e.tile);
+      var st = stats.get(e.cat);
+      box.hidden = score <= 0;
+      box.style.order = q && score > 0 ? String(3 - score) : '';
+      if (score <= 0) return;
+      st.shown++;
+      if (score > st.best) st.best = score;
+      if (score > best) { best = score; firstHit = e.tile; }
+    });
+    stats.forEach(function (st, cat) {
+      cat.hidden = st.shown === 0;
+      cat.style.order = q && st.shown ? String(3 - st.best) : '';
       var count = cat.querySelector('.launcher__count');
-      if (count) count.textContent = String(shown);
-      hits += shown;
+      if (count) count.textContent = String(st.shown);
+      hits += st.shown;
     });
     if (none) {
       none.hidden = !q || hits > 0;
@@ -159,8 +172,21 @@
       }
     });
   }
+  function labelExtensions() {
+    var I = window.MentriaI18n;
+    var label = pages.querySelector('.launcher__cat--extensions .launcher__label');
+    if (!label || !I || typeof I.t !== 'function') return;
+    var v = I.t('home.launcher.extensions');
+    if (typeof v === 'string' && v && label.textContent !== v) label.textContent = v;
+  }
+  document.addEventListener('mentria:localechange', labelExtensions);
+  if (window.MentriaI18n && typeof window.MentriaI18n.ready === 'function') window.MentriaI18n.ready().then(labelExtensions);
+
   if (window.MutationObserver) {
-    new MutationObserver(function () { if (find && find.value.trim()) filter(); }).observe(pages, { childList: true });
+    new MutationObserver(function () {
+      labelExtensions();
+      if (find && find.value.trim()) filter();
+    }).observe(pages, { childList: true });
     var root = document.documentElement;
     var capsKey = function () {
       var out = [];

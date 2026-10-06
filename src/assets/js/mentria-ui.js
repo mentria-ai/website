@@ -797,3 +797,98 @@
     windowMenu: windowMenu
   };
 })();
+
+(function () {
+  'use strict';
+
+  var SEARCH_WORD = /[\p{L}\p{N}\p{M}]/u;
+  var SEARCH_SPLIT = /[^\p{L}\p{N}\p{M}]+/u;
+  var SEARCH_CJK = /[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff66-\uff9f]/;
+
+  function searchLower(v) {
+    return String(v == null ? '' : v).normalize('NFKC').toLowerCase().normalize('NFC');
+  }
+
+  function searchFold(v) {
+    return searchLower(v).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function searchHit(text, term) {
+    var i = text.indexOf(term);
+    if (SEARCH_CJK.test(term)) return i !== -1;
+    while (i !== -1) {
+      if (i === 0 || !SEARCH_WORD.test(text.charAt(i - 1))) return true;
+      i = text.indexOf(term, i + 1);
+    }
+    return false;
+  }
+
+  function searchScore(terms, name, text) {
+    var i;
+    for (i = 0; i < terms.length; i++) if (!searchHit(name, terms[i]) && !searchHit(text, terms[i])) return 0;
+    for (i = 0; i < terms.length; i++) if (!searchHit(name, terms[i])) return 1;
+    return name.indexOf(terms[0]) === 0 ? 3 : 2;
+  }
+
+  function searchRank(query, items) {
+    var lowered = searchLower(query).trim();
+    var folded = searchFold(query).trim();
+    if (!folded) return null;
+    var run = function (prep, q) {
+      var terms = q.split(SEARCH_SPLIT).filter(Boolean);
+      if (!terms.length) terms = [q];
+      return items.map(function (it) { return it ? searchScore(terms, prep(it[0]), prep(it[1])) : 0; });
+    };
+    if (lowered.normalize('NFD') !== folded) {
+      var exact = run(searchLower, lowered);
+      for (var i = 0; i < exact.length; i++) if (exact[i] > 0) return exact;
+    }
+    return run(searchFold, folded);
+  }
+
+  function pageLang() {
+    return document.documentElement.getAttribute('lang') || 'en';
+  }
+
+  function formatNumber(n, digits, lang) {
+    var d = digits || 0;
+    try {
+      return new Intl.NumberFormat(lang || pageLang(), { minimumFractionDigits: d, maximumFractionDigits: d }).format(n);
+    } catch (_) {
+      return Number(n).toFixed(d);
+    }
+  }
+
+  var SIZE_UNITS_FR = { B: 'o', KB: 'Ko', MB: 'Mo', GB: 'Go', TB: 'To' };
+
+  function formatSize(value, unit, digits, lang) {
+    var l = lang || pageLang();
+    var u = /^fr\b/i.test(l) ? (SIZE_UNITS_FR[unit] || unit) : unit;
+    return formatNumber(value, digits, l) + '\u00a0' + u;
+  }
+
+  function formatBytes(n, digits, lang) {
+    if (n == null || isNaN(n)) return '';
+    var units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    var v = Number(n);
+    var i = 0;
+    while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+    var d = Array.isArray(digits) ? digits[Math.min(i, digits.length - 1)] : (i === 0 ? 0 : (digits == null ? 1 : digits));
+    return formatSize(v, units[i], d, lang);
+  }
+
+  function sizeLabel(label, lang) {
+    var m = /^\s*(\d+(?:\.\d+)?)\s*(B|KB|MB|GB|TB)\s*$/i.exec(String(label == null ? '' : label));
+    if (!m) return String(label == null ? '' : label);
+    var dot = m[1].indexOf('.');
+    return formatSize(parseFloat(m[1]), m[2].toUpperCase(), dot < 0 ? 0 : m[1].length - dot - 1, lang);
+  }
+
+  Object.assign(window.MentriaUI, {
+    searchRank: searchRank,
+    formatNumber: formatNumber,
+    formatSize: formatSize,
+    formatBytes: formatBytes,
+    sizeLabel: sizeLabel
+  });
+})();

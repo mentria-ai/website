@@ -64,6 +64,26 @@ const COPY = {
   errGeneration:      {{ ("tool.quote.err_generation"       | t) | dump | safe }},
   downloadPostponed:  {{ ("common.download_postponed"       | t) | dump | safe }}
 };
+const COPY_KEYS = {
+  statusLoadingModel: 'tool.quote.status_loading_model',
+  statusReady: 'tool.quote.status_ready',
+  statusGenerating: 'tool.quote.status_generating',
+  btnCopy: 'tool.quote.btn_copy',
+  btnCopied: 'tool.quote.btn_copied',
+  btnFailed: 'tool.quote.btn_failed',
+  errNoWebGpu: 'tool.quote.err_no_webgpu',
+  errUnsupportedBody: 'tool.quote.err_unsupported_body',
+  errLoadRuntime: 'tool.quote.err_load_runtime',
+  engineOffline: 'common.ai_engine_offline',
+  engineFailed: 'common.ai_engine_failed',
+  modelOffline: 'common.ai_model_offline',
+  offline: 'common.offline_title',
+  errDeviceLost: 'tool.quote.err_device_lost',
+  errLoadPrefix: 'tool.quote.err_load_prefix',
+  errNoQuote: 'tool.quote.err_no_quote',
+  errGeneration: 'tool.quote.err_generation',
+  downloadPostponed: 'common.download_postponed'
+};
 
 const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
 
@@ -76,31 +96,53 @@ const MAX_TOKENS = 128;
 /* \u2500\u2500 Status helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 const statusDot  = document.getElementById('mq-status-dot');
 const statusText = document.getElementById('mq-status-text');
-function setStatus(state, text) {
+const noteEl     = document.getElementById('mq-quote');
+const copyEl     = document.getElementById('mq-copy');
+let shownStatus = null;
+let shownNote = null;
+function setStatus(state, name, extra) {
   statusDot.className = 'mq__status-dot mq__status-dot--' + state;
-  statusText.textContent = text;
+  shownStatus = { name, extra: extra || '' };
+  statusText.textContent = COPY[name] + shownStatus.extra;
 }
+function showNote(name) {
+  shownNote = name;
+  noteEl.textContent = COPY[name];
+}
+document.addEventListener('mentria:localechange', () => {
+  const I = window.MentriaI18n;
+  if (!I || typeof I.t !== 'function') return;
+  const before = Object.assign({}, COPY);
+  for (const name of Object.keys(COPY_KEYS)) {
+    const v = I.t(COPY_KEYS[name]);
+    if (typeof v === 'string' && v !== COPY_KEYS[name]) COPY[name] = v;
+  }
+  if (shownStatus) statusText.textContent = COPY[shownStatus.name] + shownStatus.extra;
+  if (shownNote && noteEl.textContent === before[shownNote]) noteEl.textContent = COPY[shownNote];
+  if (!copyEl.querySelector('i18n-t')) {
+    for (const name of ['btnCopy', 'btnCopied', 'btnFailed']) {
+      if (copyEl.textContent === before[name]) { copyEl.textContent = COPY[name]; break; }
+    }
+  }
+});
 
 /* \u2500\u2500 WebGPU gate \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 function showUnsupportedError(reason, note) {
   setStatus('error', reason);
-  const quoteEl = document.getElementById('mq-quote');
-  if (quoteEl) {
-    quoteEl.textContent = note || COPY.errUnsupportedBody;
-  }
+  showNote(note || 'errUnsupportedBody');
   document.getElementById('mq-new').disabled = true;
 }
 
 if (!navigator.gpu) {
-  showUnsupportedError(COPY.errNoWebGpu);
+  showUnsupportedError('errNoWebGpu');
 } else {
   let MentriaEngine;
   try {
     ({ MentriaEngine } = await import(MENTRIA_DIST_BASE + 'mentria.mjs'));
   } catch (err) {
     console.error('Failed to load mentria-engine bundle:', err);
-    if (navigator.onLine) showUnsupportedError(COPY.errLoadRuntime, COPY.engineFailed);
-    else showUnsupportedError(COPY.offline, COPY.engineOffline);
+    if (navigator.onLine) showUnsupportedError('errLoadRuntime', 'engineFailed');
+    else showUnsupportedError('offline', 'engineOffline');
   }
   if (MentriaEngine) runApp(MentriaEngine);
 }
@@ -134,7 +176,7 @@ function runApp(MentriaEngine) {
     const dead = engine;
     engine = null;
     if (dead) { try { dead.terminate(); } catch (_) {} }
-    setStatus('error', COPY.errDeviceLost);
+    setStatus('error', 'errDeviceLost');
     if (!generating && !loading) newBtn.disabled = false;
     console.error('WebGPU device lost:', info);
   }
@@ -157,7 +199,7 @@ function runApp(MentriaEngine) {
   /* Load engine + model */
   async function startModel() {
     blocked = false;
-    setStatus('loading', COPY.statusLoadingModel);
+    setStatus('loading', 'statusLoadingModel');
     await ensureStrip();
     try {
       const { ensureModel } = await import('/assets/js/mentria-model.js');
@@ -191,16 +233,17 @@ function runApp(MentriaEngine) {
         return;
       }
       strip.done({ prime: COPY.statusReady, linger: 1200 });
-      setStatus('ready', COPY.statusReady);
+      setStatus('ready', 'statusReady');
       newBtn.disabled = false;
     } catch (err) {
       if (strip) strip.hide();
       console.error('Model load error:', err);
-      if (err && err.message === 'download-postponed') { blocked = true; setStatus('idle', COPY.downloadPostponed); }
-      else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) { blocked = true; showUnsupportedError(COPY.errNoWebGpu); }
+      if (err && err.message === 'download-postponed') { blocked = true; setStatus('idle', 'downloadPostponed'); }
+      else if (err && (err.message === 'no-webgpu' || err.name === 'NoWebGpuError' || err.name === 'WebGPUUnsupportedError')) { blocked = true; showUnsupportedError('errNoWebGpu'); }
       else {
         const offline = navigator.onLine === false;
-        setStatus('error', offline ? COPY.modelOffline : COPY.errLoadPrefix + (err.message || err));
+        if (offline) setStatus('error', 'modelOffline');
+        else setStatus('error', 'errLoadPrefix', String(err.message || err));
         newBtn.disabled = generating;
         if (offline) retryWhenOnline();
       }
@@ -221,9 +264,10 @@ function runApp(MentriaEngine) {
     }
     copyBtn.style.display = 'none';
     shareBtn.style.display = 'none';
+    shownNote = null;
     quoteEl.textContent = '';
     quoteEl.classList.add('mq__quote--typing');
-    setStatus('generating', COPY.statusGenerating);
+    setStatus('generating', 'statusGenerating');
 
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
@@ -274,9 +318,10 @@ function runApp(MentriaEngine) {
         .replace(/<think>[\s\S]*?<\/think>/g, '')
         .replace(/<\|[^|]*\|>/g, '')
         .trim());
-      const escNoQuote = COPY.errNoQuote.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || `<p>${escNoQuote}</p>`;
-      else quoteEl.textContent = display || COPY.errNoQuote;
+      const html = display && window.renderMarkdown ? renderMarkdown(display) : '';
+      if (!display || (window.renderMarkdown && !html)) showNote('errNoQuote');
+      else if (window.renderMarkdown) quoteEl.innerHTML = html;
+      else quoteEl.textContent = display;
       quoteEl.classList.remove('mq__quote--typing');
       if (display) copyBtn.style.display = '';
       if (display && navigator.share) shareBtn.style.display = '';
@@ -285,13 +330,13 @@ function runApp(MentriaEngine) {
       console.error('Generation error:', err);
       const lost = engine !== eng;
       if (strip) strip.error(String(err && err.message || err), lost ? { phase: 'answering', prime: COPY.errDeviceLost, onRetry: generateQuote } : { phase: 'answering' });
-      quoteEl.textContent = COPY.errGeneration;
+      showNote('errGeneration');
       quoteEl.classList.remove('mq__quote--typing');
     }
 
     generating = false;
     newBtn.disabled = false;
-    if (engine === eng) setStatus('ready', COPY.statusReady);
+    if (engine === eng) setStatus('ready', 'statusReady');
   }
 
   function stripWrapQuotes(text) {

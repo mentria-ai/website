@@ -256,7 +256,10 @@
     "send_to": "Enviar para…",
     "send_to_label": "Enviar para outra ferramenta",
     "send_named": "Enviar {name} para outra ferramenta",
-    "send_failed": "Não foi possível enviar para {tool}"
+    "send_failed": "Não foi possível enviar para {tool}",
+    "key_space": "ESPAÇO",
+    "key_click": "clique",
+    "key_tap": "toque"
   },
   "home": {
     "tools_heading": "Ferramentas",
@@ -370,22 +373,22 @@
       "tldr": "Uma plataforma traga-sua-própria-ferramenta. Uma extensão é um arquivo HTML com um manifesto embutido; instale aqui e ela ganha um bloco no seu lançador, entradas opcionais na paleta de comandos e seu próprio armazenamento local incluído no seu backup criptografado. As extensões rodam com acesso total neste dispositivo, então instale apenas arquivos de quem você confia. Nada sobre elas é enviado para servidor algum."
     },
     "coin-flip": {
-      "title": "Cara ou Coroa",
+      "title": "Cara ou coroa",
       "lede": "Cara ou coroa — jogue uma moeda instantaneamente. Faça uma série de melhor-de-N para desempates. Funciona offline.",
       "tldr": "Cara ou coroa simples apoiado no RNG seguro do navegador (Web Crypto). O resultado é decidido localmente; nada é registrado nem enviado a servidor. Mantém histórico por sessão. Útil para decisões rápidas, sorteios justos ou resolver discussões de mesa — instantâneo em qualquer dispositivo."
     },
     "color-picker": {
-      "title": "Seletor de Cores",
+      "title": "Seletor de cores",
       "lede": "Escolha qualquer cor, veja seus valores HEX / RGB / HSL e gere paletas harmônicas. Funciona offline.",
       "tldr": "Escolha, amostre e salve cores totalmente no seu navegador. Exibe HEX, RGB e HSL lado a lado. Os swatches salvos persistem via localStorage; nada é enviado. Clique no seletor, copie qualquer valor para a área de transferência ou monte uma pequena paleta para design ou código. Funciona offline."
     },
     "countdown-timer": {
-      "title": "Cronômetro Regressivo",
+      "title": "Cronômetro regressivo",
       "lede": "Defina uma duração ou escolha um horário alvo. Até 4 cronômetros independentes com som de alarme.",
       "tldr": "Rode até quatro cronômetros em paralelo com notificações opcionais do sistema ao terminar, mesmo com a aba escondida. Defina uma duração ou data e hora alvo, nomeie cada cronômetro, salve presets. O alarme sonoro e a notificação disparam do seu navegador; nada é registrado nem enviado a servidor."
     },
     "decision-wheel": {
-      "title": "Roda de Decisões",
+      "title": "Roda de decisões",
       "lede": "Não consegue decidir? Gire a roda e deixe o destino escolher. Funciona offline.",
       "tldr": "Gire uma roda personalizável para escolher na sua própria lista de opções. Adicione ou remova escolhas na hora; o resultado é selecionado localmente com o RNG do navegador. Sem contas, sem trackers, sem servidor. Útil para escolher restaurante, distribuir tarefas ou qualquer coisa em que você tiraria cara ou coroa."
     },
@@ -395,7 +398,7 @@
       "tldr": "Uma versão para navegador de Flappy Bird com estética synthwave-terminal. HTML5 Canvas puro — sem instalação, sem cadastro, sem scripts de terceiros. Estado do jogo, recorde e áudio rodam no cliente e permanecem no seu dispositivo. Toque, clique ou pressione espaço para bater asas. Funciona offline depois do cache."
     },
     "invoice": {
-      "title": "Gerador de Notas",
+      "title": "Gerador de notas",
       "lede": "Crie notas fiscais limpas de uma página no seu navegador. Salva automaticamente conforme você digita. Imprima em A4 ou exporte para JSON.",
       "tldr": "Monte faturas A4 limpas no seu navegador e salve como PDF pelo diálogo de impressão. Adicione itens, moeda, dados bancários, notas; salva automaticamente no localStorage para que recargas não percam dados. Importe ou exporte a fatura inteira como JSON. Sem contas, sem servidor — cada byte fica no seu dispositivo."
     },
@@ -410,7 +413,7 @@
       "tldr": "Campo Minado clássico reconstruído com estética synthwave/terminal. Presets de dificuldade (fácil, médio, difícil, extremo), controles por teclado e toque, melhores tempos persistentes via localStorage. Sem instalação, sem cadastro, sem analítica; lógica do jogo e cronômetro rodam localmente no navegador. Funciona offline depois que a página carrega."
     },
     "quick-notes": {
-      "title": "Notas Rápidas",
+      "title": "Notas rápidas",
       "lede": "Um bloco de notas mínimo que vive no seu navegador. Crie várias notas, salvas automaticamente a cada tecla pressionada.",
       "tldr": "Um bloco de notas focado em teclado que salva automaticamente cada tecla no localStorage do navegador. Várias notas, estética synthwave escura. As notas nunca saem do seu dispositivo — sem sincronização, sem contas, sem servidor. Use como rascunho para tarefas, trechos de código ou ideias que você vai retomar em uma aba."
     },
@@ -486,12 +489,12 @@
       "still": "Ainda em andamento: a primeira execução compila os shaders e pode levar um ou dois minutos no celular."
     },
     "quote": {
-      "title": "Frase Motivacional",
+      "title": "Frase motivacional",
       "lede": "Frases originais geradas por IA, rodando localmente no seu navegador. Seus dados não saem do seu dispositivo.",
-      "tldr": "Frase Motivacional gera aforismos originais com um modelo Qwen3.5 ajustado em dados de frases curados, rodando inteiramente no seu navegador via WebGPU. Sem servidor, sem chave de API, sem conta. O modelo é baixado na primeira visita e fica em cache localmente para reutilização instantânea."
+      "tldr": "Frase motivacional gera aforismos originais com um modelo Qwen3.5 ajustado em dados de frases curados, rodando inteiramente no seu navegador via WebGPU. Sem servidor, sem chave de API, sem conta. O modelo é baixado na primeira visita e fica em cache localmente para reutilização instantânea."
     },
     "radio": {
-      "title": "Rádio Infinita",
+      "title": "Rádio infinita",
       "lede": "Música cinematográfica épica gerada por IA, transmitindo infinitamente. Aprende seu gosto localmente — seus dados não saem do seu dispositivo.",
       "tldr": "Música cinematográfica infinita gerada por IA, em streaming direto no seu navegador. Faixas vêm de um catálogo público e tocam pelo elemento de áudio HTML5 nativo do navegador (com crossfade entre dois reprodutores); seu histórico de escuta e curtidas ficam no dispositivo no IndexedDB para aprender seu gosto localmente ao longo do tempo. Sem contas, sem rastreamento, sem personalização do lado do servidor."
     },
@@ -503,10 +506,10 @@
     "search": {
       "title": "Busca",
       "lede": "Encontre ferramentas e posts do feed. Digite qualquer consulta — palavra-chave ou linguagem natural.",
-      "tldr": "Busca em todo o site apoiada por um índice gerado em tempo de build, cobrindo cada ferramenta e post do feed em 5 idiomas. O modo padrão é correspondência fuzzy instantânea por palavras-chave em títulos, descrições e TL;DRs — sem download de modelo, sem ida ao servidor. Quando o modelo Qwen3.5 já está em cache local (após usar AI Chat ou Frase Motivacional), um resumo IA opcional aparece acima dos resultados."
+      "tldr": "Busca em todo o site apoiada por um índice gerado em tempo de build, cobrindo cada ferramenta e post do feed em 5 idiomas. O modo padrão é correspondência fuzzy instantânea por palavras-chave em títulos, descrições e TL;DRs — sem download de modelo, sem ida ao servidor. Quando o modelo Qwen3.5 já está em cache local (após usar AI Chat ou Frase motivacional), um resumo IA opcional aparece acima dos resultados."
     },
     "step-counter": {
-      "title": "Contador de Passos",
+      "title": "Contador de passos",
       "lede": "Conte seus passos durante uma caminhada, direto no navegador. Usa o sensor de movimento do seu telefone — nada é enviado.",
       "tldr": "Um pedômetro por sessão que lê o acelerômetro do seu telefone pela API DeviceMotion e conta passos com detecção de picos no dispositivo. Inicie uma sessão e caminhe com a tela ligada — ele acompanha passos, distância, ritmo e um anel de meta diária. Todo o processamento fica no navegador: sem conta, sem upload, sem rastreamento em segundo plano. Dispositivos sem sensor de movimento mostram um estado desativado. Os totais diários ficam neste dispositivo, com gráfico de 7 dias e sequências de meta. O modo bolso mantém a tela acesa, mas em preto puro (ideal em OLED), para continuar contando no bolso; lacunas curtas com a tela bloqueada são preenchidas pelo seu ritmo e marcadas como estimativas."
     },
@@ -586,7 +589,7 @@
       "tldr": "Transforme qualquer celular em velocímetro: a ferramenta lê o GPS do aparelho pelo navegador e mostra sua velocidade ao vivo em um mostrador grande, em km/h, mph ou nós. Ela também acompanha o percurso — distância, tempo em movimento, média e velocidade máxima — e mantém tudo mesmo se você recarregar a página. Sua posição nunca sai do aparelho: sem conta, sem envio e sem rastreamento."
     },
     "ruler": {
-      "title": "Régua Online",
+      "title": "Régua online",
       "lede": "Uma régua online em tamanho real: meça em cm, mm e polegadas direto na tela e calibre com um cartão de banco para que os milímetros sejam de verdade.",
       "tldr": "Uma régua desenhada direto na sua tela, com centímetros e milímetros de um lado e polegadas até 1/16 do outro. Nenhum navegador consegue saber o tamanho real do seu monitor, então você calibra uma vez ajustando um contorno a um cartão de banco — ou digitando uma medida que já conhece — e daí em diante as marcações ficam fiéis. Arraste os dois marcadores para medir o que apoiar sobre o vidro; funciona offline e a calibração fica salva neste dispositivo."
     },
@@ -596,7 +599,7 @@
       "tldr": "FPS de contrarrelógio no navegador com medalhas e fantasmas."
     },
     "model-mirror": {
-      "title": "Espelho de Modelos",
+      "title": "Espelho de modelos",
       "lede": "Ajude a distribuir os modelos locais da Mentria em P2P. Mantenha esta aba aberta e seu navegador vira um espelho.",
       "tldr": "Seu navegador compartilha o modelo 0.8B com outros visitantes por P2P, com o download oficial como reserva automática. Sem conta e sem instalação."
     },
@@ -628,7 +631,7 @@
       "tldr": "Escolha o tamanho e os tipos de caractere que quiser, ou mude para o modo frase secreta e receba algumas palavras sorteadas da lista curta da EFF. Cada caractere e cada palavra são sorteados sem viés pelo gerador criptográfico de números aleatórios do seu navegador, e toda senha tem a garantia de trazer pelo menos um caractere de cada conjunto que você ativar. O indicador de entropia mostra quanto esforço de adivinhação as suas configurações exigem, para você ver o que ganha com mais caracteres ou uma palavra a mais. Tudo roda no seu dispositivo: só as configurações ficam guardadas, e as senhas geradas nunca são salvas, registradas nem enviadas para lugar nenhum."
     },
     "image-compressor": {
-      "title": "Compressor de Imagens",
+      "title": "Compressor de imagens",
       "lede": "Comprima imagens online sem instalar nenhum app: reduza arquivos JPEG, PNG e WebP, redimensione e converta o formato direto no navegador. Nada é enviado.",
       "tldr": "Solte fotos ou capturas de tela e receba cópias mais leves em segundos. Escolha JPEG, WebP ou PNG, ajuste a qualidade e, se quiser, limite a largura e a altura ou reduza por porcentagem — a proporção é mantida e nada é ampliado. Cada imagem é decodificada e recodificada pelo seu próprio navegador, então nada é enviado e tudo continua funcionando offline. A recodificação também remove os metadados EXIF, como a localização GPS e os dados da câmera. Compare o antes e o depois com um controle deslizante e baixe uma imagem ou todas de uma vez."
     },
@@ -1000,18 +1003,18 @@
       "filename_placeholder": "clique em Gerar ou digite um nome",
       "btn_ai_generate": "Gerar nome",
       "btn_ai_generating": "Gerando…",
-      "ai_unavailable_hint": "Abra AI Chat ou Frase Motivacional uma vez para habilitar a nomeação IA",
+      "ai_unavailable_hint": "Abra AI Chat ou Frase motivacional uma vez para habilitar a nomeação IA",
       "ai_confirm_download": "A nomeação por IA precisa de um download único do modelo (490 MB ou mais, dependendo do nível). Continuar?",
       "btn_ai_loading": "Carregando {pct}%",
       "preview_region_aria": "Pré-visualização renderizada",
       "tab_hint": "Tab insere espaços. Pressione Escape e depois Tab para sair do editor.",
       "remote_img_blocked": "imagem remota bloqueada: {src}",
-      "import_note_confirm": "Substituir seu rascunho de Markdown atual pela nota do Notas Rápidas?",
+      "import_note_confirm": "Substituir seu rascunho de Markdown atual pela nota do Notas rápidas?",
       "import_file_confirm": "Substituir seu rascunho de Markdown atual pelo arquivo importado?",
       "sample": "# Boas-vindas ao Markdown → PDF\n\nEsta é uma demonstração rápida para você ver como o documento vai ser impresso.\n**Edite à esquerda**, veja a prévia à direita e clique em **Baixar PDF** quando estiver tudo certo.\n\n## Recursos\n\n- Markdown no estilo do GitHub: tabelas, listas de tarefas e tachado\n- Blocos de código bem formatados\n- Prévia ao vivo e rápida\n- Salvo automaticamente no seu navegador\n\n### Código\n\n```js\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\n```\n\n### Tabela\n\n| Recurso          | Status   |\n| ---------------- | :------: |\n| Tabelas          | ✓        |\n| Listas           | ✓        |\n| Blocos de código | ✓        |\n| Fórmulas (KaTeX) | em breve |\n\n### Lista de tarefas\n\n- [x] Digite um pouco de markdown\n- [x] Veja a prévia ser atualizada\n- [ ] Clique em **Baixar PDF**\n\n> Dica: na janela de impressão, escolha **Salvar como PDF** como destino, deixe as margens em *Padrão* e desative cabeçalhos e rodapés para um resultado mais limpo.\n\n---\n\nFeito com [Mentria](https://mentria.ai).\n"
     },
     "quote": {
-      "tldr_heading": "O que é Frase Motivacional?",
+      "tldr_heading": "O que é Frase motivacional?",
       "status_initializing": "Inicializando…",
       "status_loading_model": "Carregando modelo…",
       "status_ready": "Pronto",
@@ -1213,7 +1216,7 @@
       "ai_summary_label": "Resumo IA",
       "ai_run_btn": "Gerar resumo IA",
       "ai_thinking": "Gerando…",
-      "ai_unavailable": "Abra o AI Chat ou Frase Motivacional uma vez para cachear o modelo — depois resumos IA aparecerão aqui.",
+      "ai_unavailable": "Abra o AI Chat ou Frase motivacional uma vez para cachear o modelo — depois resumos IA aparecerão aqui.",
       "type_all": "Tudo",
       "type_tool": "Ferramentas",
       "type_post": "Posts",
@@ -2445,8 +2448,8 @@
       "evidence_missing": "Ainda não: sua evidência não está na tela. Continue, ou cite um texto realmente visível.",
       "evidence_label": "evidência:",
       "qty_mismatch": "O app usou um valor diferente do que a tarefa pedia",
-      "notes_locked": "suas notas estão bloqueadas ou vazias — abra o Notas Rápidas e desbloqueie primeiro",
-      "no_such_note": "a nota @notes.{n} não existe — confira o número no Notas Rápidas",
+      "notes_locked": "suas notas estão bloqueadas ou vazias — abra o Notas rápidas e desbloqueie primeiro",
+      "no_such_note": "a nota @notes.{n} não existe — confira o número no Notas rápidas",
       "adapter_on": "adaptador: ajustado para ferramentas",
       "adapter_off": "adaptador: desligado (modelo base)",
       "btn_adapter": "Alternar o adaptador de ferramentas",
@@ -5632,6 +5635,8 @@
     "share": "Compartilhar",
     "shared_hint": "Arquivo do pacote pronto para compartilhar. Contatos importam na página Aprender, ou envie pelo Comms.",
     "format_link": "Formato do pacote",
+    "format_english_only": "Esta página só está disponível em inglês.",
+    "format_desc": "Como escrever um pacote de aprendizado para o mentria.ai. Um único arquivo JSON, nove tipos de cartão, e qualquer ferramenta que escreva JSON pode criar um.",
     "course": "Curso",
     "course_packs_n": "{done} de {total} pacotes concluídos",
     "course_packs_n_one": "{done} de {total} pacote concluído",

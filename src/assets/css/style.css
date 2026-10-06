@@ -43,6 +43,14 @@ i18n-t {
   display: contents;
 }
 
+html:lang(ja) {
+  line-break: strict;
+}
+html:lang(ja) :is(h1, h2, h3, h4, .hero p, [class*="__title"], [class*="__name"], .launch-tile__label) {
+  word-break: auto-phrase;
+  overflow-wrap: break-word;
+}
+
 /* ── Design System Tokens ─────────────────────────── */
 :root {
   color-scheme: dark;

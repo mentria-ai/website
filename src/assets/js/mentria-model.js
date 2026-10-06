@@ -39,7 +39,7 @@ function i18nReady(ms) {
   }
 }
 
-function t(key, vars) {
+function say(key, vars) {
   let s = DEFAULT_COPY[key];
   try {
     if (window.MentriaI18n && window.MentriaI18n.t) {
@@ -50,12 +50,41 @@ function t(key, vars) {
   return vars ? s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m)) : s;
 }
 
+const SAID = new Map();
+const SIZES = new Map();
+
+function t(key, vars) {
+  const out = say(key, vars);
+  SAID.set(out, { key, vars });
+  return out;
+}
+
+function sizeText(raw) {
+  const UI = typeof window !== 'undefined' ? window.MentriaUI : null;
+  const out = UI && UI.sizeLabel ? UI.sizeLabel(raw) : raw;
+  SIZES.set(out, raw);
+  return out;
+}
+
+function relabel() {
+  const el = document.getElementById('mm-gate');
+  if (!el) return;
+  el.querySelectorAll('*').forEach((n) => {
+    if (n.children.length) return;
+    const spec = SAID.get(n.textContent);
+    if (spec) n.textContent = t(spec.key, spec.vars);
+    else if (SIZES.has(n.textContent)) n.textContent = sizeText(SIZES.get(n.textContent));
+  });
+}
+
+if (typeof document !== 'undefined') document.addEventListener('mentria:localechange', relabel);
+
 export class NoWebGpuError extends Error {
   constructor() { super('no-webgpu'); this.name = 'NoWebGpuError'; }
 }
 
 function tierName(id) { return (Tiers.TIERS[id] && Tiers.TIERS[id].name) || id; }
-function tierSize(id) { return (Tiers.TIERS[id] && Tiers.TIERS[id].sizeLabel) || ''; }
+function tierSize(id) { return sizeText((Tiers.TIERS[id] && Tiers.TIERS[id].sizeLabel) || ''); }
 
 function ensureOverlayStyle() {
   if (document.getElementById('mm-gate-style')) return;

@@ -43,7 +43,7 @@ eleventyComputed:
 
 <section class="xs-bar" aria-label="{{ ext.name }}">
   <div class="xs-head__actions">
-    <button type="button" class="m-btn m-btn--primary" id="xs-install">{{ "store.install" | t }} · {{ ext.size }}</button>
+    <button type="button" class="m-btn m-btn--primary" id="xs-install">{{ "store.install" | t }} · <span data-bytes="{{ ext.bytes }}">{{ ext.bytes | fileSize }}</span></button>
     <span class="xs-head__state" id="xs-state" hidden>{{ "store.installed_offline" | t }}</span>
     <span class="xs-head__state" id="xs-state-plain" hidden>{{ "tool.ext_gallery.installed" | t }}</span>
     <button type="button" class="m-btn" id="xs-remove" hidden>{{ "store.remove" | t }}</button>
@@ -82,7 +82,7 @@ eleventyComputed:
   <dl class="xs-info">
     <div><dt>{{ "store.info_developer" | t }}</dt><dd>{{ ext.author }}</dd></div>
     <div><dt>{{ "store.info_version" | t }}</dt><dd>{{ ext.version }}</dd></div>
-    <div><dt>{{ "store.info_size" | t }}</dt><dd>{{ ext.size }}</dd></div>
+    <div><dt>{{ "store.info_size" | t }}</dt><dd data-bytes="{{ ext.bytes }}">{{ ext.bytes | fileSize }}</dd></div>
     <div><dt>{{ "store.info_price" | t }}</dt><dd>{{ "store.free" | t }}</dd></div>
   </dl>
 </section>
@@ -208,6 +208,13 @@ function relocalize(e) {
   if (locale) D.prefix = locale.prefix;
   if (!progressEl.hidden) progressText.textContent = C.installing.replace('{pct}', String(lastPct));
   if (!installErr.hidden) installErr.textContent = C[failKind];
+  const UI = window.MentriaUI;
+  if (UI && UI.formatBytes) {
+    document.querySelectorAll('[data-bytes]').forEach((el) => {
+      const n = Number(el.dataset.bytes);
+      el.textContent = n >= 1048576 ? UI.formatBytes(n, 1) : UI.formatSize(Math.max(1, Math.round(n / 1024)), 'KB', 0);
+    });
+  }
 }
 
 function storageBlocked() {

@@ -1,7 +1,7 @@
 import * as U from '../ui.js';
 import { ACCOUNT_TYPES, INVEST_TYPES, accountGroup } from '../ledger.js';
 import { COMMON_CCY } from '../defaults.js';
-import { isCurrency, rateE6From, minorToDecimal, normalizeNumber, trimDecimal, decimalToInput, formatDecimal } from '../money.js';
+import { isCurrency, rateE6From, minorToDecimal, trimDecimal, decimalToInput, formatDecimal } from '../money.js';
 import { isISODate } from '../dates.js';
 
 const { h, t, icon } = U;
@@ -221,12 +221,12 @@ function fxTab(ctx) {
   for (const a of L.accounts(true)) if (a.currency !== base) used.add(a.currency);
   for (const r of L.list('fx_rate')) { if (r.quote === base) used.add(r.base); }
   const from = U.select(ccyOptions(L, Array.from(used)[0] || 'USD').filter((o) => o.value !== base), Array.from(used)[0] || (base === 'USD' ? 'EUR' : 'USD'));
-  const rate = U.moneyField({ placeholder: decimalToInput('0.00', U.locale()) });
+  const rate = U.readBack(U.moneyField({ placeholder: decimalToInput('0.00', U.locale()) }), 6, (dec) => formatDecimal(trimDecimal(dec), U.locale()));
   const date = h('input', { class: 'fi', type: 'date', value: L.today() });
   const err = h('p', { class: 'ff__err', role: 'alert' });
   const add = h('button', { type: 'button', class: 'fb fb--primary' }, t('accounts.fx_add'));
   add.addEventListener('click', () => {
-    const dec = normalizeNumber(rate.value, U.locale());
+    const dec = U.readNumber(rate.value, 6);
     let r6 = null;
     try { r6 = dec ? rateE6From(dec) : null; } catch (_) {}
     if (!r6 || r6 <= 0) { err.textContent = t('entry.err_amount'); return; }

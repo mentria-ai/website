@@ -1882,6 +1882,14 @@
         "fpv-drone": "Pilota un dron de carreras entre puertas luminosas sobre colinas, un patio de contenedores y un cañón del desierto. Vuelo acrobático o autonivelado, medallas, carreras contra fantasmas y un mapa de vuelo libre. Funciona con pantalla táctil, mando o teclado.",
         "nitro-racer": "Carreras arcade callejeras contra cinco rivales: derrapa para llenar el nitro, salta las rampas y consigue medallas en un circuito urbano de neón, una autopista costera y un cañón del desierto. Funciona con pantalla táctil, inclinación, mando o teclado.",
         "finance": "Controla gastos, presupuestos, facturas, inversiones e impuestos, con previsiones. Cifrado en tu dispositivo y sincronizado solo entre tus propios dispositivos."
+      },
+      "cmd": {
+        "finance": {
+          "fin-add": "añadir un movimiento, p. ej. fin-add café 4,50",
+          "fin-budget": "abrir los presupuestos de este mes",
+          "fin-subs": "abrir facturas y suscripciones",
+          "fin-tax": "abrir la estimación de impuestos"
+        }
       }
     },
     "bubble-level": {
@@ -4262,6 +4270,7 @@
         "name": "Nombre",
         "name_ph": "p. ej. Alquiler, Música, Teléfono",
         "kind_label": "Tipo",
+        "kind_pick": "¿Factura o suscripción?",
         "kind": {
           "subscription": "Suscripción",
           "bill": "Factura",
@@ -4314,6 +4323,7 @@
         "active": "Sigue activa",
         "price_history": "Cambios de precio",
         "err_name": "Ponle un nombre.",
+        "err_kind": "Elige si es una factura o una suscripción.",
         "delete_title": "¿Eliminar esta factura?",
         "delete_body": "{name} dejará de aparecer entre los próximos pagos. Los pagos ya registrados se quedan en tu libro de cuentas.",
         "none_upcoming": "Nada pendiente. Añade el alquiler, las facturas y las suscripciones para verlos aquí.",
@@ -4987,7 +4997,6 @@
         "removed": "Dispositivo quitado",
         "add_body": "En el otro dispositivo, abre Finanzas, elige \"Uso Finanzas en otro dispositivo\" y escribe este código. Funciona durante 10 minutos.",
         "add_hint": "Los dos dispositivos deben estar conectados a internet. Tu libro de cuentas pasa directamente de uno a otro, cifrado; no se guarda nada en ningún servidor.",
-        "qr_label": "Código QR con el código de emparejamiento",
         "waiting": "Esperando a tu otro dispositivo…",
         "peer_found": "Se encontró {name}. Comprueba que muestra el mismo número:",
         "approve": "Los números coinciden, enviar",

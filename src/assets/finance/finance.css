@@ -94,12 +94,15 @@ html.ext-app, html.ext-app body { background: var(--f-bg, #0b0d10); }
 .fi:focus, .fsel:focus, .fta:focus { outline: none; border-color: var(--f-in); box-shadow: 0 0 0 3px rgba(110, 243, 197, 0.15); }
 .fi::placeholder, .fta::placeholder { color: var(--f-subtle); }
 .fi--num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.fi:is([type="date"], [type="time"], [type="month"], [type="datetime-local"]) { -webkit-appearance: none; appearance: none; text-align: left; }
+.fi::-webkit-date-and-time-value { text-align: left; }
 .fta { min-height: 80px; resize: vertical; }
 .fsel { appearance: none; -webkit-appearance: none; padding-right: 34px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238896a8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
 .ff { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .ff__label { font-size: 0.8rem; color: var(--f-muted); font-weight: 500; }
 .ff__hint { font-size: 0.78rem; color: var(--f-muted); line-height: 1.4; }
 .ff__err { font-size: 0.8rem; color: var(--f-over); }
+.ff__read { display: block; font-size: 0.78rem; color: var(--f-warn); line-height: 1.4; }
 .ff-grid { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
 .ff-grid > .ff--wide { grid-column: 1 / -1; }
 @media (max-width: 480px) { .ff-grid { grid-template-columns: 1fr; } }
@@ -154,6 +157,14 @@ html.ext-app, html.ext-app body { background: var(--f-bg, #0b0d10); }
 .frow__amt small { display: block; font-size: 0.72rem; color: var(--f-muted); }
 .frow--static { cursor: default; }
 .frow--static:hover { background: none; }
+.frow--found { grid-template-columns: 38px minmax(0, 1fr) auto auto; }
+.frow--found .frow__title, .frow--found .frow__meta { white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+  .frow--found { grid-template-columns: 38px minmax(0, 1fr) auto; row-gap: 4px; }
+  .frow--found .frow__main { grid-column: 2 / -1; }
+  .frow--found .frow__amt { grid-column: 2; text-align: left; }
+  .frow--found .frow__acts { grid-column: 3; }
+}
 .fmono { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; font-family: var(--f-mono); font-weight: 600; font-size: 0.92rem; color: var(--c, var(--f-in)); background: color-mix(in srgb, var(--c, var(--f-in)) 14%, transparent); flex: 0 0 auto; overflow: hidden; }
 .fmono--sm { width: 30px; height: 30px; border-radius: 9px; font-size: 0.8rem; }
 .fmono svg { width: 18px; height: 18px; }
@@ -162,6 +173,8 @@ html.ext-app, html.ext-app body { background: var(--f-bg, #0b0d10); }
 .fleader__label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fleader__dots { flex: 1; min-width: 12px; border-bottom: 1px dotted rgba(255, 255, 255, 0.22); transform: translateY(-4px); }
 .fleader__val { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fconf .fleader__label { flex: none; }
+.fconf .fleader__val { min-width: 0; white-space: normal; overflow-wrap: anywhere; text-align: right; }
 
 .fsheet { padding: 0; border: 0; color: var(--f-fg); background: transparent; max-width: none; max-height: none; width: 100%; height: 100%; margin: 0; overflow: hidden; }
 .fsheet::backdrop { background: rgba(2, 4, 6, 0.66); }
@@ -300,8 +313,6 @@ html.ext-app, html.ext-app body { background: var(--f-bg, #0b0d10); }
 .fdl dt { color: var(--f-muted); }
 .fdl dd { margin: 0; text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
 .fsr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.fqr { display: grid; place-items: center; padding: 12px; background: #fff; border-radius: 12px; width: max-content; margin: 0 auto; }
-.fqr canvas, .fqr img, .fqr svg { display: block; width: 200px; height: 200px; image-rendering: pixelated; }
 .fspace { height: 12px; }
 .fstack { display: flex; flex-direction: column; gap: 12px; }
 .fwrap { overflow-wrap: anywhere; }

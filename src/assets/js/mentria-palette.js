@@ -48,7 +48,7 @@
     return (entry.count || 0) + 6 / (1 + (Date.now() - (entry.last || 0)) / DAY);
   }
 
-  function buildExtensions(prefix) {
+  function buildExtensions(prefix, local) {
     var out = [];
     try {
       var S = window.MentriaStore;
@@ -67,6 +67,7 @@
           if (!c || typeof c.name !== 'string') continue;
           var name = m.name || id;
           var desc = typeof c.description === 'string' ? c.description : '';
+          if (local && typeof local[id + ' ' + c.name] === 'string') desc = local[id + ' ' + c.name];
           out.push({
             title: c.name + ' · ' + name,
             hint: clip(desc, 80),
@@ -178,7 +179,7 @@
       quickEntry('flip', labels.actFlip || 'Flip a coin', words(labels.kwFlip, ['flip', 'coin']), flipCoin)
     ];
 
-    return { tools: normTools, nav: normNav, recents: recents, gallery: buildGallery((d && d.gallery) || [], prefix), extensions: buildExtensions(prefix), quick: quick, kwNote: kwNote, kwTimer: kwTimer };
+    return { tools: normTools, nav: normNav, recents: recents, gallery: buildGallery((d && d.gallery) || [], prefix), extensions: buildExtensions(prefix, d && d.extCmds), quick: quick, kwNote: kwNote, kwTimer: kwTimer };
   }
 
   function applyLabels() {

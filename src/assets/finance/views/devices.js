@@ -4,45 +4,16 @@ import { canonical } from '../oplog.js';
 
 const { h, t, icon } = U;
 
-function loadQr() {
-  if (window.qrcodegen) return Promise.resolve(window.qrcodegen);
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = '/assets/js/qrcode.js';
-    s.onload = () => resolve(window.qrcodegen);
-    s.onerror = () => reject(new Error('qr'));
-    document.head.append(s);
-  });
-}
-
-async function qrCanvas(text) {
-  const Q = await loadQr();
-  const qr = Q.QrCode.encodeText(text, Q.QrCode.Ecc.MEDIUM);
-  const scale = 6;
-  const border = 2;
-  const c = document.createElement('canvas');
-  c.width = c.height = (qr.size + border * 2) * scale;
-  const g = c.getContext('2d');
-  g.fillStyle = '#ffffff';
-  g.fillRect(0, 0, c.width, c.height);
-  g.fillStyle = '#0b0d10';
-  for (let y = 0; y < qr.size; y++) for (let x = 0; x < qr.size; x++) if (qr.getModule(x, y)) g.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
-  c.setAttribute('role', 'img');
-  c.setAttribute('aria-label', t('devices.qr_label'));
-  return c;
-}
-
 async function startPairing(ctx) {
   if (!ctx.app.sync) return;
   const status = h('p', { class: 'fsmall fmuted', role: 'status', 'aria-live': 'polite' }, t('devices.waiting'));
   const codeEl = h('div', { class: 'flock__code' });
-  const qrBox = h('div', { class: 'fqr' });
   const approve = h('button', { type: 'button', class: 'fb fb--primary', hidden: true }, t('devices.approve'));
   let session = null;
   let closed = false;
   const sh = U.sheet({
     title: t('devices.add'),
-    body: h('div', { class: 'fstack' }, h('p', { class: 'fmuted fsmall' }, t('devices.add_body')), codeEl, qrBox, status, h('p', { class: 'ff__hint' }, t('devices.add_hint'))),
+    body: h('div', { class: 'fstack' }, h('p', { class: 'fmuted fsmall' }, t('devices.add_body')), codeEl, status, h('p', { class: 'ff__hint' }, t('devices.add_hint'))),
     foot: [h('button', { type: 'button', class: 'fb', onclick: () => sh.close() }, t('common.cancel')), approve],
     onClose: () => { closed = true; if (session) session.cancel(); },
     sticky: true
@@ -60,7 +31,6 @@ async function startPairing(ctx) {
     });
     if (closed) { session.cancel(); return; }
     codeEl.replaceChildren(...session.code.split('-').map((g) => h('span', null, g)));
-    try { qrBox.replaceChildren(await qrCanvas('mentria-finance://pair/' + session.code.replace(/-/g, ''))); } catch (_) { qrBox.remove(); }
   } catch (e) {
     status.textContent = t('devices.pair_failed') + ' ' + String((e && e.message) || e);
   }
@@ -106,7 +76,7 @@ function conflictsPanel(ctx) {
         await drop();
         ctx.commit(ops, t('devices.switched'));
       } }, t('devices.use_other')) : null);
-    node.append(h('div', { class: 'fcard', style: { marginBottom: '10px' } },
+    node.append(h('div', { class: 'fcard fconf', style: { marginBottom: '10px' } },
       h('div', { class: 'fcard__head' }, h('h3', { class: 'fcard__title' }, t('devices.entity.' + c.e) + ' · ' + title), h('span', { class: 'fsmall fmuted' }, c.f)),
       U.leader(t('devices.kept'), show(c.win.v)),
       U.leader(t('devices.other'), show(c.lose.v)),

@@ -1882,6 +1882,14 @@
         "fpv-drone": "Pilotez un drone de course à travers des portes lumineuses au-dessus de collines, d'un parc à conteneurs et d'un canyon désertique. Vol acrobatique ou auto-stabilisé, médailles, courses contre des fantômes et une carte de vol libre. Fonctionne au toucher, à la manette ou au clavier.",
         "nitro-racer": "Course de rue arcade contre cinq rivaux : driftez pour remplir votre nitro, prenez les tremplins et visez les médailles sur un circuit urbain néon, une route côtière et un canyon désertique. Fonctionne au toucher, à l'inclinaison, à la manette ou au clavier.",
         "finance": "Suivez vos dépenses, budgets, factures, placements et impôts, avec des prévisions. Chiffré sur votre appareil et synchronisé uniquement entre vos propres appareils."
+      },
+      "cmd": {
+        "finance": {
+          "fin-add": "ajouter une opération, p. ex. fin-add café 4,50",
+          "fin-budget": "ouvrir les budgets de ce mois",
+          "fin-subs": "ouvrir les factures et abonnements",
+          "fin-tax": "ouvrir l'estimation d'impôts"
+        }
       }
     },
     "bubble-level": {
@@ -4262,6 +4270,7 @@
         "name": "Nom",
         "name_ph": "p. ex. Loyer, Musique, Forfait mobile",
         "kind_label": "Type",
+        "kind_pick": "Facture ou abonnement ?",
         "kind": {
           "subscription": "Abonnement",
           "bill": "Facture",
@@ -4314,6 +4323,7 @@
         "active": "Toujours en cours",
         "price_history": "Changements de prix",
         "err_name": "Donnez-lui un nom.",
+        "err_kind": "Indiquez s'il s'agit d'une facture ou d'un abonnement.",
         "delete_title": "Supprimer cette facture ?",
         "delete_body": "{name} n'apparaîtra plus dans les paiements à venir. Les paiements déjà enregistrés restent dans votre livre de comptes.",
         "none_upcoming": "Rien à payer. Ajoutez votre loyer, vos factures et vos abonnements pour les voir ici.",
@@ -4987,7 +4997,6 @@
         "removed": "Appareil retiré",
         "add_body": "Sur l'autre appareil, ouvrez Finances, choisissez « J'utilise Finances sur un autre appareil » et saisissez ce code. Il est valable 10 minutes.",
         "add_hint": "Les deux appareils doivent être en ligne. Votre livre de comptes passe directement de l'un à l'autre, chiffré ; rien n'est stocké sur un serveur.",
-        "qr_label": "QR code contenant le code d'appairage",
         "waiting": "En attente de votre autre appareil…",
         "peer_found": "{name} trouvé. Vérifiez qu'il affiche le même nombre :",
         "approve": "Les nombres correspondent, envoyer",

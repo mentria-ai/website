@@ -134,6 +134,75 @@ test('numbers: typed amounts follow the locale, grouping included', () => {
   assert.equal(M.normalizeNumber('1,234', 'en-US'), '1234');
 });
 
+test('numbers: a lone dot or comma from a phone number pad is read by the field precision', () => {
+  const LOCS = ['en-US', 'es-ES', 'fr-FR', 'pt-BR', 'ja-JP'];
+  const all = (v) => LOCS.map(() => v);
+  const table = [
+    ['1.085', 6, all('1.085')],
+    ['1,085', 6, all('1.085')],
+    ['10.125', 4, all('10.125')],
+    ['10,125', 4, all('10.125')],
+    ['45.678', 4, all('45.678')],
+    ['0.00012345', 8, all('0.00012345')],
+    ['1.234', 8, all('1.234')],
+    ['1234.567', 4, all('1234.567')],
+    ['0,925', 6, all('0.925')],
+    ['0.925', 6, all('0.925')],
+    ['1.2345', 4, all('1.2345')],
+    ['1.234.567', 4, all('1234567')],
+    ['1.234,56', 2, all('1234.56')],
+    ['1,234.56', 2, all('1234.56')],
+    ['-1.234,56', 2, all('-1234.56')],
+    ['462,49', 2, all('462.49')],
+    ['12.5', 2, all('12.5')],
+    ['1.500', 2, ['1.500', '1500', '1500', '1500', '1.500']],
+    ['1,500', 2, ['1500', '1.500', '1.500', '1.500', '1500']],
+    ['1.500', 0, all('1500')],
+    ['1,500', 0, all('1500')],
+    ['12.345', 3, all('12.345')],
+    ['12,345', 3, all('12.345')],
+    ['1 234,5', 4, all('1234.5')],
+    ['1.234,567', 4, all('1234.567')]
+  ];
+  for (const [text, decimals, want] of table) {
+    LOCS.forEach((loc, i) => assert.equal(M.typedNumber(text, loc, decimals), want[i], loc + ' ' + text + ' at ' + decimals + ' decimals'));
+  }
+  for (const loc of ['en-US', 'en-GB', 'en-IN', 'es-ES', 'es-MX', 'fr-FR', 'fr-CA', 'de-DE', 'de-CH', 'it-IT', 'pt-BR', 'pt-PT', 'ja-JP', 'nl-NL', 'sv-SE', 'hi-IN']) {
+    for (const d of ['12.345', '0.925', '1234.5678', '1.5', '100', '12345678.12345678']) assert.equal(M.typedNumber(M.decimalToInput(d, loc), loc, 8), d, loc + ' prefill ' + d);
+  }
+  assert.equal(M.normalizeNumber('1.085', 'es-ES'), '1085');
+  assert.equal(M.normalizeNumber('1,234', 'en-US'), '1234');
+});
+
+test('numbers: the iPhone repro values in Spanish, French and Portuguese', () => {
+  for (const loc of ['es-ES', 'fr-FR', 'pt-BR', 'en-US', 'ja-JP']) withLocale(loc, () => {
+    const rate = EN.minorFromTyped(UI.readNumber('1.085', 6), 6);
+    assert.equal(rate, 1085000, loc + ' rate');
+    assert.equal(M.convertMinor(1000, 'USD', 'EUR', rate), 1085, loc + ' 10 USD in EUR');
+    const qty = VI.numberFromInput('10.125', 4);
+    const price = VI.numberFromInput('45.678', 4);
+    assert.deepEqual([qty, price], [101250, 456780], loc + ' trade');
+    assert.equal(M.qtyTimesPrice(qty, 4, price, 2), 46249, loc + ' total');
+    assert.equal(VI.numberFromInput('1,085', 4), 10850, loc + ' comma price');
+    assert.equal(UI.parseAmount('1.234,56', 'EUR'), 123456, loc + ' grouped amount');
+    assert.equal(UI.parseAmount('1,234.56', 'USD'), 123456, loc + ' grouped amount en');
+    assert.equal(UI.parseAmount('0,925', 'KWD'), 925, loc + ' fils');
+    assert.equal(UI.parseAmount('12.345', 'KWD'), 12345, loc + ' KWD');
+    assert.equal(UI.parseAmount('1.500', 'JPY'), 1500, loc + ' yen');
+  });
+  const odd = (loc, text, d) => { let v; withLocale(loc, () => { v = UI.unusualReading(text, d); }); return v; };
+  assert.equal(odd('es-ES', '1.085', 6), '1.085');
+  assert.equal(odd('fr-FR', '10.125', 4), '10.125');
+  assert.equal(odd('pt-BR', '45.678', 4), '45.678');
+  assert.equal(odd('en-US', '1,385', 6), '1.385');
+  assert.equal(odd('es-ES', '1,085', 6), null);
+  assert.equal(odd('en-US', '1.085', 6), null);
+  assert.equal(odd('es-ES', '1.500', 2), null);
+  assert.equal(odd('es-ES', '1.234,567', 4), null);
+  withLocale('es-ES', () => assert.equal(UI.parseAmount('1.500', 'EUR'), 150000));
+  withLocale('en-US', () => assert.equal(UI.parseAmount('1,500', 'USD'), 150000));
+});
+
 test('numbers: exchange rates prefill in the locale and survive an edit', () => {
   for (const loc of NUM_LOCALES) withLocale(loc, () => {
     const pre = M.trimDecimal(M.minorToDecimal(925000, 6));
@@ -705,6 +774,54 @@ test('recurring: finds a monthly stream and ignores noise', () => {
     assert.deepEqual(led.orphanSchedules().map((s) => s.id), ['gym']);
   });
 
+  sched('a bill auto-added on two devices apart is the same change', async () => {
+    const recs = [['settings', 'main', { base_currency: 'USD', time_zone: 'Asia/Kolkata' }], bank, bill('gym', { anchor: '2026-10-20', created: '2026-10-19T14:30:00.000Z', amount_minor: -3000 })];
+    const devices = ['aaaaaaaaaaaaaaaa', 'bbbbbbbbbbbbbbbb'].map((node, i) => {
+      const led = ledgerOf(recs, '2026-10-20');
+      const sc = led.get('schedule', 'gym');
+      assert.deepEqual(led.autoPostDates(sc), ['2026-10-20']);
+      const post = led.scheduledTxn(sc, '2026-10-20');
+      let now = Date.parse('2026-10-20T02:30:00.000Z') + i * 3_600_000;
+      const clock = L.createClock(node, () => now++);
+      const ops = [{ t: clock.send(), e: 'transaction', id: post.id, f: '*', v: post.fields }];
+      L.applyOps(led.state, ops, true);
+      return { led, ops, clock };
+    });
+    const [a, b] = devices;
+    assert.equal(a.ops[0].id, 'sch:gym:2026-10-20');
+    assert.equal(a.ops[0].v.created, '2026-10-20T00:00:00.000Z');
+    assert.deepEqual(a.ops[0].v, b.ops[0].v);
+    L.applyOps(a.led.state, b.ops);
+    L.applyOps(b.led.state, a.ops);
+    assert.equal(a.led.state.conflicts.length, 0);
+    assert.equal(b.led.state.conflicts.length, 0);
+    assert.equal(await L.stateHash(a.led.state), await L.stateHash(b.led.state));
+    assert.equal(a.led.get('transaction', 'sch:gym:2026-10-20').amount_minor, -3000);
+    const edit = [{ t: a.clock.send(), e: 'transaction', id: 'sch:gym:2026-10-20', f: 'amount_minor', v: -3500 }];
+    const c = ledgerOf(recs, '2026-10-20');
+    const cPost = c.scheduledTxn(c.get('schedule', 'gym'), '2026-10-20');
+    let cNow = Date.parse('2026-10-20T05:00:00.000Z');
+    const cClock = L.createClock('cccccccccccccccc', () => cNow++);
+    L.applyOps(c.state, [{ t: cClock.send(), e: 'transaction', id: cPost.id, f: '*', v: cPost.fields }], true);
+    L.applyOps(c.state, a.ops.concat(edit));
+    assert.deepEqual(c.state.conflicts.map((x) => [x.f, x.win.v, x.lose.v]), [['amount_minor', -3000, -3500]]);
+  });
+
+  sched('a bill added after the reminder time still gets one', async () => {
+    const RM = await mod('reminders.js');
+    const at = (d, hh, mm) => new Date(2026, 9, d, hh, mm || 0, 0, 0).getTime();
+    assert.deepEqual(RM.reminderSlot('2026-10-07', 1, at(6, 8)), { at: at(6, 9), days: 1 });
+    assert.deepEqual(RM.reminderSlot('2026-10-07', 1, at(6, 20, 45)), { at: at(7, 9), days: 0 });
+    assert.deepEqual(RM.reminderSlot('2026-10-07', 1, at(6, 20, 45), at(7, 9)), { at: at(7, 9), days: 0 });
+    assert.equal(RM.reminderSlot('2026-10-07', 1, at(6, 20, 45), at(6, 9)), null);
+    assert.equal(RM.reminderSlot('2026-10-07', 1, at(6, 12), 0), null);
+    assert.deepEqual(RM.reminderSlot('2026-10-07', 1, at(6, 8), 0), { at: at(6, 9), days: 1 });
+    assert.equal(RM.reminderSlot('2026-10-07', 1, at(7, 10)), null);
+    assert.deepEqual(RM.reminderSlot('2026-10-08', 3, at(6, 20, 45)), { at: at(7, 9), days: 1 });
+    assert.deepEqual(RM.reminderSlot('2026-10-07', 0, at(6, 20, 45)), { at: at(7, 9), days: 0 });
+    assert.equal(RM.reminderSlot('2026-10-06', 0, at(6, 9, 30)), null);
+  });
+
   sched('upcoming counts days from today and keeps overdue bills', () => {
     const led = ledgerOf([bank, bill('today', { anchor: '2026-10-03', auto_post: false }), bill('tomorrow', { anchor: '2026-10-04', auto_post: false }), bill('late', { anchor: '2026-09-30', auto_post: false })], '2026-10-03');
     const list = led.upcoming(60, D.addDays('2026-10-03', -7));
@@ -758,6 +875,32 @@ test('recurring: finds a monthly stream and ignores noise', () => {
     const bs = led.budgetSummary('2026-10');
     assert.deepEqual([bs.total, bs.spent, bs.expense, bs.outside], [50000, 10000, 160000, 150000]);
     assert.deepEqual(Array.from(bs.byDay.entries()), [['2026-10-02', 10000]]);
+  });
+
+  sched('a budget on one sub-category leaves its siblings outside', () => {
+    const recs = (foodBudget) => [
+      bank,
+      ['category', 'food', Object.assign({ name: 'Food', kind: 'expense', group: null, order: 1 }, foodBudget == null ? {} : { budget_default_minor: foodBudget })],
+      ['category', 'groc', { name: 'Groceries', kind: 'expense', group: 'food', order: 2, rollover: true, budget_default_minor: 50000 }],
+      ['category', 'eat', { name: 'Eating out', kind: 'expense', group: 'food', order: 3 }],
+      ['category', 'trans', { name: 'Transport', kind: 'expense', group: null, order: 4 }],
+      ['category', 'taxi', { name: 'Taxi', kind: 'expense', group: 'trans', order: 5 }],
+      ['transaction', 't1', { date: '2026-10-03', amount_minor: -2000, base_minor: -2000, currency: 'USD', account: 'a1', category: 'taxi' }],
+      ['transaction', 't2', { date: '2026-10-04', amount_minor: -3000, base_minor: -3000, currency: 'USD', account: 'a1', category: 'eat' }],
+      ['transaction', 't3', { date: '2026-10-05', amount_minor: -4000, base_minor: -4000, currency: 'USD', account: 'a1', category: 'groc' }],
+      ['transaction', 't4', { date: '2026-10-05', amount_minor: -500, base_minor: -500, currency: 'USD', account: 'a1', category: 'food' }]
+    ];
+    const bs = ledgerOf(recs(null), '2026-10-06').budgetSummary('2026-10');
+    assert.deepEqual([bs.total, bs.spent, bs.expense, bs.outside], [50000, 4000, 9500, 5500]);
+    const food = bs.items.find((it) => it.group.id === 'food');
+    assert.deepEqual([food.budget, food.spent], [50000, 4000]);
+    assert.deepEqual(food.kids.map((k) => [k.cat.id, k.budget, k.spent]), [['groc', 50000, 4000], ['eat', null, 3000]]);
+    const trans = bs.items.find((it) => it.group.id === 'trans');
+    assert.deepEqual([trans.budget, trans.spent], [null, 2000]);
+    assert.deepEqual(Array.from(bs.byDay.entries()), [['2026-10-05', 4000]]);
+    const whole = ledgerOf(recs(60000), '2026-10-06').budgetSummary('2026-10');
+    assert.deepEqual([whole.total, whole.spent, whole.outside], [60000, 7500, 2000]);
+    assert.deepEqual(Array.from(whole.byDay.entries()).sort(), [['2026-10-04', 3000], ['2026-10-05', 4500]]);
   });
 
   sched('a split in another currency keeps every cent', () => {

@@ -147,7 +147,7 @@ export function detectCurrency(text) {
   return null;
 }
 
-export function normalizeNumber(raw, locale, style) {
+function readNumber(raw, sep, decimals) {
   let s = String(raw || '').replace(/[\u00a0\u202f\u2009]/g, ' ').trim();
   let neg = false;
   if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
@@ -158,7 +158,6 @@ export function normalizeNumber(raw, locale, style) {
   s = s.replace(/[^\d.,' ]/g, '').trim();
   if (!/\d/.test(s)) return null;
   s = s.replace(/'/g, '');
-  const sep = style || localeSeparators(locale);
   const lastDot = s.lastIndexOf('.');
   const lastComma = s.lastIndexOf(',');
   let decimalChar = null;
@@ -170,6 +169,8 @@ export function normalizeNumber(raw, locale, style) {
     const head = s.slice(0, s.indexOf(ch)).replace(/\s/g, '');
     if (count > 1) decimalChar = null;
     else if (!head || head[0] === '0') decimalChar = ch;
+    else if (tail.length === 3 && decimals >= 3) decimalChar = ch;
+    else if (tail.length === 3 && decimals === 0 && /^\d{1,3}$/.test(head)) decimalChar = null;
     else if (tail.length === 3 && sep.group === ch && sep.decimal !== ch) decimalChar = null;
     else if (tail.length === 3 && /^\d{1,3}$/.test(head) && sep.decimal !== ch) decimalChar = null;
     else decimalChar = ch;
@@ -190,6 +191,14 @@ export function normalizeNumber(raw, locale, style) {
     out = String(Math.round(n * 1e6) / 1e6);
   }
   return (neg ? '-' : '') + out;
+}
+
+export function normalizeNumber(raw, locale, style) {
+  return readNumber(raw, style || localeSeparators(locale), null);
+}
+
+export function typedNumber(raw, locale, decimals) {
+  return readNumber(raw, localeSeparators(locale), decimals == null ? null : decimals);
 }
 
 export function parseMoney(text, currency, locale) {

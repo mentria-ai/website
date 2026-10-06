@@ -381,27 +381,30 @@ export class Ledger {
       let spent = 0;
       for (const { group, children } of tree) {
         const members = children.length ? children : [group];
-        let gBudget = 0;
-        let gSpent = 0;
-        let gHas = false;
+        let kidBudget = 0;
+        let kidSpent = 0;
+        let allSpent = 0;
+        const budgeted = [];
         const kids = [];
         for (const c of members) {
           const b = this.budgetFor(c.id, key);
           const s = ms.byCat.get(c.id) || 0;
           const roll = c.rollover ? this.rolloverFor(c.id, key) : 0;
-          if (b != null) { gHas = true; gBudget += b + roll; }
-          gSpent += s;
+          if (b != null) { kidBudget += b + roll; kidSpent += s; budgeted.push(c.id); }
+          allSpent += s;
           kids.push({ cat: c, budget: b == null ? null : b + roll, spent: s, roll });
         }
-        const gb = this.budgetFor(group.id, key);
-        if (children.length && gb != null) { gHas = true; gBudget = gb; }
-        gSpent += children.length ? ms.byCat.get(group.id) || 0 : 0;
-        items.push({ group, kids: children.length ? kids : [], budget: gHas ? gBudget : null, spent: gSpent });
-        if (gHas) {
+        allSpent += children.length ? ms.byCat.get(group.id) || 0 : 0;
+        const gb = children.length ? this.budgetFor(group.id, key) : null;
+        const whole = gb != null;
+        const gBudget = whole ? gb : budgeted.length ? kidBudget : null;
+        const gSpent = whole || !budgeted.length ? allSpent : kidSpent;
+        items.push({ group, kids: children.length ? kids : [], budget: gBudget, spent: gSpent });
+        if (gBudget != null) {
           total += gBudget;
           spent += gSpent;
-          counted.add(group.id);
-          for (const c of members) counted.add(c.id);
+          if (whole) { counted.add(group.id); for (const c of members) counted.add(c.id); }
+          else for (const id of budgeted) counted.add(id);
         }
       }
       const uncategorized = ms.byCat.get('_expense') || 0;
@@ -457,6 +460,18 @@ export class Ledger {
     const floor = addDays(now, -400);
     const dates = occurrences(s.rule || { freq: 'month' }, s.anchor, from < floor ? floor : from, now, s.end && s.end.mode !== 'never' ? s.end : null);
     return dates.filter((d) => !this.known('transaction', 'sch:' + s.id + ':' + d));
+  }
+
+  scheduledTxn(s, d) {
+    const acct = this.get('account', s.account);
+    return {
+      id: 'sch:' + s.id + ':' + d,
+      fields: {
+        date: d, amount_minor: s.amount_minor || 0, currency: (acct && acct.currency) || s.currency || this.base(), account: s.account,
+        category: s.category || null, payee: s.payee || s.name || '', note: '', tags: [], kind: (s.amount_minor || 0) > 0 ? 'income' : 'expense',
+        schedule_id: s.id, cleared: false, created: d + 'T00:00:00.000Z', provenance: 'schedule'
+      }
+    };
   }
 
   upcoming(days, from) {

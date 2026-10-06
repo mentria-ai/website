@@ -1,6 +1,6 @@
 import * as U from '../ui.js';
 import { donut, legend } from '../charts.js';
-import { toMinor, minorToDecimal, decimalsFor, qtyTimesPrice, normalizeNumber, isCurrency, convertMinor, trimDecimal, decimalToInput, formatDecimal } from '../money.js';
+import { toMinor, minorToDecimal, decimalsFor, qtyTimesPrice, isCurrency, convertMinor, trimDecimal, decimalToInput, formatDecimal } from '../money.js';
 import { isISODate, addMonths, diffDays } from '../dates.js';
 import { ASSET_CLASSES, accountGroup, INVEST_TYPES } from '../ledger.js';
 import { xirr, depositValue, maturityValue, amortize, loanOutstanding, emi, runLots } from '../invest.js';
@@ -14,13 +14,14 @@ const CLASS_COLORS = { equity: '#6ef3c5', bond: '#22d3ee', cash: '#8896a8', meta
 function qtyText(q, scale) { return formatDecimal(trimDecimal(minorToDecimal(q, scale)), U.locale()); }
 function priceText(p) { return formatDecimal(trimDecimal(minorToDecimal(p, 4)), U.locale()); }
 function pctInput(bp) { return decimalToInput(String((bp || 0) / 100), U.locale()); }
+function decimalText(dec) { return formatDecimal(trimDecimal(dec), U.locale()); }
 
 export function numberInput(minor, scale) {
   return minor ? decimalToInput(trimDecimal(minorToDecimal(minor, scale)), U.locale()) : '';
 }
 
 export function numberFromInput(text, scale) {
-  const d = normalizeNumber(text, U.locale());
+  const d = U.readNumber(text, scale);
   if (d == null) return null;
   try { return toMinor(d, scale); } catch (_) { return null; }
 }
@@ -68,6 +69,8 @@ export function activitySheet(ctx, act, preset) {
   const inst0 = () => L.get('instrument', instSel.value) || { qty_scale: 4, currency: L.base() };
   const qty = U.moneyField({ value: numberInput(a.qty, inst0().qty_scale || 4), placeholder: '0' });
   const price = U.moneyField({ value: numberInput(a.price_e4, 4), placeholder: decimalToInput('0.00', U.locale()) });
+  U.readBack(qty, () => inst0().qty_scale || 4, decimalText);
+  U.readBack(price, 4, decimalText);
   const amount = U.moneyField({ value: a.amount_minor ? U.amountToInput(a.amount_minor, inst0().currency) : '', placeholder: decimalToInput('0.00', U.locale()) });
   const fee = U.moneyField({ value: a.fee_minor ? U.amountToInput(a.fee_minor, inst0().currency) : '', placeholder: '0' });
   const tax = U.moneyField({ value: a.tax_withheld_minor ? U.amountToInput(a.tax_withheld_minor, inst0().currency) : '', placeholder: '0' });
@@ -196,7 +199,7 @@ function pricesSheet(ctx) {
   for (const id of ids) {
     const inst = L.get('instrument', id);
     const hd = held.find((x) => x.instrument === id);
-    const inp = U.moneyField({ placeholder: hd.price ? numberInput(hd.price.price_e4, 4) : '0', style: { maxWidth: '140px' } });
+    const inp = U.readBack(U.moneyField({ placeholder: hd.price ? numberInput(hd.price.price_e4, 4) : '0', style: { maxWidth: '140px' } }), 4, decimalText);
     inputs.set(id, inp);
     tb.append(h('tr', null, h('td', null, inst.name), h('td', { class: 'n' }, hd.price ? priceText(hd.price.price_e4) + ' ' + (inst.currency || '') + ' · ' + U.date(hd.price.date, 'dayMonth') : '—'), h('td', null, inp)));
   }

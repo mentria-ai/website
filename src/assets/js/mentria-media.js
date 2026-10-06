@@ -18,6 +18,7 @@ const SAFARI = /AppleWebKit/.test(UA) && !/Chrome|Chromium|Edg\/|Firefox|FxiOS|C
 
 export const caps = Object.freeze({
   folders: typeof window.showDirectoryPicker === 'function',
+  fileHandles: typeof window.showOpenFilePicker === 'function',
   dirInput: 'webkitdirectory' in document.createElement('input'),
   launchQueue: 'launchQueue' in window,
   pip: !!document.pictureInPictureEnabled,
@@ -168,7 +169,7 @@ export function forgetEntry(fp) {
 export function register(items, ctx) {
   ctx = ctx || {};
   const now = Date.now();
-  const rows = items.slice(0, MAX_FILES).map(({ file, relPath }) => ({ file, relPath: relPath || file.webkitRelativePath || file.name, fp: fingerprint(file) }));
+  const rows = items.slice(0, MAX_FILES).map(({ file, relPath, fp }) => ({ file, relPath: relPath || file.webkitRelativePath || file.name, fp: fp || fingerprint(file) }));
   rows.forEach((r) => live.set(r.fp, r.file));
   return openDb().then((d) => new Promise((resolve) => {
     const t = d.transaction('entries', 'readwrite');
@@ -281,6 +282,72 @@ function pickWithInput(accept, directory) {
 
 export function pickFiles(kinds) {
   return pickWithInput(acceptFor(kinds), false);
+}
+
+export async function pickFileHandles(kinds, kind) {
+  const accept = {};
+  for (const k of kinds) {
+    if (k === 'video' || k === 'audio' || k === 'image') accept[k + '/*'] = EXTS[k].map((e) => '.' + e);
+  }
+  let handles = [];
+  try { handles = await window.showOpenFilePicker({ id: 'mentria-' + kind, multiple: true, types: [{ accept }] }); } catch (e) { return e && e.name === 'AbortError' ? [] : pickFiles(kinds); }
+  const out = [];
+  for (const handle of handles) {
+    try {
+      const file = await handle.getFile();
+      if (kinds.indexOf(kindOf(file)) !== -1) out.push({ file, relPath: file.name, handle });
+    } catch (_) {}
+  }
+  return out;
+}
+
+const SET_ID = 'files:';
+
+export function fileSet(kind) {
+  return run('folders', 'readonly', (s) => s.get(SET_ID + kind))
+    .then((r) => (r && Array.isArray(r.items) && r.items.length ? r : null))
+    .catch(() => null);
+}
+
+function setItems(items) {
+  return items.filter((it) => it.handle).map((it) => ({ handle: it.handle, relPath: it.relPath || it.file.name, fp: it.fp || fingerprint(it.file) }));
+}
+
+export function saveFileSet(kind, items) {
+  const rec = { id: SET_ID + kind, kind: SET_ID + kind, items: setItems(items).slice(0, MAX_FILES), usedAt: Date.now() };
+  return run('folders', 'readwrite', (s) => s.put(rec)).catch(() => {});
+}
+
+export async function addToFileSet(kind, items) {
+  const cur = await fileSet(kind);
+  const list = cur ? cur.items.slice() : [];
+  const seen = new Set(list.map((it) => it.fp));
+  setItems(items).forEach((it) => { if (!seen.has(it.fp)) { seen.add(it.fp); list.push(it); } });
+  const rec = { id: SET_ID + kind, kind: SET_ID + kind, items: list.slice(0, MAX_FILES), usedAt: Date.now() };
+  return run('folders', 'readwrite', (s) => s.put(rec)).catch(() => {});
+}
+
+export async function fileSetAccess(set) {
+  const states = await Promise.all(set.items.map((it) => it.handle.queryPermission({ mode: 'read' }).catch(() => 'denied')));
+  if (states.every((st) => st === 'granted')) return 'granted';
+  return states.some((st) => st === 'prompt') ? 'prompt' : 'denied';
+}
+
+export async function openFileSet(set, ask, prefer) {
+  const opts = { mode: 'read' };
+  const lead = set.items.find((it) => it.fp === prefer) || set.items[0];
+  if (ask && lead) {
+    try { if (await lead.handle.queryPermission(opts) === 'prompt') await lead.handle.requestPermission(opts); } catch (_) {}
+  }
+  const got = await Promise.all(set.items.map(async (it) => {
+    try {
+      if (await it.handle.queryPermission(opts) !== 'granted') return null;
+      return { file: await it.handle.getFile(), relPath: it.relPath, handle: it.handle };
+    } catch (_) {
+      return null;
+    }
+  }));
+  return got.filter(Boolean);
 }
 
 export async function pickDirectory(kinds) {

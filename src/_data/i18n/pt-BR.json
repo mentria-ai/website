@@ -3270,6 +3270,14 @@
       "err_play": "Este navegador não consegue tocar “{name}”.",
       "err_apple_only": "“{name}” está em Apple Lossless ou AIFF, que só tocam em dispositivos Apple.",
       "pick_again": "Escolha o arquivo desta música de novo para tocá-la.",
+      "resume_title": "Continuar ouvindo",
+      "resume_at": "Pausado em {time}",
+      "resume": "Retomar",
+      "resume_allow_hint": "Seu navegador pede permissão uma vez antes de o Mentria abrir estas músicas de novo.",
+      "reopen_files": "Reabrir músicas",
+      "reopen_folder": "Reabrir pasta",
+      "resume_pick_hint": "Escolha as mesmas músicas de novo para continuar de onde parou.",
+      "resume_missing": "“{name}” não está entre as músicas que você escolheu.",
       "search_hint": "Buscar"
     },
     "fpv-drone": {

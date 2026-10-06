@@ -3270,6 +3270,14 @@
       "err_play": "このブラウザーでは「{name}」を再生できません。",
       "err_apple_only": "「{name}」は Apple Lossless または AIFF 形式で、Apple 製デバイスでのみ再生できます。",
       "pick_again": "再生するには、この曲のファイルをもう一度選んでください。",
+      "resume_title": "続きを聴く",
+      "resume_at": "{time} で一時停止中",
+      "resume": "再開",
+      "resume_allow_hint": "これらの曲をもう一度開く前に、ブラウザーが一度だけ許可を求めます。",
+      "reopen_files": "音楽を開き直す",
+      "reopen_folder": "フォルダを開き直す",
+      "resume_pick_hint": "同じ音楽をもう一度選ぶと、前回の続きから再生できます。",
+      "resume_missing": "選んだ音楽の中に「{name}」が見つかりませんでした。",
       "search_hint": "検索"
     },
     "fpv-drone": {

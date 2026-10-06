@@ -138,13 +138,19 @@
     if (!S) return;
     var id = new URLSearchParams(location.search).get('id') || '';
     var nameEl = document.querySelector('.terminal-frame__filename');
-    S.set('ui', TOOL_KEY, {
+    var ps = {
       path: bare(location.pathname),
       id: id,
       tail: urlTail(),
       name: (nameEl && nameEl.textContent.trim()) || document.title,
       since: Date.now()
-    });
+    };
+    var detail = {};
+    try { document.dispatchEvent(new CustomEvent('mentria:minimize', { detail: detail })); } catch (_) {}
+    if (detail.value) ps.value = String(detail.value);
+    if (detail.label) ps.label = String(detail.label);
+    if (detail.paused) ps.paused = true;
+    S.set('ui', TOOL_KEY, ps);
     leave();
   }
   function unpark() {
@@ -494,10 +500,15 @@
     if (parked && parked.getAttribute('data-key') !== ps.path + '#' + ps.id) { parked.remove(); parked = null; }
     if (!parked) buildParked(ps);
     var name = parkedName(ps);
-    setText(parked.querySelector('.m-mini__value'), name);
+    var sub = [ps.label || '', ps.paused ? copy('paused', 'Paused') : ''].filter(Boolean).join(' · ');
+    setText(parked.querySelector('.m-mini__value'), ps.value || name);
+    var subEl = parked.querySelector('.m-mini__label');
+    setText(subEl, sub);
+    subEl.hidden = !sub;
+    parked.classList.toggle('is-paused', !!ps.paused);
     parked.setAttribute('aria-label', name);
     var open = parked.querySelector('.m-mini__open');
-    var label = copy('open', 'Open {name}').replace('{name}', name);
+    var label = copy('open', 'Open {name}').replace('{name}', name) + (ps.value ? ' · ' + ps.value : '') + (sub ? ' · ' + sub : '');
     if (open.getAttribute('aria-label') !== label) open.setAttribute('aria-label', label);
     var close = parked.querySelector('.m-mini__close');
     var closeName = copy('close', 'Close');
@@ -616,7 +627,10 @@
     text.className = 'm-mini__text';
     var value = document.createElement('span');
     value.className = 'm-mini__value';
-    text.appendChild(value);
+    var sub = document.createElement('span');
+    sub.className = 'm-mini__label';
+    sub.hidden = true;
+    text.append(value, sub);
     open.append(iconFor(ps.id ? 'extensions' : slugOf(ps.path)), text);
     open.addEventListener('click', function () {
       var cur = toolSession();

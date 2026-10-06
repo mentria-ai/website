@@ -120,8 +120,8 @@
     return v;
   }
   function slugOf(path) {
-    var m = /^\/tools\/([^/]+)\//.exec(path || '');
-    return m ? m[1] : '';
+    var m = /^\/tools\/([^/]+)\/|^\/(comms)\//.exec(path || '');
+    return m ? (m[1] || m[2]) : '';
   }
   function urlTail() {
     var hash = location.hash;

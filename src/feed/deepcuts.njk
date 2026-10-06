@@ -41,7 +41,6 @@ eleventyComputed:
      id="deckRoot"
      style="view-transition-name: deck-{{ pair.edition.id }}"
      data-chapter-id="{{ pair.edition.id }}"
-     data-chapter-title="{{ pair.edition.title }}"
      data-slide-count="{{ pair.edition.slides.length }}">
   <h1 class="sr-only">{{ pair.edition.subtitle | tloc(pair.locale.code) }}</h1>
 
@@ -97,10 +96,6 @@ eleventyComputed:
           <a class="deck__action deck__action--link" href="{{ action.url }}" target="_blank" rel="noopener">
             {{ action.label }} →
           </a>
-          {% elif action.type == "share" %}
-          <button class="deck__action deck__action--share" data-action="share">
-            {{ action.label }}
-          </button>
           {% endif %}
         {% endfor %}
       </div>

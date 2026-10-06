@@ -366,10 +366,11 @@
     }
   }
 
-  function moreBtn() { return slides[current] ? slides[current].querySelector('.pack-more') : null; }
+  function moreBtn() { return slides[current] ? slides[current].querySelector('.pack-more:not([hidden])') : null; }
   function isExpanded() { var m = moreBtn(); return !!m && m.getAttribute('aria-expanded') === 'true'; }
   function expandCurrent() { var m = moreBtn(); if (m && !isExpanded()) m.click(); }
   function collapseCurrent() { var m = moreBtn(); if (m && isExpanded()) m.click(); }
+  function bodyScrolls(b) { return moreBtn() ? isExpanded() : b.scrollHeight - b.clientHeight > 1; }
 
   function slideImageUrl(s) {
     var img = s.querySelector('img.deck__slide-img, img.pack-image__img');
@@ -449,7 +450,8 @@
     root.addEventListener('touchstart', function (e) {
       var tch = e.touches[0]; sx = tch.clientX; sy = tch.clientY; st = Date.now();
       var c = e.target.closest ? e.target : null;
-      scrolls = !!(c && c.closest('.pack-card, .pack-canvas, .pack-body:not(.is-collapsed), input, textarea'));
+      var b = c && c.closest('.pack-body');
+      scrolls = !!(c && c.closest('.pack-card, .pack-canvas, input, textarea')) || (!!b && bodyScrolls(b));
     }, { passive: true });
     root.addEventListener('touchend', function (e) {
       var tch = e.changedTouches[0];

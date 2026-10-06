@@ -617,7 +617,7 @@
     var value = document.createElement('span');
     value.className = 'm-mini__value';
     text.appendChild(value);
-    open.append(iconFor(ps.id ? 'extensions' : slugOf(ps.path)), text);
+    open.append(iconFor((!ps.id && slugOf(ps.path)) || 'extensions'), text);
     open.addEventListener('click', function () {
       var cur = toolSession();
       if (!cur) { renderParked(); return; }

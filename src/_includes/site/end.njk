@@ -440,15 +440,9 @@ try {
 try {
       (function () {
         var popup = document.getElementById('tools-popup');
-        if (!popup) return;
-        var body = popup.querySelector('.tools-popup__body');
-        var panel = popup.querySelector('.tools-popup__panel');
-        var find = document.getElementById('tools-find');
         var FRAG = '/fragments/tools-popup.';
         var FRAG_V = '.html?v={{ buildHash }}';
         var fragPromise = null;
-        var built = null;
-        var prevFocus = null;
         function loadFrag() {
           if (!fragPromise) {
             var get = function (code) { return fetch(FRAG + code + FRAG_V).then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.text(); }); };
@@ -456,17 +450,35 @@ try {
           }
           return fragPromise;
         }
+        function liftSprite(from) {
+          var sym = from.querySelector('symbol[id^="tool-"]');
+          var sprite = sym && sym.closest('svg');
+          if (!sprite) return;
+          var have = document.getElementById(sym.id);
+          if (have && have !== sym) sprite.remove();
+          else document.body.appendChild(sprite);
+        }
+        if (!popup) {
+          var icons = null;
+          window.MentriaToolsPopup = {
+            load: function () {
+              if (!icons) icons = loadFrag().then(function (html) { liftSprite(document.createRange().createContextualFragment(html)); }).catch(function () { icons = null; });
+              return icons;
+            }
+          };
+          return;
+        }
+        var body = popup.querySelector('.tools-popup__body');
+        var panel = popup.querySelector('.tools-popup__panel');
+        var find = document.getElementById('tools-find');
+        var built = null;
+        var prevFocus = null;
         function build() {
           if (built) return built;
           ['pointerdown', 'pointerover', 'focusin'].forEach(function (t) { document.removeEventListener(t, early, true); });
           built = loadFrag().then(function (html) {
             body.appendChild(document.createRange().createContextualFragment(html));
-            var sym = body.querySelector('symbol[id^="tool-"]');
-            var sprite = sym && sym.closest('svg');
-            if (sprite) {
-              if (document.getElementById(sym.id) !== sym) sprite.remove();
-              else document.body.appendChild(sprite);
-            }
+            liftSprite(body);
             var rv = body.querySelectorAll('.reveal');
             for (var i = 0; i < rv.length; i++) rv[i].classList.add('revealed');
             ['/assets/js/tool-launcher.js?v={{ buildHash }}', '/assets/js/mentria-ext-launch.js?v={{ buildHash }}'].forEach(function (src) {

@@ -2,7 +2,7 @@
 {
   "id": "meal-planner",
   "name": "Meal Planner",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "icon": "🍲",
   "author": "Mentria",
   "description": "Plan the week's meals, keep a recipe box, get a shopping list grouped by aisle and use up what's in your pantry. Nutrition estimates from USDA data.",
@@ -497,7 +497,7 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.62)}
     Object.keys(map).forEach(function (k) { if (th[k]) document.documentElement.style.setProperty(map[k], th[k]); });
   })();
 
-  var L = 'en', LI = 0, PR, NF0, NF1, DFday, DFshort, DFwd, DFlong, collator, LF;
+  var L = 'en', LI = 0, PR, NF0, NF1, DFday, DFshort, DFlong, collator, LF;
   function pickLoc(c) {
     c = String(c || 'en');
     if (LOCS.indexOf(c) >= 0) return c;
@@ -515,21 +515,21 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.62)}
     NF1 = new Intl.NumberFormat(L, { maximumFractionDigits: 1 });
     DFday = new Intl.DateTimeFormat(L, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
     DFshort = new Intl.DateTimeFormat(L, { day: 'numeric', month: 'short', timeZone: 'UTC' });
-    DFwd = new Intl.DateTimeFormat(L, { weekday: 'long', timeZone: 'UTC' });
     DFlong = new Intl.DateTimeFormat(L, { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
     collator = new Intl.Collator(L, { sensitivity: 'base', numeric: true });
     try { LF = new Intl.ListFormat(L, { style: 'long', type: 'conjunction' }); } catch (e) { LF = { format: function (a) { return a.join(', '); } }; }
   }
-  function t(k, v) {
-    var s = STR[L] && STR[L][k] != null ? STR[L][k] : STR.en[k];
+  function tFor(loc, pr, nf, k, v) {
+    var s = STR[loc] && STR[loc][k] != null ? STR[loc][k] : STR.en[k];
     if (s == null) return k;
     if (typeof s === 'object') {
       var n = v && typeof v.n === 'number' ? v.n : 1;
-      s = s[PR.select(n)] || s.other;
+      s = s[pr.select(n)] || s.other;
     }
-    if (v) s = s.replace(/\{(\w+)\}/g, function (a, b) { return v[b] == null ? a : (typeof v[b] === 'number' ? NF1.format(v[b]) : String(v[b])); });
+    if (v) s = s.replace(/\{(\w+)\}/g, function (a, b) { return v[b] == null ? a : (typeof v[b] === 'number' ? nf.format(v[b]) : String(v[b])); });
     return s;
   }
+  function t(k, v) { return tFor(L, PR, NF1, k, v); }
   function listFmt(a) { try { return LF.format(a); } catch (e) { return a.join(', '); } }
 
   function h(tag, a, kids) {
@@ -750,16 +750,19 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.62)}
       SBY[o.id] = o;
     });
   }
-  function fName(f) { return f ? (f.names[LI] || f.names[0] || f.id) : ''; }
+  function fNameIn(f, li) { return f ? (f.names[li] || f.names[0] || f.id) : ''; }
+  function fName(f) { return fNameIn(f, LI); }
   function getRecipe(id) { return (id && (S.mine[id] || SBY[id])) || null; }
-  function rName(r) { return r.mine ? r.name : (r.name[L] || r.name.en || r.id); }
+  function rNameIn(r, loc) { return r.mine ? r.name : (r.name[loc] || r.name.en || r.id); }
+  function rName(r) { return rNameIn(r, L); }
   function rSteps(r) { return r.mine ? r.steps : (r.steps[L] || r.steps.en || []); }
   function allRecipes() { return Object.keys(S.mine).map(function (k) { return S.mine[k]; }).concat(STARTERS); }
-  function itemName(it) {
-    if (it.r) { var r = getRecipe(it.r); if (r) return rName(r); }
-    if (it.f && FBY[it.f]) return fName(FBY[it.f]);
+  function itemNameIn(it, loc) {
+    if (it.r) { var r = getRecipe(it.r); if (r) return rNameIn(r, loc); }
+    if (it.f && FBY[it.f]) return fNameIn(FBY[it.f], LOCS.indexOf(loc));
     return it.t || '…';
   }
+  function itemName(it) { return itemNameIn(it, L); }
 
   function dens(f) { return f.cup ? f.cup / 236.6 : f.tbsp ? f.tbsp / 14.79 : f.tsp ? f.tsp / 4.93 : 0; }
   function gramsOf(f, q, u) {
@@ -1296,13 +1299,20 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.62)}
   }
 
   var lastSnap = '';
-  function updateWidget() {
-    var w = weekNow(), di = todayIndex(), p = getPlan(w), names = [], cnt = 0;
-    p.d[di].forEach(function (slot) { if (slot.length) cnt++; slot.forEach(function (it) { names.push(itemName(it)); }); });
-    var day = DFwd.format(todayUTC());
+  function widgetIn(loc, slots, now) {
+    var pr, names = [], cnt = 0;
+    try { pr = new Intl.PluralRules(loc); } catch (e) { pr = { select: function (n) { return n === 1 ? 'one' : 'other'; } }; }
+    var nf = new Intl.NumberFormat(loc, { maximumFractionDigits: 1 });
+    slots.forEach(function (slot) { if (slot.length) cnt++; slot.forEach(function (it) { names.push(itemNameIn(it, loc)); }); });
+    var day = new Intl.DateTimeFormat(loc, { weekday: 'long', timeZone: 'UTC' }).format(now);
     var text = names.join(' · ');
     if (text.length > 80) text = text.slice(0, 79) + '…';
-    var snap = cnt ? { text: text, detail: t('wDetail', { day: day, n: cnt }) } : { text: t('wNone'), detail: t('wNoneD', { day: day }) };
+    return cnt ? { text: text, detail: tFor(loc, pr, nf, 'wDetail', { day: day, n: cnt }) } : { text: tFor(loc, pr, nf, 'wNone'), detail: tFor(loc, pr, nf, 'wNoneD', { day: day }) };
+  }
+  function updateWidget() {
+    var slots = getPlan(weekNow()).d[todayIndex()], now = todayUTC(), locales = {};
+    LOCS.forEach(function (loc) { locales[loc] = widgetIn(loc, slots, now); });
+    var snap = { text: locales[L].text, detail: locales[L].detail, locales: locales };
     var js = JSON.stringify(snap);
     if (js === lastSnap) return;
     var cur = sget('today');

@@ -347,12 +347,42 @@ function runApp(MentriaEngine, Tiers) {
     return tier === '27b' ? 'Bonsai 27B' : 'Qwen3.5';
   }
 
-  function systemPromptFor(tier) {
+  function systemPromptFor(tier, turn) {
     const family = modelFamilyFor(tier);
-    return "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
+    const small = tier === '0.8b';
+    const prompt = "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
       "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running " + family + " in their browser. When asked about Mentria itself: it is a small privacy-first creative studio at mentria.ai, building tools, games, and AI experiences that run entirely client-side with no servers, no accounts, and no telemetry. Notable parts of the site: TOTP, quick notes, QR scanner, color picker, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, a P2P chat and file drop at /comms/, and a daily image-fact feed called Deep Cuts.\n\n" +
-      "Be helpful, accurate, and brief. Don't over-apologize. When the user shares an image, describe what you see directly. You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.\n\n" +
+      "Be helpful, accurate, and brief. Don't over-apologize." +
+      (!small || (turn && turn.image) ? " When the user shares an image, describe what you see directly." : '') +
+      (small ? '' : " You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.") + "\n\n" +
       "Formatting: use markdown sparingly. For tables, output strict GitHub-flavored markdown: one header row, one divider row made only of pipes and dashes, then data rows. Never put prose, notes, parentheticals, or extra characters between the divider and the data rows. Each cell is one short phrase, never a sentence. Any explanation goes outside the table.";
+    if (!small || !turn) return prompt;
+    if (turn.lang === 'English') return prompt + '\n\nReply in English.';
+    if (turn.lang) return 'Write your reply in ' + turn.lang + '.\n\n' + prompt;
+    return prompt + "\n\nReply in the same language as the user's message.";
+  }
+
+  const REPLY_LANGS = [
+    { name: 'English', marks: null, words: ['the', 'and', 'is', 'are', 'you', 'your', 'what', 'how', 'who', 'why', 'can', 'does', 'of', 'to', 'in', 'it', 'this', 'that', 'with', 'for', 'my', 'i', 'please', 'tell', 'give', 'write', 'explain', 'make', 'about', 'hi', 'hello', 'thanks'] },
+    { name: 'Spanish', marks: /[ñ¿¡]/, words: ['el', 'los', 'las', 'del', 'qué', 'cómo', 'cuál', 'cuáles', 'cuánto', 'cuántos', 'cuántas', 'quién', 'dónde', 'eres', 'estás', 'hola', 'gracias', 'puedes', 'dame', 'dime', 'hago', 'una', 'muy', 'también'] },
+    { name: 'French', marks: /[œèëîïûù]/, words: ['le', 'les', 'des', 'du', 'au', 'aux', 'et', 'est', 'qui', 'quel', 'quelle', 'faire', 'pourquoi', 'je', 'vous', 'une', 'avec', 'dans', 'bonjour', 'merci', 'peux', 'sais', 'fais', 'moi', 'cette', "c'est", "qu'est"] },
+    { name: 'Brazilian Portuguese', marks: /[ãõ]/, words: ['você', 'não', 'olá', 'obrigado', 'obrigada', 'quem', 'qual', 'quanto', 'quantos', 'faço', 'é', 'um', 'uma', 'da', 'das', 'na', 'em', 'isso', 'muito', 'também'] }
+  ];
+  const PAGE_REPLY_LANG = { es: 'Spanish', fr: 'French', ja: 'Japanese', 'pt-br': 'Brazilian Portuguese' };
+
+  function replyLanguage(text) {
+    const page = String(document.documentElement.lang || 'en').toLowerCase();
+    if (/[\u3040-\u30ff]/.test(text) || (page === 'ja' && /[\u4e00-\u9fff]/.test(text))) return 'Japanese';
+    const words = text.toLowerCase().replace(/\u2019/g, "'").split(/[^\p{L}']+/u);
+    let best = null;
+    let top = 0;
+    let tie = false;
+    REPLY_LANGS.forEach((lang) => {
+      const n = (lang.marks && lang.marks.test(text) ? 2 : 0) + words.filter((w) => lang.words.indexOf(w) >= 0).length;
+      if (n > top) { best = lang.name; top = n; tie = false; }
+      else if (n > 0 && n === top) tie = true;
+    });
+    return best && !tie ? best : (PAGE_REPLY_LANG[page] || null);
   }
 
   let messages = [
@@ -1727,7 +1757,11 @@ function runApp(MentriaEngine, Tiers) {
     const useTool = route ? route === 'tool' : searchActive;
     markRoute(bodyEl, route);
     await setSearchAdapter(useTool);
-    const systemContent = useTool ? systemMessage.content + SEARCH_TOOL_PROMPT : systemMessage.content;
+    const asked = rest.length ? turnText(rest[rest.length - 1]) : '';
+    const baseSystem = currentTier === '0.8b' && !pinned
+      ? systemPromptFor(currentTier, { image: !!imagesForRequest, lang: replyLanguage(asked) })
+      : systemMessage.content;
+    const systemContent = useTool ? baseSystem + SEARCH_TOOL_PROMPT : baseSystem;
     const toolTurns = [];
     const searchesDone = [];
     let searchSources = [];

@@ -689,7 +689,8 @@
     }
     var frame = dots.closest('.terminal-frame');
     var nameEl = frame && frame.querySelector('.terminal-frame__filename');
-    var slug = (location.pathname.match(/\/tools\/([^/]+)\//) || [])[1] || '';
+    var hit = location.pathname.match(/\/tools\/([^/]+)\/|^\/(comms)\//) || [];
+    var slug = hit[1] || hit[2] || '';
     wmenu.setAttribute('aria-label', uiCopy('windowLabel', 'common.window.label', 'Window controls'));
     var icon = wmenu.querySelector('.m-wmenu__icon');
     icon.innerHTML = slug ? '<svg viewBox="0 0 48 48" focusable="false"><use href="#tool-' + slug + '"></use></svg>' : '';

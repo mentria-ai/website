@@ -773,8 +773,8 @@ try {
         var BODY_FS = 'is-fullscreen-tool';
         function activeFrame() { return document.querySelector('.' + FS); }
         function toolSlug() {
-          var m = (location.pathname || '').match(/\/tools\/([^/]+)\//);
-          return m ? m[1] : null;
+          var m = (location.pathname || '').match(/\/tools\/([^/]+)\/|^\/(comms)\//);
+          return m ? (m[1] || m[2]) : null;
         }
         function persist(state) {
           var slug = toolSlug();
@@ -870,8 +870,13 @@ try {
         if (filename) filename.insertAdjacentElement('afterend', btn);
         else titlebar.appendChild(btn);
         var peekBack = null;
+        var scrim = document.createElement('div');
+        scrim.className = 'hero-scrim';
+        scrim.setAttribute('aria-hidden', 'true');
+        scrim.addEventListener('click', function () { close(); });
         function isOpen() { return hero.classList.contains('hero--peek'); }
         function open() {
+          hero.insertAdjacentElement('beforebegin', scrim);
           hero.classList.add('hero--peek');
           btn.setAttribute('aria-expanded', 'true');
           var d = hero.querySelector('.tldr');
@@ -882,6 +887,7 @@ try {
         function close() {
           if (peekBack) { peekBack.release(); peekBack = null; }
           hero.classList.remove('hero--peek');
+          if (scrim.parentNode) scrim.parentNode.removeChild(scrim);
           btn.setAttribute('aria-expanded', 'false');
         }
         btn.addEventListener('click', function () {

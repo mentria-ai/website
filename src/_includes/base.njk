@@ -38,10 +38,10 @@
     {%- if content | contains('terminal-frame--fullscreen') %}
     <script>
       (function () {
-        var m = (location.pathname || '').match(/\/tools\/([^/]+)\//);
+        var m = (location.pathname || '').match(/\/tools\/([^/]+)\/|^\/(comms)\//);
         if (!m) return;
         var pref = null;
-        try { pref = localStorage.getItem('mentria.store.ui.fullscreen.' + m[1]); } catch (e) {}
+        try { pref = localStorage.getItem('mentria.store.ui.fullscreen.' + (m[1] || m[2])); } catch (e) {}
         if (pref !== 'false') document.documentElement.classList.add('is-fullscreen-tool');
       })();
     </script>

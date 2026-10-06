@@ -25,25 +25,29 @@ localeReload: true
 
 <div class="ludo-app">
   <div class="controls">
-    <span class="ctrl-label">{{ "tool.ludo.mode" | t }}</span>
-    <div class="m-seg" id="mode-seg">
-      <button data-m="ai" data-value="ai" class="is-active">{{ "tool.ludo.mode_ai" | t }}</button>
-      <button data-m="hotseat" data-value="hotseat">{{ "tool.ludo.mode_hotseat" | t }}</button>
+    <div class="ctrl-group">
+      <span class="ctrl-label">{{ "tool.ludo.mode" | t }}</span>
+      <div class="m-seg" id="mode-seg">
+        <button data-m="ai" data-value="ai" class="is-active">{{ "tool.ludo.mode_ai" | t }}</button>
+        <button data-m="hotseat" data-value="hotseat">{{ "tool.ludo.mode_hotseat" | t }}</button>
+      </div>
     </div>
-    <span class="ctrl-label" style="margin-left:8px">{{ "tool.ludo.players" | t }}</span>
-    <div class="m-seg" id="count-seg">
-      <button data-n="2" data-value="2">2</button>
-      <button data-n="3" data-value="3">3</button>
-      <button data-n="4" data-value="4" class="is-active">4</button>
+    <div class="ctrl-group ctrl-group--players">
+      <span class="ctrl-label">{{ "tool.ludo.players" | t }}</span>
+      <div class="m-seg" id="count-seg">
+        <button data-n="2" data-value="2">2</button>
+        <button data-n="3" data-value="3">3</button>
+        <button data-n="4" data-value="4" class="is-active">4</button>
+      </div>
+      <button type="button" class="ludo-help__chip" id="ludo-help-chip" aria-haspopup="dialog" aria-expanded="false" aria-label="{{ 'tool.ludo.help_open' | t }}" title="{{ 'tool.ludo.help_open' | t }}">
+        <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="10" cy="10" r="8.4"></circle>
+          <path d="M7.7 7.7a2.4 2.4 0 1 1 3.1 2.4c-.7.3-.9.8-.9 1.4v.4"></path>
+          <circle cx="10" cy="14.4" r="0.95" fill="currentColor" stroke="none"></circle>
+        </svg>
+        <span class="ludo-help__badge" id="ludo-method-badge" hidden></span>
+      </button>
     </div>
-    <button type="button" class="ludo-help__chip" id="ludo-help-chip" aria-haspopup="dialog" aria-expanded="false" aria-label="{{ 'tool.ludo.help_open' | t }}" title="{{ 'tool.ludo.help_open' | t }}">
-      <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
-        <circle cx="10" cy="10" r="8.4"></circle>
-        <path d="M7.7 7.7a2.4 2.4 0 1 1 3.1 2.4c-.7.3-.9.8-.9 1.4v.4"></path>
-        <circle cx="10" cy="14.4" r="0.95" fill="currentColor" stroke="none"></circle>
-      </svg>
-      <span class="ludo-help__badge" id="ludo-method-badge" hidden></span>
-    </button>
   </div>
 
   <div class="ludo-turn" id="ludo-turn" aria-hidden="true">
@@ -158,7 +162,9 @@ localeReload: true
 </div>
 
 <style>
-  .ludo-app .controls { display: flex; align-items: center; gap: 14px; padding: 11px 4px 14px; flex-wrap: wrap; }
+  .ludo-app .controls { display: flex; align-items: center; gap: 8px 22px; padding: 11px 4px 14px; flex-wrap: wrap; }
+  .ludo-app .ctrl-group { display: flex; align-items: center; gap: 14px; }
+  .ludo-app .ctrl-group--players { flex: 1 1 auto; }
   .ludo-app .ctrl-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
   .ludo-app .layout { display: grid; grid-template-columns: 1fr 220px; gap: 0; border: 1px solid var(--term-border); border-radius: var(--radius-md); overflow: hidden; }
   @media (max-width: 760px) { .ludo-app .layout { grid-template-columns: 1fr; } }
@@ -233,9 +239,15 @@ localeReload: true
     .ludo-app .dice-area .status-line { flex-basis: 100%; }
   }
   @media (max-width: 560px) {
-    .ludo-app .controls { gap: 8px; }
+    .ludo-app .controls { column-gap: 14px; }
+    .ludo-app .ctrl-group { gap: 8px; }
     .ludo-app .die { width: 60px; height: 60px; }
     .ludo-app .ludo-help__badge { display: none; }
+  }
+  @media (max-width: 420px) {
+    .ludo-app .controls { column-gap: 10px; }
+    .ludo-app .ctrl-group { gap: 6px; }
+    .ludo-app .ctrl-label { letter-spacing: 0.08em; }
   }
 
   .ludo-app .ludo-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }

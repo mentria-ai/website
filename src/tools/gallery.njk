@@ -36,6 +36,14 @@ eleventyComputed:
       <h2 class="gl__h2">{{ "tool.gallery.saved_title" | t }}</h2>
       <ul class="gl__folders" id="gl-folder-list"></ul>
     </section>
+    <section class="gl__shelf" id="gl-kept" hidden>
+      <h2 class="gl__h2">{{ "tool.gallery.kept_title" | t }}</h2>
+      <div class="gl__folder">
+        <span class="gl__folder-name" id="gl-kept-count"></span>
+        <button type="button" class="m-btn m-btn--ghost gl__small" id="gl-kept-forget">{{ "tool.gallery.forget" | t }}</button>
+      </div>
+      <p class="gl__hint gl__kept-hint">{{ "tool.gallery.kept_hint" | t }}</p>
+    </section>
   </div>
 
   <div class="gl__main" id="gl-main" hidden>
@@ -53,6 +61,7 @@ eleventyComputed:
         <button type="button" class="gl__btn" id="gl-show" aria-label="{{ 'tool.gallery.slideshow' | t }}" title="{{ 'tool.gallery.slideshow' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5.5v13l11-6.5z"/></svg></button>
         <button type="button" class="gl__btn" id="gl-add" aria-label="{{ 'tool.gallery.add' | t }}" title="{{ 'tool.gallery.add' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
         <button type="button" class="gl__btn" id="gl-home" aria-label="{{ 'tool.gallery.folders' | t }}" title="{{ 'tool.gallery.folders' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2h7.5A2.5 2.5 0 0 1 21 9.5v7a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 16.5z"/></svg></button>
+        <button type="button" class="gl__btn" id="gl-forget" aria-label="{{ 'tool.gallery.forget_photos' | t }}" title="{{ 'tool.gallery.forget_photos' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9.5 7V4.5h5V7M6 7l1 12.5h10L18 7M10 11v5.5M14 11v5.5"/></svg></button>
       </div>
     </div>
     <div class="gl__grid" id="gl-grid"></div>
@@ -84,7 +93,7 @@ eleventyComputed:
   </aside>
 </div>
 
-{% set glKeys = ["no_media", "scanning", "reading_dates", "selection", "count_photos", "count_photos_one", "count_videos", "count_videos_one", "slideshow", "slideshow_stop", "position", "open", "reconnect", "forget_label", "folder_denied", "share_failed", "info_name", "info_taken", "info_modified", "info_dimensions", "info_duration", "info_size", "info_type", "info_folder", "info_camera", "info_lens", "info_exposure", "info_location", "copy", "copied", "copy_failed", "err_heic", "err_jxl", "err_image", "err_video", "err_mkv_apple", "err_avi"] %}
+{% set glKeys = ["no_media", "scanning", "reading_dates", "selection", "count_photos", "count_photos_one", "count_videos", "count_videos_one", "slideshow", "slideshow_stop", "position", "open", "reconnect", "forget_label", "forget_photos", "forget_folder", "forget_photos_confirm", "forget_folder_confirm", "forgotten", "folder_denied", "share_failed", "info_name", "info_taken", "info_modified", "info_dimensions", "info_duration", "info_size", "info_type", "info_folder", "info_camera", "info_lens", "info_exposure", "info_location", "copy", "copied", "copy_failed", "err_heic", "err_jxl", "err_image", "err_video", "err_mkv_apple", "err_avi"] %}
 <script>
 window.MENTRIA_GL_COPY = {
 {%- for k in glKeys %}
@@ -138,6 +147,9 @@ let timeFmt = null;
 const rendered = new Map();
 const thumbUrls = new Map();
 const thumbState = new Map();
+const exifRead = new WeakSet();
+let saved = new Set();
+let keptToken = 0;
 
 function lang() { return document.documentElement.lang || 'en'; }
 function fill(tpl, vars) { return String(tpl || '').replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m)); }
@@ -146,6 +158,31 @@ function num(n) { try { return new Intl.NumberFormat(lang()).format(n); } catch 
 function when(e) { return e.taken || e.lastModified || 0; }
 function monthOf(t) { const d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
 function progress(text) { progressEl.textContent = text || ''; progressEl.hidden = !text; }
+function confirmDanger(text) { return typeof window.mentriaConfirm === 'function' ? window.mentriaConfirm(text, { danger: true }) : Promise.resolve(false); }
+
+async function refreshSaved() {
+  saved = new Set((await M.listFolders()).map((f) => f.id));
+  return saved;
+}
+function keepPlace(e) { return !!(e.folderId && saved.has(e.folderId)); }
+function placeless(exif) {
+  const out = Object.assign({}, exif);
+  delete out.lat;
+  delete out.lon;
+  return out;
+}
+function storable(e, patch) {
+  return patch.exif && !keepPlace(e) ? Object.assign({}, patch, { exif: placeless(patch.exif) }) : patch;
+}
+function countText(list) {
+  let photos = 0;
+  list.forEach((e) => { if (e.kind === 'image') photos++; });
+  const videos = list.length - photos;
+  const parts = [];
+  if (photos) parts.push(fill(photos === 1 ? C.count_photos_one : C.count_photos, { n: num(photos) }));
+  if (videos) parts.push(fill(videos === 1 ? C.count_videos_one : C.count_videos, { n: num(videos) }));
+  return { photos, videos, text: parts.join(' · ') };
+}
 
 function monthLabel(key) {
   if (!monthNames.has(key)) {
@@ -456,13 +493,11 @@ function showMain(on) {
 
 function updateBar() {
   $('gl-src-name').textContent = source.name || C.selection;
-  let photos = 0;
-  all.forEach((e) => { if (e.kind === 'image') photos++; });
-  const videos = all.length - photos;
-  const parts = [];
-  if (photos) parts.push(fill(photos === 1 ? C.count_photos_one : C.count_photos, { n: num(photos) }));
-  if (videos) parts.push(fill(videos === 1 ? C.count_videos_one : C.count_videos, { n: num(videos) }));
-  $('gl-src-count').textContent = parts.join(' · ');
+  const { photos, videos, text } = countText(all);
+  $('gl-src-count').textContent = text;
+  const forgetLabel = source.folderId && saved.has(source.folderId) ? C.forget_folder : C.forget_photos;
+  $('gl-forget').setAttribute('aria-label', forgetLabel);
+  $('gl-forget').title = forgetLabel;
   $('gl-filter').hidden = !(photos && videos);
   if ($('gl-filter').hidden) filter = 'all';
   $('gl-filter').querySelectorAll('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.filter === filter ? 'true' : 'false'));
@@ -473,7 +508,7 @@ async function load(found, ctx) {
   const token = ++loadToken;
   const media = found.filter((it) => KINDS.indexOf(M.kindOf(it.file)) !== -1);
   if (!media.length) { toast(C.no_media); return; }
-  const entries = await M.register(media, { folderId: ctx.folderId, folderName: ctx.folderName });
+  const [entries] = await Promise.all([M.register(media, { folderId: ctx.folderId, folderName: ctx.folderName }), refreshSaved()]);
   if (token !== loadToken) return;
   if (ctx.add) {
     entries.forEach((e) => { if (!byFp.has(e.fp)) all.push(e); });
@@ -507,6 +542,7 @@ async function readDates(token) {
       const patch = { dated: true, taken: 0 };
       if (file && e.kind === 'image') {
         const x = await M.readExif(file);
+        exifRead.add(e);
         if (x) { patch.taken = x.taken || 0; patch.exif = x; }
       } else if (file && ['mp4', 'm4v', 'mov', '3gp'].indexOf(M.extOf(e.name)) !== -1) {
         patch.taken = await M.mediaDate(file);
@@ -514,7 +550,7 @@ async function readDates(token) {
       const before = when(e);
       Object.assign(e, patch);
       if (when(e) !== before) moved = true;
-      return [e.fp, patch];
+      return [e.fp, storable(e, patch)];
     }));
     await M.patchEntries(patches);
     done += batch.length;
@@ -561,11 +597,75 @@ async function renderStart() {
     forget.className = 'gl__x';
     forget.textContent = '×';
     forget.setAttribute('aria-label', fill(C.forget_label, { name: folder.name }));
-    forget.addEventListener('click', async () => { await M.forgetFolder(folder.id); renderStart(); });
+    forget.addEventListener('click', () => forgetSaved(folder));
     li.append(name, openBtn, forget);
     list.appendChild(li);
   }
   $('gl-folders').hidden = !folders.length;
+  renderKept();
+}
+
+function looseEntries(list) {
+  return list.filter((e) => !keepPlace(e) && (e.kind === 'image' || (e.kind === 'video' && !e.lastPlayed)));
+}
+
+async function renderKept() {
+  const token = ++keptToken;
+  const [list] = await Promise.all([M.listEntries(), refreshSaved()]);
+  if (token !== keptToken) return;
+  const loose = looseEntries(list);
+  const placed = loose.filter((e) => e.exif && ('lat' in e.exif || 'lon' in e.exif));
+  if (placed.length) M.patchEntries(placed.map((e) => [e.fp, (cur) => (cur.exif && !keepPlace(cur) ? { exif: placeless(cur.exif) } : null)]));
+  $('gl-kept-count').textContent = countText(loose).text;
+  $('gl-kept').hidden = !loose.length;
+}
+
+function resetView() {
+  loadToken++;
+  all = [];
+  items = [];
+  byFp = new Map();
+  source = { name: '', folderId: '' };
+  filter = 'all';
+  clearRows();
+  thumbUrls.forEach((u) => URL.revokeObjectURL(u));
+  thumbUrls.clear();
+  thumbState.clear();
+  layout = { rows: [], height: 0, cols: 0, cell: 0 };
+  grid.style.height = '0px';
+  progress('');
+}
+
+async function afterForget(ok, focusId) {
+  showMain(false);
+  await renderStart();
+  if (ok) toast(C.forgotten);
+  try { $(focusId).focus(); } catch (_) {}
+}
+
+async function forgetSaved(folder) {
+  if (!(await confirmDanger(fill(C.forget_folder_confirm, { name: folder.name })))) return;
+  if (source.folderId === folder.id) resetView();
+  afterForget(await M.forgetFolder(folder.id, { index: true }), 'gl-open-folder');
+}
+
+async function forgetView() {
+  const folderId = source.folderId && saved.has(source.folderId) ? source.folderId : '';
+  const text = folderId ? fill(C.forget_folder_confirm, { name: source.name }) : C.forget_photos_confirm;
+  if (!(await confirmDanger(text))) return;
+  const fps = all.map((e) => e.fp);
+  resetView();
+  const dropped = folderId ? await M.forgetFolder(folderId, { index: true }) : true;
+  afterForget((await M.forgetEntries(fps)) && dropped, folderId ? 'gl-open-folder' : 'gl-open-files');
+}
+
+async function forgetKept() {
+  if (!(await confirmDanger(C.forget_photos_confirm))) return;
+  await refreshSaved();
+  const fps = looseEntries(await M.listEntries()).map((e) => e.fp);
+  const gone = new Set(fps);
+  if (all.some((e) => gone.has(e.fp))) resetView();
+  afterForget(await M.forgetEntries(fps), 'gl-open-files');
 }
 
 $('gl-open-files').addEventListener('click', async () => {
@@ -590,6 +690,8 @@ $('gl-home').addEventListener('click', () => {
   showMain(false);
   renderStart();
 });
+$('gl-forget').addEventListener('click', forgetView);
+$('gl-kept-forget').addEventListener('click', forgetKept);
 $('gl-show').addEventListener('click', () => {
   if (!items.length) return;
   openBox(0, $('gl-show'));
@@ -962,11 +1064,20 @@ async function renderInfo() {
   const file = M.fileFor(e.fp);
   if (e.kind === 'image' && !e.dated && file) {
     const x = await M.readExif(file);
+    exifRead.add(e);
     if (items[cur] !== e) return;
     const patch = { dated: true, taken: (x && x.taken) || 0 };
     if (x) patch.exif = x;
     Object.assign(e, patch);
-    M.patchEntries([[e.fp, patch]]);
+    M.patchEntries([[e.fp, storable(e, patch)]]);
+  } else if (e.kind === 'image' && file && !exifRead.has(e) && !(e.exif && 'lat' in e.exif)) {
+    const x = await M.readExif(file);
+    exifRead.add(e);
+    if (items[cur] !== e) return;
+    if (x && 'lat' in x) {
+      e.exif = Object.assign({}, e.exif, { lat: x.lat, lon: x.lon });
+      if (keepPlace(e)) M.patchEntries([[e.fp, { exif: e.exif }]]);
+    }
   }
   const rows = [];
   const add = (label, value, copy) => { if (value) rows.push([label, value, copy]); };
@@ -1265,6 +1376,7 @@ renderStart().then(async () => {
 .gl__drop-title { margin: 0; font-family: var(--font-body); font-weight: 600; font-size: 1.05rem; color: var(--term-fg-strong); }
 .gl__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
 .gl__hint { margin: 0; max-width: 34rem; font-size: 0.85rem; color: var(--term-muted); }
+.gl__kept-hint { margin-top: 0.6rem; }
 .gl__h2 { margin: 0 0 0.6rem; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--term-muted); }
 .gl__folders { display: flex; flex-direction: column; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
 .gl__folder { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.4rem 0.4rem 0.8rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); }

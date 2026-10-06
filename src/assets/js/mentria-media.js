@@ -149,7 +149,10 @@ export function patchEntries(list) {
     const s = t.objectStore('entries');
     list.forEach(([fp, patch]) => {
       const g = s.get(fp);
-      g.onsuccess = () => { if (g.result) s.put(Object.assign(g.result, patch)); };
+      g.onsuccess = () => {
+        const p = g.result && (typeof patch === 'function' ? patch(g.result) : patch);
+        if (p) s.put(Object.assign(g.result, p));
+      };
     });
     t.oncomplete = () => resolve();
     t.onerror = () => resolve();
@@ -163,6 +166,20 @@ export function forgetEntry(fp) {
     run('entries', 'readwrite', (s) => s.delete(fp)),
     run('thumbs', 'readwrite', (s) => s.delete(fp))
   ]).then(() => true, () => false);
+}
+
+export function forgetEntries(fps) {
+  fps.forEach((fp) => live.delete(fp));
+  if (!fps.length) return Promise.resolve(true);
+  return openDb().then((d) => new Promise((resolve) => {
+    const t = d.transaction(['entries', 'thumbs'], 'readwrite');
+    const entries = t.objectStore('entries');
+    const thumbs = t.objectStore('thumbs');
+    fps.forEach((fp) => { entries.delete(fp); thumbs.delete(fp); });
+    t.oncomplete = () => resolve(true);
+    t.onerror = () => resolve(false);
+    t.onabort = () => resolve(false);
+  })).catch(() => false);
 }
 
 export function register(items, ctx) {
@@ -221,7 +238,11 @@ export function touchFolder(folder) {
   return run('folders', 'readwrite', (s) => s.put(folder)).catch(() => {});
 }
 
-export function forgetFolder(id) {
+export async function forgetFolder(id, opts) {
+  if (opts && opts.index) {
+    const fps = (await listEntries()).filter((e) => e.folderId === id).map((e) => e.fp);
+    if (!(await forgetEntries(fps))) return false;
+  }
   return run('folders', 'readwrite', (s) => s.delete(id)).then(() => true, () => false);
 }
 
@@ -385,7 +406,7 @@ export function videoThumb(entry) {
     if (shot.duration) patch.duration = shot.duration;
     if (shot.width) { patch.width = shot.width; patch.height = shot.height; }
     if (Object.keys(patch).length) { Object.assign(entry, patch); await patchEntry(entry.fp, patch); }
-    if (shot.blob) await run('thumbs', 'readwrite', (s) => s.put(shot.blob, entry.fp)).catch(() => {});
+    if (shot.blob && live.has(entry.fp)) await run('thumbs', 'readwrite', (s) => s.put(shot.blob, entry.fp)).catch(() => {});
     return shot.blob;
   });
   thumbChain = job.catch(() => null);
@@ -507,7 +528,7 @@ export async function imageThumb(entry) {
   if (!file) return null;
   let blob = await viaWorker(file);
   if (!blob) blob = await viaMain(file);
-  if (blob) await run('thumbs', 'readwrite', (s) => s.put(blob, entry.fp)).catch(() => {});
+  if (blob && live.has(entry.fp)) await run('thumbs', 'readwrite', (s) => s.put(blob, entry.fp)).catch(() => {});
   return blob;
 }
 

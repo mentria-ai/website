@@ -1535,6 +1535,7 @@ function boot() {
 
   ui = KitUi.createUI(stage, uiCopy(), {
     title: 'SKYRUSH FPV',
+    popovers: [helpEl],
     sound(kind, index) { sfx('ui', { kind, index }); },
     onPause() { openPause(); }
   });

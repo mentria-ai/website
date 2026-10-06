@@ -163,6 +163,7 @@
   box-shadow: var(--elev-2);
   z-index: 10000;
   opacity: 1;
+  pointer-events: none;
 }
 @media (prefers-reduced-motion: no-preference) {
   .m-toast {
@@ -181,6 +182,7 @@
   max-width: min(92vw, 460px);
   bottom: calc(var(--space-5) + 3.4rem + env(safe-area-inset-bottom, 0px));
 }
+.m-toast--undo:not(.m-toast--hide) { pointer-events: auto; }
 .m-toast__text { min-width: 0; overflow-wrap: anywhere; }
 .m-toast__action {
   flex: 0 0 auto;

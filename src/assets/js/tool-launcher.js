@@ -65,7 +65,7 @@
   }
 
   if (pinnedBand && window.MentriaStore) {
-    pages.querySelectorAll('.launch-tile').forEach(function (tile) {
+    pages.querySelectorAll('.launch-tile:not([data-store])').forEach(function (tile) {
       var slot = document.createElement('div');
       slot.className = 'launch-slot';
       if (tile.hasAttribute('data-requires')) slot.setAttribute('data-requires', tile.getAttribute('data-requires'));

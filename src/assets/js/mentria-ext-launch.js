@@ -25,6 +25,8 @@
         var m = e.manifest;
         var slugSel = (window.CSS && CSS.escape) ? CSS.escape(m.id) : m.id.replace(/[^a-z0-9-]/g, '');
         if (document.querySelector('.launcher .launch-tile[data-slug="' + slugSel + '"]')) return;
+        var listed = pages.querySelector('.launch-tile[data-store="' + slugSel + '"]');
+        if (listed) listed.remove();
         var a = document.createElement('a');
         a.className = 'launch-tile';
         a.setAttribute('data-slug', m.id);

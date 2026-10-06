@@ -350,7 +350,8 @@
   },
   "lang_switcher": {
     "label": "言語",
-    "current_label": "現在の言語"
+    "current_label": "現在の言語",
+    "offline": "オフラインのため、このページはまだ{lang}で表示できません。初回はインターネット接続が必要です。"
   },
   "tools": {
     "ai-chat": {

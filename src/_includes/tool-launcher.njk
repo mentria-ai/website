@@ -44,6 +44,26 @@
       </div>
     </section>
     {%- endfor %}
+    {%- if extensions.length %}
+    {%- set kindLabel = "store.kind" | traw %}
+    {%- set gamesLabel = "home.launcher.games" | traw %}
+    {%- set gameLabel = "category.Game" | traw %}
+    <section class="launcher__cat launcher__cat--store" data-group="Store">
+      <div class="launcher__head"><h2 class="launcher__label">{{ "tool.ext_gallery.title" | t }}</h2><span class="launcher__count">{{ extensions | length }}</span></div>
+      <div class="launcher__grid">
+        {%- for e in extensions %}
+        {%- set isGame = e.schemaCategory == "GameApplication" %}
+        <a class="launch-tile" data-slug="ext-{{ e.id }}" data-store="{{ e.id }}" data-group="Extensions"
+           data-search="{{ e.name }} {{ e.id }} {{ e.manifest.description }} {{ ('tool.ext_gallery.desc.' + e.id) | traw }} Extension{% if kindLabel != 'Extension' %} {{ kindLabel }}{% endif %}{% if isGame %} Game Games{% if gamesLabel != 'Games' %} {{ gamesLabel }}{% endif %}{% if gameLabel != 'Game' and gameLabel != gamesLabel %} {{ gameLabel }}{% endif %}{% endif %}"
+           data-words="tool.ext_gallery.desc.{{ e.id }};store.kind{% if isGame %};home.launcher.games;category.Game{% endif %}"
+           href="{{ ('/extensions/' + e.id + '/') | localeUrl(lang) }}">
+          <span class="launch-tile__icon launch-tile__icon--ext" aria-hidden="true">{% if e.iconIsImage %}<img src="{{ e.icon }}" alt="">{% else %}{{ e.icon }}{% endif %}</span>
+          <span class="launch-tile__label">{{ e.name }}</span>
+        </a>
+        {%- endfor %}
+      </div>
+    </section>
+    {%- endif %}
   </div>
   <p class="launcher__nomatch" id="launcher-nomatch" hidden data-label="{{ 'tools_page.no_match' | t }}"></p>
   <div class="launcher__widgets" id="launcher-widgets" hidden
@@ -173,7 +193,10 @@
       var tiles = cats[i].querySelectorAll('.launch-tile[data-search]');
       for (var j = 0; j < tiles.length; j++) {
         var cat = tiles[j].getAttribute('data-cat');
-        addWords(tiles[j], [group, cat ? tr('category.' + cat) : '']);
+        var words = [group, cat ? tr('category.' + cat) : ''];
+        var keys = (tiles[j].getAttribute('data-words') || '').split(';');
+        for (var k = 0; k < keys.length; k++) if (keys[k]) words.push(tr(keys[k]));
+        addWords(tiles[j], words);
       }
     }
   });

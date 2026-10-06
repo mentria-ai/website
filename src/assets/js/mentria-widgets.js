@@ -211,11 +211,24 @@
     return s.length > n ? s.slice(0, n) : s;
   }
 
+  function forLocale(map) {
+    if (!map || typeof map !== 'object' || Array.isArray(map)) return null;
+    var code = String(lang()).toLowerCase(), base = code.split('-')[0], exact = null, near = null;
+    Object.keys(map).forEach(function (k) {
+      var v = map[k], key = k.toLowerCase();
+      if (!v || typeof v !== 'object' || typeof v.text !== 'string' || !v.text.trim()) return;
+      if (key === code) exact = v;
+      else if (!near && key.split('-')[0] === base) near = v;
+    });
+    return exact || near;
+  }
+
   function validSnapshot(snap) {
     if (!snap || typeof snap !== 'object' || Array.isArray(snap)) return null;
-    if (typeof snap.text !== 'string' || !snap.text.trim()) return null;
-    var out = { text: capStr(snap.text.trim(), 80) };
-    if (typeof snap.detail === 'string' && snap.detail.trim()) out.detail = capStr(snap.detail.trim(), 120);
+    var pick = forLocale(snap.locales) || snap;
+    if (typeof pick.text !== 'string' || !pick.text.trim()) return null;
+    var out = { text: capStr(pick.text.trim(), 80) };
+    if (typeof pick.detail === 'string' && pick.detail.trim()) out.detail = capStr(pick.detail.trim(), 120);
     if (typeof snap.progress === 'number' && isFinite(snap.progress)) out.progress = Math.max(0, Math.min(1, snap.progress));
     return out;
   }

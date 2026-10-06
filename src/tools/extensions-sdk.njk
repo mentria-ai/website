@@ -170,6 +170,7 @@ eleventyComputed:
         <tr><td><code>text</code></td><td>string</td><td>yes</td><td>The tile's value line. Trimmed, capped at 80 chars; must be non-empty.</td></tr>
         <tr><td><code>detail</code></td><td>string</td><td>no</td><td>A secondary line below the value. Trimmed, capped at 120 chars.</td></tr>
         <tr><td><code>progress</code></td><td>number</td><td>no</td><td>Drawn as a progress bar; clamped to 0–1.</td></tr>
+        <tr><td><code>locales</code></td><td>object</td><td>no</td><td>The same <code>text</code> and <code>detail</code> per site language, keyed by language code (<code>en</code>, <code>es</code>, <code>fr</code>, <code>ja</code>, <code>pt-BR</code>), e.g. <code>{ es: { text: 'compré leche' } }</code>. The tile shows the entry for the current language, so it follows a language switch even while your extension isn't running; without a matching entry it shows <code>text</code> and <code>detail</code>.</td></tr>
       </tbody>
     </table>
   </div>

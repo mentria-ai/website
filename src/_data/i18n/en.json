@@ -350,7 +350,8 @@
   },
   "lang_switcher": {
     "label": "Language",
-    "current_label": "Current language"
+    "current_label": "Current language",
+    "offline": "You're offline, so {lang} can't load on this page yet. It needs a connection the first time."
   },
   "tools": {
     "ai-chat": {

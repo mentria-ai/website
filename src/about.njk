@@ -130,6 +130,17 @@ localeReload: true
     <h2 class="about-section-h">{{ "about.data_section_title" | t }}</h2>
     <p class="about-tagline" style="margin-bottom: 20px;">{{ "about.data_section_lede" | t }}</p>
 
+    <div class="about-data-scope">
+      <div class="about-data-scope__col">
+        <h3 class="about-data-scope__h">{{ "about.data_in_label" | t }}</h3>
+        <p class="about-data-card__p">{{ "about.data_in_body" | t }}</p>
+      </div>
+      <div class="about-data-scope__col about-data-scope__col--out">
+        <h3 class="about-data-scope__h">{{ "about.data_out_label" | t }}</h3>
+        <p class="about-data-card__p">{{ "about.data_out_body" | t }}</p>
+      </div>
+    </div>
+
     <div class="about-data-stats">
       <div class="about-data-stat">
         <span class="about-data-stat__label">{{ "about.data_persist_label" | t }}</span>
@@ -147,6 +158,8 @@ localeReload: true
         <p class="about-data-card__p">{{ "about.data_export_lede" | t }}</p>
         <button type="button" class="about-data-btn about-data-btn--ghost about-reveal-btn" data-reveal="about-export-form">{{ "about.data_export_button" | t }}…</button>
         <div class="about-fold" id="about-export-form" hidden>
+          <p class="about-data-size" id="about-data-size" aria-live="polite"></p>
+          <p class="about-data-size about-data-size--warn" id="about-data-size-warn" hidden>{{ "common.backup_size_large" | t }}</p>
           <label class="about-data-field">
             <span>{{ "about.data_pass_label" | t }}</span>
             <input type="password" id="about-data-pass" autocomplete="new-password" spellcheck="false">
@@ -385,6 +398,13 @@ localeReload: true
   .about-fold { display: flex; flex-direction: column; gap: 10px; }
   .about-page [hidden] { display: none !important; }
   .about-reveal-btn { align-self: flex-start; }
+  .about-data-scope { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+  .about-data-scope__col { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 2px 0 2px 14px; border-left: 2px solid var(--cyan-30); }
+  .about-data-scope__col--out { border-left-color: var(--term-border); }
+  .about-data-scope__h { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--term-fg); margin: 0; }
+  .about-data-size { font-family: var(--font-mono); font-size: 11px; line-height: 1.5; color: var(--term-muted); margin: 0; overflow-wrap: anywhere; }
+  .about-data-size:empty { display: none; }
+  .about-data-size--warn { color: var(--syn-amber, #f7b015); }
   .about-data-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; font-family: var(--font-mono); font-size: 12px; }
   .about-data-stat { display: flex; flex-direction: column; gap: 4px; }
   .about-data-stat__label { color: var(--term-subtle); letter-spacing: 0.1em; font-size: 10px; text-transform: uppercase; }
@@ -408,7 +428,7 @@ localeReload: true
   .about-data-status { font-family: var(--font-mono); font-size: 11px; min-height: 14px; color: var(--term-muted); }
   .about-data-status[data-tone="ok"]   { color: var(--syn-green, #34c46a); }
   .about-data-status[data-tone="err"]  { color: var(--syn-pink); }
-  @media (max-width: 600px) { .about-data-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .about-data-grid, .about-data-scope { grid-template-columns: 1fr; } }
 
   .about-identity-card { background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
   .about-identity-card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -626,17 +646,27 @@ localeReload: true
       importBusy:        {{ ('about.data_import_busy'            | t) | dump | safe }},
       importDone:        {{ ('about.data_import_done'            | t) | dump | safe }},
       importFail:        {{ ('about.data_import_fail'            | t) | dump | safe }},
+      importApplying:    {{ ('common.restore_applying'           | t) | dump | safe }},
+      importCancelled:   {{ ('common.restore_cancelled'          | t) | dump | safe }},
+      size:              {{ ('common.backup_size'                | t) | dump | safe }},
+      sizeBusy:          {{ ('common.backup_size_busy'           | t) | dump | safe }},
+      largeConfirm:      {{ ('common.backup_large_confirm'       | t) | dump | safe }},
+      areas: {{ 'common.data_areas' | tsub | dump | safe }},
       restore: {
         replace:       {{ ('common.restore_replace'        | t) | dump | safe }},
         totpVault:     {{ ('common.restore_totp_vault'     | t) | dump | safe }},
-        identityVault: {{ ('common.restore_identity_vault' | t) | dump | safe }}
+        identityVault: {{ ('common.restore_identity_vault' | t) | dump | safe }},
+        finance:       {{ ('common.restore_finance'        | t) | dump | safe }},
+        summary:       {{ ('common.restore_summary'        | t) | dump | safe }}
       },
       restoreErr: {
         file:  {{ ('common.restore_err_file'  | t) | dump | safe }},
         pass:  {{ ('common.restore_err_pass'  | t) | dump | safe }},
         space: {{ ('common.restore_err_space' | t) | dump | safe }},
         newer: {{ ('common.restore_err_newer' | t) | dump | safe }},
-        blocked: {{ ('common.restore_err_blocked' | t) | dump | safe }}
+        blocked: {{ ('common.restore_err_blocked' | t) | dump | safe }},
+        finance: {{ ('common.restore_err_finance' | t) | dump | safe }},
+        db: {{ ('common.restore_err_db' | t) | dump | safe }}
       },
       exportErr: {
         blocked: {{ ('common.backup_err_blocked' | t) | dump | safe }},
@@ -655,6 +685,9 @@ localeReload: true
     var importPass= document.getElementById('about-data-import-pass');
     var importBtn = document.getElementById('about-data-import-btn');
     var importStat= document.getElementById('about-data-import-status');
+    var sizeEl    = document.getElementById('about-data-size');
+    var sizeWarn  = document.getElementById('about-data-size-warn');
+    COPY.restore.areas = COPY.areas;
 
     function fmtBytes(n) {
       if (n == null || isNaN(n)) return '—';
@@ -707,6 +740,43 @@ localeReload: true
       if (tone) el.dataset.tone = tone; else delete el.dataset.tone;
     }
 
+    function pct(f) {
+      try { return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'percent' }).format(f); }
+      catch (_) { return Math.round(f * 100) + '%'; }
+    }
+
+    function progressTo(el, label) {
+      var last = -1;
+      return function (f) {
+        var step = Math.floor(f * 100);
+        if (step === last) return;
+        last = step;
+        setStatus(el, label + ' ' + pct(step / 100), null);
+      };
+    }
+
+    function showSize(m) {
+      var parts = m.areas.filter(function (a) { return a.bytes > 0; }).map(function (a) {
+        return (COPY.areas[a.area] || a.area) + ' ' + fmtBytes(a.bytes);
+      });
+      sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', parts.join(', '));
+      sizeWarn.hidden = m.total <= window.MentriaBackup.LARGE_BYTES;
+    }
+
+    var measuring = false;
+    function measure() {
+      if (measuring) return;
+      measuring = true;
+      sizeEl.textContent = COPY.sizeBusy;
+      window.MentriaBackup.prepareBackup().then(showSize, function (err) {
+        sizeEl.textContent = '';
+        var ecode = window.MentriaBackup.exportErrorCode(err);
+        setStatus(exportStat, ecode ? COPY.exportErr[ecode] : String(err && err.message || err), 'err');
+      }).then(function () { measuring = false; });
+    }
+    var exportReveal = document.querySelector('[data-reveal="about-export-form"]');
+    if (exportReveal) exportReveal.addEventListener('click', measure);
+
     exportBtn.addEventListener('click', async function () {
       setStatus(exportStat, '', null);
       var pw = passEl.value;
@@ -716,9 +786,14 @@ localeReload: true
       exportBtn.disabled = true;
       setStatus(exportStat, COPY.exportBusy, null);
       try {
-        var data = window.MentriaStore.exportAll();
-        var env = await window.MentriaBackup.encryptBackup(data, pw);
-        window.MentriaBackup.downloadBackupJson(env, 'mentria-backup');
+        var prepared = await window.MentriaBackup.prepareBackup();
+        showSize(prepared);
+        if (prepared.total > window.MentriaBackup.LARGE_BYTES) {
+          var go = window.mentriaConfirm ? await window.mentriaConfirm(COPY.largeConfirm.replace('{size}', fmtBytes(prepared.total))) : false;
+          if (!go) { setStatus(exportStat, '', null); return; }
+        }
+        var out = await window.MentriaBackup.sealBackup(prepared, pw, { onProgress: progressTo(exportStat, COPY.exportBusy) });
+        window.MentriaBackup.downloadBlob(out.blob, 'mentria-backup');
         setStatus(exportStat, COPY.exportDone, 'ok');
       } catch (err) {
         var ecode = window.MentriaBackup.exportErrorCode(err);
@@ -735,14 +810,14 @@ localeReload: true
       var pw = importPass.value;
       if (!f) { setStatus(importStat, COPY.importFail.replace('{err}', 'no file'), 'err'); return; }
       if (!pw) { setStatus(importStat, COPY.passTooShort, 'err'); return; }
-      if (f.size > 32 * 1024 * 1024) { setStatus(importStat, COPY.importFail.replace('{err}', 'file too large'), 'err'); return; }
       importBtn.disabled = true;
       setStatus(importStat, COPY.importBusy, null);
       try {
-        var text = await f.text();
-        var env = JSON.parse(text);
-        var data = await window.MentriaBackup.decryptBackup(env, pw);
+        var data = await window.MentriaBackup.readBackupFile(f, pw, { onProgress: progressTo(importStat, COPY.importBusy) });
+        pw = ''; importPass.value = '';
+        setStatus(importStat, COPY.importApplying, null);
         var result = await window.MentriaBackup.applyRestore(data, COPY.restore);
+        if (result.cancelled) { setStatus(importStat, COPY.importCancelled, null); return; }
         setStatus(importStat, COPY.importDone.replace('{n}', result.restored), 'ok');
         setTimeout(function () { location.reload(); }, 1200);
       } catch (err) {

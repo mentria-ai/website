@@ -81,6 +81,8 @@ localeReload: true
   <div class="files-modal__card m-modal__card">
     <h3 class="files-modal__h">{{ "tool.files.export_modal_title" | t }}</h3>
     <p class="files-modal__p">{{ "tool.files.export_modal_lede" | t }}</p>
+    <p class="files-modal__p" id="files-export-size" aria-live="polite"></p>
+    <p class="files-modal__note" id="files-export-warn" hidden>{{ "common.backup_size_large" | t }}</p>
     <div class="m-field">
       <label for="files-export-pass">{{ "tool.files.passphrase_label" | t }}</label>
       <input class="m-input" type="password" id="files-export-pass" autocomplete="new-password" minlength="8" spellcheck="false">
@@ -204,17 +206,28 @@ localeReload: true
     restoreBusy:  {{ ("about.data_import_busy" | t) | dump | safe }},
     restoreDone:  {{ ("about.data_import_done" | t) | dump | safe }},
     restoreFail:  {{ ("about.data_import_fail" | t) | dump | safe }},
+    restoreApplying: {{ ("common.restore_applying" | t) | dump | safe }},
+    restoreCancelled: {{ ("common.restore_cancelled" | t) | dump | safe }},
+    exportBusy:   {{ ("about.data_export_busy" | t) | dump | safe }},
+    size:         {{ ("common.backup_size" | t) | dump | safe }},
+    sizeBusy:     {{ ("common.backup_size_busy" | t) | dump | safe }},
+    largeConfirm: {{ ("common.backup_large_confirm" | t) | dump | safe }},
+    areas: {{ "common.data_areas" | tsub | dump | safe }},
     restore: {
       replace:       {{ ("common.restore_replace"        | t) | dump | safe }},
       totpVault:     {{ ("common.restore_totp_vault"     | t) | dump | safe }},
-      identityVault: {{ ("common.restore_identity_vault" | t) | dump | safe }}
+      identityVault: {{ ("common.restore_identity_vault" | t) | dump | safe }},
+      finance:       {{ ("common.restore_finance"        | t) | dump | safe }},
+      summary:       {{ ("common.restore_summary"        | t) | dump | safe }}
     },
     restoreErr: {
       file:  {{ ("common.restore_err_file"  | t) | dump | safe }},
       pass:  {{ ("common.restore_err_pass"  | t) | dump | safe }},
       space: {{ ("common.restore_err_space" | t) | dump | safe }},
       newer: {{ ("common.restore_err_newer" | t) | dump | safe }},
-      blocked: {{ ("common.restore_err_blocked" | t) | dump | safe }}
+      blocked: {{ ("common.restore_err_blocked" | t) | dump | safe }},
+      finance: {{ ("common.restore_err_finance" | t) | dump | safe }},
+      db: {{ ("common.restore_err_db" | t) | dump | safe }}
     },
     exportErr: {
       blocked: {{ ("common.backup_err_blocked" | t) | dump | safe }},
@@ -927,12 +940,52 @@ localeReload: true
     if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('files-restore-confirm').click(); }
   });
 
+  const sizeEl = $('files-export-size');
+  const sizeWarn = $('files-export-warn');
+  COPY.restore.areas = COPY.areas;
+
+  function pct(f) {
+    try { return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'percent' }).format(f); }
+    catch (_) { return Math.round(f * 100) + '%'; }
+  }
+
+  function progressTo(el, label) {
+    let last = -1;
+    return (f) => {
+      const step = Math.floor(f * 100);
+      if (step === last) return;
+      last = step;
+      el.textContent = label + ' ' + pct(step / 100);
+    };
+  }
+
+  function showSize(m) {
+    const parts = m.areas.filter((a) => a.bytes > 0).map((a) => (COPY.areas[a.area] || a.area) + ' ' + fmtBytes(a.bytes));
+    sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', parts.join(', '));
+    sizeWarn.hidden = m.total <= MentriaBackup.LARGE_BYTES;
+  }
+
+  let measuring = false;
+  function measure() {
+    if (measuring || !window.MentriaBackup) return;
+    measuring = true;
+    sizeEl.textContent = COPY.sizeBusy;
+    sizeWarn.hidden = true;
+    MentriaBackup.prepareBackup().then(showSize, (err) => {
+      sizeEl.textContent = '';
+      const ecode = MentriaBackup.exportErrorCode(err);
+      strengthEl.dataset.level = 'weak';
+      strengthEl.textContent = ecode ? COPY.exportErr[ecode] : COPY.backupFailed.replace('{msg}', String(err && err.message || err));
+    }).then(() => { measuring = false; });
+  }
+
   $('files-export-all').addEventListener('click', () => {
     passInput.value = '';
     strengthEl.textContent = '';
     strengthEl.dataset.level = '';
     exportModal.open();
     passInput.focus();
+    measure();
   });
 
   $('files-export-confirm').addEventListener('click', async () => {
@@ -941,10 +994,19 @@ localeReload: true
     if (!pass || pass.length < 8) { strengthEl.dataset.level = 'weak'; strengthEl.textContent = COPY.passShort; passInput.focus(); return; }
     const btn = $('files-export-confirm');
     btn.disabled = true;
+    strengthEl.dataset.level = '';
+    strengthEl.textContent = COPY.exportBusy;
     try {
-      const env = await MentriaBackup.encryptBackup(store.exportAll(), pass);
-      MentriaBackup.downloadBackupJson(env, 'mentria-files-backup');
+      const prepared = await MentriaBackup.prepareBackup();
+      showSize(prepared);
+      if (prepared.total > MentriaBackup.LARGE_BYTES && !(await window.mentriaConfirm(COPY.largeConfirm.replace('{size}', fmtBytes(prepared.total))))) {
+        strengthEl.textContent = '';
+        return;
+      }
+      const out = await MentriaBackup.sealBackup(prepared, pass, { onProgress: progressTo(strengthEl, COPY.exportBusy) });
+      MentriaBackup.downloadBlob(out.blob, 'mentria-files-backup');
       passInput.value = '';
+      strengthEl.textContent = '';
       exportModal.close();
       status.set(COPY.backupDone, 'ok');
     } catch (err) {
@@ -972,14 +1034,19 @@ localeReload: true
     if (!f) { fileEl.focus(); return; }
     if (!passEl.value) { passEl.focus(); return; }
     if (!window.MentriaBackup) { out.textContent = COPY.restoreFail.replace('{err}', 'MentriaBackup'); return; }
-    if (f.size > 32 * 1024 * 1024) { out.textContent = COPY.restoreFail.replace('{err}', 'file too large'); return; }
     const btn = $('files-restore-confirm');
     btn.disabled = true;
     out.textContent = COPY.restoreBusy;
     try {
-      const env = JSON.parse(await f.text());
-      const data = await MentriaBackup.decryptBackup(env, passEl.value);
+      const data = await MentriaBackup.readBackupFile(f, passEl.value, { onProgress: progressTo(out, COPY.restoreBusy) });
+      passEl.value = '';
+      out.textContent = COPY.restoreApplying;
       const result = await MentriaBackup.applyRestore(data, COPY.restore);
+      if (result.cancelled) {
+        out.textContent = COPY.restoreCancelled;
+        btn.disabled = false;
+        return;
+      }
       out.textContent = COPY.restoreDone.replace('{n}', result.restored);
       setTimeout(() => { location.reload(); }, 1200);
     } catch (err) {
@@ -1272,6 +1339,7 @@ localeReload: true
   color: var(--term-muted);
   line-height: 1.5;
 }
+.files-modal__p:empty { display: none; }
 .files-modal__note {
   margin: 0;
   font-size: var(--text-2xs);

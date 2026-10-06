@@ -167,6 +167,7 @@
         more.hidden = true;
         more.setAttribute('aria-expanded', 'false');
         more.addEventListener('click', function () {
+          if (more.hidden) return;
           var open = body.classList.toggle('is-collapsed');
           more.textContent = open ? t('more') : t('less');
           more.setAttribute('aria-expanded', open ? 'false' : 'true');

@@ -120,8 +120,8 @@
     return v;
   }
   function slugOf(path) {
-    var m = /^\/tools\/([^/]+)\//.exec(path || '');
-    return m ? m[1] : '';
+    var m = /^\/tools\/([^/]+)\/|^\/(comms)\//.exec(path || '');
+    return m ? (m[1] || m[2]) : '';
   }
   function urlTail() {
     var hash = location.hash;
@@ -631,7 +631,7 @@
     sub.className = 'm-mini__label';
     sub.hidden = true;
     text.append(value, sub);
-    open.append(iconFor(ps.id ? 'extensions' : slugOf(ps.path)), text);
+    open.append(iconFor((!ps.id && slugOf(ps.path)) || 'extensions'), text);
     open.addEventListener('click', function () {
       var cur = toolSession();
       if (!cur) { renderParked(); return; }

@@ -105,6 +105,41 @@ const importPub = (pub) => crypto.subtle.importKey(
   []
 );
 
+const pairProofKey = async (privateKey, theirPubJwk) => {
+  const bits = await crypto.subtle.deriveBits({ name: 'ECDH', public: await importPub(theirPubJwk) }, privateKey, 256);
+  const base = await crypto.subtle.importKey('raw', bits, 'HKDF', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'HKDF', hash: 'SHA-256', salt: te.encode('mentria-pair-proof'), info: te.encode('mentria-pair-proof-v1') },
+    base,
+    { name: 'HMAC', hash: 'SHA-256', length: 256 },
+    false,
+    ['sign', 'verify']
+  );
+};
+
+export const pairProof = async (privateKey, theirPubJwk, parts) => {
+  const key = await pairProofKey(privateKey, theirPubJwk);
+  return b64uEnc(new Uint8Array(await crypto.subtle.sign('HMAC', key, te.encode(parts.join('|')))));
+};
+
+export const checkPairProof = async (privateKey, theirPubJwk, parts, proof) => {
+  if (typeof proof !== 'string' || !proof || proof.length > 100) return false;
+  try {
+    const key = await pairProofKey(privateKey, theirPubJwk);
+    return await crypto.subtle.verify('HMAC', key, b64uDec(proof), te.encode(parts.join('|')));
+  } catch (_) {
+    return false;
+  }
+};
+
+const inboxProofParts = async (epkX, senderPub, recipientPub, payload) => [
+  'mentria-inbox-proof-v1',
+  epkX,
+  await fingerprint(senderPub),
+  await fingerprint(recipientPub),
+  JSON.stringify([String(payload.kind || ''), String(payload.name || ''), String(payload.ring || ''), String(payload.note || ''), Number(payload.ts) || 0])
+];
+
 const sealKey = async (bits, epkX) => {
   const base = await crypto.subtle.importKey('raw', bits, 'HKDF', false, ['deriveKey']);
   return crypto.subtle.deriveKey(
@@ -116,18 +151,20 @@ const sealKey = async (bits, epkX) => {
   );
 };
 
-export const sealToInbox = async (theirPubJwk, payload) => {
+export const sealToInbox = async (theirPubJwk, payload, myPrivateKey) => {
   const eph = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
   const epk = await crypto.subtle.exportKey('jwk', eph.publicKey);
   const theirKey = await importPub(theirPubJwk);
   const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: theirKey }, eph.privateKey, 256));
   const key = await sealKey(bits, epk.x);
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(payload)));
+  const body = Object.assign({}, payload);
+  if (myPrivateKey && body.pub) body.proof = await pairProof(myPrivateKey, theirPubJwk, await inboxProofParts(epk.x, body.pub, theirPubJwk, body));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(body)));
   return { v: 1, epk: { x: epk.x, y: epk.y }, iv: b64uEnc(iv), ct: b64uEnc(new Uint8Array(ct)) };
 };
 
-export const openInboxEnvelope = async (myPrivateKey, envelope) => {
+export const openInboxEnvelope = async (myPrivateKey, envelope, myPubJwk) => {
   if (!envelope || envelope.v !== 1 || !envelope.epk || !envelope.iv || !envelope.ct) return null;
   try {
     const ephKey = await importPub(envelope.epk);
@@ -136,6 +173,7 @@ export const openInboxEnvelope = async (myPrivateKey, envelope) => {
     const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64uDec(envelope.iv) }, key, b64uDec(envelope.ct));
     const payload = JSON.parse(new TextDecoder().decode(pt));
     if (!payload || payload.v !== 1 || !payload.pub || !payload.pub.x || !payload.pub.y) return null;
+    payload.verified = !!myPubJwk && await checkPairProof(myPrivateKey, payload.pub, await inboxProofParts(envelope.epk.x, payload.pub, myPubJwk, payload), payload.proof);
     return payload;
   } catch (_) {
     return null;
@@ -204,6 +242,7 @@ export const addContact = async (payload) => {
   const contacts = getContacts();
   let entry = contacts.find((c) => samePub(c.pub, payload.pub));
   if (entry) {
+    if (typeof payload.annTs === 'number' && payload.annTs <= (entry.annTs || 0)) return entry;
     entry.name = String(payload.name || entry.name || '').slice(0, 32);
     if (payload.ring) entry.ring = String(payload.ring).slice(0, 64);
   } else {
@@ -216,6 +255,7 @@ export const addContact = async (payload) => {
     };
     contacts.push(entry);
   }
+  if (typeof payload.annTs === 'number' && payload.annTs > (entry.annTs || 0)) entry.annTs = payload.annTs;
   if (!store().set(NS, CONTACTS_KEY, contacts)) throw new Error('storage-full');
   return entry;
 };

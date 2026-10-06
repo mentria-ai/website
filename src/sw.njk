@@ -243,7 +243,7 @@ self.addEventListener('activate', event => {
 
 const NOTIF_STRINGS = {
 {%- for l in locales %}
-  {{ l.code | dump | safe }}: { one: {{ "pwa.notif_message_one" | tlang(l.code) | dump | safe }}, many: {{ "pwa.notif_message_many" | tlang(l.code) | dump | safe }}, ring: {{ "pwa.notif_ring" | tlang(l.code) | dump | safe }}, reminder: {{ "pwa.notif_reminder" | tlang(l.code) | dump | safe }} }{% if not loop.last %},{% endif %}
+  {{ l.code | dump | safe }}: { one: {{ "pwa.notif_message_one" | tlang(l.code) | dump | safe }}, many: {{ "pwa.notif_message_many" | tlang(l.code) | dump | safe }}, ring: {{ "pwa.notif_ring" | tlang(l.code) | dump | safe }}, reminder: {{ "pwa.notif_reminder" | tlang(l.code) | dump | safe }}, comms: {{ (l.pathPrefix + "/comms/") | dump | safe }} }{% if not loop.last %},{% endif %}
 {%- endfor %}
 };
 
@@ -268,7 +268,7 @@ self.addEventListener('push', event => {
         tag: 'comms-ring',
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',
-        data: { url: '/comms/' },
+        data: { url: S.comms },
         renotify: true
       });
       return;
@@ -292,7 +292,7 @@ self.addEventListener('push', event => {
         tag: 'comms-msg',
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',
-        data: { url: '/comms/' },
+        data: { url: S.comms },
         renotify: true
       });
       return;

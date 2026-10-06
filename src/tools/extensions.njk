@@ -298,9 +298,9 @@ function row(entry) {
     } else {
       showOk(COPY.shareOpenComms);
       if (document.documentElement.classList.contains('is-standalone')) {
-        setTimeout(() => { location.href = '/comms/'; }, 700);
+        setTimeout(() => { location.href = PREFIX + '/comms/'; }, 700);
       } else {
-        window.open('/comms/', '_blank');
+        window.open(PREFIX + '/comms/', '_blank');
       }
     }
   });

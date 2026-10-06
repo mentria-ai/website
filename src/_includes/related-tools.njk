@@ -5,7 +5,7 @@
   <ul class="related-tools__list">
     {%- for tool in relatedList %}
     <li{% if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}>
-      <a class="related-tools__chip" href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
+      <a class="related-tools__chip" href="{% if tool.url %}{{ tool.url | localeUrl(lang) }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
         <span class="related-tools__name">{{ ("tools." + tool.slug + ".title") | t }}</span>
         <span class="related-tools__cat">{{ ("category." + tool.category) | t }}</span>
       </a>

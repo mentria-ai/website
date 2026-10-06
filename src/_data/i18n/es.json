@@ -1897,6 +1897,11 @@
           "fin-subs": "abrir facturas y suscripciones",
           "fin-tax": "abrir la estimación de impuestos"
         }
+      },
+      "perm": {
+        "finance": {
+          "network": "Solo para sincronizar tus propios dispositivos y para los recordatorios de pagos opcionales. La sincronización pasa cifrada por el relé de Mentria, que no puede leer tu libro de cuentas; los recordatorios solo envían una hora de aviso. No se guarda nada legible."
+        }
       }
     },
     "bubble-level": {
@@ -3689,7 +3694,8 @@
         "dismiss": "Descartar",
         "later": "Más tarde",
         "working": "Procesando…",
-        "progress": "Progreso"
+        "progress": "Progreso",
+        "retry": "Reintentar"
       },
       "errors": {
         "no_js": "Finanzas necesita JavaScript para funcionar.",
@@ -3807,7 +3813,8 @@
         "receiving": "Recibiendo tu libro de cuentas…",
         "no_wraps": "Desbloquea Finanzas una vez más en el otro dispositivo y vuelve a intentarlo.",
         "failed": "No se pudo emparejar:",
-        "expired": "El código caducó. Empieza de nuevo en el otro dispositivo."
+        "expired": "El código caducó. Empieza de nuevo en el otro dispositivo.",
+        "unreachable": "No se puede conectar con el servicio de sincronización. Revisa tu conexión y vuelve a intentarlo."
       },
       "restore": {
         "title": "Restaurar desde una copia de seguridad",
@@ -3878,7 +3885,8 @@
         "err_to": "Elige otra cuenta de destino.",
         "err_received": "Escribe el importe recibido o añade un tipo de cambio en Cuentas.",
         "err_split": "Las líneas suman {sum}, pero el total es {total}.",
-        "err_fx": "Añade un tipo de cambio para 1 {from} en {to}."
+        "err_fx": "Añade un tipo de cambio para 1 {from} en {to}.",
+        "no_accounts": "Todavía no hay ninguna cuenta donde anotarlo. Añade una primero."
       },
       "nl": {
         "today": "hoy|esta mañana|esta tarde|esta noche",
@@ -4316,8 +4324,8 @@
         "auto_post": "Añadir al libro de cuentas automáticamente",
         "auto_hint": "Finanzas lo registra en la fecha de vencimiento la próxima vez que abras la app. Desactívalo si el importe varía.",
         "more": "Recordatorios, prueba gratuita y cancelación",
-        "remind": "Recordarme (días antes)",
-        "remind_hint": "Se muestra en Inicio y en la ficha. -1 usa el valor predeterminado.",
+        "remind": "Recordarme",
+        "remind_hint": "Se muestra en Inicio y en la ficha. El valor predeterminado se cambia en Ajustes.",
         "shift_label": "Si cae en fin de semana",
         "shift": {
           "none": "Mantener la fecha",
@@ -4368,7 +4376,8 @@
           "quarter": "cada 3 meses",
           "half": "cada 6 meses",
           "nmonths": "cada {n} meses"
-        }
+        },
+        "remind_default": "Predeterminado ({when})"
       },
       "more": {
         "plan": "Previsiones, margen y metas",

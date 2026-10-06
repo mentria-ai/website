@@ -109,7 +109,7 @@ export function findDate(text, ctx) {
 }
 
 export function parseEntry(text, ctx) {
-  const src = String(text || '').trim();
+  const src = String(text || '').normalize('NFKC').trim();
   const out = { amount: null, currency: null, amounts: [], income: false, transfer: false, date: null, category: null, account: null, toAccount: null, payee: '', note: '', confidence: 0 };
   if (!src) return out;
   let rest = ' ' + src + ' ';

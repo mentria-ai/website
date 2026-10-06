@@ -148,7 +148,7 @@ export function detectCurrency(text) {
 }
 
 function readNumber(raw, sep, decimals) {
-  let s = String(raw || '').replace(/[\u00a0\u202f\u2009]/g, ' ').trim();
+  let s = String(raw || '').normalize('NFKC').replace(/[\u00a0\u202f\u2009]/g, ' ').trim();
   let neg = false;
   if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
   if (/[-−–]/.test(s.replace(/\d[-−–]\d/g, ''))) neg = true;

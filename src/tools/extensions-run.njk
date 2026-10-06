@@ -81,6 +81,7 @@ if (!entry || !entry.enabled || (!app && !source)) {
     onClose: () => { location.href = prefix + '/'; }
   });
   mount(takeHashArgs());
+  if (app) setTimeout(() => { if (navigator.onLine) X.ensureAppPages(id).catch(() => {}); }, 4000);
   window.addEventListener('hashchange', () => {
     const next = takeHashArgs();
     if (!next) return;

@@ -129,7 +129,20 @@
     return parsed;
   };
 
-  const backupName = (stem) => (stem || 'mentria-backup') + '-' + new Date().toISOString().slice(0, 10) + '.json';
+  const localDay = () => {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  };
+  const backupName = (stem) => (stem || 'mentria-backup') + '-' + localDay() + '.json';
+
+  const listJoin = (items) => {
+    const list = Array.from(items || [], String);
+    try {
+      return new Intl.ListFormat(document.documentElement.lang || undefined, { style: 'long', type: 'conjunction' }).format(list);
+    } catch (_) {
+      return list.join(', ');
+    }
+  };
 
   const downloadBlob = (blob, filenameStem) => {
     const url = URL.createObjectURL(blob);
@@ -180,9 +193,12 @@
   const notBackup = () => new Error('not an envelope');
 
   const SKIP = {};
+  const FIN_LOCAL = ['push_ids', 'push_at'];
+  const FIN_DEVICE = ['device_id', 'device_name', 'local'].concat(FIN_LOCAL);
+  const FIN_ID = /^[0-9a-f]{16}$/;
   const financeMeta = (store, key, value) => {
     if (store !== 'meta') return value;
-    if (key === 'push_ids') return SKIP;
+    if (FIN_LOCAL.indexOf(key) >= 0) return SKIP;
     if (key === 'wraps' && value && typeof value === 'object' && value.device) {
       const portable = Object.assign({}, value);
       delete portable.device;
@@ -190,12 +206,41 @@
     }
     return value;
   };
+  const financeAdopt = (store, device, incoming) => {
+    if (store !== 'meta') return null;
+    const mine = new Map(device.map((e) => [e.key, e.value]));
+    const theirs = new Map(incoming.map((r) => [r.k, r.v]));
+    const carry = [];
+    const keep = (key) => { if (mine.has(key)) carry.push({ key, value: mine.get(key) }); };
+    const id = mine.get('device_id');
+    if (typeof id !== 'string' || !FIN_ID.test(id)) {
+      FIN_LOCAL.forEach(keep);
+      return { drop: FIN_LOCAL, carry };
+    }
+    const same = typeof mine.get('kcv') === 'string' && mine.get('kcv') === theirs.get('kcv');
+    FIN_DEVICE.forEach(keep);
+    if (same) keep('last_sync_at');
+    const own = Number(mine.get('seq')) || 0;
+    const backed = theirs.get('device_id') === id ? Number(theirs.get('seq')) || 0 : 0;
+    carry.push({ key: 'seq', value: same ? Math.max(own, backed) : backed });
+    const drop = FIN_DEVICE.concat(['seq', 'last_sync_at']);
+    const wraps = theirs.get('wraps');
+    if (wraps && typeof wraps === 'object') {
+      const mineWraps = mine.get('wraps') || {};
+      const next = Object.assign({}, wraps, { prf: same && Array.isArray(mineWraps.prf) ? mineWraps.prf : [] });
+      delete next.device;
+      if (same && mineWraps.device) next.device = mineWraps.device;
+      carry.push({ key: 'wraps', value: next });
+      drop.push('wraps');
+    }
+    return { drop, carry };
+  };
   const DB_RULES = {
     'mentria-packs': { area: 'packs_lib' },
     'mentria-radio': { area: 'radio' },
     'mentria-ext-db': { area: 'extdata' },
     'mentria-ext-story-studio': { area: 'extdata' },
-    'mentria-ext-finance': { area: 'finance', whole: true, prep: financeMeta, keep: { meta: ['push_ids'] } }
+    'mentria-ext-finance': { area: 'finance', whole: true, prep: financeMeta, adopt: financeAdopt }
   };
   const EXT_DB = 'mentria-ext-';
   const hasRule = (name) => Object.prototype.hasOwnProperty.call(DB_RULES, name);
@@ -537,6 +582,20 @@
   };
   const estimate = (json, bin) => Math.round((json / 3 + bin) * 4 / 3);
 
+  const localSizes = (local) => {
+    const S = global.MentriaStore;
+    const out = new Map();
+    const add = (key, raw) => {
+      const area = S && typeof S.areaOf === 'function' ? S.areaOf(key) : 'other';
+      out.set(area, (out.get(area) || 0) + toUtf8.encode(JSON.stringify(key) + ':' + JSON.stringify(raw) + ',').length);
+    };
+    const store = local && local.store && typeof local.store === 'object' ? local.store : {};
+    const legacy = local && local.legacy && typeof local.legacy === 'object' ? local.legacy : {};
+    Object.keys(store).forEach((k) => add(k, store[k]));
+    Object.keys(legacy).forEach((k) => add(k, legacy[k]));
+    return out;
+  };
+
   const buildArchive = (snap) => {
     const parts = [];
     const sizes = new Map();
@@ -546,7 +605,7 @@
       s.bin += bin;
       sizes.set(area, s);
     };
-    tally('local', pushJson(parts, {
+    let rest = pushJson(parts, {
       format: ARCHIVE_FORMAT,
       version: ARCHIVE_VERSION,
       exportedAt: snap.local.exportedAt,
@@ -556,7 +615,12 @@
         version: d.version,
         stores: d.stores.map((s) => ({ name: s.name, keyPath: s.keyPath, autoIncrement: s.autoIncrement, indexes: s.indexes }))
       }))
-    }), 0);
+    });
+    localSizes(snap.local).forEach((bytes, area) => {
+      const n = Math.min(bytes, rest);
+      if (n > 0) tally(area, n, 0);
+      rest -= n;
+    });
     let records = 0;
     let skipped = 0;
     snap.dbs.forEach((d, di) => {
@@ -587,6 +651,11 @@
       });
     });
     pushJson(parts, { end: true, records });
+    if (rest > 0) {
+      let top = null;
+      sizes.forEach((v) => { if (!top || estimate(v.json, v.bin) > estimate(top.json, top.bin)) top = v; });
+      tally(top ? top.area : 'other', rest, 0);
+    }
     const areas = Array.from(sizes.values()).map((s) => ({ area: s.area, bytes: estimate(s.json, s.bin) }));
     return {
       archive: new Blob(parts),
@@ -962,7 +1031,9 @@
             plan.skipped += s.records.length;
             continue;
           }
-          const sp = { name: s.name, inline: s.keyPath != null, all: s.records, adds: [], replaces: [], device: [] };
+          const recKey = (rec) => (s.keyPath == null ? rec.k : keyFromValue(rec.v, s.keyPath));
+          const recs = s.records.filter((rec) => prepare(rule, s.name, recKey(rec), rec.v) !== SKIP);
+          const sp = { name: s.name, inline: s.keyPath != null, all: recs, adds: [], replaces: [], device: [] };
           const byKey = new Map();
           if (ds) {
             for (let i = 0; i < ds.keys.length; i++) {
@@ -974,9 +1045,9 @@
             }
           }
           const matched = new Set();
-          for (const rec of s.records) {
+          for (const rec of recs) {
             plan.records++;
-            const key = s.keyPath == null ? rec.k : keyFromValue(rec.v, s.keyPath);
+            const key = recKey(rec);
             const id = key === undefined ? null : keyId(key);
             const prev = id == null ? undefined : byKey.get(id);
             if (!prev) { sp.adds.push(rec); continue; }
@@ -1002,8 +1073,10 @@
     if (p.whole && p.conflict) {
       if (p.keep) return jobs;
       p.stores.forEach((sp) => {
-        const keys = (p.rule.keep && p.rule.keep[sp.name]) || [];
-        jobs.push({ sp, clear: true, puts: sp.all, carry: sp.device.filter((e) => keys.indexOf(e.key) >= 0), previous: sp.device });
+        const own = p.rule.adopt ? p.rule.adopt(sp.name, sp.device, sp.all) : null;
+        const drop = own ? own.drop : [];
+        const puts = drop.length ? sp.all.filter((rec) => sp.inline || drop.indexOf(rec.k) < 0) : sp.all;
+        jobs.push({ sp, clear: true, puts, carry: own ? own.carry : [], previous: sp.device });
       });
       return jobs;
     }
@@ -1172,7 +1245,7 @@
     if (copy.summary) {
       const msg = copy.summary
         .replace('{date}', formatWhen(local.exportedAt || data.exportedAt))
-        .replace('{areas}', contentAreas(S, local, dbPlans, copy.areas).join(', '));
+        .replace('{areas}', listJoin(contentAreas(S, local, dbPlans, copy.areas)));
       if (!(await ask(msg, false))) return { restored: 0, cancelled: true };
     }
     const skip = [];
@@ -1190,7 +1263,7 @@
       const label = areaLabel(p.rule.area, copy.areas);
       if (names.indexOf(label) < 0) names.push(label);
     });
-    if (names.length && !(await ask(copy.replace.replace('{areas}', names.join(', '))))) {
+    if (names.length && !(await ask(copy.replace.replace('{areas}', listJoin(names))))) {
       skip.push.apply(skip, plan.replace);
       merging.forEach((p) => { p.keepReplaced = true; });
     }
@@ -1232,9 +1305,9 @@
 
   global.MentriaBackup = {
     encryptBackup, decryptBackup, validateEnvelope,
-    downloadBackupJson, downloadBlob, scorePassphrase,
+    downloadBackupJson, downloadBlob, scorePassphrase, backupName, listJoin,
     prepareBackup, sealBackup, exportFull, readBackupFile,
-    applyRestore, restoreErrorCode, exportErrorCode,
+    applyRestore, restoreErrorCode, exportErrorCode, financeAdopt,
     ITER, ENVELOPE_VERSION, FILE_VERSION, LARGE_BYTES
   };
 })(typeof window !== 'undefined' ? window : globalThis);

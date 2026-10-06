@@ -1897,6 +1897,11 @@
           "fin-subs": "abrir contas a pagar e assinaturas",
           "fin-tax": "abrir a estimativa de impostos"
         }
+      },
+      "perm": {
+        "finance": {
+          "network": "Só para sincronizar seus próprios aparelhos e para os lembretes de contas opcionais. A sincronização passa criptografada pelo servidor de retransmissão do Mentria, que não consegue ler seu livro-caixa; os lembretes enviam só um horário de aviso. Nada legível fica guardado."
+        }
       }
     },
     "bubble-level": {
@@ -3689,7 +3694,8 @@
         "dismiss": "Dispensar",
         "later": "Depois",
         "working": "Processando…",
-        "progress": "Progresso"
+        "progress": "Progresso",
+        "retry": "Tentar de novo"
       },
       "errors": {
         "no_js": "O app Finanças precisa de JavaScript para funcionar.",
@@ -3807,7 +3813,8 @@
         "receiving": "Recebendo seu livro-caixa…",
         "no_wraps": "Desbloqueie o app Finanças mais uma vez no outro dispositivo e tente de novo.",
         "failed": "O pareamento falhou:",
-        "expired": "O código expirou. Comece de novo no outro dispositivo."
+        "expired": "O código expirou. Comece de novo no outro dispositivo.",
+        "unreachable": "Não foi possível acessar o serviço de sincronização. Verifique sua conexão e tente de novo."
       },
       "restore": {
         "title": "Restaurar de um backup",
@@ -3878,7 +3885,8 @@
         "err_to": "Escolha outra conta de destino para a transferência.",
         "err_received": "Informe o valor recebido ou adicione uma cotação em Contas.",
         "err_split": "As linhas da divisão somam {sum}, mas o total é {total}.",
-        "err_fx": "Adicione uma cotação para 1 {from} em {to}."
+        "err_fx": "Adicione uma cotação para 1 {from} em {to}.",
+        "no_accounts": "Ainda não há nenhuma conta para registrar isso. Adicione uma primeiro."
       },
       "nl": {
         "today": "hoje|hj",
@@ -4316,8 +4324,8 @@
         "auto_post": "Lançar no livro-caixa automaticamente",
         "auto_hint": "O app Finanças registra no dia do vencimento, na próxima vez que você abrir o app. Desligue para valores que variam.",
         "more": "Lembretes, teste grátis e cancelamento",
-        "remind": "Lembrar (dias antes)",
-        "remind_hint": "Aparece no Início e no bloco. -1 usa o padrão.",
+        "remind": "Lembrar",
+        "remind_hint": "Aparece no Início e no bloco. O padrão é definido em Configurações.",
         "shift_label": "Se cair no fim de semana",
         "shift": {
           "none": "Manter a data",
@@ -4368,7 +4376,8 @@
           "quarter": "a cada 3 meses",
           "half": "a cada 6 meses",
           "nmonths": "a cada {n} meses"
-        }
+        },
+        "remind_default": "Padrão ({when})"
       },
       "more": {
         "plan": "Previsões, fôlego financeiro e metas",

@@ -57,6 +57,7 @@ export function openEntry(ctx, opts) {
     lines: null,
     cleared: false,
     fxTyped: '',
+    amountFromText: false,
     touched: new Set()
   };
   if (existing) {
@@ -108,6 +109,8 @@ export function openEntry(ctx, opts) {
   const moreWrap = h('details', { style: { marginTop: '12px' } });
   const keypad = touch ? h('div', { class: 'fkp' }) : null;
   const err = h('p', { class: 'ff__err', role: 'alert' });
+  const noAccount = h('div', { class: 'fbanner', hidden: true }, icon('info'), h('span', null, t('entry.no_accounts')),
+    h('button', { type: 'button', class: 'fb fb--sm', onclick: () => import('./views/accounts.js').then((A) => A.accountSheet(ctx, null)) }, t('accounts.add')));
   let showAllCats = false;
   let fxPreview = null;
 
@@ -196,7 +199,7 @@ export function openEntry(ctx, opts) {
   function renderDetails() {
     const kids = [];
     if (st.mode !== 'xfer') {
-      kids.push(U.field(t('entry.account'), U.select(acctOptions(null), st.account, { onchange: (e) => { st.account = e.target.value; st.touched.add('account'); renderAmount(); renderMore(); } })));
+      kids.push(U.field(t('entry.account'), U.select(acctOptions(null), st.account, { onchange: (e) => { st.account = e.target.value; st.touched.add('account'); renderAmount(); renderMore(); renderKeypad(); } })));
     }
     const dateIn = h('input', { class: 'fi', type: 'date', value: st.date, required: true, onchange: (e) => { if (isISODate(e.target.value)) { st.date = e.target.value; st.touched.add('date'); } } });
     kids.push(U.field(t('entry.date'), dateIn));
@@ -277,9 +280,11 @@ export function openEntry(ctx, opts) {
 
   function renderKeypad() {
     if (!keypad) return;
-    const dc = decimalChar();
+    const dc = decimalsFor(acctCcy(st.account)) > 0 ? decimalChar() : null;
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', dc, '0', 'back'];
-    keypad.replaceChildren(...keys.map((k) => h('button', { type: 'button', 'aria-label': k === 'back' ? t('entry.backspace') : k, onclick: () => press(k) }, k === 'back' ? icon('backspace') : k)));
+    keypad.replaceChildren(...keys.map((k) => k == null
+      ? h('span', { class: 'fkp__gap', 'aria-hidden': 'true' })
+      : h('button', { type: 'button', 'aria-label': k === 'back' ? t('entry.backspace') : k, onclick: () => press(k) }, k === 'back' ? icon('backspace') : k)));
   }
 
   function press(k) {
@@ -300,7 +305,8 @@ export function openEntry(ctx, opts) {
   }
 
   function applyParse(p, fromAi) {
-    if (p.amount && (!st.touched.has('amount') || fromAi)) st.typed = p.amount;
+    if (p.amount && (!st.touched.has('amount') || fromAi)) { st.typed = p.amount; st.amountFromText = true; }
+    else if (!fromAi && !p.amount && st.amountFromText && !st.touched.has('amount')) { st.typed = ''; st.amountFromText = false; }
     if (p.transfer && L.accounts().length > 1) {
       st.mode = 'xfer';
       if (p.account) st.account = p.account;
@@ -331,7 +337,11 @@ export function openEntry(ctx, opts) {
 
   const parseNow = () => {
     const text = nl.value.trim();
-    if (!text) { nlHint.textContent = ''; return; }
+    if (!text) {
+      nlHint.textContent = '';
+      if (st.amountFromText && !st.touched.has('amount')) { st.typed = ''; st.amountFromText = false; renderAmount(); }
+      return;
+    }
     applyParse(parseEntry(text, nlContext(L)), false);
     aiBtn.hidden = !aiAvailable();
   };
@@ -356,6 +366,7 @@ export function openEntry(ctx, opts) {
   amountInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); save(false); } });
 
   function refreshAll() {
+    noAccount.hidden = L.accounts().length > 0;
     renderType();
     renderAmount();
     renderCats();
@@ -366,6 +377,7 @@ export function openEntry(ctx, opts) {
   }
 
   const body = h('div', null,
+    noAccount,
     typeSeg,
     h('div', { style: { height: '10px' } }),
     h('div', { class: 'fqa__nl' }, nl, aiBtn),
@@ -383,11 +395,23 @@ export function openEntry(ctx, opts) {
   const againBtn = !isEdit && !touch ? h('button', { type: 'button', class: 'fb', onclick: () => save(true) }, t('entry.save_another')) : null;
   const delBtn = isEdit ? h('button', { type: 'button', class: 'fb fb--danger fb--icon', 'aria-label': t('common.delete'), title: t('common.delete'), onclick: () => del() }, icon('trash')) : null;
 
+  const onLedger = () => {
+    if (!L.accounts().length || (st.account && L.exists('account', st.account))) return;
+    st.account = L.lastAccount();
+    if (!st.toAccount || st.toAccount === st.account) {
+      const other = L.accounts().find((a) => a.id !== st.account);
+      st.toAccount = other ? other.id : null;
+    }
+    refreshAll();
+  };
+  const engine = ctx.engine;
+  engine.addEventListener('change', onLedger);
   const sheet = U.sheet({
     title: existingXfer ? t('entry.edit_transfer') : existing ? t('entry.edit') : t('entry.add'),
     body,
     foot: [delBtn, againBtn, saveBtn].filter(Boolean),
-    focus: touch ? null : (o.text ? nl : amountInput)
+    focus: touch ? null : (o.text ? nl : amountInput),
+    onClose: () => engine.removeEventListener('change', onLedger)
   });
 
   if (!ctx.writer) { saveBtn.disabled = true; if (againBtn) againBtn.disabled = true; if (delBtn) delBtn.disabled = true; err.textContent = t('errors.readonly'); }

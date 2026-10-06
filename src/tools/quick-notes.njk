@@ -135,13 +135,26 @@ localeReload: true
   let sessionKey = null;
   const cryptoOK = !!(window.PublicKeyCredential && window.isSecureContext && window.crypto && crypto.subtle);
 
+  let autoBlank = null;
+
   function load() {
     const v = MentriaUI.migrateStore('quick_notes', 'blob', STORAGE_KEY, null);
     if (Array.isArray(v)) notes = v;
     if (!Array.isArray(notes) || notes.length === 0) {
       notes = [];
-      createNote();
+      const waiting = window.MentriaStore && MentriaStore.get('quick_notes', 'inbox');
+      if (!(Array.isArray(waiting) && waiting.length)) autoBlank = createNote().id;
     }
+  }
+
+  function dropAutoBlank() {
+    if (!autoBlank) return;
+    const id = autoBlank;
+    autoBlank = null;
+    const n = notes.find((x) => x.id === id);
+    if (!n || n.enc || n.title || n.body) return;
+    if (id === activeId && (titleInput.value || textarea.value)) return;
+    notes = notes.filter((x) => x.id !== id);
   }
 
   let persistingSelf = false;
@@ -349,6 +362,7 @@ localeReload: true
   }
 
   function createNote() {
+    dropAutoBlank();
     const note = {
       id: genId(),
       title: '',
@@ -770,7 +784,9 @@ localeReload: true
     }
     S.remove('quick_notes', 'inbox');
     if (added) {
+      dropAutoBlank();
       persist();
+      if (!notes.some((x) => x.id === activeId)) selectNote(notes[0].id);
       renderList();
     }
   }
@@ -793,6 +809,7 @@ localeReload: true
     if (!body) return;
     const title = String((meta && meta.title) || '').trim();
     const note = { id: genId(), title, body, createdAt: Date.now(), updatedAt: Date.now() };
+    dropAutoBlank();
     notes.unshift(note);
     persist();
     selectNote(note.id);

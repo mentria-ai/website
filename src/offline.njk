@@ -13,6 +13,39 @@ notFound: true
 eleventyExcludeFromCollections: true
 eleventyExcludeFromSitemap: true
 ---
+{%- if not locale.pathPrefix %}
+<script>
+  (function () {
+    try {
+      var locs = window.MENTRIA_LOCALES || [], path = location.pathname || '/', pref = localStorage.getItem('mentria_lang'), target = null, i;
+      for (i = 0; i < locs.length; i++) {
+        var pre = locs[i].prefix;
+        if (pre && (path === pre || path.indexOf(pre + '/') === 0)) return;
+        if (locs[i].code === pref) target = locs[i];
+      }
+      if (!target || !target.prefix) return;
+      if (path !== '/offline/') sessionStorage.setItem('mentria_offline_from', JSON.stringify({ path: path + location.search + location.hash, at: Date.now() }));
+      document.documentElement.style.visibility = 'hidden';
+      setTimeout(function () { document.documentElement.style.visibility = ''; }, 3000);
+      location.replace(target.prefix + '/offline/');
+    } catch (_) {}
+  })();
+</script>
+{%- else %}
+<script>
+  (function () {
+    try {
+      var raw = sessionStorage.getItem('mentria_offline_from');
+      if (!raw) return;
+      sessionStorage.removeItem('mentria_offline_from');
+      var from = JSON.parse(raw);
+      if (!from || typeof from.path !== 'string' || !(Date.now() - from.at < 10000)) return;
+      if (from.path.charAt(0) !== '/' || from.path.charAt(1) === '/') return;
+      history.replaceState(history.state, '', from.path);
+    } catch (_) {}
+  })();
+</script>
+{%- endif %}
 <section class="hero" style="padding-top:3rem;">
   <div style="font-family: var(--font-mono); text-align: center;">
     <p style="color: var(--syn-amber); font-size: 0.9rem;">$ ping mentria.ai</p>

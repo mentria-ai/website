@@ -350,7 +350,8 @@
   },
   "lang_switcher": {
     "label": "Langue",
-    "current_label": "Langue actuelle"
+    "current_label": "Langue actuelle",
+    "offline": "Vous êtes hors ligne, donc {lang} ne peut pas encore se charger sur cette page. La première fois, une connexion est nécessaire."
   },
   "tools": {
     "ai-chat": {

@@ -263,14 +263,36 @@
   var bc = null;
   try { if ('BroadcastChannel' in window) bc = new BroadcastChannel(CHANNEL); } catch (_) {}
 
+  function reachable(code) {
+    if (navigator.onLine !== false) return Promise.resolve(true);
+    if (!('caches' in window)) return Promise.resolve(false);
+    return caches.match(urlForLocale(code, location.pathname), { ignoreSearch: true })
+      .then(function (hit) { return !!hit; }, function () { return false; });
+  }
+
+  function tellOffline(code) {
+    var loc = byCode(code);
+    var host = document.querySelector('.lang-switcher[data-offline-msg]');
+    var tpl = (host && host.getAttribute('data-offline-msg')) || "You're offline, so {lang} can't load on this page yet. It needs a connection the first time.";
+    var msg = tpl.split('{lang}').join(loc ? loc.name : code);
+    if (window.MentriaUI && typeof window.MentriaUI.toast === 'function') window.MentriaUI.toast(msg, { duration: 6000 });
+    else if (typeof window.mentriaAlert === 'function') window.mentriaAlert(msg);
+  }
+
   function setLocale(code, opts) {
     opts = opts || {};
     if (!byCode(code) || code === currentCode || code === pending) return;
+    var target = urlForLocale(code, location.pathname) + location.search + location.hash;
     if (document.documentElement.hasAttribute('data-locale-reload')) {
       if (opts.fromRemote) return;
-      try { localStorage.setItem(STORE_KEY, code); } catch (_) {}
-      if (bc) { try { bc.postMessage({ type: 'locale', code: code }); } catch (_) {} }
-      location.replace(urlForLocale(code, location.pathname) + location.search + location.hash);
+      pending = code;
+      reachable(code).then(function (ok) {
+        if (pending === code) pending = null;
+        if (!ok) { tellOffline(code); return; }
+        try { localStorage.setItem(STORE_KEY, code); } catch (_) {}
+        if (bc) { try { bc.postMessage({ type: 'locale', code: code }); } catch (_) {} }
+        location.replace(target);
+      });
       return;
     }
     pending = code;
@@ -296,7 +318,11 @@
       }, function () {});
     }).catch(function () {
       if (pending === code) pending = null;
-      if (!opts.fromRemote) location.assign(urlForLocale(code, location.pathname) + location.search + location.hash);
+      if (opts.fromRemote) return;
+      reachable(code).then(function (ok) {
+        if (ok) location.assign(target);
+        else tellOffline(code);
+      });
     });
   }
 

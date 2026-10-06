@@ -7,14 +7,14 @@ pagination:
 permalink: "{{ locale.pathPrefix }}/comms/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
+  title: "{{ 'tools.comms.title' | t }}"
   description: "{{ 'tool.comms.meta_description' | t }}"
-title: comms
 localeReload: true
 ---
 {%- set commsHttps = "https://mentria.ai" + locale.pathPrefix + "/comms/" -%}
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">comms</span></p>
-  <h1>comms</h1>
+  <h1>{{ 'tools.comms.title' | t }}</h1>
   <p>{{ 'tool.comms.lede' | t }}</p>
 </section>
 
@@ -123,6 +123,7 @@ localeReload: true
           <span class="comms__sub-bit" id="comms-peers" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg><span id="comms-peers-n">0</span></span>
         </span>
       </div>
+      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-share" type="button" hidden title="{{ 'tool.comms.chat.share_room' | t }}" aria-label="{{ 'tool.comms.chat.share_room' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg></button>
       <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="{{ 'tool.comms.chat.call' | t }}" aria-label="{{ 'tool.comms.chat.call' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg></button>
       <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.chat.camera' | t }}" aria-label="{{ 'tool.comms.chat.camera' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
       <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-mic" type="button" hidden aria-pressed="true" title="{{ 'tool.comms.chat.mic' | t }}" aria-label="{{ 'tool.comms.chat.mic' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-mic"></use></svg></button>
@@ -176,6 +177,7 @@ localeReload: true
           <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="{{ 'tool.comms.people.paste_placeholder' | t }}" spellcheck="false" autocapitalize="off">
           <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">{{ 'tool.comms.people.add_btn' | t }}</button>
         </div>
+        <p class="comms__add-err" id="comms-add-err" role="alert" hidden></p>
       </div>
       <div class="comms__contacts-list" id="comms-contacts-list"></div>
     </div>
@@ -202,9 +204,12 @@ localeReload: true
       <div class="comms__adv-sec">
         <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
         <div class="comms__room">
-          <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="off" placeholder="!ephemeral">
+          <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="{{ 'tool.comms.adv.room_placeholder' | t }}">
           <button class="comms__btn" id="comms-join" type="button">{{ 'tool.comms.adv.join' | t }}</button>
-          <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button">{{ 'tool.comms.adv.new_room' | t }}</button>
+        </div>
+        <div class="comms__room-new">
+          <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button" title="{{ 'tool.comms.adv.new_room_title' | t }}">{{ 'tool.comms.adv.new_room' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-newsaved" type="button" title="{{ 'tool.comms.adv.new_saved_title' | t }}">{{ 'tool.comms.adv.new_saved' | t }}</button>
         </div>
       </div>
       <div class="comms__adv-sec">
@@ -215,12 +220,6 @@ localeReload: true
           <span class="comms__relay-track" aria-hidden="true"><span class="comms__relay-thumb"></span></span>
         </button>
         <p class="comms__relay-note" id="comms-relay-note" hidden>{{ 'tool.comms.adv.relay_note' | t }}</p>
-      </div>
-      <div class="comms__share" id="comms-share" hidden>
-        <span class="comms__lbl">{{ 'tool.comms.adv.share' | t }}</span>
-        <code class="comms__url" id="comms-url"></code>
-        <button class="comms__btn comms__btn--ghost" id="comms-copy" type="button">{{ 'tool.comms.adv.copy' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-genkey" type="button" title="{{ 'tool.comms.adv.genkey_title' | t }}">{{ 'tool.comms.adv.genkey' | t }}</button>
       </div>
       <div class="comms__adv-sec comms__adv-sec--col">
         <div class="comms__adv-row">
@@ -265,6 +264,7 @@ localeReload: true
 .comms__onboard-p{margin:0;color:#c3ccd6;font-size:.85rem;line-height:1.65;max-width:26rem}
 .comms__onboard-fine{margin:0;color:#7a838d;font-size:.75rem;line-height:1.5}
 .comms__onboard-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
+.comms__add-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
 .comms__onboard-actions{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
 .comms__btn--big{padding:.7rem 1.6rem;font-size:.92rem;min-height:44px}
 .comms__input--big{max-width:18rem;text-align:center;padding:.6rem .8rem;font-size:.95rem;flex:none;width:100%}
@@ -281,6 +281,7 @@ localeReload: true
 .comms__app{display:flex;flex-direction:column;gap:.75rem}
 .comms__id-row--you{flex:1;min-width:13rem}
 .comms__contacts-head{display:flex;gap:.5rem;align-items:center}
+.comms__contacts-head .comms__btn{white-space:nowrap}
 .comms__contacts-head .comms__lbl{flex:1}
 .comms__adv{display:flex;flex-direction:column;gap:.75rem;background:#0a0d10;border:1px dashed #2a3138;border-radius:8px;padding:.85rem}
 .comms__relay{display:flex;align-items:center;gap:.55rem;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
@@ -302,6 +303,7 @@ localeReload: true
   .comms__onboard-h{font-size:1rem}
 }
 .comms__room{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;flex:1;min-width:14rem}
+.comms__room-new{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
 .comms__lbl{color:var(--term-muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
 .comms__input{background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.45rem .6rem;border-radius:6px;font-family:inherit;font-size:.9rem;flex:1;min-width:6rem}
 .comms__input:focus{outline:none;border-color:var(--accent,#6ef3c5)}
@@ -318,11 +320,10 @@ localeReload: true
 .comms__pending-note{color:#d9a84e;font-style:italic;font-size:.75rem;margin-left:.45rem}
 .comms__resend{margin-left:.5rem;background:none;border:1px solid #2a3138;color:var(--accent,#6ef3c5);border-radius:4px;padding:.1rem .5rem;font:inherit;font-size:.72rem;cursor:pointer;text-transform:lowercase}
 
-.comms__share{display:flex;gap:.5rem;align-items:center;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.5rem .75rem;flex-wrap:wrap}
 .comms__url{color:#e6edf3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
 .comms__log{min-height:14rem;max-height:24rem;overflow-y:auto;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.75rem;display:flex;flex-direction:column;gap:.4rem}
 .comms__line{display:flex;gap:.5rem;align-items:baseline;line-height:1.4}
-.comms__who{color:var(--accent,#6ef3c5);font-size:.72rem;min-width:5.5rem;text-transform:lowercase;letter-spacing:.05em}
+.comms__who{color:var(--accent,#6ef3c5);font-size:.72rem;min-width:5.5rem;letter-spacing:.05em}
 .comms__who--sys{color:#7a838d}
 .comms__who--me{color:#a8b6c5}
 .comms__what{color:#e6edf3;word-break:break-word;flex:1}
@@ -344,7 +345,7 @@ localeReload: true
 .comms__prog-fill{display:block;height:100%;background:var(--accent,#6ef3c5);width:0%;transition:width .12s linear}
 .comms__thumb{display:block;margin-top:.4rem;max-width:240px;max-height:180px;border:1px solid #2a3138;border-radius:4px;cursor:zoom-in}
 .comms__peerlist{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;padding:.2rem 0}
-.comms__chip{font-family:var(--font-mono);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;border:1px solid currentColor;line-height:1;letter-spacing:.05em;text-transform:lowercase}
+.comms__chip{font-family:var(--font-mono);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;border:1px solid currentColor;line-height:1;letter-spacing:.05em}
 .comms__time{color:var(--term-subtle);font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
 .comms__btn--mute{min-width:5.5rem}
 .comms__btn--mute[aria-pressed="true"]{color:#7a838d;border-color:#3a4148}
@@ -362,7 +363,7 @@ localeReload: true
 .comms__id-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.5rem .75rem}
 .comms__id-note{color:#7a838d;font-size:.78rem}
 .comms__input--short{max-width:13rem;flex:0 1 auto}
-.comms__id-card{display:flex;gap:1rem;align-items:flex-start;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;flex-wrap:wrap}
+.comms__id-card{display:flex;gap:1rem;align-items:flex-start;justify-content:center;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;flex-wrap:wrap}
 .comms__id-qr{border-radius:4px;flex:none}
 .comms__id-card-side{display:flex;flex-direction:column;gap:.5rem;flex:1;min-width:12rem}
 .comms__id-card-actions{display:flex;gap:.5rem;flex-wrap:wrap}
@@ -588,7 +589,7 @@ const $ = (id) => document.getElementById(id);
 const els = {
   room: $('comms-room'), join: $('comms-join'),
   status: $('comms-status'), peers: $('comms-peers'), mute: $('comms-mute'), eph: $('comms-eph'), enc: $('comms-enc'),
-  share: $('comms-share'), url: $('comms-url'), copy: $('comms-copy'), genkey: $('comms-genkey'),
+  share: $('comms-share'), newSaved: $('comms-newsaved'), addErr: $('comms-add-err'),
   peerlist: $('comms-peerlist'),
   log: $('comms-log'), drop: $('comms-drop'), file: $('comms-file'),
   send: $('comms-send'), msg: $('comms-msg'), go: $('comms-go'),
@@ -616,7 +617,39 @@ const els = {
   chatTitle: $('comms-chat-title'), chatAvatar: $('comms-chat-avatar'), profAvatar: $('comms-prof-avatar'),
   notif: $('comms-notif'), notifEnable: $('comms-notif-enable'), notifDismiss: $('comms-notif-dismiss'),
   lockWaiting: $('comms-lock-waiting'), pushStatus: $('comms-push-status'),
-  pushTest: $('comms-push-test'), pushTestLog: $('comms-push-test-log')
+  pushTest: $('comms-push-test'), pushTestLog: $('comms-push-test-log'),
+  pkOffer: document.querySelector('#comms-pk-upgrade .comms__upgrade-text')
+};
+
+const APPLE_DEVICE = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+const passkeyCopy = {
+  hint: APPLE_DEVICE ? T.onboard.hint : T.onboard.hint_device,
+  protect: APPLE_DEVICE ? T.onboard.passkey : T.onboard.passkey_device,
+  offer: APPLE_DEVICE ? T.passkey.offer : T.passkey.offer_device,
+  add: APPLE_DEVICE ? T.passkey.add : T.passkey.add_device,
+  added: APPLE_DEVICE ? T.passkey.added : T.passkey.added_device
+};
+if (!APPLE_DEVICE) {
+  els.obHint.textContent = passkeyCopy.hint;
+  els.obPasskey.textContent = passkeyCopy.protect;
+  if (els.pkOffer) els.pkOffer.textContent = passkeyCopy.offer;
+  els.pkEnroll.textContent = passkeyCopy.add;
+  els.pkSettings.textContent = passkeyCopy.add;
+}
+
+const toastMs = 6000;
+const inChatView = () => !els.app.hidden && els.app.classList.contains('comms__app--chat');
+const notice = (text) => {
+  if (inChatView() || !(window.MentriaUI && typeof MentriaUI.toast === 'function')) { sys(text); return; }
+  MentriaUI.toast(text, { duration: toastMs });
+};
+
+const knockWhy = (reason) => (reason === 'network' ? T.test.no_server : reason ? T.test.server_error : T.push.failed);
+const subscribeWhy = (err) => {
+  if (!err) return T.test.unknown_error;
+  if (err.name === 'TypeError' || err.name === 'SyntaxError') return T.test.no_server;
+  if (err.name === 'NotAllowedError') return T.test.push_blocked;
+  return T.test.push_service;
 };
 
 const updatePushStatus = () => {
@@ -624,13 +657,13 @@ const updatePushStatus = () => {
   const bits = [];
   if (!window.MentriaPush || !MentriaPush.isSupported()) bits.push(T.push.unsupported);
   else if (MentriaPush.permission() !== 'granted') bits.push(T.push.yours_off);
-  else bits.push(ringToken ? T.push.yours_on : T.push.yours_pending);
+  else bits.push(ringToken ? T.push.yours_on : ringRegFailed ? T.push.yours_failed : T.push.yours_pending);
   CID.getContacts().forEach((c) => {
     bits.push(fmt(c.ring ? T.push.reachable : T.push.no_token, { name: c.name || c.fp }));
   });
   try {
     const lk = MentriaStore.get('comms', 'last_knock');
-    if (lk && lk.t) bits.push(lk.ok ? fmt(T.push.knock_ok, { time: hhmmOf(lk.t) }) : fmt(T.push.knock_fail, { time: hhmmOf(lk.t), reason: lk.reason || T.push.failed }));
+    if (lk && lk.t) bits.push(lk.ok ? fmt(T.push.knock_ok, { time: hhmmOf(lk.t) }) : fmt(T.push.knock_fail, { time: hhmmOf(lk.t), reason: knockWhy(lk.reason) }));
   } catch (_) {}
   els.pushStatus.textContent = bits.join(' · ');
   if (window.MentriaPushDB && MentriaPushDB.kvGet) {
@@ -676,6 +709,7 @@ els.pushTest.addEventListener('click', async () => {
       sub = await reg.pushManager.getSubscription();
       if (!sub) {
         const r = await fetch('https://relay.mentria.ai/push/vapid-public', { cache: 'no-store' });
+        if (!r.ok) throw new TypeError('vapid ' + r.status);
         const { publicKey } = await r.json();
         const pad = '='.repeat((4 - publicKey.length % 4) % 4);
         const b64 = (publicKey + pad).replace(/-/g, '+').replace(/_/g, '/');
@@ -683,8 +717,8 @@ els.pushTest.addEventListener('click', async () => {
         for (let i = 0; i < raw.length; i++) key[i] = raw.charCodeAt(i);
         sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
       }
-    } catch (e) { subErr = (e && e.name ? e.name + ': ' : '') + String(e && e.message || e).slice(0, 120); }
-    if (!sub) { pushTestLog(fmt(T.test.sub_failed, { reason: subErr || T.test.unknown_error })); return; }
+    } catch (e) { subErr = e || new Error('unknown'); }
+    if (!sub) { pushTestLog(fmt(T.test.sub_failed, { reason: subscribeWhy(subErr) })); return; }
     let host = T.unknown;
     try { host = new URL(sub.toJSON().endpoint).host; } catch (_) {}
     pushTestLog(fmt(T.test.sub, { host }));
@@ -699,7 +733,7 @@ els.pushTest.addEventListener('click', async () => {
     if (!reg2) return;
     const rung = await MentriaPush.ring(testToken, 'comms-msg');
     if (rung && rung.throttled) { pushTestLog(T.test.throttled); return; }
-    pushTestLog(rung && rung.ok ? T.test.knock_sent : fmt(T.test.knock_failed, { reason: (rung && rung.reason) || T.unknown }));
+    pushTestLog(rung && rung.ok ? T.test.knock_sent : fmt(T.test.knock_failed, { reason: knockWhy((rung && rung.reason) || 'unknown') }));
     if (!rung || !rung.ok) return;
     pushTestLog(T.test.waiting);
     const reg = await navigator.serviceWorker.ready;
@@ -713,6 +747,9 @@ els.pushTest.addEventListener('click', async () => {
     pushTestLog(seen ? T.test.arrived : fmt(T.test.missing, { host }), true);
   } finally {
     els.pushTest.disabled = false;
+    if (!ringToken && window.MentriaPush && MentriaPush.isSupported() && MentriaPush.permission() === 'granted') {
+      try { await initRingToken(); } catch (_) {}
+    }
     updatePushStatus();
   }
 });
@@ -764,14 +801,21 @@ let metaAction = null;
 let chunkAction = null;
 let profAction = null;
 let callAction = null;
-const call = { active: false, local: null, videoOn: false, micOff: false, ringTimer: null, ringDeadline: 0 };
+const call = { active: false, local: null, videoOn: false, micOff: false, cid: null, cids: new Set(), members: new Set(), invited: new Set(), sentTo: new Set(), connected: false, answerTimer: null };
 const callTiles = new Map();
 const pendingStreams = new Map();
+const incomingRings = new Map();
+const RING_MS = 30000;
+const ANSWER_MS = 35000;
+let ringTimer = null;
+let ringAccepting = false;
+let callStarting = false;
 let myId = null;
 let myFp = null;
 let myLegacyFp = null;
 const legacyFps = new Map();
 let ringToken = null;
+let ringRegFailed = false;
 let currentDmContact = null;
 let lastRingSentAt = 0;
 let myProfile = { name: '' };
@@ -807,9 +851,7 @@ document.getElementById('comms-relay').addEventListener('click', () => {
 renderRelayToggle();
 let audioCtx = null;
 
-const CHAT_TOPIC_PREFIX = 'mentria.chat.v1.';
 const CHAT_TOPIC_V2 = 'mentria-comms-topic-v2|';
-const LEGACY_TOPIC_SINCE = 'topic_v2_since';
 const CHAT_KIND = 3838;
 const EPHEMERAL_PREFIX = '!';
 const HISTORY_LOOKBACK_SEC = 7 * 24 * 60 * 60;
@@ -841,15 +883,19 @@ const b64urlDecode = (str) => {
   return b64decode(padded);
 };
 
+const decodeRoom = (part) => {
+  try { return decodeURIComponent(part); } catch (_) { return part; }
+};
+
 const parseHash = (hash) => {
   const raw = (hash || '').slice(1).trim();
   if (!raw) return { room: null, b64Key: null };
   const colonIdx = raw.indexOf(':');
-  if (colonIdx === -1) return { room: raw, b64Key: null };
-  return { room: raw.slice(0, colonIdx), b64Key: raw.slice(colonIdx + 1) || null };
+  if (colonIdx === -1) return { room: decodeRoom(raw) || null, b64Key: null };
+  return { room: decodeRoom(raw.slice(0, colonIdx)) || null, b64Key: raw.slice(colonIdx + 1) || null };
 };
 
-const formatHash = (room, b64Key) => '#' + room + (b64Key ? ':' + b64Key : '');
+const formatHash = (room, b64Key) => '#' + encodeURIComponent(room) + (b64Key ? ':' + b64Key : '');
 
 const deriveKey = async (b64Key) => {
   try {
@@ -875,16 +921,7 @@ const chatTopicFor = (roomName, b64Key) => {
   }
   return topicCache.get(id);
 };
-const legacyTopicFor = (roomName) => CHAT_TOPIC_PREFIX + roomName;
-const legacyTopicsOn = () => {
-  let since = 0;
-  try { since = Number(MentriaStore.get('comms', LEGACY_TOPIC_SINCE)) || 0; } catch (_) {}
-  if (!since) {
-    since = Date.now();
-    try { MentriaStore.set('comms', LEGACY_TOPIC_SINCE, since); } catch (_) {}
-  }
-  return Date.now() - since < HISTORY_LOOKBACK_SEC * 1000;
-};
+try { if (MentriaStore.get('comms', 'topic_v2_since') != null) MentriaStore.remove('comms', 'topic_v2_since'); } catch (_) {}
 const expiryTags = () => [['expiration', String(Math.floor(Date.now() / 1000) + HISTORY_LOOKBACK_SEC)]];
 
 const encryptText = async (key, plaintext) => {
@@ -911,6 +948,15 @@ const displayName = (peerId) => {
   }
   if (prof && prof.name) return prof.name;
   return short(peerId);
+};
+
+const nameOf = (peerId) => {
+  const prof = peerProfiles.get(peerId);
+  if (prof && prof.pub && prof.verified) {
+    const contact = CID.contactByPub(prof.pub);
+    if (contact && contact.name) return contact.name;
+  }
+  return (prof && prof.name) || T.people.someone;
 };
 
 const peerColor = (id) => {
@@ -966,7 +1012,7 @@ const renderPeerList = () => {
         const cur = peerProfiles.get(p);
         if (!cur || !cur.verified || !cur.pub) return;
         try { const added = await CID.addContact({ name: cur.name, pub: cur.pub, ring: cur.ring }); if (added && added.fp) CID.dropRequest(added.fp); }
-        catch (err) { sys(fmt(T.people.add_failed, { reason: why(err) })); return; }
+        catch (err) { notice(fmt(T.people.add_failed, { reason: why(err) })); return; }
         sys(fmt(T.peers.added, { name: displayName(p) }));
         renderPeerList();
         renderContacts();
@@ -1026,6 +1072,8 @@ const renderLine = (who, what, opts = {}) => {
 };
 
 const sys = (text) => renderLine('--', text, { sys: true });
+let introTs = 0;
+const sysTop = (text) => renderLine('--', text, { sys: true, ts: ++introTs });
 
 const strongName = (name) => `<strong>${escapeHtml(name)}</strong>`;
 
@@ -1049,6 +1097,8 @@ const updatePeers = () => {
 };
 
 let currentRoomName = null;
+let joinTarget = null;
+let joinedLocked = false;
 let roomJoinedAt = 0;
 let pendingResends = 0;
 const setConnUI = () => {
@@ -1092,15 +1142,31 @@ const renderPendingLine = (text, payload, cmid) => {
 const shareUrl = (roomName, b64Key) => {
   const u = new URL(window.location.href);
   u.pathname = SHARE_PATH;
+  u.search = '';
   u.hash = formatHash(roomName, b64Key);
   return u.toString();
 };
 
-const refreshShareUrl = (roomName, b64Key) => {
-  if (isDmRoom(roomName)) { els.share.hidden = true; els.url.textContent = ''; return; }
-  els.url.textContent = shareUrl(roomName, b64Key);
-  els.share.hidden = false;
+const refreshShareUrl = (roomName) => {
+  els.share.hidden = !roomName || isDmRoom(roomName);
 };
+
+const copyRoomLink = (url) => {
+  const manual = () => sys(fmt(T.chat.link_manual, { url }));
+  try {
+    navigator.clipboard.writeText(url).then(() => sys(T.chat.link_copied), manual);
+  } catch (_) { manual(); }
+};
+
+els.share.addEventListener('click', () => {
+  if (!currentRoomName || isDmRoom(currentRoomName)) return;
+  const url = shareUrl(currentRoomName, joinTarget && joinTarget.key);
+  if (typeof navigator.share === 'function') {
+    navigator.share({ url }).catch((err) => { if (!err || err.name !== 'AbortError') copyRoomLink(url); });
+    return;
+  }
+  copyRoomLink(url);
+});
 
 const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp || m.sfp === myLegacyFp));
 const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
@@ -1174,7 +1240,7 @@ const setupChatPersistence = async (roomName, topic) => {
 
   if (!chatPersist) {
     chatSubId = null;
-    sys(chatKey ? T.log.eph_key : T.log.eph_nokey);
+    sysTop(chatKey ? T.log.eph_key : T.log.eph_nokey);
     return;
   }
 
@@ -1196,7 +1262,7 @@ const setupChatPersistence = async (roomName, topic) => {
   const sinceSec = Math.floor(Date.now() / 1000) - HISTORY_LOOKBACK_SEC;
   const req = JSON.stringify(['REQ', chatSubId, {
     kinds: [CHAT_KIND],
-    '#x': legacyTopicsOn() ? [chatTopic, legacyTopicFor(roomName)] : [chatTopic],
+    '#x': [chatTopic],
     since: sinceSec,
     limit: HISTORY_LIMIT
   }]);
@@ -1345,15 +1411,15 @@ const setRoomNotify = async (roomName, on) => {
   if (on) {
     if (!window.MentriaPush || !MentriaPush.isSupported()) {
       const iosTab = /iPhone|iPad|iPod/.test(navigator.userAgent) && !navigator.standalone;
-      sys(iosTab ? T.rooms.alerts_ios : T.rooms.alerts_unsupported);
+      notice(iosTab ? T.rooms.alerts_ios : T.rooms.alerts_unsupported);
       return;
     }
     if (MentriaPush.permission() !== 'granted') {
       const ok = await MentriaPush.requestPermission();
-      if (!ok) { sys(T.rooms.alerts_denied); return; }
+      if (!ok) { notice(T.rooms.alerts_denied); return; }
     }
     if (!ringToken) await initRingToken();
-    if (!ringToken) { sys(T.rooms.alerts_failed); return; }
+    if (!ringToken) { notice(T.rooms.alerts_failed); return; }
   }
   const list = savedRooms();
   const fresh = list.find((r) => r.room === roomName);
@@ -1440,14 +1506,17 @@ const finishCheck = (peerId) => {
   pendingChecks.delete(peerId);
 };
 
-const announcePeer = (peerId) => {
-  const prof = peerProfiles.get(peerId);
-  if (!prof || prof.announced) return;
-  const contact = prof.verified && prof.pub ? CID.contactByPub(prof.pub) : null;
-  const label = (contact && contact.name) || prof.name;
-  if (!label) return;
-  prof.announced = true;
-  sys(fmt(prof.verified && prof.fp ? T.log.peer_is_fp : T.log.peer_is, { id: short(peerId), name: label, fp: prof.fp }));
+const announcePeer = (peerId, fallback) => {
+  if (!peers.has(peerId)) return;
+  let prof = peerProfiles.get(peerId);
+  const contact = prof && prof.verified && prof.pub ? CID.contactByPub(prof.pub) : null;
+  const label = (contact && contact.name) || (prof && prof.name) || '';
+  if (prof && typeof prof.announcedAs === 'string' && (prof.announcedAs || !label)) return;
+  if (!label && !fallback) return;
+  if (!prof) { prof = { name: '' }; peerProfiles.set(peerId, prof); }
+  prof.announcedAs = label;
+  const withFp = !!(label && prof.verified && prof.fp && !isDmRoom(currentRoomName || ''));
+  sys(fmt(withFp ? T.log.here_fp : T.log.here, { name: label || T.people.someone, fp: prof.fp }));
 };
 
 const challengePeer = (peerId, action) => {
@@ -1478,11 +1547,14 @@ let joinSeq = 0;
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const seq = ++joinSeq;
   const leavingDm = currentDmContact;
+  joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null };
   stopScan();
   MentriaBus.unprovide('comms.peers');
   MentriaBus.unprovide('comms.share');
   MentriaBus.unprovide('extensions.requestInstall');
   endCall(true);
+  incomingRings.clear();
+  stopRinging();
   if (room) {
     closeChatSub();
     try { await room.leave(); } catch {}
@@ -1504,6 +1576,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   if (leavingDm) clearUnreadFor(leavingDm.fp);
   els.log.innerHTML = '';
   logPinned = true;
+  introTs = 0;
   roomJoinedAt = Date.now();
   els.status.textContent = T.chat.connecting;
   els.peers.hidden = true;
@@ -1512,6 +1585,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   if (opts.leave || !roomName) {
     currentRoomName = null;
     currentDmContact = null;
+    joinedLocked = false;
     els.room.value = '';
     els.status.textContent = T.chat.not_in_chat;
     els.share.hidden = true;
@@ -1529,15 +1603,16 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   chatKey = b64Key ? await deriveKey(b64Key) : null;
   const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key) : null;
   if (seq !== joinSeq) return;
-  if (b64Key && !chatKey) sys(T.log.bad_key);
+  if (b64Key && !chatKey) sysTop(T.log.bad_key);
   if (chatKey && b64Key) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
 
   if (opts.share === false || isDmRoom(roomName)) {
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
   } else {
-    window.location.hash = formatHash(roomName, b64Key);
+    const nextHash = formatHash(roomName, b64Key);
+    if (window.location.hash !== nextHash) window.location.hash = nextHash;
   }
-  refreshShareUrl(roomName, b64Key);
+  refreshShareUrl(roomName);
 
   let iceServers;
   try {
@@ -1552,12 +1627,14 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   else if (relayOnly) console.warn('hide-my-ip requested but no relay server available — connecting normally');
   const roomConfig = { appId: 'mentria', relayConfig: { urls: [RELAY] }, rtcConfig };
   if (chatKey && b64Key) roomConfig.password = b64Key;
-  let keyMismatchShown = false;
+  const keyNotes = new Set();
   const onJoinError = (info) => {
     const reason = String((info && info.error) || '').toLowerCase();
-    if (seq !== joinSeq || keyMismatchShown || !reason.includes('password')) return;
-    keyMismatchShown = true;
-    sys(isDmRoom(roomName) ? T.log.key_dm : T.log.key_room);
+    if (seq !== joinSeq || !reason.includes('password')) return;
+    const note = isDmRoom(roomName) ? T.log.key_dm : peers.size > 0 ? T.log.key_room_other : T.log.key_room_mine;
+    if (keyNotes.has(note)) return;
+    keyNotes.add(note);
+    sys(note);
   };
   try {
     room = joinRoom(roomConfig, roomName, { onJoinError });
@@ -1568,6 +1645,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   }
 
   currentRoomName = roomName;
+  joinedLocked = CID.idState() !== 'unlocked';
   if (chatKey && b64Key) {
     renderContacts();
     subscribeUnread();
@@ -1575,7 +1653,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     setTimeout(() => { if (seq === joinSeq) announceRoomRing(); }, 3000);
   }
   if (opts.contact) currentDmContact = opts.contact;
-  els.chatTitle.textContent = opts.contact ? (opts.contact.name || opts.contact.fp) : roomName;
+  els.chatTitle.textContent = opts.contact ? (opts.contact.name || opts.contact.fp) : ((roomNotifyEntry(roomName) || {}).label || roomName);
   paintAvatar(els.chatAvatar, opts.contact ? (opts.contact.name || opts.contact.fp) : '#', opts.contact ? opts.contact.fp : roomName);
   els.status.textContent = isDmRoom(roomName) ? T.chat.private : fmt(T.chat.room, { room: roomName });
   els.leave.hidden = false;
@@ -1588,39 +1666,24 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   els.go.disabled = false;
   updatePeers();
   updateCallUI();
-  if (isDmRoom(roomName)) sys(T.log.dm_note);
-  else sys(myProfile.name ? fmt(T.log.alone_named, { name: myProfile.name, id: short(selfId), room: roomName }) : fmt(T.log.alone, { id: short(selfId), room: roomName }));
-  if (chatKey && !isDmRoom(roomName)) sys(T.log.enc_note);
+  if (isDmRoom(roomName)) sysTop(T.log.dm_note);
+  else sysTop(myProfile.name ? fmt(T.log.alone_named, { name: myProfile.name, room: roomName }) : fmt(T.log.alone, { room: roomName }));
+  if (chatKey && !isDmRoom(roomName)) sysTop(T.log.enc_note);
 
   callAction = room.makeAction('call');
   callAction.onMessage = (data, ctx) => {
-    const kind = data && data.kind;
-    if (kind === 'ring') {
-      if (call.active) return;
-      const prof = peerProfiles.get(ctx.peerId);
-      const known = prof && prof.verified && prof.pub ? CID.contactByPub(prof.pub) : null;
-      const caller = (known && known.name) || displayName(ctx.peerId);
-      els.ringText.textContent = fmt(T.ring.calling, { name: caller });
-      els.ring.hidden = false;
-      call.ringDeadline = Date.now() + 30000;
-      if (call.ringTimer) clearInterval(call.ringTimer);
-      call.ringTimer = setInterval(() => {
-        if (Date.now() > call.ringDeadline) { stopRinging(); return; }
-        playPing(660);
-      }, 1400);
-      playPing(660);
-    } else if (kind === 'decline') {
-      sys(fmt(T.call.declined, { name: displayName(ctx.peerId) }));
-    } else if (kind === 'leave') {
-      removeTile(ctx.peerId);
-      sys(fmt(T.call.left, { name: displayName(ctx.peerId) }));
-    } else if (kind === 'join') {
-      sys(fmt(T.call.joined, { name: displayName(ctx.peerId) }));
-    }
+    if (seq !== joinSeq || !data || typeof data !== 'object') return;
+    const cid = (typeof data.cid === 'string' && data.cid && data.cid.length <= 64) ? data.cid : 'legacy:' + ctx.peerId;
+    if (data.kind === 'ring') onCallRing(ctx.peerId, cid);
+    else if (data.kind === 'join') onCallJoin(ctx.peerId, cid, true);
+    else if (data.kind === 'here') onCallJoin(ctx.peerId, cid, false);
+    else if (data.kind === 'decline') onCallDecline(ctx.peerId, cid);
+    else if (data.kind === 'leave') onCallLeave(ctx.peerId);
   };
 
   room.onPeerStream = (stream, peerId) => {
-    if (call.active) addTile(peerId, stream, { label: displayName(peerId) });
+    if (seq !== joinSeq) return;
+    if (call.active && call.members.has(peerId)) addTile(peerId, stream, { label: displayName(peerId) });
     else pendingStreams.set(peerId, stream);
   };
 
@@ -1668,13 +1731,13 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     if (seq !== joinSeq || !peers.has(ctx.peerId)) return;
     const known = peerProfiles.get(ctx.peerId);
     prof.verified = !!(known && known.verified && samePubOf(known.pub, prof.pub));
-    prof.announced = !!(known && known.announced);
+    if (known && typeof known.announcedAs === 'string') prof.announcedAs = known.announcedAs;
     peerProfiles.set(ctx.peerId, prof);
     if (prof.verified) await applyVerifiedProfile(ctx.peerId);
-    else if (prof.pub) challengePeer(ctx.peerId, pchk);
+    else if (prof.pub && myId) challengePeer(ctx.peerId, pchk);
     else finishCheck(ctx.peerId);
     renderPeerList();
-    if (!prof.pub) announcePeer(ctx.peerId);
+    if (!prof.pub || !myId) announcePeer(ctx.peerId);
   };
 
   chatAction = room.makeAction('chat');
@@ -1744,7 +1807,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       const blob = new Blob(entry.chunks, { type: safeType });
       if (entry.meta.kind === 'mentria-pack' || /\.mentria\.json$/i.test(entry.meta.name || '')) {
         const text = await blob.text();
-        const who = short(ctx.peerId);
+        const who = nameOf(ctx.peerId);
         const label = document.createElement('span');
         label.textContent = fmt(T.files.pack_from, { who, title: entry.meta.packTitle || entry.meta.name }) + ' ';
         const importBtn = document.createElement('button');
@@ -1764,7 +1827,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         entry.line.what.append(label, importBtn);
       } else if (entry.meta.kind === 'mentria-ext') {
         const html = await blob.text();
-        const who = short(ctx.peerId);
+        const who = nameOf(ctx.peerId);
         const label = document.createElement('span');
         label.textContent = fmt(T.files.ext_from, { who, name: entry.meta.extName || entry.meta.name }) + ' ';
         const installBtn = document.createElement('button');
@@ -1796,11 +1859,13 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     peers.add(peerId);
     updatePeers();
     renderPeerList();
-    sys(fmt(T.log.joined, { id: short(peerId) }));
     sendProfileTo(peerId);
+    setTimeout(() => { if (seq === joinSeq && peers.has(peerId) && !peerProfiles.has(peerId)) announcePeer(peerId, true); }, 6000);
   };
   room.onPeerLeave = (peerId) => {
-    const who = displayName(peerId);
+    const who = nameOf(peerId);
+    const announced = (peerProfiles.get(peerId) || {}).announcedAs;
+    const wasMember = call.members.has(peerId);
     for (const [key, entry] of incoming) {
       if (key.startsWith(peerId + ':')) {
         entry.line.line.removeAttribute('aria-live');
@@ -1808,15 +1873,19 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         incoming.delete(key);
       }
     }
+    if (incomingRings.delete(peerId)) { sys(fmt(T.people.tried_call, { name: who })); renderRing(); }
+    call.invited.delete(peerId);
     peers.delete(peerId);
     peerProfiles.delete(peerId);
     finishCheck(peerId);
     proofAnswers.delete(peerId);
-    removeTile(peerId);
+    if (!wasMember) removeTile(peerId);
     pendingStreams.delete(peerId);
     updatePeers();
     renderPeerList();
-    sys(fmt(T.log.left, { name: displayName(peerId) }));
+    if (typeof announced === 'string') sys(fmt(T.log.left, { name: who }));
+    if (wasMember) dropMember(peerId, false);
+    else if (call.active && !call.connected && call.cid && !call.invited.size) endCall(false);
   };
 
   setupChatPersistence(roomName, topic);
@@ -1837,21 +1906,6 @@ els.join.addEventListener('click', () => {
   const name = (els.room.value || (EPHEMERAL_PREFIX + randomRoomSlug())).trim().slice(0, 64);
   const { b64Key } = parseHash(window.location.hash);
   joinNew(name, b64Key);
-});
-
-els.genkey.addEventListener('click', async () => {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  const key = b64urlEncode(bytes);
-  const name = (els.room.value || (EPHEMERAL_PREFIX + randomRoomSlug())).trim().slice(0, 64);
-  await joinNew(name, key);
-  try {
-    await navigator.clipboard.writeText(shareUrl(name, key));
-    els.genkey.textContent = T.adv.key_copied;
-    setTimeout(() => { els.genkey.textContent = T.adv.genkey; }, 2000);
-  } catch {
-    els.genkey.textContent = T.adv.key_made;
-    setTimeout(() => { els.genkey.textContent = T.adv.genkey; }, 2000);
-  }
 });
 
 els.send.addEventListener('submit', async (e) => {
@@ -1879,13 +1933,15 @@ els.send.addEventListener('submit', async (e) => {
   }
   chatAction.send(livePayload);
   publishChat(text, cmid);
-  renderLine('you', text, { me: true });
+  const sent = renderLine('you', text, { me: true });
+  if (!currentDmContact && peers.size === 0) {
+    const note = document.createElement('span');
+    note.className = 'comms__pending-note';
+    note.textContent = chatPersist ? T.log.saved_note : T.log.nobody_note;
+    sent.what.append(' ', note);
+  }
   els.msg.value = '';
   maybeRingContact();
-});
-
-els.copy.addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(els.url.textContent); els.copy.textContent = T.adv.copied; setTimeout(() => els.copy.textContent = T.adv.copy, 1200); } catch {}
 });
 
 const dragEvents = ['dragenter', 'dragover'];
@@ -2059,6 +2115,7 @@ if (muted) { els.mute.textContent = T.adv.sound_off; els.mute.setAttribute('aria
 
 const updateCallUI = () => {
   const inRoom = !!room;
+  if (inRoom && currentRoomName) els.share.hidden = isDmRoom(currentRoomName) || call.active;
   els.callStart.hidden = !inRoom || call.active;
   els.callCam.hidden = !call.active;
   els.callMic.hidden = !call.active;
@@ -2107,8 +2164,26 @@ const removeTile = (key) => {
 };
 
 const stopRinging = () => {
-  if (call.ringTimer) { clearInterval(call.ringTimer); call.ringTimer = null; }
+  if (ringTimer) { clearInterval(ringTimer); ringTimer = null; }
   els.ring.hidden = true;
+};
+
+const renderRing = () => {
+  if (ringAccepting) return;
+  const now = Date.now();
+  incomingRings.forEach((r, pid) => {
+    if (r.until > now && peers.has(pid)) return;
+    incomingRings.delete(pid);
+    sys(fmt(T.people.tried_call, { name: nameOf(pid) }));
+  });
+  if (!incomingRings.size) { stopRinging(); return; }
+  const latest = Array.from(incomingRings.keys()).pop();
+  els.ringText.textContent = fmt(T.ring.calling, { name: nameOf(latest) });
+  els.ring.hidden = false;
+  if (!ringTimer) {
+    playPing(660);
+    ringTimer = setInterval(() => { renderRing(); if (ringTimer) playPing(660); }, 1400);
+  }
 };
 
 const resetCallButtons = () => {
@@ -2125,8 +2200,83 @@ const getLocalMedia = (video) => navigator.mediaDevices.getUserMedia({
   video: video ? { width: { ideal: 640 }, height: { ideal: 480 } } : false
 });
 
-const startCall = async (answering) => {
-  if (call.active || !room) return;
+const callSend = (msg, peerId) => {
+  if (!callAction) return;
+  try {
+    const sent = callAction.send(msg, peerId || undefined);
+    if (sent && typeof sent.catch === 'function') sent.catch(() => {});
+  } catch (_) {}
+};
+
+const settle = (result) => { Promise.allSettled([].concat(result || [])); };
+
+const shareStreamWith = (peerId) => {
+  if (!room || !call.local || call.sentTo.has(peerId) || !peers.has(peerId)) return;
+  call.sentTo.add(peerId);
+  try { settle(room.addStream(call.local, { target: peerId })); } catch (_) {}
+};
+
+const unshareStreamWith = (peerId) => {
+  if (!call.sentTo.delete(peerId) || !room || !call.local || !peers.has(peerId)) return;
+  try { settle(room.removeStream(call.local, { target: peerId })); } catch (_) {}
+};
+
+const clearAnswerTimer = () => {
+  if (call.answerTimer) { clearTimeout(call.answerTimer); call.answerTimer = null; }
+};
+
+const addMember = (peerId, announce) => {
+  if (!call.active || !peers.has(peerId)) return;
+  const fresh = !call.members.has(peerId);
+  call.members.add(peerId);
+  call.invited.delete(peerId);
+  call.connected = true;
+  clearAnswerTimer();
+  shareStreamWith(peerId);
+  const held = pendingStreams.get(peerId);
+  if (held) {
+    pendingStreams.delete(peerId);
+    if (held.getTracks().some((t) => t.readyState === 'live')) addTile(peerId, held, { label: displayName(peerId) });
+  }
+  if (fresh && announce) sys(fmt(T.call.joined, { name: nameOf(peerId) }));
+  updateCallUI();
+};
+
+const dropMember = (peerId, announce) => {
+  if (!call.members.delete(peerId)) return;
+  unshareStreamWith(peerId);
+  removeTile(peerId);
+  pendingStreams.delete(peerId);
+  if (announce) sys(fmt(T.call.left, { name: nameOf(peerId) }));
+  if (call.active && !call.members.size) endCall(false);
+  else updateCallUI();
+};
+
+const openCall = async () => {
+  const forRoom = room;
+  let local;
+  try { local = await getLocalMedia(false); }
+  catch (err) { sys(fmt(T.call.mic_unavailable, { reason: why(err) })); return false; }
+  if (!room || room !== forRoom) { local.getTracks().forEach((t) => t.stop()); return false; }
+  if (call.active) { local.getTracks().forEach((t) => t.stop()); return true; }
+  call.active = true;
+  call.local = local;
+  call.videoOn = false;
+  call.micOff = false;
+  call.connected = false;
+  call.cid = null;
+  call.cids.clear();
+  call.members.clear();
+  call.invited.clear();
+  call.sentTo.clear();
+  resetCallButtons();
+  addTile('you', local, { local: true, label: myProfile.name || T.call.you });
+  updateCallUI();
+  return true;
+};
+
+const startCall = async () => {
+  if (call.active || !room || callStarting) return;
   if (!peers.size) {
     if (currentDmContact) {
       sys(fmt(T.call.ringing, { name: whoNow() }));
@@ -2140,44 +2290,122 @@ const startCall = async (answering) => {
     return;
   }
   if (peers.size > 4) { sys(T.call.too_many); return; }
-  let local;
-  try { local = await getLocalMedia(false); }
-  catch (err) { sys(fmt(T.call.mic_unavailable, { reason: why(err) })); return; }
-  call.active = true;
-  call.local = local;
-  call.videoOn = false;
-  call.micOff = false;
-  resetCallButtons();
-  room.addStream(local);
-  addTile('you', local, { local: true, label: myProfile.name || T.call.you });
-  pendingStreams.forEach((stream, peerId) => addTile(peerId, stream, { label: displayName(peerId) }));
-  pendingStreams.clear();
-  if (!answering) {
-    callAction.send({ kind: 'ring' });
-    sys(T.call.calling_room);
-  } else {
-    callAction.send({ kind: 'join' });
-  }
+  callStarting = true;
+  let opened = false;
+  try { opened = await openCall(); } finally { callStarting = false; }
+  if (!opened || call.cid) return;
+  const cid = b64urlEncode(crypto.getRandomValues(new Uint8Array(9)));
+  call.cid = cid;
+  call.cids.add(cid);
+  peers.forEach((p) => { if (!call.members.has(p)) call.invited.add(p); });
+  callSend({ kind: 'ring', cid });
+  sys(T.call.calling_room);
+  clearAnswerTimer();
+  call.answerTimer = setTimeout(() => {
+    call.answerTimer = null;
+    if (call.active && !call.connected) endCall(false, T.call.no_answer);
+  }, ANSWER_MS);
   updateCallUI();
 };
 
-const endCall = (silent) => {
-  stopRinging();
+const endCall = (silent, note) => {
+  clearAnswerTimer();
   if (!call.active) { pendingStreams.clear(); return; }
-  try { if (callAction && !silent) callAction.send({ kind: 'leave' }); } catch {}
-  try { if (room && call.local) room.removeStream(call.local); } catch {}
+  if (!silent) callSend(call.cid ? { kind: 'leave', cid: call.cid } : { kind: 'leave' });
+  try { if (room && call.local) settle(room.removeStream(call.local)); } catch (_) {}
   if (call.local) call.local.getTracks().forEach((t) => t.stop());
   call.local = null;
   call.active = false;
+  call.connected = false;
+  call.cid = null;
+  call.cids.clear();
+  call.members.clear();
+  call.invited.clear();
+  call.sentTo.clear();
   resetCallButtons();
   callTiles.forEach((t) => t.tile.remove());
   callTiles.clear();
   pendingStreams.clear();
   updateCallUI();
-  if (!silent) sys(T.call.ended);
+  if (!silent) sys(note || T.call.ended);
 };
 
-els.callStart.addEventListener('click', () => startCall(false));
+const onCallRing = (peerId, cid) => {
+  if (!peers.has(peerId)) return;
+  pendingStreams.delete(peerId);
+  if (call.active && call.cids.has(cid)) return;
+  if (call.active && (call.members.has(peerId) || call.invited.has(peerId))) {
+    call.cids.add(cid);
+    addMember(peerId, false);
+    callSend({ kind: 'join', cid }, peerId);
+    return;
+  }
+  incomingRings.set(peerId, { cid, until: Date.now() + RING_MS });
+  renderRing();
+};
+
+const onCallJoin = (peerId, cid, reply) => {
+  if (!call.active || !call.cids.has(cid) || !peers.has(peerId)) return;
+  addMember(peerId, true);
+  if (reply) callSend({ kind: 'here', cid }, peerId);
+};
+
+const onCallDecline = (peerId, cid) => {
+  if (!call.active || !call.cids.has(cid)) return;
+  sys(fmt(T.call.declined, { name: nameOf(peerId) }));
+  call.invited.delete(peerId);
+  if (!call.connected && !call.invited.size) endCall(false);
+};
+
+const onCallLeave = (peerId) => {
+  pendingStreams.delete(peerId);
+  if (incomingRings.delete(peerId)) {
+    sys(fmt(T.people.tried_call, { name: nameOf(peerId) }));
+    renderRing();
+  }
+  call.invited.delete(peerId);
+  if (call.members.has(peerId)) dropMember(peerId, true);
+  else if (call.active && !call.connected && call.cid && !call.invited.size) endCall(false);
+};
+
+const acceptRings = async () => {
+  if (ringAccepting) return;
+  const now = Date.now();
+  if (!Array.from(incomingRings.entries()).some(([pid, r]) => peers.has(pid) && r.until > now)) { renderRing(); return; }
+  ringAccepting = true;
+  stopRinging();
+  let opened = call.active;
+  try { if (!opened) opened = await openCall(); } finally { ringAccepting = false; }
+  const rings = Array.from(incomingRings.entries()).filter(([pid]) => peers.has(pid));
+  incomingRings.clear();
+  if (!opened) {
+    rings.forEach(([pid, r]) => callSend({ kind: 'decline', cid: r.cid }, pid));
+    return;
+  }
+  if (!rings.length) {
+    if (!call.connected && !call.cid) endCall(true);
+    return;
+  }
+  const cids = new Set();
+  rings.forEach(([pid, r]) => {
+    call.cids.add(r.cid);
+    cids.add(r.cid);
+    addMember(pid, false);
+  });
+  cids.forEach((cid) => callSend({ kind: 'join', cid }));
+  updateCallUI();
+};
+
+const declineRings = () => {
+  stopRinging();
+  incomingRings.forEach((r, pid) => {
+    callSend({ kind: 'decline', cid: r.cid }, pid);
+    pendingStreams.delete(pid);
+  });
+  incomingRings.clear();
+};
+
+els.callStart.addEventListener('click', () => startCall());
 els.callHangup.addEventListener('click', () => endCall(false));
 
 els.callMic.addEventListener('click', () => {
@@ -2194,12 +2422,15 @@ els.callCam.addEventListener('click', async () => {
   els.callCam.disabled = true;
   try {
     const next = await getLocalMedia(!call.videoOn);
-    try { room.removeStream(call.local); } catch {}
+    if (!call.active || !room || !call.local) { next.getTracks().forEach((t) => t.stop()); return; }
+    const targets = Array.from(call.sentTo);
+    try { settle(room.removeStream(call.local)); } catch (_) {}
     call.local.getTracks().forEach((t) => t.stop());
+    call.sentTo.clear();
     call.local = next;
     call.videoOn = !call.videoOn;
     if (call.micOff) next.getAudioTracks().forEach((t) => { t.enabled = false; });
-    room.addStream(next);
+    targets.forEach((pid) => { if (call.members.has(pid)) shareStreamWith(pid); });
     addTile('you', next, { local: true, label: myProfile.name || T.call.you });
     els.callCam.title = call.videoOn ? T.call.cam_on : T.call.cam_off;
     els.callCam.classList.toggle('is-off', !call.videoOn);
@@ -2211,12 +2442,8 @@ els.callCam.addEventListener('click', async () => {
   }
 });
 
-els.ringAccept.addEventListener('click', () => { stopRinging(); startCall(true); });
-els.ringDecline.addEventListener('click', () => {
-  stopRinging();
-  try { if (callAction) callAction.send({ kind: 'decline' }); } catch {}
-  pendingStreams.clear();
-});
+els.ringAccept.addEventListener('click', () => { acceptRings(); });
+els.ringDecline.addEventListener('click', () => { declineRings(); });
 
 const sendProfileTo = (peerId) => {
   if (!profAction || !myId) return;
@@ -2336,7 +2563,6 @@ const subscribeInbox = async () => {
 const subscribeUnread = async () => {
   if (!myId) return;
   const contacts = CID.getContacts();
-  const legacy = legacyTopicsOn();
   const byFp = new Map();
   const byRoom = new Map();
   for (const c of contacts) {
@@ -2344,13 +2570,11 @@ const subscribeUnread = async () => {
       const { roomName, b64Key } = await CID.deriveDm(myId.privateKey, c.pub);
       const topic = await chatTopicFor(roomName, b64Key);
       if (topic) byFp.set(topic, c.fp);
-      if (legacy) byFp.set(legacyTopicFor(roomName), c.fp);
     } catch (_) {}
   }
   for (const r of savedRooms()) {
     const topic = await chatTopicFor(r.room, r.key);
     if (topic) byRoom.set(topic, r);
-    if (legacy) byRoom.set(legacyTopicFor(r.room), r);
   }
   topicToFp.clear();
   byFp.forEach((fp, topic) => topicToFp.set(topic, fp));
@@ -2392,7 +2616,7 @@ const handleSideMsg = async (msgEvent) => {
       if (!markMissedCall(callerFp, payload.ts, ev.id)) return;
       renderContacts();
       playPing(660);
-      sys(fmt(T.people.tried_call, { name: who }));
+      notice(fmt(T.people.tried_call, { name: who }));
       return;
     }
     const existing = CID.contactByPub(payload.pub);
@@ -2409,7 +2633,7 @@ const handleSideMsg = async (msgEvent) => {
     const saved = await CID.saveRequest(payload);
     if (saved) {
       renderContacts();
-      sys(fmt(T.people.wants_sys, { name: saved.name || T.people.someone }));
+      notice(fmt(T.people.wants_sys, { name: saved.name || T.people.someone }));
       playPing(660);
     }
     return;
@@ -2524,9 +2748,9 @@ els.notifEnable.addEventListener('click', async () => {
       await initRingToken();
       const contacts = CID.getContacts();
       for (const c of contacts) { try { await announceToContact(c); } catch (_) {} }
-      sys(T.notif.on);
+      notice(T.notif.on);
     } else {
-      sys(T.notif.off);
+      notice(T.notif.off);
     }
   } finally {
     els.notifEnable.disabled = false;
@@ -2542,6 +2766,7 @@ const initRingToken = async () => {
     token = btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
   }
   const ok = await MentriaPush.ringRegister(token);
+  ringRegFailed = !ok;
   if (ok) {
     ringToken = token;
     if (window.MentriaStore) MentriaStore.set('comms', 'ring_token', token);
@@ -2709,7 +2934,7 @@ const enrollPasskeyFromComms = async (btn) => {
     await window.MentriaIdentity.enrollPasskey();
     els.pkUpgrade.hidden = true;
     els.pkSettings.hidden = true;
-    sys(T.passkey.added);
+    notice(passkeyCopy.added);
   } catch (err) {
     const msg = err && err.message;
     els.pkErr.textContent = msg === 'prf-unsupported' ? T.passkey.err_prf : T.passkey.err_failed;
@@ -2741,13 +2966,17 @@ const initIdentity = async () => {
     renderContacts();
     syncOsBadge();
     broadcastProfile();
+    if (joinedLocked && joinTarget && currentRoomName === joinTarget.room && !isDmRoom(currentRoomName)) {
+      joinedLocked = false;
+      joinNew(joinTarget.room, joinTarget.key);
+    }
     await initRingToken();
     refreshNotifBanner();
     subscribeInbox();
     subscribeUnread();
     refreshPasskeyOffer(false);
   } catch (err) {
-    sys(fmt(T.log.identity_err, { reason: why(err) }));
+    notice(fmt(T.log.identity_err, { reason: why(err) }));
   }
 };
 
@@ -2774,11 +3003,17 @@ els.idPasskey.addEventListener('click', async () => {
     await initIdentity();
   } catch (err) {
     const code = err && err.message;
+    const name = err && err.name;
     els.idErr.textContent = code === 'webauthn-timeout'
       ? T.lock.pk_timeout
       : code === 'no-passkey' || code === 'no-credential'
         ? T.lock.pk_gone
-        : fmt(T.lock.pk_failed, { detail: ((err && err.name) || 'error') + (code ? ': ' + String(code).slice(0, 80) : '') });
+        : name === 'NotAllowedError' || name === 'AbortError'
+          ? T.lock.pk_cancelled
+          : code === 'prf-unsupported' || name === 'NotSupportedError' || name === 'SecurityError' || name === 'InvalidStateError'
+            ? T.lock.pk_unavailable
+            : T.lock.pk_failed;
+    els.lockAlt.open = true;
   } finally {
     els.idPasskey.disabled = false;
   }
@@ -2844,7 +3079,7 @@ els.addToggle.addEventListener('click', () => {
   els.addToggle.classList.toggle('is-on', open);
   els.addToggleT.textContent = open ? T.people.close : T.people.add;
   if (open) els.contactIn.focus();
-  else stopScan();
+  else { stopScan(); showAddError(''); }
 });
 
 let scanStream = null;
@@ -3045,7 +3280,7 @@ els.idShareOut.addEventListener('click', async () => {
     await navigator.share({ text });
   } catch (err) {
     if (err && err.name === 'AbortError') return;
-    try { await navigator.clipboard.writeText(code); sys(T.people.code_copied); } catch (_) {}
+    try { await navigator.clipboard.writeText(code); notice(T.people.code_copied); } catch (_) {}
   }
 });
 
@@ -3218,7 +3453,7 @@ const renderContactsBase = () => {
         subscribeUnread();
         if (added) announceToContact(added);
       } catch (err) {
-        sys(fmt(T.people.accept_failed, { reason: why(err) }));
+        notice(fmt(T.people.accept_failed, { reason: why(err) }));
       }
     });
     const no = document.createElement('button');
@@ -3302,22 +3537,39 @@ const renderContactsBase = () => {
   });
 };
 
+const showAddError = (text) => {
+  els.addErr.textContent = text || '';
+  els.addErr.hidden = !text;
+};
+
+const contactCodeError = (err) => {
+  const msg = String((err && err.message) || '');
+  if (msg === 'not a contact code') return T.people.code_not;
+  if (msg === 'bad contact code' || (err && (err.name === 'SyntaxError' || err.name === 'InvalidCharacterError' || err.name === 'TypeError'))) return T.people.code_broken;
+  return fmt(T.people.add_failed, { reason: why(err) });
+};
+
 els.contactAdd.addEventListener('click', async () => {
+  showAddError('');
+  if (!els.contactIn.value.trim()) { showAddError(T.people.code_empty); els.contactIn.focus(); return; }
+  let saved;
   try {
     const payload = CID.decodeContactCode(els.contactIn.value);
-    const saved = await CID.addContact(payload);
-    if (saved && saved.fp) CID.dropRequest(saved.fp);
-    els.contactIn.value = '';
-    renderContacts();
-    subscribeUnread();
-    const reached = await announceToContact(saved);
-    sys(fmt(reached ? T.people.added_reached : T.people.added, { name: saved.name || saved.fp }));
+    saved = await CID.addContact(payload);
   } catch (err) {
-    const unreadable = !!err && (err.name === 'SyntaxError' || err.name === 'InvalidCharacterError');
-    sys(fmt(T.people.add_failed, { reason: unreadable ? fmt(T.why.unreadable, { detail: why(err) }) : why(err) }));
+    showAddError(contactCodeError(err));
+    els.contactIn.focus();
+    return;
   }
+  if (saved && saved.fp) CID.dropRequest(saved.fp);
+  els.contactIn.value = '';
+  renderContacts();
+  subscribeUnread();
+  const reached = await announceToContact(saved);
+  notice(fmt(reached ? T.people.added_reached : T.people.added, { name: saved.name || saved.fp }));
 });
 els.contactIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.contactAdd.click(); } });
+els.contactIn.addEventListener('input', () => { if (!els.addErr.hidden) showAddError(''); });
 
 const RECOVERY_ALPHA = 'abcdefghjkmnpqrstuvwxyz23456789';
 const makeRecoveryCode = () => {
@@ -3427,22 +3679,33 @@ els.advToggle.addEventListener('click', () => {
   if (open) els.adv.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 });
 
+const closeAdv = () => {
+  els.adv.hidden = true;
+  els.advToggle.setAttribute('aria-expanded', 'false');
+};
+
 els.newRoom.addEventListener('click', async () => {
   const name = EPHEMERAL_PREFIX + randomRoomSlug();
   const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
   els.room.value = name;
+  closeAdv();
   await joinNew(name, key);
-  try {
-    await navigator.clipboard.writeText(shareUrl(name, key));
-    els.newRoom.textContent = T.adv.link_copied;
-    setTimeout(() => { els.newRoom.textContent = T.adv.new_room; }, 2000);
-  } catch (_) {}
+});
+
+els.newSaved.addEventListener('click', async () => {
+  const name = randomRoomSlug() + randomRoomSlug();
+  const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
+  els.room.value = name;
+  closeAdv();
+  await joinNew(name, key);
+  if (currentRoomName === name) sys(T.log.saved_room);
 });
 
 refreshIdUI();
+let bootUnlock = null;
 if (CID.idState() === 'unlocked') initIdentity();
 else if (CID.idState() === 'locked' && window.MentriaIdentity && MentriaIdentity.tryDeviceUnlock) {
-  MentriaIdentity.tryDeviceUnlock().then((ok) => { if (ok) initIdentity(); else refreshIdUI(); });
+  bootUnlock = MentriaIdentity.tryDeviceUnlock().then((ok) => { if (ok) initIdentity(); else refreshIdUI(); }, () => { refreshIdUI(); });
 }
 
 function randomRoomSlug() {
@@ -3460,15 +3723,15 @@ const bootHash = window.location.hash && window.location.hash !== '#' ? parseHas
 if (bootHash && isDmRoom(bootHash.room)) {
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
 }
-const hasHash = !!bootHash && !isDmRoom(bootHash.room);
+const hasHash = !!bootHash && !!bootHash.room && !isDmRoom(bootHash.room);
 if (hasHash) {
   const parsed = bootHash;
   els.room.value = parsed.room;
-  refreshShareUrl(parsed.room, parsed.b64Key);
-  window.addEventListener('load', () => joinNew(parsed.room, parsed.b64Key));
-} else {
-  window.addEventListener('load', () => {
-    if (CID.idState() === 'unlocked') sys(T.people.pick_hint);
+  refreshShareUrl(parsed.room);
+  window.addEventListener('load', async () => {
+    if (bootUnlock) await Promise.race([bootUnlock, new Promise((r) => setTimeout(r, 4000))]);
+    if (joinTarget) return;
+    joinNew(parsed.room, parsed.b64Key);
   });
 }
 window.addEventListener('hashchange', () => {
@@ -3478,10 +3741,11 @@ window.addEventListener('hashchange', () => {
     refreshIdUI();
     return;
   }
-  const sameRoom = next.room === (els.room.value || '').trim();
-  const sameKey = next.b64Key === (chatKey ? next.b64Key : null);
-  if (!sameRoom || !sameKey) {
-    els.room.value = next.room;
+  const same = next.room
+    ? !!joinTarget && joinTarget.room === next.room && joinTarget.key === (next.b64Key || null)
+    : !joinTarget;
+  if (!same) {
+    els.room.value = next.room || '';
     joinNew(next.room, next.b64Key);
   }
   refreshIdUI();

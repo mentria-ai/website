@@ -654,6 +654,18 @@ try {
             },
             check: function () { return registration ? registration.update() : Promise.resolve(); }
           };
+          var lastCheck = Date.now();
+          var recheck = function (again) {
+            if (!registration || navigator.onLine === false) return;
+            lastCheck = Date.now();
+            registration.update().catch(function () {
+              if (again) setTimeout(function () { recheck(false); }, 15000);
+            });
+          };
+          window.addEventListener('online', function () { setTimeout(function () { recheck(true); }, 1500); });
+          document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible' && Date.now() - lastCheck > 3600000) recheck(false);
+          });
           navigator.serviceWorker.register('/sw.js').then(function (reg) {
             registration = reg;
             var chip = document.getElementById('m-update');

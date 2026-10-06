@@ -522,6 +522,14 @@ localeReload: true
     if (gapConfirmTimer) { clearTimeout(gapConfirmTimer); gapConfirmTimer = null; }
   }
 
+  function askMotion() {
+    return new Promise((resolve) => resolve(DeviceMotionEvent.requestPermission())).then((res) => {
+      state.motionGranted = res === 'granted';
+      persist();
+      return res;
+    });
+  }
+
   async function start() {
     if (!window.isSecureContext) {
       showPanel('insecure');
@@ -532,6 +540,10 @@ localeReload: true
       return;
     }
     if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      if (state.motionGranted) {
+        askMotion().then((res) => { if (res === 'granted') beginTracking(); else showPanel('denied'); }, () => showPanel('perm'));
+        return;
+      }
       MentriaUI.sensorsGranted(['accelerometer']).then((ok) => { if (ok) beginTracking(); else showPanel('perm'); });
       return;
     }
@@ -554,7 +566,7 @@ localeReload: true
 
   permBtn.addEventListener('click', async () => {
     try {
-      const res = await DeviceMotionEvent.requestPermission();
+      const res = await askMotion();
       if (res === 'granted') {
         showPanel(null);
         beginTracking();
@@ -734,7 +746,7 @@ localeReload: true
     window.MentriaStore.remove('ui', 'mini');
     if (running) return;
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function' && window.isSecureContext) {
-      DeviceMotionEvent.requestPermission()
+      askMotion()
         .then((res) => { if (res === 'granted') { showPanel(null); beginTracking(); } else start(); })
         .catch(() => start());
       return;

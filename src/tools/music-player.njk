@@ -22,6 +22,16 @@ eleventyComputed:
 <section class="mu" id="mu">
   <p class="mu__progress" id="mu-progress" role="status" aria-live="polite" hidden></p>
   <div class="mu__start" id="mu-start">
+    <section class="mu__resume" id="mu-resume" aria-labelledby="mu-resume-kicker" hidden>
+      <span class="mu__art mu__resume-art" id="mu-resume-art"><img alt="" hidden></span>
+      <div class="mu__resume-text">
+        <p class="mu__resume-kicker" id="mu-resume-kicker">{{ "tool.music-player.resume_title" | t }}</p>
+        <p class="mu__resume-song" id="mu-resume-song"></p>
+        <p class="mu__resume-sub" id="mu-resume-sub"></p>
+        <p class="mu__resume-hint" id="mu-resume-hint"></p>
+      </div>
+      <button type="button" class="m-btn m-btn--primary mu__resume-btn" id="mu-resume-btn"></button>
+    </section>
     <div class="mu__drop">
       <svg class="mu__drop-icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#tool-music-player"></use></svg>
       <p class="mu__drop-title">{{ "tool.music-player.drop" | t }}</p>
@@ -94,7 +104,7 @@ eleventyComputed:
 {% include "terminal-frame-close.njk" %}
 {% include "tool-schema.njk" %}
 
-{% set muKeys = ["no_music", "scanning", "reading", "selection", "count_songs", "count_songs_one", "count_albums", "count_albums_one", "open", "reconnect", "forget_label", "folder_denied", "no_results", "unknown_artist", "unknown_album", "back", "play", "pause", "play_all", "shuffle_all", "repeat_off", "repeat_all", "repeat_one", "queue", "queue_empty", "clear_queue", "sleep_off", "sleep_min", "sleep_end", "sleep_set", "sleep_set_end", "sleep_cleared", "mini", "more", "play_next", "add_queue", "add_playlist", "go_album", "go_artist", "remove_queue", "remove_playlist", "new_playlist", "playlist_name", "create", "added_to", "queued", "playing_next", "import_playlist", "imported", "import_none", "no_playlists", "export", "rename", "save", "delete", "delete_confirm", "cancel", "playlist_empty", "err_play", "err_apple_only", "pick_again"] %}
+{% set muKeys = ["no_music", "scanning", "reading", "selection", "count_songs", "count_songs_one", "count_albums", "count_albums_one", "open", "reconnect", "forget_label", "folder_denied", "no_results", "unknown_artist", "unknown_album", "back", "play", "pause", "play_all", "shuffle_all", "repeat_off", "repeat_all", "repeat_one", "queue", "queue_empty", "clear_queue", "sleep_off", "sleep_min", "sleep_end", "sleep_set", "sleep_set_end", "sleep_cleared", "mini", "more", "play_next", "add_queue", "add_playlist", "go_album", "go_artist", "remove_queue", "remove_playlist", "new_playlist", "playlist_name", "create", "added_to", "queued", "playing_next", "import_playlist", "imported", "import_none", "no_playlists", "export", "rename", "save", "delete", "delete_confirm", "cancel", "playlist_empty", "err_play", "err_apple_only", "pick_again", "resume_at", "resume", "resume_allow_hint", "reopen_files", "reopen_folder", "resume_pick_hint", "resume_missing"] %}
 <script>
 window.MENTRIA_MU_COPY = {
 {%- for k in muKeys %}
@@ -119,6 +129,7 @@ const searchEl = $('mu-search');
 const progressEl = $('mu-progress');
 const seekEl = $('mu-seek');
 const playBtn = $('mu-play');
+const resumeEl = $('mu-resume');
 const STORE_NS = 'tools';
 const STATE_KEY = 'music_player';
 const LISTS_KEY = 'music_playlists';
@@ -161,6 +172,7 @@ let seeking = false;
 let sleep = { mode: 'off', until: 0, timer: 0 };
 let fadeTimer = 0;
 let mini = null;
+let pending = null;
 let menuState = null;
 const artUrls = new Map();
 const artTypes = new Map();
@@ -1093,27 +1105,29 @@ function saveState(force) {
   const now = Date.now();
   if (!force && now - lastSave < 15000) return;
   lastSave = now;
+  if (!curFp) { savePref({ shuffle, repeat, vol: audio.volume }); return; }
   savePref({
     shuffle,
     repeat,
     vol: audio.volume,
     fp: curFp,
-    pos: Math.round((audio.currentTime || 0) * 10) / 10,
+    pos: Math.round((restoreAt || audio.currentTime || 0) * 10) / 10,
     q: queue.length <= QUEUE_CAP ? queue : [curFp],
     b: base.length <= QUEUE_CAP ? base : [curFp]
   });
 }
 
-function restoreState() {
-  if (curFp) return;
+function restoreState(play) {
+  if (curFp) return false;
   const p = pref();
-  if (!p.fp || !byFp.has(p.fp) || !M.fileFor(p.fp)) return;
+  if (!p.fp || !byFp.has(p.fp) || !M.fileFor(p.fp)) return false;
   const q = (Array.isArray(p.q) ? p.q : []).filter((fp) => byFp.has(fp));
   const b = (Array.isArray(p.b) ? p.b : []).filter((fp) => byFp.has(fp));
   queue = q.indexOf(p.fp) !== -1 ? q : [p.fp];
   base = b.length ? b : queue.slice();
   restoreAt = p.pos > 3 ? p.pos : 0;
-  playAt(Math.max(0, queue.indexOf(p.fp)), false);
+  playAt(Math.max(0, queue.indexOf(p.fp)), !!play);
+  return true;
 }
 
 function setSleep(mode, quiet) {
@@ -1279,6 +1293,42 @@ searchEl.addEventListener('input', () => {
   }, 120);
 });
 
+async function rematch(items) {
+  const known = await M.listEntries('audio');
+  if (!known.length) return;
+  const p = pref();
+  const want = new Set([p.fp].concat(Array.isArray(p.q) ? p.q : []));
+  const better = (a, b) => (want.has(a.fp) - want.has(b.fp)) || ((a.seenAt || 0) - (b.seenAt || 0));
+  const byPath = new Map();
+  const byName = new Map();
+  known.forEach((e) => {
+    const kp = (e.relPath || e.name) + '|' + e.size;
+    const kn = e.name + '|' + e.size;
+    if (!byPath.has(kp) || better(e, byPath.get(kp)) > 0) byPath.set(kp, e);
+    if (!byName.has(kn) || better(e, byName.get(kn)) > 0) byName.set(kn, e);
+  });
+  const have = new Set(known.map((e) => e.fp));
+  const used = new Set();
+  const fresh = items.filter((it) => {
+    const fp = M.fingerprint(it.file);
+    if (!have.has(fp)) return true;
+    used.add(fp);
+    return false;
+  });
+  fresh.forEach((it) => {
+    const f = it.file;
+    const hit = [byPath.get((it.relPath || f.name) + '|' + f.size), byName.get(f.name + '|' + f.size)].find((e) => e && !used.has(e.fp));
+    if (hit) { used.add(hit.fp); it.fp = hit.fp; }
+  });
+}
+
+function keep(items, ctx) {
+  if (!ctx.add) savePref({ src: { kind: ctx.folderId ? 'folder' : (ctx.dir ? 'dir' : 'files'), id: ctx.folderId || '', name: ctx.folderName || '' } });
+  if (!M.caps.fileHandles || (pref().src || {}).kind !== 'files') return;
+  if (!ctx.add) M.saveFileSet('music', items);
+  else if (items.some((it) => it.handle)) M.addToFileSet('music', items);
+}
+
 async function load(found, ctx) {
   ctx = ctx || {};
   const token = ++loadToken;
@@ -1289,14 +1339,19 @@ async function load(found, ctx) {
     else toast(C.no_music);
     return;
   }
+  await rematch(music);
+  if (token !== loadToken) return;
   const entries = await M.register(music, { kind: 'audio', folderId: ctx.folderId, folderName: ctx.folderName });
   if (token !== loadToken) return;
+  const was = pending;
+  pending = null;
   if (ctx.add) {
     entries.forEach((e) => { if (!byFp.has(e.fp)) all.push(e); });
   } else {
     all = entries;
     source = { name: ctx.folderName || '', folderId: ctx.folderId || '' };
   }
+  keep(music, ctx);
   byFp = new Map(all.map((e) => [e.fp, e]));
   buildLibrary();
   showMain(true);
@@ -1305,7 +1360,7 @@ async function load(found, ctx) {
   if (ctx.play) {
     const fps = entries.map((e) => e.fp);
     playList(M.naturalSort(fps, (fp) => byFp.get(fp).relPath || byFp.get(fp).name), 0);
-  } else if (!ctx.add) restoreState();
+  } else if (!ctx.add && !restoreState(ctx.resume) && ctx.resume && was) toast(fill(C.resume_missing, { name: was.title }));
   if (curFp) updateNowPlaying();
   if (pls.length) importPlaylists(pls);
   readAllTags(token);
@@ -1364,7 +1419,7 @@ function refresh() {
   if (curFp) { updateNowPlaying(); session(); }
 }
 
-async function openFolder(folder) {
+async function openFolder(folder, opts) {
   const ok = await M.folderAccess(folder, true);
   if (!ok) { toast(C.folder_denied); renderStart(); return; }
   await M.touchFolder(folder);
@@ -1373,10 +1428,104 @@ async function openFolder(folder) {
   try { found = await M.scanFolder(folder, ['audio', 'playlist'], (n) => progress(fill(C.scanning, { n: num(n) }))); } catch (_) {}
   progress('');
   if (!found.some((it) => M.kindOf(it.file) === 'audio')) { toast(C.no_music); renderStart(); return; }
-  load(found.filter((it) => M.kindOf(it.file) === 'audio'), { folderId: folder.id, folderName: folder.name });
+  load(found.filter((it) => M.kindOf(it.file) === 'audio'), { folderId: folder.id, folderName: folder.name, resume: !!(opts && opts.resume) });
+}
+
+function pickMusic() {
+  return M.caps.fileHandles ? M.pickFileHandles(['audio'], 'music') : M.pickFiles(['audio']);
+}
+
+async function chooseFolder(resume) {
+  if (M.caps.folders) {
+    let folder = null;
+    try { folder = await M.addFolder('music'); } catch (_) {}
+    if (folder) openFolder(folder, { resume });
+    return;
+  }
+  const picked = await M.pickDirectory(['audio']);
+  if (picked.length) load(picked, { dir: true, folderName: (picked[0].relPath || '').split('/')[0], resume });
+}
+
+async function showResume(mode, plan) {
+  const p = pref();
+  const e = p.fp ? await M.getEntry(p.fp) : null;
+  if (!e || all.length) { pending = null; renderResume(); return; }
+  e._i = infoOf(e);
+  pending = { mode, plan, title: e._i.title, artist: e._i.artist, pos: p.pos > 3 ? p.pos : 0, art: ownArtKey(e) };
+  renderResume();
+}
+
+function renderResume() {
+  const st = pending;
+  if (!st || all.length) { resumeEl.hidden = true; return; }
+  const allow = st.mode === 'allow';
+  $('mu-resume-song').textContent = st.title;
+  $('mu-resume-sub').textContent = [st.artist, fill(C.resume_at, { time: M.formatTime(st.pos) })].filter(Boolean).join(' · ');
+  $('mu-resume-hint').textContent = allow ? C.resume_allow_hint : C.resume_pick_hint;
+  $('mu-resume-btn').textContent = allow ? C.resume : (st.mode === 'folder' ? C.reopen_folder : C.reopen_files);
+  const box = $('mu-resume-art');
+  if (box.dataset.art !== st.art) {
+    const img = box.firstChild;
+    box.dataset.art = st.art;
+    img.hidden = true;
+    img.removeAttribute('src');
+    withArt(st.art, (url) => {
+      if (box.dataset.art !== st.art) return;
+      img.src = url;
+      img.hidden = false;
+    });
+  }
+  resumeEl.hidden = false;
+}
+
+async function resumeSaved(plan, ask) {
+  if (plan.folder) {
+    if (ask && !(await M.folderAccess(plan.folder, true))) { showResume('folder', null); return; }
+    openFolder(plan.folder, { resume: ask });
+    return;
+  }
+  const found = await M.openFileSet(plan.set, ask, pref().fp);
+  if (!ask && !mainEl.hidden) return;
+  if (found.length) load(found, { resume: ask });
+  else showResume('files', null);
+}
+
+async function resumeSession() {
+  if (!mainEl.hidden) return;
+  const p = pref();
+  const src = p.src || null;
+  if (p.fp && src) {
+    if (src.kind === 'folder' && M.caps.folders) {
+      const folder = (await M.listFolders('music')).find((f) => f.id === src.id);
+      if (folder) {
+        const ok = await M.folderAccess(folder, false);
+        if (!mainEl.hidden) return;
+        if (ok) openFolder(folder);
+        else showResume('allow', { folder });
+        return;
+      }
+    }
+    if (src.kind === 'files' && M.caps.fileHandles) {
+      const set = await M.fileSet('music');
+      if (set) {
+        const state = await M.fileSetAccess(set);
+        if (!mainEl.hidden) return;
+        if (state === 'granted') { resumeSaved({ set }, false); return; }
+        if (state === 'prompt') { showResume('allow', { set }); return; }
+      }
+    }
+    if (mainEl.hidden) showResume(src.kind === 'files' ? 'files' : 'folder', null);
+    return;
+  }
+  if (M.caps.folders) {
+    const folders = await M.listFolders('music');
+    if (folders.length && mainEl.hidden && await M.folderAccess(folders[0], false)) { openFolder(folders[0]); return; }
+  }
+  if (p.fp && mainEl.hidden) showResume('files', null);
 }
 
 async function renderStart() {
+  renderResume();
   $('mu-ios-hint').hidden = !M.caps.ios;
   $('mu-lock-hint').hidden = !(M.caps.ios && M.caps.standalone);
   const list = $('mu-folder-list');
@@ -1398,22 +1547,21 @@ async function renderStart() {
 }
 
 $('mu-open-files').addEventListener('click', async () => {
-  const picked = await M.pickFiles(['audio']);
+  const picked = await pickMusic();
   if (picked.length) load(picked, {});
 });
-$('mu-open-folder').addEventListener('click', async () => {
-  if (M.caps.folders) {
-    let folder = null;
-    try { folder = await M.addFolder('music'); } catch (_) {}
-    if (folder) openFolder(folder);
-    return;
-  }
-  const picked = await M.pickDirectory(['audio']);
-  if (picked.length) load(picked, { folderName: (picked[0].relPath || '').split('/')[0] });
-});
+$('mu-open-folder').addEventListener('click', () => chooseFolder(false));
 $('mu-add').addEventListener('click', async () => {
-  const picked = await M.pickFiles(['audio']);
+  const picked = await pickMusic();
   if (picked.length) load(picked, { add: true });
+});
+$('mu-resume-btn').addEventListener('click', async () => {
+  const st = pending;
+  if (!st) return;
+  if (st.mode === 'allow') { resumeSaved(st.plan, true); return; }
+  if (st.mode === 'folder') { chooseFolder(true); return; }
+  const picked = await pickMusic();
+  if (picked.length) load(picked, { resume: true });
 });
 $('mu-home').addEventListener('click', () => {
   showMain(false);
@@ -1451,6 +1599,16 @@ document.addEventListener('keydown', (e) => {
 });
 
 window.addEventListener('pagehide', () => saveState(true));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveState(true); });
+document.addEventListener('mentria:minimize', (e) => {
+  const d = e.detail;
+  const cur = byFp.get(curFp);
+  const info = cur ? cur._i : (all.length ? null : pending);
+  if (!d || !info) return;
+  d.value = info.title;
+  d.label = info.artist || '';
+  d.paused = true;
+});
 
 document.addEventListener('mentria:localechange', () => {
   const I = window.MentriaI18n;
@@ -1473,7 +1631,7 @@ if (M.caps.launchQueue) {
     if (!params || !params.files || !params.files.length) return;
     const found = [];
     for (const h of params.files) {
-      try { const file = await h.getFile(); found.push({ file, relPath: file.name }); } catch (_) {}
+      try { const file = await h.getFile(); found.push({ file, relPath: file.name, handle: h }); } catch (_) {}
     }
     if (found.length) load(found, { play: true });
   });
@@ -1490,11 +1648,7 @@ if (M.caps.launchQueue) {
   syncModes();
   syncPlay();
   if (!document.getElementById('tool-music-player') && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
-  renderStart().then(async () => {
-    if (!M.caps.folders) return;
-    const folders = await M.listFolders('music');
-    if (folders.length && mainEl.hidden && await M.folderAccess(folders[0], false)) openFolder(folders[0]);
-  });
+  renderStart().then(resumeSession);
 })();
 </script>
 
@@ -1504,6 +1658,16 @@ if (M.caps.launchQueue) {
 .mu__progress { margin: 0; font-family: var(--font-mono); font-size: 0.75rem; color: var(--term-muted); }
 .mu__progress[hidden], .mu__start[hidden], .mu__main[hidden], .mu__shelf[hidden], .mu__np[hidden], .mu__menu[hidden] { display: none; }
 .mu__start { display: flex; flex-direction: column; gap: 1.5rem; }
+.mu__resume { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 0.75rem 1rem; padding: 0.9rem 1rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-lg); background: var(--term-bg-raised, #14181d); }
+.mu__resume[hidden] { display: none; }
+.mu__resume-art { width: 56px; height: 56px; }
+.mu__resume-text { min-width: 0; }
+.mu__resume-kicker { margin: 0; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--syn-cyan); }
+.mu__resume-song { margin: 0.2rem 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: var(--term-fg-strong); }
+.mu__resume-sub { margin: 0.1rem 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.8rem; color: var(--term-muted); }
+.mu__resume-hint { margin: 0.4rem 0 0; font-size: 0.8rem; color: var(--term-muted); }
+.mu__resume-btn { min-height: 44px; }
+@media (max-width: 560px) { .mu__resume { grid-template-columns: 56px minmax(0, 1fr); } .mu__resume-btn { grid-column: 1 / -1; width: 100%; } }
 .mu__drop { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 2rem 1rem; border: 1px dashed var(--term-border-strong); border-radius: var(--radius-lg); text-align: center; }
 .mu__drop-icon { width: 64px; height: 64px; }
 .mu__drop-title { margin: 0; font-family: var(--font-body); font-weight: 600; font-size: 1.05rem; color: var(--term-fg-strong); }

@@ -71,10 +71,12 @@
   var undoEl = null;
   var undoTimer = null;
   var undoFire = null;
+  var undoTyped = null;
 
   function hideUndo() {
     if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; }
     undoFire = null;
+    undoTyped = null;
     var el = undoEl;
     undoEl = null;
     if (!el) return;
@@ -110,6 +112,7 @@
       try { onUndo(); } catch (_) {}
     }
     undoFire = fire;
+    undoTyped = new WeakSet();
     btn.addEventListener('click', fire);
     var left = opts.duration != null ? opts.duration : 6000;
     var started = 0;
@@ -135,10 +138,20 @@
     return { dismiss: function () { if (undoEl === el) hideUndo(); } };
   }
 
+  function typable(t) {
+    if (!t) return false;
+    if (t.isContentEditable || t.tagName === 'TEXTAREA') return true;
+    return t.tagName === 'INPUT' && /^(text|search|url|tel|email|password|number)$/.test(t.type);
+  }
+
+  document.addEventListener('input', function (e) {
+    if (undoTyped && typable(e.target)) undoTyped.add(e.target);
+  }, true);
+
   document.addEventListener('keydown', function (e) {
-    if (!undoFire || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || (e.key !== 'z' && e.key !== 'Z')) return;
-    var t = e.target;
-    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    if (!undoFire || e.defaultPrevented || e.isComposing || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey) return;
+    if (e.key !== 'z' && e.key !== 'Z' && !(e.code === 'KeyZ' && /^[^\x00-\x7f]$/.test(e.key))) return;
+    if (undoTyped && undoTyped.has(e.target)) return;
     e.preventDefault();
     undoFire();
   });

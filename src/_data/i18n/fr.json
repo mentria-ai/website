@@ -3278,6 +3278,14 @@
       "err_play": "Ce navigateur ne peut pas lire « {name} ».",
       "err_apple_only": "« {name} » est en Apple Lossless ou AIFF, des formats lus uniquement sur les appareils Apple.",
       "pick_again": "Choisissez à nouveau le fichier de ce morceau pour le lire.",
+      "resume_title": "Reprendre l’écoute",
+      "resume_at": "En pause à {time}",
+      "resume": "Reprendre",
+      "resume_allow_hint": "Votre navigateur demande une fois l’autorisation avant que Mentria rouvre ces morceaux.",
+      "reopen_files": "Rouvrir la musique",
+      "reopen_folder": "Rouvrir le dossier",
+      "resume_pick_hint": "Choisissez à nouveau la même musique pour reprendre là où vous en étiez.",
+      "resume_missing": "« {name} » ne fait pas partie de la musique choisie.",
       "search_hint": "Rechercher"
     },
     "fpv-drone": {

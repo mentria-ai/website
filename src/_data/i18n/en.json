@@ -3278,6 +3278,14 @@
       "err_play": "This browser can't play “{name}”.",
       "err_apple_only": "“{name}” is Apple Lossless or AIFF, which only play on Apple devices.",
       "pick_again": "Choose this song's file again to play it.",
+      "resume_title": "Continue listening",
+      "resume_at": "Paused at {time}",
+      "resume": "Resume",
+      "resume_allow_hint": "Your browser asks once before Mentria opens these songs again.",
+      "reopen_files": "Reopen music",
+      "reopen_folder": "Reopen folder",
+      "resume_pick_hint": "Choose the same music again to carry on where you left off.",
+      "resume_missing": "Couldn't find “{name}” in the music you chose.",
       "search_hint": "Search"
     },
     "fpv-drone": {

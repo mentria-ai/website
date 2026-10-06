@@ -3278,6 +3278,14 @@
       "err_play": "Este navegador no puede reproducir «{name}».",
       "err_apple_only": "«{name}» está en Apple Lossless o AIFF, que solo se reproducen en dispositivos Apple.",
       "pick_again": "Vuelve a elegir el archivo de esta canción para reproducirla.",
+      "resume_title": "Seguir escuchando",
+      "resume_at": "En pausa en {time}",
+      "resume": "Reanudar",
+      "resume_allow_hint": "Tu navegador pide permiso una vez antes de que Mentria vuelva a abrir estas canciones.",
+      "reopen_files": "Volver a abrir la música",
+      "reopen_folder": "Volver a abrir la carpeta",
+      "resume_pick_hint": "Vuelve a elegir la misma música para seguir donde lo dejaste.",
+      "resume_missing": "No se encontró «{name}» en la música que elegiste.",
       "search_hint": "Buscar"
     },
     "fpv-drone": {

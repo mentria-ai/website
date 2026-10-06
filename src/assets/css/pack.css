@@ -209,7 +209,7 @@ html:has(.deck--pack) .m-update { display: none; }
 
 .pack-canvas { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; padding-top: calc(136px + env(safe-area-inset-top)); }
 .pack-canvas__frame { flex: 1; width: 100%; border: 0; background: var(--term-bg, #0b0e11); }
-.pack-canvas__bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); background: var(--pack-panel); border-top: 1px solid rgba(255, 255, 255, 0.12); font-family: var(--font-body, 'Inter', sans-serif); }
+.pack-canvas__bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px calc(10px + var(--mini-clear, 0px) + env(safe-area-inset-bottom)); background: var(--pack-panel); border-top: 1px solid rgba(255, 255, 255, 0.12); font-family: var(--font-body, 'Inter', sans-serif); }
 .pack-canvas__hint { font-size: 0.82rem; color: rgba(255, 255, 255, 0.7); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pack-canvas__hint.is-right { color: var(--pack-right); }
 .pack-canvas__hint.is-wrong { color: var(--pack-wrong); }

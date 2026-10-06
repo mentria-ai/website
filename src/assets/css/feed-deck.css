@@ -178,7 +178,7 @@ html.feed-layout body { overflow: hidden; }
   position: absolute;
   left: 0; right: 0; bottom: 0;
   z-index: 2;
-  padding: 18px 18px calc(22px + env(safe-area-inset-bottom));
+  padding: 18px 18px calc(22px + var(--mini-clear, 0px) + env(safe-area-inset-bottom));
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.85) 0%,
@@ -278,7 +278,7 @@ html.feed-layout body { overflow: hidden; }
 /* ── First-time hint ──────────────────────────────────────── */
 .deck__hint {
   position: absolute;
-  bottom: calc(8px + env(safe-area-inset-bottom));
+  bottom: calc(8px + var(--mini-clear, 0px) + env(safe-area-inset-bottom));
   left: 0; right: 0;
   display: flex; justify-content: center; gap: 14px;
   z-index: 7;
@@ -327,6 +327,11 @@ html.feed-layout body { overflow: hidden; }
 
 @media (orientation: landscape) and (max-height: 520px) {
   .deck__slide-overlay { max-height: 86vh; overflow-y: auto; pointer-events: auto; }
+}
+@media (max-width: 1023px) and (max-aspect-ratio: 1/1) {
+  html:has(.m-mini-dock:not(.is-moved)) .deck { --mini-clear: 60px; }
+  html:has(.m-mini-dock:not(.is-moved) > :nth-child(2)) .deck { --mini-clear: 122px; }
+  html:has(.m-mini-dock:not(.is-moved) > :nth-child(3)) .deck { --mini-clear: 184px; }
 }
 .deck__slide-img.is-broken { visibility: hidden; }
 .deck__slide:has(.deck__slide-img.is-broken) { background: radial-gradient(120% 70% at 50% 18%, rgba(34, 211, 238, 0.16), transparent 62%), radial-gradient(90% 60% at 80% 85%, rgba(244, 114, 182, 0.1), transparent 60%), linear-gradient(160deg, #0f172a, #1e293b); }

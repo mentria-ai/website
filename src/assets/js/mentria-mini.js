@@ -15,10 +15,12 @@
     paused: 'common.mini.paused',
     steps: 'common.mini.steps',
     tapResume: 'common.mini.tap_resume',
+    stillRunning: 'common.mini.still_running',
     timerTool: 'tools.countdown-timer.title',
     stepsTool: 'tools.step-counter.title'
   };
   var KEY = 'mini';
+  var KINDS = ['timer', 'steps'];
   var TOOL_KEY = 'mini_tool';
   var POS_KEY = 'mini_pos';
   var MAX_AGE = 12 * 3600000;
@@ -29,7 +31,7 @@
   var STEP_MIN_MS = 300;
   var TOP_GAP = 64;
   var dock = null;
-  var pill = null;
+  var pills = {};
   var parked = null;
   var tickTimer = 0;
   var endTimer = 0;
@@ -69,34 +71,88 @@
     return (window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.prefix) || '';
   }
 
-  function session() {
+  function readAll() {
     var v = S ? S.get('ui', KEY) : null;
-    if (!v || !v.kind || !v.url) return null;
-    if (Date.now() - (v.since || 0) > MAX_AGE) { stop(); return null; }
-    return v;
+    var all = {};
+    if (!v || typeof v !== 'object') return all;
+    if (typeof v.kind === 'string') {
+      if (KINDS.indexOf(v.kind) >= 0 && v.url) all[v.kind] = { url: v.url, since: v.since, rang: v.rang };
+      return all;
+    }
+    KINDS.forEach(function (k) {
+      var s = v[k];
+      if (s && typeof s === 'object' && typeof s.url === 'string' && s.url) all[k] = s;
+    });
+    return all;
+  }
+  function writeAll(all) {
+    if (!S) return;
+    if (KINDS.some(function (k) { return all[k]; })) S.set('ui', KEY, all);
+    else S.remove('ui', KEY);
+  }
+  function hasSessions() {
+    var all = readAll();
+    return KINDS.some(function (k) { return all[k]; });
+  }
+  function sessions() {
+    var all = readAll();
+    var now = Date.now();
+    var stale = KINDS.filter(function (k) { return all[k] && now - (all[k].since || 0) > MAX_AGE; });
+    if (stale.length) {
+      stale.forEach(function (k) { delete all[k]; });
+      writeAll(all);
+      stale.forEach(teardown);
+    }
+    return all;
+  }
+  function session(kind) {
+    return sessions()[kind] || null;
   }
   function start(kind, url) {
-    if (!S) return;
-    S.set('ui', KEY, { kind: kind, url: bare(url || location.pathname), since: Date.now() });
+    if (!S || KINDS.indexOf(kind) < 0) return;
+    var all = readAll();
+    all[kind] = { url: bare(url || location.pathname), since: Date.now() };
+    writeAll(all);
   }
-  function stop() {
-    if (S) S.remove('ui', KEY);
-    if (listening) { window.removeEventListener('devicemotion', onMotion); listening = false; }
-    releaseWake();
-    clearInterval(tickTimer);
-    tickTimer = 0;
-    clearTimeout(endTimer);
-    endTimer = 0;
-    silence();
-    armUnlock(false);
-    if (audio) {
-      var ctx = audio;
-      audio = null;
-      unlocked = false;
-      resuming = false;
-      try { ctx.close().catch(function () {}); } catch (_) {}
+  function stop(kind) {
+    if (!kind) { KINDS.forEach(stop); return; }
+    var all = readAll();
+    if (all[kind]) {
+      delete all[kind];
+      writeAll(all);
     }
-    if (pill) { pill.remove(); pill = null; }
+    teardown(kind);
+  }
+  function teardown(kind) {
+    if (kind === 'steps' && listening) {
+      window.removeEventListener('devicemotion', onMotion);
+      listening = false;
+    }
+    if (kind === 'timer') {
+      clearTimeout(endTimer);
+      endTimer = 0;
+      silence();
+      armUnlock(false);
+      if (audio) {
+        var ctx = audio;
+        audio = null;
+        unlocked = false;
+        resuming = false;
+        try { ctx.close().catch(function () {}); } catch (_) {}
+      }
+    }
+    if (!wakeWanted()) releaseWake();
+    removePill(kind);
+    if (!hasSessions()) {
+      clearInterval(tickTimer);
+      tickTimer = 0;
+    }
+  }
+  function removePill(kind) {
+    if (pills[kind]) {
+      pills[kind].remove();
+      delete pills[kind];
+    }
     tidyDock();
   }
   function leave() {
@@ -172,8 +228,7 @@
 
   function wakeWanted() {
     if (listening) return true;
-    var ses = S ? S.get('ui', KEY) : null;
-    return !!(ses && ses.kind === 'timer') && timerLive();
+    return !!readAll().timer && timerLive();
   }
   function holdWake() {
     if (wakeLock || wakePending || !navigator.wakeLock || document.visibilityState !== 'visible') return;
@@ -232,7 +287,8 @@
     if (paused) return { value: fmtClock(paused.remaining), label: timerLabel(paused) + ' · ' + copy('paused', 'Paused') };
     return null;
   }
-  function dueAlarm(ses) {
+  function dueAlarm(all) {
+    var ses = all.timer;
     var now = Date.now();
     var since = Math.max(typeof ses.rang === 'number' ? ses.rang : 0, rangAt);
     var hit = null;
@@ -240,7 +296,7 @@
     if (!hit) return null;
     rangAt = hit.endAt;
     ses.rang = hit.endAt;
-    if (S) S.set('ui', KEY, ses);
+    writeAll(all);
     return now - hit.endAt <= RING_FRESH ? hit : null;
   }
   function armEnd() {
@@ -371,11 +427,20 @@
       titleBefore = null;
     }
   }
-  function dismiss() {
-    if (!ringing) { stop(); return; }
-    silence();
-    if (timerLive()) render();
-    else stop();
+  function dismiss(kind) {
+    if (kind !== 'timer') { stop(kind); return; }
+    if (ringing) {
+      silence();
+      if (timerLive()) render();
+      else stop('timer');
+      return;
+    }
+    var all = readAll();
+    if (!all.timer || !timerLive()) { stop('timer'); return; }
+    all.timer.hidden = true;
+    writeAll(all);
+    removePill('timer');
+    if (window.MentriaUI) liftToast(window.MentriaUI.toast(copy('stillRunning', 'The timer keeps running and will ring when it ends.'), { duration: 4000 }));
   }
 
   var gravity = 9.81, acEMA = 0, waitingForPeak = true, peaked = false, lastPeakAt = 0;
@@ -465,15 +530,33 @@
   }
 
   function render() {
-    var ses = session();
-    if (!ses) { silence(); if (pill) { pill.remove(); pill = null; tidyDock(); } return; }
-    var fresh = ses.kind === 'timer' ? dueAlarm(ses) : null;
+    var all = sessions();
+    renderTimer(all);
+    renderSteps(all);
+  }
+  function renderTimer(all) {
+    var ses = all.timer;
+    if (!ses) { silence(); removePill('timer'); return; }
+    var fresh = dueAlarm(all);
     if (fresh) ringing = fresh;
-    var view = ses.kind === 'timer' ? timerView() : stepsView();
-    if (!view) { stop(); return; }
-    if (pill && pill.getAttribute('data-kind') !== ses.kind) { pill.remove(); pill = null; }
-    if (!pill) build(ses);
-    var groupName = toolName(ses.kind);
+    var view = timerView();
+    if (!view) { stop('timer'); return; }
+    if (ses.hidden && (ringing || view.done)) {
+      delete ses.hidden;
+      writeAll(all);
+    }
+    if (ses.hidden) removePill('timer');
+    else fill(pills.timer || build('timer'), 'timer', view);
+    if (timerLive()) holdWake();
+    else if (!wakeWanted()) releaseWake();
+    if (fresh) alarm(fresh);
+  }
+  function renderSteps(all) {
+    if (!all.steps) { removePill('steps'); return; }
+    fill(pills.steps || build('steps'), 'steps', stepsView());
+  }
+  function fill(pill, kind, view) {
+    var groupName = toolName(kind);
     if (pill.getAttribute('aria-label') !== groupName) pill.setAttribute('aria-label', groupName);
     setText(pill.querySelector('.m-mini__value'), view.value);
     var label = pill.querySelector('.m-mini__label');
@@ -481,17 +564,12 @@
     label.hidden = !view.label;
     pill.classList.toggle('is-done', !!view.done);
     pill.classList.toggle('is-paused', !!view.paused);
-    var name = copy('open', 'Open {name}').replace('{name}', toolName(ses.kind)) + ' · ' + view.value + (view.label ? ' · ' + view.label : '');
+    var name = copy('open', 'Open {name}').replace('{name}', groupName) + ' · ' + view.value + (view.label ? ' · ' + view.label : '');
     var open = pill.querySelector('.m-mini__open');
     if (open.getAttribute('aria-label') !== name) open.setAttribute('aria-label', name);
     var close = pill.querySelector('.m-mini__close');
-    var closeName = ringing ? copy('stopAlarm', 'Stop alarm') : copy('close', 'Close');
+    var closeName = kind === 'timer' && ringing ? copy('stopAlarm', 'Stop alarm') : copy('close', 'Close');
     if (close.getAttribute('aria-label') !== closeName) close.setAttribute('aria-label', closeName);
-    if (ses.kind === 'timer') {
-      if (timerLive()) holdWake();
-      else releaseWake();
-    }
-    if (fresh) alarm(fresh);
   }
   function renderParked() {
     var ps = toolSession();
@@ -518,8 +596,10 @@
   function applyPos() {
     if (!dock) return;
     var p = S ? S.get('ui', POS_KEY) : null;
+    var raised = !!(p && typeof p.y === 'number' && p.y > 0);
     dock.classList.toggle('is-left', !!(p && p.side === 'left'));
-    if (p && typeof p.y === 'number' && p.y > 0) dock.style.setProperty('--mini-y', p.y + 'px');
+    dock.classList.toggle('is-moved', raised);
+    if (raised) dock.style.setProperty('--mini-y', p.y + 'px');
     else dock.style.removeProperty('--mini-y');
   }
   function draggable(el) {
@@ -581,12 +661,12 @@
   function tidyDock() {
     if (dock && !dock.children.length) { dock.remove(); dock = null; }
   }
-  function build(ses) {
-    pill = document.createElement('div');
+  function build(kind) {
+    var pill = document.createElement('div');
     pill.className = 'm-mini';
-    pill.setAttribute('data-kind', ses.kind);
+    pill.setAttribute('data-kind', kind);
     pill.setAttribute('role', 'group');
-    pill.setAttribute('aria-label', toolName(ses.kind));
+    pill.setAttribute('aria-label', toolName(kind));
     var open = document.createElement('button');
     open.type = 'button';
     open.className = 'm-mini__open';
@@ -597,11 +677,11 @@
     var label = document.createElement('span');
     label.className = 'm-mini__label';
     text.append(value, label);
-    open.append(iconFor(ses.kind === 'timer' ? 'countdown-timer' : 'step-counter'), text);
+    open.append(iconFor(kind === 'timer' ? 'countdown-timer' : 'step-counter'), text);
     open.addEventListener('click', function () {
-      var cur = session();
+      var cur = session(kind);
       if (!cur) { render(); return; }
-      if (cur.kind === 'steps' && needsGesture() && !sawMotion && !granted) {
+      if (kind === 'steps' && needsGesture() && !sawMotion && !granted) {
         DeviceMotionEvent.requestPermission().then(function (res) {
           if (res !== 'granted') return;
           granted = true;
@@ -612,8 +692,13 @@
       }
       location.href = prefix() + cur.url;
     });
-    pill.append(open, closeButton(dismiss));
-    ensureDock().appendChild(pill);
+    pill.append(open, closeButton(function () { dismiss(kind); }));
+    var host = ensureDock();
+    var before = null;
+    KINDS.slice(KINDS.indexOf(kind) + 1).some(function (k) { before = pills[k] || null; return !!before; });
+    host.insertBefore(pill, before);
+    pills[kind] = pill;
+    return pill;
   }
   function buildParked(ps) {
     parked = document.createElement('div');
@@ -646,14 +731,17 @@
     clearInterval(tickTimer);
     tickTimer = 0;
     renderParked();
-    var ses = session();
-    if (!ses) { if (pill) { pill.remove(); pill = null; tidyDock(); } return; }
-    if (bare(location.pathname) === ses.url) { stop(); return; }
-    if (ses.kind === 'timer') {
+    var here = bare(location.pathname);
+    var owned = sessions();
+    KINDS.forEach(function (k) { if (owned[k] && owned[k].url === here) stop(k); });
+    var all = readAll();
+    KINDS.forEach(function (k) { if (!all[k]) teardown(k); });
+    if (!all.timer && !all.steps) return;
+    if (all.timer) {
       if (timerLive()) armUnlock(true);
       armEnd();
     }
-    if (ses.kind === 'steps') {
+    if (all.steps) {
       listen();
       holdWake();
       if (needsGesture() && !granted) {
@@ -664,7 +752,16 @@
       }
     }
     render();
-    tickTimer = setInterval(function () { if (ses.kind === 'timer' || document.visibilityState === 'visible') render(); }, 1000);
+    tickTimer = setInterval(tick, 1000);
+  }
+  function tick() {
+    var all = readAll();
+    if (!all.timer && !all.steps) {
+      clearInterval(tickTimer);
+      tickTimer = 0;
+      return;
+    }
+    if (all.timer || document.visibilityState === 'visible') render();
   }
 
   document.addEventListener('click', function (e) {
@@ -674,7 +771,7 @@
     minimizeTool();
   });
   document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState !== 'visible' || !dock) return;
+    if (document.visibilityState !== 'visible' || (!dock && !hasSessions())) return;
     render();
     renderParked();
     if (wakeWanted()) holdWake();

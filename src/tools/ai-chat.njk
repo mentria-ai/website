@@ -712,6 +712,7 @@ function runApp(MentriaEngine, Tiers) {
   /* ── Tier selection ──────────────────────────────── */
   let tierDecision = null;
   let currentTier = null;
+  let loraFused = false;
   let contextTokens = 2048;
   let deepThinkOn = false;
 
@@ -797,11 +798,11 @@ function runApp(MentriaEngine, Tiers) {
     } finally { clearTimeout(t); }
   }
 
-  const SEARCH_TOOL_PROMPT = "\\n\\n# Tool: web search\\nYou can search the web with the web_search tool. The client runs your search and sends you the results in a <tool_response> message — you never need to imagine results or wait; just emit the call and stop.\\nHow to call: end your reply (after any thinking) with exactly this on its own, then stop:\\n<tool_call>{\\\"name\\\": \\\"web_search\\\", \\\"arguments\\\": {\\\"query\\\": \\\"your search terms\\\"}}</tool_call>\\nThe call must appear in your final reply, not only inside your thinking.\\nWhen to call: ALWAYS when the user asks you to search, look something up online, check a manual or documentation, or verify something on the web. Also when the answer needs current or uncertain facts: news, prices, weather, versions, schedules, results.\\nAfter a <tool_response> arrives, answer the question using those results, briefly, and mention the source domains. At most 2 searches per question.";
+  const SEARCH_TOOL_PROMPT = "\n\n# Tool: web search\nYou can search the web with the web_search tool. The client runs your search and sends you the results in a <tool_response> message — you never need to imagine results or wait; just emit the call and stop.\nHow to call: end your reply (after any thinking) with exactly this on its own, then stop:\n<tool_call>{\"name\": \"web_search\", \"arguments\": {\"query\": \"your search terms\"}}</tool_call>\nThe call must appear in your final reply, not only inside your thinking.\nWhen to call: ALWAYS when the user asks you to search, look something up online, check a manual or documentation, or verify something on the web. Also when the answer needs current or uncertain facts: news, prices, weather, versions, schedules, results.\nAfter a <tool_response> arrives, answer the question using those results, briefly, and mention the source domains. At most 2 searches per question.";
 
   const ROUTER_SYSTEM = 'You route messages for a chat assistant that has one tool, web search. Answer with exactly one word. Answer tool when the user asks to look something up, asks whether something is true or has happened, asks about current prices, news, weather, schedules, releases or anything that changes over time, or asks for facts about a specific product, place, document or organisation. Answer chat when the user wants writing, code, math, explanation of a stable concept, advice, or a reply about this conversation. Only the word.';
   const ROUTER_LABELS = ['tool', 'chat'];
-  const SEARCH_ADAPTER = { name: 'aichat-search', path: 'loras/aichat-search/v1/' };
+  const SEARCH_ADAPTER = { name: 'aichat-search', path: 'loras/aichat-search/v2/' };
   let routerIds = null;
   let searchAdapterSpecState = null;
   let searchAdapterLoaded = false;
@@ -1354,6 +1355,7 @@ function runApp(MentriaEngine, Tiers) {
       });
       engine = res.engine;
       currentTier = res.tier;
+      loraFused = !!(res.decodeRoute && res.decodeRoute.loraFuse === 'epilogue');
       contextTokens = res.maxSeq || 2048;
       strip.setTier(Activity.tierInfo(Tiers.TIERS[currentTier], currentTier));
       prefixCache = null;
@@ -1744,9 +1746,10 @@ function runApp(MentriaEngine, Tiers) {
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
     const searchActive = webSearchOn && !pinned && !!(getSearchCfg() || {}).url;
-    if (searchActive && currentTier === '27b' && !imagesForRequest && rest.length > 1) setStatus('generating', 'statusRereading');
+    const routed = searchActive && currentTier === '27b' && !loraFused && !imagesForRequest;
+    if (routed && rest.length > 1) setStatus('generating', 'statusRereading');
     const routeAsk = () => routeTurn(turnText(rest[rest.length - 1]));
-    const route = (searchActive && currentTier === '27b' && !imagesForRequest && rest.length)
+    const route = (routed && rest.length)
       ? (prefixCache ? await prefixCache.withCheckpoint(routeAsk) : await routeAsk())
       : null;
     if (epoch !== genEpoch) {

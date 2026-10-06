@@ -62,6 +62,7 @@
     "update_checking": "Checking…",
     "update_updating": "Updating…",
     "update_latest": "Up to date",
+    "update_offline": "Offline · couldn't check",
     "cache_clear": "Clear cache",
     "cache_clearing": "Clearing…",
     "cache_cleared": "Cleared — reloading…",
@@ -229,6 +230,7 @@
     "offline_title": "Offline",
     "offline_msg": "You're offline and this page isn't cached yet.",
     "offline_home": "Go to the cached home page",
+    "offline_retry": "Try again",
     "offline_strip": "Offline · showing what this device has saved",
     "offline_works": "These still work offline",
     "close": "Close",
@@ -5673,6 +5675,7 @@
     "start_today": "Start today's pack",
     "welcome_back": "Welcome back",
     "continue": "Continue",
+    "continue_offline": "This pack opens once you're back online.",
     "week_n": "You've learned on {n} of 7 days this week.",
     "week_zero": "One card today starts your week.",
     "your_tools": "Your tools"

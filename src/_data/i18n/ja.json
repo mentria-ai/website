@@ -62,6 +62,7 @@
     "update_checking": "確認中…",
     "update_updating": "更新中…",
     "update_latest": "最新です",
+    "update_offline": "オフラインのため確認できません",
     "cache_clear": "キャッシュを消去",
     "cache_clearing": "消去中…",
     "cache_cleared": "完了 — 再読み込み中…",
@@ -229,6 +230,7 @@
     "offline_title": "オフライン",
     "offline_msg": "オフラインです。このページはまだキャッシュされていません。",
     "offline_home": "キャッシュ済みのホームへ",
+    "offline_retry": "再試行",
     "offline_strip": "オフライン · この端末に保存済みの内容を表示中",
     "offline_works": "オフラインでも使えるもの",
     "close": "閉じる",
@@ -5673,6 +5675,7 @@
     "start_today": "今日のパックを始める",
     "welcome_back": "おかえりなさい",
     "continue": "続ける",
+    "continue_offline": "このパックはオンラインに戻ると開けます。",
     "week_n": "今週は 7 日中 {n} 日学習しました。",
     "week_zero": "今日 1 枚読めば、今週のスタートです。",
     "your_tools": "よく使うツール"

@@ -965,7 +965,7 @@ const renderPeerList = () => {
       add.addEventListener('click', async () => {
         const cur = peerProfiles.get(p);
         if (!cur || !cur.verified || !cur.pub) return;
-        try { await CID.addContact({ name: cur.name, pub: cur.pub, ring: cur.ring }); }
+        try { const added = await CID.addContact({ name: cur.name, pub: cur.pub, ring: cur.ring }); if (added && added.fp) CID.dropRequest(added.fp); }
         catch (err) { sys(fmt(T.people.add_failed, { reason: why(err) })); return; }
         sys(fmt(T.peers.added, { name: displayName(p) }));
         renderPeerList();
@@ -3306,6 +3306,7 @@ els.contactAdd.addEventListener('click', async () => {
   try {
     const payload = CID.decodeContactCode(els.contactIn.value);
     const saved = await CID.addContact(payload);
+    if (saved && saved.fp) CID.dropRequest(saved.fp);
     els.contactIn.value = '';
     renderContacts();
     subscribeUnread();

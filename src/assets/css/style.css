@@ -504,7 +504,8 @@ html.is-standalone .m-mini-dock { --mini-base: calc(var(--app-bar-h, 52px) + 12p
 .launcher__cat--create { --cat: var(--syn-purple); }
 .launcher__cat--dev { --cat: var(--syn-amber); }
 .launcher__cat--everyday { --cat: var(--syn-green); }
-.launcher__cat--extensions { --cat: var(--accent); }
+.launcher__cat--extensions, .launcher__cat--store { --cat: var(--accent); }
+.launcher:not(.is-searching) .launcher__cat--store { display: none; }
 .launch-tile[data-group="Extensions"] { --cat: var(--accent); }
 .launch-tile__icon--ext { font-size: 40px; line-height: 1; }
 .launch-tile__icon--ext img { width: 48px; height: 48px; border-radius: 10px; }

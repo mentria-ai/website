@@ -33,6 +33,24 @@
 .pack-body code { font-family: var(--font-mono, monospace); font-size: 0.9em; background: rgba(255, 255, 255, 0.1); padding: 0 4px; border-radius: 4px; }
 .pack-body pre { overflow-x: auto; background: rgba(0, 0, 0, 0.5); padding: 10px; border-radius: 8px; font-size: 0.8rem; }
 
+.pack-slide .deck__eq {
+  position: relative; z-index: 4; flex: 0 0 auto; min-width: 0; max-width: 100%; box-sizing: border-box;
+  margin: 0 0 12px; padding: 9px 12px;
+  background: rgba(34, 211, 238, 0.06); border-left: 2px solid rgba(34, 211, 238, 0.55); border-radius: 5px;
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  pointer-events: auto; color: #fff;
+}
+.deck--pack .deck__eq { touch-action: pan-x; }
+.pack-slide .deck__eq:focus-visible { outline: 2px solid var(--syn-cyan, #22d3ee); outline-offset: 2px; }
+.pack-slide .deck__eq math { margin: 0; color: #fff; font-size: 1.1em; }
+@media (max-width: 480px) { .pack-slide .deck__eq math { font-size: 1em; } }
+.pack-slide .deck__eq::-webkit-scrollbar { height: 4px; }
+.pack-slide .deck__eq::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); border-radius: 2px; }
+.pack-slide .deck__eq.is-clipped:not(.is-end) {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+}
+
 .pack-card {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   z-index: 5; width: min(560px, calc(100% - 28px)); max-height: calc(100% - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom));

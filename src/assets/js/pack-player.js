@@ -13,13 +13,19 @@
     if (vars) Object.keys(vars).forEach(function (v) { s = s.split('{' + v + '}').join(String(vars[v])); });
     return s;
   };
-  var lang = document.documentElement.lang || 'en';
+  var LOCALES = window.MENTRIA_LOCALES || [];
+  var pageLang = document.documentElement.lang || 'en';
+  var here = localeOf(location.pathname);
+  var lang = here ? here.code : pageLang;
+  var foreign = lang !== pageLang;
   var plural = (function () {
     try { var rules = new Intl.PluralRules(lang); return function (n) { return rules.select(n); }; } catch (_) { return function (n) { return n === 1 ? 'one' : 'other'; }; }
   })();
   var tx = function (v) { return P.text(v, lang); };
-  var localePrefix = root.dataset.prefix || '';
+  var localePrefix = here ? here.prefix || '' : (root.dataset.prefix || '');
   var libraryHref = localePrefix + '/learn/';
+  var learnTitle = '';
+  var DECK_KEYS = { hint_tap_short: 'hint_tap', hint_depth: 'hint_depth', hint_exit: 'hint_exit', share_card: 'share_slide' };
 
   var pack = null, native = false, order = [], byId = {}, sectionOf = {}, current = 0, mode = 'quiz', progress = null;
   var importedRow = null, nextInfo = null, finishRefresh = null;
@@ -32,14 +38,61 @@
   var slides = [], segs = [], stage, progressBar, liveEl, hint, modeWrap, secLabel, shareBtn;
   var coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
-  function load() {
-    var inline = document.getElementById('pack-data');
-    if (inline) {
-      try { native = true; return Promise.resolve(JSON.parse(inline.textContent)); } catch (_) { return Promise.resolve(null); }
+  function localeOf(path) {
+    var fallback = null;
+    for (var i = 0; i < LOCALES.length; i++) {
+      var pre = LOCALES[i].prefix;
+      if (pre && (path === pre || path.indexOf(pre + '/') === 0)) return LOCALES[i];
+      if (!pre && !fallback) fallback = LOCALES[i];
     }
-    var id = new URLSearchParams(location.search).get('id');
-    if (!id) return Promise.resolve(null);
-    return P.get(id).then(function (row) { importedRow = row || null; return row ? row.pack : null; });
+    return fallback;
+  }
+
+  function localStrings() {
+    var url = (here && here.dict) || ('/assets/i18n/' + lang + '.json');
+    return fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (dict) {
+      if (!dict) return;
+      var learn = dict.learn || {}, deck = dict.feed_deck || {}, next = {};
+      Object.keys(T).forEach(function (k) {
+        var v = DECK_KEYS[k] ? deck[DECK_KEYS[k]] : learn[k];
+        next[k] = typeof v === 'string' ? v : T[k];
+      });
+      T = next;
+      if (typeof learn.title === 'string') learnTitle = learn.title;
+    }).catch(function () {});
+  }
+
+  function fullPack(id) {
+    return fetch('/learn/' + encodeURIComponent(id) + '/pack.json', { credentials: 'omit' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+  }
+
+  function load() {
+    return (foreign ? localStrings() : Promise.resolve()).then(function () {
+      var inline = document.getElementById('pack-data');
+      if (inline) {
+        native = true;
+        var data = null;
+        try { data = JSON.parse(inline.textContent); } catch (_) {}
+        if (!foreign || !data || !data.id) return data;
+        return fullPack(data.id).then(function (full) { return full && full.id === data.id ? full : data; });
+      }
+      var id = new URLSearchParams(location.search).get('id');
+      if (!id) return null;
+      return P.get(id).then(function (row) { importedRow = row || null; return row ? row.pack : null; });
+    });
+  }
+
+  function relabel() {
+    document.documentElement.lang = lang;
+    var name = tx(pack.title);
+    if (!name) return;
+    var h = document.getElementById('packHeading') || document.querySelector('main h1.sr-only');
+    if (h) h.textContent = name;
+    if (!learnTitle) return;
+    var at = document.title.lastIndexOf(' | ');
+    document.title = name + ' · ' + learnTitle + (at >= 0 ? document.title.slice(at) : '');
   }
 
   function notFound() {
@@ -76,6 +129,7 @@
     var avail = P.availableModes(pack, progress);
     mode = avail.indexOf(progress.mode) >= 0 ? progress.mode : baseMode(avail);
     if (!native) nameImported();
+    if (foreign) relabel();
     root.innerHTML = '';
     root.dataset.mode = mode;
     if (pack.cover) root.style.setProperty('--pack-cover', 'url("' + String(pack.cover).replace(/"/g, '%22') + '")');
@@ -124,9 +178,10 @@
     root.appendChild(stage);
 
     hint = el('div', 'deck__hint', coarse
-      ? '<span>' + esc(t('hint_tap_short')) + '</span><span>' + esc(t('hint_depth')) + '</span><span>' + esc(t('hint_exit')) + '</span>'
+      ? '<span>' + esc(t('hint_tap_short')) + '</span><span class="pack-hint-depth" hidden>' + esc(t('hint_depth')) + '</span><span>' + esc(t('hint_exit')) + '</span>'
       : '<span>' + esc(t('hint_tap')) + '</span><span>' + esc(t('hint_keys')) + '</span>');
     root.appendChild(hint);
+    stage.addEventListener('pack:fold', syncHint);
     liveEl = el('div', 'sr-only'); liveEl.setAttribute('role', 'status'); liveEl.setAttribute('aria-live', 'polite');
     root.appendChild(liveEl);
 
@@ -346,6 +401,7 @@
     try { target.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
     try { s.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
     if (hint && (!silent || (i < order.length && byId[order[i]].type === 'canvas'))) hint.classList.add('is-fading');
+    syncHint();
     var focusable = s.querySelector('.pack-guess:not([hidden]) input, .pack-guess:not([hidden]) button:not([disabled])') || s.querySelector('.pack-next:not([hidden])') || s.querySelector('input, textarea, button:not(.deck__tap):not(.pack-more):not([disabled])');
     if (focusable && !silent && document.activeElement && document.activeElement.tagName !== 'INPUT') { try { focusable.focus({ preventScroll: true }); } catch (_) {} }
   }
@@ -367,6 +423,14 @@
   }
 
   function moreBtn() { return slides[current] ? slides[current].querySelector('.pack-more:not([hidden])') : null; }
+  function syncHint() {
+    var depth = hint && hint.querySelector('.pack-hint-depth');
+    if (depth) depth.hidden = !moreBtn();
+  }
+  function eqScrolls(node) {
+    var q = node && node.closest ? node.closest('.deck__eq') : null;
+    return !!q && q.scrollWidth > q.clientWidth + 1;
+  }
   function isExpanded() { var m = moreBtn(); return !!m && m.getAttribute('aria-expanded') === 'true'; }
   function expandCurrent() { var m = moreBtn(); if (m && !isExpanded()) m.click(); }
   function collapseCurrent() { var m = moreBtn(); if (m && isExpanded()) m.click(); }
@@ -397,12 +461,8 @@
   }
 
   function prefixOf(path) {
-    var list = window.MENTRIA_LOCALES || [];
-    for (var i = 0; i < list.length; i++) {
-      var pre = list[i].prefix;
-      if (pre && (path === pre || path.indexOf(pre + '/') === 0)) return pre;
-    }
-    return '';
+    var l = localeOf(path);
+    return l ? l.prefix || '' : '';
   }
 
   function initExit() {
@@ -440,18 +500,20 @@
       }
       if (e.target && e.target.closest && (e.key === ' ' || e.key === 'Enter') && e.target.closest('button, a[href], [role="button"]')) return;
       if (e.target && e.target.closest && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.target.closest('[role="radiogroup"], [role="listbox"], .pack-order, .pack-match')) return;
+      if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && eqScrolls(e.target)) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); go(current + 1); }
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(current - 1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); expandCurrent(); }
       else if (e.key === 'ArrowDown') { e.preventDefault(); if (isExpanded()) collapseCurrent(); else exit(); }
       else if (e.key === 'Escape') { e.preventDefault(); if (isExpanded()) collapseCurrent(); else exit(); }
     });
-    var sx = 0, sy = 0, st = 0, scrolls = false;
+    var sx = 0, sy = 0, st = 0, scrolls = false, sideways = false;
     root.addEventListener('touchstart', function (e) {
       var tch = e.touches[0]; sx = tch.clientX; sy = tch.clientY; st = Date.now();
       var c = e.target.closest ? e.target : null;
       var b = c && c.closest('.pack-body');
       scrolls = !!(c && c.closest('.pack-card, .pack-canvas, input, textarea')) || (!!b && bodyScrolls(b));
+      sideways = eqScrolls(c);
     }, { passive: true });
     root.addEventListener('touchend', function (e) {
       var tch = e.changedTouches[0];
@@ -464,7 +526,7 @@
         if (dy < 0) expandCurrent();
         else if (isExpanded()) collapseCurrent();
         else exit();
-      } else if (ax >= 50) {
+      } else if (ax >= 50 && !sideways) {
         if (dx < 0) go(current + 1); else go(current - 1);
       }
     }, { passive: true });

@@ -62,6 +62,7 @@
     "update_checking": "Vérification…",
     "update_updating": "Mise à jour…",
     "update_latest": "À jour",
+    "update_offline": "Hors ligne · vérification impossible",
     "cache_clear": "Vider le cache",
     "cache_clearing": "Vidage…",
     "cache_cleared": "Vidé — rechargement…",
@@ -229,6 +230,7 @@
     "offline_title": "Hors ligne",
     "offline_msg": "Vous êtes hors ligne et cette page n'est pas encore en cache.",
     "offline_home": "Aller à la page d'accueil en cache",
+    "offline_retry": "Réessayer",
     "offline_strip": "Hors ligne · affichage de ce que cet appareil a enregistré",
     "offline_works": "Ceci fonctionne encore hors ligne",
     "close": "Fermer",
@@ -5673,6 +5675,7 @@
     "start_today": "Commencer le pack du jour",
     "welcome_back": "Bon retour",
     "continue": "Continuer",
+    "continue_offline": "Ce pack s'ouvrira quand vous serez de nouveau en ligne.",
     "week_n": "Jours d’apprentissage cette semaine : {n} sur 7.",
     "week_zero": "Une carte aujourd’hui lance votre semaine.",
     "your_tools": "Vos outils"

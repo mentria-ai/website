@@ -62,6 +62,7 @@
     "update_checking": "Verificando…",
     "update_updating": "Atualizando…",
     "update_latest": "Atualizado",
+    "update_offline": "Sem conexão · não foi possível verificar",
     "cache_clear": "Limpar cache",
     "cache_clearing": "Limpando…",
     "cache_cleared": "Pronto — recarregando…",
@@ -229,6 +230,7 @@
     "offline_title": "Off-line",
     "offline_msg": "Você está off-line e esta página ainda não está em cache.",
     "offline_home": "Ir para a página inicial em cache",
+    "offline_retry": "Tentar de novo",
     "offline_strip": "Offline · mostrando o que este aparelho tem salvo",
     "offline_works": "Isto ainda funciona offline",
     "close": "Fechar",
@@ -5673,6 +5675,7 @@
     "start_today": "Começar o pacote de hoje",
     "welcome_back": "Que bom ver você de novo",
     "continue": "Continuar",
+    "continue_offline": "Este pacote abre quando você estiver online de novo.",
     "week_n": "Nesta semana você aprendeu em {n} de 7 dias.",
     "week_zero": "Um cartão hoje começa a sua semana.",
     "your_tools": "Suas ferramentas"

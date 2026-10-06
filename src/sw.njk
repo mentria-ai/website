@@ -19,6 +19,8 @@ const FEED_PAGE = /^\/(({{ localeAlt }})\/)?(feed\/|learn\/[^/]+\/)/;
 const PACK_JSON = /^\/learn\/[^/]+\/pack\.json$/;
 const PACK_PAGE = /^\/(?:(?:{{ localeAlt }})\/)?learn\/(?!play\/|format\/)([^/]+)\/$/;
 const LOCALE_PATH = /^\/({{ localeAlt }})(\/|$)/;
+const LOCALE_PREFIXES = '{{ localeAlt }}'.split('|');
+const LEARN_PAGE = /^\/(?:(?:{{ localeAlt }})\/)?learn\/(?!format\/)[^/]+\/$/;
 const FEED_INDEX = /^\/search-index-feed\.[A-Za-z-]+\.json$/;
 const ASSETS = [
   '/',
@@ -211,8 +213,102 @@ self.addEventListener('install', event => {
       fetchList.push(url);
     }));
     await cache.addAll(fetchList);
+    await refreshDecks();
   })());
 });
+
+async function eachLimit(list, limit, fn) {
+  const out = new Array(list.length);
+  let next = 0;
+  const lane = async () => {
+    while (next < list.length) {
+      const i = next++;
+      out[i] = await fn(list[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, list.length) }, lane));
+  return out;
+}
+
+async function freshCopy(url) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const resp = await fetch(url, { cache: 'no-cache', signal: ctrl.signal });
+    if (resp.ok && !resp.redirected) return { resp };
+    if (resp.redirected || resp.status === 404 || resp.status === 410) return { gone: true };
+  } catch (_) {
+  } finally {
+    clearTimeout(timer);
+  }
+  return {};
+}
+
+async function refreshDecks() {
+  try {
+    const names = (await caches.keys()).filter(k => k.startsWith('mentria-decks-') && k !== DECKS_CACHE);
+    if (!names.length) return;
+    const target = await caches.open(DECKS_CACHE);
+    const seen = new Set((await target.keys()).map(r => r.url));
+    const saved = [];
+    for (const name of names) {
+      const old = await caches.open(name);
+      for (const req of await old.keys()) {
+        if (seen.has(req.url)) continue;
+        seen.add(req.url);
+        saved.push({ req, old });
+      }
+    }
+    const recent = saved.slice(-DECKS_LIMIT);
+    const results = await eachLimit(recent, 4, (entry) => freshCopy(entry.req.url));
+    for (let i = 0; i < recent.length; i++) {
+      const { req, old } = recent[i];
+      if (results[i].gone) { await old.delete(req); continue; }
+      const resp = results[i].resp || await old.match(req);
+      if (resp) await target.put(req, resp);
+    }
+  } catch (_) {}
+}
+
+async function carryDecks(keys) {
+  const olds = keys.filter(k => k.startsWith('mentria-decks-') && k !== DECKS_CACHE);
+  if (!olds.length) return;
+  try {
+    const target = await caches.open(DECKS_CACHE);
+    const have = new Set((await target.keys()).map(r => r.url));
+    for (const name of olds) {
+      const old = await caches.open(name);
+      for (const req of await old.keys()) {
+        if (have.has(req.url)) continue;
+        const hit = await old.match(req);
+        if (hit) { await target.put(req, hit); have.add(req.url); }
+      }
+    }
+    const all = await target.keys();
+    if (all.length > DECKS_LIMIT) await Promise.all(all.slice(0, all.length - DECKS_LIMIT).map(k => target.delete(k)));
+  } catch (_) {}
+}
+
+async function markStale(name) {
+  try {
+    const cache = await caches.open(name);
+    for (const req of await cache.keys()) {
+      if (new URL(req.url).pathname.startsWith('/__mentria-locale__/')) await cache.delete(req);
+    }
+  } catch (_) {}
+}
+
+function altPaths(path) {
+  const base = path.replace(LOCALE_PATH, '/');
+  const out = base !== path ? [base] : [];
+  if (LEARN_PAGE.test(path)) {
+    for (const prefix of LOCALE_PREFIXES) {
+      const alt = '/' + prefix + base;
+      if (alt !== path) out.push(alt);
+    }
+  }
+  return out;
+}
 
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
@@ -223,10 +319,11 @@ self.addEventListener('activate', event => {
     const keys = await caches.keys();
     const updating = keys.some(k => k.startsWith('mentria-cache-') && k !== CACHE_NAME);
     const hadOldModels = keys.some(k => k.startsWith('mentria-models-') && k !== MODELS_MARKER);
+    await carryDecks(keys);
     await Promise.all(keys.map(key => {
       if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER || key === DECKS_CACHE || key === ART_CACHE || key === SHARE_CACHE) return;
       if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-') || key.startsWith('mentria-decks-')) return caches.delete(key);
-      if (key.startsWith('mentria-locale-') && updating) return caches.delete(key);
+      if (key.startsWith('mentria-locale-') && updating) return markStale(key);
     }));
     if (!keys.includes(MODELS_MARKER)) {
       if (hadOldModels) {
@@ -602,15 +699,15 @@ self.addEventListener('fetch', event => {
       return resp;
     } catch (err) {
       if (event.request.mode !== 'navigate') {
+        if (event.request.headers.has('x-mentria-fill')) throw err;
         const kept = await caches.match(event.request, { ignoreSearch: true });
         if (kept) return kept;
       }
       if (event.request.mode === 'navigate') {
         const localized = await caches.match(event.request, { ignoreSearch: true });
         if (localized) return localized;
-        const stripped = url.pathname.replace(LOCALE_PATH, '/');
-        if (stripped !== url.pathname) {
-          const alt = await caches.match(stripped, { ignoreSearch: true });
+        for (const path of altPaths(url.pathname)) {
+          const alt = await caches.match(path, { ignoreSearch: true });
           if (alt) return alt;
         }
         const lp = url.pathname.match(LOCALE_PATH);

@@ -145,10 +145,28 @@
       if (done || !body.offsetHeight) return;
       done = true;
       if (ro) ro.disconnect();
-      if (body.scrollHeight > global.innerHeight * 0.45) { body.classList.add('is-collapsed'); more.hidden = false; }
+      if (body.scrollHeight > global.innerHeight * 0.45) {
+        body.classList.add('is-collapsed');
+        more.hidden = false;
+        try { body.dispatchEvent(new CustomEvent('pack:fold', { bubbles: true })); } catch (_) {}
+      }
     };
     if (global.ResizeObserver) { ro = new global.ResizeObserver(check); ro.observe(body); }
     else global.setTimeout(check, 0);
+  }
+
+  function equation(html) {
+    var box = el('div', 'deck__eq', html);
+    var sync = function () {
+      var clipped = box.scrollWidth > box.clientWidth + 1;
+      if (clipped) box.tabIndex = 0; else box.removeAttribute('tabindex');
+      box.classList.toggle('is-clipped', clipped);
+      box.classList.toggle('is-end', clipped && box.scrollLeft + box.clientWidth >= box.scrollWidth - 2);
+    };
+    box.addEventListener('scroll', sync, { passive: true });
+    if (global.ResizeObserver) new global.ResizeObserver(sync).observe(box);
+    else global.setTimeout(sync, 0);
+    return box;
   }
 
   function renderSlide(card, ctx) {
@@ -156,7 +174,7 @@
     var o = el('div', 'deck__slide-overlay pack-overlay');
     if (card.title) o.appendChild(el('p', 'pack-overlay__title', esc(ctx.tx(card.title))));
     if (card.caption) o.appendChild(el('p', 'deck__caption', inline(ctx.md(card.caption))));
-    if (card.equation_html && ctx.native) o.appendChild(el('div', 'deck__eq', card.equation_html));
+    if (card.equation_html && ctx.native) o.appendChild(equation(card.equation_html));
     if (card.body) {
       var parts = splitLead(ctx.tx(card.body));
       var body = el('div', 'deck__body pack-body', parts ? ctx.md(parts.lead) + '<div class="pack-body__rest">' + ctx.md(parts.rest) + '</div>' : ctx.md(card.body));

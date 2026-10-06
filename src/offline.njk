@@ -51,9 +51,22 @@ eleventyExcludeFromSitemap: true
     <p style="color: var(--syn-amber); font-size: 0.9rem;">$ ping mentria.ai</p>
     <h1 style="font-size: clamp(2.4rem, 7vw, 4rem); margin: 1rem 0;">{{ "common.offline_title" | t }}</h1>
     <p style="color: var(--term-muted);">{{ "common.offline_msg" | t }}<span class="cursor-blink"></span></p>
-    <p style="margin-top: 2rem;"><a href="{{ locale.pathPrefix }}/">{{ "common.offline_home" | t }}</a></p>
+    <p class="offline-actions">
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="offline-retry" hidden>{{ "common.offline_retry" | t }}</button>
+      <a href="{{ locale.pathPrefix }}/">{{ "common.offline_home" | t }}</a>
+    </p>
   </div>
 </section>
+<script>
+  (function () {
+    var retry = document.getElementById('offline-retry');
+    if (!retry || /\/offline\/?$/.test(location.pathname)) return;
+    var again = function () { location.reload(); };
+    retry.hidden = false;
+    retry.addEventListener('click', again);
+    window.addEventListener('online', function () { setTimeout(again, 800); });
+  })();
+</script>
 {{ toolIconsSvg | safe }}
 <section class="offline-tools" id="offline-tools" aria-labelledby="offline-tools-h" hidden>
   <h2 class="launcher__label" id="offline-tools-h">{{ "common.offline_works" | t }}</h2>
@@ -95,6 +108,8 @@ eleventyExcludeFromSitemap: true
 })();
 </script>
 <style>
+.hero .offline-actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; justify-content: center; align-items: center; }
+.offline-actions [hidden] { display: none; }
 .offline-tools { max-width: 760px; margin: 1rem auto 3rem; padding: 0 1rem; }
 .offline-tools[hidden] { display: none; }
 .offline-tools .launcher__label { text-align: center; }

@@ -216,19 +216,27 @@
         var routes = shellRoutes(loc.prefix).concat([dictUrl(code), '/fragments/tools-popup.' + code + '.html?v=' + i18nBuild(), '/assets/js/site-palette.' + lower + '.js', '/assets/js/site-end.' + lower + '.js']);
         routes.forEach(function (route) {
           chain = chain.then(function () {
-            return fetch(route, { cache: 'no-cache' }).then(function (resp) {
+            return fetch(route, { cache: 'no-cache', headers: { 'x-mentria-fill': '1' } }).then(function (resp) {
               if (resp && resp.ok) return shell.put(route, resp.clone());
             }, function () { missed = true; }).catch(function () {});
           });
         });
-        return chain
-          .then(function () { if (!missed) return shell.put(marker, new Response('1')); })
-          .then(function () { return caches.keys(); })
-          .then(function (keys) {
-            return Promise.all(keys.map(function (key) {
-              if (key !== cacheName && key.indexOf('mentria-locale-' + code + '-') === 0) return caches.delete(key);
-            }));
-          });
+        return chain.then(function () {
+          if (missed) return;
+          var keep = {};
+          routes.concat([marker]).forEach(function (route) { keep[new URL(route, location.origin).href] = true; });
+          return shell.put(marker, new Response('1'))
+            .then(function () { return shell.keys(); })
+            .then(function (entries) {
+              return Promise.all(entries.map(function (req) { if (!keep[req.url]) return shell.delete(req); }));
+            })
+            .then(function () { return caches.keys(); })
+            .then(function (keys) {
+              return Promise.all(keys.map(function (key) {
+                if (key !== cacheName && key.indexOf('mentria-locale-' + code + '-') === 0) return caches.delete(key);
+              }));
+            });
+        });
       });
     }).catch(function () {}).then(function () { delete shellsBusy[code]; });
     shellsBusy[code] = p;

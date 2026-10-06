@@ -5086,8 +5086,8 @@
   },
   "feed_deck": {
     "hint_tap": "touchez →",
-    "hint_depth": "balayez ↑ pour approfondir",
-    "hint_exit": "balayez ↓ pour quitter",
+    "hint_depth": "balayez ↑ : plus",
+    "hint_exit": "balayez ↓ : quitter",
     "hint_keys_next": "clic ou → suivant",
     "hint_keys_depth": "↑ pour approfondir",
     "hint_keys_exit": "échap pour quitter",

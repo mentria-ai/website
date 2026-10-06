@@ -218,7 +218,7 @@
     return victims.length;
   };
 
-  const LOCAL_KEYS = ['tools.ruler_calibration', 'tools.decibel_settings', 'tools.countdown_active', 'ui.mini', 'ui.mini_tool', 'ui.mini_pos', 'handoff.md', 'comms.ring_token', 'comms.selftest_token', 'comms.ring_announced'];
+  const LOCAL_KEYS = ['tools.ruler_calibration', 'tools.decibel_settings', 'tools.countdown_active', 'ui.mini', 'ui.mini_tool', 'ui.mini_pos', 'handoff.md', 'comms.ring_token', 'comms.selftest_token', 'comms.ring_announced', 'comms.topic_v2_since'];
   const LOCAL_KEY_PREFIXES = ['ui.fullscreen.'];
   const LOCAL_LEGACY = ['mentria_lang', 'mentria_lang_redirected_at', 'mentria_seen', 'mentria_caps', 'mentria_pwa_installed_at', 'mentria_pwa_install_dismissed_at', 'mentria_pwa_install_seen'];
   const VAULTS = ['totp.vault', 'identity.vault'];

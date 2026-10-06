@@ -741,6 +741,8 @@ let currentDmContact = null;
 let lastRingSentAt = 0;
 let myProfile = { name: '' };
 const peerProfiles = new Map();
+const pendingChecks = new Map();
+const proofAnswers = new Map();
 const peers = new Set();
 const objectUrls = new Set();
 const trackObjectUrl = (blob) => { const u = URL.createObjectURL(blob); objectUrls.add(u); return u; };
@@ -771,10 +773,13 @@ renderRelayToggle();
 let audioCtx = null;
 
 const CHAT_TOPIC_PREFIX = 'mentria.chat.v1.';
+const CHAT_TOPIC_V2 = 'mentria-comms-topic-v2|';
+const LEGACY_TOPIC_SINCE = 'topic_v2_since';
 const CHAT_KIND = 3838;
 const EPHEMERAL_PREFIX = '!';
 const HISTORY_LOOKBACK_SEC = 7 * 24 * 60 * 60;
 const HISTORY_LIMIT = 100;
+const PROOF_LABEL = 'mentria-prof-proof-v1';
 
 let chatSubId = null;
 let chatTopic = null;
@@ -822,6 +827,31 @@ const deriveKey = async (b64Key) => {
   }
 };
 
+const topicCache = new Map();
+const chatTopicFor = (roomName, b64Key) => {
+  const id = b64Key + ':' + roomName;
+  if (!topicCache.has(id)) {
+    topicCache.set(id, (async () => {
+      const raw = b64urlDecode(b64Key);
+      if (raw.length !== 32) return null;
+      const mac = await crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+      return b64urlEncode(new Uint8Array(await crypto.subtle.sign('HMAC', mac, new TextEncoder().encode(CHAT_TOPIC_V2 + roomName))));
+    })().catch(() => null));
+  }
+  return topicCache.get(id);
+};
+const legacyTopicFor = (roomName) => CHAT_TOPIC_PREFIX + roomName;
+const legacyTopicsOn = () => {
+  let since = 0;
+  try { since = Number(MentriaStore.get('comms', LEGACY_TOPIC_SINCE)) || 0; } catch (_) {}
+  if (!since) {
+    since = Date.now();
+    try { MentriaStore.set('comms', LEGACY_TOPIC_SINCE, since); } catch (_) {}
+  }
+  return Date.now() - since < HISTORY_LOOKBACK_SEC * 1000;
+};
+const expiryTags = () => [['expiration', String(Math.floor(Date.now() / 1000) + HISTORY_LOOKBACK_SEC)]];
+
 const encryptText = async (key, plaintext) => {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(plaintext));
@@ -840,7 +870,7 @@ const short = (id) => id ? id.slice(0, 6) : 'unknown';
 
 const displayName = (peerId) => {
   const prof = peerProfiles.get(peerId);
-  if (prof && prof.pub) {
+  if (prof && prof.pub && prof.verified) {
     const contact = CID.contactByPub(prof.pub);
     if (contact && contact.name) return contact.name;
   }
@@ -889,15 +919,17 @@ const renderPeerList = () => {
     chip.style.color = peerColor(p);
     chip.textContent = displayName(p);
     const prof = peerProfiles.get(p);
-    chip.title = prof && prof.fp ? 'fingerprint ' + prof.fp : p;
-    if (prof && prof.pub && prof.fp && !CID.contactByPub(prof.pub)) {
+    chip.title = prof && prof.verified && prof.fp ? 'fingerprint ' + prof.fp : p;
+    if (prof && prof.verified && prof.pub && prof.fp && !CID.contactByPub(prof.pub)) {
       const add = document.createElement('button');
       add.type = 'button';
       add.className = 'comms__chip-add';
       add.textContent = '+';
       add.title = 'add ' + (prof.name || short(p)) + ' as a contact';
       add.addEventListener('click', async () => {
-        try { await CID.addContact({ name: prof.name, pub: prof.pub, ring: prof.ring }); }
+        const cur = peerProfiles.get(p);
+        if (!cur || !cur.verified || !cur.pub) return;
+        try { await CID.addContact({ name: cur.name, pub: cur.pub, ring: cur.ring }); }
         catch (err) { sys('could not add contact: ' + err.message); return; }
         sys(`${displayName(p)} added to contacts.`);
         renderPeerList();
@@ -1063,22 +1095,15 @@ const handleNostrMsg = async (msgEvent) => {
     const ev = msg[2];
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
-    if (!content || !content.cmid || seenCmids.has(content.cmid)) return;
+    if (!content || !content.cmid || !content.enc || !chatKey || seenCmids.has(content.cmid)) return;
     let text, sfp = null, sfp2 = null;
-    if (content.enc) {
-      if (!chatKey) return;
-      try {
-        const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
-        text = unpacked.text;
-        sfp = unpacked.sfp;
-        sfp2 = unpacked.sfp2;
-        if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
-      } catch { return; }
-    } else if (typeof content.text === 'string') {
-      text = content.text;
-    } else {
-      return;
-    }
+    try {
+      const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
+      text = unpacked.text;
+      sfp = unpacked.sfp;
+      sfp2 = unpacked.sfp2;
+      if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
+    } catch { return; }
     seenCmids.add(content.cmid);
     const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
     const evTs = (ev.created_at || 0) * 1000;
@@ -1098,14 +1123,16 @@ const closeChatSub = () => {
   }
 };
 
-const setupChatPersistence = async (roomName) => {
-  chatTopic = CHAT_TOPIC_PREFIX + roomName;
-  chatPersist = !isEphemeralRoom(roomName);
+const setupChatPersistence = async (roomName, topic) => {
+  chatTopic = topic || null;
+  chatPersist = !!(chatTopic && chatKey);
   seenCmids = new Set();
 
   if (!chatPersist) {
     chatSubId = null;
-    sys('ephemeral room — messages aren\'t saved. drop the leading ! to persist.');
+    sys(chatKey
+      ? 'ephemeral room — messages aren\'t saved. drop the leading ! to persist.'
+      : 'no key in this link — messages aren\'t saved, and anyone who knows the room name can join.');
     return;
   }
 
@@ -1127,7 +1154,7 @@ const setupChatPersistence = async (roomName) => {
   const sinceSec = Math.floor(Date.now() / 1000) - HISTORY_LOOKBACK_SEC;
   const req = JSON.stringify(['REQ', chatSubId, {
     kinds: [CHAT_KIND],
-    '#x': [chatTopic],
+    '#x': legacyTopicsOn() ? [chatTopic, legacyTopicFor(roomName)] : [chatTopic],
     since: sinceSec,
     limit: HISTORY_LIMIT
   }]);
@@ -1239,7 +1266,7 @@ const publishRoomCtl = async (ctl) => {
     const enc = await encryptText(chatKey, packChatPlain('', { ctl }));
     if (chatAction) { try { chatAction.send({ cmid, enc }); } catch (_) {} }
     rememberSentCmid(cmid);
-    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }));
+    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
     let sent = false;
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
@@ -1307,7 +1334,7 @@ const ringRoomMembers = () => {
   const entry = roomNotifyEntry(currentRoomName);
   const rings = roomRings(entry);
   const connected = new Set();
-  for (const p of peerProfiles.values()) if (p && p.ring) connected.add(p.ring);
+  for (const p of peerProfiles.values()) if (p && p.verified && p.ring) connected.add(p.ring);
   const targets = Object.keys(rings).filter((tk) => tk !== ringToken && !connected.has(tk));
   if (!targets.length || Date.now() - lastRoomRingAt < 8000) return;
   lastRoomRingAt = Date.now();
@@ -1329,17 +1356,11 @@ const sentCmidsFor = (fp) => {
 };
 
 const publishChat = async (text, cmid) => {
-  if (!chatTopic || !chatPersist) return;
+  if (!chatTopic || !chatPersist || !chatKey) return;
   rememberSentCmid(cmid);
   try {
-    let payload;
-    if (chatKey) {
-      const enc = await encryptText(chatKey, packChatPlain(text));
-      payload = { cmid, ts: Date.now(), enc };
-    } else {
-      payload = { text, cmid, ts: Date.now() };
-    }
-    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify(payload));
+    const enc = await encryptText(chatKey, packChatPlain(text));
+    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
       if (ws && ws.readyState === 1) {
@@ -1351,6 +1372,64 @@ const publishChat = async (text, cmid) => {
     console.warn('chat publish failed:', err);
   }
 };
+
+const certFingerprints = (sdp) => {
+  const out = new Set();
+  String(sdp || '').split(/\r?\n/).forEach((line) => {
+    const m = /^a=fingerprint:(\S+)\s+([0-9A-Fa-f:]+)/.exec(line.trim());
+    if (m) out.add(m[1].toLowerCase() + ' ' + m[2].toUpperCase());
+  });
+  return Array.from(out).sort().join(',');
+};
+
+const connBinding = (peerId) => {
+  try {
+    const pc = room && room.getPeers ? room.getPeers()[peerId] : null;
+    const local = pc && pc.localDescription ? certFingerprints(pc.localDescription.sdp) : '';
+    const remote = pc && pc.remoteDescription ? certFingerprints(pc.remoteDescription.sdp) : '';
+    return local && remote ? { local, remote } : null;
+  } catch (_) { return null; }
+};
+
+const finishCheck = (peerId) => {
+  const pend = pendingChecks.get(peerId);
+  if (!pend) return;
+  clearTimeout(pend.timer);
+  pendingChecks.delete(peerId);
+};
+
+const announcePeer = (peerId) => {
+  const prof = peerProfiles.get(peerId);
+  if (!prof || prof.announced) return;
+  const contact = prof.verified && prof.pub ? CID.contactByPub(prof.pub) : null;
+  const label = (contact && contact.name) || prof.name;
+  if (!label) return;
+  prof.announced = true;
+  sys(`${short(peerId)} is ${label}${prof.verified && prof.fp ? ' (' + prof.fp + ')' : ''}`);
+};
+
+const challengePeer = (peerId, action) => {
+  const prof = peerProfiles.get(peerId);
+  if (!action || !myId || !prof || !prof.pub) return;
+  finishCheck(peerId);
+  const entry = { n: b64urlEncode(crypto.getRandomValues(new Uint8Array(16))), pub: prof.pub, timer: null };
+  entry.timer = setTimeout(() => { if (pendingChecks.get(peerId) === entry) announcePeer(peerId); }, 8000);
+  pendingChecks.set(peerId, entry);
+  try { action.send({ t: 'q', n: entry.n, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y } }, peerId); } catch (_) {}
+};
+
+const applyVerifiedProfile = async (peerId) => {
+  const prof = peerProfiles.get(peerId);
+  if (!prof || !prof.verified || !prof.pub || !prof.ring) return;
+  const existing = CID.contactByPub(prof.pub);
+  if (!existing || existing.ring === prof.ring) return;
+  try {
+    await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring });
+    if (currentDmContact && currentDmContact.fp === existing.fp) currentDmContact.ring = prof.ring;
+  } catch (_) {}
+};
+
+const samePubOf = (a, b) => !!(a && b && a.x === b.x && a.y === b.y);
 
 let joinSeq = 0;
 
@@ -1370,6 +1449,9 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     chatAction = metaAction = chunkAction = profAction = callAction = null;
     peers.clear();
     peerProfiles.clear();
+    pendingChecks.forEach((pend) => clearTimeout(pend.timer));
+    pendingChecks.clear();
+    proofAnswers.clear();
     chatSubId = null;
     chatTopic = null;
     chatKey = null;
@@ -1403,6 +1485,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   }
 
   chatKey = b64Key ? await deriveKey(b64Key) : null;
+  const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key) : null;
   if (seq !== joinSeq) return;
   if (b64Key && !chatKey) sys('encryption key in URL is invalid — chat will appear unreadable.');
   if (chatKey && b64Key) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
@@ -1425,15 +1508,19 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const rtcConfig = { iceServers };
   if (relayOnly && hasTurn(iceServers)) rtcConfig.iceTransportPolicy = 'relay';
   else if (relayOnly) console.warn('hide-my-ip requested but no relay server available — connecting normally');
+  const roomConfig = { appId: 'mentria', relayConfig: { urls: [RELAY] }, rtcConfig };
+  if (chatKey && b64Key) roomConfig.password = b64Key;
+  let keyMismatchShown = false;
+  const onJoinError = (info) => {
+    const reason = String((info && info.error) || '').toLowerCase();
+    if (seq !== joinSeq || keyMismatchShown || !reason.includes('password')) return;
+    keyMismatchShown = true;
+    sys(isDmRoom(roomName)
+      ? 'a device couldn\'t prove it belongs in this private chat — if it\'s them, they need the latest comms.'
+      : 'someone tried to connect with a different key — they need the exact link (including the part after the colon) and the latest comms.');
+  };
   try {
-    room = joinRoom(
-      {
-        appId: 'mentria',
-        relayConfig: { urls: [RELAY] },
-        rtcConfig
-      },
-      roomName
-    );
+    room = joinRoom(roomConfig, roomName, { onJoinError });
   } catch (err) {
     sys(`failed to join: ${err.message}`);
     els.status.textContent = 'error';
@@ -1454,7 +1541,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   els.leave.hidden = false;
   setView('chat');
   setConnUI();
-  els.eph.hidden = !isEphemeralRoom(roomName);
+  els.eph.hidden = !!chatKey && !isEphemeralRoom(roomName);
+  els.eph.title = chatKey ? 'messages aren\'t saved (room starts with !)' : 'messages aren\'t saved (no key in the link)';
   els.enc.hidden = !chatKey;
   els.msg.disabled = false;
   els.go.disabled = false;
@@ -1470,7 +1558,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     if (kind === 'ring') {
       if (call.active) return;
       const prof = peerProfiles.get(ctx.peerId);
-      const known = prof && prof.pub ? CID.contactByPub(prof.pub) : null;
+      const known = prof && prof.verified && prof.pub ? CID.contactByPub(prof.pub) : null;
       const caller = (known && known.name) || displayName(ctx.peerId);
       els.ringText.textContent = `${caller} is calling`;
       els.ring.hidden = false;
@@ -1496,6 +1584,38 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     else pendingStreams.set(peerId, stream);
   };
 
+  const pchk = room.makeAction('pchk');
+  pchk.onMessage = async (data, ctx) => {
+    if (!data || typeof data !== 'object' || !myId || !myFp || typeof data.n !== 'string' || data.n.length > 64) return;
+    if (data.t === 'q') {
+      if (!data.pub || typeof data.pub.x !== 'string' || typeof data.pub.y !== 'string') return;
+      const asked = (proofAnswers.get(ctx.peerId) || 0) + 1;
+      proofAnswers.set(ctx.peerId, asked);
+      const bind = asked <= 12 ? connBinding(ctx.peerId) : null;
+      if (!bind) return;
+      try {
+        const theirPub = { x: data.pub.x, y: data.pub.y };
+        const mac = await CID.pairProof(myId.privateKey, theirPub, [PROOF_LABEL, data.n, myFp, await CID.fingerprint(theirPub), bind.local, bind.remote]);
+        if (seq === joinSeq) pchk.send({ t: 'a', n: data.n, mac }, ctx.peerId);
+      } catch (_) {}
+      return;
+    }
+    if (data.t !== 'a') return;
+    const pend = pendingChecks.get(ctx.peerId);
+    const prof = peerProfiles.get(ctx.peerId);
+    if (!pend || pend.n !== data.n || !prof || !prof.fp || !samePubOf(prof.pub, pend.pub)) return;
+    const bind = connBinding(ctx.peerId);
+    if (!bind) return;
+    const ok = await CID.checkPairProof(myId.privateKey, pend.pub, [PROOF_LABEL, pend.n, prof.fp, myFp, bind.remote, bind.local], data.mac);
+    const cur = peerProfiles.get(ctx.peerId);
+    if (!ok || seq !== joinSeq || pendingChecks.get(ctx.peerId) !== pend || !cur || !samePubOf(cur.pub, pend.pub)) return;
+    finishCheck(ctx.peerId);
+    cur.verified = true;
+    await applyVerifiedProfile(ctx.peerId);
+    renderPeerList();
+    announcePeer(ctx.peerId);
+  };
+
   profAction = room.makeAction('prof');
   profAction.onMessage = async (data, ctx) => {
     if (!data || typeof data !== 'object') return;
@@ -1505,19 +1625,16 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       try { prof.fp = await CID.fingerprint(prof.pub); } catch {}
     }
     if (typeof data.ring === 'string') prof.ring = data.ring.slice(0, 64);
+    if (seq !== joinSeq || !peers.has(ctx.peerId)) return;
     const known = peerProfiles.get(ctx.peerId);
+    prof.verified = !!(known && known.verified && samePubOf(known.pub, prof.pub));
+    prof.announced = !!(known && known.announced);
     peerProfiles.set(ctx.peerId, prof);
-    if (prof.fp && prof.ring && prof.pub) {
-      const existing = CID.contactByPub(prof.pub);
-      if (existing && existing.ring !== prof.ring) {
-        try {
-          await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring });
-          if (currentDmContact && currentDmContact.fp === existing.fp) currentDmContact.ring = prof.ring;
-        } catch (_) {}
-      }
-    }
+    if (prof.verified) await applyVerifiedProfile(ctx.peerId);
+    else if (prof.pub) challengePeer(ctx.peerId, pchk);
+    else finishCheck(ctx.peerId);
     renderPeerList();
-    if (!known && prof.name) sys(`${short(ctx.peerId)} is ${prof.name}${prof.fp ? ' (' + prof.fp + ')' : ''}`);
+    if (!prof.pub) announcePeer(ctx.peerId);
   };
 
   chatAction = room.makeAction('chat');
@@ -1653,6 +1770,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     }
     peers.delete(peerId);
     peerProfiles.delete(peerId);
+    finishCheck(peerId);
+    proofAnswers.delete(peerId);
     removeTile(peerId);
     pendingStreams.delete(peerId);
     updatePeers();
@@ -1660,7 +1779,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     sys(`${displayName(peerId)} left`);
   };
 
-  setupChatPersistence(roomName);
+  setupChatPersistence(roomName, topic);
 
   MentriaBus.provide('comms.peers', () => ({ count: peers.size }), { description: 'Number of connected comms peers.', parameters: { type: 'object', properties: {} }, ai: false });
   MentriaBus.provide('comms.share', async ({ filename, html, name }) => {
@@ -2080,7 +2199,7 @@ let onboardDone = false;
 let onboardActive = false;
 
 const INBOX_KIND = 3839;
-const INBOX_LOOKBACK_SEC = 14 * 24 * 60 * 60;
+const INBOX_LOOKBACK_SEC = HISTORY_LOOKBACK_SEC;
 let sideWs = null;
 let sideOpen = null;
 let inboxSubId = null;
@@ -2153,10 +2272,11 @@ const sideSend = async (str) => {
 };
 
 const publishToInbox = async (theirPub, payload) => {
+  if (!myId) return false;
   try {
-    const env = await CID.sealToInbox(theirPub, payload);
+    const env = await CID.sealToInbox(theirPub, payload, myId.privateKey);
     const topic = await CID.inboxTopic(theirPub);
-    const evt = await createPersistentEvent(INBOX_KIND, topic, JSON.stringify(env));
+    const evt = await createPersistentEvent(INBOX_KIND, topic, JSON.stringify(env), expiryTags());
     let sent = await sideSend(evt);
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
@@ -2168,7 +2288,7 @@ const publishToInbox = async (theirPub, payload) => {
 
 const announceToContact = async (contact) => {
   if (!myId || !contact || !contact.pub) return;
-  const payload = { v: 1, name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y } };
+  const payload = { v: 1, name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, ts: Date.now() };
   if (ringToken) payload.ring = ringToken;
   await publishToInbox(contact.pub, payload);
 };
@@ -2184,18 +2304,27 @@ const subscribeInbox = async () => {
 const subscribeUnread = async () => {
   if (!myId) return;
   const contacts = CID.getContacts();
-  topicToFp.clear();
-  const topics = [];
+  const legacy = legacyTopicsOn();
+  const byFp = new Map();
+  const byRoom = new Map();
   for (const c of contacts) {
     try {
-      const { roomName } = await CID.deriveDm(myId.privateKey, c.pub);
-      const topic = CHAT_TOPIC_PREFIX + roomName;
-      topicToFp.set(topic, c.fp);
-      topics.push(topic);
+      const { roomName, b64Key } = await CID.deriveDm(myId.privateKey, c.pub);
+      const topic = await chatTopicFor(roomName, b64Key);
+      if (topic) byFp.set(topic, c.fp);
+      if (legacy) byFp.set(legacyTopicFor(roomName), c.fp);
     } catch (_) {}
   }
+  for (const r of savedRooms()) {
+    const topic = await chatTopicFor(r.room, r.key);
+    if (topic) byRoom.set(topic, r);
+    if (legacy) byRoom.set(legacyTopicFor(r.room), r);
+  }
+  topicToFp.clear();
+  byFp.forEach((fp, topic) => topicToFp.set(topic, fp));
   topicToRoom.clear();
-  for (const r of savedRooms()) { const topic = CHAT_TOPIC_PREFIX + r.room; topicToRoom.set(topic, r); topics.push(topic); }
+  byRoom.forEach((r, topic) => topicToRoom.set(topic, r));
+  const topics = Array.from(byFp.keys()).concat(Array.from(byRoom.keys()));
   if (unreadSubId) await sideSend(JSON.stringify(['CLOSE', unreadSubId]));
   if (!topics.length) { unreadSubId = null; return; }
   unreadFloor.clear();
@@ -2218,8 +2347,8 @@ const handleSideMsg = async (msgEvent) => {
     if (!myId) return;
     let envelope;
     try { envelope = JSON.parse(ev.content); } catch { return; }
-    const payload = await CID.openInboxEnvelope(myId.privateKey, envelope);
-    if (!payload) return;
+    const payload = await CID.openInboxEnvelope(myId.privateKey, envelope, myId.publicJwk);
+    if (!payload || !payload.verified) return;
     if (payload.kind === 'call') {
       let callerFp = null;
       try { callerFp = await CID.fingerprint(payload.pub); } catch (_) {}
@@ -2236,8 +2365,9 @@ const handleSideMsg = async (msgEvent) => {
     }
     const existing = CID.contactByPub(payload.pub);
     if (existing) {
+      if (typeof payload.ts !== 'number' || payload.ts <= (existing.annTs || 0)) return;
       try {
-        const updated = await CID.addContact(payload);
+        const updated = await CID.addContact({ name: payload.name, pub: payload.pub, ring: payload.ring, annTs: Math.min(payload.ts, Date.now()) });
         if (currentDmContact && currentDmContact.fp === existing.fp && updated) currentDmContact = updated;
         renderContacts();
         updatePushStatus();
@@ -2269,18 +2399,16 @@ const handleSideMsg = async (msgEvent) => {
         queueUnreadFlush(false);
         return;
       }
-      if (content && typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
+      if (!content || !content.enc) return;
+      if (typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
       if (ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
       let preview = null;
-      if (content && content.enc) {
-        try {
-          const key = await roomCryptoKey(savedRoom);
-          const unpacked = key ? unpackChatPlain(await decryptText(key, content.enc)) : null;
-          if (unpacked && unpacked.ctl) return;
-          if (unpacked && sentByMe(unpacked)) return;
-          preview = unpacked ? unpacked.text : null;
-        } catch (_) {}
-      }
+      try {
+        const key = await roomCryptoKey(savedRoom);
+        const unpacked = key ? unpackChatPlain(await decryptText(key, content.enc)) : null;
+        if (!unpacked || unpacked.ctl || sentByMe(unpacked)) return;
+        preview = unpacked.text;
+      } catch (_) { return; }
       if (currentRoomName === savedRoom.room || ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
       countUnread(k, ts);
       notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: '/comms/' + formatHash(savedRoom.room, savedRoom.key) });
@@ -2295,7 +2423,8 @@ const handleSideMsg = async (msgEvent) => {
       queueUnreadFlush(false);
       return;
     }
-    if (content && typeof content.cmid === 'string') {
+    if (!content || !content.enc) return;
+    if (typeof content.cmid === 'string') {
       if (content.cmid.startsWith(selfId + ':')) return;
       if (sentCmidsFor(fp).includes(content.cmid)) return;
     }

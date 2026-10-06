@@ -349,7 +349,7 @@ export async function ensureModel(engineFactory, opts) {
     if (!c) throw new Error('model-not-cached');
     tellTier(c, true);
     const res = await Tiers.loadWithFallback(makeEngine, c, { vision, onlyCached: true, onFallback: (from, to) => tellTier(to, true) });
-    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq, decodeRoute: res.decodeRoute || null };
   }
 
   if (offerUpgrade && !Tiers.getUserTier()) {
@@ -374,7 +374,7 @@ export async function ensureModel(engineFactory, opts) {
     requestPersistentStorage();
     const res = await Tiers.loadWithFallback(makeEngine, candidate, { vision, onFallback: (from, to) => { Tiers.isTierCached(to).then((c) => tellTier(to, c), () => tellTier(to, false)); } });
     if (res.tier !== candidate) Tiers.clearValidatedTier();
-    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq, decodeRoute: res.decodeRoute || null };
   }
 
   let stopReject = null;
@@ -430,7 +430,7 @@ export async function ensureModel(engineFactory, opts) {
       await new Promise((r) => setTimeout(r, READY_LINGER));
     } else if (gateStrip) gateStrip.hide();
     hide();
-    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq, decodeRoute: res.decodeRoute || null };
   } catch (e) {
     release();
     try { lastEngine && lastEngine.terminate && lastEngine.terminate(); } catch (_) {}

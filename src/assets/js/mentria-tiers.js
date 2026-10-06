@@ -368,7 +368,7 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
     weightUpload: 'writeBuffer'
   };
   if (vendor === 'nvidia' && t.nvidiaMaxSeq) { opts.residualFusion = true; opts.q1Decode = 'lut'; opts.q1Concat = 'all'; opts.bindGroupCache = true; opts.q1LutSkew = true; opts.prefillTile = 'arow'; opts.specSlots = 1; opts.residentTrim = 'all'; }
-  if (vendor === 'apple' && t.appleMaxSeq) { opts.kvF16 = true; opts.flashDecode = true; opts.prefillTile = 'wmap+bn128'; opts.specSlots = 1; opts.residentTrim = 'all'; }
+  if (vendor === 'apple' && t.appleMaxSeq) { opts.kvF16 = true; opts.flashDecode = true; opts.prefillTile = 'wmap+bn128'; opts.specSlots = 1; opts.residentTrim = 'all'; opts.loraFuse = 'epilogue'; }
   if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {
     opts.visionModelUrl = shardBase;
@@ -443,7 +443,7 @@ export async function loadWithFallback(createEngine, startTier, { vision = true,
         if (loadRes && loadRes.decodeRoute) console.info('[mentria-tiers] ' + id + ' loaded', 'decodeRoute', loadRes.decodeRoute, 'adapter', loadRes.adapter);
       } catch (_) {}
       if (validate) await validate(engine, id);
-      return { engine, tier: id, maxSeq: (opts.config.attention && opts.config.attention.maxSeq) || 2048 };
+      return { engine, tier: id, maxSeq: (opts.config.attention && opts.config.attention.maxSeq) || 2048, decodeRoute: (loadRes && loadRes.decodeRoute) || null };
     } catch (err) {
       lastErr = err;
       try { engine.terminate(); } catch (_) {}

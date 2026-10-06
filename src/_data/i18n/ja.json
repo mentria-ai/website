@@ -1090,7 +1090,7 @@
       "search_test_fail": "接続できません: {err}。URLを確認し、SearXNGでJSON形式を有効化（settings.yml → search.formats）、このサイトへのCORSを許可し、ブラウザのローカルネットワーク許可が出たら承認してください。",
       "search_local_only": "ローカルエンドポイント（http://localhost または http://127.0.0.1）のみ対応しています。",
       "searching": "検索中: {q}",
-      "search_sources": "情報源",
+      "search_sources": "検索した情報源",
       "search_failed_note": "検索に失敗しました — ウェブ結果なしで回答します",
       "thinking": "思考中…",
       "thought_for": "思考時間 {s}秒",

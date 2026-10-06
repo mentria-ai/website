@@ -1090,7 +1090,7 @@
       "search_test_fail": "Connexion impossible : {err}. Vérifiez l'URL, activez le format JSON dans SearXNG (settings.yml → search.formats), autorisez CORS pour ce site et acceptez l'invite de réseau local du navigateur si elle apparaît.",
       "search_local_only": "Seuls les endpoints locaux (http://localhost ou http://127.0.0.1) sont pris en charge.",
       "searching": "Recherche : {q}",
-      "search_sources": "Sources",
+      "search_sources": "Sources consultées",
       "search_failed_note": "recherche échouée — réponse sans résultats web",
       "thinking": "Réflexion…",
       "thought_for": "A réfléchi pendant {s}s",

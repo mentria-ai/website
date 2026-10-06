@@ -266,11 +266,78 @@ export function createHud(stage, copyIn) {
 
   const cache = Object.create(null);
   const size = { w: 1, h: 1 };
+  const blocks = [];
+  let blocksAt = -1e9;
+  let labelW = 0;
+  let labelH = 0;
   let ro = null;
   function measure() {
     const r = stage.getBoundingClientRect();
     size.w = Math.max(1, r.width);
     size.h = Math.max(1, r.height);
+    blocksAt = -1e9;
+    if (tc.classList.contains('is-on')) placeSplit();
+  }
+
+  function placeSplit() {
+    tc.style.left = '';
+    tc.style.top = '';
+    const b = bl.getBoundingClientRect();
+    const a = tc.getBoundingClientRect();
+    if (!b.width || !a.width) return;
+    const gap = 16;
+    if (a.right + gap <= b.left || a.left >= b.right + gap || a.bottom <= b.top || a.top >= b.bottom) return;
+    const s = root.getBoundingClientRect();
+    const l = tl.getBoundingClientRect();
+    if (b.left - l.right >= a.width + gap * 2) {
+      tc.style.left = ((l.right + b.left) / 2 - s.left) + 'px';
+      return;
+    }
+    tc.style.left = (l.left - s.left + a.width / 2) + 'px';
+    tc.style.top = (l.bottom - s.top + 6) + 'px';
+  }
+
+  function readBlocks() {
+    blocks.length = 0;
+    const s = root.getBoundingClientRect();
+    const els = [tl, tr, bl, bc];
+    if (tc.classList.contains('is-on')) els.push(tc);
+    if (coach.classList.contains('is-on')) els.push(coach);
+    const chromeBtns = stage.querySelectorAll('.gk-chrome__btn');
+    for (let i = 0; i < chromeBtns.length; i++) els.push(chromeBtns[i]);
+    for (let i = 0; i < els.length; i++) {
+      const r = els[i].getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) continue;
+      blocks.push(r.left - s.left - 6, r.top - s.top - 6, r.right - s.left + 6, r.bottom - s.top + 6);
+    }
+    labelW = arrowText.offsetWidth;
+    labelH = arrowText.offsetHeight;
+  }
+
+  function rayEnter(ox, oy, dx, dy, hx, hy, i) {
+    const x0 = blocks[i] - hx;
+    const y0 = blocks[i + 1] - hy;
+    const x1 = blocks[i + 2] + hx;
+    const y1 = blocks[i + 3] + hy;
+    let t0 = -Infinity;
+    let t1 = Infinity;
+    if (Math.abs(dx) < 1e-6) {
+      if (ox < x0 || ox > x1) return Infinity;
+    } else {
+      const a = (x0 - ox) / dx;
+      const b = (x1 - ox) / dx;
+      t0 = Math.min(a, b);
+      t1 = Math.max(a, b);
+    }
+    if (Math.abs(dy) < 1e-6) {
+      if (oy < y0 || oy > y1) return Infinity;
+    } else {
+      const a = (y0 - oy) / dy;
+      const b = (y1 - oy) / dy;
+      t0 = Math.max(t0, Math.min(a, b));
+      t1 = Math.min(t1, Math.max(a, b));
+    }
+    return t0 <= t1 && t0 > 0 ? t0 : Infinity;
   }
   measure();
   try {
@@ -399,8 +466,13 @@ export function createHud(stage, copyIn) {
     splitV.textContent = formatDelta(delta);
     splitV.classList.toggle('is-good', delta <= 0);
     splitV.classList.toggle('is-bad', delta > 0);
+    placeSplit();
     tc.classList.add('is-on');
-    splitTimer = setTimeout(() => tc.classList.remove('is-on'), 2400);
+    blocksAt = -1e9;
+    splitTimer = setTimeout(() => {
+      tc.classList.remove('is-on');
+      blocksAt = -1e9;
+    }, 2400);
   }
 
   function clearSplit() {
@@ -445,12 +517,14 @@ export function createHud(stage, copyIn) {
   function coachSet(text, stepText) {
     if (!text) {
       coach.classList.remove('is-on');
+      blocksAt = -1e9;
       return;
     }
     coachStep.textContent = stepText || '';
     coachStep.hidden = !stepText;
     coachText.textContent = text;
     coach.classList.add('is-on');
+    blocksAt = -1e9;
   }
 
   const pa = { behind: false, cx: 0, cy: 0, nx: 0, ny: 0 };
@@ -472,7 +546,25 @@ export function createHud(stage, copyIn) {
     const my = h / 2 - 44;
     const ca = Math.cos(ang);
     const sa = Math.sin(ang);
-    const s = Math.min(mx / Math.max(1e-4, Math.abs(ca)), my / Math.max(1e-4, Math.abs(sa)));
+    let s = Math.min(mx / Math.max(1e-4, Math.abs(ca)), my / Math.max(1e-4, Math.abs(sa)));
+    const now = performance.now();
+    if (now - blocksAt > 250) {
+      blocksAt = now;
+      readBlocks();
+    }
+    if (blocks.length) {
+      const cx = w / 2;
+      const cy = h / 2;
+      const k = 17 + labelH / 2;
+      const lx = cx - sa * k;
+      const ly = cy + ca * k;
+      const ha = 17 * (Math.abs(ca) + Math.abs(sa));
+      for (let i = 0; i < blocks.length; i += 4) {
+        const t = Math.min(rayEnter(cx, cy, ca, sa, ha, ha, i), rayEnter(lx, ly, ca, sa, labelW / 2 + 2, labelH / 2 + 2, i));
+        if (t < s) s = t;
+      }
+      s = Math.max(s, Math.min(w, h) * 0.12);
+    }
     pointer('edge', w / 2 + ca * s, h / 2 + sa * s, ang, label);
   }
 

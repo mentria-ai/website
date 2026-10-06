@@ -890,8 +890,15 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
     else if (canRestart()) reset();
   });
 
+  function controlKey(e) {
+    if (e.key !== 'Enter' && e.code !== 'Space') return false;
+    const ctl = e.target && e.target.closest ? e.target.closest('button, a[href], summary, [role="button"]') : null;
+    return !!ctl && !!(window.MentriaUI && typeof window.MentriaUI.tabFocused === 'function' && window.MentriaUI.tabFocused());
+  }
+
   document.addEventListener('keydown', e => {
     if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"], .game-help')) return;
+    if (controlKey(e)) return;
     const code = e.code;
     if (code === 'Space' || code === 'ArrowUp' || code === 'KeyW') {
       e.preventDefault();
@@ -902,8 +909,10 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
       togglePause();
     } else if (code === 'Escape') {
       if (helpOpen() || document.fullscreenElement) return;
+      if (!State.running || State.over || !State.started) return;
+      e.preventDefault();
       noteMethod('keyboard');
-      setPaused(true);
+      togglePause();
     } else if (code === 'KeyR') {
       noteMethod('keyboard');
       if (canRestart()) reset();
@@ -924,6 +933,9 @@ canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-actio
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') setPaused(true);
+  });
+  document.addEventListener('mentria:overlay', e => {
+    if (e.detail && e.detail.open) setPaused(true);
   });
 
   if (!helpSeen() && helpEl && typeof helpEl.showPopover === 'function') {

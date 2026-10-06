@@ -200,11 +200,18 @@
     toastTimer = setTimeout(() => { el.classList.remove('is-visible'); }, 2400);
   }
 
+  function padToast(text, tone) {
+    let host = null;
+    try { if (global.parent !== global && global.parent.MentriaGamepad && typeof global.parent.MentriaGamepad.showToast === 'function') host = global.parent.MentriaGamepad; } catch (_) { host = null; }
+    if (host) host.showToast(text, tone);
+    else showToast(text, tone);
+  }
+
   on('connect', (info) => {
     if (info.late) return;
-    showToast((window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('common.gamepad_connected')) || '🎮 controller connected', 'connect');
+    padToast((window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('common.gamepad_connected')) || '🎮 controller connected', 'connect');
   });
-  on('disconnect', () => showToast((window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('common.gamepad_disconnected')) || '🎮 controller disconnected', 'disconnect'));
+  on('disconnect', () => padToast((window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('common.gamepad_disconnected')) || '🎮 controller disconnected', 'disconnect'));
 
   global.MentriaGamepad = {
     on,

@@ -191,6 +191,13 @@ localeReload: true
           <div class="about-data-status" id="about-data-import-status" aria-live="polite"></div>
         </div>
       </div>
+
+      <div class="about-data-card about-rescue" id="about-rescue" hidden>
+        <h3 class="about-data-card__h">{{ "about.sync_rescue_title" | t }}</h3>
+        <p class="about-data-card__p" id="about-rescue-text"></p>
+        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-rescue-btn">{{ "about.sync_rescue_button" | t }}</button>
+        <div class="about-data-status" id="about-rescue-status" aria-live="polite"></div>
+      </div>
     </div>
   </section>
 
@@ -398,6 +405,8 @@ localeReload: true
   .about-fold { display: flex; flex-direction: column; gap: 10px; }
   .about-page [hidden] { display: none !important; }
   .about-reveal-btn { align-self: flex-start; }
+  .about-rescue .about-data-btn { align-self: flex-start; }
+  .about-rescue .about-data-status:empty { display: none; }
   .about-data-scope { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
   .about-data-scope__col { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 2px 0 2px 14px; border-left: 2px solid var(--cyan-30); }
   .about-data-scope__col--out { border-left-color: var(--term-border); }
@@ -847,8 +856,26 @@ localeReload: true
       scanDenied:      {{ ('about.sync_scan_denied'      | t) | dump | safe }},
       scanNoCamera:    {{ ('about.sync_scan_no_camera'   | t) | dump | safe }},
       scanSecureRequired: {{ ('about.sync_scan_secure_required' | t) | dump | safe }},
-      noPeer:          {{ ('about.sync_no_peer'          | t) | dump | safe }}
+      noPeer:          {{ ('about.sync_no_peer'          | t) | dump | safe }},
+      busy:            {{ ('about.sync_busy'             | t) | dump | safe }},
+      rescueText:      {{ ('about.sync_rescue_text'      | t) | dump | safe }},
+      rescueConfirm:   {{ ('about.sync_rescue_confirm'   | t) | dump | safe }},
+      rescueButton:    {{ ('about.sync_rescue_button'    | t) | dump | safe }},
+      rescueDone:      {{ ('about.sync_rescue_done'      | t) | dump | safe }},
+      areas: {{ 'common.data_areas' | tsub | dump | safe }}
     };
+    window.MentriaSyncCopy = {
+      'about.sync_vault_totp':     {{ ('about.sync_vault_totp'     | t) | dump | safe }},
+      'about.sync_vault_identity': {{ ('about.sync_vault_identity' | t) | dump | safe }},
+      'about.sync_vault_keep':     {{ ('about.sync_vault_keep'     | t) | dump | safe }},
+      'about.sync_vault_replace':  {{ ('about.sync_vault_replace'  | t) | dump | safe }},
+      'about.sync_confirm_replace': {{ ('about.sync_confirm_replace' | t) | dump | safe }}
+    };
+    function relabel(key, fallback) {
+      var I = window.MentriaI18n;
+      var v = I && typeof I.t === 'function' ? I.t(key) : null;
+      return typeof v === 'string' && v && v !== key ? v : fallback;
+    }
     var startBtn      = document.getElementById('about-sync-start-btn');
     var joinBtn       = document.getElementById('about-sync-join-btn');
     var disconnectBtn = document.getElementById('about-sync-disconnect-btn');
@@ -879,6 +906,62 @@ localeReload: true
       }, 100);
     }
 
+    var rescueBox = document.getElementById('about-rescue');
+    var rescueText = document.getElementById('about-rescue-text');
+    var rescueBtn = document.getElementById('about-rescue-btn');
+    var rescueStatus = document.getElementById('about-rescue-status');
+    var rescueShown = false;
+
+    function fmtDay(ms) {
+      try { return new Intl.DateTimeFormat(document.documentElement.lang || undefined, { dateStyle: 'medium' }).format(new Date(ms)); }
+      catch (_) { return new Date(ms).toISOString().slice(0, 10); }
+    }
+
+    function rescueAreas(info) {
+      try { return window.MentriaStore.areaNames(info.suffixes, COPY.areas).join(', '); }
+      catch (_) { return info.suffixes.join(', '); }
+    }
+
+    function renderRescue() {
+      if (!rescueBox || !window.MentriaSync || typeof window.MentriaSync.rescueInfo !== 'function') return;
+      var info = window.MentriaSync.rescueInfo();
+      if (!info) { if (!rescueStatus.textContent) rescueBox.hidden = true; return; }
+      rescueText.textContent = relabel('about.sync_rescue_text', COPY.rescueText)
+        .replace('{date}', fmtDay(info.at)).replace('{areas}', rescueAreas(info)).replace('{until}', fmtDay(info.until));
+      rescueBtn.hidden = false;
+      rescueStatus.textContent = '';
+      rescueBox.hidden = false;
+      if (!rescueShown) {
+        rescueShown = true;
+        var adv = document.getElementById('about-advanced');
+        if (adv && !adv.open) adv.open = true;
+      }
+    }
+
+    if (rescueBtn) {
+      rescueBtn.addEventListener('click', function () {
+        whenReady(async function () {
+          var info = window.MentriaSync.rescueInfo();
+          if (!info) { renderRescue(); return; }
+          var areas = rescueAreas(info);
+          var ok = typeof window.mentriaConfirm === 'function'
+            ? await window.mentriaConfirm(relabel('about.sync_rescue_confirm', COPY.rescueConfirm).replace('{areas}', areas), { ok: relabel('about.sync_rescue_button', COPY.rescueButton) })
+            : false;
+          if (!ok) return;
+          try {
+            window.MentriaSync.restoreRescue();
+            rescueBtn.hidden = true;
+            rescueText.textContent = '';
+            rescueStatus.textContent = relabel('about.sync_rescue_done', COPY.rescueDone).replace('{areas}', areas);
+            rescueStatus.setAttribute('tabindex', '-1');
+            try { rescueStatus.focus({ preventScroll: true }); } catch (_) {}
+          } catch (err) {
+            rescueStatus.textContent = COPY.statusError + ': ' + (err && err.message || err);
+          }
+        });
+      });
+    }
+
     whenReady(function () {
       window.MentriaSync.on('state', function (st) {
         if (st.status === 'idle') {
@@ -899,9 +982,12 @@ localeReload: true
         }
       });
       window.MentriaSync.on('error', function (err) {
-        if (err && err.code === 'no-peer') { setStatus(COPY.noPeer, 'err'); return; }
+        if (err && err.code === 'no-peer') { setStatus(relabel('about.sync_no_peer', COPY.noPeer), 'err'); return; }
+        if (err && err.code === 'busy') { setStatus(relabel('about.sync_busy', COPY.busy), 'err'); return; }
         setStatus(COPY.statusError + ': ' + (err && err.message || err), 'err');
       });
+      window.MentriaSync.on('synced', renderRescue);
+      renderRescue();
     });
 
     var qrCanvas = document.getElementById('about-sync-qr');

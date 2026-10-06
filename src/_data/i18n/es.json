@@ -145,6 +145,16 @@
     "identity_setup_reminder": "Identidad creada. Ahora ve a «Tus datos» arriba y descarga una copia cifrada — restaurarla en otro dispositivo le da la misma identidad.",
     "sync_confirm_replace": "Este dispositivo ya tiene sus propios datos: {areas}. La vinculación los reemplaza por la copia del otro dispositivo. ¿Continuar?",
     "sync_no_peer": "Ningún dispositivo respondió con este código. Revisa el código y mantén Acerca de abierto en el otro dispositivo.",
+    "sync_busy": "Este código ya lo están usando otros dos dispositivos. Crea un código nuevo en el dispositivo con el que quieres vincular este.",
+    "sync_vault_totp": "Este dispositivo tiene su propia bóveda TOTP y el otro dispositivo tiene una distinta. ¿Reemplazar la bóveda de este dispositivo por la del otro? Las cuentas TOTP que solo están en este dispositivo se perderán, y se abrirá con la contraseña del otro dispositivo.",
+    "sync_vault_identity": "Este dispositivo tiene su propia identidad de Mentria y el otro dispositivo tiene una distinta. ¿Reemplazarla por la del otro dispositivo? La identidad de este dispositivo se perderá, y se abrirá con la contraseña del otro dispositivo.",
+    "sync_vault_keep": "Mantener la de este dispositivo",
+    "sync_vault_replace": "Reemplazar",
+    "sync_rescue_title": "Antes de la vinculación",
+    "sync_rescue_text": "La vinculación del {date} reemplazó estos datos de este dispositivo: {areas}. Puedes recuperar lo que tenía antes hasta el {until}.",
+    "sync_rescue_button": "Recuperar",
+    "sync_rescue_confirm": "¿Recuperar lo que este dispositivo tenía antes de la vinculación ({areas})? Lo que trajo la vinculación se reemplaza solo en este dispositivo.",
+    "sync_rescue_done": "Listo. Este dispositivo vuelve a tener lo que tenía antes de la vinculación ({areas}).",
     "identity_passkey_unlock": "Desbloquear con llave de acceso",
     "identity_passkey_add": "Añadir una llave de acceso",
     "identity_passkey_remove": "Quitar la llave de acceso",
@@ -1167,6 +1177,8 @@
       "run_disabled": "instalada pero desactivada — reactívala en",
       "run_blocked": "{name} intentó conectarse a {host}. La política de seguridad de este sitio solo permite que las extensiones se conecten a los servidores de Mentria.",
       "run_manager_link": "el gestor",
+      "run_gone": "{name} no está instalada en este dispositivo.",
+      "run_store_link": "Abre su página para volver a instalarla",
       "btn_open": "abrir",
       "btn_export": "exportar",
       "btn_remove": "eliminar",
@@ -1184,6 +1196,7 @@
       "large_note": "({kb} KB — grande para el almacenamiento local)",
       "installed_ok": "instalada.",
       "installed_where": "{name} instalada. Ábrela cuando quieras desde el menú Herramientas.",
+      "updated_to": "{name} se actualizó a la versión {version}.",
       "sample_heading": "Prueba el ejemplo",
       "sample_install": "instalar hello-world",
       "sample_download": "descargar el archivo",
@@ -1855,7 +1868,12 @@
       "strength_strong": "fuerte",
       "db_media": "Índice de fotos, vídeos y música (miniaturas, fechas, dónde te quedaste; puede incluir la ubicación de las fotos)",
       "db_ext_local": "Datos de extensiones guardados en este dispositivo",
-      "cache_ext_data": "Archivos de datos de extensiones"
+      "cache_ext_data": "Archivos de datos de extensiones",
+      "cache_ext_files": "Archivos de extensiones para usar sin conexión",
+      "cache_locale": "Páginas en {lang} para usar sin conexión",
+      "cache_phosphor": "Gráficos HD de PHOSPHOR",
+      "cache_share": "Elementos compartidos con Mentria",
+      "cache_radio": "Lista de emisoras de la radio"
     },
     "extensions-sdk": {
       "heading_start": "Inicio rápido",
@@ -1886,10 +1904,16 @@
       },
       "cmd": {
         "finance": {
-          "fin-add": "añadir un movimiento, p. ej. fin-add café 4,50",
+          "fin-add": "añadir un movimiento",
           "fin-budget": "abrir los presupuestos de este mes",
           "fin-subs": "abrir facturas y suscripciones",
           "fin-tax": "abrir la estimación de impuestos"
+        },
+        "dice-roller": {
+          "roll": "tirar dados"
+        },
+        "pomodoro-timer": {
+          "pomodoro": "empezar una sesión de concentración"
         }
       }
     },

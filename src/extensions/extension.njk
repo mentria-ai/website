@@ -125,7 +125,8 @@ eleventyComputed:
     failed: {{ ("store.install_failed" | t) | dump | safe }},
     blocked: {{ ("store.install_blocked" | t) | dump | safe }},
     full: {{ ("store.install_full" | t) | dump | safe }},
-    removeConfirm: {{ ("store.remove_confirm" | t) | dump | safe }}
+    removeConfirm: {{ ("store.remove_confirm" | t) | dump | safe }},
+    removeLabel: {{ ("store.remove" | t) | dump | safe }}
   };
 </script>
 <script type="module">
@@ -203,6 +204,7 @@ function relocalize(e) {
   C.blocked = pick('store.install_blocked', C.blocked);
   C.full = pick('store.install_full', C.full);
   C.removeConfirm = pick('store.remove_confirm', C.removeConfirm);
+  C.removeLabel = pick('store.remove', C.removeLabel);
   const code = (e && e.detail && e.detail.code) || document.documentElement.lang;
   const locale = (window.MENTRIA_LOCALES || []).find((l) => l.code === code);
   if (locale) D.prefix = locale.prefix;
@@ -302,7 +304,7 @@ function runAgain() {
 
 async function removeExtension() {
   const name = (D.manifest && D.manifest.name) || D.id;
-  const ok = window.mentriaConfirm ? await window.mentriaConfirm(C.removeConfirm.replace('{name}', name), { danger: true }) : false;
+  const ok = window.mentriaConfirm ? await window.mentriaConfirm(C.removeConfirm.replace('{name}', name), { danger: true, ok: C.removeLabel }) : false;
   if (!ok) return;
   removeBtn.disabled = true;
   await stopRunning();

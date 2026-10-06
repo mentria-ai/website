@@ -1040,10 +1040,17 @@ canvas#game {
   const HOLD_KEYS = ['c', 'C', 'Shift'];
   const PAUSE_KEYS = ['p', 'P', 'Escape'];
 
+  function controlKey(e) {
+    if (e.key !== 'Enter' && e.code !== 'Space') return false;
+    const ctl = e.target && e.target.closest ? e.target.closest('button, a[href], summary, [role="button"]') : null;
+    return !!ctl && !!(window.MentriaUI && typeof window.MentriaUI.tabFocused === 'function' && window.MentriaUI.tabFocused());
+  }
+
   document.addEventListener('keydown', (e) => {
     if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     markInput('keyboard');
+    if (controlKey(e)) return;
     if (helpOpen) return;
 
     if (State.over) {
@@ -1140,6 +1147,13 @@ canvas#game {
       State.softDropTouch = false;
       if (State.running && !State.over) setPaused(true);
     }
+  });
+  document.addEventListener('mentria:overlay', (e) => {
+    if (!e.detail || !e.detail.open) return;
+    stopDas();
+    State.softDropKey = false;
+    State.softDropTouch = false;
+    if (State.running && !State.over) setPaused(true);
   });
 
   const tcRoot = $('touch-controls');

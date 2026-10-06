@@ -364,10 +364,18 @@
     if (img && img.tagName === 'IMG' && img.classList.contains('learn-tile__cover')) blankCover(img);
   }, true);
   Array.prototype.forEach.call(document.querySelectorAll('img.learn-tile__cover.is-broken'), blankCover);
+  function revealFocus() {
+    var a = document.activeElement;
+    if (!a || a === document.body || !a.getBoundingClientRect) return;
+    var r = a.getBoundingClientRect();
+    if (!r.width && !r.height) return;
+    if (r.top >= 0 && r.bottom <= window.innerHeight) return;
+    try { a.scrollIntoView({ block: 'center' }); } catch (_) {}
+  }
   window.addEventListener('pageshow', function (e) {
     if (!e.persisted) return;
     nativeProgress();
-    refresh();
+    refresh().then(revealFocus, revealFocus);
   });
   nativeProgress();
   shelves();

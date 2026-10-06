@@ -187,6 +187,11 @@ localeReload: true
     dbExtLocal: {{ ("tool.files.db_ext_local" | t) | dump | safe }},
     dbMedia: {{ ("tool.files.db_media" | t) | dump | safe }},
     cacheExtData: {{ ("tool.files.cache_ext_data" | t) | dump | safe }},
+    cacheExtFiles: {{ ("tool.files.cache_ext_files" | t) | dump | safe }},
+    cacheLocale: {{ ("tool.files.cache_locale" | t) | dump | safe }},
+    cachePhosphor: {{ ("tool.files.cache_phosphor" | t) | dump | safe }},
+    cacheShare: {{ ("tool.files.cache_share" | t) | dump | safe }},
+    cacheRadio: {{ ("tool.files.cache_radio" | t) | dump | safe }},
     deleteModels: {{ ("tool.files.delete_models" | t) | dump | safe }},
     confirmDeleteModels: {{ ("tool.files.confirm_delete_models" | t) | dump | safe }},
     clearCache: {{ ("tool.files.clear_cache" | t) | dump | safe }},
@@ -278,6 +283,15 @@ localeReload: true
   const KNOWN_DBS = ['mentria-radio', 'mentria-push', 'mentria-packs', 'mentria-identity', 'mentria-media', 'mentria-ext-db'];
   const isModelCache = (nm) => nm === 'mentria-models' || nm.indexOf('mentria-models-') === 0;
 
+  function langName(code) {
+    const ui = document.documentElement.lang || 'en';
+    try {
+      const n = new Intl.DisplayNames([ui], { type: 'language' }).of(code);
+      if (n && n !== code) return n;
+    } catch (_) {}
+    const loc = (window.MENTRIA_LOCALES || []).find((l) => l.code.toLowerCase() === String(code).toLowerCase());
+    return loc ? loc.name : code;
+  }
   function cacheLabel(nm) {
     if (nm === 'mentria-models') return COPY.cacheModels;
     if (isModelCache(nm)) return COPY.cacheModels + ' (' + nm.slice('mentria-models-'.length) + ')';
@@ -285,6 +299,12 @@ localeReload: true
     if (nm.indexOf('mentria-decks-') === 0) return COPY.cacheDecks;
     if (nm === 'mentria-deck-art') return COPY.cacheArt;
     if (nm === 'mentria-ext-data') return COPY.cacheExtData;
+    if (nm === 'mentria-ext-files') return COPY.cacheExtFiles;
+    if (nm === 'mentria-phosphor-hd') return COPY.cachePhosphor;
+    if (nm === 'mentria-share') return COPY.cacheShare;
+    if (nm === 'mentria-radio') return COPY.cacheRadio;
+    const loc = nm.match(/^mentria-locale-([A-Za-z]{2,3}(?:-[A-Za-z]{2,4})?)-/);
+    if (loc) return COPY.cacheLocale.split('{lang}').join(langName(loc[1]));
     return nm;
   }
   function dbLabel(nm) {

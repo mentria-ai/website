@@ -309,6 +309,28 @@ try {
         var queue = [];
         var lockUntil = 0;
         var safeBtn = okBtn;
+        var current = null;
+        var cancelText = cancelBtn.querySelector('i18n-t');
+        if (!cancelText) {
+          cancelText = document.createElement('span');
+          while (cancelBtn.firstChild) cancelText.appendChild(cancelBtn.firstChild);
+          cancelBtn.appendChild(cancelText);
+        }
+        var cancelCustom = document.createElement('span');
+        function setCancel(label) {
+          if (label) {
+            cancelCustom.textContent = label;
+            if (cancelCustom.parentNode !== cancelBtn) cancelBtn.appendChild(cancelCustom);
+            cancelText.style.display = 'none';
+          } else {
+            if (cancelCustom.parentNode) cancelCustom.parentNode.removeChild(cancelCustom);
+            cancelText.style.display = '';
+          }
+        }
+        function okText(item) {
+          if (!item || item.mode === 'alert') return okLabel;
+          return (item.opts && typeof item.opts.ok === 'string' && item.opts.ok) || confirmLabel;
+        }
         function trapKey(e) {
           if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); settle(false); return; }
           if (e.key !== 'Tab') return;
@@ -322,6 +344,7 @@ try {
         }
         function settle(result) {
           var r = resolver; resolver = null;
+          current = null;
           if (backHandle) { backHandle.release(); backHandle = null; }
           if (isShown()) conceal();
           document.removeEventListener('keydown', trapKey, true);
@@ -338,10 +361,12 @@ try {
         function show(queued) {
           if (resolver || !queue.length) return;
           var item = queue.shift();
+          current = item;
           opener = document.activeElement;
           msgEl.textContent = item.message;
           cancelBtn.hidden = (item.mode === 'alert');
-          okBtn.textContent = (item.mode === 'alert') ? okLabel : confirmLabel;
+          okBtn.textContent = okText(item);
+          setCancel(item.mode === 'confirm' && item.opts && typeof item.opts.cancel === 'string' ? item.opts.cancel : '');
           safeBtn = (item.mode === 'confirm' && item.opts && item.opts.danger) ? cancelBtn : okBtn;
           reveal();
           document.addEventListener('keydown', trapKey, true);
@@ -365,7 +390,7 @@ try {
           var cf = window.MentriaI18n.t('common.dialog.confirm');
           if (ok != null) okLabel = ok;
           if (cf != null) confirmLabel = cf;
-          if (isShown()) okBtn.textContent = cancelBtn.hidden ? okLabel : confirmLabel;
+          if (isShown()) okBtn.textContent = okText(current);
         });
       })();
 } catch (e) { console.error(e); }
@@ -565,6 +590,7 @@ try {
           panel.scrollTop = 0;
           popup.scrollTop = 0;
           panel.focus();
+          if (window.MentriaUI && window.MentriaUI.overlay) window.MentriaUI.overlay(true, 'tools');
           build().then(function () {
             if (popup.hidden || !find) return;
             if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) find.focus();
@@ -589,6 +615,7 @@ try {
           var to = prevFocus;
           prevFocus = null;
           if (to && to.focus && document.contains(to)) { try { to.focus(); } catch (_) {} }
+          if (window.MentriaUI && window.MentriaUI.overlay) window.MentriaUI.overlay(false, 'tools');
         }
         document.addEventListener('click', function (e) {
           var plain = e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
@@ -845,8 +872,10 @@ try {
           else withTransition(function () { enter(frame); });
         });
         document.addEventListener('click', function (e) {
-          var btn = e.target.closest && e.target.closest('[data-action="close-tool"]');
+          var btn = e.target.closest && e.target.closest('[data-action="close-tool"], .terminal-frame__dot--back');
           if (!btn) return;
+          var link = btn.tagName === 'A' && btn.href;
+          if (link && (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return;
           e.preventDefault();
           var here = location.pathname, ref = null;
           try { ref = window.MentriaNav ? window.MentriaNav.from() : (document.referrer ? new URL(document.referrer) : null); } catch (_) { ref = null; }
@@ -855,14 +884,39 @@ try {
             window.addEventListener('pagehide', function () { gone = true; }, { once: true });
             history.back();
             setTimeout(function () { if (!gone && location.pathname === here) location.href = ref.href; }, 800);
+          } else if (link) {
+            location.href = btn.href;
           } else {
             location.href = (window.MentriaUI && window.MentriaUI.localePrefix ? window.MentriaUI.localePrefix() : ((window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.prefix) || '')) + '/tools/';
           }
         });
-        document.addEventListener('keydown', function (e) {
-          if (e.key !== 'Escape' || !activeFrame()) return;
-          if (document.querySelector('.m-modal:not([hidden]), .m-wmenu:not([hidden]), .m-palette:not([hidden]), .hero--peek')) return;
-          withTransition(function () { exit(); });
+        var TYPING = 'textarea, select, [contenteditable=""], [contenteditable="true"], [contenteditable="plaintext-only"], input:not([type]), input[type="text"], input[type="search"], input[type="email"], input[type="url"], input[type="tel"], input[type="password"], input[type="number"]';
+        function shown(el) {
+          if (typeof el.checkVisibility === 'function') return el.checkVisibility({ visibilityProperty: true });
+          return !!el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden';
+        }
+        function layerOpen() {
+          try { if (document.querySelector(':popover-open')) return true; } catch (_) {}
+          try { if (document.querySelector('dialog:modal')) return true; } catch (_) {}
+          var list = document.querySelectorAll('[aria-modal="true"], .m-modal:not([hidden]), .m-wmenu:not([hidden]), .m-palette:not([hidden]), .hero--peek, .pwa-install-sheet--open');
+          for (var i = 0; i < list.length; i++) if (shown(list[i])) return true;
+          return false;
+        }
+        var pendingEsc = null;
+        window.addEventListener('keydown', function (e) {
+          pendingEsc = null;
+          if (e.key !== 'Escape' || e.isComposing || e.keyCode === 229 || e.defaultPrevented || !activeFrame()) return;
+          if (e.target && e.target.closest && e.target.closest(TYPING)) return;
+          if (layerOpen()) return;
+          pendingEsc = e;
+        }, true);
+        window.addEventListener('keydown', function (e) {
+          if (e !== pendingEsc) return;
+          pendingEsc = null;
+          setTimeout(function () {
+            if (e.defaultPrevented || !activeFrame()) return;
+            withTransition(function () { exit(true); });
+          }, 0);
         });
         document.addEventListener('DOMContentLoaded', function () {
           var slug = toolSlug();
@@ -894,25 +948,99 @@ try {
         if (filename) filename.insertAdjacentElement('afterend', btn);
         else titlebar.appendChild(btn);
         var peekBack = null;
+        var peekFrom = null;
+        var peekAttrs = null;
+        var shielded = [];
         var scrim = document.createElement('div');
         scrim.className = 'hero-scrim';
         scrim.setAttribute('aria-hidden', 'true');
         scrim.addEventListener('click', function () { close(); });
         function isOpen() { return hero.classList.contains('hero--peek'); }
+        function signal(on) {
+          if (window.MentriaUI && window.MentriaUI.overlay) window.MentriaUI.overlay(on, 'info');
+        }
+        function shield(on) {
+          for (var i = 0; i < shielded.length; i++) shielded[i].removeAttribute('inert');
+          shielded = [];
+          if (!on) return;
+          for (var node = hero; node && node !== document.body && node.parentElement; node = node.parentElement) {
+            for (var c = node.parentElement.firstElementChild; c; c = c.nextElementSibling) {
+              if (c === node || c === scrim || c.hasAttribute('inert') || c.hasAttribute('popover')) continue;
+              if (['SCRIPT', 'STYLE', 'LINK', 'TEMPLATE', 'NOSCRIPT'].indexOf(c.tagName) !== -1) continue;
+              c.setAttribute('inert', '');
+              shielded.push(c);
+            }
+          }
+        }
+        function tabbables() {
+          var list = hero.querySelectorAll('a[href], button, input, select, textarea, summary, [tabindex]');
+          var out = [];
+          for (var i = 0; i < list.length; i++) {
+            var el = list[i];
+            if (el === hero || el.tabIndex < 0 || el.disabled || !el.getClientRects().length) continue;
+            out.push(el);
+          }
+          return out;
+        }
+        function onKey(e) {
+          if (!isOpen()) return;
+          if (e.key === 'Escape') {
+            if (e.isComposing || e.keyCode === 229) return;
+            e.preventDefault();
+            e.stopPropagation();
+            close();
+            return;
+          }
+          if (e.key !== 'Tab') { e.stopPropagation(); return; }
+          var f = tabbables();
+          var a = document.activeElement;
+          if (!f.length) { e.preventDefault(); hero.focus({ preventScroll: true }); return; }
+          var first = f[0], last = f[f.length - 1];
+          var inside = a !== hero && hero.contains(a);
+          if (!inside) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+          else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+        }
         function open() {
+          if (isOpen()) return;
+          var was = document.activeElement;
+          peekFrom = (was && was !== document.body && !hero.contains(was)) ? was : btn;
           hero.insertAdjacentElement('beforebegin', scrim);
           hero.classList.add('hero--peek');
           btn.setAttribute('aria-expanded', 'true');
           var d = hero.querySelector('.tldr');
           if (d) d.open = true;
+          var h1 = hero.querySelector('h1');
+          if (h1 && !h1.id) h1.id = 'hero-peek-title';
+          peekAttrs = {};
+          ['role', 'aria-modal', 'aria-labelledby', 'tabindex'].forEach(function (n) { peekAttrs[n] = hero.getAttribute(n); });
+          hero.setAttribute('role', 'dialog');
+          hero.setAttribute('aria-modal', 'true');
+          if (h1) hero.setAttribute('aria-labelledby', h1.id);
+          hero.setAttribute('tabindex', '-1');
+          shield(true);
+          window.addEventListener('keydown', onKey, true);
           peekBack = (window.MentriaUI && window.MentriaUI.backDismiss)
             ? window.MentriaUI.backDismiss(close) : null;
+          try { hero.focus({ preventScroll: true }); } catch (_) {}
+          signal(true);
         }
         function close() {
+          if (!isOpen()) return;
           if (peekBack) { peekBack.release(); peekBack = null; }
+          window.removeEventListener('keydown', onKey, true);
+          shield(false);
           hero.classList.remove('hero--peek');
           if (scrim.parentNode) scrim.parentNode.removeChild(scrim);
           btn.setAttribute('aria-expanded', 'false');
+          if (peekAttrs) {
+            Object.keys(peekAttrs).forEach(function (n) { if (peekAttrs[n] == null) hero.removeAttribute(n); else hero.setAttribute(n, peekAttrs[n]); });
+            peekAttrs = null;
+          }
+          var to = peekFrom;
+          peekFrom = null;
+          if (to && to.focus && document.contains(to)) { try { to.focus({ preventScroll: true }); } catch (_) {} }
+          signal(false);
         }
         btn.addEventListener('click', function () {
           if (isOpen()) close(); else open();
@@ -922,9 +1050,6 @@ try {
           var t = e.target;
           if (t === btn || (t.closest && (t.closest('.terminal-frame__info') || t.closest('.hero') === hero))) return;
           close();
-        });
-        document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && isOpen()) close();
         });
       });
 } catch (e) { console.error(e); }

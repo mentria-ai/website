@@ -16,12 +16,21 @@ eleventyComputed:
 <h1 class="sr-only" id="xr-h1">{{ "tools.extensions.title" | t }}</h1>
 <section class="xr" data-prefix="{{ locale.pathPrefix }}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}" data-install-quiet>
   <p class="xr__error" id="xr-error" hidden></p>
-  <p class="xr__missing" id="xr-missing" hidden>{{ "tool.extensions.run_not_installed" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
+  <p class="xr__missing" id="xr-gone" role="status" hidden><span id="xr-gone-text"></span> <a id="xr-gone-link" href="{{ locale.pathPrefix }}/tools/extensions/"></a></p>
   <p class="xr__missing" id="xr-disabled" hidden>{{ "tool.extensions.run_disabled" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
   <iframe class="xr__frame" id="xr-frame" title="{{ 'tools.extensions.title' | t }}" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay"></iframe>
 </section>
 {% include "terminal-frame-close.njk" %}
 
+<script type="application/json" id="xr-gallery">{ {%- for e in extensions %}{{ e.id | dump | safe }}: {{ e.name | dump | safe }}{% if not loop.last %}, {% endif %}{%- endfor %} }</script>
+<script>
+  window.XR_COPY = {
+    gone: {{ ("tool.extensions.run_gone" | t) | dump | safe }},
+    removed: {{ ("store.removed" | t) | dump | safe }},
+    storeLink: {{ ("tool.extensions.run_store_link" | t) | dump | safe }},
+    manageLink: {{ ("store.manage_link" | t) | dump | safe }}
+  };
+</script>
 <script type="module">
 const X = await import('/assets/js/mentria-extensions.js');
 const H = await import('/assets/js/mentria-ext-host.js');
@@ -32,6 +41,57 @@ const entry = X.getEntry(id);
 const frame = document.getElementById('xr-frame');
 const errEl = document.getElementById('xr-error');
 let prefix = root.dataset.prefix || '';
+let gallery = {};
+try { gallery = JSON.parse(document.getElementById('xr-gallery').textContent) || {}; } catch (_) {}
+const listed = Object.prototype.hasOwnProperty.call(gallery, id) ? gallery[id] : '';
+
+function tr(key, fallback) {
+  const I = window.MentriaI18n;
+  const v = I && typeof I.t === 'function' ? I.t(key) : null;
+  return typeof v === 'string' && v && v !== key ? v : fallback;
+}
+
+function setFilename(label) {
+  const filename = document.querySelector('.terminal-frame__filename');
+  if (filename) filename.textContent = label || 'extensions';
+}
+
+let goneState = null;
+function renderGone() {
+  if (!goneState) return;
+  const C = window.XR_COPY || {};
+  const text = goneState.removed ? tr('store.removed', C.removed) : tr('tool.extensions.run_gone', C.gone);
+  document.getElementById('xr-gone-text').textContent = String(text || '').split('{name}').join(goneState.name);
+  const link = document.getElementById('xr-gone-link');
+  if (listed) {
+    link.href = prefix + '/extensions/' + encodeURIComponent(id) + '/';
+    link.textContent = tr('tool.extensions.run_store_link', C.storeLink);
+  } else {
+    link.href = prefix + '/tools/extensions/';
+    link.textContent = tr('store.manage_link', C.manageLink);
+  }
+  document.getElementById('xr-gone').hidden = false;
+}
+
+function showGone(name, removed) {
+  goneState = { name: name || listed || id, removed: !!removed };
+  renderGone();
+  setFilename(goneState.name);
+}
+
+function showDisabled(name) {
+  const miss = document.getElementById('xr-disabled');
+  if (name) miss.prepend(name + ': ');
+  miss.hidden = false;
+  setFilename(name);
+}
+
+document.addEventListener('mentria:localechange', (e) => {
+  const code = (e && e.detail && e.detail.code) || document.documentElement.lang;
+  const locale = (window.MENTRIA_LOCALES || []).find((l) => l.code === code);
+  if (locale) prefix = locale.prefix;
+  renderGone();
+});
 
 function takeHashArgs() {
   const h = new URLSearchParams(location.hash.slice(1));
@@ -48,12 +108,8 @@ function takeHashArgs() {
 const app = entry && X.isApp(entry);
 const source = entry && entry.enabled && !app ? X.getSource(id) : null;
 if (!entry || !entry.enabled || (!app && !source)) {
-  const miss = document.getElementById(entry && !entry.enabled ? 'xr-disabled' : 'xr-missing');
-  const label = entry ? entry.manifest.name : id;
-  if (label) miss.prepend(label + ': ');
-  miss.hidden = false;
-  const filename = document.querySelector('.terminal-frame__filename');
-  if (filename) filename.textContent = label || 'extensions';
+  if (entry && !entry.enabled) showDisabled(entry.manifest.name);
+  else showGone(entry ? entry.manifest.name : '', false);
   frame.remove();
 } else {
   const m = entry.manifest;
@@ -65,12 +121,7 @@ if (!entry || !entry.enabled || (!app && !source)) {
   if (xrH1) xrH1.textContent = m.name;
   frame.title = m.name;
   if (app) root.classList.add('xr--app');
-  document.addEventListener('mentria:localechange', (e) => {
-    const code = (e && e.detail && e.detail.code) || document.documentElement.lang;
-    const locale = (window.MENTRIA_LOCALES || []).find((l) => l.code === code);
-    if (locale) prefix = locale.prefix;
-    document.title = title;
-  });
+  document.addEventListener('mentria:localechange', () => { document.title = title; });
   const mount = (args) => H.mountExtension(frame, {
     manifest: m,
     source,
@@ -81,7 +132,31 @@ if (!entry || !entry.enabled || (!app && !source)) {
     onClose: () => { location.href = prefix + '/'; }
   });
   mount(takeHashArgs());
+  let running = true;
+  const stop = (removed) => {
+    if (!running) return;
+    running = false;
+    frame.remove();
+    errEl.hidden = true;
+    if (removed) {
+      showGone(m.name, true);
+      setTimeout(() => { try { if (!X.getEntry(id)) X.clearData(id); } catch (_) {} }, 0);
+    } else {
+      showDisabled(m.name);
+    }
+  };
+  const check = () => {
+    if (!running) return;
+    let now = null;
+    try { now = X.getEntry(id); } catch (_) { return; }
+    if (!now) stop(true);
+    else if (!now.enabled) stop(false);
+  };
+  window.addEventListener('storage', (e) => { if (e.key === null || e.key === 'mentria.store.ext.registry') check(); });
+  window.addEventListener('mentria:write', (e) => { const d = (e && e.detail) || {}; if (d.ns === 'ext' && d.key === 'registry') check(); });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) check(); });
   window.addEventListener('hashchange', () => {
+    if (!running) return;
     const next = takeHashArgs();
     if (!next) return;
     let taken = false;

@@ -145,6 +145,16 @@
     "identity_setup_reminder": "Identité créée. Allez maintenant dans « Vos données » ci-dessus et téléchargez une sauvegarde chiffrée — la restaurer sur un autre appareil lui donne la même identité.",
     "sync_confirm_replace": "Cet appareil a déjà ses propres données : {areas}. Le jumelage les remplace par la copie de l'autre appareil. Continuer ?",
     "sync_no_peer": "Aucun appareil n'a répondu avec ce code. Vérifiez le code et gardez la page À propos ouverte sur l'autre appareil.",
+    "sync_busy": "Ce code est déjà utilisé par deux autres appareils. Créez un nouveau code sur l'appareil avec lequel vous voulez jumeler celui-ci.",
+    "sync_vault_totp": "Cet appareil a son propre coffre TOTP, et l'autre appareil en a un différent. Remplacer le coffre de cet appareil par celui de l'autre ? Les comptes TOTP qui ne sont que sur cet appareil seront perdus, et il s'ouvrira avec la phrase secrète de l'autre appareil.",
+    "sync_vault_identity": "Cet appareil a sa propre identité Mentria, et l'autre appareil en a une différente. La remplacer par celle de l'autre appareil ? L'identité de cet appareil sera perdue, et elle s'ouvrira avec la phrase secrète de l'autre appareil.",
+    "sync_vault_keep": "Garder la version de cet appareil",
+    "sync_vault_replace": "Remplacer",
+    "sync_rescue_title": "Avant le jumelage",
+    "sync_rescue_text": "Le jumelage du {date} a remplacé ces données de cet appareil : {areas}. Vous pouvez récupérer ce qu'il avait avant, jusqu'au {until}.",
+    "sync_rescue_button": "Récupérer",
+    "sync_rescue_confirm": "Récupérer ce que cet appareil avait avant le jumelage ({areas}) ? Ce que le jumelage a apporté est remplacé sur cet appareil uniquement.",
+    "sync_rescue_done": "C'est fait. Cet appareil a de nouveau ce qu'il avait avant le jumelage ({areas}).",
     "identity_passkey_unlock": "Déverrouiller avec une clé d'accès",
     "identity_passkey_add": "Ajouter une clé d'accès",
     "identity_passkey_remove": "Retirer la clé d'accès",
@@ -1167,6 +1177,8 @@
       "run_disabled": "installée mais désactivée — réactivez-la dans",
       "run_blocked": "{name} a tenté de joindre {host}. La politique de sécurité de ce site n’autorise les extensions qu’à se connecter aux serveurs de Mentria.",
       "run_manager_link": "le gestionnaire",
+      "run_gone": "{name} n'est pas installée sur cet appareil.",
+      "run_store_link": "Ouvrez sa page pour la réinstaller",
       "btn_open": "ouvrir",
       "btn_export": "exporter",
       "btn_remove": "supprimer",
@@ -1184,6 +1196,7 @@
       "large_note": "({kb} KB — volumineux pour le stockage local)",
       "installed_ok": "installée.",
       "installed_where": "{name} installée. Ouvrez-la à tout moment depuis le menu Outils.",
+      "updated_to": "{name} a été mise à jour vers la version {version}.",
       "sample_heading": "Essayez l'exemple",
       "sample_install": "installer hello-world",
       "sample_download": "télécharger le fichier",
@@ -1855,7 +1868,12 @@
       "strength_strong": "forte",
       "db_media": "Index des photos, vidéos et musiques (miniatures, dates, où vous vous êtes arrêté ; peut inclure le lieu des photos)",
       "db_ext_local": "Données d’extensions gardées sur cet appareil",
-      "cache_ext_data": "Fichiers de données des extensions"
+      "cache_ext_data": "Fichiers de données des extensions",
+      "cache_ext_files": "Fichiers des extensions pour le hors-ligne",
+      "cache_locale": "Pages en {lang} pour le hors-ligne",
+      "cache_phosphor": "Graphismes HD de PHOSPHOR",
+      "cache_share": "Éléments partagés avec Mentria",
+      "cache_radio": "Liste des stations de la radio"
     },
     "extensions-sdk": {
       "heading_start": "Démarrage rapide",
@@ -1886,10 +1904,16 @@
       },
       "cmd": {
         "finance": {
-          "fin-add": "ajouter une opération, p. ex. fin-add café 4,50",
+          "fin-add": "ajouter une opération",
           "fin-budget": "ouvrir les budgets de ce mois",
           "fin-subs": "ouvrir les factures et abonnements",
           "fin-tax": "ouvrir l'estimation d'impôts"
+        },
+        "dice-roller": {
+          "roll": "lancer des dés"
+        },
+        "pomodoro-timer": {
+          "pomodoro": "lancer une session de concentration"
         }
       }
     },

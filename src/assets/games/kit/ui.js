@@ -1714,6 +1714,10 @@ export function createUI(stage, copyIn, opts = {}) {
     if (!window.MentriaGamepad && !padPollRaf) padPollRaf = requestAnimationFrame(padPoll);
   }
 
+  function onOverlay(e) {
+    if (e && e.detail && e.detail.open) requestPause();
+  }
+
   function onPause(fn) {
     pauseHandler = typeof fn === 'function' ? fn : null;
   }
@@ -1745,6 +1749,7 @@ export function createUI(stage, copyIn, opts = {}) {
     document.removeEventListener('pointermove', onDocPointerMove, true);
     document.removeEventListener('fullscreenchange', onFsChange);
     document.removeEventListener('webkitfullscreenchange', onFsChange);
+    document.removeEventListener('mentria:overlay', onOverlay);
     try { if (rotateRO) rotateRO.disconnect(); } catch (_) {}
     const nodes = [hud, root, countEl, chrome, toastEl, loadingEl, askEl, rotateEl];
     for (let i = 0; i < nodes.length; i++) {
@@ -1763,6 +1768,7 @@ export function createUI(stage, copyIn, opts = {}) {
   document.addEventListener('pointermove', onDocPointerMove, { capture: true, passive: true });
   document.addEventListener('fullscreenchange', onFsChange);
   document.addEventListener('webkitfullscreenchange', onFsChange);
+  document.addEventListener('mentria:overlay', onOverlay);
   onPadConnected();
   updateChromeWidth();
 

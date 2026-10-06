@@ -145,6 +145,16 @@
     "identity_setup_reminder": "Identity created. Now go to \"Your data\" above and download an encrypted backup — restoring it on another device gives that device the same identity.",
     "sync_confirm_replace": "This device already has its own {areas}. Pairing replaces them with the other device’s copy. Continue?",
     "sync_no_peer": "No device answered with this code. Check the code, and keep About open on the other device.",
+    "sync_busy": "This code is already in use by two other devices. Make a new code on the device you want to pair with.",
+    "sync_vault_totp": "This device has its own TOTP vault, and the other device has a different one. Replace this device’s vault with the other device’s? TOTP accounts that are only on this device will be lost, and the other device’s passphrase will unlock it.",
+    "sync_vault_identity": "This device has its own Mentria identity, and the other device has a different one. Replace it with the other device’s? This device’s identity will be lost, and the other device’s passphrase will unlock it.",
+    "sync_vault_keep": "Keep this device’s",
+    "sync_vault_replace": "Replace",
+    "sync_rescue_title": "Before pairing",
+    "sync_rescue_text": "Pairing replaced this device’s {areas} on {date}. You can put back what this device had before until {until}.",
+    "sync_rescue_button": "Put it back",
+    "sync_rescue_confirm": "Put back this device’s {areas} from before pairing? What pairing brought in for them is replaced on this device only.",
+    "sync_rescue_done": "Done. This device has its {areas} from before pairing again.",
     "identity_passkey_unlock": "Unlock with passkey",
     "identity_passkey_add": "Add a passkey",
     "identity_passkey_remove": "Remove passkey",
@@ -1167,6 +1177,8 @@
       "run_disabled": "installed but disabled — re-enable it in",
       "run_blocked": "{name} tried to reach {host}. This site’s security policy only lets extensions connect to Mentria’s own servers.",
       "run_manager_link": "the manager",
+      "run_gone": "{name} isn’t installed on this device.",
+      "run_store_link": "Open its page to install it again",
       "btn_open": "open",
       "btn_export": "export",
       "btn_remove": "remove",
@@ -1184,6 +1196,7 @@
       "large_note": "({kb} KB — large for local storage)",
       "installed_ok": "installed.",
       "installed_where": "{name} installed. Open it any time from the Tools menu.",
+      "updated_to": "{name} updated to {version}.",
       "sample_heading": "Try the sample",
       "sample_install": "install hello-world",
       "sample_download": "download the file",
@@ -1855,7 +1868,12 @@
       "strength_strong": "strong",
       "db_media": "Photo, video and music index (thumbnails, dates, where you stopped; may include photo locations)",
       "db_ext_local": "Extension data kept on this device",
-      "cache_ext_data": "Extension data files"
+      "cache_ext_data": "Extension data files",
+      "cache_ext_files": "Extension files for offline use",
+      "cache_locale": "{lang} pages for offline use",
+      "cache_phosphor": "PHOSPHOR HD graphics",
+      "cache_share": "Items shared to Mentria",
+      "cache_radio": "Radio station list"
     },
     "extensions-sdk": {
       "heading_start": "Quick start",
@@ -1886,10 +1904,16 @@
       },
       "cmd": {
         "finance": {
-          "fin-add": "add a transaction, e.g. fin-add coffee 4.50",
+          "fin-add": "add a transaction",
           "fin-budget": "open this month's budgets",
           "fin-subs": "open subscriptions and bills",
           "fin-tax": "open the tax estimate"
+        },
+        "dice-roller": {
+          "roll": "roll dice"
+        },
+        "pomodoro-timer": {
+          "pomodoro": "start a focus session"
         }
       }
     },

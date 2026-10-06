@@ -900,6 +900,7 @@ html.app-chrome body:has(.terminal-frame) .hero.hero--peek {
   box-shadow: var(--elev-3);
   text-align: left;
 }
+html.app-chrome body:has(.terminal-frame) .hero.hero--peek:focus { outline: none; }
 html.app-chrome .hero-scrim {
   position: fixed;
   inset: 0;

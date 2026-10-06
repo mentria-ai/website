@@ -159,6 +159,12 @@ export function exists(state, e, id) {
   return !!(r && !r.del);
 }
 
+export function removed(state, e, id) {
+  const m = state.ents.get(e);
+  const r = m && m.get(id);
+  return r && r.del ? view(r) : null;
+}
+
 export function list(state, e) {
   const m = state.ents.get(e);
   const out = [];

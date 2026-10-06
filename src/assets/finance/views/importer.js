@@ -10,6 +10,7 @@ import { csvHeader } from './ledger.js';
 
 const { h, t, icon } = U;
 const MAX_BYTES = 12 * 1024 * 1024;
+const LAYOUT_VERSION = 2;
 
 function resetFile(vs) {
   for (const k of ['file', 'name', 'text', 'format', 'csv', 'header', 'headerIdx', 'roles', 'mode', 'dayFirst', 'numberStyle', 'invert', 'parsed', 'preview', 'excluded', 'sha', 'bytes', 'finance', 'transfers']) delete vs[k];
@@ -44,7 +45,7 @@ async function readFile(ctx, vs, file) {
       vs.dayFirst = I.detectDateStyle(body.map((r) => r[fin.roles.date]), dayFirstFor(U.locale()));
       vs.invert = false;
       vs.presetUsed = false;
-    } else if (preset) {
+    } else if (preset && preset.v === LAYOUT_VERSION) {
       vs.roles = Object.assign({}, preset.roles);
       vs.mode = preset.mode;
       vs.dayFirst = preset.dayFirst;
@@ -52,18 +53,12 @@ async function readFile(ctx, vs, file) {
       vs.invert = !!preset.invert;
       vs.presetUsed = true;
     } else {
-      vs.roles = vs.header ? I.guessRoles(vs.header) : I.guessRolesFromData(vs.csv.rows);
-      vs.mode = vs.roles.debit != null && vs.roles.credit != null ? 'debitcredit' : vs.roles.drcr != null && vs.roles.amount != null ? 'drcr' : 'amount';
-      const body = vs.csv.rows.slice(idx + 1, idx + 201);
-      const amtCols = [vs.roles.amount, vs.roles.debit, vs.roles.credit].filter((x) => x != null);
-      const vals = [];
-      for (const r of body) for (const c of amtCols) if (r[c]) vals.push(r[c]);
-      vs.numberStyle = I.detectNumberStyle(vals);
-      if (vs.mode === 'amount' && vals.some((v) => /\b(cr|dr)\b/i.test(v))) vs.mode = 'suffix';
-      vs.dayFirst = I.detectDateStyle(body.map((r) => (vs.roles.date != null ? r[vs.roles.date] : '')), dayFirstFor(U.locale()));
+      Object.assign(vs, I.guessCsvSetup(vs.csv.rows, dayFirstFor(U.locale()), idx));
       vs.invert = false;
       vs.presetUsed = false;
     }
+  } else if (vs.format === 'qif') {
+    vs.dayFirst = I.qifDayFirst(text, dayFirstFor(U.locale()));
   }
   vs.step = 'map';
   await buildPreview(ctx, vs);
@@ -72,7 +67,7 @@ async function readFile(ctx, vs, file) {
 
 function parseItems(vs) {
   if (vs.format === 'ofx') return I.parseOfx(vs.text);
-  if (vs.format === 'qif') return I.parseQif(vs.text, dayFirstFor(U.locale()));
+  if (vs.format === 'qif') return I.parseQif(vs.text, vs.dayFirst != null ? vs.dayFirst : dayFirstFor(U.locale()));
   if (vs.format === 'camt') return I.parseCamt(vs.text);
   return I.csvToRows(vs.csv.rows, { headerIdx: vs.headerIdx, roles: vs.roles, mode: vs.mode, dayFirst: vs.dayFirst, numberStyle: vs.numberStyle, invert: vs.invert, locale: U.locale(), finance: !!vs.finance, transferLabel: t('csv.type_transfer') });
 }
@@ -86,15 +81,17 @@ async function buildPreview(ctx, vs) {
   const seen = new Set();
   const rules = L.list('rule');
   const existing = (L.rowsByAccount().get(acct.id) || []).filter((r) => r.kind === 'txn' && !String(r.id).startsWith('imp:'));
+  const liveBatches = new Set(L.list('transaction').map((x) => x.import_batch).filter(Boolean));
+  const undone = (id) => { const gone = L.removed('transaction', id); return !!(gone && gone.import_batch && !liveBatches.has(gone.import_batch)); };
   const d = decimalsFor(acct.currency);
   const out = [];
   let transfers = 0;
   for (const it of parsed.items) {
     if (it.transfer) { transfers++; continue; }
-    const id = await I.itemId(acct.id, it, seen);
+    const id = await I.importId(acct.id, it, seen, undone);
     let minor = null;
     try { minor = toMinor(it.amount, d); } catch (_) { minor = null; }
-    if (minor == null || minor === 0) continue;
+    if (minor == null || minor === 0) { parsed.errors.push({ line: it.line, reason: 'amount', raw: it.amount }); continue; }
     const status = L.known('transaction', id) ? 'dup' : existing.some((r) => r.amount === minor && Math.abs(diffDays(r.date, it.date)) <= 1) ? 'maybe' : 'new';
     const ruled = R.apply(rules, { payee: it.payee, note: it.note || it.memo, amount_minor: minor, account: acct.id, category: null }).txn;
     const payee = vs.finance ? it.payee : ruled.payee || it.payee;
@@ -117,8 +114,9 @@ function categoryNamed(L, name, kind) {
 }
 
 function colSelect(vs, role, label, header) {
-  const cols = header || (vs.csv.rows[Math.max(0, vs.headerIdx + 1)] || []).map((_, i) => t('import.column', { n: i + 1 }));
-  const opts = [{ value: '', label: t('import.none') }].concat(cols.map((c, i) => ({ value: String(i), label: header ? c : t('import.column', { n: i + 1 }) })));
+  const cols = header ? header.map((c) => String(c == null ? '' : c).trim()) : (vs.csv.rows[Math.max(0, vs.headerIdx + 1)] || []).map(() => '');
+  const name = (c, i) => (!c ? t('import.column', { n: i + 1 }) : cols.indexOf(c) !== cols.lastIndexOf(c) ? c + ' · ' + t('import.column', { n: i + 1 }) : c);
+  const opts = [{ value: '', label: t('import.none') }].concat(cols.map((c, i) => ({ value: String(i), label: name(c, i) })));
   return U.field(label, U.select(opts, vs.roles[role] != null ? String(vs.roles[role]) : '', { onchange: (e) => { vs.roles[role] = e.target.value === '' ? null : Number(e.target.value); vs.dirty = true; } }));
 }
 
@@ -132,25 +130,40 @@ function mappingPanel(ctx, vs) {
   else grid.append(colSelect(vs, 'amount', t('import.role.amount'), header));
   if (vs.mode === 'drcr') grid.append(colSelect(vs, 'drcr', t('import.role.drcr'), header));
   grid.append(colSelect(vs, 'note', t('import.role.note'), header), colSelect(vs, 'ref', t('import.role.ref'), header), colSelect(vs, 'balance', t('import.role.balance'), header));
-  const dateSel = U.select([{ value: 'd', label: t('import.date_dmy') }, { value: 'm', label: t('import.date_mdy') }], vs.dayFirst ? 'd' : 'm', { onchange: (e) => { vs.dayFirst = e.target.value === 'd'; vs.dirty = true; } });
   const styleKey = vs.numberStyle ? (vs.numberStyle.decimal === ',' ? (vs.numberStyle.group === '.' ? 'comma' : 'spacecomma') : 'dot') : 'auto';
   const numSel = U.select([{ value: 'auto', label: t('import.num_auto') }, { value: 'dot', label: '1,234.56' }, { value: 'comma', label: '1.234,56' }, { value: 'spacecomma', label: '1 234,56' }], styleKey, { onchange: (e) => {
     const v = e.target.value;
     vs.numberStyle = v === 'dot' ? { group: ',', decimal: '.' } : v === 'comma' ? { group: '.', decimal: ',' } : v === 'spacecomma' ? { group: ' ', decimal: ',' } : null;
     vs.dirty = true;
   } });
-  grid.append(U.field(t('import.date_order'), dateSel), U.field(t('import.number_style'), numSel));
+  grid.append(dateOrderField(vs), U.field(t('import.number_style'), numSel));
   box.append(grid, U.checkbox(t('import.invert'), !!vs.invert, (v) => { vs.invert = v; vs.dirty = true; }));
   const hdrSel = U.select(vs.csv.rows.slice(0, 40).map((r, i) => ({ value: String(i), label: t('import.row', { n: i + 1 }) + ': ' + r.join(' | ').slice(0, 60) })).concat([{ value: '-1', label: t('import.no_header') }]), String(vs.headerIdx), { onchange: (e) => {
-    vs.headerIdx = Number(e.target.value);
-    vs.header = vs.headerIdx >= 0 ? vs.csv.rows[vs.headerIdx] : null;
-    vs.roles = vs.header ? I.guessRoles(vs.header) : I.guessRolesFromData(vs.csv.rows);
+    const g = I.guessCsvSetup(vs.csv.rows, dayFirstFor(U.locale()), Number(e.target.value));
+    vs.headerIdx = g.headerIdx;
+    vs.header = g.header;
+    vs.roles = g.roles;
+    vs.mode = g.mode;
+    vs.dayFirst = g.dayFirst;
+    vs.numberStyle = g.numberStyle;
     vs.dirty = true;
     ctx.rerender();
   } });
   box.append(h('details', { style: { marginTop: '8px' } }, h('summary', { style: { cursor: 'pointer', color: 'var(--f-muted)', fontSize: '0.86rem' } }, t('import.header_row')), h('div', { style: { marginTop: '8px' } }, hdrSel)));
-  box.append(h('div', { class: 'fb-row', style: { marginTop: '12px' } }, h('button', { type: 'button', class: 'fb fb--sm', onclick: async () => { await buildPreview(ctx, vs); vs.dirty = false; ctx.rerender(); } }, icon('sync'), t('import.refresh'))));
+  box.append(refreshRow(ctx, vs));
   return box;
+}
+
+function dateOrderField(vs) {
+  return U.field(t('import.date_order'), U.select([{ value: 'd', label: t('import.date_dmy') }, { value: 'm', label: t('import.date_mdy') }], vs.dayFirst ? 'd' : 'm', { onchange: (e) => { vs.dayFirst = e.target.value === 'd'; vs.dirty = true; } }));
+}
+
+function refreshRow(ctx, vs) {
+  return h('div', { class: 'fb-row', style: { marginTop: '12px' } }, h('button', { type: 'button', class: 'fb fb--sm', onclick: async () => { await buildPreview(ctx, vs); vs.dirty = false; ctx.rerender(); } }, icon('sync'), t('import.refresh')));
+}
+
+function qifPanel(ctx, vs) {
+  return h('div', { class: 'fcard', style: { marginBottom: '14px' } }, h('div', { class: 'ff-grid' }, dateOrderField(vs)), refreshRow(ctx, vs));
 }
 
 function previewPanel(ctx, vs) {
@@ -216,7 +229,7 @@ async function doImport(ctx, vs, take) {
   }
   ops.push(...ctx.engine.createOps('import_batch', batch, { source: vs.name, format: vs.format, sha256: vs.sha, bytes: vs.bytes, account: acct.id, row_count: (vs.preview || []).length, imported_count: take.length, skipped_count: (vs.preview || []).length - take.length, created: now }));
   if (vs.format === 'csv' && vs.header && !vs.finance) {
-    ops.push(...ctx.save('import_preset', await sha256Hex(I.headerSignature(vs.header)), { roles: vs.roles, mode: vs.mode, dayFirst: vs.dayFirst, numberStyle: vs.numberStyle, invert: !!vs.invert, header: vs.header.slice(0, 30).map((x) => String(x).slice(0, 40)) }));
+    ops.push(...ctx.save('import_preset', await sha256Hex(I.headerSignature(vs.header)), { v: LAYOUT_VERSION, roles: vs.roles, mode: vs.mode, dayFirst: vs.dayFirst, numberStyle: vs.numberStyle, invert: !!vs.invert, header: vs.header.slice(0, 30).map((x) => String(x).slice(0, 40)) }));
   }
   const ok = await ctx.commit(ops);
   if (ok) {
@@ -271,6 +284,7 @@ export function render(ctx) {
     node.append(h('div', { class: 'fb-row', style: { marginBottom: '12px' } }, h('span', { class: 'fpill fpill--mint' }, vs.format.toUpperCase()), h('span', { class: 'fsmall fmuted fwrap' }, vs.name)));
     if (vs.finance) node.append(h('div', { class: 'fbanner fbanner--mint' }, icon('check'), h('span', null, t('import.finance_found'))));
     else if (vs.format === 'csv') node.append(mappingPanel(ctx, vs));
+    else if (vs.format === 'qif') node.append(qifPanel(ctx, vs));
     node.append(previewPanel(ctx, vs));
   }
   const b = batchesPanel(ctx);

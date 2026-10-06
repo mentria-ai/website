@@ -240,7 +240,8 @@
       "times_up": "Time's up",
       "paused": "Paused",
       "steps": "{n} steps",
-      "tap_resume": "Tap to keep counting"
+      "tap_resume": "Tap to keep counting",
+      "still_running": "The timer keeps running and will ring when it ends."
     },
     "window": {
       "label": "Window controls",
@@ -1070,6 +1071,7 @@
       "counter": "{n} tokens · {tps} tok/s",
       "status_ready": "Ready",
       "status_model_deleted": "Model deleted. Reload to re-download.",
+      "status_no_model": "No model loaded",
       "tier_label": "Model quality",
       "tier_fast": "fast",
       "tier_better": "better",
@@ -1124,6 +1126,8 @@
       "err_device_lost": "GPU device lost — reload to recover",
       "gpu_lost_notice": "The GPU was reset, so the model stopped. Your chat is kept. Reload the model to continue.",
       "btn_reload_model": "Reload model",
+      "no_model_notice": "Choose a model to start chatting. It downloads once, then runs on this device.",
+      "btn_choose_model": "Choose a model",
       "interrupted": "Interrupted: the GPU was reset before this answer finished.",
       "err_context_full": "Conversation is too long for the model's memory. Start a new chat to continue.",
       "status_too_long": "Message too long",

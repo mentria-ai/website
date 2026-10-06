@@ -14,7 +14,7 @@
      {%- if hasShort %} data-name="{{ titleKey | t }}" data-i18na="data-name={{ titleKey }}"{% endif %}
      data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}{% if groupLabel and groupLabel != tool.group %} {{ groupLabel }}{% endif %}{% if catLabel != tool.category and catLabel != groupLabel %} {{ catLabel }}{% endif %}"
      style="view-transition-name: tool-{{ tool.slug }}; --i: {{ i or 0 }}"
-     href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
+     href="{% if tool.url %}{{ tool.url | localeUrl(lang) }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
     <span class="launch-tile__icon" aria-hidden="true">
       <svg viewBox="0 0 48 48"><use href="#tool-{{ tool.slug }}"></use></svg>
     </span>

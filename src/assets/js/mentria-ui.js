@@ -702,7 +702,7 @@
     }
     var frame = dots.closest('.terminal-frame');
     var nameEl = frame && frame.querySelector('.terminal-frame__filename');
-    var hit = location.pathname.match(/\/tools\/([^/]+)\/|^\/(comms)\//) || [];
+    var hit = location.pathname.match(/\/tools\/([^/]+)\/|^(?:\/[a-z]{2}(?:-[a-z]{2})?)?\/(comms)\//) || [];
     var slug = hit[1] || hit[2] || '';
     wmenu.setAttribute('aria-label', uiCopy('windowLabel', 'common.window.label', 'Window controls'));
     var icon = wmenu.querySelector('.m-wmenu__icon');

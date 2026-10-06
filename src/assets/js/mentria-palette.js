@@ -140,7 +140,7 @@
       var entry = {
         title: title,
         hint: cat,
-        href: t.url ? t.url : prefix + '/tools/' + t.slug + '/',
+        href: prefix + (t.url || '/tools/' + t.slug + '/'),
         titleN: norm(title),
         hayN: norm(title + ' ' + t.slug + ' ' + kwString(t.keywords) + ' ' + cat + ' ' + (t.group || '')),
         usage: usageScore(usage[t.slug])

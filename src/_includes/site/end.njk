@@ -785,7 +785,7 @@ try {
         var BODY_FS = 'is-fullscreen-tool';
         function activeFrame() { return document.querySelector('.' + FS); }
         function toolSlug() {
-          var m = (location.pathname || '').match(/\/tools\/([^/]+)\/|^\/(comms)\//);
+          var m = (location.pathname || '').match(/\/tools\/([^/]+)\/|^(?:\/[a-z]{2}(?:-[a-z]{2})?)?\/(comms)\//);
           return m ? (m[1] || m[2]) : null;
         }
         function persist(state) {

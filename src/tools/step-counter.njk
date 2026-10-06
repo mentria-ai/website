@@ -740,11 +740,20 @@ localeReload: true
     window.MentriaMini.leave();
   });
 
+  function takeMiniSession() {
+    const store = window.MentriaStore;
+    const minis = store && store.get('ui', 'mini');
+    if (!minis || typeof minis !== 'object') return false;
+    if (minis.kind === 'steps') { store.remove('ui', 'mini'); return true; }
+    if (!minis.steps) return false;
+    delete minis.steps;
+    if (minis.timer) store.set('ui', 'mini', minis);
+    else store.remove('ui', 'mini');
+    return true;
+  }
+
   function resumeFromMini() {
-    const miniSession = window.MentriaStore && window.MentriaStore.get('ui', 'mini');
-    if (!miniSession || miniSession.kind !== 'steps') return;
-    window.MentriaStore.remove('ui', 'mini');
-    if (running) return;
+    if (!takeMiniSession() || running) return;
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function' && window.isSecureContext) {
       askMotion()
         .then((res) => { if (res === 'granted') { showPanel(null); beginTracking(); } else start(); })
@@ -776,6 +785,7 @@ localeReload: true
   align-items: center;
   gap: var(--space-5);
   font-family: var(--font-mono);
+  width: 100%;
   max-width: 480px;
   margin: 0 auto;
   padding: var(--space-2) 0 var(--space-4);

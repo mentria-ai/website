@@ -229,7 +229,7 @@ main:has(.terminal-frame) .hero { max-width: 912px; margin-inline: auto; }
 .m-mini-dock > * { pointer-events: auto; }
 .m-mini-dock.is-left { right: auto; left: 12px; align-items: flex-start; }
 .m-mini-dock.is-dragging { cursor: grabbing; opacity: 0.92; }
-html.is-standalone .m-mini-dock { --mini-base: calc(var(--app-bar-h, 52px) + 12px); }
+html.is-standalone .app-bar ~ .m-mini-dock { --mini-base: calc(var(--app-bar-h, 52px) + 12px); }
 @media (max-width: 1100px) {
   html:not(.is-fullscreen-tool):has(.pwa-install-banner--visible) .m-mini-dock,
   html:has(.m-update:not([hidden])) .m-mini-dock { --mini-base: calc(88px + env(safe-area-inset-bottom, 0px)); }

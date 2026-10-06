@@ -28,12 +28,12 @@ eleventyComputed:
             <button type="button" data-value="deg" title="{{ 'tool.calculator.deg_title' | t }}">{{ "tool.calculator.deg" | t }}</button>
             <button type="button" data-value="rad" title="{{ 'tool.calculator.rad_title' | t }}">{{ "tool.calculator.rad" | t }}</button>
           </div>
+          <p class="calc__recap" id="calc-recap" dir="ltr" hidden></p>
           <button type="button" class="m-btn m-btn--ghost calc__copy" id="calc-copy" aria-label="{{ 'tool.calculator.copy_aria' | t }}" disabled>
             <span class="calc__copy-idle">{{ "tool.calculator.copy" | t }}</span>
             <span class="calc__copy-done">{{ "tool.calculator.copied" | t }}</span>
           </button>
         </div>
-        <p class="calc__recap" id="calc-recap" dir="ltr" hidden></p>
         <label class="sr-only" for="calc-expr">{{ "tool.calculator.expr_label" | t }}</label>
         <input class="calc__expr" id="calc-expr" type="text" dir="ltr" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="0" aria-describedby="calc-result">
         <p class="calc__result" id="calc-result" dir="ltr"></p>
@@ -1552,11 +1552,15 @@ eleventyComputed:
 .calc__copy.is-copied .calc__copy-done { display: inline; }
 
 .calc__recap {
-  margin: 0.2rem 0 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
   font-size: var(--text-xs);
   color: var(--term-subtle);
   text-align: right;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1579,12 +1583,15 @@ eleventyComputed:
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+@media (hover: hover), (pointer: fine) {
+  .calc__expr { min-height: calc(clamp(1.45rem, 7.5cqi, 2.1rem) * 1.3 + 0.3rem); }
+}
 .calc__expr::placeholder { color: var(--term-subtle); opacity: 0.7; }
 .calc__expr:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 3px; }
 
 .calc__result {
   margin: 0;
-  min-height: 1.75rem;
+  min-height: calc(clamp(1.5rem, 9.5cqi, 2.6rem) * 1.2);
   color: var(--term-muted);
   font-size: 1.15rem;
   font-size: clamp(1.05rem, 5cqi, 1.3rem);

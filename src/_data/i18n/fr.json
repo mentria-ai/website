@@ -242,7 +242,8 @@
       "times_up": "Temps écoulé",
       "paused": "En pause",
       "steps": "{n} pas",
-      "tap_resume": "Touchez pour continuer à compter"
+      "tap_resume": "Touchez pour continuer à compter",
+      "still_running": "Le minuteur continue et sonnera à la fin."
     },
     "window": {
       "label": "Commandes de la fenêtre",
@@ -1072,6 +1073,7 @@
       "counter": "{n} jetons · {tps} jetons/s",
       "status_ready": "Prêt",
       "status_model_deleted": "Modèle supprimé. Rechargez pour le retélécharger.",
+      "status_no_model": "Aucun modèle chargé",
       "tier_label": "Qualité du modèle",
       "tier_fast": "rapide",
       "tier_better": "meilleur",
@@ -1126,6 +1128,8 @@
       "err_device_lost": "GPU perdu — recharge pour récupérer",
       "gpu_lost_notice": "Le GPU a été réinitialisé et le modèle s'est arrêté. Votre discussion est conservée. Rechargez le modèle pour continuer.",
       "btn_reload_model": "Recharger le modèle",
+      "no_model_notice": "Choisissez un modèle pour commencer à discuter. Il se télécharge une fois, puis fonctionne sur cet appareil.",
+      "btn_choose_model": "Choisir un modèle",
       "interrupted": "Interrompue : le GPU a été réinitialisé avant la fin de cette réponse.",
       "err_context_full": "La conversation dépasse la mémoire du modèle. Démarrez une nouvelle discussion pour continuer.",
       "status_too_long": "Message trop long",

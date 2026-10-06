@@ -242,7 +242,8 @@
       "times_up": "Tempo esgotado",
       "paused": "Pausado",
       "steps": "{n} passos",
-      "tap_resume": "Toque para continuar contando"
+      "tap_resume": "Toque para continuar contando",
+      "still_running": "O timer continua rodando e vai tocar quando terminar."
     },
     "window": {
       "label": "Controles da janela",
@@ -1072,6 +1073,7 @@
       "counter": "{n} tokens · {tps} tok/s",
       "status_ready": "Pronto",
       "status_model_deleted": "Modelo excluído. Recarregue para baixar novamente.",
+      "status_no_model": "Nenhum modelo carregado",
       "tier_label": "Qualidade do modelo",
       "tier_fast": "rápido",
       "tier_better": "melhor",
@@ -1126,6 +1128,8 @@
       "err_device_lost": "GPU perdida — recarregue para recuperar",
       "gpu_lost_notice": "A GPU foi reiniciada e o modelo parou. Seu chat foi mantido. Recarregue o modelo para continuar.",
       "btn_reload_model": "Recarregar modelo",
+      "no_model_notice": "Escolha um modelo para começar a conversar. Ele é baixado uma vez e depois roda neste dispositivo.",
+      "btn_choose_model": "Escolher modelo",
       "interrupted": "Interrompida: a GPU foi reiniciada antes de esta resposta terminar.",
       "err_context_full": "A conversa é longa demais para a memória do modelo. Inicie um novo chat para continuar.",
       "status_too_long": "Mensagem longa demais",

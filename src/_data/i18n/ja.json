@@ -242,7 +242,8 @@
       "times_up": "時間です",
       "paused": "一時停止中",
       "steps": "{n} 歩",
-      "tap_resume": "タップしてカウントを続ける"
+      "tap_resume": "タップしてカウントを続ける",
+      "still_running": "タイマーは動き続け、終了すると鳴ります。"
     },
     "window": {
       "label": "ウィンドウ操作",
@@ -1072,6 +1073,7 @@
       "counter": "{n} トークン · {tps} トークン/秒",
       "status_ready": "準備完了",
       "status_model_deleted": "モデル削除済み。再読込して再ダウンロード。",
+      "status_no_model": "モデル未読み込み",
       "tier_label": "モデル品質",
       "tier_fast": "高速",
       "tier_better": "高品質",
@@ -1126,6 +1128,8 @@
       "err_device_lost": "GPUデバイス喪失 — 再読込で復旧",
       "gpu_lost_notice": "GPUがリセットされたため、モデルが停止しました。チャットは保持されています。続けるにはモデルを再読み込みしてください。",
       "btn_reload_model": "モデルを再読み込み",
+      "no_model_notice": "チャットを始めるにはモデルを選んでください。ダウンロードは一度だけで、その後はこの端末で動きます。",
+      "btn_choose_model": "モデルを選ぶ",
       "interrupted": "中断：この回答が終わる前にGPUがリセットされました。",
       "err_context_full": "会話がモデルのメモリ上限を超えました。続けるには新しいチャットを開始してください。",
       "status_too_long": "メッセージが長すぎます",

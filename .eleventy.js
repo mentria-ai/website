@@ -243,6 +243,13 @@ module.exports = function(eleventyConfig) {
     return str.startsWith(prefix);
   });
 
+  const coverThumbs = new Set(require("./src/_data/coverThumbs.json"));
+  eleventyConfig.addFilter("coverThumb", function (url) {
+    if (typeof url !== "string") return url;
+    const thumb = url.replace(/\/00_cover\.webp$/, "/00_cover.thumb.webp");
+    return coverThumbs.has(thumb) ? thumb : url;
+  });
+
   const siteUrl = require("./src/_data/site.json").siteUrl;
   eleventyConfig.addFilter("deckImages", function (deck, lang, coverCaption) {
     if (!deck) return [];

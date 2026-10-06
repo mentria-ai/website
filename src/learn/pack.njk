@@ -24,5 +24,5 @@ eleventyComputed:
 </div>
 
 <script type="application/json" id="pack-data">{{ (pair.pack | dump) | replace("</", "<\\/") | safe }}</script>
-{% if pair.next %}<script type="application/json" id="pack-next">{{ ({ id: pair.next.id, title: (pair.next.title | tloc(pair.locale.code)), cover: pair.next.cover, cards: pair.next.cards, minutes: pair.next.minutes } | dump) | replace("</", "<\\/") | safe }}</script>{% endif %}
+{% if pair.next %}<script type="application/json" id="pack-next">{{ ({ id: pair.next.id, title: (pair.next.title | tloc(pair.locale.code)), cover: (pair.next.cover | coverThumb), cards: pair.next.cards, minutes: pair.next.minutes } | dump) | replace("</", "<\\/") | safe }}</script>{% endif %}
 {% include "pack-player-scripts.njk" %}

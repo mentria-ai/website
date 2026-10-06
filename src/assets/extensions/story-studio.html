@@ -475,7 +475,10 @@ function setOnline(on, info) {
     if (on) tx(s, (info.model ? 'svcOn' : 'svcReady') + (info.queue ? 'Q' : ''), { model: info.model, n: info.queue });
     else tx(s, 'svcOff');
   }
-  document.querySelectorAll('.gen-btn').forEach((b) => { b.disabled = !on || genBusy; });
+  paintGen();
+}
+function paintGen() {
+  document.querySelectorAll('.gen-btn').forEach((b) => { b.disabled = !online || genBusy; });
 }
 async function hello() {
   try {
@@ -503,7 +506,7 @@ room.onPush = (event, data) => {
   } else if (event === 'job:error') {
     if (st) { if (data.message) untx(st, data.message); else tx(st, 'genFailed'); st.className = 'genstate err'; }
     myJob = null; chunks = null; genSlide = null; genBusy = false;
-    setOnline(online, {});
+    paintGen();
   }
 };
 
@@ -517,7 +520,7 @@ async function finishGen(slide) {
   touch();
   myJob = null; chunks = null; genSlide = null; genBusy = false;
   renderSlides();
-  setOnline(online, {});
+  paintGen();
 }
 
 async function generateFor(slide, prompt, stateEl) {
@@ -537,7 +540,7 @@ async function generateFor(slide, prompt, stateEl) {
     else if (e.key) tx(stateEl, e.key);
     else untx(stateEl, String(e.message || e));
     genBusy = false;
-    setOnline(online, {});
+    paintGen();
     if (/timeout/.test(String(e.message))) setOnline(false, {});
   }
 }

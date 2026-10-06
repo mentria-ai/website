@@ -131,6 +131,7 @@ const UI_STYLE = [
   'border:1px solid rgba(255,255,255,.1);border-radius:999px;transition:color .14s ease,border-color .14s ease;-webkit-appearance:none;appearance:none}',
   '.gk-backbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}',
   '.gk-backbtn:hover,.gk-backbtn.is-focus{color:var(--gk-mint);border-color:rgba(var(--gk-mint-rgb),.7);outline:none}',
+  '@container (max-height: 640px){.gk-backbtn{margin-right:max(0px,calc(var(--gk-chrome-w,0px) + 12px - clamp(16px,4cqw,48px)))}}',
   '.gk-cards{display:flex;gap:clamp(10px,2.2cqw,22px);margin:clamp(8px,2.6cqh,22px) calc(-1 * clamp(16px,4cqw,48px)) 0;',
   'padding:clamp(10px,2.6cqh,18px) clamp(16px,4cqw,48px) clamp(14px,3.4cqh,24px);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;',
   'scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;flex:1 1 auto;align-items:stretch;min-height:0}',
@@ -178,7 +179,7 @@ const UI_STYLE = [
   '.gk-tile__desc{font:500 clamp(9.5px,2.6cqh,12.5px)/1.45 var(--gk-mono);letter-spacing:.04em;color:var(--gk-muted);max-width:34ch}',
   '.gk-tile.is-focus{transform:translateY(-6px);box-shadow:0 0 0 2px var(--gk-mint),0 0 34px rgba(var(--gk-mint-rgb),.3),0 20px 44px rgba(0,0,0,.55)}',
   '.gk-tile.is-focus .gk-tile__label{color:var(--gk-mint)}',
-  '.gk-settings{display:grid;grid-template-columns:minmax(0,1fr);width:min(100%,clamp(420px,62cqw,780px));align-content:start;',
+  '.gk-settings{display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;width:min(100%,clamp(420px,62cqw,780px));align-content:start;',
   'gap:clamp(5px,1.4cqh,10px) clamp(10px,2.4cqw,22px);margin-top:clamp(10px,3cqh,24px);overflow-y:auto;overflow-x:hidden;flex:1 1 auto;min-height:0;',
   'padding:4px 6px 18px 4px;scrollbar-width:thin;scrollbar-color:rgba(var(--gk-mint-rgb),.35) transparent;',
   '-webkit-mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 22px),transparent)}',
@@ -462,6 +463,7 @@ export function createUI(stage, copyIn, opts = {}) {
   let copy = Object.assign({}, UI_COPY_DEFAULTS, copyIn || null);
   const sound = typeof opts.sound === 'function' ? opts.sound : null;
   let pauseHandler = typeof opts.onPause === 'function' ? opts.onPause : null;
+  const popovers = Array.isArray(opts.popovers) ? opts.popovers.filter(Boolean) : [];
 
   ensureStyle();
   stage.classList.add('gk-stage');
@@ -1539,10 +1541,43 @@ export function createUI(stage, copyIn, opts = {}) {
     }
   }
 
+  function openPopover() {
+    for (let i = 0; i < popovers.length; i++) {
+      try { if (popovers[i].matches(':popover-open')) return popovers[i]; } catch (_) {}
+    }
+    return null;
+  }
+
+  function closePopover(el) {
+    try { el.hidePopover(); } catch (_) {}
+    play('back');
+  }
+
+  function scrollPopover(el, dir) {
+    const dy = dir * Math.max(40, el.clientHeight * 0.4);
+    try { el.scrollBy({ top: dy, behavior: reducedMotion() ? 'auto' : 'smooth' }); } catch (_) { el.scrollTop += dy; }
+  }
+
+  function popoverKey(e, pop) {
+    const k = e.key;
+    if (k === 'Escape' || k === 'Backspace' || k === 'Enter' || k === ' ' || k === 'Spacebar') {
+      if (!e.repeat) closePopover(pop);
+    } else if (k === 'ArrowUp' || k === 'w' || k === 'W') scrollPopover(pop, -1);
+    else if (k === 'ArrowDown' || k === 's' || k === 'S') scrollPopover(pop, 1);
+    else if (k !== 'Tab' && k !== 'ArrowLeft' && k !== 'ArrowRight' && k !== 'a' && k !== 'A' && k !== 'd' && k !== 'D') return;
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
   function onKeyDown(e) {
     if (disposed || !e || e.defaultPrevented && !currentName) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (isEditableTarget(e.target)) return;
+    const pop = openPopover();
+    if (pop) {
+      if (stageEngaged() || pop.contains(e.target)) popoverKey(e, pop);
+      return;
+    }
     const k = e.key;
     const menuOpen = !!currentName || !!askEl;
     if (!menuOpen) {
@@ -1598,6 +1633,11 @@ export function createUI(stage, copyIn, opts = {}) {
     const d = e && e.detail;
     if (!d || !stageVisible()) return;
     setMethod('gamepad');
+    const pop = openPopover();
+    if (pop) {
+      if (d.direction === 'up' || d.direction === 'down') scrollPopover(pop, d.direction === 'up' ? -1 : 1);
+      return;
+    }
     if (!currentName && !askEl) return;
     navigate(d.direction);
   }
@@ -1610,6 +1650,11 @@ export function createUI(stage, copyIn, opts = {}) {
 
   function handlePadButton(name) {
     setMethod('gamepad');
+    const pop = openPopover();
+    if (pop) {
+      if (name === 'a' || name === 'b' || name === 'start') closePopover(pop);
+      return;
+    }
     const menuOpen = !!currentName || !!askEl;
     if (name === 'start') {
       if (askEl) closeAsk(false);

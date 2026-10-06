@@ -217,7 +217,7 @@ function uiSound(kind, index) {
   try { audio.play('ui', { kind: k, index: index || 0, volume: 0.8 }); } catch (_) {}
 }
 
-const ui = createUI(stage, kitUiCopy(), { sound: uiSound, onPause: requestPause, title: 'NITRO RACER' });
+const ui = createUI(stage, kitUiCopy(), { sound: uiSound, onPause: requestPause, title: 'NITRO RACER', popovers: [helpEl] });
 const input = createInput({
   element: stage,
   layout: inputLayoutRacer,

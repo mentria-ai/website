@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -29,6 +30,7 @@ const N = await mod('nl.js');
 const RC = await mod('recurring.js');
 const F = await mod('forecast.js');
 const T = await mod('tax.js');
+const LG = await mod('ledger.js');
 
 test('money: decimals per currency', () => {
   assert.equal(M.decimalsFor('USD'), 2);
@@ -482,6 +484,129 @@ test('import: payee names are cleaned', () => {
   assert.equal(I.cleanPayee('NEFT/HDFC0001234/ACME LTD'), 'Acme Ltd');
   assert.equal(I.cleanPayee('UPI-SWIGGY-1234567890'), 'Swiggy');
   assert.equal(I.cleanPayee('Café de Flore'), 'Café de Flore');
+  assert.equal(I.cleanPayee('ACME CORP DES:PAYROLL ID:XXXXX12345 INDN:SMITH,JANE CO ID:XXXXX67890 PPD'), 'Acme Corp');
+  assert.equal(I.cleanPayee('ACME CORP PAYROLL      PPD ID: 9876543210'), 'Acme Corp Payroll');
+  assert.equal(I.cleanPayee('PURCHASE AUTHORIZED ON 09/29 STARBUCKS STORE 12345 SAN FRANCISCO CA S386272823158932 CARD 9081'), 'Starbucks Store San Francisco CA');
+  assert.equal(I.cleanPayee('ZELLE PAYMENT TO JOHN SMITH JPM99A1B2C3D'), 'Zelle TO John Smith');
+  assert.equal(I.cleanPayee('AMAZON MKTPL*TQ4RA1B22'), 'Amazon Mktpl');
+  assert.equal(I.cleanPayee('Zelle payment to LANDLORD LLC Conf# k8fj2m3n4'), 'Zelle to Landlord Llc');
+  assert.equal(I.cleanPayee('Online Transfer to SAV ...4321 transaction#: 12345678901'), 'Online Transfer to Sav');
+  assert.equal(I.cleanPayee('UPI/628112345679/Payment from Ph/swiggy.stores@ic/ICICI Bank'), 'Swiggy Stores');
+  assert.equal(I.cleanPayee('UPI/628012345678/RENT AUGUST/ramesh.k@okicici/ICICI Bank'), 'Ramesh K');
+  assert.equal(I.cleanPayee('NEFT-ACMEIN0001-ACME SOFTWARE PVT LTD'), 'Acme Software Pvt Ltd');
+  assert.equal(I.cleanPayee('UPI/P2M/624812345678/SWIGGY/Payment'), 'Swiggy');
+  assert.equal(I.cleanPayee('Coca-Cola 1234'), 'Coca-Cola');
+});
+
+const FIXTURES = resolve(here, 'fixtures/finance-import');
+
+function statementText(name) {
+  const buf = readFileSync(resolve(FIXTURES, name));
+  const text = new TextDecoder('utf-8').decode(buf);
+  return text.slice(0, 4000).includes(String.fromCharCode(0xfffd)) ? new TextDecoder('windows-1252').decode(buf) : text;
+}
+
+function importStatement(name, locale) {
+  const text = statementText(name);
+  const format = I.detectFormat(text, name);
+  const dayFirst = D.dayFirstFor(locale);
+  if (format === 'ofx') return { res: I.parseOfx(text), rows: (text.match(/<STMTTRN>/gi) || []).length };
+  if (format === 'qif') return { res: I.parseQif(text, I.qifDayFirst(text, dayFirst)), rows: text.split(/\r?\n/).filter((l) => /^D/.test(l.trim())).length };
+  if (format === 'camt') return typeof DOMParser === 'undefined' ? null : { res: I.parseCamt(text), rows: (text.match(/<Ntry>/g) || []).length };
+  const csv = I.parseCsv(text);
+  const g = I.guessCsvSetup(csv.rows, dayFirst);
+  const res = I.csvToRows(csv.rows, { headerIdx: g.headerIdx, roles: g.roles, mode: g.mode, dayFirst: g.dayFirst, numberStyle: g.numberStyle, locale });
+  return { res, rows: csv.rows.slice(g.headerIdx + 1).filter((r) => r.some((c) => String(c || '').trim())).length };
+}
+
+test('import: real-world statements import exactly in en-US and en-IN', () => {
+  const expected = JSON.parse(readFileSync(resolve(FIXTURES, 'expected.json'), 'utf8'));
+  let checked = 0;
+  for (const locale of ['en-US', 'en-IN']) {
+    for (const [name, want] of Object.entries(expected)) {
+      const r = importStatement(name, locale);
+      if (!r) continue;
+      const got = r.res.items.map((x) => x.date + ' ' + M.toMinor(x.amount, 2)).sort();
+      assert.deepEqual(got, want.map(([date, minor]) => date + ' ' + minor).sort(), locale + ' ' + name);
+      assert.equal(r.res.items.length + r.res.errors.length, r.rows, locale + ' ' + name + ': every row is imported or listed as skipped');
+      checked++;
+    }
+  }
+  assert.ok(checked >= 32, 'checked ' + checked);
+});
+
+test('import: Type and Dr/Cr columns, payee and date columns are guessed from the data', () => {
+  const chase = I.parseCsv('Details,Posting Date,Description,Amount,Type,Balance,Check or Slip #\nDEBIT,09/30/2026,"ZELLE PAYMENT TO JOHN SMITH",-45.00,QUICKPAY_DEBIT,3105.82,,\nCREDIT,09/30/2026,ACME PAYROLL,2850.00,ACH_CREDIT,3150.82,,\n');
+  const g = I.guessCsvSetup(chase.rows, true);
+  assert.deepEqual([g.mode, g.roles.payee, g.roles.drcr, g.dayFirst], ['amount', 2, undefined, false]);
+  const typed = I.csvToRows(chase.rows, { headerIdx: 0, roles: Object.assign({}, g.roles, { drcr: 4 }), mode: 'drcr', dayFirst: false });
+  assert.deepEqual(typed.items.map((x) => x.amount), ['-45.00', '2850.00']);
+  assert.deepEqual(['Dr.', 'CR', 'Soll', 'H', 'Sale', 'DEBIT_CARD', ''].map(I.flagSign), [-1, 1, -1, 1, 0, 0, 0]);
+  const kotak = I.parseCsv('Sl. No.,Date,Description,Chq / Ref number,Amount,Dr / Cr,Balance,Dr / Cr\n1,01-09-2026,SALARY,UTR1,"1,20,000.00",CR,"2,00,000.00",CR\n2,25-09-2026,RENT,UTR2,"32,000.00",DR,"1,68,000.00",CR\n');
+  const k = I.guessCsvSetup(kotak.rows, false);
+  assert.deepEqual([k.mode, k.roles.amount, k.roles.drcr, k.roles.debit, k.dayFirst], ['drcr', 4, 5, undefined, true]);
+  assert.deepEqual(I.csvToRows(kotak.rows, { headerIdx: 0, roles: k.roles, mode: k.mode, dayFirst: k.dayFirst, numberStyle: k.numberStyle }).items.map((x) => x.amount), ['120000.00', '-32000.00']);
+  const drcr = I.parseCsv('Date,Narration,Amount,Dr/Cr,Balance\n01/09/2026,SALARY,"1,20,000.00",Cr,"2,00,000.00"\n03/09/2026,RENT,"32,000.00",Dr,"1,68,000.00"\n');
+  const dc = I.guessCsvSetup(drcr.rows, true);
+  assert.deepEqual([dc.mode, dc.roles.drcr, dc.roles.debit], ['drcr', 3, undefined]);
+  const revolut = I.parseCsv('Type,Product,Started Date,Completed Date,Description,Amount\nCARD_PAYMENT,Current,2026-09-01 08:12:44,2026-09-02 10:01:12,Lidl,-23.45\n');
+  const rv = I.guessCsvSetup(revolut.rows, true);
+  assert.deepEqual([rv.mode, rv.roles.date, rv.roles.payee, rv.roles.drcr], ['amount', 3, 4, undefined]);
+  assert.equal(I.guessCsvSetup(I.parseCsv('Started Date,Description,Amount\n2026-09-01 08:12:44,Lidl,-23.45\n').rows, true).roles.date, 0);
+  const wells = I.parseCsv('"09/30/2026","-4.75","*","","PURCHASE AUTHORIZED ON 09/29 STARBUCKS"\n"09/02/2026","-4.75","*","","SAFEWAY"\n');
+  const w = I.guessCsvSetup(wells.rows, true);
+  assert.deepEqual([w.headerIdx, w.roles.date, w.roles.amount, w.roles.payee, w.dayFirst], [-1, 0, 1, 4, false]);
+  const legend = I.csvToRows(I.parseCsv('No,Date,Description,Amount\n1,01/09/2026,X,-1.00\nLegends Used in Account Statement\n').rows, { headerIdx: 0, roles: { date: 1, payee: 2, amount: 3 }, mode: 'amount', dayFirst: true });
+  assert.deepEqual(legend.errors, [{ line: 3, reason: 'date', raw: 'Legends Used in Account Statement' }]);
+  const hdfc = I.guessRoles(['Date', 'Narration', 'Chq./Ref.No.', 'Value Dt', 'Withdrawal Amt.', 'Deposit Amt.', 'Closing Balance']);
+  assert.equal(hdfc.amount, undefined);
+});
+
+test('import: QIF reads the date order from the file and lists rows it cannot read', () => {
+  const us = '!Type:Bank\nD09/02/2026\nT-23.40\nPCORNER BAKERY\n^\nD09/21/2026\nT-60.00\nPWATER\n^\n';
+  assert.equal(I.qifDayFirst(us, true), false);
+  assert.deepEqual(I.parseQif(us, I.qifDayFirst(us, true)).items.map((x) => x.date), ['2026-09-02', '2026-09-21']);
+  assert.equal(I.qifDayFirst('!Type:Bank\nD21/09/2026\nT-60.00\n^\n', false), true);
+  assert.equal(I.qifDayFirst('!Type:Bank\nD09/02/2026\nT-60.00\n^\n', true), true);
+  const q = I.parseQif('!Account\nNChecking\nTBank\nDMain account\n^\n!Type:Bank\nD13/45/2026\nT-1.00\nPX\n^\nD09/02/2026\nPNO AMOUNT\n^\nD09/03/2026\nT-2.00\nPSHOP\n^\n', false);
+  assert.deepEqual(q.items.map((x) => [x.date, x.amount, x.payee]), [['2026-09-03', '-2.00', 'Shop']]);
+  assert.deepEqual(q.errors.map((e) => [e.line, e.reason, e.raw]), [[7, 'date', '13/45/2026'], [11, 'amount', '']]);
+});
+
+test('import: OFX rows without a date or an amount are listed as skipped', () => {
+  const o = I.parseOfx('<OFX><BANKTRANLIST>\n<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20240305<TRNAMT>-1.00<FITID>A1<NAME>X\n</STMTTRN>\n<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>2024<TRNAMT>-2.00<FITID>A2<NAME>Y\n</STMTTRN>\n<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20240306<TRNAMT>0.00<FITID>A3<NAME>Z\n</STMTTRN></BANKTRANLIST></OFX>');
+  assert.deepEqual(o.items.map((x) => [x.line, x.ref]), [[2, 'A1']]);
+  assert.deepEqual(o.errors.map((e) => [e.line, e.reason, e.raw]), [[4, 'date', '2024'], [6, 'amount', '0.00']]);
+});
+
+test('import: rows of an undone import can be imported again, other deleted rows stay imported', async () => {
+  const st = L.createState();
+  const led = new LG.Ledger({ state: st });
+  let ms = Date.UTC(2026, 9, 1);
+  const op = (id, f, v) => ({ t: L.hlcString(ms++, 0, 'a1b2c3d4e5f60718'), e: 'transaction', id, f, v });
+  const items = [{ date: '2026-09-02', amount: '-23.40', memo: 'CORNER BAKERY', ref: '' }, { date: '2026-09-03', amount: '-9.99', memo: 'ICLOUD', ref: 'R9' }];
+  const undone = () => {
+    const live = new Set(led.list('transaction').map((x) => x.import_batch).filter(Boolean));
+    return (id) => { const gone = led.removed('transaction', id); return !!(gone && gone.import_batch && !live.has(gone.import_batch)); };
+  };
+  const ids = async () => { const seen = new Set(); const pred = undone(); const out = []; for (const it of items) out.push(await I.importId('acct', it, seen, pred)); return out; };
+  const first = await ids();
+  assert.deepEqual(first, [await I.itemId('acct', items[0], new Set()), await I.itemId('acct', items[1], new Set())]);
+  L.applyOps(st, first.map((id) => op(id, '*', { amount_minor: -1, import_batch: 'b1' })));
+  assert.deepEqual(await ids(), first);
+  L.applyOps(st, [op(first[1], '~', null)]);
+  assert.deepEqual(await ids(), first);
+  assert.equal(led.removed('transaction', first[1]).import_batch, 'b1');
+  assert.equal(led.removed('transaction', first[0]), null);
+  L.applyOps(st, [op(first[0], '~', null)]);
+  const second = await ids();
+  assert.ok(second.every((id, i) => /^imp:[0-9a-f]{24}$/.test(id) && id !== first[i] && !led.known('transaction', id)));
+  assert.deepEqual(await ids(), second);
+  L.applyOps(st, second.map((id) => op(id, '*', { amount_minor: -1, import_batch: 'b2' })));
+  assert.deepEqual(await ids(), second);
+  L.applyOps(st, second.map((id) => op(id, '~', null)));
+  const third = await ids();
+  assert.ok(third.every((id, i) => id !== first[i] && id !== second[i] && !led.known('transaction', id)));
 });
 
 test('import: ids are stable and dedupe identical rows', async () => {

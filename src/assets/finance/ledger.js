@@ -54,6 +54,7 @@ export class Ledger {
   get(e, id) { return L.get(this.state, e, id); }
   exists(e, id) { return L.exists(this.state, e, id); }
   known(e, id) { return L.known(this.state, e, id); }
+  removed(e, id) { return L.removed(this.state, e, id); }
 
   settings() {
     return this.cached('settings', () => {

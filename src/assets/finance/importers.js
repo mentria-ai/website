@@ -59,7 +59,7 @@ export function parseCsv(text) {
 }
 
 const ROLE_RE = {
-  date: /^(txn|tran|transaction|posting|booking|value|trade|settlement|operation)?(date|dt|datum|fecha|data)$|^(buchungstag|buchungsdatum|valuta|valutadatum|wertstellung|datevaleur|dateoperation|datedoperation|fechaoperacion|fechavalor|datamovimento|datalancamento|torihikibi|riyoubi)$/,
+  date: /^(txn|tran|trans|transaction|posting|posted|post|booking|value|trade|settlement|operation|completed)?(date|dt|datum|fecha|data)$|^(buchungstag|buchungsdatum|valuta|valutadatum|wertstellung|datevaleur|dateoperation|datedoperation|fechaoperacion|fechavalor|datamovimento|datalancamento|torihikibi|riyoubi)$/,
   payee: /(narration|particular|description|memo|remark|detail|payee|name|merchant|beneficiary|counterparty|libelle|concepto|descricao|verwendungszweck|reference|ref)/,
   debit: /^(withdrawal|debit|dr|out|paidout|moneyout|withdrawalamt|debitamount|spent|charge)/,
   credit: /^(deposit|credit|cr|in|paidin|moneyin|depositamt|creditamount|received)/,
@@ -71,7 +71,18 @@ const ROLE_RE = {
   note: /^(note|notes|nota|notas|memo|memos|remarque|remarques|commentaire|commentaires|comment|comments|observacao|observacoes|notiz|notizen|bemerkung)$/
 };
 
+const LATE_DATE = /^(started|start)(date|dt)$/;
+const WEAK_PAYEE = /(detail|memo|ref)/;
+const ROLE_ORDER = ['date', 'debit', 'credit', 'balance', 'currency', 'ref', 'amount', 'payee', 'note'];
+const DEBIT_FLAGS = new Set(['d', 'dr', 'db', 'deb', 'debit', 'debito', 'withdrawal', 'out', 's', 'soll', '-']);
+const CREDIT_FLAGS = new Set(['c', 'cr', 'cred', 'credit', 'credito', 'deposit', 'in', 'h', 'haben', '+']);
+
 function norm(h) { return String(h || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, ''); }
+
+export function flagSign(v) {
+  const s = String(v == null ? '' : v).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z+-]/g, '');
+  return DEBIT_FLAGS.has(s) ? -1 : CREDIT_FLAGS.has(s) ? 1 : 0;
+}
 
 export function guessHeader(rows) {
   let best = { idx: 0, score: -1 };
@@ -90,20 +101,52 @@ export function guessHeader(rows) {
   return best.score >= 3 ? best.idx : -1;
 }
 
-export function guessRoles(header) {
+function payeeOk(n) {
+  return !(ROLE_RE.balance.test(n) || ROLE_RE.ref.test(n) && !/(desc|narr|memo|partic)/.test(n));
+}
+
+function assignRoles(cells, skipWeakPayee) {
   const roles = {};
-  header.forEach((cell, i) => {
-    const n = norm(cell);
-    for (const role of ['date', 'debit', 'credit', 'drcr', 'balance', 'currency', 'ref', 'amount', 'payee', 'note']) {
-      if (roles[role] != null) continue;
-      if (ROLE_RE[role].test(n)) {
-        if (role === 'payee' && (ROLE_RE.balance.test(n) || ROLE_RE.ref.test(n) && !/(desc|narr|memo|partic)/.test(n))) continue;
-        if (role === 'amount' && (roles.debit === i || roles.credit === i || ROLE_RE.balance.test(n))) continue;
-        roles[role] = i;
-        break;
-      }
+  cells.forEach((n, i) => {
+    if (!n || ROLE_RE.drcr.test(n)) return;
+    for (const role of ROLE_ORDER) {
+      if (roles[role] != null || !ROLE_RE[role].test(n)) continue;
+      if (role === 'payee' && (!payeeOk(n) || skipWeakPayee && WEAK_PAYEE.test(n))) continue;
+      if (role === 'amount' && (ROLE_RE.balance.test(n) || ROLE_RE.date.test(n))) continue;
+      roles[role] = i;
+      break;
     }
   });
+  return roles;
+}
+
+function flagShare(body, c) {
+  const vals = body.map((r) => String(r[c] == null ? '' : r[c]).trim()).filter(Boolean);
+  if (!vals.length) return 0;
+  return vals.filter((v) => flagSign(v) !== 0).length / vals.length;
+}
+
+function flagColumn(cells, roles, body) {
+  const cand = [];
+  cells.forEach((n, i) => { if (n && ROLE_RE.drcr.test(n)) cand.push(i); });
+  const ok = body ? cand.filter((c) => flagShare(body, c) >= 0.8) : cand;
+  if (!ok.length) return null;
+  if (roles.amount != null && ok.includes(roles.amount + 1)) return roles.amount + 1;
+  const free = ok.filter((c) => roles.balance == null || c !== roles.balance + 1);
+  return (free.length ? free : ok)[0];
+}
+
+export function guessRoles(header, body) {
+  const cells = header.map(norm);
+  let roles = assignRoles(cells, true);
+  if (roles.payee == null) roles = assignRoles(cells, false);
+  if (roles.date == null) {
+    const used = new Set(Object.values(roles));
+    const i = cells.findIndex((n, j) => LATE_DATE.test(n) && !used.has(j));
+    if (i >= 0) roles.date = i;
+  }
+  const drcr = flagColumn(cells, roles, body);
+  if (drcr != null) roles.drcr = drcr;
   return roles;
 }
 
@@ -113,7 +156,7 @@ export function guessRolesFromData(rows) {
   for (let c = 0; c < cols; c++) {
     const vals = rows.slice(0, 20).map((r) => r[c] || '').filter(Boolean);
     if (!vals.length) continue;
-    if (roles.date == null && vals.every((v) => parseDateLoose(v))) { roles.date = c; continue; }
+    if (roles.date == null && [true, false].some((dayFirst) => vals.every((v) => parseDateLoose(v, { dayFirst })))) { roles.date = c; continue; }
     if (roles.amount == null && vals.every((v) => /^[-+(]?[\d\s.,'$€£₹¥]+\)?$/.test(v))) { roles.amount = c; continue; }
     if (roles.payee == null && vals.some((v) => /[A-Za-z]{3}/.test(v))) roles.payee = c;
   }
@@ -145,25 +188,69 @@ export function numberWith(raw, style) {
   return normalizeNumber(raw, null, style || undefined);
 }
 
+export function guessMode(roles, body, style) {
+  if (roles.debit != null && roles.credit != null) return 'debitcredit';
+  const amounts = roles.amount == null ? [] : body.map((r) => String(r[roles.amount] == null ? '' : r[roles.amount]).trim()).filter(Boolean);
+  if (amounts.some((v) => { const n = numberWith(v, style); return n != null && n.startsWith('-') && Number(n) !== 0; })) return 'amount';
+  if (roles.drcr != null && roles.amount != null) return 'drcr';
+  const cols = [roles.amount, roles.debit, roles.credit].filter((x) => x != null);
+  for (const r of body) for (const c of cols) if (r[c] && /\b(cr|dr)\b/i.test(r[c])) return 'suffix';
+  return 'amount';
+}
+
+export function guessCsvSetup(rows, dayFirstDefault, headerAt) {
+  const headerIdx = headerAt != null ? headerAt : guessHeader(rows);
+  const header = headerIdx >= 0 ? rows[headerIdx] : null;
+  const body = rows.slice(headerIdx + 1, headerIdx + 201);
+  const roles = header ? guessRoles(header, body) : guessRolesFromData(rows);
+  const vals = [];
+  for (const r of body) for (const c of [roles.amount, roles.debit, roles.credit]) if (c != null && r[c]) vals.push(r[c]);
+  const numberStyle = detectNumberStyle(vals);
+  const mode = guessMode(roles, body, numberStyle);
+  const dayFirst = detectDateStyle(body.map((r) => (roles.date != null ? r[roles.date] : '')), dayFirstDefault);
+  return { headerIdx, header, roles, mode, numberStyle, dayFirst };
+}
+
 function titleCase(word) {
   if (word.length <= 2 || word.includes('.') || /[a-z]/.test(word) || !/[A-Z]/.test(word)) return word;
   return word.charAt(0) + word.slice(1).toLowerCase();
 }
 
-const CHANNEL = /^(upi|neft|imps|rtgs|pos|ach|ecom|vps|nach|mmt|tfr|trf|ib|mb|dc|cc|bil|onl|purchase|payment|pmt|debit|credit|card|txn|ref|utr|rrn)$/i;
+const CHANNEL = /^(upi|neft|imps|rtgs|pos|ach|ecom|vps|nach|mmt|tfr|trf|ib|mb|dc|cc|bil|onl|purchase|payment|pmt|debit|credit|card|checkcard|txn|ref|utr|rrn|p2m|p2a)$/i;
+const ACH_TAIL = /\s(des|indn|co id|(ppd|ccd|web|tel|ctx|iat) id):.*$/i;
+const AUTH_ON = /\bauthori[sz]ed on \d{1,2}\/\d{1,2}\b/i;
+const VPA = /^([a-z0-9][a-z0-9._-]*)@[a-z][a-z0-9]*$/i;
+const UPI_APPS = /^(paytm|phonepe|bharatpe|gpay|googlepay|mobikwik|freecharge|payzapp|upi|pay)$/i;
+
+function codeLike(tok) {
+  const letters = (tok.match(/[A-Za-z]/g) || []).length;
+  const digits = (tok.match(/\d/g) || []).length;
+  return tok.length >= 8 && digits >= 3 && letters >= 2 || /[A-Za-z]+\d{5,}/.test(tok);
+}
+
+function vpaName(s) {
+  for (const tok of s.split(/[\s/|*]+/)) {
+    const m = tok.match(VPA);
+    if (!m) continue;
+    const parts = m[1].split(/[._-]+/).filter((x) => /^[a-z]+$/i.test(x) && !UPI_APPS.test(x));
+    if (parts.some((x) => x.length >= 3)) return parts.map((x) => x.charAt(0).toUpperCase() + x.slice(1).toLowerCase()).join(' ');
+  }
+  return '';
+}
 
 export function cleanPayee(text) {
-  const s = String(text || '').replace(/\s+/g, ' ').trim();
-  const raw = s.split(/[\s/|*]+/).flatMap((tok) => (/\d{5,}/.test(tok) && tok.includes('-') ? tok.split('-') : [tok]));
+  const full = String(text || '').replace(/\s+/g, ' ').trim();
+  const s = vpaName(full) || full.replace(ACH_TAIL, '').replace(AUTH_ON, ' ').replace(/\s+/g, ' ').trim();
+  const raw = s.split(/[\s/|*]+/).flatMap((tok) => (tok.includes('-') && (/\d{5,}/.test(tok) || tok.split('-').some((x) => CHANNEL.test(x) || codeLike(x))) ? tok.split('-') : [tok]));
   const parts = [];
   for (let tok of raw) {
     if (!tok) continue;
     tok = tok.replace(/\.(com|net|org|in|co|io)(\.[a-z]{2})?$/i, '');
-    if (!tok || tok.includes('.') && !/^[A-Za-z]\.[A-Za-z]\.?$/.test(tok)) continue;
-    if (/^[\dX*#]{5,}$/i.test(tok) || /[A-Za-z]+\d{5,}/.test(tok)) continue;
+    if (!tok || tok.includes('@') || tok.includes('.') && !/^[A-Za-z]\.[A-Za-z]\.?$/.test(tok)) continue;
+    if (/^[\dX*#]{5,}$/i.test(tok) || codeLike(tok)) continue;
     if (/^#?\d[\d-]*$/.test(tok) && tok.replace(/\D/g, '').length >= 2) continue;
-    if (/^#\w+$/.test(tok)) continue;
-    if (CHANNEL.test(tok)) continue;
+    if (/^#\w*$/.test(tok) || /^\w+#:?$/.test(tok)) continue;
+    if (CHANNEL.test(tok.replace(/:$/, ''))) continue;
     parts.push(tok);
   }
   const words = parts.length ? parts : s.split(' ').slice(0, 4);
@@ -214,8 +301,8 @@ export function csvToRows(rows, opts) {
       else if (c && Number(c) !== 0) amount = c.replace(/^-/, '');
     } else if (o.mode === 'drcr') {
       const a = num(r.amount);
-      const flag = String(row[r.drcr] || '').trim().toLowerCase();
-      if (a) amount = /^(d|dr|debit|deb|withdrawal|s|out|-)/.test(flag) ? '-' + a.replace(/^-/, '') : a.replace(/^-/, '');
+      const sign = r.drcr == null ? 0 : flagSign(row[r.drcr]);
+      if (a) amount = sign < 0 ? '-' + a.replace(/^-/, '') : sign > 0 ? a.replace(/^-/, '') : a;
     } else if (o.mode === 'suffix') {
       const raw = String(row[r.amount] || '');
       const a = num(r.amount);
@@ -237,7 +324,7 @@ export function csvToRows(rows, opts) {
       item.tags = cell(row, r.tags).split(',').map((x) => x.trim()).filter(Boolean).slice(0, 12);
       item.transfer = !!xferLabel && cell(row, r.type).toLowerCase() === xferLabel;
     }
-    if (!date) errors.push({ line: item.line, reason: 'date', raw: dateRaw });
+    if (!date) errors.push({ line: item.line, reason: 'date', raw: String(dateRaw || '').trim() || row.join(' | ').slice(0, 80) });
     else if (!amount || Number(amount) === 0) errors.push({ line: item.line, reason: 'amount', raw: row.join(' | ').slice(0, 80) });
     else out.push(item);
   });
@@ -263,49 +350,76 @@ function decodeEntities(s) {
 export function parseOfx(text) {
   const src = String(text || '');
   const items = [];
+  const errors = [];
   const re = /<STMTTRN>([\s\S]*?)(?:<\/STMTTRN>|(?=<STMTTRN>)|(?=<\/BANKTRANLIST>))/gi;
   let m;
+  let pos = 0;
+  let line = 1;
   while ((m = re.exec(src))) {
+    for (; pos < m.index; pos++) if (src.charCodeAt(pos) === 10) line++;
     const b = m[1];
     const amount = normalizeNumber(tagVal(b, 'TRNAMT'), null, { group: ',', decimal: '.' });
     const date = ofxDate(tagVal(b, 'DTPOSTED')) || ofxDate(tagVal(b, 'DTUSER'));
     const name = decodeEntities(tagVal(b, 'NAME') || tagVal(b, 'PAYEE'));
     const memo = decodeEntities(tagVal(b, 'MEMO'));
-    if (!date || !amount || Number(amount) === 0) continue;
-    items.push({ date, amount, payee: cleanPayee(name || memo), memo: memo || name, ref: tagVal(b, 'FITID'), type: tagVal(b, 'TRNTYPE'), balance: null, currency: null });
+    if (!date) { errors.push({ line, reason: 'date', raw: tagVal(b, 'DTPOSTED') || tagVal(b, 'DTUSER') }); continue; }
+    if (!amount || Number(amount) === 0) { errors.push({ line, reason: 'amount', raw: tagVal(b, 'TRNAMT') }); continue; }
+    items.push({ line, date, amount, payee: cleanPayee(name || memo), memo: memo || name, ref: tagVal(b, 'FITID'), type: tagVal(b, 'TRNTYPE'), balance: null, currency: null });
   }
   const currency = tagVal(src, 'CURDEF') || null;
   const acctId = tagVal(src, 'ACCTID');
   const bal = tagVal(src.slice(src.search(/<LEDGERBAL>/i) >= 0 ? src.search(/<LEDGERBAL>/i) : src.length), 'BALAMT');
   const card = /<CCSTMTRS>/i.test(src);
-  return { items, errors: [], currency: isCurrency(currency) ? currency : null, accountHint: acctId ? acctId.slice(-4) : '', closing: bal ? normalizeNumber(bal, null, { group: ',', decimal: '.' }) : null, card };
+  return { items, errors, currency: isCurrency(currency) ? currency : null, accountHint: acctId ? acctId.slice(-4) : '', closing: bal ? normalizeNumber(bal, null, { group: ',', decimal: '.' }) : null, card };
 }
 
-export function parseQif(text, dayFirst) {
-  const items = [];
-  let cur = {};
+const QIF_LISTS = /^(cat|class|memorized|prices|security)$/i;
+
+function qifDateText(v) { return String(v || '').replace(/'/g, '/').replace(/\s/g, ''); }
+
+function qifRecords(text) {
+  const recs = [];
+  let cur = null;
+  let skip = false;
   let type = '';
-  const flush = () => {
-    if (cur.D && cur.T) {
-      const date = parseDateLoose(cur.D.replace(/'/g, '/').replace(/\s/g, ''), { dayFirst });
-      const amount = normalizeNumber(cur.T, null, /,\d{2}$/.test(cur.T) && !/\.\d{2}$/.test(cur.T) ? { group: '.', decimal: ',' } : { group: ',', decimal: '.' });
-      if (date && amount && Number(amount) !== 0) items.push({ date, amount, payee: cleanPayee(cur.P || cur.M || ''), memo: cur.M || cur.P || '', ref: cur.N || '', category: cur.L || '', balance: null, currency: null });
-    }
-    cur = {};
-  };
-  for (const raw of String(text || '').split(/\r\n|\n|\r/)) {
+  const end = () => { if (cur && !skip) recs.push(cur); cur = null; };
+  String(text || '').split(/\r\n|\n|\r/).forEach((raw, i) => {
     const line = raw.trim();
-    if (!line) continue;
-    if (line.startsWith('!')) { flush(); if (/^!Type:/i.test(line)) type = line.slice(6).trim(); continue; }
-    if (line === '^') { flush(); continue; }
+    if (!line) return;
+    if (line.startsWith('!')) {
+      end();
+      if (/^!Type:/i.test(line)) { type = line.slice(6).trim(); skip = QIF_LISTS.test(type); }
+      else if (/^!Account/i.test(line)) skip = true;
+      return;
+    }
+    if (line === '^') { end(); return; }
+    if (!cur) cur = { line: i + 1 };
     const k = line[0];
     const v = line.slice(1).trim();
     if (k === 'U' && !cur.T) cur.T = v;
     else if (k === 'T') cur.T = v;
     else if ('DPMNL'.includes(k)) cur[k] = v;
+  });
+  end();
+  return { recs, type };
+}
+
+export function qifDayFirst(text, dayFirstDefault) {
+  return detectDateStyle(qifRecords(text).recs.map((r) => qifDateText(r.D)), dayFirstDefault);
+}
+
+export function parseQif(text, dayFirst) {
+  const { recs, type } = qifRecords(text);
+  const items = [];
+  const errors = [];
+  for (const cur of recs) {
+    const date = cur.D ? parseDateLoose(qifDateText(cur.D), { dayFirst }) : null;
+    const amount = cur.T ? normalizeNumber(cur.T, null, /,\d{2}$/.test(cur.T) && !/\.\d{2}$/.test(cur.T) ? { group: '.', decimal: ',' } : { group: ',', decimal: '.' }) : null;
+    if (!date) errors.push({ line: cur.line, reason: 'date', raw: cur.D || '' });
+    else if (!amount || Number(amount) === 0) errors.push({ line: cur.line, reason: 'amount', raw: cur.T || '' });
+    else items.push({ line: cur.line, date, amount, payee: cleanPayee(cur.P || cur.M || ''), memo: cur.M || cur.P || '', ref: cur.N || '', category: cur.L || '', balance: null, currency: null });
   }
-  flush();
-  return { items, errors: [], type };
+  return { items, errors, type };
 }
 
 export function parseCamt(text) {
@@ -315,8 +429,11 @@ export function parseCamt(text) {
   const one = (el, tag) => all(el, tag)[0] || null;
   const txt = (el) => (el ? el.textContent.trim() : '');
   const items = [];
+  const errors = [];
   let currency = null;
+  let n = 0;
   for (const e of all(doc, 'Ntry')) {
+    n++;
     const amtEl = one(e, 'Amt');
     const amount = normalizeNumber(txt(amtEl), null, { group: ',', decimal: '.' });
     const ccy = amtEl ? amtEl.getAttribute('Ccy') : null;
@@ -329,10 +446,11 @@ export function parseCamt(text) {
     const name = party ? txt(one(party, 'Nm')) : '';
     const memo = all(e, 'Ustrd').map(txt).join(' ').trim() || txt(one(e, 'AddtlNtryInf'));
     const ref = txt(one(e, 'EndToEndId')) || txt(one(e, 'AcctSvcrRef')) || txt(one(e, 'NtryRef'));
-    if (!isISODate(date) || !amount || Number(amount) === 0) continue;
-    items.push({ date, amount: sign + amount.replace(/^-/, ''), payee: cleanPayee(name || memo), memo: memo || name, ref: ref === 'NOTPROVIDED' ? '' : ref, balance: null, currency: ccy && isCurrency(ccy) ? ccy : null });
+    if (!isISODate(date)) { errors.push({ line: n, reason: 'date', raw: date }); continue; }
+    if (!amount || Number(amount) === 0) { errors.push({ line: n, reason: 'amount', raw: txt(amtEl) }); continue; }
+    items.push({ line: n, date, amount: sign + amount.replace(/^-/, ''), payee: cleanPayee(name || memo), memo: memo || name, ref: ref === 'NOTPROVIDED' ? '' : ref, balance: null, currency: ccy && isCurrency(ccy) ? ccy : null });
   }
-  return { items, errors: [], currency };
+  return { items, errors, currency };
 }
 
 export async function itemId(accountId, item, seen) {
@@ -345,6 +463,18 @@ export async function itemId(accountId, item, seen) {
   const bytes = new TextEncoder().encode(accountId + '|' + key);
   const d = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
   return 'imp:' + Array.from(d.slice(0, 12), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function retryId(id, n) {
+  const d = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(id + '|' + n)));
+  return 'imp:' + Array.from(d.slice(0, 12), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+export async function importId(accountId, item, seen, undone) {
+  const first = await itemId(accountId, item, seen);
+  let id = first;
+  for (let n = 2; n < 50 && undone && undone(id); n++) id = await retryId(first, n);
+  return id;
 }
 
 export function headerSignature(header) {

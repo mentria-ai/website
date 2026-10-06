@@ -1882,6 +1882,14 @@
         "fpv-drone": "Fly a racing drone through glowing gates over hills, a container yard and a desert canyon. Acro or self-level flight, medals, ghost races and a free-flight map. Works with touch, controller or keyboard.",
         "nitro-racer": "Arcade street racing against five rivals: drift to fill your nitro, hit the jumps and chase medals on a neon city circuit, a coastal highway and a desert canyon. Works with touch, tilt, controller or keyboard.",
         "finance": "Track spending, budgets, bills, investments and taxes, with forecasts. Encrypted on your device and synced only between your own devices."
+      },
+      "cmd": {
+        "finance": {
+          "fin-add": "add a transaction, e.g. fin-add coffee 4.50",
+          "fin-budget": "open this month's budgets",
+          "fin-subs": "open subscriptions and bills",
+          "fin-tax": "open the tax estimate"
+        }
       }
     },
     "bubble-level": {
@@ -4262,6 +4270,7 @@
         "name": "Name",
         "name_ph": "e.g. Rent, Music, Phone plan",
         "kind_label": "Type",
+        "kind_pick": "Bill or subscription?",
         "kind": {
           "subscription": "Subscription",
           "bill": "Bill",
@@ -4314,6 +4323,7 @@
         "active": "Still active",
         "price_history": "Price changes",
         "err_name": "Give it a name.",
+        "err_kind": "Choose whether this is a bill or a subscription.",
         "delete_title": "Delete this bill?",
         "delete_body": "{name} stops showing as upcoming. Payments already recorded stay in your ledger.",
         "none_upcoming": "Nothing due. Add rent, bills and subscriptions to see them here.",
@@ -4987,7 +4997,6 @@
         "removed": "Device removed",
         "add_body": "On the other device, open Finance, choose \"I use Finance on another device\" and type this code. It works for 10 minutes.",
         "add_hint": "Both devices need to be online. Your ledger goes directly between them, encrypted; nothing is stored on a server.",
-        "qr_label": "QR code with the pairing code",
         "waiting": "Waiting for your other device…",
         "peer_found": "Found {name}. Check it shows the same number:",
         "approve": "Numbers match, send",

@@ -276,15 +276,9 @@ async function autoPost() {
   const ops = [];
   for (const s of L.schedules()) {
     const dates = L.autoPostDates(s, today);
-    if (!dates.length) continue;
-    const acct = L.get('account', s.account);
     for (const d of dates) {
-      const id = 'sch:' + s.id + ':' + d;
-      ops.push(...app.engine.createOps('transaction', id, {
-        date: d, amount_minor: s.amount_minor || 0, currency: (acct && acct.currency) || s.currency || L.base(), account: s.account,
-        category: s.category || null, payee: s.payee || s.name || '', note: '', tags: [], kind: (s.amount_minor || 0) > 0 ? 'income' : 'expense',
-        schedule_id: s.id, cleared: false, created: new Date().toISOString(), provenance: 'schedule'
-      }));
+      const p = L.scheduledTxn(s, d);
+      ops.push(...app.engine.createOps('transaction', p.id, p.fields));
     }
   }
   if (ops.length) await app.engine.commit(ops);

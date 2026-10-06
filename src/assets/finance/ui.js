@@ -1,4 +1,4 @@
-import { format, decimalsFor, currencySymbol, normalizeNumber, toMinor, minorToDecimal, localeSeparators } from './money.js';
+import { format, decimalsFor, currencySymbol, normalizeNumber, typedNumber, toMinor, minorToDecimal, localeSeparators } from './money.js';
 import { formatDate, formatMonthKey } from './dates.js';
 
 const SVGNS = 'http://www.w3.org/2000/svg';
@@ -175,9 +175,29 @@ export function month(key, short) { return formatMonthKey(key, locale(), short);
 export function symbol(ccy) { return currencySymbol(ccy, locale()); }
 
 export function parseAmount(text, ccy) {
-  const dec = normalizeNumber(text, locale());
+  const dec = typedNumber(text, locale(), decimalsFor(ccy));
   if (dec == null) return null;
   try { return toMinor(dec, ccy); } catch (_) { return null; }
+}
+
+export function readNumber(text, decimals) {
+  return typedNumber(text, locale(), decimals);
+}
+
+export function unusualReading(text, decimals) {
+  const dec = typedNumber(text, locale(), decimals);
+  return dec != null && dec !== normalizeNumber(text, locale()) ? dec : null;
+}
+
+export function readBack(input, decimals, show) {
+  const note = h('span', { class: 'ff__read', 'aria-live': 'polite', hidden: true });
+  input.addEventListener('input', () => {
+    if (!note.isConnected && input.parentNode) input.after(note);
+    const dec = unusualReading(input.value, typeof decimals === 'function' ? decimals() : decimals);
+    note.textContent = dec == null ? '' : t('entry.nl_read', { what: show(dec) });
+    note.hidden = dec == null;
+  });
+  return input;
 }
 
 export function amountToInput(minor, ccy) {

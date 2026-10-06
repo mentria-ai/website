@@ -11,6 +11,11 @@
           { id: {{ ext.id | dump | safe }}, title: {{ ext.name | dump | safe }}, keywords: {{ (("tool.ext_gallery.desc." + ext.id) | t) | dump | safe }}{% if ext.schemaCategory == "GameApplication" %}, group: {{ ("home.launcher.games" | t) | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
           {%- endfor %}
         ],
+        extCmds: {
+          {%- for ext in extensions %}{% if ext.manifest.mounts and ext.manifest.mounts.commands %}{% for c in ext.manifest.mounts.commands %}{% set cmdKey = "tool.ext_gallery.cmd." + ext.id + "." + c.name %}{% if cmdKey | hasKey %}
+          {{ (ext.id + " " + c.name) | dump | safe }}: {{ (cmdKey | t) | dump | safe }},
+          {%- endif %}{% endfor %}{% endif %}{% endfor %}
+        },
         nav: [
           { id: "home", title: {{ ("nav.home" | t) | dump | safe }}, href: "/" },
           { id: "tools", title: {{ ("nav.tools" | t) | dump | safe }}, href: "/tools/" },

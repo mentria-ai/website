@@ -32,7 +32,8 @@ export function scheduleSheet(ctx, sch, preset) {
   const acctCcy = (id) => ((L.get('account', id) || {}).currency) || base;
   const orphan = !!sch && L.scheduleOrphaned(sch);
   const name = U.input({ value: s.name || '', maxlength: '60', placeholder: t('subs.name_ph') });
-  const kind = U.select(['subscription', 'bill', 'income'].map((k) => ({ value: k, label: t('subs.kind.' + k) })), s.kind || 'subscription');
+  const kindOpts = ['subscription', 'bill', 'income'].map((k) => ({ value: k, label: t('subs.kind.' + k) }));
+  const kind = s.kind === '' ? U.select([{ value: '', label: t('subs.kind_pick'), disabled: true }].concat(kindOpts), '') : U.select(kindOpts, s.kind || 'subscription');
   const amount = U.moneyField({ value: s.amount_minor ? U.amountToInput(s.amount_minor, acctCcy(s.account)) : '', placeholder: '0' });
   const acct = U.select(L.accounts().map((a) => ({ value: a.id, label: a.name + (a.currency !== base ? ' · ' + a.currency : '') })), orphan ? L.lastAccount() : s.account || L.lastAccount());
   const catSel = U.select([], '');
@@ -101,6 +102,7 @@ export function scheduleSheet(ctx, sch, preset) {
   save.addEventListener('click', () => {
     const nm = name.value.trim();
     if (!nm) { err.textContent = t('subs.err_name'); return; }
+    if (!kind.value) { err.textContent = t('subs.err_kind'); return; }
     const ccy = acctCcy(acct.value);
     const v = U.parseAmount(amount.value, ccy);
     if (!v) { err.textContent = t('entry.err_amount'); return; }
@@ -228,14 +230,14 @@ function foundTab(ctx) {
   if (!streams.length) { node.append(U.empty(t('subs.found_none'))); return node; }
   for (const st of streams) {
     const ccy = st.currency || L.base();
-    node.append(h('div', { class: 'frow frow--static' },
+    node.append(h('div', { class: 'frow frow--static frow--found' },
       U.mono(st.payee, U.colorFor(st.key)),
       h('span', { class: 'frow__main' }, h('span', { class: 'frow__title' }, st.payee),
         h('span', { class: 'frow__meta' }, t('subs.found_meta', { cycle: t('subs.cycle.' + (st.cadence === 'half' ? 'half' : st.cadence)), n: st.count, date: U.date(st.last, 'dayMonth') }) + (st.variable ? ' · ' + t('subs.varies') : '') + (st.state === 'stale' ? ' · ' + t('subs.maybe_ended') : ''))),
-      h('span', { class: 'fb-row', style: { flexWrap: 'nowrap' } },
-        h('span', { class: 'frow__amt ' + (st.dir === 'in' ? 'amt--in' : '') }, (st.variable ? '≈ ' : '') + U.money(st.amount, ccy)),
+      h('span', { class: 'frow__amt ' + (st.dir === 'in' ? 'amt--in' : '') }, (st.variable ? '≈ ' : '') + U.money(st.amount, ccy)),
+      h('span', { class: 'fb-row frow__acts', style: { flexWrap: 'nowrap' } },
         h('button', { type: 'button', class: 'fb fb--sm fb--primary', onclick: () => scheduleSheet(ctx, null, {
-          name: st.payee, payee: st.payee, kind: st.dir === 'in' ? 'income' : 'subscription', amount_minor: st.dir === 'in' ? st.amount : -st.amount,
+          name: st.payee, payee: st.payee, kind: st.dir === 'in' ? 'income' : '', amount_minor: st.dir === 'in' ? st.amount : -st.amount,
           account: st.account, category: st.category, rule: Object.assign({}, st.rule), anchor: nextDue(st, L.today()), auto_post: !st.variable, stream_id: st.id
         }) }, t('subs.track')),
         h('button', { type: 'button', class: 'fb fb--sm fb--ghost', 'aria-label': t('common.dismiss'), onclick: () => ctx.commit(ctx.save('stream', st.id, { state: 'dismissed', payee_key: st.key }), t('subs.dismissed')) }, icon('close')))));

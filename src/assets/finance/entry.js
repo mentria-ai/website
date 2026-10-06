@@ -1,5 +1,5 @@
 import * as U from './ui.js';
-import { decimalsFor, convertMinor, normalizeNumber, localeSeparators, minorToDecimal, toMinor, trimDecimal, decimalToInput } from './money.js';
+import { decimalsFor, convertMinor, localeSeparators, minorToDecimal, toMinor, trimDecimal, decimalToInput, formatDecimal } from './money.js';
 import { isISODate, weekday, weekdayNames } from './dates.js';
 import { parseEntry, aiPrompt, parseAiJson } from './nl.js';
 import { payeeKey } from './ledger.js';
@@ -26,7 +26,7 @@ export function nlContext(L) {
 
 function decimalChar() { return localeSeparators(U.locale()).decimal; }
 function fieldText(dec) { return decimalToInput(dec, U.locale()); }
-function fromField(text) { return normalizeNumber(text, U.locale()) || ''; }
+function fromField(text, decimals) { return U.readNumber(text, decimals) || ''; }
 
 export function minorFromTyped(str, ccy) {
   if (!str) return null;
@@ -109,6 +109,7 @@ export function openEntry(ctx, opts) {
   const keypad = touch ? h('div', { class: 'fkp' }) : null;
   const err = h('p', { class: 'ff__err', role: 'alert' });
   let showAllCats = false;
+  let fxPreview = null;
 
   function renderType() {
     typeSeg.replaceChildren(U.seg([
@@ -127,6 +128,18 @@ export function openEntry(ctx, opts) {
     amountEl.classList.toggle('is-in', st.mode === 'in');
     ccyChip.textContent = ccy;
     if (document.activeElement !== amountInput) amountInput.value = fieldText(st.typed);
+    updateFx();
+  }
+
+  function updateFx() {
+    if (!fxPreview) return;
+    const ccy = acctCcy(st.account);
+    const m = amountMinor();
+    const rate = st.fxTyped ? minorFromTyped(st.fxTyped, 6) : L.rateE6(ccy, base, st.date);
+    let text = '';
+    if (m && rate) { try { text = U.money(m, ccy) + ' ≈ ' + U.money(convertMinor(m, ccy, base, rate), base); } catch (_) {} }
+    fxPreview.textContent = text;
+    fxPreview.hidden = !text;
   }
 
   function catList() {
@@ -174,7 +187,7 @@ export function openEntry(ctx, opts) {
     const to = U.select([{ value: '', label: t('entry.pick_account'), disabled: true }].concat(acctOptions(st.account)), st.toAccount || '', { onchange: (e) => { st.toAccount = e.target.value; refreshAll(); } });
     const kids = [U.field(t('entry.from'), from), U.field(t('entry.to'), to)];
     if (st.toAccount && acctCcy(st.toAccount) !== acctCcy(st.account)) {
-      const rec = U.moneyField({ value: fieldText(st.toTyped), placeholder: '0', oninput: (e) => { st.toTyped = fromField(e.target.value); } });
+      const rec = U.moneyField({ value: fieldText(st.toTyped), placeholder: '0', oninput: (e) => { st.toTyped = fromField(e.target.value, decimalsFor(acctCcy(st.toAccount))); } });
       kids.push(U.field(t('entry.received', { ccy: acctCcy(st.toAccount) }), rec, t('entry.received_hint'), 'ff--wide'));
     }
     xferWrap.replaceChildren(h('div', { class: 'ff-grid', style: { margin: '8px 0 4px' } }, ...kids));
@@ -207,6 +220,7 @@ export function openEntry(ctx, opts) {
   function renderMore() {
     if (st.mode === 'xfer') { moreWrap.replaceChildren(); moreWrap.hidden = true; return; }
     moreWrap.hidden = false;
+    fxPreview = null;
     const ccy = acctCcy(st.account);
     const tags = U.input({ value: (st.tags || []).join(', '), placeholder: t('entry.tags_ph'), oninput: (e) => { st.tags = e.target.value.split(',').map((x) => x.trim()).filter(Boolean).slice(0, 12); } });
     const cleared = U.checkbox(t('entry.cleared'), st.cleared, (v) => { st.cleared = v; });
@@ -215,8 +229,11 @@ export function openEntry(ctx, opts) {
     kids.push(grid);
     if (ccy !== base) {
       const known = L.rateE6(ccy, base, st.date);
-      const fx = U.moneyField({ value: fieldText(st.fxTyped || (known ? trimDecimal(minorToDecimal(known, 6)) : '')), placeholder: fieldText('0.00'), oninput: (e) => { st.fxTyped = fromField(e.target.value); } });
+      const fx = U.moneyField({ value: fieldText(st.fxTyped || (known ? trimDecimal(minorToDecimal(known, 6)) : '')), placeholder: fieldText('0.00'), oninput: (e) => { st.fxTyped = fromField(e.target.value, 6); updateFx(); } });
+      U.readBack(fx, 6, (dec) => formatDecimal(trimDecimal(dec), U.locale()));
+      fxPreview = h('span', { class: 'ff__hint fnum', 'aria-live': 'polite' });
       grid.append(U.field(t('entry.fx', { from: ccy, to: base }), fx, known ? t('entry.fx_known') : t('entry.fx_needed'), 'ff--wide'));
+      fx.after(fxPreview);
       if (!known) moreWrap.open = true;
     }
     const splitBox = h('div', { class: 'ff ff--wide', style: { gridColumn: '1 / -1' } });
@@ -235,7 +252,7 @@ export function openEntry(ctx, opts) {
       st.lines.forEach((ln, i) => {
         splitBox.append(h('div', { class: 'fsplit' },
           U.select(opts, ln.category || '', { onchange: (e) => { ln.category = e.target.value || null; } }),
-          U.moneyField({ value: fieldText(ln.typed), placeholder: '0', oninput: (e) => { ln.typed = fromField(e.target.value); updateSplitSum(); } }),
+          U.moneyField({ value: fieldText(ln.typed), placeholder: '0', oninput: (e) => { ln.typed = fromField(e.target.value, decimalsFor(ccy)); updateSplitSum(); } }),
           h('button', { type: 'button', class: 'fb fb--ghost fb--icon', 'aria-label': t('common.remove'), onclick: () => { st.lines.splice(i, 1); if (st.lines.length < 2) st.lines = null; renderSplit(); } }, icon('close'))
         ));
       });
@@ -255,6 +272,7 @@ export function openEntry(ctx, opts) {
     grid.append(splitBox);
     moreWrap.replaceChildren(...kids);
     if (st.lines || (st.tags && st.tags.length)) moreWrap.open = true;
+    updateFx();
   }
 
   function renderKeypad() {
@@ -334,7 +352,7 @@ export function openEntry(ctx, opts) {
     aiBtn.disabled = false;
   });
 
-  amountInput.addEventListener('input', () => { st.typed = fromField(amountInput.value); st.touched.add('amount'); amountEl.textContent = ''; });
+  amountInput.addEventListener('input', () => { st.typed = fromField(amountInput.value, decimalsFor(acctCcy(st.account))); st.touched.add('amount'); amountEl.textContent = ''; updateFx(); });
   amountInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); save(false); } });
 
   function refreshAll() {

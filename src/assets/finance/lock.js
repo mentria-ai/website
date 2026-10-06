@@ -319,7 +319,7 @@ function pairStep(root, opts) {
   let session = null;
   go.addEventListener('click', async () => {
     const raw = code.value.toUpperCase().replace(/[^A-Z2-7]/g, '');
-    if (raw.length < 16) { err.textContent = t('pair.code_short'); return; }
+    if (raw.length !== 16) { err.textContent = t('pair.code_short'); return; }
     busy(go, true, t('pair.connecting'));
     err.textContent = '';
     status.textContent = t('pair.looking');

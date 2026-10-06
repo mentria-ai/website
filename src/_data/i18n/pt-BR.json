@@ -1882,6 +1882,14 @@
         "fpv-drone": "Pilote um drone de corrida por portais luminosos sobre colinas, um pátio de contêineres e um cânion no deserto. Voo acrobático ou autonivelado, medalhas, corridas contra fantasmas e um mapa de voo livre. Funciona com toque, controle ou teclado.",
         "nitro-racer": "Corrida de rua arcade contra cinco rivais: drifte para encher o nitro, salte nas rampas e conquiste medalhas num circuito urbano neon, numa rodovia litorânea e num cânion no deserto. Funciona com toque, inclinação, controle ou teclado.",
         "finance": "Acompanhe gastos, orçamentos, contas a pagar, investimentos e impostos, com previsões. Tudo criptografado no seu dispositivo e sincronizado só entre os seus próprios dispositivos."
+      },
+      "cmd": {
+        "finance": {
+          "fin-add": "adicionar uma transação, ex.: fin-add café 4,50",
+          "fin-budget": "abrir os orçamentos deste mês",
+          "fin-subs": "abrir contas a pagar e assinaturas",
+          "fin-tax": "abrir a estimativa de impostos"
+        }
       }
     },
     "bubble-level": {
@@ -4262,6 +4270,7 @@
         "name": "Nome",
         "name_ph": "ex.: Aluguel, Música, Plano de celular",
         "kind_label": "Tipo",
+        "kind_pick": "Conta a pagar ou assinatura?",
         "kind": {
           "subscription": "Assinatura",
           "bill": "Conta a pagar",
@@ -4314,6 +4323,7 @@
         "active": "Ainda ativa",
         "price_history": "Mudanças de preço",
         "err_name": "Dê um nome.",
+        "err_kind": "Escolha se é uma conta a pagar ou uma assinatura.",
         "delete_title": "Excluir esta conta a pagar?",
         "delete_body": "{name} deixa de aparecer em Próximas. Os pagamentos já registrados continuam no seu livro-caixa.",
         "none_upcoming": "Nada a vencer. Adicione aluguel, contas e assinaturas para vê-los aqui.",
@@ -4987,7 +4997,6 @@
         "removed": "Dispositivo removido",
         "add_body": "No outro dispositivo, abra o app Finanças, escolha \"Já uso o app Finanças em outro dispositivo\" e digite este código. Ele vale por 10 minutos.",
         "add_hint": "Os dois dispositivos precisam estar online. Seu livro-caixa vai direto de um para o outro, criptografado; nada fica guardado em servidor.",
-        "qr_label": "QR code com o código de pareamento",
         "waiting": "Aguardando seu outro dispositivo…",
         "peer_found": "{name} encontrado. Confira se ele mostra o mesmo número:",
         "approve": "Os números conferem, enviar",

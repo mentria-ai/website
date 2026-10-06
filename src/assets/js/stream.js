@@ -336,6 +336,14 @@
     Array.prototype.forEach.call(dyn.querySelectorAll('.stream-card--pack'), function (s) { io.observe(s); });
   }
 
+  function refreshTail() {
+    Array.prototype.forEach.call(tailEl.querySelectorAll('.stream-card'), function (s) {
+      var x = byId[s.dataset.packId];
+      var cap = s.querySelector('.feed-card__caption');
+      if (x && cap) cap.textContent = metaFor(x, P.getProgress(s.dataset.packId));
+    });
+  }
+
   function reorderTail() {
     var order = seededOrder(tail, 3);
     var existing = {};
@@ -348,12 +356,7 @@
     });
     tailEl.innerHTML = '';
     tailEl.appendChild(frag);
-    Array.prototype.forEach.call(tailEl.querySelectorAll('.stream-card'), function (s) {
-      var x = byId[s.dataset.packId];
-      var pr = P.getProgress(s.dataset.packId);
-      var cap = s.querySelector('.feed-card__caption');
-      if (x && cap) cap.textContent = metaFor(x, pr);
-    });
+    refreshTail();
     if (!pending.length || !more) return;
     var io = new IntersectionObserver(function (entries) {
       if (!entries.some(function (e) { return e.isIntersecting; })) return;
@@ -372,7 +375,7 @@
   var heroCard = scroller.querySelector('.stream-card--hero');
   var HERO_BG = 'url("/assets/img/stream-hero.svg")';
   if (heroCard) heroCard.style.setProperty('--feed-card-bg', HERO_BG);
-  var hero = { pickId: null, contId: null };
+  var hero = { pickId: null, contId: null, cont: null };
   var heroIntro = (function () {
     var box = heroCard && heroCard.querySelector('.stream-hero');
     if (!box) return '';
@@ -426,9 +429,45 @@
     heroCard.style.setProperty('--feed-card-bg', HERO_BG);
   }
 
+  function opensOffline(href) {
+    if (!('caches' in window)) return Promise.resolve(true);
+    var u;
+    try { u = new URL(href, location.href); } catch (_) { return Promise.resolve(true); }
+    var path = u.pathname, base = path, locs = window.MENTRIA_LOCALES || [];
+    locs.some(function (l) {
+      if (!l.prefix || path.indexOf(l.prefix + '/') !== 0) return false;
+      base = path.slice(l.prefix.length);
+      return true;
+    });
+    var tries = [path + u.search];
+    if (base !== path) tries.push(base);
+    if (/^\/learn\/(?!format\/)[^/]+\/$/.test(base)) locs.forEach(function (l) { if (l.prefix && l.prefix + base !== path) tries.push(l.prefix + base); });
+    return tries.reduce(function (found, p) {
+      return found.then(function (ok) {
+        return ok || caches.match(p, { ignoreSearch: true }).then(function (r) { return !!r; }, function () { return false; });
+      });
+    }, Promise.resolve(false));
+  }
+
+  function guardOffline(box) {
+    var go = box.querySelector('.stream-hero__go');
+    if (!go || navigator.onLine !== false) return;
+    go.hidden = true;
+    opensOffline(go.getAttribute('href')).then(function (ok) {
+      if (!go.isConnected) return;
+      if (ok) { go.hidden = false; return; }
+      var actions = go.parentNode;
+      go.remove();
+      var browse = actions.querySelector('.pack-btn');
+      if (browse) browse.className = 'pack-btn pack-btn--primary';
+      box.insertBefore(el('p', 'stream-hero__note', esc(t('continue_offline'))), actions);
+    });
+  }
+
   function renderHero(cont) {
     var box = heroCard && heroCard.querySelector('.stream-hero');
     if (!box) return;
+    hero.cont = cont || null;
     var usage = toolUsage();
     var returning = !!cont || touchedNative().length > 0 || Object.keys(usage).length > 0 || Object.keys(P.getDays() || {}).length > 0;
     var pick = cont ? null : heroPick();
@@ -459,7 +498,7 @@
         '<h1 class="stream-hero__title stream-hero__title--pack">' + esc(tx(cont.title)) + '</h1>' +
         '<p class="stream-hero__meta">' + esc(collectionLabel(cont.collection) + ' · ' + t('card_pos', { n: Math.min(cont.seen + 1, cont.total), total: cont.total })) + '</p>' +
         '<div class="stream-hero__bar" aria-hidden="true"><span style="width:' + pct + '%"></span></div>';
-      action = '<a class="pack-btn pack-btn--primary" href="' + esc(cont.href) + '">' + esc(t('continue')) + '</a>';
+      action = '<a class="pack-btn pack-btn--primary stream-hero__go" href="' + esc(cont.href) + '">' + esc(t('continue')) + '</a>';
     } else if (returning && !pick) {
       html += '<p class="stream-hero__kicker">' + esc(t('welcome_back')) + '</p>';
     } else if (returning) {
@@ -467,11 +506,11 @@
         '<p class="stream-chip stream-chip--today stream-hero__chip">' + esc(t('today')) + '</p>' +
         '<h1 class="stream-hero__title stream-hero__title--pack">' + esc(tx(pick.title)) + '</h1>' +
         '<p class="stream-hero__meta">' + esc(metaFor(pick)) + '</p>';
-      action = '<a class="pack-btn pack-btn--primary" href="' + esc(prefix + '/learn/' + pick.id + '/') + '">' + esc(t('start_today')) + '</a>';
+      action = '<a class="pack-btn pack-btn--primary stream-hero__go" href="' + esc(prefix + '/learn/' + pick.id + '/') + '">' + esc(t('start_today')) + '</a>';
     } else {
       html += heroIntro +
         '<p class="stream-hero__pick"><span class="stream-chip stream-chip--today">' + esc(t('today')) + '</span><span class="stream-hero__pick-title">' + esc(tx(pick.title)) + '</span><span class="stream-hero__pick-meta">' + esc(metaFor(pick)) + '</span></p>';
-      action = '<a class="pack-btn pack-btn--primary" href="' + esc(prefix + '/learn/' + pick.id + '/') + '">' + esc(t('start_today')) + '</a>';
+      action = '<a class="pack-btn pack-btn--primary stream-hero__go" href="' + esc(prefix + '/learn/' + pick.id + '/') + '">' + esc(t('start_today')) + '</a>';
     }
     html += '<div class="stream-hero__actions">' + action + '<a class="pack-btn ' + (action ? 'pack-btn--ghost' : 'pack-btn--primary') + '" href="' + esc(prefix + '/learn/') + '">' + esc(t('browse')) + '</a></div>';
     if (returning) {
@@ -486,6 +525,7 @@
     }
     box.innerHTML = html;
     box.classList.toggle('stream-hero--back', returning);
+    guardOffline(box);
   }
 
   function importedContinue(packs) {
@@ -533,6 +573,7 @@
     var back = openedPack;
     openedPack = null;
     renderHero(nativeContinue());
+    refreshTail();
     activePacks().then(function (packs) {
       importedContinue(packs);
       return buildDynamic(packs);
@@ -542,5 +583,8 @@
       renderDynamic(res);
       if (back) land(back);
     }).catch(function () {});
+  });
+  ['online', 'offline'].forEach(function (type) {
+    window.addEventListener(type, function () { if (hero.cont || hero.pickId) renderHero(hero.cont); });
   });
 })();

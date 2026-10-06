@@ -20,6 +20,7 @@
 .stream-hero__bar { width: min(220px, 70%); height: 4px; border-radius: 4px; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
 .stream-hero__bar span { display: block; height: 100%; border-radius: inherit; background: var(--accent, #6ef3c5); }
 .stream-hero__week { margin: 0.25rem 0 0; font-size: 0.9rem; color: rgba(255, 255, 255, 0.72); }
+.stream-hero__note { margin: 0.25rem 0 0; max-width: 22rem; font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.5; color: var(--syn-amber, #fbbf24); }
 .stream-hero__tools { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; max-width: 26rem; }
 .stream-hero__tools-label { width: 100%; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
 .stream-hero__tool { padding: 5px 11px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.22); background: rgba(0, 0, 0, 0.35); color: #fff; font-family: var(--font-mono); font-size: 0.8rem; text-decoration: none; white-space: nowrap; max-width: 12rem; overflow: hidden; text-overflow: ellipsis; }

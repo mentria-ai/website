@@ -279,18 +279,24 @@ export function createHud(stage, copyIn) {
     if (tc.classList.contains('is-on')) placeSplit();
   }
 
+  function speedRoom() {
+    return 2 * spdV.getBoundingClientRect().width / Math.max(1, spdV.textContent.length);
+  }
+
   function placeSplit() {
     tc.style.left = '';
     tc.style.top = '';
     const b = bl.getBoundingClientRect();
     const a = tc.getBoundingClientRect();
     if (!b.width || !a.width) return;
-    const gap = 16;
-    if (a.right + gap <= b.left || a.left >= b.right + gap || a.bottom <= b.top || a.top >= b.bottom) return;
+    const gap = 12;
+    const grow = speedRoom();
+    const bLeft = b.left - grow;
+    if (a.right + gap <= bLeft || a.left >= b.right + grow + gap || a.bottom <= b.top || a.top >= b.bottom) return;
     const s = root.getBoundingClientRect();
     const l = tl.getBoundingClientRect();
-    if (b.left - l.right >= a.width + gap * 2) {
-      tc.style.left = ((l.right + b.left) / 2 - s.left) + 'px';
+    if (bLeft - l.right >= a.width + gap * 2) {
+      tc.style.left = ((l.right + bLeft) / 2 - s.left) + 'px';
       return;
     }
     tc.style.left = (l.left - s.left + a.width / 2) + 'px';
@@ -305,10 +311,12 @@ export function createHud(stage, copyIn) {
     if (coach.classList.contains('is-on')) els.push(coach);
     const chromeBtns = stage.querySelectorAll('.gk-chrome__btn');
     for (let i = 0; i < chromeBtns.length; i++) els.push(chromeBtns[i]);
+    const grow = speedRoom();
     for (let i = 0; i < els.length; i++) {
       const r = els[i].getBoundingClientRect();
       if (r.width < 1 || r.height < 1) continue;
-      blocks.push(r.left - s.left - 6, r.top - s.top - 6, r.right - s.left + 6, r.bottom - s.top + 6);
+      const px = els[i] === bl ? 6 + grow : 6;
+      blocks.push(r.left - s.left - px, r.top - s.top - 6, r.right - s.left + px, r.bottom - s.top + 6);
     }
     labelW = arrowText.offsetWidth;
     labelH = arrowText.offsetHeight;

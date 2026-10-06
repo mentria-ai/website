@@ -110,6 +110,7 @@ function buildEntry(entry) {
     manifest,
     files,
     kb: Math.max(1, Math.round(bytes / 1024)),
+    bytes,
     size: sizeLabel(bytes),
     schemaCategory: entry.schemaCategory || 'UtilitiesApplication'
   };

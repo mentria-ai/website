@@ -1341,18 +1341,19 @@ function runApp(MentriaEngine, Tiers) {
 
 
   const emptySubEl = document.querySelector('.ac__empty-sub');
+  const sizeText = (label) => (window.MentriaUI && window.MentriaUI.sizeLabel ? window.MentriaUI.sizeLabel(label) : label);
   function updateEmptySub(id) {
     if (!emptySubEl) return;
     const tier = Tiers.TIERS[id || currentTier || (tierDecision && tierDecision.tier) || '0.8b'];
     if (!tier) return;
-    emptySubEl.textContent = COPY.emptySub.replace('{size}', tier.sizeLabel);
+    emptySubEl.textContent = COPY.emptySub.replace('{size}', sizeText(tier.sizeLabel));
   }
   updateEmptySub(Tiers.getUserTier() || '0.8b');
 
   function tierOptionLabel(id) {
     const t = Tiers.TIERS[id];
     const quality = id === '0.8b' ? COPY.tierFast : id === '2b' ? COPY.tierBetter : id === '4b' ? COPY.tierBest : COPY.tierMax;
-    return id === '0.8b' ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + t.sizeLabel);
+    return id === '0.8b' ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + sizeText(t.sizeLabel));
   }
 
   function syncTierSelector() {
@@ -1374,7 +1375,7 @@ function runApp(MentriaEngine, Tiers) {
     const id = tierSel.value;
     if (id === currentTier || generating || recovering) { tierSel.value = currentTier; return; }
     if (id !== '0.8b' && !(await Tiers.isTierCached(id))) {
-      const ok = await window.mentriaConfirm(COPY.tierConfirm.replace('{size}', Tiers.TIERS[id].sizeLabel));
+      const ok = await window.mentriaConfirm(COPY.tierConfirm.replace('{size}', sizeText(Tiers.TIERS[id].sizeLabel)));
       if (!ok) { tierSel.value = currentTier; return; }
     }
     Tiers.setUserTier(id);

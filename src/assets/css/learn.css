@@ -65,6 +65,8 @@
 .learn-tile__share:hover { color: var(--term-fg); border-color: var(--term-fg); }
 
 .prose { max-width: 720px; margin: 0 auto; padding: 0 0 3rem; line-height: 1.6; color: var(--term-fg); }
+.learn-format__lang { padding: 0.5rem 0.8rem; border: 1px solid var(--term-border); border-left: 3px solid var(--syn-cyan); border-radius: 6px; background: var(--term-bg-raised); font-size: 0.85rem; color: var(--term-fg); }
+html:lang(en) .learn-format__lang { display: none; }
 .prose h2 { margin: 2.2rem 0 0.6rem; font-size: 1.25rem; }
 .prose h3 { margin: 1.6rem 0 0.4rem; font-size: 1.02rem; }
 .prose p, .prose li { color: rgba(230, 237, 243, 0.86); }

@@ -269,7 +269,10 @@
     "send_to": "Send to…",
     "send_to_label": "Send to another tool",
     "send_named": "Send {name} to another tool",
-    "send_failed": "Couldn’t send to {tool}"
+    "send_failed": "Couldn’t send to {tool}",
+    "key_space": "SPACE",
+    "key_click": "click",
+    "key_tap": "tap"
   },
   "home": {
     "tools_heading": "Tools",
@@ -5687,6 +5690,8 @@
     "share": "Share",
     "shared_hint": "Pack file ready to share. Contacts import it on their Learn page, or you can send it in Comms.",
     "format_link": "Pack format",
+    "format_english_only": "This page is only available in English.",
+    "format_desc": "How to write a learning pack for mentria.ai. One JSON file, nine card types, any tool that writes JSON can make one.",
     "course": "Course",
     "course_packs_n": "{done} of {total} packs done",
     "course_packs_n_one": "{done} of {total} pack done",

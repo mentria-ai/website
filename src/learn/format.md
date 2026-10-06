@@ -1,24 +1,31 @@
 ---
 layout: base.njk
-permalink: /learn/format/
-englishOnly: true
-title: Pack format
-description: How to write a learning pack for mentria.ai. One JSON file, nine card types, any tool that writes JSON can make one.
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/learn/format/index.html"
+templateEngineOverride: njk,md
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'learn.format_link' | t: locale.code }}"
+  description: "{{ 'learn.format_desc' | t: locale.code }}"
 ---
 
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="/" aria-label="Home">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="/learn/">learn</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">format</span></p>
-  <h1>Pack format</h1>
-  <p>A pack is one JSON file. mentria plays it as cards you read, answer and come back to. Anything that writes JSON can make one, including an AI assistant working from a book or your notes.</p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/learn/">learn</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">format</span></p>
+  <h1>{{ "learn.format_link" | t }}</h1>
+  <p class="learn-format__lang" role="note">{{ "learn.format_english_only" | t }}</p>
+  <p lang="en">A pack is one JSON file. mentria plays it as cards you read, answer and come back to. Anything that writes JSON can make one, including an AI assistant working from a book or your notes.</p>
 </section>
 
 <link rel="stylesheet" href="/assets/css/learn.css?v={{ buildHash }}">
 
-<div class="prose learn-format">
+<div class="prose learn-format" lang="en">
 
 ## The file
 
-Save it as `something.mentria.json` and import it on the [Learn page](/learn/), or drop it there. Packs stay on the device that imported them. Nothing is uploaded.
+Save it as `something.mentria.json` and import it on the [Learn page]({{ locale.pathPrefix }}/learn/), or drop it there. Packs stay on the device that imported them. Nothing is uploaded.
 
 A pack can also come from a link, pasted on the Learn page or opened as `https://mentria.ai/learn/?pack=<url>`, but only when the link points at mentria.ai, `cdn.mentria.ai`, `mentria-ai.github.io` or Hugging Face (`huggingface.co`, `*.hf.co`) over HTTPS. The site's content security policy blocks every other host, so the Learn page refuses those links and says so instead of fetching them. A pack kept anywhere else travels as a file: download it, then import it from your device.
 

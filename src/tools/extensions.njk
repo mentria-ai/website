@@ -29,7 +29,7 @@ localeReload: true
     <article class="exg__card" data-id="{{ e.id }}">
       <div class="exg__head"><span class="exg__icon" aria-hidden="true">{% if e.iconIsImage %}<img src="{{ e.icon }}" alt="" width="32" height="32">{% else %}{{ e.icon }}{% endif %}</span><h3 class="exg__name"><a href="{{ locale.pathPrefix }}/extensions/{{ e.id }}/">{{ e.name }}</a></h3></div>
       <p class="exg__desc">{{ ("tool.ext_gallery.desc." + e.id) | t }}</p>
-      <div class="exg__badges"><span class="exg__chip">v{{ e.version }}</span>{% if e.manifest.author %}<span class="exg__chip">{{ e.manifest.author }}</span>{% endif %}{% for p in e.permissions %}<span class="exg__chip exg__chip--perm">{{ ("store.perm_" + p) | t }}</span>{% endfor %}<span class="exg__chip">{{ e.size }}</span></div>
+      <div class="exg__badges"><span class="exg__chip">v{{ e.version }}</span>{% if e.manifest.author %}<span class="exg__chip">{{ e.manifest.author }}</span>{% endif %}{% for p in e.permissions %}<span class="exg__chip exg__chip--perm">{{ ("store.perm_" + p) | t }}</span>{% endfor %}<span class="exg__chip">{{ e.bytes | fileSize }}</span></div>
       <p class="exg__status" role="status" hidden></p>
       <div class="exg__actions"></div>
     </article>
@@ -130,7 +130,7 @@ const ERROR_CODES = new Map([
 ]);
 const CATALOG = [
   {%- for e in extensions %}
-  { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }}, size: {{ e.size | dump | safe }}, version: {{ e.version | dump | safe }}{% if e.kind == 'app' %}, app: {{ e.app | dump | safe }}, manifest: {{ e.manifest | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
+  { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }}, size: {{ (e.bytes | fileSize) | dump | safe }}, version: {{ e.version | dump | safe }}{% if e.kind == 'app' %}, app: {{ e.app | dump | safe }}, manifest: {{ e.manifest | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
   {%- endfor %}
 ];
 const BUNDLED = new Map(CATALOG.map((e) => [e.id, e.version]));
@@ -270,7 +270,7 @@ function row(entry) {
   const perms = document.createElement('div');
   perms.className = 'xt__perms';
   const cat = CATALOG.find((c) => c.id === m.id && c.version === m.version);
-  perms.textContent = (m.permissions || []).map(permName).join(' · ') + (X.isApp(entry) ? '' : '  (' + (cat ? cat.size : Math.round(entry.size / 1024) + ' KB') + ')');
+  perms.textContent = (m.permissions || []).map(permName).join(' · ') + (X.isApp(entry) ? '' : '  (' + (cat ? cat.size : MentriaUI.formatSize(Math.round(entry.size / 1024), 'KB', 0)) + ')');
   meta.appendChild(title); meta.appendChild(sub); meta.appendChild(perms);
   const actions = document.createElement('div');
   actions.className = 'xt__actions';
@@ -560,7 +560,7 @@ async function galLoad(entry, card) {
   }
   entry.ready = true;
   const m = ins.manifest;
-  if (!entry.size || entry.version !== m.version) entry.size = Math.max(1, Math.round(ins.size / 1024)) + ' KB';
+  if (!entry.size || entry.version !== m.version) entry.size = MentriaUI.formatSize(Math.max(1, Math.round(ins.size / 1024)), 'KB', 0);
   entry.version = m.version;
   entry.name = m.name;
   setIcon(p.icon, m.icon, 32);

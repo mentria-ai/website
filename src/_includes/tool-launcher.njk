@@ -9,10 +9,12 @@
   {%- set hasShort = shortKey | hasKey -%}
   {%- set groupLabel = (groupKey | traw) if groupKey else "" -%}
   {%- set catLabel = ("category." + tool.category) | traw -%}
+  {%- set ledeKey = "tools." + tool.slug + ".lede" -%}
   <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}" data-cat="{{ tool.category }}"
      {%- if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}
      {%- if hasShort %} data-name="{{ titleKey | t }}" data-i18na="data-name={{ titleKey }}"{% endif %}
-     data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}{% if groupLabel and groupLabel != tool.group %} {{ groupLabel }}{% endif %}{% if catLabel != tool.category and catLabel != groupLabel %} {{ catLabel }}{% endif %}"
+     data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}{% if groupLabel and groupLabel != tool.group %} {{ groupLabel }}{% endif %}{% if catLabel != tool.category and catLabel != groupLabel %} {{ catLabel }}{% endif %}{% if lang != 'en' and (ledeKey | hasKey) %} {{ ledeKey | traw }}{% endif %}"
+     data-words="{{ ledeKey }}"
      style="view-transition-name: tool-{{ tool.slug }}; --i: {{ i or 0 }}"
      href="{% if tool.url %}{{ tool.url | localeUrl(lang) }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
     <span class="launch-tile__icon" aria-hidden="true">

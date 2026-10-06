@@ -37,6 +37,7 @@ localeReload: true
     </div>
 </div>
 {{ toolIconsSvg | safe }}
+<div class="tools-groups">
 <section class="tools-group tools-group--recent" id="tools-recent" aria-labelledby="tools-recent-h" hidden>
     <h2 class="tools-group__h" id="tools-recent-h">{{ "home.launcher.recents" | t }}</h2>
     <div class="tools-grid" id="tools-recent-grid"></div>
@@ -49,7 +50,7 @@ localeReload: true
     <div class="tools-grid">
         {% for tool in members %}
         {% set shelf = "games" if tool.category == "Game" else ("ai" if tool.category == "AI" else "tools") %}
-        <a class="tool-tile" data-slug="{{ tool.slug }}" data-shelf="{{ shelf }}"{% if tool.requires %} data-requires="{{ tool.requires }}"{% endif %} href="{% if tool.url %}{{ tool.url | localeUrl(lang) }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
+        <a class="tool-tile" data-slug="{{ tool.slug }}" data-shelf="{{ shelf }}" data-search="{{ tool.summary }} {{ tool.slug }}"{% if tool.requires %} data-requires="{{ tool.requires }}"{% endif %} href="{% if tool.url %}{{ tool.url | localeUrl(lang) }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
             <span class="tool-tile__icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><use href="#tool-{{ tool.slug }}"></use></svg></span>
             <span class="tool-tile__text">
                 <span class="tool-tile__name">{{ ("tools." + tool.slug + ".title") | t }}{% if tool.added | isNew %}<span class="tool-tile__new">{{ "home.launcher.new_badge" | t }}</span>{% endif %}</span>
@@ -67,7 +68,7 @@ localeReload: true
     <h2 class="tools-group__h" id="tools-g-extensions"><a class="tools-group__link" href="{{ locale.pathPrefix }}/extensions/">{{ "tool.ext_gallery.title" | t }}</a></h2>
     <div class="tools-grid">
         {% for e in extensions %}
-        <a class="tool-tile" data-slug="ext-{{ e.id }}" data-shelf="{{ 'games' if e.schemaCategory == 'GameApplication' else 'tools' }}" href="{{ locale.pathPrefix }}/extensions/{{ e.id }}/">
+        <a class="tool-tile" data-slug="ext-{{ e.id }}" data-shelf="{{ 'games' if e.schemaCategory == 'GameApplication' else 'tools' }}" data-search="{{ e.manifest.description }} {{ e.id }}" href="{{ locale.pathPrefix }}/extensions/{{ e.id }}/">
             <span class="tool-tile__icon{% if not e.iconIsImage %} tool-tile__icon--emoji{% endif %}" aria-hidden="true">{% if e.iconIsImage %}<img src="{{ e.icon }}" alt="" width="40" height="40">{% else %}{{ e.icon }}{% endif %}</span>
             <span class="tool-tile__text">
                 <span class="tool-tile__name">{{ e.name }}</span>
@@ -80,6 +81,7 @@ localeReload: true
 </section>
 {% endif %}
 <p class="tools-none" id="tools-none" role="status" hidden></p>
+</div>
 {% else %}
 <div style="margin-top: 2rem; font-family: var(--font-mono); color: var(--term-muted);">
     <p>{{ "tools_page.empty_cmd" | t }}</p>
@@ -96,6 +98,7 @@ localeReload: true
   .tools-filter { background: transparent; border: 1px solid var(--term-border); color: var(--term-muted); font-family: var(--font-mono); font-size: 0.8rem; padding: 5px 14px; border-radius: 999px; cursor: pointer; transition: color 120ms, border-color 120ms, background 120ms; }
   .tools-filter:hover { color: var(--term-fg); border-color: var(--term-border-strong); }
   .tools-filter.is-active { color: var(--syn-cyan); border-color: var(--syn-cyan); background: var(--cyan-8); }
+  .tools-groups { display: flex; flex-direction: column; }
   .tools-group { margin-top: 2rem; }
   .tools-group[hidden] { display: none; }
   .tools-group__h { margin: 0 0 0.75rem; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--term-muted); }
@@ -136,13 +139,15 @@ localeReload: true
   var NO_MATCH = {{ ("tools_page.no_match" | t) | dump | safe }};
   var valid = { all: 1, tools: 1, games: 1, ai: 1 };
   var shelf = 'all';
-  function norm(v) { return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
   var labels = {};
   Array.prototype.forEach.call(filters.querySelectorAll('[data-shelf]'), function (b) { labels[b.getAttribute('data-shelf')] = b.textContent; });
-  var text = tiles.map(function (t) {
+  var items = tiles.map(function (t) {
     var g = t.closest('.tools-group');
     var h = g && g.querySelector('.tools-group__h');
-    return norm([t.textContent, h ? h.textContent : '', labels[t.getAttribute('data-shelf')] || ''].join(' '));
+    var nameEl = t.querySelector('.tool-tile__name');
+    var name = '';
+    if (nameEl) Array.prototype.forEach.call(nameEl.childNodes, function (n) { if (!(n.classList && n.classList.contains('tool-tile__new'))) name += n.textContent; });
+    return [name, [t.textContent, h ? h.textContent : '', labels[t.getAttribute('data-shelf')] || '', t.getAttribute('data-search') || ''].join(' ')];
   });
   function usable(t) {
     var need = t.getAttribute('data-requires');
@@ -158,19 +163,29 @@ localeReload: true
     tiles.forEach(function (t) { bySlug[t.getAttribute('data-slug')] = t; });
     var slugs = Object.keys(usage).filter(function (s) { return bySlug[s]; }).sort(function (a, b) { return score(usage[b]) - score(usage[a]); }).slice(0, 6);
     recentGrid.textContent = '';
-    slugs.forEach(function (s) { recentGrid.appendChild(bySlug[s].cloneNode(true)); });
+    slugs.forEach(function (s) { var c = bySlug[s].cloneNode(true); c.style.order = ''; recentGrid.appendChild(c); });
   }
   buildRecent();
 
   function apply() {
-    var v = norm(q.value);
+    var UI = window.MentriaUI;
+    var raw = q.value.trim();
+    var scores = raw && UI && UI.searchRank ? UI.searchRank(raw, items) : null;
+    var v = !!scores;
     var hits = 0;
     tiles.forEach(function (t, i) {
-      var ok = usable(t) && (shelf === 'all' || t.getAttribute('data-shelf') === shelf) && (!v || text[i].indexOf(v) >= 0);
+      var score = scores ? scores[i] : 1;
+      var ok = usable(t) && (shelf === 'all' || t.getAttribute('data-shelf') === shelf) && score > 0;
       t.hidden = !ok;
+      t.style.order = v && ok ? String(3 - score) : '';
       if (ok) hits++;
     });
-    groups.forEach(function (g) { g.hidden = !g.querySelector('.tool-tile:not([hidden])'); });
+    groups.forEach(function (g) {
+      var bestScore = 0;
+      tiles.forEach(function (t, i) { if (!t.hidden && g.contains(t)) bestScore = Math.max(bestScore, scores ? scores[i] : 1); });
+      g.hidden = !bestScore;
+      g.style.order = v && bestScore ? String(3 - bestScore) : '';
+    });
     Array.prototype.forEach.call(recentGrid.children, function (t) { t.hidden = !usable(t); });
     recent.hidden = !!v || shelf !== 'all' || !recentGrid.querySelector('.tool-tile:not([hidden])');
     none.hidden = !v || hits > 0;

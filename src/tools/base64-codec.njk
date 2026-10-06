@@ -165,6 +165,21 @@ localeReload: true
     const decodePreview = document.getElementById('b64-decode-preview');
     const fileStatus    = MentriaUI.status(document.getElementById('b64-file-status'));
 
+    const KEEP_KEY = 'mentria.b64.keep';
+    document.addEventListener('mentria:localereload', () => {
+      if (!inputEl.value && !outputEl.value && !decodeInput.value) return;
+      try { sessionStorage.setItem(KEEP_KEY, JSON.stringify({ t: Date.now(), input: inputEl.value, output: outputEl.value, decode: decodeInput.value })); } catch (_) {}
+    });
+    try {
+      const kept = JSON.parse(sessionStorage.getItem(KEEP_KEY) || 'null');
+      sessionStorage.removeItem(KEEP_KEY);
+      if (kept && Date.now() - kept.t < 120000) {
+        inputEl.value = kept.input || '';
+        outputEl.value = kept.output || '';
+        decodeInput.value = kept.decode || '';
+      }
+    } catch (_) {}
+
     let currentDataUri  = '';
     let currentRawB64   = '';
     let decodedBlob     = null;
@@ -309,6 +324,7 @@ localeReload: true
     const syncSend = () => { sendBtn.hidden = !MentriaUI.sendTargets({ text: outputEl.value }).length; };
     [encodeBtn, decodeBtn, clearBtn].forEach((b) => b.addEventListener('click', syncSend));
     MentriaUI.sendMenu(sendBtn, () => (outputEl.value ? { text: outputEl.value } : null));
+    if (outputEl.value) syncSend();
 
     function looksBase64(text) {
       const v = text.replace(/\s+/g, '');

@@ -141,8 +141,8 @@ module.exports = function(eleventyConfig) {
   // {{ "nav.tools" | t }} — uses the page's `lang`, fallback to English.
   // The output is wrapped in invisible sentinels so the build transform can
   // turn every translation into a client-switchable marker.
-  eleventyConfig.addFilter("t", function (key) {
-    const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
+  eleventyConfig.addFilter("t", function (key, langArg) {
+    const lang = langArg || (this.ctx && this.ctx.lang) || DEFAULT_LANG;
     const str = tResolve(lang, key);
     if (str == null) return missingKey(key, lang);
     return I18N_S0 + key + I18N_S1 + str + I18N_S2;
@@ -182,6 +182,22 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addFilter("tlang", function (key, lang) {
     const str = tResolve(lang, key);
     return str == null ? missingKey(key, lang) : str;
+  });
+
+  const FR_SIZE_UNITS = { KB: "Ko", MB: "Mo" };
+  eleventyConfig.addFilter("fileSize", function (bytes) {
+    const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
+    const big = bytes >= 1024 * 1024;
+    const value = big ? bytes / (1024 * 1024) : Math.max(1, Math.round(bytes / 1024));
+    const digits = big ? 1 : 0;
+    const unit = big ? "MB" : "KB";
+    let num;
+    try {
+      num = new Intl.NumberFormat(lang, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+    } catch {
+      num = value.toFixed(digits);
+    }
+    return num + "\u00a0" + (lang.startsWith("fr") ? FR_SIZE_UNITS[unit] : unit);
   });
 
   eleventyConfig.addTransform("hoistBodyStyles", function (content) {

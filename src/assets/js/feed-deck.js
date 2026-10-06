@@ -222,38 +222,8 @@
       const target = btn.dataset.target;
       const idx = slides.findIndex((s) => s.dataset.slideId === target);
       if (idx >= 0) go(idx);
-    } else if (action === 'share') {
-      e.preventDefault();
-      shareChapter();
     }
   });
-
-  async function shareChapter() {
-    const title = root.dataset.chapterTitle || 'Mentria chapter';
-    const url = location.origin + localePrefix + '/feed/chapter/' + chapterId + '/';
-    const data = { title, text: 'Just finished: ' + title, url };
-    try {
-      if (navigator.share) await navigator.share(data);
-      else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url);
-        flashToast('Link copied');
-      }
-    } catch (_) { /* user-cancel — no-op */ }
-  }
-
-  function flashToast(msg) {
-    const t = document.createElement('div');
-    t.textContent = msg;
-    t.style.cssText = `
-      position: absolute; left: 50%; bottom: 80px; transform: translateX(-50%);
-      background: rgba(34, 211, 238, 0.95); color: #000;
-      padding: 8px 16px; border-radius: 18px; font-family: var(--font-mono, monospace);
-      font-size: 0.78rem; font-weight: 700; z-index: 12;
-      animation: fadeOut 1.6s ease forwards;
-    `;
-    root.appendChild(t);
-    setTimeout(() => t.remove(), 1700);
-  }
 
   /* ── Keyboard ─────────────────────────────────────────── */
   document.addEventListener('keydown', (e) => {
@@ -360,9 +330,4 @@
   }
 
   if (shareBtn) shareBtn.addEventListener('click', shareCurrentSlide);
-
-  /* ── Style: fadeOut keyframe (toast) ───────────────────── */
-  const style = document.createElement('style');
-  style.textContent = '@keyframes fadeOut { 0%,70%{opacity:1} 100%{opacity:0;transform:translateX(-50%) translateY(8px)} }';
-  document.head.appendChild(style);
 })();

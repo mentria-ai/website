@@ -42,7 +42,6 @@ eleventyComputed:
      id="deckRoot"
      style="view-transition-name: deck-{{ pair.deck.id }}"
      data-chapter-id="{{ pair.deck.id }}"
-     data-chapter-title="{{ pair.deck.title }}"
      data-slide-count="{{ pair.deck.slides.length }}">
   <h1 class="sr-only">{{ pair.deck.subtitle | tloc(pair.locale.code) }}</h1>
 

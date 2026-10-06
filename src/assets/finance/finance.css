@@ -56,6 +56,10 @@ html.ext-app, html.ext-app body { background: var(--f-bg, #0b0d10); }
 .fin-nav__add svg { width: 26px; height: 26px; }
 .fin-nav__rail-only { display: none; }
 .fin-nav__brand { display: none; }
+@media (max-width: 340px) {
+  .fin-nav__btn { font-size: 0.62rem; letter-spacing: -0.01em; }
+  .fin-nav__add { margin: 0 3px; }
+}
 
 @media (min-width: 900px) {
   .fin { grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: auto 1fr; grid-template-areas: "nav top" "nav main"; }
@@ -86,7 +90,7 @@ html.ext-app, html.ext-app body { background: var(--f-bg, #0b0d10); }
 .fb--danger:hover { background: var(--f-over-soft); }
 .fb--icon { width: 40px; min-width: 40px; padding: 0; }
 .fb--sm { min-height: 32px; padding: 4px 10px; font-size: 0.82rem; border-radius: 9px; }
-.fb--block { width: 100%; }
+.fb--block { width: 100%; white-space: normal; text-align: center; overflow-wrap: anywhere; }
 .fb-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .fb-row--end { justify-content: flex-end; }
 
@@ -210,6 +214,26 @@ html.ext-app, html.ext-app body { background: var(--f-bg, #0b0d10); }
 .fkp button { min-height: 48px; border: 1px solid var(--f-line); border-radius: 12px; background: var(--f-raised-2); color: var(--f-strong); font-family: var(--f-mono); font-size: 1.3rem; cursor: pointer; touch-action: manipulation; }
 .fkp button:active { background: var(--f-in-soft); }
 .fkp svg { width: 22px; height: 22px; }
+@media (max-height: 640px) {
+  .fsheet__panel { max-height: 100%; }
+  .fsheet__head { padding: 8px 10px 4px 16px; }
+  .fsheet__body { padding: 2px 16px 12px; }
+  .fsheet__foot { padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); }
+  .fsheet__foot .fb { min-height: 42px; }
+  .fqa__nl { margin-bottom: 6px; }
+  .fqa__nlhint:empty { min-height: 0; margin: 0; }
+  .fqa__amount { padding: 0 0 4px; }
+  .fqa__value { font-size: clamp(1.8rem, 8vw, 2.4rem); }
+  .fkp { gap: 5px; margin-top: 6px; }
+  .fkp button { min-height: 42px; }
+}
+@media (max-height: 520px) {
+  .fseg--block button { padding: 4px 10px; }
+  .fqa__nl .fi { min-height: 36px; }
+  .fqa__value { font-size: clamp(1.5rem, 7vw, 2rem); }
+  .fkp { gap: 4px; margin-top: 4px; }
+  .fkp button { min-height: 38px; font-size: 1.15rem; }
+}
 
 .ftoast { position: fixed; left: 50%; bottom: calc(var(--f-nav-h) + 14px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 90; display: flex; align-items: center; gap: 12px; max-width: min(92vw, 460px); padding: 10px 10px 10px 16px; background: var(--f-raised-2); border: 1px solid var(--f-line-2); border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); font-size: 0.9rem; animation: fsheet-up 180ms ease-out; }
 .ftoast { width: max-content; }

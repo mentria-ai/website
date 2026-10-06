@@ -155,6 +155,7 @@ if (!entry || !entry.enabled || (!app && !source)) {
   window.addEventListener('storage', (e) => { if (e.key === null || e.key === 'mentria.store.ext.registry') check(); });
   window.addEventListener('mentria:write', (e) => { const d = (e && e.detail) || {}; if (d.ns === 'ext' && d.key === 'registry') check(); });
   window.addEventListener('pageshow', (e) => { if (e.persisted) check(); });
+  if (app) setTimeout(() => { if (running && navigator.onLine) X.ensureAppPages(id).catch(() => {}); }, 4000);
   window.addEventListener('hashchange', () => {
     if (!running) return;
     const next = takeHashArgs();

@@ -62,6 +62,7 @@
     "update_checking": "Verificando…",
     "update_updating": "Atualizando…",
     "update_latest": "Atualizado",
+    "update_offline": "Sem conexão · não foi possível verificar",
     "cache_clear": "Limpar cache",
     "cache_clearing": "Limpando…",
     "cache_cleared": "Pronto — recarregando…",
@@ -239,6 +240,7 @@
     "offline_title": "Off-line",
     "offline_msg": "Você está off-line e esta página ainda não está em cache.",
     "offline_home": "Ir para a página inicial em cache",
+    "offline_retry": "Tentar de novo",
     "offline_strip": "Offline · mostrando o que este aparelho tem salvo",
     "offline_works": "Isto ainda funciona offline",
     "close": "Fechar",
@@ -250,7 +252,8 @@
       "times_up": "Tempo esgotado",
       "paused": "Pausado",
       "steps": "{n} passos",
-      "tap_resume": "Toque para continuar contando"
+      "tap_resume": "Toque para continuar contando",
+      "still_running": "O timer continua rodando e vai tocar quando terminar."
     },
     "window": {
       "label": "Controles da janela",
@@ -1080,6 +1083,7 @@
       "counter": "{n} tokens · {tps} tok/s",
       "status_ready": "Pronto",
       "status_model_deleted": "Modelo excluído. Recarregue para baixar novamente.",
+      "status_no_model": "Nenhum modelo carregado",
       "tier_label": "Qualidade do modelo",
       "tier_fast": "rápido",
       "tier_better": "melhor",
@@ -1134,6 +1138,8 @@
       "err_device_lost": "GPU perdida — recarregue para recuperar",
       "gpu_lost_notice": "A GPU foi reiniciada e o modelo parou. Seu chat foi mantido. Recarregue o modelo para continuar.",
       "btn_reload_model": "Recarregar modelo",
+      "no_model_notice": "Escolha um modelo para começar a conversar. Ele é baixado uma vez e depois roda neste dispositivo.",
+      "btn_choose_model": "Escolher modelo",
       "interrupted": "Interrompida: a GPU foi reiniciada antes de esta resposta terminar.",
       "err_context_full": "A conversa é longa demais para a memória do modelo. Inicie um novo chat para continuar.",
       "status_too_long": "Mensagem longa demais",
@@ -1914,6 +1920,11 @@
         },
         "pomodoro-timer": {
           "pomodoro": "começar uma sessão de foco"
+        }
+      },
+      "perm": {
+        "finance": {
+          "network": "Só para sincronizar seus próprios aparelhos e para os lembretes de contas opcionais. A sincronização passa criptografada pelo servidor de retransmissão do Mentria, que não consegue ler seu livro-caixa; os lembretes enviam só um horário de aviso. Nada legível fica guardado."
         }
       }
     },
@@ -3707,7 +3718,8 @@
         "dismiss": "Dispensar",
         "later": "Depois",
         "working": "Processando…",
-        "progress": "Progresso"
+        "progress": "Progresso",
+        "retry": "Tentar de novo"
       },
       "errors": {
         "no_js": "O app Finanças precisa de JavaScript para funcionar.",
@@ -3825,7 +3837,8 @@
         "receiving": "Recebendo seu livro-caixa…",
         "no_wraps": "Desbloqueie o app Finanças mais uma vez no outro dispositivo e tente de novo.",
         "failed": "O pareamento falhou:",
-        "expired": "O código expirou. Comece de novo no outro dispositivo."
+        "expired": "O código expirou. Comece de novo no outro dispositivo.",
+        "unreachable": "Não foi possível acessar o serviço de sincronização. Verifique sua conexão e tente de novo."
       },
       "restore": {
         "title": "Restaurar de um backup",
@@ -3896,7 +3909,8 @@
         "err_to": "Escolha outra conta de destino para a transferência.",
         "err_received": "Informe o valor recebido ou adicione uma cotação em Contas.",
         "err_split": "As linhas da divisão somam {sum}, mas o total é {total}.",
-        "err_fx": "Adicione uma cotação para 1 {from} em {to}."
+        "err_fx": "Adicione uma cotação para 1 {from} em {to}.",
+        "no_accounts": "Ainda não há nenhuma conta para registrar isso. Adicione uma primeiro."
       },
       "nl": {
         "today": "hoje|hj",
@@ -4334,8 +4348,8 @@
         "auto_post": "Lançar no livro-caixa automaticamente",
         "auto_hint": "O app Finanças registra no dia do vencimento, na próxima vez que você abrir o app. Desligue para valores que variam.",
         "more": "Lembretes, teste grátis e cancelamento",
-        "remind": "Lembrar (dias antes)",
-        "remind_hint": "Aparece no Início e no bloco. -1 usa o padrão.",
+        "remind": "Lembrar",
+        "remind_hint": "Aparece no Início e no bloco. O padrão é definido em Configurações.",
         "shift_label": "Se cair no fim de semana",
         "shift": {
           "none": "Manter a data",
@@ -4386,7 +4400,8 @@
           "quarter": "a cada 3 meses",
           "half": "a cada 6 meses",
           "nmonths": "a cada {n} meses"
-        }
+        },
+        "remind_default": "Padrão ({when})"
       },
       "more": {
         "plan": "Previsões, fôlego financeiro e metas",
@@ -5697,6 +5712,7 @@
     "start_today": "Começar o pacote de hoje",
     "welcome_back": "Que bom ver você de novo",
     "continue": "Continuar",
+    "continue_offline": "Este pacote abre quando você estiver online de novo.",
     "week_n": "Nesta semana você aprendeu em {n} de 7 dias.",
     "week_zero": "Um cartão hoje começa a sua semana.",
     "your_tools": "Suas ferramentas"

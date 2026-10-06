@@ -681,6 +681,18 @@ try {
             },
             check: function () { return registration ? registration.update() : Promise.resolve(); }
           };
+          var lastCheck = Date.now();
+          var recheck = function (again) {
+            if (!registration || navigator.onLine === false) return;
+            lastCheck = Date.now();
+            registration.update().catch(function () {
+              if (again) setTimeout(function () { recheck(false); }, 15000);
+            });
+          };
+          window.addEventListener('online', function () { setTimeout(function () { recheck(true); }, 1500); });
+          document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible' && Date.now() - lastCheck > 3600000) recheck(false);
+          });
           navigator.serviceWorker.register('/sw.js').then(function (reg) {
             registration = reg;
             var chip = document.getElementById('m-update');
@@ -1066,6 +1078,7 @@ try {
         paused: {{ ("common.mini.paused" | t) | dump | safe }},
         steps: {{ ("common.mini.steps" | t) | dump | safe }},
         tapResume: {{ ("common.mini.tap_resume" | t) | dump | safe }},
+        stillRunning: {{ ("common.mini.still_running" | t) | dump | safe }},
         timerTool: {{ ("tools.countdown-timer.title" | t) | dump | safe }},
         stepsTool: {{ ("tools.step-counter.title" | t) | dump | safe }}
       };

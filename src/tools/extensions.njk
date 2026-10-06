@@ -489,7 +489,7 @@ async function galInstall(entry, card, b) {
       const pkg = await X.fetchPackage(entry.id);
       X.installApp(pkg.manifest);
       created = true;
-      await X.downloadFiles(entry.id, pkg.files, [PREFIX + pkg.app], (f) => galStatus(card, COPY.galInstalling.replace('{pct}', String(Math.round(f * 100)))));
+      await X.downloadFiles(entry.id, pkg.files, X.appPages(pkg.app), (f) => galStatus(card, COPY.galInstalling.replace('{pct}', String(Math.round(f * 100)))));
       galStatus(card, '');
       render();
       announceInstall(X.getEntry(entry.id), before);

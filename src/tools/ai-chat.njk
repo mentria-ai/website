@@ -137,7 +137,9 @@ eleventyComputed:
   errDeletePrefix:        "tool.ai-chat.err_delete_prefix",
   emptyResponse:          "tool.ai-chat.empty_response",
   confirmDelete:          "tool.ai-chat.confirm_delete",
-  downloadPostponed:      "common.download_postponed",
+  statusNoModel:          "tool.ai-chat.status_no_model",
+  noModelNotice:          "tool.ai-chat.no_model_notice",
+  btnChooseModel:         "tool.ai-chat.btn_choose_model",
   tierLabel:              "tool.ai-chat.tier_label",
   tierFast:               "tool.ai-chat.tier_fast",
   tierBetter:             "tool.ai-chat.tier_better",
@@ -278,6 +280,61 @@ function renderUnsupported() {
   }
 }
 
+function watchDockLift() {
+  const acEl = document.querySelector('.ac');
+  const inputWrap = acEl && acEl.querySelector('.ac__input-wrap');
+  if (!acEl || !inputWrap) return;
+  let liftFrame = 0;
+  function measureDockLift() {
+    liftFrame = 0;
+    const dock = document.querySelector('.m-mini-dock');
+    if (dock && dock.classList.contains('is-dragging')) return;
+    const current = parseFloat(acEl.style.getPropertyValue('--ac-dock-lift')) || 0;
+    let lift = 0;
+    if (dock && dock.childElementCount) {
+      const d = dock.getBoundingClientRect();
+      const w = inputWrap.getBoundingClientRect();
+      const cs = getComputedStyle(inputWrap);
+      const bottom = w.bottom - (parseFloat(cs.paddingBottom) - current);
+      const top = w.top + current + parseFloat(cs.paddingTop);
+      if (d.width && d.height && d.left < w.right && d.right > w.left && d.bottom > top && d.top - 8 < bottom) {
+        lift = Math.ceil(bottom - (d.top - 8));
+        if (lift > acEl.clientHeight * 0.4) lift = 0;
+      }
+    }
+    if (lift === current) return;
+    if (lift) acEl.style.setProperty('--ac-dock-lift', lift + 'px');
+    else acEl.style.removeProperty('--ac-dock-lift');
+  }
+  function scheduleLift() {
+    if (!liftFrame) liftFrame = requestAnimationFrame(measureDockLift);
+  }
+  const dockWatch = new MutationObserver(scheduleLift);
+  let watchedDock = null;
+  function watchDock() {
+    const dock = document.querySelector('.m-mini-dock');
+    if (dock !== watchedDock) {
+      dockWatch.disconnect();
+      watchedDock = dock;
+      if (dock) dockWatch.observe(dock, { childList: true, attributes: true, attributeFilter: ['class', 'style'] });
+    }
+    scheduleLift();
+  }
+  new MutationObserver(watchDock).observe(document.body, { childList: true });
+  if (typeof ResizeObserver === 'function') {
+    const sizes = new ResizeObserver(scheduleLift);
+    sizes.observe(acEl);
+    const field = inputWrap.querySelector('.ac__input');
+    if (field) sizes.observe(field);
+  }
+  window.addEventListener('resize', scheduleLift, { passive: true });
+  window.addEventListener('scroll', scheduleLift, { passive: true });
+  const frameBody = acEl.closest('.terminal-frame__body');
+  if (frameBody) frameBody.addEventListener('scroll', scheduleLift, { passive: true });
+  watchDock();
+}
+watchDockLift();
+
 if (!navigator.gpu) {
   showUnsupportedError('errNoWebGpu');
 } else {
@@ -324,8 +381,6 @@ function runApp(MentriaEngine, Tiers) {
   const noticeEl      = document.getElementById('ac-notice');
   const noticeText    = document.getElementById('ac-notice-text');
   const noticeBtn     = document.getElementById('ac-notice-btn');
-  const acEl          = messagesEl.closest('.ac');
-  const inputWrap     = acEl.querySelector('.ac__input-wrap');
 
   /* ── State ───────────────────────────────────────── */
   let engine = null;
@@ -549,6 +604,7 @@ function runApp(MentriaEngine, Tiers) {
     if (notice && notice.kind === 'tooLong' && kind !== 'tooLong') clearTooLong();
     notice = { kind, key, vars, actionKey, action };
     renderNotice();
+    noticeEl.dataset.kind = kind;
     noticeEl.hidden = false;
   }
 
@@ -556,6 +612,7 @@ function runApp(MentriaEngine, Tiers) {
     if (!notice || (kind && notice.kind !== kind)) return;
     notice = null;
     noticeEl.hidden = true;
+    delete noticeEl.dataset.kind;
     noticeText.textContent = '';
     noticeBtn.textContent = '';
     noticeBtn.hidden = true;
@@ -1331,9 +1388,10 @@ function runApp(MentriaEngine, Tiers) {
   });
 
   /* ── Load engine + model ─────────────────────────── */
-  async function loadModel() {
+  async function loadModel(choose) {
     deviceLost = false;
     hideNotice('lost');
+    hideNotice('postponed');
     setStatus('loading', 'statusLoadingModel');
     await ensureStrip();
     try {
@@ -1346,6 +1404,7 @@ function runApp(MentriaEngine, Tiers) {
       const res = await ensureModel(createEngine, {
         vision: true,
         offerUpgrade: true,
+        choose: choose === true,
         onProgress: onEngineProgress,
         onTier: (info) => strip.setTier(info),
         onDeviceLost: (info) => {
@@ -1385,7 +1444,13 @@ function runApp(MentriaEngine, Tiers) {
       inputEl.focus();
       return true;
     } catch (err) {
-      if (err && err.message === 'download-postponed') { if (strip) strip.hide(); setStatus('idle', 'downloadPostponed'); return false; }
+      if (err && err.message === 'download-postponed') {
+        if (strip) strip.hide();
+        setStatus('idle', 'statusNoModel');
+        showNotice('postponed', 'noModelNotice', null, 'btnChooseModel', () => loadModel(true));
+        noticeBtn.focus({ preventScroll: true });
+        return false;
+      }
       console.error('Model load error:', err);
       if (strip) strip.error(String(err && err.message || err), { phase: strip.phaseName || 'loading', onRetry: () => { inputEl.disabled = true; sendBtn.disabled = true; loadModel(); } });
       if (navigator.onLine === false) setStatus('error', 'modelOffline');
@@ -2018,50 +2083,6 @@ function runApp(MentriaEngine, Tiers) {
     }
   });
 
-  let liftFrame = 0;
-  function measureDockLift() {
-    liftFrame = 0;
-    const dock = document.querySelector('.m-mini-dock');
-    if (dock && dock.classList.contains('is-dragging')) return;
-    const current = parseFloat(acEl.style.getPropertyValue('--ac-dock-lift')) || 0;
-    let lift = 0;
-    if (dock && dock.childElementCount) {
-      const d = dock.getBoundingClientRect();
-      const w = inputWrap.getBoundingClientRect();
-      const cs = getComputedStyle(inputWrap);
-      const bottom = w.bottom - (parseFloat(cs.paddingBottom) - current);
-      const top = w.top + current + parseFloat(cs.paddingTop);
-      if (d.width && d.height && d.left < w.right && d.right > w.left && d.bottom > top && d.top - 8 < bottom) {
-        lift = Math.ceil(bottom - (d.top - 8));
-        if (lift > acEl.clientHeight * 0.4) lift = 0;
-      }
-    }
-    if (lift === current) return;
-    if (lift) acEl.style.setProperty('--ac-dock-lift', lift + 'px');
-    else acEl.style.removeProperty('--ac-dock-lift');
-  }
-  function scheduleLift() {
-    if (!liftFrame) liftFrame = requestAnimationFrame(measureDockLift);
-  }
-  const dockWatch = new MutationObserver(scheduleLift);
-  let watchedDock = null;
-  function watchDock() {
-    const dock = document.querySelector('.m-mini-dock');
-    if (dock !== watchedDock) {
-      dockWatch.disconnect();
-      watchedDock = dock;
-      if (dock) dockWatch.observe(dock, { childList: true, attributes: true, attributeFilter: ['class', 'style'] });
-    }
-    scheduleLift();
-  }
-  new MutationObserver(watchDock).observe(document.body, { childList: true });
-  if (typeof ResizeObserver === 'function') new ResizeObserver(scheduleLift).observe(acEl);
-  window.addEventListener('resize', scheduleLift, { passive: true });
-  window.addEventListener('scroll', scheduleLift, { passive: true });
-  const frameBody = acEl.closest('.terminal-frame__body');
-  if (frameBody) frameBody.addEventListener('scroll', scheduleLift, { passive: true });
-  watchDock();
-
   localeHooks.push(() => {
     syncSendLabel();
     messagesEl.querySelectorAll('.ac__msg--user > .ac__msg-label').forEach((el) => { el.textContent = COPY.labelYou; });
@@ -2424,6 +2445,7 @@ function runApp(MentriaEngine, Tiers) {
   flex-shrink: 0;
 }
 .ac__notice[hidden] { display: none; }
+.ac__notice[data-kind="postponed"] { color: var(--term-fg); }
 .ac__notice-text { flex: 1 1 16rem; min-width: 0; }
 .ac__notice-btn {
   flex-shrink: 0;

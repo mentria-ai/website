@@ -62,6 +62,7 @@
     "update_checking": "Checking…",
     "update_updating": "Updating…",
     "update_latest": "Up to date",
+    "update_offline": "Offline · couldn't check",
     "cache_clear": "Clear cache",
     "cache_clearing": "Clearing…",
     "cache_cleared": "Cleared — reloading…",
@@ -239,6 +240,7 @@
     "offline_title": "Offline",
     "offline_msg": "You're offline and this page isn't cached yet.",
     "offline_home": "Go to the cached home page",
+    "offline_retry": "Try again",
     "offline_strip": "Offline · showing what this device has saved",
     "offline_works": "These still work offline",
     "close": "Close",
@@ -250,7 +252,8 @@
       "times_up": "Time's up",
       "paused": "Paused",
       "steps": "{n} steps",
-      "tap_resume": "Tap to keep counting"
+      "tap_resume": "Tap to keep counting",
+      "still_running": "The timer keeps running and will ring when it ends."
     },
     "window": {
       "label": "Window controls",
@@ -1080,6 +1083,7 @@
       "counter": "{n} tokens · {tps} tok/s",
       "status_ready": "Ready",
       "status_model_deleted": "Model deleted. Reload to re-download.",
+      "status_no_model": "No model loaded",
       "tier_label": "Model quality",
       "tier_fast": "fast",
       "tier_better": "better",
@@ -1134,6 +1138,8 @@
       "err_device_lost": "GPU device lost — reload to recover",
       "gpu_lost_notice": "The GPU was reset, so the model stopped. Your chat is kept. Reload the model to continue.",
       "btn_reload_model": "Reload model",
+      "no_model_notice": "Choose a model to start chatting. It downloads once, then runs on this device.",
+      "btn_choose_model": "Choose a model",
       "interrupted": "Interrupted: the GPU was reset before this answer finished.",
       "err_context_full": "Conversation is too long for the model's memory. Start a new chat to continue.",
       "status_too_long": "Message too long",
@@ -1914,6 +1920,11 @@
         },
         "pomodoro-timer": {
           "pomodoro": "start a focus session"
+        }
+      },
+      "perm": {
+        "finance": {
+          "network": "Only for syncing your own devices and for optional bill reminders. Sync passes through Mentria's relay encrypted, so the relay can't read your ledger; reminders send just a wake-up time. Nothing readable is stored."
         }
       }
     },
@@ -3707,7 +3718,8 @@
         "dismiss": "Dismiss",
         "later": "Later",
         "working": "Working…",
-        "progress": "Progress"
+        "progress": "Progress",
+        "retry": "Try again"
       },
       "errors": {
         "no_js": "Finance needs JavaScript to run.",
@@ -3825,7 +3837,8 @@
         "receiving": "Receiving your ledger…",
         "no_wraps": "Unlock Finance once more on the other device, then try again.",
         "failed": "Pairing failed:",
-        "expired": "The code expired. Start again on the other device."
+        "expired": "The code expired. Start again on the other device.",
+        "unreachable": "Can't reach the sync service. Check your connection and try again."
       },
       "restore": {
         "title": "Restore from a backup",
@@ -3896,7 +3909,8 @@
         "err_to": "Choose a different account to transfer to.",
         "err_received": "Enter the amount received, or add an exchange rate in Accounts.",
         "err_split": "The split lines add up to {sum}, but the total is {total}.",
-        "err_fx": "Add a rate for 1 {from} in {to}."
+        "err_fx": "Add a rate for 1 {from} in {to}.",
+        "no_accounts": "There's no account to record this in yet. Add one first."
       },
       "nl": {
         "today": "today",
@@ -4334,8 +4348,8 @@
         "auto_post": "Add to the ledger automatically",
         "auto_hint": "Finance records it on the due date when you next open the app. Turn off for amounts that vary.",
         "more": "Reminders, trial and cancel details",
-        "remind": "Remind me (days before)",
-        "remind_hint": "Shown on Home and in the tile. -1 uses the default.",
+        "remind": "Remind me",
+        "remind_hint": "Shown on Home and in the tile. Change the default in Settings.",
         "shift_label": "If it falls on a weekend",
         "shift": {
           "none": "Keep the date",
@@ -4386,7 +4400,8 @@
           "quarter": "every 3 months",
           "half": "every 6 months",
           "nmonths": "every {n} months"
-        }
+        },
+        "remind_default": "Default ({when})"
       },
       "more": {
         "plan": "Forecasts, runway and goals",
@@ -5697,6 +5712,7 @@
     "start_today": "Start today's pack",
     "welcome_back": "Welcome back",
     "continue": "Continue",
+    "continue_offline": "This pack opens once you're back online.",
     "week_n": "You've learned on {n} of 7 days this week.",
     "week_zero": "One card today starts your week.",
     "your_tools": "Your tools"

@@ -65,9 +65,10 @@ eleventyComputed:
   <dl class="xs-perms">
     {%- for p in ext.permissions %}
     {%- set pk = "store.perm_" + p %}
+    {%- set xk = "tool.ext_gallery.perm." + ext.id + "." + p %}
     <div class="xs-perms__row">
       <dt>{% if pk | hasKey %}{{ pk | t }}{% else %}{{ p }}{% endif %}</dt>
-      <dd>{% if (pk + "_desc") | hasKey %}{{ (pk + "_desc") | t }}{% endif %}</dd>
+      <dd>{% if xk | hasKey %}{{ xk | t }}{% elif (pk + "_desc") | hasKey %}{{ (pk + "_desc") | t }}{% endif %}</dd>
     </div>
     {%- endfor %}
   </dl>
@@ -223,9 +224,7 @@ function failureKind(e) {
 }
 
 function extraUrls() {
-  const urls = [location.pathname];
-  if (D.app) urls.push(D.prefix + D.app);
-  return urls;
+  return [location.pathname].concat(D.app ? X.appPages(D.app) : []);
 }
 
 async function start() {

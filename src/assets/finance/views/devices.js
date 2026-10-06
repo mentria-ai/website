@@ -9,12 +9,15 @@ async function startPairing(ctx) {
   const status = h('p', { class: 'fsmall fmuted', role: 'status', 'aria-live': 'polite' }, t('devices.waiting'));
   const codeEl = h('div', { class: 'flock__code' });
   const approve = h('button', { type: 'button', class: 'fb fb--primary', hidden: true }, t('devices.approve'));
+  const retry = h('button', { type: 'button', class: 'fb fb--primary', hidden: true, onclick: () => { sh.close(); startPairing(ctx); } }, t('common.retry'));
+  const lede = h('p', { class: 'fmuted fsmall' }, t('devices.add_body'));
+  const failed = (text) => { lede.hidden = true; codeEl.hidden = true; status.textContent = text; approve.hidden = true; retry.hidden = false; };
   let session = null;
   let closed = false;
   const sh = U.sheet({
     title: t('devices.add'),
-    body: h('div', { class: 'fstack' }, h('p', { class: 'fmuted fsmall' }, t('devices.add_body')), codeEl, status, h('p', { class: 'ff__hint' }, t('devices.add_hint'))),
-    foot: [h('button', { type: 'button', class: 'fb', onclick: () => sh.close() }, t('common.cancel')), approve],
+    body: h('div', { class: 'fstack' }, lede, codeEl, status, h('p', { class: 'ff__hint' }, t('devices.add_hint'))),
+    foot: [h('button', { type: 'button', class: 'fb', onclick: () => sh.close() }, t('common.cancel')), retry, approve],
     onClose: () => { closed = true; if (session) session.cancel(); },
     sticky: true
   });
@@ -27,12 +30,13 @@ async function startPairing(ctx) {
       onEnd: (reason) => {
         if (reason === 'done') { sh.close(); U.toast(t('devices.paired')); ctx.rerender(); }
         else if (reason === 'expired') { status.textContent = t('pair.expired'); approve.hidden = true; }
+        else if (reason === 'unreachable') failed(t('pair.unreachable'));
       }
     });
     if (closed) { session.cancel(); return; }
     codeEl.replaceChildren(...session.code.split('-').map((g) => h('span', null, g)));
   } catch (e) {
-    status.textContent = t('devices.pair_failed') + ' ' + String((e && e.message) || e);
+    failed(t('devices.pair_failed') + ' ' + String((e && e.message) || e));
   }
   approve.addEventListener('click', async () => {
     if (!session) return;

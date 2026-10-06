@@ -2,7 +2,7 @@ import * as U from './ui.js';
 import * as V from './vault.js';
 import * as C from './crypto.js';
 import * as db from './db.js';
-import { defaultOps, guessCurrency, COMMON_CCY } from './defaults.js';
+import { guessCurrency, COMMON_CCY } from './defaults.js';
 import { todayISO } from './dates.js';
 import { decimalToInput } from './money.js';
 import { readFileJson, decryptExport, wrapRecords, foreignSafe } from './backup.js';
@@ -159,15 +159,14 @@ function basicsStep(root, opts, draft) {
     busy(done, true, t('setup.creating'));
     err.textContent = '';
     try {
-      const base = ccy.value;
-      const created = await V.create(draft.passphrase, { recoveryCode: draft.recoveryCode });
+      const created = await V.create(draft.passphrase, { recoveryCode: draft.recoveryCode, pending: { base: ccy.value } });
       if (wantDevice) await V.setDeviceUnlock(created.root, true);
       if (wantPasskey) {
         try { await V.enrollPrf(created.root, V.defaultDeviceName()); }
         catch (e) { U.toast(t('setup.passkey_failed'), { ms: 5000 }); }
       }
       draft.passphrase = null;
-      opts.onOpen({ root: created.root, keys: created.keys, firstRun: async (engine) => { await engine.commit(defaultOps(engine, base)); } });
+      opts.onOpen({ root: created.root, keys: created.keys });
     } catch (e) {
       busy(done, false);
       err.textContent = t('errors.setup') + ' ' + String((e && e.message) || e);
@@ -341,7 +340,10 @@ function pairStep(root, opts) {
             err.textContent = t('pair.failed') + ' ' + String((e && e.message) || e);
           }
         },
-        onEnd: (reason) => { if (reason === 'expired') { busy(go, false); err.textContent = t('pair.expired'); } }
+        onEnd: (reason) => {
+          if (reason === 'expired') { busy(go, false); err.textContent = t('pair.expired'); }
+          else if (reason === 'unreachable') { busy(go, false); status.textContent = ''; err.textContent = t('pair.unreachable'); }
+        }
       });
     } catch (e) {
       busy(go, false);

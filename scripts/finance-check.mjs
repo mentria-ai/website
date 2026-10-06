@@ -344,6 +344,12 @@ test('dates: loose parsing', () => {
   assert.equal(D.parseDateLoose('31/02/2024', { dayFirst: true }), null);
 });
 
+test('dates: short month labels carry the full year', () => {
+  assert.equal(D.formatMonthKey('2026-10', 'en-US', true), 'Oct 2026');
+  assert.equal(D.formatMonthKey('2026-10', 'ja-JP', true), '2026年10月');
+  assert.equal(D.formatMonthKey('2026-10', 'es-ES', true), 'oct 2026');
+});
+
 test('hlc: monotonic and drift guard', () => {
   let now = 1_700_000_000_000;
   const c = L.createClock('0123456789abcdef', () => now);
@@ -790,6 +796,18 @@ test('ui fixes: quick add reads amounts and dates in every locale', () => {
   }
 });
 
+test('ui fixes: quick add reads full-width digits and the full-width yen sign', () => {
+  const ctx = { today: '2026-10-07', locale: 'ja-JP', words: UIFIX.copy('ja').nl, accounts: [], categories: [], payees: [] };
+  const want = [['コーヒー ４５０円', 'コーヒー', '450'], ['ランチ ￥１，２００ 昨日', 'ランチ', '1200'], ['タクシー　２８００', 'タクシー', '2800'], ['コーヒー 450円', 'コーヒー', '450']];
+  for (const [text, payee, amount] of want) {
+    const r = N.parseEntry(text, ctx);
+    assert.deepEqual([r.payee, r.amount], [payee, amount], text);
+  }
+  assert.equal(N.parseEntry('ランチ ￥１，２００ 昨日', ctx).date, '2026-10-06');
+  assert.equal(M.typedNumber('１２．５０', 'en-US', 2), '12.50');
+  assert.equal(M.typedNumber('４５０', 'ja-JP', 0), '450');
+});
+
 test('ui fixes: CSV cells that start a formula are exported as text', () => {
   const out = UIFIX.ui.csv([['=1+2', '@SUM(1,1)', '+44 20 7946 0000', '-x', '\tcmd', '-12.50', -3, '12.5%', 'plain', '=HYPERLINK("http://x.example","click")']]);
   assert.equal(out, '﻿' + "'=1+2,\"'@SUM(1,1)\",'+44 20 7946 0000,'-x,\"'\tcmd\",-12.50,-3,12.5%,plain,\"'=HYPERLINK(\"\"http://x.example\"\",\"\"click\"\")\"");
@@ -1136,6 +1154,57 @@ test('tax: losses offset ordinary income up to the cap and carry forward', () =>
   assert.equal(est.lossOffset, 300000);
   assert.equal(est.carryOut, 800000 - 300000);
   assert.equal(est.taxable, 4600000 - 300000);
+});
+
+const BK = await (async () => {
+  await import(pathToFileURL(resolve(here, '../src/assets/js/mentria-backup.js')).href);
+  return globalThis.MentriaBackup;
+})();
+
+test('backup: restoring a Finance ledger keeps this device\'s identity', () => {
+  const dev = (meta) => Object.keys(meta).map((key) => ({ key, value: meta[key] }));
+  const inc = (meta) => Object.keys(meta).map((k) => ({ k, v: meta[k], size: 1 }));
+  const backup = { device_id: 'aaaaaaaaaaaaaaaa', device_name: 'Mac · Chrome', seq: 40, kcv: 'k1', wraps: { pass: { ct: 'p' }, recovery: { ct: 'r' }, prf: [{ id: 'mac-passkey' }] }, inbox_pub: 'pub', inbox_priv: 'priv', local: { auto_lock_min: 15 }, last_sync_at: '2026-10-01T00:00:00Z', schema: 1 };
+  const apply = (mine, theirs) => {
+    const plan = BK.financeAdopt('meta', dev(mine), inc(theirs));
+    const out = {};
+    for (const r of inc(theirs)) if (plan.drop.indexOf(r.k) < 0) out[r.k] = r.v;
+    for (const c of plan.carry) out[c.key] = c.value;
+    return out;
+  };
+  const other = apply({ device_id: 'bbbbbbbbbbbbbbbb', device_name: 'Android · Chrome', seq: 12, kcv: 'k2', wraps: { pass: { ct: 'old' }, prf: [{ id: 'phone-passkey' }], device: { key: 'd' } }, local: { auto_lock_min: 1 }, push_ids: ['x'], push_at: { x: 1 } }, backup);
+  assert.equal(other.device_id, 'bbbbbbbbbbbbbbbb');
+  assert.equal(other.device_name, 'Android · Chrome');
+  assert.equal(other.seq, 0);
+  assert.equal(other.kcv, 'k1');
+  assert.equal(other.wraps.pass.ct, 'p');
+  assert.deepEqual(other.wraps.prf, []);
+  assert.equal(other.wraps.device, undefined);
+  assert.deepEqual(other.local, { auto_lock_min: 1 });
+  assert.deepEqual(other.push_ids, ['x']);
+  assert.equal(other.last_sync_at, undefined);
+  assert.equal(other.inbox_priv, 'priv');
+  const same = apply({ device_id: 'bbbbbbbbbbbbbbbb', device_name: 'Android · Chrome', seq: 55, kcv: 'k1', wraps: { pass: { ct: 'old' }, prf: [{ id: 'phone-passkey' }], device: { key: 'd' } }, last_sync_at: '2026-10-05T00:00:00Z' }, backup);
+  assert.equal(same.device_id, 'bbbbbbbbbbbbbbbb');
+  assert.equal(same.seq, 55);
+  assert.deepEqual(same.wraps.prf, [{ id: 'phone-passkey' }]);
+  assert.deepEqual(same.wraps.device, { key: 'd' });
+  assert.equal(same.wraps.pass.ct, 'p');
+  assert.equal(same.last_sync_at, '2026-10-05T00:00:00Z');
+  const own = apply({ device_id: 'aaaaaaaaaaaaaaaa', device_name: 'Mac · Chrome', seq: 52, kcv: 'k1', wraps: { pass: { ct: 'p' }, prf: [] } }, backup);
+  assert.equal(own.seq, 52);
+  const fresh = apply({ push_ids: ['y'] }, backup);
+  assert.equal(fresh.device_id, 'aaaaaaaaaaaaaaaa');
+  assert.equal(fresh.seq, 40);
+  assert.deepEqual(fresh.wraps.prf, [{ id: 'mac-passkey' }]);
+  assert.deepEqual(fresh.push_ids, ['y']);
+  assert.equal(BK.financeAdopt('pages', [], []), null);
+});
+
+test('backup: file names use the local date', () => {
+  const d = new Date();
+  const day = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  assert.equal(BK.backupName('mentria-backup'), 'mentria-backup-' + day + '.json');
 });
 
 let failed = 0;

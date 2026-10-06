@@ -981,7 +981,7 @@ localeReload: true
 
   function showSize(m) {
     const parts = m.areas.filter((a) => a.bytes > 0).map((a) => (COPY.areas[a.area] || a.area) + ' ' + fmtBytes(a.bytes));
-    sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', parts.join(', '));
+    sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', MentriaBackup.listJoin(parts));
     sizeWarn.hidden = m.total <= MentriaBackup.LARGE_BYTES;
   }
 

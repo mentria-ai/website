@@ -62,6 +62,7 @@
     "update_checking": "Comprobando…",
     "update_updating": "Actualizando…",
     "update_latest": "Actualizado",
+    "update_offline": "Sin conexión · no se pudo comprobar",
     "cache_clear": "Vaciar caché",
     "cache_clearing": "Vaciando…",
     "cache_cleared": "Listo — recargando…",
@@ -239,6 +240,7 @@
     "offline_title": "Sin conexión",
     "offline_msg": "Estás sin conexión y esta página aún no está en caché.",
     "offline_home": "Ir a la página de inicio en caché",
+    "offline_retry": "Reintentar",
     "offline_strip": "Sin conexión · mostrando lo que este dispositivo tiene guardado",
     "offline_works": "Esto sigue funcionando sin conexión",
     "close": "Cerrar",
@@ -250,7 +252,8 @@
       "times_up": "Tiempo cumplido",
       "paused": "En pausa",
       "steps": "{n} pasos",
-      "tap_resume": "Toca para seguir contando"
+      "tap_resume": "Toca para seguir contando",
+      "still_running": "El temporizador sigue en marcha y sonará al terminar."
     },
     "window": {
       "label": "Controles de ventana",
@@ -1080,6 +1083,7 @@
       "counter": "{n} tokens · {tps} tok/s",
       "status_ready": "Listo",
       "status_model_deleted": "Modelo eliminado. Recarga para volver a descargar.",
+      "status_no_model": "Ningún modelo cargado",
       "tier_label": "Calidad del modelo",
       "tier_fast": "rápido",
       "tier_better": "mejor",
@@ -1134,6 +1138,8 @@
       "err_device_lost": "GPU perdida — recarga para recuperar",
       "gpu_lost_notice": "La GPU se reinició y el modelo se detuvo. Tu chat se conserva. Recarga el modelo para continuar.",
       "btn_reload_model": "Recargar modelo",
+      "no_model_notice": "Elige un modelo para empezar a chatear. Se descarga una vez y luego funciona en este dispositivo.",
+      "btn_choose_model": "Elegir modelo",
       "interrupted": "Interrumpida: la GPU se reinició antes de que terminara esta respuesta.",
       "err_context_full": "La conversación es demasiado larga para la memoria del modelo. Inicia un chat nuevo para continuar.",
       "status_too_long": "Mensaje demasiado largo",
@@ -1914,6 +1920,11 @@
         },
         "pomodoro-timer": {
           "pomodoro": "empezar una sesión de concentración"
+        }
+      },
+      "perm": {
+        "finance": {
+          "network": "Solo para sincronizar tus propios dispositivos y para los recordatorios de pagos opcionales. La sincronización pasa cifrada por el relé de Mentria, que no puede leer tu libro de cuentas; los recordatorios solo envían una hora de aviso. No se guarda nada legible."
         }
       }
     },
@@ -3707,7 +3718,8 @@
         "dismiss": "Descartar",
         "later": "Más tarde",
         "working": "Procesando…",
-        "progress": "Progreso"
+        "progress": "Progreso",
+        "retry": "Reintentar"
       },
       "errors": {
         "no_js": "Finanzas necesita JavaScript para funcionar.",
@@ -3825,7 +3837,8 @@
         "receiving": "Recibiendo tu libro de cuentas…",
         "no_wraps": "Desbloquea Finanzas una vez más en el otro dispositivo y vuelve a intentarlo.",
         "failed": "No se pudo emparejar:",
-        "expired": "El código caducó. Empieza de nuevo en el otro dispositivo."
+        "expired": "El código caducó. Empieza de nuevo en el otro dispositivo.",
+        "unreachable": "No se puede conectar con el servicio de sincronización. Revisa tu conexión y vuelve a intentarlo."
       },
       "restore": {
         "title": "Restaurar desde una copia de seguridad",
@@ -3896,7 +3909,8 @@
         "err_to": "Elige otra cuenta de destino.",
         "err_received": "Escribe el importe recibido o añade un tipo de cambio en Cuentas.",
         "err_split": "Las líneas suman {sum}, pero el total es {total}.",
-        "err_fx": "Añade un tipo de cambio para 1 {from} en {to}."
+        "err_fx": "Añade un tipo de cambio para 1 {from} en {to}.",
+        "no_accounts": "Todavía no hay ninguna cuenta donde anotarlo. Añade una primero."
       },
       "nl": {
         "today": "hoy|esta mañana|esta tarde|esta noche",
@@ -4334,8 +4348,8 @@
         "auto_post": "Añadir al libro de cuentas automáticamente",
         "auto_hint": "Finanzas lo registra en la fecha de vencimiento la próxima vez que abras la app. Desactívalo si el importe varía.",
         "more": "Recordatorios, prueba gratuita y cancelación",
-        "remind": "Recordarme (días antes)",
-        "remind_hint": "Se muestra en Inicio y en la ficha. -1 usa el valor predeterminado.",
+        "remind": "Recordarme",
+        "remind_hint": "Se muestra en Inicio y en la ficha. El valor predeterminado se cambia en Ajustes.",
         "shift_label": "Si cae en fin de semana",
         "shift": {
           "none": "Mantener la fecha",
@@ -4386,7 +4400,8 @@
           "quarter": "cada 3 meses",
           "half": "cada 6 meses",
           "nmonths": "cada {n} meses"
-        }
+        },
+        "remind_default": "Predeterminado ({when})"
       },
       "more": {
         "plan": "Previsiones, margen y metas",
@@ -5697,6 +5712,7 @@
     "start_today": "Empezar el paquete de hoy",
     "welcome_back": "Hola de nuevo",
     "continue": "Continuar",
+    "continue_offline": "Este paquete se abrirá cuando vuelvas a tener conexión.",
     "week_n": "Esta semana aprendiste {n} de 7 días.",
     "week_zero": "Una tarjeta hoy empieza tu semana.",
     "your_tools": "Tus herramientas"

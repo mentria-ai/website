@@ -495,7 +495,8 @@ localeReload: true
       idle:     {{ ("about.update_check"    | t) | dump | safe }},
       checking: {{ ("about.update_checking" | t) | dump | safe }},
       updating: {{ ("about.update_updating" | t) | dump | safe }},
-      latest:   {{ ("about.update_latest"   | t) | dump | safe }}
+      latest:   {{ ("about.update_latest"   | t) | dump | safe }},
+      offline:  {{ ("about.update_offline"  | t) | dump | safe }}
     };
     function setLabel(txt) {
       var l = btn.querySelector('.about-refresh__label');
@@ -529,14 +530,23 @@ localeReload: true
       }
       function onFound() { if (!updating) { updating = true; setLabel(COPY.updating); } takeOver(reg.waiting || reg.installing); }
       reg.addEventListener('updatefound', onFound);
-      try { await reg.update(); } catch (_) {}
+      var failed = navigator.onLine === false;
+      if (!failed) {
+        try {
+          await Promise.race([reg.update(), new Promise(function (_, stop) { setTimeout(function () { stop(new Error('timeout')); }, 15000); })]);
+        } catch (_) { failed = true; }
+      }
       if (reg.installing || reg.waiting) onFound();
+      function settle(label, hold) {
+        checking = false;
+        setLabel(label);
+        btn.classList.remove('is-busy');
+        setTimeout(function () { setLabel(COPY.idle); btn.disabled = false; }, hold);
+      }
+      if (failed && !updating) { settle(COPY.offline, 3500); return; }
       setTimeout(function () {
         if (updating || reloading) return;
-        checking = false;
-        setLabel(COPY.latest);
-        btn.classList.remove('is-busy');
-        setTimeout(function () { setLabel(COPY.idle); btn.disabled = false; }, 2000);
+        settle(COPY.latest, 2000);
       }, 1500);
     });
   })();
@@ -768,7 +778,7 @@ localeReload: true
       var parts = m.areas.filter(function (a) { return a.bytes > 0; }).map(function (a) {
         return (COPY.areas[a.area] || a.area) + ' ' + fmtBytes(a.bytes);
       });
-      sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', parts.join(', '));
+      sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', window.MentriaBackup.listJoin(parts));
       sizeWarn.hidden = m.total <= window.MentriaBackup.LARGE_BYTES;
     }
 

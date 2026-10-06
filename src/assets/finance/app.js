@@ -3,11 +3,13 @@ import * as db from './db.js';
 import * as V from './vault.js';
 import { Engine } from './engine.js';
 import { Ledger, accountGroup } from './ledger.js';
-import { monthKey, isISODate } from './dates.js';
+import { monthKey, isISODate, formatMonthKey, formatDate } from './dates.js';
+import { format, isCurrency } from './money.js';
 import { randomId } from './crypto.js';
 import { showLock } from './lock.js';
 import { openEntry } from './entry.js';
 import { syncController } from './sync.js';
+import { defaultOps, guessCurrency } from './defaults.js';
 
 const { h, t, icon } = U;
 
@@ -241,28 +243,61 @@ function updateSyncBadge() {
   txt.textContent = st.state === 'live' ? t('sync.live') : st.state === 'waiting' ? t('sync.waiting') : t('sync.local');
 }
 
+function fill(str, vars) {
+  let v = String(str == null ? '' : str);
+  for (const k of Object.keys(vars || {})) v = v.split('{' + k + '}').join(String(vars[k]));
+  return v;
+}
+
+function widgetCopies() {
+  const all = window.FIN_WIDGET && typeof window.FIN_WIDGET === 'object' ? window.FIN_WIDGET : {};
+  const out = {};
+  for (const code of Object.keys(all)) if (all[code] && all[code].w && typeof all[code].name === 'string') out[code] = all[code];
+  const cur = U.uiLang();
+  if (!out[cur]) out[cur] = { name: t('app.name'), w: { locked: t('widget.locked'), open: t('widget.open'), spent: t('widget.spent'), spent_of: t('widget.spent_of'), next: t('widget.next'), no_upcoming: t('widget.no_upcoming') } };
+  return out;
+}
+
+function widgetLocale(code) {
+  if (code === U.uiLang()) return U.locale();
+  const set = app.ledger && app.ledger.settings().locale;
+  if (set) return set;
+  const base = code.slice(0, 2).toLowerCase();
+  const nav = (navigator.languages || []).find((l) => String(l).toLowerCase().slice(0, 2) === base);
+  return nav || code;
+}
+
 function updateWidget() {
   const S = window.MentriaStore;
   if (!S) return;
   const open = !!(app.engine && !app.engine.closed && app.ledger);
-  let snap = { text: t('app.name'), detail: t('widget.locked') };
+  let info = null;
   if (open && app.local.widget_amounts) {
     try {
       const L = app.ledger;
       const key = monthKey(L.today());
-      const b = L.budgetSummary(key);
-      const month = U.month(key, true);
-      const cash = (v) => U.money(v, L.base(), { compact: true });
-      const up = L.upcoming(14)[0];
-      snap = {
-        text: b.total > 0 ? t('widget.spent_of', { spent: cash(b.spent), budget: cash(b.total), month }) : t('widget.spent', { amount: cash(b.expense), month }),
-        detail: up ? t('widget.next', { name: up.schedule.name || '', amount: U.money(Math.abs(up.amount), up.currency), date: U.date(up.date, 'dayMonth') }) : t('widget.no_upcoming')
-      };
-      if (b.total > 0) snap.progress = Math.max(0, Math.min(1, b.spent / b.total));
-    } catch (_) {}
-  } else if (open) {
-    snap = { text: t('app.name'), detail: t('widget.open') };
+      info = { key, base: L.base(), b: L.budgetSummary(key), up: L.upcoming(14)[0] || null };
+    } catch (_) { info = null; }
   }
+  const build = (c, loc) => {
+    if (!open) return { text: c.name, detail: c.w.locked };
+    if (!info) return { text: c.name, detail: c.w.open };
+    const { b, up } = info;
+    const month = formatMonthKey(info.key, loc, true);
+    const cash = (v) => format(v, info.base, loc, { compact: true });
+    return {
+      text: b.total > 0 ? fill(c.w.spent_of, { spent: cash(b.spent), budget: cash(b.total), month }) : fill(c.w.spent, { amount: cash(b.expense), month }),
+      detail: up ? fill(c.w.next, { name: up.schedule.name || '', amount: format(Math.abs(up.amount), up.currency, loc), date: formatDate(up.date, loc, 'dayMonth') }) : c.w.no_upcoming
+    };
+  };
+  const copies = widgetCopies();
+  const locales = {};
+  for (const code of Object.keys(copies)) {
+    try { locales[code] = build(copies[code], widgetLocale(code)); } catch (_) {}
+  }
+  const here = locales[U.uiLang()] || { text: t('app.name'), detail: t(open ? 'widget.open' : 'widget.locked') };
+  const snap = { text: here.text, detail: here.detail, locales };
+  if (info && info.b.total > 0) snap.progress = Math.max(0, Math.min(1, info.b.spent / info.b.total));
   try {
     if (JSON.stringify(S.get('extdata.finance', 'widget')) === JSON.stringify(snap)) return;
     S.set('extdata.finance', 'widget', snap);
@@ -360,9 +395,18 @@ function askPersist() {
   db.requestPersist().catch(() => {});
 }
 
+async function finishSetup() {
+  const pending = await db.getMeta('pending_setup');
+  if (!pending || !app.engine || app.engine.readOnly) return;
+  if (!app.ledger.get('settings', 'main')) await app.engine.commit(defaultOps(app.engine, isCurrency(pending.base) ? pending.base : guessCurrency()));
+  await db.setMeta({ pending_setup: undefined });
+}
+
 async function afterWriter(session) {
   try {
     if (session && session.firstRun) await session.firstRun(app.engine, app.ledger);
+    await finishSetup();
+    if (app.engine.foreignBase) await app.engine.checkpoint();
     const merged = await app.engine.mergeInbox((v) => inboxOps(v));
     if (merged) U.toast(U.tp('lock.inbox_merged', merged), { ms: 5000 });
     await autoPost();
@@ -483,6 +527,7 @@ window.addEventListener('keydown', (e) => {
 async function start() {
   const root = app.root;
   await loadLocal();
+  try { await V.refreshDeviceName(); } catch (_) {}
   const st = await V.status();
   showLock(root, {
     status: st,

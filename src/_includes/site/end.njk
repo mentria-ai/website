@@ -85,6 +85,18 @@ try {
 
   function showBanner() {
     if (document.querySelector('[data-install-quiet]')) return;
+    if (ls && ls.getItem(INSTALLED_KEY)) return;
+    var root = document.documentElement;
+    if (root.classList.contains('is-fullscreen-tool')) {
+      if (!window.MutationObserver) return;
+      var wait = new MutationObserver(function () {
+        if (root.classList.contains('is-fullscreen-tool')) return;
+        wait.disconnect();
+        showBanner();
+      });
+      wait.observe(root, { attributes: true, attributeFilter: ['class'] });
+      return;
+    }
     if (ls) {
       var seen = (parseInt(ls.getItem(SEEN_KEY), 10) || 0) + 1;
       if (seen > SEEN_CAP) {

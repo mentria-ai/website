@@ -70,6 +70,7 @@ export class Engine extends EventTarget {
     this.opsSinceCkpt = 0;
     this.opsPages = 0;
     this.badPages = [];
+    this.foreignBase = false;
     this.closed = false;
     this.chain = Promise.resolve();
     this.channel = null;
@@ -106,12 +107,15 @@ export class Engine extends EventTarget {
     this.have = new Map();
     this.covers = {};
     this.badPages = [];
-    const own = pages.filter((p) => p.kind === 'ckpt' && p.device === this.deviceId).sort((a, b) => String(b.created).localeCompare(String(a.created)));
-    for (const c of own) {
+    this.foreignBase = false;
+    const ownFirst = (p) => (p.device === this.deviceId ? 1 : 0);
+    const ckpts = pages.filter((p) => p.kind === 'ckpt').sort((a, b) => ownFirst(b) - ownFirst(a) || String(b.created).localeCompare(String(a.created)));
+    for (const c of ckpts) {
       try {
         const snap = await openPage(this.keys.dek, c);
         L.mergeSnapshot(this.state, snap);
         this.covers = Object.assign({}, c.covers);
+        this.foreignBase = c.device !== this.deviceId;
         break;
       } catch (_) { this.badPages.push(c.id); }
     }
@@ -313,6 +317,7 @@ export class Engine extends EventTarget {
     for (const p of pages) if (p.kind === 'ckpt' && p.device !== this.deviceId) drop.push(p.id);
     await db.deletePages(drop);
     this.covers = covers;
+    this.foreignBase = false;
     for (const [d, s] of this.have) for (const seq of Array.from(s)) if (seq <= (covers[d] || 0)) s.delete(seq);
     this.opsSinceCkpt = 0;
     this.opsPages = pages.filter((p) => p.kind === 'ops').length - drop.filter((id) => pages.some((p) => p.id === id && p.kind === 'ops')).length;

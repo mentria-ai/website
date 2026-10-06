@@ -118,7 +118,7 @@ export function formatDate(s, locale, style) {
   const opts = style === 'long' ? { year: 'numeric', month: 'long', day: 'numeric' }
     : style === 'month' ? { year: 'numeric', month: 'long' }
     : style === 'monthShort' ? { month: 'short' }
-    : style === 'monthYearShort' ? { month: 'short', year: '2-digit' }
+    : style === 'monthYearShort' ? { month: 'short', year: 'numeric' }
     : style === 'weekday' ? { weekday: 'long', day: 'numeric', month: 'short' }
     : style === 'dayMonth' ? { day: 'numeric', month: 'short' }
     : style === 'year' ? { year: 'numeric' }

@@ -340,6 +340,13 @@
     ui: 'layout settings', ai_chat: 'AI chat', ext: 'extensions', extdata: 'extension data', feed: 'feed progress'
   };
 
+  const areaOf = (suffix) => {
+    let ns = String(suffix).split('.')[0];
+    if (ns.indexOf(LEGACY_PREFIX) === 0) ns = /^mentria_(chess|ludo|sudoku|msw)/.test(ns) ? 'games' : 'tools';
+    if (ns === 'tool') ns = 'games';
+    return ns in AREA_NAMES ? ns : 'other';
+  };
+
   const areaNames = (suffixes, names) => {
     const t = (key, fallback) => {
       try {
@@ -351,10 +358,7 @@
     };
     const out = [];
     (suffixes || []).forEach((suffix) => {
-      let ns = String(suffix).split('.')[0];
-      if (ns.indexOf(LEGACY_PREFIX) === 0) ns = /^mentria_(chess|ludo|sudoku|msw)/.test(ns) ? 'games' : 'tools';
-      if (ns === 'tool') ns = 'games';
-      if (!(ns in AREA_NAMES)) ns = 'other';
+      const ns = areaOf(suffix);
       const name = (names && typeof names[ns] === 'string' && names[ns]) || t('common.data_areas.' + ns, AREA_NAMES[ns] || 'other saved data');
       if (out.indexOf(name) < 0) out.push(name);
     });
@@ -479,7 +483,7 @@
   global.MentriaStore = {
     get, set, remove, list, clear: clearNs, status,
     getMeta, listNamespaces,
-    exportAll, importAll, planImport, areaNames,
+    exportAll, importAll, planImport, areaNames, areaOf,
     isLocalOnly, isLocalLegacy, adopt, mergeNotes, maxMergeMap,
     requestPersist, estimate, persisted,
     EVENT_NAME

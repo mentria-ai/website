@@ -339,6 +339,8 @@ export function promptDialog(opts) {
 
 let toastEl = null;
 let toastTimer = null;
+let undoNow = null;
+let typedSince = null;
 function toastHost() {
   const top = sheetStack.length ? sheetStack[sheetStack.length - 1].el : null;
   return top && top.open ? top : document.getElementById('fin') || document.body;
@@ -347,12 +349,44 @@ export function toast(msg, opts) {
   const o = opts || {};
   if (toastEl) toastEl.remove();
   clearTimeout(toastTimer);
-  toastEl = h('div', { class: 'ftoast', role: 'status', 'aria-live': 'polite' }, h('span', null, msg));
-  if (o.undo) toastEl.append(h('button', { type: 'button', onclick: () => { const u = o.undo; dismiss(); u(); } }, t('common.undo')));
-  if (o.action) toastEl.append(h('button', { type: 'button', onclick: () => { const a = o.action.run; dismiss(); a(); } }, o.action.label));
-  toastHost().append(toastEl);
+  undoNow = null;
+  typedSince = null;
+  const el = h('div', { class: 'ftoast', role: 'status', 'aria-live': 'polite' }, h('span', null, msg));
+  toastEl = el;
+  const undo = () => { const u = o.undo; dismiss(); u(); };
+  if (o.undo) {
+    el.append(h('button', { type: 'button', onclick: undo }, t('common.undo')));
+    undoNow = undo;
+    typedSince = new WeakSet();
+  }
+  if (o.action) el.append(h('button', { type: 'button', onclick: () => { const a = o.action.run; dismiss(); a(); } }, o.action.label));
+  toastHost().append(el);
   toastTimer = setTimeout(dismiss, o.ms || (o.undo ? 6000 : 2800));
-  function dismiss() { clearTimeout(toastTimer); if (toastEl) { toastEl.remove(); toastEl = null; } }
+  function dismiss() {
+    if (toastEl !== el) return;
+    clearTimeout(toastTimer);
+    el.remove();
+    toastEl = null;
+    undoNow = null;
+    typedSince = null;
+  }
+}
+
+function typable(el) {
+  if (!el) return false;
+  if (el.isContentEditable || el.tagName === 'TEXTAREA') return true;
+  return el.tagName === 'INPUT' && /^(text|search|url|tel|email|password|number)$/.test(el.type);
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('input', (e) => { if (typedSince && typable(e.target)) typedSince.add(e.target); }, true);
+  document.addEventListener('keydown', (e) => {
+    if (!undoNow || e.defaultPrevented || e.isComposing || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey) return;
+    if (e.key !== 'z' && e.key !== 'Z' && !(e.code === 'KeyZ' && /^[^\x00-\x7f]$/.test(e.key))) return;
+    if (typedSince && typedSince.has(e.target)) return;
+    e.preventDefault();
+    undoNow();
+  });
 }
 
 export function downloadBlob(name, blob) {

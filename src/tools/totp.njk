@@ -171,8 +171,9 @@ localeReload: true
       <p class="totp-modal__p" id="totp-backup-lede">{{ "tool.totp.backup_gate_lede" | t }}</p>
       <label class="totp-field">
         <span>{{ "tool.totp.backup_pass_label" | t }}</span>
-        <input type="password" id="totp-backup-pass" autocomplete="new-password" minlength="8">
+        <input type="password" id="totp-backup-pass" autocomplete="new-password" minlength="8" aria-describedby="totp-backup-err">
       </label>
+      <p class="totp-modal__err" id="totp-backup-err" role="alert"></p>
       <div class="totp-modal__actions">
         <button type="button" class="totp-btn m-btn m-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
         <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-backup-confirm-btn">{{ "tool.totp.backup_gate_confirm" | t }}</button>
@@ -1437,14 +1438,19 @@ localeReload: true
     $('totp-backup-lede').textContent = unsaved ? COPY.backup_unsaved_lede : COPY.backup_gate_lede;
     $('totp-backup-confirm-btn').textContent = unsaved ? COPY.backup_button : COPY.backup_gate_confirm;
     $('totp-backup-pass').value = '';
+    $('totp-backup-err').textContent = '';
     backupModal.open();
     $('totp-backup-pass').focus();
   }
 
+  $('totp-backup-pass').addEventListener('input', () => { $('totp-backup-err').textContent = ''; });
+
   $('totp-backup-confirm-btn').addEventListener('click', async () => {
-    if (!window.MentriaBackup) { setStatus('backup library not loaded', 'err'); return; }
+    const backupErr = $('totp-backup-err');
+    backupErr.textContent = '';
+    if (!window.MentriaBackup) { backupErr.textContent = 'backup library not loaded'; return; }
     const pass = $('totp-backup-pass').value;
-    if (!pass || pass.length < 8) { setStatus(COPY.setup_strength_too_short, 'err'); return; }
+    if (!pass || pass.length < 8) { backupErr.textContent = COPY.setup_strength_too_short; $('totp-backup-pass').focus(); return; }
     $('totp-backup-confirm-btn').disabled = true;
     try {
       const next = pendingAdd ? state.accounts.concat(pendingAdd) : state.accounts;
@@ -1468,7 +1474,7 @@ localeReload: true
       backupModal.close();
       setStatus(COPY.backup_done, 'ok');
     } catch (err) {
-      setStatus(String(err && err.message || err), 'err');
+      backupErr.textContent = String(err && err.message || err);
     } finally {
       $('totp-backup-confirm-btn').disabled = false;
     }

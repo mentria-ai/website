@@ -10,13 +10,14 @@ const FALLBACK_ICE = [{ urls: 'stun:turn.mentria.ai:3478' }];
 const WEEK = 7 * 86400000;
 const BATCH = 40;
 const PAIR_TTL = 10 * 60 * 1000;
+const RELAY_WAIT = 12000;
 
 let iceCache = null;
 let iceUntil = 0;
 async function getIce() {
   if (iceCache && Date.now() < iceUntil) return iceCache;
   try {
-    const r = await fetch(TURN_CRED_URL, { cache: 'no-store' });
+    const r = await fetch(TURN_CRED_URL, { cache: 'no-store', signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined });
     if (!r.ok) throw new Error(String(r.status));
     const d = await r.json();
     iceCache = d.iceServers || FALLBACK_ICE;
@@ -40,6 +41,18 @@ function leaveRoom(r) {
   leaving.add(p);
   p.then(() => leaving.delete(p));
   return p;
+}
+
+async function relayOpen(ms) {
+  const T = await import(TRYSTERO);
+  const end = Date.now() + ms;
+  for (;;) {
+    let socks = {};
+    try { socks = (T.getRelaySockets && T.getRelaySockets()) || {}; } catch (_) {}
+    if (Object.values(socks).some((ws) => ws && ws.readyState === 1)) return true;
+    if (Date.now() >= end) return false;
+    await new Promise((done) => setTimeout(done, 250));
+  }
 }
 
 async function join(appId, roomId, live) {
@@ -201,6 +214,7 @@ export function syncController(getCtx) {
     r.onPeerJoin = async (pid) => {
       try { hi.send(await C.encryptJson(d.key, { name: c.engine.deviceName || '' }, 'mentria-finance|pair-hi'), { target: pid }); } catch (_) {}
     };
+    relayOpen(RELAY_WAIT).then((ok) => { if (!ok && !peer) finish('unreachable'); }, () => {});
     hi.onMessage = async (data, ctx) => {
       let m;
       try { m = await C.decryptJson(d.key, data, 'mentria-finance|pair-hi'); } catch (_) { return; }
@@ -255,6 +269,7 @@ export async function pairJoin(code, opts) {
   r.onPeerJoin = async (pid) => {
     try { hi.send(await C.encryptJson(d.key, { name: opts.name || '' }, 'mentria-finance|pair-hi'), { target: pid }); } catch (_) {}
   };
+  relayOpen(RELAY_WAIT).then((ok) => { if (!ok && !hostId) end('unreachable'); }, () => {});
   hi.onMessage = async (data, ctx) => {
     try { await C.decryptJson(d.key, data, 'mentria-finance|pair-hi'); } catch (_) { return; }
     hostId = ctx.peerId;

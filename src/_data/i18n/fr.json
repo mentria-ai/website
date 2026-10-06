@@ -1891,6 +1891,11 @@
           "fin-subs": "ouvrir les factures et abonnements",
           "fin-tax": "ouvrir l'estimation d'impôts"
         }
+      },
+      "perm": {
+        "finance": {
+          "network": "Uniquement pour synchroniser vos propres appareils et pour les rappels de paiement facultatifs. La synchronisation passe chiffrée par le relais de Mentria, qui ne peut pas lire votre livre de comptes ; les rappels n'envoient qu'une heure de réveil. Rien de lisible n'est conservé."
+        }
       }
     },
     "bubble-level": {
@@ -3683,7 +3688,8 @@
         "dismiss": "Ignorer",
         "later": "Plus tard",
         "working": "En cours…",
-        "progress": "Progression"
+        "progress": "Progression",
+        "retry": "Réessayer"
       },
       "errors": {
         "no_js": "Finances a besoin de JavaScript pour fonctionner.",
@@ -3801,7 +3807,8 @@
         "receiving": "Réception de votre livre de comptes…",
         "no_wraps": "Déverrouillez à nouveau Finances sur l'autre appareil, puis réessayez.",
         "failed": "Échec de l'appairage :",
-        "expired": "Le code a expiré. Recommencez sur l'autre appareil."
+        "expired": "Le code a expiré. Recommencez sur l'autre appareil.",
+        "unreachable": "Impossible de joindre le service de synchronisation. Vérifiez votre connexion et réessayez."
       },
       "restore": {
         "title": "Restaurer une sauvegarde",
@@ -3872,7 +3879,8 @@
         "err_to": "Choisissez un autre compte de destination.",
         "err_received": "Saisissez le montant reçu, ou ajoutez un taux de change dans Comptes.",
         "err_split": "Les lignes totalisent {sum}, mais le total est de {total}.",
-        "err_fx": "Ajoutez un taux pour 1 {from} en {to}."
+        "err_fx": "Ajoutez un taux pour 1 {from} en {to}.",
+        "no_accounts": "Il n'y a pas encore de compte où l'enregistrer. Ajoutez-en un d'abord."
       },
       "nl": {
         "today": "aujourd'hui|aujourd’hui|ce matin|ce midi|cet après-midi|ce soir",
@@ -4310,8 +4318,8 @@
         "auto_post": "Ajouter automatiquement au livre de comptes",
         "auto_hint": "Finances l'enregistre à la date d'échéance lors de votre prochaine ouverture de l'app. Désactivez cette option pour les montants variables.",
         "more": "Rappels, essai gratuit et résiliation",
-        "remind": "Me rappeler (jours avant)",
-        "remind_hint": "Affiché sur l'Accueil et sur la tuile. -1 utilise la valeur par défaut.",
+        "remind": "Me rappeler",
+        "remind_hint": "Affiché sur l'Accueil et sur la tuile. La valeur par défaut se change dans Réglages.",
         "shift_label": "Si la date tombe un week-end",
         "shift": {
           "none": "Garder la date",
@@ -4362,7 +4370,8 @@
           "quarter": "tous les 3 mois",
           "half": "tous les 6 mois",
           "nmonths": "tous les {n} mois"
-        }
+        },
+        "remind_default": "Par défaut ({when})"
       },
       "more": {
         "plan": "Projections, autonomie et objectifs",

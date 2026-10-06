@@ -24,6 +24,14 @@ export function defaultDeviceName() {
   return browser ? platform + ' · ' + browser : platform;
 }
 
+const AUTO_NAME = /^(iPhone|iPad|Android|Mac|Windows|Linux|Device)( · (Edge|Firefox|Chrome|Safari))?$/;
+
+export async function refreshDeviceName() {
+  const cur = await db.getMeta('device_name');
+  const next = defaultDeviceName();
+  if (typeof cur === 'string' && cur !== next && AUTO_NAME.test(cur)) await db.setMeta({ device_name: next });
+}
+
 export async function create(passphrase, opts) {
   const o = opts || {};
   const root = o.root ? new Uint8Array(o.root) : C.randomBytes(32);
@@ -44,7 +52,8 @@ export async function create(passphrase, opts) {
     inbox_pub: inbox.pub,
     inbox_priv: inbox.sealed,
     seq: 0,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    pending_setup: o.pending || undefined
   });
   return { root, keys, recoveryCode, deviceId };
 }

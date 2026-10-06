@@ -1891,6 +1891,11 @@
           "fin-subs": "open subscriptions and bills",
           "fin-tax": "open the tax estimate"
         }
+      },
+      "perm": {
+        "finance": {
+          "network": "Only for syncing your own devices and for optional bill reminders. Sync passes through Mentria's relay encrypted, so the relay can't read your ledger; reminders send just a wake-up time. Nothing readable is stored."
+        }
       }
     },
     "bubble-level": {
@@ -3683,7 +3688,8 @@
         "dismiss": "Dismiss",
         "later": "Later",
         "working": "Working…",
-        "progress": "Progress"
+        "progress": "Progress",
+        "retry": "Try again"
       },
       "errors": {
         "no_js": "Finance needs JavaScript to run.",
@@ -3801,7 +3807,8 @@
         "receiving": "Receiving your ledger…",
         "no_wraps": "Unlock Finance once more on the other device, then try again.",
         "failed": "Pairing failed:",
-        "expired": "The code expired. Start again on the other device."
+        "expired": "The code expired. Start again on the other device.",
+        "unreachable": "Can't reach the sync service. Check your connection and try again."
       },
       "restore": {
         "title": "Restore from a backup",
@@ -3872,7 +3879,8 @@
         "err_to": "Choose a different account to transfer to.",
         "err_received": "Enter the amount received, or add an exchange rate in Accounts.",
         "err_split": "The split lines add up to {sum}, but the total is {total}.",
-        "err_fx": "Add a rate for 1 {from} in {to}."
+        "err_fx": "Add a rate for 1 {from} in {to}.",
+        "no_accounts": "There's no account to record this in yet. Add one first."
       },
       "nl": {
         "today": "today",
@@ -4310,8 +4318,8 @@
         "auto_post": "Add to the ledger automatically",
         "auto_hint": "Finance records it on the due date when you next open the app. Turn off for amounts that vary.",
         "more": "Reminders, trial and cancel details",
-        "remind": "Remind me (days before)",
-        "remind_hint": "Shown on Home and in the tile. -1 uses the default.",
+        "remind": "Remind me",
+        "remind_hint": "Shown on Home and in the tile. Change the default in Settings.",
         "shift_label": "If it falls on a weekend",
         "shift": {
           "none": "Keep the date",
@@ -4362,7 +4370,8 @@
           "quarter": "every 3 months",
           "half": "every 6 months",
           "nmonths": "every {n} months"
-        }
+        },
+        "remind_default": "Default ({when})"
       },
       "more": {
         "plan": "Forecasts, runway and goals",

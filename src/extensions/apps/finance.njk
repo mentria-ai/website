@@ -16,5 +16,5 @@ eleventyComputed:
 <script src="/assets/js/mentria-backup.js?v={{ buildHash }}"></script>
 <div id="fin" class="fin" data-install-quiet></div>
 <noscript><p style="padding:24px;color:#e2e8f0;font-family:sans-serif">{{ "tool.finance.errors.no_js" | traw }}</p></noscript>
-<script>window.FIN_COPY = {{ "tool.finance" | tsub | dump | safe }};</script>
+<script>window.FIN_COPY = {{ "tool.finance" | tsub | dump | safe }};window.FIN_WIDGET = { {%- for loc in locales %}{{ loc.code | dump | safe }}: { name: {{ ("tool.finance.app.name" | tlang(loc.code)) | dump | safe }}, w: {{ ("tool.finance.widget" | tlang(loc.code)) | dump | safe }} }{% if not loop.last %}, {% endif %}{%- endfor %} };</script>
 <script type="module" src="/assets/finance/app.js?v={{ buildHash }}"></script>

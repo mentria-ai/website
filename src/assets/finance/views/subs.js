@@ -64,7 +64,13 @@ export function scheduleSheet(ctx, sch, preset) {
   syncEnd();
   const auto = U.checkbox(t('subs.auto_post'), s.auto_post !== false, () => {});
   const shift = U.select(['none', 'before', 'after'].map((m) => ({ value: m, label: t('subs.shift.' + m) })), (s.rule && s.rule.weekend_shift) || 'none');
-  const remind = h('input', { class: 'fi', type: 'number', min: '-1', max: '30', value: String(s.notify_days == null ? -1 : s.notify_days) });
+  const dayLabel = (d) => (d === 0 ? t('settings.on_the_day') : U.tp('settings.days_before', d));
+  const defDays = L.settings().default_notify_days == null ? 1 : L.settings().default_notify_days;
+  const curDays = s.notify_days == null || s.notify_days < 0 ? -1 : Math.min(30, s.notify_days);
+  const dayList = [0, 1, 2, 3, 7, 14, 30];
+  if (curDays >= 0 && !dayList.includes(curDays)) dayList.push(curDays);
+  dayList.sort((a, b) => a - b);
+  const remind = U.select([{ value: '-1', label: t('subs.remind_default', { when: dayLabel(defDays) }) }].concat(dayList.map((d) => ({ value: String(d), label: dayLabel(d) }))), String(curDays));
   const trial = h('input', { class: 'fi', type: 'date', value: s.trial_end || '' });
   const cancelUrl = U.input({ value: s.cancel_url || '', type: 'url', placeholder: 'https://', maxlength: '300' });
   const notes = h('textarea', { class: 'fta', maxlength: '500' }, s.cancel_notes || '');

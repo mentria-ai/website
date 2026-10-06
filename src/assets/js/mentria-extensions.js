@@ -247,6 +247,29 @@ export async function downloadFiles(id, files, extra, onProgress) {
   return list.length;
 }
 
+export function appPages(app) {
+  const locales = (typeof window !== 'undefined' && Array.isArray(window.MENTRIA_LOCALES)) ? window.MENTRIA_LOCALES : [];
+  const prefixes = locales.map((l) => (l && typeof l.prefix === 'string' ? l.prefix : '')).concat(['']);
+  return Array.from(new Set(prefixes.map((p) => p + app)));
+}
+
+export async function ensureAppPages(id) {
+  const entry = getEntry(id);
+  const owned = ownedFiles(id);
+  if (!entry || !isApp(entry) || !owned || !owned.complete || !Array.isArray(owned.list) || typeof caches === 'undefined') return false;
+  const have = new Set(owned.list.map((f) => f.u));
+  if (appPages(entry.manifest.app).every((u) => have.has(u))) return false;
+  const pkg = await fetchPackage(id);
+  const now = getEntry(id);
+  if (!now || pkg.kind !== 'app') return false;
+  if (pkg.manifest && pkg.manifest.version !== now.manifest.version) installApp(pkg.manifest);
+  const files = new Set((pkg.files || []).map((f) => f.u));
+  const extra = owned.list.map((f) => f.u).filter((u) => !files.has(u)).concat(appPages(pkg.app));
+  await downloadFiles(id, pkg.files, extra);
+  if (!getEntry(id)) await removeFiles(id);
+  return true;
+}
+
 export async function removeFiles(id) {
   const owned = ownedFiles(id);
   store().remove(NS, FILES_KEY + id);

@@ -11,7 +11,7 @@ eleventyComputed:
   description: "{{ 'tools.ai-chat.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">ai-chat</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">ai-chat</span></p>
   <h1>{{ "tools.ai-chat.title" | t }}</h1>
   <p>{{ "tools.ai-chat.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -63,7 +63,7 @@ eleventyComputed:
     <div class="ac__adapters-note" id="ac-adapters-note" aria-live="polite"></div>
   </div>
 
-  <div class="ac__messages" id="ac-messages">
+  <div class="ac__messages" id="ac-messages" role="log" aria-live="polite" aria-relevant="additions">
     <div class="ac__empty" id="ac-empty">
       <div class="ac__empty-icon">&#9670;</div>
       <p>{{ "tool.ai-chat.empty_msg" | t }}</p>
@@ -76,19 +76,24 @@ eleventyComputed:
     <button class="ac__img-remove" id="ac-img-remove" title="{{ 'tool.ai-chat.btn_remove_image' | t }}">{% include "icon-x.njk" %}</button>
   </div>
 
+  <div class="ac__notice" id="ac-notice" hidden>
+    <span class="ac__notice-text" id="ac-notice-text"></span>
+    <button type="button" class="ac__notice-btn" id="ac-notice-btn" hidden></button>
+  </div>
+
   <div class="ac__input-wrap">
     <button type="button" class="ac__grip" id="ac-grip" tabindex="-1" aria-hidden="true" hidden><span class="ac__grip-line"></span></button>
-    <label class="ac__attach-btn" id="ac-attach-label" title="{{ 'tool.ai-chat.btn_attach_image' | t }}">
-      <input type="file" id="ac-file-input" accept="image/*" hidden />
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-    </label>
+    <button type="button" class="ac__attach-btn" id="ac-attach" title="{{ 'tool.ai-chat.btn_attach_image' | t }}" aria-label="{{ 'tool.ai-chat.btn_attach_image' | t }}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <input type="file" id="ac-file-input" accept="image/*" tabindex="-1" hidden />
     <button class="ac__think-btn" id="ac-think-toggle" title="{{ 'tool.ai-chat.think_toggle' | t }}" aria-label="{{ 'tool.ai-chat.think_toggle' | t }}" aria-pressed="false" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4.9 12A6.5 6.5 0 0 1 9 17h6a6.5 6.5 0 0 1 1.9-3A7 7 0 0 0 12 2z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
     </button>
     <button class="ac__think-btn" id="ac-search-toggle" title="{{ 'tool.ai-chat.search_toggle' | t }}" aria-label="{{ 'tool.ai-chat.search_toggle' | t }}" aria-pressed="false" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14.5 14.5 0 0 1 0 18M12 3a14.5 14.5 0 0 0 0 18"/></svg>
     </button>
-    <textarea class="ac__input" id="ac-input" rows="1" enterkeyhint="send" placeholder="{{ 'tool.ai-chat.input_placeholder' | t }}" disabled></textarea>
+    <textarea class="ac__input" id="ac-input" rows="1" enterkeyhint="send" placeholder="{{ 'tool.ai-chat.input_placeholder' | t }}" aria-label="{{ 'tool.ai-chat.input_placeholder' | t }}" disabled></textarea>
     <button class="ac__send-btn" id="ac-send" title="{{ 'tool.ai-chat.btn_send' | t }}" disabled>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
     </button>
@@ -100,75 +105,95 @@ eleventyComputed:
 
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 
+{%- set acCopy = {
+  statusLoadingModel:     "tool.ai-chat.status_loading_model",
+  routeTool:              "tool.ai-chat.route_tool",
+  routeChat:              "tool.ai-chat.route_chat",
+  statusGenerating:       "tool.ai-chat.status_generating",
+  statusRereading:        "tool.ai-chat.status_rereading",
+  counter:                "tool.ai-chat.counter",
+  statusReady:            "tool.ai-chat.status_ready",
+  statusModelDeleted:     "tool.ai-chat.status_model_deleted",
+  imgAltAttachedShort:    "tool.ai-chat.img_alt_attached_short",
+  labelYou:               "tool.ai-chat.label_you",
+  errNoWebGpu:            "tool.ai-chat.err_no_webgpu",
+  errUnsupportedMain:     "tool.ai-chat.err_unsupported_main",
+  errUnsupportedSub:      "tool.ai-chat.err_unsupported_sub",
+  errLoadRuntime:         "tool.ai-chat.err_load_runtime",
+  engineOffline:          "common.ai_engine_offline",
+  engineFailed:           "common.ai_engine_failed",
+  modelOffline:           "common.ai_model_offline",
+  offline:                "common.offline_title",
+  errDeviceLost:          "tool.ai-chat.err_device_lost",
+  gpuLostNotice:          "tool.ai-chat.gpu_lost_notice",
+  btnReloadModel:         "tool.ai-chat.btn_reload_model",
+  interrupted:            "tool.ai-chat.interrupted",
+  errBadImage:            "tool.ai-chat.err_bad_image",
+  errLoadPrefix:          "tool.ai-chat.err_load_prefix",
+  errContextFull:         "tool.ai-chat.err_context_full",
+  statusTooLong:          "tool.ai-chat.status_too_long",
+  errMessageTooLong:      "tool.ai-chat.err_message_too_long",
+  errPrefix:              "tool.ai-chat.err_prefix",
+  errDeletePrefix:        "tool.ai-chat.err_delete_prefix",
+  emptyResponse:          "tool.ai-chat.empty_response",
+  confirmDelete:          "tool.ai-chat.confirm_delete",
+  statusNoModel:          "tool.ai-chat.status_no_model",
+  noModelNotice:          "tool.ai-chat.no_model_notice",
+  btnChooseModel:         "tool.ai-chat.btn_choose_model",
+  tierLabel:              "tool.ai-chat.tier_label",
+  tierFast:               "tool.ai-chat.tier_fast",
+  tierBetter:             "tool.ai-chat.tier_better",
+  tierBest:               "tool.ai-chat.tier_best",
+  tierMax:                "tool.ai-chat.tier_max",
+  emptySub:               "tool.ai-chat.empty_sub",
+  tierConfirm:            "tool.ai-chat.tier_confirm",
+  tierFallback:           "tool.ai-chat.tier_fallback",
+  btnSend:                "tool.ai-chat.btn_send",
+  btnStop:                "tool.ai-chat.btn_stop",
+  btnCopy:                "tool.ai-chat.btn_copy",
+  copied:                 "tool.ai-chat.copied",
+  copyFailed:             "tool.ai-chat.copy_failed",
+  btnRegenerate:          "tool.ai-chat.btn_regenerate",
+  stopped:                "tool.ai-chat.stopped",
+  unanswered:             "tool.ai-chat.unanswered",
+  thinkToggle:            "tool.ai-chat.think_toggle",
+  thinkNeedsCtx:          "tool.ai-chat.think_needs_ctx",
+  thinkToggleSlow:        "tool.ai-chat.think_toggle_slow",
+  searchToggle:           "tool.ai-chat.search_toggle",
+  searchConfigure:        "tool.ai-chat.search_configure",
+  searchTestOk:           "tool.ai-chat.search_test_ok",
+  searchTestFail:         "tool.ai-chat.search_test_fail",
+  searchLocalOnly:        "tool.ai-chat.search_local_only",
+  searching:              "tool.ai-chat.searching",
+  searchSources:          "tool.ai-chat.search_sources",
+  searchFailedNote:       "tool.ai-chat.search_failed_note",
+  adaptersBase:           "tool.ai-chat.adapters_base",
+  adaptersBaseDesc:       "tool.ai-chat.adapters_base_desc",
+  adaptersNone:           "tool.ai-chat.adapters_none",
+  adaptersOnly27:         "tool.ai-chat.adapters_only27",
+  adaptersPin:            "tool.ai-chat.adapters_pin",
+  adaptersActive:         "tool.ai-chat.adapters_active",
+  adaptersRouter:         "tool.ai-chat.adapters_router",
+  adaptersNote:           "tool.ai-chat.adapters_note",
+  adaptersLoading:        "tool.ai-chat.adapters_loading",
+  adaptersPinned:         "tool.ai-chat.adapters_pinned",
+  adaptersFailed:         "tool.ai-chat.adapters_failed",
+  adaptersSha:            "tool.ai-chat.adapters_sha",
+  adaptersThinkingOff:    "tool.ai-chat.adapters_thinking_off",
+  adaptersThinkingOn:     "tool.ai-chat.adapters_thinking_on",
+  adaptersThinkingEither: "tool.ai-chat.adapters_thinking_either",
+  thinkPinned:            "tool.ai-chat.think_pinned",
+  searchPinned:           "tool.ai-chat.search_pinned",
+  thinking:               "tool.ai-chat.thinking",
+  thoughtFor:             "tool.ai-chat.thought_for",
+  thinkCut:               "tool.ai-chat.think_cut"
+} -%}
 <script type="module">
+const COPY_KEYS = {{ acCopy | dump | safe }};
 const COPY = {
-  statusLoadingModel:  {{ ("tool.ai-chat.status_loading_model"  | t) | dump | safe }},
-  routeTool:           {{ ("tool.ai-chat.route_tool"            | t) | dump | safe }},
-  routeChat:           {{ ("tool.ai-chat.route_chat"            | t) | dump | safe }},
-  statusGenerating:    {{ ("tool.ai-chat.status_generating"     | t) | dump | safe }},
-  statusRereading:     {{ ("tool.ai-chat.status_rereading"      | t) | dump | safe }},
-  counter:             {{ ("tool.ai-chat.counter"               | t) | dump | safe }},
-  statusReady:         {{ ("tool.ai-chat.status_ready"          | t) | dump | safe }},
-  statusModelDeleted:  {{ ("tool.ai-chat.status_model_deleted"  | t) | dump | safe }},
-  imgAltAttachedShort: {{ ("tool.ai-chat.img_alt_attached_short" | t) | dump | safe }},
-  labelYou:            {{ ("tool.ai-chat.label_you"             | t) | dump | safe }},
-  errNoWebGpu:         {{ ("tool.ai-chat.err_no_webgpu"         | t) | dump | safe }},
-  errUnsupportedMain:  {{ ("tool.ai-chat.err_unsupported_main"  | t) | dump | safe }},
-  errUnsupportedSub:   {{ ("tool.ai-chat.err_unsupported_sub"   | t) | dump | safe }},
-  errLoadRuntime:      {{ ("tool.ai-chat.err_load_runtime"      | t) | dump | safe }},
-  errDeviceLost:       {{ ("tool.ai-chat.err_device_lost"       | t) | dump | safe }},
-  errBadImage:         {{ ("tool.ai-chat.err_bad_image"         | t) | dump | safe }},
-  errLoadPrefix:       {{ ("tool.ai-chat.err_load_prefix"       | t) | dump | safe }},
-  errContextFull:      {{ ("tool.ai-chat.err_context_full"      | t) | dump | safe }},
-  errPrefix:           {{ ("tool.ai-chat.err_prefix"            | t) | dump | safe }},
-  errDeletePrefix:     {{ ("tool.ai-chat.err_delete_prefix"     | t) | dump | safe }},
-  emptyResponse:       {{ ("tool.ai-chat.empty_response"        | t) | dump | safe }},
-  confirmDelete:       {{ ("tool.ai-chat.confirm_delete"        | t) | dump | safe }},
-  downloadPostponed:   {{ ("common.download_postponed"          | t) | dump | safe }},
-  tierLabel:           {{ ("tool.ai-chat.tier_label"            | t) | dump | safe }},
-  tierFast:            {{ ("tool.ai-chat.tier_fast"             | t) | dump | safe }},
-  tierBetter:          {{ ("tool.ai-chat.tier_better"           | t) | dump | safe }},
-  tierBest:            {{ ("tool.ai-chat.tier_best"             | t) | dump | safe }},
-  tierMax:             {{ ("tool.ai-chat.tier_max"              | t) | dump | safe }},
-  emptySub:            {{ ("tool.ai-chat.empty_sub"             | t) | dump | safe }},
-  tierConfirm:         {{ ("tool.ai-chat.tier_confirm"          | t) | dump | safe }},
-  tierFallback:        {{ ("tool.ai-chat.tier_fallback"         | t) | dump | safe }},
-  btnSend:             {{ ("tool.ai-chat.btn_send"              | t) | dump | safe }},
-  btnStop:             {{ ("tool.ai-chat.btn_stop"              | t) | dump | safe }},
-  btnCopy:             {{ ("tool.ai-chat.btn_copy"              | t) | dump | safe }},
-  copied:              {{ ("tool.ai-chat.copied"                | t) | dump | safe }},
-  copyFailed:          {{ ("tool.ai-chat.copy_failed"           | t) | dump | safe }},
-  btnRegenerate:       {{ ("tool.ai-chat.btn_regenerate"        | t) | dump | safe }},
-  stopped:             {{ ("tool.ai-chat.stopped"               | t) | dump | safe }},
-  thinkToggle:         {{ ("tool.ai-chat.think_toggle"          | t) | dump | safe }},
-  thinkNeedsCtx:       {{ ("tool.ai-chat.think_needs_ctx"       | t) | dump | safe }},
-  thinkToggleSlow:     {{ ("tool.ai-chat.think_toggle_slow"     | t) | dump | safe }},
-  searchToggle:        {{ ("tool.ai-chat.search_toggle"         | t) | dump | safe }},
-  searchConfigure:     {{ ("tool.ai-chat.search_configure"      | t) | dump | safe }},
-  searchTestOk:        {{ ("tool.ai-chat.search_test_ok"        | t) | dump | safe }},
-  searchTestFail:      {{ ("tool.ai-chat.search_test_fail"      | t) | dump | safe }},
-  searchLocalOnly:     {{ ("tool.ai-chat.search_local_only"     | t) | dump | safe }},
-  searching:           {{ ("tool.ai-chat.searching"             | t) | dump | safe }},
-  searchSources:       {{ ("tool.ai-chat.search_sources"        | t) | dump | safe }},
-  searchFailedNote:    {{ ("tool.ai-chat.search_failed_note"    | t) | dump | safe }},
-  adaptersBase:        {{ ("tool.ai-chat.adapters_base"         | t) | dump | safe }},
-  adaptersBaseDesc:    {{ ("tool.ai-chat.adapters_base_desc"    | t) | dump | safe }},
-  adaptersNone:        {{ ("tool.ai-chat.adapters_none"         | t) | dump | safe }},
-  adaptersOnly27:      {{ ("tool.ai-chat.adapters_only27"       | t) | dump | safe }},
-  adaptersPin:         {{ ("tool.ai-chat.adapters_pin"          | t) | dump | safe }},
-  adaptersActive:      {{ ("tool.ai-chat.adapters_active"       | t) | dump | safe }},
-  adaptersRouter:      {{ ("tool.ai-chat.adapters_router"       | t) | dump | safe }},
-  adaptersNote:        {{ ("tool.ai-chat.adapters_note"         | t) | dump | safe }},
-  adaptersLoading:     {{ ("tool.ai-chat.adapters_loading"      | t) | dump | safe }},
-  adaptersPinned:      {{ ("tool.ai-chat.adapters_pinned"       | t) | dump | safe }},
-  adaptersFailed:      {{ ("tool.ai-chat.adapters_failed"       | t) | dump | safe }},
-  adaptersSha:         {{ ("tool.ai-chat.adapters_sha"          | t) | dump | safe }},
-  adaptersThinking:    { off: {{ ("tool.ai-chat.adapters_thinking_off" | t) | dump | safe }}, on: {{ ("tool.ai-chat.adapters_thinking_on" | t) | dump | safe }}, either: {{ ("tool.ai-chat.adapters_thinking_either" | t) | dump | safe }} },
-  thinkPinned:         {{ ("tool.ai-chat.think_pinned"          | t) | dump | safe }},
-  searchPinned:        {{ ("tool.ai-chat.search_pinned"         | t) | dump | safe }},
-  thinking:            {{ ("tool.ai-chat.thinking"              | t) | dump | safe }},
-  thoughtFor:          {{ ("tool.ai-chat.thought_for"           | t) | dump | safe }},
-  thinkCut:            {{ ("tool.ai-chat.think_cut"             | t) | dump | safe }}
+{%- for prop, key in acCopy %}
+  {{ prop }}: {{ (key | t) | dump | safe }}{% if not loop.last %},{% endif %}
+{%- endfor %}
 };
 
 const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
@@ -184,20 +209,45 @@ const statusText = document.getElementById('ac-status-text');
 const counterEl = document.getElementById('ac-counter');
 let counterN = 0, counterFirst = 0, counterLast = 0;
 function counterReset() { counterN = 0; counterFirst = 0; counterLast = 0; counterEl.hidden = true; counterEl.textContent = ''; }
+function renderCounter() {
+  if (!counterN) return;
+  const secs = (counterLast - counterFirst) / 1000;
+  const tps = counterN > 1 && secs > 0.05 ? ((counterN - 1) / secs).toLocaleString(document.documentElement.lang || undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '';
+  counterEl.textContent = COPY.counter.replace('{n}', String(counterN)).replace('{tps}', tps || '…');
+  counterEl.hidden = false;
+}
 function counterTick() {
   const now = performance.now();
   counterN++;
   if (!counterFirst) counterFirst = now;
   counterLast = now;
-  const secs = (counterLast - counterFirst) / 1000;
-  const tps = counterN > 1 && secs > 0.05 ? ((counterN - 1) / secs).toFixed(1) : '';
-  counterEl.textContent = COPY.counter.replace('{n}', String(counterN)).replace('{tps}', tps || '…');
-  counterEl.hidden = false;
+  renderCounter();
 }
-function setStatus(state, text) {
+function copyText(key, extra) {
+  const base = COPY[key] == null ? '' : String(COPY[key]);
+  if (extra && typeof extra === 'object') return Object.keys(extra).reduce((s, k) => s.split('{' + k + '}').join(String(extra[k])), base);
+  return base + (extra == null ? '' : String(extra));
+}
+let statusNow = null;
+function setStatus(state, key, extra) {
+  statusNow = { state, key, extra };
   statusDot.className = 'ac__status-dot ac__status-dot--' + state;
-  statusText.textContent = text;
+  statusText.textContent = copyText(key, extra);
 }
+
+const localeHooks = [];
+document.addEventListener('mentria:localechange', () => {
+  const i18n = window.MentriaI18n;
+  if (!i18n || typeof i18n.t !== 'function') return;
+  Object.keys(COPY_KEYS).forEach((prop) => {
+    const v = i18n.t(COPY_KEYS[prop]);
+    if (typeof v === 'string') COPY[prop] = v;
+  });
+  if (statusNow) setStatus(statusNow.state, statusNow.key, statusNow.extra);
+  renderCounter();
+  if (unsupported) renderUnsupported();
+  localeHooks.forEach((fn) => { try { fn(); } catch (err) { console.warn('ai-chat locale refresh:', err); } });
+});
 
 /* ── WebGPU gate ───────────────────────────────────────────────────────── */
 // Mentria is WebGPU-only by design. If the browser doesn't expose WebGPU,
@@ -206,24 +256,87 @@ function setStatus(state, text) {
 //   - Firefox stable (WebGPU still in nightly as of 2026-04)
 //   - Chrome on Linux without `--enable-features=Vulkan`
 //   - Mobile browsers without WebGPU yet
-function showUnsupportedError(reason) {
-  setStatus('error', reason);
-  const messagesEl = document.getElementById('ac-messages');
-  const emptyEl    = document.getElementById('ac-empty');
-  if (emptyEl) {
+let unsupported = null;
+function showUnsupportedError(reasonKey, noteKey) {
+  unsupported = { reasonKey, noteKey };
+  renderUnsupported();
+  document.getElementById('ac-input').disabled = true;
+  document.getElementById('ac-send').disabled  = true;
+  document.getElementById('ac-attach').style.display = 'none';
+}
+
+function renderUnsupported() {
+  setStatus('error', unsupported.reasonKey);
+  const emptyEl = document.getElementById('ac-empty');
+  if (emptyEl && unsupported.noteKey) {
+    emptyEl.innerHTML = '<div class="ac__empty-icon">&#9888;</div><p></p>';
+    emptyEl.querySelector('p').textContent = COPY[unsupported.noteKey];
+  } else if (emptyEl) {
     const escSub = COPY.errUnsupportedSub.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     emptyEl.innerHTML =
       '<div class="ac__empty-icon">&#9888;</div>' +
       '<p>' + COPY.errUnsupportedMain + '</p>' +
       '<p class="ac__empty-sub">' + escSub + '</p>';
   }
-  document.getElementById('ac-input').disabled = true;
-  document.getElementById('ac-send').disabled  = true;
-  document.getElementById('ac-attach-label').style.display = 'none';
 }
 
+function watchDockLift() {
+  const acEl = document.querySelector('.ac');
+  const inputWrap = acEl && acEl.querySelector('.ac__input-wrap');
+  if (!acEl || !inputWrap) return;
+  let liftFrame = 0;
+  function measureDockLift() {
+    liftFrame = 0;
+    const dock = document.querySelector('.m-mini-dock');
+    if (dock && dock.classList.contains('is-dragging')) return;
+    const current = parseFloat(acEl.style.getPropertyValue('--ac-dock-lift')) || 0;
+    let lift = 0;
+    if (dock && dock.childElementCount) {
+      const d = dock.getBoundingClientRect();
+      const w = inputWrap.getBoundingClientRect();
+      const cs = getComputedStyle(inputWrap);
+      const bottom = w.bottom - (parseFloat(cs.paddingBottom) - current);
+      const top = w.top + current + parseFloat(cs.paddingTop);
+      if (d.width && d.height && d.left < w.right && d.right > w.left && d.bottom > top && d.top - 8 < bottom) {
+        lift = Math.ceil(bottom - (d.top - 8));
+        if (lift > acEl.clientHeight * 0.4) lift = 0;
+      }
+    }
+    if (lift === current) return;
+    if (lift) acEl.style.setProperty('--ac-dock-lift', lift + 'px');
+    else acEl.style.removeProperty('--ac-dock-lift');
+  }
+  function scheduleLift() {
+    if (!liftFrame) liftFrame = requestAnimationFrame(measureDockLift);
+  }
+  const dockWatch = new MutationObserver(scheduleLift);
+  let watchedDock = null;
+  function watchDock() {
+    const dock = document.querySelector('.m-mini-dock');
+    if (dock !== watchedDock) {
+      dockWatch.disconnect();
+      watchedDock = dock;
+      if (dock) dockWatch.observe(dock, { childList: true, attributes: true, attributeFilter: ['class', 'style'] });
+    }
+    scheduleLift();
+  }
+  new MutationObserver(watchDock).observe(document.body, { childList: true });
+  if (typeof ResizeObserver === 'function') {
+    const sizes = new ResizeObserver(scheduleLift);
+    sizes.observe(acEl);
+    const field = inputWrap.querySelector('.ac__input');
+    if (field) sizes.observe(field);
+  }
+  window.addEventListener('resize', scheduleLift, { passive: true });
+  window.addEventListener('scroll', scheduleLift, { passive: true });
+  const frameBody = acEl.closest('.terminal-frame__body');
+  if (frameBody) frameBody.addEventListener('scroll', scheduleLift, { passive: true });
+  watchDock();
+}
+watchDockLift();
+
 if (!navigator.gpu) {
-  showUnsupportedError(COPY.errNoWebGpu);
+  showUnsupportedError('errNoWebGpu');
 } else {
   let MentriaEngine, Tiers;
   try {
@@ -231,7 +344,8 @@ if (!navigator.gpu) {
     Tiers = await import(MENTRIA_TIERS_PATH);
   } catch (err) {
     console.error('Failed to load mentria-engine bundle:', err);
-    showUnsupportedError(COPY.errLoadRuntime);
+    if (navigator.onLine) showUnsupportedError('errLoadRuntime', 'engineFailed');
+    else showUnsupportedError('offline', 'engineOffline');
   }
   if (MentriaEngine && Tiers) runApp(MentriaEngine, Tiers);
 }
@@ -263,6 +377,10 @@ function runApp(MentriaEngine, Tiers) {
   const adaptersNote  = document.getElementById('ac-adapters-note');
   const adaptersClose = document.getElementById('ac-adapters-close');
   const adapterChip   = document.getElementById('ac-adapter-chip');
+  const attachBtn     = document.getElementById('ac-attach');
+  const noticeEl      = document.getElementById('ac-notice');
+  const noticeText    = document.getElementById('ac-notice-text');
+  const noticeBtn     = document.getElementById('ac-notice-btn');
 
   /* ── State ───────────────────────────────────────── */
   let engine = null;
@@ -270,6 +388,9 @@ function runApp(MentriaEngine, Tiers) {
   let generating = false;
   let abortCtrl = null;
   let genEpoch = 0;
+  let deviceLost = false;
+  let recovering = false;
+  let sending = false;
   let attachedImage = null;       // {rgbHwc, h, w} — pending attach for the NEXT send
   let attachedDataUrl = null;
   // conversationImages keeps every image sent in this conversation, in order.
@@ -281,12 +402,42 @@ function runApp(MentriaEngine, Tiers) {
     return tier === '27b' ? 'Bonsai 27B' : 'Qwen3.5';
   }
 
-  function systemPromptFor(tier) {
+  function systemPromptFor(tier, turn) {
     const family = modelFamilyFor(tier);
-    return "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
+    const small = tier === '0.8b';
+    const prompt = "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
       "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running " + family + " in their browser. When asked about Mentria itself: it is a small privacy-first creative studio at mentria.ai, building tools, games, and AI experiences that run entirely client-side with no servers, no accounts, and no telemetry. Notable parts of the site: TOTP, quick notes, QR scanner, color picker, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, a P2P chat and file drop at /comms/, and a daily image-fact feed called Deep Cuts.\n\n" +
-      "Be helpful, accurate, and brief. Don't over-apologize. When the user shares an image, describe what you see directly. You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.\n\n" +
+      "Be helpful, accurate, and brief. Don't over-apologize." +
+      (!small || (turn && turn.image) ? " When the user shares an image, describe what you see directly." : '') +
+      (small ? '' : " You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.") + "\n\n" +
       "Formatting: use markdown sparingly. For tables, output strict GitHub-flavored markdown: one header row, one divider row made only of pipes and dashes, then data rows. Never put prose, notes, parentheticals, or extra characters between the divider and the data rows. Each cell is one short phrase, never a sentence. Any explanation goes outside the table.";
+    if (!small || !turn) return prompt;
+    if (turn.lang === 'English') return prompt + '\n\nReply in English.';
+    if (turn.lang) return 'Write your reply in ' + turn.lang + '.\n\n' + prompt;
+    return prompt + "\n\nReply in the same language as the user's message.";
+  }
+
+  const REPLY_LANGS = [
+    { name: 'English', marks: null, words: ['the', 'and', 'is', 'are', 'you', 'your', 'what', 'how', 'who', 'why', 'can', 'does', 'of', 'to', 'in', 'it', 'this', 'that', 'with', 'for', 'my', 'i', 'please', 'tell', 'give', 'write', 'explain', 'make', 'about', 'hi', 'hello', 'thanks'] },
+    { name: 'Spanish', marks: /[ñ¿¡]/, words: ['el', 'los', 'las', 'del', 'qué', 'cómo', 'cuál', 'cuáles', 'cuánto', 'cuántos', 'cuántas', 'quién', 'dónde', 'eres', 'estás', 'hola', 'gracias', 'puedes', 'dame', 'dime', 'hago', 'una', 'muy', 'también'] },
+    { name: 'French', marks: /[œèëîïûù]/, words: ['le', 'les', 'des', 'du', 'au', 'aux', 'et', 'est', 'qui', 'quel', 'quelle', 'faire', 'pourquoi', 'je', 'vous', 'une', 'avec', 'dans', 'bonjour', 'merci', 'peux', 'sais', 'fais', 'moi', 'cette', "c'est", "qu'est"] },
+    { name: 'Brazilian Portuguese', marks: /[ãõ]/, words: ['você', 'não', 'olá', 'obrigado', 'obrigada', 'quem', 'qual', 'quanto', 'quantos', 'faço', 'é', 'um', 'uma', 'da', 'das', 'na', 'em', 'isso', 'muito', 'também'] }
+  ];
+  const PAGE_REPLY_LANG = { es: 'Spanish', fr: 'French', ja: 'Japanese', 'pt-br': 'Brazilian Portuguese' };
+
+  function replyLanguage(text) {
+    const page = String(document.documentElement.lang || 'en').toLowerCase();
+    if (/[\u3040-\u30ff]/.test(text) || (page === 'ja' && /[\u4e00-\u9fff]/.test(text))) return 'Japanese';
+    const words = text.toLowerCase().replace(/\u2019/g, "'").split(/[^\p{L}']+/u);
+    let best = null;
+    let top = 0;
+    let tie = false;
+    REPLY_LANGS.forEach((lang) => {
+      const n = (lang.marks && lang.marks.test(text) ? 2 : 0) + words.filter((w) => lang.words.indexOf(w) >= 0).length;
+      if (n > top) { best = lang.name; top = n; tie = false; }
+      else if (n > 0 && n === top) tie = true;
+    });
+    return best && !tie ? best : (PAGE_REPLY_LANG[page] || null);
   }
 
   let messages = [
@@ -332,17 +483,22 @@ function runApp(MentriaEngine, Tiers) {
     const saved = window.MentriaStore.get('ai_chat', 'conversation');
     if (!Array.isArray(saved) || !saved.length) return;
     if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
-    saved.forEach((t) => {
-      if (!t || (t.role !== 'user' && t.role !== 'assistant') || typeof t.text !== 'string') return;
+    const turns = saved.filter((t) => t && (t.role === 'user' || t.role === 'assistant') && typeof t.text === 'string');
+    if (!turns.length) return;
+    messagesEl.setAttribute('aria-live', 'off');
+    turns.forEach((t, i) => {
       if (t.role === 'user') {
         const shown = t.img
           ? (t.text ? t.text + ' [' + COPY.imgAltAttachedShort + ']' : '[' + COPY.imgAltAttachedShort + ']')
           : t.text;
         addMessage('user', shown);
+        const next = turns[i + 1];
+        if (next && next.role === 'user') { addGhost('unanswered', false); return; }
         const engineText = t.img
           ? (t.text || 'Describe this image.') + ' (an image was attached here in an earlier session; it is no longer available)'
           : t.text;
         messages.push({ role: 'user', content: [{ type: 'text', text: engineText }] });
+        if (!next) addGhost('unanswered', true);
       } else {
         const bodyEl = addMessage('assistant', '');
         if (window.renderMarkdown) bodyEl.innerHTML = renderMarkdown(t.text) || '';
@@ -353,6 +509,7 @@ function runApp(MentriaEngine, Tiers) {
     });
     clearChatBtn.style.display = '';
     scrollToBottom();
+    setTimeout(() => messagesEl.setAttribute('aria-live', 'polite'), 1500);
   }
 
   clearChatBtn.addEventListener('click', clearConversation);
@@ -372,7 +529,11 @@ function runApp(MentriaEngine, Tiers) {
     bubble.className = 'ac__msg ac__msg--' + role;
     const label = document.createElement('div');
     label.className = 'ac__msg-label';
-    label.textContent = role === 'user' ? COPY.labelYou : (currentTier === '27b' ? 'bonsai-' : 'qwen-') + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B') + (pinned && role !== 'user' ? ' · ' + pinned.name : '');
+    if (role === 'user') label.textContent = COPY.labelYou;
+    else {
+      label.dataset.model = (currentTier === '27b' ? 'bonsai-' : 'qwen-') + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B') + (pinned ? ' · ' + pinned.name : '');
+      label.textContent = label.dataset.model;
+    }
     bubble.appendChild(label);
     if (imageUrl) {
       const img = document.createElement('img');
@@ -388,6 +549,77 @@ function runApp(MentriaEngine, Tiers) {
     return body;
   }
 
+  function ghostText(bodyEl, key) {
+    bodyEl.textContent = COPY[key];
+    bodyEl.dataset.copy = key;
+    bodyEl.classList.add('ac__msg-body--muted');
+    bodyEl.parentNode.classList.add('ac__msg--ghost');
+  }
+
+  function addGhost(key, retry) {
+    const bodyEl = addMessage('assistant', '');
+    ghostText(bodyEl, key);
+    if (retry) addAssistantActions(bodyEl, null);
+    return bodyEl;
+  }
+
+  function revealAnswer(bodyEl) {
+    const bubble = bodyEl.parentNode;
+    bodyEl.inert = false;
+    if (!bubble || !bubble.hasAttribute('aria-hidden')) return;
+    bubble.querySelectorAll('summary[tabindex="-1"]').forEach((s) => s.removeAttribute('tabindex'));
+    bubble.removeAttribute('aria-hidden');
+    const parent = bubble.parentNode;
+    if (parent) parent.insertBefore(bubble, bubble.nextSibling);
+  }
+
+  function dropUnanswered() {
+    const last = messages[messages.length - 1];
+    if (messages.length < 2 || !last || last.role !== 'user') return;
+    messages.pop();
+    const imgs = Array.isArray(last.content) ? last.content.filter((p) => p && p.type === 'image').length : 0;
+    if (imgs) conversationImages.splice(Math.max(0, conversationImages.length - imgs), imgs);
+    messagesEl.querySelectorAll('.ac__msg-regen').forEach((b) => {
+      const row = b.parentNode;
+      b.remove();
+      if (row && !row.children.length) row.remove();
+    });
+  }
+
+  function fmtNum(n) {
+    return Number(n).toLocaleString(document.documentElement.lang || undefined);
+  }
+
+  let notice = null;
+  function renderNotice() {
+    if (!notice) return;
+    const vars = {};
+    Object.keys(notice.vars || {}).forEach((k) => { vars[k] = fmtNum(notice.vars[k]); });
+    noticeText.textContent = copyText(notice.key, vars);
+    noticeBtn.textContent = notice.actionKey ? COPY[notice.actionKey] : '';
+    noticeBtn.hidden = !notice.actionKey;
+  }
+
+  function showNotice(kind, key, vars, actionKey, action) {
+    if (notice && notice.kind === 'tooLong' && kind !== 'tooLong') clearTooLong();
+    notice = { kind, key, vars, actionKey, action };
+    renderNotice();
+    noticeEl.dataset.kind = kind;
+    noticeEl.hidden = false;
+  }
+
+  function hideNotice(kind) {
+    if (!notice || (kind && notice.kind !== kind)) return;
+    notice = null;
+    noticeEl.hidden = true;
+    delete noticeEl.dataset.kind;
+    noticeText.textContent = '';
+    noticeBtn.textContent = '';
+    noticeBtn.hidden = true;
+  }
+
+  noticeBtn.addEventListener('click', () => { if (notice && notice.action) notice.action(); });
+
   const SEND_SVG = sendBtn.innerHTML;
   const STOP_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
   const ICON_ATTRS = 'width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
@@ -396,10 +628,14 @@ function runApp(MentriaEngine, Tiers) {
   const FAIL_SVG  = '<svg ' + ICON_ATTRS + '><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
   const REGEN_SVG = '<svg ' + ICON_ATTRS + '><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>';
 
+  function syncSendLabel() {
+    sendBtn.title = sendBtn.classList.contains('ac__send-btn--stop') ? COPY.btnStop : COPY.btnSend;
+  }
+
   function setSendMode(stop) {
     sendBtn.classList.toggle('ac__send-btn--stop', stop);
     sendBtn.innerHTML = stop ? STOP_SVG : SEND_SVG;
-    sendBtn.title = stop ? COPY.btnStop : COPY.btnSend;
+    syncSendLabel();
     deleteBtn.disabled = stop;
     tierSel.disabled = stop;
   }
@@ -451,7 +687,7 @@ function runApp(MentriaEngine, Tiers) {
     if (getText) {
       const copyBtn = document.createElement('button');
       copyBtn.type = 'button';
-      copyBtn.className = 'ac__msg-action';
+      copyBtn.className = 'ac__msg-action ac__msg-copy';
       copyBtn.title = COPY.btnCopy;
       copyBtn.setAttribute('aria-label', COPY.btnCopy);
       copyBtn.innerHTML = COPY_SVG;
@@ -509,6 +745,7 @@ function runApp(MentriaEngine, Tiers) {
     canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(bitmap, 0, 0, w, h);
+    if (bitmap.close) bitmap.close();
     const { data } = ctx.getImageData(0, 0, w, h);
     const rgbHwc = new Uint8Array(w * h * 3);
     for (let i = 0, j = 0; i < data.length; i += 4, j += 3) {
@@ -532,6 +769,7 @@ function runApp(MentriaEngine, Tiers) {
   /* ── Tier selection ──────────────────────────────── */
   let tierDecision = null;
   let currentTier = null;
+  let loraFused = false;
   let contextTokens = 2048;
   let deepThinkOn = false;
 
@@ -617,11 +855,11 @@ function runApp(MentriaEngine, Tiers) {
     } finally { clearTimeout(t); }
   }
 
-  const SEARCH_TOOL_PROMPT = "\\n\\n# Tool: web search\\nYou can search the web with the web_search tool. The client runs your search and sends you the results in a <tool_response> message — you never need to imagine results or wait; just emit the call and stop.\\nHow to call: end your reply (after any thinking) with exactly this on its own, then stop:\\n<tool_call>{\\\"name\\\": \\\"web_search\\\", \\\"arguments\\\": {\\\"query\\\": \\\"your search terms\\\"}}</tool_call>\\nThe call must appear in your final reply, not only inside your thinking.\\nWhen to call: ALWAYS when the user asks you to search, look something up online, check a manual or documentation, or verify something on the web. Also when the answer needs current or uncertain facts: news, prices, weather, versions, schedules, results.\\nAfter a <tool_response> arrives, answer the question using those results, briefly, and mention the source domains. At most 2 searches per question.";
+  const SEARCH_TOOL_PROMPT = "\n\n# Tool: web search\nYou can search the web with the web_search tool. The client runs your search and sends you the results in a <tool_response> message — you never need to imagine results or wait; just emit the call and stop.\nHow to call: end your reply (after any thinking) with exactly this on its own, then stop:\n<tool_call>{\"name\": \"web_search\", \"arguments\": {\"query\": \"your search terms\"}}</tool_call>\nThe call must appear in your final reply, not only inside your thinking.\nWhen to call: ALWAYS when the user asks you to search, look something up online, check a manual or documentation, or verify something on the web. Also when the answer needs current or uncertain facts: news, prices, weather, versions, schedules, results.\nAfter a <tool_response> arrives, answer the question using those results, briefly, and mention the source domains. At most 2 searches per question.";
 
   const ROUTER_SYSTEM = 'You route messages for a chat assistant that has one tool, web search. Answer with exactly one word. Answer tool when the user asks to look something up, asks whether something is true or has happened, asks about current prices, news, weather, schedules, releases or anything that changes over time, or asks for facts about a specific product, place, document or organisation. Answer chat when the user wants writing, code, math, explanation of a stable concept, advice, or a reply about this conversation. Only the word.';
   const ROUTER_LABELS = ['tool', 'chat'];
-  const SEARCH_ADAPTER = { name: 'aichat-search', path: 'loras/aichat-search/v1/' };
+  const SEARCH_ADAPTER = { name: 'aichat-search', path: 'loras/aichat-search/v2/' };
   let routerIds = null;
   let searchAdapterSpecState = null;
   let searchAdapterLoaded = false;
@@ -726,7 +964,8 @@ function runApp(MentriaEngine, Tiers) {
     if (e.r) parts.push('r' + e.r);
     if (e.alpha) parts.push('α' + e.alpha);
     if (e.bytes) parts.push(fmtBytes(e.bytes));
-    if (e.thinking && COPY.adaptersThinking[e.thinking]) parts.push(COPY.adaptersThinking[e.thinking]);
+    const thinkingKey = { off: 'adaptersThinkingOff', on: 'adaptersThinkingOn', either: 'adaptersThinkingEither' }[e.thinking];
+    if (thinkingKey) parts.push(COPY[thinkingKey]);
     if (e.date) parts.push(e.date);
     return parts.join(' · ');
   }
@@ -1019,7 +1258,9 @@ function runApp(MentriaEngine, Tiers) {
     if (!route) return;
     const bubble = bodyEl && bodyEl.closest ? bodyEl.closest('.ac__msg') : null;
     const label = bubble ? bubble.querySelector('.ac__msg-label') : null;
-    if (label) label.textContent = label.textContent + ' · ' + (route === 'tool' ? COPY.routeTool : COPY.routeChat);
+    if (!label) return;
+    label.dataset.route = route;
+    label.textContent = (label.dataset.model || label.textContent) + ' · ' + (route === 'tool' ? COPY.routeTool : COPY.routeChat);
   }
 
   function parseToolCall(text) {
@@ -1100,21 +1341,19 @@ function runApp(MentriaEngine, Tiers) {
 
 
   const emptySubEl = document.querySelector('.ac__empty-sub');
+  const sizeText = (label) => (window.MentriaUI && window.MentriaUI.sizeLabel ? window.MentriaUI.sizeLabel(label) : label);
   function updateEmptySub(id) {
     if (!emptySubEl) return;
     const tier = Tiers.TIERS[id || currentTier || (tierDecision && tierDecision.tier) || '0.8b'];
     if (!tier) return;
-    let raw = null;
-    try { raw = window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('tool.ai-chat.empty_sub'); } catch (_) {}
-    emptySubEl.textContent = (raw || COPY.emptySub).replace('{size}', tier.sizeLabel);
+    emptySubEl.textContent = COPY.emptySub.replace('{size}', sizeText(tier.sizeLabel));
   }
-  document.addEventListener('mentria:localechange', function () { updateEmptySub(); });
   updateEmptySub(Tiers.getUserTier() || '0.8b');
 
   function tierOptionLabel(id) {
     const t = Tiers.TIERS[id];
     const quality = id === '0.8b' ? COPY.tierFast : id === '2b' ? COPY.tierBetter : id === '4b' ? COPY.tierBest : COPY.tierMax;
-    return id === '0.8b' ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + t.sizeLabel);
+    return id === '0.8b' ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + sizeText(t.sizeLabel));
   }
 
   function syncTierSelector() {
@@ -1134,9 +1373,9 @@ function runApp(MentriaEngine, Tiers) {
 
   tierSel.addEventListener('change', async () => {
     const id = tierSel.value;
-    if (id === currentTier || generating) { tierSel.value = currentTier; return; }
+    if (id === currentTier || generating || recovering) { tierSel.value = currentTier; return; }
     if (id !== '0.8b' && !(await Tiers.isTierCached(id))) {
-      const ok = await window.mentriaConfirm(COPY.tierConfirm.replace('{size}', Tiers.TIERS[id].sizeLabel));
+      const ok = await window.mentriaConfirm(COPY.tierConfirm.replace('{size}', sizeText(Tiers.TIERS[id].sizeLabel)));
       if (!ok) { tierSel.value = currentTier; return; }
     }
     Tiers.setUserTier(id);
@@ -1150,8 +1389,11 @@ function runApp(MentriaEngine, Tiers) {
   });
 
   /* ── Load engine + model ─────────────────────────── */
-  async function loadModel() {
-    setStatus('loading', COPY.statusLoadingModel);
+  async function loadModel(choose) {
+    deviceLost = false;
+    hideNotice('lost');
+    hideNotice('postponed');
+    setStatus('loading', 'statusLoadingModel');
     await ensureStrip();
     try {
       const { ensureModel } = await import('/assets/js/mentria-model.js');
@@ -1163,17 +1405,17 @@ function runApp(MentriaEngine, Tiers) {
       const res = await ensureModel(createEngine, {
         vision: true,
         offerUpgrade: true,
+        choose: choose === true,
         onProgress: onEngineProgress,
         onTier: (info) => strip.setTier(info),
         onDeviceLost: (info) => {
-          prefixCache = null;
-          setStatus('error', COPY.errDeviceLost);
-          inputEl.disabled = true; sendBtn.disabled = true;
           console.error('WebGPU device lost:', info);
+          markDeviceLost();
         }
       });
       engine = res.engine;
       currentTier = res.tier;
+      loraFused = !!(res.decodeRoute && res.decodeRoute.loraFuse === 'epilogue');
       contextTokens = res.maxSeq || 2048;
       strip.setTier(Activity.tierInfo(Tiers.TIERS[currentTier], currentTier));
       prefixCache = null;
@@ -1193,31 +1435,143 @@ function runApp(MentriaEngine, Tiers) {
       systemMessage.content = systemPromptFor(currentTier);
       syncThinkToggle();
       syncSearchToggle();
-      try { await navigator.storage?.persist?.(); } catch (_) {}
       syncTierSelector();
       updateEmptySub();
-      strip.done({ prime: COPY.statusReady, linger: 1200 });
-      setStatus('ready', COPY.statusReady);
+      strip.done({ tokens: 0, prime: COPY.statusReady, linger: 1200 });
+      setStatus('ready', 'statusReady');
       deleteBtn.style.display = '';
       inputEl.disabled = false;
       sendBtn.disabled = false;
       inputEl.focus();
+      return true;
     } catch (err) {
-      if (err && err.message === 'download-postponed') { if (strip) strip.hide(); setStatus('idle', COPY.downloadPostponed); return; }
+      if (err && err.message === 'download-postponed') {
+        if (strip) strip.hide();
+        setStatus('idle', 'statusNoModel');
+        showNotice('postponed', 'noModelNotice', null, 'btnChooseModel', () => loadModel(true));
+        noticeBtn.focus({ preventScroll: true });
+        return false;
+      }
       console.error('Model load error:', err);
       if (strip) strip.error(String(err && err.message || err), { phase: strip.phaseName || 'loading', onRetry: () => { inputEl.disabled = true; sendBtn.disabled = true; loadModel(); } });
-      setStatus('error', COPY.errLoadPrefix + (err.message || err));
+      if (navigator.onLine === false) setStatus('error', 'modelOffline');
+      else setStatus('error', 'errLoadPrefix', (err && err.message) || err);
+      return false;
     }
+  }
+
+  function markDeviceLost() {
+    deviceLost = true;
+    prefixCache = null;
+    inputEl.disabled = true;
+    sendBtn.disabled = true;
+    setStatus('error', 'errDeviceLost');
+    if (!generating) showLostState(false);
+  }
+
+  function isDeviceLostError(err) {
+    const m = String((err && err.message) || err || '').toLowerCase();
+    return m.includes('device was lost') || m.includes('device lost') || m.includes('new mentriaengine');
+  }
+
+  function showLostState(moveFocus) {
+    if (strip) strip.hide();
+    setStatus('error', 'errDeviceLost');
+    inputEl.disabled = true;
+    sendBtn.disabled = true;
+    showNotice('lost', 'gpuLostNotice', null, 'btnReloadModel', () => recoverModel());
+    if (moveFocus) noticeBtn.focus();
+  }
+
+  async function recoverModel(after) {
+    if (recovering || generating) return;
+    recovering = true;
+    hideNotice('lost');
+    const old = engine;
+    engine = null;
+    prefixCache = null;
+    try { if (old && typeof old.terminate === 'function') old.terminate(); } catch (_) {}
+    inputEl.disabled = true;
+    sendBtn.disabled = true;
+    let ok = false;
+    try { ok = await loadModel(); } finally { recovering = false; }
+    if (ok && typeof after === 'function') after();
+  }
+
+  function deepThinkActive() {
+    return deepThinkOn && !pinned && currentTier === '27b' && contextTokens >= 2048;
+  }
+
+  function historyBudget(deepThink) {
+    const big = contextTokens >= 4096;
+    const huge = contextTokens >= 8192;
+    const chars = deepThink
+      ? (huge ? 7000 : big ? 5000 : 800)
+      : (huge ? 14000 : big ? 9500 : contextTokens >= 2048 ? 3400 : 1200);
+    const replyReserve = deepThink
+      ? (huge ? 6000 : big ? 3400 : 512)
+      : (big ? 768 : contextTokens >= 2048 ? MAX_TOKENS : 320);
+    return { chars, tokens: Math.max(256, contextTokens - replyReserve - 160) };
+  }
+
+  function roundFit(n) {
+    if (n >= 1000) return Math.floor(n / 100) * 100;
+    if (n >= 100) return Math.floor(n / 10) * 10;
+    return Math.max(0, Math.floor(n));
+  }
+
+  async function messageOverBudget(text, withImage) {
+    const deepThink = deepThinkActive();
+    const budget = historyBudget(deepThink);
+    if (engine && typeof engine.encodeChat === 'function') {
+      const imageTokens = withImage ? 300 : 0;
+      const system = { role: 'system', content: systemMessage.content };
+      const all = await engine.encodeChat([system, { role: 'user', content: text }], { enableThinking: deepThink });
+      if (all.ids.length + imageTokens <= budget.tokens) return null;
+      const base = await engine.encodeChat([system, { role: 'user', content: '' }], { enableThinking: deepThink });
+      const textTokens = Math.max(1, all.ids.length - base.ids.length);
+      const room = Math.max(0, budget.tokens - base.ids.length - imageTokens - 16);
+      return { fit: roundFit(text.length * Math.min(1, room / textTokens)), total: text.length };
+    }
+    const imageChars = withImage ? 1200 : 0;
+    if (text.length + imageChars <= budget.chars) return null;
+    return { fit: roundFit(budget.chars - imageChars), total: text.length };
+  }
+
+  function showTooLong(over) {
+    setStatus('error', 'statusTooLong');
+    showNotice('tooLong', 'errMessageTooLong', { fit: over.fit, total: over.total });
+    inputEl.setAttribute('aria-invalid', 'true');
+    inputEl.setAttribute('aria-describedby', 'ac-notice-text');
+    inputEl.focus();
+  }
+
+  function clearTooLong() {
+    if (!notice || notice.kind !== 'tooLong') return;
+    hideNotice('tooLong');
+    inputEl.removeAttribute('aria-invalid');
+    inputEl.removeAttribute('aria-describedby');
+    if (statusNow && statusNow.key === 'statusTooLong') setStatus('ready', 'statusReady');
   }
 
   /* ── Generate ────────────────────────────────────── */
   async function generate() {
-    if (generating || !engine) return;
+    if (generating || sending || deviceLost || !engine) return;
     const text = inputEl.value.trim();
     if (!text && !attachedImage) return;
 
+    sending = true;
+    let over = null;
+    try { over = await messageOverBudget(text || 'Describe this image.', !!attachedImage); }
+    catch (_) { over = null; }
+    finally { sending = false; }
+    if (over) { showTooLong(over); return; }
+    if (generating || deviceLost || !engine) return;
+    clearTooLong();
+
     inputEl.value = '';
     autoResize();
+    dropUnanswered();
 
     // Build user content (mirrors HF chat-template content-array shape)
     const userContent = [];
@@ -1248,7 +1602,9 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   async function regenerate() {
-    if (generating || !engine) return;
+    if (generating || sending) return;
+    if (deviceLost) { recoverModel(regenerate); return; }
+    if (!engine) return;
     const bubbles = messagesEl.querySelectorAll('.ac__msg--assistant');
     const lastBubble = bubbles.length ? bubbles[bubbles.length - 1] : null;
     const last = messages[messages.length - 1];
@@ -1270,23 +1626,22 @@ function runApp(MentriaEngine, Tiers) {
 
   async function runGeneration() {
     const epoch = genEpoch;
-    const deepThink = deepThinkOn && !pinned && currentTier === '27b' && contextTokens >= 2048;
+    const deepThink = deepThinkActive();
     generating = true;
     setSendMode(true);
-    setStatus('generating', deepThink ? COPY.thinking : COPY.statusGenerating);
+    setStatus('generating', deepThink ? 'thinking' : 'statusGenerating');
     counterReset();
     abortCtrl = new AbortController();
 
     if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
     if (epoch !== genEpoch) {
-      generating = false;
-      abortCtrl = null;
-      setSendMode(false);
-      setStatus('ready', COPY.statusReady);
+      settleGeneration(false);
       return;
     }
 
     const bodyEl = addMessage('assistant', '');
+    bodyEl.parentNode.setAttribute('aria-hidden', 'true');
+    bodyEl.inert = true;
     bodyEl.classList.add('ac__streaming');
     let fullText = '';
     let pendingPaint = false;
@@ -1298,6 +1653,7 @@ function runApp(MentriaEngine, Tiers) {
       thinkDetails.className = 'ac__think';
       thinkDetails.open = true;
       thinkSummaryEl = document.createElement('summary');
+      thinkSummaryEl.tabIndex = -1;
       thinkSummaryEl.textContent = COPY.thinking;
       thinkBodyEl = document.createElement('div');
       thinkBodyEl.className = 'ac__think-text';
@@ -1345,7 +1701,7 @@ function runApp(MentriaEngine, Tiers) {
       if (stick) scrollToBottom();
     }
 
-    function finalize(wasStopped) {
+    function finalize(mode) {
       bodyEl.classList.remove('ac__streaming');
       const stick = isNearBottom();
       let display;
@@ -1357,7 +1713,7 @@ function runApp(MentriaEngine, Tiers) {
           thinkSummaryEl.textContent = COPY.thoughtFor.replace('{s}', String(Math.round((performance.now() - genStart) / 1000)));
         }
         display = parts.answer.replace(/<\|[^|]*\|>/g, '').replace(/<tool_call>[\s\S]*?(<\/tool_call>|$)/g, '').trim();
-        thinkTruncated = !wasStopped && !parts.closed;
+        thinkTruncated = mode === 'done' && !parts.closed;
       } else {
         display = fullText
           .replace(/<think>[\s\S]*?<\/think>/g, '')
@@ -1365,16 +1721,33 @@ function runApp(MentriaEngine, Tiers) {
           .replace(/<\|[^|]*\|>/g, '')   // belt-and-suspenders strip if a multi-piece special leaks through
           .trim();
       }
-      if (wasStopped && !display) {
-        bodyEl.textContent = COPY.stopped;
-        bodyEl.classList.add('ac__msg-body--muted');
-        bodyEl.parentNode.classList.add('ac__msg--ghost');
+      if (mode === 'lost') {
+        bodyEl.parentNode.classList.add('ac__msg--ghost', 'ac__msg--cut');
+        if (display) {
+          if (window.renderMarkdown) bodyEl.innerHTML = renderMarkdown(display) || '';
+          else bodyEl.textContent = display;
+          const note = document.createElement('div');
+          note.className = 'ac__msg-note';
+          note.dataset.copy = 'interrupted';
+          note.textContent = COPY.interrupted;
+          bodyEl.after(note);
+          addAssistantActions(bodyEl, () => display);
+        } else {
+          ghostText(bodyEl, 'interrupted');
+          addAssistantActions(bodyEl, null);
+        }
+        if (stick) scrollToBottom();
+        return;
+      }
+      if (mode === 'stopped' && !display) {
+        ghostText(bodyEl, 'stopped');
         addAssistantActions(bodyEl, null);
         return;
       }
       if (thinkTruncated && !display) {
         thinkDetails.open = true;
         bodyEl.textContent = COPY.thinkCut;
+        bodyEl.dataset.copy = 'thinkCut';
         bodyEl.classList.add('ac__msg-body--muted');
         messages.push({ role: 'assistant', content: COPY.thinkCut });
         persistConversation();
@@ -1393,9 +1766,8 @@ function runApp(MentriaEngine, Tiers) {
 
     const bigContext = contextTokens >= 4096;
     const hugeContext = contextTokens >= 8192;
-    const HISTORY_CHAR_BUDGET = deepThink
-      ? (hugeContext ? 7000 : bigContext ? 5000 : 800)
-      : (hugeContext ? 14000 : bigContext ? 9500 : contextTokens >= 2048 ? 3400 : 1200);
+    const limits = historyBudget(deepThink);
+    const HISTORY_CHAR_BUDGET = limits.chars;
     const turnText = (m) => Array.isArray(m.content)
       ? m.content.filter(p => p && p.type === 'text').map(p => p.text).join(' ')
       : String(m.content || '');
@@ -1403,10 +1775,7 @@ function runApp(MentriaEngine, Tiers) {
       ? m.content.filter(p => p && p.type === 'image').length
       : 0;
     const rest = messages.slice(1);
-    const replyReserve = deepThink
-      ? (hugeContext ? 6000 : bigContext ? 3400 : 512)
-      : (bigContext ? 768 : contextTokens >= 2048 ? MAX_TOKENS : 320);
-    const historyTokenBudget = Math.max(256, contextTokens - replyReserve - 160);
+    const historyTokenBudget = limits.tokens;
     const textOnly = (m) => ({ role: m.role, content: turnText(m) });
     const countTokens = async (turns) => {
       if (!engine || typeof engine.encodeChat !== 'function') return null;
@@ -1443,16 +1812,25 @@ function runApp(MentriaEngine, Tiers) {
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
     const searchActive = webSearchOn && !pinned && !!(getSearchCfg() || {}).url;
-    if (searchActive && currentTier === '27b' && !imagesForRequest && rest.length > 1) setStatus('generating', COPY.statusRereading);
+    const routed = searchActive && currentTier === '27b' && !loraFused && !imagesForRequest;
+    if (routed && rest.length > 1) setStatus('generating', 'statusRereading');
     const routeAsk = () => routeTurn(turnText(rest[rest.length - 1]));
-    const route = (searchActive && currentTier === '27b' && !imagesForRequest && rest.length)
+    const route = (routed && rest.length)
       ? (prefixCache ? await prefixCache.withCheckpoint(routeAsk) : await routeAsk())
       : null;
-    if (epoch !== genEpoch) return;
+    if (epoch !== genEpoch) {
+      if (strip) strip.hide();
+      settleGeneration(false);
+      return;
+    }
     const useTool = route ? route === 'tool' : searchActive;
     markRoute(bodyEl, route);
     await setSearchAdapter(useTool);
-    const systemContent = useTool ? systemMessage.content + SEARCH_TOOL_PROMPT : systemMessage.content;
+    const asked = rest.length ? turnText(rest[rest.length - 1]) : '';
+    const baseSystem = currentTier === '0.8b' && !pinned
+      ? systemPromptFor(currentTier, { image: !!imagesForRequest, lang: replyLanguage(asked) })
+      : systemMessage.content;
+    const systemContent = useTool ? baseSystem + SEARCH_TOOL_PROMPT : baseSystem;
     const toolTurns = [];
     const searchesDone = [];
     let searchSources = [];
@@ -1544,21 +1922,32 @@ function runApp(MentriaEngine, Tiers) {
       generating = false;
       if (epoch === genEpoch) {
         for (const t of toolTurns) messages.push(t);
-        finalize(false);
+        finalize('done');
         if (searchesDone.length) attachSources(bodyEl, searchesDone, searchSources, searchErrored);
       }
     } catch (err) {
-      generating = false;
       if (prefixCache) prefixCache.invalidate();
       const aborted = err && err.name === 'AbortError';
+      const lost = !aborted && (deviceLost || isDeviceLostError(err));
+      if (lost) deviceLost = true;
+      let friendly = COPY.errPrefix + (err && err.message);
+      if (!aborted && !lost && /maxseq/i.test(String(err && err.message))) {
+        friendly = COPY.errContextFull;
+        const newest = kept[kept.length - 1];
+        if (kept.length <= 1 && newest && newest.role === 'user') {
+          let over = null;
+          try { over = await messageOverBudget(turnText(newest), turnImages(newest) > 0); } catch (_) { over = null; }
+          if (over) friendly = copyText('errMessageTooLong', { fit: fmtNum(over.fit), total: fmtNum(over.total) });
+        }
+      }
+      generating = false;
       if (epoch === genEpoch) {
-        const friendly = /maxseq/i.test(String(err && err.message))
-          ? COPY.errContextFull
-          : COPY.errPrefix + (err && err.message);
         if (aborted) {
-          finalize(true);
+          finalize('stopped');
+        } else if (lost) {
+          finalize('lost');
         } else if (fullText.trim()) {
-          finalize(true);
+          finalize('stopped');
           if (window.MentriaUI) MentriaUI.toast(friendly);
         } else {
           bodyEl.textContent = friendly;
@@ -1569,30 +1958,44 @@ function runApp(MentriaEngine, Tiers) {
       if (!aborted) console.error('Generation error:', err);
     }
 
+    if (epoch === genEpoch) revealAnswer(bodyEl);
+    if (strip) {
+      if (deviceLost) strip.hide();
+      else if (strip.phaseName === 'answering') strip.done({ tokens: counterN });
+      else strip.hide();
+    }
+    settleGeneration(true);
+  }
+
+  function settleGeneration(focus) {
+    generating = false;
     abortCtrl = null;
-    if (strip) { if (strip.phaseName === 'answering') strip.done({ tokens: counterN }); else strip.hide(); }
     setSendMode(false);
-    setStatus('ready', COPY.statusReady);
-    inputEl.focus();
+    if (deviceLost) { showLostState(focus); return; }
+    setStatus('ready', 'statusReady');
+    if (focus) inputEl.focus();
   }
 
   /* ── Delete cached model ─────────────────────────── */
   async function deleteModel() {
-    if (!(await mentriaConfirm(COPY.confirmDelete))) return;
+    if (!(await mentriaConfirm(COPY.confirmDelete, { danger: true }))) return;
     try {
       const keys = await caches.keys();
       for (const key of keys) {
-        if (key.includes('mentria') || key.includes('huggingface') || key.includes('transformers')) {
+        if (key === 'mentria-models' || key.startsWith('mentria-models-') || key.includes('huggingface') || key.includes('transformers')) {
           await caches.delete(key);
         }
       }
       const dbs = (typeof indexedDB.databases === 'function') ? await indexedDB.databases() : [];
       for (const db of dbs) {
-        if (db.name && (db.name.includes('mentria') || db.name.includes('transformers') || db.name.includes('onnxruntime'))) {
+        if (db.name && (db.name === 'mentria-engine' || db.name.includes('transformers') || db.name.includes('onnxruntime'))) {
           indexedDB.deleteDatabase(db.name);
         }
       }
-      try { await engine?.unload(); } catch {}
+      const old = engine;
+      try { await old?.unload(); } catch {}
+      try { old?.terminate(); } catch {}
+      if (old && window.__mentriaEngine === old) window.__mentriaEngine = null;
       engine = null;
       prefixCache = null;
       messages = [systemMessage];
@@ -1607,7 +2010,9 @@ function runApp(MentriaEngine, Tiers) {
       deleteBtn.style.display = 'none';
       inputEl.disabled = true;
       sendBtn.disabled = true;
-      setStatus('idle', COPY.statusModelDeleted);
+      deviceLost = false;
+      hideNotice('lost');
+      setStatus('idle', 'statusModelDeleted');
     } catch (err) {
       console.error('Delete error:', err);
       mentriaAlert(COPY.errDeletePrefix + err.message);
@@ -1627,7 +2032,7 @@ function runApp(MentriaEngine, Tiers) {
     } catch (err) {
       console.error('Image attach error:', err);
       removeImage();
-      setStatus('error', COPY.errBadImage);
+      setStatus('error', 'errBadImage');
     }
   }
 
@@ -1655,7 +2060,9 @@ function runApp(MentriaEngine, Tiers) {
     }
   });
 
-  inputEl.addEventListener('input', autoResize);
+  inputEl.addEventListener('input', () => { autoResize(); clearTooLong(); });
+
+  attachBtn.addEventListener('click', () => fileInput.click());
 
   fileInput.addEventListener('change', () => {
     if (fileInput.files[0]) attachFile(fileInput.files[0]);
@@ -1677,11 +2084,28 @@ function runApp(MentriaEngine, Tiers) {
     }
   });
 
+  localeHooks.push(() => {
+    syncSendLabel();
+    messagesEl.querySelectorAll('.ac__msg--user > .ac__msg-label').forEach((el) => { el.textContent = COPY.labelYou; });
+    messagesEl.querySelectorAll('.ac__msg-label[data-route]').forEach((el) => {
+      el.textContent = el.dataset.model + ' · ' + (el.dataset.route === 'tool' ? COPY.routeTool : COPY.routeChat);
+    });
+    messagesEl.querySelectorAll('.ac__msg-copy').forEach((b) => { b.title = COPY.btnCopy; b.setAttribute('aria-label', COPY.btnCopy); });
+    messagesEl.querySelectorAll('.ac__msg-regen').forEach((b) => { b.title = COPY.btnRegenerate; b.setAttribute('aria-label', COPY.btnRegenerate); });
+    messagesEl.querySelectorAll('[data-copy]').forEach((el) => { if (typeof COPY[el.dataset.copy] === 'string') el.textContent = COPY[el.dataset.copy]; });
+    messagesEl.querySelectorAll('.ac__msg-img').forEach((img) => { img.alt = COPY.imgAltAttachedShort; });
+    syncTierSelector();
+    if (currentTier) { syncThinkToggle(); syncSearchToggle(); }
+    if (!adaptersPanel.hidden) renderAdapters();
+    updateEmptySub();
+    renderNotice();
+  });
+
   /* ── Init ────────────────────────────────────────── */
   (async () => {
     tierDecision = await Tiers.decideTier();
     if (!tierDecision.tier) {
-      showUnsupportedError(COPY.errNoWebGpu);
+      showUnsupportedError('errNoWebGpu');
       return;
     }
     syncTierSelector();
@@ -1826,7 +2250,7 @@ function runApp(MentriaEngine, Tiers) {
 }
 .ac__empty-sub {
   font-size: 0.65rem;
-  opacity: 0.6;
+  color: var(--term-subtle);
 }
 
 /* ── Message bubble ─────────────────────────────── */
@@ -1874,6 +2298,7 @@ function runApp(MentriaEngine, Tiers) {
   color: var(--term-fg);
   word-wrap: break-word;
 }
+.ac__msg--user .ac__msg-body { white-space: pre-wrap; }
 /* ── Markdown-rendered output: tight spacing for chat bubbles ──── */
 .ac__msg-body p              { margin: 0 0 0.45rem; }
 .ac__msg-body p:last-child   { margin-bottom: 0; }
@@ -1945,6 +2370,13 @@ function runApp(MentriaEngine, Tiers) {
 .ac__msg-body table tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
 
 .ac__msg-body--muted { color: var(--term-muted); font-style: italic; }
+.ac__msg--cut { border-style: dashed; }
+.ac__msg-note {
+  margin-top: 0.45rem;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--syn-amber);
+}
 
 .ac__msg-actions {
   display: flex;
@@ -2001,12 +2433,41 @@ function runApp(MentriaEngine, Tiers) {
 }
 
 /* ── Input area ─────────────────────────────────── */
+.ac__notice {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--term-border);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--syn-pink);
+  flex-shrink: 0;
+}
+.ac__notice[hidden] { display: none; }
+.ac__notice[data-kind="postponed"] { color: var(--term-fg); }
+.ac__notice-text { flex: 1 1 16rem; min-width: 0; }
+.ac__notice-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--syn-cyan);
+  color: var(--syn-cyan);
+  border-radius: 6px;
+  padding: 0.3rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+.ac__notice-btn:hover { background: rgba(34, 211, 238, 0.12); }
+.ac__notice-btn[hidden] { display: none; }
+
 .ac__input-wrap {
   position: relative;
   display: flex;
   align-items: flex-end;
   gap: 0.4rem;
-  padding: 0.6rem 0.75rem;
+  padding: 0.6rem 0.75rem calc(0.6rem + var(--ac-dock-lift, 0px));
   border-top: 1px solid var(--term-border);
   flex-shrink: 0;
 }
@@ -2107,6 +2568,9 @@ function runApp(MentriaEngine, Tiers) {
   justify-content: center;
   width: 36px;
   height: 36px;
+  padding: 0;
+  border: none;
+  background: none;
   border-radius: 6px;
   cursor: pointer;
   color: var(--term-muted);
@@ -2287,6 +2751,7 @@ function runApp(MentriaEngine, Tiers) {
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
+.ac__think-btn[hidden] { display: none; }
 .ac__think-btn:hover:not(:disabled) {
   color: var(--syn-cyan);
   background: rgba(34, 211, 238, 0.08);

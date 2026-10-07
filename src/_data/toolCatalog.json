@@ -1,0 +1,346 @@
+[
+  {
+    "slug": "search",
+    "title": "Search",
+    "summary": "AI-aware site search across tools and feed posts. Falls back to instant fuzzy keyword matching; uses Qwen3.5 for natural-language summaries when the model is already cached locally.",
+    "category": "AI",
+    "group": "AI"
+  },
+  {
+    "slug": "step-counter",
+    "title": "Step Counter",
+    "summary": "Session pedometer using your phone's motion sensor — goal ring, 7-day history, streaks, a black-screen pocket mode that keeps counting in your pocket, and honest estimates for locked-screen gaps. All on-device.",
+    "category": "Health",
+    "group": "Everyday",
+    "requires": "motion"
+  },
+  {
+    "slug": "qr-scanner",
+    "title": "QR & Barcode Scanner + Generator",
+    "summary": "Scan QR codes and barcodes, or generate a QR code from any link or text — all on-device, nothing uploaded.",
+    "category": "Utility",
+    "group": "Dev"
+  },
+  {
+    "slug": "decision-wheel",
+    "title": "Decision Wheel",
+    "summary": "Offline-ready spinner for quick calls: Yes, No, Up to you, or Wait & try again.",
+    "category": "Utility",
+    "group": "Everyday"
+  },
+  {
+    "slug": "countdown-timer",
+    "title": "Countdown Timer",
+    "summary": "Up to 4 simultaneous countdown timers with custom titles. Set a duration or pick a target date & time (max 99 hrs).",
+    "category": "Timer",
+    "group": "Everyday"
+  },
+  {
+    "slug": "coin-flip",
+    "title": "Coin Flip",
+    "summary": "Animated heads or tails coin flip with optional best-of-N series mode. Works offline.",
+    "category": "Utility",
+    "group": "Everyday"
+  },
+  {
+    "slug": "calculator",
+    "title": "Calculator",
+    "summary": "Calculator online with no app to install — type or tap an expression and watch the answer update as you go, with brackets, percent, powers, square roots, sin/cos/tan in degrees or radians, ln, log, π and e. Keeps your last 20 calculations on this device; nothing is uploaded.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-09-24"
+  },
+  {
+    "slug": "unit-converter",
+    "title": "Unit Converter",
+    "summary": "Unit converter online with no app to install — length, weight, temperature, volume, area, speed, time, data (kB and KiB), pressure, energy, fuel economy (L/100 km to mpg) and angles. Type in either field to see the other update with the exact factor or formula and a quick-reference table; it all runs on-device and nothing is uploaded.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-09-24"
+  },
+  {
+    "slug": "world-clock",
+    "title": "World Clock",
+    "summary": "World clock online with no app — compare the time in cities worldwide with the date, UTC offset and day or night at a glance, and convert any date and time across time zones with daylight saving handled. Searchable time zone picker, 12/24-hour format, runs on-device and works offline.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-09-24"
+  },
+  {
+    "slug": "quick-notes",
+    "title": "Quick Notes",
+    "summary": "Minimal scratchpad that saves to your browser. Supports multiple notes with localStorage persistence.",
+    "category": "Productivity",
+    "group": "Create"
+  },
+  {
+    "slug": "base64-codec",
+    "title": "Base64 Codec",
+    "summary": "Encode and decode text or files (including images) to and from Base64. All processing stays in your browser.",
+    "category": "Developer",
+    "group": "Dev"
+  },
+  {
+    "slug": "json-formatter",
+    "title": "JSON Formatter & Validator",
+    "summary": "JSON formatter and validator in the browser: pretty-print, minify or sort keys, with the exact line and column for every error, a collapsible tree that copies paths like $.items[3].name, and big numbers kept digit for digit. Runs on-device; nothing is uploaded.",
+    "category": "Developer",
+    "group": "Dev",
+    "added": "2026-09-24"
+  },
+  {
+    "slug": "totp",
+    "title": "TOTP",
+    "summary": "Two-factor codes that live in your browser, not on a server. Encrypted at rest, unlocked with a passphrase or Touch ID. Mandatory encrypted backup before your first secret saves.",
+    "category": "Security",
+    "group": "Everyday"
+  },
+  {
+    "slug": "password-generator",
+    "title": "Password Generator",
+    "summary": "Password generator online with no app to install — strong random passwords from 8 to 128 characters with every chosen character set guaranteed and an optional no-look-alikes mode, or passphrases from the EFF short wordlist, with an honest entropy readout. Made on-device with the Web Crypto API; passwords are never stored or sent.",
+    "category": "Security",
+    "group": "Everyday",
+    "added": "2026-09-24"
+  },
+  {
+    "slug": "exif",
+    "title": "EXIF Inspector",
+    "summary": "See the metadata hiding in a photo — camera, timestamps, GPS position — and download a byte-identical clean copy with it all stripped. Nothing is uploaded.",
+    "category": "Security",
+    "group": "Everyday"
+  },
+  {
+    "slug": "color-picker",
+    "title": "Color Picker",
+    "summary": "Pick colors, generate harmonious palettes, and copy values in HEX, RGB, and HSL. Works offline.",
+    "category": "Design",
+    "group": "Create"
+  },
+  {
+    "slug": "image-compressor",
+    "title": "Image Compressor",
+    "summary": "Compress and resize images online with no app to install — shrink JPEG, PNG and WebP photos, convert formats and strip EXIF location data, all on your device. Nothing is uploaded.",
+    "category": "Design",
+    "group": "Create",
+    "added": "2026-09-24"
+  },
+  {
+    "slug": "annotate-image",
+    "title": "Annotate Image",
+    "summary": "Upload an image, get an instant on-device AI description, alt-text, transcription, or tags — tested one-tap prompts, nothing uploaded. Open images straight from your file manager.",
+    "category": "AI",
+    "group": "AI",
+    "offline": "model"
+  },
+  {
+    "slug": "ai-chat",
+    "title": "AI Chat",
+    "summary": "Chat with Qwen3.5 running locally in your browser via WebGPU. Supports vision. No data leaves your device.",
+    "category": "AI",
+    "group": "AI",
+    "offline": "model"
+  },
+  {
+    "slug": "forge",
+    "held": true,
+    "title": "Forge",
+    "summary": "Describe a 3D scene and the on-device 27B model writes it in three.js, renders it in a sandbox, checks it and repairs it once.",
+    "category": "AI",
+    "group": "AI",
+    "offline": "model"
+  },
+  {
+    "slug": "console",
+    "title": "Console",
+    "summary": "A shared screen for you and the on-device model: chat, and let it open apps and use them like a person would — or watch it test the site and report what it finds.",
+    "category": "AI",
+    "group": "AI",
+    "offline": "model"
+  },
+  {
+    "slug": "model-mirror",
+    "title": "Model Mirror",
+    "summary": "Keep a tab open and your browser helps deliver Mentria's on-device models peer-to-peer to other visitors — official download as fallback.",
+    "category": "AI",
+    "group": "AI",
+    "offline": "model"
+  },
+  {
+    "slug": "quote",
+    "title": "Motivational Quote",
+    "summary": "AI-generated original motivational quotes. Runs locally in your browser.",
+    "category": "AI",
+    "group": "AI",
+    "offline": "model"
+  },
+  {
+    "slug": "radio",
+    "title": "Infinite Radio",
+    "summary": "AI-generated epic cinematic music streaming infinitely. Learns your taste locally. No data leaves your device.",
+    "category": "AI",
+    "group": "AI",
+    "offline": "network"
+  },
+  {
+    "slug": "invoice",
+    "title": "Invoice Generator",
+    "summary": "Build clean, single-page invoices in your browser. Auto-saves, prints to A4, exports/imports JSON. No data leaves your device.",
+    "category": "Utility",
+    "group": "Create"
+  },
+  {
+    "slug": "markdown-pdf",
+    "title": "Markdown → PDF",
+    "summary": "Write markdown, see a live preview, and download a clean professional PDF. Auto-saves to your browser. No data leaves your device.",
+    "category": "Utility",
+    "group": "Create"
+  },
+  {
+    "slug": "tetris",
+    "title": "Tetris",
+    "summary": "Browser-native Tetris in the Mentria synthwave palette. Touch, keyboard, and mouse supported. Plays offline.",
+    "category": "Game",
+    "group": "Games"
+  },
+  {
+    "slug": "breakout",
+    "title": "Breakout",
+    "summary": "Brick-buster paddle game with synthwave powerups, lives, and a high-score table. Plays offline.",
+    "category": "Game",
+    "group": "Games"
+  },
+  {
+    "slug": "flappy",
+    "title": "Flappy",
+    "summary": "Paper plane flapping through stacks of command prompts. Tap, click, or SPACE. Plays offline.",
+    "category": "Game",
+    "group": "Games"
+  },
+  {
+    "slug": "minesweeper",
+    "title": "Minesweeper",
+    "summary": "Classic logic puzzle in terminal dress. Three difficulties, mouse + touch input, best-time tracking. Plays offline.",
+    "category": "Game",
+    "group": "Games"
+  },
+  {
+    "slug": "sudoku",
+    "title": "Sudoku",
+    "summary": "Unique-solution generator, four difficulties, pencil marks, conflict highlighting, hints, and per-difficulty best times. Keyboard, mouse, and touch. Plays offline.",
+    "category": "Game",
+    "group": "Games"
+  },
+  {
+    "slug": "ludo",
+    "title": "Ludo",
+    "summary": "The cross-and-circle race game on canvas. Roll, capture, race four tokens home. 2–4 players vs built-in bots or pass-and-play. Plays offline.",
+    "category": "Game",
+    "group": "Games"
+  },
+  {
+    "slug": "chess",
+    "title": "Chess",
+    "summary": "Full-rules chess with a local alpha-beta engine (four strengths), hot-seat, and encrypted online play via share-code. Eval bar, hints, move history. Plays offline.",
+    "category": "Game",
+    "group": "Games"
+  },
+  {
+    "slug": "phosphor",
+    "title": "PHOSPHOR",
+    "summary": "Combat time trials in the browser — sprint, slide, mantle and a full-auto carbine across five dusk-lit courses. Medals, ghost racing, offline play.",
+    "category": "Game",
+    "group": "Games",
+    "added": "2026-07-31"
+  },
+  {
+    "slug": "extensions",
+    "title": "Extensions",
+    "summary": "Install private single-file extensions that live only on your device — they get a launcher tile, optional command-palette entries, and their own local storage, and are never part of the public site.",
+    "category": "Utility",
+    "group": "Dev"
+  },
+  {
+    "slug": "files",
+    "title": "Files",
+    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, TOTP vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all. Nothing leaves your device.",
+    "category": "Utility",
+    "group": "Dev",
+    "added": "2026-07-02"
+  },
+  {
+    "slug": "comms",
+    "title": "Comms",
+    "summary": "Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted rooms, contact codes, and private DMs derived from your identity. No accounts, no server in the middle.",
+    "category": "Social",
+    "group": "Everyday",
+    "url": "/comms/",
+    "added": "2026-07-06"
+  },
+  {
+    "slug": "bubble-level",
+    "title": "Bubble Level",
+    "summary": "Spirit level for your phone — a bubble level online with no app needed. Circular two-axis bubble when the phone lies flat, single-vial carpenter's level on edge, 0.1° readouts, tap-to-freeze and one-tap calibration. Works offline, all on-device.",
+    "category": "Utility",
+    "group": "Everyday",
+    "requires": "motion",
+    "added": "2026-07-28"
+  },
+  {
+    "slug": "decibel-meter",
+    "title": "Decibel Meter",
+    "summary": "Sound level meter online — measure noise in decibels with your phone or laptop mic, no app to install. Live dB reading with color ramp, peak-hold meter, session min/average/peak, adjustable calibration offset, and a ladder of everyday sounds for context. Honest estimates, not a calibrated instrument. Audio is analysed on-device and never recorded or uploaded.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-07-28"
+  },
+  {
+    "slug": "compass",
+    "title": "Compass",
+    "summary": "Compass online with no app to install — works right in the browser and reads your magnetic heading from your phone's magnetometer. Rotating rose, tap-to-lock bearing, calibration hint. All on-device.",
+    "category": "Utility",
+    "group": "Everyday",
+    "requires": "motion",
+    "added": "2026-07-28"
+  },
+  {
+    "slug": "speedometer",
+    "title": "GPS Speedometer",
+    "summary": "GPS speedometer online without an app — live speed in km/h, mph or knots on a big auto-ranging dial, plus trip distance, moving time, average and top speed. Reads your device GPS in the browser; the position never leaves the device.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-07-28"
+  },
+  {
+    "slug": "ruler",
+    "title": "Online Ruler",
+    "summary": "Online ruler at actual size — centimetres, millimetres and inches down to 1/16 on screen. Calibrate once with a bank card (or a length you already know) so the marks are true to size, then drag two markers to measure anything you lay on the glass. Works offline; calibration stays on your device.",
+    "category": "Utility",
+    "group": "Everyday",
+    "added": "2026-07-28"
+  },
+  {
+    "slug": "gallery",
+    "title": "Gallery",
+    "summary": "Photo gallery and image viewer that runs in your browser: open a folder or pick photos and videos, browse them by the month they were taken, zoom, play videos, run a slideshow and see camera details. A private local gallery that never uploads your files.",
+    "category": "Media",
+    "group": "Everyday",
+    "added": "2026-10-01"
+  },
+  {
+    "slug": "video-player",
+    "title": "Video Player",
+    "summary": "Play videos from your phone or computer in the browser: open files or a whole folder, resume where you stopped, change speed from 0.25× to 3×, load .srt or .vtt subtitles, and use picture-in-picture. A free local video player that never uploads your files.",
+    "category": "Media",
+    "group": "Everyday",
+    "added": "2026-10-01"
+  },
+  {
+    "slug": "music-player",
+    "title": "Music Player",
+    "summary": "Music player for your own files in the browser: open songs or a folder, browse songs, albums and artists from their tags with cover art, then shuffle, repeat, queue and build playlists with M3U export. Lock-screen controls and a sleep timer included. A private local music player that never uploads your files.",
+    "category": "Media",
+    "group": "Everyday",
+    "added": "2026-10-01"
+  }
+]

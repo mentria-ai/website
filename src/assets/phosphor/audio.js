@@ -704,6 +704,14 @@ export function createAudio() {
     } catch (_) {}
   }
 
+  function sleep() {
+    try {
+      if (!S.ctx || S.ctx.state !== 'running') return;
+      const p = S.ctx.suspend();
+      if (p && p.catch) p.catch(function () {});
+    } catch (_) {}
+  }
+
   function event(e) {
     if (!S.ctx || !e) return;
     try {
@@ -804,6 +812,7 @@ export function createAudio() {
 
   return {
     unlock: unlock,
+    sleep: sleep,
     event: event,
     setListener: setListener,
     setLevels: setLevels,

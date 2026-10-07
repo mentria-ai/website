@@ -11,13 +11,13 @@ description: "Measures load time, time to first token and decode speed of the on
 eleventyComputed:
   lang: "{{ locale.code }}"
 ---
-<section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bench</span></p>
+<section class="hero" style="padding-top:1rem;"{% if locale.code != "en" %} lang="en"{% endif %}>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bench</span></p>
   <h1>Model benchmark</h1>
   <p class="lede">Loads a tier in this tab, runs fixed prompts, and reports load time, time to first token and decode speed. Close other model tabs first: one engine per device.</p>
 </section>
 
-<section class="bench" id="bench">
+<section class="bench" id="bench"{% if locale.code != "en" %} lang="en"{% endif %}>
   <div class="bench__grid">
     <fieldset class="bench__box">
       <legend>Tiers</legend>
@@ -64,23 +64,23 @@ eleventyComputed:
 .bench { max-width: var(--wide, 1100px); margin: 0 auto; padding: 0 1rem 3rem; }
 .bench__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 720px) { .bench__grid { grid-template-columns: 1fr; } }
-.bench__box { border: 1px solid var(--border, rgba(255,255,255,.12)); border-radius: 12px; padding: 1rem; min-width: 0; }
-.bench__box legend { font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #8896a8); padding: 0 .4rem; }
+.bench__box { border: 1px solid var(--term-border-strong); border-radius: 12px; padding: 1rem; min-width: 0; }
+.bench__box legend { font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--term-muted); padding: 0 .4rem; }
 .bench__tiers { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
-.bench__tiers label { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--border, rgba(255,255,255,.14)); border-radius: 999px; padding: .35rem .8rem; font-family: var(--font-mono); font-size: .9rem; }
+.bench__tiers label { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; padding: .35rem .8rem; font-family: var(--font-mono); font-size: .9rem; }
 .bench__tiers label.is-off { opacity: .55; }
 .bench__opt { display: block; font-size: .9rem; margin: .35rem 0; }
 .bench__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .8rem; }
 .bench__btn { background: var(--accent, #6ef3c5); color: #0a0a0a; border: 0; border-radius: 8px; padding: .55rem 1rem; font-family: var(--font-mono); font-weight: 600; cursor: pointer; }
-.bench__btn--ghost { background: transparent; color: var(--fg, #e2e8f0); border: 1px solid var(--border, rgba(255,255,255,.2)); }
+.bench__btn--ghost { background: transparent; color: var(--term-fg); border: 1px solid rgba(255,255,255,.2); }
 .bench__btn:disabled { opacity: .45; cursor: default; }
 .bench__status { font-family: var(--font-mono); font-size: .85rem; color: var(--accent, #6ef3c5); margin: .8rem 0 0; min-height: 1.2em; overflow-wrap: anywhere; }
-.bench__pre { font-family: var(--font-mono); font-size: .78rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; color: var(--muted, #c9d4df); }
-.bench__log { margin-top: 1rem; max-height: 14rem; overflow: auto; border-top: 1px solid var(--border, rgba(255,255,255,.1)); padding-top: .75rem; }
+.bench__pre { font-family: var(--font-mono); font-size: .78rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; color: #c9d4df; }
+.bench__log { margin-top: 1rem; max-height: 14rem; overflow: auto; border-top: 1px solid rgba(255,255,255,.1); padding-top: .75rem; }
 .bench__tablewrap { overflow-x: auto; margin-top: 1rem; }
 .bench__table { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-size: .82rem; }
-.bench__table th, .bench__table td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--border, rgba(255,255,255,.1)); white-space: nowrap; }
-.bench__table th { color: var(--muted, #8896a8); font-weight: 500; }
+.bench__table th, .bench__table td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid rgba(255,255,255,.1); white-space: nowrap; }
+.bench__table th { color: var(--term-muted); font-weight: 500; }
 </style>
 
 <script type="module">

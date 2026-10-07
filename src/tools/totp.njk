@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.totp.title' | t }}"
   description: "{{ 'tools.totp.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">totp</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">totp</span></p>
   <h1>{{ "tools.totp.title" | t }}</h1>
   <p>{{ "tools.totp.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -21,6 +22,11 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 <section class="totp" id="totp">
   <div class="totp-status m-status" id="totp-status" role="status" aria-live="polite"></div>
+  <p class="totp-unsaved" id="totp-unsaved" role="status" aria-live="polite" hidden>
+    <span data-unsaved="blocked" hidden>{{ "tool.totp.unsaved_blocked" | t }}</span>
+    <span data-unsaved="full" hidden>{{ "tool.totp.unsaved_full" | t }}</span>
+  </p>
+  <span id="totp-copy-hint" class="sr-only">{{ "tool.totp.copy_code" | t }}</span>
 
   <div class="totp-locked" id="totp-locked" hidden>
     <h2 class="totp-locked__h">{{ "tool.totp.locked_title" | t }}</h2>
@@ -36,6 +42,7 @@ eleventyComputed:
         <input type="password" id="totp-setup-pass2" autocomplete="new-password" minlength="8">
       </label>
       <div class="totp-strength" id="totp-setup-strength" aria-live="polite"></div>
+      <p class="totp-setup__note">{{ "tool.totp.setup_recovery_note" | t }}</p>
       <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-setup-btn">{{ "tool.totp.setup_button" | t }}</button>
     </div>
 
@@ -66,6 +73,10 @@ eleventyComputed:
       </span>
     </div>
 
+    <div class="totp-clock" id="totp-clock" hidden>
+      <p class="totp-clock__msg" id="totp-clock-msg"></p>
+      <button type="button" class="m-btn m-btn--ghost" id="totp-clock-fix">{{ "tool.totp.clock_fix" | t }}</button>
+    </div>
     <ul class="totp-list" id="totp-list"></ul>
     <p class="totp-empty" id="totp-empty" hidden>{{ "tool.totp.empty_state" | t }}</p>
   </div>
@@ -74,7 +85,9 @@ eleventyComputed:
     <div class="totp-modal__backdrop" data-close></div>
     <div class="totp-modal__card m-modal__card">
       <h3 class="totp-modal__h">{{ "tool.totp.add_title" | t }}</h3>
+      <p class="totp-modal__warn" id="totp-add-unsaved" hidden>{{ "tool.totp.add_unsaved" | t }}</p>
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-scan-btn">{{ "tool.totp.scan_button" | t }}</button>
+      <p class="totp-modal__hint">{{ "tool.totp.scan_hint" | t }}</p>
       <div class="totp-scanner" id="totp-scanner" hidden>
         <video class="totp-scanner__video" id="totp-scanner-video" playsinline muted></video>
         <p class="totp-scanner__note" id="totp-scanner-note" hidden></p>
@@ -104,6 +117,53 @@ eleventyComputed:
     </div>
   </div>
 
+  <div class="totp-modal m-modal" id="totp-import-modal" hidden>
+    <div class="totp-modal__backdrop" data-close></div>
+    <div class="totp-modal__card m-modal__card">
+      <h3 class="totp-modal__h">{{ "tool.totp.import_title" | t }}</h3>
+      <p class="totp-modal__warn" id="totp-import-unsaved" hidden>{{ "tool.totp.add_unsaved" | t }}</p>
+      <p class="totp-modal__p" id="totp-import-lede"></p>
+      <ul class="totp-import-list" id="totp-import-list"></ul>
+      <p class="totp-modal__p" id="totp-import-batch" hidden></p>
+      <div class="totp-modal__actions">
+        <button type="button" class="totp-btn m-btn m-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
+        <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-import-confirm">{{ "tool.totp.import_confirm" | t }}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="totp-modal m-modal" id="totp-export-modal" hidden>
+    <div class="totp-modal__backdrop" data-close></div>
+    <div class="totp-modal__card m-modal__card">
+      <h3 class="totp-modal__h" id="totp-export-title"></h3>
+      <div id="totp-export-gate">
+        <p class="totp-modal__p">{{ "tool.totp.export_gate" | t }}</p>
+        <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-export-prf" hidden>{{ "tool.totp.unlock_prf" | t }}</button>
+        <label class="totp-field">
+          <span>{{ "tool.totp.pass_label" | t }}</span>
+          <input type="password" id="totp-export-pass" autocomplete="current-password">
+        </label>
+        <p class="totp-modal__err" id="totp-export-err" role="alert"></p>
+        <div class="totp-modal__actions">
+          <button type="button" class="totp-btn m-btn m-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
+          <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-export-show">{{ "tool.totp.export_show" | t }}</button>
+        </div>
+      </div>
+      <div id="totp-export-reveal" hidden>
+        <p class="totp-modal__warn">{{ "tool.totp.export_warning" | t }}</p>
+        <canvas class="totp-export__qr" id="totp-export-qr" role="img" aria-label="{{ 'tool.totp.export_qr_label' | t }}"></canvas>
+        <div class="totp-export__uri">
+          <code id="totp-export-uri"></code>
+          <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-export-copy">{{ "tool.totp.export_copy" | t }}</button>
+        </div>
+        <p class="totp-modal__p" id="totp-export-timer"></p>
+        <div class="totp-modal__actions">
+          <button type="button" class="totp-btn m-btn m-btn--primary" data-close>{{ "tool.totp.export_done" | t }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="totp-modal m-modal" id="totp-backup-modal" hidden>
     <div class="totp-modal__backdrop" data-close></div>
     <div class="totp-modal__card m-modal__card">
@@ -111,8 +171,9 @@ eleventyComputed:
       <p class="totp-modal__p" id="totp-backup-lede">{{ "tool.totp.backup_gate_lede" | t }}</p>
       <label class="totp-field">
         <span>{{ "tool.totp.backup_pass_label" | t }}</span>
-        <input type="password" id="totp-backup-pass" autocomplete="new-password" minlength="8">
+        <input type="password" id="totp-backup-pass" autocomplete="new-password" minlength="8" aria-describedby="totp-backup-err">
       </label>
+      <p class="totp-modal__err" id="totp-backup-err" role="alert"></p>
       <div class="totp-modal__actions">
         <button type="button" class="totp-btn m-btn m-btn--ghost" data-close>{{ "tool.totp.cancel" | t }}</button>
         <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-backup-confirm-btn">{{ "tool.totp.backup_gate_confirm" | t }}</button>
@@ -122,6 +183,7 @@ eleventyComputed:
 </section>
 {% include "terminal-frame-close.njk" %}
 {% include "tool-schema.njk" %}
+<script src="/assets/js/qrcode.js?v={{ buildHash }}"></script>
 
 <style>
   .totp { display: flex; flex-direction: column; gap: 18px; padding: var(--space-2) 0; }
@@ -150,6 +212,10 @@ eleventyComputed:
 
   .totp-toolbar { display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .totp-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .totp-clock { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--syn-amber, #fbbf24); border-radius: var(--radius-md, 6px); font-size: 13px; line-height: 1.45; color: var(--term-fg); }
+  .totp-clock[hidden] { display: none; }
+  .totp-clock__msg { margin: 0; flex: 1 1 240px; }
+  .totp-unsaved { margin: 0; padding: 10px 12px; border: 1px solid var(--syn-amber, #fbbf24); border-radius: var(--radius-md, 6px); font-size: 13px; line-height: 1.45; color: var(--term-fg); }
   .totp-empty { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--term-muted); text-align: center; padding: var(--space-5); }
 
   .totp-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--term-bg); border: 1px solid var(--term-border); border-radius: var(--radius-md); }
@@ -157,7 +223,7 @@ eleventyComputed:
   .totp-row__issuer { font-family: var(--font-mono); font-size: 11px; color: var(--term-subtle); text-transform: uppercase; letter-spacing: 0.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .totp-row__account { font-size: 12px; color: var(--term-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .totp-row__code-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 0; }
-  .totp-row__code { font-family: var(--font-mono); font-size: 22px; letter-spacing: 0.1em; color: var(--accent, #6ef3c5); cursor: pointer; user-select: all; padding: 4px 8px; border-radius: 4px; display: inline-block; will-change: transform, opacity; }
+  .totp-row__code { font-family: var(--font-mono); font-size: 22px; letter-spacing: 0.1em; color: var(--accent, #6ef3c5); cursor: pointer; user-select: all; padding: 4px 8px; border-radius: 4px; display: inline-block; will-change: transform, opacity; background: none; border: 0; line-height: inherit; }
   .totp-row__code:hover { background: rgba(110,243,197,0.08); }
   .totp-row__code.is-copied { color: var(--syn-green, #34c46a); }
   .totp-row__next { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--term-subtle); opacity: .85; padding: 0 8px; transition: color 0.3s ease; display: inline-block; will-change: transform, opacity; }
@@ -177,6 +243,21 @@ eleventyComputed:
   .totp-row__ring.warning .fg { stroke: var(--syn-amber, #f7b015); }
   .totp-row__del { background: transparent; border: none; color: var(--term-subtle); cursor: pointer; padding: 4px 6px; font-family: var(--font-mono); font-size: 11px; }
   .totp-row__del:hover { color: var(--syn-pink, #f25fa8); }
+  .totp-row__export { background: transparent; border: none; color: var(--term-subtle); cursor: pointer; padding: 4px 6px; font-size: 13px; line-height: 1; }
+  .totp-row__export:hover { color: var(--syn-cyan, #22d3ee); }
+  .totp-setup__note { margin: 0; font-size: 12px; line-height: 1.5; color: var(--term-muted); }
+  .totp-modal__hint { margin: 0; font-size: 11px; line-height: 1.45; color: var(--term-subtle); }
+  .totp-modal__warn { margin: 0 0 10px; font-size: 12px; line-height: 1.5; color: var(--syn-amber, #fbbf24); }
+  .totp-modal__err { margin: 0; min-height: 1em; font-size: 12px; color: var(--syn-pink, #f25fa8); }
+  .totp-modal__err:empty { display: none; }
+  .totp-import-list { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: min(46vh, 360px); overflow-y: auto; }
+  .totp-import-list label { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; line-height: 1.4; color: var(--term-fg); cursor: pointer; }
+  .totp-import-list input { margin-top: 2px; accent-color: var(--syn-cyan, #22d3ee); }
+  .totp-import-list .is-off { color: var(--term-subtle); cursor: default; }
+  .totp-import-list small { display: block; font-size: 11px; color: var(--term-subtle); }
+  .totp-export__qr { display: block; width: min(100%, 240px); height: auto; margin: 0 auto 10px; image-rendering: pixelated; border-radius: 6px; }
+  .totp-export__uri { display: flex; gap: 8px; align-items: flex-start; }
+  .totp-export__uri code { flex: 1; min-width: 0; font-family: var(--font-mono); font-size: 11px; line-height: 1.45; color: var(--term-muted); overflow-wrap: anywhere; user-select: all; }
 
   .totp [hidden] { display: none; }
   .totp-modal__backdrop { position: absolute; inset: 0; }
@@ -211,21 +292,46 @@ eleventyComputed:
     prf_enroll_failed:        {{ ('tool.totp.prf_enroll_failed'        | t) | dump | safe }},
     locked_lede_setup:        {{ ('tool.totp.locked_lede_setup'        | t) | dump | safe }},
     locked_lede_unlock:       {{ ('tool.totp.locked_lede_unlock'       | t) | dump | safe }},
+    handoff_unlock:           {{ ('tool.totp.handoff_unlock'           | t) | dump | safe }},
+    handoff_setup:            {{ ('tool.totp.handoff_setup'            | t) | dump | safe }},
     add_invalid_secret:       {{ ('tool.totp.add_invalid_secret'       | t) | dump | safe }},
     add_secret_bad_chars:     {{ ('tool.totp.add_secret_bad_chars'     | t) | dump | safe }},
     add_invalid_uri:          {{ ('tool.totp.add_invalid_uri'          | t) | dump | safe }},
     add_missing_fields:       {{ ('tool.totp.add_missing_fields'       | t) | dump | safe }},
     delete_confirm:           {{ ('tool.totp.delete_confirm'           | t) | dump | safe }},
+    delete_label:             {{ ('tool.totp.delete_label'             | t) | dump | safe }},
+    clock_fast:               {{ ('tool.totp.clock_fast'               | t) | dump | safe }},
+    clock_slow:               {{ ('tool.totp.clock_slow'               | t) | dump | safe }},
+    clock_fixed:              {{ ('tool.totp.clock_fixed'              | t) | dump | safe }},
     copied:                   {{ ('tool.totp.copied'                   | t) | dump | safe }},
+    copy_code:                {{ ('tool.totp.copy_code'                | t) | dump | safe }},
     copyFailed:               {{ ('common.copy_failed'                  | t) | dump | safe }},
     backup_required:          {{ ('tool.totp.backup_required'          | t) | dump | safe }},
     backup_done:              {{ ('tool.totp.backup_done'              | t) | dump | safe }},
+    backup_button:            {{ ('tool.totp.backup_button'            | t) | dump | safe }},
+    backup_gate_title:        {{ ('tool.totp.backup_gate_title'        | t) | dump | safe }},
+    backup_gate_lede:         {{ ('tool.totp.backup_gate_lede'         | t) | dump | safe }},
+    backup_gate_confirm:      {{ ('tool.totp.backup_gate_confirm'      | t) | dump | safe }},
+    backup_unsaved_title:     {{ ('tool.totp.backup_unsaved_title'     | t) | dump | safe }},
+    backup_unsaved_lede:      {{ ('tool.totp.backup_unsaved_lede'      | t) | dump | safe }},
     scan_unsupported:         {{ ('tool.totp.scan_unsupported'         | t) | dump | safe }},
     scan_denied:              {{ ('tool.totp.scan_denied'              | t) | dump | safe }},
     scan_no_camera:           {{ ('tool.totp.scan_no_camera'           | t) | dump | safe }},
     scan_secure_required:     {{ ('tool.totp.scan_secure_required'     | t) | dump | safe }},
     scan_invalid_qr:          {{ ('tool.totp.scan_invalid_qr'          | t) | dump | safe }},
-    next_label:               {{ ('tool.totp.next_label'               | t) | dump | safe }}
+    next_label:               {{ ('tool.totp.next_label'               | t) | dump | safe }},
+    unlock_failed:            {{ ('tool.totp.unlock_failed'            | t) | dump | safe }},
+    prf_unsupported:          {{ ('tool.totp.prf_unsupported'          | t) | dump | safe }},
+    import_found:             {{ ('tool.totp.import_found'             | t) | dump | safe }},
+    import_none:              {{ ('tool.totp.import_none'              | t) | dump | safe }},
+    import_batch:             {{ ('tool.totp.import_batch'             | t) | dump | safe }},
+    import_dup:               {{ ('tool.totp.import_dup'               | t) | dump | safe }},
+    import_hotp:              {{ ('tool.totp.import_hotp'              | t) | dump | safe }},
+    import_algo:              {{ ('tool.totp.import_algo'              | t) | dump | safe }},
+    import_done:              {{ ('tool.totp.import_done'              | t) | dump | safe }},
+    import_invalid:           {{ ('tool.totp.import_invalid'           | t) | dump | safe }},
+    export_label:             {{ ('tool.totp.export_label'             | t) | dump | safe }},
+    export_hides:             {{ ('tool.totp.export_hides'             | t) | dump | safe }}
   };
 
   function b64uEnc(bytes) {
@@ -240,6 +346,97 @@ eleventyComputed:
     const u8 = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
     return u8;
+  }
+  function b32Enc(bytes) {
+    const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let out = '', bits = 0, value = 0;
+    for (const b of bytes) {
+      value = (value << 8) | b;
+      bits += 8;
+      while (bits >= 5) { out += alpha[(value >>> (bits - 5)) & 31]; bits -= 5; }
+      value &= (1 << bits) - 1;
+    }
+    if (bits > 0) out += alpha[(value << (5 - bits)) & 31];
+    return out;
+  }
+  function b64AnyDec(str) {
+    const clean = String(str).replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/').replace(/=+$/, '');
+    const bin = atob(clean + '='.repeat((4 - (clean.length % 4)) % 4));
+    const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return u8;
+  }
+  function pbVarint(buf, pos) {
+    let result = 0, mul = 1, b;
+    do {
+      if (pos.i >= buf.length) throw new Error('truncated');
+      b = buf[pos.i++];
+      result += (b & 0x7f) * mul;
+      mul *= 128;
+    } while (b & 0x80);
+    return result;
+  }
+  function pbFields(buf) {
+    const pos = { i: 0 };
+    const out = [];
+    while (pos.i < buf.length) {
+      const key = pbVarint(buf, pos);
+      const field = Math.floor(key / 8);
+      const wire = key % 8;
+      if (wire === 0) out.push({ field, value: pbVarint(buf, pos) });
+      else if (wire === 2) {
+        const len = pbVarint(buf, pos);
+        if (pos.i + len > buf.length) throw new Error('bad length');
+        out.push({ field, bytes: buf.subarray(pos.i, pos.i + len) });
+        pos.i += len;
+      } else if (wire === 1) pos.i += 8;
+      else if (wire === 5) pos.i += 4;
+      else throw new Error('bad wire type');
+    }
+    return out;
+  }
+  function parseMigrationUri(uri) {
+    if (!/^otpauth-migration:\/\//i.test(uri)) throw new Error('not migration');
+    const m = uri.match(/[?&]data=([^&#]+)/);
+    if (!m) throw new Error('no data');
+    const buf = b64AnyDec(decodeURIComponent(m[1]));
+    const dec = new TextDecoder();
+    const out = { accounts: [], skipped: [], batchSize: 1, batchIndex: 0 };
+    for (const f of pbFields(buf)) {
+      if (f.field === 1 && f.bytes) {
+        const p = { secret: null, name: '', issuer: '', algorithm: 0, digits: 0, type: 0 };
+        for (const g of pbFields(f.bytes)) {
+          if (g.field === 1 && g.bytes) p.secret = g.bytes.slice();
+          else if (g.field === 2 && g.bytes) p.name = dec.decode(g.bytes);
+          else if (g.field === 3 && g.bytes) p.issuer = dec.decode(g.bytes);
+          else if (g.field === 4 && g.value != null) p.algorithm = g.value;
+          else if (g.field === 5 && g.value != null) p.digits = g.value;
+          else if (g.field === 6 && g.value != null) p.type = g.value;
+        }
+        let issuer = p.issuer.trim();
+        let account = p.name.trim();
+        const colon = account.indexOf(':');
+        if (colon > -1) {
+          if (!issuer) issuer = account.slice(0, colon).trim();
+          account = account.slice(colon + 1).trim();
+        }
+        const label = ((issuer ? issuer + ' ' : '') + account).trim() || '—';
+        const algorithm = { 0: 'SHA1', 1: 'SHA1', 2: 'SHA256', 3: 'SHA512' }[p.algorithm];
+        if (p.type === 1) out.skipped.push({ label, reason: 'hotp' });
+        else if (!algorithm) out.skipped.push({ label, reason: 'algo' });
+        else if (!p.secret || !p.secret.length) out.skipped.push({ label, reason: 'invalid' });
+        else out.accounts.push({ issuer, account, label, secretBytes: p.secret, digits: p.digits === 2 ? 8 : 6, period: 30, algorithm });
+      } else if (f.field === 3 && f.value != null) out.batchSize = f.value || 1;
+      else if (f.field === 4 && f.value != null) out.batchIndex = f.value;
+    }
+    return out;
+  }
+  function otpauthUri(acc) {
+    const label = acc.issuer ? encodeURIComponent(acc.issuer) + ':' + encodeURIComponent(acc.account || '') : encodeURIComponent(acc.account || '');
+    const params = ['secret=' + b32Enc(b64uDec(acc.secret))];
+    if (acc.issuer) params.push('issuer=' + encodeURIComponent(acc.issuer));
+    params.push('algorithm=' + (acc.algorithm || 'SHA1'), 'digits=' + (acc.digits || 6), 'period=' + (acc.period || 30));
+    return 'otpauth://totp/' + label + '?' + params.join('&');
   }
   function b32Dec(s) {
     const cleaned = s.toUpperCase().replace(/[^A-Z2-7]/g, '');
@@ -297,7 +494,7 @@ eleventyComputed:
     const digits = opts.digits || 6;
     const offset = opts.offset || 0;
     const hash = { SHA1: 'SHA-1', SHA256: 'SHA-256', SHA512: 'SHA-512' }[(opts.algorithm || 'SHA1').toUpperCase()] || 'SHA-1';
-    const counter = Math.floor(Date.now() / 1000 / period) + offset;
+    const counter = Math.floor(nowMs() / 1000 / period) + offset;
     const buf = new ArrayBuffer(8);
     const view = new DataView(buf);
     view.setUint32(4, counter >>> 0, false);
@@ -415,14 +612,43 @@ eleventyComputed:
     return false;
   }
 
+  let vaultUnsaved = null;
+
+  function storageTrouble() {
+    const S = window.MentriaStore;
+    if (S && typeof S.status === 'function') {
+      try {
+        const s = S.status();
+        if (s === 'ok') return null;
+        if (s === 'blocked' || s === 'full') return s;
+      } catch (_) {}
+    }
+    try { window.localStorage.getItem('mentria.store.' + NS + '.' + VAULT_KEY); return null; } catch (_) { return 'blocked'; }
+  }
+
+  function showUnsaved(why) {
+    const box = $('totp-unsaved');
+    box.hidden = !why;
+    box.querySelectorAll('[data-unsaved]').forEach((s) => { s.hidden = s.dataset.unsaved !== why; });
+  }
+
+  function warnIfUnsaved(id) {
+    $(id).hidden = !(vaultUnsaved || storageTrouble());
+  }
+
   function loadVault() { return window.MentriaStore.get(NS, VAULT_KEY); }
-  function saveVault(v) { window.MentriaStore.set(NS, VAULT_KEY, v); }
+  function saveVault(v) {
+    const ok = !!window.MentriaStore.set(NS, VAULT_KEY, v);
+    vaultUnsaved = ok ? null : (storageTrouble() === 'blocked' ? 'blocked' : 'full');
+    showUnsaved(vaultUnsaved);
+    return ok;
+  }
 
   async function reEncryptSecrets() {
     const json = JSON.stringify(state.accounts);
     const env = await encryptWith(state.masterKey, new TextEncoder().encode(json));
     state.vault.secrets = env;
-    saveVault(state.vault);
+    return saveVault(state.vault);
   }
 
   async function decryptSecrets() {
@@ -454,6 +680,36 @@ eleventyComputed:
     }
   }
 
+  let clockOffset = 0;
+  let clockChecked = false;
+  function nowMs() { return Date.now() + clockOffset; }
+
+  async function checkClock() {
+    if (clockChecked || navigator.onLine === false) return;
+    clockChecked = true;
+    try {
+      const t0 = Date.now();
+      const res = await fetch('/manifest.json?clock=' + t0, { method: 'HEAD', cache: 'no-store' });
+      const t1 = Date.now();
+      const server = Date.parse(res.headers.get('date') || '');
+      if (!server || t1 - t0 > 4000) return;
+      const drift = server + 500 - (t0 + t1) / 2;
+      if (Math.abs(drift) < 20000) return;
+      const secs = String(Math.round(Math.abs(drift) / 1000));
+      $('totp-clock-msg').textContent = (drift < 0 ? COPY.clock_fast : COPY.clock_slow).replace('{n}', secs);
+      $('totp-clock-fix').hidden = false;
+      $('totp-clock-fix').onclick = () => {
+        clockOffset = Math.round(drift);
+        $('totp-clock-msg').textContent = COPY.clock_fixed;
+        $('totp-clock-fix').hidden = true;
+        tick();
+      };
+      $('totp-clock').hidden = false;
+    } catch (_) {}
+  }
+
+  let pendingHandoff = null;
+
   function showVault() {
     $('totp-locked').hidden = true;
     $('totp-vault').hidden = false;
@@ -461,13 +717,53 @@ eleventyComputed:
     renderList();
     if (!state.timer) state.timer = setInterval(tick, 1000);
     tick();
+    checkClock();
+    if (pendingHandoff) runHandoff();
+  }
+
+  function takeHandoff(text) {
+    const uri = String(text || '').trim();
+    if (!/^otpauth(-migration)?:\/\//i.test(uri)) return;
+    pendingHandoff = uri;
+    if (state.masterKey) { runHandoff(); return; }
+    setStatus(state.vault ? COPY.handoff_unlock : COPY.handoff_setup, null);
+  }
+
+  function runHandoff() {
+    const uri = pendingHandoff;
+    pendingHandoff = null;
+    if (!uri) return;
+    let result;
+    try {
+      if (/^otpauth-migration:/i.test(uri)) {
+        result = parseMigrationUri(uri);
+      } else {
+        const p = parseOtpauthUri(uri);
+        const secretBytes = b32Dec(p.secret_b32);
+        if (!secretBytes.length) throw new Error('empty secret');
+        const label = ((p.issuer ? p.issuer + ' ' : '') + p.account).trim() || '—';
+        const known = /^SHA(1|256|512)$/.test(p.algorithm);
+        result = {
+          accounts: known ? [{ issuer: p.issuer, account: p.account, label, secretBytes, digits: p.digits, period: p.period, algorithm: p.algorithm }] : [],
+          skipped: known ? [] : [{ label, reason: 'algo' }],
+          batchSize: 1,
+          batchIndex: 0
+        };
+      }
+    } catch (_) {
+      setStatus(COPY.import_invalid, 'err');
+      return;
+    }
+    openImport(result);
   }
 
   function lock() {
     if (state.timer) { clearInterval(state.timer); state.timer = null; }
+    if (typeof exportModalReady !== 'undefined' && exportModalReady) closeExport();
     state.masterKey = null;
     state.accounts = [];
     lastCodes.clear();
+    $('totp-list').replaceChildren();
     showLocked();
     setStatus('', null);
   }
@@ -495,13 +791,22 @@ eleventyComputed:
           <div class="totp-row__account"></div>
         </div>
         <div class="totp-row__code-stack">
-          <span class="totp-row__code" data-copy>—</span>
+          <button type="button" class="totp-row__code" data-copy aria-describedby="totp-copy-hint" title="${COPY.copy_code}">—</button>
           <span class="totp-row__next"><span class="totp-row__next-label">${COPY.next_label}</span><span class="totp-row__next-value">—</span></span>
         </div>
-        <button type="button" class="totp-row__del" data-del title="${COPY.delete_confirm.replace(/{name}/g, '')}"><svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6"></path></svg></button>
+        <button type="button" class="totp-row__export" data-export><svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10.5V2.5M5 5.2l3-2.9 3 2.9"></path><path d="M3.5 8.5v4.2h9V8.5"></path></svg></button>
+        <button type="button" class="totp-row__del" data-del><svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6"></path></svg></button>
       `;
       li.querySelector('.totp-row__issuer').textContent = acc.issuer || '—';
       li.querySelector('.totp-row__account').textContent = acc.account || '';
+      const delLabel = COPY.delete_label.replace(/{name}/g, ((acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '')).trim());
+      const delBtn = li.querySelector('.totp-row__del');
+      delBtn.setAttribute('aria-label', delLabel);
+      delBtn.title = delLabel;
+      const exportLabel = COPY.export_label.replace(/{name}/g, ((acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '')).trim());
+      const exportBtn = li.querySelector('.totp-row__export');
+      exportBtn.setAttribute('aria-label', exportLabel);
+      exportBtn.title = exportLabel;
       list.appendChild(li);
     });
   }
@@ -554,7 +859,7 @@ eleventyComputed:
         }
         lastCodes.set(acc.id, { current: code, next: nextCode });
 
-        const remaining = period - (Math.floor(Date.now() / 1000) % period);
+        const remaining = period - (Math.floor(nowMs() / 1000) % period);
         const ring = row.querySelector('.totp-row__ring');
         const fg = ring.querySelector('.fg');
         const circumference = 2 * Math.PI * 14;
@@ -622,10 +927,10 @@ eleventyComputed:
       const wrap = await encryptWith(wrapKey, rawMaster);
       state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
     }
-    saveVault(state.vault);
+    return saveVault(state.vault);
   }
 
-  const scanner = { detector: null, useJsQR: false, stream: null, rafId: 0, scanning: false, lastDetect: 0, canvas: null, ctx: null };
+  const scanner = { detector: null, useJsQR: false, stream: null, rafId: 0, scanning: false, lastDetect: 0, canvas: null, ctx: null, gen: 0 };
 
   function loadScript(src) {
     return new Promise((res, rej) => {
@@ -668,6 +973,7 @@ eleventyComputed:
   }
 
   function stopScanner() {
+    scanner.gen++;
     scanner.scanning = false;
     if (scanner.rafId) { cancelAnimationFrame(scanner.rafId); scanner.rafId = 0; }
     if (scanner.stream) { scanner.stream.getTracks().forEach((t) => t.stop()); scanner.stream = null; }
@@ -697,7 +1003,7 @@ eleventyComputed:
       rawValue = jsqrDecode(video);
     }
     if (!rawValue) return;
-    if (!/^otpauth:\/\/totp\//i.test(rawValue)) {
+    if (!/^otpauth(-migration)?:\/\//i.test(rawValue) || (/^otpauth:/i.test(rawValue) && !/^otpauth:\/\/totp\//i.test(rawValue))) {
       showScanNote(COPY.scan_invalid_qr);
       return;
     }
@@ -709,6 +1015,8 @@ eleventyComputed:
 
   async function startScanner(opts) {
     opts = opts || {};
+    stopScanner();
+    const gen = scanner.gen;
     showScanNote('');
     $('totp-scanner').hidden = false;
     if (!window.isSecureContext) {
@@ -722,14 +1030,17 @@ eleventyComputed:
       return false;
     }
     const ok = await initDetector();
+    if (gen !== scanner.gen) return false;
     if (!ok) {
       if (!opts.silentOnFail) showScanNote(COPY.scan_unsupported);
       else $('totp-scanner').hidden = true;
       return false;
     }
+    let opened;
     try {
-      scanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      opened = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
     } catch (err) {
+      if (gen !== scanner.gen) return false;
       const name = err && err.name;
       if (opts.silentOnFail && (name === 'NotAllowedError' || name === 'SecurityError' || name === 'NotFoundError')) {
         $('totp-scanner').hidden = true;
@@ -740,9 +1051,16 @@ eleventyComputed:
       else showScanNote(String(err && err.message || err));
       return false;
     }
+    if (gen !== scanner.gen || document.hidden || $('totp-add-modal').hidden) {
+      opened.getTracks().forEach((t) => t.stop());
+      if (gen === scanner.gen) stopScanner();
+      return false;
+    }
+    scanner.stream = opened;
     const video = $('totp-scanner-video');
     video.srcObject = scanner.stream;
     try { await video.play(); } catch (_) {}
+    if (gen !== scanner.gen) return false;
     scanner.scanning = true;
     scanner.lastDetect = 0;
     scanner.rafId = requestAnimationFrame(scanLoop);
@@ -825,8 +1143,7 @@ eleventyComputed:
   $('totp-prf-enroll-btn').addEventListener('click', async () => {
     $('totp-prf-enroll-btn').disabled = true;
     try {
-      await enrollPrf();
-      setStatus(COPY.prf_enroll_done, 'ok');
+      if (await enrollPrf()) setStatus(COPY.prf_enroll_done, 'ok');
       $('totp-prf-enroll-btn').hidden = true;
     } catch (err) {
       setStatus(COPY.prf_enroll_failed + ' — ' + (err && err.message || err), 'err');
@@ -850,8 +1167,12 @@ eleventyComputed:
 
   document.body.appendChild($('totp-add-modal'));
   document.body.appendChild($('totp-backup-modal'));
+  document.body.appendChild($('totp-import-modal'));
+  document.body.appendChild($('totp-export-modal'));
   const addModal = MentriaUI.modal($('totp-add-modal'));
   const backupModal = MentriaUI.modal($('totp-backup-modal'));
+  const importModal = MentriaUI.modal($('totp-import-modal'));
+  const exportModal = MentriaUI.modal($('totp-export-modal'));
   new MutationObserver(() => { if ($('totp-add-modal').hidden) stopScanner(); })
     .observe($('totp-add-modal'), { attributes: true, attributeFilter: ['hidden'] });
 
@@ -860,6 +1181,7 @@ eleventyComputed:
     $('totp-issuer').value = '';
     $('totp-account').value = '';
     $('totp-secret').value = '';
+    warnIfUnsaved('totp-add-unsaved');
     addModal.open();
     startScanner({ silentOnFail: true });
   });
@@ -869,15 +1191,104 @@ eleventyComputed:
       stopScanner();
       addModal.close();
       backupModal.close();
+      importModal.close();
+      closeExport();
     });
   });
 
   let pendingAdd = null;
+  let pendingImport = null;
+
+  function openImport(result) {
+    const have = new Set(state.accounts.map((a) => a.secret));
+    const list = $('totp-import-list');
+    list.innerHTML = '';
+    const rows = [];
+    result.accounts.forEach((a) => {
+      const secret = b64uEnc(a.secretBytes);
+      const dup = have.has(secret);
+      have.add(secret);
+      const li = document.createElement('li');
+      const label = document.createElement('label');
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = !dup;
+      box.disabled = dup;
+      const text = document.createElement('span');
+      text.textContent = a.label;
+      if (dup) {
+        label.className = 'is-off';
+        const note = document.createElement('small');
+        note.textContent = COPY.import_dup;
+        text.appendChild(note);
+      }
+      label.append(box, text);
+      li.appendChild(label);
+      list.appendChild(li);
+      rows.push({ box, account: { id: uuid(), issuer: a.issuer, account: a.account, secret, digits: a.digits, period: a.period, algorithm: a.algorithm } });
+    });
+    result.skipped.forEach((sk) => {
+      const li = document.createElement('li');
+      const label = document.createElement('label');
+      label.className = 'is-off';
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.disabled = true;
+      const text = document.createElement('span');
+      text.textContent = sk.label;
+      const note = document.createElement('small');
+      note.textContent = sk.reason === 'hotp' ? COPY.import_hotp : sk.reason === 'algo' ? COPY.import_algo : COPY.import_invalid;
+      text.appendChild(note);
+      label.append(box, text);
+      li.appendChild(label);
+      list.appendChild(li);
+    });
+    const importable = rows.filter((r) => !r.box.disabled).length;
+    $('totp-import-lede').textContent = importable ? COPY.import_found.replace('{n}', String(importable)) : COPY.import_none;
+    $('totp-import-confirm').disabled = !importable;
+    const batch = $('totp-import-batch');
+    batch.hidden = !(result.batchSize > 1 && result.batchIndex + 1 < result.batchSize);
+    batch.textContent = COPY.import_batch.replace('{i}', String(result.batchIndex + 1)).replace('{n}', String(result.batchSize));
+    pendingImport = rows;
+    warnIfUnsaved('totp-import-unsaved');
+    importModal.open();
+  }
+
+  $('totp-import-confirm').addEventListener('click', async () => {
+    const chosen = (pendingImport || []).filter((r) => r.box.checked && !r.box.disabled).map((r) => r.account);
+    pendingImport = null;
+    if (!chosen.length) { importModal.close(); return; }
+    importModal.close();
+    if (state.accounts.length === 0) {
+      pendingAdd = chosen;
+      openBackupModal('gate');
+      return;
+    }
+    state.accounts = state.accounts.concat(chosen);
+    const kept = await reEncryptSecrets();
+    window.MentriaStore.requestPersist();
+    renderList();
+    tick();
+    setStatus(COPY.import_done.replace('{n}', String(chosen.length)), 'ok');
+    if (!kept) openBackupModal('unsaved');
+  });
+
   $('totp-save-btn').addEventListener('click', async () => {
     const uri = $('totp-uri').value.trim();
     let parsed = null;
+    if (/^otpauth-migration:/i.test(uri)) {
+      let result;
+      try { result = parseMigrationUri(uri); } catch (_) { setStatus(COPY.import_invalid, 'err'); return; }
+      addModal.close();
+      openImport(result);
+      return;
+    }
     if (uri) {
       try { parsed = parseOtpauthUri(uri); } catch (_) { setStatus(COPY.add_invalid_uri, 'err'); return; }
+      if (!/^SHA(1|256|512)$/.test(parsed.algorithm || 'SHA1')) {
+        setStatus((((parsed.issuer ? parsed.issuer + ' ' : '') + (parsed.account || '')).trim() + ' ' + COPY.import_algo).trim(), 'err');
+        return;
+      }
     } else {
       const issuer = $('totp-issuer').value.trim();
       const account = $('totp-account').value.trim();
@@ -908,30 +1319,141 @@ eleventyComputed:
     if (state.accounts.length === 0) {
       pendingAdd = account;
       addModal.close();
-      openBackupModal(true);
+      openBackupModal('gate');
       return;
     }
     state.accounts.push(account);
-    await reEncryptSecrets();
+    const kept = await reEncryptSecrets();
     window.MentriaStore.requestPersist();
     addModal.close();
+    setStatus('');
     renderList();
     tick();
+    if (!kept) openBackupModal('unsaved');
   });
 
-  function openBackupModal(forFirstSave) {
+  let exportAcc = null;
+  let exportTimer = 0;
+  var exportModalReady = true;
+  function closeExport() {
+    clearInterval(exportTimer);
+    exportTimer = 0;
+    exportAcc = null;
+    $('totp-export-uri').textContent = '';
+    const c = $('totp-export-qr');
+    c.width = 1;
+    c.height = 1;
+    $('totp-export-pass').value = '';
+    $('totp-export-err').textContent = '';
+    exportModal.close();
+  }
+  function openExport(acc) {
+    exportAcc = acc;
+    $('totp-export-title').textContent = COPY.export_label.replace(/{name}/g, ((acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '')).trim());
+    $('totp-export-gate').hidden = false;
+    $('totp-export-reveal').hidden = true;
+    $('totp-export-prf').hidden = !(state.vault && state.vault.prf && prfSupported);
+    $('totp-export-pass').value = '';
+    $('totp-export-err').textContent = '';
+    exportModal.open();
+    $('totp-export-pass').focus();
+  }
+  function drawExportQr(text) {
+    const code = qrcodegen.QrCode.encodeText(text, qrcodegen.QrCode.Ecc.MEDIUM);
+    const quiet = 4, scale = 6, n = code.size + quiet * 2;
+    const c = $('totp-export-qr');
+    c.width = n * scale;
+    c.height = n * scale;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillStyle = '#000';
+    for (let y = 0; y < code.size; y++) {
+      for (let x = 0; x < code.size; x++) {
+        if (code.getModule(x, y)) ctx.fillRect((x + quiet) * scale, (y + quiet) * scale, scale, scale);
+      }
+    }
+  }
+  function revealExport() {
+    if (!exportAcc) return;
+    const uri = otpauthUri(exportAcc);
+    $('totp-export-uri').textContent = uri;
+    try { drawExportQr(uri); } catch (_) {}
+    $('totp-export-gate').hidden = true;
+    $('totp-export-reveal').hidden = false;
+    let left = 60;
+    const timerEl = $('totp-export-timer');
+    timerEl.textContent = COPY.export_hides.replace('{n}', String(left));
+    clearInterval(exportTimer);
+    exportTimer = setInterval(() => {
+      left -= 1;
+      if (left <= 0 || document.hidden || !state.masterKey) { closeExport(); return; }
+      timerEl.textContent = COPY.export_hides.replace('{n}', String(left));
+    }, 1000);
+    $('totp-export-copy').focus();
+  }
+  $('totp-export-show').addEventListener('click', async () => {
+    const pass = $('totp-export-pass').value;
+    if (!pass || !state.vault || !state.vault.pass) return;
+    $('totp-export-show').disabled = true;
+    try {
+      const salt = b64uDec(state.vault.pass.salt);
+      const wrapKey = await pbkdf2(pass, salt, state.vault.pass.iter);
+      await decryptWith(wrapKey, { iv: state.vault.pass.iv, ct: state.vault.pass.wrap });
+      $('totp-export-pass').value = '';
+      revealExport();
+    } catch (_) {
+      $('totp-export-err').textContent = COPY.unlock_failed;
+    } finally {
+      $('totp-export-show').disabled = false;
+    }
+  });
+  $('totp-export-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('totp-export-show').click(); });
+  $('totp-setup-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) $('totp-setup-pass2').focus(); });
+  $('totp-setup-pass2').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) $('totp-setup-btn').click(); });
+  $('totp-unlock-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) $('totp-unlock-btn').click(); });
+  $('totp-backup-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) $('totp-backup-confirm-btn').click(); });
+  $('totp-export-prf').addEventListener('click', async () => {
+    try {
+      const prfResult = await prfGet(b64uDec(state.vault.prf.cred_id), b64uDec(state.vault.prf.salt));
+      const wrapKey = await prfDeriveKey(prfResult);
+      await decryptWith(wrapKey, { iv: state.vault.prf.iv, ct: state.vault.prf.wrap });
+      revealExport();
+    } catch (_) {
+      $('totp-export-err').textContent = COPY.prf_unsupported;
+    }
+  });
+  $('totp-export-copy').addEventListener('click', async () => {
+    const text = $('totp-export-uri').textContent;
+    if (!text) return;
+    try { await navigator.clipboard.writeText(text); MentriaUI.toast(COPY.copied); }
+    catch (_) { MentriaUI.toast(COPY.copyFailed); }
+  });
+  new MutationObserver(() => { if ($('totp-export-modal').hidden && exportAcc) closeExport(); })
+    .observe($('totp-export-modal'), { attributes: true, attributeFilter: ['hidden'] });
+
+  function openBackupModal(mode) {
+    const unsaved = mode === 'unsaved';
+    $('totp-backup-title').textContent = unsaved ? COPY.backup_unsaved_title : COPY.backup_gate_title;
+    $('totp-backup-lede').textContent = unsaved ? COPY.backup_unsaved_lede : COPY.backup_gate_lede;
+    $('totp-backup-confirm-btn').textContent = unsaved ? COPY.backup_button : COPY.backup_gate_confirm;
     $('totp-backup-pass').value = '';
+    $('totp-backup-err').textContent = '';
     backupModal.open();
     $('totp-backup-pass').focus();
   }
 
+  $('totp-backup-pass').addEventListener('input', () => { $('totp-backup-err').textContent = ''; });
+
   $('totp-backup-confirm-btn').addEventListener('click', async () => {
-    if (!window.MentriaBackup) { setStatus('backup library not loaded', 'err'); return; }
+    const backupErr = $('totp-backup-err');
+    backupErr.textContent = '';
+    if (!window.MentriaBackup) { backupErr.textContent = 'backup library not loaded'; return; }
     const pass = $('totp-backup-pass').value;
-    if (!pass || pass.length < 8) { setStatus(COPY.setup_strength_too_short, 'err'); return; }
+    if (!pass || pass.length < 8) { backupErr.textContent = COPY.setup_strength_too_short; $('totp-backup-pass').focus(); return; }
     $('totp-backup-confirm-btn').disabled = true;
     try {
-      const next = pendingAdd ? state.accounts.concat([pendingAdd]) : state.accounts;
+      const next = pendingAdd ? state.accounts.concat(pendingAdd) : state.accounts;
       let vaultForBackup = state.vault;
       if (pendingAdd) {
         const tempEnv = await encryptWith(state.masterKey, new TextEncoder().encode(JSON.stringify(next)));
@@ -952,7 +1474,7 @@ eleventyComputed:
       backupModal.close();
       setStatus(COPY.backup_done, 'ok');
     } catch (err) {
-      setStatus(String(err && err.message || err), 'err');
+      backupErr.textContent = String(err && err.message || err);
     } finally {
       $('totp-backup-confirm-btn').disabled = false;
     }
@@ -960,7 +1482,7 @@ eleventyComputed:
 
   $('totp-backup-btn').addEventListener('click', () => {
     pendingAdd = null;
-    openBackupModal(false);
+    openBackupModal('manual');
   });
 
   $('totp-list').addEventListener('click', async (e) => {
@@ -973,11 +1495,14 @@ eleventyComputed:
       e.target.classList.add('is-copied');
       e.target.textContent = ok ? COPY.copied : COPY.copyFailed;
       setTimeout(() => { e.target.classList.remove('is-copied'); tick(); }, ok ? 900 : 1600);
-    } else if (e.target.matches('[data-del]')) {
+    } else if (e.target.closest('[data-export]')) {
+      const acc = state.accounts.find((a) => a.id === row.dataset.id);
+      if (acc) openExport(acc);
+    } else if (e.target.closest('[data-del]')) {
       const acc = state.accounts.find((a) => a.id === row.dataset.id);
       if (!acc) return;
-      const name = (acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '');
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(COPY.delete_confirm.replace(/{name}/g, name)) : Promise.resolve(confirm(COPY.delete_confirm.replace(/{name}/g, name))));
+      const name = ((acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '')).trim();
+      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(COPY.delete_confirm.replace(/{name}/g, name), { danger: true }) : Promise.resolve(false));
       if (!ok) return;
       state.accounts = state.accounts.filter((a) => a.id !== row.dataset.id);
       await reEncryptSecrets();
@@ -989,6 +1514,7 @@ eleventyComputed:
   function init() {
     if (!window.MentriaStore) { setStatus('storage unavailable', 'err'); return; }
     state.vault = loadVault();
+    if (storageTrouble() === 'blocked') showUnsaved('blocked');
     showLocked();
   }
 
@@ -1000,10 +1526,26 @@ eleventyComputed:
     const d = e.detail || {};
     if (d.ns === NS && d.key === VAULT_KEY && d.op === 'remove') acceptExternalDelete();
   });
+  async function acceptExternalChange() {
+    const next = loadVault();
+    if (!next) { acceptExternalDelete(); return; }
+    state.vault = next;
+    if (!state.masterKey) return;
+    try {
+      await decryptSecrets();
+      renderList();
+      tick();
+    } catch (_) {
+      lock();
+    }
+  }
   window.addEventListener('storage', (e) => {
-    if (e.key === 'mentria.store.totp.vault' && !e.newValue) acceptExternalDelete();
+    if (e.key !== 'mentria.store.totp.vault') return;
+    if (!e.newValue) acceptExternalDelete();
+    else acceptExternalChange();
   });
 
   init();
+  if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(null, takeHandoff);
 })();
 </script>

@@ -4,31 +4,35 @@ eleventyExcludeFromCollections: true
 layout: null
 ---
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+{%- set listed = collections.all | groupby("url") -%}
 {%- for page in collections.all -%}
-{%- if not page.data.eleventyExcludeFromSitemap and not (page.url | startsWith('/assets/')) -%}
+{%- if not page.data.eleventyExcludeFromSitemap and not (page.url | startsWith('/assets/')) and not ((page.data.robots or '') | startsWith('noindex')) -%}
 {%- if page.data.englishOnly %}
-  <url>
-    <loc>{{ site.siteUrl }}{{ page.url }}</loc>
-    <lastmod>{{ (page.data.modified or page.date).toISOString() }}</lastmod>
-  </url>
+  <url><loc>{{ site.siteUrl }}{{ page.url }}</loc></url>
 {%- else -%}
 {%- for locale in locales %}
-  <url>
-    <loc>{{ site.siteUrl }}{{ locale.pathPrefix }}{{ page.url }}</loc>
-    <lastmod>{{ (page.data.modified or page.date).toISOString() }}</lastmod>
-  </url>
+  <url><loc>{{ site.siteUrl }}{{ locale.pathPrefix }}{{ page.url }}</loc></url>
 {%- endfor -%}
 {%- endif -%}
 {%- endif -%}
 {%- endfor -%}
+{%- for tool in tools %}{% if tool.url and not listed[tool.url] %}
+  <url><loc>{{ site.siteUrl }}{{ tool.url }}</loc></url>
+{%- endif %}{% endfor -%}
 {%- for pair in deepcutsLocalized %}
-  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/deepcuts/{{ pair.edition.id }}/</loc></url>
+  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/deepcuts/{{ pair.edition.id }}/</loc>{% for img in pair.edition | deckImages(pair.locale.code) %}<image:image><image:loc>{{ img.url }}</image:loc></image:image>{% endfor %}</url>
 {%- endfor -%}
 {%- for pair in sourceLocalized %}
-  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/source/{{ pair.deck.id }}/</loc></url>
+  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/source/{{ pair.deck.id }}/</loc>{% for img in pair.deck | deckImages(pair.locale.code) %}<image:image><image:loc>{{ img.url }}</image:loc></image:image>{% endfor %}</url>
 {%- endfor -%}
-{%- for pair in chaptersLocalized %}
-  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/chapter/{{ pair.chapter.id }}/</loc></url>
+{%- for pair in extensionsLocalized %}
+  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/extensions/{{ pair.ext.id }}/</loc></url>
+{%- endfor -%}
+{%- for chapter in chapter_list %}
+  <url><loc>{{ site.siteUrl }}/feed/chapter/{{ chapter.id }}/</loc>{% for img in chapter | deckImages("en") %}<image:image><image:loc>{{ img.url }}</image:loc></image:image>{% endfor %}</url>
+{%- endfor -%}
+{%- for pair in storiesLocalized %}
+  <url><loc>{{ site.siteUrl }}{{ pair.locale.pathPrefix }}/feed/story/{{ pair.deck.id }}/</loc>{% for img in pair.deck | deckImages(pair.locale.code) %}<image:image><image:loc>{{ img.url }}</image:loc></image:image>{% endfor %}</url>
 {%- endfor -%}
 </urlset>

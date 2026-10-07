@@ -11,6 +11,7 @@ eleventyComputed:
   title: "{{ pair.deck.subtitle | tloc(pair.locale.code) }} · Mentria"
   description: "{{ pair.deck.subtitle | tloc(pair.locale.code) }}"
   socialImageOverride: "{{ pair.deck.cover_image }}"
+  preloadImage: "{% set s = pair.deck.slides[0] %}{% if s.image and s.image_status != 'pending' %}{{ s.image }}{% endif %}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 
@@ -18,7 +19,6 @@ eleventyComputed:
      id="deckRoot"
      style="view-transition-name: deck-{{ pair.deck.id }}"
      data-chapter-id="{{ pair.deck.id }}"
-     data-chapter-title="{{ pair.deck.title }}"
      data-slide-count="{{ pair.deck.slides.length }}">
   <h1 class="sr-only">{{ pair.deck.subtitle | tloc(pair.locale.code) }}</h1>
 
@@ -57,7 +57,7 @@ eleventyComputed:
       <span class="deck__placeholder-tag">{{ slide.story_type }}</span>
     </div>
     {% else %}
-    <img class="deck__slide-img" src="{{ slide.image }}" onerror="this.classList.add('is-broken')" alt="{{ slide.caption | tloc(pair.locale.code) }}" loading="lazy">
+    <img class="deck__slide-img" src="{{ slide.image }}" onerror="this.classList.add('is-broken')" alt="{{ slide.caption | tloc(pair.locale.code) | striptags }}" loading="{{ 'eager' if loop.first else 'lazy' }}"{% if loop.first %} fetchpriority="high"{% endif %}>
     {% endif %}
 
     <div class="deck__slide-overlay">
@@ -74,10 +74,6 @@ eleventyComputed:
           <a class="deck__action deck__action--link" href="{{ action.url }}" target="_blank" rel="noopener">
             {{ action.label }} →
           </a>
-          {% elif action.type == "share" %}
-          <button class="deck__action deck__action--share" data-action="share">
-            {{ action.label }}
-          </button>
           {% endif %}
         {% endfor %}
       </div>
@@ -87,12 +83,13 @@ eleventyComputed:
   {% endfor %}
 
   <div class="deck__hint" id="deckHint">
-    <span>{{ "feed_deck.hint_tap" | t }}</span><span>{{ "feed_deck.hint_depth" | t }}</span><span>{{ "feed_deck.hint_exit" | t }}</span>
+    <span class="deck__hint-touch">{{ "feed_deck.hint_tap" | t }}</span><span class="deck__hint-touch">{{ "feed_deck.hint_depth" | t }}</span><span class="deck__hint-touch">{{ "feed_deck.hint_exit" | t }}</span><span class="deck__hint-keys">{{ "feed_deck.hint_keys_next" | t }}</span><span class="deck__hint-keys">{{ "feed_deck.hint_keys_depth" | t }}</span><span class="deck__hint-keys">{{ "feed_deck.hint_keys_exit" | t }}</span>
   </div>
   <div class="sr-only" id="deckLive" role="status" aria-live="polite"></div>
 
 {% if devMode %}{% include "dev-feedback.njk" %}{% endif %}
 </div>
 
+{% set schemaDeck = pair.deck %}{% include "deck-schema.njk" %}
 <script src="/assets/js/share-card.js?v={{ buildHash }}" defer></script>
 <script src="/assets/js/feed-deck.js?v={{ buildHash }}" defer></script>

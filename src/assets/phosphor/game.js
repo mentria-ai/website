@@ -44,6 +44,8 @@ const AQ_STEP = 0.1;
 const AQ_FLOOR = 0.5;
 
 const COURSE_KEY = 'phosphor_course';
+const GFX_KEY = 'phosphor_gfx';
+const GFX_MODES = ['enhanced', 'classic'];
 const FALLBACK_COURSE_IDS = ['c01', 'c02', 'c03', 'c04', 'c05'];
 const MEDALS = ['bronze', 'silver', 'gold', 'signal'];
 const MENU_DEAD = 0.55;
@@ -73,14 +75,15 @@ const scene = {
 };
 const vm = scene.viewmodel;
 
-const settings = { fov: 100, quality: 1, glitchTest: 0 };
+const settings = { fov: 100, quality: 1, glitchTest: 0, gfx: 'classic' };
 const sens = { mnk: 1, pad: 1, touch: 1, gyro: 1, adsMul: 0.75 };
 const levels = { master: 0.8, sfx: 0.9, ambient: 0.5 };
 
 const localIntents = {
   forward: 0, strafe: 0, jumpPressed: false, crouchHeld: false, sprintHeld: false,
   fireHeld: false, adsHeld: false, reloadPressed: false, restartPressed: false,
-  pausePressed: false, lookDx: 0, lookDy: 0
+  pausePressed: false, lockPause: false, lookDx: 0, lookDy: 0,
+  navY: 0, padA: false, padB: false
 };
 
 const completeEv = { t: 'run_complete', medal: null };
@@ -131,11 +134,15 @@ let killFlashUntil = 0;
 let fpsFrames = 0;
 let fpsWindowStart = 0;
 let fpsValue = 0;
+let menuSkip = false;
+let menuDt = 0;
+let audioSleepTimer = 0;
 let devOpen = false;
 let touchDevice = false;
 let touchUiOn = false;
 let contextLost = false;
 let autoQuality = true;
+let gfxAuto = true;
 let qualityCap = 1;
 let qualityLowSince = 0;
 let qualityHighSince = 0;
@@ -151,6 +158,7 @@ let loadSeq = 0;
 let pendingId = '';
 let selIndex = 0;
 let menuAxis = 0;
+let padFocus = null;
 
 let recorder = null;
 let ghostPlayer = null;
@@ -215,6 +223,8 @@ function grabDom() {
   dom.gyro = $('ph-gyro');
   dom.fs = $('ph-fs');
   dom.pauseBtn = $('ph-pausebtn');
+  dom.gfx = $('ph-gfx');
+  dom.gfxPause = $('ph-gfx-pause');
   dom.pauseNoteDefault = dom.pauseNote ? dom.pauseNote.textContent : '';
   dom.gyroLabel = dom.gyro ? dom.gyro.textContent : '';
 }
@@ -339,8 +349,12 @@ function copyIntents(src) {
     d.reloadPressed = false;
     d.restartPressed = false;
     d.pausePressed = false;
+    d.lockPause = false;
     d.lookDx = 0;
     d.lookDy = 0;
+    d.navY = 0;
+    d.padA = false;
+    d.padB = false;
     return d;
   }
   d.forward = clamp(num(src.forward, 0), -1, 1);
@@ -353,8 +367,12 @@ function copyIntents(src) {
   d.reloadPressed = !!src.reloadPressed;
   d.restartPressed = !!src.restartPressed;
   d.pausePressed = !!src.pausePressed;
+  d.lockPause = !!src.lockPause;
   d.lookDx = num(src.lookDx, 0);
   d.lookDy = num(src.lookDy, 0);
+  d.navY = clamp(num(src.navY, 0), -1, 1);
+  d.padA = !!src.padA;
+  d.padB = !!src.padB;
   return d;
 }
 
@@ -669,6 +687,8 @@ function showOverlays() {
 function setState(next) {
   if (state === next) return;
   state = next;
+  menuAxis = 2;
+  if (next !== 'paused') setPadFocus(null);
   showOverlays();
 }
 
@@ -730,6 +750,48 @@ function saveCoursePref(id) {
   try {
     localStorage.setItem(COURSE_KEY, id);
   } catch (_) {}
+}
+
+function loadGfxPref() {
+  try {
+    const v = localStorage.getItem(GFX_KEY);
+    if (typeof v === 'string' && GFX_MODES.indexOf(v) >= 0) return v;
+  } catch (_) {}
+  return '';
+}
+
+function saveGfxPref(mode) {
+  try {
+    localStorage.setItem(GFX_KEY, mode);
+  } catch (_) {}
+}
+
+function updateGfxBtns() {
+  const on = settings.gfx === 'enhanced';
+  const mode = on ? COPY.gfxEnhanced : COPY.gfxClassic;
+  const label = mode ? (COPY.gfxLabel ? COPY.gfxLabel + ': ' + mode : mode) : '';
+  const btns = [dom.gfx, dom.gfxPause];
+  for (let i = 0; i < btns.length; i++) {
+    const b = btns[i];
+    if (!b) continue;
+    if (label) b.textContent = label;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+}
+
+function applyGraphics() {
+  const got = call(renderer, 'setGraphics', settings.gfx);
+  if (typeof got === 'string' && GFX_MODES.indexOf(got) >= 0) settings.gfx = got;
+  else settings.gfx = 'classic';
+  if (dom.stage) dom.stage.classList.toggle('is-gfx-enhanced', settings.gfx === 'enhanced');
+  updateGfxBtns();
+}
+
+function toggleGraphics() {
+  settings.gfx = settings.gfx === 'enhanced' ? 'classic' : 'enhanced';
+  gfxAuto = false;
+  applyGraphics();
+  saveGfxPref(settings.gfx);
 }
 
 function markSel() {
@@ -827,12 +889,57 @@ function moveSel(delta) {
   pickCourse(courseIds[i]);
 }
 
-function menuNav(it) {
-  const ax = it.forward > MENU_DEAD ? 1 : it.forward < -MENU_DEAD ? -1 : 0;
-  if (ax === menuAxis) return;
+function menuAxisOf(it) {
+  const v = it.forward !== 0 ? it.forward : it.navY;
+  return v > MENU_DEAD ? 1 : v < -MENU_DEAD ? -1 : 0;
+}
+
+function menuStep(it) {
+  const ax = menuAxisOf(it);
+  if (menuAxis === 2) {
+    if (ax === 0) menuAxis = 0;
+    return 0;
+  }
+  if (ax === menuAxis) return 0;
   menuAxis = ax;
+  return ax;
+}
+
+function menuNav(it) {
+  const ax = menuStep(it);
   if (ax === 1) moveSel(-1);
   else if (ax === -1) moveSel(1);
+}
+
+function pauseButtons() {
+  if (!dom.pause || dom.pause.hidden) return [];
+  return Array.prototype.filter.call(dom.pause.querySelectorAll('.ph-stack .ph-btn'), (b) => !b.hidden && !b.disabled && b.getClientRects().length > 0);
+}
+
+function setPadFocus(btn) {
+  if (padFocus && padFocus !== btn) padFocus.classList.remove('is-pad-focus');
+  padFocus = btn || null;
+  if (!padFocus) return;
+  padFocus.classList.add('is-pad-focus');
+  try { padFocus.focus({ preventScroll: true }); } catch (_) {}
+}
+
+function pauseNav(it) {
+  const list = pauseButtons();
+  if (!list.length) return;
+  const ax = menuStep(it);
+  if (ax !== 0) {
+    const at = list.indexOf(padFocus);
+    const cur = at >= 0 ? at : Math.max(0, list.indexOf(dom.resume));
+    setPadFocus(list[(cur + (ax === 1 ? -1 : 1) + list.length) % list.length]);
+  }
+  if (it.padA) {
+    it.jumpPressed = false;
+    const target = list.indexOf(padFocus) >= 0 ? padFocus : (dom.resume || list[0]);
+    if (target) target.click();
+  } else if (it.padB) {
+    resumeGame();
+  }
 }
 
 function setCourseError(on) {
@@ -919,12 +1026,20 @@ function resetRunCore() {
   newRun();
 }
 
+function sleepAudioSoon() {
+  clearTimeout(audioSleepTimer);
+  audioSleepTimer = setTimeout(() => {
+    if (state === 'paused' || state === 'ready') call(audio, 'sleep');
+  }, 400);
+}
+
 function resetRun() {
   if (!worldReady) return;
   resetRunCore();
   if (state !== 'playing') {
     setState('playing');
     if (!touchDevice) call(input, 'requestPointerLock');
+    call(audio, 'unlock');
     call(audio, 'startAmbient');
   }
 }
@@ -932,6 +1047,7 @@ function resetRun() {
 function backToSelect() {
   if (state !== 'paused' && state !== 'complete') return;
   call(audio, 'stopAmbient');
+  sleepAudioSoon();
   if (touchUiOn) {
     call(input, 'enableTouchUI', false);
     touchUiOn = false;
@@ -946,6 +1062,7 @@ function pauseGame(note) {
   setState('paused');
   call(input, 'exitPointerLock');
   call(audio, 'stopAmbient');
+  sleepAudioSoon();
 }
 
 function resumeGame() {
@@ -1375,6 +1492,7 @@ function onResize() {
   }
   hudCache.gap = -1;
   call(renderer, 'resize');
+  menuSkip = true;
 }
 
 function fullscreenSupported() {
@@ -1409,6 +1527,11 @@ function adaptQuality(now) {
     else if (now - qualityLowSince >= AQ_LOW_MS) {
       qualityLowSince = now;
       if (settings.quality > AQ_FLOOR) applyQuality(settings.quality - AQ_STEP);
+      else if (gfxAuto && settings.gfx === 'enhanced') {
+        settings.gfx = 'classic';
+        applyGraphics();
+        setAutoNote('auto graphics classic');
+      }
     }
     return;
   }
@@ -1885,6 +2008,7 @@ function onKeyDown(e) {
   }
   const tag = e.target && e.target.tagName ? e.target.tagName : '';
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.code === 'Escape' && (state === 'playing' || (state === 'paused' && !devOpen))) e.preventDefault();
   if (e.code === 'Backquote') {
     e.preventDefault();
     toggleDev(!devOpen);
@@ -1934,10 +2058,12 @@ function frame(now) {
     startedNow = state === 'playing';
   }
   if (state === 'ready' && !startedNow) menuNav(it);
+  else if (state === 'paused' && !devOpen) pauseNav(it);
   else if (state !== 'ready') menuAxis = 0;
 
   if (it.restartPressed && (state === 'playing' || state === 'paused' || state === 'complete')) resetRun();
-  if (it.pausePressed && !startedNow) {
+  if (it.lockPause && state === 'playing') pauseGame(null);
+  else if (it.pausePressed && !startedNow) {
     if (state === 'playing') pauseGame(null);
     else if (state === 'paused' && !devOpen) resumeGame();
   }
@@ -1988,7 +2114,19 @@ function frame(now) {
     call(audio, 'setListener', scene.camera.pos, scene.camera.yaw, sp);
   }
 
-  if (worldReady) call(renderer, 'render', scene, dt);
+  if (worldReady) {
+    menuDt += dt;
+    menuSkip = state !== 'playing' && !menuSkip;
+    if (!menuSkip) {
+      call(renderer, 'render', scene, menuDt);
+      menuDt = 0;
+    }
+  }
+  if (settings.gfx === 'enhanced' && call(renderer, 'getGraphics') === 'classic') {
+    settings.gfx = 'classic';
+    if (dom.stage) dom.stage.classList.remove('is-gfx-enhanced');
+    updateGfxBtns();
+  }
 
   if (state === 'playing' && !runDone && targetTotal > 0 && downCount >= targetTotal) completeRun();
 }
@@ -1998,6 +2136,7 @@ function wireUi() {
     dom.ready.addEventListener('pointerdown', (e) => {
       const t = e.target;
       if (t && t === dom.gyro) return;
+      if (t && t === dom.gfx) return;
       if (dom.sel && t && dom.sel.contains(t)) return;
       firstGesture();
     });
@@ -2053,17 +2192,30 @@ function wireUi() {
       askGyro();
     });
   }
+  if (dom.gfx) {
+    dom.gfx.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleGraphics();
+    });
+  }
+  if (dom.gfxPause) {
+    dom.gfxPause.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleGraphics();
+    });
+  }
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', onResize);
   document.addEventListener('fullscreenchange', onResize);
   document.addEventListener('webkitfullscreenchange', onResize);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      if (state === 'playing') pauseGame(null);
-      return;
-    }
-    if (state === 'playing' || state === 'paused') call(audio, 'unlock');
+    if (!document.hidden) return;
+    if (state === 'playing') pauseGame(null);
+    call(audio, 'sleep');
+  });
+  document.addEventListener('mentria:overlay', (e) => {
+    if (e.detail && e.detail.open && state === 'playing') pauseGame(null);
   });
 }
 
@@ -2104,6 +2256,11 @@ function boot() {
     fail('renderer.js: createRenderer returned nothing');
     return;
   }
+
+  const storedGfx = loadGfxPref();
+  gfxAuto = !storedGfx;
+  settings.gfx = storedGfx || call(renderer, 'defaultGraphics') || 'enhanced';
+  applyGraphics();
 
   constants = simMod.CONSTANTS && typeof simMod.CONSTANTS === 'object' ? simMod.CONSTANTS : FALLBACK_CONSTANTS;
 

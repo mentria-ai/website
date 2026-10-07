@@ -319,12 +319,12 @@ function sanQuick(pos, m, allMoves){
   return u + (m.capture?'x':'') + sqName(m.to);
 }
 self.onmessage = (e) => {
-  const { type, pos, depth, skill } = e.data;
+  const { type, id, pos, depth, skill } = e.data;
   if (type === 'go'){
     const t0 = Date.now();
     const r = pickMove(pos, depth, 8000, skill);
     const t1 = Date.now();
-    self.postMessage({ type: 'best', ...r, time: t1-t0 });
+    self.postMessage({ type: 'best', id, ...r, time: t1-t0 });
   }
 };
 `;

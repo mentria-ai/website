@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.ruler.title' | t }}"
   description: "{{ 'tools.ruler.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">ruler</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">ruler</span></p>
   <h1>{{ "tools.ruler.title" | t }}</h1>
   <p>{{ "tools.ruler.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -563,6 +564,7 @@ eleventyComputed:
   box-shadow: var(--elev-3);
 }
 .rl-ov__cal[hidden] { display: none; }
+.rl-ov__cal > * { flex-shrink: 0; }
 .rl-ov__cal.is-full {
   top: 0;
   max-height: none;
@@ -1584,7 +1586,7 @@ html.rl-ov-on .app-bar { display: none !important; }
   });
 
   clearBtn.addEventListener('click', function () {
-    var ask = window.mentriaConfirm ? window.mentriaConfirm(COPY.confirmClear) : Promise.resolve(true);
+    var ask = window.mentriaConfirm ? window.mentriaConfirm(COPY.confirmClear, { danger: true }) : Promise.resolve(true);
     Promise.resolve(ask).then(function (ok) {
       if (!ok) return;
       clearCalibration();

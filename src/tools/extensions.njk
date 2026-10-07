@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.extensions.title' | t }}"
   description: "{{ 'tools.extensions.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">extensions</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">extensions</span></p>
   <h1>{{ "tools.extensions.title" | t }}</h1>
   <p>{{ "tools.extensions.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -23,18 +24,28 @@ eleventyComputed:
 <section class="xt">
   <h2 class="xt__heading">{{ "tool.ext_gallery.title" | t }}</h2>
   <p class="xt__lede">{{ "tool.ext_gallery.lede" | t }}</p>
-  <div class="exg" id="exg-grid"></div>
+  <div class="exg" id="exg-grid">
+    {%- for e in extensions %}
+    <article class="exg__card" data-id="{{ e.id }}">
+      <div class="exg__head"><span class="exg__icon" aria-hidden="true">{% if e.iconIsImage %}<img src="{{ e.icon }}" alt="" width="32" height="32">{% else %}{{ e.icon }}{% endif %}</span><h3 class="exg__name"><a href="{{ locale.pathPrefix }}/extensions/{{ e.id }}/">{{ e.name }}</a></h3></div>
+      <p class="exg__desc">{{ ("tool.ext_gallery.desc." + e.id) | t }}</p>
+      <div class="exg__badges"><span class="exg__chip">v{{ e.version }}</span>{% if e.manifest.author %}<span class="exg__chip">{{ e.manifest.author }}</span>{% endif %}{% for p in e.permissions %}<span class="exg__chip exg__chip--perm">{{ ("store.perm_" + p) | t }}</span>{% endfor %}<span class="exg__chip">{{ e.bytes | fileSize }}</span></div>
+      <p class="exg__status" role="status" hidden></p>
+      <div class="exg__actions"></div>
+    </article>
+    {%- endfor %}
+  </div>
 
   <h2 class="xt__heading">{{ "tool.extensions.install_heading" | t }}</h2>
   <div class="xt__drop" id="xt-drop">
     <input type="file" id="xt-file" accept=".html,text/html" hidden>
     <span class="xt__drop-hint">{{ "tool.extensions.drop_hint" | t }}</span>
-    <button type="button" class="xt__btn xt__btn--small xt__choose" id="xt-choose">{{ "tool.extensions.choose_file" | t }}</button>
+    <button type="button" class="m-btn m-btn--ghost xt__btn xt__choose" id="xt-choose">{{ "tool.extensions.choose_file" | t }}</button>
   </div>
   <details class="xt__paste">
     <summary>{{ "tool.extensions.paste_hint" | t }}</summary>
     <textarea id="xt-paste" rows="6" spellcheck="false"></textarea>
-    <button class="xt__btn" id="xt-paste-install" type="button">{{ "tool.extensions.btn_install" | t }}</button>
+    <button class="m-btn m-btn--primary xt__btn" id="xt-paste-install" type="button">{{ "tool.extensions.btn_install" | t }}</button>
   </details>
   <p class="xt__error" id="xt-error" hidden></p>
 
@@ -44,7 +55,7 @@ eleventyComputed:
 
   <h2 class="xt__heading">{{ "tool.extensions.sample_heading" | t }}</h2>
   <div class="xt__sample">
-    <button class="xt__btn" id="xt-sample-install" type="button">{{ "tool.extensions.sample_install" | t }}</button>
+    <button class="m-btn m-btn--primary xt__btn" id="xt-sample-install" type="button">{{ "tool.extensions.sample_install" | t }}</button>
     <a class="xt__link" href="/assets/extensions/hello-world.html" download="hello-world.html">{{ "tool.extensions.sample_download" | t }}</a>
   </div>
 </section>
@@ -56,12 +67,30 @@ eleventyComputed:
 const COPY = {
   trustPrompt:   {{ ("tool.extensions.trust_prompt"   | t) | dump | safe }},
   updatePrompt:  {{ ("tool.extensions.update_prompt"  | t) | dump | safe }},
+  reinstallPrompt: {{ ("tool.extensions.reinstall_prompt" | t) | dump | safe }},
   downgradePrompt: {{ ("tool.extensions.downgrade_prompt" | t) | dump | safe }},
+  replacePrompt: {{ ("tool.extensions.replace_prompt" | t) | dump | safe }},
   permsAdded:    {{ ("tool.extensions.update_perms_added" | t) | dump | safe }},
   permsRemoved:  {{ ("tool.extensions.update_perms_removed" | t) | dump | safe }},
+  largeNote:     {{ ("tool.extensions.large_note"     | t) | dump | safe }},
   confirmRemove: {{ ("tool.extensions.confirm_remove" | t) | dump | safe }},
   installedOk:   {{ ("tool.extensions.installed_ok"   | t) | dump | safe }},
+  installedWhere:{{ ("tool.extensions.installed_where" | t) | dump | safe }},
+  updatedTo:     {{ ("tool.extensions.updated_to"     | t) | dump | safe }},
+  removeLabel:   {{ ("store.remove"                   | t) | dump | safe }},
   errPrefix:     {{ ("tool.extensions.err_prefix"     | t) | dump | safe }},
+  errNoManifest: {{ ("tool.extensions.err_no_manifest" | t) | dump | safe }},
+  errJson:       {{ ("tool.extensions.err_bad_json"   | t) | dump | safe }},
+  errId:         {{ ("tool.extensions.err_bad_id"     | t) | dump | safe }},
+  errReserved:   {{ ("tool.extensions.err_reserved_id" | t) | dump | safe }},
+  errName:       {{ ("tool.extensions.err_bad_name"   | t) | dump | safe }},
+  errVersion:    {{ ("tool.extensions.err_bad_version" | t) | dump | safe }},
+  errTooLarge:   {{ ("tool.extensions.err_too_large"  | t) | dump | safe }},
+  errFull:       {{ ("tool.extensions.err_storage_full" | t) | dump | safe }},
+  errBlocked:    {{ ("store.install_blocked" | t) | dump | safe }},
+  errApp:        {{ ("tool.extensions.err_app_only"   | t) | dump | safe }},
+  errManifest:   {{ ("tool.extensions.err_manifest"   | t) | dump | safe }},
+  errDownload:   {{ ("tool.extensions.err_download"   | t) | dump | safe }},
   btnOpen:       {{ ("tool.extensions.btn_open"       | t) | dump | safe }},
   btnExport:     {{ ("tool.extensions.btn_export"     | t) | dump | safe }},
   btnRemove:     {{ ("tool.extensions.btn_remove"     | t) | dump | safe }},
@@ -73,41 +102,87 @@ const COPY = {
   galInstalled:  {{ ("tool.ext_gallery.installed"   | t) | dump | safe }},
   galUpdate:    {{ ("tool.ext_gallery.btn_update" | t) | dump | safe }},
   galOpen:       {{ ("tool.ext_gallery.btn_open"    | t) | dump | safe }},
-  galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }}
+  galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }},
+  galInstalling: {{ ("store.installing" | t) | dump | safe }},
+  galFailed:     {{ ("store.install_failed" | t) | dump | safe }}
 };
+const PERMS = {
+  {%- for p in ["storage", "ai", "bluetooth", "usb", "serial", "network", "notifications", "share"] %}
+  {{ p | dump | safe }}: {{ (("store.perm_" + p) | t) | dump | safe }}{% if not loop.last %},{% endif %}
+  {%- endfor %}
+};
+const INSTALL_OPTS = {
+  copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, reinstall: COPY.reinstallPrompt, downgrade: COPY.downgradePrompt, replace: COPY.replacePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved, large: COPY.largeNote },
+  perms: PERMS
+};
+const ERROR_CODES = new Map([
+  ['no-manifest', 'errNoManifest'],
+  ['bad-json', 'errJson'],
+  ['bad-id', 'errId'],
+  ['reserved-id', 'errReserved'],
+  ['bad-name', 'errName'],
+  ['bad-version', 'errVersion'],
+  ['too-large', 'errTooLarge'],
+  ['storage-full', 'errFull'],
+  ['storage-blocked', 'errBlocked'],
+  ['app-only', 'errApp'],
+  ['bad-manifest', 'errManifest']
+]);
 const CATALOG = [
-  { id: "forge",          desc: {{ ("tool.ext_gallery.desc.forge"          | t) | dump | safe }} },
-  { id: "unit-converter", desc: {{ ("tool.ext_gallery.desc.unit-converter" | t) | dump | safe }} },
-  { id: "pomodoro-timer", desc: {{ ("tool.ext_gallery.desc.pomodoro-timer" | t) | dump | safe }} },
-  { id: "dice-roller",    desc: {{ ("tool.ext_gallery.desc.dice-roller"    | t) | dump | safe }} },
-  { id: "image-gen",      desc: {{ ("tool.ext_gallery.desc.image-gen"      | t) | dump | safe }} },
-  { id: "story-studio",   desc: {{ ("tool.ext_gallery.desc.story-studio"   | t) | dump | safe }} }
+  {%- for e in extensions %}
+  { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }}, size: {{ (e.bytes | fileSize) | dump | safe }}, version: {{ e.version | dump | safe }}{% if e.kind == 'app' %}, app: {{ e.app | dump | safe }}, manifest: {{ e.manifest | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
+  {%- endfor %}
 ];
+const BUNDLED = new Map(CATALOG.map((e) => [e.id, e.version]));
 const CATALOG_URL = 'https://mentria-ai.github.io/extensions/catalog.json';
+const CATALOG_TIMEOUT = 3500;
+const HIDDEN = [{% for e in extensionCatalog %}{% if e.held or e.retired %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
+const HELD = [{% for e in extensionCatalog %}{% if e.held %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
 let remoteCatalog = null;
 async function loadRemoteCatalog() {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), CATALOG_TIMEOUT);
   try {
-    const res = await fetch(CATALOG_URL, { cache: 'no-store' });
+    const res = await fetch(CATALOG_URL, { cache: 'no-store', signal: ctl.signal });
     if (!res.ok) return null;
     const c = await res.json();
     if (!c || !Array.isArray(c.extensions)) return null;
-    for (const e of c.extensions) if (!CATALOG.some((k) => k.id === e.id)) CATALOG.push({ id: e.id, desc: e.summary || '' });
+    for (const e of c.extensions) if (HIDDEN.indexOf(e.id) === -1 && !CATALOG.some((k) => k.id === e.id)) CATALOG.push({ id: e.id, desc: e.summary || '' });
     return c;
-  } catch (_) { return null; }
+  } catch (_) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+function remoteIsNewer(id, version) {
+  const bundled = BUNDLED.get(id);
+  if (!bundled) return true;
+  try { return X.compareVersions(String(version), bundled) > 0; } catch (_) { return true; }
 }
 function sourceUrls(id) {
   const urls = [];
   const r = remoteCatalog && remoteCatalog.extensions.find((e) => e.id === id);
-  if (r) urls.push((remoteCatalog.base || 'https://mentria-ai.github.io/extensions/') + r.file);
+  if (r && remoteIsNewer(id, r.version)) urls.push((remoteCatalog.base || 'https://mentria-ai.github.io/extensions/') + r.file);
   urls.push('/assets/extensions/' + id + '.html');
   return urls;
 }
 async function fetchSource(id) {
   let lastErr = null;
+  let best = null;
   for (const u of sourceUrls(id)) {
-    try { const r = await fetch(u, { cache: 'no-store' }); if (!r.ok) throw new Error(String(r.status)); return await r.text(); } catch (e) { lastErr = e; }
+    try {
+      const r = await fetch(u, { cache: 'no-store' });
+      if (!r.ok) throw new Error(String(r.status));
+      const html = await r.text();
+      let ins = null;
+      try { ins = X.inspect(html); } catch (_) {}
+      const version = ins ? ins.manifest.version : null;
+      if (best === null || (version && (!best.version || X.compareVersions(version, best.version) > 0))) best = { html, ins, version };
+    } catch (e) { lastErr = e; }
   }
-  throw lastErr || new Error('unavailable');
+  if (best === null) throw lastErr || new Error('unavailable');
+  return best;
 }
 
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
@@ -126,18 +201,55 @@ function showError(msg) { errEl.classList.remove('xt__error--ok'); errEl.textCon
 function showOk(msg) { errEl.classList.add('xt__error--ok'); errEl.textContent = msg; errEl.hidden = false; }
 function clearError() { errEl.hidden = true; }
 
+function errText(e) {
+  const msg = String((e && e.message) || e || '');
+  const key = e && ERROR_CODES.get(e.code);
+  if (key) return fmt(COPY[key], Object.assign({ detail: msg }, e.vars));
+  return msg;
+}
+
+function permName(p) {
+  return Object.prototype.hasOwnProperty.call(PERMS, p) ? PERMS[p] : p;
+}
+
 function fmt(tpl, vars) {
   return tpl.replace(/\{(\w+)\}/g, (s, k) => (vars[k] != null ? vars[k] : s));
+}
+
+function announceInstall(entry, before) {
+  const m = entry && entry.manifest;
+  if (!m || !window.MentriaUI || !window.MentriaUI.toast) return;
+  const prev = before && before.manifest && before.manifest.version;
+  if (prev && prev !== m.version) { window.MentriaUI.toast(fmt(COPY.updatedTo, { name: m.name, version: m.version })); return; }
+  if (!(m.mounts && m.mounts.tool)) return;
+  window.MentriaUI.toast(fmt(COPY.installedWhere, { name: m.name }));
 }
 
 async function installFlow(html) {
   clearError();
   try {
-    const entry = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
+    let before = null;
+    try { before = X.getEntry(X.inspect(html).manifest.id); } catch (_) {}
+    const entry = await confirmInstall(html, INSTALL_OPTS);
     if (!entry) return;
     showOk(entry.manifest.name + ' ' + COPY.installedOk);
     render();
-  } catch (e) { showError(e.message); }
+    announceInstall(entry, before);
+  } catch (e) { showError(errText(e)); }
+}
+
+function setIcon(el, icon, size) {
+  el.textContent = '';
+  if (/^data:image\//.test(icon || '')) {
+    const img = document.createElement('img');
+    img.src = icon;
+    img.alt = '';
+    img.width = size;
+    img.height = size;
+    el.appendChild(img);
+  } else {
+    el.textContent = icon || '🧩';
+  }
 }
 
 function row(entry) {
@@ -146,9 +258,7 @@ function row(entry) {
   div.className = 'xt__row';
   const icon = document.createElement('span');
   icon.className = 'xt__icon';
-  if (/^data:image\//.test(m.icon || '')) {
-    const img = document.createElement('img'); img.src = m.icon; img.alt = ''; icon.appendChild(img);
-  } else { icon.textContent = m.icon || '🧩'; }
+  setIcon(icon, m.icon, 28);
   const meta = document.createElement('div');
   meta.className = 'xt__meta';
   const title = document.createElement('div');
@@ -159,7 +269,8 @@ function row(entry) {
   sub.textContent = 'v' + m.version + (m.author ? ' · ' + m.author : '');
   const perms = document.createElement('div');
   perms.className = 'xt__perms';
-  perms.textContent = (m.permissions || []).join(' · ') + '  (' + Math.round(entry.size / 1024) + ' KB)';
+  const cat = CATALOG.find((c) => c.id === m.id && c.version === m.version);
+  perms.textContent = (m.permissions || []).map(permName).join(' · ') + (X.isApp(entry) ? '' : '  (' + (cat ? cat.size : MentriaUI.formatSize(Math.round(entry.size / 1024), 'KB', 0)) + ')');
   meta.appendChild(title); meta.appendChild(sub); meta.appendChild(perms);
   const actions = document.createElement('div');
   actions.className = 'xt__actions';
@@ -177,9 +288,11 @@ function row(entry) {
     const src = X.getSource(m.id);
     if (!src) { showError(m.id); return; }
     const blob = new Blob([src], { type: 'text/html' });
+    if (window.MentriaUI && window.MentriaUI.downloadFile) { window.MentriaUI.downloadFile(m.id + '.html', blob); return; }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = m.id + '.html';
-    document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
   });
   const share = btn(COPY.btnShare, async () => {
     const src = X.getSource(m.id);
@@ -192,24 +305,25 @@ function row(entry) {
     } else {
       showOk(COPY.shareOpenComms);
       if (document.documentElement.classList.contains('is-standalone')) {
-        setTimeout(() => { location.href = '/comms/'; }, 700);
+        setTimeout(() => { location.href = PREFIX + '/comms/'; }, 700);
       } else {
-        window.open('/comms/', '_blank');
+        window.open(PREFIX + '/comms/', '_blank');
       }
     }
   });
   const rem = btn(COPY.btnRemove, async () => {
-    if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name })))) return;
+    if (!(await window.mentriaConfirm(fmt(COPY.confirmRemove, { name: m.name }), { danger: true, ok: COPY.removeLabel }))) return;
     X.remove(m.id); render();
   });
-  actions.append(toggle, open, exp, share, rem);
+  if (X.isApp(entry)) actions.append(toggle, open, rem);
+  else actions.append(toggle, open, exp, share, rem);
   div.append(icon, meta, actions);
   return div;
 }
 
 function btn(label, fn) {
   const b = document.createElement('button');
-  b.type = 'button'; b.className = 'xt__btn xt__btn--small'; b.textContent = label;
+  b.type = 'button'; b.className = 'm-btn m-btn--ghost xt__btn'; b.textContent = label;
   b.addEventListener('click', fn);
   return b;
 }
@@ -228,7 +342,7 @@ function render() {
 ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('xt__drop--hot'); }));
 drop.addEventListener('drop', (e) => {
   const f = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f) f.text().then(installFlow).catch((e) => showError(e.message));
+  if (f) f.text().then(installFlow).catch((e) => showError(errText(e)));
 });
 chooseBtn.addEventListener('click', () => fileInput.click());
 drop.addEventListener('click', (e) => {
@@ -237,7 +351,7 @@ drop.addEventListener('click', (e) => {
 });
 fileInput.addEventListener('change', (e) => {
   const f = e.target.files && e.target.files[0];
-  if (f) f.text().then(installFlow).catch((e) => showError(e.message));
+  if (f) f.text().then(installFlow).catch((e) => showError(errText(e)));
   e.target.value = '';
 });
 document.getElementById('xt-paste-install').addEventListener('click', async () => {
@@ -245,20 +359,27 @@ document.getElementById('xt-paste-install').addEventListener('click', async () =
   if (!pasted) return;
   if (/^https?:\/\/\S+$/.test(pasted)) {
     clearError();
+    let html = null;
+    let status = 0;
     try {
       const res = await fetch(pasted, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      installFlow(await res.text());
-    } catch (e) { showError(pasted + ' · ' + e.message); }
+      if (res.ok) html = await res.text();
+      else status = res.status;
+    } catch (_) {}
+    if (html === null) { showError(fmt(COPY.errDownload, { url: pasted }) + (status ? ' (HTTP ' + status + ')' : '')); return; }
+    installFlow(html);
     return;
   }
   installFlow(pasted);
 });
 document.getElementById('xt-sample-install').addEventListener('click', async () => {
+  let html = null;
   try {
-    const html = await fetch('/assets/extensions/hello-world.html').then((r) => r.text());
-    installFlow(html);
-  } catch (e) { showError(e.message); }
+    const res = await fetch('/assets/extensions/hello-world.html');
+    if (res.ok) html = await res.text();
+  } catch (_) {}
+  if (html === null) { showError(fmt(COPY.errDownload, { url: 'hello-world.html' })); return; }
+  installFlow(html);
 });
 
 const galGrid = document.getElementById('exg-grid');
@@ -276,7 +397,17 @@ function galStatus(card, msg) {
   card._parts.status.hidden = !msg;
 }
 
+function galBuiltCard(entry) {
+  if (!entry.page) return null;
+  const card = Array.from(galGrid.children).find((el) => el.dataset.id === entry.id && !el._parts);
+  if (!card) return null;
+  card._parts = { icon: card.querySelector('.exg__icon'), name: card.querySelector('.exg__name a'), badges: card.querySelector('.exg__badges'), status: card.querySelector('.exg__status'), actions: card.querySelector('.exg__actions') };
+  return card;
+}
+
 function galMakeCard(entry) {
+  const built = galBuiltCard(entry);
+  if (built) return built;
   const card = document.createElement('article');
   card.className = 'exg__card';
   card.dataset.id = entry.id;
@@ -287,7 +418,13 @@ function galMakeCard(entry) {
   icon.setAttribute('aria-hidden', 'true');
   const name = document.createElement('h3');
   name.className = 'exg__name';
-  name.textContent = entry.id;
+  let label = name;
+  if (entry.page) {
+    label = document.createElement('a');
+    label.href = PREFIX + '/extensions/' + encodeURIComponent(entry.id) + '/';
+    name.appendChild(label);
+  }
+  label.textContent = entry.id;
   head.append(icon, name);
   const desc = document.createElement('p');
   desc.className = 'exg__desc';
@@ -301,7 +438,7 @@ function galMakeCard(entry) {
   const actions = document.createElement('div');
   actions.className = 'exg__actions';
   card.append(head, desc, badges, status, actions);
-  card._parts = { icon, name, badges, status, actions };
+  card._parts = { icon, name: label, badges, status, actions };
   galGrid.appendChild(card);
   return card;
 }
@@ -313,11 +450,11 @@ function galActions(entry, card) {
   if (installed && entry.version && X.compareVersions(entry.version, installed.manifest.version) > 0) {
     const up = document.createElement('button');
     up.type = 'button';
-    up.className = 'xt__btn xt__btn--small exg__btn';
+    up.className = 'm-btn m-btn--primary xt__btn';
     up.textContent = COPY.galUpdate.replace('{v}', entry.version);
     up.addEventListener('click', () => galInstall(entry, card, up));
     const open = document.createElement('a');
-    open.className = 'xt__btn xt__btn--small exg__btn';
+    open.className = 'm-btn m-btn--ghost xt__btn';
     open.textContent = COPY.galOpen;
     open.href = PREFIX + '/tools/extensions/run/?id=' + encodeURIComponent(entry.id);
     p.actions.append(up, open);
@@ -326,14 +463,14 @@ function galActions(entry, card) {
     done.className = 'exg__done';
     done.textContent = COPY.galInstalled;
     const open = document.createElement('a');
-    open.className = 'xt__btn xt__btn--small exg__btn';
+    open.className = 'm-btn m-btn--ghost xt__btn';
     open.textContent = COPY.galOpen;
     open.href = PREFIX + '/tools/extensions/run/?id=' + encodeURIComponent(entry.id);
     p.actions.append(done, open);
   } else {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'xt__btn xt__btn--small exg__btn';
+    b.className = 'm-btn m-btn--primary xt__btn';
     b.textContent = COPY.galInstall;
     b.addEventListener('click', () => galInstall(entry, card, b));
     p.actions.append(b);
@@ -343,45 +480,96 @@ function galActions(entry, card) {
 async function galInstall(entry, card, b) {
   galStatus(card, '');
   b.disabled = true;
+  const before = X.getEntry(entry.id);
+  if (entry.app) {
+    let prev = null;
+    let created = false;
+    try {
+      prev = X.getEntry(entry.id);
+      const pkg = await X.fetchPackage(entry.id);
+      X.installApp(pkg.manifest);
+      created = true;
+      await X.downloadFiles(entry.id, pkg.files, X.appPages(pkg.app), (f) => galStatus(card, COPY.galInstalling.replace('{pct}', String(Math.round(f * 100)))));
+      galStatus(card, '');
+      render();
+      announceInstall(X.getEntry(entry.id), before);
+    } catch (e) {
+      if (created && prev) { try { X.installApp(prev.manifest); } catch (_) {} }
+      else if (created) X.remove(entry.id, { keepData: true });
+      b.disabled = false;
+      render();
+      galStatus(card, COPY.galFailed);
+    }
+    return;
+  }
+  let html = entry.html;
+  if (!html) {
+    try {
+      html = (await fetchSource(entry.id)).html;
+    } catch (_) {
+      b.disabled = false;
+      galStatus(card, COPY.galFailed);
+      return;
+    }
+  }
   try {
-    const html = entry.html || await fetchSource(entry.id);
-    const result = await confirmInstall(html, { copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, downgrade: COPY.downgradePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved } });
+    const result = await confirmInstall(html, INSTALL_OPTS);
     if (!result) { b.disabled = false; return; }
     render();
+    announceInstall(result, before);
+    if (entry.page) X.fetchPackage(entry.id).then((pkg) => X.downloadFiles(entry.id, pkg.files, [PREFIX + '/extensions/' + entry.id + '/'])).catch(() => {});
   } catch (e) {
     b.disabled = false;
-    galStatus(card, e.message);
+    galStatus(card, errText(e));
   }
 }
 
 async function galLoad(entry, card) {
   const p = card._parts;
-  let html;
+  if (entry.app && entry.manifest) {
+    const am = entry.manifest;
+    entry.ready = true;
+    entry.version = am.version;
+    entry.name = am.name;
+    setIcon(p.icon, am.icon, 32);
+    p.name.textContent = am.name;
+    p.badges.innerHTML = '';
+    p.badges.append(galChip('v' + am.version));
+    if (am.author) p.badges.append(galChip(am.author));
+    (am.permissions || []).forEach((perm) => p.badges.append(galChip(permName(perm), 'perm')));
+    if (entry.size) p.badges.append(galChip(entry.size));
+    galActions(entry, card);
+    return;
+  }
+  let src;
   try {
-    html = await fetchSource(entry.id);
+    src = await fetchSource(entry.id);
   } catch (e) {
     galStatus(card, COPY.galErrLoad);
     return;
   }
-  entry.html = html;
-  let ins;
-  try {
-    ins = X.inspect(html);
-  } catch (e) {
-    galStatus(card, COPY.galErrLoad + ' ' + e.message);
-    return;
+  entry.html = src.html;
+  let ins = src.ins;
+  if (!ins) {
+    try {
+      ins = X.inspect(src.html);
+    } catch (e) {
+      galStatus(card, COPY.galErrLoad + ' ' + errText(e));
+      return;
+    }
   }
   entry.ready = true;
   const m = ins.manifest;
+  if (!entry.size || entry.version !== m.version) entry.size = MentriaUI.formatSize(Math.max(1, Math.round(ins.size / 1024)), 'KB', 0);
   entry.version = m.version;
   entry.name = m.name;
-  p.icon.textContent = m.icon && !/^data:/.test(m.icon) ? m.icon : '🧩';
+  setIcon(p.icon, m.icon, 32);
   p.name.textContent = m.name;
   p.badges.innerHTML = '';
   p.badges.append(galChip('v' + m.version));
   if (m.author) p.badges.append(galChip(m.author));
-  (m.permissions || []).forEach((perm) => p.badges.append(galChip(perm, 'perm')));
-  p.badges.append(galChip(Math.max(1, Math.round(ins.size / 1024)) + ' KB'));
+  (m.permissions || []).forEach((perm) => p.badges.append(galChip(permName(perm), 'perm')));
+  p.badges.append(galChip(entry.size));
   galActions(entry, card);
 }
 
@@ -389,12 +577,28 @@ refreshGallery = () => {
   galCards.forEach(({ entry, card }) => { if (entry.ready) galActions(entry, card); });
 };
 
+render();
 remoteCatalog = await loadRemoteCatalog();
+const wanted = new URLSearchParams(location.search).get('add');
+if (wanted && HELD.indexOf(wanted) !== -1 && !CATALOG.some((k) => k.id === wanted)) CATALOG.push({ id: wanted, desc: '' });
 CATALOG.forEach((entry) => {
   const card = galMakeCard(entry);
-  galCards.push({ entry, card });
-  galLoad(entry, card);
+  galCards.push({ entry, card, loaded: galLoad(entry, card) });
 });
+
+if (wanted) {
+  history.replaceState(history.state, '', location.pathname + location.hash);
+  const hit = galCards.find((g) => g.entry.id === wanted);
+  if (hit) {
+    hit.card.classList.add('exg__card--target');
+    hit.card.scrollIntoView({ block: 'center' });
+    hit.loaded.then(() => {
+      if (!hit.entry.ready || X.getEntry(wanted)) return;
+      const b = hit.card.querySelector('.exg__actions button');
+      if (b) b.click();
+    });
+  }
+}
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') { render(); }
@@ -425,10 +629,7 @@ render();
   }
 }
 .xt__paste textarea { width: 100%; margin: 0.5rem 0; background: var(--term-bg-raised, #0d0f12); border: 1px solid var(--term-border, #2a3138); color: var(--term-fg); border-radius: 6px; font-family: inherit; font-size: 0.75rem; padding: 0.5rem; }
-.xt__btn { background: transparent; border: 1px solid var(--accent, #6ef3c5); color: var(--accent, #6ef3c5); border-radius: 6px; padding: 0.35rem 0.9rem; font-family: inherit; font-size: 0.8rem; cursor: pointer; }
-.xt__btn--small { padding: 0.2rem 0.6rem; font-size: 0.7rem; }
-.xt__btn:hover { background: var(--accent, #6ef3c5); color: #0b0e11; }
-.xt__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.xt__btn { display: inline-flex; align-items: center; justify-content: center; min-height: 28px; padding: var(--space-1) var(--space-3); font-size: var(--text-xs); line-height: 1.2; text-decoration: none; }
 .xt__error { color: var(--syn-pink, #f472b6); font-size: 0.8rem; }
 .xt__error--ok { color: var(--accent, #6ef3c5); }
 .xt__row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem 0.8rem; border: 1px solid var(--term-border, #2a3138); border-radius: 8px; padding: 0.6rem 0.8rem; margin-bottom: 0.5rem; }
@@ -443,7 +644,7 @@ render();
 @media (max-width: 640px) {
   .xt__row { align-items: flex-start; }
   .xt__actions { flex-basis: 100%; margin-left: 0; padding-left: calc(2.2rem + 0.8rem); }
-  .xt__btn--small { padding: 0.35rem 0.7rem; font-size: 0.75rem; }
+  .xt__btn { min-height: 32px; }
 }
 @media (max-width: 400px) {
   .xt__actions { padding-left: 0; }
@@ -459,12 +660,14 @@ render();
 .exg__head { display: flex; align-items: center; gap: 0.55rem; }
 .exg__icon { font-size: 1.4rem; line-height: 1; }
 .exg__name { font-size: 0.85rem; margin: 0; color: var(--term-fg); overflow-wrap: anywhere; }
+.exg__name a { color: inherit; text-decoration: none; }
+.exg__name a:hover, .exg__name a:focus-visible { color: var(--accent, #6ef3c5); text-decoration: underline; }
+.exg__card--target { border-color: var(--accent, #6ef3c5); box-shadow: 0 0 0 1px var(--accent, #6ef3c5); }
 .exg__desc { margin: 0; font-size: 0.75rem; color: var(--term-muted); line-height: 1.5; flex: 1; }
 .exg__badges { display: flex; flex-wrap: wrap; gap: 0.25rem; }
 .exg__chip { font-size: 0.62rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--term-border, #2a3138); color: var(--term-muted); }
 .exg__chip--perm { border-color: var(--syn-cyan, #7dd3fc); color: var(--syn-cyan, #7dd3fc); }
-.exg__actions { display: flex; align-items: center; gap: 0.6rem; min-height: 1.8rem; }
-.exg__btn { text-decoration: none; }
+.exg__actions { display: flex; align-items: center; gap: 0.6rem; min-height: 2rem; }
 .exg__done { font-size: 0.7rem; color: var(--accent, #6ef3c5); }
 .exg__status { font-size: 0.7rem; color: var(--syn-pink, #f472b6); margin: 0; }
 .exg__status[hidden] { display: none; }

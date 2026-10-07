@@ -54,6 +54,7 @@
     });
 
     s = escapeHtml(s);
+    s = s.replace(/&lt;(\/?)(em|strong|b|i|sub|sup|del|ins|code|br)\s*\/?&gt;/gi, '<$1$2>');
 
     /* emphasis — bold first so * inside doesn't trip italic match */
     s = s.replace(/\*\*([^*\n](?:[^*\n]|\*(?!\*))*?)\*\*/g, '<strong>$1</strong>');
@@ -136,12 +137,28 @@
     }
   }
 
+  function labelTasks(root) {
+    const boxes = root.querySelectorAll ? root.querySelectorAll('li > input[type="checkbox"]') : [];
+    boxes.forEach(function (box) {
+      if (box.hasAttribute('aria-label') || box.hasAttribute('aria-labelledby')) return;
+      let text = '';
+      box.parentNode.childNodes.forEach(function (n) {
+        if (n === box) return;
+        if (n.nodeType === 1 && (n.tagName === 'UL' || n.tagName === 'OL')) return;
+        text += n.textContent;
+      });
+      text = text.replace(/\s+/g, ' ').trim();
+      if (text) box.setAttribute('aria-label', text.slice(0, 160));
+    });
+  }
+
   function sanitizeHtml(html) {
     if (!html) return '';
     if (typeof document === 'undefined') return String(html).replace(/<[^>]*>/g, '');
     const tpl = document.createElement('template');
     tpl.innerHTML = String(html);
     scrubNode(tpl.content);
+    labelTasks(tpl.content);
     return tpl.innerHTML;
   }
 

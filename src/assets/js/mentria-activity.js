@@ -12,7 +12,11 @@ const DEFAULT_COPY = {
   answering: 'answering',
   done: 'done',
   error: 'error',
+  adapter: 'loading adapter',
+  adapterDownloading: 'downloading adapter',
+  adapterFromDevice: 'loading adapter from device',
   shardOf: 'shard {n} of {m}',
+  mb: '{done} MB',
   mbOf: '{done} / {total} MB',
   mbps: '{rate} MB/s',
   tensorsOf: '{done} / {total} tensors',
@@ -42,6 +46,9 @@ const DEFAULT_COPY = {
   phaseLog: 'phase log',
   total: 'total',
   collapse: 'Collapse panel',
+  details: 'Device details',
+  srDone: 'done, {n} tokens',
+  srError: 'error: {msg}',
   nothingLeaves: 'nothing leaves your device'
 };
 
@@ -57,12 +64,14 @@ function tr(key, vars) {
 }
 
 const CSS = `
-.es{--es-c:var(--syn-cyan);display:flex;flex-direction:column;gap:6px;padding:.5rem 0 .55rem;border-bottom:1px solid var(--term-divider,var(--term-border));font-family:var(--font-mono);font-variant-numeric:tabular-nums;cursor:default}
+.es{--es-c:var(--syn-cyan);position:relative;display:flex;flex-direction:column;gap:6px;padding:.5rem 0 .55rem;border-bottom:1px solid var(--term-divider,var(--term-border));font-family:var(--font-mono);font-variant-numeric:tabular-nums;cursor:default}
 .es[hidden]{display:none}
 .es--mint{--es-c:var(--accent)}
 .es--amber{--es-c:var(--syn-amber)}
 .es--pink{--es-c:var(--syn-pink)}
 .es--tap{cursor:pointer}
+.es__tap{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:var(--radius-sm,4px);background:none;color:inherit;font:inherit;cursor:pointer}
+.es__sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 .es__row{display:grid;gap:2px var(--space-3,.75rem);align-items:baseline;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"label right" "nums nums"}
 .es__label{grid-area:label;font-size:var(--text-2xs,.68rem);letter-spacing:.14em;text-transform:uppercase;color:var(--es-c)}
 .es__nums{grid-area:nums;display:flex;align-items:baseline;gap:var(--space-2,.5rem);flex-wrap:nowrap;overflow:hidden;min-width:0}
@@ -73,7 +82,7 @@ const CSS = `
 .es__bit,.es__note{font-size:var(--text-2xs,.68rem);color:var(--term-muted);white-space:nowrap}
 .es__note{color:var(--term-subtle,var(--term-muted))}
 .es__time{flex:0 0 auto;font-size:var(--text-2xs,.68rem);color:var(--term-subtle,var(--term-muted))}
-.es__retry{font:inherit;font-size:var(--text-2xs,.68rem);padding:.15rem .6rem;border:1px solid var(--syn-pink);border-radius:999px;background:none;color:var(--syn-pink);cursor:pointer}
+.es__retry{position:relative;z-index:1;font:inherit;font-size:var(--text-2xs,.68rem);padding:.15rem .6rem;border:1px solid var(--syn-pink);border-radius:999px;background:none;color:var(--syn-pink);cursor:pointer}
 .es__seg{display:flex;gap:2px;height:4px}
 .es__seg i{flex:1;border-radius:1px;background:var(--term-surface-3,rgba(255,255,255,.08));transition:background var(--dur-3,.3s) var(--ease-out,ease-out),box-shadow var(--dur-3,.3s) var(--ease-out,ease-out)}
 .es__seg i.is-on{background:var(--es-c)}
@@ -120,6 +129,7 @@ function ensureStyle() {
 
 const PHASES = {
   downloading: { tone: 'cyan' },
+  adapter: { tone: 'cyan' },
   uploading: { tone: 'cyan' },
   loading: { tone: 'amber', sweep: true },
   warming: { tone: 'amber', sweep: true },
@@ -133,6 +143,9 @@ const PHASES = {
 const lang = () => (document.documentElement.lang || undefined);
 const fmtInt = (v) => Number(v).toLocaleString(lang());
 const fmt1 = (v) => Number(v).toLocaleString(lang(), { maximumFractionDigits: 1 });
+const fmtMb = (bytes) => (bytes < 1e7 ? fmt1(bytes / 1e6) : fmtInt(Math.round(bytes / 1e6)));
+const fmtPct = (frac) => Number(frac).toLocaleString(lang(), { style: 'percent', maximumFractionDigits: 0 });
+let stripSeq = 0;
 function fmtSecs(ms) {
   const s = Math.max(1, Math.round(ms / 1000));
   if (s < 60) return s + ' s';
@@ -169,12 +182,11 @@ export function gpuLabel(info) {
 export function createActivityStrip(host, opts = {}) {
   ensureStyle();
   host.classList.add('es-host');
+  const uid = 'es-' + (++stripSeq) + '-' + Math.random().toString(36).slice(2, 7);
   const el = document.createElement('div');
   el.className = 'es';
   el.hidden = true;
-  el.setAttribute('role', 'status');
-  el.setAttribute('aria-live', 'polite');
-  el.innerHTML = '<div class="es__row"><span class="es__label"></span><span class="es__nums"></span><span class="es__right"><button type="button" class="es__retry" hidden></button><span class="es__time"></span></span></div><div class="es__seg" aria-hidden="true">' + Array.from({ length: SEGS }, (_, i) => '<i style="--i:' + i + '"></i>').join('') + '</div>';
+  el.innerHTML = '<div class="es__row" id="' + uid + '-row"><span class="es__label"></span><span class="es__nums"></span><span class="es__right"><button type="button" class="es__retry" hidden></button><span class="es__time"></span></span></div><div class="es__seg" aria-hidden="true">' + Array.from({ length: SEGS }, (_, i) => '<i style="--i:' + i + '"></i>').join('') + '</div>';
   host.appendChild(el);
   const labelEl = el.querySelector('.es__label');
   const numsEl = el.querySelector('.es__nums');
@@ -182,9 +194,32 @@ export function createActivityStrip(host, opts = {}) {
   const retryBtn = el.querySelector('.es__retry');
   const segs = Array.from(el.querySelectorAll('.es__seg i'));
 
+  let srEl = null;
+  let srTimer = 0;
+  if (opts.announce !== false) {
+    srEl = document.createElement('span');
+    srEl.className = 'es__sr';
+    srEl.setAttribute('role', 'status');
+    srEl.setAttribute('aria-live', 'polite');
+    srEl.setAttribute('aria-atomic', 'true');
+    host.appendChild(srEl);
+  }
+  function announce(text) {
+    if (!srEl) return;
+    clearTimeout(srTimer);
+    srEl.textContent = '';
+    srTimer = setTimeout(() => { srEl.textContent = text; }, 80);
+  }
+
   let panelEl = null;
+  let tapBtn = null;
   const panelEnabled = opts.panel !== false;
-  const state = { phase: null, since: 0, tier: opts.tier || null, gpu: '', log: [], nowLog: null, onRetry: null, lastFrac: 0, samples: [], lastBytes: null, tokens: 0, tokStart: 0, hideTimer: 0, expanded: false };
+  const state = { phase: null, since: 0, tier: opts.tier || null, gpu: '', log: [], nowLog: null, onRetry: null, lastFrac: 0, samples: [], lastBytes: null, tokens: 0, tokStart: 0, hideTimer: 0, expanded: false, adapterAsked: false };
+  function setExpanded(on) {
+    state.expanded = !!on;
+    if (panelEl) panelEl.hidden = !state.expanded;
+    if (tapBtn) tapBtn.setAttribute('aria-expanded', state.expanded ? 'true' : 'false');
+  }
 
   function setTone(tone, sweep) {
     el.classList.remove('es--mint', 'es--amber', 'es--pink', 'es--sweep');
@@ -228,6 +263,8 @@ export function createActivityStrip(host, opts = {}) {
     clearTimeout(state.hideTimer);
     el.hidden = false;
     retryBtn.hidden = true;
+    if (tapBtn) tapBtn.setAttribute('aria-label', tr('details'));
+    if (name === 'answering') announce(tr('answering'));
     renderPanel();
   }
 
@@ -279,6 +316,26 @@ export function createActivityStrip(host, opts = {}) {
     render(fromCache ? tr('fromDevice') : tr('downloading'), prime, bits, [], fromCache ? '' : tr('keptOnDevice'), time);
   }
 
+  function onBytes(p, adapter) {
+    const cached = !!(adapter && adapter.cached);
+    beginPhase(adapter ? 'adapter' : 'downloading');
+    const total = p.total > 1 ? Number(p.total) : 0;
+    const raw = Number(p.loaded) || 0;
+    const loaded = total ? Math.max(0, Math.min(total, raw)) : (raw > 1 ? raw : 0);
+    const frac = total ? loaded / total : null;
+    const prime = total ? tr('mbOf', { done: fmtMb(loaded), total: fmtMb(total) }) : (loaded ? tr('mb', { done: fmtMb(loaded) }) : '…');
+    const bits = [];
+    const more = [];
+    const rate = loaded ? bytesRate(loaded) : null;
+    if (rate && rate > 0) bits.push(tr('mbps', { rate: fmt1(rate / 1e6) }));
+    if (frac != null) more.push(fmtPct(frac));
+    const eta = frac != null ? etaFromFrac(frac) : null;
+    const time = (eta != null && eta > 1000 && frac < 1) ? tr('left', { t: fmtSecs(eta) }) : '';
+    setFill(frac || 0);
+    const label = adapter ? tr(cached ? 'adapterFromDevice' : 'adapterDownloading') : tr('downloading');
+    render(label, prime, bits, more, adapter && !cached ? tr('keptOnDevice') : '', time);
+  }
+
   function onUpload(p) {
     beginPhase('uploading');
     const total = p.total > 0 ? p.total : 1;
@@ -321,7 +378,8 @@ export function createActivityStrip(host, opts = {}) {
     onProgress(p) {
       if (!p) return;
       const st = p.stage;
-      if (st === 'download' || (typeof p.progress === 'number' && !st)) onDownload(p);
+      if (st === 'download' && (p.adapter || p.total >= 4096)) onBytes(p, p.adapter || null);
+      else if (st === 'download' || (typeof p.progress === 'number' && !st)) onDownload(p);
       else if (st === 'upload') onUpload(p);
       else if (st === 'init') onInit(p);
       else if (st === 'prefill') onPrefill(p);
@@ -365,6 +423,7 @@ export function createActivityStrip(host, opts = {}) {
       beginPhase('done');
       setFill(1);
       render(tr('done'), n ? tr('doneLine', { n: fmtInt(n), rate: fmt1(tps), s: fmt1(secs) }) : (s.prime || ''), [], [], '', '');
+      if (n) announce(tr('srDone', { n: fmtInt(n) }));
       clearTimeout(state.hideTimer);
       state.hideTimer = setTimeout(() => { if (state.phase === 'done') api.hide(); }, s.linger != null ? s.linger : DONE_LINGER);
     },
@@ -374,25 +433,36 @@ export function createActivityStrip(host, opts = {}) {
       beginPhase('error');
       setFill(state.lastFrac || 0);
       render(label, d.prime || message || tr('error'), d.prime && message ? [message] : [], [], '', '');
+      const said = [d.prime, message].filter(Boolean).join(' · ');
+      announce(said ? tr('srError', { msg: said }) : tr('error'));
       state.onRetry = d.onRetry || null;
       retryBtn.textContent = tr('retry');
       retryBtn.hidden = !state.onRetry;
     },
     hide() {
       clearTimeout(state.hideTimer);
+      clearTimeout(srTimer);
+      if (srEl) srEl.textContent = '';
       if (state.nowLog) { state.nowLog.ms = performance.now() - state.nowLog.start; state.nowLog = null; }
       state.phase = null;
       el.hidden = true;
-      if (panelEl) { panelEl.hidden = true; state.expanded = false; }
+      setExpanded(false);
     },
     get phaseName() { return state.phase; },
     get log() { return state.log.slice(); }
   };
 
   retryBtn.addEventListener('click', (e) => { e.stopPropagation(); if (state.onRetry) state.onRetry(); });
+  document.addEventListener('mentria:localechange', () => {
+    if (tapBtn) tapBtn.setAttribute('aria-label', tr('details'));
+    if (srEl && state.phase === 'answering') srEl.textContent = tr('answering');
+  });
 
   function renderPanel() {
     if (!panelEl || panelEl.hidden) return;
+    panelEl.querySelector('.es-panel__lb').textContent = tr('thisDevice');
+    panelEl.querySelector('.es-panel__x').setAttribute('aria-label', tr('collapse'));
+    panelEl.querySelector('.es-panel__note').textContent = tr('nothingLeaves');
     const dev = panelEl.querySelector('.es-dev');
     const plog = panelEl.querySelector('.es-plog');
     const kv = (k, v, cls) => { const r = document.createElement('div'); r.className = 'es-dev__kv' + (cls ? ' ' + cls : ''); const a = document.createElement('span'); a.textContent = k; const b = document.createElement('b'); b.textContent = v; r.append(a, b); return r; };
@@ -429,26 +499,33 @@ export function createActivityStrip(host, opts = {}) {
 
   if (panelEnabled) {
     el.classList.add('es--tap');
-    el.setAttribute('tabindex', '0');
-    const toggle = async () => {
-      if (!panelEl) {
-        panelEl = document.createElement('div');
-        panelEl.className = 'es-panel';
-        panelEl.innerHTML = '<div class="es-panel__hd"><span class="es-panel__lb"></span><button type="button" class="es-panel__x">×</button></div><div class="es-panel__grid"><div class="es-dev"></div><div class="es-plog"></div></div><p class="es-panel__note"></p>';
-        panelEl.querySelector('.es-panel__lb').textContent = tr('thisDevice');
-        panelEl.querySelector('.es-panel__x').setAttribute('aria-label', tr('collapse'));
-        panelEl.querySelector('.es-panel__note').textContent = tr('nothingLeaves');
-        panelEl.querySelector('.es-panel__x').addEventListener('click', () => { panelEl.hidden = true; state.expanded = false; });
-        el.insertAdjacentElement('afterend', panelEl);
-        state.adapter = await adapterInfo();
-        if (!state.gpu) state.gpu = gpuLabel(state.adapter);
-      }
-      state.expanded = !state.expanded;
-      panelEl.hidden = !state.expanded;
+    panelEl = document.createElement('div');
+    panelEl.className = 'es-panel';
+    panelEl.id = uid + '-panel';
+    panelEl.hidden = true;
+    panelEl.innerHTML = '<div class="es-panel__hd"><span class="es-panel__lb"></span><button type="button" class="es-panel__x">×</button></div><div class="es-panel__grid"><div class="es-dev"></div><div class="es-plog"></div></div><p class="es-panel__note"></p>';
+    el.insertAdjacentElement('afterend', panelEl);
+    tapBtn = document.createElement('button');
+    tapBtn.type = 'button';
+    tapBtn.className = 'es__tap';
+    tapBtn.setAttribute('aria-label', tr('details'));
+    tapBtn.setAttribute('aria-expanded', 'false');
+    tapBtn.setAttribute('aria-controls', panelEl.id);
+    tapBtn.setAttribute('aria-describedby', uid + '-row');
+    el.insertBefore(tapBtn, el.firstChild);
+    tapBtn.addEventListener('click', () => {
+      setExpanded(!state.expanded);
       renderPanel();
-    };
-    el.addEventListener('click', toggle);
-    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+      if (state.expanded && !state.adapterAsked) {
+        state.adapterAsked = true;
+        adapterInfo().then((info) => {
+          state.adapter = info;
+          if (!state.gpu) state.gpu = gpuLabel(info);
+          renderPanel();
+        });
+      }
+    });
+    panelEl.querySelector('.es-panel__x').addEventListener('click', () => { setExpanded(false); tapBtn.focus(); });
     setInterval(() => { if (state.expanded && state.nowLog) renderPanel(); }, 1000);
   }
 

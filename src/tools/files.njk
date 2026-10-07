@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.files.title' | t }}"
   description: "{{ 'tools.files.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">files</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">files</span></p>
   <h1>{{ "tools.files.title" | t }}</h1>
   <p>{{ "tools.files.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -25,7 +26,9 @@ eleventyComputed:
     <p class="files__summary" id="files-summary"></p>
     <div class="files__toolbar-actions">
       <button type="button" class="m-btn m-btn--ghost" id="files-export-all">{{ "tool.files.export_all" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" id="files-restore">{{ "about.data_import_button" | t }}…</button>
       <button type="button" class="m-btn m-btn--ghost" id="files-refresh">{{ "tool.files.refresh" | t }}</button>
+      <button type="button" class="m-btn m-btn--danger" id="files-erase">{{ "tool.files.erase_button" | t }}</button>
     </div>
   </div>
 
@@ -36,6 +39,7 @@ eleventyComputed:
       <div class="files__main-head">
         <h2 class="files__main-title" id="files-main-title">{{ "tool.files.select_prompt" | t }}</h2>
         <span class="files__main-count" id="files-main-count"></span>
+        <div class="files__main-actions" id="files-main-actions"></div>
       </div>
 
       <p class="files__empty" id="files-empty" hidden></p>
@@ -77,6 +81,8 @@ eleventyComputed:
   <div class="files-modal__card m-modal__card">
     <h3 class="files-modal__h">{{ "tool.files.export_modal_title" | t }}</h3>
     <p class="files-modal__p">{{ "tool.files.export_modal_lede" | t }}</p>
+    <p class="files-modal__p" id="files-export-size" aria-live="polite"></p>
+    <p class="files-modal__note" id="files-export-warn" hidden>{{ "common.backup_size_large" | t }}</p>
     <div class="m-field">
       <label for="files-export-pass">{{ "tool.files.passphrase_label" | t }}</label>
       <input class="m-input" type="password" id="files-export-pass" autocomplete="new-password" minlength="8" spellcheck="false">
@@ -85,6 +91,44 @@ eleventyComputed:
     <div class="files-modal__actions">
       <button type="button" class="m-btn m-btn--ghost" data-close>{{ "tool.files.cancel" | t }}</button>
       <button type="button" class="m-btn m-btn--primary" id="files-export-confirm">{{ "tool.files.export_confirm" | t }}</button>
+    </div>
+  </div>
+</div>
+
+<div class="files-modal m-modal" id="files-restore-modal" hidden>
+  <div class="files-modal__backdrop" data-close></div>
+  <div class="files-modal__card m-modal__card">
+    <h3 class="files-modal__h">{{ "about.data_import_title" | t }}</h3>
+    <p class="files-modal__p">{{ "about.data_import_lede" | t }}</p>
+    <div class="m-field">
+      <label for="files-restore-file">{{ "about.data_import_choose" | t }}</label>
+      <input class="m-input" type="file" id="files-restore-file" accept="application/json,.json">
+    </div>
+    <div class="m-field">
+      <label for="files-restore-pass">{{ "tool.files.passphrase_label" | t }}</label>
+      <input class="m-input" type="password" id="files-restore-pass" autocomplete="current-password" spellcheck="false">
+    </div>
+    <p class="files-modal__strength" id="files-restore-status" aria-live="polite"></p>
+    <div class="files-modal__actions">
+      <button type="button" class="m-btn m-btn--ghost" data-close>{{ "tool.files.cancel" | t }}</button>
+      <button type="button" class="m-btn m-btn--primary" id="files-restore-confirm">{{ "about.data_import_button" | t }}</button>
+    </div>
+  </div>
+</div>
+
+<div class="files-modal m-modal" id="files-erase-modal" hidden>
+  <div class="files-modal__backdrop" data-close></div>
+  <div class="files-modal__card m-modal__card">
+    <h3 class="files-modal__h">{{ "tool.files.erase_title" | t }}</h3>
+    <p class="files-modal__p">{{ "tool.files.erase_lede" | t }}</p>
+    <div class="m-field">
+      <label for="files-erase-word" id="files-erase-word-label"></label>
+      <input class="m-input" type="text" id="files-erase-word" autocomplete="off" spellcheck="false" autocapitalize="off">
+    </div>
+    <p class="files-modal__strength" id="files-erase-status" aria-live="polite"></p>
+    <div class="files-modal__actions">
+      <button type="button" class="m-btn m-btn--ghost" data-close>{{ "tool.files.cancel" | t }}</button>
+      <button type="button" class="m-btn m-btn--danger" id="files-erase-confirm" disabled>{{ "tool.files.erase_confirm" | t }}</button>
     </div>
   </div>
 </div>
@@ -106,6 +150,11 @@ eleventyComputed:
     nsExt:        {{ ("tool.files.ns_ext"         | t) | dump | safe }},
     nsExtdata:    {{ ("tool.files.ns_extdata"     | t) | dump | safe }},
     nsUi:         {{ ("tool.files.ns_ui"          | t) | dump | safe }},
+    nsPacks:      {{ ("tool.files.ns_packs"       | t) | dump | safe }},
+    nsFeed:       {{ ("tool.files.ns_feed"        | t) | dump | safe }},
+    nsHandoff:    {{ ("tool.files.ns_handoff"     | t) | dump | safe }},
+    nsComms:      {{ ("nav.comms"                 | t) | dump | safe }},
+    nsAiChat:     {{ ("tools.ai-chat.title"       | t) | dump | safe }},
     nsLegacy:     {{ ("tool.files.ns_legacy"      | t) | dump | safe }},
     treeItemLabel:{{ ("tool.files.tree_item_label"| t) | dump | safe }},
     view:         {{ ("tool.files.view"           | t) | dump | safe }},
@@ -125,6 +174,70 @@ eleventyComputed:
     statusDeleted:{{ ("tool.files.status_deleted" | t) | dump | safe }},
     statusExported:{{ ("tool.files.status_exported" | t) | dump | safe }},
     backupDone:   {{ ("tool.files.status_backup_done" | t) | dump | safe }},
+    dbGroup: {{ ("tool.files.db_group" | t) | dump | safe }},
+    cacheModels: {{ ("tool.files.cache_models" | t) | dump | safe }},
+    cacheApp: {{ ("tool.files.cache_app" | t) | dump | safe }},
+    cacheDecks: {{ ("tool.files.cache_decks" | t) | dump | safe }},
+    cacheArt: {{ ("tool.files.cache_art" | t) | dump | safe }},
+    dbRadio: {{ ("tool.files.db_radio" | t) | dump | safe }},
+    dbPush: {{ ("tool.files.db_push" | t) | dump | safe }},
+    dbPacks: {{ ("tool.files.db_packs" | t) | dump | safe }},
+    dbIdentity: {{ ("tool.files.db_identity" | t) | dump | safe }},
+    dbExt: {{ ("tool.files.db_ext" | t) | dump | safe }},
+    dbExtLocal: {{ ("tool.files.db_ext_local" | t) | dump | safe }},
+    dbMedia: {{ ("tool.files.db_media" | t) | dump | safe }},
+    cacheExtData: {{ ("tool.files.cache_ext_data" | t) | dump | safe }},
+    cacheExtFiles: {{ ("tool.files.cache_ext_files" | t) | dump | safe }},
+    cacheLocale: {{ ("tool.files.cache_locale" | t) | dump | safe }},
+    cachePhosphor: {{ ("tool.files.cache_phosphor" | t) | dump | safe }},
+    cacheShare: {{ ("tool.files.cache_share" | t) | dump | safe }},
+    cacheRadio: {{ ("tool.files.cache_radio" | t) | dump | safe }},
+    deleteModels: {{ ("tool.files.delete_models" | t) | dump | safe }},
+    confirmDeleteModels: {{ ("tool.files.confirm_delete_models" | t) | dump | safe }},
+    clearCache: {{ ("tool.files.clear_cache" | t) | dump | safe }},
+    confirmClearCache: {{ ("tool.files.confirm_clear_cache" | t) | dump | safe }},
+    deleteDb: {{ ("tool.files.delete_db" | t) | dump | safe }},
+    confirmDeleteDb: {{ ("tool.files.confirm_delete_db" | t) | dump | safe }},
+    confirmDeleteIdentity: {{ ("tool.files.confirm_delete_identity" | t) | dump | safe }},
+    confirmDeletePacks: {{ ("tool.files.confirm_delete_packs" | t) | dump | safe }},
+    recordsN: {{ ("tool.files.records_n" | t) | dump | safe }},
+    dbBlocked: {{ ("tool.files.db_blocked" | t) | dump | safe }},
+    modelsShare: {{ ("tool.files.models_share" | t) | dump | safe }},
+    eraseType: {{ ("tool.files.erase_type" | t) | dump | safe }},
+    eraseWord: {{ ("tool.files.erase_word" | t) | dump | safe }},
+    eraseWorking: {{ ("tool.files.erase_working" | t) | dump | safe }},
+    eraseDone: {{ ("tool.files.erase_done" | t) | dump | safe }},
+    statusCleared: {{ ("tool.files.status_cleared" | t) | dump | safe }},
+    restoreBusy:  {{ ("about.data_import_busy" | t) | dump | safe }},
+    restoreDone:  {{ ("about.data_import_done" | t) | dump | safe }},
+    restoreFail:  {{ ("about.data_import_fail" | t) | dump | safe }},
+    restoreApplying: {{ ("common.restore_applying" | t) | dump | safe }},
+    restoreCancelled: {{ ("common.restore_cancelled" | t) | dump | safe }},
+    exportBusy:   {{ ("about.data_export_busy" | t) | dump | safe }},
+    size:         {{ ("common.backup_size" | t) | dump | safe }},
+    sizeBusy:     {{ ("common.backup_size_busy" | t) | dump | safe }},
+    largeConfirm: {{ ("common.backup_large_confirm" | t) | dump | safe }},
+    areas: {{ "common.data_areas" | tsub | dump | safe }},
+    restore: {
+      replace:       {{ ("common.restore_replace"        | t) | dump | safe }},
+      totpVault:     {{ ("common.restore_totp_vault"     | t) | dump | safe }},
+      identityVault: {{ ("common.restore_identity_vault" | t) | dump | safe }},
+      finance:       {{ ("common.restore_finance"        | t) | dump | safe }},
+      summary:       {{ ("common.restore_summary"        | t) | dump | safe }}
+    },
+    restoreErr: {
+      file:  {{ ("common.restore_err_file"  | t) | dump | safe }},
+      pass:  {{ ("common.restore_err_pass"  | t) | dump | safe }},
+      space: {{ ("common.restore_err_space" | t) | dump | safe }},
+      newer: {{ ("common.restore_err_newer" | t) | dump | safe }},
+      blocked: {{ ("common.restore_err_blocked" | t) | dump | safe }},
+      finance: {{ ("common.restore_err_finance" | t) | dump | safe }},
+      db: {{ ("common.restore_err_db" | t) | dump | safe }}
+    },
+    exportErr: {
+      blocked: {{ ("common.backup_err_blocked" | t) | dump | safe }},
+      read:    {{ ("common.backup_err_read"    | t) | dump | safe }}
+    },
     passShort:    {{ ("tool.files.status_pass_short" | t) | dump | safe }},
     backupFailed: {{ ("tool.files.status_backup_failed" | t) | dump | safe }},
     strengthHint: {{ ("tool.files.strength_hint"  | t) | dump | safe }},
@@ -144,7 +257,12 @@ eleventyComputed:
     games: COPY.nsGames,
     identity: COPY.nsIdentity,
     ext: COPY.nsExt,
-    ui: COPY.nsUi
+    ui: COPY.nsUi,
+    packs: COPY.nsPacks,
+    feed: COPY.nsFeed,
+    handoff: COPY.nsHandoff,
+    comms: COPY.nsComms,
+    ai_chat: COPY.nsAiChat
   };
 
   const $ = (id) => document.getElementById(id);
@@ -159,15 +277,99 @@ eleventyComputed:
   const summaryEl = $('files-summary');
   const status = MentriaUI.status($('files-status'));
 
-  const state = { buckets: [], cacheBuckets: [], selected: null, cacheView: null };
-  function allBuckets() { return state.buckets.concat(state.cacheBuckets); }
+  const state = { buckets: [], cacheBuckets: [], dbBuckets: [], selected: null, cacheView: null, dbView: null };
+  function allBuckets() { return state.buckets.concat(state.cacheBuckets, state.dbBuckets); }
+  const mainActions = $('files-main-actions');
+  const KNOWN_DBS = ['mentria-radio', 'mentria-push', 'mentria-packs', 'mentria-identity', 'mentria-media', 'mentria-ext-db'];
+  const isModelCache = (nm) => nm === 'mentria-models' || nm.indexOf('mentria-models-') === 0;
+
+  function langName(code) {
+    const ui = document.documentElement.lang || 'en';
+    try {
+      const n = new Intl.DisplayNames([ui], { type: 'language' }).of(code);
+      if (n && n !== code) return n;
+    } catch (_) {}
+    const loc = (window.MENTRIA_LOCALES || []).find((l) => l.code.toLowerCase() === String(code).toLowerCase());
+    return loc ? loc.name : code;
+  }
+  function cacheLabel(nm) {
+    if (nm === 'mentria-models') return COPY.cacheModels;
+    if (isModelCache(nm)) return COPY.cacheModels + ' (' + nm.slice('mentria-models-'.length) + ')';
+    if (nm.indexOf('mentria-cache-') === 0) return COPY.cacheApp;
+    if (nm.indexOf('mentria-decks-') === 0) return COPY.cacheDecks;
+    if (nm === 'mentria-deck-art') return COPY.cacheArt;
+    if (nm === 'mentria-ext-data') return COPY.cacheExtData;
+    if (nm === 'mentria-ext-files') return COPY.cacheExtFiles;
+    if (nm === 'mentria-phosphor-hd') return COPY.cachePhosphor;
+    if (nm === 'mentria-share') return COPY.cacheShare;
+    if (nm === 'mentria-radio') return COPY.cacheRadio;
+    const loc = nm.match(/^mentria-locale-([A-Za-z]{2,3}(?:-[A-Za-z]{2,4})?)-/);
+    if (loc) return COPY.cacheLocale.split('{lang}').join(langName(loc[1]));
+    return nm;
+  }
+  function dbLabel(nm) {
+    if (nm === 'mentria-radio') return COPY.dbRadio;
+    if (nm === 'mentria-push') return COPY.dbPush;
+    if (nm === 'mentria-packs') return COPY.dbPacks;
+    if (nm === 'mentria-identity') return COPY.dbIdentity;
+    if (nm === 'mentria-media') return COPY.dbMedia;
+    if (nm === 'mentria-ext-db') return COPY.dbExtLocal;
+    if (nm.indexOf('mentria-ext-') === 0) return COPY.dbExt.replace('{id}', nm.slice('mentria-ext-'.length));
+    return nm;
+  }
+  function idbReq(req) {
+    return new Promise((resolve, reject) => {
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  function openExistingDb(name) {
+    return new Promise((resolve) => {
+      let req;
+      try { req = indexedDB.open(name); } catch (_) { resolve(null); return; }
+      let created = false;
+      req.onupgradeneeded = () => { created = true; try { req.transaction.abort(); } catch (_) {} };
+      req.onsuccess = () => { if (created) { req.result.close(); resolve(null); } else resolve(req.result); };
+      req.onerror = () => resolve(null);
+      req.onblocked = () => resolve(null);
+    });
+  }
+  async function listDbNames() {
+    if (typeof indexedDB === 'undefined') return [];
+    if (indexedDB.databases) {
+      try { return (await indexedDB.databases()).map((d) => d.name).filter(Boolean); } catch (_) {}
+    }
+    const out = [];
+    for (const nm of KNOWN_DBS) { const db = await openExistingDb(nm); if (db) { out.push(nm); db.close(); } }
+    return out;
+  }
+  async function dbStores(name) {
+    const db = await openExistingDb(name);
+    if (!db) return null;
+    const stores = [];
+    try {
+      for (const st of Array.from(db.objectStoreNames)) {
+        const count = await idbReq(db.transaction(st, 'readonly').objectStore(st).count());
+        stores.push({ name: st, count });
+      }
+    } catch (_) {}
+    db.close();
+    return stores;
+  }
+  function deleteDb(name) {
+    return new Promise((resolve) => {
+      let req;
+      try { req = indexedDB.deleteDatabase(name); } catch (_) { resolve('error'); return; }
+      const timer = setTimeout(() => resolve('blocked'), 4000);
+      req.onsuccess = () => { clearTimeout(timer); resolve('ok'); };
+      req.onerror = () => { clearTimeout(timer); resolve('error'); };
+      req.onblocked = () => {};
+    });
+  }
 
   function fmtBytes(n) {
     if (n == null || isNaN(n)) return DASH;
-    if (n < 1024) return n + ' B';
-    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
-    if (n < 1024 * 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + ' MB';
-    return (n / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+    return MentriaUI.formatBytes(n, 1);
   }
 
   function localFootprint() {
@@ -302,35 +504,51 @@ eleventyComputed:
       btn.appendChild(count);
       treeEl.appendChild(btn);
     });
-    if (state.cacheBuckets.length) {
-      const h = document.createElement('p');
-      h.className = 'files__tree-group';
-      h.textContent = COPY.cachesGroup;
-      treeEl.appendChild(h);
-      state.cacheBuckets.forEach((bucket) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'files__ns';
-        btn.dataset.id = bucket.id;
-        const selected = state.selected === bucket.id;
-        if (selected) btn.classList.add('is-active');
-        btn.setAttribute('aria-current', selected ? 'true' : 'false');
-        btn.setAttribute('aria-label', COPY.treeItemLabel.replace('{name}', bucket.name).replace('{n}', bucket.count));
-        const name = document.createElement('span');
-        name.className = 'files__ns-name';
-        name.textContent = bucket.name;
-        const count = document.createElement('span');
-        count.className = 'files__ns-count';
-        count.textContent = bucket.count;
-        btn.appendChild(name);
-        btn.appendChild(count);
-        treeEl.appendChild(btn);
-      });
-    }
+    appendGroup(COPY.cachesGroup, state.cacheBuckets, (b) => cacheLabel(b.name));
+    appendGroup(COPY.dbGroup, state.dbBuckets, (b) => dbLabel(b.name));
+  }
+
+  function appendGroup(title, buckets, labelOf) {
+    if (!buckets.length) return;
+    const h = document.createElement('p');
+    h.className = 'files__tree-group';
+    h.textContent = title;
+    treeEl.appendChild(h);
+    buckets.forEach((bucket) => {
+      const label = labelOf(bucket);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'files__ns';
+      btn.dataset.id = bucket.id;
+      btn.title = bucket.name;
+      const selected = state.selected === bucket.id;
+      if (selected) btn.classList.add('is-active');
+      btn.setAttribute('aria-current', selected ? 'true' : 'false');
+      btn.setAttribute('aria-label', COPY.treeItemLabel.replace('{name}', label).replace('{n}', bucket.count));
+      const name = document.createElement('span');
+      name.className = 'files__ns-name';
+      name.textContent = label;
+      const count = document.createElement('span');
+      count.className = 'files__ns-count';
+      count.textContent = bucket.count;
+      btn.appendChild(name);
+      btn.appendChild(count);
+      treeEl.appendChild(btn);
+    });
+  }
+
+  function headAction(label, handler) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'm-btn m-btn--danger files-table__btn';
+    btn.textContent = label;
+    btn.addEventListener('click', handler);
+    mainActions.appendChild(btn);
   }
 
   function renderMain() {
     const bucket = state.selected ? allBuckets().find((b) => b.id === state.selected) : null;
+    mainActions.textContent = '';
     if (!bucket) {
       mainTitle.textContent = COPY.selectPrompt;
       mainCount.textContent = '';
@@ -340,6 +558,7 @@ eleventyComputed:
       return;
     }
     if (bucket.kind === 'cache') { renderCacheMain(bucket); return; }
+    if (bucket.kind === 'idb') { renderDbMain(bucket); return; }
     const label = nsLabel(bucket.id);
     mainTitle.textContent = label;
     const items = itemsOf(bucket);
@@ -401,6 +620,7 @@ eleventyComputed:
       for (const nm of names) {
         const c = await caches.open(nm);
         const reqs = await c.keys();
+        if (isModelCache(nm) && !reqs.length) continue;
         out.push({ id: 'cache:' + nm, kind: 'cache', name: nm, count: reqs.length });
       }
       out.sort((a, b) => a.name.localeCompare(b.name));
@@ -409,8 +629,115 @@ eleventyComputed:
     } catch (_) {}
   }
 
+  async function scanDbs() {
+    try {
+      const names = (await listDbNames()).sort();
+      const out = [];
+      for (const nm of names) {
+        const stores = await dbStores(nm);
+        if (!stores) continue;
+        out.push({ id: 'idb:' + nm, kind: 'idb', name: nm, count: stores.reduce((a, st) => a + st.count, 0), stores });
+      }
+      state.dbBuckets = out;
+      if (state.selected && state.selected.indexOf('idb:') === 0 && !out.some((b) => b.id === state.selected)) state.selected = null;
+      renderTree();
+    } catch (_) {}
+  }
+
+  function renderDbMain(bucket) {
+    mainTitle.textContent = dbLabel(bucket.name);
+    mainCount.textContent = COPY.recordsN.replace('{n}', bucket.count);
+    rowsEl.textContent = '';
+    state.dbView = bucket;
+    headAction(COPY.deleteDb, () => deleteDbBucket(bucket));
+    if (!bucket.stores.length) { tableWrap.hidden = true; emptyEl.hidden = false; emptyEl.textContent = COPY.emptyNs; return; }
+    emptyEl.hidden = true;
+    tableWrap.hidden = false;
+    bucket.stores.forEach((st) => {
+      const tr = document.createElement('tr');
+      const keyCell = document.createElement('th');
+      keyCell.scope = 'row';
+      keyCell.className = 'files-table__key';
+      keyCell.textContent = st.name;
+      const sizeCell = document.createElement('td');
+      sizeCell.className = 'files-table__num';
+      sizeCell.textContent = COPY.recordsN.replace('{n}', st.count);
+      const dateCell = document.createElement('td');
+      dateCell.className = 'files-table__date';
+      const actionCell = document.createElement('td');
+      actionCell.className = 'files-table__actions';
+      if (bucket.name !== 'mentria-identity' && st.count) actionCell.appendChild(makeAction(COPY.exportItem, 'dbexport', st.name, 'm-btn--ghost'));
+      tr.appendChild(keyCell);
+      tr.appendChild(sizeCell);
+      tr.appendChild(dateCell);
+      tr.appendChild(actionCell);
+      rowsEl.appendChild(tr);
+    });
+  }
+
+  async function exportDbStore(bucket, storeName) {
+    const db = await openExistingDb(bucket.name);
+    if (!db) return;
+    let rows = [];
+    try { rows = await idbReq(db.transaction(storeName, 'readonly').objectStore(storeName).getAll()); } catch (_) {}
+    db.close();
+    let text;
+    try { text = JSON.stringify(rows, null, 2); } catch (_) { text = '[]'; }
+    MentriaUI.downloadFile(safeName(bucket.name) + '.' + safeName(storeName) + '.json', new Blob([text], { type: 'application/json' }));
+    status.set(COPY.statusExported.replace('{name}', storeName), 'ok');
+  }
+
+  async function deleteDbBucket(bucket) {
+    const label = dbLabel(bucket.name);
+    const msg = bucket.name === 'mentria-identity' ? COPY.confirmDeleteIdentity
+      : bucket.name === 'mentria-packs' ? COPY.confirmDeletePacks
+      : COPY.confirmDeleteDb.replace('{name}', label);
+    if (!(await window.mentriaConfirm(msg, { danger: true }))) return;
+    const res = await deleteDb(bucket.name);
+    if (res === 'blocked') { status.set(COPY.dbBlocked, 'err'); return; }
+    status.set(COPY.statusDeleted.replace('{name}', label), 'ok');
+    state.selected = null;
+    refresh();
+  }
+
+  async function clearCacheBucket(bucket) {
+    if (isModelCache(bucket.name)) {
+      if (!(await window.mentriaConfirm(COPY.confirmDeleteModels, { danger: true }))) return;
+      try { const names = await caches.keys(); await Promise.all(names.filter(isModelCache).map((nm) => caches.delete(nm))); } catch (_) {}
+      status.set(COPY.statusDeleted.replace('{name}', COPY.cacheModels), 'ok');
+    } else {
+      const label = cacheLabel(bucket.name);
+      if (!(await window.mentriaConfirm(COPY.confirmClearCache.replace('{name}', label), { danger: true }))) return;
+      try { await caches.delete(bucket.name); } catch (_) {}
+      status.set(COPY.statusCleared.replace('{name}', label), 'ok');
+    }
+    state.selected = null;
+    refresh();
+  }
+
+  async function modelBytes() {
+    let total = 0;
+    try {
+      for (const nm of await caches.keys()) {
+        if (!isModelCache(nm)) continue;
+        const c = await caches.open(nm);
+        const reqs = await c.keys();
+        if (reqs.length > 400) continue;
+        for (const req of reqs) {
+          const res = await c.match(req);
+          if (!res) continue;
+          const cl = parseInt(res.headers.get('content-length') || '', 10);
+          total += Number.isFinite(cl) && cl > 0 ? cl : (await res.blob()).size;
+        }
+      }
+    } catch (_) {}
+    return total;
+  }
+
   async function renderCacheMain(bucket) {
-    mainTitle.textContent = bucket.name;
+    mainTitle.textContent = cacheLabel(bucket.name);
+    if (isModelCache(bucket.name)) headAction(COPY.deleteModels, () => clearCacheBucket(bucket));
+    else if (bucket.name.indexOf('mentria-cache-') !== 0) headAction(COPY.clearCache, () => clearCacheBucket(bucket));
     mainCount.textContent = bucket.count;
     rowsEl.textContent = '';
     emptyEl.hidden = true;
@@ -479,7 +806,7 @@ eleventyComputed:
       return;
     }
     if (action === 'cdelete') {
-      const ok = await window.mentriaConfirm(COPY.confirmDelete.replace('{name}', en.tail.slice(0, 40)));
+      const ok = await window.mentriaConfirm(COPY.confirmDelete.replace('{name}', en.tail.slice(0, 40)), { danger: true });
       if (!ok) return;
       try {
         const c = await caches.open(cv.name);
@@ -506,6 +833,8 @@ eleventyComputed:
     }
     if (ud && ud.caches > 0) text += ' · ' + COPY.cachesShare.replace('{n}', fmtBytes(ud.caches));
     summaryEl.textContent = text;
+    const models = await modelBytes();
+    if (models > 0 && models >= (est.usage + local) * 0.4) summaryEl.textContent = text + ' · ' + COPY.modelsShare.replace('{n}', fmtBytes(models));
   }
 
   function refresh() {
@@ -514,6 +843,7 @@ eleventyComputed:
     renderMain();
     renderSummary();
     scanCaches();
+    scanDbs();
   }
 
   treeEl.addEventListener('click', (e) => {
@@ -527,8 +857,12 @@ eleventyComputed:
 
   const viewModal = MentriaUI.modal($('files-view-modal'));
   const exportModal = MentriaUI.modal($('files-export-modal'));
+  const restoreModal = MentriaUI.modal($('files-restore-modal'));
+  const eraseModal = MentriaUI.modal($('files-erase-modal'));
   document.body.appendChild($('files-view-modal'));
   document.body.appendChild($('files-export-modal'));
+  document.body.appendChild($('files-restore-modal'));
+  document.body.appendChild($('files-erase-modal'));
 
   const viewTitle = $('files-view-title');
   const viewPre = $('files-view-pre');
@@ -557,18 +891,27 @@ eleventyComputed:
   }
 
   async function deleteItem(bucket, key) {
-    const msg = (bucket.id === 'totp')
-      ? COPY.confirmDeleteTotp.replace('{name}', key)
-      : COPY.confirmDelete.replace('{name}', key);
-    const ok = await window.mentriaConfirm(msg);
-    if (!ok) return;
+    const guarded = bucket.id === 'totp' || bucket.id === 'identity';
+    if (guarded) {
+      const msg = bucket.id === 'totp' ? COPY.confirmDeleteTotp.replace('{name}', key) : COPY.confirmDelete.replace('{name}', key);
+      if (!(await window.mentriaConfirm(msg, { danger: true }))) return;
+    }
+    let saved = null;
     if (bucket.kind === 'legacy') {
-      try { localStorage.removeItem(key); } catch (_) {}
+      try { saved = localStorage.getItem(key); localStorage.removeItem(key); } catch (_) {}
     } else {
+      try { saved = store.get(bucket.id, key); } catch (_) {}
       store.remove(bucket.id, key);
     }
     status.set(COPY.statusDeleted.replace('{name}', key), 'ok');
     refresh();
+    if (guarded || saved == null) return;
+    MentriaUI.undoToast(COPY.statusDeleted.replace('{name}', key), () => {
+      if (bucket.kind === 'legacy') { try { localStorage.setItem(key, saved); } catch (_) {} }
+      else store.set(bucket.id, key, saved);
+      status.clear();
+      refresh();
+    });
   }
 
   function exportItem(bucket, key) {
@@ -582,6 +925,7 @@ eleventyComputed:
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
     if (btn.dataset.action === 'cview' || btn.dataset.action === 'cdelete') { cacheAction(btn.dataset.action, Number(btn.dataset.key)); return; }
+    if (btn.dataset.action === 'dbexport') { if (state.dbView) exportDbStore(state.dbView, btn.dataset.key); return; }
     const bucket = state.selected ? allBuckets().find((b) => b.id === state.selected) : null;
     if (!bucket) return;
     const key = btn.dataset.key;
@@ -606,35 +950,183 @@ eleventyComputed:
     strengthEl.textContent = COPY.strengthHint.replace('{label}', strengthLabel(s.label));
   });
 
+  passInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('files-export-confirm').click(); }
+  });
+  $('files-restore-pass').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('files-restore-confirm').click(); }
+  });
+
+  const sizeEl = $('files-export-size');
+  const sizeWarn = $('files-export-warn');
+  COPY.restore.areas = COPY.areas;
+
+  function pct(f) {
+    try { return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'percent' }).format(f); }
+    catch (_) { return Math.round(f * 100) + '%'; }
+  }
+
+  function progressTo(el, label) {
+    let last = -1;
+    return (f) => {
+      const step = Math.floor(f * 100);
+      if (step === last) return;
+      last = step;
+      el.textContent = label + ' ' + pct(step / 100);
+    };
+  }
+
+  function showSize(m) {
+    const parts = m.areas.filter((a) => a.bytes > 0).map((a) => (COPY.areas[a.area] || a.area) + ' ' + fmtBytes(a.bytes));
+    sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', MentriaBackup.listJoin(parts));
+    sizeWarn.hidden = m.total <= MentriaBackup.LARGE_BYTES;
+  }
+
+  let measuring = false;
+  function measure() {
+    if (measuring || !window.MentriaBackup) return;
+    measuring = true;
+    sizeEl.textContent = COPY.sizeBusy;
+    sizeWarn.hidden = true;
+    MentriaBackup.prepareBackup().then(showSize, (err) => {
+      sizeEl.textContent = '';
+      const ecode = MentriaBackup.exportErrorCode(err);
+      strengthEl.dataset.level = 'weak';
+      strengthEl.textContent = ecode ? COPY.exportErr[ecode] : COPY.backupFailed.replace('{msg}', String(err && err.message || err));
+    }).then(() => { measuring = false; });
+  }
+
   $('files-export-all').addEventListener('click', () => {
     passInput.value = '';
     strengthEl.textContent = '';
     strengthEl.dataset.level = '';
     exportModal.open();
     passInput.focus();
+    measure();
   });
 
   $('files-export-confirm').addEventListener('click', async () => {
     if (!window.MentriaBackup) { status.set(COPY.backupFailed.replace('{msg}', 'MentriaBackup'), 'err'); return; }
     const pass = passInput.value;
-    if (!pass || pass.length < 8) { status.set(COPY.passShort, 'err'); return; }
+    if (!pass || pass.length < 8) { strengthEl.dataset.level = 'weak'; strengthEl.textContent = COPY.passShort; passInput.focus(); return; }
     const btn = $('files-export-confirm');
     btn.disabled = true;
+    strengthEl.dataset.level = '';
+    strengthEl.textContent = COPY.exportBusy;
     try {
-      const env = await MentriaBackup.encryptBackup(store.exportAll(), pass);
-      MentriaBackup.downloadBackupJson(env, 'mentria-files-backup');
+      const prepared = await MentriaBackup.prepareBackup();
+      showSize(prepared);
+      if (prepared.total > MentriaBackup.LARGE_BYTES && !(await window.mentriaConfirm(COPY.largeConfirm.replace('{size}', fmtBytes(prepared.total))))) {
+        strengthEl.textContent = '';
+        return;
+      }
+      const out = await MentriaBackup.sealBackup(prepared, pass, { onProgress: progressTo(strengthEl, COPY.exportBusy) });
+      MentriaBackup.downloadBlob(out.blob, 'mentria-files-backup');
       passInput.value = '';
+      strengthEl.textContent = '';
       exportModal.close();
       status.set(COPY.backupDone, 'ok');
     } catch (err) {
-      status.set(COPY.backupFailed.replace('{msg}', String(err && err.message || err)), 'err');
+      const ecode = MentriaBackup.exportErrorCode(err);
+      strengthEl.dataset.level = 'weak';
+      strengthEl.textContent = ecode ? COPY.exportErr[ecode] : COPY.backupFailed.replace('{msg}', String(err && err.message || err));
     } finally {
       btn.disabled = false;
     }
   });
 
+  $('files-restore').addEventListener('click', () => {
+    $('files-restore-file').value = '';
+    $('files-restore-pass').value = '';
+    $('files-restore-status').textContent = '';
+    restoreModal.open();
+    $('files-restore-file').focus();
+  });
+
+  $('files-restore-confirm').addEventListener('click', async () => {
+    const fileEl = $('files-restore-file');
+    const passEl = $('files-restore-pass');
+    const out = $('files-restore-status');
+    const f = fileEl.files && fileEl.files[0];
+    if (!f) { fileEl.focus(); return; }
+    if (!passEl.value) { passEl.focus(); return; }
+    if (!window.MentriaBackup) { out.textContent = COPY.restoreFail.replace('{err}', 'MentriaBackup'); return; }
+    const btn = $('files-restore-confirm');
+    btn.disabled = true;
+    out.textContent = COPY.restoreBusy;
+    try {
+      const data = await MentriaBackup.readBackupFile(f, passEl.value, { onProgress: progressTo(out, COPY.restoreBusy) });
+      passEl.value = '';
+      out.textContent = COPY.restoreApplying;
+      const result = await MentriaBackup.applyRestore(data, COPY.restore);
+      if (result.cancelled) {
+        out.textContent = COPY.restoreCancelled;
+        btn.disabled = false;
+        return;
+      }
+      out.textContent = COPY.restoreDone.replace('{n}', result.restored);
+      setTimeout(() => { location.reload(); }, 1200);
+    } catch (err) {
+      const code = MentriaBackup.restoreErrorCode(err);
+      out.textContent = code ? COPY.restoreErr[code] : COPY.restoreFail.replace('{err}', String(err && err.message || err));
+      btn.disabled = false;
+    } finally {
+      passEl.value = '';
+    }
+  });
+
+  const eraseWord = $('files-erase-word');
+  const eraseBtn = $('files-erase-confirm');
+  const eraseOut = $('files-erase-status');
+  $('files-erase-word-label').textContent = COPY.eraseType.replace('{word}', COPY.eraseWord);
+  eraseWord.addEventListener('input', () => {
+    eraseBtn.disabled = eraseWord.value.trim().toLocaleLowerCase() !== COPY.eraseWord.toLocaleLowerCase();
+  });
+  $('files-erase').addEventListener('click', () => {
+    eraseWord.value = '';
+    eraseBtn.disabled = true;
+    eraseOut.textContent = '';
+    eraseModal.open();
+    eraseWord.focus();
+  });
+  eraseBtn.addEventListener('click', async () => {
+    if (eraseBtn.disabled) return;
+    eraseBtn.disabled = true;
+    eraseWord.disabled = true;
+    eraseOut.textContent = COPY.eraseWorking;
+    const settle = (p, ms) => Promise.race([p.catch(() => {}), new Promise((r) => setTimeout(r, ms))]);
+    try {
+      const reg = navigator.serviceWorker ? await settle(navigator.serviceWorker.getRegistration(), 2000) : null;
+      const sub = reg && reg.pushManager ? await settle(reg.pushManager.getSubscription(), 2000) : null;
+      if (sub) await settle(sub.unsubscribe(), 3000);
+    } catch (_) {}
+    try { localStorage.clear(); } catch (_) {}
+    try { sessionStorage.clear(); } catch (_) {}
+    try {
+      const names = await settle(listDbNames(), 3000);
+      for (const nm of names || []) await deleteDb(nm);
+    } catch (_) {}
+    try { if (typeof caches !== 'undefined') for (const nm of await caches.keys()) await caches.delete(nm); } catch (_) {}
+    try {
+      if (navigator.storage && navigator.storage.getDirectory) {
+        const root = await navigator.storage.getDirectory();
+        for await (const name of root.keys()) await root.removeEntry(name, { recursive: true });
+      }
+    } catch (_) {}
+    try {
+      if (navigator.serviceWorker) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+    } catch (_) {}
+    try { localStorage.clear(); } catch (_) {}
+    location.replace(location.pathname + '?erased=1');
+  });
+
+  if (/[?&]erased=1/.test(location.search)) {
+    history.replaceState(null, '', location.pathname);
+    status.set(COPY.eraseDone, 'ok');
+  }
+
   document.querySelectorAll('.files-modal [data-close]').forEach((el) => {
-    el.addEventListener('click', () => { viewModal.close(); exportModal.close(); });
+    el.addEventListener('click', () => { viewModal.close(); exportModal.close(); restoreModal.close(); eraseModal.close(); });
   });
 
   $('files-refresh').addEventListener('click', () => { refresh(); status.set('', ''); status.clear(); });
@@ -646,6 +1138,9 @@ eleventyComputed:
 </script>
 
 <style>
+.files__main-actions { display: flex; gap: 0.5rem; margin-left: auto; }
+.files__main-actions:empty { display: none; }
+
 .files {
   display: flex;
   flex-direction: column;
@@ -730,9 +1225,8 @@ eleventyComputed:
   color: var(--syn-cyan);
 }
 .files__ns-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .files__ns-count {
   flex-shrink: 0;
@@ -861,6 +1355,7 @@ eleventyComputed:
   color: var(--term-muted);
   line-height: 1.5;
 }
+.files-modal__p:empty { display: none; }
 .files-modal__note {
   margin: 0;
   font-size: var(--text-2xs);
@@ -899,10 +1394,9 @@ eleventyComputed:
 
 @media (max-width: 640px) {
   .files__body { grid-template-columns: 1fr; }
-  .files__tree { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .files__ns { width: 100%; min-width: 0; }
-  .files__ns-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .files__tree-group { grid-column: 1 / -1; }
+  .files__tree { flex-flow: row wrap; }
+  .files__ns { flex: 1 1 auto; width: auto; min-width: 0; max-width: 100%; }
+  .files__tree-group, .files__tree-empty { flex: 0 0 100%; }
   .files-table__actions { justify-content: flex-start; }
   .m-input { font-size: 16px; }
 }

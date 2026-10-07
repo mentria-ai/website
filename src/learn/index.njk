@@ -9,12 +9,26 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'learn.title' | t }}"
   description: "{{ 'learn.lede' | t }}"
+localeReload: true
 ---
 <link rel="stylesheet" href="/assets/css/learn.css?v={{ buildHash }}">
 <section class="hero" style="padding-top:1rem;">
-    <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">learn</span></p>
+    <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">learn</span></p>
     <h1>{{ "learn.title" | t }}</h1>
     <p>{{ "learn.lede" | t }}</p>
+</section>
+
+<div class="learn-search" role="search">
+    <label class="sr-only" for="learn-q">{{ "learn.search_label" | t }}</label>
+    <input type="search" id="learn-q" class="learn-input learn-search__input" placeholder="{{ 'learn.search_placeholder' | t }}" autocomplete="off" spellcheck="false" enterkeyhint="search">
+</div>
+<p class="learn-empty learn-search__none" id="learn-none" role="status" hidden></p>
+
+<section class="learn-shelf learn-continue" id="learn-continue" aria-labelledby="learn-continue-h" hidden>
+    <div class="learn-section-head">
+        <h2 id="learn-continue-h">{{ "learn.continue" | t }}</h2>
+    </div>
+    <ul class="learn-grid learn-grid--row" id="learn-continue-list"></ul>
 </section>
 
 <section class="learn-mine" id="learn-mine" aria-labelledby="learn-mine-h">
@@ -37,7 +51,7 @@ eleventyComputed:
             <textarea class="learn-input learn-textarea" id="learn-paste" rows="6" placeholder="{{ 'learn.paste_placeholder' | t }}" spellcheck="false"></textarea>
             <button type="button" class="learn-btn" id="learn-paste-go">{{ "learn.import" | t }}</button>
         </details>
-        <p class="learn-import__hint">{{ "learn.import_hint" | t }} <button type="button" class="learn-link" id="learn-example">{{ "learn.try_example" | t }}</button> · <a class="learn-link" href="/learn/format/">{{ "learn.format_link" | t }}</a></p>
+        <p class="learn-import__hint">{{ "learn.import_hint" | t }} <button type="button" class="learn-link" id="learn-example">{{ "learn.try_example" | t }}</button> · <a class="learn-link" href="{{ locale.pathPrefix }}/learn/format/">{{ "learn.format_link" | t }}</a></p>
         <p class="learn-import__status" id="learn-status" role="status" aria-live="polite"></p>
     </div>
     <p class="learn-empty" id="learn-empty">{{ "learn.empty_packs" | t }}</p>
@@ -50,19 +64,20 @@ eleventyComputed:
   { key: "deepcuts", title: ("learn.deepcuts_shelf" | t), lede: ("learn.deepcuts_lede" | t) }
 ] %}
 {% for g in groups %}
-<section class="learn-shelf" aria-labelledby="learn-shelf-{{ g.key }}">
+<section class="learn-shelf learn-shelf--native" aria-labelledby="learn-shelf-{{ g.key }}">
     <div class="learn-section-head">
         <h2 id="learn-shelf-{{ g.key }}">{{ g.title }}</h2>
+        <button type="button" class="learn-btn learn-shelf__all" hidden></button>
         <p class="learn-section-lede">{{ g.lede }}</p>
     </div>
     <ul class="learn-grid learn-grid--native" data-collection="{{ g.key }}">
         {% for pack in packs %}{% if pack.collection == g.key %}
-        <li class="learn-tile" data-pack-id="{{ pack.id }}">
+        <li class="learn-tile" data-pack-id="{{ pack.id }}" data-cards="{{ pack.cards.length }}">
             <a class="learn-tile__link" href="{{ locale.pathPrefix }}/learn/{{ pack.id }}/">
-                {% if pack.cover %}<img class="learn-tile__cover" src="{{ pack.cover }}" alt="" loading="lazy" decoding="async">{% else %}<span class="learn-tile__cover learn-tile__cover--blank"></span>{% endif %}
+                {% if pack.cover %}<img class="learn-tile__cover" src="{{ pack.cover | coverThumb }}" data-full="{{ pack.cover }}" alt="" loading="lazy" decoding="async" onerror="if(this.dataset.full&&this.getAttribute('src')!==this.dataset.full){this.src=this.dataset.full}else{this.classList.add('is-broken')}">{% else %}<span class="learn-tile__cover learn-tile__cover--blank"></span>{% endif %}
                 <span class="learn-tile__body">
                     <span class="learn-tile__title">{{ pack.title | tloc(locale.code) }}</span>
-                    <span class="learn-tile__meta">{{ ("learn.cards_n" | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</span>
+                    <span class="learn-tile__meta">{{ (("learn.cards_n_one" if pack.cards.length == 1 else "learn.cards_n") | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</span>
                     <span class="learn-tile__progress" hidden><span class="learn-tile__progress-fill"></span></span>
                 </span>
             </a>
@@ -76,25 +91,47 @@ eleventyComputed:
   window.MENTRIA_LEARN_PAGE = {
     prefix: {{ locale.pathPrefix | dump | safe }},
     cards_n: {{ ("learn.cards_n" | t) | dump | safe }},
+    cards_n_one: {{ ("learn.cards_n_one" | t) | dump | safe }},
     minutes_n: {{ ("learn.minutes_n" | t) | dump | safe }},
     imported: {{ ("learn.imported" | t) | dump | safe }},
     replaced: {{ ("learn.replaced" | t) | dump | safe }},
     import_failed: {{ ("learn.import_failed" | t) | dump | safe }},
+    import_err_empty: {{ ("learn.import_err_empty" | t) | dump | safe }},
+    import_err_json: {{ ("learn.import_err_json" | t) | dump | safe }},
+    import_err_at: {{ ("learn.import_err_at" | t) | dump | safe }},
+    import_err_kind: {{ ("learn.import_err_kind" | t) | dump | safe }},
+    import_err_size: {{ ("learn.import_err_size" | t) | dump | safe }},
+    import_err_invalid: {{ ("learn.import_err_invalid" | t) | dump | safe }},
+    import_err_network: {{ ("learn.import_err_network" | t) | dump | safe }},
+    import_err_url: {{ ("learn.import_err_url" | t) | dump | safe }},
+    import_err_other: {{ ("learn.import_err_other" | t) | dump | safe }},
+    import_err_storage_full: {{ ("learn.import_err_storage_full" | t) | dump | safe }},
+    import_err_storage_blocked: {{ ("learn.import_err_storage_blocked" | t) | dump | safe }},
     importing: {{ ("learn.importing" | t) | dump | safe }},
+    import_url_confirm: {{ ("learn.import_url_confirm" | t) | dump | safe }},
+    import_host_blocked: {{ ("learn.import_host_blocked" | t) | dump | safe }},
+    import_course_host_blocked: {{ ("learn.import_course_host_blocked" | t) | dump | safe }},
     remove: {{ ("learn.remove" | t) | dump | safe }},
     share: {{ ("learn.share" | t) | dump | safe }},
     course: {{ ("learn.course" | t) | dump | safe }},
     course_packs_n: {{ ("learn.course_packs_n" | t) | dump | safe }},
+    course_packs_n_one: {{ ("learn.course_packs_n_one" | t) | dump | safe }},
     remove_course: {{ ("learn.remove_course" | t) | dump | safe }},
     remove_course_confirm: {{ ("learn.remove_course_confirm" | t) | dump | safe }},
     imported_course: {{ ("learn.imported_course" | t) | dump | safe }},
+    imported_course_one: {{ ("learn.imported_course_one" | t) | dump | safe }},
     single_packs: {{ ("learn.single_packs" | t) | dump | safe }},
     show_all_packs: {{ ("learn.show_all_packs" | t) | dump | safe }},
+    show_all_packs_one: {{ ("learn.show_all_packs_one" | t) | dump | safe }},
     shared_hint: {{ ("learn.shared_hint" | t) | dump | safe }},
     remove_confirm: {{ ("learn.remove_confirm" | t) | dump | safe }},
     open: {{ ("learn.open" | t) | dump | safe }},
     progress_n: {{ ("learn.progress_n" | t) | dump | safe }},
-    from_contact: {{ ("learn.from_contact" | t) | dump | safe }}
+    from_contact: {{ ("learn.from_contact" | t) | dump | safe }},
+    finished: {{ ("learn.finish_kicker" | t) | dump | safe }},
+    no_match: {{ ("learn.no_match" | t) | dump | safe }},
+    see_all: {{ ("learn.see_all" | t) | dump | safe }},
+    show_less: {{ ("learn.show_less" | t) | dump | safe }}
   };
 </script>
 <script src="/assets/js/mentria-backdrop.js?v={{ buildHash }}"></script>

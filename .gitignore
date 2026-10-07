@@ -16,3 +16,4 @@ src/assets/mentria/loras/
 
 # Deep Cuts images live on cdn.mentria.ai, not in the repo
 src/assets/img/feed/deepcuts*/
+!src/assets/vendor/three-0.186.0/build/

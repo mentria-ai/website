@@ -1,0 +1,1473 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/gallery/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.gallery.title' | t }}"
+  description: "{{ 'tools.gallery.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">gallery</span></p>
+  <h1>{{ "tools.gallery.title" | t }}</h1>
+  <p>{{ "tools.gallery.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "gallery.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="gl" id="gl">
+  <p class="gl__progress" id="gl-progress" role="status" aria-live="polite" hidden></p>
+  <div class="gl__start" id="gl-start">
+    <div class="gl__drop">
+      <svg class="gl__drop-icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#tool-gallery"></use></svg>
+      <p class="gl__drop-title">{{ "tool.gallery.drop" | t }}</p>
+      <div class="gl__actions">
+        <button type="button" class="m-btn m-btn--primary" id="gl-open-files">{{ "tool.gallery.open_files" | t }}</button>
+        <button type="button" class="m-btn m-btn--ghost" id="gl-open-folder">{{ "tool.gallery.open_folder" | t }}</button>
+      </div>
+      <p class="gl__hint">{{ "tool.gallery.drop_hint" | t }}</p>
+      <p class="gl__hint" id="gl-ios-hint" hidden>{{ "tool.gallery.ios_hint" | t }}</p>
+    </div>
+    <section class="gl__shelf" id="gl-folders" hidden>
+      <h2 class="gl__h2">{{ "tool.gallery.saved_title" | t }}</h2>
+      <ul class="gl__folders" id="gl-folder-list"></ul>
+    </section>
+    <section class="gl__shelf" id="gl-kept" hidden>
+      <h2 class="gl__h2">{{ "tool.gallery.kept_title" | t }}</h2>
+      <div class="gl__folder">
+        <span class="gl__folder-name" id="gl-kept-count"></span>
+        <button type="button" class="m-btn m-btn--ghost gl__small" id="gl-kept-forget">{{ "tool.gallery.forget" | t }}</button>
+      </div>
+      <p class="gl__hint gl__kept-hint">{{ "tool.gallery.kept_hint" | t }}</p>
+    </section>
+  </div>
+
+  <div class="gl__main" id="gl-main" hidden>
+    <div class="gl__bar">
+      <div class="gl__src">
+        <p class="gl__src-name" id="gl-src-name"></p>
+        <p class="gl__src-count" id="gl-src-count"></p>
+      </div>
+      <div class="gl__filter" id="gl-filter" role="group" aria-label="{{ 'tool.gallery.filter' | t }}" hidden>
+        <button type="button" class="gl__seg" data-filter="all" aria-pressed="true">{{ "tool.gallery.filter_all" | t }}</button>
+        <button type="button" class="gl__seg" data-filter="image" aria-pressed="false">{{ "tool.gallery.filter_photos" | t }}</button>
+        <button type="button" class="gl__seg" data-filter="video" aria-pressed="false">{{ "tool.gallery.filter_videos" | t }}</button>
+      </div>
+      <div class="gl__tools">
+        <button type="button" class="gl__btn" id="gl-show" aria-label="{{ 'tool.gallery.slideshow' | t }}" title="{{ 'tool.gallery.slideshow' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5.5v13l11-6.5z"/></svg></button>
+        <button type="button" class="gl__btn" id="gl-add" aria-label="{{ 'tool.gallery.add' | t }}" title="{{ 'tool.gallery.add' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button type="button" class="gl__btn" id="gl-home" aria-label="{{ 'tool.gallery.folders' | t }}" title="{{ 'tool.gallery.folders' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2h7.5A2.5 2.5 0 0 1 21 9.5v7a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 16.5z"/></svg></button>
+        <button type="button" class="gl__btn" id="gl-forget" aria-label="{{ 'tool.gallery.forget_photos' | t }}" title="{{ 'tool.gallery.forget_photos' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9.5 7V4.5h5V7M6 7l1 12.5h10L18 7M10 11v5.5M14 11v5.5"/></svg></button>
+      </div>
+    </div>
+    <div class="gl__grid" id="gl-grid"></div>
+    <p class="gl__keys">{{ "tool.gallery.keys" | t }}</p>
+  </div>
+</section>
+{% include "terminal-frame-close.njk" %}
+{% include "tool-schema.njk" %}
+
+<div class="gl-box" id="gl-box" role="dialog" aria-modal="true" aria-labelledby="gl-box-name" hidden>
+  <div class="gl-box__stage" id="gl-stage">
+    <div class="gl-box__slide"></div>
+    <div class="gl-box__slide"></div>
+    <div class="gl-box__slide"></div>
+  </div>
+  <div class="gl-box__top">
+    <button type="button" class="gl-box__btn" id="gl-close" aria-label="{{ 'tool.gallery.close' | t }}" title="{{ 'tool.gallery.close' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="gl-box__title"><p class="gl-box__name" id="gl-box-name"></p><p class="gl-box__count" id="gl-box-count"></p></div>
+    <button type="button" class="gl-box__btn" id="gl-play" aria-pressed="false"><svg class="gl-box__on" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5.5v13l11-6.5z"/></svg><svg class="gl-box__off" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13M16 5.5v13"/></svg></button>
+    <button type="button" class="gl-box__btn" id="gl-share" aria-label="{{ 'tool.gallery.share' | t }}" title="{{ 'tool.gallery.share' | t }}" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 8 12 3.5 16.5 8M5 13.5V18a2.5 2.5 0 0 0 2.5 2.5h9A2.5 2.5 0 0 0 19 18v-4.5"/></svg></button>
+    <button type="button" class="gl-box__btn" id="gl-send" aria-label="{{ 'tool.gallery.send' | t }}" title="{{ 'tool.gallery.send' | t }}" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 5.5 20 12l-6.5 6.5M20 12H9.5A5.5 5.5 0 0 0 4 17.5v1"/></svg></button>
+    <button type="button" class="gl-box__btn" id="gl-info-btn" aria-expanded="false" aria-controls="gl-info" aria-label="{{ 'tool.gallery.details' | t }}" title="{{ 'tool.gallery.details' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.4"/></svg></button>
+  </div>
+  <button type="button" class="gl-box__nav gl-box__nav--prev" id="gl-prev" aria-label="{{ 'tool.gallery.prev' | t }}" title="{{ 'tool.gallery.prev' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button type="button" class="gl-box__nav gl-box__nav--next" id="gl-next" aria-label="{{ 'tool.gallery.next' | t }}" title="{{ 'tool.gallery.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  <aside class="gl-info" id="gl-info" aria-labelledby="gl-info-title" hidden>
+    <h2 class="gl-info__title" id="gl-info-title">{{ "tool.gallery.details" | t }}</h2>
+    <dl class="gl-info__list" id="gl-info-list"></dl>
+  </aside>
+</div>
+
+{% set glKeys = ["no_media", "scanning", "reading_dates", "selection", "count_photos", "count_photos_one", "count_videos", "count_videos_one", "slideshow", "slideshow_stop", "position", "open", "reconnect", "forget_label", "forget_photos", "forget_folder", "forget_photos_confirm", "forget_folder_confirm", "forgotten", "folder_denied", "share_failed", "info_name", "info_taken", "info_modified", "info_dimensions", "info_duration", "info_size", "info_type", "info_folder", "info_camera", "info_lens", "info_exposure", "info_location", "copy", "copied", "copy_failed", "err_heic", "err_jxl", "err_image", "err_video", "err_mkv_apple", "err_avi"] %}
+<script>
+window.MENTRIA_GL_COPY = {
+{%- for k in glKeys %}
+  {{ k | dump | safe }}: {{ ("tool.gallery." + k) | t | dump | safe }}{% if not loop.last %},{% endif %}
+{%- endfor %}
+};
+</script>
+<script type="module">
+import * as M from '/assets/js/mentria-media.js?v={{ buildHash }}';
+
+const C = window.MENTRIA_GL_COPY;
+const $ = (id) => document.getElementById(id);
+const root = $('gl');
+const startEl = $('gl-start');
+const mainEl = $('gl-main');
+const grid = $('gl-grid');
+const progressEl = $('gl-progress');
+const box = $('gl-box');
+const stage = $('gl-stage');
+const infoEl = $('gl-info');
+const playBtn = $('gl-play');
+const shareBtn = $('gl-share');
+const sendBtn = $('gl-send');
+const GAP = 3;
+const HEAD_H = 44;
+const SECTION_GAP = 14;
+const URL_CAP = 1200;
+const SLIDE_GAP = 24;
+const SHOW_MS = 4000;
+const KINDS = ['image', 'video'];
+const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
+let all = [];
+let items = [];
+let byFp = new Map();
+let filter = 'all';
+let source = { name: '', folderId: '' };
+let loadToken = 0;
+let layout = { rows: [], height: 0, cols: 0, cell: 0 };
+let view = { from: 0, to: 0 };
+let rafId = 0;
+let pendingRelayout = false;
+let lastWidth = 0;
+let busyImg = 0;
+let busyVid = 0;
+let monthNames = new Map();
+let launched = false;
+let dateFmt = null;
+let timeFmt = null;
+const rendered = new Map();
+const thumbUrls = new Map();
+const thumbState = new Map();
+const exifRead = new WeakSet();
+let saved = new Set();
+let keptToken = 0;
+
+function lang() { return document.documentElement.lang || 'en'; }
+function fill(tpl, vars) { return String(tpl || '').replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m)); }
+function toast(msg) { if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast(msg); }
+function num(n) { try { return new Intl.NumberFormat(lang()).format(n); } catch (_) { return String(n); } }
+function when(e) { return e.taken || e.lastModified || 0; }
+function monthOf(t) { const d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
+function progress(text) { progressEl.textContent = text || ''; progressEl.hidden = !text; }
+function confirmDanger(text) { return typeof window.mentriaConfirm === 'function' ? window.mentriaConfirm(text, { danger: true }) : Promise.resolve(false); }
+
+async function refreshSaved() {
+  saved = new Set((await M.listFolders()).map((f) => f.id));
+  return saved;
+}
+function keepPlace(e) { return !!(e.folderId && saved.has(e.folderId)); }
+function placeless(exif) {
+  const out = Object.assign({}, exif);
+  delete out.lat;
+  delete out.lon;
+  return out;
+}
+function storable(e, patch) {
+  return patch.exif && !keepPlace(e) ? Object.assign({}, patch, { exif: placeless(patch.exif) }) : patch;
+}
+function countText(list) {
+  let photos = 0;
+  list.forEach((e) => { if (e.kind === 'image') photos++; });
+  const videos = list.length - photos;
+  const parts = [];
+  if (photos) parts.push(fill(photos === 1 ? C.count_photos_one : C.count_photos, { n: num(photos) }));
+  if (videos) parts.push(fill(videos === 1 ? C.count_videos_one : C.count_videos, { n: num(videos) }));
+  return { photos, videos, text: parts.join(' · ') };
+}
+
+function monthLabel(key) {
+  if (!monthNames.has(key)) {
+    const d = new Date(Math.floor(key / 12), key % 12, 1);
+    let label;
+    try { label = new Intl.DateTimeFormat(lang(), { month: 'long', year: 'numeric' }).format(d); } catch (_) { label = d.toDateString(); }
+    monthNames.set(key, label);
+  }
+  return monthNames.get(key);
+}
+function dayText(t) {
+  if (!dateFmt) { try { dateFmt = new Intl.DateTimeFormat(lang(), { dateStyle: 'medium' }); } catch (_) { dateFmt = { format: (d) => d.toDateString() }; } }
+  return dateFmt.format(new Date(t));
+}
+function dateTimeText(t) {
+  if (!timeFmt) { try { timeFmt = new Intl.DateTimeFormat(lang(), { dateStyle: 'medium', timeStyle: 'short' }); } catch (_) { timeFmt = { format: (d) => d.toString() }; } }
+  return timeFmt.format(new Date(t));
+}
+
+function rebuild() {
+  items = all.filter((e) => filter === 'all' || e.kind === filter);
+  items.forEach((e) => { e._t = when(e); e._m = monthOf(e._t); });
+  items.sort((a, b) => (b._t - a._t) || collator.compare(a.name, b.name));
+}
+
+function computeLayout() {
+  const width = grid.clientWidth || 1;
+  const target = width < 560 ? 104 : (width < 960 ? 136 : 164);
+  const cols = Math.max(3, Math.round((width + GAP) / (target + GAP)));
+  const cell = Math.floor(((width - GAP * (cols - 1)) / cols) * 100) / 100;
+  const rows = [];
+  let y = 0;
+  for (let i = 0; i < items.length;) {
+    const key = items[i]._m;
+    let j = i;
+    while (j < items.length && items[j]._m === key) j++;
+    rows.push({ type: 'head', y, h: HEAD_H, key, start: i, count: j - i });
+    y += HEAD_H;
+    for (let k = i; k < j; k += cols) {
+      rows.push({ type: 'cells', y, h: cell, start: k, count: Math.min(cols, j - k) });
+      y += cell + GAP;
+    }
+    y += SECTION_GAP;
+    i = j;
+  }
+  layout = { rows, height: y, cols, cell };
+  grid.style.height = Math.max(0, Math.round(y)) + 'px';
+}
+
+function firstRowBelow(y) {
+  let lo = 0;
+  let hi = layout.rows.length - 1;
+  let ans = layout.rows.length;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    const row = layout.rows[mid];
+    if (row.y + row.h >= y) { ans = mid; hi = mid - 1; } else lo = mid + 1;
+  }
+  return ans;
+}
+
+function rowOfItem(k) {
+  let lo = 0;
+  let hi = layout.rows.length - 1;
+  let ans = -1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (layout.rows[mid].start <= k) { ans = mid; lo = mid + 1; } else hi = mid - 1;
+  }
+  return ans;
+}
+
+function scroller() {
+  let el = grid.parentElement;
+  while (el && el !== document.body && el !== document.documentElement) {
+    const oy = getComputedStyle(el).overflowY;
+    if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight + 1) return el;
+    el = el.parentElement;
+  }
+  return null;
+}
+function scrollByY(dy) {
+  if (!dy) return;
+  const sc = scroller();
+  if (sc) sc.scrollTop += dy;
+  else window.scrollBy(0, dy);
+}
+
+function anchorNow() {
+  if (mainEl.hidden || !layout.rows.length) return null;
+  const top = Math.max(0, -grid.getBoundingClientRect().top);
+  if (!top) return null;
+  for (let r = firstRowBelow(top); r < layout.rows.length; r++) {
+    const row = layout.rows[r];
+    if (row.type === 'cells') return { fp: items[row.start].fp, off: row.y - top };
+  }
+  return null;
+}
+function restoreAnchor(a) {
+  if (!a) return;
+  const k = items.findIndex((e) => e.fp === a.fp);
+  if (k === -1) return;
+  const row = layout.rows[rowOfItem(k)];
+  if (!row) return;
+  const top = Math.max(0, -grid.getBoundingClientRect().top);
+  scrollByY(Math.round(row.y - a.off - top));
+}
+
+function clearRows() {
+  rendered.forEach((el) => el.remove());
+  rendered.clear();
+}
+
+function relayout(resort) {
+  if (!box.hidden) { pendingRelayout = pendingRelayout || resort || true; return; }
+  const a = anchorNow();
+  if (resort) rebuild();
+  clearRows();
+  computeLayout();
+  restoreAnchor(a);
+  render();
+}
+
+function schedule() {
+  if (!rafId) rafId = requestAnimationFrame(render);
+}
+
+function render() {
+  rafId = 0;
+  if (mainEl.hidden || !layout.rows.length) return;
+  const r = grid.getBoundingClientRect();
+  const vh = window.innerHeight || 800;
+  const from = -r.top - vh * 0.75;
+  const to = -r.top + vh * 1.75;
+  const want = [];
+  for (let i = firstRowBelow(from); i < layout.rows.length && layout.rows[i].y <= to; i++) want.push(i);
+  const keep = new Set(want);
+  rendered.forEach((el, i) => { if (!keep.has(i)) { el.remove(); rendered.delete(i); } });
+  const fresh = [];
+  const frag = document.createDocumentFragment();
+  for (const i of want) {
+    if (rendered.has(i)) continue;
+    const row = layout.rows[i];
+    const el = buildRow(row);
+    rendered.set(i, el);
+    frag.appendChild(el);
+    if (row.type === 'cells') fresh.push(row);
+  }
+  if (frag.childNodes.length) grid.appendChild(frag);
+  view = { from: -r.top, to: -r.top + vh };
+  if (fresh.length) checkCached(fresh);
+  pump();
+}
+
+function buildRow(row) {
+  const el = document.createElement('div');
+  el.style.top = row.y + 'px';
+  el.style.height = row.h + 'px';
+  if (row.type === 'head') {
+    el.className = 'gl__head';
+    const name = document.createElement('span');
+    name.className = 'gl__head-name';
+    name.textContent = monthLabel(row.key);
+    const n = document.createElement('span');
+    n.className = 'gl__head-n';
+    n.textContent = num(row.count);
+    el.append(name, n);
+    return el;
+  }
+  el.className = 'gl__row';
+  el.style.gridTemplateColumns = 'repeat(' + layout.cols + ', minmax(0, 1fr))';
+  for (let k = row.start; k < row.start + row.count; k++) el.appendChild(buildCell(k));
+  return el;
+}
+
+function buildCell(k) {
+  const e = items[k];
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'gl__cell' + (e.kind === 'video' ? ' is-video' : '');
+  b.dataset.i = String(k);
+  b.dataset.fp = e.fp;
+  b.setAttribute('aria-label', e.name + ', ' + dayText(e._t));
+  const img = document.createElement('img');
+  img.alt = '';
+  img.decoding = 'async';
+  img.draggable = false;
+  b.appendChild(img);
+  decorate(b, e);
+  return b;
+}
+
+function decorate(cell, e) {
+  const url = thumbUrls.get(e.fp);
+  const img = cell.firstChild;
+  if (url && img.getAttribute('src') !== url) img.src = url;
+  cell.classList.toggle('has-thumb', !!url);
+  let fmt = cell.querySelector('.gl__fmt');
+  if (!url && thumbState.get(e.fp) === 'none') {
+    if (!fmt) {
+      fmt = document.createElement('span');
+      fmt.className = 'gl__fmt';
+      cell.appendChild(fmt);
+    }
+    fmt.textContent = (M.extOf(e.name) || '?').toUpperCase();
+  } else if (fmt) fmt.remove();
+  if (e.kind === 'video') {
+    let badge = cell.querySelector('.gl__badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'gl__badge';
+      cell.appendChild(badge);
+    }
+    badge.textContent = e.duration ? M.formatTime(e.duration) : '';
+  }
+}
+
+function paint(fp) {
+  const e = byFp.get(fp);
+  if (!e) return;
+  grid.querySelectorAll('[data-fp="' + fp + '"]').forEach((cell) => decorate(cell, e));
+}
+
+function setUrl(fp, blob) {
+  if (thumbUrls.has(fp)) { URL.revokeObjectURL(thumbUrls.get(fp)); thumbUrls.delete(fp); }
+  thumbUrls.set(fp, URL.createObjectURL(blob));
+  if (thumbUrls.size <= URL_CAP) return;
+  const inUse = new Set();
+  grid.querySelectorAll('[data-fp]').forEach((c) => inUse.add(c.dataset.fp));
+  slides.forEach((s) => { const i = Number(s.dataset.i); if (s.dataset.i && items[i]) inUse.add(items[i].fp); });
+  for (const [k, u] of thumbUrls) {
+    if (thumbUrls.size <= URL_CAP * 0.8) break;
+    if (inUse.has(k)) continue;
+    URL.revokeObjectURL(u);
+    thumbUrls.delete(k);
+    thumbState.delete(k);
+  }
+}
+
+function checkCached(rows) {
+  const fps = [];
+  rows.forEach((row) => {
+    for (let k = row.start; k < row.start + row.count; k++) {
+      const fp = items[k].fp;
+      if (!thumbUrls.has(fp) && !thumbState.has(fp)) { thumbState.set(fp, 'check'); fps.push(fp); }
+    }
+  });
+  if (!fps.length) return;
+  M.cachedThumbs(fps).then((found) => {
+    fps.forEach((fp) => {
+      const blob = found.get(fp);
+      if (blob) { setUrl(fp, blob); thumbState.set(fp, 'done'); paint(fp); }
+      else if (thumbState.get(fp) === 'check') thumbState.delete(fp);
+    });
+    pump();
+  });
+}
+
+function pump() {
+  if (mainEl.hidden) return;
+  const slots = M.thumbSlots();
+  if (busyImg >= slots && busyVid >= 1) return;
+  const mid = (view.from + view.to) / 2;
+  const order = Array.from(rendered.keys())
+    .filter((i) => layout.rows[i] && layout.rows[i].type === 'cells')
+    .sort((a, b) => Math.abs(layout.rows[a].y - mid) - Math.abs(layout.rows[b].y - mid));
+  for (const i of order) {
+    const row = layout.rows[i];
+    for (let k = row.start; k < row.start + row.count; k++) {
+      const e = items[k];
+      if (thumbUrls.has(e.fp) || thumbState.has(e.fp) || !M.fileFor(e.fp)) continue;
+      const isVid = e.kind === 'video';
+      if (isVid ? busyVid >= 1 : busyImg >= slots) continue;
+      if (isVid) busyVid++; else busyImg++;
+      thumbState.set(e.fp, 'busy');
+      M.thumbFor(e).then((b) => b, () => null).then((blob) => {
+        if (isVid) busyVid--; else busyImg--;
+        if (blob) { setUrl(e.fp, blob); thumbState.set(e.fp, 'done'); }
+        else thumbState.set(e.fp, 'none');
+        paint(e.fp);
+        pump();
+      });
+      if (busyImg >= slots && busyVid >= 1) return;
+    }
+  }
+}
+
+grid.addEventListener('click', (e) => {
+  const cell = e.target.closest('.gl__cell');
+  if (cell) openBox(Number(cell.dataset.i), cell);
+});
+document.addEventListener('scroll', schedule, { capture: true, passive: true });
+window.addEventListener('resize', schedule);
+if (typeof ResizeObserver === 'function') {
+  new ResizeObserver(() => {
+    const w = grid.clientWidth;
+    if (!w || w === lastWidth || mainEl.hidden) return;
+    lastWidth = w;
+    relayout(false);
+  }).observe(grid);
+}
+
+function showMain(on) {
+  mainEl.hidden = !on;
+  startEl.hidden = on;
+  if (on) { lastWidth = grid.clientWidth; }
+}
+
+function updateBar() {
+  $('gl-src-name').textContent = source.name || C.selection;
+  const { photos, videos, text } = countText(all);
+  $('gl-src-count').textContent = text;
+  const forgetLabel = source.folderId && saved.has(source.folderId) ? C.forget_folder : C.forget_photos;
+  $('gl-forget').setAttribute('aria-label', forgetLabel);
+  $('gl-forget').title = forgetLabel;
+  $('gl-filter').hidden = !(photos && videos);
+  if ($('gl-filter').hidden) filter = 'all';
+  $('gl-filter').querySelectorAll('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.filter === filter ? 'true' : 'false'));
+}
+
+async function load(found, ctx) {
+  ctx = ctx || {};
+  const token = ++loadToken;
+  const media = found.filter((it) => KINDS.indexOf(M.kindOf(it.file)) !== -1);
+  if (!media.length) { toast(C.no_media); return; }
+  const [entries] = await Promise.all([M.register(media, { folderId: ctx.folderId, folderName: ctx.folderName }), refreshSaved()]);
+  if (token !== loadToken) return;
+  if (ctx.add) {
+    entries.forEach((e) => { if (!byFp.has(e.fp)) all.push(e); });
+  } else {
+    all = entries;
+    source = { name: ctx.folderName || '', folderId: ctx.folderId || '' };
+    filter = 'all';
+  }
+  byFp = new Map(all.map((e) => [e.fp, e]));
+  showMain(true);
+  updateBar();
+  rebuild();
+  clearRows();
+  computeLayout();
+  render();
+  readDates(token);
+}
+
+async function readDates(token) {
+  const todo = all.filter((e) => !e.dated && M.fileFor(e.fp));
+  if (!todo.length) { progress(''); return; }
+  let done = 0;
+  let moved = false;
+  let lastNote = 0;
+  let lastMove = Date.now();
+  for (let i = 0; i < todo.length; i += 8) {
+    if (token !== loadToken) return;
+    const batch = todo.slice(i, i + 8);
+    const patches = await Promise.all(batch.map(async (e) => {
+      const file = M.fileFor(e.fp);
+      const patch = { dated: true, taken: 0 };
+      if (file && e.kind === 'image') {
+        const x = await M.readExif(file);
+        exifRead.add(e);
+        if (x) { patch.taken = x.taken || 0; patch.exif = x; }
+      } else if (file && ['mp4', 'm4v', 'mov', '3gp'].indexOf(M.extOf(e.name)) !== -1) {
+        patch.taken = await M.mediaDate(file);
+      }
+      const before = when(e);
+      Object.assign(e, patch);
+      if (when(e) !== before) moved = true;
+      return [e.fp, storable(e, patch)];
+    }));
+    await M.patchEntries(patches);
+    done += batch.length;
+    const now = Date.now();
+    if (now - lastNote > 400) { lastNote = now; progress(fill(C.reading_dates, { done: num(done), total: num(todo.length) })); }
+    if (moved && now - lastMove > 4000) { moved = false; lastMove = now; relayout(true); }
+  }
+  if (token !== loadToken) return;
+  progress('');
+  if (moved) relayout(true);
+}
+
+async function openFolder(folder, auto) {
+  const ok = await M.folderAccess(folder, !auto);
+  if (!ok) { if (!auto) { toast(C.folder_denied); renderStart(); } return; }
+  await M.touchFolder(folder);
+  progress(fill(C.scanning, { n: num(0) }));
+  let found = [];
+  try { found = await M.scanFolder(folder, KINDS, (n) => progress(fill(C.scanning, { n: num(n) }))); } catch (_) {}
+  progress('');
+  if (auto && (launched || !mainEl.hidden)) return;
+  if (!found.length) { toast(C.no_media); renderStart(); return; }
+  load(found, { folderId: folder.id, folderName: folder.name });
+}
+
+async function renderStart() {
+  $('gl-ios-hint').hidden = !M.caps.ios;
+  const list = $('gl-folder-list');
+  const folders = M.caps.folders ? await M.listFolders('gallery') : [];
+  list.textContent = '';
+  for (const folder of folders) {
+    const li = document.createElement('li');
+    li.className = 'gl__folder';
+    const name = document.createElement('span');
+    name.className = 'gl__folder-name';
+    name.textContent = folder.name;
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'm-btn m-btn--ghost gl__small';
+    openBtn.textContent = (await M.folderAccess(folder, false)) ? C.open : C.reconnect;
+    openBtn.addEventListener('click', () => openFolder(folder));
+    const forget = document.createElement('button');
+    forget.type = 'button';
+    forget.className = 'gl__x';
+    forget.textContent = '×';
+    forget.setAttribute('aria-label', fill(C.forget_label, { name: folder.name }));
+    forget.addEventListener('click', () => forgetSaved(folder));
+    li.append(name, openBtn, forget);
+    list.appendChild(li);
+  }
+  $('gl-folders').hidden = !folders.length;
+  renderKept();
+}
+
+function looseEntries(list) {
+  return list.filter((e) => !keepPlace(e) && (e.kind === 'image' || (e.kind === 'video' && !e.lastPlayed)));
+}
+
+async function renderKept() {
+  const token = ++keptToken;
+  const [list] = await Promise.all([M.listEntries(), refreshSaved()]);
+  if (token !== keptToken) return;
+  const loose = looseEntries(list);
+  const placed = loose.filter((e) => e.exif && ('lat' in e.exif || 'lon' in e.exif));
+  if (placed.length) M.patchEntries(placed.map((e) => [e.fp, (cur) => (cur.exif && !keepPlace(cur) ? { exif: placeless(cur.exif) } : null)]));
+  $('gl-kept-count').textContent = countText(loose).text;
+  $('gl-kept').hidden = !loose.length;
+}
+
+function resetView() {
+  loadToken++;
+  all = [];
+  items = [];
+  byFp = new Map();
+  source = { name: '', folderId: '' };
+  filter = 'all';
+  clearRows();
+  thumbUrls.forEach((u) => URL.revokeObjectURL(u));
+  thumbUrls.clear();
+  thumbState.clear();
+  layout = { rows: [], height: 0, cols: 0, cell: 0 };
+  grid.style.height = '0px';
+  progress('');
+}
+
+async function afterForget(ok, focusId) {
+  showMain(false);
+  await renderStart();
+  if (ok) toast(C.forgotten);
+  try { $(focusId).focus(); } catch (_) {}
+}
+
+async function forgetSaved(folder) {
+  if (!(await confirmDanger(fill(C.forget_folder_confirm, { name: folder.name })))) return;
+  if (source.folderId === folder.id) resetView();
+  afterForget(await M.forgetFolder(folder.id, { index: true }), 'gl-open-folder');
+}
+
+async function forgetView() {
+  const folderId = source.folderId && saved.has(source.folderId) ? source.folderId : '';
+  const text = folderId ? fill(C.forget_folder_confirm, { name: source.name }) : C.forget_photos_confirm;
+  if (!(await confirmDanger(text))) return;
+  const fps = all.map((e) => e.fp);
+  resetView();
+  const dropped = folderId ? await M.forgetFolder(folderId, { index: true }) : true;
+  afterForget((await M.forgetEntries(fps)) && dropped, folderId ? 'gl-open-folder' : 'gl-open-files');
+}
+
+async function forgetKept() {
+  if (!(await confirmDanger(C.forget_photos_confirm))) return;
+  await refreshSaved();
+  const fps = looseEntries(await M.listEntries()).map((e) => e.fp);
+  const gone = new Set(fps);
+  if (all.some((e) => gone.has(e.fp))) resetView();
+  afterForget(await M.forgetEntries(fps), 'gl-open-files');
+}
+
+$('gl-open-files').addEventListener('click', async () => {
+  const picked = await M.pickFiles(KINDS);
+  if (picked.length) load(picked, {});
+});
+$('gl-open-folder').addEventListener('click', async () => {
+  if (M.caps.folders) {
+    let folder = null;
+    try { folder = await M.addFolder('gallery'); } catch (_) {}
+    if (folder) openFolder(folder);
+    return;
+  }
+  const picked = await M.pickDirectory(KINDS);
+  if (picked.length) load(picked, { folderName: (picked[0].relPath || '').split('/')[0] });
+});
+$('gl-add').addEventListener('click', async () => {
+  const picked = await M.pickFiles(KINDS);
+  if (picked.length) load(picked, { add: true });
+});
+$('gl-home').addEventListener('click', () => {
+  showMain(false);
+  renderStart();
+});
+$('gl-forget').addEventListener('click', forgetView);
+$('gl-kept-forget').addEventListener('click', forgetKept);
+$('gl-show').addEventListener('click', () => {
+  if (!items.length) return;
+  openBox(0, $('gl-show'));
+  startShow();
+});
+$('gl-filter').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-filter]');
+  if (!b || b.dataset.filter === filter) return;
+  filter = b.dataset.filter;
+  updateBar();
+  rebuild();
+  clearRows();
+  computeLayout();
+  const top = grid.getBoundingClientRect().top;
+  const sc = scroller();
+  const edge = sc ? sc.getBoundingClientRect().top : 0;
+  if (top < edge) scrollByY(top - edge - 8);
+  render();
+});
+
+root.addEventListener('dragover', (e) => {
+  if (!e.dataTransfer || Array.from(e.dataTransfer.types || []).indexOf('Files') === -1) return;
+  e.preventDefault();
+  root.classList.add('is-drop');
+});
+root.addEventListener('dragleave', (e) => { if (!root.contains(e.relatedTarget)) root.classList.remove('is-drop'); });
+root.addEventListener('drop', async (e) => {
+  if (!e.dataTransfer) return;
+  e.preventDefault();
+  root.classList.remove('is-drop');
+  const found = await M.filesFromDrop(e.dataTransfer, KINDS);
+  if (found.length) load(found, mainEl.hidden ? {} : { add: true });
+});
+
+document.body.appendChild(box);
+const slides = Array.from(stage.children);
+let cur = -1;
+let W = 0;
+let H = 0;
+let zoom = { s: 1, tx: 0, ty: 0 };
+let opener = null;
+let watcher = null;
+let show = null;
+let sliding = false;
+const pointers = new Map();
+let gesture = null;
+let lastTap = { t: 0, x: 0, y: 0 };
+let tapTimer = 0;
+
+function measure() {
+  W = stage.clientWidth || window.innerWidth;
+  H = stage.clientHeight || window.innerHeight;
+}
+function place(dx, animate) {
+  slides.forEach((el, k) => {
+    el.style.transition = animate && !reduceMotion ? 'transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none';
+    el.style.transform = 'translate3d(' + ((k - 1) * (W + SLIDE_GAP) + dx) + 'px, 0, 0)';
+  });
+}
+
+function clearSlide(el) {
+  const v = el.querySelector('video');
+  if (v) { try { v.pause(); } catch (_) {} v.removeAttribute('src'); try { v.load(); } catch (_) {} }
+  if (el._url) { URL.revokeObjectURL(el._url); el._url = ''; }
+  el.textContent = '';
+  el.dataset.i = '';
+  el.classList.remove('is-loading');
+}
+
+function message(el, text) {
+  el.querySelectorAll('.gl-box__media').forEach((n) => n.remove());
+  el.classList.remove('is-loading');
+  const p = document.createElement('p');
+  p.className = 'gl-box__msg';
+  p.textContent = text;
+  el.appendChild(p);
+}
+
+function imageError(e) {
+  const ext = M.extOf(e.name);
+  if (ext === 'heic' || ext === 'heif') return C.err_heic;
+  if (ext === 'jxl') return C.err_jxl;
+  return C.err_image;
+}
+
+function posterSlide(el, e) {
+  const url = thumbUrls.get(e.fp);
+  if (url) {
+    const img = document.createElement('img');
+    img.className = 'gl-box__media gl-box__poster';
+    img.alt = '';
+    img.src = url;
+    el.appendChild(img);
+  }
+  const icon = document.createElement('span');
+  icon.className = 'gl-box__play';
+  icon.setAttribute('aria-hidden', 'true');
+  el.appendChild(icon);
+}
+
+function fillSlide(el, i, active) {
+  clearSlide(el);
+  if (i < 0 || i >= items.length) return;
+  const e = items[i];
+  el.dataset.i = String(i);
+  const file = M.fileFor(e.fp);
+  if (!file) return;
+  if (e.kind === 'video') {
+    if (!active) { posterSlide(el, e); return; }
+    const v = document.createElement('video');
+    v.className = 'gl-box__media gl-box__video';
+    v.controls = true;
+    v.playsInline = true;
+    v.preload = 'metadata';
+    const poster = thumbUrls.get(e.fp);
+    if (poster) v.poster = poster;
+    el._url = URL.createObjectURL(file);
+    v.addEventListener('error', () => {
+      M.preflight(file).then((pf) => {
+        if (pf.issues.indexOf('mkv_apple') !== -1) message(el, C.err_mkv_apple);
+        else if (pf.issues.indexOf('avi') !== -1) message(el, C.err_avi);
+        else message(el, C.err_video);
+      });
+    });
+    v.addEventListener('ended', () => { if (show && el === slides[1]) advanceShow(); });
+    v.src = el._url;
+    el.appendChild(v);
+    return;
+  }
+  const thumb = thumbUrls.get(e.fp);
+  if (thumb) {
+    const ph = document.createElement('img');
+    ph.className = 'gl-box__ph';
+    ph.alt = '';
+    ph.src = thumb;
+    el.appendChild(ph);
+  }
+  const img = document.createElement('img');
+  img.className = 'gl-box__media gl-box__img';
+  img.alt = '';
+  img.decoding = 'async';
+  img.draggable = false;
+  el._url = URL.createObjectURL(file);
+  el.classList.add('is-loading');
+  img.addEventListener('load', () => {
+    el.classList.remove('is-loading');
+    const ph = el.querySelector('.gl-box__ph');
+    if (ph) ph.remove();
+    if (el === slides[1] && !infoEl.hidden) renderInfo();
+  });
+  img.addEventListener('error', () => message(el, imageError(e)));
+  img.src = el._url;
+  el.appendChild(img);
+}
+
+function curImg() {
+  const e = items[cur];
+  return e && e.kind === 'image' ? slides[1].querySelector('.gl-box__img') : null;
+}
+function applyZoom(animate) {
+  const img = curImg();
+  box.classList.toggle('is-zoomed', zoom.s > 1.01);
+  if (!img) return;
+  img.style.transition = animate && !reduceMotion ? 'transform 0.2s ease' : 'none';
+  img.style.transform = zoom.s === 1 && !zoom.tx && !zoom.ty ? '' : 'translate3d(' + zoom.tx + 'px, ' + zoom.ty + 'px, 0) scale(' + zoom.s + ')';
+}
+function clampZoom() {
+  const img = curImg();
+  if (!img) return;
+  const mx = Math.max(0, (img.offsetWidth * zoom.s - W) / 2);
+  const my = Math.max(0, (img.offsetHeight * zoom.s - H) / 2);
+  zoom.tx = Math.max(-mx, Math.min(mx, zoom.tx));
+  zoom.ty = Math.max(-my, Math.min(my, zoom.ty));
+}
+function resetZoom(animate) {
+  zoom = { s: 1, tx: 0, ty: 0 };
+  applyZoom(animate);
+}
+function zoomAt(s, cx, cy, animate) {
+  if (!curImg()) return;
+  const r = stage.getBoundingClientRect();
+  const fx = cx - (r.left + r.width / 2);
+  const fy = cy - (r.top + r.height / 2);
+  const s0 = zoom.s;
+  s = Math.max(1, Math.min(6, s));
+  zoom.tx = fx - (s * (fx - zoom.tx)) / s0;
+  zoom.ty = fy - (s * (fy - zoom.ty)) / s0;
+  zoom.s = s;
+  if (s === 1) { zoom.tx = 0; zoom.ty = 0; }
+  clampZoom();
+  applyZoom(animate);
+}
+function zoomCenter(s) {
+  const r = stage.getBoundingClientRect();
+  zoomAt(s, r.left + r.width / 2, r.top + r.height / 2, true);
+}
+
+function updatePlayBtn() {
+  const on = !!show;
+  const label = on ? C.slideshow_stop : C.slideshow;
+  playBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  playBtn.setAttribute('aria-label', label);
+  playBtn.title = label;
+  playBtn.classList.toggle('is-on', on);
+}
+
+function canShare(file) {
+  try { return !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch (_) { return false; }
+}
+
+function activate() {
+  const e = items[cur];
+  if (!e) return;
+  $('gl-box-name').textContent = e.name;
+  $('gl-box-count').textContent = fill(C.position, { i: num(cur + 1), n: num(items.length) });
+  $('gl-prev').disabled = cur <= 0;
+  $('gl-next').disabled = cur >= items.length - 1;
+  const file = M.fileFor(e.fp);
+  shareBtn.hidden = !(file && canShare(file));
+  const UI = window.MentriaUI;
+  sendBtn.hidden = !(file && e.kind === 'image' && UI && UI.sendTargets && UI.sendTargets({ blob: file, name: file.name }).length);
+  box.classList.toggle('is-video', e.kind === 'video');
+  if (!infoEl.hidden) renderInfo();
+  if (show) scheduleShow();
+}
+
+function openBox(i, from) {
+  if (i < 0 || i >= items.length) return;
+  opener = from || document.activeElement;
+  box.hidden = false;
+  box.style.removeProperty('--fade');
+  measure();
+  cur = i;
+  fillSlide(slides[0], i - 1, false);
+  fillSlide(slides[1], i, true);
+  fillSlide(slides[2], i + 1, false);
+  resetZoom(false);
+  place(0, false);
+  updatePlayBtn();
+  activate();
+  window.addEventListener('keydown', onKey, true);
+  if (typeof window.CloseWatcher === 'function') {
+    try {
+      watcher = new window.CloseWatcher();
+      watcher.addEventListener('close', () => { watcher = null; closeBox(); });
+    } catch (_) { watcher = null; }
+  }
+  try { $('gl-close').focus({ preventScroll: true }); } catch (_) {}
+}
+
+function closeBox() {
+  if (box.hidden) return;
+  stopShow();
+  window.removeEventListener('keydown', onKey, true);
+  if (watcher) { try { watcher.destroy(); } catch (_) {} watcher = null; }
+  const fp = items[cur] && items[cur].fp;
+  slides.forEach(clearSlide);
+  box.hidden = true;
+  box.classList.remove('is-bare', 'is-zoomed', 'is-video');
+  cur = -1;
+  if (pendingRelayout) { pendingRelayout = false; relayout(true); }
+  const k = fp ? items.findIndex((e) => e.fp === fp) : -1;
+  if (k === -1) { try { if (opener) opener.focus({ preventScroll: true }); } catch (_) {} return; }
+  const row = layout.rows[rowOfItem(k)];
+  const r = grid.getBoundingClientRect();
+  const vh = window.innerHeight;
+  if (row && (r.top + row.y < 60 || r.top + row.y + row.h > vh - 20)) scrollByY(Math.round(r.top + row.y - vh / 3));
+  render();
+  const cell = grid.querySelector('.gl__cell[data-i="' + k + '"]');
+  try { (cell || opener).focus({ preventScroll: true }); } catch (_) {}
+}
+
+function go(delta) {
+  if (sliding || !delta || cur < 0) return;
+  const to = cur + delta;
+  if (to < 0 || to >= items.length) { place(0, true); return; }
+  sliding = true;
+  resetZoom(false);
+  place(-delta * (W + SLIDE_GAP), true);
+  const finish = () => {
+    sliding = false;
+    if (box.hidden) return;
+    const old = slides[1];
+    const from = cur;
+    if (delta > 0) {
+      const first = slides.shift();
+      slides.push(first);
+      fillSlide(first, to + 1, false);
+    } else {
+      const last = slides.pop();
+      slides.unshift(last);
+      fillSlide(last, to - 1, false);
+    }
+    cur = to;
+    if (items[from] && items[from].kind === 'video') fillSlide(old, from, false);
+    if (items[cur].kind === 'video') fillSlide(slides[1], cur, true);
+    place(0, false);
+    activate();
+  };
+  if (reduceMotion) finish(); else setTimeout(finish, 270);
+}
+
+function jump(i) {
+  if (i < 0 || i >= items.length || sliding) return;
+  cur = i;
+  fillSlide(slides[0], i - 1, false);
+  fillSlide(slides[1], i, true);
+  fillSlide(slides[2], i + 1, false);
+  resetZoom(false);
+  place(0, false);
+  activate();
+}
+
+function startShow() {
+  if (show || !items.length || box.hidden) return;
+  show = { timer: 0, idle: 0 };
+  M.keepAwake(true);
+  box.classList.add('is-show');
+  updatePlayBtn();
+  scheduleShow();
+  bare();
+}
+function stopShow() {
+  if (!show) return;
+  clearTimeout(show.timer);
+  clearTimeout(show.idle);
+  show = null;
+  M.keepAwake(false);
+  box.classList.remove('is-show', 'is-bare');
+  updatePlayBtn();
+}
+function scheduleShow() {
+  if (!show) return;
+  clearTimeout(show.timer);
+  const e = items[cur];
+  const v = e && e.kind === 'video' ? slides[1].querySelector('video') : null;
+  if (v) {
+    v.play().catch(() => {
+      v.muted = true;
+      v.play().catch(() => { if (show) show.timer = setTimeout(advanceShow, SHOW_MS); });
+    });
+    return;
+  }
+  show.timer = setTimeout(advanceShow, SHOW_MS);
+}
+function advanceShow() {
+  if (!show) return;
+  if (cur < items.length - 1) go(1); else jump(0);
+}
+function bare() {
+  if (!show) return;
+  clearTimeout(show.idle);
+  box.classList.remove('is-bare');
+  show.idle = setTimeout(() => { if (show) box.classList.add('is-bare'); }, 2500);
+}
+
+function setInfo(on) {
+  infoEl.hidden = !on;
+  $('gl-info-btn').setAttribute('aria-expanded', on ? 'true' : 'false');
+  box.classList.toggle('has-info', on);
+  measure();
+  place(0, false);
+  resetZoom(false);
+  if (on) renderInfo();
+}
+
+async function renderInfo() {
+  const e = items[cur];
+  if (!e) return;
+  const file = M.fileFor(e.fp);
+  if (e.kind === 'image' && !e.dated && file) {
+    const x = await M.readExif(file);
+    exifRead.add(e);
+    if (items[cur] !== e) return;
+    const patch = { dated: true, taken: (x && x.taken) || 0 };
+    if (x) patch.exif = x;
+    Object.assign(e, patch);
+    M.patchEntries([[e.fp, storable(e, patch)]]);
+  } else if (e.kind === 'image' && file && !exifRead.has(e) && !(e.exif && 'lat' in e.exif)) {
+    const x = await M.readExif(file);
+    exifRead.add(e);
+    if (items[cur] !== e) return;
+    if (x && 'lat' in x) {
+      e.exif = Object.assign({}, e.exif, { lat: x.lat, lon: x.lon });
+      if (keepPlace(e)) M.patchEntries([[e.fp, { exif: e.exif }]]);
+    }
+  }
+  const rows = [];
+  const add = (label, value, copy) => { if (value) rows.push([label, value, copy]); };
+  add(C.info_name, e.name);
+  if (e.taken) add(C.info_taken, dateTimeText(e.taken));
+  else if (e.lastModified) add(C.info_modified, dateTimeText(e.lastModified));
+  let w = 0;
+  let h = 0;
+  const media = slides[1].querySelector('.gl-box__img, .gl-box__video');
+  if (media && media.naturalWidth) { w = media.naturalWidth; h = media.naturalHeight; }
+  else if (media && media.videoWidth) { w = media.videoWidth; h = media.videoHeight; }
+  else if (e.exif && e.exif.width) { w = e.exif.width; h = e.exif.height; if (e.exif.orientation >= 5) { const t = w; w = h; h = t; } }
+  else if (e.width) { w = e.width; h = e.height; }
+  if (w && h) add(C.info_dimensions, num(w) + ' × ' + num(h));
+  if (e.kind === 'video' && e.duration) add(C.info_duration, M.formatTime(e.duration));
+  add(C.info_size, M.formatBytes(e.size, lang()));
+  add(C.info_type, e.type || (M.extOf(e.name) || '').toUpperCase());
+  const dir = e.relPath && e.relPath.indexOf('/') !== -1 ? e.relPath.slice(0, e.relPath.lastIndexOf('/')) : '';
+  add(C.info_folder, dir && e.folderName && dir.indexOf(e.folderName) !== 0 ? e.folderName + '/' + dir : (dir || e.folderName || ''));
+  const x = e.exif || {};
+  const make = (x.make || '').trim();
+  const model = (x.model || '').trim();
+  const camera = make && model.toLowerCase().indexOf(make.toLowerCase().split(' ')[0]) === 0 ? model : [make, model].filter(Boolean).join(' ');
+  add(C.info_camera, camera);
+  add(C.info_lens, x.lens || '');
+  const shot = [];
+  const one = (v) => { try { return new Intl.NumberFormat(lang(), { maximumFractionDigits: 1 }).format(v); } catch (_) { return String(Math.round(v * 10) / 10); } };
+  if (x.exposure) shot.push(x.exposure >= 1 ? one(x.exposure) + ' s' : '1/' + Math.round(1 / x.exposure) + ' s');
+  if (x.fnumber) shot.push('f/' + one(x.fnumber));
+  if (x.iso) shot.push('ISO ' + x.iso);
+  if (x.focal) shot.push(one(x.focal) + ' mm');
+  add(C.info_exposure, shot.join(' · '));
+  if (typeof x.lat === 'number' && typeof x.lon === 'number') add(C.info_location, x.lat.toFixed(5) + ', ' + x.lon.toFixed(5), true);
+  const dl = $('gl-info-list');
+  dl.textContent = '';
+  rows.forEach(([label, value, copy]) => {
+    const row = document.createElement('div');
+    row.className = 'gl-info__row';
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+    const dd = document.createElement('dd');
+    const span = document.createElement('span');
+    span.textContent = value;
+    dd.appendChild(span);
+    if (copy && window.MentriaUI && window.MentriaUI.copyButton) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'm-btn m-btn--ghost gl-info__copy';
+      b.textContent = C.copy;
+      window.MentriaUI.copyButton(b, () => value, { copiedText: C.copied, failedText: C.copy_failed });
+      dd.appendChild(b);
+    }
+    row.append(dt, dd);
+    dl.appendChild(row);
+  });
+}
+
+function trapFocus(e) {
+  const list = Array.from(box.querySelectorAll('button, video[controls], [tabindex]:not([tabindex="-1"])'))
+    .filter((n) => !n.disabled && !n.hidden && n.getClientRects().length);
+  if (!list.length) return;
+  const i = list.indexOf(document.activeElement);
+  if (e.shiftKey && i <= 0) { e.preventDefault(); list[list.length - 1].focus(); }
+  else if (!e.shiftKey && (i === -1 || i === list.length - 1)) { e.preventDefault(); list[0].focus(); }
+}
+
+function onKey(e) {
+  if (box.hidden) return;
+  if (document.querySelector('.m-send, .m-modal:not([hidden])')) return;
+  const k = e.key;
+  if (k === 'Escape') { e.preventDefault(); e.stopPropagation(); closeBox(); return; }
+  if (k === 'Tab') { trapFocus(e); return; }
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  const t = e.target;
+  const tag = (t && t.tagName) || '';
+  if (tag === 'VIDEO' && (k === ' ' || k.indexOf('Arrow') === 0)) return;
+  if (tag === 'BUTTON' && (k === ' ' || k === 'Enter')) return;
+  let handled = true;
+  if (k === 'ArrowRight') go(1);
+  else if (k === 'ArrowLeft') go(-1);
+  else if (k === 'Home') jump(0);
+  else if (k === 'End') jump(items.length - 1);
+  else if (k === '+' || k === '=') zoomCenter(zoom.s * 1.5);
+  else if (k === '-') zoomCenter(zoom.s / 1.5);
+  else if (k === '0') resetZoom(true);
+  else if (k === 'i' || k === 'I') setInfo(infoEl.hidden);
+  else if (k === 's' || k === 'S') { if (show) stopShow(); else startShow(); }
+  else if (k === ' ' && items[cur] && items[cur].kind === 'video') {
+    const v = slides[1].querySelector('video');
+    if (v) { if (v.paused) v.play().catch(() => {}); else v.pause(); }
+  } else handled = false;
+  if (handled) { e.preventDefault(); e.stopPropagation(); }
+}
+
+function pinchState() {
+  const [a, b] = Array.from(pointers.values());
+  return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+}
+function startPinch() {
+  if (!curImg()) { gesture = { type: 'none' }; return; }
+  const p = pinchState();
+  gesture = { type: 'pinch', d0: p.d, mx0: p.mx, my0: p.my, s0: zoom.s, tx0: zoom.tx, ty0: zoom.ty };
+}
+function movePinch() {
+  const g = gesture;
+  const p = pinchState();
+  const r = stage.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  const s = Math.max(0.7, Math.min(8, (g.s0 * p.d) / g.d0));
+  zoom.s = s;
+  zoom.tx = (p.mx - cx) - (s * (g.mx0 - cx - g.tx0)) / g.s0;
+  zoom.ty = (p.my - cy) - (s * (g.my0 - cy - g.ty0)) / g.s0;
+  applyZoom(false);
+}
+
+function onTap(e) {
+  const now = e.timeStamp;
+  if (now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) {
+    clearTimeout(tapTimer);
+    lastTap.t = 0;
+    if (zoom.s > 1.01) resetZoom(true);
+    else zoomAt(2.5, e.clientX, e.clientY, true);
+    return;
+  }
+  lastTap = { t: now, x: e.clientX, y: e.clientY };
+  clearTimeout(tapTimer);
+  if (e.pointerType === 'mouse') return;
+  tapTimer = setTimeout(() => {
+    if (show) { if (box.classList.contains('is-bare')) bare(); else box.classList.add('is-bare'); return; }
+    box.classList.toggle('is-bare');
+  }, 320);
+}
+
+stage.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  const vid = e.target.closest('video');
+  if (vid && (e.pointerType === 'mouse' || pointers.size || e.clientY > vid.getBoundingClientRect().bottom - 72)) return;
+  if (sliding) return;
+  if (!vid) { try { stage.setPointerCapture(e.pointerId); } catch (_) {} }
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pointers.size === 2) startPinch();
+  else if (pointers.size === 1) gesture = { type: 'pending', video: !!vid, x0: e.clientX, y0: e.clientY, t0: e.timeStamp, tx0: zoom.tx, ty0: zoom.ty };
+});
+stage.addEventListener('pointermove', (e) => {
+  const p = pointers.get(e.pointerId);
+  if (!p) return;
+  p.x = e.clientX;
+  p.y = e.clientY;
+  if (!gesture) return;
+  if (gesture.type === 'pinch') { movePinch(); return; }
+  const dx = e.clientX - gesture.x0;
+  const dy = e.clientY - gesture.y0;
+  if (gesture.type === 'pending') {
+    if (Math.hypot(dx, dy) < 8) return;
+    if (zoom.s > 1.01) gesture.type = 'pan';
+    else if (Math.abs(dx) >= Math.abs(dy)) gesture.type = 'swipe';
+    else if (dy > 0 && e.pointerType !== 'mouse') gesture.type = 'drop';
+    else gesture.type = 'none';
+    if (gesture.video && gesture.type !== 'none') { try { stage.setPointerCapture(e.pointerId); } catch (_) {} }
+  }
+  if (gesture.type === 'swipe') {
+    const edge = (dx > 0 && cur <= 0) || (dx < 0 && cur >= items.length - 1);
+    place(edge ? dx * 0.3 : dx, false);
+  } else if (gesture.type === 'pan') {
+    zoom.tx = gesture.tx0 + dx;
+    zoom.ty = gesture.ty0 + dy;
+    clampZoom();
+    applyZoom(false);
+  } else if (gesture.type === 'drop') {
+    const d = Math.max(0, dy);
+    slides[1].style.transition = 'none';
+    slides[1].style.transform = 'translate3d(0, ' + d + 'px, 0) scale(' + (1 - Math.min(d / 1600, 0.15)) + ')';
+    box.style.setProperty('--fade', String(1 - Math.min(d / 500, 0.7)));
+  }
+});
+function endPointer(e) {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.delete(e.pointerId);
+  if (!gesture) return;
+  if (gesture.type === 'pinch') {
+    if (pointers.size < 2) {
+      if (zoom.s < 1.01) resetZoom(true);
+      else { clampZoom(); applyZoom(true); }
+      const rest = Array.from(pointers.values())[0];
+      gesture = rest ? { type: 'pan', x0: rest.x, y0: rest.y, t0: e.timeStamp, tx0: zoom.tx, ty0: zoom.ty } : null;
+    }
+    return;
+  }
+  const g = gesture;
+  gesture = null;
+  if (pointers.size) return;
+  const dx = e.clientX - g.x0;
+  const dy = e.clientY - g.y0;
+  const dt = Math.max(1, e.timeStamp - g.t0);
+  if (g.type === 'swipe') {
+    const v = dx / dt;
+    if (e.type !== 'pointercancel' && (dx < -W * 0.18 || v < -0.45)) go(1);
+    else if (e.type !== 'pointercancel' && (dx > W * 0.18 || v > 0.45)) go(-1);
+    else place(0, true);
+  } else if (g.type === 'drop') {
+    if (e.type !== 'pointercancel' && dy > 110) closeBox();
+    else { box.style.removeProperty('--fade'); place(0, true); }
+  } else if (g.type === 'pending' && !g.video && e.type !== 'pointercancel') {
+    onTap(e);
+  }
+}
+stage.addEventListener('pointerup', endPointer);
+stage.addEventListener('pointercancel', endPointer);
+stage.addEventListener('dblclick', (e) => e.preventDefault());
+box.addEventListener('wheel', (e) => {
+  if (e.target.closest('.gl-info')) return;
+  e.preventDefault();
+  if (!curImg() || !e.target.closest('#gl-stage')) return;
+  const factor = Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.002));
+  zoomAt(zoom.s * factor, e.clientX, e.clientY, false);
+}, { passive: false });
+box.addEventListener('pointermove', () => { if (show) bare(); });
+window.addEventListener('resize', () => {
+  if (box.hidden) return;
+  measure();
+  place(0, false);
+  resetZoom(false);
+});
+
+$('gl-close').addEventListener('click', closeBox);
+$('gl-prev').addEventListener('click', () => go(-1));
+$('gl-next').addEventListener('click', () => go(1));
+$('gl-info-btn').addEventListener('click', () => setInfo(infoEl.hidden));
+playBtn.addEventListener('click', () => { if (show) stopShow(); else startShow(); });
+shareBtn.addEventListener('click', async () => {
+  const e = items[cur];
+  const file = e && M.fileFor(e.fp);
+  if (!file) return;
+  try { await navigator.share({ files: [file], title: e.name }); }
+  catch (err) { if (!err || err.name !== 'AbortError') toast(C.share_failed); }
+});
+if (window.MentriaUI && window.MentriaUI.sendMenu) {
+  window.MentriaUI.sendMenu(sendBtn, () => {
+    const e = items[cur];
+    const file = e && e.kind === 'image' ? M.fileFor(e.fp) : null;
+    return file ? { blob: file, name: file.name } : {};
+  });
+}
+
+document.addEventListener('mentria:localechange', () => {
+  const I = window.MentriaI18n;
+  if (I && typeof I.t === 'function') {
+    Object.keys(C).forEach((k) => {
+      const v = I.t('tool.gallery.' + k);
+      if (typeof v === 'string' && v !== 'tool.gallery.' + k) C[k] = v;
+    });
+  }
+  monthNames = new Map();
+  dateFmt = null;
+  timeFmt = null;
+  updatePlayBtn();
+  if (!mainEl.hidden) { updateBar(); clearRows(); render(); }
+  if (!box.hidden) activate();
+  renderStart();
+});
+
+if (M.caps.launchQueue) {
+  window.launchQueue.setConsumer(async (params) => {
+    if (!params || !params.files || !params.files.length) return;
+    launched = true;
+    const found = [];
+    for (const h of params.files) {
+      try { const file = await h.getFile(); found.push({ file, relPath: file.name }); } catch (_) {}
+    }
+    if (!found.length) return;
+    await load(found, {});
+    const fp = M.fingerprint(found[0].file);
+    const i = items.findIndex((e) => e.fp === fp);
+    if (i !== -1) openBox(i);
+  });
+}
+
+if (!document.getElementById('tool-gallery') && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
+updatePlayBtn();
+renderStart().then(async () => {
+  if (!M.caps.folders || launched) return;
+  const folders = await M.listFolders('gallery');
+  if (folders.length && mainEl.hidden && !launched && await M.folderAccess(folders[0], false)) openFolder(folders[0], true);
+});
+</script>
+
+<style>
+.gl { position: relative; display: flex; flex-direction: column; gap: 1rem; }
+.gl.is-drop::after { content: ''; position: absolute; inset: 0; border: 2px dashed var(--syn-cyan); border-radius: var(--radius-lg); background: rgba(34, 211, 238, 0.06); pointer-events: none; }
+.gl__progress { margin: 0; font-family: var(--font-mono); font-size: 0.75rem; color: var(--term-muted); }
+.gl__progress[hidden], .gl__start[hidden], .gl__main[hidden], .gl__shelf[hidden] { display: none; }
+.gl__start { display: flex; flex-direction: column; gap: 1.5rem; }
+.gl__drop { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 2rem 1rem; border: 1px dashed var(--term-border-strong); border-radius: var(--radius-lg); text-align: center; }
+.gl__drop-icon { width: 64px; height: 64px; }
+.gl__drop-title { margin: 0; font-family: var(--font-body); font-weight: 600; font-size: 1.05rem; color: var(--term-fg-strong); }
+.gl__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+.gl__hint { margin: 0; max-width: 34rem; font-size: 0.85rem; color: var(--term-muted); }
+.gl__kept-hint { margin-top: 0.6rem; }
+.gl__h2 { margin: 0 0 0.6rem; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--term-muted); }
+.gl__folders { display: flex; flex-direction: column; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.gl__folder { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.4rem 0.4rem 0.8rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); }
+.gl__folder-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: 0.85rem; }
+.gl__small { min-height: 44px; }
+.gl__x { flex: 0 0 auto; width: 44px; height: 44px; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--term-muted); font-size: 1.1rem; cursor: pointer; }
+.gl__x:hover, .gl__x:focus-visible { color: var(--term-fg); background: var(--term-surface-2); outline: none; }
+.gl__main { display: flex; flex-direction: column; gap: 0.75rem; }
+.gl__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem 1rem; }
+.gl__src { flex: 1 1 12rem; min-width: 0; }
+.gl__src-name { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: var(--term-fg-strong); }
+.gl__src-count { margin: 0.1rem 0 0; font-family: var(--font-mono); font-size: 0.75rem; color: var(--term-muted); }
+.gl__filter { display: inline-flex; border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); overflow: hidden; }
+.gl__filter[hidden] { display: none; }
+.gl__seg { min-height: 44px; padding: 0 0.85rem; border: 0; background: transparent; color: var(--term-muted); font: inherit; font-size: 0.85rem; cursor: pointer; }
+.gl__seg + .gl__seg { border-left: 1px solid var(--term-border-strong); }
+.gl__seg[aria-pressed="true"] { background: var(--term-surface-2); color: var(--term-fg-strong); }
+.gl__seg:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; }
+.gl__tools { display: inline-flex; gap: 0.35rem; }
+.gl__btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); background: transparent; color: var(--term-fg); cursor: pointer; }
+.gl__btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.gl__btn:hover, .gl__btn:focus-visible { border-color: var(--syn-cyan); color: var(--syn-cyan); outline: none; }
+.gl__grid { position: relative; min-height: 120px; }
+.gl__head { position: absolute; left: 0; right: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; padding: 0 2px 10px; box-sizing: border-box; }
+.gl__head-name { font-weight: 600; color: var(--term-fg-strong); }
+.gl__head-n { font-family: var(--font-mono); font-size: 0.72rem; color: var(--term-muted); }
+.gl__row { position: absolute; left: 0; right: 0; display: grid; gap: 3px; }
+.gl__cell { position: relative; display: block; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 4px; overflow: hidden; background: var(--term-surface-2); cursor: pointer; }
+.gl__cell img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.18s ease; }
+.gl__cell.has-thumb img { opacity: 1; }
+.gl__cell:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; }
+.gl__badge { position: absolute; right: 4px; bottom: 4px; display: inline-flex; align-items: center; gap: 3px; padding: 1px 5px 1px 4px; border-radius: 4px; background: rgba(0, 0, 0, 0.62); color: #fff; font-family: var(--font-mono); font-size: 0.65rem; line-height: 1.5; }
+.gl__badge::before { content: ''; width: 0; height: 0; border-style: solid; border-width: 4px 0 4px 6px; border-color: transparent transparent transparent #fff; }
+.gl__fmt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 0.7rem; color: var(--term-muted); }
+.gl__keys { margin: 0.25rem 0 0; font-family: var(--font-mono); font-size: 0.7rem; color: var(--term-subtle); }
+@media (hover: none) and (pointer: coarse) { .gl__keys { display: none; } }
+@media (max-width: 640px) { .gl__drop { padding: 1.5rem 0.75rem; } }
+
+.gl-box { --info-w: 340px; position: fixed; inset: 0; z-index: 10000; overflow: hidden; background: rgba(0, 0, 0, var(--fade, 1)); color: #fff; touch-action: none; overscroll-behavior: contain; -webkit-user-select: none; user-select: none; }
+.gl-box[hidden] { display: none; }
+.gl-box__stage { position: absolute; inset: 0; overflow: hidden; touch-action: none; }
+.gl-box__slide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.gl-box__media { position: relative; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; transform-origin: 50% 50%; -webkit-touch-callout: none; }
+.gl-box__video { width: 100%; height: 100%; background: #000; }
+.gl-box__ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0.7; }
+.gl-box__poster { width: 100%; height: 100%; }
+.gl-box__play { position: absolute; width: 72px; height: 72px; border-radius: 50%; background: rgba(0, 0, 0, 0.55); }
+.gl-box__play::after { content: ''; position: absolute; left: 29px; top: 22px; border-style: solid; border-width: 14px 0 14px 22px; border-color: transparent transparent transparent #fff; }
+.gl-box__slide.is-loading::after { content: ''; position: absolute; width: 28px; height: 28px; border: 2px solid rgba(255, 255, 255, 0.25); border-top-color: #fff; border-radius: 50%; animation: gl-spin 0.9s linear infinite; }
+@keyframes gl-spin { to { transform: rotate(360deg); } }
+.gl-box__msg { position: relative; max-width: 26rem; margin: 0 1.5rem; padding: 1rem 1.25rem; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 12px; background: rgba(18, 20, 24, 0.92); font-size: 0.9rem; line-height: 1.5; text-align: center; -webkit-user-select: text; user-select: text; }
+.gl-box__top { position: absolute; top: 0; left: 0; right: 0; z-index: 2; display: flex; align-items: center; gap: 0.15rem; padding: calc(env(safe-area-inset-top, 0px) + 6px) calc(env(safe-area-inset-right, 0px) + 6px) 28px calc(env(safe-area-inset-left, 0px) + 6px); background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)); transition: opacity 0.2s ease; }
+.gl-box__title { flex: 1 1 auto; min-width: 0; padding: 0 0.5rem; }
+.gl-box__name { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-size: 0.9rem; }
+.gl-box__count { margin: 0; font-family: var(--font-mono); font-size: 0.72rem; opacity: 0.75; }
+.gl-box__btn { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; }
+.gl-box__btn[hidden] { display: none; }
+.gl-box__btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.gl-box__btn:hover, .gl-box__btn:focus-visible { background: rgba(255, 255, 255, 0.14); outline: none; }
+.gl-box__btn.is-on, .gl-box__btn[aria-expanded="true"] { color: var(--syn-cyan); }
+.gl-box__off, .gl-box__btn.is-on .gl-box__on { display: none; }
+.gl-box__btn.is-on .gl-box__off { display: block; }
+.gl-box__nav { position: absolute; top: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; width: 48px; height: 64px; margin-top: -32px; padding: 0; border: 0; border-radius: 12px; background: rgba(0, 0, 0, 0.38); color: #fff; cursor: pointer; transition: opacity 0.2s ease; }
+.gl-box__nav svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.gl-box__nav:hover, .gl-box__nav:focus-visible { background: rgba(0, 0, 0, 0.6); outline: none; }
+.gl-box__nav:focus-visible { box-shadow: 0 0 0 2px var(--syn-cyan); }
+.gl-box__nav--prev { left: calc(env(safe-area-inset-left, 0px) + 10px); }
+.gl-box__nav--next { right: calc(env(safe-area-inset-right, 0px) + 10px); }
+.gl-box__nav:disabled { opacity: 0; pointer-events: none; }
+@media (hover: none) { .gl-box:not(.is-video) .gl-box__nav { display: none; } }
+.gl-box.is-bare .gl-box__top, .gl-box.is-bare .gl-box__nav, .gl-box.is-zoomed .gl-box__nav { opacity: 0; pointer-events: none; }
+.gl-box.is-bare { cursor: none; }
+.gl-info { position: absolute; z-index: 3; box-sizing: border-box; overflow-y: auto; padding: 1rem 1.25rem calc(env(safe-area-inset-bottom, 0px) + 1rem); background: var(--term-bg-raised, #14181d); color: var(--term-fg); touch-action: pan-y; overscroll-behavior: contain; -webkit-user-select: text; user-select: text; }
+.gl-info[hidden] { display: none; }
+.gl-info__title { margin: 0 0 0.75rem; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--term-muted); }
+.gl-info__list { display: flex; flex-direction: column; gap: 0.7rem; margin: 0; }
+.gl-info__row dt { font-size: 0.75rem; color: var(--term-muted); }
+.gl-info__row dd { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.15rem 0 0; font-size: 0.9rem; overflow-wrap: anywhere; }
+.gl-info__copy { min-height: 32px; padding: 0 0.7rem; font-size: 0.75rem; }
+@media (min-width: 900px) {
+  .gl-info { top: 0; right: 0; bottom: 0; width: var(--info-w); padding-top: calc(env(safe-area-inset-top, 0px) + 1.25rem); border-left: 1px solid var(--term-border-strong); }
+  .gl-box.has-info .gl-box__stage { right: var(--info-w); }
+  .gl-box.has-info .gl-box__top { right: var(--info-w); }
+  .gl-box.has-info .gl-box__nav--next { right: calc(var(--info-w) + 10px); }
+}
+@media (max-width: 899px) {
+  .gl-info { left: 0; right: 0; bottom: 0; height: 50%; border-top: 1px solid var(--term-border-strong); border-radius: 16px 16px 0 0; }
+  .gl-box.has-info .gl-box__stage { bottom: 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gl__cell img, .gl-box__top, .gl-box__nav { transition: none; }
+  .gl-box__slide.is-loading::after { animation: none; }
+}
+</style>

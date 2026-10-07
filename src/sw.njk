@@ -2,15 +2,26 @@
 permalink: /sw.js
 eleventyExcludeFromCollections: true
 ---
+{% set localeAlt = locales | selectattr("pathPrefix") | sort(false, true, "pathPrefix") | join("|", "pathPrefix") | replace("/", "") -%}
 importScripts('/assets/js/mentria-push-db.js?v={{ buildHash }}');
 const CACHE_NAME = 'mentria-cache-{{ buildHash }}';
 const MODELS_CACHE = 'mentria-models';
 const MODELS_MARKER = 'mentria-models-{{ modelsVersion }}';
+const ENGINE_FILES = {{ engineFiles | dump | safe }};
 const DECKS_CACHE = 'mentria-decks-{{ buildHash }}';
 const ART_CACHE = 'mentria-deck-art';
-const DECKS_LIMIT = 40;
+const SHARE_CACHE = 'mentria-share';
+const EXT_DATA_CACHE = 'mentria-ext-data';
+const EXT_FILES_CACHE = 'mentria-ext-files';
+const DECKS_LIMIT = 60;
 const ART_LIMIT = 200;
-const FEED_PAGE = /^\/((es|fr|ja|pt-br)\/)?feed\//;
+const FEED_PAGE = /^\/(({{ localeAlt }})\/)?(feed\/|learn\/[^/]+\/)/;
+const PACK_JSON = /^\/learn\/[^/]+\/pack\.json$/;
+const PACK_PAGE = /^\/(?:(?:{{ localeAlt }})\/)?learn\/(?!play\/|format\/)([^/]+)\/$/;
+const LOCALE_PATH = /^\/({{ localeAlt }})(\/|$)/;
+const LOCALE_PREFIXES = '{{ localeAlt }}'.split('|');
+const LEARN_PAGE = /^\/(?:(?:{{ localeAlt }})\/)?learn\/(?!format\/)[^/]+\/$/;
+const FEED_INDEX = /^\/search-index-feed\.[A-Za-z-]+\.json$/;
 const ASSETS = [
   '/',
   '/assets/css/style.css',
@@ -22,12 +33,11 @@ const ASSETS = [
   '/assets/js/mentria-webmcp.js',
   '/assets/js/qrcode.js',
   '/assets/js/tool-launcher.js',
-  '/assets/img/tool-icons.svg',
+  '/assets/js/mentria-media.js',
+  '/assets/js/mentria-meta-strip.js',
+  '/assets/js/mentria-media-worker.js',
+  '/assets/js/mentria-media-tags.js',
   '/assets/i18n/en.json',
-  '/assets/i18n/es.json',
-  '/assets/i18n/fr.json',
-  '/assets/i18n/ja.json',
-  '/assets/i18n/pt-BR.json',
   '/manifest.json',
   '/assets/css/feed-deck.css',
   '/assets/css/source-deck.css',
@@ -39,6 +49,15 @@ const ASSETS = [
   '/assets/js/mentria-backdrop.js',
   '/assets/img/stream-hero.svg',
   '/assets/js/pack-cards.js',
+  '/assets/js/pack-player.js',
+  '/assets/js/learn-library.js',
+  '/assets/css/learn.css',
+  '/assets/js/mentria-p2p-models.js',
+  '/assets/models-manifest.json',
+  '/assets/extensions/meal-planner.html',
+  '/assets/fonts/jbm-latin-ext.woff2',
+  '/assets/phosphor/renderer-modern.js',
+  '/assets/css/store.css',
   '/assets/js/stream.js',
   '/learn/',
   '/tools/',
@@ -55,6 +74,11 @@ const ASSETS = [
   '/tools/annotate-image/',
   '/tools/quote/',
   '/offline/',
+{%- for l in locales | selectattr("pathPrefix") %}
+  '{{ l.pathPrefix }}/offline/',
+{%- endfor %}
+  '/share/',
+  '/fragments/tools-popup.en.html',
   '/tools/radio/',
   '/assets/radio/radio.js',
   '/assets/radio/player.js',
@@ -79,9 +103,24 @@ const ASSETS = [
   '/tools/compass/',
   '/tools/speedometer/',
   '/tools/ruler/',
+  '/tools/gallery/',
+  '/tools/video-player/',
+  '/tools/music-player/',
+  '/tools/json-formatter/',
+  '/tools/calculator/',
+  '/tools/image-compressor/',
+  '/tools/password-generator/',
+  '/tools/world-clock/',
+  '/tools/unit-converter/',
   '/tools/phosphor/',
   '/assets/phosphor/game.js',
   '/assets/phosphor/renderer.js',
+  '/assets/phosphor/renderer-classic.js',
+  '/assets/phosphor/fx.js',
+  '/assets/games/textures/ph-panel.webp',
+  '/assets/games/sprites/logo-phosphor.webp',
+  '/assets/games/textures/ph-floor.webp',
+  '/assets/games/backdrops/ph-void.webp',
   '/assets/phosphor/sim.js',
   '/assets/phosphor/input.js',
   '/assets/phosphor/audio.js',
@@ -97,39 +136,40 @@ const ASSETS = [
   '/tools/totp/',
   '/tools/exif/',
   '/tools/files/',
-  '/search-index.json',
+{%- for l in locales %}
+  '/search-index.{{ l.code }}.json',
+{%- endfor %}
+  '/assets/packs/example-qkv.svg',
   '/assets/img/badge.svg',
   '/assets/img/icon-192x192.png',
   '/assets/img/favicon-96x96.png',
   '/assets/img/shortcuts/ai-chat.png',
   '/assets/img/shortcuts/qr-scanner.png',
   '/assets/img/shortcuts/quick-notes.png',
-  '/assets/videos/mentria-install.mp4',
-  '/assets/videos/mentria-install.webm',
-  '/assets/videos/mentria-install-poster.jpg',
   '/assets/fonts/inter-latin.woff2',
-  '/assets/fonts/inter-latin-ext.woff2',
   '/assets/fonts/jbm-latin.woff2',
-  '/assets/fonts/jbm-latin-ext.woff2',
   '/assets/fonts/mentrialogofont.woff2',
   '/assets/js/marked.esm.js',
   '/assets/js/markdown.js',
   '/assets/js/mentria-store.js',
   '/assets/js/mentria-caps.js',
   '/assets/js/mentria-ui.js',
+  '/assets/js/mentria-mini.js',
   '/assets/js/mentria-palette.js',
+  '/assets/js/site-palette.en.js',
+  '/assets/js/site-end.en.js',
   '/assets/js/mentria-widgets.js',
   '/assets/js/mentria-tiers.js',
   '/assets/js/mentria-model.js',
   '/assets/js/mentria-activity.js',
   '/assets/js/mentria-extensions.js',
+  '/assets/js/mentria-ext-host.js',
   '/assets/js/mentria-bus.js',
   '/assets/js/mentria-ext-install-ui.js',
   '/assets/js/mentria-ext-launch.js',
   '/tools/extensions/',
   '/tools/extensions/sdk/',
   '/tools/extensions/run/',
-  '/assets/extensions/unit-converter.html',
   '/assets/extensions/pomodoro-timer.html',
   '/assets/extensions/dice-roller.html',
   '/assets/extensions/image-gen.html',
@@ -149,11 +189,126 @@ const ASSETS = [
   '/assets/vendor/trystero-nostr.js'
 ];
 
+const REVISIONS = {/*REVISIONS*/};
+
+function precacheUrl(u) {
+  return u.indexOf('?') >= 0 ? u : u + '?v=' + (REVISIONS[u] || '{{ buildHash }}');
+}
+
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS.map(u => u.indexOf('?') >= 0 ? u : u + '?v={{ buildHash }}')))
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const names = (await caches.keys()).filter(k => k.startsWith('mentria-cache-') && k !== CACHE_NAME);
+    const previous = await Promise.all(names.map(n => caches.open(n)));
+    const fetchList = [];
+    await Promise.all(ASSETS.map(async (u) => {
+      const url = precacheUrl(u);
+      if (await cache.match(url)) return;
+      if (REVISIONS[u]) {
+        for (const old of previous) {
+          const hit = await old.match(url);
+          if (hit) { await cache.put(url, hit); return; }
+        }
+      }
+      fetchList.push(url);
+    }));
+    await cache.addAll(fetchList);
+    await refreshDecks();
+  })());
 });
+
+async function eachLimit(list, limit, fn) {
+  const out = new Array(list.length);
+  let next = 0;
+  const lane = async () => {
+    while (next < list.length) {
+      const i = next++;
+      out[i] = await fn(list[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, list.length) }, lane));
+  return out;
+}
+
+async function freshCopy(url) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const resp = await fetch(url, { cache: 'no-cache', signal: ctrl.signal });
+    if (resp.ok && !resp.redirected) return { resp };
+    if (resp.redirected || resp.status === 404 || resp.status === 410) return { gone: true };
+  } catch (_) {
+  } finally {
+    clearTimeout(timer);
+  }
+  return {};
+}
+
+async function refreshDecks() {
+  try {
+    const names = (await caches.keys()).filter(k => k.startsWith('mentria-decks-') && k !== DECKS_CACHE);
+    if (!names.length) return;
+    const target = await caches.open(DECKS_CACHE);
+    const seen = new Set((await target.keys()).map(r => r.url));
+    const saved = [];
+    for (const name of names) {
+      const old = await caches.open(name);
+      for (const req of await old.keys()) {
+        if (seen.has(req.url)) continue;
+        seen.add(req.url);
+        saved.push({ req, old });
+      }
+    }
+    const recent = saved.slice(-DECKS_LIMIT);
+    const results = await eachLimit(recent, 4, (entry) => freshCopy(entry.req.url));
+    for (let i = 0; i < recent.length; i++) {
+      const { req, old } = recent[i];
+      if (results[i].gone) { await old.delete(req); continue; }
+      const resp = results[i].resp || await old.match(req);
+      if (resp) await target.put(req, resp);
+    }
+  } catch (_) {}
+}
+
+async function carryDecks(keys) {
+  const olds = keys.filter(k => k.startsWith('mentria-decks-') && k !== DECKS_CACHE);
+  if (!olds.length) return;
+  try {
+    const target = await caches.open(DECKS_CACHE);
+    const have = new Set((await target.keys()).map(r => r.url));
+    for (const name of olds) {
+      const old = await caches.open(name);
+      for (const req of await old.keys()) {
+        if (have.has(req.url)) continue;
+        const hit = await old.match(req);
+        if (hit) { await target.put(req, hit); have.add(req.url); }
+      }
+    }
+    const all = await target.keys();
+    if (all.length > DECKS_LIMIT) await Promise.all(all.slice(0, all.length - DECKS_LIMIT).map(k => target.delete(k)));
+  } catch (_) {}
+}
+
+async function markStale(name) {
+  try {
+    const cache = await caches.open(name);
+    for (const req of await cache.keys()) {
+      if (new URL(req.url).pathname.startsWith('/__mentria-locale__/')) await cache.delete(req);
+    }
+  } catch (_) {}
+}
+
+function altPaths(path) {
+  const base = path.replace(LOCALE_PATH, '/');
+  const out = base !== path ? [base] : [];
+  if (LEARN_PAGE.test(path)) {
+    for (const prefix of LOCALE_PREFIXES) {
+      const alt = '/' + prefix + base;
+      if (alt !== path) out.push(alt);
+    }
+  }
+  return out;
+}
 
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
@@ -162,11 +317,13 @@ self.addEventListener('message', event => {
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
+    const updating = keys.some(k => k.startsWith('mentria-cache-') && k !== CACHE_NAME);
     const hadOldModels = keys.some(k => k.startsWith('mentria-models-') && k !== MODELS_MARKER);
+    await carryDecks(keys);
     await Promise.all(keys.map(key => {
-      if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER || key === DECKS_CACHE || key === ART_CACHE) return;
+      if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER || key === DECKS_CACHE || key === ART_CACHE || key === SHARE_CACHE) return;
       if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-') || key.startsWith('mentria-decks-')) return caches.delete(key);
-      if (key.startsWith('mentria-locale-') && !key.endsWith('-{{ buildHash }}')) return caches.delete(key);
+      if (key.startsWith('mentria-locale-') && updating) return markStale(key);
     }));
     if (!keys.includes(MODELS_MARKER)) {
       if (hadOldModels) {
@@ -182,11 +339,9 @@ self.addEventListener('activate', event => {
 });
 
 const NOTIF_STRINGS = {
-  en:      { one: 'New message',  many: (n) => n + ' new messages',     ring: 'Someone is trying to reach you.' },
-  es:      { one: 'Nuevo mensaje', many: (n) => n + ' mensajes nuevos', ring: 'Alguien intenta comunicarse contigo.' },
-  fr:      { one: 'Nouveau message', many: (n) => n + ' nouveaux messages', ring: 'Quelqu\'un essaie de vous joindre.' },
-  ja:      { one: '新着メッセージ', many: (n) => '新着メッセージ ' + n + ' 件', ring: '誰かがあなたに連絡しようとしています。' },
-  'pt-BR': { one: 'Nova mensagem', many: (n) => n + ' novas mensagens', ring: 'Alguém está tentando falar com você.' }
+{%- for l in locales %}
+  {{ l.code | dump | safe }}: { one: {{ "pwa.notif_message_one" | tlang(l.code) | dump | safe }}, many: {{ "pwa.notif_message_many" | tlang(l.code) | dump | safe }}, ring: {{ "pwa.notif_ring" | tlang(l.code) | dump | safe }}, reminder: {{ "pwa.notif_reminder" | tlang(l.code) | dump | safe }}, comms: {{ (l.pathPrefix + "/comms/") | dump | safe }} }{% if not loop.last %},{% endif %}
+{%- endfor %}
 };
 
 async function notifStrings() {
@@ -210,7 +365,7 @@ self.addEventListener('push', event => {
         tag: 'comms-ring',
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',
-        data: { url: '/comms/' },
+        data: { url: S.comms },
         renotify: true
       });
       return;
@@ -230,11 +385,11 @@ self.addEventListener('push', event => {
       } catch (_) {}
       const S = await notifStrings();
       await self.registration.showNotification('comms', {
-        body: n > 1 ? S.many(n) : S.one,
+        body: n > 1 ? S.many.replace('{n}', n) : S.one,
         tag: 'comms-msg',
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',
-        data: { url: '/comms/' },
+        data: { url: S.comms },
         renotify: true
       });
       return;
@@ -258,8 +413,9 @@ self.addEventListener('push', event => {
       });
       try { await self.MentriaPushDB.deletePending(scheduleId); } catch (_) {}
     } else {
+      const S = await notifStrings();
       await self.registration.showNotification(fallback, {
-        body: 'You have a reminder.',
+        body: S.reminder,
         icon: '/assets/img/icon-192x192.png',
         badge: '/assets/img/badge.svg',
         data: { url: '/' }
@@ -325,10 +481,122 @@ async function stashCapped(cacheName, key, response, limit) {
   if (keys.length > limit) await Promise.all(keys.slice(0, keys.length - limit).map(k => cache.delete(k)));
 }
 
+async function warmPack(id) {
+  const key = '/learn/' + id + '/pack.json';
+  const cache = await caches.open(DECKS_CACHE);
+  if (await cache.match(key, { ignoreSearch: true })) return;
+  try {
+    const resp = await fetch(key, { credentials: 'omit' });
+    if (resp.ok) await stashCapped(DECKS_CACHE, key, resp, DECKS_LIMIT);
+  } catch (_) {}
+}
+
+async function handleShareTarget(request) {
+  let form = null;
+  try { form = await request.formData(); } catch (_) {}
+  if (!form) return Response.redirect('/share/', 303);
+  const pick = (k) => { const v = form.get(k); return typeof v === 'string' ? v : ''; };
+  const file = form.get('image');
+  if (file && typeof file !== 'string' && file.size) {
+    const cache = await caches.open(SHARE_CACHE);
+    await cache.put('/share-target/file', new Response(file, { headers: { 'content-type': file.type || 'application/octet-stream', 'x-file-name': encodeURIComponent(file.name || 'shared-image') } }));
+    return Response.redirect('/share/', 303);
+  }
+  const title = pick('title').trim();
+  const body = [pick('text').trim(), pick('url').trim()].filter(Boolean).join('\n\n') || title;
+  if (!body) return Response.redirect('/tools/quick-notes/', 303);
+  const cache = await caches.open(SHARE_CACHE);
+  await cache.delete('/share-target/file');
+  const headers = { 'content-type': 'text/plain; charset=utf-8' };
+  if (title && title !== body) headers['x-share-title'] = encodeURIComponent(title);
+  await cache.put('/share-target/text', new Response(body, { headers }));
+  return Response.redirect('/tools/quick-notes/?shared=1', 303);
+}
+
+function bufferedResponse(body, resp) {
+  return new Response(body, { status: resp.status, statusText: resp.statusText, headers: { 'content-type': resp.headers.get('content-type') || 'application/octet-stream' } });
+}
+
+let engineKit = null;
+function keepEngineOffline() {
+  if (!engineKit) {
+    engineKit = (async () => {
+      const cache = await caches.open(MODELS_CACHE);
+      let complete = true;
+      for (const path of ENGINE_FILES) {
+        if (await cache.match(path, { ignoreSearch: true })) continue;
+        try {
+          const resp = await fetch(path, { cache: 'no-cache' });
+          if (!resp.ok) throw new Error(path);
+          await cache.put(path, bufferedResponse(await resp.arrayBuffer(), resp));
+        } catch (_) {
+          complete = false;
+        }
+      }
+      if (!complete) engineKit = null;
+    })().catch(() => { engineKit = null; });
+  }
+  return engineKit;
+}
+
+const TOKENIZER_FILES = ['tokenizer.json', 'tokenizer_config.json', 'chat_template.jinja'];
+const MODEL_SHARD = /^(https:\/\/cdn\.mentria\.ai\/models\/[^/]+\/|https:\/\/huggingface\.co\/mentriaai\/[^/]+\/resolve\/[^/]+\/)[^/]+\.safetensors$/;
+
+let modelBackfill = null;
+function keepModelsOffline() {
+  if (!modelBackfill) {
+    modelBackfill = (async () => {
+      const cache = await caches.open(MODELS_CACHE);
+      const bases = new Set();
+      for (const req of await cache.keys()) {
+        const m = req.url.split('?')[0].match(MODEL_SHARD);
+        if (m) bases.add(m[1]);
+      }
+      if (!bases.size) return;
+      await keepEngineOffline();
+      for (const base of bases) {
+        for (const name of TOKENIZER_FILES) {
+          if (await cache.match(base + name)) continue;
+          try {
+            const resp = await fetch(base + name);
+            if (resp.ok) await cache.put(base + name, bufferedResponse(await resp.arrayBuffer(), resp));
+          } catch (_) {}
+        }
+      }
+    })().catch(() => {});
+  }
+  return modelBackfill;
+}
+
+function isTokenizerFile(url) {
+  const fromCdn = url.origin === 'https://cdn.mentria.ai' && url.pathname.startsWith('/models/');
+  const fromHub = url.origin === 'https://huggingface.co' && /^\/mentriaai\/[^/]+\/resolve\//.test(url.pathname);
+  return (fromCdn || fromHub) && TOKENIZER_FILES.includes(url.pathname.slice(url.pathname.lastIndexOf('/') + 1));
+}
+
 self.addEventListener('fetch', event => {
+  if (event.request.method === 'POST') {
+    const postUrl = new URL(event.request.url);
+    if (postUrl.origin === self.location.origin && postUrl.pathname === '/share-target/') event.respondWith(handleShareTarget(event.request));
+    return;
+  }
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
+  if (isTokenizerFile(url)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(MODELS_CACHE);
+      const cached = await cache.match(event.request.url);
+      if (cached) return cached;
+      const resp = await fetch(event.request);
+      if (!resp.ok) return resp;
+      const body = await resp.arrayBuffer();
+      event.waitUntil(cache.put(event.request.url, bufferedResponse(body, resp)).catch(() => {}));
+      return bufferedResponse(body, resp);
+    })());
+    return;
+  }
 
   if (url.origin === 'https://mentria-ai.github.io' && url.pathname === '/radio-catalog/catalog.json') {
     event.respondWith((async () => {
@@ -351,11 +619,14 @@ self.addEventListener('fetch', event => {
     event.respondWith((async () => {
       const cache = await caches.open(ART_CACHE);
       const cached = await cache.match(event.request.url, { ignoreVary: true });
-      const network = fetch(event.request.url, { mode: 'cors' }).then(resp => {
-        if (resp && resp.ok) stashCapped(ART_CACHE, event.request.url, resp.clone(), ART_LIMIT);
+      if (cached) return cached;
+      try {
+        const resp = await fetch(event.request.url, { mode: 'cors' });
+        if (resp && resp.ok) event.waitUntil(stashCapped(ART_CACHE, event.request.url, resp.clone(), ART_LIMIT).catch(() => {}));
         return resp;
-      }).catch(() => cached || fetch(event.request));
-      return cached || network;
+      } catch (_) {
+        return fetch(event.request);
+      }
     })());
     return;
   }
@@ -370,6 +641,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  if (event.request.mode === 'navigate') event.waitUntil(keepModelsOffline());
+  if (url.pathname.startsWith('/assets/mentria/dist/')) event.waitUntil(keepEngineOffline());
+
   event.respondWith((async () => {
     if (url.pathname.startsWith('/assets/mentria/dist/')) {
       const hit = await caches.match(event.request, { ignoreSearch: true });
@@ -378,25 +652,66 @@ self.addEventListener('fetch', event => {
       if (resp && resp.ok) { const copy = resp.clone(); caches.open(MODELS_CACHE).then(c => c.put(event.request, copy)); }
       return resp;
     }
+    if (/^\/assets\/extensions\/[^/]+\//.test(url.pathname)) {
+      const data = await caches.open(EXT_DATA_CACHE);
+      try {
+        const resp = await fetch(event.request);
+        if (resp && resp.ok) event.waitUntil(data.put(url.pathname, resp.clone()).catch(() => {}));
+        return resp;
+      } catch (err) {
+        const kept = await data.match(url.pathname)
+          || await caches.match(url.pathname, { cacheName: EXT_FILES_CACHE })
+          || await caches.match(url.pathname, { cacheName: CACHE_NAME, ignoreSearch: true });
+        if (kept) return kept;
+        throw err;
+      }
+    }
     const precache = await caches.open(CACHE_NAME);
-    const cached = await precache.match(event.request, { ignoreSearch: true });
+    const loose = event.request.mode === 'navigate' || !url.searchParams.has('v');
+    const cached = await precache.match(event.request) || (loose ? await precache.match(event.request, { ignoreSearch: true }) : null);
     if (cached) return cached;
+    if (event.request.mode === 'navigate') {
+      const saved = await caches.match(event.request, { ignoreSearch: true });
+      if (saved) {
+        const net = fetch(event.request).then((resp) => {
+          if (resp && resp.ok && FEED_PAGE.test(url.pathname)) event.waitUntil(stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT).catch(() => {}));
+          return resp;
+        });
+        event.waitUntil(net.catch(() => {}));
+        const first = await Promise.race([net.catch(() => null), new Promise((r) => setTimeout(() => r(null), 3500))]);
+        return first && first.ok ? first : saved;
+      }
+    }
     try {
       const resp = await fetch(event.request);
       if (resp && resp.ok && event.request.mode === 'navigate' && FEED_PAGE.test(url.pathname)) {
-        stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT);
+        event.waitUntil(stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT).catch(() => {}));
+        const pack = url.pathname.match(PACK_PAGE);
+        if (pack) event.waitUntil(warmPack(pack[1]));
+      }
+      if (resp && resp.ok && PACK_JSON.test(url.pathname)) {
+        event.waitUntil(stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT).catch(() => {}));
+      }
+      if (resp && resp.ok && (url.pathname.startsWith('/assets/fonts/') || FEED_INDEX.test(url.pathname))) {
+        const copy = resp.clone();
+        event.waitUntil(precache.put(event.request, copy).catch(() => {}));
       }
       return resp;
     } catch (err) {
+      if (event.request.mode !== 'navigate') {
+        if (event.request.headers.has('x-mentria-fill')) throw err;
+        const kept = await caches.match(event.request, { ignoreSearch: true });
+        if (kept) return kept;
+      }
       if (event.request.mode === 'navigate') {
         const localized = await caches.match(event.request, { ignoreSearch: true });
         if (localized) return localized;
-        const stripped = url.pathname.replace(/^\/(es|fr|ja|pt-br)(\/|$)/, '/');
-        if (stripped !== url.pathname) {
-          const alt = await caches.match(stripped, { ignoreSearch: true });
+        for (const path of altPaths(url.pathname)) {
+          const alt = await caches.match(path, { ignoreSearch: true });
           if (alt) return alt;
         }
-        const offline = await precache.match('/offline/', { ignoreSearch: true });
+        const lp = url.pathname.match(LOCALE_PATH);
+        const offline = (lp && await caches.match('/' + lp[1] + '/offline/', { ignoreSearch: true })) || await precache.match('/offline/', { ignoreSearch: true });
         if (offline) return offline;
       }
       throw err;
@@ -404,8 +719,6 @@ self.addEventListener('fetch', event => {
   })());
 });
 
-// Notification click → focus the originating tool tab. Action buttons
-// post a typed message back to the page so it can react (e.g. stop alarm).
 self.addEventListener('notificationclick', event => {
   const action  = event.action;
   const data    = event.notification.data || {};
@@ -416,12 +729,14 @@ self.addEventListener('notificationclick', event => {
 
   event.waitUntil((async () => {
     const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    // Prefer a client already on the same path; fall back to any open client
-    let client = all.find(c => {
-      try { return new URL(c.url).pathname === target; } catch { return false; }
-    }) || all[0];
+    const pageOf = (u) => {
+      try { return new URL(u, self.location.origin).pathname.replace(LOCALE_PATH, '/'); } catch (_) { return null; }
+    };
+    const want = pageOf(target);
+    const onTarget = all.find(c => pageOf(c.url) === want);
 
     if (action === 'stop-alarm') {
+      const client = onTarget || all[0];
       if (client) {
         client.postMessage({ type: 'STOP_ALARM', timerId });
         try { await client.focus(); } catch (_) {}
@@ -429,11 +744,15 @@ self.addEventListener('notificationclick', event => {
       return;
     }
 
-    // Default click: focus existing tab or open the tool fresh.
-    if (client) {
-      try { await client.focus(); } catch (_) {}
-    } else if (self.clients.openWindow) {
-      await self.clients.openWindow(target);
+    if (onTarget) {
+      try { await onTarget.focus(); } catch (_) {}
+      return;
+    }
+    if (self.clients.openWindow) {
+      try { await self.clients.openWindow(target); return; } catch (_) {}
+    }
+    if (all[0]) {
+      try { await all[0].focus(); } catch (_) {}
     }
   })());
 });

@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.decision-wheel.title' | t }}"
   description: "{{ 'tools.decision-wheel.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">decision-wheel</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">decision-wheel</span></p>
   <h1>{{ "tools.decision-wheel.title" | t }}</h1>
   <p>{{ "tools.decision-wheel.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -27,8 +28,8 @@ eleventyComputed:
       <div class="dw__pointer" aria-hidden="true">
         <svg width="20" height="28" viewBox="0 0 20 28"><path d="M10 28L0 0h20z" fill="var(--syn-cyan)"/></svg>
       </div>
-      <div class="dw__wheel" id="dw-wheel" role="img" aria-label="{{ 'tool.decision-wheel.aria_wheel' | t }}">
-        <div class="dw__segments" id="dw-segments"></div>
+      <div class="dw__wheel" id="dw-wheel">
+        <div class="dw__segments" id="dw-segments" role="img" aria-label="{{ 'tool.decision-wheel.aria_wheel' | t }}"></div>
         <button class="dw__hub" id="dw-hub" type="button" aria-label="{{ 'tool.decision-wheel.aria_spin' | t }}"></button>
       </div>
     </div>
@@ -55,6 +56,7 @@ eleventyComputed:
       <input class="m-input dw__option-input" id="dw-option-input" maxlength="24" autocomplete="off" placeholder="{{ 'tool.decision-wheel.add_placeholder' | t }}" aria-label="{{ 'tool.decision-wheel.add_placeholder' | t }}">
       <button type="submit" class="m-btn m-btn--ghost" id="dw-option-add">{{ "tool.decision-wheel.btn_add" | t }}</button>
       <button type="button" class="m-btn m-btn--ghost" id="dw-option-reset">{{ "tool.decision-wheel.btn_reset" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" id="dw-option-share">{{ "tool.decision-wheel.btn_share" | t }}</button>
     </form>
   </div>
 </section>
@@ -71,7 +73,10 @@ eleventyComputed:
     wait: {{ ("tool.decision-wheel.outcome_wait" | t) | dump | safe }},
     errMin: {{ ("tool.decision-wheel.err_min" | t) | dump | safe }},
     errMax: {{ ("tool.decision-wheel.err_max" | t) | dump | safe }},
-    btnRemove: {{ ("tool.decision-wheel.btn_remove" | t) | dump | safe }}
+    btnRemove: {{ ("tool.decision-wheel.btn_remove" | t) | dump | safe }},
+    linkCopied: {{ ("tool.decision-wheel.link_copied" | t) | dump | safe }},
+    copyFailed: {{ ("common.copy_failed" | t) | dump | safe }},
+    useShared: {{ ("tool.decision-wheel.use_shared" | t) | dump | safe }}
   };
   const DEFAULTS = [COPY.yes, COPY.no, COPY.upto, COPY.wait];
   const PALETTE = [
@@ -223,10 +228,11 @@ eleventyComputed:
     catch (_) { return Math.random(); }
   }
 
-  let rotation = 0;
+  let rotation = rand() * 360;
   let velocity = 0;
   let animating = false;
   let lastActiveIndex = -1;
+  let lastFrame = 0;
   const FRICTION = 0.985;
   const STOP_THRESHOLD = 0.3;
 
@@ -254,10 +260,12 @@ eleventyComputed:
     if (navigator.vibrate) { try { navigator.vibrate(30); } catch (_) {} }
   }
 
-  function tick() {
+  function tick(ts) {
     if (!animating) return;
-    velocity *= FRICTION;
-    rotation += velocity;
+    const dt = lastFrame && ts > lastFrame ? Math.min(4, (ts - lastFrame) / (1000 / 60)) : 1;
+    lastFrame = ts;
+    velocity *= Math.pow(FRICTION, dt);
+    rotation += velocity * dt;
     wheel.style.transform = "rotate(" + rotation + "deg)";
     highlightSegment(getSegmentAtPointer());
     if (velocity < STOP_THRESHOLD) {
@@ -288,11 +296,31 @@ eleventyComputed:
     wheel.classList.add("dw__wheel--spinning");
     if (!animating) {
       animating = true;
+      lastFrame = 0;
       requestAnimationFrame(tick);
     }
   }
 
   if (spinBtn) spinBtn.addEventListener("click", spin);
+
+  document.getElementById("dw-option-share").addEventListener("click", () => {
+    const url = location.origin + location.pathname + "?" + options.map((o) => "o=" + encodeURIComponent(o)).join("&");
+    if (window.MentriaUI) MentriaUI.copyText(url).then((ok) => { MentriaUI.toast(ok ? COPY.linkCopied : COPY.copyFailed); });
+  });
+
+  const sharedOpts = new URLSearchParams(location.search).getAll("o").map((s) => s.trim().slice(0, 24)).filter(Boolean);
+  if (sharedOpts.length) {
+    history.replaceState(null, "", location.pathname);
+    if (sharedOpts.length >= MINN && sharedOpts.length <= MAXN && sharedOpts.join("\n") !== options.join("\n")) {
+      const useShared = () => { options = sharedOpts; customized = true; applyChange(); };
+      const offer = () => {
+        if (!customized) useShared();
+        else if (window.mentriaConfirm) window.mentriaConfirm(COPY.useShared.replace("{list}", sharedOpts.join(", ")), { danger: true }).then((ok) => { if (ok) useShared(); });
+      };
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", offer, { once: true });
+      else offer();
+    }
+  }
 
   import('/assets/js/mentria-bus.js').then(({ MentriaBus }) => {
     MentriaBus.provide('wheel.spin', async (p) => {
@@ -321,6 +349,7 @@ eleventyComputed:
   });
   if (hubBtn) hubBtn.addEventListener("click", spin);
 
+  wheel.style.transform = "rotate(" + rotation + "deg)";
   buildWheel();
   renderOptions();
 })();

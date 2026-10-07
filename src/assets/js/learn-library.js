@@ -9,6 +9,12 @@
     return s;
   };
   var lang = document.documentElement.lang || 'en';
+  var plural = (function () {
+    try { var rules = new Intl.PluralRules(lang); return function (n) { return rules.select(n); }; } catch (_) { return function (n) { return n === 1 ? 'one' : 'other'; }; }
+  })();
+  var tn = function (k, n, vars) {
+    return t(plural(n) === 'one' && T[k + '_one'] ? k + '_one' : k, Object.assign({ n: n }, vars || {}));
+  };
   var prefix = T.prefix || '';
   var list = document.getElementById('learn-list');
   var empty = document.getElementById('learn-empty');
@@ -18,11 +24,39 @@
   var fileInput = document.getElementById('learn-file');
   var drop = document.getElementById('learn-drop');
 
-  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
-  function say(msg, kind) {
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function say(msg, kind, detail) {
     if (!status) return;
     status.textContent = msg;
     status.dataset.kind = kind || '';
+    if (!detail) return;
+    var small = document.createElement('small');
+    small.textContent = detail;
+    status.append(' ', document.createElement('br'), small);
+  }
+
+  function mark(li, seen, total) {
+    var done = !!total && seen >= total;
+    li.classList.toggle('is-done', done);
+    li.classList.toggle('is-started', seen > 0 && !done);
+    var text = done ? t('finished') : (seen ? t('progress_n', { n: Math.min(99, Math.round((seen / total) * 100)) }) : '');
+    var badge = li.querySelector('.learn-tile__badge');
+    if (!text) { if (badge) badge.remove(); return; }
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'learn-tile__badge';
+      var link = li.querySelector('.learn-tile__link');
+      link.insertBefore(badge, link.firstChild);
+    }
+    badge.textContent = text;
+  }
+
+  function blankCover(img) {
+    var li = img.closest('.learn-tile');
+    var blank = document.createElement('span');
+    blank.className = 'learn-tile__cover learn-tile__cover--blank';
+    img.replaceWith(blank);
+    if (window.MentriaBackdrop && li) window.MentriaBackdrop.apply(blank, 'tile/' + li.dataset.packId, { square: true });
   }
 
   function tile(row) {
@@ -30,14 +64,14 @@
     li.className = 'learn-tile learn-tile--mine';
     li.dataset.packId = row.id;
     var sum = null;
-    try { sum = P.summary(row.pack || { id: row.id, cards: new Array(row.cards) }, P.getProgress(row.id)); } catch (_) {}
+    try { sum = P.summary(row.pack || { id: row.id, cards: row.cardList || [] }, P.getProgress(row.id)); } catch (_) {}
     var pct = sum && sum.total ? Math.round((sum.seen / sum.total) * 100) : 0;
     li.innerHTML =
       '<a class="learn-tile__link" href="' + esc(prefix + '/learn/play/?id=' + encodeURIComponent(row.id)) + '">' +
         (row.cover ? '<img class="learn-tile__cover" src="' + esc(row.cover) + '" alt="" loading="lazy">' : '<span class="learn-tile__cover learn-tile__cover--blank"></span>') +
         '<span class="learn-tile__body">' +
           '<span class="learn-tile__title">' + esc(P.text(row.title, lang)) + '</span>' +
-          '<span class="learn-tile__meta">' + esc(t('cards_n', { n: row.cards })) + (row.source === 'contact' ? ' · ' + esc(t('from_contact')) : '') + '</span>' +
+          '<span class="learn-tile__meta">' + esc(tn('cards_n', row.cards)) + (row.source === 'contact' ? ' · ' + esc(t('from_contact')) : '') + '</span>' +
           '<span class="learn-tile__progress"' + (pct ? '' : ' hidden') + '><span class="learn-tile__progress-fill" style="width:' + pct + '%"></span></span>' +
         '</span>' +
       '</a>' +
@@ -49,6 +83,7 @@
       '</button>';
     var blank = li.querySelector('.learn-tile__cover--blank');
     if (blank && window.MentriaBackdrop) window.MentriaBackdrop.apply(blank, 'tile/' + row.id, { square: true });
+    if (sum) mark(li, sum.seen, sum.total);
     li.querySelector('.learn-tile__share').addEventListener('click', function () {
       P.get(row.id).then(function (full) {
         if (!full || !full.pack) return;
@@ -60,7 +95,7 @@
       });
     });
     li.querySelector('.learn-tile__remove').addEventListener('click', function () {
-      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_confirm', { title: P.text(row.title, lang) })) : Promise.resolve(true);
+      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_confirm', { title: P.text(row.title, lang) }), { danger: true }) : Promise.resolve(true);
       Promise.resolve(ask).then(function (ok) { if (ok) P.remove(row.id).then(refresh); });
     });
     return li;
@@ -72,76 +107,191 @@
     var li = document.createElement('li');
     li.className = 'learn-course';
     li.dataset.courseId = course.id;
-    var done = rows.filter(function (r) { var pr = P.getProgress(r.id); return Object.keys(pr.cards || {}).length >= r.cards; }).length;
+    var done = rows.filter(function (r) { return r.cardList && r.cardList.length && P.summary({ id: r.id, cards: r.cardList }, P.getProgress(r.id)).done; }).length;
     li.innerHTML =
       '<span class="learn-course__k">' + esc(t('course')) + '</span>' +
       '<span class="learn-course__title">' + esc(P.text(course.title, lang)) + '</span>' +
-      '<span class="learn-course__meta">' + esc(t('course_packs_n', { done: done, total: rows.length })) + '</span>' +
+      '<span class="learn-course__meta">' + esc(tn('course_packs_n', rows.length, { done: done, total: rows.length })) + '</span>' +
       '<button type="button" class="learn-course__remove learn-link">' + esc(t('remove_course')) + '</button>';
     li.querySelector('.learn-course__remove').addEventListener('click', function () {
-      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_course_confirm', { title: P.text(course.title, lang) })) : Promise.resolve(true);
+      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('remove_course_confirm', { title: P.text(course.title, lang) }), { danger: true }) : Promise.resolve(true);
       Promise.resolve(ask).then(function (ok) { if (ok) P.removeCourse(course.id).then(refresh); });
     });
     return li;
   }
 
+  var shelf = null, wide = false, folds = 0;
   function refresh() {
-    return P.list().then(function (rows) {
-      list.innerHTML = '';
-      var courses = P.getCourses();
-      var grouped = {};
-      rows.forEach(function (r) { var cid = P.courseOf(r); if (cid && courses[cid]) (grouped[cid] = grouped[cid] || []).push(r); });
-      Object.keys(courses).sort(function (a, b) { return (courses[b].updated || 0) - (courses[a].updated || 0); }).forEach(function (cid) {
-        var packs = (grouped[cid] || []).sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); });
-        if (!packs.length) return;
-        list.appendChild(courseHead(courses[cid], packs));
-        var firstOpen = packs.findIndex(function (r) { var pr = P.getProgress(r.id); return Object.keys(pr.cards || {}).length < r.cards; });
-        var start = Math.max(0, (firstOpen < 0 ? packs.length : firstOpen) - 1);
-        var visible = expanded[cid] ? packs : packs.slice(start, start + SHOW);
-        visible.forEach(function (r) { list.appendChild(tile(r)); });
-        if (!expanded[cid] && visible.length < packs.length) {
-          var moreLi = document.createElement('li');
-          moreLi.className = 'learn-course__more';
-          var b = document.createElement('button');
-          b.type = 'button'; b.className = 'learn-btn';
-          b.textContent = t('show_all_packs', { n: packs.length });
-          b.addEventListener('click', function () { expanded[cid] = true; refresh(); });
-          moreLi.appendChild(b);
-          list.appendChild(moreLi);
-        }
-      });
-      var loose = rows.filter(function (r) { var cid = P.courseOf(r); return !(cid && courses[cid] && grouped[cid]); });
-      if (loose.length && Object.keys(grouped).length) { var h = document.createElement('li'); h.className = 'learn-course learn-course--loose'; h.innerHTML = '<span class="learn-course__title">' + esc(t('single_packs')) + '</span>'; list.appendChild(h); }
-      loose.forEach(function (r) { list.appendChild(tile(r)); });
-      list.hidden = !rows.length;
-      empty.hidden = !!rows.length;
+    return P.list().then(function (rows) { shelf = rows; render(); });
+  }
+  function render() {
+    var rows = shelf || [];
+    wide = searching();
+    folds = 0;
+    list.innerHTML = '';
+    var courses = P.getCourses();
+    var grouped = {}, placed = {};
+    rows.forEach(function (r) {
+      var cid = P.courseOf(r), c = cid && courses[cid];
+      if (!c || (Array.isArray(c.packs) && c.packs.indexOf(r.id) < 0)) return;
+      (grouped[cid] = grouped[cid] || []).push(r);
+      placed[r.id] = true;
     });
+    Object.keys(courses).sort(function (a, b) { return (courses[b].updated || 0) - (courses[a].updated || 0); }).forEach(function (cid) {
+      var packs = (grouped[cid] || []).sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); });
+      if (!packs.length) return;
+      var name = P.text(courses[cid].title, lang);
+      list.appendChild(courseHead(courses[cid], packs));
+      var firstOpen = packs.findIndex(function (r) { return P.doneCount(P.getProgress(r.id)) < r.cards; });
+      var start = Math.max(0, (firstOpen < 0 ? packs.length : firstOpen) - 1);
+      var visible = expanded[cid] ? packs : packs.slice(start, start + SHOW);
+      folds += packs.length - visible.length;
+      (wide ? packs : visible).forEach(function (r) { var li = tile(r); li.dataset.course = name; list.appendChild(li); });
+      if (!wide && visible.length < packs.length) {
+        var moreLi = document.createElement('li');
+        moreLi.className = 'learn-course__more';
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'learn-btn';
+        b.textContent = tn('show_all_packs', packs.length);
+        b.addEventListener('click', function () { expanded[cid] = true; refresh(); });
+        moreLi.appendChild(b);
+        list.appendChild(moreLi);
+      }
+    });
+    var loose = rows.filter(function (r) { return !placed[r.id]; });
+    if (loose.length && Object.keys(grouped).length) { var h = document.createElement('li'); h.className = 'learn-course learn-course--loose'; h.innerHTML = '<span class="learn-course__title">' + esc(t('single_packs')) + '</span>'; list.appendChild(h); }
+    loose.forEach(function (r) { list.appendChild(tile(r)); });
+    list.hidden = !rows.length;
+    empty.hidden = !!rows.length;
+    renderContinue();
+    filter();
   }
 
   function nativeProgress() {
     var tiles = document.querySelectorAll('.learn-grid--native .learn-tile');
     Array.prototype.forEach.call(tiles, function (li) {
       var p = P.getProgress(li.dataset.packId);
-      var seen = Object.keys(p.cards || {}).length;
+      var seen = P.doneCount(p);
       if (!seen) return;
-      var meta = li.querySelector('.learn-tile__meta');
-      var m = meta && meta.textContent.match(/^(\d+)/);
-      var total = m ? +m[1] : 0;
+      var total = +li.dataset.cards || 0;
       var bar = li.querySelector('.learn-tile__progress');
       if (!bar || !total) return;
       bar.hidden = false;
       bar.querySelector('.learn-tile__progress-fill').style.width = Math.min(100, Math.round((seen / total) * 100)) + '%';
+      mark(li, seen, total);
     });
   }
 
+  function renderContinue() {
+    var box = document.getElementById('learn-continue');
+    var row = document.getElementById('learn-continue-list');
+    if (!box || !row) return;
+    var picks = [];
+    Array.prototype.forEach.call(document.querySelectorAll('.learn-grid--native .learn-tile.is-started, #learn-list .learn-tile.is-started'), function (li) {
+      picks.push({ last: P.getProgress(li.dataset.packId).last || 0, li: li });
+    });
+    picks.sort(function (a, b) { return b.last - a.last; });
+    row.innerHTML = '';
+    picks.slice(0, 10).forEach(function (x) {
+      var c = x.li.cloneNode(true);
+      c.classList.remove('is-extra', 'is-miss');
+      Array.prototype.forEach.call(c.querySelectorAll('.learn-tile__share, .learn-tile__remove'), function (b) { b.remove(); });
+      row.appendChild(c);
+    });
+    box.hidden = !picks.length;
+  }
+
+  var ROW = 12;
+  function shelves() {
+    Array.prototype.forEach.call(document.querySelectorAll('.learn-shelf--native'), function (sec) {
+      var grid = sec.querySelector('.learn-grid--native');
+      var btn = sec.querySelector('.learn-shelf__all');
+      var tiles = grid ? grid.querySelectorAll('.learn-tile') : [];
+      if (!btn || tiles.length <= ROW) return;
+      sec.classList.add('is-row');
+      Array.prototype.forEach.call(tiles, function (li, i) { if (i >= ROW) li.classList.add('is-extra'); });
+      function label() {
+        var open = grid.classList.contains('is-expanded');
+        btn.textContent = open ? t('show_less') : tn('see_all', tiles.length);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      label();
+      btn.hidden = false;
+      btn.addEventListener('click', function () {
+        var open = grid.classList.toggle('is-expanded');
+        label();
+        if (!open) sec.scrollIntoView({ block: 'start' });
+      });
+    });
+  }
+
+  var q = document.getElementById('learn-q');
+  var none = document.getElementById('learn-none');
+  function norm(v) { return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
+  function searching() { return !!(q && norm(q.value)); }
+  function applySearch() {
+    if (!q) return;
+    if (shelf && folds && searching() !== wide) { render(); return; }
+    filter();
+  }
+  function filter() {
+    if (!q) return;
+    var v = norm(q.value);
+    document.body.classList.toggle('learn-searching', !!v);
+    var hits = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('.learn-shelf--native, .learn-mine'), function (sec) {
+      var head = sec.querySelector('h2');
+      var where = head ? norm(head.textContent) + ' ' : '';
+      var n = 0;
+      Array.prototype.forEach.call(sec.querySelectorAll('.learn-tile'), function (li) {
+        var title = li.querySelector('.learn-tile__title');
+        var ok = !v || (where + norm(li.dataset.course) + ' ' + norm(title && title.textContent)).indexOf(v) >= 0;
+        li.classList.toggle('is-miss', !ok);
+        if (ok) n++;
+      });
+      sec.classList.toggle('is-empty', !!v && !n);
+      hits += n;
+    });
+    var group = null, shown = 0;
+    var endGroup = function () { if (group) group.style.display = v && !shown ? 'none' : ''; };
+    Array.prototype.forEach.call(list.children, function (li) {
+      if (li.classList.contains('learn-course')) { endGroup(); group = li; shown = 0; }
+      else if (li.classList.contains('learn-tile') && !li.classList.contains('is-miss')) shown++;
+    });
+    endGroup();
+    if (none) {
+      none.hidden = !v || hits > 0;
+      none.textContent = none.hidden ? '' : t('no_match', { q: q.value.trim() });
+    }
+  }
+  if (q) {
+    var timer = 0;
+    q.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(applySearch, 120); });
+    q.addEventListener('keydown', function (e) { if (e.key === 'Escape' && q.value) { q.value = ''; applySearch(); } });
+  }
+
   function handleResult(res) {
-    if (res.course) say(t('imported_course', { title: P.text(res.course.title, lang), n: res.imported }) + (res.warnings.length ? ' · ' + res.warnings[0] : ''), 'ok');
+    if (res.course) say(tn('imported_course', res.imported, { title: P.text(res.course.title, lang) }) + (res.warnings.length ? ' · ' + res.warnings[0] : ''), 'ok');
     else say(t(res.replaced ? 'replaced' : 'imported', { title: P.text(res.row.title, lang) }) + (res.warnings.length ? ' · ' + res.warnings[0] : ''), 'ok');
     refresh();
   }
+  var ERRS = { empty: 'import_err_empty', json: 'import_err_json', kind: 'import_err_kind', size: 'import_err_size', invalid: 'import_err_invalid', network: 'import_err_network', url: 'import_err_url' };
+  var HOST_ERRS = { host: 'import_host_blocked', course_host: 'import_course_host_blocked' };
+  function storageBlocked() {
+    try { return !window.localStorage || !window.indexedDB; } catch (_) { return true; }
+  }
   function handleError(e) {
-    var msg = (e && e.errors && e.errors.slice(0, 3).join('; ')) || (e && e.message) || String(e);
-    say(t('import_failed') + ' ' + msg, 'error');
+    if (e && Object.prototype.hasOwnProperty.call(HOST_ERRS, e.code)) { say(t(HOST_ERRS[e.code], { host: e.host, site: location.hostname }), 'error'); return; }
+    var code = e && Object.prototype.hasOwnProperty.call(ERRS, e.code) ? e.code : '';
+    var key = code ? ERRS[code] : 'import_err_other';
+    if (!code && e && e.name === 'QuotaExceededError') key = 'import_err_storage_full';
+    else if (!code && ((e && e.name === 'SecurityError') || storageBlocked())) key = 'import_err_storage_blocked';
+    var detail = '';
+    if (code === 'invalid') detail = (e.errors && e.errors.length ? e.errors : [e.message]).slice(0, 3).join('; ');
+    else if (code === 'json' && e.line) detail = t('import_err_at', { line: e.line, column: e.column });
+    else if (code === 'network' && e.status) detail = 'HTTP ' + e.status;
+    else if (key === 'import_err_other') detail = (e && e.message) || String(e);
+    say(t('import_failed') + ' ' + t(key), 'error', detail);
   }
 
   function importFile(file) {
@@ -183,12 +333,51 @@
     P.importUrl(location.origin + '/assets/packs/example.mentria.json').then(handleResult, handleError);
   });
   var params = new URLSearchParams(location.search);
-  if (params.get('pack')) {
-    if (importBox && importBox.hidden) toggle.click();
-    say(t('importing'));
-    P.importUrl(params.get('pack')).then(function (r) { try { history.replaceState(null, '', location.pathname); } catch (_) {} handleResult(r); }, handleError);
+  var packUrl = params.get('pack');
+  var revealStatus = false;
+  if (packUrl) {
+    try { history.replaceState(null, '', location.pathname); } catch (_) {}
+    var refused = P.linkProblem(packUrl);
+    if (refused) {
+      if (importBox && importBox.hidden) toggle.click();
+      handleError(refused);
+      revealStatus = !!status;
+    } else {
+      var host = packUrl;
+      try { host = new URL(packUrl, location.href).host; } catch (_) {}
+      var ask = window.mentriaConfirm ? window.mentriaConfirm(t('import_url_confirm', { host: host })) : Promise.resolve(false);
+      Promise.resolve(ask).then(function (ok) {
+        if (!ok) return;
+        if (importBox && importBox.hidden) toggle.click();
+        say(t('importing'));
+        P.importUrl(packUrl).then(handleResult, handleError);
+      });
+    }
   }
-  window.addEventListener('mentria:packs', refresh);
-  refresh();
+  var refreshTimer = 0;
+  window.addEventListener('mentria:packs', function () {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(refresh, 80);
+  });
+  document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (img && img.tagName === 'IMG' && img.classList.contains('learn-tile__cover')) blankCover(img);
+  }, true);
+  Array.prototype.forEach.call(document.querySelectorAll('img.learn-tile__cover.is-broken'), blankCover);
+  function revealFocus() {
+    var a = document.activeElement;
+    if (!a || a === document.body || !a.getBoundingClientRect) return;
+    var r = a.getBoundingClientRect();
+    if (!r.width && !r.height) return;
+    if (r.top >= 0 && r.bottom <= window.innerHeight) return;
+    try { a.scrollIntoView({ block: 'center' }); } catch (_) {}
+  }
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    nativeProgress();
+    refresh().then(revealFocus, revealFocus);
+  });
   nativeProgress();
+  shelves();
+  refresh().then(function () { if (revealStatus) status.scrollIntoView({ block: 'center' }); });
 })();

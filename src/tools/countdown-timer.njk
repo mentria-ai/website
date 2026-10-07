@@ -9,15 +9,17 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.countdown-timer.title' | t }}"
   description: "{{ 'tools.countdown-timer.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">countdown-timer</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">countdown-timer</span></p>
   <h1>{{ "tools.countdown-timer.title" | t }}</h1>
   <p>{{ "tools.countdown-timer.lede" | t }}</p>
   {% include "tldr.njk" %}
 </section>
 
 {% set terminalTitle = "countdown-timer.js" %}
+{% set terminalMini = "timer" %}
 {% include "terminal-frame-open.njk" %}
 <section class="countdown-tool">
   <div class="ct-notif-bar" id="ct-notif-bar" role="status" aria-live="polite">
@@ -39,7 +41,7 @@ eleventyComputed:
 
 <template id="ct-widget-tpl">
   <div class="ct-widget" data-widget-id="">
-    <button class="ct-widget__close" title="{{ 'tool.countdown-timer.btn_remove_timer' | t }}">&times;</button>
+    <button type="button" class="ct-widget__close" title="{{ 'tool.countdown-timer.btn_remove_timer' | t }}" aria-label="{{ 'tool.countdown-timer.btn_remove_timer' | t }}">&times;</button>
 
     <div class="ct-widget__title" contenteditable="true" spellcheck="false" data-placeholder="Timer"></div>
 
@@ -62,22 +64,22 @@ eleventyComputed:
     <div class="ct-widget__inputs" data-panel="duration">
       <div class="ct-input-grp">
         <label>{{ "tool.countdown-timer.input_hours" | t }}</label>
-        <input class="m-input" type="number" data-input="hours" min="0" max="99" value="0" />
+        <input class="m-input" type="number" data-field="hours" min="0" max="99" value="0" />
       </div>
       <div class="ct-input-grp">
         <label>{{ "tool.countdown-timer.input_minutes" | t }}</label>
-        <input class="m-input" type="number" data-input="mins" min="0" max="59" value="0" />
+        <input class="m-input" type="number" data-field="mins" min="0" max="59" value="0" />
       </div>
       <div class="ct-input-grp">
         <label>{{ "tool.countdown-timer.input_seconds" | t }}</label>
-        <input class="m-input" type="number" data-input="secs" min="0" max="59" value="0" />
+        <input class="m-input" type="number" data-field="secs" min="0" max="59" value="0" />
       </div>
     </div>
 
     <div class="ct-widget__inputs ct-widget__inputs--hidden" data-panel="datetime">
       <div class="ct-input-grp ct-input-grp--wide">
         <label>{{ "tool.countdown-timer.input_until_label" | t }}</label>
-        <input class="m-input" type="datetime-local" data-input="datetime" />
+        <input class="m-input" type="datetime-local" data-field="datetime" />
       </div>
       <div class="ct-widget__dt-error" data-role="dt-error"></div>
     </div>
@@ -96,6 +98,7 @@ eleventyComputed:
     <div class="ct-widget__controls">
       <button class="m-btn m-btn--primary" data-action="start">{{ "tool.countdown-timer.btn_start" | t }}</button>
       <button class="m-btn m-btn--ghost" data-action="reset" disabled>{{ "tool.countdown-timer.btn_reset" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" data-action="float" title="{{ 'tool.countdown-timer.float_title' | t }}" hidden>{{ "tool.countdown-timer.btn_float" | t }}</button>
     </div>
   </div>
 </template>
@@ -110,6 +113,7 @@ eleventyComputed:
     statusPaused:   {{ ("tool.countdown-timer.status_paused"    | t) | dump | safe }},
     statusTimesUp:  {{ ("tool.countdown-timer.status_times_up"  | t) | dump | safe }},
     btnStart:       {{ ("tool.countdown-timer.btn_start"        | t) | dump | safe }},
+    floatDocTitle:  {{ ("tool.countdown-timer.float_doc_title"  | t) | dump | safe }},
     btnPause:       {{ ("tool.countdown-timer.btn_pause"        | t) | dump | safe }},
     btnResume:      {{ ("tool.countdown-timer.btn_resume"       | t) | dump | safe }},
     errPickDt:      {{ ("tool.countdown-timer.err_pick_dt"      | t) | dump | safe }},
@@ -135,6 +139,13 @@ eleventyComputed:
     notifStopAlarm: {{ ("tool.countdown-timer.notif_stop_alarm" | t) | dump | safe }}
   };
   const fmtTimer = n => COPY.timerDefault.replace('{n}', n);
+  const freeTimerName = (except) => {
+    const taken = new Set();
+    document.querySelectorAll('.ct-widget__title').forEach((t) => { if (t !== except) taken.add(t.textContent.trim()); });
+    let n = 1;
+    while (taken.has(fmtTimer(n))) n++;
+    return fmtTimer(n);
+  };
 
   const MAX_WIDGETS = 4;
   const MAX_SECONDS = 99 * 3600;
@@ -164,8 +175,8 @@ eleventyComputed:
     return Notification.permission;
   }
 
-  function refreshNotifBar() {
-    const s = notifState();
+  function refreshNotifBar(result) {
+    const s = result === 'denied' ? 'denied' : notifState();
     notifBar.classList.toggle('is-unsupported', s === 'unsupported');
     notifBar.classList.toggle('is-granted',     s === 'granted');
     notifBar.classList.toggle('is-denied',      s === 'denied');
@@ -181,7 +192,7 @@ eleventyComputed:
     if (!notifSupported()) return;
     try {
       const result = await Notification.requestPermission();
-      refreshNotifBar();
+      refreshNotifBar(result);
       if (result === 'granted') {
         if (window.MentriaPush) await MentriaPush.requestPermission();
         await showRawNotification(COPY.notifOnTitle, {
@@ -238,9 +249,9 @@ eleventyComputed:
         const id = event.data.timerId;
         if (id != null) {
           const state = widgets.get(id);
-          if (state) stopAlarmFor(state);
+          if (state) state.dismissAlarm();
         } else {
-          for (const [, s] of widgets) stopAlarmFor(s);
+          for (const [, s] of widgets) s.dismissAlarm();
         }
         updatePageTitle();
       }
@@ -371,7 +382,10 @@ eleventyComputed:
         x.dataset.removePreset = String(secs);
         x.textContent = '\u00d7';
         x.setAttribute('aria-label', COPY.presetRemoveAria.replace('{label}', fmtPreset(secs)));
-        holder.append(b, x);
+        const chip = document.createElement('span');
+        chip.className = 'ct-preset-chip';
+        chip.append(b, x);
+        holder.append(chip);
       });
     });
   }
@@ -399,7 +413,7 @@ eleventyComputed:
     el.dataset.widgetId = id;
 
     const titleEl = el.querySelector('.ct-widget__title');
-    titleEl.textContent = fmtTimer(widgets.size + 1);
+    titleEl.textContent = freeTimerName(null);
     titleEl.dataset.isDefault = '1';
 
     const $ = sel => el.querySelector(sel);
@@ -412,28 +426,82 @@ eleventyComputed:
     const displayWrap = $('.ct-widget__display');
     const panelDuration = $('[data-panel="duration"]');
     const panelDatetime = $('[data-panel="datetime"]');
-    const inputH = $('[data-input="hours"]');
-    const inputM = $('[data-input="mins"]');
-    const inputS = $('[data-input="secs"]');
-    const inputDT = $('[data-input="datetime"]');
+    const inputH = $('[data-field="hours"]');
+    const inputM = $('[data-field="mins"]');
+    const inputS = $('[data-field="secs"]');
+    const inputDT = $('[data-field="datetime"]');
     const dtError = $('[data-role="dt-error"]');
     [inputH, inputM, inputS, inputDT].forEach((inp) => {
       const grp = inp.closest('.ct-input-grp');
       const label = grp && grp.querySelector('label');
       if (!label) return;
-      const fid = 'ct' + id + '-' + inp.dataset.input;
+      const fid = 'ct' + id + '-' + inp.dataset.field;
       inp.id = fid;
       label.htmlFor = fid;
     });
     const btnStart = $('[data-action="start"]');
+    const durationSeconds = () => {
+      const part = (inp) => Math.max(0, Number(inp.value) || 0);
+      return Math.round(part(inputH) * 3600 + part(inputM) * 60 + part(inputS));
+    };
     const btnReset = $('[data-action="reset"]');
     const btnClose = $('.ct-widget__close');
+    const btnFloat = $('[data-action="float"]');
+    let floatWin = null;
+    function closeFloat() {
+      if (floatWin && !floatWin.closed) { try { floatWin.close(); } catch (_) {} }
+      floatWin = null;
+    }
+    async function floatWidget() {
+      const win = await MentriaUI.floatWindow({
+        width: 280,
+        height: 180,
+        title: COPY.floatDocTitle,
+        css: '.pip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:100%;padding:10px;box-sizing:border-box;text-align:center}' +
+          '.pip__title{max-width:100%;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+          '.pip__time{font-size:clamp(28px,16vw,56px);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em}' +
+          '.pip__status{font-size:11px;color:var(--muted)}.is-done .pip__time{color:var(--pink)}' +
+          '.pip__row{display:flex;gap:8px;margin-top:4px}'
+      });
+      if (!win) return;
+      floatWin = win;
+      const d = win.document;
+      d.body.innerHTML = '<main class="pip"><div class="pip__title"></div><div class="pip__time" role="timer"></div><div class="pip__status" aria-live="polite"></div><div class="pip__row"><button type="button" data-act="toggle"></button><button type="button" data-act="reset"></button></div></main>';
+      const sync = () => {
+        if (!floatWin || floatWin.closed || floatWin !== win) { clearInterval(timer); return; }
+        d.querySelector('.pip__title').textContent = (titleEl.textContent || '').trim() || fmtTimer(state.id);
+        d.querySelector('.pip__time').textContent = displayH.textContent + ':' + displayM.textContent + ':' + displayS.textContent;
+        d.querySelector('.pip__status').textContent = statusEl.textContent;
+        const toggle = d.querySelector('[data-act="toggle"]');
+        toggle.textContent = btnStart.textContent;
+        toggle.disabled = btnStart.disabled;
+        const reset = d.querySelector('[data-act="reset"]');
+        reset.textContent = btnReset.textContent;
+        reset.disabled = btnReset.disabled;
+        d.body.classList.toggle('is-done', displayWrap.classList.contains('ct-widget__display--finished'));
+      };
+      d.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-act]');
+        if (!b || b.disabled) return;
+        if (b.dataset.act === 'toggle') btnStart.click();
+        else btnReset.click();
+        sync();
+      });
+      const timer = setInterval(sync, 250);
+      sync();
+      win.addEventListener('pagehide', () => { clearInterval(timer); if (floatWin === win) floatWin = null; });
+    }
+    if (btnFloat && window.MentriaUI && MentriaUI.floatSupported && MentriaUI.floatSupported()) {
+      btnFloat.hidden = false;
+      btnFloat.addEventListener('click', floatWidget);
+    }
     const modeToggle = $('.ct-widget__mode-toggle');
     const presetButtons = $$('.ct-preset');
 
     const state = {
       id,
       totalSeconds: 0,
+      duration: 0,
       countdown: null,
       isPaused: false,
       isAlarming: false,
@@ -458,6 +526,7 @@ eleventyComputed:
       if (state.totalSeconds > 0) {
         updateDisplay();
       } else {
+        updateDisplay();
         clearInterval(state.countdown);
         state.countdown = null;
         statusEl.textContent = COPY.statusTimesUp;
@@ -538,10 +607,7 @@ eleventyComputed:
         if (secs < 0) return;
         state.totalSeconds = secs;
       } else {
-        const h = parseInt(inputH.value) || 0;
-        const m = parseInt(inputM.value) || 0;
-        const s = parseInt(inputS.value) || 0;
-        state.totalSeconds = h * 3600 + m * 60 + s;
+        state.totalSeconds = durationSeconds();
       }
 
       if (state.totalSeconds <= 0) {
@@ -555,6 +621,7 @@ eleventyComputed:
         return;
       }
 
+      state.duration = state.mode === 'duration' ? state.totalSeconds : 0;
       displayWrap.classList.remove('ct-widget__display--finished');
       statusEl.textContent = COPY.statusRunning;
       updateDisplay();
@@ -571,12 +638,18 @@ eleventyComputed:
     }
 
     function resetTimer() {
+      closeFloat();
       stopAlarmFor(state);
       if (state.countdown) { clearInterval(state.countdown); state.countdown = null; }
       disarmServerPush(state);
       syncWakeLock();
+      showReady();
+      persistActive();
+    }
+
+    function showReady() {
       state.isPaused = false;
-      state.totalSeconds = 0;
+      state.totalSeconds = state.mode === 'duration' ? durationSeconds() : 0;
       updateDisplay();
       statusEl.textContent = COPY.statusReady;
       displayWrap.classList.remove('ct-widget__display--finished');
@@ -591,7 +664,12 @@ eleventyComputed:
         panelDatetime.classList.remove('ct-widget__inputs--hidden');
       }
       updatePageTitle();
-      persistActive();
+    }
+
+    function setInputs(seconds) {
+      inputH.value = Math.floor(seconds / 3600);
+      inputM.value = Math.floor((seconds % 3600) / 60);
+      inputS.value = seconds % 60;
     }
 
     function setPreset(seconds) {
@@ -602,20 +680,16 @@ eleventyComputed:
         panelDuration.classList.remove('ct-widget__inputs--hidden');
         panelDatetime.classList.add('ct-widget__inputs--hidden');
       }
-      const h = Math.floor(seconds / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      const s = seconds % 60;
-      inputH.value = h;
-      inputM.value = m;
-      inputS.value = s;
+      setInputs(seconds);
       state.totalSeconds = seconds;
       updateDisplay();
     }
 
     state.getSnapshot = () => {
       const title = titleEl.dataset.isDefault === '1' ? '' : (titleEl.textContent || '').trim().slice(0, 60);
-      if (state.countdown) return { mode: 'run', endAt: state.endAt, title };
-      if (state.isPaused && state.totalSeconds > 0) return { mode: 'pause', remaining: state.totalSeconds, title };
+      const dur = state.duration || undefined;
+      if (state.countdown) return { mode: 'run', endAt: state.endAt, title, id: state.id, dur };
+      if (state.isPaused && state.totalSeconds > 0) return { mode: 'pause', remaining: state.totalSeconds, title, id: state.id, dur };
       return null;
     };
 
@@ -624,22 +698,21 @@ eleventyComputed:
         titleEl.textContent = entry.title.slice(0, 60);
         titleEl.dataset.isDefault = '';
       }
+      const dur = Math.floor(Number(entry.dur) || 0);
+      if (dur > 0 && dur <= MAX_SECONDS) {
+        state.duration = dur;
+        setInputs(dur);
+      }
+      const remaining = entry.mode === 'run'
+        ? Math.round((entry.endAt - Date.now()) / 1000)
+        : Math.max(0, Math.floor(entry.remaining) || 0);
+      if (!(remaining > 0)) { showReady(); return; }
       btnReset.disabled = false;
       presetButtons.forEach(b => b.disabled = true);
       panelDuration.classList.add('ct-widget__inputs--hidden');
       panelDatetime.classList.add('ct-widget__inputs--hidden');
+      state.totalSeconds = remaining;
       if (entry.mode === 'run') {
-        const remaining = Math.round((entry.endAt - Date.now()) / 1000);
-        if (remaining <= 0) {
-          state.totalSeconds = 0;
-          updateDisplay();
-          statusEl.textContent = COPY.statusTimesUp;
-          displayWrap.classList.add('ct-widget__display--finished');
-          btnStart.textContent = COPY.btnStart;
-          btnStart.disabled = true;
-          return;
-        }
-        state.totalSeconds = remaining;
         state.endAt = entry.endAt;
         updateDisplay();
         statusEl.textContent = COPY.statusRunning;
@@ -649,13 +722,12 @@ eleventyComputed:
         btnStart.textContent = COPY.btnPause;
         return;
       }
-      state.totalSeconds = Math.max(0, Math.floor(entry.remaining) || 0);
-      if (!state.totalSeconds) return;
       state.isPaused = true;
       updateDisplay();
       statusEl.textContent = COPY.statusPaused;
       btnStart.textContent = COPY.btnResume;
     };
+    state.dismissAlarm = () => { if (state.isAlarming) resetTimer(); };
 
     btnStart.addEventListener('click', startTimer);
     widgetApi.set(id, {
@@ -670,7 +742,7 @@ eleventyComputed:
     });
     btnReset.addEventListener('click', resetTimer);
 
-    btnClose.addEventListener('click', () => removeWidget(id));
+    btnClose.addEventListener('click', () => { closeFloat(); removeWidget(id); });
 
     const modeSeg = MentriaUI.segmented(modeToggle, (mode) => {
       if (state.countdown || state.isPaused) { modeSeg.set(state.mode); return; }
@@ -682,12 +754,14 @@ eleventyComputed:
     [inputH, inputM, inputS].forEach(inp => {
       inp.addEventListener('input', () => {
         if (!state.countdown && !state.isPaused) {
-          const h = parseInt(inputH.value) || 0;
-          const m = parseInt(inputM.value) || 0;
-          const s = parseInt(inputS.value) || 0;
-          state.totalSeconds = h * 3600 + m * 60 + s;
+          state.totalSeconds = durationSeconds();
           updateDisplay();
         }
+      });
+      inp.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' || e.isComposing) return;
+        e.preventDefault();
+        if (!state.countdown) btnStart.click();
       });
     });
 
@@ -751,7 +825,7 @@ eleventyComputed:
     });
     titleEl.addEventListener('blur', () => {
       if (!titleEl.textContent.trim()) {
-        titleEl.textContent = fmtTimer(id);
+        titleEl.textContent = freeTimerName(titleEl);
         titleEl.dataset.isDefault = '1';
       }
       persistActive();
@@ -801,6 +875,16 @@ eleventyComputed:
   }).catch(() => {});
   addWidget();
 
+  const miniDot = document.querySelector('[data-mini="timer"]');
+  if (miniDot) miniDot.addEventListener('click', () => {
+    persistActive();
+    const active = window.MentriaStore && window.MentriaStore.get('tools', 'countdown_active');
+    if (!window.MentriaMini) return;
+    if (!Array.isArray(active) || !active.length) { window.MentriaMini.minimizeTool(); return; }
+    window.MentriaMini.start('timer', location.pathname);
+    window.MentriaMini.leave();
+  });
+
   let restoredActive = 0;
   (function restoreActive() {
     const saved = window.MentriaStore && window.MentriaStore.get('tools', 'countdown_active');
@@ -837,7 +921,7 @@ eleventyComputed:
     }
     if (!w) return;
     const setInput = (name, v) => {
-      const el = w.querySelector('[data-input="' + name + '"]');
+      const el = w.querySelector('[data-field="' + name + '"]');
       if (el) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
     };
     setInput('hours', Math.floor(secs / 3600));
@@ -961,6 +1045,7 @@ eleventyComputed:
   background: none;
   border: none;
   color: rgba(255,255,255,0.3);
+  font-family: inherit;
   font-size: 1.4rem;
   cursor: pointer;
   line-height: 1;
@@ -974,6 +1059,7 @@ eleventyComputed:
 }
 
 .ct-widget__title {
+  font-family: var(--font-mono);
   font-size: 1rem;
   color: var(--syn-orange);
   font-weight: 600;
@@ -997,7 +1083,8 @@ eleventyComputed:
   width: 100%;
 }
 .ct-widget__display {
-  font-family: 'Courier New', 'Lucida Console', monospace;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 700;
   color: var(--syn-orange);
@@ -1035,6 +1122,7 @@ eleventyComputed:
   50% { opacity: 0.3; }
 }
 .ct-widget__status {
+  font-family: var(--font-mono);
   font-size: 0.85rem;
   color: rgba(255, 149, 0, 0.7);
   letter-spacing: 0.08em;
@@ -1062,6 +1150,7 @@ eleventyComputed:
   min-width: 200px;
 }
 .ct-input-grp label {
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   color: var(--term-muted);
   font-weight: 500;
@@ -1099,12 +1188,26 @@ eleventyComputed:
   font-size: 0.8rem;
   color: var(--term-muted);
 }
+
+.ct-widget__presets > span {
+  font-family: var(--font-mono);
+}
+.ct-preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
 .ct-preset-remove {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   padding: 0;
-  font-size: var(--text-2xs);
-  margin-left: -4px;
+  font-size: var(--text-xs);
+}
+@media (pointer: coarse) {
+  .ct-preset-remove {
+    width: 28px;
+    height: 28px;
+  }
 }
 .ct-preset-save {
   min-width: 28px;

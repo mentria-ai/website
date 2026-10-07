@@ -3,7 +3,7 @@
   var P = global.MentriaPacks;
   if (!P) return;
 
-  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function el(tag, cls, html) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -17,6 +17,11 @@
   }
   function norm(s) { return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.,;:!?'"’]/g, ''); }
   function inline(html) { return html.replace(/^<p>|<\/p>\s*$/g, ''); }
+  function plain(html) {
+    var tpl = document.createElement('template');
+    tpl.innerHTML = html;
+    return tpl.content.textContent.trim();
+  }
 
   function Ctx(opts) {
     this.pack = opts.pack;
@@ -46,10 +51,14 @@
     if (card.image) {
       var img = el('img', 'deck__slide-img');
       img.src = card.image;
-      img.alt = ctx.tx(card.caption || card.title || '');
+      img.alt = card.caption ? plain(ctx.md(card.caption)) : ctx.tx(card.title || '');
       img.loading = 'lazy';
       img.decoding = 'async';
       img.addEventListener('error', function () { img.classList.add('is-broken'); });
+      img.addEventListener('load', function () {
+        img.classList.add('is-loaded');
+        if (img.dataset.warm && img.decode) img.decode().catch(function () {});
+      });
       if (interactive || card.type === 'checkpoint') img.classList.add('pack-slide__bg');
       s.appendChild(img);
       s.style.setProperty('--slide-bg', 'url("' + card.image + '")');
@@ -82,67 +91,198 @@
     return s;
   }
 
+  var STOPS = '.!?…', CJK_STOPS = '。！？', CLOSERS = '"\'”’)]」』）';
+  function sentences(text) {
+    var out = [], start = 0, i = 0, n = text.length, depth = 0;
+    while (i < n) {
+      var ch = text.charAt(i);
+      if (ch === '<') {
+        var close = text.indexOf('>', i);
+        if (close < 0) break;
+        var tag = text.slice(i + 1, close);
+        if (tag.charAt(0) === '/') depth = Math.max(0, depth - 1);
+        else if (tag.charAt(tag.length - 1) !== '/' && !/^(br|hr|img|wbr)\b/i.test(tag)) depth++;
+        i = close + 1;
+        continue;
+      }
+      if (!depth && (CJK_STOPS.indexOf(ch) >= 0 || STOPS.indexOf(ch) >= 0)) {
+        var j = i + 1;
+        while (j < n && (CLOSERS.indexOf(text.charAt(j)) >= 0 || STOPS.indexOf(text.charAt(j)) >= 0)) j++;
+        var cjk = CJK_STOPS.indexOf(ch) >= 0;
+        if (cjk || j >= n || /\s/.test(text.charAt(j))) {
+          out.push(text.slice(start, j).trim());
+          while (j < n && /\s/.test(text.charAt(j))) j++;
+          start = j;
+          i = j;
+          continue;
+        }
+      }
+      i++;
+    }
+    if (start < n && text.slice(start).trim()) out.push(text.slice(start).trim());
+    return out;
+  }
+  function splitLead(text) {
+    var cjk = (text.match(/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g) || []).length > text.length * 0.3;
+    var limit = cjk ? 110 : 240;
+    if (text.length <= limit + 60) return null;
+    var paras = text.split(/\n{2,}/);
+    var first = sentences(paras[0]);
+    if (first.length < 2 && paras.length < 2) return null;
+    var lead = first[0], k = 1;
+    while (k < first.length && ((lead.length + 1 + first[k].length) <= limit || lead.length < limit * 0.4)) { lead += (cjk ? '' : ' ') + first[k]; k++; }
+    var rest = first.slice(k).join(cjk ? '' : ' ');
+    var tail = paras.slice(1).join('\n\n');
+    rest = rest && tail ? rest + '\n\n' + tail : (rest || tail);
+    if (!rest || rest.length < 40) return null;
+    return { lead: lead, rest: rest };
+  }
+
+  function foldIfLong(body, more) {
+    var done = false;
+    var ro = null;
+    var check = function () {
+      if (done || !body.offsetHeight) return;
+      done = true;
+      if (ro) ro.disconnect();
+      if (body.scrollHeight > global.innerHeight * 0.45) {
+        body.classList.add('is-collapsed');
+        more.hidden = false;
+        try { body.dispatchEvent(new CustomEvent('pack:fold', { bubbles: true })); } catch (_) {}
+      }
+    };
+    if (global.ResizeObserver) { ro = new global.ResizeObserver(check); ro.observe(body); }
+    else global.setTimeout(check, 0);
+  }
+
+  function equation(html) {
+    var box = el('div', 'deck__eq', html);
+    var sync = function () {
+      var clipped = box.scrollWidth > box.clientWidth + 1;
+      if (clipped) box.tabIndex = 0; else box.removeAttribute('tabindex');
+      box.classList.toggle('is-clipped', clipped);
+      box.classList.toggle('is-end', clipped && box.scrollLeft + box.clientWidth >= box.scrollWidth - 2);
+    };
+    box.addEventListener('scroll', sync, { passive: true });
+    if (global.ResizeObserver) new global.ResizeObserver(sync).observe(box);
+    else global.setTimeout(sync, 0);
+    return box;
+  }
+
   function renderSlide(card, ctx) {
     var t = ctx.t;
     var o = el('div', 'deck__slide-overlay pack-overlay');
     if (card.title) o.appendChild(el('p', 'pack-overlay__title', esc(ctx.tx(card.title))));
     if (card.caption) o.appendChild(el('p', 'deck__caption', inline(ctx.md(card.caption))));
-    if (card.equation_html && ctx.native) o.appendChild(el('div', 'deck__eq', card.equation_html));
+    if (card.equation_html && ctx.native) o.appendChild(equation(card.equation_html));
     if (card.body) {
-      var body = el('div', 'deck__body pack-body', ctx.md(card.body));
+      var parts = splitLead(ctx.tx(card.body));
+      var body = el('div', 'deck__body pack-body', parts ? ctx.md(parts.lead) + '<div class="pack-body__rest">' + ctx.md(parts.rest) + '</div>' : ctx.md(card.body));
       o.appendChild(body);
-      if (body.textContent.trim().length > 220) {
-        body.classList.add('is-collapsed');
+      if (parts) {
         var more = el('button', 'deck__more pack-more', esc(t('more')));
         more.type = 'button';
+        more.hidden = true;
         more.setAttribute('aria-expanded', 'false');
         more.addEventListener('click', function () {
+          if (more.hidden) return;
           var open = body.classList.toggle('is-collapsed');
           more.textContent = open ? t('more') : t('less');
           more.setAttribute('aria-expanded', open ? 'false' : 'true');
         });
         o.appendChild(more);
+        foldIfLong(body, more);
       }
     }
     return o;
   }
 
+  var tipSeq = 0;
   function renderImage(card, ctx, slide) {
     var t = ctx.t;
     var wrap = el('div', 'pack-image');
     var img = slide.querySelector('.deck__slide-img');
-    if (img) { img.classList.remove('deck__slide-img'); img.classList.add('pack-image__img'); wrap.appendChild(img); }
+    if (img) {
+      img.classList.remove('deck__slide-img');
+      img.classList.add('pack-image__img');
+      img.addEventListener('error', function () {
+        img.classList.add('deck__slide-img');
+        Array.prototype.forEach.call(wrap.querySelectorAll('.pack-hotspot'), function (b) {
+          b.textContent = b.getAttribute('aria-label');
+          b.style.color = '#fff';
+          b.style.font = '600 0.9rem/1.2 var(--font-body, sans-serif)';
+          b.style.padding = '4px';
+          b.style.overflowWrap = 'anywhere';
+        });
+      });
+      wrap.appendChild(img);
+    }
     var tip = el('div', 'pack-hotspot-tip');
     tip.hidden = true;
+    tip.id = 'pack-tip-' + (++tipSeq);
     var seen = {};
+    function closeTip() {
+      Array.prototype.forEach.call(wrap.querySelectorAll('.pack-hotspot'), function (x) { x.classList.remove('is-open'); x.setAttribute('aria-expanded', 'false'); });
+      tip.hidden = true;
+      tip.dataset.n = '';
+    }
     (card.hotspots || []).forEach(function (h, j) {
       var b = el('button', 'pack-hotspot');
+      var label = ctx.tx(h.label);
       b.type = 'button';
       b.style.left = h.x + '%'; b.style.top = h.y + '%'; b.style.width = h.w + '%'; b.style.height = h.h + '%';
-      b.setAttribute('aria-label', ctx.tx(h.label));
+      b.setAttribute('aria-label', label);
+      b.setAttribute('aria-expanded', 'false');
+      b.setAttribute('aria-controls', tip.id);
       b.dataset.n = String(j + 1);
       b.addEventListener('click', function (e) {
         e.stopPropagation();
         var open = tip.dataset.n === b.dataset.n && !tip.hidden;
-        Array.prototype.forEach.call(wrap.querySelectorAll('.pack-hotspot'), function (x) { x.classList.remove('is-open'); });
-        if (open) { tip.hidden = true; tip.dataset.n = ''; return; }
+        closeTip();
+        if (open) return;
         b.classList.add('is-open');
+        b.setAttribute('aria-expanded', 'true');
         tip.dataset.n = b.dataset.n;
-        tip.innerHTML = '<strong>' + esc(ctx.tx(h.label)) + '</strong>' + (h.body ? ctx.md(h.body) : '');
+        tip.innerHTML = '<strong>' + esc(label) + '</strong>' + (h.body ? ctx.md(h.body) : '');
         tip.hidden = false;
+        var hb = b.getBoundingClientRect(), bb = box.getBoundingClientRect();
+        var top = hb.bottom - bb.top + 14;
+        if (top + tip.offsetHeight > bb.height - 8) top = Math.max(8, hb.top - bb.top - 14 - tip.offsetHeight);
+        tip.style.top = top + 'px';
+        var said = tip.textContent.slice(tip.firstChild.textContent.length).trim();
+        ctx.live(said ? label + ': ' + said : label);
         seen[j] = true;
         if (Object.keys(seen).length >= card.hotspots.length && !slide.dataset.answered) { slide.dataset.answered = '1'; ctx.onAnswer(card, true); }
       });
       wrap.appendChild(b);
     });
-    wrap.appendChild(tip);
+    wrap.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || tip.hidden) return;
+      e.preventDefault();
+      e.stopPropagation();
+      closeTip();
+    });
     var o = el('div', 'deck__slide-overlay pack-overlay pack-overlay--thin');
     if (card.title) o.appendChild(el('p', 'pack-overlay__title', esc(ctx.tx(card.title))));
     if (card.caption) o.appendChild(el('p', 'deck__caption', inline(ctx.md(card.caption))));
     if ((card.hotspots || []).length) o.appendChild(el('p', 'pack-overlay__hint', esc(t('hotspot_hint', { n: card.hotspots.length }))));
     var box = el('div', 'pack-image-wrap');
     box.appendChild(wrap);
+    box.appendChild(tip);
     box.appendChild(o);
+    if (img) {
+      var fit = function () {
+        if (!tip.hidden) closeTip();
+        var W = box.clientWidth, H = box.clientHeight, iw = img.naturalWidth, ih = img.naturalHeight;
+        if (!W || !H || !iw || !ih) return;
+        var w = W, h = W * ih / iw;
+        if (h > H) { h = H; w = H * iw / ih; }
+        wrap.style.cssText = 'left:' + ((W - w) / 2) + 'px;top:' + ((H - h) / 2) + 'px;width:' + w + 'px;height:' + h + 'px;right:auto;bottom:auto';
+      };
+      if (img.complete) fit(); else img.addEventListener('load', fit);
+      if (global.ResizeObserver) new global.ResizeObserver(fit).observe(box);
+      else global.addEventListener('resize', fit);
+    }
     return box;
   }
 
@@ -169,11 +309,23 @@
     p.appendChild(b);
   }
 
+  function guessExtra(slide) {
+    var g = slide && slide.dataset.guessDistance;
+    return g ? { distance: +g } : undefined;
+  }
+
   function done(p, card, ctx, right) {
     var slide = p.closest('.pack-slide');
     if (slide && slide.dataset.answered) return;
     if (slide) slide.dataset.answered = '1';
-    ctx.onAnswer(card, right);
+    ctx.onAnswer(card, right, guessExtra(slide));
+  }
+
+  function refocus(p, had, target) {
+    var a = document.activeElement;
+    if (!had || (a && a !== document.body && !p.contains(a))) return;
+    var f = target || p.querySelector('.pack-btn--continue');
+    if (f) f.focus();
   }
 
   function renderMcq(card, ctx) {
@@ -221,20 +373,28 @@
     }
     function grade() {
       graded = true;
+      var hadFocus = p.contains(document.activeElement);
       var right = card.choices.every(function (c, i) { return !!c.correct === !!picked[i]; });
+      var correctText = [];
       Array.prototype.forEach.call(list.children, function (b) {
         var i = +b.dataset.i, c = card.choices[i];
         b.disabled = true;
-        if (c.correct) b.classList.add('is-correct');
+        b.setAttribute('aria-pressed', picked[i] ? 'true' : 'false');
+        if (c.correct) {
+          b.classList.add('is-correct');
+          var label = b.querySelector('.pack-choice__text');
+          if (label) correctText.push(label.textContent.trim());
+        }
         if (picked[i] && !c.correct) b.classList.add('is-wrong');
         if (picked[i]) b.classList.add('is-picked');
         var why = b.querySelector('.pack-choice__why');
         if (why && (picked[i] || c.correct)) why.hidden = false;
       });
       if (check) check.remove();
-      feedback(p, ctx, right);
+      feedback(p, ctx, right, right ? '' : esc(t('answer_was')) + ' <em>' + correctText.map(esc).join(', ') + '</em>');
       continueBtn(p, card, ctx);
       done(p, card, ctx, right);
+      refocus(p, hadFocus);
     }
     return p;
   }
@@ -313,16 +473,16 @@
     }
     function grade() {
       if (graded) return;
-      var allRight = true, anyFilled = false;
+      var vals = blanks.map(function (b) { return useChips ? (b.dataset.val || '') : b.value; });
+      if (!vals.some(Boolean)) return;
+      var hadFocus = p.contains(document.activeElement);
+      var allRight = true;
       blanks.forEach(function (b, i) {
-        var val = useChips ? (b.dataset.val || '') : b.value;
-        if (val) anyFilled = true;
-        var ok = answers[i].some(function (a) { return norm(a) === norm(val); });
+        var ok = answers[i].some(function (a) { return norm(a) === norm(vals[i]); });
         b.classList.toggle('is-correct', ok);
         b.classList.toggle('is-wrong', !ok);
         if (!ok) { allRight = false; b.title = answers[i][0]; }
       });
-      if (!anyFilled) return;
       graded = true;
       blanks.forEach(function (b) { b.disabled = true; });
       if (chipsWrap) Array.prototype.forEach.call(chipsWrap.children, function (c) { c.disabled = true; });
@@ -331,6 +491,7 @@
       feedback(p, ctx, allRight, reveal);
       continueBtn(p, card, ctx);
       done(p, card, ctx, allRight);
+      refocus(p, hadFocus);
     }
     return p;
   }
@@ -363,6 +524,13 @@
     return p;
   }
 
+  function rangeStep(g) {
+    var span = g.max - g.min;
+    if (span >= 100) return Math.round(span / 100);
+    if (Number.isInteger(g.min) && Number.isInteger(g.max) && Number.isInteger(g.answer)) return 1;
+    return Math.pow(10, Math.floor(Math.log10(span / 100)));
+  }
+
   function renderGuess(card, ctx) {
     var t = ctx.t, g = card.guess;
     var veil = el('div', 'pack-guess');
@@ -383,7 +551,7 @@
     } else if (g.kind === 'range') {
       var row = el('div', 'pack-range');
       input = el('input', 'pack-range__input');
-      input.type = 'range'; input.min = g.min; input.max = g.max; input.step = g.step || Math.max(1, Math.round((g.max - g.min) / 100));
+      input.type = 'range'; input.min = g.min; input.max = g.max; input.step = g.step || rangeStep(g);
       input.value = String(g.min + (g.max - g.min) / 2);
       var out = el('output', 'pack-range__out', esc(input.value + (g.unit ? ' ' + g.unit : '')));
       input.addEventListener('input', function () { out.textContent = input.value + (g.unit ? ' ' + g.unit : ''); });
@@ -407,13 +575,25 @@
     box.appendChild(lock);
     var skip = el('button', 'pack-btn pack-btn--ghost', esc(t('skip')));
     skip.type = 'button';
-    skip.addEventListener('click', function () { veil.remove(); });
+    skip.addEventListener('click', function () { var had = leave(); veil.remove(); land(had); });
     box.appendChild(skip);
     veil.appendChild(box);
     veil.addEventListener('click', function (e) { e.stopPropagation(); });
+    var home = null;
+    function leave() {
+      home = veil.parentNode;
+      return veil.contains(document.activeElement);
+    }
+    function land(had) {
+      if (!home || !had) return;
+      var f = Array.prototype.find.call(home.querySelectorAll('input:not([disabled]), textarea:not([disabled]), button:not(.pack-more):not([disabled])'), function (x) { return !veil.contains(x); });
+      if (!f) { home.tabIndex = -1; f = home; }
+      refocus(home, had, f);
+    }
     function reveal() {
       var v = getVal();
       if (v == null || (g.kind === 'choice' && v < 0)) return;
+      var had = veil.contains(document.activeElement);
       var right, msg, distance = null;
       if (g.kind === 'choice') {
         right = v === g.answer;
@@ -430,9 +610,14 @@
       feedback(box, ctx, right, msg);
       var show = el('button', 'pack-btn pack-btn--primary', esc(t('reveal')));
       show.type = 'button';
-      show.addEventListener('click', function () { veil.classList.add('is-gone'); setTimeout(function () { veil.remove(); }, 260); });
+      show.addEventListener('click', function () { var was = leave(); veil.classList.add('is-gone'); land(was); setTimeout(function () { veil.remove(); }, 260); });
       box.appendChild(show);
+      refocus(veil, had, show);
       var slide = veil.closest('.pack-slide');
+      if (P.INTERACTIVE[card.type] || card.type === 'canvas') {
+        if (slide && distance != null) slide.dataset.guessDistance = String(distance);
+        return;
+      }
       if (slide) slide.dataset.answered = '1';
       ctx.onAnswer(card, right, { distance: distance });
     }
@@ -466,7 +651,8 @@
             if (!sib) return;
             if (d[0] === 'up') list.insertBefore(li, sib); else list.insertBefore(sib, li);
             renumber();
-            b.focus();
+            if (!b.disabled) b.focus();
+            else { var other = li.querySelector('[data-dir="' + (d[0] === 'up' ? 'down' : 'up') + '"]'); if (other && !other.disabled) other.focus(); }
           });
           btns.appendChild(b);
         });
@@ -482,6 +668,7 @@
     check.addEventListener('click', function () {
       if (graded) return;
       graded = true;
+      var hadFocus = p.contains(document.activeElement);
       var right = true;
       Array.prototype.forEach.call(list.children, function (li, i) {
         var ok = li.dataset.text === correct[i];
@@ -494,6 +681,7 @@
       feedback(p, ctx, right, msg);
       continueBtn(p, card, ctx);
       done(p, card, ctx, right);
+      refocus(p, hadFocus);
     });
     p.appendChild(check);
     return p;
@@ -520,7 +708,7 @@
     var check = el('button', 'pack-btn pack-btn--primary', esc(t('check')));
     check.type = 'button';
     function paint() {
-      leftBtns.forEach(function (b, i) { b.classList.toggle('is-selected', selected === i); b.classList.toggle('is-paired', link[i] != null); b.dataset.pair = link[i] != null ? String((link[i] % 6) + 1) : ''; });
+      leftBtns.forEach(function (b, i) { b.classList.toggle('is-selected', selected === i); b.setAttribute('aria-pressed', selected === i ? 'true' : 'false'); b.classList.toggle('is-paired', link[i] != null); b.dataset.pair = link[i] != null ? String((link[i] % 6) + 1) : ''; });
       rightBtns.forEach(function (b, j) { var li = Object.keys(link).find(function (k) { return link[k] === j; }); b.classList.toggle('is-paired', li != null); b.dataset.pair = li != null ? String((j % 6) + 1) : ''; });
       check.disabled = Object.keys(link).length !== pairs.length;
     }
@@ -541,13 +729,15 @@
       b.addEventListener('click', function () {
         if (graded) return;
         var owner = Object.keys(link).find(function (k) { return link[k] === j; });
-        if (owner != null) { delete link[owner]; if (selected == null) { paint(); return; } }
+        if (owner != null) { delete link[owner]; if (selected == null) { selected = +owner; paint(); return; } }
         if (selected == null) return;
+        var from = selected;
         link[selected] = j;
         selected = null;
         var nextFree = pairs.findIndex(function (_, k) { return link[k] == null; });
         if (nextFree >= 0) selected = nextFree;
         paint();
+        ctx.live(t('match_paired', { a: pairs[from][0], b: r.text }));
       });
       rightBtns.push(b); rightCol.appendChild(b);
     });
@@ -556,6 +746,7 @@
     check.addEventListener('click', function () {
       if (graded || check.disabled) return;
       graded = true;
+      var hadFocus = p.contains(document.activeElement);
       var right = true;
       pairs.forEach(function (pr, i) {
         var ok = rights[link[i]].text === pr[1];
@@ -569,6 +760,7 @@
       feedback(p, ctx, right, msg);
       continueBtn(p, card, ctx);
       done(p, card, ctx, right);
+      refocus(p, hadFocus);
     });
     p.appendChild(check);
     selected = 0;
@@ -607,18 +799,29 @@
     cont.addEventListener('click', function () { ctx.onContinue(card); });
     bar.appendChild(cont);
     wrap.appendChild(bar);
-    window.addEventListener('message', function (e) {
+    var onMessage = function (e) {
       if (!e.data || e.data.mentriaCanvas !== token || e.source !== frame.contentWindow) return;
       if (e.data.type === 'done') {
         var slide = wrap.closest('.pack-slide');
-        if (slide && !slide.dataset.answered) { slide.dataset.answered = '1'; ctx.onAnswer(card, e.data.right !== false); }
+        if (slide && !slide.dataset.answered) { slide.dataset.answered = '1'; ctx.onAnswer(card, e.data.right !== false, guessExtra(slide)); }
         hint.textContent = e.data.right === false ? t('wrong') : t('correct');
         hint.className = 'pack-canvas__hint ' + (e.data.right === false ? 'is-wrong' : 'is-right');
       } else if (e.data.type === 'next') ctx.onContinue(card);
       else if (e.data.type === 'notify') hint.textContent = e.data.text;
       else if (e.data.type === 'error') { hint.textContent = e.data.text; hint.className = 'pack-canvas__hint is-wrong'; }
-    });
+    };
+    window.addEventListener('message', onMessage);
+    canvases.push({ wrap: wrap, off: function () { window.removeEventListener('message', onMessage); } });
     return wrap;
+  }
+
+  var canvases = [];
+  function release(root) {
+    canvases = canvases.filter(function (c) {
+      if (!root.contains(c.wrap)) return true;
+      c.off();
+      return false;
+    });
   }
 
   var enginePromise = null;
@@ -671,29 +874,34 @@
     actions.appendChild(check);
     p.appendChild(actions);
     var finished = false;
-    function finish(right, msg) {
+    function finish(right, msg, had) {
       if (finished) return;
       finished = true;
       if (ref.children.length && !ref.parentNode) p.appendChild(ref);
       feedback(p, ctx, right, msg);
       continueBtn(p, card, ctx);
       done(p, card, ctx, right);
+      refocus(p, had);
     }
-    function selfGrade() {
+    function selfGrade(why, had) {
       actions.innerHTML = '';
       if (ref.children.length) p.insertBefore(ref, actions);
+      if (why) p.insertBefore(el('p', 'pack-card__note', esc(why)), actions);
       var yes = el('button', 'pack-btn pack-btn--primary', esc(t('self_right')));
       var no = el('button', 'pack-btn', esc(t('self_wrong')));
       yes.type = 'button'; no.type = 'button';
-      yes.addEventListener('click', function () { actions.remove(); finish(true); });
-      no.addEventListener('click', function () { actions.remove(); finish(false); });
+      yes.addEventListener('click', function () { var f = p.contains(document.activeElement); actions.remove(); finish(true, '', f); });
+      no.addEventListener('click', function () { var f = p.contains(document.activeElement); actions.remove(); finish(false, '', f); });
       actions.appendChild(yes); actions.appendChild(no);
+      if (why) ctx.live(why);
+      refocus(p, had, yes);
     }
     check.addEventListener('click', function () {
       var answer = ta.value.trim();
       if (!answer) { ta.focus(); return; }
+      var had = p.contains(document.activeElement);
       ta.disabled = true;
-      if (!useModel) { selfGrade(); return; }
+      if (!useModel) { selfGrade('', had); return; }
       check.disabled = true;
       check.textContent = t('checking');
       p.classList.add('is-busy');
@@ -701,14 +909,14 @@
         p.classList.remove('is-busy');
         actions.remove();
         var msg = (v.verdict === 'partial' ? '<strong>' + esc(t('partial')) + '</strong> ' : '') + esc(v.text);
-        finish(v.verdict === 'right', msg);
-      }).catch(function () {
+        finish(v.verdict === 'right', msg, had);
+      }).catch(function (err) {
         p.classList.remove('is-busy');
-        selfGrade();
+        selfGrade(t(err && err.message === 'model-not-cached' ? 'model_missing' : 'model_failed'), had);
       });
     });
     return p;
   }
 
-  global.MentriaPackCards = { render: render, Ctx: Ctx, esc: esc, el: el };
+  global.MentriaPackCards = { render: render, release: release, Ctx: Ctx, esc: esc, el: el };
 })(typeof window !== 'undefined' ? window : globalThis);

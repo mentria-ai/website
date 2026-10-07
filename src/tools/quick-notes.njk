@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.quick-notes.title' | t }}"
   description: "{{ 'tools.quick-notes.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">quick-notes</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">quick-notes</span></p>
   <h1>{{ "tools.quick-notes.title" | t }}</h1>
   <p>{{ "tools.quick-notes.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -32,6 +33,7 @@ eleventyComputed:
     <button class="qn-sidebar__new" id="qn-new-btn" title="{{ 'tool.quick-notes.new_note_title' | t }}">
       <span>+</span> {{ "tool.quick-notes.new_note_btn" | t }}
     </button>
+    <button type="button" class="qn-sidebar__export" id="qn-export-all-btn" title="{{ 'tool.quick-notes.export_all_title' | t }}">{{ "tool.quick-notes.export_all_btn" | t }}</button>
   </aside>
 
   <div class="qn-editor" id="qn-editor">
@@ -52,6 +54,10 @@ eleventyComputed:
         <button class="qn-action-btn m-btn m-btn--danger" id="qn-delete-btn" title="{{ 'tool.quick-notes.delete_title' | t }}">{{ "tool.quick-notes.delete_btn" | t }}</button>
       </div>
     </div>
+    <p class="qn-unsaved" id="qn-unsaved" role="status" aria-live="polite" hidden>
+      <span data-unsaved="blocked" hidden>{{ "tool.quick-notes.unsaved_blocked" | t }}</span>
+      <span data-unsaved="full" hidden>{{ "tool.quick-notes.unsaved_full" | t }}</span>
+    </p>
     <textarea
       class="qn-editor__textarea"
       id="qn-textarea"
@@ -67,6 +73,7 @@ eleventyComputed:
       <p class="qn-locked__body">{{ "tool.quick-notes.locked_body" | t }}</p>
       <button class="qn-unlock-btn m-btn m-btn--primary m-btn--pill" id="qn-unlock-btn">{{ "tool.quick-notes.unlock_btn" | t }}</button>
     </div>
+    <div class="qn-print" id="qn-print" aria-hidden="true"></div>
     <div class="qn-editor__statusbar">
       <span class="qn-status__counts" id="qn-counts">{{ ('tool.quick-notes.count_summary' | t) | replace('{words}', '0') | replace('{chars}', '0') }}</span>
       <span class="qn-status__saved" id="qn-saved"></span>
@@ -81,9 +88,12 @@ eleventyComputed:
 (() => {
   const COPY = {
     untitled:          {{ ("tool.quick-notes.untitled"           | t) | dump | safe }},
+    exportAllSkipped:  {{ ("tool.quick-notes.export_all_skipped" | t) | dump | safe }},
     savedPrefix:       {{ ("tool.quick-notes.saved_prefix"       | t) | dump | safe }},
     emptyPreview:      {{ ("tool.quick-notes.empty_preview"      | t) | dump | safe }},
     confirmDelete:     {{ ("tool.quick-notes.confirm_delete"     | t) | dump | safe }},
+    linkConfirm:       {{ ("tool.quick-notes.link_confirm"       | t) | dump | safe }},
+    noteDeleted:       {{ ("tool.quick-notes.note_deleted"       | t) | dump | safe }},
     lockBtn:           {{ ("tool.quick-notes.lock_btn"           | t) | dump | safe }},
     removeLockBtn:     {{ ("tool.quick-notes.remove_lock_btn"    | t) | dump | safe }},
     lockedTag:         {{ ("tool.quick-notes.locked_tag"         | t) | dump | safe }},
@@ -92,7 +102,8 @@ eleventyComputed:
     lockFailed:        {{ ("tool.quick-notes.lock_failed"        | t) | dump | safe }},
     unlockFailed:      {{ ("tool.quick-notes.unlock_failed"      | t) | dump | safe }},
     prfUnsupported:    {{ ("tool.quick-notes.prf_unsupported"    | t) | dump | safe }},
-    countSummary:      {{ ("tool.quick-notes.count_summary"      | t) | dump | safe }}
+    countSummary:      {{ ("tool.quick-notes.count_summary"      | t) | dump | safe }},
+    toMdpdfFailed:     {{ ("tool.quick-notes.to_mdpdf_failed"    | t) | dump | safe }}
   };
 
   const STORAGE_KEY = 'mentria-quick-notes';
@@ -104,6 +115,7 @@ eleventyComputed:
   const textarea    = document.getElementById('qn-textarea');
   const countsEl    = document.getElementById('qn-counts');
   const savedEl     = document.getElementById('qn-saved');
+  const unsavedEl   = document.getElementById('qn-unsaved');
   const exportBtn   = document.getElementById('qn-export-btn');
   const shareBtn    = document.getElementById('qn-share-btn');
   const MDPDF_URL = {{ ("/tools/markdown-pdf/" | localeUrl(lang)) | dump | safe }};
@@ -123,25 +135,69 @@ eleventyComputed:
   let sessionKey = null;
   const cryptoOK = !!(window.PublicKeyCredential && window.isSecureContext && window.crypto && crypto.subtle);
 
+  let autoBlank = null;
+
   function load() {
     const v = MentriaUI.migrateStore('quick_notes', 'blob', STORAGE_KEY, null);
     if (Array.isArray(v)) notes = v;
     if (!Array.isArray(notes) || notes.length === 0) {
       notes = [];
-      createNote();
+      const waiting = window.MentriaStore && MentriaStore.get('quick_notes', 'inbox');
+      if (!(Array.isArray(waiting) && waiting.length)) autoBlank = createNote().id;
     }
   }
 
+  function dropAutoBlank() {
+    if (!autoBlank) return;
+    const id = autoBlank;
+    autoBlank = null;
+    const n = notes.find((x) => x.id === id);
+    if (!n || n.enc || n.title || n.body) return;
+    if (id === activeId && (titleInput.value || textarea.value)) return;
+    notes = notes.filter((x) => x.id !== id);
+  }
+
   let persistingSelf = false;
+  let unsavedWhy = null;
+
+  function storageTrouble() {
+    const S = window.MentriaStore;
+    if (S && typeof S.status === 'function') {
+      try {
+        const s = S.status();
+        if (s === 'ok') return null;
+        if (s === 'blocked' || s === 'full') return s;
+      } catch (_) {}
+    }
+    try { window.localStorage.getItem(STORAGE_KEY); return null; } catch (_) { return 'blocked'; }
+  }
+
+  function showUnsaved(why) {
+    const was = unsavedWhy;
+    unsavedWhy = why || null;
+    if (unsavedWhy === was) return;
+    unsavedEl.hidden = !unsavedWhy;
+    unsavedEl.querySelectorAll('[data-unsaved]').forEach((s) => { s.hidden = s.dataset.unsaved !== unsavedWhy; });
+    if (unsavedWhy) savedEl.textContent = '';
+    else if (was) {
+      const note = getNote(activeId);
+      updateSavedLabel(note && note.updatedAt);
+    }
+  }
 
   function persist() {
     persistingSelf = true;
+    let ok = false;
     try {
-      if (window.MentriaStore) return window.MentriaStore.set('quick_notes', 'blob', notes);
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); return true; } catch (_) { return false; }
+      if (window.MentriaStore) ok = window.MentriaStore.set('quick_notes', 'blob', notes);
+      else {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); ok = true; } catch (_) {}
+      }
     } finally {
       persistingSelf = false;
     }
+    showUnsaved(ok ? null : (storageTrouble() === 'blocked' ? 'blocked' : 'full'));
+    return ok;
   }
 
   function reconcileExternal() {
@@ -152,13 +208,19 @@ eleventyComputed:
     const del = S.get('quick_notes', 'deleted');
     const deleted = (del && typeof del === 'object') ? del : {};
     const byId = new Map(notes.map(n => [n.id, n]));
+    const editing = saver.pending();
     let changed = false;
+    let activeChanged = false;
     for (const e of ext) {
       if (!e || !e.id || typeof e.body !== 'string') continue;
       if (deleted[String(e.id)] && e.id !== activeId) continue;
       const l = byId.get(e.id);
       if (!l) { byId.set(e.id, e); changed = true; }
-      else if ((e.updatedAt || 0) > (l.updatedAt || 0) && e.id !== activeId) { byId.set(e.id, e); changed = true; }
+      else if ((e.updatedAt || 0) > (l.updatedAt || 0) && (e.id !== activeId || !editing)) {
+        byId.set(e.id, e);
+        changed = true;
+        if (e.id === activeId) activeChanged = true;
+      }
     }
     for (const n of [...byId.values()]) {
       if (deleted[String(n.id)] && n.id !== activeId) { byId.delete(n.id); changed = true; }
@@ -168,6 +230,14 @@ eleventyComputed:
     if (activeId && !notes.some(n => n.id === activeId)) {
       if (notes.length) selectNote(notes[0].id);
       else createNote();
+    } else if (activeChanged) {
+      const focused = document.activeElement === textarea;
+      const start = textarea.selectionStart, end = textarea.selectionEnd;
+      Promise.resolve(renderEditor()).then(() => {
+        if (!focused) return;
+        const len = textarea.value.length;
+        textarea.setSelectionRange(Math.min(start, len), Math.min(end, len));
+      });
     }
     renderList();
   }
@@ -292,6 +362,7 @@ eleventyComputed:
   }
 
   function createNote() {
+    dropAutoBlank();
     const note = {
       id: genId(),
       title: '',
@@ -378,13 +449,16 @@ eleventyComputed:
     updateSavedLabel(note.updatedAt);
   }
 
+  let editorMode = 'plain';
   function applyEditorMode(mode) {
+    editorMode = mode;
     const locked = mode === 'locked';
     if (!locked) drainInbox();
     textarea.hidden = locked;
     lockedPanel.hidden = !locked;
     exportBtn.hidden = locked;
     shareBtn.hidden = locked || !navigator.share;
+    mdpdfBtn.hidden = locked;
     if (!cryptoOK) {
       lockBtn.hidden = true;
     } else {
@@ -423,8 +497,13 @@ eleventyComputed:
     const note = getNote(activeId);
     if (!note) return;
     note.title = titleInput.value;
+    if (note.enc && (!sessionKey || editorMode !== 'unlocked')) {
+      note.updatedAt = Date.now();
+      persist();
+      renderList();
+      return;
+    }
     if (note.enc) {
-      if (!sessionKey) return;
       try {
         const enc = await encryptText(textarea.value);
         note.body = enc.body;
@@ -464,7 +543,7 @@ eleventyComputed:
   }
 
   function updateSavedLabel(ts) {
-    if (!ts) { savedEl.textContent = ''; return; }
+    if (!ts || unsavedWhy) { savedEl.textContent = ''; return; }
     const d = new Date(ts);
     const now = new Date();
     const lang = document.documentElement.lang || 'en';
@@ -487,6 +566,26 @@ eleventyComputed:
     const filename = title.replace(/[\/\\:*?"<>|\s]/g, '_') + '.txt';
     const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
     MentriaUI.downloadFile(filename, blob);
+  }
+
+  async function exportAll() {
+    const sorted = notes.slice().sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
+    const parts = [];
+    let skipped = 0;
+    for (const n of sorted) {
+      let body;
+      if (!n.enc) body = n.id === activeId && !textarea.hidden ? textarea.value : String(n.body || '');
+      else if (sessionKey) {
+        try { body = await decryptNote(n); } catch (_) { body = null; }
+      } else body = null;
+      if (body == null) { skipped++; continue; }
+      parts.push('# ' + ((n.title || '').trim() || COPY.untitled) + '\n\n' + body.trim() + '\n');
+    }
+    if (parts.length) {
+      const stamp = new Date().toISOString().slice(0, 10);
+      MentriaUI.downloadFile('mentria-notes-' + stamp + '.md', new Blob([parts.join('\n---\n\n')], { type: 'text/markdown;charset=utf-8' }));
+    }
+    if (skipped) MentriaUI.toast(COPY.exportAllSkipped.replace('{n}', skipped));
   }
 
   async function shareNote() {
@@ -551,13 +650,35 @@ eleventyComputed:
     renderList();
   }
 
-  async function confirmDelete() {
+  function confirmDelete() {
     const note = getNote(activeId);
     if (!note) return;
-    const name = note.title || COPY.untitled;
-    if (await mentriaConfirm(COPY.confirmDelete.replace('{name}', name))) {
-      deleteNote(activeId);
+    saver.flush();
+    const snapshot = Object.assign({}, getNote(activeId));
+    const index = notes.findIndex(n => n.id === snapshot.id);
+    const wasLast = notes.length === 1;
+    deleteNote(snapshot.id);
+    const placeholderId = wasLast ? activeId : null;
+    const name = (snapshot.title || '').trim() || COPY.untitled;
+    MentriaUI.undoToast(COPY.noteDeleted.replace('{name}', name), () => restoreNote(snapshot, index, placeholderId));
+  }
+
+  function restoreNote(snapshot, index, placeholderId) {
+    if (notes.some(n => n.id === snapshot.id)) return;
+    if (placeholderId) {
+      const p = notes.findIndex(n => n.id === placeholderId && !n.enc && !(n.title || '').trim() && !(n.body || '').trim());
+      if (p !== -1) notes.splice(p, 1);
     }
+    notes.splice(Math.min(index, notes.length), 0, Object.assign({}, snapshot, { updatedAt: Date.now() }));
+    if (window.MentriaStore) {
+      const del = window.MentriaStore.get('quick_notes', 'deleted');
+      if (del && typeof del === 'object' && del[String(snapshot.id)] != null) {
+        delete del[String(snapshot.id)];
+        window.MentriaStore.set('quick_notes', 'deleted', del);
+      }
+    }
+    persist();
+    selectNote(snapshot.id);
   }
 
   function toggleSidebar() {
@@ -590,6 +711,18 @@ eleventyComputed:
     MentriaBus.provide('notes.list', () => notes.map((n) => ({ title: n.title || '', preview: String(n.body || n.text || '').replace(/\s+/g, ' ').slice(0, 80), updatedAt: n.updatedAt || 0 })), { description: 'List saved notes: title, a short preview, and last-updated time.', parameters: { type: 'object', properties: {} }, ai: true, readonly: true });
   }).catch(() => {});
   exportBtn.addEventListener('click', exportNote);
+  window.addEventListener('beforeprint', () => {
+    const out = document.getElementById('qn-print');
+    out.textContent = '';
+    if (textarea.hidden) return;
+    const h = document.createElement('h1');
+    h.textContent = titleInput.value.trim() || COPY.untitled;
+    const body = document.createElement('div');
+    body.className = 'qn-print__body';
+    body.textContent = textarea.value;
+    out.append(h, body);
+  });
+  document.getElementById('qn-export-all-btn').addEventListener('click', exportAll);
   if (navigator.share) shareBtn.addEventListener('click', shareNote);
   else shareBtn.hidden = true;
   mdpdfBtn.addEventListener('click', () => {
@@ -597,7 +730,10 @@ eleventyComputed:
     const title = titleInput.value.trim();
     const text = title ? '# ' + title + '\n\n' + body : body;
     if (!text.trim()) return;
-    if (window.MentriaStore) window.MentriaStore.set('handoff', 'md', { text, ts: Date.now() });
+    if (window.MentriaStore && !window.MentriaStore.set('handoff', 'md', { text, ts: Date.now() })) {
+      MentriaUI.toast(COPY.toMdpdfFailed, { duration: 6000 });
+      return;
+    }
     location.href = MDPDF_URL;
   });
   lockBtn.addEventListener('click', handleLockClick);
@@ -612,18 +748,23 @@ eleventyComputed:
     const text  = (p.get('text')  || '').trim();
     const url   = (p.get('url')   || '').trim();
     if (!title && !text && !url) return false;
-    const note = {
-      id: genId(),
-      title: title,
-      body: [text, url].filter(Boolean).join('\n\n'),
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-    notes.unshift(note);
-    persist();
     history.replaceState(null, '', location.pathname);
-    activeId = note.id;
-    return true;
+    const ask = () => window.mentriaConfirm(COPY.linkConfirm).then((ok) => {
+      if (!ok) return;
+      const note = {
+        id: genId(),
+        title: title,
+        body: [text, url].filter(Boolean).join('\n\n'),
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+      notes.unshift(note);
+      persist();
+      selectNote(note.id);
+    });
+    if (typeof window.mentriaConfirm === 'function') ask();
+    else document.addEventListener('DOMContentLoaded', ask, { once: true });
+    return false;
   }
 
   function drainInbox() {
@@ -632,16 +773,20 @@ eleventyComputed:
     if (lockedPanel && !lockedPanel.hidden) return;
     const inbox = S.get('quick_notes', 'inbox');
     if (!Array.isArray(inbox) || !inbox.length) return;
+    const del = S.get('quick_notes', 'deleted');
+    const deleted = (del && typeof del === 'object') ? del : {};
     let added = false;
     for (const n of inbox) {
-      if (n && n.id && typeof n.body === 'string' && !notes.some(x => x.id === n.id)) {
+      if (n && n.id && typeof n.body === 'string' && !deleted[String(n.id)] && !notes.some(x => x.id === n.id)) {
         notes.unshift(n);
         added = true;
       }
     }
     S.remove('quick_notes', 'inbox');
     if (added) {
+      dropAutoBlank();
       persist();
+      if (!notes.some((x) => x.id === activeId)) selectNote(notes[0].id);
       renderList();
     }
   }
@@ -659,7 +804,19 @@ eleventyComputed:
     if (e.key === 'mentria.store.quick_notes.blob' && !e.newValue) acceptExternalDelete();
   });
 
+  function addSharedText(text, meta) {
+    const body = String(text || '').trim();
+    if (!body) return;
+    const title = String((meta && meta.title) || '').trim();
+    const note = { id: genId(), title, body, createdAt: Date.now(), updatedAt: Date.now() };
+    dropAutoBlank();
+    notes.unshift(note);
+    persist();
+    selectNote(note.id);
+  }
+
   load();
+  if (!unsavedWhy && storageTrouble() === 'blocked') showUnsaved('blocked');
   drainInbox();
   if (ingestSharedContent()) {
     selectNote(activeId);
@@ -667,10 +824,22 @@ eleventyComputed:
     selectNote(notes[0].id);
   }
   renderList();
+  if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(null, addSharedText);
 })();
 </script>
 
 <style>
+.qn-print { display: none; }
+
+@media print {
+  .hero, .qn-sidebar, .qn-editor__titlebar, .qn-unsaved, .qn-editor__textarea, .qn-editor__statusbar, .qn-locked { display: none !important; }
+  .qn-tool { display: block !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; background: none !important; }
+  .qn-editor { display: block !important; }
+  .qn-print { display: block; color: #111; }
+  .qn-print h1 { margin: 0 0 0.6em; font-family: var(--font-body, sans-serif); font-size: 18pt; line-height: 1.25; color: #000; }
+  .qn-print__body { font-family: var(--font-body, sans-serif); font-size: 12pt; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+}
+
 .qn-tool {
   display: flex;
   min-height: 520px;
@@ -806,12 +975,30 @@ eleventyComputed:
   border-radius: var(--radius-md);
   background: transparent;
   color: var(--syn-purple);
-  font-family: var(--font-body, 'Inter', sans-serif);
+  font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
+.qn-sidebar__export {
+  margin: 0 0.6rem 0.6rem;
+  padding: 0.45rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--term-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.qn-sidebar__export:hover,
+.qn-sidebar__export:focus-visible {
+  color: var(--syn-purple);
+  background: var(--purple-8);
+}
+
 .qn-sidebar__new:hover {
   background: var(--purple-8);
   border-color: rgba(167, 139, 250, 0.6);
@@ -858,6 +1045,20 @@ eleventyComputed:
   gap: 0.4rem;
   flex-shrink: 0;
 }
+
+.qn-unsaved {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--term-border);
+  border-left: 3px solid var(--syn-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.07);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--term-fg);
+}
+.qn-unsaved[hidden] { display: none; }
 
 .qn-action-btn {
   padding: 0.35rem 0.75rem;

@@ -15,31 +15,17 @@
   const hint = document.getElementById('deckHint');
   const progressBar = root.querySelector('.deck__progress');
   const liveEl = document.getElementById('deckLive');
-  (function markSeen() {
-    try {
-      const id = root.dataset.chapterId;
-      if (!id || !window.MentriaStore) return;
-      const seen = window.MentriaStore.get('feed', 'seen') || {};
-      if (seen[id]) return;
-      seen[id] = Date.now();
-      const keys = Object.keys(seen);
-      if (keys.length > 400) {
-        keys.sort((a, b) => seen[a] - seen[b]);
-        keys.slice(0, keys.length - 400).forEach((k) => { delete seen[k]; });
-      }
-      window.MentriaStore.set('feed', 'seen', seen);
-    } catch (_) {}
-  })();
 
-  const localePrefix = (function () {
+  function prefixOf(path) {
     const locs = window.MENTRIA_LOCALES || [];
-    const path = location.pathname || '/';
     for (let i = 0; i < locs.length; i++) {
       const p = locs[i].prefix;
       if (p && (path === p || path.indexOf(p + '/') === 0)) return p;
     }
     return '';
-  })();
+  }
+  const localePrefix = prefixOf(location.pathname || '/');
+  const words = window.MENTRIA_DECK_I18N || {};
 
   let current = 0;
   let hintFaded = false;
@@ -69,7 +55,24 @@
     });
     collapseAll();
     fadeHint();
-    try { history.replaceState(null, '', '#s' + (i + 1)); } catch (_) {}
+    try { history.replaceState(history.state, '', '#s' + (i + 1)); } catch (_) {}
+    warm(i);
+  }
+
+  function imgAt(i) {
+    return slides[i] ? slides[i].querySelector('img.deck__slide-img') : null;
+  }
+  function whenLoaded(img, fn) {
+    if (!img || img.complete) { fn(); return; }
+    img.addEventListener('load', fn, { once: true });
+    img.addEventListener('error', fn, { once: true });
+  }
+  function warm(i) {
+    const nextImg = imgAt(i + 1), prevImg = imgAt(i - 1);
+    whenLoaded(imgAt(i), () => {
+      if (nextImg) nextImg.loading = 'eager';
+      whenLoaded(nextImg, () => { if (prevImg) prevImg.loading = 'eager'; });
+    });
   }
 
   function next() {
@@ -120,8 +123,8 @@
   function moreLink(label, expanded) {
     return '<button type="button" class="deck__more" data-action="expand" aria-expanded="' + (expanded ? 'true' : 'false') + '">' + label + '</button>';
   }
-  function collapsedHTML(body) { return esc(body.dataset.truncated) + '… ' + moreLink('more', false); }
-  function fullHTML(body) { return body.dataset.full + ' ' + moreLink('less', true); }
+  function collapsedHTML(body) { return esc(body.dataset.truncated) + '… ' + moreLink(esc(words.more || 'more'), false); }
+  function fullHTML(body) { return body.dataset.full + ' ' + moreLink(esc(words.less || 'less'), true); }
 
   function animateBody(body, html, onDone) {
     const startH = body.offsetHeight;
@@ -175,11 +178,27 @@
     setExpanded(slides[current], !isExpanded());
   }
 
+  function basePath(path) {
+    return path.slice(prefixOf(path).length) || '/';
+  }
+
+  function canGoBack() {
+    const nav = window.navigation;
+    let prev = null;
+    if (nav && typeof nav.entries === 'function') {
+      const cur = nav.currentEntry;
+      const entry = cur && cur.index > 0 ? nav.entries()[cur.index - 1] : null;
+      if (!entry || entry.sameDocument) return false;
+      try { prev = new URL(entry.url); } catch (_) { return false; }
+    } else {
+      try { prev = window.MentriaNav ? window.MentriaNav.from() : (document.referrer ? new URL(document.referrer) : null); } catch (_) {}
+      if (!prev || prev.origin !== location.origin || history.length < 2 || prefixOf(prev.pathname) !== localePrefix) return false;
+    }
+    return basePath(prev.pathname) !== basePath(location.pathname);
+  }
+
   function exit() {
-    const back = document.referrer && document.referrer.indexOf(location.origin) === 0
-      ? -1
-      : localePrefix + '/learn/';
-    if (back === -1) history.back();
+    if (canGoBack()) history.back();
     else location.href = localePrefix + '/learn/';
   }
 
@@ -203,38 +222,8 @@
       const target = btn.dataset.target;
       const idx = slides.findIndex((s) => s.dataset.slideId === target);
       if (idx >= 0) go(idx);
-    } else if (action === 'share') {
-      e.preventDefault();
-      shareChapter();
     }
   });
-
-  async function shareChapter() {
-    const title = root.dataset.chapterTitle || 'Mentria chapter';
-    const url = location.origin + localePrefix + '/feed/chapter/' + chapterId + '/';
-    const data = { title, text: 'Just finished: ' + title, url };
-    try {
-      if (navigator.share) await navigator.share(data);
-      else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url);
-        flashToast('Link copied');
-      }
-    } catch (_) { /* user-cancel — no-op */ }
-  }
-
-  function flashToast(msg) {
-    const t = document.createElement('div');
-    t.textContent = msg;
-    t.style.cssText = `
-      position: absolute; left: 50%; bottom: 80px; transform: translateX(-50%);
-      background: rgba(34, 211, 238, 0.95); color: #000;
-      padding: 8px 16px; border-radius: 18px; font-family: var(--font-mono, monospace);
-      font-size: 0.78rem; font-weight: 700; z-index: 12;
-      animation: fadeOut 1.6s ease forwards;
-    `;
-    root.appendChild(t);
-    setTimeout(() => t.remove(), 1700);
-  }
 
   /* ── Keyboard ─────────────────────────────────────────── */
   document.addEventListener('keydown', (e) => {
@@ -302,6 +291,7 @@
       if (idx > 0) go(idx);
     }
   }
+  if (!current) warm(0);
 
   /* ── Share the current slide as an image card ─────── */
   const shareBtn = document.getElementById('deckShare');
@@ -340,9 +330,4 @@
   }
 
   if (shareBtn) shareBtn.addEventListener('click', shareCurrentSlide);
-
-  /* ── Style: fadeOut keyframe (toast) ───────────────────── */
-  const style = document.createElement('style');
-  style.textContent = '@keyframes fadeOut { 0%,70%{opacity:1} 100%{opacity:0;transform:translateX(-50%) translateY(8px)} }';
-  document.head.appendChild(style);
 })();

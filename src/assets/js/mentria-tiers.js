@@ -217,18 +217,24 @@ export async function effectiveTier(opts) {
   if (IS_IOS) return cachedOnly ? ((await isTierCached('0.8b')) ? '0.8b' : null) : '0.8b';
   const caps = await detectCaps();
   if (!caps) return null;
+  if (cachedOnly) {
+    for (const id of TIER_CHAIN) {
+      if (capAllows(id) && await isTierCached(id)) return id;
+    }
+    return null;
+  }
   const d = await decideTier();
   const eligible = new Set([d.tier].concat(d.eligible || []));
   const cap = getTierCap();
   const allowed = (id) => !cap || TIERS[id].order <= TIERS[cap].order;
   const pref = getUserTier();
-  if (!cachedOnly && pref && eligible.has(pref) && allowed(pref)) return pref;
+  if (pref && eligible.has(pref) && allowed(pref)) return pref;
   for (const id of TIER_CHAIN) {
     if (!allowed(id)) continue;
     if (!(await isTierCached(id))) continue;
-    if (cachedOnly || eligible.has(id)) return id;
+    if (eligible.has(id)) return id;
   }
-  return cachedOnly ? null : '0.8b';
+  return '0.8b';
 }
 
 export async function isTierCached(id) {
@@ -362,7 +368,7 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
     weightUpload: 'writeBuffer'
   };
   if (vendor === 'nvidia' && t.nvidiaMaxSeq) { opts.residualFusion = true; opts.q1Decode = 'lut'; opts.q1Concat = 'all'; opts.bindGroupCache = true; opts.q1LutSkew = true; opts.prefillTile = 'arow'; opts.specSlots = 1; opts.residentTrim = 'all'; }
-  if (vendor === 'apple' && t.appleMaxSeq) { opts.kvF16 = true; opts.flashDecode = true; opts.prefillTile = 'wmap+bn128'; opts.specSlots = 1; opts.residentTrim = 'all'; }
+  if (vendor === 'apple' && t.appleMaxSeq) { opts.kvF16 = true; opts.flashDecode = true; opts.prefillTile = 'wmap+bn128'; opts.specSlots = 1; opts.residentTrim = 'all'; opts.loraFuse = 'epilogue'; }
   if (t.streamingLoad) opts.streamingLoad = true;
   if (vision) {
     opts.visionModelUrl = shardBase;
@@ -416,8 +422,15 @@ export async function resolveBase(t) {
   return ok ? cdn : t.base;
 }
 
-export async function loadWithFallback(createEngine, startTier, { vision = true, onFallback = null, validate = null } = {}) {
-  const chain = TIER_CHAIN.slice(TIER_CHAIN.indexOf(startTier));
+export async function loadWithFallback(createEngine, startTier, { vision = true, onFallback = null, validate = null, aborted = null, onlyCached = false } = {}) {
+  let chain = TIER_CHAIN.slice(TIER_CHAIN.indexOf(startTier));
+  if (onlyCached) {
+    const kept = [];
+    for (const id of chain) {
+      if (!kept.length || await isTierCached(id)) kept.push(id);
+    }
+    chain = kept;
+  }
   let lastErr = null;
   for (let i = 0; i < chain.length; i++) {
     const id = chain[i];
@@ -430,17 +443,17 @@ export async function loadWithFallback(createEngine, startTier, { vision = true,
         if (loadRes && loadRes.decodeRoute) console.info('[mentria-tiers] ' + id + ' loaded', 'decodeRoute', loadRes.decodeRoute, 'adapter', loadRes.adapter);
       } catch (_) {}
       if (validate) await validate(engine, id);
-      return { engine, tier: id, maxSeq: (opts.config.attention && opts.config.attention.maxSeq) || 2048 };
+      return { engine, tier: id, maxSeq: (opts.config.attention && opts.config.attention.maxSeq) || 2048, decodeRoute: (loadRes && loadRes.decodeRoute) || null };
     } catch (err) {
       lastErr = err;
       try { engine.terminate(); } catch (_) {}
+      if (aborted && aborted()) throw err;
       const next = chain[i + 1];
+      const lower = TIER_CHAIN[TIER_CHAIN.indexOf(id) + 1];
       console.warn('[mentria-tiers] load failed for ' + id +
         (next ? ' — falling back to ' + next : ' — no tier left'), err);
-      if (next) {
-        setTierCap(next);
-        if (onFallback) { try { onFallback(id, next, err); } catch (_) {} }
-      }
+      if (lower) setTierCap(lower);
+      if (next && onFallback) { try { onFallback(id, next, err); } catch (_) {} }
     }
   }
   throw lastErr;

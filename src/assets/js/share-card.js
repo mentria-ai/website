@@ -11,34 +11,75 @@
     });
   }
 
-  function wrapLines(ctx, text, maxWidth, maxLines) {
-    var words = text.split(/\s+/).filter(Boolean);
-    var lines = [];
-    var line = '';
-    for (var i = 0; i < words.length; i++) {
-      var w = words[i];
-      var probe = line ? line + ' ' + w : w;
-      if (ctx.measureText(probe).width <= maxWidth || !line) {
-        line = probe;
+  var NO_START = '、。，．,.・：:；;？?！!ー～…‥）)」』】〕〉》｝}］]〙〗’”ぁぃぅぇぉっゃゅょゎゕゖァィゥェォッャュョヮヵヶ%％';
+  var NO_END = '（(「『【〔〈《｛{［[〘〖‘“';
+
+  function isWide(ch) {
+    var c = ch.codePointAt(0);
+    return (c >= 0x2e80 && c <= 0x9fff) || (c >= 0xf900 && c <= 0xfaff) || (c >= 0xfe30 && c <= 0xfe4f) || (c >= 0xff00 && c <= 0xffef) || (c >= 0x20000 && c <= 0x2fa1f);
+  }
+
+  function pieces(word) {
+    var chars = Array.from(word), atoms = [], run = '', i;
+    for (i = 0; i < chars.length; i++) {
+      if (isWide(chars[i])) {
+        if (run) { atoms.push(run); run = ''; }
+        atoms.push(chars[i]);
       } else {
-        lines.push(line);
-        line = w;
-        if (lines.length === maxLines - 1) break;
+        run += chars[i];
       }
     }
-    if (line && lines.length < maxLines) lines.push(line);
-    var used = lines.join(' ');
-    if (used.length < text.length && lines.length) {
+    if (run) atoms.push(run);
+    var out = [];
+    for (i = 0; i < atoms.length; i++) {
+      var prev = out[out.length - 1];
+      if (prev && (NO_START.indexOf(atoms[i].charAt(0)) >= 0 || NO_END.indexOf(prev.charAt(prev.length - 1)) >= 0)) out[out.length - 1] = prev + atoms[i];
+      else out.push(atoms[i]);
+    }
+    return out;
+  }
+
+  function breakUnits(ctx, text, maxWidth) {
+    var words = text.split(/\s+/).filter(Boolean), out = [];
+    for (var w = 0; w < words.length; w++) {
+      var parts = pieces(words[w]);
+      for (var p = 0; p < parts.length; p++) {
+        var spaced = w > 0 && p === 0;
+        if (ctx.measureText(parts[p]).width <= maxWidth) { out.push({ t: parts[p], sp: spaced }); continue; }
+        var chars = Array.from(parts[p]);
+        for (var c = 0; c < chars.length; c++) out.push({ t: chars[c], sp: spaced && c === 0 });
+      }
+    }
+    return out;
+  }
+
+  function joinUnits(list) {
+    var s = '';
+    for (var i = 0; i < list.length; i++) s += (i && list[i].sp ? ' ' : '') + list[i].t;
+    return s;
+  }
+
+  function wrapLines(ctx, text, maxWidth, maxLines) {
+    var units = breakUnits(ctx, text, maxWidth);
+    var lines = [];
+    var line = [];
+    var cut = false;
+    for (var i = 0; i < units.length; i++) {
+      var probe = line.concat(units[i]);
+      if (!line.length || ctx.measureText(joinUnits(probe)).width <= maxWidth) {
+        line = probe;
+        continue;
+      }
+      if (lines.length === maxLines - 1) { cut = true; break; }
+      lines.push(line);
+      line = [units[i]];
+    }
+    if (line.length) lines.push(line);
+    if (cut) {
       var last = lines[lines.length - 1];
-      while (last && ctx.measureText(last + '…').width > maxWidth) last = last.replace(/\s*\S*$/, '');
-      if (!last && lines.length > 1) {
-        lines.pop();
-        last = lines[lines.length - 1];
-        while (last && ctx.measureText(last + '…').width > maxWidth) last = last.replace(/\s*\S*$/, '');
-      }
-      lines[lines.length - 1] = last + '…';
+      while (last.length > 1 && ctx.measureText(joinUnits(last) + '…').width > maxWidth) last.pop();
     }
-    return lines;
+    return lines.map(function (l, n) { return joinUnits(l) + (cut && n === lines.length - 1 ? '…' : ''); });
   }
 
   function render(opts) {

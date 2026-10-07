@@ -11,7 +11,7 @@ eleventyComputed:
   description: "{{ 'tools.annotate-image.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">annotate-image</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">annotate-image</span></p>
   <h1>{{ "tools.annotate-image.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
   <p>{{ "tools.annotate-image.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -28,15 +28,15 @@ eleventyComputed:
   </div>
   <div class="an-activity" id="an-activity"></div>
 
-  <label class="an-drop" id="an-drop">
+  <div class="an-drop" id="an-drop">
     <input type="file" id="an-file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" hidden>
-    <div class="an-drop__inner" id="an-drop-inner">
-      <div class="an-drop__icon" aria-hidden="true">⬆</div>
-      <p class="an-drop__title">{{ "tool.annotate-image.drop_title" | t }}</p>
-      <p class="an-drop__sub">{{ "tool.annotate-image.drop_sub" | t }}</p>
-    </div>
+    <button type="button" class="an-drop__inner" id="an-drop-inner">
+      <span class="an-drop__icon" aria-hidden="true">⬆</span>
+      <span class="an-drop__title">{{ "tool.annotate-image.drop_title" | t }}</span>
+      <span class="an-drop__sub">{{ "tool.annotate-image.drop_sub" | t }}</span>
+    </button>
     <img class="an-drop__preview" id="an-preview" alt="" hidden>
-  </label>
+  </div>
 
   <div class="an-modes" id="an-modes" hidden>
     <button class="an-mode active" data-mode="describe">{{ "tool.annotate-image.mode_describe" | t }}</button>
@@ -77,10 +77,12 @@ eleventyComputed:
 
   .an-drop { display: flex; align-items: center; justify-content: center; min-height: 220px; border: 1.5px dashed var(--term-border-strong); border-radius: var(--radius-lg); background: var(--term-surface-2); cursor: pointer; position: relative; overflow: hidden; transition: border-color 150ms, background 150ms; }
   .an-drop:hover, .an-drop.dragover { border-color: var(--syn-cyan); background: var(--cyan-8); }
-  .an-drop__inner { text-align: center; padding: 28px; pointer-events: none; }
-  .an-drop__icon { font-size: 30px; color: var(--syn-cyan); margin-bottom: 8px; }
-  .an-drop__title { font-family: var(--font-mono); font-size: 14px; color: var(--term-fg); margin: 0 0 4px; }
-  .an-drop__sub { font-family: var(--font-mono); font-size: 11px; color: var(--term-muted); margin: 0; }
+  .an-drop__inner { flex: 1 1 auto; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 28px; background: none; border: 0; border-radius: inherit; color: inherit; font: inherit; cursor: pointer; }
+  .an-drop__inner:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -6px; }
+  .an-drop:has(.an-drop__inner:focus-visible) { border-color: var(--syn-cyan); background: var(--cyan-8); }
+  .an-drop__icon { display: block; font-size: 30px; color: var(--syn-cyan); margin-bottom: 8px; }
+  .an-drop__title { display: block; font-family: var(--font-mono); font-size: 14px; color: var(--term-fg); margin: 0 0 4px; }
+  .an-drop__sub { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--term-muted); margin: 0; }
   .an-drop__preview { max-width: 100%; max-height: 420px; display: block; object-fit: contain; }
   .an-drop.has-image { min-height: 0; border-style: solid; cursor: default; background: #050507; }
 
@@ -165,10 +167,33 @@ eleventyComputed:
 
   function setStatus(state, text){ dot.className = 'an-status-dot an-status-dot--' + state; statusText.textContent = text; }
 
-  if (!navigator.gpu){ setStatus('error', COPY.errNoWebgpu); drop.style.pointerEvents = 'none'; drop.style.opacity = '0.5'; return; }
+  document.addEventListener('mentria:localechange', () => {
+    const i18n = window.MentriaI18n;
+    if (!i18n || typeof i18n.t !== 'function') return;
+    const shown = statusText.textContent;
+    const before = Object.assign({}, COPY);
+    const pick = (key) => { const v = i18n.t('tool.annotate-image.' + key); return typeof v === 'string' ? v : null; };
+    ['status_idle', 'status_loading', 'status_ready', 'status_generating', 'err_no_webgpu', 'err_load', 'err_device_lost', 'empty_response', 'copy', 'copied', 'bad_file', 'sys_prompt'].forEach((key) => {
+      const v = pick(key);
+      if (v != null) COPY[key.replace(/_([a-z])/g, (m, c) => c.toUpperCase())] = v;
+    });
+    Object.keys(COPY.labels).forEach((mode) => {
+      const label = pick('mode_' + mode);
+      const prompt = pick('prompt_' + mode);
+      if (label != null) COPY.labels[mode] = label;
+      if (prompt != null) COPY.prompts[mode] = prompt;
+    });
+    const was = Object.keys(before).find((key) => typeof before[key] === 'string' && before[key] === shown);
+    if (was) statusText.textContent = COPY[was];
+    const mode = resultLabel.getAttribute('data-mode');
+    if (mode && COPY.labels[mode]) resultLabel.textContent = COPY.labels[mode];
+  });
 
-  let MentriaEngine = null, engine = null, loaded = false, loadingPromise = null, generating = false;
+  if (!navigator.gpu){ setStatus('error', COPY.errNoWebgpu); dropInner.disabled = true; drop.style.pointerEvents = 'none'; drop.style.opacity = '0.5'; return; }
+
+  let MentriaEngine = null, engine = null, loaded = false, loadingPromise = null, busy = false;
   let curImage = null, curMode = 'describe', curName = 'image';
+  let runSeq = 0, running = null, loadSeq = 0;
 
   async function fileToEngineImage(file, targetSize = 448){
     const bitmap = await createImageBitmap(file);
@@ -207,7 +232,13 @@ eleventyComputed:
           offerUpgrade: true,
           onProgress: onProgress,
           onTier: (info) => strip.setTier(info),
-          onDeviceLost: (info) => { setStatus('error', COPY.errDeviceLost); console.error('WebGPU device lost:', info); loaded = false; engine = null; loadingPromise = null; }
+          onDeviceLost: (info) => {
+            setStatus('error', COPY.errDeviceLost);
+            console.error('WebGPU device lost:', info);
+            const dead = engine;
+            loaded = false; engine = null; loadingPromise = null;
+            if (dead){ try { dead.terminate(); } catch(_){} }
+          }
         });
         engine = res.engine;
         strip.done({ prime: COPY.statusReady, linger: 1200 });
@@ -226,41 +257,83 @@ eleventyComputed:
     return loadingPromise;
   }
 
-  async function run(mode){
-    if (generating || !curImage) return;
-    const ok = await ensureModel();
-    if (!ok || !engine) return;
-    generating = true;
+  function showPending(mode){
     setModeButtons(mode, true);
-    setStatus('generating', COPY.statusGenerating);
     resultWrap.hidden = false;
     resultLabel.textContent = COPY.labels[mode] || '';
-    if (window.renderMarkdownReady){ try { await window.renderMarkdownReady; } catch(_){} }
-    let full = '', pending = false, nTok = 0;
+    resultLabel.setAttribute('data-mode', mode);
+    resultEl.innerHTML = '<span class="an-cursor"></span>';
+  }
+
+  function cancelRun(){
+    runSeq++;
+    if (!busy) return;
+    if (engine && typeof engine.interrupt === 'function'){ try { engine.interrupt(); } catch(_){} }
+    if (strip) strip.hide();
+  }
+
+  function run(mode){
+    if (!curImage) return Promise.resolve();
+    const wasBusy = busy;
+    cancelRun();
+    const seq = runSeq;
+    if (wasBusy) showPending(mode);
+    const prev = running;
+    const job = (async () => {
+      if (prev){ try { await prev; } catch(_){} }
+      if (seq === runSeq && curImage) await describe(mode, seq);
+    })();
+    running = job;
+    const settle = () => { if (running === job) running = null; };
+    job.then(settle, settle);
+    return job;
+  }
+
+  async function describe(mode, seq){
+    const stale = () => seq !== runSeq;
+    const ok = await ensureModel();
+    if (stale()) return;
+    if (!ok || !engine || !curImage){
+      setModeButtons(curMode, false);
+      if (resultEl.querySelector('.an-cursor')) resultEl.innerHTML = '';
+      return;
+    }
+    const eng = engine;
+    const img = curImage;
+    let full = '', frame = 0, open = true, nTok = 0;
     const paint = () => {
+      frame = 0;
+      if (!open || stale()) return;
       const display = full.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
       if (window.renderMarkdown) resultEl.innerHTML = (renderMarkdown(display) || '') + '<span class="an-cursor"></span>';
       else resultEl.textContent = display;
-      pending = false;
     };
-    resultEl.innerHTML = '<span class="an-cursor"></span>';
+    const close = () => { open = false; if (frame){ cancelAnimationFrame(frame); frame = 0; } };
+    busy = true;
+    showPending(mode);
+    setStatus('generating', COPY.statusGenerating);
     try {
+      if (window.renderMarkdownReady){ try { await window.renderMarkdownReady; } catch(_){} }
+      if (stale()) return;
       const params = {
         messages: [
           { role: 'system', content: COPY.sysPrompt },
           { role: 'user', content: [ { type: 'image' }, { type: 'text', text: COPY.prompts[mode] } ] }
         ],
-        images: [ { rgbHwc: curImage.rgbHwc, h: curImage.h, w: curImage.w } ],
+        images: [ { rgbHwc: img.rgbHwc, h: img.h, w: img.w } ],
         maxTokens: MAX_TOKENS, temperature: 0, topK: 1, topP: 1.0, repetitionPenalty: 1.15, enableThinking: false
       };
-      await engine.generate(params, (event) => {
+      await eng.generate(params, (event) => {
+        if (!open || stale()) return;
         if (typeof event.token === 'string' && event.token.length > 0){
           if (/^<\|[^|]*\|>$/.test(event.token)) return;
           full += event.token;
           if (strip) strip.token(++nTok);
-          if (!pending){ pending = true; requestAnimationFrame(paint); }
+          if (!frame) frame = requestAnimationFrame(paint);
         }
       });
+      close();
+      if (stale()) return;
       if (strip) strip.done({ tokens: nTok });
       const display = full.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<\|[^|]*\|>/g, '').trim();
       lastText = display;
@@ -268,12 +341,17 @@ eleventyComputed:
       else resultEl.textContent = display || COPY.emptyResponse;
       setStatus('ready', COPY.statusReady);
     } catch (err){
-      resultEl.innerHTML = '<span class="an-error">' + esc(COPY.errLoad + (err && err.message || err)) + '</span>';
-      if (strip) strip.error(String(err && err.message || err), { phase: 'answering' });
-      setStatus('error', COPY.errLoad);
+      close();
+      if (stale()) return;
+      const msg = String(err && err.message || err);
+      const lost = eng !== engine;
+      resultEl.innerHTML = '<span class="an-error">' + esc(lost ? COPY.errDeviceLost : COPY.errLoad + msg) + '</span>';
+      if (strip) strip.error(msg, lost ? { phase: 'answering', prime: COPY.errDeviceLost } : { phase: 'answering' });
+      if (!lost) setStatus('error', COPY.errLoad);
     } finally {
-      generating = false;
-      setModeButtons(curMode, false);
+      close();
+      busy = false;
+      if (!stale()) setModeButtons(curMode, false);
     }
   }
   let lastText = '';
@@ -286,6 +364,8 @@ eleventyComputed:
   let curUrl = null;
 
   function resetDropzone(){
+    loadSeq++;
+    cancelRun();
     if (curUrl){ try { URL.revokeObjectURL(curUrl); } catch(_){} curUrl = null; }
     curImage = null; preview.hidden = true; preview.removeAttribute('src'); dropInner.style.display = '';
     drop.classList.remove('has-image'); modesEl.hidden = true; resultWrap.hidden = true; resultEl.innerHTML = '';
@@ -293,17 +373,21 @@ eleventyComputed:
 
   async function loadImage(file){
     if (!file || !file.type || !file.type.startsWith('image/')){ setStatus('error', COPY.badFile); return; }
-    curName = (file.name || 'image').replace(/\.[^.]+$/, '');
+    const n = ++loadSeq;
     try {
+      const img = await fileToEngineImage(file, IMG_MAX);
+      if (n !== loadSeq) return;
+      curName = (file.name || 'image').replace(/\.[^.]+$/, '');
       if (curUrl){ try { URL.revokeObjectURL(curUrl); } catch(_){} }
       curUrl = URL.createObjectURL(file);
       preview.src = curUrl; preview.hidden = false; dropInner.style.display = 'none';
       drop.classList.add('has-image');
-      curImage = await fileToEngineImage(file, IMG_MAX);
+      curImage = img;
       modesEl.hidden = false;
       curMode = 'describe';
       run('describe');
     } catch (err){
+      if (n !== loadSeq) return;
       resetDropzone();
       setStatus('error', COPY.badFile);
       console.error(err);
@@ -312,6 +396,8 @@ eleventyComputed:
 
   // upload interactions
   fileInput.addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (f) loadImage(f); fileInput.value = ''; });
+  dropInner.addEventListener('click', () => fileInput.click());
+  preview.addEventListener('click', () => fileInput.click());
   drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('dragover'); });
   drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
   drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('dragover'); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadImage(f); });
@@ -319,7 +405,7 @@ eleventyComputed:
   window.addEventListener('paste', (e) => { const items = e.clipboardData && e.clipboardData.items; if (!items) return; for (const it of items){ if (it.type && it.type.startsWith('image/')){ const f = it.getAsFile(); if (f) loadImage(f); break; } } });
 
   modesEl.addEventListener('click', (e) => {
-    const b = e.target.closest('.an-mode'); if (!b || generating) return;
+    const b = e.target.closest('.an-mode'); if (!b || busy) return;
     curMode = b.dataset.mode; setModeButtons(curMode, false); run(curMode);
   });
 
@@ -339,9 +425,10 @@ eleventyComputed:
   document.getElementById('an-new').addEventListener('click', () => {
     resetDropzone();
     if (loaded) setStatus('ready', COPY.statusReady); else setStatus('idle', COPY.statusIdle);
+    dropInner.focus();
   });
   deleteBtn.addEventListener('click', async () => {
-    if (!(await window.mentriaConfirm(COPY.confirmDelete))) return;
+    if (!(await window.mentriaConfirm(COPY.confirmDelete, { danger: true }))) return;
     try { if (window.caches){ const keys = await caches.keys(); await Promise.all(keys.filter(k => k === 'mentria-models' || k.startsWith('mentria-models-')).map(k => caches.delete(k))); } } catch(_){}
     location.reload();
   });
@@ -349,6 +436,8 @@ eleventyComputed:
   setStatus('idle', COPY.statusIdle);
 
   // "open with" — PWA file handler
+  if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(loadImage);
+
   if ('launchQueue' in window && 'setConsumer' in window.launchQueue){
     window.launchQueue.setConsumer(async (params) => {
       if (!params || !params.files || !params.files.length) return;

@@ -9,11 +9,12 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.chess.title' | t }}"
   description: "{{ 'tools.chess.lede' | t }}"
+localeReload: true
 ---
 <div class="game-page game-page--wide">
 
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">chess</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">chess</span></p>
   <h1>{{ "tools.chess.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
   <p>{{ "tools.chess.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -26,15 +27,15 @@ eleventyComputed:
 <div id="chess-help" popover class="game-help chess-help">
   <div class="chess-help__bar">
     <p class="game-help-title">{{ "tool.common.controls" | t }}</p>
-    <button type="button" class="chess-help__x" id="chess-help-close" aria-label="{{ 'tool.chess.help_close' | t }}">{% include "icon-x.njk" %}</button>
+    <button type="button" class="game-help-x" id="chess-help-close" popovertarget="chess-help" popovertargetaction="hide" aria-label="{{ 'tool.chess.help_close' | t }}">{% include "icon-x.njk" %}</button>
   </div>
   <div class="chess-help__methods">
     <section class="chess-help__method" data-method="pointer" data-input="pointer">
-      <h3 class="chess-help__method-h">
+      <h2 class="chess-help__method-h">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 10.4V5.2a1.7 1.7 0 0 1 3.4 0v5.2"/><path d="M12.4 10.4V4a1.7 1.7 0 0 1 3.4 0v6.4"/><path d="M15.8 10.8V7.4a1.7 1.7 0 0 1 3.4 0v7.4c0 3.4-2.5 6.2-6 6.2-2 0-3.7-.8-4.9-2.4L5 14.4a1.7 1.7 0 0 1 2.6-2.2l1.4 1.5v-3.3"/></svg>
         <span>{{ "tool.chess.help_touch" | t }}</span>
         <span class="chess-help__badge">{{ "tool.chess.help_active" | t }}</span>
-      </h3>
+      </h2>
       <ul class="game-help-list">
         <li><span class="game-help-label">{{ "tool.chess.help_tap_move" | t }}</span></li>
         <li><span class="game-help-label">{{ "tool.chess.help_drag_move" | t }}</span></li>
@@ -42,14 +43,14 @@ eleventyComputed:
       </ul>
     </section>
     <section class="chess-help__method" data-method="keyboard" data-input="keyboard">
-      <h3 class="chess-help__method-h">
+      <h2 class="chess-help__method-h">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 9.6h.01M9.6 9.6h.01M13.2 9.6h.01M16.8 9.6h.01M6 13.2h.01M9.6 13.2h.01M13.2 13.2h.01M16.8 13.2h.01M8.5 15.9h7"/></svg>
         <span>{{ "tool.chess.help_keyboard" | t }}</span>
         <span class="chess-help__badge">{{ "tool.chess.help_active" | t }}</span>
-      </h3>
+      </h2>
       <ul class="game-help-list">
         <li><span class="chess-help__keys"><span class="kbd">←</span><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd">→</span></span><span class="game-help-label">{{ "tool.chess.help_move_cursor" | t }}</span></li>
-        <li><span class="chess-help__keys"><span class="kbd">⏎</span><span class="kbd">SPACE</span></span><span class="game-help-label">{{ "tool.chess.help_select" | t }}</span></li>
+        <li><span class="chess-help__keys"><span class="kbd">⏎</span><span class="kbd">{{ "common.key_space" | t }}</span></span><span class="game-help-label">{{ "tool.chess.help_select" | t }}</span></li>
         <li><span class="chess-help__keys"><span class="kbd">ESC</span></span><span class="game-help-label">{{ "tool.chess.help_cancel" | t }}</span></li>
         <li><span class="chess-help__keys"><span class="kbd">⇧</span><span class="kbd">←</span><span class="kbd">→</span></span><span class="game-help-label">{{ "tool.chess.help_scrub" | t }}</span></li>
         <li><span class="chess-help__keys"><span class="kbd">F</span></span><span class="game-help-label">{{ "tool.chess.help_flip" | t }}</span></li>
@@ -58,11 +59,11 @@ eleventyComputed:
       </ul>
     </section>
     <section class="chess-help__method" data-method="gamepad" data-input="gamepad">
-      <h3 class="chess-help__method-h">
+      <h2 class="chess-help__method-h">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.6 7.8h8.8a5 5 0 0 1 4.9 4.1l.5 3.1a2.9 2.9 0 0 1-5.3 2.1l-1.4-2H8.9l-1.4 2a2.9 2.9 0 0 1-5.3-2.1l.5-3.1a5 5 0 0 1 4.9-4.1Z"/><path d="M7.2 11v2.6M5.9 12.3h2.6M15.7 11.4h.01M17.9 13.1h.01"/></svg>
         <span>{{ "tool.chess.help_gamepad" | t }}</span>
         <span class="chess-help__badge">{{ "tool.chess.help_active" | t }}</span>
-      </h3>
+      </h2>
       <ul class="game-help-list">
         <li><span class="chess-help__keys"><span class="kbd">D-PAD</span></span><span class="game-help-label">{{ "tool.chess.help_move_cursor" | t }}</span></li>
         <li><span class="chess-help__keys"><span class="kbd">A</span></span><span class="game-help-label">{{ "tool.chess.help_select" | t }}</span></li>
@@ -148,6 +149,10 @@ eleventyComputed:
         </div>
         <div class="moves-table" id="moves-table"></div>
         <button class="btn scrub-back" id="scrub-back">{{ "tool.chess.back_to_live" | t }}</button>
+        <div class="export-row">
+          <button class="btn" id="btn-pgn">{{ "tool.chess.export_pgn" | t }}</button>
+          <button class="btn" id="btn-fen">{{ "tool.chess.copy_fen" | t }}</button>
+        </div>
       </div>
 
       <div class="panel" data-tab="connect">
@@ -185,6 +190,7 @@ eleventyComputed:
 
   <div class="modal-bg" id="end-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="end-title" aria-describedby="end-reason" tabindex="-1">
+      <button type="button" class="modal-x" id="btn-end-close" aria-label="{{ 'common.close' | t }}">{% include "icon-x.njk" %}</button>
       <div class="eyebrow" id="end-eyebrow">checkmate</div>
       <h2 id="end-title">White wins</h2>
       <p id="end-reason">by checkmate</p>
@@ -217,7 +223,7 @@ eleventyComputed:
   .chess-app .eng-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--term-muted); }
   .chess-app .eng-row span:last-child { color: var(--term-fg-strong); font-weight: 600; }
   .chess-app .skill-group { display: flex; flex-direction: column; gap: 6px; }
-  .chess-app .skill-label { font-size: 10px; color: var(--term-muted); text-transform: uppercase; letter-spacing: 0.12em; }
+  .chess-app .skill-label { font-family: var(--font-mono); font-size: 10px; color: var(--term-muted); text-transform: uppercase; letter-spacing: 0.12em; }
   .chess-app .skill-pills { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
   .chess-app .skill-pills button { padding: 6px 4px; background: transparent; color: var(--term-fg); border: 1px solid var(--term-border); border-radius: 5px; font-size: 10px; cursor: pointer; transition: all 120ms; font-family: var(--font-mono); }
   .chess-app .skill-pills button:hover { border-color: var(--cyan-30); color: var(--syn-cyan); }
@@ -247,7 +253,6 @@ eleventyComputed:
   .chess-app .sq { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none; }
   .chess-app .sq:focus { outline: none; }
   .chess-app .sq:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--syn-cyan); z-index: 2; }
-  .chess-app .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   .chess-app .sq.light { background: rgba(255,255,255,0.06); }
   .chess-app .sq.dark { background: rgba(0,0,0,0.35); }
   .chess-app .sq.sel { background: var(--cyan-15) !important; box-shadow: inset 0 0 0 2px var(--syn-cyan); }
@@ -281,6 +286,7 @@ eleventyComputed:
   .chess-app .moves-table .empty { padding: 12px 14px; color: var(--term-subtle); font-size: 11px; }
   .chess-app .scrub-back { display: none; margin: 6px 14px 10px; }
   .chess-app .scrub-back.show { display: inline-flex; }
+  .chess-app .export-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 14px 12px; }
 
   .chess-app .conn-section { padding: 12px 14px; border-bottom: 1px solid var(--term-divider); display: flex; flex-direction: column; gap: 8px; }
   .chess-app .conn-section:last-child { border-bottom: none; }
@@ -307,7 +313,9 @@ eleventyComputed:
 
   .chess-app .modal-bg { position: fixed; inset: 0; background: rgba(8,9,12,0.78); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 200; }
   .chess-app .modal-bg.show { display: flex; }
-  .chess-app .modal { background: var(--term-bg-raised); border: 1px solid var(--syn-pink); border-radius: 12px; padding: 28px 32px; max-width: 360px; box-shadow: 0 0 40px rgba(244,114,182,0.25); text-align: center; }
+  .chess-app .modal { position: relative; background: var(--term-bg-raised); border: 1px solid var(--syn-pink); border-radius: 12px; padding: 28px 32px; min-width: min(280px, calc(100vw - 32px)); max-width: 360px; box-shadow: 0 0 40px rgba(244,114,182,0.25); text-align: center; }
+  .chess-app .modal-x { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; padding: 0; background: transparent; border: 1px solid var(--term-border); border-radius: 6px; color: var(--term-muted); font-size: 14px; cursor: pointer; }
+  .chess-app .modal-x:hover, .chess-app .modal-x:focus-visible { color: var(--syn-cyan); border-color: var(--syn-cyan); outline: none; }
   .chess-app .modal .eyebrow { font-size: 10px; letter-spacing: 0.2em; color: var(--syn-pink); text-transform: uppercase; font-weight: 600; }
   .chess-app .modal h2 { margin: 8px 0 6px; font-size: 22px; color: var(--term-fg-strong); font-weight: 700; }
   .chess-app .modal p { color: var(--term-muted); font-size: 12px; margin: 0 0 18px; }
@@ -322,8 +330,6 @@ eleventyComputed:
   .chess-help--fallback.is-open { display: block; }
   .chess-help__bar { display: flex; align-items: center; gap: 10px; margin-bottom: 0.7rem; }
   .chess-help__bar .game-help-title { margin: 0; flex: 1; }
-  .chess-help__x { width: 24px; height: 24px; padding: 0; background: transparent; border: 1px solid var(--term-border); border-radius: 6px; color: var(--term-muted); font-family: var(--font-mono); font-size: 11px; line-height: 1; cursor: pointer; }
-  .chess-help__x:hover, .chess-help__x:focus-visible { color: var(--syn-cyan); border-color: var(--syn-cyan); outline: none; }
   .chess-help__methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: start; }
   .chess-help__method { border: 1px solid var(--term-divider); border-radius: 8px; padding: 10px 12px; }
   .chess-help__method.is-active { border-color: var(--cyan-30); background: var(--cyan-8); }
@@ -370,6 +376,7 @@ eleventyComputed:
     no_moves_yet: {{ ("tool.chess.no_moves_yet" | t) | dump | safe }},
     confirm_resign: {{ ("tool.chess.confirm_resign" | t) | dump | safe }},
     confirm_new_color: {{ ("tool.chess.confirm_new_color" | t) | dump | safe }},
+    confirm_new: {{ ("tool.chess.confirm_new" | t) | dump | safe }},
     color_white: {{ ("tool.chess.color_white" | t) | dump | safe }},
     color_black: {{ ("tool.chess.color_black" | t) | dump | safe }},
     chat_you: {{ ("tool.chess.chat_you" | t) | dump | safe }},
@@ -380,6 +387,8 @@ eleventyComputed:
     peer_connected: {{ ("tool.chess.peer_connected" | t) | dump | safe }},
     peer_disconnected: {{ ("tool.chess.peer_disconnected" | t) | dump | safe }},
     peer_error: {{ ("tool.chess.peer_error" | t) | dump | safe }},
+    relay_unreachable: {{ ("tool.chess.relay_unreachable" | t) | dump | safe }},
+    copy_fen: {{ ("tool.chess.copy_fen" | t) | dump | safe }},
     room_invalid: {{ ("tool.chess.room_invalid" | t) | dump | safe }},
     copy: {{ ("tool.chess.copy" | t) | dump | safe }},
     copied: {{ ("tool.chess.copied" | t) | dump | safe }},

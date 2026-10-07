@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.base64-codec.title' | t }}"
   description: "{{ 'tools.base64-codec.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">base64-codec</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">base64-codec</span></p>
   <h1>{{ "tools.base64-codec.title" | t }}</h1>
   <p>{{ "tools.base64-codec.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -40,6 +41,7 @@ eleventyComputed:
       <button class="m-btn m-btn--primary" id="b64-encode-btn">{{ "tool.base64-codec.btn_encode" | t }}</button>
       <button class="m-btn m-btn--primary" id="b64-decode-btn">{{ "tool.base64-codec.btn_decode" | t }}</button>
       <button class="m-btn m-btn--ghost" id="b64-copy-btn">{{ "tool.base64-codec.btn_copy_output" | t }}</button>
+      <button class="m-btn m-btn--ghost" id="b64-send-btn" type="button" hidden>{{ "common.send_to" | t }}</button>
       <button class="m-btn m-btn--ghost" id="b64-clear-btn">{{ "tool.base64-codec.btn_clear" | t }}</button>
     </div>
     <div class="b64-status m-status" id="b64-text-status"></div>
@@ -103,7 +105,7 @@ eleventyComputed:
 (() => {
   const COPY = {
     previewOf:      {{ ("tool.base64-codec.preview_of"      | t) | dump | safe }},
-    decodedPreview: {{ ("tool.base64-codec.decoded_preview" | t) | dump | safe }},
+    decodedAlt:     {{ ("tool.base64-codec.decoded_preview" | t) | dump | safe }},
     unknown:                 {{ ("tool.base64-codec.meta_unknown"                | t) | dump | safe }},
     noPreview:               {{ ("tool.base64-codec.preview_no_preview"          | t) | dump | safe }},
     decodedPreview:          {{ ("tool.base64-codec.preview_decoded_template"    | t) | dump | safe }},
@@ -119,6 +121,9 @@ eleventyComputed:
     statusNothingCopy:       {{ ("tool.base64-codec.status_nothing_copy"         | t) | dump | safe }},
     statusFileLoaded:        {{ ("tool.base64-codec.status_file_loaded"          | t) | dump | safe }},
     statusFileReadFailed:    {{ ("tool.base64-codec.status_file_read_failed"     | t) | dump | safe }},
+    bigFileConfirm:          {{ ("tool.base64-codec.big_file_confirm"            | t) | dump | safe }},
+    fileTooLarge:            {{ ("tool.base64-codec.file_too_large"              | t) | dump | safe }},
+    tooLargeToShow:          {{ ("tool.base64-codec.too_large_to_show"           | t) | dump | safe }},
     statusPasteFirst:        {{ ("tool.base64-codec.status_paste_first"          | t) | dump | safe }},
     statusInvalidB64:        {{ ("tool.base64-codec.status_invalid_b64"          | t) | dump | safe }},
     statusFileDecoded:       {{ ("tool.base64-codec.status_file_decoded_template"| t) | dump | safe }},
@@ -131,6 +136,9 @@ eleventyComputed:
 
     const inputEl       = document.getElementById('b64-input');
     const outputEl      = document.getElementById('b64-output');
+    const FILE_WARN_BYTES = 10 * 1024 * 1024;
+    const FILE_MAX_BYTES = 100 * 1024 * 1024;
+    const TEXTAREA_MAX_CHARS = 2 * 1024 * 1024;
     const encodeBtn     = document.getElementById('b64-encode-btn');
     const decodeBtn     = document.getElementById('b64-decode-btn');
     const copyBtn       = document.getElementById('b64-copy-btn');
@@ -157,9 +165,25 @@ eleventyComputed:
     const decodePreview = document.getElementById('b64-decode-preview');
     const fileStatus    = MentriaUI.status(document.getElementById('b64-file-status'));
 
+    const KEEP_KEY = 'mentria.b64.keep';
+    document.addEventListener('mentria:localereload', () => {
+      if (!inputEl.value && !outputEl.value && !decodeInput.value) return;
+      try { sessionStorage.setItem(KEEP_KEY, JSON.stringify({ t: Date.now(), input: inputEl.value, output: outputEl.value, decode: decodeInput.value })); } catch (_) {}
+    });
+    try {
+      const kept = JSON.parse(sessionStorage.getItem(KEEP_KEY) || 'null');
+      sessionStorage.removeItem(KEEP_KEY);
+      if (kept && Date.now() - kept.t < 120000) {
+        inputEl.value = kept.input || '';
+        outputEl.value = kept.output || '';
+        decodeInput.value = kept.decode || '';
+      }
+    } catch (_) {}
+
     let currentDataUri  = '';
     let currentRawB64   = '';
     let decodedBlob     = null;
+    let decodedUrl      = null;
     let decodedFilename = 'decoded-file';
 
     function formatBytes(bytes) {
@@ -169,9 +193,11 @@ eleventyComputed:
       return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     }
 
+    const statusTimers = new WeakMap();
     function showStatus(status, msg, tone) {
+      clearTimeout(statusTimers.get(status));
       status.set(msg, tone);
-      if (tone !== 'err') setTimeout(() => status.clear(), 3000);
+      if (tone !== 'err') statusTimers.set(status, setTimeout(() => status.clear(), 3000));
     }
 
     async function copyText(text, status) {
@@ -187,7 +213,7 @@ eleventyComputed:
       const s = str.trim();
       if (s.startsWith('data:')) return true;
       if (s.length < 4) return false;
-      return /^[A-Za-z0-9+/\n\r]+=*$/.test(s);
+      return /^[A-Za-z0-9+/_\-\s]+=*$/.test(s);
     }
 
     function isImageMime(mime) {
@@ -215,13 +241,27 @@ eleventyComputed:
       const raw = inputEl.value;
       if (!raw) { showStatus(textStatus, COPY.statusNothingEncode, 'err'); return; }
       try {
-        const encoded = btoa(unescape(encodeURIComponent(raw)));
+        const encoded = bytesToB64(new TextEncoder().encode(raw));
         outputEl.value = encoded;
         showStatus(textStatus, COPY.statusEncoded.replace('{size}', formatBytes(encoded.length)), 'ok');
       } catch (e) {
+        outputEl.value = '';
         showStatus(textStatus, COPY.statusEncodeFailed.replace('{reason}', e.message), 'err');
       }
     });
+
+    function bytesToB64(bytes) {
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      return btoa(bin);
+    }
+
+    function b64ToBytes(str) {
+      const bin = atob(normalizeB64(str));
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
 
     function normalizeB64(str) {
       let v = str.replace(/\s+/g, '');
@@ -254,8 +294,9 @@ eleventyComputed:
       if (dataUriMatch) raw = dataUriMatch[1];
       let bytes;
       try {
-        bytes = Uint8Array.from(atob(normalizeB64(raw)), c => c.charCodeAt(0));
+        bytes = b64ToBytes(raw);
       } catch (e) {
+        outputEl.value = '';
         showStatus(textStatus, COPY.statusDecodeFailedInv, 'err');
         return;
       }
@@ -277,6 +318,27 @@ eleventyComputed:
       inputEl.value = '';
       outputEl.value = '';
       textStatus.clear();
+    });
+
+    const sendBtn = document.getElementById('b64-send-btn');
+    const syncSend = () => { sendBtn.hidden = !MentriaUI.sendTargets({ text: outputEl.value }).length; };
+    [encodeBtn, decodeBtn, clearBtn].forEach((b) => b.addEventListener('click', syncSend));
+    MentriaUI.sendMenu(sendBtn, () => (outputEl.value ? { text: outputEl.value } : null));
+    if (outputEl.value) syncSend();
+
+    function looksBase64(text) {
+      const v = text.replace(/\s+/g, '');
+      if (v.length < 16 || !/^[A-Za-z0-9+/_-]+={0,2}$/.test(v)) return false;
+      try {
+        new TextDecoder('utf-8', { fatal: true }).decode(b64ToBytes(v));
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+    MentriaUI.consumeShared(null, (text) => {
+      inputEl.value = text;
+      (looksBase64(text) ? decodeBtn : encodeBtn).click();
     });
 
     browseBtn.addEventListener('click', () => fileInput.click());
@@ -303,9 +365,20 @@ eleventyComputed:
 
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length) handleFile(fileInput.files[0]);
+      fileInput.value = '';
     });
 
-    function handleFile(file) {
+    let previewUrl = null;
+    async function handleFile(file) {
+      if (file.size > FILE_MAX_BYTES) {
+        showStatus(fileStatus, COPY.fileTooLarge, 'err');
+        return;
+      }
+      if (file.size > FILE_WARN_BYTES) {
+        const msg = COPY.bigFileConfirm.replace('{size}', formatBytes(file.size));
+        const ok = window.mentriaConfirm ? await window.mentriaConfirm(msg) : true;
+        if (!ok) return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         currentDataUri = reader.result;
@@ -316,12 +389,16 @@ eleventyComputed:
         fileTypeEl.textContent = file.type || COPY.unknown;
         fileSizeEl.textContent = formatBytes(file.size);
         fileB64SizeEl.textContent = formatBytes(currentRawB64.length);
-        fileDataUri.value = currentDataUri;
+        const showable = currentDataUri.length <= TEXTAREA_MAX_CHARS;
+        fileDataUri.value = showable ? currentDataUri : '';
+        fileDataUri.placeholder = showable ? '' : COPY.tooLargeToShow;
 
         filePreview.innerHTML = '';
+        if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
         if (isImageMime(file.type)) {
           const img = document.createElement('img');
-          img.src = currentDataUri;
+          previewUrl = URL.createObjectURL(file);
+          img.src = previewUrl;
           img.alt = COPY.previewOf.replace('{name}', file.name);
           img.className = 'b64-preview-img';
           filePreview.appendChild(img);
@@ -348,56 +425,88 @@ eleventyComputed:
       copyText(currentRawB64, fileStatus);
     });
 
+    const hashMatch = location.hash.match(/^#v=([^&]*)/);
+    if (hashMatch && hashMatch[1].length <= 20000) {
+      history.replaceState(null, '', location.pathname + location.search);
+      try {
+        inputEl.value = decodeURIComponent(hashMatch[1]);
+        decodeBtn.click();
+      } catch (_) {}
+    }
+
     fileClearBtn.addEventListener('click', () => {
       currentDataUri = '';
       currentRawB64 = '';
       fileInfoWrap.classList.add('b64-file-info--hidden');
       filePreview.innerHTML = '';
+      if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
       fileDataUri.value = '';
+      fileDataUri.placeholder = '';
       fileInput.value = '';
       fileStatus.clear();
     });
 
+    function clearDecoded() {
+      decodedBlob = null;
+      decodePreview.innerHTML = '';
+      if (decodedUrl) { URL.revokeObjectURL(decodedUrl); decodedUrl = null; }
+      downloadBtn.disabled = true;
+    }
+
+    function sniffMime(bytes) {
+      const at = (i, arr) => arr.every((b, k) => bytes[i + k] === b);
+      if (at(0, [0x89, 0x50, 0x4E, 0x47])) return 'image/png';
+      if (at(0, [0xFF, 0xD8, 0xFF])) return 'image/jpeg';
+      if (at(0, [0x47, 0x49, 0x46, 0x38])) return 'image/gif';
+      if (at(0, [0x52, 0x49, 0x46, 0x46]) && at(8, [0x57, 0x45, 0x42, 0x50])) return 'image/webp';
+      if (at(0, [0x25, 0x50, 0x44, 0x46])) return 'application/pdf';
+      return null;
+    }
+
     decodeFileBtn.addEventListener('click', () => {
       const val = decodeInput.value.trim();
-      if (!val) { showStatus(fileStatus, COPY.statusPasteFirst, 'err'); return; }
+      if (!val) { clearDecoded(); showStatus(fileStatus, COPY.statusPasteFirst, 'err'); return; }
 
       let mime = 'application/octet-stream';
       let b64 = val;
 
       const dataUriMatch = val.match(/^data:([^;,]+)[^,]*;base64,(.*)$/s);
       if (dataUriMatch) {
-        mime = dataUriMatch[1];
+        mime = /^[\w.+-]+\/[\w.+-]+$/.test(dataUriMatch[1]) ? dataUriMatch[1] : 'application/octet-stream';
         b64 = dataUriMatch[2];
       } else if (!isBase64(val)) {
+        clearDecoded();
         showStatus(fileStatus, COPY.statusInvalidB64, 'err');
         return;
       }
 
       try {
-        const binary = atob(normalizeB64(b64));
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const bytes = b64ToBytes(b64);
+        if (!dataUriMatch) mime = sniffMime(bytes) || mime;
         decodedBlob = new Blob([bytes], { type: mime });
         decodedFilename = 'decoded-file.' + mimeToExt(mime);
 
         decodePreview.innerHTML = '';
+        if (decodedUrl) { URL.revokeObjectURL(decodedUrl); decodedUrl = null; }
         if (isImageMime(mime)) {
           const img = document.createElement('img');
-          img.src = val.startsWith('data:') ? val : 'data:' + mime + ';base64,' + b64;
-          img.alt = COPY.decodedPreview;
+          decodedUrl = URL.createObjectURL(decodedBlob);
+          img.src = decodedUrl;
+          img.alt = COPY.decodedAlt;
           img.className = 'b64-preview-img';
           decodePreview.appendChild(img);
         } else {
-          decodePreview.innerHTML = '<p class="b64-preview-placeholder">' + COPY.decodedPreview.replace('{mime}', mime).replace('{size}', formatBytes(decodedBlob.size)) + '</p>';
+          const note = document.createElement('p');
+          note.className = 'b64-preview-placeholder';
+          note.textContent = COPY.decodedPreview.replace('{mime}', mime).replace('{size}', formatBytes(decodedBlob.size));
+          decodePreview.appendChild(note);
         }
 
         downloadBtn.disabled = false;
         showStatus(fileStatus, COPY.statusFileDecoded.replace('{size}', formatBytes(decodedBlob.size)), 'ok');
       } catch (e) {
+        clearDecoded();
         showStatus(fileStatus, COPY.statusDecodeFailedB64, 'err');
-        decodedBlob = null;
-        downloadBtn.disabled = true;
       }
     });
 
@@ -654,5 +763,12 @@ eleventyComputed:
     width: 100%;
     text-align: center;
   }
+}
+
+@media print {
+  .b64-mode-tabs,
+  .b64-dropzone { display: none !important; }
+  .b64-label,
+  .b64-section-title { color: var(--term-fg); }
 }
 </style>

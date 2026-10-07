@@ -1,17 +1,117 @@
 ---
 layout: base.njk
-permalink: /offline/index.html
-title: "Offline"
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/offline/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'common.offline_title' | t }}"
 robots: "noindex, nofollow"
-englishOnly: true
+notFound: true
 eleventyExcludeFromCollections: true
 eleventyExcludeFromSitemap: true
 ---
+{%- if not locale.pathPrefix %}
+<script>
+  (function () {
+    try {
+      var locs = window.MENTRIA_LOCALES || [], path = location.pathname || '/', pref = localStorage.getItem('mentria_lang'), target = null, i;
+      for (i = 0; i < locs.length; i++) {
+        var pre = locs[i].prefix;
+        if (pre && (path === pre || path.indexOf(pre + '/') === 0)) return;
+        if (locs[i].code === pref) target = locs[i];
+      }
+      if (!target || !target.prefix) return;
+      if (path !== '/offline/') sessionStorage.setItem('mentria_offline_from', JSON.stringify({ path: path + location.search + location.hash, at: Date.now() }));
+      document.documentElement.style.visibility = 'hidden';
+      setTimeout(function () { document.documentElement.style.visibility = ''; }, 3000);
+      location.replace(target.prefix + '/offline/');
+    } catch (_) {}
+  })();
+</script>
+{%- else %}
+<script>
+  (function () {
+    try {
+      var raw = sessionStorage.getItem('mentria_offline_from');
+      if (!raw) return;
+      sessionStorage.removeItem('mentria_offline_from');
+      var from = JSON.parse(raw);
+      if (!from || typeof from.path !== 'string' || !(Date.now() - from.at < 10000)) return;
+      if (from.path.charAt(0) !== '/' || from.path.charAt(1) === '/') return;
+      history.replaceState(history.state, '', from.path);
+    } catch (_) {}
+  })();
+</script>
+{%- endif %}
 <section class="hero" style="padding-top:3rem;">
   <div style="font-family: var(--font-mono); text-align: center;">
     <p style="color: var(--syn-amber); font-size: 0.9rem;">$ ping mentria.ai</p>
     <h1 style="font-size: clamp(2.4rem, 7vw, 4rem); margin: 1rem 0;">{{ "common.offline_title" | t }}</h1>
     <p style="color: var(--term-muted);">{{ "common.offline_msg" | t }}<span class="cursor-blink"></span></p>
-    <p style="margin-top: 2rem;"><a href="/">{{ "common.offline_home" | t }}</a></p>
+    <p class="offline-actions">
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="offline-retry" hidden>{{ "common.offline_retry" | t }}</button>
+      <a href="{{ locale.pathPrefix }}/">{{ "common.offline_home" | t }}</a>
+    </p>
   </div>
 </section>
+<script>
+  (function () {
+    var retry = document.getElementById('offline-retry');
+    if (!retry || /\/offline\/?$/.test(location.pathname)) return;
+    var again = function () { location.reload(); };
+    retry.hidden = false;
+    retry.addEventListener('click', again);
+    window.addEventListener('online', function () { setTimeout(again, 800); });
+  })();
+</script>
+{{ toolIconsSvg | safe }}
+<section class="offline-tools" id="offline-tools" aria-labelledby="offline-tools-h" hidden>
+  <h2 class="launcher__label" id="offline-tools-h">{{ "common.offline_works" | t }}</h2>
+  <div class="offline-tools__grid" id="offline-tools-grid">
+    {%- for tool in tools %}
+    <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"{% if tool.offline %} data-needs="{{ tool.offline }}"{% endif %} href="{{ locale.pathPrefix + (tool.url or ('/tools/' + tool.slug + '/')) }}" hidden>
+      <span class="launch-tile__icon" aria-hidden="true"><svg viewBox="0 0 48 48"><use href="#tool-{{ tool.slug }}"></use></svg></span>
+      <span class="launch-tile__label">{{ ("tools." + tool.slug + ".title") | t }}</span>
+    </a>
+    {%- endfor %}
+  </div>
+</section>
+<script>
+(async () => {
+  if (!('caches' in window)) return;
+  const grid = document.getElementById('offline-tools-grid');
+  const tiles = Array.from(grid.querySelectorAll('.launch-tile'));
+  let usage = {};
+  try { usage = JSON.parse(localStorage.getItem('mentria_tool_usage')) || {}; } catch (_) {}
+  const now = Date.now();
+  const score = (slug) => { const e = usage[slug]; return e ? (e.count || 0) + 6 / (1 + (now - (e.last || 0)) / 86400000) : 0; };
+  let hasModel = false;
+  try {
+    const tiers = await import('/assets/js/mentria-tiers.js');
+    for (const id of tiers.TIER_CHAIN) {
+      if (await tiers.isTierCached(id)) { hasModel = true; break; }
+    }
+  } catch (_) {}
+  const found = [];
+  for (const tile of tiles) {
+    const needs = tile.dataset.needs;
+    if (needs === 'network' || (needs === 'model' && !hasModel)) continue;
+    try { if (await caches.match(tile.getAttribute('href'), { ignoreSearch: true })) found.push(tile); } catch (_) {}
+  }
+  if (!found.length) return;
+  found.sort((a, b) => score(b.dataset.slug) - score(a.dataset.slug));
+  found.forEach((tile) => { tile.hidden = false; grid.appendChild(tile); });
+  document.getElementById('offline-tools').hidden = false;
+})();
+</script>
+<style>
+.hero .offline-actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; justify-content: center; align-items: center; }
+.offline-actions [hidden] { display: none; }
+.offline-tools { max-width: 760px; margin: 1rem auto 3rem; padding: 0 1rem; }
+.offline-tools[hidden] { display: none; }
+.offline-tools .launcher__label { text-align: center; }
+.offline-tools__grid { display: grid; grid-template-columns: repeat(auto-fill, 84px); justify-content: center; gap: 1.4rem 1.1rem; }
+</style>

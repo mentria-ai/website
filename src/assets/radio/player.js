@@ -1,72 +1,67 @@
-/**
- * Audio player using <audio> elements instead of fetch() + Web Audio API.
- * This avoids CORS issues with GitHub Release asset URLs.
- */
 export class RadioPlayer {
   constructor() {
-    this._a = null; // current audio element
-    this._b = null;
+    this._a = null;
+    this._els = new Set();
+    this._waits = new Map();
     this._volume = 0.8;
-    this.isPlaying = false;
+    this.onblocked = null;
   }
 
-  init() {
-    this._a = new Audio();
-    this._b = new Audio();
-    this._a.preload = "auto";
-    this._b.preload = "auto";
-  }
-
-  /**
-   * Pre-load a track URL into a new Audio element.
-   * Returns a promise that resolves with { audio, duration } when loadable.
-   */
-  loadTrack(url) {
-    return new Promise((resolve, reject) => {
-      const audio = new Audio();
-      audio.preload = "auto";
-      audio.src = url;
-
-      const onReady = () => {
-        cleanup();
-        resolve({ audio, duration: audio.duration });
-      };
-      const onError = () => {
-        cleanup();
-        reject(new Error(`Failed to load: ${url}`));
-      };
-      const cleanup = () => {
+  load(url) {
+    const audio = new Audio();
+    audio.preload = "auto";
+    this._els.add(audio);
+    audio.addEventListener("play", () => this.solo(audio));
+    const ready = new Promise((resolve, reject) => {
+      const finish = (settle, value) => {
         audio.removeEventListener("canplaythrough", onReady);
         audio.removeEventListener("error", onError);
+        this._waits.delete(audio);
+        settle(value);
       };
+      const onReady = () => finish(resolve, { audio, duration: audio.duration });
+      const onError = () => finish(reject, new Error(`Failed to load: ${url}`));
+      audio.addEventListener("canplaythrough", onReady);
+      audio.addEventListener("error", onError);
+      this._waits.set(audio, () => finish(resolve, null));
+    });
+    audio.src = url;
+    audio.load();
+    return { audio, ready };
+  }
 
-      audio.addEventListener("canplaythrough", onReady, { once: true });
-      audio.addEventListener("error", onError, { once: true });
-      audio.load();
+  solo(audio) {
+    if (audio !== this._a) {
+      audio.pause();
+      return;
+    }
+    this._els.forEach((el) => {
+      if (el !== audio) el.pause();
     });
   }
 
-  /**
-   * Play a loaded audio element with fade-in, crossfading out the current.
-   * Returns { audio, duration }.
-   */
-  playAudio(loaded) {
-    const { audio, duration } = loaded;
-
-    if (this._a && this._a !== audio) {
-      this._a.pause();
-      this._a.src = "";
-    }
-
-    audio.volume = this._volume;
-    audio.play().catch(() => {});
-
-    this._a = audio;
-    this.isPlaying = true;
-
-    return { audio, duration };
+  discard(audio) {
+    if (!audio) return;
+    const wait = this._waits.get(audio);
+    if (wait) wait();
+    this._els.delete(audio);
+    if (audio === this._a) this._a = null;
+    audio.onended = null;
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
   }
 
+  start(audio, play) {
+    if (this._a && this._a !== audio) this.discard(this._a);
+    this._els.add(audio);
+    this._a = audio;
+    this._els.forEach((el) => {
+      if (el !== audio) el.pause();
+    });
+    audio.volume = this._volume;
+    if (play) this.resume();
+  }
 
   setVolume(value) {
     this._volume = value;
@@ -76,21 +71,21 @@ export class RadioPlayer {
   }
 
   pause() {
-    if (this._a && !this._a.paused) {
-      this._a.pause();
-      this.isPlaying = false;
-    }
+    this._els.forEach((el) => el.pause());
   }
 
   resume() {
-    if (this._a && this._a.paused && this._a.src) {
-      this._a.volume = this._volume;
-      this._a.play().catch(() => {});
-      this.isPlaying = true;
-    }
+    const audio = this._a;
+    if (!audio || !audio.getAttribute("src")) return;
+    audio.volume = this._volume;
+    const started = audio.play();
+    if (!started || !started.catch) return;
+    started.catch((err) => {
+      if (!err || err.name !== "NotAllowedError" || audio !== this._a || !audio.paused) return;
+      if (this.onblocked) this.onblocked();
+    });
   }
 
-  /** Get current playback time in seconds. */
   get currentTime() {
     return this._a ? this._a.currentTime : 0;
   }

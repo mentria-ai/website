@@ -22,12 +22,24 @@ const DEFAULT_COPY = {
   stop: 'Stop',
   stoppedTitle: 'Stopped',
   stoppedHint: 'Try a smaller model, or come back later.',
+  stoppedHintLater: 'You can start again later.',
   tryTier: 'Try {name}',
   failedTitle: '{name} didn’t run on this device',
-  failedHint: 'You can try a smaller model or skip for now.'
+  failedHint: 'You can try a smaller model or skip for now.',
+  failedHintLater: 'You can skip for now and try again later.'
 };
 
-function t(key, vars) {
+function i18nReady(ms) {
+  try {
+    const r = window.MentriaI18n && typeof window.MentriaI18n.ready === 'function' ? window.MentriaI18n.ready() : null;
+    if (!r) return Promise.resolve();
+    return Promise.race([r, new Promise((res) => setTimeout(res, ms))]);
+  } catch (_) {
+    return Promise.resolve();
+  }
+}
+
+function say(key, vars) {
   let s = DEFAULT_COPY[key];
   try {
     if (window.MentriaI18n && window.MentriaI18n.t) {
@@ -38,18 +50,47 @@ function t(key, vars) {
   return vars ? s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m)) : s;
 }
 
+const SAID = new Map();
+const SIZES = new Map();
+
+function t(key, vars) {
+  const out = say(key, vars);
+  SAID.set(out, { key, vars });
+  return out;
+}
+
+function sizeText(raw) {
+  const UI = typeof window !== 'undefined' ? window.MentriaUI : null;
+  const out = UI && UI.sizeLabel ? UI.sizeLabel(raw) : raw;
+  SIZES.set(out, raw);
+  return out;
+}
+
+function relabel() {
+  const el = document.getElementById('mm-gate');
+  if (!el) return;
+  el.querySelectorAll('*').forEach((n) => {
+    if (n.children.length) return;
+    const spec = SAID.get(n.textContent);
+    if (spec) n.textContent = t(spec.key, spec.vars);
+    else if (SIZES.has(n.textContent)) n.textContent = sizeText(SIZES.get(n.textContent));
+  });
+}
+
+if (typeof document !== 'undefined') document.addEventListener('mentria:localechange', relabel);
+
 export class NoWebGpuError extends Error {
   constructor() { super('no-webgpu'); this.name = 'NoWebGpuError'; }
 }
 
 function tierName(id) { return (Tiers.TIERS[id] && Tiers.TIERS[id].name) || id; }
-function tierSize(id) { return (Tiers.TIERS[id] && Tiers.TIERS[id].sizeLabel) || ''; }
+function tierSize(id) { return sizeText((Tiers.TIERS[id] && Tiers.TIERS[id].sizeLabel) || ''); }
 
 function ensureOverlayStyle() {
   if (document.getElementById('mm-gate-style')) return;
   const st = document.createElement('style');
   st.id = 'mm-gate-style';
-  st.textContent = '.mm-gate{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);font-family:var(--font-mono,monospace)}.mm-gate[hidden]{display:none}.mm-gate__card{position:relative;background:var(--term-bg-raised,#0d1014);border:1px solid var(--term-border-strong,#2a3138);border-radius:var(--radius-md,10px);padding:1.1rem 1.25rem 1.15rem;width:100%;max-width:24rem;display:flex;flex-direction:column;gap:.7rem}.mm-gate__title{font-size:.9rem;color:var(--accent,#6ef3c5)}.mm-gate__strip{display:flex;flex-direction:column}.mm-gate__strip:empty{display:none}.mm-gate__strip .es{border-bottom:0;padding:.2rem 0 .3rem}.mm-gate__detail{font-size:.75rem;color:var(--term-muted,#9ba6b1);display:flex;flex-direction:column;gap:.45rem}.mm-gate__detail:empty{display:none}.mm-gate__hint-line{font-size:.72rem;color:var(--term-subtle,var(--term-muted,#9ba6b1));line-height:1.5}.mm-gate__hint-line[hidden]{display:none}.mm-gate__actions{display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem}.mm-gate__actions[hidden]{display:none}.mm-gate__actions--row{flex-direction:row;align-items:stretch}.mm-gate__actions--row .mm-gate__btn{flex:1 1 auto;align-items:center;justify-content:center;text-align:center;line-height:1.35;padding:.55rem .7rem}.mm-gate__actions--row .mm-gate__btn--stop{flex:0 0 auto;min-width:5.5rem}.mm-gate__btn{font:inherit;font-size:.8rem;text-align:left;background:var(--term-bg,#0a0d10);border:1px solid var(--term-border-strong,#2a3138);color:var(--term-fg-strong,#e6edf3);padding:.6rem .8rem;border-radius:var(--radius-sm,8px);cursor:pointer;display:flex;justify-content:space-between;gap:1rem}.mm-gate__btn:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}.mm-gate__btn-size{color:var(--term-muted,#9ba6b1);font-size:.78rem}.mm-gate__btn--stop{color:var(--syn-pink,#f472b6);border-color:rgba(244,114,182,.5)}.mm-gate__btn--stop:hover{border-color:var(--syn-pink,#f472b6);color:var(--syn-pink,#f472b6)}.mm-gate__pitch{color:var(--term-fg-strong,#e6edf3)}.mm-gate__sample{color:var(--term-muted,#9ba6b1);font-style:italic}.mm-gate__hint{color:var(--term-muted,#9ba6b1)}.mm-gate__btn--ghost{justify-content:center;color:var(--term-muted,#9ba6b1);border-style:dashed}';
+  st.textContent = '.mm-gate{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);font-family:var(--font-mono,monospace)}.mm-gate[hidden]{display:none}.mm-gate__card{position:relative;background:var(--term-bg-raised,#0d1014);border:1px solid var(--term-border-strong,#2a3138);border-radius:var(--radius-md,10px);padding:1.1rem 1.25rem 1.15rem;width:100%;max-width:24rem;display:flex;flex-direction:column;gap:.7rem}.mm-gate__title{font-size:.9rem;color:var(--accent,#6ef3c5)}.mm-gate__strip{display:flex;flex-direction:column}.mm-gate__strip:empty{display:none}.mm-gate__strip .es{border-bottom:0;padding:.2rem 0 .3rem}.mm-gate__detail{font-size:.75rem;color:var(--term-muted,#9ba6b1);display:flex;flex-direction:column;gap:.45rem}.mm-gate__detail:empty{display:none}.mm-gate__hint-line{font-size:.72rem;color:var(--term-subtle,var(--term-muted,#9ba6b1));line-height:1.5}.mm-gate__hint-line[hidden]{display:none}.mm-gate__actions{display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem}.mm-gate__actions[hidden]{display:none}.mm-gate__actions--row{flex-direction:row;align-items:stretch}.mm-gate__actions--row .mm-gate__btn{flex:1 1 auto;align-items:center;justify-content:center;text-align:center;line-height:1.35;padding:.55rem .7rem}.mm-gate__actions--row .mm-gate__btn--stop{flex:0 0 auto;min-width:5.5rem}.mm-gate__btn{font:inherit;font-size:.8rem;text-align:left;background:var(--term-bg,#0a0d10);border:1px solid var(--term-border-strong,#2a3138);color:var(--term-fg-strong,#e6edf3);padding:.6rem .8rem;border-radius:var(--radius-sm,8px);cursor:pointer;display:flex;justify-content:space-between;gap:1rem}.mm-gate__btn:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}.mm-gate__btn-size{color:var(--term-muted,#9ba6b1);font-size:.78rem}.mm-gate__btn--stop{color:var(--syn-pink,#f472b6);border-color:rgba(244,114,182,.5)}.mm-gate__btn--stop:hover{border-color:var(--syn-pink,#f472b6);color:var(--syn-pink,#f472b6)}.mm-gate__pitch{color:var(--term-fg-strong,#e6edf3)}.mm-gate__sample{color:var(--term-muted,#9ba6b1);font-style:italic}.mm-gate__hint{color:var(--term-muted,#9ba6b1)}.mm-gate__btn--ghost{justify-content:center;color:var(--term-muted,#9ba6b1);border-style:dashed}.mm-gate__btn:focus{outline:2px solid var(--accent,#6ef3c5);outline-offset:2px}';
   document.head.appendChild(st);
 }
 
@@ -88,7 +129,7 @@ function overlay() {
   card.append(title, strip, detail, hint, actions);
   el.appendChild(card);
   document.body.appendChild(el);
-  gateStrip = createActivityStrip(strip, { panel: false });
+  gateStrip = createActivityStrip(strip, { panel: false, announce: false });
   return el;
 }
 
@@ -158,13 +199,16 @@ function showCheck(candidate, ctl, cached) {
   actions.classList.add('mm-gate__actions--row');
   actions.hidden = false;
   const dismiss = () => { ctl.background(); };
-  actions.appendChild(button(t('continueBg'), 'mm-gate__btn--ghost', dismiss));
+  const primary = button(t('continueBg'), 'mm-gate__btn--ghost', dismiss);
+  actions.appendChild(primary);
   actions.appendChild(button(t('stop'), 'mm-gate__btn--stop', () => ctl.stop()));
   el.hidden = false;
-  return trapFocus(el, actions, dismiss);
+  const release = trapFocus(el, actions, dismiss);
+  primary.focus();
+  return release;
 }
 
-function offerChoice(choices, titleText, detailNodes, labelFor) {
+function offerChoice(choices, titleText, detailNodes, labelFor, focusId) {
   const el = overlay();
   setTitle(el, titleText);
   setHint(el, '');
@@ -186,6 +230,7 @@ function offerChoice(choices, titleText, detailNodes, labelFor) {
       resolve(id);
     };
     release = trapFocus(el, actions, () => finish('postpone'));
+    let focusBtn = null;
     choices.forEach((id) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -198,21 +243,23 @@ function offerChoice(choices, titleText, detailNodes, labelFor) {
       b.append(nm, sz);
       b.addEventListener('click', () => finish(id));
       actions.appendChild(b);
+      if (id === focusId) focusBtn = b;
     });
     actions.appendChild(button(t('chooseNotNow'), 'mm-gate__btn--ghost', () => finish('postpone')));
-    const firstBtn = actions.querySelector('button');
-    if (firstBtn) firstBtn.focus();
+    const target = focusBtn || actions.querySelector('button');
+    if (target) target.focus();
   });
 }
 
 function span(cls, text) { const s = document.createElement('span'); s.className = cls; s.textContent = text; return s; }
 
 function offerTiers(choices) {
+  const pref = Tiers.getUserTier();
   return offerChoice(choices, t('chooseTitle'), [
     span('mm-gate__pitch', t('choosePitch')),
     span('mm-gate__sample', t('chooseSample')),
     span('mm-gate__hint', t('chooseHint', { name: tierName(choices[0]) }))
-  ]);
+  ], null, choices.indexOf(pref) >= 0 ? pref : choices[choices.length - 1]);
 }
 
 async function tierChoices() {
@@ -258,6 +305,27 @@ async function validateRun(engine, candidate) {
   }
 }
 
+async function adapterCached(url) {
+  try {
+    const c = await caches.open('mentria-models');
+    const sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return !!((await c.match(url + sep + 'mentria_seg=meta')) || (await c.match(url)));
+  } catch (_) { return false; }
+}
+
+function trackAdapters(engine) {
+  if (!engine || typeof engine.swapAdapter !== 'function') return () => null;
+  const swapAdapter = engine.swapAdapter.bind(engine);
+  let current = null;
+  engine.swapAdapter = async (spec) => {
+    if (!spec || !spec.weightsUrl) return swapAdapter(spec);
+    const tag = { name: spec.name || '', cached: await adapterCached(String(spec.weightsUrl)) };
+    current = tag;
+    try { return await swapAdapter(spec); } finally { if (current === tag) current = null; }
+  };
+  return () => current;
+}
+
 function requestPersistentStorage() {
   try {
     if (window.MentriaStore && window.MentriaStore.requestPersist) { window.MentriaStore.requestPersist(); return; }
@@ -273,9 +341,11 @@ export async function ensureModel(engineFactory, opts) {
   const onTier = typeof opts.onTier === 'function' ? opts.onTier : null;
   const tellTier = (id, cached) => { if (onTier) { try { onTier(Object.assign(tierInfo(Tiers.TIERS[id], id), { cached: !!cached }), id); } catch (_) {} } };
   const offerUpgrade = !!opts.offerUpgrade;
+  const choose = !!opts.choose;
   const cachedOnly = !!opts.cachedOnly;
 
   if (typeof navigator === 'undefined' || !navigator.gpu) throw new NoWebGpuError();
+  await i18nReady(2500);
 
   let stopped = false;
   let lastEngine = null;
@@ -283,7 +353,13 @@ export async function ensureModel(engineFactory, opts) {
     if (stopped) throw new Error('stopped');
     const e = engineFactory();
     lastEngine = e;
-    e.onProgress = (p) => { if (gateStrip) gateStrip.onProgress(p); if (onProgress) onProgress(p); };
+    const swapping = trackAdapters(e);
+    e.onProgress = (p) => {
+      const tag = p && (p.stage === 'download' || p.stage === 'upload') ? swapping() : null;
+      if (tag) p = Object.assign({}, p, { adapter: tag });
+      else if (gateStrip) gateStrip.onProgress(p);
+      if (onProgress) onProgress(p);
+    };
     return e;
   };
 
@@ -305,11 +381,11 @@ export async function ensureModel(engineFactory, opts) {
     const c = await Tiers.effectiveTier({ cachedOnly: true });
     if (!c) throw new Error('model-not-cached');
     tellTier(c, true);
-    const res = await Tiers.loadWithFallback(makeEngine, c, { vision, onFallback: (from, to) => tellTier(to, true) });
-    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
+    const res = await Tiers.loadWithFallback(makeEngine, c, { vision, onlyCached: true, onFallback: (from, to) => tellTier(to, true) });
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq, decodeRoute: res.decodeRoute || null };
   }
 
-  if (offerUpgrade && !Tiers.getUserTier()) {
+  if (offerUpgrade && (choose || !Tiers.getUserTier())) {
     const choices = await tierChoices();
     if (choices.length > 1) {
       const pick = await offerTiers(choices);
@@ -331,7 +407,7 @@ export async function ensureModel(engineFactory, opts) {
     requestPersistentStorage();
     const res = await Tiers.loadWithFallback(makeEngine, candidate, { vision, onFallback: (from, to) => { Tiers.isTierCached(to).then((c) => tellTier(to, c), () => tellTier(to, false)); } });
     if (res.tier !== candidate) Tiers.clearValidatedTier();
-    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq, decodeRoute: res.decodeRoute || null };
   }
 
   let stopReject = null;
@@ -346,11 +422,11 @@ export async function ensureModel(engineFactory, opts) {
       stopReject(new Error('stopped'));
     }
   };
-  release = showCheck(candidate, ctl, cached);
   if (!cached && typeof window.mentriaConfirmHeavyDownload === 'function') {
     const ok = await window.mentriaConfirmHeavyDownload();
-    if (!ok) { release(); hide(); throw new Error('download-postponed'); }
+    if (!ok) { hide(); throw new Error('download-postponed'); }
   }
+  release = showCheck(candidate, ctl, cached);
   requestPersistentStorage();
   try {
     const P2P = await import('/assets/js/mentria-p2p-models.js');
@@ -365,6 +441,7 @@ export async function ensureModel(engineFactory, opts) {
     const res = await Promise.race([
       Tiers.loadWithFallback(makeEngine, candidate, {
         vision,
+        aborted: () => stopped,
         validate: (engine) => validateRun(engine, candidate),
         onFallback: (from, to) => {
           const el = document.getElementById('mm-gate');
@@ -386,7 +463,7 @@ export async function ensureModel(engineFactory, opts) {
       await new Promise((r) => setTimeout(r, READY_LINGER));
     } else if (gateStrip) gateStrip.hide();
     hide();
-    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq };
+    return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq, decodeRoute: res.decodeRoute || null };
   } catch (e) {
     release();
     try { lastEngine && lastEngine.terminate && lastEngine.terminate(); } catch (_) {}
@@ -394,14 +471,15 @@ export async function ensureModel(engineFactory, opts) {
     if (el) el.hidden = false;
     const smaller = await smallerChoices(candidate);
     const wasStopped = stopped || (e && e.message === 'stopped');
+    const later = !smaller.length;
     const nodes = wasStopped
-      ? [span('mm-gate__hint', t('stoppedHint'))]
-      : [span('mm-gate__pitch', String(e && e.message || t('failed'))), span('mm-gate__hint', t('failedHint'))];
+      ? [span('mm-gate__hint', t(later ? 'stoppedHintLater' : 'stoppedHint'))]
+      : [span('mm-gate__pitch', String(e && e.message || t('failed'))), span('mm-gate__hint', t(later ? 'failedHintLater' : 'failedHint'))];
     const pick = await offerChoice(smaller, wasStopped ? t('stoppedTitle') : t('failedTitle', { name: tierName(candidate) }), nodes, (id) => t('tryTier', { name: tierName(id) }));
     if (pick && pick !== 'postpone') {
       Tiers.setUserTier(pick);
       hide();
-      return ensureModel(engineFactory, opts);
+      return ensureModel(engineFactory, Object.assign({}, opts, { choose: false }));
     }
     hide();
     throw wasStopped ? new Error('download-postponed') : e;

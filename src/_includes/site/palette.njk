@@ -1,0 +1,50 @@
+      window.MENTRIA_PALETTE_DATA = {
+        locale: {{ (lang | default('en')) | dump | safe }},
+        prefix: {{ localePrefix | dump | safe }},
+        tools: [
+          {%- for tool in tools %}
+          { slug: {{ tool.slug | dump | safe }}, title: {{ (("tools." + tool.slug + ".title") | t) | dump | safe }}, category: {{ (("category." + tool.category) | t) | dump | safe }}{% if tool.group %}, group: {{ (("home.launcher." + (tool.group | lower)) | t) | dump | safe }}{% endif %}, keywords: {{ (("tools." + tool.slug + ".lede") | t) | dump | safe }}{% if tool.url %}, url: {{ tool.url | dump | safe }}{% endif %}{% if tool.requires %}, requires: {{ tool.requires | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
+          {%- endfor %}
+        ],
+        gallery: [
+          {%- for ext in extensions %}
+          { id: {{ ext.id | dump | safe }}, title: {{ ext.name | dump | safe }}, keywords: {{ (("tool.ext_gallery.desc." + ext.id) | t) | dump | safe }}{% if ext.schemaCategory == "GameApplication" %}, group: {{ ("home.launcher.games" | t) | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
+          {%- endfor %}
+        ],
+        extCmds: {
+          {%- for ext in extensions %}{% if ext.manifest.mounts and ext.manifest.mounts.commands %}{% for c in ext.manifest.mounts.commands %}{% set cmdKey = "tool.ext_gallery.cmd." + ext.id + "." + c.name %}{% if cmdKey | hasKey %}
+          {{ (ext.id + " " + c.name) | dump | safe }}: {{ (cmdKey | t) | dump | safe }},
+          {%- endif %}{% endfor %}{% endif %}{% endfor %}
+        },
+        nav: [
+          { id: "home", title: {{ ("nav.home" | t) | dump | safe }}, href: "/" },
+          { id: "tools", title: {{ ("nav.tools" | t) | dump | safe }}, href: "/tools/" },
+          { id: "learn", title: {{ ("learn.title" | t) | dump | safe }}, href: "/learn/" },
+          { id: "about", title: {{ ("about.title" | t) | dump | safe }}, href: "/about/" }
+        ],
+        labels: {
+          placeholder: {{ ("palette.placeholder" | t) | dump | safe }},
+          listLabel: {{ ("palette.list_label" | t) | dump | safe }},
+          noResults: {{ ("palette.no_results" | t) | dump | safe }},
+          recents: {{ ("palette.recents" | t) | dump | safe }},
+          pages: {{ ("palette.pages" | t) | dump | safe }},
+          extensions: {{ ("palette.extensions" | t) | dump | safe }},
+          extKind: {{ ("store.kind" | t) | dump | safe }},
+          actions: {{ ("palette.actions" | t) | dump | safe }},
+          actNote: {{ ("palette.act_note" | t) | dump | safe }},
+          actNoteDone: {{ ("palette.act_note_done" | t) | dump | safe }},
+          actNoteFail: {{ ("palette.act_note_fail" | t) | dump | safe }},
+          actTimer: {{ ("palette.act_timer" | t) | dump | safe }},
+          actNoteNew: {{ ("palette.act_note_new" | t) | dump | safe }},
+          actTimerNew: {{ ("palette.act_timer_new" | t) | dump | safe }},
+          actFlip: {{ ("palette.act_flip" | t) | dump | safe }},
+          actHeads: {{ ("palette.act_heads" | t) | dump | safe }},
+          actTails: {{ ("palette.act_tails" | t) | dump | safe }},
+          kwNote: {{ ("palette.kw_note" | t) | dump | safe }},
+          kwTimer: {{ ("palette.kw_timer" | t) | dump | safe }},
+          kwFlip: {{ ("palette.kw_flip" | t) | dump | safe }},
+          hintNote: {{ ("palette.hint_note" | t) | dump | safe }},
+          hintTimer: {{ ("palette.hint_timer" | t) | dump | safe }},
+          searchSite: {{ ("palette.search_site" | t) | dump | safe }}
+        }
+      };

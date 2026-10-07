@@ -20,7 +20,7 @@ function strongTerms(deck, code) {
       if (term) seen.add(term);
     }
   }
-  return Array.from(seen).join(" ").slice(0, 280);
+  return Array.from(seen).join(" ").slice(0, 280).replace(/[\uD800-\uDBFF]$/, "");
 }
 
 function deckItem(deck, kind, loc) {
@@ -28,7 +28,8 @@ function deckItem(deck, kind, loc) {
     .map(slide => locText(slide.caption, loc.code))
     .filter(Boolean)
     .join(" ")
-    .slice(0, 320);
+    .slice(0, 320)
+    .replace(/[\uD800-\uDBFF]$/, "");
   return {
     type: "post",
     lang: loc.code,
@@ -42,11 +43,13 @@ function deckItem(deck, kind, loc) {
 }
 
 module.exports = function () {
-  const items = [];
+  const byLang = {};
   for (const loc of locales) {
+    const items = [];
     for (const deck of deepcuts) items.push(deckItem(deck, "deepcuts", loc));
     for (const deck of source) items.push(deckItem(deck, "source", loc));
     for (const deck of stories) items.push(deckItem(deck, "story", loc));
+    byLang[loc.code] = items;
   }
-  return items;
+  return byLang;
 };

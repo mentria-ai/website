@@ -9,15 +9,17 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.step-counter.title' | t }}"
   description: "{{ 'tools.step-counter.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">step-counter</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">step-counter</span></p>
   <h1>{{ "tools.step-counter.title" | t }}</h1>
   <p>{{ "tools.step-counter.lede" | t }}</p>
   {% include "tldr.njk" %}
 </section>
 
 {% set terminalTitle = "step-counter.js" %}
+{% set terminalMini = "steps" %}
 {% include "terminal-frame-open.njk" %}
 <section class="sc" id="sc">
 
@@ -232,10 +234,21 @@ eleventyComputed:
     return s;
   }
 
+  let saveTimer = null;
   function persist() {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
     if (window.MentriaStore) window.MentriaStore.set('tools', 'step_counter', state);
     else try { localStorage.setItem(LS, JSON.stringify(state)); } catch (_) {}
   }
+
+  function persistSoon() {
+    if (saveTimer) return;
+    saveTimer = setTimeout(persist, 2000);
+  }
+  function flushSave() {
+    if (saveTimer) persist();
+  }
+  window.addEventListener('pagehide', flushSave);
 
   function rolloverIfNeeded() {
     const key = todayKey();
@@ -310,7 +323,14 @@ eleventyComputed:
     distEl.textContent = fmtDistance(total);
   }
 
+  let historyTimer = null;
+  function renderHistorySoon() {
+    if (historyTimer) return;
+    historyTimer = setTimeout(renderHistory, 5000);
+  }
+
   function renderHistory() {
+    if (historyTimer) { clearTimeout(historyTimer); historyTimer = null; }
     const days = [];
     const now = new Date();
     for (let i = 6; i >= 0; i--) {
@@ -319,7 +339,7 @@ eleventyComputed:
       const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       const steps = key === state.date ? state.steps : (state.history[key] || 0);
       const est = key === state.date ? state.estSteps : (state.estHistory[key] || 0);
-      days.push({ key, steps, est, label: d.toLocaleDateString(LANG, { weekday: 'short' }).slice(0, 2) });
+      days.push({ key, steps, est, label: d.toLocaleDateString(LANG, { weekday: 'short' }).replace(/\.$/, '') });
     }
     const max = Math.max(state.goal, ...days.map(d => d.steps + d.est), 1);
     barsEl.innerHTML = '';
@@ -407,11 +427,13 @@ eleventyComputed:
     const now = Date.now();
     stepTimes.push(now);
     if (stepTimes.length > 240) stepTimes.shift();
+    const reached = wasUnderGoal && state.steps + state.estSteps >= state.goal;
     renderCount();
-    renderHistory();
-    persist();
+    if (reached) renderHistory();
+    else renderHistorySoon();
+    persistSoon();
     if (pocketOn) renderPocket();
-    if (wasUnderGoal && state.steps + state.estSteps >= state.goal && navigator.vibrate) {
+    if (reached && navigator.vibrate) {
       navigator.vibrate([120, 60, 120, 60, 200]);
     }
   }
@@ -481,6 +503,7 @@ eleventyComputed:
   }
 
   function stopTracking(silent) {
+    flushSave();
     running = false;
     sessionElapsed += sessionStart ? Date.now() - sessionStart : 0;
     sessionStart = 0;
@@ -499,6 +522,14 @@ eleventyComputed:
     if (gapConfirmTimer) { clearTimeout(gapConfirmTimer); gapConfirmTimer = null; }
   }
 
+  function askMotion() {
+    return new Promise((resolve) => resolve(DeviceMotionEvent.requestPermission())).then((res) => {
+      state.motionGranted = res === 'granted';
+      persist();
+      return res;
+    });
+  }
+
   async function start() {
     if (!window.isSecureContext) {
       showPanel('insecure');
@@ -509,7 +540,11 @@ eleventyComputed:
       return;
     }
     if (typeof DeviceMotionEvent.requestPermission === 'function') {
-      showPanel('perm');
+      if (state.motionGranted) {
+        askMotion().then((res) => { if (res === 'granted') beginTracking(); else showPanel('denied'); }, () => showPanel('perm'));
+        return;
+      }
+      MentriaUI.sensorsGranted(['accelerometer']).then((ok) => { if (ok) beginTracking(); else showPanel('perm'); });
       return;
     }
     beginTracking();
@@ -531,7 +566,7 @@ eleventyComputed:
 
   permBtn.addEventListener('click', async () => {
     try {
-      const res = await DeviceMotionEvent.requestPermission();
+      const res = await askMotion();
       if (res === 'granted') {
         showPanel(null);
         beginTracking();
@@ -557,7 +592,7 @@ eleventyComputed:
     renderSettings();
   });
   resetBtn.addEventListener('click', async () => {
-    if (!(await mentriaConfirm(COPY.confirmReset))) return;
+    if (!(await mentriaConfirm(COPY.confirmReset, { danger: true }))) return;
     state.steps = 0;
     state.estSteps = 0;
     stepTimes = [];
@@ -609,6 +644,7 @@ eleventyComputed:
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') {
+      flushSave();
       markGapStart();
       return;
     }
@@ -695,9 +731,50 @@ eleventyComputed:
   pocketEl.addEventListener('contextmenu', e => e.preventDefault());
   pocketEl.addEventListener('selectstart', e => e.preventDefault());
 
+  const miniDot = document.querySelector('[data-mini="steps"]');
+  if (miniDot) miniDot.addEventListener('click', () => {
+    if (!window.MentriaMini) return;
+    if (!running) { window.MentriaMini.minimizeTool(); return; }
+    stopTracking(false);
+    window.MentriaMini.start('steps', location.pathname);
+    window.MentriaMini.leave();
+  });
+
+  function takeMiniSession() {
+    const store = window.MentriaStore;
+    const minis = store && store.get('ui', 'mini');
+    if (!minis || typeof minis !== 'object') return false;
+    if (minis.kind === 'steps') { store.remove('ui', 'mini'); return true; }
+    if (!minis.steps) return false;
+    delete minis.steps;
+    if (minis.timer) store.set('ui', 'mini', minis);
+    else store.remove('ui', 'mini');
+    return true;
+  }
+
+  function resumeFromMini() {
+    if (!takeMiniSession() || running) return;
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function' && window.isSecureContext) {
+      askMotion()
+        .then((res) => { if (res === 'granted') { showPanel(null); beginTracking(); } else start(); })
+        .catch(() => start());
+      return;
+    }
+    start();
+  }
+
   renderCount();
   renderHistory();
   renderSettings();
+  resumeFromMini();
+
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    Object.assign(state, loadState());
+    renderCount();
+    renderHistory();
+    resumeFromMini();
+  });
 })();
 </script>
 
@@ -708,6 +785,7 @@ eleventyComputed:
   align-items: center;
   gap: var(--space-5);
   font-family: var(--font-mono);
+  width: 100%;
   max-width: 480px;
   margin: 0 auto;
   padding: var(--space-2) 0 var(--space-4);

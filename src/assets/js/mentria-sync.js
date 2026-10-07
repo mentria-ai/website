@@ -69,7 +69,11 @@ const deriveFromCode = async (codeRaw) => {
   return { roomId, key };
 };
 
-const b64Encode = (bytes) => btoa(String.fromCharCode.apply(null, bytes));
+const b64Encode = (bytes) => {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
 const b64Decode = (s) => {
   const bin = atob(s);
   const out = new Uint8Array(bin.length);
@@ -112,6 +116,9 @@ const getIce = async () => {
 };
 
 const RESCUE_KEY = 'mentria-sync-rescue';
+const RESCUE_MS = 14 * 24 * 3600 * 1000;
+const VAULTS = ['totp.vault', 'identity.vault'];
+const HELLO_FALLBACK_MS = 4000;
 
 const state = {
   status: 'idle',
@@ -123,7 +130,17 @@ const state = {
   peers: new Set(),
   isInitiator: false,
   applyApproved: false,
+  approval: null,
   syncedSinceConnect: 0,
+  partner: null,
+  exchanged: false,
+  joinTimer: 0,
+  helloTimer: 0,
+  refused: false,
+  snapshotSent: false,
+  vaultChoice: {},
+  vaultLinked: new Set(),
+  vaultKept: new Set(),
   listeners: { state: [], error: [], synced: [] }
 };
 
@@ -138,16 +155,36 @@ const setStatus = (status) => {
   emit('state', { status, code: state.code, peers: state.peers.size, syncedSinceConnect: state.syncedSinceConnect });
 };
 
-const CONFIRM_FALLBACK = 'This device already has data for: {areas}. Pairing will replace it with the other device’s copy — a rescue copy is saved on this device. Continue?';
+const CONFIRM_FALLBACK = 'This device already has its own {areas}. Pairing replaces them with the other device’s copy. Continue?';
+const JOIN_TIMEOUT_MS = 25000;
 
-const confirmReplaceText = (areas) => {
-  let s = CONFIRM_FALLBACK;
-  try {
-    const v = window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t('about.sync_confirm_replace');
-    if (v) s = v;
-  } catch (_) {}
-  return s.replace('{areas}', areas);
+const areaList = (suffixes) => {
+  try { return window.MentriaStore.areaNames(suffixes).join(', '); } catch (_) { return Array.from(new Set(suffixes.map((k) => k.split('.')[0]))).join(', '); }
 };
+
+const sendToPartner = (payload) => {
+  if (!state.action) return;
+  if (state.partner) state.action.send(payload, state.partner);
+  else state.action.send(payload);
+};
+
+const COPY_FALLBACK = {
+  'about.sync_vault_totp': 'This device has its own TOTP vault, and the other device has a different one. Replace this device’s vault with the other device’s? TOTP accounts that are only on this device will be lost, and the other device’s passphrase will unlock it.',
+  'about.sync_vault_identity': 'This device has its own Mentria identity, and the other device has a different one. Replace it with the other device’s? This device’s identity will be lost, and the other device’s passphrase will unlock it.',
+  'about.sync_vault_keep': 'Keep this device’s',
+  'about.sync_vault_replace': 'Replace'
+};
+
+const copyText = (key, fallback) => {
+  try {
+    const v = window.MentriaI18n && window.MentriaI18n.t && window.MentriaI18n.t(key);
+    if (typeof v === 'string' && v && v !== key) return v;
+  } catch (_) {}
+  const pre = window.MentriaSyncCopy && window.MentriaSyncCopy[key];
+  return typeof pre === 'string' && pre ? pre : (fallback || COPY_FALLBACK[key] || '');
+};
+
+const confirmReplaceText = (areas) => copyText('about.sync_confirm_replace', CONFIRM_FALLBACK).replace('{areas}', areas);
 
 const collectConflicts = (payload) => {
   const local = window.MentriaStore.exportAll();
@@ -163,14 +200,130 @@ const collectConflicts = (payload) => {
   return conflicts;
 };
 
-const saveRescue = () => {
-  try { localStorage.setItem(RESCUE_KEY, JSON.stringify(window.MentriaStore.exportAll())); } catch (_) {}
+const STORE_PREFIX = 'mentria.store.';
+const META_PREFIX = 'mentria.meta.';
+
+const isVault = (suffix) => VAULTS.indexOf(suffix) >= 0;
+
+const vaultId = (suffix, value) => {
+  const v = (typeof value === 'string') ? parseRaw(value) : value;
+  if (!v || typeof v !== 'object') return null;
+  if (suffix === 'identity.vault') return typeof v.kcv === 'string' && v.kcv ? v.kcv : null;
+  if (suffix === 'totp.vault') return v.pass && typeof v.pass.salt === 'string' && typeof v.pass.wrap === 'string' ? v.pass.salt + '.' + v.pass.wrap : null;
+  return null;
+};
+
+const sameVault = (suffix, a, b) => {
+  const x = vaultId(suffix, a);
+  return !!x && x === vaultId(suffix, b);
+};
+
+const readRescue = () => {
+  let rec = null;
+  try { rec = JSON.parse(localStorage.getItem(RESCUE_KEY) || 'null'); } catch (_) { rec = null; }
+  if (rec && typeof rec === 'object' && rec.v !== 2) {
+    const store = (rec.store && typeof rec.store === 'object') ? rec.store : {};
+    const entries = {};
+    VAULTS.forEach((suffix) => {
+      if (typeof store[suffix] !== 'string') return;
+      let now = null;
+      try { now = localStorage.getItem(STORE_PREFIX + suffix); } catch (_) {}
+      if (now == null || sameVault(suffix, now, store[suffix])) return;
+      entries[suffix] = { raw: store[suffix], meta: null };
+    });
+    const at = Date.parse(rec.exportedAt);
+    rec = { v: 2, at: isFinite(at) ? at : 0, entries };
+  }
+  const fresh = rec && typeof rec === 'object' && typeof rec.at === 'number' && Date.now() - rec.at < RESCUE_MS;
+  if (!fresh) {
+    try { if (localStorage.getItem(RESCUE_KEY) != null) localStorage.removeItem(RESCUE_KEY); } catch (_) {}
+    return null;
+  }
+  if (!rec.entries || typeof rec.entries !== 'object' || !Object.keys(rec.entries).length) return null;
+  return rec;
+};
+
+const saveRescue = (suffixes) => {
+  const list = (suffixes || []).filter((s) => typeof s === 'string' && s);
+  if (!list.length) return;
+  try {
+    const rec = readRescue() || { v: 2, at: 0, entries: {} };
+    let added = 0;
+    list.forEach((suffix) => {
+      if (rec.entries[suffix]) return;
+      const raw = localStorage.getItem(STORE_PREFIX + suffix);
+      if (raw == null) return;
+      rec.entries[suffix] = { raw, meta: localStorage.getItem(META_PREFIX + suffix) };
+      added++;
+    });
+    if (!added && rec.at) return;
+    rec.at = Date.now();
+    if (Object.keys(rec.entries).length) localStorage.setItem(RESCUE_KEY, JSON.stringify(rec));
+  } catch (_) {}
+};
+
+const rescueInfo = () => {
+  const rec = readRescue();
+  if (!rec) return null;
+  return { at: rec.at, until: rec.at + RESCUE_MS, suffixes: Object.keys(rec.entries) };
 };
 
 const restoreRescue = () => {
-  const raw = localStorage.getItem(RESCUE_KEY);
-  if (!raw) return null;
-  return window.MentriaStore.importAll(JSON.parse(raw), { mode: 'replace' });
+  const rec = readRescue();
+  if (!rec) return null;
+  let restored = 0;
+  Object.keys(rec.entries).forEach((suffix) => {
+    const e = rec.entries[suffix];
+    if (!e || typeof e.raw !== 'string') return;
+    const { ns, key } = splitSuffix(suffix);
+    let mtime = null;
+    try { const m = JSON.parse(e.meta || 'null'); if (m && typeof m.m === 'number') mtime = m.m; } catch (_) {}
+    if (window.MentriaStore.set(ns, key, parseRaw(e.raw), { remote: true, mtime: mtime != null ? mtime : Date.now() })) restored++;
+    state.vaultLinked.delete(suffix);
+    if (isVault(suffix)) state.vaultKept.add(suffix);
+  });
+  try { localStorage.removeItem(RESCUE_KEY); } catch (_) {}
+  return { restored };
+};
+
+const approveReplace = (suffixes) => {
+  if (!state.approval) {
+    const decision = new Promise((resolve) => {
+      resolve(typeof window.mentriaConfirm === 'function' ? window.mentriaConfirm(confirmReplaceText(areaList(suffixes)), { danger: true }) : false);
+    }).catch(() => false).then((ok) => {
+      if (ok && state.approval === decision) state.applyApproved = true;
+      return !!ok;
+    });
+    state.approval = decision;
+  }
+  return state.approval;
+};
+
+const approveVault = (suffix) => {
+  if (!state.vaultChoice[suffix]) {
+    const text = copyText(suffix === 'totp.vault' ? 'about.sync_vault_totp' : 'about.sync_vault_identity');
+    state.vaultChoice[suffix] = new Promise((resolve) => {
+      resolve(typeof window.mentriaConfirm === 'function'
+        ? window.mentriaConfirm(text, { danger: true, ok: copyText('about.sync_vault_replace'), cancel: copyText('about.sync_vault_keep') })
+        : false);
+    }).catch(() => false).then((ok) => !!ok);
+  }
+  return state.vaultChoice[suffix];
+};
+
+const sendVaultChoice = async (suffix, keep) => {
+  if (!state.action || !state.key) return;
+  try { sendToPartner(await encryptPayload(state.key, { op: 'vault', suffix, keep: !!keep })); } catch (_) {}
+};
+
+const vaultFollows = (suffix, incoming) => {
+  if (state.vaultKept.has(suffix)) return false;
+  let local = null;
+  try { local = localStorage.getItem(STORE_PREFIX + suffix); } catch (_) {}
+  if (local == null) return true;
+  if (state.vaultLinked.has(suffix)) return true;
+  if (state.vaultChoice[suffix]) return false;
+  return incoming !== undefined && sameVault(suffix, local, incoming);
 };
 
 const TOMB_KEY = 'mentria-sync-tombstones';
@@ -205,48 +358,6 @@ const recordTomb = (ns, key, mtime) => {
   }
 };
 
-const clearTomb = (ns, key) => {
-  const tombs = loadTombs();
-  const suffix = ns + '.' + key;
-  if (suffix in tombs) {
-    delete tombs[suffix];
-    saveTombs(tombs);
-  }
-};
-
-const tombListener = (event) => {
-  const d = event.detail || {};
-  if (!d.ns || !d.key) return;
-  if (d.op === 'remove') {
-    if (d.remote) return;
-    recordTomb(d.ns, d.key, (typeof d.mtime === 'number') ? d.mtime : Date.now());
-  } else if (d.op === 'set') {
-    clearTomb(d.ns, d.key);
-  }
-};
-
-try { window.addEventListener('mentria:write', tombListener); } catch (_) {}
-
-const maxMergeMap = (a, b, cap) => {
-  const out = {};
-  const add = (m) => {
-    if (!m || typeof m !== 'object') return;
-    Object.keys(m).forEach((k) => {
-      const v = Number(m[k]);
-      if (!isFinite(v)) return;
-      if (!(k in out) || v > out[k]) out[k] = v;
-    });
-  };
-  add(a); add(b);
-  const keys = Object.keys(out);
-  if (cap && keys.length > cap) {
-    const capped = {};
-    keys.sort((x, y) => out[y] - out[x]).slice(0, cap).forEach((k) => { capped[k] = out[k]; });
-    return capped;
-  }
-  return out;
-};
-
 const splitSuffix = (suffix) => {
   const parts = String(suffix).split('.');
   let ns = parts[0];
@@ -277,28 +388,6 @@ const buildMeta = (store) => {
   return meta;
 };
 
-const mergeNotes = (localArr, incomingArr, deletedMap) => {
-  const byId = new Map();
-  const consider = (note) => {
-    if (!note || typeof note !== 'object') return;
-    const id = note.id;
-    if (id == null) return;
-    const key = String(id);
-    const del = (deletedMap && typeof deletedMap[key] === 'number') ? deletedMap[key] : null;
-    if (del != null && del > (Number(note.updatedAt) || 0)) return;
-    const existing = byId.get(key);
-    if (!existing) { byId.set(key, note); return; }
-    const eu = Number(existing.updatedAt) || 0;
-    const nu = Number(note.updatedAt) || 0;
-    if (nu > eu) byId.set(key, note);
-  };
-  (Array.isArray(localArr) ? localArr : []).forEach(consider);
-  (Array.isArray(incomingArr) ? incomingArr : []).forEach(consider);
-  const arr = Array.from(byId.values());
-  arr.sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
-  return arr;
-};
-
 const mergePalette = (localArr, localMtime, incomingArr, incomingMtime, deletedMap) => {
   const out = [];
   const seen = new Set();
@@ -323,7 +412,7 @@ const sendBack = async (store, meta, legacy, tombs) => {
       meta,
       tombs: tombs || {}
     });
-    state.action.send(payload);
+    sendToPartner(payload);
   } catch (err) {
     emit('error', err);
   }
@@ -340,33 +429,51 @@ const mergeV2 = async (msg, isBack) => {
   const incomingTombs = (msg.tombs && typeof msg.tombs === 'object') ? msg.tombs : {};
   const summary = { applied: 0, kept: 0, merged: 0, removed: 0, flagged: [] };
 
+  const { mergeNotes, maxMergeMap } = window.MentriaStore;
   const mergedDeletedNotes = maxMergeMap(parseRaw(localStore['quick_notes.deleted']), parseRaw(incoming['quick_notes.deleted']), 200);
   const mergedDeletedColors = maxMergeMap(parseRaw(localStore['tools.color_picker_deleted']), parseRaw(incoming['tools.color_picker_deleted']), 200);
 
   const additions = [];
   const unions = [];
   const lwwReplace = [];
+  const vaultAsks = [];
   const keeps = [];
   const deletions = [];
 
   Object.keys(incoming).forEach((suffix) => {
-    const rawIn = incoming[suffix];
+    if (window.MentriaStore.isLocalOnly(suffix)) return;
+    const rawIn = window.MentriaStore.adopt(suffix, String(incoming[suffix]));
     const rawLocal = localStore[suffix];
     const { ns, key } = splitSuffix(suffix);
     const inMtime = (typeof meta[suffix] === 'number') ? meta[suffix] : null;
     const localTomb = (typeof localTombs[suffix] === 'number') ? localTombs[suffix] : null;
 
     if (localTomb != null && localTomb > ((inMtime != null) ? inMtime : -Infinity)) return;
-    if (rawLocal != null && rawLocal === String(rawIn)) return;
+    if (rawLocal != null && rawLocal === String(rawIn)) {
+      if (isVault(suffix)) state.vaultLinked.add(suffix);
+      return;
+    }
 
     if (rawLocal == null) {
       additions.push({ ns, key, raw: rawIn, mtime: inMtime });
+      if (isVault(suffix)) state.vaultLinked.add(suffix);
       return;
     }
 
     const localMtime = localMtimeOf(ns, key);
 
-    if (suffix === 'quick_notes.blob') {
+    if (isVault(suffix) && (suffix === 'totp.vault' || !sameVault(suffix, rawLocal, rawIn))) {
+      if (state.vaultKept.has(suffix)) {
+        keeps.push(suffix); summary.kept++;
+      } else if (inMtime != null && localMtime != null && inMtime > localMtime) {
+        vaultAsks.push({ suffix, ns, key, raw: rawIn, mtime: inMtime });
+      } else {
+        keeps.push(suffix); summary.kept++; summary.flagged.push(suffix);
+      }
+      return;
+    }
+
+    if (suffix === 'quick_notes.blob' || suffix === 'quick_notes.inbox') {
       unions.push({ suffix, ns, key, value: mergeNotes(parseRaw(rawLocal), parseRaw(rawIn), mergedDeletedNotes) });
       return;
     }
@@ -376,14 +483,6 @@ const mergeV2 = async (msg, isBack) => {
     }
     if (suffix === 'quick_notes.deleted' || suffix === 'tools.color_picker_deleted') {
       unions.push({ suffix, ns, key, value: maxMergeMap(parseRaw(rawLocal), parseRaw(rawIn), 200) });
-      return;
-    }
-    if (suffix === 'totp.vault') {
-      if (inMtime != null && localMtime != null && inMtime > localMtime) {
-        lwwReplace.push({ suffix, ns, key, raw: rawIn, mtime: inMtime });
-      } else {
-        keeps.push(suffix); summary.kept++; summary.flagged.push(suffix);
-      }
       return;
     }
 
@@ -399,32 +498,42 @@ const mergeV2 = async (msg, isBack) => {
 
   Object.keys(incomingTombs).forEach((suffix) => {
     const tm = Number(incomingTombs[suffix]);
-    if (!isFinite(tm)) return;
+    if (!isFinite(tm) || window.MentriaStore.isLocalOnly(suffix)) return;
     const { ns, key } = splitSuffix(suffix);
     const rawLocal = localStore[suffix];
     if (rawLocal != null) {
+      if (isVault(suffix) && !state.vaultLinked.has(suffix)) return;
       const localMtime = localMtimeOf(ns, key);
-      if (localMtime == null || tm > localMtime) deletions.push({ ns, key, mtime: tm });
+      if (localMtime == null || tm > localMtime) deletions.push({ suffix, ns, key, mtime: tm });
     } else {
       recordTomb(ns, key, tm);
     }
   });
 
   if (lwwReplace.length && !state.applyApproved) {
-    const areas = Array.from(new Set(lwwReplace.map((x) => x.suffix.split('.')[0]))).join(', ');
-    const ok = typeof window.mentriaConfirm === 'function'
-      ? await window.mentriaConfirm(confirmReplaceText(areas))
-      : false;
+    const ok = await approveReplace(lwwReplace.map((x) => x.suffix));
     if (!ok) {
       lwwReplace.forEach((x) => { keeps.push(x.suffix); summary.kept++; });
       lwwReplace.length = 0;
-    } else {
-      state.applyApproved = true;
-      saveRescue();
     }
   }
 
-  if (deletions.length) saveRescue();
+  const vaultReplace = [];
+  for (const v of vaultAsks) {
+    const ok = await approveVault(v.suffix);
+    if (ok) {
+      vaultReplace.push(v);
+      state.vaultLinked.add(v.suffix);
+      state.vaultKept.delete(v.suffix);
+    } else {
+      keeps.push(v.suffix); summary.kept++;
+      state.vaultKept.add(v.suffix);
+      state.vaultLinked.delete(v.suffix);
+    }
+    sendVaultChoice(v.suffix, !ok);
+  }
+
+  saveRescue(lwwReplace.concat(vaultReplace, deletions).map((x) => x.suffix));
 
   additions.forEach((a) => {
     window.MentriaStore.set(a.ns, a.key, parseRaw(a.raw), { mtime: a.mtime != null ? a.mtime : Date.now(), remote: true });
@@ -434,7 +543,7 @@ const mergeV2 = async (msg, isBack) => {
     window.MentriaStore.set(u.ns, u.key, u.value, { mtime: Date.now(), remote: true });
     summary.merged++;
   });
-  lwwReplace.forEach((l) => {
+  lwwReplace.concat(vaultReplace).forEach((l) => {
     window.MentriaStore.set(l.ns, l.key, parseRaw(l.raw), { mtime: l.mtime != null ? l.mtime : Date.now(), remote: true });
     summary.applied++;
   });
@@ -445,7 +554,7 @@ const mergeV2 = async (msg, isBack) => {
   });
 
   Object.keys(incomingLegacy).forEach((k) => {
-    if (typeof k !== 'string' || k.indexOf('mentria_') !== 0) return;
+    if (typeof k !== 'string' || k.indexOf('mentria_') !== 0 || window.MentriaStore.isLocalLegacy(k)) return;
     try {
       if (window.localStorage.getItem(k) != null) return;
       window.localStorage.setItem(k, String(incomingLegacy[k]));
@@ -485,7 +594,7 @@ const mergeV2 = async (msg, isBack) => {
   emit('synced', { restored: summary.applied + summary.merged, summary });
 };
 
-const handleIncoming = async (payload) => {
+const handleIncoming = async (payload, from) => {
   let msg;
   try {
     msg = await decryptPayload(state.key, payload);
@@ -495,9 +604,25 @@ const handleIncoming = async (payload) => {
   }
   if (!msg || typeof msg !== 'object') return;
 
+  if (state.code && from) {
+    if (msg.op === 'hello' || msg.op === 'welcome' || msg.op === 'busy') { await handshake(msg, from); return; }
+    if (state.partner && from !== state.partner) return;
+    if (!state.partner) {
+      if (state.isInitiator || msg.op !== 'snapshot') return;
+      acceptPartner(from);
+    }
+  }
+
+  if (msg.op === 'vault' && typeof msg.suffix === 'string' && isVault(msg.suffix)) {
+    if (msg.keep) { state.vaultKept.add(msg.suffix); state.vaultLinked.delete(msg.suffix); }
+    else { state.vaultLinked.add(msg.suffix); state.vaultKept.delete(msg.suffix); }
+    return;
+  }
+
   if ((msg.op === 'snapshot' || msg.op === 'snapshot-back') && msg.v === 2 && msg.data) {
     try {
       await mergeV2(msg, msg.op === 'snapshot-back');
+      state.exchanged = true;
     } catch (err) {
       emit('error', new Error('merge failed: ' + err.message));
     }
@@ -506,20 +631,15 @@ const handleIncoming = async (payload) => {
 
   if (msg.op === 'snapshot' && msg.data) {
     try {
-      if (!state.applyApproved) {
-        const conflicts = collectConflicts(msg.data);
-        if (conflicts.length) {
-          const areas = Array.from(new Set(conflicts.map((k) => k.split('.')[0]))).join(', ');
-          const ok = typeof window.mentriaConfirm === 'function'
-            ? await window.mentriaConfirm(confirmReplaceText(areas))
-            : false;
-          if (!ok) { emit('synced', { restored: 0, declined: true }); return; }
-          saveRescue();
-        }
-        state.applyApproved = true;
-      }
-      const result = window.MentriaStore.importAll(msg.data, { mode: 'merge' });
+      const conflicts = collectConflicts(msg.data).filter((k) => !window.MentriaStore.isLocalOnly(k) && !window.MentriaStore.isLocalLegacy(k));
+      const vaultSkip = conflicts.filter(isVault);
+      const others = conflicts.filter((k) => !isVault(k));
+      if (!state.applyApproved && others.length && !(await approveReplace(others))) { emit('synced', { restored: 0, declined: true }); return; }
+      state.applyApproved = true;
+      saveRescue(others.filter((k) => k.indexOf('mentria_') !== 0));
+      const result = window.MentriaStore.importAll(msg.data, { mode: 'merge', skip: vaultSkip });
       state.syncedSinceConnect += result.restored;
+      state.exchanged = true;
       emit('synced', { restored: result.restored });
     } catch (err) {
       emit('error', new Error('snapshot import failed: ' + err.message));
@@ -527,13 +647,25 @@ const handleIncoming = async (payload) => {
     return;
   }
 
+  if ((msg.op === 'set' || msg.op === 'remove') && typeof msg.ns === 'string' && typeof msg.key === 'string' && window.MentriaStore.isLocalOnly(msg.ns + '.' + msg.key)) return;
   if (msg.op === 'set' && typeof msg.ns === 'string' && typeof msg.key === 'string') {
-    window.MentriaStore.set(msg.ns, msg.key, msg.value, { remote: true, mtime: msg.mtime });
+    let value = msg.value;
+    const suffix = msg.ns + '.' + msg.key;
+    if (isVault(suffix)) {
+      if (!vaultFollows(suffix, value)) return;
+      state.vaultLinked.add(suffix);
+    }
+    if (msg.ns === 'identity' && msg.key === 'vault') {
+      try { value = JSON.parse(window.MentriaStore.adopt('identity.vault', JSON.stringify(value))); } catch (_) {}
+    }
+    window.MentriaStore.set(msg.ns, msg.key, value, { remote: true, mtime: msg.mtime });
     state.syncedSinceConnect++;
     emit('synced', { restored: 1 });
     return;
   }
   if (msg.op === 'remove' && typeof msg.ns === 'string' && typeof msg.key === 'string') {
+    const gone = msg.ns + '.' + msg.key;
+    if (isVault(gone) && (state.vaultKept.has(gone) || !state.vaultLinked.has(gone))) return;
     window.MentriaStore.remove(msg.ns, msg.key, { remote: true });
     recordTomb(msg.ns, msg.key, (typeof msg.mtime === 'number') ? msg.mtime : Date.now());
     state.syncedSinceConnect++;
@@ -548,10 +680,17 @@ const onLocalWrite = async (event) => {
   if (d.remote) return;
   if (!d.ns || !d.key) return;
   if (d.op !== 'set' && d.op !== 'remove') return;
+  if (window.MentriaStore.isLocalOnly(d.ns + '.' + d.key)) return;
+  if (state.vaultKept.has(d.ns + '.' + d.key)) return;
   try {
     const mtime = (typeof d.mtime === 'number') ? d.mtime : Date.now();
-    const payload = await encryptPayload(state.key, { op: d.op, ns: d.ns, key: d.key, value: d.value, mtime });
-    state.action.send(payload);
+    let value = d.value;
+    if (d.ns === 'identity' && d.key === 'vault' && value && typeof value === 'object' && value.device) {
+      value = Object.assign({}, value);
+      delete value.device;
+    }
+    const payload = await encryptPayload(state.key, { op: d.op, ns: d.ns, key: d.key, value, mtime });
+    sendToPartner(payload);
   } catch (err) {
     emit('error', err);
   }
@@ -562,8 +701,81 @@ const sendSnapshot = async () => {
   try {
     const snap = window.MentriaStore.exportAll();
     const payload = await encryptPayload(state.key, { op: 'snapshot', v: 2, data: snap, meta: buildMeta(snap.store || {}), tombs: loadTombs() });
-    state.action.send(payload);
+    sendToPartner(payload);
   } catch (err) {
+    emit('error', err);
+  }
+};
+
+const resetSession = () => {
+  clearTimeout(state.joinTimer);
+  clearTimeout(state.helloTimer);
+  state.applyApproved = false;
+  state.approval = null;
+  state.syncedSinceConnect = 0;
+  state.partner = null;
+  state.exchanged = false;
+  state.refused = false;
+  state.snapshotSent = false;
+  state.vaultChoice = {};
+  state.vaultLinked.clear();
+  state.vaultKept.clear();
+  state.peers.clear();
+};
+
+const sendControl = async (op, to) => {
+  if (!state.action || !state.key) return;
+  try { state.action.send(await encryptPayload(state.key, { op, initiator: state.isInitiator }), to); } catch (_) {}
+};
+
+const armJoinTimer = () => {
+  if (state.isInitiator) return;
+  clearTimeout(state.joinTimer);
+  state.joinTimer = setTimeout(async () => {
+    if (state.partner || state.status !== 'connecting') return;
+    await disconnect();
+    const err = new Error('no-peer');
+    err.code = 'no-peer';
+    emit('error', err);
+  }, JOIN_TIMEOUT_MS);
+};
+
+const acceptPartner = (peerId) => {
+  if (state.partner === peerId) return;
+  clearTimeout(state.joinTimer);
+  clearTimeout(state.helloTimer);
+  state.partner = peerId;
+  state.peers.clear();
+  state.peers.add(peerId);
+  setStatus('connected');
+};
+
+const startSync = () => {
+  if (!state.isInitiator || state.snapshotSent) return;
+  state.snapshotSent = true;
+  sendSnapshot();
+};
+
+const handshake = async (msg, from) => {
+  if (msg.op === 'hello') {
+    if (!state.isInitiator || msg.initiator) return;
+    if (state.partner && state.partner !== from) { sendControl('busy', from); return; }
+    acceptPartner(from);
+    sendControl('welcome', from);
+    startSync();
+    return;
+  }
+  if (state.isInitiator || !msg.initiator) return;
+  if (msg.op === 'welcome') {
+    if (state.partner && state.partner !== from) return;
+    acceptPartner(from);
+    return;
+  }
+  if (msg.op === 'busy' && !state.partner && !state.refused) {
+    state.refused = true;
+    await disconnect();
+    const err = new Error('code-busy');
+    err.code = 'busy';
     emit('error', err);
   }
 };
@@ -575,9 +787,7 @@ const joinRoomWithCode = async (codeRaw, opts) => {
   state.roomId = derived.roomId;
   state.key = derived.key;
   state.isInitiator = !!opts.initiator;
-  state.applyApproved = false;
-  state.syncedSinceConnect = 0;
-  state.peers.clear();
+  resetSession();
 
   setStatus(opts.initiator ? 'pairing' : 'connecting');
 
@@ -599,19 +809,33 @@ const joinRoomWithCode = async (codeRaw, opts) => {
   }
 
   state.action = state.room.makeAction('sync');
-  state.action.onMessage = (data, ctx) => handleIncoming(data);
+  state.action.onMessage = (data, ctx) => {
+    handleIncoming(data, (ctx && ctx.peerId) || null);
+  };
 
   state.room.onPeerJoin = (peerId) => {
-    state.peers.add(peerId);
-    setStatus('connected');
-    if (state.isInitiator) sendSnapshot();
+    if (state.partner) return;
+    if (!state.isInitiator) { sendControl('hello', peerId); return; }
+    clearTimeout(state.helloTimer);
+    state.helloTimer = setTimeout(() => {
+      if (state.partner || !state.room) return;
+      acceptPartner(peerId);
+      startSync();
+    }, HELLO_FALLBACK_MS);
   };
   state.room.onPeerLeave = (peerId) => {
+    if (peerId !== state.partner) return;
     state.peers.delete(peerId);
-    if (state.peers.size === 0) setStatus(state.isInitiator ? 'pairing' : 'connecting');
+    if (state.exchanged) { disconnect(); return; }
+    state.partner = null;
+    state.snapshotSent = false;
+    setStatus(state.isInitiator ? 'pairing' : 'connecting');
+    armJoinTimer();
   };
 
   window.addEventListener('mentria:write', onLocalWrite);
+
+  armJoinTimer();
 };
 
 const start = async () => {
@@ -662,9 +886,7 @@ const joinWithIdentity = async (secretBytes) => {
   state.roomId = derived.roomId;
   state.key = derived.key;
   state.isInitiator = false;
-  state.applyApproved = false;
-  state.syncedSinceConnect = 0;
-  state.peers.clear();
+  resetSession();
   setStatus('pairing');
   const ice = await getIce();
   try {
@@ -693,18 +915,25 @@ const joinWithIdentity = async (secretBytes) => {
 };
 
 const disconnect = async () => {
+  clearTimeout(state.joinTimer);
+  clearTimeout(state.helloTimer);
   window.removeEventListener('mentria:write', onLocalWrite);
-  if (state.room) {
-    try { await state.room.leave(); } catch (_) {}
-  }
+  const room = state.room;
   state.room = null;
   state.action = null;
+  if (room) {
+    try { await room.leave(); } catch (_) {}
+  }
   state.peers.clear();
   state.code = null;
   state.roomId = null;
   state.key = null;
   state.isInitiator = false;
   state.applyApproved = false;
+  state.approval = null;
+  state.partner = null;
+  state.exchanged = false;
+  state.snapshotSent = false;
   setStatus('idle');
 };
 
@@ -726,5 +955,5 @@ const status = () => ({
 
 window.MentriaSync = {
   start, joinWithCode, joinWithIdentity, disconnect, on, status,
-  formatCode, normalizeCode, restoreRescue
+  formatCode, normalizeCode, restoreRescue, rescueInfo
 };

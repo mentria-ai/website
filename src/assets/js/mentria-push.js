@@ -2,7 +2,7 @@
   'use strict';
   var BASE = 'https://relay.mentria.ai/push';
   var vapidKey = null;
-  var armed = new Map();   // callerId -> { spec, scheduleId, posted }
+  var armed = new Map();
 
   function supported() {
     return 'serviceWorker' in navigator && 'PushManager' in global && 'Notification' in global;

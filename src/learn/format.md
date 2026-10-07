@@ -1,32 +1,41 @@
 ---
 layout: base.njk
-permalink: /learn/format/
-englishOnly: true
-title: Pack format
-description: How to write a learning pack for mentria.ai. One JSON file, nine card types, any tool that writes JSON can make one.
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/learn/format/index.html"
+templateEngineOverride: njk,md
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'learn.format_link' | t: locale.code }}"
+  description: "{{ 'learn.format_desc' | t: locale.code }}"
 ---
 
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="/learn/">learn</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">format</span></p>
-  <h1>Pack format</h1>
-  <p>A pack is one JSON file. mentria plays it as cards you read, answer and come back to. Anything that writes JSON can make one, including an AI assistant working from a book or your notes.</p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/learn/">learn</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">format</span></p>
+  <h1>{{ "learn.format_link" | t }}</h1>
+  <p class="learn-format__lang" role="note">{{ "learn.format_english_only" | t }}</p>
+  <p lang="en">A pack is one JSON file. mentria plays it as cards you read, answer and come back to. Anything that writes JSON can make one, including an AI assistant working from a book or your notes.</p>
 </section>
 
-<link rel="stylesheet" href="/assets/css/learn.css">
+<link rel="stylesheet" href="/assets/css/learn.css?v={{ buildHash }}">
 
-<div class="prose learn-format">
+<div class="prose learn-format" lang="en">
 
 ## The file
 
-Save it as `something.mentria.json` and import it on the [Learn page](/learn/), drop it there, or open `https://mentria.ai/learn/?pack=<url>` where the URL points at a file served over HTTPS. Packs stay on the device that imported them. Nothing is uploaded.
+Save it as `something.mentria.json` and import it on the [Learn page]({{ locale.pathPrefix }}/learn/), or drop it there. Packs stay on the device that imported them. Nothing is uploaded.
+
+A pack can also come from a link, pasted on the Learn page or opened as `https://mentria.ai/learn/?pack=<url>`, but only when the link points at mentria.ai, `cdn.mentria.ai`, `mentria-ai.github.io` or Hugging Face (`huggingface.co`, `*.hf.co`) over HTTPS. The site's content security policy blocks every other host, so the Learn page refuses those links and says so instead of fetching them. A pack kept anywhere else travels as a file: download it, then import it from your device.
 
 ```json
 {
   "id": "attention-basics",
   "version": 1,
-  "title": "Attention in five cards",
+  "title": "Attention in four cards",
   "subtitle": "How a token decides what to look at.",
-  "cover": "https://example.com/cover.webp",
+  "cover": "data:image/webp;base64,…",
   "author": { "name": "you" },
   "language": "en",
   "tags": ["ai"],
@@ -37,7 +46,7 @@ Save it as `something.mentria.json` and import it on the [Learn page](/learn/), 
   ],
   "cards": [
     { "id": "c1", "type": "slide", "caption": "Every word gets to look at every other word.", "body": "One move, called **attention**, is under almost everything a model does." },
-    { "id": "c2", "type": "image", "image": "https://example.com/parts.webp", "caption": "Tap the three parts.",
+    { "id": "c2", "type": "image", "image": "data:image/webp;base64,…", "caption": "Tap the three parts.",
       "hotspots": [ { "x": 8, "y": 20, "w": 26, "h": 22, "label": "Query", "body": "What this token is looking for." } ] },
     { "id": "c3", "type": "mcq", "question": "What does the **query** represent?",
       "choices": [
@@ -53,15 +62,15 @@ Save it as `something.mentria.json` and import it on the [Learn page](/learn/), 
 
 | field | required | notes |
 |---|---|---|
-| `id` | yes | letters, digits, dots, dashes. Stable across versions. Importing the same id again replaces the pack. |
+| `id` | yes | letters, digits, dots, dashes and underscores, starting with a letter or digit, up to 100 characters. Stable across versions. Importing the same id again replaces the pack. |
 | `version` | no | integer, default 1. Bump it when you edit. |
 | `title` | yes | text |
-| `subtitle`, `cover`, `author`, `language`, `tags`, `minutes` | no | `cover` is a URL or data URI. `minutes` is an estimate; it is computed from the card count when missing. |
+| `subtitle`, `cover`, `author`, `language`, `tags`, `minutes` | no | `cover` is a data URI or an image URL; see Limits for the hosts that load. `minutes` is an estimate; it is computed from the card count when missing. |
 | `modes` | no | subset of `read`, `quiz`, `review`, `budget`. Default is all four. |
 | `sections` | no | ordered groups of card ids. Every card should be in exactly one section. Without sections the pack is one section in card order. |
 | `cards` | yes | at least one card, at most 2000 |
 
-Any text field can be a string or a map of language codes to strings, for example `{ "en": "Hello", "fr": "Bonjour" }`. Text fields accept Markdown.
+Any text field can be a string or a map of language codes to strings, for example `{ "en": "Hello", "fr": "Bonjour" }`. The site's languages are `en`, `es`, `fr`, `ja` and `pt-BR`. Text fields accept Markdown.
 
 ## Cards
 
@@ -72,7 +81,7 @@ Every card has `id` (unique in the pack) and `type`. Every card may also have `t
 | `slide` | `caption`, `body`, `image` | reads |
 | `image` | `image`, `caption`, `hotspots[]` of `{x, y, w, h, label, body}` in percent | taps the spots; tapping all of them counts as done |
 | `mcq` | `question`, `choices[]` of `{text, correct, why}`, `multi`, `shuffle` | picks one, or every correct one when `multi` is true. `why` shows after answering. |
-| `cloze` | `text` with `{{blank}}` markers, `answers[]` (one per blank; an array lists accepted alternatives), `chips[]` extra distractors | fills the blanks with chips when `chips` is given, otherwise by typing |
+| `cloze` | `text` with `{% raw %}{{blank}}{% endraw %}` markers, `answers[]` (one per blank; an array lists accepted alternatives), `chips[]` extra distractors | fills the blanks with chips when `chips` is given, otherwise by typing |
 | `order` | `prompt`, `items[]` in the correct order | puts the shuffled items back in order |
 | `match` | `prompt`, `pairs[]` of `[left, right]` | pairs each left item with its right item |
 | `canvas` | `html` (one self-contained HTML document, up to 512 KB) | uses your interactive; see below |
@@ -118,18 +127,18 @@ A syllabus is a course: one JSON file that carries several packs in order. Impor
   "version": 1,
   "title": "Signals and systems",
   "subtitle": "Twelve weeks, one pack per lecture.",
-  "cover": "https://example.com/cover.webp",
+  "cover": "data:image/webp;base64,…",
   "packs": [
     { "id": "signals-101-w01", "title": "Week 1: what a signal is", "cards": [ ... ] },
     { "id": "signals-101-w02", "title": "Week 2: sampling", "cards": [ ... ] },
-    "https://example.com/signals-101-w03.mentria.json"
+    "https://huggingface.co/datasets/you/signals-101/resolve/main/signals-101-w03.mentria.json"
   ]
 }
 ```
 
-Each entry in `packs` is a full pack or an HTTPS URL to one. A course may hold up to 200 packs. Re-importing a course with the same id updates its packs in place and keeps your progress on cards whose ids did not change.
+Each entry in `packs` is a full pack or an HTTPS link to one on the hosts listed under The file. A course that links anywhere else is refused on import, so put those packs in the course itself. A course may hold up to 200 packs. Re-importing a course with the same id updates its packs in place and keeps your progress on cards whose ids did not change.
 
-To assemble a course from a folder of pack files:
+To assemble a course from a folder of pack files, run the course script from the [site's source repository](https://github.com/mentria-ai/website):
 
 ```
 node scripts/pack-course.mjs ./my-course --id signals-101 --title "Signals and systems"
@@ -139,7 +148,7 @@ It validates every pack, orders them by filename (or by an `order` field inside 
 
 ## Checking a pack
 
-The repository ships a validator:
+The same [repository](https://github.com/mentria-ai/website) ships a validator:
 
 ```
 node scripts/pack-check.mjs my-pack.mentria.json
@@ -149,7 +158,7 @@ It prints the outline and every problem it finds, for a single pack or a whole c
 
 ## Limits
 
-A pack may be at most 25 MB as JSON. Images should be small WebP files or hosted URLs. Card ids and pack ids must match `[a-z0-9][a-z0-9._-]*`.
+A pack may be at most 25 MB as JSON. Images (`cover` and card `image`) load only from mentria.ai, `cdn.mentria.ai`, `mentria-ai.github.io` or a data URI; the security policy blocks images on every other host, Hugging Face included, so embed small WebP files as data URIs. Pack, course, section and card ids must match `[A-Za-z0-9][A-Za-z0-9._-]{0,99}`: letters, digits, dots, dashes and underscores, starting with a letter or digit, at most 100 characters.
 
 ## Sharing
 

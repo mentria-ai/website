@@ -29,6 +29,10 @@
     if (!l.prefix) return p || '/';
     return p.slice(l.prefix.length) || '/';
   }
+  function englishOnly(p) {
+    var list = window.MENTRIA_EN_ONLY;
+    return !!(list && list.indexOf(basePath(p)) >= 0);
+  }
   function urlForLocale(code, p) {
     var l = byCode(code);
     if (!l) return p;
@@ -113,7 +117,10 @@
 
   function updateSwitcher(code) {
     var loc = byCode(code), cur = document.querySelector('.lang-switcher__current');
-    if (cur && loc) cur.textContent = loc.name;
+    if (cur && loc) { cur.textContent = loc.name; cur.setAttribute('lang', loc.code); }
+    var summary = document.querySelector('.lang-switcher summary');
+    var label = activeDict ? lookup(activeDict, 'lang_switcher.current_label') : null;
+    if (summary && loc && label != null) summary.setAttribute('aria-label', label + ': ' + loc.name);
     var items = document.querySelectorAll('.lang-switcher__item');
     for (var i = 0; i < items.length; i++) {
       items[i].classList.toggle('is-active', items[i].getAttribute('hreflang') === code);
@@ -130,6 +137,7 @@
       var u;
       try { u = new URL(href, location.origin); } catch (_) { continue; }
       if (u.pathname !== '/' && u.pathname.slice(-1) !== '/') continue;
+      if (englishOnly(u.pathname)) continue;
       a.setAttribute('href', urlForLocale(code, u.pathname) + u.search + u.hash);
     }
   }
@@ -146,12 +154,20 @@
     rewriteLinks(code);
   }
 
+  function dictUrl(code) {
+    var l = byCode(code);
+    return (l && l.dict) || DICT_BASE + code + '.json';
+  }
+
   var cache = {};
   function getDict(code) {
     if (!cache[code]) {
-      cache[code] = fetch(DICT_BASE + code + '.json').then(function (r) {
+      cache[code] = fetch(dictUrl(code)).then(function (r) {
         if (!r.ok) throw new Error('dict ' + code);
         return r.json();
+      }).catch(function (e) {
+        delete cache[code];
+        throw e;
       });
     }
     return cache[code];
@@ -172,11 +188,13 @@
   }
 
   function shellRoutes(prefix) {
-    var routes = [prefix + '/', prefix + '/tools/', prefix + '/learn/', prefix + '/about/'];
+    var routes = [prefix + '/', prefix + '/tools/', prefix + '/tools/extensions/run/', prefix + '/learn/', prefix + '/about/', prefix + '/offline/'];
     var data = window.MENTRIA_PALETTE_DATA;
     var tools = (data && data.tools) || [];
     for (var i = 0; i < tools.length; i++) {
-      if (tools[i] && tools[i].slug) routes.push(prefix + '/tools/' + tools[i].slug + '/');
+      if (!tools[i] || !tools[i].slug) continue;
+      var path = tools[i].url || ('/tools/' + tools[i].slug + '/');
+      if (!englishOnly(path)) routes.push(prefix + path);
     }
     return routes;
   }
@@ -193,29 +211,43 @@
       return shell.match(marker).then(function (done) {
         if (done) return;
         var chain = Promise.resolve();
-        shellRoutes(loc.prefix).forEach(function (route) {
+        var missed = false;
+        var lower = code.toLowerCase();
+        var routes = shellRoutes(loc.prefix).concat([dictUrl(code), '/fragments/tools-popup.' + code + '.html?v=' + i18nBuild(), '/assets/js/site-palette.' + lower + '.js', '/assets/js/site-end.' + lower + '.js']);
+        routes.forEach(function (route) {
           chain = chain.then(function () {
-            return fetch(route).then(function (resp) {
+            return fetch(route, { cache: 'no-cache', headers: { 'x-mentria-fill': '1' } }).then(function (resp) {
               if (resp && resp.ok) return shell.put(route, resp.clone());
-            }).catch(function () {});
+            }, function () { missed = true; }).catch(function () {});
           });
         });
-        return chain
-          .then(function () { return shell.put(marker, new Response('1')); })
-          .then(function () { return caches.keys(); })
-          .then(function (keys) {
-            return Promise.all(keys.map(function (key) {
-              if (key !== cacheName && key.indexOf('mentria-locale-' + code + '-') === 0) return caches.delete(key);
-            }));
-          });
+        return chain.then(function () {
+          if (missed) return;
+          var keep = {};
+          routes.concat([marker]).forEach(function (route) { keep[new URL(route, location.origin).href] = true; });
+          return shell.put(marker, new Response('1'))
+            .then(function () { return shell.keys(); })
+            .then(function (entries) {
+              return Promise.all(entries.map(function (req) { if (!keep[req.url]) return shell.delete(req); }));
+            })
+            .then(function () { return caches.keys(); })
+            .then(function (keys) {
+              return Promise.all(keys.map(function (key) {
+                if (key !== cacheName && key.indexOf('mentria-locale-' + code + '-') === 0) return caches.delete(key);
+              }));
+            });
+        });
       });
     }).catch(function () {}).then(function () { delete shellsBusy[code]; });
     shellsBusy[code] = p;
     return p;
   }
 
-  function scheduleLocaleShells(code) {
+  function scheduleLocaleShells(code, passive) {
     if (code === 'en' || !('caches' in window)) return;
+    var conn = navigator.connection;
+    if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ''))) return;
+    if (passive && !(navigator.serviceWorker && navigator.serviceWorker.controller)) return;
     var run = function () { cacheLocaleShells(code); };
     if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 4000 });
     else setTimeout(run, 1500);
@@ -241,18 +273,54 @@
   var bc = null;
   try { if ('BroadcastChannel' in window) bc = new BroadcastChannel(CHANNEL); } catch (_) {}
 
+  function reachable(code) {
+    if (navigator.onLine !== false) return Promise.resolve(true);
+    if (!('caches' in window)) return Promise.resolve(false);
+    return caches.match(urlForLocale(code, location.pathname), { ignoreSearch: true })
+      .then(function (hit) { return !!hit; }, function () { return false; });
+  }
+
+  function tellOffline(code) {
+    var loc = byCode(code);
+    var host = document.querySelector('.lang-switcher[data-offline-msg]');
+    var tpl = (host && host.getAttribute('data-offline-msg')) || "You're offline, so {lang} can't load on this page yet. It needs a connection the first time.";
+    var msg = tpl.split('{lang}').join(loc ? loc.name : code);
+    if (window.MentriaUI && typeof window.MentriaUI.toast === 'function') window.MentriaUI.toast(msg, { duration: 6000 });
+    else if (typeof window.mentriaAlert === 'function') window.mentriaAlert(msg);
+  }
+
   function setLocale(code, opts) {
     opts = opts || {};
     if (!byCode(code) || code === currentCode || code === pending) return;
+    var target = urlForLocale(code, location.pathname) + location.search + location.hash;
+    if (document.documentElement.hasAttribute('data-locale-reload')) {
+      if (opts.fromRemote) return;
+      pending = code;
+      reachable(code).then(function (ok) {
+        if (pending === code) pending = null;
+        if (!ok) { tellOffline(code); return; }
+        try { localStorage.setItem(STORE_KEY, code); } catch (_) {}
+        if (bc) { try { bc.postMessage({ type: 'locale', code: code }); } catch (_) {} }
+        try { document.dispatchEvent(new CustomEvent('mentria:localereload', { detail: { code: code } })); } catch (_) {}
+        location.replace(target);
+      });
+      return;
+    }
     pending = code;
     getDict(code).then(function (dict) {
       if (pending === code) pending = null;
       var run = function () { apply(dict, code); };
-      var vt = document.startViewTransition ? document.startViewTransition(run) : null;
+      var vt = (document.startViewTransition && !document.hidden) ? document.startViewTransition(run) : null;
       if (!vt) run();
+      else {
+        if (vt.ready) vt.ready.catch(function () {});
+        if (vt.finished) vt.finished.catch(function () {});
+      }
       currentCode = code;
       scheduleLocaleShells(code);
-      try { history.replaceState(history.state, '', urlForLocale(code, location.pathname) + location.search + location.hash); } catch (_) {}
+      if (window.MENTRIA_PAGE_LOCALIZED !== false) {
+        try { history.replaceState(history.state, '', urlForLocale(code, location.pathname) + location.search + location.hash); } catch (_) {}
+      }
       try { localStorage.setItem(STORE_KEY, code); } catch (_) {}
       if (!opts.fromRemote && bc) { try { bc.postMessage({ type: 'locale', code: code }); } catch (_) {} }
       var done = (vt && vt.updateCallbackDone) ? vt.updateCallbackDone : Promise.resolve();
@@ -261,7 +329,11 @@
       }, function () {});
     }).catch(function () {
       if (pending === code) pending = null;
-      if (!opts.fromRemote) location.assign(urlForLocale(code, location.pathname) + location.search + location.hash);
+      if (opts.fromRemote) return;
+      reachable(code).then(function (ok) {
+        if (ok) location.assign(target);
+        else tellOffline(code);
+      });
     });
   }
 
@@ -281,6 +353,8 @@
     var code = a.getAttribute('hreflang');
     if (!code || !byCode(code)) return;
     e.preventDefault();
+    var menu = a.closest('details');
+    if (menu) menu.open = false;
     setLocale(code, {});
   });
 
@@ -288,8 +362,12 @@
     set: function (code) { setLocale(code, {}); },
     locale: function () { return currentCode; },
     t: function (key) { return activeDict ? lookup(activeDict, key) : null; },
+    ready: function () {
+      if (currentCode === 'en' || activeDict) return Promise.resolve();
+      return getDict(currentCode).then(function (dict) { if (!activeDict) activeDict = dict; }, function () {});
+    },
     cacheShells: function (code) { return cacheLocaleShells(code || currentCode); }
   };
 
-  scheduleLocaleShells(currentCode);
+  scheduleLocaleShells(currentCode, true);
 })();

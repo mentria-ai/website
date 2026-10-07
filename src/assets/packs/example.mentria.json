@@ -57,7 +57,7 @@
       "type": "image",
       "title": "Three parts",
       "caption": "Tap the numbered spots to see what each part does.",
-      "image": "https://cdn.mentria.ai/source01/02_query.webp",
+      "image": "/assets/packs/example-qkv.svg",
       "hotspots": [
         {
           "x": 8,

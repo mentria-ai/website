@@ -8,29 +8,91 @@
   var esc = C.esc, el = C.el;
   var T = window.MENTRIA_LEARN_I18N || {};
   var t = function (k, vars) {
+    if (vars && typeof vars.n === 'number' && plural(vars.n) === 'one' && T[k + '_one']) k = k + '_one';
     var s = T[k] || k;
     if (vars) Object.keys(vars).forEach(function (v) { s = s.split('{' + v + '}').join(String(vars[v])); });
     return s;
   };
-  var lang = document.documentElement.lang || 'en';
+  var LOCALES = window.MENTRIA_LOCALES || [];
+  var pageLang = document.documentElement.lang || 'en';
+  var here = localeOf(location.pathname);
+  var lang = here ? here.code : pageLang;
+  var foreign = lang !== pageLang;
+  var plural = (function () {
+    try { var rules = new Intl.PluralRules(lang); return function (n) { return rules.select(n); }; } catch (_) { return function (n) { return n === 1 ? 'one' : 'other'; }; }
+  })();
   var tx = function (v) { return P.text(v, lang); };
-  var localePrefix = root.dataset.prefix || '';
+  var localePrefix = here ? here.prefix || '' : (root.dataset.prefix || '');
   var libraryHref = localePrefix + '/learn/';
+  var learnTitle = '';
+  var DECK_KEYS = { hint_tap_short: 'hint_tap', hint_depth: 'hint_depth', hint_exit: 'hint_exit', share_card: 'share_slide' };
 
   var pack = null, native = false, order = [], byId = {}, sectionOf = {}, current = 0, mode = 'quiz', progress = null;
+  var importedRow = null, nextInfo = null, finishRefresh = null;
   var BUDGET = 10;
+  var MODES = ['read', 'quiz', 'review', 'budget'];
+  var EXIT_KEY = 'mentria.packExit';
+  var exitSteps = 0;
   function renderMode() { return mode === 'read' ? 'read' : 'quiz'; }
+  function baseMode(avail) { return avail.indexOf('quiz') >= 0 ? 'quiz' : avail.indexOf('read') >= 0 ? 'read' : avail[0] || 'read'; }
   var slides = [], segs = [], stage, progressBar, liveEl, hint, modeWrap, secLabel, shareBtn;
   var coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
-  function load() {
-    var inline = document.getElementById('pack-data');
-    if (inline) {
-      try { native = true; return Promise.resolve(JSON.parse(inline.textContent)); } catch (_) { return Promise.resolve(null); }
+  function localeOf(path) {
+    var fallback = null;
+    for (var i = 0; i < LOCALES.length; i++) {
+      var pre = LOCALES[i].prefix;
+      if (pre && (path === pre || path.indexOf(pre + '/') === 0)) return LOCALES[i];
+      if (!pre && !fallback) fallback = LOCALES[i];
     }
-    var id = new URLSearchParams(location.search).get('id');
-    if (!id) return Promise.resolve(null);
-    return P.get(id).then(function (row) { return row ? row.pack : null; });
+    return fallback;
+  }
+
+  function localStrings() {
+    var url = (here && here.dict) || ('/assets/i18n/' + lang + '.json');
+    return fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (dict) {
+      if (!dict) return;
+      var learn = dict.learn || {}, deck = dict.feed_deck || {}, next = {};
+      Object.keys(T).forEach(function (k) {
+        var v = DECK_KEYS[k] ? deck[DECK_KEYS[k]] : learn[k];
+        next[k] = typeof v === 'string' ? v : T[k];
+      });
+      T = next;
+      if (typeof learn.title === 'string') learnTitle = learn.title;
+    }).catch(function () {});
+  }
+
+  function fullPack(id) {
+    return fetch('/learn/' + encodeURIComponent(id) + '/pack.json', { credentials: 'omit' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+  }
+
+  function load() {
+    return (foreign ? localStrings() : Promise.resolve()).then(function () {
+      var inline = document.getElementById('pack-data');
+      if (inline) {
+        native = true;
+        var data = null;
+        try { data = JSON.parse(inline.textContent); } catch (_) {}
+        if (!foreign || !data || !data.id) return data;
+        return fullPack(data.id).then(function (full) { return full && full.id === data.id ? full : data; });
+      }
+      var id = new URLSearchParams(location.search).get('id');
+      if (!id) return null;
+      return P.get(id).then(function (row) { importedRow = row || null; return row ? row.pack : null; });
+    });
+  }
+
+  function relabel() {
+    document.documentElement.lang = lang;
+    var name = tx(pack.title);
+    if (!name) return;
+    var h = document.getElementById('packHeading') || document.querySelector('main h1.sr-only');
+    if (h) h.textContent = name;
+    if (!learnTitle) return;
+    var at = document.title.lastIndexOf(' | ');
+    document.title = name + ' · ' + learnTitle + (at >= 0 ? document.title.slice(at) : '');
   }
 
   function notFound() {
@@ -50,8 +112,7 @@
       sectionOf: function (id) { return sectionOf[id] || null; },
       getProgress: function () { return progress; },
       onAnswer: function (card, right, extra) {
-        P.recordAnswer(pack.id, card.id, right, extra);
-        progress = P.getProgress(pack.id);
+        progress = P.recordAnswer(pack.id, card.id, right, extra);
         updateSeg(current);
         refreshModes();
       },
@@ -66,9 +127,13 @@
     pack.sections.forEach(function (s) { s.cards.forEach(function (id) { sectionOf[id] = s; }); });
     progress = P.getProgress(pack.id);
     var avail = P.availableModes(pack, progress);
-    mode = avail.indexOf(progress.mode) >= 0 ? progress.mode : (avail.indexOf('quiz') >= 0 ? 'quiz' : 'read');
+    mode = avail.indexOf(progress.mode) >= 0 ? progress.mode : baseMode(avail);
+    if (!native) nameImported();
+    if (foreign) relabel();
     root.innerHTML = '';
     root.dataset.mode = mode;
+    if (pack.cover) root.style.setProperty('--pack-cover', 'url("' + String(pack.cover).replace(/"/g, '%22') + '")');
+    findNext();
 
     progressBar = el('div', 'deck__progress');
     progressBar.setAttribute('role', 'progressbar');
@@ -113,9 +178,10 @@
     root.appendChild(stage);
 
     hint = el('div', 'deck__hint', coarse
-      ? '<span>' + esc(t('hint_tap_short')) + '</span><span>' + esc(t('hint_depth')) + '</span><span>' + esc(t('hint_exit')) + '</span>'
+      ? '<span>' + esc(t('hint_tap_short')) + '</span><span class="pack-hint-depth" hidden>' + esc(t('hint_depth')) + '</span><span>' + esc(t('hint_exit')) + '</span>'
       : '<span>' + esc(t('hint_tap')) + '</span><span>' + esc(t('hint_keys')) + '</span>');
     root.appendChild(hint);
+    stage.addEventListener('pack:fold', syncHint);
     liveEl = el('div', 'sr-only'); liveEl.setAttribute('role', 'status'); liveEl.setAttribute('aria-live', 'polite');
     root.appendChild(liveEl);
 
@@ -124,8 +190,17 @@
     bindInput();
   }
 
+  function nameImported() {
+    var name = tx(pack.title);
+    if (!name) return;
+    var h = document.getElementById('packHeading');
+    if (h) h.textContent = name;
+    if (root.dataset.titleSuffix) document.title = name + root.dataset.titleSuffix;
+  }
+
   function refreshModes() {
     var avail = P.availableModes(pack, progress);
+    if (avail.indexOf(mode) < 0) avail = MODES.filter(function (m) { return m === mode || avail.indexOf(m) >= 0; });
     modeWrap.innerHTML = '';
     avail.forEach(function (m) {
       var b = el('button', 'pack-mode__btn', esc(t('mode_' + m)));
@@ -142,11 +217,12 @@
   function startIndex() {
     var m = (location.hash || '').match(/^#c(\d+)$/);
     if (m) { var i = +m[1] - 1; if (i >= 0 && i < order.length) return i; }
-    for (var k = 0; k < order.length; k++) if (!progress.cards[order[k]]) return k;
+    for (var k = 0; k < order.length; k++) if (!P.isDone(byId[order[k]], progress.cards[order[k]])) return k;
     return 0;
   }
 
   function renderAll() {
+    C.release(stage);
     stage.innerHTML = '';
     progressBar.innerHTML = '';
     slides = []; segs = [];
@@ -177,6 +253,27 @@
     root.dataset.mode = mode;
   }
 
+  function findNext() {
+    var inline = document.getElementById('pack-next');
+    if (inline) {
+      try {
+        var n = JSON.parse(inline.textContent);
+        nextInfo = { title: n.title, cover: n.cover, href: localePrefix + '/learn/' + n.id + '/' };
+      } catch (_) {}
+      return;
+    }
+    var cid = P.courseOf(importedRow);
+    if (!cid) return;
+    var at = importedRow.course.order || 0;
+    P.list().then(function (rows) {
+      var after = rows.filter(function (r) { return P.courseOf(r) === cid && (r.course.order || 0) > at; })
+        .sort(function (a, b) { return (a.course.order || 0) - (b.course.order || 0); })[0];
+      if (!after) return;
+      nextInfo = { title: after.title, cover: after.cover, href: localePrefix + '/learn/play/?id=' + encodeURIComponent(after.id) };
+      if (finishRefresh) finishRefresh();
+    });
+  }
+
   function renderFinish() {
     var s = el('article', 'deck__slide pack-slide pack-slide--finish');
     s.dataset.idx = String(order.length);
@@ -185,9 +282,15 @@
     p.appendChild(el('h2', 'pack-card__title', esc(tx(pack.title))));
     var stats = el('p', 'pack-card__stats');
     p.appendChild(stats);
+    var up = el('a', 'pack-next');
+    up.hidden = true;
+    up.addEventListener('click', function (e) {
+      if (e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) handOff(up.href);
+    });
+    p.appendChild(up);
     var again = el('button', 'pack-btn pack-btn--primary', esc(t('restart')));
     again.type = 'button';
-    again.addEventListener('click', function () { if (mode === 'review' || mode === 'budget') setMode('quiz', true); else { rebuildOrder(); go(0); } });
+    again.addEventListener('click', function () { if (mode === 'review' || mode === 'budget') setMode(baseMode(P.availableModes(pack, progress)), true); else { rebuildOrder(); go(0); } });
     var review = el('button', 'pack-btn', esc(t('review_wrong')));
     review.type = 'button';
     review.addEventListener('click', function () { setMode('review', true); });
@@ -200,13 +303,33 @@
     var note = el('p', 'pack-card__text');
     note.hidden = true;
     p.insertBefore(note, stats);
+    var unsavedNote = el('p', 'pack-card__text');
+    unsavedNote.hidden = true;
+    p.insertBefore(unsavedNote, up);
+    function paintNext() {
+      if (!nextInfo) return;
+      up.href = nextInfo.href;
+      up.innerHTML = (nextInfo.cover ? '<img class="pack-next__img" src="' + esc(nextInfo.cover) + '" alt="" loading="lazy" decoding="async">' : '') +
+        '<span class="pack-next__text"><span class="pack-next__k">' + esc(t('next_pack')) + '</span><span class="pack-next__t">' + esc(tx(nextInfo.title)) + '</span></span>' +
+        '<span class="pack-next__go" aria-hidden="true">→</span>';
+      var cover = up.querySelector('.pack-next__img');
+      if (cover) cover.addEventListener('error', function () { cover.remove(); });
+      up.hidden = false;
+      again.className = 'pack-btn';
+    }
+    finishRefresh = paintNext;
+    paintNext();
     s.addEventListener('pack:enter', function () {
       var sum = P.summary(pack, progress);
-      stats.textContent = t('finish_stats', { seen: sum.seen, total: sum.total, right: sum.right, wrong: sum.wrong });
+      stats.textContent = mode === 'read'
+        ? t('finish_stats_read', { seen: sum.viewed, total: sum.total })
+        : t('finish_stats', { seen: sum.seen, total: sum.total, right: sum.right, wrong: sum.wrong });
       note.hidden = !(mode === 'review' && !order.length) && !(mode === 'budget');
       note.textContent = mode === 'review' && !order.length ? t('nothing_to_review') : (mode === 'budget' ? t('budget_done') : '');
       review.hidden = !sum.wrong || mode === 'review';
       P.setMode(pack.id, mode);
+      unsavedNote.hidden = !P.progressSaved || P.progressSaved(pack.id);
+      unsavedNote.textContent = unsavedNote.hidden ? '' : t('progress_unsaved');
     });
     return s;
   }
@@ -215,11 +338,12 @@
     var all = [];
     pack.sections.forEach(function (s) { s.cards.forEach(function (id) { if (byId[id]) all.push(id); }); });
     if (mode === 'review') {
-      order = all.filter(function (id) { var r = progress.cards[id]; return r && r.r === 'wrong'; });
+      var nowR = Date.now();
+      order = all.filter(function (id) { var r = progress.cards[id]; return r && (r.r === 'wrong' || P.isDue(r, nowR)); });
     } else if (mode === 'budget') {
       var now = Date.now();
-      var due = all.filter(function (id) { var r = progress.cards[id]; return r && r.r === 'wrong' && r.d && r.d <= now; });
-      var fresh = all.filter(function (id) { return !progress.cards[id]; });
+      var due = all.filter(function (id) { return P.isDue(progress.cards[id], now); });
+      var fresh = all.filter(function (id) { return !P.isDone(byId[id], progress.cards[id]); });
       var answeredToday = P.getDays()[P.dayKey()] || 0;
       order = due.concat(fresh).slice(0, Math.max(0, BUDGET - answeredToday) + due.length).slice(0, BUDGET);
     } else {
@@ -243,9 +367,19 @@
     });
   }
 
+  function warm(k, high) {
+    var s = slides[k];
+    var img = s && s.querySelector('img.deck__slide-img, img.pack-image__img');
+    if (!img) return;
+    if (img.loading === 'lazy') img.loading = 'eager';
+    if (high && 'fetchPriority' in img) img.fetchPriority = 'high';
+    if (!high) img.dataset.warm = '1';
+  }
+
   function go(i, silent) {
     if (i < 0 || i > order.length) return;
     current = i;
+    warm(i, true); warm(i + 1); warm(i + 2);
     slides.forEach(function (s, k) { s.classList.toggle('is-active', k === i); });
     var s = slides[i];
     if (i < order.length) {
@@ -253,13 +387,13 @@
       var sec = sectionOf[id];
       var secTitle = sec ? tx(sec.title) : '';
       secLabel.textContent = secTitle === tx(pack.title) ? '' : secTitle;
-      if (!progress.cards[id] || !P.INTERACTIVE[byId[id].type]) { P.recordSeen(pack.id, id); progress = P.getProgress(pack.id); }
+      if (!progress.cards[id] || !P.INTERACTIVE[byId[id].type]) progress = P.recordSeen(pack.id, id, P.answerable(byId[id]));
       progressBar.setAttribute('aria-valuenow', String(i + 1));
       liveEl.textContent = t('card_of', { n: i + 1, total: order.length });
-      try { history.replaceState(null, '', '#c' + (i + 1)); } catch (_) {}
+      try { history.replaceState(history.state, '', '#c' + (i + 1)); } catch (_) {}
     } else {
       secLabel.textContent = '';
-      try { history.replaceState(null, '', '#end'); } catch (_) {}
+      try { history.replaceState(history.state, '', '#end'); } catch (_) {}
     }
     if (shareBtn) shareBtn.hidden = i >= order.length;
     updateSeg(i);
@@ -267,7 +401,8 @@
     try { target.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
     try { s.dispatchEvent(new CustomEvent('pack:enter')); } catch (_) {}
     if (hint && (!silent || (i < order.length && byId[order[i]].type === 'canvas'))) hint.classList.add('is-fading');
-    var focusable = s.querySelector('input, button:not(.deck__tap):not(.pack-more):not([disabled])');
+    syncHint();
+    var focusable = s.querySelector('.pack-guess:not([hidden]) input, .pack-guess:not([hidden]) button:not([disabled])') || s.querySelector('.pack-next:not([hidden])') || s.querySelector('input, textarea, button:not(.deck__tap):not(.pack-more):not([disabled])');
     if (focusable && !silent && document.activeElement && document.activeElement.tagName !== 'INPUT') { try { focusable.focus({ preventScroll: true }); } catch (_) {} }
   }
 
@@ -279,12 +414,27 @@
     var keep = current;
     rebuildOrder();
     go(structural || restart ? 0 : Math.min(keep, order.length), true);
+    var a = document.activeElement;
+    if (!a || a === document.body || !document.contains(a)) {
+      var s = slides[current];
+      var f = s && (s.querySelector('.pack-next:not([hidden])') || s.querySelector('button:not(.deck__tap):not(.pack-more):not([disabled]), input'));
+      if (f) { try { f.focus({ preventScroll: true }); } catch (_) {} }
+    }
   }
 
-  function moreBtn() { return slides[current] ? slides[current].querySelector('.pack-more') : null; }
+  function moreBtn() { return slides[current] ? slides[current].querySelector('.pack-more:not([hidden])') : null; }
+  function syncHint() {
+    var depth = hint && hint.querySelector('.pack-hint-depth');
+    if (depth) depth.hidden = !moreBtn();
+  }
+  function eqScrolls(node) {
+    var q = node && node.closest ? node.closest('.deck__eq') : null;
+    return !!q && q.scrollWidth > q.clientWidth + 1;
+  }
   function isExpanded() { var m = moreBtn(); return !!m && m.getAttribute('aria-expanded') === 'true'; }
   function expandCurrent() { var m = moreBtn(); if (m && !isExpanded()) m.click(); }
   function collapseCurrent() { var m = moreBtn(); if (m && isExpanded()) m.click(); }
+  function bodyScrolls(b) { return moreBtn() ? isExpanded() : b.scrollHeight - b.clientHeight > 1; }
 
   function slideImageUrl(s) {
     var img = s.querySelector('img.deck__slide-img, img.pack-image__img');
@@ -310,30 +460,60 @@
       .then(function () { shareBtn.classList.remove('is-busy'); });
   }
 
-  function exit() {
+  function prefixOf(path) {
+    var l = localeOf(path);
+    return l ? l.prefix || '' : '';
+  }
+
+  function initExit() {
+    var st = history.state;
+    if (st && typeof st.packExit === 'number') { exitSteps = st.packExit; return; }
+    var hand = null, ref = null;
+    try { hand = JSON.parse(sessionStorage.getItem(EXIT_KEY) || 'null'); sessionStorage.removeItem(EXIT_KEY); } catch (_) {}
+    try { ref = window.MentriaNav ? window.MentriaNav.from() : (document.referrer ? new URL(document.referrer) : null); } catch (_) {}
+    if (ref && ref.origin === location.origin && history.length > 1 && prefixOf(ref.pathname) === localePrefix) {
+      var chained = hand && hand.from === ref.pathname + ref.search && hand.to === location.pathname + location.search;
+      exitSteps = chained ? (hand.steps > 0 ? hand.steps + 1 : 0) : 1;
+    }
+    try { history.replaceState(Object.assign({}, st, { packExit: exitSteps }), ''); } catch (_) {}
+  }
+
+  function handOff(href) {
     try {
-      var ref = document.referrer ? new URL(document.referrer) : null;
-      if (ref && ref.origin === location.origin && history.length > 1) { history.back(); return; }
+      var u = new URL(href, location.href);
+      sessionStorage.setItem(EXIT_KEY, JSON.stringify({ from: location.pathname + location.search, to: u.pathname + u.search, steps: exitSteps }));
     } catch (_) {}
+  }
+
+  function exit() {
+    if (exitSteps > 0 && history.length > exitSteps) { history.go(-exitSteps); return; }
     location.href = libraryHref;
   }
 
   function bindInput() {
     document.addEventListener('keydown', function (e) {
       var tag = (e.target && e.target.tagName) || '';
-      if (tag === 'INPUT' || tag === 'TEXTAREA') { if (e.key === 'Escape') { e.target.blur(); } return; }
+      if (tag === 'INPUT' || tag === 'TEXTAREA') {
+        if (e.key === 'Escape') { e.target.blur(); return; }
+        if (!((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.target.value)) return;
+        e.target.blur();
+      }
       if (e.target && e.target.closest && (e.key === ' ' || e.key === 'Enter') && e.target.closest('button, a[href], [role="button"]')) return;
+      if (e.target && e.target.closest && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.target.closest('[role="radiogroup"], [role="listbox"], .pack-order, .pack-match')) return;
+      if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && eqScrolls(e.target)) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); go(current + 1); }
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(current - 1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); expandCurrent(); }
       else if (e.key === 'ArrowDown') { e.preventDefault(); if (isExpanded()) collapseCurrent(); else exit(); }
       else if (e.key === 'Escape') { e.preventDefault(); if (isExpanded()) collapseCurrent(); else exit(); }
     });
-    var sx = 0, sy = 0, st = 0, scrolls = false;
+    var sx = 0, sy = 0, st = 0, scrolls = false, sideways = false;
     root.addEventListener('touchstart', function (e) {
       var tch = e.touches[0]; sx = tch.clientX; sy = tch.clientY; st = Date.now();
       var c = e.target.closest ? e.target : null;
-      scrolls = !!(c && c.closest('.pack-card, .pack-canvas, .pack-body:not(.is-collapsed), input, textarea'));
+      var b = c && c.closest('.pack-body');
+      scrolls = !!(c && c.closest('.pack-card, .pack-canvas, input, textarea')) || (!!b && bodyScrolls(b));
+      sideways = eqScrolls(c);
     }, { passive: true });
     root.addEventListener('touchend', function (e) {
       var tch = e.changedTouches[0];
@@ -346,12 +526,13 @@
         if (dy < 0) expandCurrent();
         else if (isExpanded()) collapseCurrent();
         else exit();
-      } else if (ax >= 50) {
+      } else if (ax >= 50 && !sideways) {
         if (dx < 0) go(current + 1); else go(current - 1);
       }
     }, { passive: true });
   }
 
+  initExit();
   load().then(function (p) {
     if (!p) { notFound(); return; }
     var v = P.validate(p);

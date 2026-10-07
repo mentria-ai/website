@@ -51,7 +51,8 @@ for (const match of body.matchAll(urlRe)) { if (!seen.has(match[0])) { seen.add(
 if (urls.length !== slides.length) fail(`found ${urls.length} image attachment(s) but the story has ${slides.length} slide(s) — drop exactly one image per slide, in order`);
 
 async function download(u) {
-  let r = await fetch(u, { redirect: 'manual', headers: token ? { Authorization: 'Bearer ' + token, 'User-Agent': 'mentria-story-publish' } : { 'User-Agent': 'mentria-story-publish' } });
+  const githubHosted = /^https:\/\/(?:[a-z0-9-]+\.)?(?:github\.com|githubusercontent\.com)\//i.test(u);
+  let r = await fetch(u, { redirect: 'manual', headers: token && githubHosted ? { Authorization: 'Bearer ' + token, 'User-Agent': 'mentria-story-publish' } : { 'User-Agent': 'mentria-story-publish' } });
   if (r.status >= 300 && r.status < 400 && r.headers.get('location')) r = await fetch(r.headers.get('location'), { headers: { 'User-Agent': 'mentria-story-publish' } });
   if (!r.ok) throw new Error('download ' + r.status + ' ' + u);
   const buf = Buffer.from(await r.arrayBuffer());
@@ -62,8 +63,9 @@ async function download(u) {
 const stories = JSON.parse(fs.readFileSync('src/_data/stories.json', 'utf8'));
 const feed = JSON.parse(fs.readFileSync('src/_data/feed.json', 'utf8'));
 const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'story';
+const pending = new Set(String(process.env.PENDING_IDS || '').split('\n').map((s) => s.trim()).filter(Boolean));
 let sid = 'story-' + slug;
-for (let n = 2; stories.some((d) => d.id === sid); n++) sid = 'story-' + slug + '-' + n;
+for (let n = 2; stories.some((d) => d.id === sid) || pending.has(sid); n++) sid = 'story-' + slug + '-' + n;
 const outDir = path.join('out', sid);
 fs.mkdirSync(outDir, { recursive: true });
 

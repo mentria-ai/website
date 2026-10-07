@@ -1,18 +1,26 @@
 ---
 layout: base.njk
-permalink: /comms/index.html
-eleventyExcludeFromCollections: true
-englishOnly: true
-title: comms
-description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no accounts, no server in the middle.
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/comms/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.comms.title' | t }}"
+  description: "{{ 'tool.comms.meta_description' | t }}"
+localeReload: true
 ---
+{%- set commsHttps = "https://mentria.ai" + locale.pathPrefix + "/comms/" -%}
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="/">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">comms</span></p>
-  <h1>comms</h1>
-  <p>Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted, no accounts, no server in the middle. Share a room URL, or trade contact codes and message people directly.</p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">comms</span></p>
+  <h1>{{ 'tools.comms.title' | t }}</h1>
+  <p>{{ 'tool.comms.lede' | t }}</p>
 </section>
 
 {% set terminalTitle = "comms.js" %}
+{% set terminalFullscreen = true %}
+{% set terminalMini = "tool" %}
 {% include "terminal-frame-open.njk" %}
 
 <svg class="comms__sprite" aria-hidden="true" focusable="false"><defs>
@@ -39,45 +47,45 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 <section class="comms">
   <div class="comms__onboard" id="comms-onboard" hidden>
     <div class="comms__onboard-step" id="comms-onboard-insecure" hidden>
-      <h2 class="comms__onboard-h">This page needs a secure connection</h2>
-      <p class="comms__onboard-p">Your browser only allows the encryption comms depends on over <strong>https</strong>. You're on a plain http address, so keys can't be created here.</p>
-      <p class="comms__onboard-p">Open <a class="comms__url" href="https://mentria.ai/comms/">https://mentria.ai/comms/</a> instead — or use an https address if you're testing locally.</p>
+      <h2 class="comms__onboard-h">{{ 'tool.comms.onboard.insecure_title' | t }}</h2>
+      <p class="comms__onboard-p">{{ 'tool.comms.onboard.insecure_body' | t | safe }}</p>
+      <p class="comms__onboard-p">{{ 'tool.comms.onboard.insecure_open' | t | replace('{link}', '<a class="comms__url" href="' + commsHttps + '">' + commsHttps + '</a>') | safe }}</p>
     </div>
     <div class="comms__onboard-step" id="comms-onboard-intro">
-      <h2 class="comms__onboard-h">Private chat that runs on your devices</h2>
-      <p class="comms__onboard-p">Messages, calls and files go straight to the other person — encrypted end to end. No account, no phone number, and no server that can read them.</p>
-      <button class="comms__btn comms__btn--big" id="comms-onboard-start" type="button">get started</button>
-      <p class="comms__onboard-fine">Takes about ten seconds. Everything stays on your device.</p>
+      <h2 class="comms__onboard-h">{{ 'tool.comms.onboard.intro_title' | t }}</h2>
+      <p class="comms__onboard-p">{{ 'tool.comms.onboard.intro_body' | t }}</p>
+      <button class="comms__btn comms__btn--big" id="comms-onboard-start" type="button">{{ 'tool.comms.onboard.start' | t }}</button>
+      <p class="comms__onboard-fine">{{ 'tool.comms.onboard.intro_fine' | t }}</p>
     </div>
     <div class="comms__onboard-step" id="comms-onboard-form" hidden>
-      <h2 class="comms__onboard-h">What should people call you?</h2>
-      <input class="comms__input comms__input--big" id="comms-onboard-name" type="text" maxlength="32" placeholder="your name" autocomplete="nickname" enterkeyhint="done">
-      <button class="comms__btn comms__btn--big" id="comms-onboard-create" type="button">create my identity</button>
-      <p class="comms__onboard-fine" id="comms-onboard-hint">Your device will ask for Face&nbsp;ID, Touch&nbsp;ID or your screen lock to protect it.</p>
+      <h2 class="comms__onboard-h">{{ 'tool.comms.onboard.name_title' | t }}</h2>
+      <input class="comms__input comms__input--big" id="comms-onboard-name" type="text" maxlength="32" placeholder="{{ 'tool.comms.onboard.name_placeholder' | t }}" autocomplete="nickname" enterkeyhint="done">
+      <button class="comms__btn comms__btn--big" id="comms-onboard-create" type="button">{{ 'tool.comms.onboard.create' | t }}</button>
+      <p class="comms__onboard-fine" id="comms-onboard-hint">{{ 'tool.comms.onboard.hint' | t }}</p>
       <p class="comms__onboard-err" id="comms-onboard-err" hidden></p>
     </div>
     <div class="comms__onboard-step" id="comms-onboard-done" hidden>
-      <h2 class="comms__onboard-h">You're set up</h2>
+      <h2 class="comms__onboard-h">{{ 'tool.comms.onboard.done_title' | t }}</h2>
       <p class="comms__onboard-p" id="comms-onboard-method"></p>
-      <p class="comms__onboard-p">Save this recovery code somewhere safe. It's the only way back in if you lose your devices — you won't need it day to day.</p>
+      <p class="comms__onboard-p">{{ 'tool.comms.onboard.done_body' | t }}</p>
       <code class="comms__recovery" id="comms-onboard-code"></code>
       <div class="comms__onboard-actions">
-        <button class="comms__btn comms__btn--ghost" id="comms-onboard-copy" type="button">copy code</button>
-        <button class="comms__btn" id="comms-onboard-passkey" type="button" hidden>protect with face id / touch id</button>
-        <button class="comms__btn comms__btn--big" id="comms-onboard-continue" type="button">start chatting</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-onboard-copy" type="button">{{ 'tool.comms.onboard.copy_code' | t }}</button>
+        <button class="comms__btn" id="comms-onboard-passkey" type="button" hidden>{{ 'tool.comms.onboard.passkey' | t }}</button>
+        <button class="comms__btn comms__btn--big" id="comms-onboard-continue" type="button">{{ 'tool.comms.onboard.continue' | t }}</button>
       </div>
     </div>
   </div>
 
   <div class="comms__lock" id="comms-id-locked" hidden>
-    <p class="comms__lock-h">Welcome back</p>
+    <p class="comms__lock-h">{{ 'tool.comms.lock.title' | t }}</p>
     <p class="comms__lock-waiting" id="comms-lock-waiting" hidden></p>
-    <button class="comms__btn comms__btn--big" id="comms-id-passkey" type="button" hidden>unlock</button>
+    <button class="comms__btn comms__btn--big" id="comms-id-passkey" type="button" hidden>{{ 'tool.comms.lock.unlock' | t }}</button>
     <details class="comms__lock-alt" id="comms-lock-alt">
-      <summary>use my recovery code instead</summary>
+      <summary>{{ 'tool.comms.lock.use_code' | t }}</summary>
       <div class="comms__lock-row">
-        <input class="comms__input" id="comms-id-pass" type="password" placeholder="recovery code or passphrase" autocomplete="current-password">
-        <button class="comms__btn" id="comms-id-unlock" type="button">unlock</button>
+        <input class="comms__input" id="comms-id-pass" type="password" placeholder="{{ 'tool.comms.lock.code_placeholder' | t }}" autocomplete="current-password">
+        <button class="comms__btn" id="comms-id-unlock" type="button">{{ 'tool.comms.lock.unlock' | t }}</button>
       </div>
     </details>
     <span class="comms__id-note" id="comms-id-err"></span>
@@ -87,95 +95,97 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
     <div class="comms__profile" id="comms-profile">
       <div class="comms__id-row comms__id-row--you" id="comms-id-on" hidden>
         <span class="comms__avatar comms__avatar--me" id="comms-prof-avatar" aria-hidden="true"></span>
-        <input class="comms__input comms__input--short" id="comms-id-name" type="text" maxlength="32" placeholder="display name" autocomplete="nickname" aria-label="your display name">
-        <span class="comms__badge comms__badge--fp" id="comms-id-fp" title="your identity fingerprint"></span>
+        <input class="comms__input comms__input--short" id="comms-id-name" type="text" maxlength="32" placeholder="{{ 'tool.comms.profile.name_placeholder' | t }}" autocomplete="nickname" aria-label="{{ 'tool.comms.profile.name_label' | t }}">
+        <span class="comms__badge comms__badge--fp" id="comms-id-fp" title="{{ 'tool.comms.profile.fp_title' | t }}"></span>
       </div>
       <span class="comms__profile-spacer"></span>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-adv-toggle" type="button" aria-expanded="false" title="settings and rooms" aria-label="settings and rooms"><svg class="comms__i" aria-hidden="true"><use href="#ci-gear"></use></svg></button>
+      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-adv-toggle" type="button" aria-expanded="false" title="{{ 'tool.comms.profile.settings' | t }}" aria-label="{{ 'tool.comms.profile.settings' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-gear"></use></svg></button>
     </div>
 
     <div class="comms__upgrade" id="comms-pk-upgrade" hidden>
-      <span class="comms__upgrade-text">Unlock with Face ID / Touch ID next time instead of typing your code?</span>
+      <span class="comms__upgrade-text">{{ 'tool.comms.passkey.offer' | t }}</span>
       <div class="comms__upgrade-actions">
-        <button class="comms__btn" id="comms-pk-enroll" type="button">add face id / touch id</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-pk-later" type="button">not now</button>
+        <button class="comms__btn" id="comms-pk-enroll" type="button">{{ 'tool.comms.passkey.add' | t }}</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-pk-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
       </div>
       <span class="comms__id-note" id="comms-pk-err" hidden></span>
     </div>
 
     <div class="comms__chathead" id="comms-chathead">
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-leave" type="button" hidden title="back to your people" aria-label="back to your people"><svg class="comms__i" aria-hidden="true"><use href="#ci-back"></use></svg></button>
+      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-leave" type="button" hidden title="{{ 'tool.comms.chat.back' | t }}" aria-label="{{ 'tool.comms.chat.back' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-back"></use></svg></button>
       <span class="comms__avatar" id="comms-chat-avatar" aria-hidden="true"></span>
       <div class="comms__chathead-mid">
         <span class="comms__chathead-name" id="comms-chat-title"></span>
         <span class="comms__chathead-sub">
-          <span class="comms__sub-bit" id="comms-status">not in a chat</span>
-          <span class="comms__sub-bit" id="comms-enc" title="end-to-end encrypted — only people in this chat can read it" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></span>
-          <span class="comms__sub-bit" id="comms-eph" title="messages aren't saved (room starts with !)" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clock"></use></svg></span>
+          <span class="comms__sub-bit" id="comms-status">{{ 'tool.comms.chat.not_in_chat' | t }}</span>
+          <span class="comms__sub-bit" id="comms-enc" title="{{ 'tool.comms.chat.enc_title' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></span>
+          <span class="comms__sub-bit" id="comms-eph" title="{{ 'tool.comms.chat.eph_bang' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clock"></use></svg></span>
           <span class="comms__sub-bit" id="comms-peers" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg><span id="comms-peers-n">0</span></span>
         </span>
       </div>
-      <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="start a call" aria-label="start a call"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg></button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="camera" aria-label="camera"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-mic" type="button" hidden aria-pressed="true" title="microphone" aria-label="microphone"><svg class="comms__i" aria-hidden="true"><use href="#ci-mic"></use></svg></button>
-      <button class="comms__btn comms__btn--danger comms__btn--icon" id="comms-call-hangup" type="button" hidden title="hang up" aria-label="hang up"><svg class="comms__i" aria-hidden="true"><use href="#ci-hangup"></use></svg></button>
+      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-share" type="button" hidden title="{{ 'tool.comms.chat.share_room' | t }}" aria-label="{{ 'tool.comms.chat.share_room' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg></button>
+      <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="{{ 'tool.comms.chat.call' | t }}" aria-label="{{ 'tool.comms.chat.call' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg></button>
+      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.chat.camera' | t }}" aria-label="{{ 'tool.comms.chat.camera' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
+      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-mic" type="button" hidden aria-pressed="true" title="{{ 'tool.comms.chat.mic' | t }}" aria-label="{{ 'tool.comms.chat.mic' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-mic"></use></svg></button>
+      <button class="comms__btn comms__btn--danger comms__btn--icon" id="comms-call-hangup" type="button" hidden title="{{ 'tool.comms.chat.hangup' | t }}" aria-label="{{ 'tool.comms.chat.hangup' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-hangup"></use></svg></button>
     </div>
 
     <div class="comms__notif" id="comms-notif" hidden>
-      <span class="comms__notif-text">get a notification when a message arrives — even with comms closed</span>
-      <button class="comms__btn" id="comms-notif-enable" type="button">enable</button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-notif-dismiss" type="button" title="not now" aria-label="not now"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus" style="transform:rotate(45deg);transform-origin:center"></use></svg></button>
+      <span class="comms__notif-text">{{ 'tool.comms.notif.text' | t }}</span>
+      <button class="comms__btn" id="comms-notif-enable" type="button">{{ 'tool.comms.notif.enable' | t }}</button>
+      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-notif-dismiss" type="button" title="{{ 'tool.comms.notif.dismiss' | t }}" aria-label="{{ 'tool.comms.notif.dismiss' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus" style="transform:rotate(45deg);transform-origin:center"></use></svg></button>
     </div>
 
     <div class="comms__id-row" id="comms-id-none" hidden>
-      <span class="comms__id-note">you're in a shared room as a guest. set up an identity to use your name, contacts and direct messages.</span>
-      <button class="comms__btn comms__btn--ghost" id="comms-id-setup-here" type="button">set up</button>
+      <span class="comms__id-note">{{ 'tool.comms.guest.note' | t }}</span>
+      <button class="comms__btn comms__btn--ghost" id="comms-id-setup-here" type="button">{{ 'tool.comms.guest.setup' | t }}</button>
     </div>
 
     <div class="comms__contacts" id="comms-contacts" hidden>
       <div class="comms__contacts-head">
-        <span class="comms__lbl">people</span>
-        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share" type="button" aria-pressed="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span class="comms__btn-t" id="comms-id-share-t">my code</span></button>
-        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-add-toggle" type="button" aria-expanded="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus"></use></svg><span class="comms__btn-t" id="comms-add-toggle-t">add someone</span></button>
-        <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false" hidden>contacts</button>
+        <span class="comms__lbl">{{ 'tool.comms.people.heading' | t }}</span>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share" type="button" aria-pressed="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span class="comms__btn-t" id="comms-id-share-t">{{ 'tool.comms.people.my_code' | t }}</span></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-add-toggle" type="button" aria-expanded="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus"></use></svg><span class="comms__btn-t" id="comms-add-toggle-t">{{ 'tool.comms.people.add' | t }}</span></button>
+        <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false" hidden>{{ 'tool.comms.people.contacts' | t }}</button>
       </div>
       <div class="comms__id-card" id="comms-id-card" hidden>
         <canvas class="comms__id-qr" id="comms-id-qr" width="0" height="0"></canvas>
         <div class="comms__id-card-side">
-          <p class="comms__id-note">scan or paste this code on another person's device to become contacts. it contains your public key, never your secrets.</p>
+          <p class="comms__id-note">{{ 'tool.comms.people.code_note' | t }}</p>
           <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
           <div class="comms__id-card-actions">
-          <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">copy code</button>
-          <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share-out" type="button" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg><span class="comms__btn-t">share</span></button>
+          <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">{{ 'tool.comms.people.copy_code' | t }}</button>
+          <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share-out" type="button" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg><span class="comms__btn-t">{{ 'tool.comms.people.share' | t }}</span></button>
         </div>
         </div>
       </div>
       <div class="comms__add" id="comms-add" hidden>
-        <button class="comms__addopt" id="comms-scan" type="button"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span>scan their code</span></button>
+        <button class="comms__addopt" id="comms-scan" type="button"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span>{{ 'tool.comms.people.scan' | t }}</span></button>
         <div class="comms__scan" id="comms-scan-wrap" hidden>
           <video class="comms__scan-video" id="comms-scan-video" playsinline muted></video>
           <div class="comms__scan-zoom" id="comms-scan-zoom-wrap" hidden>
             <svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg>
-            <input type="range" id="comms-scan-zoom" min="1" max="5" step="0.1" value="1" aria-label="camera zoom">
+            <input type="range" id="comms-scan-zoom" min="1" max="5" step="0.1" value="1" aria-label="{{ 'tool.comms.people.zoom' | t }}">
           </div>
-          <p class="comms__id-note" id="comms-scan-note">point the camera at their “my code” screen</p>
+          <p class="comms__id-note" id="comms-scan-note">{{ 'tool.comms.people.scan_hint' | t }}</p>
           <div class="comms__scan-actions">
-            <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-scan-torch" type="button" hidden aria-pressed="false" title="flashlight" aria-label="flashlight"><svg class="comms__i" aria-hidden="true"><use href="#ci-flash"></use></svg></button>
-            <button class="comms__btn comms__btn--ghost" id="comms-scan-stop" type="button">cancel</button>
+            <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-scan-torch" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.people.torch' | t }}" aria-label="{{ 'tool.comms.people.torch' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-flash"></use></svg></button>
+            <button class="comms__btn comms__btn--ghost" id="comms-scan-stop" type="button">{{ 'tool.comms.people.cancel' | t }}</button>
           </div>
         </div>
         <div class="comms__contacts-add">
-          <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="…or paste a contact code (MC1.…)" spellcheck="false" autocapitalize="off">
-          <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">add</button>
+          <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="{{ 'tool.comms.people.paste_placeholder' | t }}" spellcheck="false" autocapitalize="off">
+          <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">{{ 'tool.comms.people.add_btn' | t }}</button>
         </div>
+        <p class="comms__add-err" id="comms-add-err" role="alert" hidden></p>
       </div>
       <div class="comms__contacts-list" id="comms-contacts-list"></div>
     </div>
 
     <div class="comms__ring" id="comms-ring" hidden>
-      <span class="comms__ring-text" id="comms-ring-text">incoming call</span>
-      <button class="comms__btn" id="comms-ring-accept" type="button">accept</button>
-      <button class="comms__btn comms__btn--ghost" id="comms-ring-decline" type="button">decline</button>
+      <span class="comms__ring-text" id="comms-ring-text">{{ 'tool.comms.ring.incoming' | t }}</span>
+      <button class="comms__btn" id="comms-ring-accept" type="button">{{ 'tool.comms.ring.accept' | t }}</button>
+      <button class="comms__btn comms__btn--ghost" id="comms-ring-decline" type="button">{{ 'tool.comms.ring.decline' | t }}</button>
     </div>
 
     <div class="comms__chatbody" id="comms-drop">
@@ -185,61 +195,58 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
     </div>
 
     <form class="comms__send" id="comms-send" autocomplete="off">
-      <label class="comms__attach" title="send a file" aria-label="send a file"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
-      <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="message" disabled>
-      <button class="comms__btn comms__btn--send" id="comms-go" type="submit" disabled title="send" aria-label="send"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
+      <label class="comms__attach" title="{{ 'tool.comms.chat.attach' | t }}" aria-label="{{ 'tool.comms.chat.attach' | t }}"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
+      <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled>
+      <button class="comms__btn comms__btn--send" id="comms-go" type="submit" disabled title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
     </form>
 
     <div class="comms__adv" id="comms-adv" hidden>
       <div class="comms__adv-sec">
-        <span class="comms__lbl">room</span>
+        <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
         <div class="comms__room">
-          <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" lang="en" dir="ltr" autocapitalize="off" placeholder="!ephemeral">
-          <button class="comms__btn" id="comms-join" type="button">join</button>
-          <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button">new room link</button>
+          <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="{{ 'tool.comms.adv.room_placeholder' | t }}">
+          <button class="comms__btn" id="comms-join" type="button">{{ 'tool.comms.adv.join' | t }}</button>
+        </div>
+        <div class="comms__room-new">
+          <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button" title="{{ 'tool.comms.adv.new_room_title' | t }}">{{ 'tool.comms.adv.new_room' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-newsaved" type="button" title="{{ 'tool.comms.adv.new_saved_title' | t }}">{{ 'tool.comms.adv.new_saved' | t }}</button>
         </div>
       </div>
       <div class="comms__adv-sec">
-        <span class="comms__lbl">privacy</span>
+        <span class="comms__lbl">{{ 'tool.comms.adv.privacy' | t }}</span>
         <button class="comms__relay" id="comms-relay" type="button" role="switch" aria-checked="false">
           <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6v5c0 4.4 3 7.9 7 9 4-1.1 7-4.6 7-9V6Z"></path><path d="M9.4 11.8l1.9 1.9 3.3-3.4"></path></svg>
-          <span class="comms__relay-lbl">hide my ip</span>
+          <span class="comms__relay-lbl">{{ 'tool.comms.adv.hide_ip' | t }}</span>
           <span class="comms__relay-track" aria-hidden="true"><span class="comms__relay-thumb"></span></span>
         </button>
-        <p class="comms__relay-note" id="comms-relay-note" hidden>traffic routes through the mentria relay — peers only see the relay's address, not yours. slightly slower. applies when you next join.</p>
-      </div>
-      <div class="comms__share" id="comms-share" hidden>
-        <span class="comms__lbl">share</span>
-        <code class="comms__url" id="comms-url"></code>
-        <button class="comms__btn comms__btn--ghost" id="comms-copy" type="button">copy</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-genkey" type="button" title="generate a fresh encryption key and append it to the URL">+ key</button>
+        <p class="comms__relay-note" id="comms-relay-note" hidden>{{ 'tool.comms.adv.relay_note' | t }}</p>
       </div>
       <div class="comms__adv-sec comms__adv-sec--col">
         <div class="comms__adv-row">
-          <span class="comms__lbl">notifications</span>
-          <button class="comms__btn comms__btn--ghost" id="comms-push-test" type="button">test my notifications</button>
+          <span class="comms__lbl">{{ 'tool.comms.adv.notifications' | t }}</span>
+          <button class="comms__btn comms__btn--ghost" id="comms-push-test" type="button">{{ 'tool.comms.adv.test' | t }}</button>
         </div>
         <span class="comms__id-note" id="comms-push-status">…</span>
         <span class="comms__id-note comms__push-log" id="comms-push-test-log" hidden></span>
       </div>
       <div class="comms__adv-sec">
-        <span class="comms__lbl">this device</span>
-        <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">sound: on</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">attach extension</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">attach learning pack</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>add face id / touch id</button>
-        <a class="comms__btn comms__btn--ghost" href="/about/">identity settings</a>
+        <span class="comms__lbl">{{ 'tool.comms.adv.device' | t }}</span>
+        <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">{{ 'tool.comms.adv.sound_on' | t }}</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">{{ 'tool.comms.adv.attach_ext' | t }}</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">{{ 'tool.comms.adv.attach_pack' | t }}</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>{{ 'tool.comms.passkey.add' | t }}</button>
+        <a class="comms__btn comms__btn--ghost" href="{{ locale.pathPrefix }}/about/">{{ 'tool.comms.adv.identity' | t }}</a>
       </div>
     </div>
   </div>
 
   <div class="comms__picker" id="comms-picker" hidden>
     <div class="comms__picker-backdrop" data-picker-close></div>
-    <div class="comms__picker-card" role="dialog" aria-modal="true" aria-label="share extension">
-      <h3 class="comms__picker-h">share extension</h3>
+    <div class="comms__picker-card" role="dialog" aria-modal="true" aria-label="{{ 'tool.comms.picker.title' | t }}">
+      <h3 class="comms__picker-h">{{ 'tool.comms.picker.title' | t }}</h3>
       <div class="comms__picker-list" id="comms-picker-list"></div>
       <div class="comms__picker-actions">
-        <button type="button" class="comms__btn comms__btn--ghost" data-picker-close>cancel</button>
+        <button type="button" class="comms__btn comms__btn--ghost" data-picker-close>{{ 'tool.comms.picker.cancel' | t }}</button>
       </div>
     </div>
   </div>
@@ -252,23 +259,19 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__onboard,.comms__lock{margin-top:auto;margin-bottom:auto}
 .comms [hidden]{display:none !important}
 .comms__onboard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;padding:2.5rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px}
-.comms__onboard[hidden]{display:none}
 .comms__onboard-step{display:flex;flex-direction:column;align-items:center;gap:.9rem;width:100%;max-width:30rem}
-.comms__onboard-step[hidden]{display:none}
 .comms__onboard-h{margin:0;font-size:1.05rem;color:var(--accent,#6ef3c5);letter-spacing:.02em;line-height:1.4;text-transform:none}
 .comms__onboard-p{margin:0;color:#c3ccd6;font-size:.85rem;line-height:1.65;max-width:26rem}
 .comms__onboard-fine{margin:0;color:#7a838d;font-size:.75rem;line-height:1.5}
 .comms__onboard-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
-.comms__onboard-err[hidden]{display:none}
+.comms__add-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
 .comms__onboard-actions{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
 .comms__btn--big{padding:.7rem 1.6rem;font-size:.92rem;min-height:44px}
 .comms__input--big{max-width:18rem;text-align:center;padding:.6rem .8rem;font-size:.95rem;flex:none;width:100%}
 .comms__recovery{display:block;width:100%;max-width:24rem;background:#0a0d10;border:1px dashed var(--accent,#6ef3c5);border-radius:6px;padding:.7rem;color:var(--accent,#6ef3c5);font-size:.95rem;letter-spacing:.12em;word-break:break-all;line-height:1.6}
 .comms__lock{display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:2rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px;text-align:center}
-.comms__lock[hidden]{display:none}
 .comms__lock-h{margin:0;color:#c3ccd6;font-size:.95rem}
 .comms__lock-waiting{margin:0;color:var(--accent,#6ef3c5);font-size:.8rem}
-.comms__lock-waiting[hidden]{display:none}
 .comms__lock-alt{width:100%;max-width:24rem;color:#7a838d;font-size:.78rem}
 .comms__lock-alt summary{cursor:pointer;list-style:none;padding:.3rem}
 .comms__lock-alt summary::-webkit-details-marker{display:none}
@@ -276,14 +279,11 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__lock-row{display:none;gap:.5rem;margin-top:.6rem}
 .comms__lock-alt[open] .comms__lock-row{display:flex}
 .comms__app{display:flex;flex-direction:column;gap:.75rem}
-.comms__app[hidden]{display:none}
-.comms__topline{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
 .comms__id-row--you{flex:1;min-width:13rem}
-.comms__btn--gear{min-width:2.4rem;padding:.4rem .6rem;font-size:1rem;line-height:1}
 .comms__contacts-head{display:flex;gap:.5rem;align-items:center}
+.comms__contacts-head .comms__btn{white-space:nowrap}
 .comms__contacts-head .comms__lbl{flex:1}
 .comms__adv{display:flex;flex-direction:column;gap:.75rem;background:#0a0d10;border:1px dashed #2a3138;border-radius:8px;padding:.85rem}
-.comms__adv[hidden]{display:none}
 .comms__relay{display:flex;align-items:center;gap:.55rem;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
 .comms__relay svg{color:#8b97a3;transition:color .25s}
 .comms__relay[aria-checked="true"] svg{color:var(--accent,#6ef3c5)}
@@ -301,32 +301,29 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 @media (max-width:640px){
   .comms__onboard{padding:1.75rem 1rem}
   .comms__onboard-h{font-size:1rem}
-  .comms__topline{gap:.5rem}
 }
-.comms__bar{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
-.comms__room{display:flex;gap:.5rem;align-items:center;flex:1;min-width:14rem}
-.comms__meta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
-.comms__lbl{color:var(--muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
+.comms__room{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;flex:1;min-width:14rem}
+.comms__room-new{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.comms__lbl{color:var(--term-muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
 .comms__input{background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.45rem .6rem;border-radius:6px;font-family:inherit;font-size:.9rem;flex:1;min-width:6rem}
 .comms__input:focus{outline:none;border-color:var(--accent,#6ef3c5)}
 .comms__btn{background:transparent;border:1px solid var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);padding:.4rem .8rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer;text-transform:lowercase;letter-spacing:.05em}
 
 .comms__btn:disabled{opacity:.4;cursor:not-allowed}
 .comms__btn--ghost{border-color:#3a4148;color:#9ba6b1}
+.comms:lang(ja) .comms__btn,.comms:lang(ja) .comms__lbl,.comms:lang(ja) .comms__picker-h,.comms:lang(ja) .comms__resend{text-transform:none}
 
 .comms__badge{background:#1a1f24;border:1px solid #2a3138;color:#9ba6b1;padding:.3rem .55rem;border-radius:4px;font-size:.75rem;text-transform:lowercase;letter-spacing:.05em}
-.comms__badge--peers{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
 .comms__badge--offline{border-color:#e05c5c;color:#e05c5c}
 .comms__send--offline{opacity:.55}
 .comms__line--pending .comms__what{color:#9ba6b1}
 .comms__pending-note{color:#d9a84e;font-style:italic;font-size:.75rem;margin-left:.45rem}
 .comms__resend{margin-left:.5rem;background:none;border:1px solid #2a3138;color:var(--accent,#6ef3c5);border-radius:4px;padding:.1rem .5rem;font:inherit;font-size:.72rem;cursor:pointer;text-transform:lowercase}
 
-.comms__share{display:flex;gap:.5rem;align-items:center;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.5rem .75rem;flex-wrap:wrap}
 .comms__url{color:#e6edf3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
 .comms__log{min-height:14rem;max-height:24rem;overflow-y:auto;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.75rem;display:flex;flex-direction:column;gap:.4rem}
 .comms__line{display:flex;gap:.5rem;align-items:baseline;line-height:1.4}
-.comms__who{color:var(--accent,#6ef3c5);font-size:.72rem;min-width:5.5rem;text-transform:lowercase;letter-spacing:.05em}
+.comms__who{color:var(--accent,#6ef3c5);font-size:.72rem;min-width:5.5rem;letter-spacing:.05em}
 .comms__who--sys{color:#7a838d}
 .comms__who--me{color:#a8b6c5}
 .comms__what{color:#e6edf3;word-break:break-word;flex:1}
@@ -342,35 +339,31 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__what blockquote { margin: .35em 0 0; padding-left: .7em; border-left: 2px solid rgba(127,127,127,.4); }
 .comms__what--sys{color:#7a838d;font-style:italic}
 .comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
-.comms__drop{display:block;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;text-align:center;color:#7a838d;font-size:.82rem;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
 
 .comms__drop--hot{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);background:rgba(110,243,197,.04)}
 .comms__prog{display:inline-block;width:96px;height:6px;background:#1a1f24;border-radius:3px;overflow:hidden;margin:0 .4rem;vertical-align:middle}
 .comms__prog-fill{display:block;height:100%;background:var(--accent,#6ef3c5);width:0%;transition:width .12s linear}
 .comms__thumb{display:block;margin-top:.4rem;max-width:240px;max-height:180px;border:1px solid #2a3138;border-radius:4px;cursor:zoom-in}
 .comms__peerlist{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;padding:.2rem 0}
-.comms__chip{font-family:var(--font-mono);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;border:1px solid currentColor;line-height:1;letter-spacing:.05em;text-transform:lowercase}
-.comms__time{color:#5a636d;font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
+.comms__chip{font-family:var(--font-mono);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;border:1px solid currentColor;line-height:1;letter-spacing:.05em}
+.comms__time{color:var(--term-subtle);font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
 .comms__btn--mute{min-width:5.5rem}
 .comms__btn--mute[aria-pressed="true"]{color:#7a838d;border-color:#3a4148}
-.comms__badge--eph{border-color:#d9a84e;color:#d9a84e;cursor:help}
-.comms__badge--enc{border-color:#9b6fd4;color:#9b6fd4;cursor:help}
 .comms__send{display:flex;gap:.5rem;align-items:center}
 .comms__input--msg{min-width:0}
 .comms__picker{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem}
-.comms__picker[hidden]{display:none}
 .comms__picker-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
 .comms__picker-card{position:relative;z-index:1;background:#0d1014;border:1px solid #2a3138;border-radius:8px;padding:1rem;width:100%;max-width:24rem;max-height:80vh;overflow:auto;display:flex;flex-direction:column;gap:.7rem}
 .comms__picker-h{margin:0;font-size:.9rem;color:var(--accent,#6ef3c5);text-transform:lowercase;letter-spacing:.05em}
 .comms__picker-list{display:flex;flex-direction:column;gap:.4rem}
 .comms__picker-item{display:flex;justify-content:space-between;align-items:center;gap:.7rem;width:100%;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.5rem .7rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer}
 
-.comms__picker-ver{color:var(--muted);font-size:.75rem;flex:none}
+.comms__picker-ver{color:var(--term-muted);font-size:.75rem;flex:none}
 .comms__picker-actions{display:flex;justify-content:flex-end}
 .comms__id-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.5rem .75rem}
 .comms__id-note{color:#7a838d;font-size:.78rem}
 .comms__input--short{max-width:13rem;flex:0 1 auto}
-.comms__id-card{display:flex;gap:1rem;align-items:flex-start;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;flex-wrap:wrap}
+.comms__id-card{display:flex;gap:1rem;align-items:flex-start;justify-content:center;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;flex-wrap:wrap}
 .comms__id-qr{border-radius:4px;flex:none}
 .comms__id-card-side{display:flex;flex-direction:column;gap:.5rem;flex:1;min-width:12rem}
 .comms__id-card-actions{display:flex;gap:.5rem;flex-wrap:wrap}
@@ -395,7 +388,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__btn:hover:not(:disabled){background:var(--accent,#6ef3c5);color:#0a0d10}
 .comms__btn--ghost:hover{background:#3a4148;color:#e6edf3}
 .comms__btn--danger:hover:not(:disabled){background:#e5534b;color:#0a0d10}
-.comms__drop:hover{border-color:#3a424a;color:#9ba6b1}
 .comms__contact:hover{background:#10151a}
 .comms__contact:hover .comms__rowbtn{opacity:1}
 .comms__rowbtn:hover{color:#e5534b}
@@ -408,9 +400,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 
 .comms__badge{display:inline-flex;align-items:center;gap:.3rem}
 .comms__add{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;padding-top:.6rem;border-top:1px solid #14181d}
-.comms__add[hidden]{display:none}
 .comms__scan{display:flex;flex-direction:column;gap:.5rem;align-items:flex-start}
-.comms__scan[hidden]{display:none}
 .comms__scan-video{width:100%;max-width:18rem;border-radius:8px;border:1px solid #2a3138;background:#000;aspect-ratio:1;object-fit:cover}
 @media (max-width:640px){
   .comms__btn--icon .comms__btn-t{display:none}
@@ -418,13 +408,12 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 }
 .comms__contact:last-child{border-bottom:none}
 .comms__contact-name{color:#e6edf3;font-size:.85rem}
-.comms__contact-fp{color:#5a636d;font-size:.7rem}
-.comms__rooms-head{color:#5a636d;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 0 .15rem}
+.comms__contact-fp{color:var(--term-subtle);font-size:.7rem}
+.comms__rooms-head{color:var(--term-subtle);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 0 .15rem}
 .comms__avatar--room{display:inline-flex;align-items:center;justify-content:center;color:#9b6fd4}
 .comms__roomrow--current .comms__contact-name{color:var(--accent,#6ef3c5)}
 .comms__room-rename{max-width:12rem;padding:.15rem .4rem;font-size:.85rem}
 .comms__rowbtn--text{font-size:.72rem;letter-spacing:.04em;padding:.15rem .4rem;opacity:.7}
-.comms__contact-spacer{flex:1}
 .comms__chip-add{margin-left:.3rem;border:none;background:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0}
 .comms__btn--danger{border-color:#e5534b;color:#e5534b}
 
@@ -437,19 +426,18 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__tile-voice{color:var(--accent,#6ef3c5);font-size:1.3rem}
 
 .comms__upgrade{display:flex;align-items:center;gap:.6rem .9rem;flex-wrap:wrap;padding:.6rem .8rem;margin-bottom:.6rem;border:1px solid rgba(110,243,197,.35);border-radius:8px;background:rgba(110,243,197,.06)}
-.comms__upgrade[hidden]{display:none}
 .comms__upgrade-text{flex:1 1 14rem;color:#c3ccd6;font-size:.82rem}
 .comms__upgrade-actions{display:flex;gap:.5rem;flex-wrap:wrap}
 .comms__app--chat .comms__upgrade{display:none}
 .comms__profile{display:flex;align-items:center;gap:.6rem}
 .comms__profile-spacer{flex:1}
-.comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
+.comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);justify-content:start;grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
 .comms__id-row--you .comms__avatar{grid-area:av}
 .comms__id-row--you .comms__input{grid-area:input;width:100%}
 .comms__id-row--you .comms__badge--fp{grid-area:fp;justify-self:start}
 .comms__avatar{width:2.3rem;height:2.3rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex:none;user-select:none}
 .comms__avatar--me{width:2.1rem;height:2.1rem}
-.comms__badge--fp{border:0;background:transparent;color:#5a636d;padding:0;font-size:.7rem}
+.comms__badge--fp{border:0;background:transparent;color:var(--term-subtle);padding:0;font-size:.7rem}
 .comms__app--people #comms-chathead{display:none}
 .comms__app--people .comms__chatbody{display:none}
 .comms__app--people .comms__send{display:none}
@@ -461,8 +449,9 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__chathead{display:flex;align-items:center;gap:.55rem;padding:.1rem 0 .55rem;border-bottom:1px solid #14181d}
 .comms__chathead-mid{display:flex;flex-direction:column;gap:.12rem;flex:1;min-width:0}
 .comms__chathead-name{color:#e6edf3;font-size:.95rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.comms__chathead-sub{display:flex;align-items:center;gap:.55rem;color:#7a838d;font-size:.72rem;min-width:0}
+.comms__chathead-sub{display:flex;align-items:center;gap:.55rem;color:#7a838d;font-size:.72rem;min-width:0;overflow:hidden}
 .comms__sub-bit{display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap}
+#comms-status.comms__sub-bit{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
 #comms-enc.comms__sub-bit{color:#9b6fd4}
 #comms-eph.comms__sub-bit{color:#d9a84e}
 .comms__chathead .comms__btn--icon,.comms__profile .comms__btn--icon{width:2.4rem;height:2.4rem;border-radius:50%;padding:0;justify-content:center}
@@ -474,7 +463,7 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__line--me{align-items:flex-end}
 .comms__line--sys{align-items:center}
 .comms__who{min-width:0;font-size:.68rem;letter-spacing:.04em;padding:0 .45rem}
-.comms__who--me{color:#5a636d;font-size:.62rem}
+.comms__who--me{color:var(--term-subtle);font-size:.62rem}
 .comms__what{flex:none;width:fit-content;max-width:min(52ch,84%);background:#161c23;border-radius:14px 14px 14px 5px;padding:.5rem .75rem;line-height:1.45}
 .comms__line--me .comms__what{background:#12352a;border-radius:14px 14px 5px 14px}
 .comms__line--sys .comms__what{background:#10151a;border:1px solid #171d24;border-radius:999px;padding:.28rem .75rem;font-size:.72rem;color:#6a737d;font-style:normal;text-align:center;max-width:94%}
@@ -490,7 +479,10 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__contacts-head{padding:0 .1rem}
 .comms__contact{gap:.65rem;padding:.55rem .45rem;border-bottom:1px solid #12161b;cursor:pointer;border-radius:10px;flex-wrap:nowrap;min-height:52px}
 
-.comms__contact:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:-2px}
+.comms__contact-open{display:flex;flex:1;min-width:0;align-items:center;background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.comms__contact-open:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:2px}
+.comms__contact:has(> .comms__contact-open:focus-visible){outline:2px solid var(--accent,#6ef3c5);outline-offset:-2px}
+.comms__contact:has(> .comms__contact-open:focus-visible) .comms__contact-open{outline:none}
 .comms__contact--req{cursor:default}
 .comms__contact--req:hover{background:rgba(110,243,197,.05)}
 .comms__contact-mid{display:flex;flex-direction:column;gap:.12rem;flex:1;min-width:0}
@@ -505,7 +497,6 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 .comms__chev{color:#3a4148;flex:none;display:flex;align-items:center}
 .comms__contacts-empty{padding:.65rem .3rem}
 .comms__notif{display:flex;align-items:center;gap:.6rem;background:rgba(110,243,197,.05);border:1px solid rgba(110,243,197,.25);border-radius:10px;padding:.55rem .75rem}
-.comms__notif[hidden]{display:none}
 .comms__notif-text{flex:1;color:#c3ccd6;font-size:.78rem;line-height:1.45}
 .comms__app--chat .comms__notif{display:none}
 .comms__addopt{display:flex;align-items:center;gap:.65rem;width:100%;background:#0a0d10;border:1px solid #2a3138;border-radius:12px;padding:.75rem .85rem;color:#e6edf3;font:inherit;font-size:.88rem;cursor:pointer;min-height:48px;transition:border-color .15s}
@@ -530,14 +521,45 @@ description: Peer-to-peer chat, calls and file drop — end-to-end encrypted, no
 </style>
 
 <script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
-<script src="/assets/js/qrcode.js?v={{ buildHash }}"></script>
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 <script type="module">
 import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/assets/vendor/trystero-nostr.js';
 import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
-import '/assets/js/mentria-packs.js';
+
+const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
+
+const T = {{ "tool.comms" | tsub | dump | safe }};
+const LANG = {{ locale.code | dump | safe }};
+const PREFIX = {{ locale.pathPrefix | dump | safe }};
+const COMMS_PATH = PREFIX + '/comms/';
+const SHARE_PATH = '/comms/';
+const COMMS_HTTPS = 'https://mentria.ai' + COMMS_PATH;
+const own = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
+const fmt = (tpl, vars) => String(tpl).replace(/\{(\w+)\}/g, (m, k) => (own(vars, k) && vars[k] != null ? String(vars[k]) : m));
+const DEC = (() => {
+  try {
+    const part = new Intl.NumberFormat(LANG).formatToParts(1.5).find((p) => p.type === 'decimal');
+    return part ? part.value : '.';
+  } catch (_) { return '.'; }
+})();
+const num1 = (v) => { const s = v.toFixed(1); return DEC === '.' ? s : s.replace('.', DEC); };
+const WHY = { 'bad contact code': 'bad_code', 'not a contact code': 'not_code', 'storage-full': 'storage_full', 'storage unavailable': 'storage_unavailable', 'already-set-up': 'already_set_up', 'passphrase-too-short': 'too_short', 'locked': 'locked', 'no-vault': 'no_vault', 'corrupt-vault': 'corrupt_vault', 'kcv-mismatch': 'kcv_mismatch' };
+const MEDIA_WHY = { NotAllowedError: 'not_allowed', NotFoundError: 'not_found', NotReadableError: 'not_readable', OverconstrainedError: 'overconstrained', SecurityError: 'security', AbortError: 'abort' };
+const why = (err) => {
+  const msg = String(err && err.message !== undefined ? err.message : err);
+  const vars = Object.assign({}, (err && err.vars) || {}, { detail: msg });
+  const code = err && typeof err.code === 'string' ? err.code.replace(/-/g, '_') : '';
+  if (code && own(T.ext_why, code)) return fmt(T.ext_why[code], vars);
+  if (own(WHY, msg)) return fmt(T.why[WHY[msg]], vars);
+  if (err && own(MEDIA_WHY, err.name)) return fmt(T.media_why[MEDIA_WHY[err.name]], vars);
+  return msg;
+};
+const INSTALL_OPTS = {
+  copy: { trust: T.install.trust, update: T.install.update, reinstall: T.install.reinstall, downgrade: T.install.downgrade, replace: T.install.replace, permsAdded: T.install.perms_added, permsRemoved: T.install.perms_removed, from: T.install.from, large: T.install.large },
+  perms: T.perms
+};
 
 const RELAY = 'wss://relay.mentria.ai';
 const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
@@ -567,7 +589,7 @@ const $ = (id) => document.getElementById(id);
 const els = {
   room: $('comms-room'), join: $('comms-join'),
   status: $('comms-status'), peers: $('comms-peers'), mute: $('comms-mute'), eph: $('comms-eph'), enc: $('comms-enc'),
-  share: $('comms-share'), url: $('comms-url'), copy: $('comms-copy'), genkey: $('comms-genkey'),
+  share: $('comms-share'), newSaved: $('comms-newsaved'), addErr: $('comms-add-err'),
   peerlist: $('comms-peerlist'),
   log: $('comms-log'), drop: $('comms-drop'), file: $('comms-file'),
   send: $('comms-send'), msg: $('comms-msg'), go: $('comms-go'),
@@ -595,26 +617,58 @@ const els = {
   chatTitle: $('comms-chat-title'), chatAvatar: $('comms-chat-avatar'), profAvatar: $('comms-prof-avatar'),
   notif: $('comms-notif'), notifEnable: $('comms-notif-enable'), notifDismiss: $('comms-notif-dismiss'),
   lockWaiting: $('comms-lock-waiting'), pushStatus: $('comms-push-status'),
-  pushTest: $('comms-push-test'), pushTestLog: $('comms-push-test-log')
+  pushTest: $('comms-push-test'), pushTestLog: $('comms-push-test-log'),
+  pkOffer: document.querySelector('#comms-pk-upgrade .comms__upgrade-text')
+};
+
+const APPLE_DEVICE = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+const passkeyCopy = {
+  hint: APPLE_DEVICE ? T.onboard.hint : T.onboard.hint_device,
+  protect: APPLE_DEVICE ? T.onboard.passkey : T.onboard.passkey_device,
+  offer: APPLE_DEVICE ? T.passkey.offer : T.passkey.offer_device,
+  add: APPLE_DEVICE ? T.passkey.add : T.passkey.add_device,
+  added: APPLE_DEVICE ? T.passkey.added : T.passkey.added_device
+};
+if (!APPLE_DEVICE) {
+  els.obHint.textContent = passkeyCopy.hint;
+  els.obPasskey.textContent = passkeyCopy.protect;
+  if (els.pkOffer) els.pkOffer.textContent = passkeyCopy.offer;
+  els.pkEnroll.textContent = passkeyCopy.add;
+  els.pkSettings.textContent = passkeyCopy.add;
+}
+
+const toastMs = 6000;
+const inChatView = () => !els.app.hidden && els.app.classList.contains('comms__app--chat');
+const notice = (text) => {
+  if (inChatView() || !(window.MentriaUI && typeof MentriaUI.toast === 'function')) { sys(text); return; }
+  MentriaUI.toast(text, { duration: toastMs });
+};
+
+const knockWhy = (reason) => (reason === 'network' ? T.test.no_server : reason ? T.test.server_error : T.push.failed);
+const subscribeWhy = (err) => {
+  if (!err) return T.test.unknown_error;
+  if (err.name === 'TypeError' || err.name === 'SyntaxError') return T.test.no_server;
+  if (err.name === 'NotAllowedError') return T.test.push_blocked;
+  return T.test.push_service;
 };
 
 const updatePushStatus = () => {
   if (!els.pushStatus) return;
   const bits = [];
-  if (!window.MentriaPush || !MentriaPush.isSupported()) bits.push('not supported in this browser');
-  else if (MentriaPush.permission() !== 'granted') bits.push('yours: off — use the enable banner in your people list');
-  else bits.push(ringToken ? 'yours: on' : 'yours: registering…');
+  if (!window.MentriaPush || !MentriaPush.isSupported()) bits.push(T.push.unsupported);
+  else if (MentriaPush.permission() !== 'granted') bits.push(T.push.yours_off);
+  else bits.push(ringToken ? T.push.yours_on : ringRegFailed ? T.push.yours_failed : T.push.yours_pending);
   CID.getContacts().forEach((c) => {
-    bits.push(`${c.name || c.fp}: ${c.ring ? 'reachable' : 'no token yet — they need to enable notifications once'}`);
+    bits.push(fmt(c.ring ? T.push.reachable : T.push.no_token, { name: c.name || c.fp }));
   });
   try {
     const lk = MentriaStore.get('comms', 'last_knock');
-    if (lk && lk.t) bits.push(`last knock sent: ${hhmmOf(lk.t)} ${lk.ok ? '✓' : '✗ ' + (lk.reason || 'failed')}`);
+    if (lk && lk.t) bits.push(lk.ok ? fmt(T.push.knock_ok, { time: hhmmOf(lk.t) }) : fmt(T.push.knock_fail, { time: hhmmOf(lk.t), reason: knockWhy(lk.reason) }));
   } catch (_) {}
   els.pushStatus.textContent = bits.join(' · ');
   if (window.MentriaPushDB && MentriaPushDB.kvGet) {
     MentriaPushDB.kvGet('last-push-at').then((t) => {
-      if (typeof t === 'number' && t > 0) els.pushStatus.textContent += ` · last push received: ${hhmmOf(t)}`;
+      if (typeof t === 'number' && t > 0) els.pushStatus.textContent += ' · ' + fmt(T.push.last_push, { time: hhmmOf(t) });
     }).catch(() => {});
   }
 };
@@ -636,19 +690,17 @@ els.pushTest.addEventListener('click', async () => {
   try {
     if (!window.MentriaPush || !MentriaPush.isSupported()) {
       const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent);
-      pushTestLog(isIos && !navigator.standalone
-        ? '1. push not available in the iPhone browser — install comms to your home screen first (share → add to home screen), then test from the installed app'
-        : '1. push not supported in this browser');
+      pushTestLog(isIos && !navigator.standalone ? T.test.ios : T.test.unsupported);
       return;
     }
-    pushTestLog('1. support: yes');
+    pushTestLog(T.test.support);
     if (MentriaPush.permission() !== 'granted') {
-      pushTestLog('2. permission: asking…');
+      pushTestLog(T.test.asking);
       const ok = await MentriaPush.requestPermission();
-      pushTestLog('2. permission: ' + (ok ? 'granted' : 'NOT granted — the browser blocked or you declined; check site settings'), true);
+      pushTestLog(ok ? T.test.granted : T.test.denied, true);
       if (!ok) return;
     } else {
-      pushTestLog('2. permission: granted');
+      pushTestLog(T.test.granted);
     }
     let sub = null;
     let subErr = null;
@@ -657,6 +709,7 @@ els.pushTest.addEventListener('click', async () => {
       sub = await reg.pushManager.getSubscription();
       if (!sub) {
         const r = await fetch('https://relay.mentria.ai/push/vapid-public', { cache: 'no-store' });
+        if (!r.ok) throw new TypeError('vapid ' + r.status);
         const { publicKey } = await r.json();
         const pad = '='.repeat((4 - publicKey.length % 4) % 4);
         const b64 = (publicKey + pad).replace(/-/g, '+').replace(/_/g, '/');
@@ -664,11 +717,11 @@ els.pushTest.addEventListener('click', async () => {
         for (let i = 0; i < raw.length; i++) key[i] = raw.charCodeAt(i);
         sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
       }
-    } catch (e) { subErr = (e && e.name ? e.name + ': ' : '') + String(e && e.message || e).slice(0, 120); }
-    if (!sub) { pushTestLog('3. subscription: FAILED — ' + (subErr || 'unknown error')); return; }
-    let host = 'unknown';
+    } catch (e) { subErr = e || new Error('unknown'); }
+    if (!sub) { pushTestLog(fmt(T.test.sub_failed, { reason: subscribeWhy(subErr) })); return; }
+    let host = T.unknown;
     try { host = new URL(sub.toJSON().endpoint).host; } catch (_) {}
-    pushTestLog('3. subscription: ' + host);
+    pushTestLog(fmt(T.test.sub, { host }));
     let testToken = MentriaStore.get('comms', 'selftest_token');
     if (!testToken || !/^[A-Za-z0-9_-]{20,64}$/.test(testToken)) {
       const b = crypto.getRandomValues(new Uint8Array(18));
@@ -676,13 +729,13 @@ els.pushTest.addEventListener('click', async () => {
       MentriaStore.set('comms', 'selftest_token', testToken);
     }
     const reg2 = await MentriaPush.ringRegister(testToken);
-    pushTestLog('4. register with relay: ' + (reg2 ? 'ok' : 'FAILED'));
+    pushTestLog(reg2 ? T.test.reg_ok : T.test.reg_failed);
     if (!reg2) return;
     const rung = await MentriaPush.ring(testToken, 'comms-msg');
-    if (rung && rung.throttled) { pushTestLog('5. self-knock: throttled — you just tested; wait ~25s and try again'); return; }
-    pushTestLog('5. self-knock: ' + (rung && rung.ok ? 'sent' : 'FAILED — ' + ((rung && rung.reason) || 'unknown')));
+    if (rung && rung.throttled) { pushTestLog(T.test.throttled); return; }
+    pushTestLog(rung && rung.ok ? T.test.knock_sent : fmt(T.test.knock_failed, { reason: knockWhy((rung && rung.reason) || 'unknown') }));
     if (!rung || !rung.ok) return;
-    pushTestLog('6. waiting for the notification…');
+    pushTestLog(T.test.waiting);
     const reg = await navigator.serviceWorker.ready;
     const t0 = Date.now();
     let seen = false;
@@ -691,11 +744,12 @@ els.pushTest.addEventListener('click', async () => {
       const notes = await reg.getNotifications({ tag: 'comms-msg' });
       if (notes.length) { seen = true; break; }
     }
-    pushTestLog(seen
-      ? '6. notification arrived ✓ — push works on this device'
-      : '6. relay accepted but NO notification in 15s ✗ — the push service (' + host + ') did not deliver; tell mihir this line', true);
+    pushTestLog(seen ? T.test.arrived : fmt(T.test.missing, { host }), true);
   } finally {
     els.pushTest.disabled = false;
+    if (!ringToken && window.MentriaPush && MentriaPush.isSupported() && MentriaPush.permission() === 'granted') {
+      try { await initRingToken(); } catch (_) {}
+    }
     updatePushStatus();
   }
 });
@@ -714,7 +768,7 @@ const updateLockWaiting = async () => {
     }
   } catch (_) {}
   els.lockWaiting.textContent = total > 0
-    ? (total > 1 ? total + ' messages waiting — unlock to read' : '1 message waiting — unlock to read')
+    ? (total > 1 ? fmt(T.lock.waiting_many, { n: total }) : T.lock.waiting_one)
     : '';
   els.lockWaiting.hidden = total === 0;
 };
@@ -747,16 +801,27 @@ let metaAction = null;
 let chunkAction = null;
 let profAction = null;
 let callAction = null;
-const call = { active: false, local: null, videoOn: false, micOff: false, ringTimer: null, ringDeadline: 0 };
+const call = { active: false, local: null, videoOn: false, micOff: false, cid: null, cids: new Set(), members: new Set(), invited: new Set(), sentTo: new Set(), connected: false, answerTimer: null };
 const callTiles = new Map();
 const pendingStreams = new Map();
+const incomingRings = new Map();
+const RING_MS = 30000;
+const ANSWER_MS = 35000;
+let ringTimer = null;
+let ringAccepting = false;
+let callStarting = false;
 let myId = null;
 let myFp = null;
+let myLegacyFp = null;
+const legacyFps = new Map();
 let ringToken = null;
+let ringRegFailed = false;
 let currentDmContact = null;
 let lastRingSentAt = 0;
 let myProfile = { name: '' };
 const peerProfiles = new Map();
+const pendingChecks = new Map();
+const proofAnswers = new Map();
 const peers = new Set();
 const objectUrls = new Set();
 const trackObjectUrl = (blob) => { const u = URL.createObjectURL(blob); objectUrls.add(u); return u; };
@@ -786,11 +851,12 @@ document.getElementById('comms-relay').addEventListener('click', () => {
 renderRelayToggle();
 let audioCtx = null;
 
-const CHAT_TOPIC_PREFIX = 'mentria.chat.v1.';
+const CHAT_TOPIC_V2 = 'mentria-comms-topic-v2|';
 const CHAT_KIND = 3838;
 const EPHEMERAL_PREFIX = '!';
 const HISTORY_LOOKBACK_SEC = 7 * 24 * 60 * 60;
 const HISTORY_LIMIT = 100;
+const PROOF_LABEL = 'mentria-prof-proof-v1';
 
 let chatSubId = null;
 let chatTopic = null;
@@ -804,7 +870,11 @@ const newCmid = () => selfId + ':' + Math.random().toString(36).slice(2);
 
 let chatKey = null;
 
-const b64encode = (bytes) => btoa(String.fromCharCode(...bytes));
+const b64encode = (bytes) => {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
 const b64decode = (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
 const b64urlEncode = (bytes) => b64encode(bytes).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
 const b64urlDecode = (str) => {
@@ -813,15 +883,19 @@ const b64urlDecode = (str) => {
   return b64decode(padded);
 };
 
+const decodeRoom = (part) => {
+  try { return decodeURIComponent(part); } catch (_) { return part; }
+};
+
 const parseHash = (hash) => {
   const raw = (hash || '').slice(1).trim();
   if (!raw) return { room: null, b64Key: null };
   const colonIdx = raw.indexOf(':');
-  if (colonIdx === -1) return { room: raw, b64Key: null };
-  return { room: raw.slice(0, colonIdx), b64Key: raw.slice(colonIdx + 1) || null };
+  if (colonIdx === -1) return { room: decodeRoom(raw) || null, b64Key: null };
+  return { room: decodeRoom(raw.slice(0, colonIdx)) || null, b64Key: raw.slice(colonIdx + 1) || null };
 };
 
-const formatHash = (room, b64Key) => '#' + room + (b64Key ? ':' + b64Key : '');
+const formatHash = (room, b64Key) => '#' + encodeURIComponent(room) + (b64Key ? ':' + b64Key : '');
 
 const deriveKey = async (b64Key) => {
   try {
@@ -833,6 +907,22 @@ const deriveKey = async (b64Key) => {
     return null;
   }
 };
+
+const topicCache = new Map();
+const chatTopicFor = (roomName, b64Key) => {
+  const id = b64Key + ':' + roomName;
+  if (!topicCache.has(id)) {
+    topicCache.set(id, (async () => {
+      const raw = b64urlDecode(b64Key);
+      if (raw.length !== 32) return null;
+      const mac = await crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+      return b64urlEncode(new Uint8Array(await crypto.subtle.sign('HMAC', mac, new TextEncoder().encode(CHAT_TOPIC_V2 + roomName))));
+    })().catch(() => null));
+  }
+  return topicCache.get(id);
+};
+try { if (MentriaStore.get('comms', 'topic_v2_since') != null) MentriaStore.remove('comms', 'topic_v2_since'); } catch (_) {}
+const expiryTags = () => [['expiration', String(Math.floor(Date.now() / 1000) + HISTORY_LOOKBACK_SEC)]];
 
 const encryptText = async (key, plaintext) => {
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -848,16 +938,25 @@ const decryptText = async (key, payload) => {
   return new TextDecoder().decode(pt);
 };
 
-const short = (id) => id ? id.slice(0, 6) : 'unknown';
+const short = (id) => id ? id.slice(0, 6) : T.unknown;
 
 const displayName = (peerId) => {
   const prof = peerProfiles.get(peerId);
-  if (prof && prof.fp) {
-    const contact = CID.getContacts().find((c) => c.fp === prof.fp);
+  if (prof && prof.pub && prof.verified) {
+    const contact = CID.contactByPub(prof.pub);
     if (contact && contact.name) return contact.name;
   }
   if (prof && prof.name) return prof.name;
   return short(peerId);
+};
+
+const nameOf = (peerId) => {
+  const prof = peerProfiles.get(peerId);
+  if (prof && prof.pub && prof.verified) {
+    const contact = CID.contactByPub(prof.pub);
+    if (contact && contact.name) return contact.name;
+  }
+  return (prof && prof.name) || T.people.someone;
 };
 
 const peerColor = (id) => {
@@ -867,8 +966,9 @@ const peerColor = (id) => {
 };
 
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmtKB = (n) => (n / 1024).toFixed(1) + ' KB';
-const fmtMB = (n) => (n / 1024 / 1024).toFixed(1) + ' MB';
+const fmtHtml = (tpl, vars) => escapeHtml(tpl).replace(/\{(\w+)\}/g, (m, k) => (own(vars, k) && vars[k] != null ? String(vars[k]) : m));
+const fmtKB = (n) => fmt(T.files.kb, { n: num1(n / 1024) });
+const fmtMB = (n) => fmt(T.files.mb, { n: num1(n / 1024 / 1024) });
 const fmtSize = (n) => n >= 1024 * 1024 ? fmtMB(n) : fmtKB(n);
 const nowHHMM = () => { const d = new Date(); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
 
@@ -901,16 +1001,19 @@ const renderPeerList = () => {
     chip.style.color = peerColor(p);
     chip.textContent = displayName(p);
     const prof = peerProfiles.get(p);
-    chip.title = prof && prof.fp ? 'fingerprint ' + prof.fp : p;
-    if (prof && prof.pub && prof.fp && !CID.getContacts().some((c) => c.fp === prof.fp)) {
+    chip.title = prof && prof.verified && prof.fp ? fmt(T.peers.fp_title, { fp: prof.fp }) : p;
+    if (prof && prof.verified && prof.pub && prof.fp && !CID.contactByPub(prof.pub)) {
       const add = document.createElement('button');
       add.type = 'button';
       add.className = 'comms__chip-add';
       add.textContent = '+';
-      add.title = 'add ' + (prof.name || short(p)) + ' as a contact';
+      add.title = fmt(T.peers.add_title, { name: prof.name || short(p) });
       add.addEventListener('click', async () => {
-        await CID.addContact({ name: prof.name, pub: prof.pub, ring: prof.ring });
-        sys(`${displayName(p)} added to contacts.`);
+        const cur = peerProfiles.get(p);
+        if (!cur || !cur.verified || !cur.pub) return;
+        try { const added = await CID.addContact({ name: cur.name, pub: cur.pub, ring: cur.ring }); if (added && added.fp) CID.dropRequest(added.fp); }
+        catch (err) { notice(fmt(T.people.add_failed, { reason: why(err) })); return; }
+        sys(fmt(T.peers.added, { name: displayName(p) }));
         renderPeerList();
         renderContacts();
       });
@@ -924,6 +1027,9 @@ const hhmmOf = (ts) => {
   const d = ts ? new Date(ts) : new Date();
   return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 };
+
+let logPinned = true;
+els.log.addEventListener('scroll', () => { logPinned = els.log.scrollHeight - els.log.scrollTop - els.log.clientHeight < 80; }, { passive: true });
 
 const renderLine = (who, what, opts = {}) => {
   const line = document.createElement('div');
@@ -961,23 +1067,28 @@ const renderLine = (who, what, opts = {}) => {
   }
   if (ref) els.log.insertBefore(line, ref);
   else els.log.append(line);
-  els.log.scrollTop = els.log.scrollHeight;
+  if (logPinned || (opts.me && typeof opts.ts !== 'number')) els.log.scrollTop = els.log.scrollHeight;
   return { line, what: t };
 };
 
 const sys = (text) => renderLine('--', text, { sys: true });
+let introTs = 0;
+const sysTop = (text) => renderLine('--', text, { sys: true, ts: ++introTs });
+
+const strongName = (name) => `<strong>${escapeHtml(name)}</strong>`;
 
 const progressHTML = (verb, name, size, transferred) => {
   const pct = size > 0 ? Math.min(100, Math.round((transferred / size) * 100)) : 0;
-  return `${verb} <strong>${escapeHtml(name)}</strong>` +
+  return fmtHtml(verb, { name: strongName(name) }) +
     ` <span class="comms__prog"><span class="comms__prog-fill" style="width:${pct}%"></span></span>` +
-    ` <span class="comms__prog-text">${pct}% (${fmtKB(transferred)} / ${fmtKB(size)})</span>`;
+    ` <span class="comms__prog-text">${escapeHtml(fmt(T.files.progress, { pct, done: fmtKB(transferred), total: fmtKB(size) }))}</span>`;
 };
 
-const completeHTML = (name, size, type, url) => {
+const completeHTML = (tpl, vars, name, size, type, url) => {
   const isImg = type && type.startsWith('image/');
   const preview = isImg ? `<br><a href="${url}" target="_blank" rel="noopener"><img class="comms__thumb" src="${url}" alt="${escapeHtml(name)}"></a>` : '';
-  return `<a href="${url}" download="${escapeHtml(name)}">${escapeHtml(name)}</a> (${fmtKB(size)})${preview}`;
+  const file = `<a href="${url}" download="${escapeHtml(name)}">${escapeHtml(name)}</a>`;
+  return fmtHtml(tpl, Object.assign({ file, size: escapeHtml(fmtKB(size)) }, vars)) + preview;
 };
 
 const updatePeers = () => {
@@ -986,6 +1097,8 @@ const updatePeers = () => {
 };
 
 let currentRoomName = null;
+let joinTarget = null;
+let joinedLocked = false;
 let roomJoinedAt = 0;
 let pendingResends = 0;
 const setConnUI = () => {
@@ -993,13 +1106,13 @@ const setConnUI = () => {
   els.send.classList.toggle('comms__send--offline', offline);
   els.status.classList.toggle('comms__badge--offline', offline);
   if (currentRoomName) {
-    els.status.textContent = offline ? 'reconnecting…' : (isDmRoom(currentRoomName) ? 'private chat' : `room: ${currentRoomName}`);
+    els.status.textContent = offline ? T.chat.reconnecting : (isDmRoom(currentRoomName) ? T.chat.private : fmt(T.chat.room, { room: currentRoomName }));
   }
 };
 window.addEventListener('offline', setConnUI);
 window.addEventListener('online', () => {
   setConnUI();
-  if (pendingResends > 0) sys(`back online — ${pendingResends} message${pendingResends === 1 ? '' : 's'} awaiting resend.`);
+  if (pendingResends > 0) sys(fmt(pendingResends === 1 ? T.log.back_online_one : T.log.back_online_many, { n: pendingResends }));
 });
 
 const renderPendingLine = (text, payload, cmid) => {
@@ -1007,14 +1120,14 @@ const renderPendingLine = (text, payload, cmid) => {
   line.line.classList.add('comms__line--pending');
   const note = document.createElement('span');
   note.className = 'comms__pending-note';
-  note.textContent = 'not delivered — no connection';
+  note.textContent = T.log.not_delivered;
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'comms__resend';
-  btn.textContent = 'resend';
+  btn.textContent = T.log.resend;
   btn.addEventListener('click', () => {
-    if (!navigator.onLine) { sys('still offline — try again when the connection returns.'); return; }
-    if (!chatAction) { sys('not connected to a room — rejoin to send.'); return; }
+    if (!navigator.onLine) { sys(T.log.still_offline); return; }
+    if (!chatAction) { sys(T.log.not_connected); return; }
     chatAction.send(payload);
     publishChat(text, cmid);
     line.line.classList.remove('comms__line--pending');
@@ -1026,21 +1139,45 @@ const renderPendingLine = (text, payload, cmid) => {
   pendingResends++;
 };
 
-const refreshShareUrl = (roomName, b64Key) => {
-  if (isDmRoom(roomName)) { els.share.hidden = true; els.url.textContent = ''; return; }
+const shareUrl = (roomName, b64Key) => {
   const u = new URL(window.location.href);
+  u.pathname = SHARE_PATH;
+  u.search = '';
   u.hash = formatHash(roomName, b64Key);
-  els.url.textContent = u.toString();
-  els.share.hidden = false;
+  return u.toString();
 };
 
+const refreshShareUrl = (roomName) => {
+  els.share.hidden = !roomName || isDmRoom(roomName);
+};
+
+const copyRoomLink = (url) => {
+  const manual = () => sys(fmt(T.chat.link_manual, { url }));
+  try {
+    navigator.clipboard.writeText(url).then(() => sys(T.chat.link_copied), manual);
+  } catch (_) { manual(); }
+};
+
+els.share.addEventListener('click', () => {
+  if (!currentRoomName || isDmRoom(currentRoomName)) return;
+  const url = shareUrl(currentRoomName, joinTarget && joinTarget.key);
+  if (typeof navigator.share === 'function') {
+    navigator.share({ url }).catch((err) => { if (!err || err.name !== 'AbortError') copyRoomLink(url); });
+    return;
+  }
+  copyRoomLink(url);
+});
+
+const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp || m.sfp === myLegacyFp));
+const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
+
 const renderRemoteChat = (item, opts = {}) => {
-  if (item.sfp && myFp && item.sfp === myFp) {
+  if (sentByMe(item)) {
     renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
     return;
   }
   let who = displayName(item.senderId);
-  if (currentDmContact && item.sfp && currentDmContact.fp === item.sfp) who = currentDmContact.name || who;
+  if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
   renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
   if (!opts.silent) {
     playPing(880);
@@ -1049,15 +1186,15 @@ const renderRemoteChat = (item, opts = {}) => {
   }
 };
 
-const packChatPlain = (text, extra) => JSON.stringify(Object.assign({ v: 2, t: text, sfp: myFp || undefined }, extra || {}));
+const packChatPlain = (text, extra) => JSON.stringify(Object.assign({ v: 2, t: text, sfp: myLegacyFp || undefined, sfp2: (myFp && myFp !== myLegacyFp) ? myFp : undefined }, extra || {}));
 const unpackChatPlain = (raw) => {
   try {
     const o = JSON.parse(raw);
     if (o && o.v === 2 && typeof o.t === 'string') {
-      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null };
+      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, sfp2: typeof o.sfp2 === 'string' ? o.sfp2 : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null };
     }
   } catch (_) {}
-  return { text: raw, sfp: null, ctl: null };
+  return { text: raw, sfp: null, sfp2: null, ctl: null };
 };
 
 const handleNostrMsg = async (msgEvent) => {
@@ -1068,27 +1205,21 @@ const handleNostrMsg = async (msgEvent) => {
     const ev = msg[2];
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
-    if (!content || !content.cmid || seenCmids.has(content.cmid)) return;
-    let text, sfp = null;
-    if (content.enc) {
-      if (!chatKey) return;
-      try {
-        const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
-        text = unpacked.text;
-        sfp = unpacked.sfp;
-        if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
-      } catch { return; }
-    } else if (typeof content.text === 'string') {
-      text = content.text;
-    } else {
-      return;
-    }
+    if (!content || !content.cmid || !content.enc || !chatKey || seenCmids.has(content.cmid)) return;
+    let text, sfp = null, sfp2 = null;
+    try {
+      const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
+      text = unpacked.text;
+      sfp = unpacked.sfp;
+      sfp2 = unpacked.sfp2;
+      if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
+    } catch { return; }
     seenCmids.add(content.cmid);
     const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp };
+    const item = { senderId, text, ts, sfp, sfp2 };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1102,14 +1233,14 @@ const closeChatSub = () => {
   }
 };
 
-const setupChatPersistence = async (roomName) => {
-  chatTopic = CHAT_TOPIC_PREFIX + roomName;
-  chatPersist = !isEphemeralRoom(roomName);
+const setupChatPersistence = async (roomName, topic) => {
+  chatTopic = topic || null;
+  chatPersist = !!(chatTopic && chatKey);
   seenCmids = new Set();
 
   if (!chatPersist) {
     chatSubId = null;
-    sys('ephemeral room — messages aren\'t saved. drop the leading ! to persist.');
+    sysTop(chatKey ? T.log.eph_key : T.log.eph_nokey);
     return;
   }
 
@@ -1124,7 +1255,7 @@ const setupChatPersistence = async (roomName) => {
     await new Promise(r => setTimeout(r, 200));
   }
   if (!openSockets.length) {
-    sys('relay unreachable — history disabled this session.');
+    sys(T.log.relay_down);
     return;
   }
 
@@ -1194,11 +1325,11 @@ const notifyLocal = async (spec) => {
   try {
     const reg = await navigator.serviceWorker.ready;
     await reg.showNotification(spec.title || 'comms', {
-      body: spec.body || 'new message',
+      body: spec.body || T.notif.new_message,
       tag: spec.tag || 'comms-msg',
       icon: '/assets/img/icon-192x192.png',
       badge: '/assets/img/badge.svg',
-      data: { url: spec.url || '/comms/' },
+      data: { url: spec.url || COMMS_PATH },
       renotify: true
     });
   } catch (_) {}
@@ -1211,12 +1342,12 @@ const closeLocalNotif = async (tag) => {
   } catch (_) {}
 };
 const notifTargetNow = () => {
-  if (currentDmContact) return { tag: 'comms-dm:' + currentDmContact.fp, url: '/comms/' };
+  if (currentDmContact) return { tag: 'comms-dm:' + currentDmContact.fp, url: COMMS_PATH };
   if (currentRoomName && !isDmRoom(currentRoomName)) {
     const entry = roomNotifyEntry(currentRoomName);
-    return { tag: 'comms-room:' + currentRoomName, url: entry ? '/comms/' + formatHash(entry.room, entry.key) : '/comms/' };
+    return { tag: 'comms-room:' + currentRoomName, url: entry ? COMMS_PATH + formatHash(entry.room, entry.key) : COMMS_PATH };
   }
-  return { tag: 'comms-msg', url: '/comms/' };
+  return { tag: 'comms-msg', url: COMMS_PATH };
 };
 
 const handleRoomCtl = (ctl, sfp) => {
@@ -1243,7 +1374,7 @@ const publishRoomCtl = async (ctl) => {
     const enc = await encryptText(chatKey, packChatPlain('', { ctl }));
     if (chatAction) { try { chatAction.send({ cmid, enc }); } catch (_) {} }
     rememberSentCmid(cmid);
-    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }));
+    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
     let sent = false;
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
@@ -1266,11 +1397,11 @@ const announceRoomRing = async () => {
       entry.announced = ringToken;
       entry.announcedAt = Date.now();
       setSavedRooms(list);
-      if (fresh) sys('alerts on — this device gets pinged for messages in this room.');
+      if (fresh) sys(T.rooms.alerts_on);
     }
   } else if (!entry.notify && entry.announced) {
     const sent = await publishRoomCtl({ k: 'ring', token: entry.announced, off: true });
-    if (sent) { entry.announced = null; setSavedRooms(list); sys('alerts off for this room.'); }
+    if (sent) { entry.announced = null; setSavedRooms(list); sys(T.rooms.alerts_off); }
   }
 };
 
@@ -1280,15 +1411,15 @@ const setRoomNotify = async (roomName, on) => {
   if (on) {
     if (!window.MentriaPush || !MentriaPush.isSupported()) {
       const iosTab = /iPhone|iPad|iPod/.test(navigator.userAgent) && !navigator.standalone;
-      sys(iosTab ? 'alerts need comms installed on your home screen first (share button → add to home screen).' : 'alerts are not available in this browser.');
+      notice(iosTab ? T.rooms.alerts_ios : T.rooms.alerts_unsupported);
       return;
     }
     if (MentriaPush.permission() !== 'granted') {
       const ok = await MentriaPush.requestPermission();
-      if (!ok) { sys('alerts stay off — notifications were not allowed.'); return; }
+      if (!ok) { notice(T.rooms.alerts_denied); return; }
     }
     if (!ringToken) await initRingToken();
-    if (!ringToken) { sys('could not register this device for alerts — try again in a moment.'); return; }
+    if (!ringToken) { notice(T.rooms.alerts_failed); return; }
   }
   const list = savedRooms();
   const fresh = list.find((r) => r.room === roomName);
@@ -1311,7 +1442,7 @@ const ringRoomMembers = () => {
   const entry = roomNotifyEntry(currentRoomName);
   const rings = roomRings(entry);
   const connected = new Set();
-  for (const p of peerProfiles.values()) if (p && p.ring) connected.add(p.ring);
+  for (const p of peerProfiles.values()) if (p && p.verified && p.ring) connected.add(p.ring);
   const targets = Object.keys(rings).filter((tk) => tk !== ringToken && !connected.has(tk));
   if (!targets.length || Date.now() - lastRoomRingAt < 8000) return;
   lastRoomRingAt = Date.now();
@@ -1333,17 +1464,11 @@ const sentCmidsFor = (fp) => {
 };
 
 const publishChat = async (text, cmid) => {
-  if (!chatTopic || !chatPersist) return;
+  if (!chatTopic || !chatPersist || !chatKey) return;
   rememberSentCmid(cmid);
   try {
-    let payload;
-    if (chatKey) {
-      const enc = await encryptText(chatKey, packChatPlain(text));
-      payload = { cmid, ts: Date.now(), enc };
-    } else {
-      payload = { text, cmid, ts: Date.now() };
-    }
-    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify(payload));
+    const enc = await encryptText(chatKey, packChatPlain(text));
+    const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
       if (ws && ws.readyState === 1) {
@@ -1356,16 +1481,80 @@ const publishChat = async (text, cmid) => {
   }
 };
 
+const certFingerprints = (sdp) => {
+  const out = new Set();
+  String(sdp || '').split(/\r?\n/).forEach((line) => {
+    const m = /^a=fingerprint:(\S+)\s+([0-9A-Fa-f:]+)/.exec(line.trim());
+    if (m) out.add(m[1].toLowerCase() + ' ' + m[2].toUpperCase());
+  });
+  return Array.from(out).sort().join(',');
+};
+
+const connBinding = (peerId) => {
+  try {
+    const pc = room && room.getPeers ? room.getPeers()[peerId] : null;
+    const local = pc && pc.localDescription ? certFingerprints(pc.localDescription.sdp) : '';
+    const remote = pc && pc.remoteDescription ? certFingerprints(pc.remoteDescription.sdp) : '';
+    return local && remote ? { local, remote } : null;
+  } catch (_) { return null; }
+};
+
+const finishCheck = (peerId) => {
+  const pend = pendingChecks.get(peerId);
+  if (!pend) return;
+  clearTimeout(pend.timer);
+  pendingChecks.delete(peerId);
+};
+
+const announcePeer = (peerId, fallback) => {
+  if (!peers.has(peerId)) return;
+  let prof = peerProfiles.get(peerId);
+  const contact = prof && prof.verified && prof.pub ? CID.contactByPub(prof.pub) : null;
+  const label = (contact && contact.name) || (prof && prof.name) || '';
+  if (prof && typeof prof.announcedAs === 'string' && (prof.announcedAs || !label)) return;
+  if (!label && !fallback) return;
+  if (!prof) { prof = { name: '' }; peerProfiles.set(peerId, prof); }
+  prof.announcedAs = label;
+  const withFp = !!(label && prof.verified && prof.fp && !isDmRoom(currentRoomName || ''));
+  sys(fmt(withFp ? T.log.here_fp : T.log.here, { name: label || T.people.someone, fp: prof.fp }));
+};
+
+const challengePeer = (peerId, action) => {
+  const prof = peerProfiles.get(peerId);
+  if (!action || !myId || !prof || !prof.pub) return;
+  finishCheck(peerId);
+  const entry = { n: b64urlEncode(crypto.getRandomValues(new Uint8Array(16))), pub: prof.pub, timer: null };
+  entry.timer = setTimeout(() => { if (pendingChecks.get(peerId) === entry) announcePeer(peerId); }, 8000);
+  pendingChecks.set(peerId, entry);
+  try { action.send({ t: 'q', n: entry.n, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y } }, peerId); } catch (_) {}
+};
+
+const applyVerifiedProfile = async (peerId) => {
+  const prof = peerProfiles.get(peerId);
+  if (!prof || !prof.verified || !prof.pub || !prof.ring) return;
+  const existing = CID.contactByPub(prof.pub);
+  if (!existing || existing.ring === prof.ring) return;
+  try {
+    await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring });
+    if (currentDmContact && currentDmContact.fp === existing.fp) currentDmContact.ring = prof.ring;
+  } catch (_) {}
+};
+
+const samePubOf = (a, b) => !!(a && b && a.x === b.x && a.y === b.y);
+
 let joinSeq = 0;
 
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const seq = ++joinSeq;
   const leavingDm = currentDmContact;
+  joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null };
   stopScan();
   MentriaBus.unprovide('comms.peers');
   MentriaBus.unprovide('comms.share');
   MentriaBus.unprovide('extensions.requestInstall');
   endCall(true);
+  incomingRings.clear();
+  stopRinging();
   if (room) {
     closeChatSub();
     try { await room.leave(); } catch {}
@@ -1374,6 +1563,9 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     chatAction = metaAction = chunkAction = profAction = callAction = null;
     peers.clear();
     peerProfiles.clear();
+    pendingChecks.forEach((pend) => clearTimeout(pend.timer));
+    pendingChecks.clear();
+    proofAnswers.clear();
     chatSubId = null;
     chatTopic = null;
     chatKey = null;
@@ -1383,16 +1575,19 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   currentDmContact = null;
   if (leavingDm) clearUnreadFor(leavingDm.fp);
   els.log.innerHTML = '';
+  logPinned = true;
+  introTs = 0;
   roomJoinedAt = Date.now();
-  els.status.textContent = 'connecting…';
+  els.status.textContent = T.chat.connecting;
   els.peers.hidden = true;
   els.enc.hidden = true;
 
   if (opts.leave || !roomName) {
     currentRoomName = null;
     currentDmContact = null;
+    joinedLocked = false;
     els.room.value = '';
-    els.status.textContent = 'not in a chat';
+    els.status.textContent = T.chat.not_in_chat;
     els.share.hidden = true;
     els.eph.hidden = true;
     els.leave.hidden = true;
@@ -1406,16 +1601,18 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   }
 
   chatKey = b64Key ? await deriveKey(b64Key) : null;
+  const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key) : null;
   if (seq !== joinSeq) return;
-  if (b64Key && !chatKey) sys('encryption key in URL is invalid — chat will appear unreadable.');
+  if (b64Key && !chatKey) sysTop(T.log.bad_key);
   if (chatKey && b64Key) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
 
   if (opts.share === false || isDmRoom(roomName)) {
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
   } else {
-    window.location.hash = formatHash(roomName, b64Key);
+    const nextHash = formatHash(roomName, b64Key);
+    if (window.location.hash !== nextHash) window.location.hash = nextHash;
   }
-  refreshShareUrl(roomName, b64Key);
+  refreshShareUrl(roomName);
 
   let iceServers;
   try {
@@ -1428,22 +1625,27 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const rtcConfig = { iceServers };
   if (relayOnly && hasTurn(iceServers)) rtcConfig.iceTransportPolicy = 'relay';
   else if (relayOnly) console.warn('hide-my-ip requested but no relay server available — connecting normally');
+  const roomConfig = { appId: 'mentria', relayConfig: { urls: [RELAY] }, rtcConfig };
+  if (chatKey && b64Key) roomConfig.password = b64Key;
+  const keyNotes = new Set();
+  const onJoinError = (info) => {
+    const reason = String((info && info.error) || '').toLowerCase();
+    if (seq !== joinSeq || !reason.includes('password')) return;
+    const note = isDmRoom(roomName) ? T.log.key_dm : peers.size > 0 ? T.log.key_room_other : T.log.key_room_mine;
+    if (keyNotes.has(note)) return;
+    keyNotes.add(note);
+    sys(note);
+  };
   try {
-    room = joinRoom(
-      {
-        appId: 'mentria',
-        relayConfig: { urls: [RELAY] },
-        rtcConfig
-      },
-      roomName
-    );
+    room = joinRoom(roomConfig, roomName, { onJoinError });
   } catch (err) {
-    sys(`failed to join: ${err.message}`);
-    els.status.textContent = 'error';
+    sys(fmt(T.log.join_failed, { reason: why(err) }));
+    els.status.textContent = T.chat.error;
     return;
   }
 
   currentRoomName = roomName;
+  joinedLocked = CID.idState() !== 'unlocked';
   if (chatKey && b64Key) {
     renderContacts();
     subscribeUnread();
@@ -1451,52 +1653,70 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     setTimeout(() => { if (seq === joinSeq) announceRoomRing(); }, 3000);
   }
   if (opts.contact) currentDmContact = opts.contact;
-  els.chatTitle.textContent = opts.contact ? (opts.contact.name || opts.contact.fp) : roomName;
+  els.chatTitle.textContent = opts.contact ? (opts.contact.name || opts.contact.fp) : ((roomNotifyEntry(roomName) || {}).label || roomName);
   paintAvatar(els.chatAvatar, opts.contact ? (opts.contact.name || opts.contact.fp) : '#', opts.contact ? opts.contact.fp : roomName);
-  els.status.textContent = isDmRoom(roomName) ? 'private chat' : `room: ${roomName}`;
+  els.status.textContent = isDmRoom(roomName) ? T.chat.private : fmt(T.chat.room, { room: roomName });
   els.leave.hidden = false;
   setView('chat');
   setConnUI();
-  els.eph.hidden = !isEphemeralRoom(roomName);
+  els.eph.hidden = !!chatKey && !isEphemeralRoom(roomName);
+  els.eph.title = chatKey ? T.chat.eph_bang : T.chat.eph_nokey;
   els.enc.hidden = !chatKey;
   els.msg.disabled = false;
   els.go.disabled = false;
   updatePeers();
   updateCallUI();
-  if (isDmRoom(roomName)) sys('private chat — end-to-end encrypted, only your two identities can open it.');
-  else sys(`you are ${myProfile.name ? myProfile.name + ' (' + short(selfId) + ')' : short(selfId)} — alone in "${roomName}". share the URL to invite someone.`);
-  if (chatKey && !isDmRoom(roomName)) sys('end-to-end encrypted. anyone with the full URL (including the key after the colon) can decrypt.');
+  if (isDmRoom(roomName)) sysTop(T.log.dm_note);
+  else sysTop(myProfile.name ? fmt(T.log.alone_named, { name: myProfile.name, room: roomName }) : fmt(T.log.alone, { room: roomName }));
+  if (chatKey && !isDmRoom(roomName)) sysTop(T.log.enc_note);
 
   callAction = room.makeAction('call');
   callAction.onMessage = (data, ctx) => {
-    const kind = data && data.kind;
-    if (kind === 'ring') {
-      if (call.active) return;
-      const prof = peerProfiles.get(ctx.peerId);
-      const byFp = prof && prof.fp ? CID.getContacts().find((c) => c.fp === prof.fp) : null;
-      const caller = (byFp && byFp.name) || displayName(ctx.peerId);
-      els.ringText.textContent = `${caller} is calling`;
-      els.ring.hidden = false;
-      call.ringDeadline = Date.now() + 30000;
-      if (call.ringTimer) clearInterval(call.ringTimer);
-      call.ringTimer = setInterval(() => {
-        if (Date.now() > call.ringDeadline) { stopRinging(); return; }
-        playPing(660);
-      }, 1400);
-      playPing(660);
-    } else if (kind === 'decline') {
-      sys(`${displayName(ctx.peerId)} declined the call.`);
-    } else if (kind === 'leave') {
-      removeTile(ctx.peerId);
-      sys(`${displayName(ctx.peerId)} left the call.`);
-    } else if (kind === 'join') {
-      sys(`${displayName(ctx.peerId)} joined the call.`);
-    }
+    if (seq !== joinSeq || !data || typeof data !== 'object') return;
+    const cid = (typeof data.cid === 'string' && data.cid && data.cid.length <= 64) ? data.cid : 'legacy:' + ctx.peerId;
+    if (data.kind === 'ring') onCallRing(ctx.peerId, cid);
+    else if (data.kind === 'join') onCallJoin(ctx.peerId, cid, true);
+    else if (data.kind === 'here') onCallJoin(ctx.peerId, cid, false);
+    else if (data.kind === 'decline') onCallDecline(ctx.peerId, cid);
+    else if (data.kind === 'leave') onCallLeave(ctx.peerId);
   };
 
   room.onPeerStream = (stream, peerId) => {
-    if (call.active) addTile(peerId, stream, { label: displayName(peerId) });
+    if (seq !== joinSeq) return;
+    if (call.active && call.members.has(peerId)) addTile(peerId, stream, { label: displayName(peerId) });
     else pendingStreams.set(peerId, stream);
+  };
+
+  const pchk = room.makeAction('pchk');
+  pchk.onMessage = async (data, ctx) => {
+    if (!data || typeof data !== 'object' || !myId || !myFp || typeof data.n !== 'string' || data.n.length > 64) return;
+    if (data.t === 'q') {
+      if (!data.pub || typeof data.pub.x !== 'string' || typeof data.pub.y !== 'string') return;
+      const asked = (proofAnswers.get(ctx.peerId) || 0) + 1;
+      proofAnswers.set(ctx.peerId, asked);
+      const bind = asked <= 12 ? connBinding(ctx.peerId) : null;
+      if (!bind) return;
+      try {
+        const theirPub = { x: data.pub.x, y: data.pub.y };
+        const mac = await CID.pairProof(myId.privateKey, theirPub, [PROOF_LABEL, data.n, myFp, await CID.fingerprint(theirPub), bind.local, bind.remote]);
+        if (seq === joinSeq) pchk.send({ t: 'a', n: data.n, mac }, ctx.peerId);
+      } catch (_) {}
+      return;
+    }
+    if (data.t !== 'a') return;
+    const pend = pendingChecks.get(ctx.peerId);
+    const prof = peerProfiles.get(ctx.peerId);
+    if (!pend || pend.n !== data.n || !prof || !prof.fp || !samePubOf(prof.pub, pend.pub)) return;
+    const bind = connBinding(ctx.peerId);
+    if (!bind) return;
+    const ok = await CID.checkPairProof(myId.privateKey, pend.pub, [PROOF_LABEL, pend.n, prof.fp, myFp, bind.remote, bind.local], data.mac);
+    const cur = peerProfiles.get(ctx.peerId);
+    if (!ok || seq !== joinSeq || pendingChecks.get(ctx.peerId) !== pend || !cur || !samePubOf(cur.pub, pend.pub)) return;
+    finishCheck(ctx.peerId);
+    cur.verified = true;
+    await applyVerifiedProfile(ctx.peerId);
+    renderPeerList();
+    announcePeer(ctx.peerId);
   };
 
   profAction = room.makeAction('prof');
@@ -1508,47 +1728,51 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       try { prof.fp = await CID.fingerprint(prof.pub); } catch {}
     }
     if (typeof data.ring === 'string') prof.ring = data.ring.slice(0, 64);
+    if (seq !== joinSeq || !peers.has(ctx.peerId)) return;
     const known = peerProfiles.get(ctx.peerId);
+    prof.verified = !!(known && known.verified && samePubOf(known.pub, prof.pub));
+    if (known && typeof known.announcedAs === 'string') prof.announcedAs = known.announcedAs;
     peerProfiles.set(ctx.peerId, prof);
-    if (prof.fp && prof.ring && prof.pub) {
-      const existing = CID.getContacts().find((c) => c.fp === prof.fp);
-      if (existing && existing.ring !== prof.ring) {
-        try {
-          await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring });
-          if (currentDmContact && currentDmContact.fp === prof.fp) currentDmContact.ring = prof.ring;
-        } catch (_) {}
-      }
-    }
+    if (prof.verified) await applyVerifiedProfile(ctx.peerId);
+    else if (prof.pub && myId) challengePeer(ctx.peerId, pchk);
+    else finishCheck(ctx.peerId);
     renderPeerList();
-    if (!known && prof.name) sys(`${short(ctx.peerId)} is ${prof.name}${prof.fp ? ' (' + prof.fp + ')' : ''}`);
+    if (!prof.pub || !myId) announcePeer(ctx.peerId);
   };
 
   chatAction = room.makeAction('chat');
   chatAction.onMessage = async (data, ctx) => {
     const cmid = data && data.cmid;
     if (cmid && seenCmids.has(cmid)) return;
-    let text, sfp = null;
+    let text, sfp = null, sfp2 = null;
     if (data && data.enc) {
       if (!chatKey) return;
       try {
         const unpacked = unpackChatPlain(await decryptText(chatKey, data.enc));
         text = unpacked.text;
         sfp = unpacked.sfp;
+        sfp2 = unpacked.sfp2;
         if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
       } catch { return; }
     } else {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
-    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp });
+    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2 });
     playPing(880);
   };
 
   const incoming = new Map();
   metaAction = room.makeAction('fmeta');
   metaAction.onMessage = (meta, ctx) => {
-    const line = renderLine(displayName(ctx.peerId), '', { peerId: ctx.peerId, quiet: true, html: progressHTML('receiving', meta.name, meta.size, 0) });
-    incoming.set(ctx.peerId + ':' + meta.id, { meta, chunks: [], received: 0, line });
+    if (!meta || typeof meta !== 'object') return;
+    const size = Number(meta.size);
+    if (!Number.isFinite(size) || size < 0 || size > MAX_FILE) return;
+    let open = 0;
+    incoming.forEach((_, k) => { if (k.startsWith(ctx.peerId + ':')) open++; });
+    if (open >= 4) return;
+    const line = renderLine(displayName(ctx.peerId), '', { peerId: ctx.peerId, quiet: true, html: progressHTML(T.files.receiving, meta.name, size, 0) });
+    incoming.set(ctx.peerId + ':' + meta.id, { meta, size, chunks: [], received: 0, line, paint: 0 });
   };
 
   chunkAction = room.makeAction('fchunk');
@@ -1557,55 +1781,74 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     const key = ctx.peerId + ':' + m.id;
     const entry = incoming.get(key);
     if (!entry) return;
-    entry.chunks.push(data);
-    entry.received += (data.byteLength || data.size || 0);
-    entry.line.what.innerHTML = progressHTML('receiving', entry.meta.name, entry.meta.size, entry.received);
-    if (m.done) {
+    const bytes = (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) ? data.byteLength : -1;
+    const received = entry.received + bytes;
+    if (bytes < 0 || received > entry.size || received > MAX_FILE) {
+      incoming.delete(key);
+      entry.chunks = [];
+      if (entry.paint) cancelAnimationFrame(entry.paint);
       entry.line.line.removeAttribute('aria-live');
-      const blob = new Blob(entry.chunks, { type: entry.meta.type || 'application/octet-stream' });
+      entry.line.what.innerHTML = fmtHtml(T.files.interrupted, { name: strongName(entry.meta.name) });
+      return;
+    }
+    entry.chunks.push(data);
+    entry.received = received;
+    if (!entry.paint) {
+      entry.paint = requestAnimationFrame(() => {
+        entry.paint = 0;
+        if (incoming.get(key) === entry) entry.line.what.innerHTML = progressHTML(T.files.receiving, entry.meta.name, entry.size, entry.received);
+      });
+    }
+    if (m.done) {
+      if (entry.paint) { cancelAnimationFrame(entry.paint); entry.paint = 0; }
+      entry.line.what.innerHTML = progressHTML(T.files.receiving, entry.meta.name, entry.size, entry.received);
+      entry.line.line.removeAttribute('aria-live');
+      const safeType = /^image\/(png|jpeg|gif|webp|avif|bmp)$/i.test(entry.meta.type || '') ? entry.meta.type : 'application/octet-stream';
+      const blob = new Blob(entry.chunks, { type: safeType });
       if (entry.meta.kind === 'mentria-pack' || /\.mentria\.json$/i.test(entry.meta.name || '')) {
         const text = await blob.text();
-        const who = short(ctx.peerId);
+        const who = nameOf(ctx.peerId);
         const label = document.createElement('span');
-        label.textContent = 'learning pack from ' + who + ': ' + (entry.meta.packTitle || entry.meta.name) + ' ';
+        label.textContent = fmt(T.files.pack_from, { who, title: entry.meta.packTitle || entry.meta.name }) + ' ';
         const importBtn = document.createElement('button');
         importBtn.type = 'button';
         importBtn.className = 'comms__btn comms__btn--ghost';
-        importBtn.textContent = 'import';
+        importBtn.textContent = T.files.import;
         importBtn.addEventListener('click', async () => {
           importBtn.disabled = true;
           try {
-            const res = await window.MentriaPacks.importText(text, { source: 'contact', from: who });
-            importBtn.replaceWith(Object.assign(document.createElement('a'), { href: '/learn/play/?id=' + encodeURIComponent(res.row.id), textContent: 'open' }));
-            label.textContent = (res.replaced ? 'updated' : 'imported') + ' \u2713 ';
-          } catch (e) { sys('import failed: ' + ((e && e.errors && e.errors[0]) || e.message)); importBtn.disabled = false; }
+            const P = await loadPacks();
+            const res = await P.importText(text, { source: 'contact', from: who });
+            importBtn.replaceWith(Object.assign(document.createElement('a'), { href: PREFIX + '/learn/play/?id=' + encodeURIComponent(res.row.id), textContent: T.files.open }));
+            label.textContent = (res.replaced ? T.files.updated : T.files.imported) + ' ';
+          } catch (e) { sys(fmt(T.files.import_failed, { reason: (e && e.errors && e.errors[0]) || why(e) })); importBtn.disabled = false; }
         });
         entry.line.what.innerHTML = '';
         entry.line.what.append(label, importBtn);
       } else if (entry.meta.kind === 'mentria-ext') {
         const html = await blob.text();
-        const who = short(ctx.peerId);
+        const who = nameOf(ctx.peerId);
         const label = document.createElement('span');
-        label.textContent = 'extension from ' + who + ': ' + (entry.meta.extName || entry.meta.name) + ' ';
+        label.textContent = fmt(T.files.ext_from, { who, name: entry.meta.extName || entry.meta.name }) + ' ';
         const installBtn = document.createElement('button');
         installBtn.type = 'button';
         installBtn.className = 'comms__btn comms__btn--ghost';
-        installBtn.textContent = 'install';
+        installBtn.textContent = T.files.install;
         installBtn.addEventListener('click', async () => {
           installBtn.disabled = true;
           try {
             const installed = await MentriaBus.invoke('extensions.requestInstall', { html, from: who });
             if (installed) {
-              installBtn.replaceWith(Object.assign(document.createElement('a'), { href: '/tools/extensions/run/?id=' + encodeURIComponent(installed.manifest.id), textContent: 'open' }));
-              label.textContent = 'installed ✓ ';
+              installBtn.replaceWith(Object.assign(document.createElement('a'), { href: PREFIX + '/tools/extensions/run/?id=' + encodeURIComponent(installed.manifest.id), textContent: T.files.open }));
+              label.textContent = T.files.installed + ' ';
             } else { installBtn.disabled = false; }
-          } catch (e) { sys('install failed: ' + e.message); installBtn.disabled = false; }
+          } catch (e) { sys(fmt(T.files.install_failed, { reason: why(e) })); installBtn.disabled = false; }
         });
         entry.line.what.innerHTML = '';
         entry.line.what.append(label, installBtn);
       } else {
         const url = trackObjectUrl(blob);
-        entry.line.what.innerHTML = 'received ' + completeHTML(entry.meta.name, entry.meta.size, entry.meta.type, url);
+        entry.line.what.innerHTML = completeHTML(T.files.received, {}, entry.meta.name, entry.meta.size, safeType, url);
       }
       incoming.delete(key);
       playPing(660);
@@ -1616,60 +1859,53 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     peers.add(peerId);
     updatePeers();
     renderPeerList();
-    sys(`${short(peerId)} joined`);
     sendProfileTo(peerId);
+    setTimeout(() => { if (seq === joinSeq && peers.has(peerId) && !peerProfiles.has(peerId)) announcePeer(peerId, true); }, 6000);
   };
   room.onPeerLeave = (peerId) => {
-    const who = displayName(peerId);
+    const who = nameOf(peerId);
+    const announced = (peerProfiles.get(peerId) || {}).announcedAs;
+    const wasMember = call.members.has(peerId);
     for (const [key, entry] of incoming) {
       if (key.startsWith(peerId + ':')) {
         entry.line.line.removeAttribute('aria-live');
-        entry.line.what.innerHTML = `transfer interrupted — <strong>${escapeHtml(entry.meta.name)}</strong> (${escapeHtml(who)} left before finishing)`;
+        entry.line.what.innerHTML = fmtHtml(T.files.peer_left, { name: strongName(entry.meta.name), who: escapeHtml(who) });
         incoming.delete(key);
       }
     }
+    if (incomingRings.delete(peerId)) { sys(fmt(T.people.tried_call, { name: who })); renderRing(); }
+    call.invited.delete(peerId);
     peers.delete(peerId);
     peerProfiles.delete(peerId);
-    removeTile(peerId);
+    finishCheck(peerId);
+    proofAnswers.delete(peerId);
+    if (!wasMember) removeTile(peerId);
     pendingStreams.delete(peerId);
     updatePeers();
     renderPeerList();
-    sys(`${displayName(peerId)} left`);
+    if (typeof announced === 'string') sys(fmt(T.log.left, { name: who }));
+    if (wasMember) dropMember(peerId, false);
+    else if (call.active && !call.connected && call.cid && !call.invited.size) endCall(false);
   };
 
-  setupChatPersistence(roomName);
+  setupChatPersistence(roomName, topic);
 
   MentriaBus.provide('comms.peers', () => ({ count: peers.size }), { description: 'Number of connected comms peers.', parameters: { type: 'object', properties: {} }, ai: false });
   MentriaBus.provide('comms.share', async ({ filename, html, name }) => {
-    if (!metaAction || !chunkAction) throw new Error('comms not connected');
-    if (peers.size === 0) throw new Error('no peers to send to');
-    if (new Blob([html]).size > MAX_FILE) throw new Error('extension too large to send');
+    if (!metaAction || !chunkAction) throw new Error(T.share_err.not_connected);
+    if (peers.size === 0) throw new Error(T.share_err.no_peers);
+    if (new Blob([html]).size > MAX_FILE) throw new Error(T.share_err.too_large);
     const file = new File([html], filename || 'extension.html', { type: 'text/html' });
     await sendOne(file, { kind: 'mentria-ext', extName: name });
     return { sentTo: peers.size };
   }, { description: 'Send an extension to connected comms peers.', parameters: { type: 'object', properties: { filename: { type: 'string' }, html: { type: 'string' }, name: { type: 'string' } }, required: ['html'] }, ai: false });
-  MentriaBus.provide('extensions.requestInstall', ({ html, from }) => confirmInstall(html, { from }), { description: 'Install a received extension after a human trust prompt.', parameters: { type: 'object', properties: { html: { type: 'string' }, from: { type: 'string' } }, required: ['html'] }, ai: false });
+  MentriaBus.provide('extensions.requestInstall', ({ html, from }) => confirmInstall(html, Object.assign({ from }, INSTALL_OPTS)), { description: 'Install a received extension after a human trust prompt.', parameters: { type: 'object', properties: { html: { type: 'string' }, from: { type: 'string' } }, required: ['html'] }, ai: false });
 };
 
 els.join.addEventListener('click', () => {
   const name = (els.room.value || (EPHEMERAL_PREFIX + randomRoomSlug())).trim().slice(0, 64);
   const { b64Key } = parseHash(window.location.hash);
   joinNew(name, b64Key);
-});
-
-els.genkey.addEventListener('click', async () => {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  const key = b64urlEncode(bytes);
-  const name = (els.room.value || (EPHEMERAL_PREFIX + randomRoomSlug())).trim().slice(0, 64);
-  await joinNew(name, key);
-  try {
-    await navigator.clipboard.writeText(window.location.href);
-    els.genkey.textContent = 'key generated · url copied';
-    setTimeout(() => { els.genkey.textContent = '+ key'; }, 2000);
-  } catch {
-    els.genkey.textContent = 'key generated';
-    setTimeout(() => { els.genkey.textContent = '+ key'; }, 2000);
-  }
 });
 
 els.send.addEventListener('submit', async (e) => {
@@ -1684,7 +1920,7 @@ els.send.addEventListener('submit', async (e) => {
       const enc = await encryptText(chatKey, packChatPlain(text));
       livePayload = { cmid, enc };
     } catch (err) {
-      sys('encryption failed: ' + err.message);
+      sys(fmt(T.log.enc_failed, { reason: why(err) }));
       return;
     }
   } else {
@@ -1697,13 +1933,15 @@ els.send.addEventListener('submit', async (e) => {
   }
   chatAction.send(livePayload);
   publishChat(text, cmid);
-  renderLine('you', text, { me: true });
+  const sent = renderLine('you', text, { me: true });
+  if (!currentDmContact && peers.size === 0) {
+    const note = document.createElement('span');
+    note.className = 'comms__pending-note';
+    note.textContent = chatPersist ? T.log.saved_note : T.log.nobody_note;
+    sent.what.append(' ', note);
+  }
   els.msg.value = '';
   maybeRingContact();
-});
-
-els.copy.addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(els.url.textContent); els.copy.textContent = 'copied'; setTimeout(() => els.copy.textContent = 'copy', 1200); } catch {}
 });
 
 const dragEvents = ['dragenter', 'dragover'];
@@ -1713,39 +1951,40 @@ undragEvents.forEach(ev => els.drop.addEventListener(ev, (e) => { e.preventDefau
 const CHUNK = 32 * 1024;
 const sendOne = async (file, extra) => {
   const id = Math.random().toString(36).slice(2);
-  const line = renderLine('you', '', { me: true, quiet: true, html: progressHTML('sending', file.name, file.size, 0) });
+  const line = renderLine('you', '', { me: true, quiet: true, html: progressHTML(T.files.sending, file.name, file.size, 0) });
   await metaAction.send(Object.assign({ id, name: file.name, size: file.size, type: file.type }, extra || {}));
   const buf = await file.arrayBuffer();
   let sent = 0;
+  let paint = 0;
   for (let offset = 0; offset < buf.byteLength; offset += CHUNK) {
     if (peers.size === 0) {
+      if (paint) cancelAnimationFrame(paint);
       line.line.removeAttribute('aria-live');
-      line.what.innerHTML = `send interrupted — <strong>${escapeHtml(file.name)}</strong>: everyone left the room`;
-      throw new Error('all peers left during send');
+      line.what.innerHTML = fmtHtml(T.files.send_interrupted, { name: strongName(file.name) });
+      throw new Error(T.files.all_left);
     }
     const slice = buf.slice(offset, Math.min(offset + CHUNK, buf.byteLength));
     const done = offset + CHUNK >= buf.byteLength;
     await chunkAction.send(slice, { metadata: { id, done } });
     sent += slice.byteLength;
-    line.what.innerHTML = progressHTML('sending', file.name, file.size, sent);
+    if (!paint) paint = requestAnimationFrame(() => { paint = 0; line.what.innerHTML = progressHTML(T.files.sending, file.name, file.size, sent); });
   }
+  if (paint) cancelAnimationFrame(paint);
   const previewUrl = trackObjectUrl(file);
   const n = peers.size;
   line.line.removeAttribute('aria-live');
-  line.what.innerHTML = (n > 0
-    ? `sent to ${n} peer${n === 1 ? '' : 's'} `
-    : 'delivery uncertain — no peers connected ') + completeHTML(file.name, file.size, file.type, previewUrl);
+  line.what.innerHTML = completeHTML(n > 0 ? (n === 1 ? T.files.sent_one : T.files.sent_many) : T.files.uncertain, { n }, file.name, file.size, file.type, previewUrl);
 };
 
 const sendFiles = async (fileList) => {
   if (!metaAction || !chunkAction || peers.size === 0) {
     if (currentDmContact) {
-      sys(`files go straight device-to-device, so ${whoNow()} has to be online too. they're not connected right now.`);
+      sys(fmt(T.files.dm_offline, { name: whoNow() }));
       knockNow('comms-msg').then((ok) => {
-        if (ok) sys(`pinged their device — try again once they open comms.`);
+        if (ok) sys(T.files.pinged);
       });
     } else {
-      sys('nobody is connected to this room yet — files send directly, so someone has to be here.');
+      sys(T.files.nobody);
     }
     return;
   }
@@ -1754,14 +1993,14 @@ const sendFiles = async (fileList) => {
   const tooBig = all.filter(f => f.size > MAX_FILE);
   const ok = all.filter(f => f.size <= MAX_FILE);
   if (tooBig.length) {
-    sys(`skipped (over ${fmtMB(MAX_FILE)} cap): ${tooBig.map(f => `${f.name} ${fmtSize(f.size)}`).join(', ')}`);
+    sys(fmt(T.files.skipped, { cap: fmtMB(MAX_FILE), files: tooBig.map(f => `${f.name} ${fmtSize(f.size)}`).join(', ') }));
   }
   if (!ok.length) return;
   const total = ok.reduce((s, f) => s + f.size, 0);
-  if (ok.length > 1) sys(`sending ${ok.length} file${ok.length===1?'':'s'} (${fmtSize(total)}) to ${peers.size} peer${peers.size===1?'':'s'}…`);
-  if (total > MAX_TOTAL_WARN) sys(`heads up: ${fmtSize(total)} total — this may take a while.`);
+  if (ok.length > 1) sys(fmt(peers.size === 1 ? T.files.sending_to_one : T.files.sending_to_many, { n: ok.length, size: fmtSize(total), p: peers.size }));
+  if (total > MAX_TOTAL_WARN) sys(fmt(T.files.heads_up, { size: fmtSize(total) }));
   for (const file of ok) {
-    try { await sendOne(file); } catch (err) { sys(`send failed for ${file.name}: ${err.message}`); }
+    try { await sendOne(file); } catch (err) { sys(fmt(T.files.send_failed_for, { name: file.name, reason: why(err) })); }
   }
 };
 
@@ -1824,22 +2063,20 @@ attachExtBtn.addEventListener('click', async () => {
   attachExtBtn.disabled = true;
   try {
     if (peers.size === 0) {
-      sys(currentDmContact
-        ? `extensions go device-to-device — ${whoNow()} isn't connected right now.`
-        : 'nobody is connected to this room yet.');
+      sys(currentDmContact ? fmt(T.attach.ext_dm, { name: whoNow() }) : T.attach.nobody);
       return;
     }
     let list;
-    try { list = await MentriaBus.invoke('extensions.list'); } catch (e) { sys('extensions unavailable: ' + e.message); return; }
-    if (!list.length) { sys('no installed extensions to share.'); return; }
+    try { list = await MentriaBus.invoke('extensions.list'); } catch (e) { sys(fmt(T.attach.ext_unavailable, { reason: why(e) })); return; }
+    if (!list.length) { sys(T.attach.no_ext); return; }
     const chosen = await pickExtension(list);
     if (!chosen) return;
     let html;
-    try { html = await MentriaBus.invoke('extensions.getSource', { id: chosen.id }); } catch (e) { sys('could not read extension: ' + e.message); return; }
-    if (!html) { sys('extension source missing.'); return; }
+    try { html = await MentriaBus.invoke('extensions.getSource', { id: chosen.id }); } catch (e) { sys(fmt(T.attach.ext_read_failed, { reason: why(e) })); return; }
+    if (!html) { sys(T.attach.ext_missing); return; }
     const file = new File([html], chosen.id + '.html', { type: 'text/html' });
     await sendOne(file, { kind: 'mentria-ext', extName: chosen.name });
-  } catch (e) { sys('send failed: ' + e.message); }
+  } catch (e) { sys(fmt(T.attach.send_failed, { reason: why(e) })); }
   finally { attachExtBtn.disabled = false; }
 });
 
@@ -1849,37 +2086,36 @@ attachPackBtn.addEventListener('click', async () => {
   attachPackBtn.disabled = true;
   try {
     if (peers.size === 0) {
-      sys(currentDmContact
-        ? `packs go device-to-device — ${whoNow()} isn't connected right now.`
-        : 'nobody is connected to this room yet.');
+      sys(currentDmContact ? fmt(T.attach.pack_dm, { name: whoNow() }) : T.attach.nobody);
       return;
     }
-    const P = window.MentriaPacks;
+    const P = await loadPacks().catch(() => null);
     const rows = P ? await P.list() : [];
-    if (!rows.length) { sys('no imported packs to share. Packs you import on /learn/ show up here.'); return; }
+    if (!rows.length) { sys(T.attach.no_packs); return; }
     const chosen = await pickExtension(rows.map((r) => ({ id: r.id, name: P.text(r.title), version: String(r.version), icon: '' })));
     if (!chosen) return;
     const row = await P.get(chosen.id);
-    if (!row || !row.pack) { sys('pack missing.'); return; }
+    if (!row || !row.pack) { sys(T.attach.pack_missing); return; }
     const json = JSON.stringify(row.pack);
-    if (new Blob([json]).size > MAX_FILE) { sys('pack too large to send.'); return; }
+    if (new Blob([json]).size > MAX_FILE) { sys(T.attach.pack_too_large); return; }
     const file = new File([json], chosen.id + '.mentria.json', { type: 'application/json' });
     await sendOne(file, { kind: 'mentria-pack', packTitle: chosen.name });
-  } catch (e) { sys('send failed: ' + e.message); }
+  } catch (e) { sys(fmt(T.attach.send_failed, { reason: why(e) })); }
   finally { attachPackBtn.disabled = false; }
 });
 
 els.mute.addEventListener('click', () => {
   muted = !muted;
-  els.mute.textContent = muted ? 'sound: off' : 'sound: on';
+  els.mute.textContent = muted ? T.adv.sound_off : T.adv.sound_on;
   els.mute.setAttribute('aria-pressed', String(muted));
   try { localStorage.setItem('comms.muted', muted ? '1' : '0'); } catch (_) {}
   if (!muted) playPing(880);
 });
-if (muted) { els.mute.textContent = 'sound: off'; els.mute.setAttribute('aria-pressed', 'true'); }
+if (muted) { els.mute.textContent = T.adv.sound_off; els.mute.setAttribute('aria-pressed', 'true'); }
 
 const updateCallUI = () => {
   const inRoom = !!room;
+  if (inRoom && currentRoomName) els.share.hidden = isDmRoom(currentRoomName) || call.active;
   els.callStart.hidden = !inRoom || call.active;
   els.callCam.hidden = !call.active;
   els.callMic.hidden = !call.active;
@@ -1912,7 +2148,7 @@ const addTile = (key, stream, opts = {}) => {
   tile.append(mediaEl);
   const label = document.createElement('span');
   label.className = 'comms__tile-label';
-  label.textContent = opts.label || 'peer';
+  label.textContent = opts.label || T.call.peer;
   tile.append(label);
   els.media.append(tile);
   callTiles.set(key, { tile, stream });
@@ -1928,8 +2164,35 @@ const removeTile = (key) => {
 };
 
 const stopRinging = () => {
-  if (call.ringTimer) { clearInterval(call.ringTimer); call.ringTimer = null; }
+  if (ringTimer) { clearInterval(ringTimer); ringTimer = null; }
   els.ring.hidden = true;
+};
+
+const renderRing = () => {
+  if (ringAccepting) return;
+  const now = Date.now();
+  incomingRings.forEach((r, pid) => {
+    if (r.until > now && peers.has(pid)) return;
+    incomingRings.delete(pid);
+    sys(fmt(T.people.tried_call, { name: nameOf(pid) }));
+  });
+  if (!incomingRings.size) { stopRinging(); return; }
+  const latest = Array.from(incomingRings.keys()).pop();
+  els.ringText.textContent = fmt(T.ring.calling, { name: nameOf(latest) });
+  els.ring.hidden = false;
+  if (!ringTimer) {
+    playPing(660);
+    ringTimer = setInterval(() => { renderRing(); if (ringTimer) playPing(660); }, 1400);
+  }
+};
+
+const resetCallButtons = () => {
+  els.callMic.classList.remove('is-off');
+  els.callMic.setAttribute('aria-pressed', 'true');
+  els.callMic.title = T.call.mic_on;
+  els.callCam.classList.add('is-off');
+  els.callCam.setAttribute('aria-pressed', 'false');
+  els.callCam.title = T.call.cam_off;
 };
 
 const getLocalMedia = (video) => navigator.mediaDevices.getUserMedia({
@@ -1937,72 +2200,219 @@ const getLocalMedia = (video) => navigator.mediaDevices.getUserMedia({
   video: video ? { width: { ideal: 640 }, height: { ideal: 480 } } : false
 });
 
-const startCall = async (answering) => {
-  if (call.active || !room) return;
-  if (!peers.size) {
-    if (currentDmContact) {
-      sys(`${whoNow()} isn't connected — ringing their device…`);
-      const target = currentDmContact;
-      const ok = await knockNow('comms-ring');
-      announceCallTo(target);
-      sys(ok
-        ? `notification sent — they'll see it was you. start the call again once they appear.`
-        : `couldn't reach their device — they'll see your missed call when they next open comms.`);
-    } else {
-      sys('nobody is here to call yet.');
-    }
-    return;
+const callSend = (msg, peerId) => {
+  if (!callAction) return;
+  try {
+    const sent = callAction.send(msg, peerId || undefined);
+    if (sent && typeof sent.catch === 'function') sent.catch(() => {});
+  } catch (_) {}
+};
+
+const settle = (result) => { Promise.allSettled([].concat(result || [])); };
+
+const shareStreamWith = (peerId) => {
+  if (!room || !call.local || call.sentTo.has(peerId) || !peers.has(peerId)) return;
+  call.sentTo.add(peerId);
+  try { settle(room.addStream(call.local, { target: peerId })); } catch (_) {}
+};
+
+const unshareStreamWith = (peerId) => {
+  if (!call.sentTo.delete(peerId) || !room || !call.local || !peers.has(peerId)) return;
+  try { settle(room.removeStream(call.local, { target: peerId })); } catch (_) {}
+};
+
+const clearAnswerTimer = () => {
+  if (call.answerTimer) { clearTimeout(call.answerTimer); call.answerTimer = null; }
+};
+
+const addMember = (peerId, announce) => {
+  if (!call.active || !peers.has(peerId)) return;
+  const fresh = !call.members.has(peerId);
+  call.members.add(peerId);
+  call.invited.delete(peerId);
+  call.connected = true;
+  clearAnswerTimer();
+  shareStreamWith(peerId);
+  const held = pendingStreams.get(peerId);
+  if (held) {
+    pendingStreams.delete(peerId);
+    if (held.getTracks().some((t) => t.readyState === 'live')) addTile(peerId, held, { label: displayName(peerId) });
   }
-  if (peers.size > 4) { sys('calls support up to 5 people in a room (peer-to-peer mesh).'); return; }
+  if (fresh && announce) sys(fmt(T.call.joined, { name: nameOf(peerId) }));
+  updateCallUI();
+};
+
+const dropMember = (peerId, announce) => {
+  if (!call.members.delete(peerId)) return;
+  unshareStreamWith(peerId);
+  removeTile(peerId);
+  pendingStreams.delete(peerId);
+  if (announce) sys(fmt(T.call.left, { name: nameOf(peerId) }));
+  if (call.active && !call.members.size) endCall(false);
+  else updateCallUI();
+};
+
+const openCall = async () => {
+  const forRoom = room;
   let local;
   try { local = await getLocalMedia(false); }
-  catch (err) { sys('microphone unavailable: ' + err.message); return; }
+  catch (err) { sys(fmt(T.call.mic_unavailable, { reason: why(err) })); return false; }
+  if (!room || room !== forRoom) { local.getTracks().forEach((t) => t.stop()); return false; }
+  if (call.active) { local.getTracks().forEach((t) => t.stop()); return true; }
   call.active = true;
   call.local = local;
   call.videoOn = false;
   call.micOff = false;
-  els.callCam.setAttribute('aria-pressed', 'false');
-  els.callCam.title = 'camera off — tap to turn on';
-  els.callCam.setAttribute('aria-pressed', 'false');
-  els.callMic.setAttribute('aria-pressed', 'true');
-  els.callMic.title = 'mic on — tap to mute';
-  els.callMic.setAttribute('aria-pressed', 'false');
-  room.addStream(local);
-  addTile('you', local, { local: true, label: myProfile.name || 'you' });
-  pendingStreams.forEach((stream, peerId) => addTile(peerId, stream, { label: displayName(peerId) }));
-  pendingStreams.clear();
-  if (!answering) {
-    callAction.send({ kind: 'ring' });
-    sys('calling the room… they need to accept.');
-  } else {
-    callAction.send({ kind: 'join' });
+  call.connected = false;
+  call.cid = null;
+  call.cids.clear();
+  call.members.clear();
+  call.invited.clear();
+  call.sentTo.clear();
+  resetCallButtons();
+  addTile('you', local, { local: true, label: myProfile.name || T.call.you });
+  updateCallUI();
+  return true;
+};
+
+const startCall = async () => {
+  if (call.active || !room || callStarting) return;
+  if (!peers.size) {
+    if (currentDmContact) {
+      sys(fmt(T.call.ringing, { name: whoNow() }));
+      const target = currentDmContact;
+      const ok = await knockNow('comms-ring');
+      announceCallTo(target);
+      sys(ok ? T.call.notified : T.call.unreachable);
+    } else {
+      sys(T.call.nobody);
+    }
+    return;
   }
+  if (peers.size > 4) { sys(T.call.too_many); return; }
+  callStarting = true;
+  let opened = false;
+  try { opened = await openCall(); } finally { callStarting = false; }
+  if (!opened || call.cid) return;
+  const cid = b64urlEncode(crypto.getRandomValues(new Uint8Array(9)));
+  call.cid = cid;
+  call.cids.add(cid);
+  peers.forEach((p) => { if (!call.members.has(p)) call.invited.add(p); });
+  callSend({ kind: 'ring', cid });
+  sys(T.call.calling_room);
+  clearAnswerTimer();
+  call.answerTimer = setTimeout(() => {
+    call.answerTimer = null;
+    if (call.active && !call.connected) endCall(false, T.call.no_answer);
+  }, ANSWER_MS);
   updateCallUI();
 };
 
-const endCall = (silent) => {
-  stopRinging();
+const endCall = (silent, note) => {
+  clearAnswerTimer();
   if (!call.active) { pendingStreams.clear(); return; }
-  try { if (callAction && !silent) callAction.send({ kind: 'leave' }); } catch {}
-  try { if (room && call.local) room.removeStream(call.local); } catch {}
+  if (!silent) callSend(call.cid ? { kind: 'leave', cid: call.cid } : { kind: 'leave' });
+  try { if (room && call.local) settle(room.removeStream(call.local)); } catch (_) {}
   if (call.local) call.local.getTracks().forEach((t) => t.stop());
   call.local = null;
   call.active = false;
+  call.connected = false;
+  call.cid = null;
+  call.cids.clear();
+  call.members.clear();
+  call.invited.clear();
+  call.sentTo.clear();
+  resetCallButtons();
   callTiles.forEach((t) => t.tile.remove());
   callTiles.clear();
   pendingStreams.clear();
   updateCallUI();
-  if (!silent) sys('call ended.');
+  if (!silent) sys(note || T.call.ended);
 };
 
-els.callStart.addEventListener('click', () => startCall(false));
+const onCallRing = (peerId, cid) => {
+  if (!peers.has(peerId)) return;
+  pendingStreams.delete(peerId);
+  if (call.active && call.cids.has(cid)) return;
+  if (call.active && (call.members.has(peerId) || call.invited.has(peerId))) {
+    call.cids.add(cid);
+    addMember(peerId, false);
+    callSend({ kind: 'join', cid }, peerId);
+    return;
+  }
+  incomingRings.set(peerId, { cid, until: Date.now() + RING_MS });
+  renderRing();
+};
+
+const onCallJoin = (peerId, cid, reply) => {
+  if (!call.active || !call.cids.has(cid) || !peers.has(peerId)) return;
+  addMember(peerId, true);
+  if (reply) callSend({ kind: 'here', cid }, peerId);
+};
+
+const onCallDecline = (peerId, cid) => {
+  if (!call.active || !call.cids.has(cid)) return;
+  sys(fmt(T.call.declined, { name: nameOf(peerId) }));
+  call.invited.delete(peerId);
+  if (!call.connected && !call.invited.size) endCall(false);
+};
+
+const onCallLeave = (peerId) => {
+  pendingStreams.delete(peerId);
+  if (incomingRings.delete(peerId)) {
+    sys(fmt(T.people.tried_call, { name: nameOf(peerId) }));
+    renderRing();
+  }
+  call.invited.delete(peerId);
+  if (call.members.has(peerId)) dropMember(peerId, true);
+  else if (call.active && !call.connected && call.cid && !call.invited.size) endCall(false);
+};
+
+const acceptRings = async () => {
+  if (ringAccepting) return;
+  const now = Date.now();
+  if (!Array.from(incomingRings.entries()).some(([pid, r]) => peers.has(pid) && r.until > now)) { renderRing(); return; }
+  ringAccepting = true;
+  stopRinging();
+  let opened = call.active;
+  try { if (!opened) opened = await openCall(); } finally { ringAccepting = false; }
+  const rings = Array.from(incomingRings.entries()).filter(([pid]) => peers.has(pid));
+  incomingRings.clear();
+  if (!opened) {
+    rings.forEach(([pid, r]) => callSend({ kind: 'decline', cid: r.cid }, pid));
+    return;
+  }
+  if (!rings.length) {
+    if (!call.connected && !call.cid) endCall(true);
+    return;
+  }
+  const cids = new Set();
+  rings.forEach(([pid, r]) => {
+    call.cids.add(r.cid);
+    cids.add(r.cid);
+    addMember(pid, false);
+  });
+  cids.forEach((cid) => callSend({ kind: 'join', cid }));
+  updateCallUI();
+};
+
+const declineRings = () => {
+  stopRinging();
+  incomingRings.forEach((r, pid) => {
+    callSend({ kind: 'decline', cid: r.cid }, pid);
+    pendingStreams.delete(pid);
+  });
+  incomingRings.clear();
+};
+
+els.callStart.addEventListener('click', () => startCall());
 els.callHangup.addEventListener('click', () => endCall(false));
 
 els.callMic.addEventListener('click', () => {
   if (!call.local) return;
   call.micOff = !call.micOff;
   call.local.getAudioTracks().forEach((t) => { t.enabled = !call.micOff; });
-  els.callMic.title = call.micOff ? 'mic off — tap to unmute' : 'mic on — tap to mute';
+  els.callMic.title = call.micOff ? T.call.mic_off : T.call.mic_on;
   els.callMic.classList.toggle('is-off', call.micOff);
   els.callMic.setAttribute('aria-pressed', String(!call.micOff));
 });
@@ -2012,30 +2422,28 @@ els.callCam.addEventListener('click', async () => {
   els.callCam.disabled = true;
   try {
     const next = await getLocalMedia(!call.videoOn);
-    try { room.removeStream(call.local); } catch {}
+    if (!call.active || !room || !call.local) { next.getTracks().forEach((t) => t.stop()); return; }
+    const targets = Array.from(call.sentTo);
+    try { settle(room.removeStream(call.local)); } catch (_) {}
     call.local.getTracks().forEach((t) => t.stop());
+    call.sentTo.clear();
     call.local = next;
     call.videoOn = !call.videoOn;
     if (call.micOff) next.getAudioTracks().forEach((t) => { t.enabled = false; });
-    room.addStream(next);
-    addTile('you', next, { local: true, label: myProfile.name || 'you' });
-    els.callCam.title = call.videoOn ? 'camera on — tap to turn off' : 'camera off — tap to turn on';
+    targets.forEach((pid) => { if (call.members.has(pid)) shareStreamWith(pid); });
+    addTile('you', next, { local: true, label: myProfile.name || T.call.you });
+    els.callCam.title = call.videoOn ? T.call.cam_on : T.call.cam_off;
     els.callCam.classList.toggle('is-off', !call.videoOn);
     els.callCam.setAttribute('aria-pressed', String(call.videoOn));
-    els.callCam.setAttribute('aria-pressed', String(call.videoOn));
   } catch (err) {
-    sys('camera unavailable: ' + err.message);
+    sys(fmt(T.call.cam_unavailable, { reason: why(err) }));
   } finally {
     els.callCam.disabled = false;
   }
 });
 
-els.ringAccept.addEventListener('click', () => { stopRinging(); startCall(true); });
-els.ringDecline.addEventListener('click', () => {
-  stopRinging();
-  try { if (callAction) callAction.send({ kind: 'decline' }); } catch {}
-  pendingStreams.clear();
-});
+els.ringAccept.addEventListener('click', () => { acceptRings(); });
+els.ringDecline.addEventListener('click', () => { declineRings(); });
 
 const sendProfileTo = (peerId) => {
   if (!profAction || !myId) return;
@@ -2050,7 +2458,7 @@ let onboardDone = false;
 let onboardActive = false;
 
 const INBOX_KIND = 3839;
-const INBOX_LOOKBACK_SEC = 14 * 24 * 60 * 60;
+const INBOX_LOOKBACK_SEC = HISTORY_LOOKBACK_SEC;
 let sideWs = null;
 let sideOpen = null;
 let inboxSubId = null;
@@ -2060,6 +2468,34 @@ const topicToFp = new Map();
 const topicToRoom = new Map();
 const seenInboxIds = new Set();
 let unreadMap = {};
+const unreadFloor = new Map();
+let unreadFlush = null;
+
+const queueUnreadFlush = (render) => {
+  if (!unreadFlush) {
+    unreadFlush = { render: false };
+    setTimeout(() => {
+      const f = unreadFlush;
+      unreadFlush = null;
+      try { CID.setUnread(unreadMap); } catch (_) {}
+      if (f.render) { renderContacts(); syncOsBadge(); }
+    }, 80);
+  }
+  if (render) unreadFlush.render = true;
+};
+
+const unreadFloorOf = (k, fallback) => {
+  if (unreadFloor.has(k)) return unreadFloor.get(k);
+  return unreadMap[k] ? (unreadMap[k].lastTs || 0) : (fallback || 0);
+};
+
+const countUnread = (k, ts) => {
+  const e = unreadMap[k] || { n: 0, lastTs: 0 };
+  e.n = (e.n || 0) + 1;
+  e.lastTs = Math.max(e.lastTs || 0, ts);
+  unreadMap[k] = e;
+  queueUnreadFlush(true);
+};
 
 let sideOpens = 0;
 
@@ -2095,10 +2531,11 @@ const sideSend = async (str) => {
 };
 
 const publishToInbox = async (theirPub, payload) => {
+  if (!myId) return false;
   try {
-    const env = await CID.sealToInbox(theirPub, payload);
+    const env = await CID.sealToInbox(theirPub, payload, myId.privateKey);
     const topic = await CID.inboxTopic(theirPub);
-    const evt = await createPersistentEvent(INBOX_KIND, topic, JSON.stringify(env));
+    const evt = await createPersistentEvent(INBOX_KIND, topic, JSON.stringify(env), expiryTags());
     let sent = await sideSend(evt);
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
@@ -2110,7 +2547,7 @@ const publishToInbox = async (theirPub, payload) => {
 
 const announceToContact = async (contact) => {
   if (!myId || !contact || !contact.pub) return;
-  const payload = { v: 1, name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y } };
+  const payload = { v: 1, name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, ts: Date.now() };
   if (ringToken) payload.ring = ringToken;
   await publishToInbox(contact.pub, payload);
 };
@@ -2126,20 +2563,29 @@ const subscribeInbox = async () => {
 const subscribeUnread = async () => {
   if (!myId) return;
   const contacts = CID.getContacts();
-  topicToFp.clear();
-  const topics = [];
+  const byFp = new Map();
+  const byRoom = new Map();
   for (const c of contacts) {
     try {
-      const { roomName } = await CID.deriveDm(myId.privateKey, c.pub);
-      const topic = CHAT_TOPIC_PREFIX + roomName;
-      topicToFp.set(topic, c.fp);
-      topics.push(topic);
+      const { roomName, b64Key } = await CID.deriveDm(myId.privateKey, c.pub);
+      const topic = await chatTopicFor(roomName, b64Key);
+      if (topic) byFp.set(topic, c.fp);
     } catch (_) {}
   }
+  for (const r of savedRooms()) {
+    const topic = await chatTopicFor(r.room, r.key);
+    if (topic) byRoom.set(topic, r);
+  }
+  topicToFp.clear();
+  byFp.forEach((fp, topic) => topicToFp.set(topic, fp));
   topicToRoom.clear();
-  for (const r of savedRooms()) { const topic = CHAT_TOPIC_PREFIX + r.room; topicToRoom.set(topic, r); topics.push(topic); }
+  byRoom.forEach((r, topic) => topicToRoom.set(topic, r));
+  const topics = Array.from(byFp.keys()).concat(Array.from(byRoom.keys()));
   if (unreadSubId) await sideSend(JSON.stringify(['CLOSE', unreadSubId]));
   if (!topics.length) { unreadSubId = null; return; }
+  unreadFloor.clear();
+  topicToFp.forEach((fp) => unreadFloor.set(fp, (unreadMap[fp] && unreadMap[fp].lastTs) || 0));
+  topicToRoom.forEach((r) => { const k = roomUnreadKey(r.room); unreadFloor.set(k, unreadMap[k] ? (unreadMap[k].lastTs || 0) : (r.lastSeen || 0)); });
   unreadSubId = 'mu-' + Math.random().toString(36).slice(2);
   const since = Math.floor(Date.now() / 1000) - HISTORY_LOOKBACK_SEC;
   await sideSend(JSON.stringify(['REQ', unreadSubId, { kinds: [CHAT_KIND], '#x': topics, since, limit: 300 }]));
@@ -2157,30 +2603,28 @@ const handleSideMsg = async (msgEvent) => {
     if (!myId) return;
     let envelope;
     try { envelope = JSON.parse(ev.content); } catch { return; }
-    const payload = await CID.openInboxEnvelope(myId.privateKey, envelope);
-    if (!payload) return;
+    const payload = await CID.openInboxEnvelope(myId.privateKey, envelope, myId.publicJwk);
+    if (!payload || !payload.verified) return;
     if (payload.kind === 'call') {
       let callerFp = null;
       try { callerFp = await CID.fingerprint(payload.pub); } catch (_) {}
       if (!callerFp) return;
-      const known = CID.getContacts().find((c) => c.fp === callerFp);
-      const who = (known && known.name) || payload.name || 'someone';
-      if (currentDmContact && currentDmContact.fp === callerFp && peers.size > 0) return;
-      markMissedCall(callerFp, payload.ts);
+      const known = CID.contactByPub(payload.pub);
+      if (known) callerFp = known.fp;
+      const who = (known && known.name) || payload.name || T.people.someone;
+      if (currentDmContact && currentDmContact.fp === callerFp && peers.size > 0) { markMissedCall(callerFp, payload.ts, ev.id, true); return; }
+      if (!markMissedCall(callerFp, payload.ts, ev.id)) return;
       renderContacts();
       playPing(660);
-      sys(`${who} tried to call you.`);
+      notice(fmt(T.people.tried_call, { name: who }));
       return;
     }
-    let existingFp = null;
-    try { existingFp = await CID.fingerprint(payload.pub); } catch (_) {}
-    if (existingFp && CID.getContacts().some((c) => c.fp === existingFp)) {
+    const existing = CID.contactByPub(payload.pub);
+    if (existing) {
+      if (typeof payload.ts !== 'number' || payload.ts <= (existing.annTs || 0)) return;
       try {
-        await CID.addContact(payload);
-        if (currentDmContact && currentDmContact.fp === existingFp) {
-          const fresh = freshContact(existingFp);
-          if (fresh) currentDmContact = fresh;
-        }
+        const updated = await CID.addContact({ name: payload.name, pub: payload.pub, ring: payload.ring, annTs: Math.min(payload.ts, Date.now()) });
+        if (currentDmContact && currentDmContact.fp === existing.fp && updated) currentDmContact = updated;
         renderContacts();
         updatePushStatus();
       } catch (_) {}
@@ -2189,7 +2633,7 @@ const handleSideMsg = async (msgEvent) => {
     const saved = await CID.saveRequest(payload);
     if (saved) {
       renderContacts();
-      sys(`${saved.name || 'someone'} wants to connect — accept them in your people list.`);
+      notice(fmt(T.people.wants_sys, { name: saved.name || T.people.someone }));
       playPing(660);
     }
     return;
@@ -2207,29 +2651,23 @@ const handleSideMsg = async (msgEvent) => {
       const k = roomUnreadKey(savedRoom.room);
       if (currentRoomName === savedRoom.room) {
         unreadMap[k] = { n: 0, lastTs: Math.max(ts, Date.now()) };
-        try { CID.setUnread(unreadMap); } catch (_) {}
+        unreadFloor.set(k, Date.now());
+        queueUnreadFlush(false);
         return;
       }
-      if (content && typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
-      const entry = unreadMap[k] || { n: 0, lastTs: savedRoom.lastSeen || 0 };
-      if (ts <= entry.lastTs) return;
+      if (!content || !content.enc) return;
+      if (typeof content.cmid === 'string' && content.cmid.startsWith(selfId + ':')) return;
+      if (ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
       let preview = null;
-      if (content && content.enc) {
-        try {
-          const key = await roomCryptoKey(savedRoom);
-          const unpacked = key ? unpackChatPlain(await decryptText(key, content.enc)) : null;
-          if (unpacked && unpacked.ctl) return;
-          if (unpacked && unpacked.sfp && myFp && unpacked.sfp === myFp) return;
-          preview = unpacked ? unpacked.text : null;
-        } catch (_) {}
-      }
-      entry.n = (entry.n || 0) + 1;
-      entry.lastTs = ts;
-      unreadMap[k] = entry;
-      try { CID.setUnread(unreadMap); } catch (_) {}
-      renderContacts();
-      syncOsBadge();
-      notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: '/comms/' + formatHash(savedRoom.room, savedRoom.key) });
+      try {
+        const key = await roomCryptoKey(savedRoom);
+        const unpacked = key ? unpackChatPlain(await decryptText(key, content.enc)) : null;
+        if (!unpacked || unpacked.ctl || sentByMe(unpacked)) return;
+        preview = unpacked.text;
+      } catch (_) { return; }
+      if (currentRoomName === savedRoom.room || ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
+      countUnread(k, ts);
+      notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: COMMS_PATH + formatHash(savedRoom.room, savedRoom.key) });
       return;
     }
     if (currentDmContact && currentDmContact.fp === fp) {
@@ -2237,25 +2675,23 @@ const handleSideMsg = async (msgEvent) => {
       seen.n = 0;
       seen.lastTs = Math.max(seen.lastTs || 0, ts, Date.now());
       unreadMap[fp] = seen;
-      try { CID.setUnread(unreadMap); } catch (_) {}
+      unreadFloor.set(fp, Date.now());
+      queueUnreadFlush(false);
       return;
     }
-    if (content && typeof content.cmid === 'string') {
+    if (!content || !content.enc) return;
+    if (typeof content.cmid === 'string') {
       if (content.cmid.startsWith(selfId + ':')) return;
       if (sentCmidsFor(fp).includes(content.cmid)) return;
     }
-    const entry = unreadMap[fp] || { n: 0, lastTs: 0 };
-    if (ts <= entry.lastTs) return;
-    entry.n = (entry.n || 0) + 1;
-    unreadMap[fp] = entry;
-    try { CID.setUnread(unreadMap); } catch (_) {}
-    renderContacts();
-    syncOsBadge();
+    if (ts <= unreadFloorOf(fp, 0)) return;
+    countUnread(fp, ts);
   }
 };
 
 const clearUnreadFor = (fp) => {
   unreadMap[fp] = { n: 0, lastTs: Date.now() };
+  unreadFloor.set(fp, Date.now());
   try { CID.setUnread(unreadMap); } catch (_) {}
   syncOsBadge();
 };
@@ -2289,7 +2725,7 @@ const refreshNotifBanner = () => {
   const supported = !!(window.MentriaPush && MentriaPush.isSupported());
   const isIosBrowser = /iPhone|iPad|iPod/.test(navigator.userAgent) && !navigator.standalone;
   if (unlocked && !dismissed && !supported && isIosBrowser) {
-    els.notif.querySelector('.comms__notif-text').textContent = 'to get message notifications on iPhone, install comms: share button → add to home screen';
+    els.notif.querySelector('.comms__notif-text').textContent = T.notif.ios;
     els.notifEnable.hidden = true;
     els.notif.hidden = false;
     return;
@@ -2312,9 +2748,9 @@ els.notifEnable.addEventListener('click', async () => {
       await initRingToken();
       const contacts = CID.getContacts();
       for (const c of contacts) { try { await announceToContact(c); } catch (_) {} }
-      sys('notifications on — your contacts can now reach you when comms is closed.');
+      notice(T.notif.on);
     } else {
-      sys('notifications stayed off. you can enable them from your browser settings later.');
+      notice(T.notif.off);
     }
   } finally {
     els.notifEnable.disabled = false;
@@ -2330,6 +2766,7 @@ const initRingToken = async () => {
     token = btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
   }
   const ok = await MentriaPush.ringRegister(token);
+  ringRegFailed = !ok;
   if (ok) {
     ringToken = token;
     if (window.MentriaStore) MentriaStore.set('comms', 'ring_token', token);
@@ -2363,7 +2800,7 @@ const maybeRingContact = () => {
       const ok = !!(res && res.ok);
       try { MentriaStore.set('comms', 'last_knock', { t: Date.now(), ok, reason: (res && res.reason) || null }); } catch (_) {}
       if (!ok && res && res.reason === 'unknown-token' && currentDmContact) {
-        sys(`${currentDmContact.name || 'they'} can't be reached by notification — their device needs to reopen comms once.`);
+        sys(fmt(T.log.cant_reach, { name: currentDmContact.name || T.log.they }));
       }
     });
   }
@@ -2373,15 +2810,26 @@ const getMissed = () => {
   try { const m = MentriaStore.get('comms', 'missed'); return (m && typeof m === 'object') ? m : {}; }
   catch (_) { return {}; }
 };
-const markMissedCall = (fp, ts) => {
+const markMissedCall = (fp, ts, id, seen) => {
   const m = getMissed();
-  m[fp] = { n: ((m[fp] && m[fp].n) || 0) + 1, ts: ts || Date.now() };
+  const e = (m[fp] && Array.isArray(m[fp].ids)) ? m[fp] : { n: 0, ids: [] };
+  if (id && e.ids.includes(id)) return false;
+  if (id) e.ids = e.ids.concat(id).slice(-50);
+  if (!seen) { e.n = (e.n || 0) + 1; e.ts = ts || Date.now(); }
+  m[fp] = e;
   try { MentriaStore.set('comms', 'missed', m); } catch (_) {}
+  return !seen;
 };
 const clearMissedCall = (fp) => {
   const m = getMissed();
-  if (!m[fp]) return;
-  delete m[fp];
+  const e = m[fp];
+  if (!e) return;
+  if (Array.isArray(e.ids) && e.ids.length) {
+    if (!e.n) return;
+    e.n = 0;
+  } else {
+    delete m[fp];
+  }
   try { MentriaStore.set('comms', 'missed', m); } catch (_) {}
 };
 
@@ -2407,13 +2855,13 @@ const knockNow = async (kind) => {
   return !!(res && res.ok);
 };
 
-const whoNow = () => (currentDmContact && (currentDmContact.name || currentDmContact.fp)) || 'they';
+const whoNow = () => (currentDmContact && (currentDmContact.name || currentDmContact.fp)) || T.log.they;
 
 let noTokenNoticeShown = false;
 const noticeNoToken = () => {
   if (noTokenNoticeShown || !currentDmContact) return;
   noTokenNoticeShown = true;
-  sys(`${currentDmContact.name || 'they'} can't be notified yet — they haven't enabled notifications on their device.`);
+  sys(fmt(T.log.no_token, { name: currentDmContact.name || T.log.they }));
 };
 
 const syncOsBadge = async () => {
@@ -2486,12 +2934,10 @@ const enrollPasskeyFromComms = async (btn) => {
     await window.MentriaIdentity.enrollPasskey();
     els.pkUpgrade.hidden = true;
     els.pkSettings.hidden = true;
-    sys('face id / touch id added — your device lock unlocks comms from now on.');
+    notice(passkeyCopy.added);
   } catch (err) {
     const msg = err && err.message;
-    els.pkErr.textContent = msg === 'prf-unsupported'
-      ? 'this device can\'t use a passkey for encryption yet — your code still unlocks everything.'
-      : 'that didn\'t work — your code still unlocks everything. try again from ⚙ settings.';
+    els.pkErr.textContent = msg === 'prf-unsupported' ? T.passkey.err_prf : T.passkey.err_failed;
     els.pkErr.hidden = false;
     if (msg === 'prf-unsupported') { pkSupportCache = false; els.pkSettings.hidden = true; }
   } finally {
@@ -2509,6 +2955,8 @@ const initIdentity = async () => {
   try {
     myId = await CID.ensureKeypair();
     myFp = await CID.fingerprint(myId.publicJwk);
+    myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
+    try { await CID.migrateFingerprints(); } catch (_) {}
     myProfile = CID.getProfile();
     els.idName.value = myProfile.name;
     els.idFp.textContent = myFp;
@@ -2518,13 +2966,17 @@ const initIdentity = async () => {
     renderContacts();
     syncOsBadge();
     broadcastProfile();
+    if (joinedLocked && joinTarget && currentRoomName === joinTarget.room && !isDmRoom(currentRoomName)) {
+      joinedLocked = false;
+      joinNew(joinTarget.room, joinTarget.key);
+    }
     await initRingToken();
     refreshNotifBanner();
     subscribeInbox();
     subscribeUnread();
     refreshPasskeyOffer(false);
   } catch (err) {
-    sys('identity error: ' + err.message);
+    notice(fmt(T.log.identity_err, { reason: why(err) }));
   }
 };
 
@@ -2537,7 +2989,7 @@ els.idUnlock.addEventListener('click', async () => {
     await initIdentity();
     refreshPasskeyOffer(true);
   } catch {
-    els.idErr.textContent = 'wrong passphrase';
+    els.idErr.textContent = T.lock.wrong;
   } finally {
     els.idUnlock.disabled = false;
   }
@@ -2551,11 +3003,17 @@ els.idPasskey.addEventListener('click', async () => {
     await initIdentity();
   } catch (err) {
     const code = err && err.message;
+    const name = err && err.name;
     els.idErr.textContent = code === 'webauthn-timeout'
-      ? 'no passkey prompt appeared — open this page in your browser, or use your recovery code'
+      ? T.lock.pk_timeout
       : code === 'no-passkey' || code === 'no-credential'
-        ? 'this device has no passkey for comms any more — use your recovery code'
-        : 'passkey unlock failed — use your recovery code';
+        ? T.lock.pk_gone
+        : name === 'NotAllowedError' || name === 'AbortError'
+          ? T.lock.pk_cancelled
+          : code === 'prf-unsupported' || name === 'NotSupportedError' || name === 'SecurityError' || name === 'InvalidStateError'
+            ? T.lock.pk_unavailable
+            : T.lock.pk_failed;
+    els.lockAlt.open = true;
   } finally {
     els.idPasskey.disabled = false;
   }
@@ -2569,10 +3027,26 @@ els.idName.addEventListener('change', () => {
   refreshMyCode();
 });
 
+let qrLoading = null;
+const loadQr = () => {
+  if (window.qrcodegen) return Promise.resolve(true);
+  if (!qrLoading) {
+    qrLoading = new Promise((resolve) => {
+      const s = document.createElement('script');
+      s.src = '/assets/js/qrcode.js?v={{ buildHash }}';
+      s.onload = () => resolve(!!window.qrcodegen);
+      s.onerror = () => { qrLoading = null; s.remove(); resolve(false); };
+      document.head.appendChild(s);
+    });
+  }
+  return qrLoading;
+};
+
 const refreshMyCode = () => {
   if (els.idCard.hidden || !myId) return;
   const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken);
   els.idCode.textContent = code;
+  if (!window.qrcodegen) { loadQr().then((ok) => { if (ok) refreshMyCode(); }); return; }
   try {
     const qr = qrcodegen.QrCode.encodeText(code, qrcodegen.QrCode.Ecc.LOW);
     const border = 2, px = 4, dim = qr.size + border * 2;
@@ -2594,7 +3068,7 @@ els.idShare.addEventListener('click', () => {
   els.idCard.hidden = !open;
   els.idShare.setAttribute('aria-pressed', String(open));
   els.idShare.classList.toggle('is-on', open);
-  els.shareT.textContent = open ? 'hide my code' : 'my code';
+  els.shareT.textContent = open ? T.people.hide_code : T.people.my_code;
   if (open) refreshMyCode();
 });
 
@@ -2603,9 +3077,9 @@ els.addToggle.addEventListener('click', () => {
   els.addBox.hidden = !open;
   els.addToggle.setAttribute('aria-expanded', String(open));
   els.addToggle.classList.toggle('is-on', open);
-  els.addToggleT.textContent = open ? 'close' : 'add someone';
+  els.addToggleT.textContent = open ? T.people.close : T.people.add;
   if (open) els.contactIn.focus();
-  else stopScan();
+  else { stopScan(); showAddError(''); }
 });
 
 let scanStream = null;
@@ -2702,7 +3176,7 @@ const stopScan = () => {
 const handleScanned = async (value) => {
   const raw = String(value || '').trim();
   const idx = raw.indexOf('MC1.');
-  if (idx === -1) { els.scanNote.textContent = 'that code isn\'t a mentria contact code — keep pointing at their screen'; return false; }
+  if (idx === -1) { els.scanNote.textContent = T.people.scan_not_code; return false; }
   stopScan();
   els.contactIn.value = raw.slice(idx);
   els.contactAdd.click();
@@ -2738,17 +3212,17 @@ els.scan.addEventListener('click', async () => {
   els.scan.hidden = true;
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     els.scanWrap.hidden = false;
-    els.scanNote.textContent = 'this browser can\'t open the camera — paste their code instead';
+    els.scanNote.textContent = T.people.scan_no_camera;
     return;
   }
   els.scanWrap.hidden = false;
-  els.scanNote.textContent = 'starting camera…';
+  els.scanNote.textContent = T.people.scan_starting;
   try {
     scanStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
     });
   } catch (_) {
-    els.scanNote.textContent = 'camera permission denied — paste their code instead';
+    els.scanNote.textContent = T.people.scan_denied;
     return;
   }
   els.scanVideo.srcObject = scanStream;
@@ -2763,7 +3237,7 @@ els.scan.addEventListener('click', async () => {
     } catch (_) {}
   }
   if (!scanDetector) await loadJsQR();
-  els.scanNote.textContent = 'point the camera at their “my code” screen';
+  els.scanNote.textContent = T.people.scan_hint;
   scanTick();
 });
 
@@ -2793,7 +3267,7 @@ if (navigator.share) els.idShareOut.hidden = false;
 els.idShareOut.addEventListener('click', async () => {
   const code = els.idCode.textContent || '';
   if (!code) return;
-  const text = `add me on mentria comms:\n${code}`;
+  const text = fmt(T.people.share_text, { code });
   try {
     const blob = await new Promise((resolve) => {
       try { els.idQr.toBlob(resolve, 'image/png'); } catch (_) { resolve(null); }
@@ -2806,15 +3280,15 @@ els.idShareOut.addEventListener('click', async () => {
     await navigator.share({ text });
   } catch (err) {
     if (err && err.name === 'AbortError') return;
-    try { await navigator.clipboard.writeText(code); sys('code copied — share it however you like.'); } catch (_) {}
+    try { await navigator.clipboard.writeText(code); notice(T.people.code_copied); } catch (_) {}
   }
 });
 
 els.idCopy.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(els.idCode.textContent);
-    els.idCopy.textContent = 'copied';
-    setTimeout(() => { els.idCopy.textContent = 'copy code'; }, 1200);
+    els.idCopy.textContent = T.people.copied;
+    setTimeout(() => { els.idCopy.textContent = T.people.copy_code; }, 1200);
   } catch {}
 });
 
@@ -2830,17 +3304,18 @@ const openDmWith = async (c) => {
   dmOpening = true;
   els.chatTitle.textContent = c.name || c.fp;
   paintAvatar(els.chatAvatar, c.name || c.fp, c.fp);
-  els.status.textContent = 'connecting…';
+  els.status.textContent = T.chat.connecting;
   setView('chat');
   try {
     const { roomName, b64Key } = await CID.deriveDm(myId.privateKey, c.pub);
+    if (!legacyFps.has(c.fp)) legacyFps.set(c.fp, await CID.legacyFingerprint(c.pub));
     els.room.value = roomName;
     clearUnreadFor(c.fp);
     clearMissedCall(c.fp);
     renderContacts();
     await joinNew(roomName, b64Key, { share: false, contact: c });
   } catch (err) {
-    sys('could not open the chat: ' + err.message);
+    sys(fmt(T.people.open_failed, { reason: why(err) }));
   } finally {
     dmOpening = false;
   }
@@ -2857,16 +3332,17 @@ const renderRoomsSection = () => {
   if (!list.length) return;
   const head = document.createElement('div');
   head.className = 'comms__rooms-head';
-  head.textContent = 'rooms';
+  head.textContent = T.rooms.heading;
   els.contactList.append(head);
   for (const r of list) {
     const row = document.createElement('div');
     row.className = 'comms__contact comms__roomrow' + (currentRoomName === r.room ? ' comms__roomrow--current' : '');
-    row.tabIndex = 0;
-    row.setAttribute('role', 'button');
     const av = document.createElement('span');
     av.className = 'comms__avatar comms__avatar--room';
     av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'comms__contact-open';
     const mid = document.createElement('span');
     mid.className = 'comms__contact-mid';
     const name = document.createElement('span');
@@ -2874,25 +3350,25 @@ const renderRoomsSection = () => {
     name.textContent = r.label || r.room;
     const sub = document.createElement('span');
     sub.className = 'comms__contact-fp';
-    sub.textContent = 'encrypted room · ' + short(r.room);
+    sub.textContent = fmt(T.rooms.sub, { id: short(r.room) });
     mid.append(name, sub);
-    row.append(av, mid);
+    openBtn.append(mid);
+    row.append(av, openBtn);
     const unread = (unreadMap[roomUnreadKey(r.room)] || {}).n || 0;
     if (unread > 0 && currentRoomName !== r.room) {
       const badge = document.createElement('span');
       badge.className = 'comms__unread';
       badge.textContent = unread > 99 ? '99+' : String(unread);
-      badge.title = unread + ' unread';
+      badge.title = fmt(unread === 1 ? T.people.unread_one : T.people.unread_many, { n: unread });
       row.append(badge);
     }
     const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
     row.addEventListener('click', open);
-    row.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     const bell = document.createElement('button');
     bell.type = 'button';
     const alertsOn = !!r.notify;
     bell.className = 'comms__rowbtn comms__rowbtn--bell' + (alertsOn ? ' comms__rowbtn--on' : '');
-    bell.title = alertsOn ? 'alerts on — tap to stop pinging this device' : 'ping this device for messages here';
+    bell.title = alertsOn ? T.rooms.bell_on : T.rooms.bell_off;
     bell.setAttribute('aria-label', bell.title);
     bell.setAttribute('aria-pressed', String(alertsOn));
     bell.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-bell"></use></svg>';
@@ -2900,9 +3376,9 @@ const renderRoomsSection = () => {
     const ren = document.createElement('button');
     ren.type = 'button';
     ren.className = 'comms__rowbtn';
-    ren.title = 'rename';
-    ren.setAttribute('aria-label', 'rename room');
-    ren.textContent = 'rename';
+    ren.title = T.rooms.rename;
+    ren.setAttribute('aria-label', T.rooms.rename_label);
+    ren.textContent = T.rooms.rename;
     ren.className = 'comms__rowbtn comms__rowbtn--text';
     ren.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -2911,11 +3387,16 @@ const renderRoomsSection = () => {
       input.type = 'text';
       input.maxLength = 40;
       input.value = r.label || r.room;
-      input.setAttribute('aria-label', 'room name');
-      const done = (save) => { if (save) renameRoom(r.room, input.value); renderContacts(); };
-      input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') done(false); });
+      input.setAttribute('aria-label', T.rooms.name_label);
+      let finished = false;
+      const done = (save) => { if (finished) return; finished = true; if (save) renameRoom(r.room, input.value); renderContacts(); };
+      input.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Escape') ev.stopPropagation();
+        if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') { ev.preventDefault(); done(false); }
+      });
       input.addEventListener('blur', () => done(true));
       input.addEventListener('click', (ev) => ev.stopPropagation());
+      openBtn.replaceWith(mid);
       name.replaceWith(input);
       input.focus();
       input.select();
@@ -2923,12 +3404,12 @@ const renderRoomsSection = () => {
     const rm = document.createElement('button');
     rm.type = 'button';
     rm.className = 'comms__rowbtn';
-    rm.title = 'forget this room';
-    rm.setAttribute('aria-label', 'forget this room');
+    rm.title = T.rooms.forget;
+    rm.setAttribute('aria-label', T.rooms.forget);
     rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
     rm.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm('Forget this room on this device? You will need its link to come back.') : Promise.resolve(true));
+      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.rooms.confirm_forget, { danger: true }) : Promise.resolve(true));
       if (!ok) return;
       forgetRoom(r.room);
       delete unreadMap[roomUnreadKey(r.room)];
@@ -2955,15 +3436,15 @@ const renderContactsBase = () => {
     mid.className = 'comms__contact-mid';
     const name = document.createElement('span');
     name.className = 'comms__contact-name';
-    name.textContent = r.name || '(unnamed)';
+    name.textContent = r.name || T.people.unnamed;
     const sub = document.createElement('span');
     sub.className = 'comms__contact-fp';
-    sub.textContent = 'wants to connect · ' + r.fp;
+    sub.textContent = fmt(T.people.wants, { fp: r.fp });
     mid.append(name, sub);
     const ok = document.createElement('button');
     ok.type = 'button';
     ok.className = 'comms__btn';
-    ok.textContent = 'accept';
+    ok.textContent = T.people.accept;
     ok.addEventListener('click', async () => {
       try {
         const added = await CID.addContact(r);
@@ -2972,13 +3453,13 @@ const renderContactsBase = () => {
         subscribeUnread();
         if (added) announceToContact(added);
       } catch (err) {
-        sys('could not accept: ' + err.message);
+        notice(fmt(T.people.accept_failed, { reason: why(err) }));
       }
     });
     const no = document.createElement('button');
     no.type = 'button';
     no.className = 'comms__btn comms__btn--ghost';
-    no.textContent = 'ignore';
+    no.textContent = T.people.ignore;
     no.addEventListener('click', () => { CID.dropRequest(r.fp); renderContacts(); });
     row.append(av, mid, ok, no);
     els.contactList.append(row);
@@ -2988,35 +3469,39 @@ const renderContactsBase = () => {
   if (!contacts.length && !requests.length) {
     const empty = document.createElement('div');
     empty.className = 'comms__id-note comms__contacts-empty';
-    empty.textContent = 'no one here yet — share “my code” with someone, or use “add someone” to scan or paste theirs.';
+    empty.textContent = T.people.empty;
     els.contactList.append(empty);
     return;
   }
+  const missedMap = getMissed();
   contacts.forEach((c) => {
     const row = document.createElement('div');
     row.className = 'comms__contact';
-    row.setAttribute('role', 'button');
-    row.setAttribute('tabindex', '0');
     row.dataset.fp = c.fp;
-    row.setAttribute('aria-label', 'chat with ' + (c.name || c.fp));
     const av = document.createElement('span');
     av.className = 'comms__avatar';
+    av.setAttribute('aria-hidden', 'true');
     paintAvatar(av, c.name, c.fp);
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'comms__contact-open';
+    openBtn.setAttribute('aria-label', fmt(T.people.chat_with, { name: c.name || c.fp }));
     const mid = document.createElement('span');
     mid.className = 'comms__contact-mid';
     const name = document.createElement('span');
     name.className = 'comms__contact-name';
-    name.textContent = c.name || '(unnamed)';
+    name.textContent = c.name || T.people.unnamed;
     const sub = document.createElement('span');
     sub.className = 'comms__contact-fp';
     sub.textContent = c.fp;
     mid.append(name, sub);
-    row.append(av, mid);
-    const missed = getMissed()[c.fp];
+    openBtn.append(mid);
+    row.append(av, openBtn);
+    const missed = missedMap[c.fp];
     if (missed && missed.n > 0) {
       const mc = document.createElement('span');
       mc.className = 'comms__missed';
-      mc.title = missed.n > 1 ? `${missed.n} missed calls` : 'missed call';
+      mc.title = missed.n > 1 ? fmt(T.people.missed_many, { n: missed.n }) : T.people.missed_one;
       mc.setAttribute('aria-label', mc.title);
       mc.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg>';
       row.append(mc);
@@ -3026,18 +3511,18 @@ const renderContactsBase = () => {
       const badge = document.createElement('span');
       badge.className = 'comms__unread';
       badge.textContent = unread > 99 ? '99+' : String(unread);
-      badge.title = unread + ' unread';
+      badge.title = fmt(unread === 1 ? T.people.unread_one : T.people.unread_many, { n: unread });
       row.append(badge);
     }
     const rm = document.createElement('button');
     rm.type = 'button';
     rm.className = 'comms__rowbtn';
-    rm.title = 'remove ' + (c.name || c.fp);
-    rm.setAttribute('aria-label', 'remove ' + (c.name || c.fp));
+    rm.title = fmt(T.people.remove, { name: c.name || c.fp });
+    rm.setAttribute('aria-label', fmt(T.people.remove, { name: c.name || c.fp }));
     rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
     rm.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm('Remove ' + (c.name || c.fp) + ' from contacts?') : Promise.resolve(true));
+      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.people.confirm_remove, { name: c.name || c.fp }), { danger: true }) : Promise.resolve(true));
       if (!ok) return;
       CID.removeContact(c.fp);
       renderContacts();
@@ -3048,29 +3533,43 @@ const renderContactsBase = () => {
     chev.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-chev"></use></svg>';
     row.append(rm, chev);
     row.addEventListener('click', () => openDmWith(c));
-    row.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDmWith(c); }
-    });
     els.contactList.append(row);
   });
 };
 
+const showAddError = (text) => {
+  els.addErr.textContent = text || '';
+  els.addErr.hidden = !text;
+};
+
+const contactCodeError = (err) => {
+  const msg = String((err && err.message) || '');
+  if (msg === 'not a contact code') return T.people.code_not;
+  if (msg === 'bad contact code' || (err && (err.name === 'SyntaxError' || err.name === 'InvalidCharacterError' || err.name === 'TypeError'))) return T.people.code_broken;
+  return fmt(T.people.add_failed, { reason: why(err) });
+};
+
 els.contactAdd.addEventListener('click', async () => {
+  showAddError('');
+  if (!els.contactIn.value.trim()) { showAddError(T.people.code_empty); els.contactIn.focus(); return; }
+  let saved;
   try {
     const payload = CID.decodeContactCode(els.contactIn.value);
-    const saved = await CID.addContact(payload);
-    els.contactIn.value = '';
-    renderContacts();
-    subscribeUnread();
-    const reached = await announceToContact(saved);
-    sys(reached
-      ? `contact added: ${saved.name || saved.fp} — they'll see your request next time they open comms.`
-      : `contact added: ${saved.name || saved.fp}`);
+    saved = await CID.addContact(payload);
   } catch (err) {
-    sys('could not add contact: ' + err.message);
+    showAddError(contactCodeError(err));
+    els.contactIn.focus();
+    return;
   }
+  if (saved && saved.fp) CID.dropRequest(saved.fp);
+  els.contactIn.value = '';
+  renderContacts();
+  subscribeUnread();
+  const reached = await announceToContact(saved);
+  notice(fmt(reached ? T.people.added_reached : T.people.added, { name: saved.name || saved.fp }));
 });
 els.contactIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.contactAdd.click(); } });
+els.contactIn.addEventListener('input', () => { if (!els.addErr.hidden) showAddError(''); });
 
 const RECOVERY_ALPHA = 'abcdefghjkmnpqrstuvwxyz23456789';
 const makeRecoveryCode = () => {
@@ -3101,19 +3600,17 @@ els.obStart.addEventListener('click', () => {
 els.obName.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.obCreate.click(); } });
 
 const setOnboardMethod = (ok) => {
-  els.obMethod.textContent = ok
-    ? 'Your device lock now unlocks comms — no password to remember.'
-    : 'This device can\'t use a passkey for encryption yet, so your recovery code is how you unlock.';
+  els.obMethod.textContent = ok ? T.onboard.method_ok : T.onboard.method_none;
   els.obPasskey.hidden = ok;
 };
 
 els.obCreate.addEventListener('click', async () => {
   const name = (els.obName.value || '').trim().slice(0, 32);
-  if (!name) { els.obErr.hidden = false; els.obErr.textContent = 'pick a name first — it\'s only shared with people you add.'; els.obName.focus(); return; }
+  if (!name) { els.obErr.hidden = false; els.obErr.textContent = T.onboard.err_name; els.obName.focus(); return; }
   els.obErr.hidden = true;
   els.obCreate.disabled = true;
   const prevLabel = els.obCreate.textContent;
-  els.obCreate.textContent = 'setting up…';
+  els.obCreate.textContent = T.onboard.setting_up;
   try {
     const code = makeRecoveryCode();
     await window.MentriaIdentity.setup(code);
@@ -3128,8 +3625,8 @@ els.obCreate.addEventListener('click', async () => {
     const code = err && err.message;
     els.obErr.hidden = false;
     els.obErr.textContent = code === 'insecure-context'
-      ? 'this page needs an https address before it can create keys — open https://mentria.ai/comms/'
-      : 'could not set up: ' + (code || err);
+      ? fmt(T.onboard.err_insecure, { url: COMMS_HTTPS })
+      : fmt(T.onboard.err_setup, { reason: code ? why(err) : String(err) });
     if (code === 'insecure-context') showOnboardStep('insecure');
   } finally {
     els.obCreate.disabled = false;
@@ -3144,9 +3641,7 @@ els.obPasskey.addEventListener('click', async () => {
     setOnboardMethod(true);
   } catch (err) {
     const code = err && err.message;
-    els.obMethod.textContent = code === 'prf-unsupported'
-      ? 'This device can\'t use a passkey for encryption yet, so your recovery code is how you unlock.'
-      : 'That didn\'t work — your recovery code still unlocks everything. You can try again in identity settings.';
+    els.obMethod.textContent = code === 'prf-unsupported' ? T.onboard.method_none : T.onboard.method_failed;
     els.obPasskey.hidden = true;
   } finally {
     els.obPasskey.disabled = false;
@@ -3156,8 +3651,8 @@ els.obPasskey.addEventListener('click', async () => {
 els.obCopy.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(els.obCode.textContent || '');
-    els.obCopy.textContent = 'copied';
-    setTimeout(() => { els.obCopy.textContent = 'copy code'; }, 1600);
+    els.obCopy.textContent = T.onboard.copied;
+    setTimeout(() => { els.obCopy.textContent = T.onboard.copy_code; }, 1600);
   } catch (_) {}
 });
 
@@ -3184,22 +3679,33 @@ els.advToggle.addEventListener('click', () => {
   if (open) els.adv.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 });
 
+const closeAdv = () => {
+  els.adv.hidden = true;
+  els.advToggle.setAttribute('aria-expanded', 'false');
+};
+
 els.newRoom.addEventListener('click', async () => {
   const name = EPHEMERAL_PREFIX + randomRoomSlug();
   const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
   els.room.value = name;
+  closeAdv();
   await joinNew(name, key);
-  try {
-    await navigator.clipboard.writeText(window.location.href);
-    els.newRoom.textContent = 'link copied';
-    setTimeout(() => { els.newRoom.textContent = 'new room link'; }, 2000);
-  } catch (_) {}
+});
+
+els.newSaved.addEventListener('click', async () => {
+  const name = randomRoomSlug() + randomRoomSlug();
+  const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
+  els.room.value = name;
+  closeAdv();
+  await joinNew(name, key);
+  if (currentRoomName === name) sys(T.log.saved_room);
 });
 
 refreshIdUI();
+let bootUnlock = null;
 if (CID.idState() === 'unlocked') initIdentity();
 else if (CID.idState() === 'locked' && window.MentriaIdentity && MentriaIdentity.tryDeviceUnlock) {
-  MentriaIdentity.tryDeviceUnlock().then((ok) => { if (ok) initIdentity(); else refreshIdUI(); });
+  bootUnlock = MentriaIdentity.tryDeviceUnlock().then((ok) => { if (ok) initIdentity(); else refreshIdUI(); }, () => { refreshIdUI(); });
 }
 
 function randomRoomSlug() {
@@ -3217,15 +3723,15 @@ const bootHash = window.location.hash && window.location.hash !== '#' ? parseHas
 if (bootHash && isDmRoom(bootHash.room)) {
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
 }
-const hasHash = !!bootHash && !isDmRoom(bootHash.room);
+const hasHash = !!bootHash && !!bootHash.room && !isDmRoom(bootHash.room);
 if (hasHash) {
   const parsed = bootHash;
   els.room.value = parsed.room;
-  refreshShareUrl(parsed.room, parsed.b64Key);
-  window.addEventListener('load', () => joinNew(parsed.room, parsed.b64Key));
-} else {
-  window.addEventListener('load', () => {
-    if (CID.idState() === 'unlocked') sys('pick someone below to start a private chat — or open ⚙ for a shareable room link.');
+  refreshShareUrl(parsed.room);
+  window.addEventListener('load', async () => {
+    if (bootUnlock) await Promise.race([bootUnlock, new Promise((r) => setTimeout(r, 4000))]);
+    if (joinTarget) return;
+    joinNew(parsed.room, parsed.b64Key);
   });
 }
 window.addEventListener('hashchange', () => {
@@ -3235,10 +3741,11 @@ window.addEventListener('hashchange', () => {
     refreshIdUI();
     return;
   }
-  const sameRoom = next.room === (els.room.value || '').trim();
-  const sameKey = next.b64Key === (chatKey ? next.b64Key : null);
-  if (!sameRoom || !sameKey) {
-    els.room.value = next.room;
+  const same = next.room
+    ? !!joinTarget && joinTarget.room === next.room && joinTarget.key === (next.b64Key || null)
+    : !joinTarget;
+  if (!same) {
+    els.room.value = next.room || '';
     joinNew(next.room, next.b64Key);
   }
   refreshIdUI();

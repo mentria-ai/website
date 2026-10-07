@@ -2,7 +2,7 @@
 {
   "id": "story-studio",
   "name": "Story Studio",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "icon": "📖",
   "author": "Mentria",
   "description": "Build swipeable story decks: generate images on Mentria's render node or import your own, write captions, arrange slides, export the finished deck.",
@@ -101,38 +101,38 @@
   <div class="topbar">
     <h1>📖 Story Studio</h1>
     <span class="grow"></span>
-    <span class="svc"><span class="dot" id="dot"></span><span id="svc">checking render node…</span></span>
-    <button class="btn--primary" id="new-deck" type="button">New story</button>
+    <span class="svc"><span class="dot" id="dot"></span><span id="svc" data-t="svcChecking">checking render node…</span></span>
+    <button class="btn--primary" id="new-deck" type="button" data-t="newStory">New story</button>
   </div>
   <div class="decklist" id="decklist"></div>
-  <p class="empty" id="list-empty">No stories yet. Hit "New story" — describe scenes, generate or import images, caption each slide, then export the finished deck.</p>
+  <p class="empty" id="list-empty" data-t="listEmpty">No stories yet. Hit "New story" — describe scenes, generate or import images, caption each slide, then export the finished deck.</p>
 </div>
 
 <div class="view" id="v-edit" hidden>
   <div class="topbar">
-    <button id="back" type="button">← Stories</button>
+    <button id="back" type="button" data-t="back">← Stories</button>
     <span class="grow"></span>
     <span class="svc"><span class="dot" id="dot2"></span><span id="svc2"></span></span>
-    <button id="pv-open" type="button">Preview</button>
-    <button id="translate" type="button">Translate</button>
-    <button id="submit" type="button">Submit to Mentria</button>
-    <button class="btn--primary" id="export" type="button">Export deck</button>
+    <button id="pv-open" type="button" data-t="preview">Preview</button>
+    <button id="translate" type="button" data-t="translate">Translate</button>
+    <button id="submit" type="button" data-t="submit">Submit to Mentria</button>
+    <button class="btn--primary" id="export" type="button" data-t="exportDeck">Export deck</button>
   </div>
-  <div class="field"><label>title</label><input type="text" id="d-title" maxlength="60" placeholder="My Story"></div>
-  <div class="field"><label>one-line subtitle (shown on the feed card)</label><input type="text" id="d-sub" maxlength="140" placeholder="What this story is about"></div>
-  <div class="field"><label>credit (optional — shown if you submit the story)</label><input type="text" id="d-credit" maxlength="60" placeholder="your name or handle"></div>
+  <div class="field"><label data-t="lblTitle">title</label><input type="text" id="d-title" maxlength="60" placeholder="My Story" data-t-placeholder="phTitle"></div>
+  <div class="field"><label data-t="lblSub">one-line subtitle (shown on the feed card)</label><input type="text" id="d-sub" maxlength="140" placeholder="What this story is about" data-t-placeholder="phSub"></div>
+  <div class="field"><label data-t="lblCredit">credit (optional — shown if you submit the story)</label><input type="text" id="d-credit" maxlength="60" placeholder="your name or handle" data-t-placeholder="phCredit"></div>
   <div class="stylerow" id="stylerow" hidden>
-    <label for="lora">image style for new generations</label>
-    <select id="lora"><option value="">Default (photoreal)</option></select>
+    <label for="lora" data-t="lblStyle">image style for new generations</label>
+    <select id="lora"><option value="" data-t="styleDefault">Default (photoreal)</option></select>
     <span class="stylehint" id="lorahint"></span>
   </div>
   <p class="tstate" id="tstate" hidden></p>
   <details class="tr" id="deck-tr" hidden>
-    <summary>translations · title &amp; subtitle</summary>
+    <summary data-t="trDeck">translations · title &amp; subtitle</summary>
     <div class="tr__rows" id="deck-tr-rows"></div>
   </details>
   <div class="slides" id="slides"></div>
-  <button id="add-slide" type="button">+ Add slide</button>
+  <button id="add-slide" type="button" data-t="addSlide">+ Add slide</button>
   <p class="status" id="status"></p>
 </div>
 
@@ -140,9 +140,9 @@
   <div class="pv__stage" id="pv-stage">
     <img class="pv__img" id="pv-img" alt="">
     <span class="pv__count" id="pv-count"></span>
-    <button class="pv__close" id="pv-close" type="button" aria-label="Close"><svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6"></path></svg></button>
-    <button class="pv__nav pv__nav--prev" id="pv-prev" type="button" aria-label="previous"></button>
-    <button class="pv__nav pv__nav--next" id="pv-next" type="button" aria-label="next"></button>
+    <button class="pv__close" id="pv-close" type="button" aria-label="Close" data-t-aria-label="close"><svg viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6"></path></svg></button>
+    <button class="pv__nav pv__nav--prev" id="pv-prev" type="button" aria-label="previous" data-t-aria-label="prev"></button>
+    <button class="pv__nav pv__nav--next" id="pv-next" type="button" aria-label="next" data-t-aria-label="next"></button>
     <div class="pv__overlay">
       <p class="pv__caption" id="pv-caption"></p>
       <p class="pv__long" id="pv-long"></p>
@@ -150,72 +150,232 @@
   </div>
 </div>
 
+<script>
+var m = window.mentria || {};
+if (m.theme && m.theme.fontMono) document.documentElement.style.setProperty('--ext-font', m.theme.fontMono);
+var LOCS = ['en', 'es', 'fr', 'ja', 'pt-BR'];
+var STR = {
+  en: {
+    svcChecking: 'checking render node…', svcOn: 'render node: {model}', svcOnQ: 'render node: {model} · {n} in queue', svcReady: 'render node: ready', svcReadyQ: 'render node: ready · {n} in queue', svcOff: 'render node offline — import still works',
+    newStory: 'New story', listEmpty: 'No stories yet. Hit "New story" — describe scenes, generate or import images, caption each slide, then export the finished deck.',
+    untitled: 'Untitled story', deckSub: { one: '{n} slide · {k} with images', other: '{n} slides · {k} with images' },
+    back: '← Stories', preview: 'Preview', translate: 'Translate', submit: 'Submit to Mentria', exportDeck: 'Export deck',
+    lblTitle: 'title', phTitle: 'My Story', lblSub: 'one-line subtitle (shown on the feed card)', phSub: 'What this story is about', lblCredit: 'credit (optional — shown if you submit the story)', phCredit: 'your name or handle',
+    lblStyle: 'image style for new generations', styleDefault: 'Default (photoreal)', styleTrigger: 'adds “{trigger}” to the prompt automatically', styleAuto: 'style applied automatically',
+    trDeck: 'translations · title & subtitle', trSlide: 'translations', tr_subtitle: '{lang} · subtitle', tr_caption: '{lang} · caption', tr_long: '{lang} · long press', f_subtitle: 'subtitle', f_caption: 'caption', f_long: 'long press',
+    addSlide: '+ Add slide', phPrompt: 'describe the image to generate…', generate: 'Generate', regenerate: 'Re-generate', importImg: 'Import',
+    phCaption: 'caption — the line shown on the slide', phLong: 'long-press text (optional) — deeper detail revealed on hold',
+    num: '{i}/{n}', numCover: '{i}/{n} · cover', setCover: 'Set cover', del: 'Delete', sure: 'sure?',
+    submitting: 'submitting…', queuePos: 'queue position {n} · ~{sec}s', rendering: 'rendering… ~{sec}s', receivingImg: 'receiving image…', receivingPct: 'receiving {pct}', genFailed: 'generation failed', genTimeout: 'timeout: generate', reqFailed: 'request failed',
+    noTitle: 'give the story a title first', noReady: 'need at least one slide with an image and a caption', packing: 'packing…',
+    exported: { one: 'exported {n} slide — saved to your downloads', other: 'exported {n} slides — saved to your downloads' },
+    exportedSkip: { one: 'exported {n} slide ({k} skipped: missing image or caption) — saved to your downloads', other: 'exported {n} slides ({k} skipped: missing image or caption) — saved to your downloads' },
+    submitDone: { one: 'GitHub opened with the issue pre-filled. Unzip the download, drag the image into the issue, then click “Submit new issue”. It goes live on mentria.ai once approved.', other: 'GitHub opened with the issue pre-filled. Unzip the download, drag the {n} images into the issue in order, then click “Submit new issue”. It goes live on mentria.ai once approved.' },
+    submitDonePaste: { one: 'GitHub opened with the issue pre-filled. Unzip the download, drag the image into the issue, paste story.json into the data block (it is also on your clipboard), then click “Submit new issue”. It goes live on mentria.ai once approved.', other: 'GitHub opened with the issue pre-filled. Unzip the download, drag the {n} images into the issue in order, paste story.json into the data block (it is also on your clipboard), then click “Submit new issue”. It goes live on mentria.ai once approved.' },
+    noPreview: 'no slides with images to preview yet', pvCount: '{i} / {n}', close: 'Close', prev: 'previous', next: 'next',
+    loadingModel: 'loading the on-device model…', gbOf: '{a} / {b} GB', gpuLost: 'the GPU device was lost — reload and try again', notSupported: 'translation is not supported on this device — it needs the 27B on-device model',
+    nothingToTr: 'nothing to translate yet — add a subtitle or captions', translatingTo: 'translating to {lang}… ({i}/{n})',
+    trOk: 'translated into {langsOk} — review and edit below', trSome: 'translated into {langsOk} — review and edit below · could not translate: {langsFailed} (try again)', trNone: 'translation failed · could not translate: {langsFailed} (try again)'
+  },
+  es: {
+    svcChecking: 'comprobando el nodo de render…', svcOn: 'nodo de render: {model}', svcOnQ: 'nodo de render: {model} · {n} en cola', svcReady: 'nodo de render: listo', svcReadyQ: 'nodo de render: listo · {n} en cola', svcOff: 'nodo de render sin conexión: puedes seguir importando imágenes',
+    newStory: 'Nueva historia', listEmpty: 'Aún no hay historias. Toca «Nueva historia»: describe escenas, genera o importa imágenes, ponle una leyenda a cada diapositiva y exporta el deck terminado.',
+    untitled: 'Historia sin título', deckSub: { one: '{n} diapositiva · {k} con imagen', other: '{n} diapositivas · {k} con imagen' },
+    back: '← Historias', preview: 'Vista previa', translate: 'Traducir', submit: 'Enviar a Mentria', exportDeck: 'Exportar deck',
+    lblTitle: 'título', phTitle: 'Mi historia', lblSub: 'subtítulo de una línea (se muestra en la tarjeta del feed)', phSub: 'De qué trata esta historia', lblCredit: 'crédito (opcional: se muestra si envías la historia)', phCredit: 'tu nombre o usuario',
+    lblStyle: 'estilo de las próximas imágenes generadas', styleDefault: 'Predeterminado (fotorrealista)', styleTrigger: 'añade «{trigger}» al prompt automáticamente', styleAuto: 'el estilo se aplica automáticamente',
+    trDeck: 'traducciones · título y subtítulo', trSlide: 'traducciones', tr_subtitle: '{lang} · subtítulo', tr_caption: '{lang} · leyenda', tr_long: '{lang} · pulsación larga', f_subtitle: 'subtítulo', f_caption: 'leyenda', f_long: 'pulsación larga',
+    addSlide: '+ Añadir diapositiva', phPrompt: 'describe la imagen que quieres generar…', generate: 'Generar', regenerate: 'Regenerar', importImg: 'Importar',
+    phCaption: 'leyenda: la línea que se ve en la diapositiva', phLong: 'texto de pulsación larga (opcional): más detalle que aparece al mantener pulsado',
+    num: '{i}/{n}', numCover: '{i}/{n} · portada', setCover: 'Usar de portada', del: 'Eliminar', sure: '¿seguro?',
+    submitting: 'enviando…', queuePos: 'puesto en la cola: {n} · ~{sec} s', rendering: 'renderizando… ~{sec} s', receivingImg: 'recibiendo la imagen…', receivingPct: 'recibiendo {pct}', genFailed: 'la generación falló', genTimeout: 'se agotó el tiempo de espera al generar', reqFailed: 'la solicitud falló',
+    noTitle: 'primero ponle un título a la historia', noReady: 'necesitas al menos una diapositiva con imagen y leyenda', packing: 'empaquetando…',
+    exported: { one: 'se exportó {n} diapositiva: el archivo está en tus descargas', other: 'se exportaron {n} diapositivas: el archivo está en tus descargas' },
+    exportedSkip: { one: 'se exportó {n} diapositiva (omitidas por falta de imagen o leyenda: {k}): el archivo está en tus descargas', other: 'se exportaron {n} diapositivas (omitidas por falta de imagen o leyenda: {k}): el archivo está en tus descargas' },
+    submitDone: { one: 'Se abrió GitHub con la incidencia ya rellenada. Descomprime la descarga, arrastra la imagen a la incidencia y luego haz clic en «Submit new issue». Se publicará en mentria.ai cuando se apruebe.', other: 'Se abrió GitHub con la incidencia ya rellenada. Descomprime la descarga, arrastra las {n} imágenes a la incidencia en orden y luego haz clic en «Submit new issue». Se publicará en mentria.ai cuando se apruebe.' },
+    submitDonePaste: { one: 'Se abrió GitHub con la incidencia ya rellenada. Descomprime la descarga, arrastra la imagen a la incidencia, pega story.json en el bloque de datos (también está en tu portapapeles) y luego haz clic en «Submit new issue». Se publicará en mentria.ai cuando se apruebe.', other: 'Se abrió GitHub con la incidencia ya rellenada. Descomprime la descarga, arrastra las {n} imágenes a la incidencia en orden, pega story.json en el bloque de datos (también está en tu portapapeles) y luego haz clic en «Submit new issue». Se publicará en mentria.ai cuando se apruebe.' },
+    noPreview: 'aún no hay diapositivas con imagen para previsualizar', pvCount: '{i} / {n}', close: 'Cerrar', prev: 'diapositiva anterior', next: 'diapositiva siguiente',
+    loadingModel: 'cargando el modelo del dispositivo…', gbOf: '{a} / {b} GB', gpuLost: 'se perdió el dispositivo GPU: recarga la página y vuelve a intentarlo', notSupported: 'la traducción no está disponible en este dispositivo: necesita el modelo 27B local',
+    nothingToTr: 'aún no hay nada que traducir: añade un subtítulo o leyendas', translatingTo: 'traduciendo al {lang}… ({i}/{n})',
+    trOk: 'traducido al {langsOk}: revisa y edita las traducciones abajo', trSome: 'traducido al {langsOk}: revisa y edita las traducciones abajo · no se pudo traducir al {langsFailed} (vuelve a intentarlo)', trNone: 'la traducción falló · no se pudo traducir al {langsFailed} (vuelve a intentarlo)'
+  },
+  fr: {
+    svcChecking: 'vérification du nœud de rendu…', svcOn: 'nœud de rendu : {model}', svcOnQ: 'nœud de rendu : {model} · {n} en file d’attente', svcReady: 'nœud de rendu : prêt', svcReadyQ: 'nœud de rendu : prêt · {n} en file d’attente', svcOff: 'nœud de rendu hors ligne : l’import d’images fonctionne toujours',
+    newStory: 'Nouvelle histoire', listEmpty: 'Aucune histoire pour l’instant. Touchez « Nouvelle histoire » : décrivez les scènes, générez ou importez des images, légendez chaque diapositive, puis exportez le deck terminé.',
+    untitled: 'Histoire sans titre', deckSub: { one: '{n} diapositive · {k} avec image', other: '{n} diapositives · {k} avec image' },
+    back: '← Histoires', preview: 'Aperçu', translate: 'Traduire', submit: 'Envoyer à Mentria', exportDeck: 'Exporter le deck',
+    lblTitle: 'titre', phTitle: 'Mon histoire', lblSub: 'sous-titre d’une ligne (affiché sur la carte du fil)', phSub: 'Le sujet de cette histoire', lblCredit: 'crédit (facultatif : affiché si vous envoyez l’histoire)', phCredit: 'votre nom ou pseudo',
+    lblStyle: 'style des prochaines images générées', styleDefault: 'Par défaut (photoréaliste)', styleTrigger: 'ajoute automatiquement « {trigger} » au prompt', styleAuto: 'style appliqué automatiquement',
+    trDeck: 'traductions · titre et sous-titre', trSlide: 'traductions', tr_subtitle: '{lang} · sous-titre', tr_caption: '{lang} · légende', tr_long: '{lang} · appui long', f_subtitle: 'sous-titre', f_caption: 'légende', f_long: 'appui long',
+    addSlide: '+ Ajouter une diapositive', phPrompt: 'décrivez l’image à générer…', generate: 'Générer', regenerate: 'Régénérer', importImg: 'Importer',
+    phCaption: 'légende : la ligne affichée sur la diapositive', phLong: 'texte de l’appui long (facultatif) : un détail de plus, révélé en maintenant le doigt',
+    num: '{i}/{n}', numCover: '{i}/{n} · couverture', setCover: 'Mettre en couverture', del: 'Supprimer', sure: 'vraiment ?',
+    submitting: 'envoi…', queuePos: 'position dans la file : {n} · ~{sec} s', rendering: 'rendu en cours… ~{sec} s', receivingImg: 'réception de l’image…', receivingPct: 'réception : {pct}', genFailed: 'échec de la génération', genTimeout: 'délai dépassé pour la génération', reqFailed: 'échec de la requête',
+    noTitle: 'donnez d’abord un titre à l’histoire', noReady: 'il faut au moins une diapositive avec une image et une légende', packing: 'préparation du fichier…',
+    exported: { one: '{n} diapositive exportée : le fichier est dans vos téléchargements', other: '{n} diapositives exportées : le fichier est dans vos téléchargements' },
+    exportedSkip: { one: '{n} diapositive exportée (ignorées faute d’image ou de légende : {k}) : le fichier est dans vos téléchargements', other: '{n} diapositives exportées (ignorées faute d’image ou de légende : {k}) : le fichier est dans vos téléchargements' },
+    submitDone: { one: 'GitHub s’est ouvert avec le ticket prérempli. Décompressez le téléchargement, faites glisser l’image dans le ticket, puis cliquez sur « Submit new issue ». L’histoire sera publiée sur mentria.ai une fois approuvée.', other: 'GitHub s’est ouvert avec le ticket prérempli. Décompressez le téléchargement, faites glisser les {n} images dans le ticket, dans l’ordre, puis cliquez sur « Submit new issue ». L’histoire sera publiée sur mentria.ai une fois approuvée.' },
+    submitDonePaste: { one: 'GitHub s’est ouvert avec le ticket prérempli. Décompressez le téléchargement, faites glisser l’image dans le ticket, collez story.json dans le bloc de données (il est aussi dans votre presse-papiers), puis cliquez sur « Submit new issue ». L’histoire sera publiée sur mentria.ai une fois approuvée.', other: 'GitHub s’est ouvert avec le ticket prérempli. Décompressez le téléchargement, faites glisser les {n} images dans le ticket, dans l’ordre, collez story.json dans le bloc de données (il est aussi dans votre presse-papiers), puis cliquez sur « Submit new issue ». L’histoire sera publiée sur mentria.ai une fois approuvée.' },
+    noPreview: 'aucune diapositive avec image à prévisualiser pour l’instant', pvCount: '{i} / {n}', close: 'Fermer', prev: 'diapositive précédente', next: 'diapositive suivante',
+    loadingModel: 'chargement du modèle sur l’appareil…', gbOf: '{a} / {b} Go', gpuLost: 'le GPU a été perdu : rechargez la page et réessayez', notSupported: 'la traduction n’est pas prise en charge sur cet appareil : elle nécessite le modèle 27B sur l’appareil',
+    nothingToTr: 'rien à traduire pour l’instant : ajoutez un sous-titre ou des légendes', translatingTo: 'traduction en {lang}… ({i}/{n})',
+    trOk: 'traduit en {langsOk} : vérifiez et modifiez ci-dessous', trSome: 'traduit en {langsOk} : vérifiez et modifiez ci-dessous · impossible de traduire en {langsFailed} (réessayez)', trNone: 'échec de la traduction · impossible de traduire en {langsFailed} (réessayez)'
+  },
+  ja: {
+    svcChecking: 'レンダーノードを確認中…', svcOn: 'レンダーノード：{model}', svcOnQ: 'レンダーノード：{model}・{n}件待ち', svcReady: 'レンダーノード：準備完了', svcReadyQ: 'レンダーノード：準備完了・{n}件待ち', svcOff: 'レンダーノードはオフラインです（画像の取り込みは使えます）',
+    newStory: '新しいストーリー', listEmpty: 'まだストーリーがありません。「新しいストーリー」を押して、シーンを説明し、画像を生成するか取り込んで、各スライドにキャプションを付けたら、完成したデッキを書き出しましょう。',
+    untitled: '無題のストーリー', deckSub: 'スライド{n}枚・画像あり{k}枚',
+    back: '← ストーリー一覧', preview: 'プレビュー', translate: '翻訳する', submit: 'Mentriaに投稿', exportDeck: 'デッキを書き出す',
+    lblTitle: 'タイトル', phTitle: '私のストーリー', lblSub: '1行のサブタイトル（フィードのカードに表示）', phSub: 'このストーリーの内容', lblCredit: 'クレジット（任意。ストーリーを投稿すると表示されます）', phCredit: '名前またはハンドルネーム',
+    lblStyle: 'これから生成する画像のスタイル', styleDefault: 'デフォルト（写実的）', styleTrigger: 'プロンプトに「{trigger}」を自動で追加します', styleAuto: 'スタイルは自動で適用されます',
+    trDeck: '翻訳・タイトルとサブタイトル', trSlide: '翻訳', tr_subtitle: '{lang}・サブタイトル', tr_caption: '{lang}・キャプション', tr_long: '{lang}・長押し', f_subtitle: 'サブタイトル', f_caption: 'キャプション', f_long: '長押しのテキスト',
+    addSlide: '+ スライドを追加', phPrompt: '生成したい画像を説明してください…', generate: '生成', regenerate: '再生成', importImg: '取り込む',
+    phCaption: 'キャプション：スライドに表示する一文', phLong: '長押しのテキスト（任意）：長押しすると表示される詳しい説明',
+    num: '{i}/{n}', numCover: '{i}/{n}・表紙', setCover: '表紙にする', del: '削除', sure: '本当に？',
+    submitting: '送信中…', queuePos: '待ち順：{n}番目・約{sec}秒', rendering: 'レンダリング中…約{sec}秒', receivingImg: '画像を受信中…', receivingPct: '受信中 {pct}', genFailed: '生成に失敗しました', genTimeout: '生成のリクエストがタイムアウトしました', reqFailed: 'リクエストに失敗しました',
+    noTitle: '先にストーリーのタイトルを付けてください', noReady: '画像とキャプションのあるスライドが1枚以上必要です', packing: 'まとめています…',
+    exported: 'スライド{n}枚を書き出しました。ファイルはダウンロードフォルダにあります',
+    exportedSkip: 'スライド{n}枚を書き出しました（画像かキャプションがない{k}枚はスキップ）。ファイルはダウンロードフォルダにあります',
+    submitDone: 'GitHubで、内容を入力済みのIssueを開きました。ダウンロードしたファイルを解凍し、{n}枚の画像を順番どおりにIssueへドラッグしてから、「Submit new issue」をクリックしてください。承認されるとmentria.aiに公開されます。',
+    submitDonePaste: 'GitHubで、内容を入力済みのIssueを開きました。ダウンロードしたファイルを解凍し、{n}枚の画像を順番どおりにIssueへドラッグして、story.jsonの中身をデータ欄に貼り付けてから（クリップボードにもコピーしてあります）、「Submit new issue」をクリックしてください。承認されるとmentria.aiに公開されます。',
+    noPreview: 'プレビューできる画像付きのスライドがまだありません', pvCount: '{i} / {n}', close: '閉じる', prev: '前のスライド', next: '次のスライド',
+    loadingModel: 'デバイス上のモデルを読み込み中…', gbOf: '{a} / {b} GB', gpuLost: 'GPUデバイスが失われました。ページを再読み込みして、もう一度お試しください', notSupported: 'この端末では翻訳を使えません。デバイス上で動く27Bモデルが必要です',
+    nothingToTr: 'まだ翻訳するものがありません。サブタイトルかキャプションを追加してください', translatingTo: '{lang}に翻訳中…（{i}/{n}）',
+    trOk: '{langsOk}に翻訳しました。下で確認・編集してください', trSome: '{langsOk}に翻訳しました。下で確認・編集してください。{langsFailed}には翻訳できませんでした（もう一度お試しください）', trNone: '翻訳に失敗しました。{langsFailed}には翻訳できませんでした（もう一度お試しください）'
+  },
+  'pt-BR': {
+    svcChecking: 'verificando o nó de render…', svcOn: 'nó de render: {model}', svcOnQ: 'nó de render: {model} · {n} na fila', svcReady: 'nó de render: pronto', svcReadyQ: 'nó de render: pronto · {n} na fila', svcOff: 'nó de render offline — importar imagens continua funcionando',
+    newStory: 'Nova história', listEmpty: 'Nenhuma história ainda. Toque em “Nova história”: descreva as cenas, gere ou importe imagens, escreva uma legenda para cada slide e exporte o deck pronto.',
+    untitled: 'História sem título', deckSub: { one: '{n} slide · {k} com imagem', other: '{n} slides · {k} com imagem' },
+    back: '← Histórias', preview: 'Prévia', translate: 'Traduzir', submit: 'Enviar para a Mentria', exportDeck: 'Exportar deck',
+    lblTitle: 'título', phTitle: 'Minha história', lblSub: 'subtítulo de uma linha (aparece no card do feed)', phSub: 'Sobre o que é esta história', lblCredit: 'crédito (opcional — aparece se você enviar a história)', phCredit: 'seu nome ou apelido',
+    lblStyle: 'estilo das próximas imagens geradas', styleDefault: 'Padrão (fotorrealista)', styleTrigger: 'adiciona “{trigger}” ao prompt automaticamente', styleAuto: 'estilo aplicado automaticamente',
+    trDeck: 'traduções · título e subtítulo', trSlide: 'traduções', tr_subtitle: '{lang} · subtítulo', tr_caption: '{lang} · legenda', tr_long: '{lang} · toque longo', f_subtitle: 'subtítulo', f_caption: 'legenda', f_long: 'toque longo',
+    addSlide: '+ Adicionar slide', phPrompt: 'descreva a imagem que você quer gerar…', generate: 'Gerar', regenerate: 'Regenerar', importImg: 'Importar',
+    phCaption: 'legenda — a linha que aparece no slide', phLong: 'texto do toque longo (opcional) — detalhes extras que aparecem ao segurar',
+    num: '{i}/{n}', numCover: '{i}/{n} · capa', setCover: 'Usar como capa', del: 'Excluir', sure: 'certeza?',
+    submitting: 'enviando…', queuePos: 'posição na fila: {n} · ~{sec} s', rendering: 'renderizando… ~{sec} s', receivingImg: 'recebendo a imagem…', receivingPct: 'recebendo {pct}', genFailed: 'a geração falhou', genTimeout: 'o tempo para gerar se esgotou', reqFailed: 'a solicitação falhou',
+    noTitle: 'dê um título à história primeiro', noReady: 'é preciso pelo menos um slide com imagem e legenda', packing: 'empacotando…',
+    exported: { one: '{n} slide exportado — o arquivo foi salvo nos seus downloads', other: '{n} slides exportados — o arquivo foi salvo nos seus downloads' },
+    exportedSkip: { one: '{n} slide exportado (ignorados por falta de imagem ou legenda: {k}) — o arquivo foi salvo nos seus downloads', other: '{n} slides exportados (ignorados por falta de imagem ou legenda: {k}) — o arquivo foi salvo nos seus downloads' },
+    submitDone: { one: 'O GitHub abriu com a issue já preenchida. Descompacte o download, arraste a imagem para a issue e clique em “Submit new issue”. A história entra no ar no mentria.ai depois de aprovada.', other: 'O GitHub abriu com a issue já preenchida. Descompacte o download, arraste as {n} imagens para a issue, na ordem, e clique em “Submit new issue”. A história entra no ar no mentria.ai depois de aprovada.' },
+    submitDonePaste: { one: 'O GitHub abriu com a issue já preenchida. Descompacte o download, arraste a imagem para a issue, cole o story.json no bloco de dados (ele também está na sua área de transferência) e clique em “Submit new issue”. A história entra no ar no mentria.ai depois de aprovada.', other: 'O GitHub abriu com a issue já preenchida. Descompacte o download, arraste as {n} imagens para a issue, na ordem, cole o story.json no bloco de dados (ele também está na sua área de transferência) e clique em “Submit new issue”. A história entra no ar no mentria.ai depois de aprovada.' },
+    noPreview: 'ainda não há slides com imagem para visualizar', pvCount: '{i} / {n}', close: 'Fechar', prev: 'slide anterior', next: 'próximo slide',
+    loadingModel: 'carregando o modelo no dispositivo…', gbOf: '{a} / {b} GB', gpuLost: 'o dispositivo de GPU foi perdido — recarregue a página e tente de novo', notSupported: 'a tradução não é compatível com este dispositivo — ela precisa do modelo 27B no dispositivo',
+    nothingToTr: 'nada para traduzir ainda — adicione um subtítulo ou legendas', translatingTo: 'traduzindo para {lang}… ({i}/{n})',
+    trOk: 'traduzido para {langsOk} — revise e edite abaixo', trSome: 'traduzido para {langsOk}: revise e edite abaixo · não foi possível traduzir para {langsFailed} — tente de novo', trNone: 'a tradução falhou · não foi possível traduzir para {langsFailed} — tente de novo'
+  }
+};
+var L = 'en', PR, NF0, NF2, NFP, LF, DN;
+function pickLoc(c) {
+  c = String(c || 'en');
+  if (LOCS.indexOf(c) >= 0) return c;
+  var b = c.slice(0, 2).toLowerCase();
+  if (b === 'pt') return 'pt-BR';
+  return LOCS.indexOf(b) >= 0 ? b : 'en';
+}
+function setLocale(c) {
+  L = pickLoc(c);
+  document.documentElement.lang = L;
+  try { PR = new Intl.PluralRules(L); } catch (e) { PR = { select: function (n) { return n === 1 ? 'one' : 'other'; } }; }
+  NF0 = new Intl.NumberFormat(L, { maximumFractionDigits: 0 });
+  NF2 = new Intl.NumberFormat(L, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  NFP = new Intl.NumberFormat(L, { style: 'percent', maximumFractionDigits: 0 });
+  try { LF = new Intl.ListFormat(L, { style: 'long', type: 'conjunction' }); } catch (e) { LF = { format: function (a) { return a.join(', '); } }; }
+  try { DN = new Intl.DisplayNames([L], { type: 'language' }); } catch (e) { DN = null; }
+}
+function langName(c) {
+  try { return (DN && DN.of(c)) || c; } catch (e) { return c; }
+}
+function listFmt(a) {
+  try { return LF.format(a); } catch (e) { return a.join(', '); }
+}
+function fmtVar(k, x) {
+  if (k.indexOf('lang') === 0) return listFmt([].concat(x).map(langName));
+  if (typeof x === 'number') return k === 'pct' ? NFP.format(x) : NF0.format(x);
+  return String(x);
+}
+function t(k, v) {
+  var s = STR[L] && STR[L][k] != null ? STR[L][k] : STR.en[k];
+  if (s == null) return k;
+  if (typeof s === 'object') {
+    var n = v && typeof v.n === 'number' ? v.n : 1;
+    s = s[PR.select(n)] || s.other;
+  }
+  if (v) s = s.replace(/[{]([A-Za-z0-9_]+)[}]/g, function (a, b) { return v[b] == null ? a : fmtVar(b, v[b]); });
+  return s;
+}
+function tx(el, k, v) {
+  el.setAttribute('data-t', k);
+  if (v) el.setAttribute('data-tv', JSON.stringify(v)); else el.removeAttribute('data-tv');
+  el.textContent = t(k, v);
+}
+function txAttr(el, attr, k) {
+  el.setAttribute('data-t-' + attr, k);
+  el.setAttribute(attr, t(k));
+}
+function untx(el, s) {
+  el.removeAttribute('data-t');
+  el.removeAttribute('data-tv');
+  el.textContent = s;
+}
+function relabel(root) {
+  root.querySelectorAll('[data-t]').forEach(function (el) {
+    var v = null;
+    try { v = JSON.parse(el.getAttribute('data-tv') || 'null'); } catch (e) {}
+    el.textContent = t(el.getAttribute('data-t'), v);
+  });
+  ['placeholder', 'aria-label'].forEach(function (attr) {
+    root.querySelectorAll('[data-t-' + attr + ']').forEach(function (el) { el.setAttribute(attr, t(el.getAttribute('data-t-' + attr))); });
+  });
+}
+if (typeof m.onLocaleChange === 'function') m.onLocaleChange(function (code) {
+  setLocale(code);
+  relabel(document);
+});
+setLocale(m.locale || document.documentElement.lang || navigator.language);
+relabel(document);
+</script>
+
 <script type="module">
-import { SimplePool, generateSecretKey, getPublicKey, finalizeEvent } from '/assets/vendor/nostr-tools.js';
+import { SimplePool, generateSecretKey, getPublicKey, finalizeEvent, verifyEvent, nip44 } from '/assets/vendor/nostr-tools.js';
 
 const KIND = 20808;
 const RELAY = 'wss://relay.mentria.ai';
-const SERVICE = 'mentria-imagegen-v1';
+const NODE = '7a226244edc0a12d6e37345bdeade4ff27d969e135f5e6aa9adc23b534640328';
 const ISSUE_URL = 'https://github.com/mentria-ai/website/issues/new';
 const URL_BODY_BUDGET = 5200;
 const m = window.mentria || {};
 const store = m.storage;
 
-const te = new TextEncoder(), td = new TextDecoder();
-const toB64 = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
 const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 const hx = (u8) => [...u8].map((b) => b.toString(16).padStart(2, '0')).join('');
 
-async function deriveKey(secret) {
-  const raw = await crypto.subtle.digest('SHA-256', te.encode('mentria-imagegen:key:' + secret));
-  return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt']);
-}
-async function deriveChannel(secret) {
-  return hx(new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('mentria-imagegen:chan:' + secret))));
-}
-async function seal(key, obj) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const enc = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(obj))));
-  const ct = enc.subarray(0, enc.length - 16), tag = enc.subarray(enc.length - 16);
-  const out = new Uint8Array(28 + ct.length);
-  out.set(iv, 0); out.set(tag, 12); out.set(ct, 28);
-  return toB64(out);
-}
-async function open(key, b64) {
-  const buf = fromB64(b64);
-  const iv = buf.subarray(0, 12), tag = buf.subarray(12, 28), ct = buf.subarray(28);
-  const cw = new Uint8Array(ct.length + 16);
-  cw.set(ct, 0); cw.set(tag, ct.length);
-  return JSON.parse(td.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cw)));
-}
-
 class Room {
-  constructor(relay, secret) { this.relays = [relay]; this.secret = secret; this.pool = new SimplePool(); this.sk = generateSecretKey(); this.pk = getPublicKey(this.sk); this.pending = new Map(); this.onPush = null; }
-  async start() {
-    this.key = await deriveKey(this.secret);
-    this.channel = await deriveChannel(this.secret);
-    this.sub = this.pool.subscribeMany(this.relays, { kinds: [KIND], '#t': [this.channel], since: Math.floor(Date.now() / 1000) - 5 }, { onevent: (ev) => this._ev(ev) });
+  constructor(relay, node) { this.relays = [relay]; this.node = node; this.pool = new SimplePool(); this.sk = generateSecretKey(); this.pk = getPublicKey(this.sk); this.key = nip44.getConversationKey(this.sk, node); this.pending = new Map(); this.onPush = null; }
+  start() {
+    this.sub = this.pool.subscribeMany(this.relays, { kinds: [KIND], authors: [this.node], '#p': [this.pk], since: Math.floor(Date.now() / 1000) - 5 }, { onevent: (ev) => this._ev(ev) });
   }
-  async _ev(ev) {
-    if (ev.pubkey === this.pk) return;
-    let msg; try { msg = await open(this.key, ev.content); } catch { return; }
-    const role = ev.tags.find((t) => t[0] === 'role')?.[1];
-    if (role !== 'res') return;
+  _ev(ev) {
+    if (ev.pubkey !== this.node || !verifyEvent(ev) || !ev.tags.some((t) => t[0] === 'p' && t[1] === this.pk)) return;
+    let msg; try { msg = JSON.parse(nip44.decrypt(ev.content, this.key)); } catch { return; }
+    if (!msg || typeof msg !== 'object') return;
     if (msg.id && this.pending.has(msg.id)) {
       const p = this.pending.get(msg.id); clearTimeout(p.to); this.pending.delete(msg.id);
-      msg.ok ? p.resolve(msg.data) : p.reject(new Error(msg.error?.message || 'request failed'));
+      msg.ok ? p.resolve(msg.data) : p.reject(msg.error?.message ? new Error(msg.error.message) : Object.assign(new Error('request failed'), { key: 'reqFailed' }));
     } else if (msg.event && this.onPush) { this.onPush(msg.event, msg.data); }
   }
   request(op, params = {}, timeoutMs = 20000) {
     const id = hx(crypto.getRandomValues(new Uint8Array(8)));
     return new Promise((resolve, reject) => {
-      const to = setTimeout(() => { this.pending.delete(id); reject(new Error('timeout: ' + op)); }, timeoutMs);
+      const to = setTimeout(() => { this.pending.delete(id); reject(Object.assign(new Error('timeout: ' + op), { key: 'timeout' })); }, timeoutMs);
       this.pending.set(id, { resolve, reject, to });
-      this._send('req', { id, op, params });
+      this._send({ id, op, params });
     });
   }
-  async _send(role, obj) {
-    const ev = finalizeEvent({ kind: KIND, created_at: Math.floor(Date.now() / 1000), tags: [['t', this.channel], ['role', role], ['expiration', String(Math.floor(Date.now() / 1000) + 600)]], content: await seal(this.key, obj) }, this.sk);
+  _send(obj) {
+    const now = Math.floor(Date.now() / 1000);
+    const ev = finalizeEvent({ kind: KIND, created_at: now, tags: [['p', this.node], ['expiration', String(now + 600)]], content: nip44.encrypt(JSON.stringify(obj), this.key) }, this.sk);
     for (const p of this.pool.publish(this.relays, ev)) Promise.resolve(p).catch(() => {});
   }
 }
@@ -279,7 +439,7 @@ function dropUrl(key) {
   if (urls.has(key)) { URL.revokeObjectURL(urls.get(key)); urls.delete(key); }
 }
 
-const room = new Room(RELAY, SERVICE);
+const room = new Room(RELAY, NODE);
 let myJob = null;
 let chunks = null;
 let genSlide = null;
@@ -289,7 +449,11 @@ function paintLoras(list) {
   LORAS = Array.isArray(list) ? list : [];
   const sel = $('lora');
   const keep = sel.value;
-  sel.innerHTML = '<option value="">Default (photoreal)</option>';
+  sel.innerHTML = '';
+  const def = document.createElement('option');
+  def.value = '';
+  tx(def, 'styleDefault');
+  sel.appendChild(def);
   for (const l of LORAS) { const o = document.createElement('option'); o.value = l.id; o.textContent = l.label; sel.appendChild(o); }
   if (LORAS.some((l) => l.id === keep)) sel.value = keep;
   $('stylerow').hidden = LORAS.length === 0;
@@ -297,7 +461,9 @@ function paintLoras(list) {
 }
 function paintLoraHint() {
   const l = LORAS.find((x) => x.id === $('lora').value);
-  $('lorahint').textContent = l ? (l.trigger ? 'adds “' + l.trigger + '” to the prompt automatically' : 'style applied automatically') : '';
+  if (!l) untx($('lorahint'), '');
+  else if (l.trigger) tx($('lorahint'), 'styleTrigger', { trigger: l.trigger });
+  else tx($('lorahint'), 'styleAuto');
 }
 $('lora').addEventListener('change', () => { paintLoraHint(); if (cur) { cur.lora = $('lora').value; touch(); } });
 
@@ -306,9 +472,13 @@ function setOnline(on, info) {
   if (on) paintLoras(info.loras);
   for (const [d, s] of [[$('dot'), $('svc')], [$('dot2'), $('svc2')]]) {
     d.className = 'dot ' + (on ? 'on' : 'off');
-    s.textContent = on ? 'render node: ' + (info.model || 'ready') + (info.queue ? ' · ' + info.queue + ' in queue' : '') : 'render node offline — import still works';
+    if (on) tx(s, (info.model ? 'svcOn' : 'svcReady') + (info.queue ? 'Q' : ''), { model: info.model, n: info.queue });
+    else tx(s, 'svcOff');
   }
-  document.querySelectorAll('.gen-btn').forEach((b) => { b.disabled = !on || genBusy; });
+  paintGen();
+}
+function paintGen() {
+  document.querySelectorAll('.gen-btn').forEach((b) => { b.disabled = !online || genBusy; });
 }
 async function hello() {
   try {
@@ -323,20 +493,20 @@ room.onPush = (event, data) => {
   if (!slide) return;
   const st = document.querySelector('[data-genstate="' + slide.id + '"]');
   if (event === 'job:pos') {
-    if (st) st.textContent = 'queue position ' + data.pos + ' · ~' + Math.round(data.etaMs / 1000) + 's';
+    if (st) tx(st, 'queuePos', { n: data.pos, sec: Math.round(data.etaMs / 1000) });
   } else if (event === 'job:start') {
-    if (st) st.textContent = 'rendering… ~' + Math.round((data.etaMs || 40000) / 1000) + 's';
+    if (st) tx(st, 'rendering', { sec: Math.round((data.etaMs || 40000) / 1000) });
   } else if (event === 'job:done') {
     chunks = { mime: data.mime, total: data.chunks, got: 0, parts: new Array(data.chunks) };
-    if (st) st.textContent = 'receiving image…';
+    if (st) tx(st, 'receivingImg');
   } else if (event === 'job:chunk' && chunks) {
     if (!chunks.parts[data.i]) { chunks.parts[data.i] = fromB64(data.b64); chunks.got++; }
-    if (st) st.textContent = 'receiving ' + Math.round((chunks.got / chunks.total) * 100) + '%';
+    if (st) tx(st, 'receivingPct', { pct: Math.round((chunks.got / chunks.total) * 100) / 100 });
     if (chunks.got === chunks.total) finishGen(slide);
   } else if (event === 'job:error') {
-    if (st) { st.textContent = data.message || 'generation failed'; st.className = 'genstate err'; }
+    if (st) { if (data.message) untx(st, data.message); else tx(st, 'genFailed'); st.className = 'genstate err'; }
     myJob = null; chunks = null; genSlide = null; genBusy = false;
-    setOnline(online, {});
+    paintGen();
   }
 };
 
@@ -350,7 +520,7 @@ async function finishGen(slide) {
   touch();
   myJob = null; chunks = null; genSlide = null; genBusy = false;
   renderSlides();
-  setOnline(online, {});
+  paintGen();
 }
 
 async function generateFor(slide, prompt, stateEl) {
@@ -358,17 +528,19 @@ async function generateFor(slide, prompt, stateEl) {
   genBusy = true;
   document.querySelectorAll('.gen-btn').forEach((b) => { b.disabled = true; });
   stateEl.className = 'genstate';
-  stateEl.textContent = 'submitting…';
+  tx(stateEl, 'submitting');
   try {
     const r = await room.request('generate', $('lora').value ? { prompt: prompt.trim(), lora: $('lora').value } : { prompt: prompt.trim() }, 15000);
     myJob = r.job;
     genSlide = slide;
-    stateEl.textContent = 'queue position ' + r.pos + ' · ~' + Math.round(r.etaMs / 1000) + 's';
+    tx(stateEl, 'queuePos', { n: r.pos, sec: Math.round(r.etaMs / 1000) });
   } catch (e) {
     stateEl.className = 'genstate err';
-    stateEl.textContent = String(e.message || e);
+    if (e.key === 'timeout') tx(stateEl, 'genTimeout');
+    else if (e.key) tx(stateEl, e.key);
+    else untx(stateEl, String(e.message || e));
     genBusy = false;
-    setOnline(online, {});
+    paintGen();
     if (/timeout/.test(String(e.message))) setOnline(false, {});
   }
 }
@@ -378,16 +550,16 @@ function touch() {
   saveDecks();
 }
 
-function confirmBtn(label, fn) {
+function confirmBtn(key, fn) {
   const wrap = document.createElement('span');
   wrap.className = 'confirmwrap';
   const b = document.createElement('button');
-  b.type = 'button'; b.className = 'mini btn--danger'; b.textContent = label;
+  b.type = 'button'; b.className = 'mini btn--danger'; tx(b, key);
   b.addEventListener('click', () => {
     if (b.dataset.armed) { fn(); return; }
     b.dataset.armed = '1';
-    b.textContent = 'sure?';
-    setTimeout(() => { delete b.dataset.armed; b.textContent = label; }, 2500);
+    tx(b, 'sure');
+    setTimeout(() => { delete b.dataset.armed; tx(b, key); }, 2500);
   });
   wrap.appendChild(b);
   return wrap;
@@ -400,14 +572,15 @@ function renderList() {
   decks.forEach((d) => {
     const c = document.createElement('div');
     c.className = 'deckcard';
-    const t = document.createElement('div');
-    t.className = 'deckcard__title';
-    t.textContent = d.title || 'Untitled story';
+    const ti = document.createElement('div');
+    ti.className = 'deckcard__title';
+    if (d.title) ti.textContent = d.title;
+    else tx(ti, 'untitled');
     const s = document.createElement('div');
     s.className = 'deckcard__sub';
     const withImg = d.slides.filter((x) => x.hasImage).length;
-    s.textContent = d.slides.length + ' slides · ' + withImg + ' with images';
-    c.append(t, s);
+    tx(s, 'deckSub', { n: d.slides.length, k: withImg });
+    c.append(ti, s);
     c.addEventListener('click', () => openDeck(d.id));
     list.appendChild(c);
   });
@@ -436,8 +609,9 @@ function closeDeck() {
   renderList();
 }
 
-function setStatus(msg, cls) {
-  $('status').textContent = msg || '';
+function setStatus(key, cls, vars) {
+  if (key) tx($('status'), key, vars);
+  else untx($('status'), '');
   $('status').className = 'status' + (cls ? ' ' + cls : '');
 }
 
@@ -462,19 +636,19 @@ function renderSlides() {
     genrow.className = 'genrow';
     const gp = document.createElement('input');
     gp.type = 'text';
-    gp.placeholder = 'describe the image to generate…';
+    txAttr(gp, 'placeholder', 'phPrompt');
     gp.value = slide.prompt || '';
     gp.maxLength = 800;
     gp.addEventListener('change', () => { slide.prompt = gp.value; touch(); });
     const gb = document.createElement('button');
     gb.type = 'button';
     gb.className = 'mini gen-btn';
-    gb.textContent = slide.hasImage ? 'Re-generate' : 'Generate';
+    tx(gb, slide.hasImage ? 'regenerate' : 'generate');
     gb.disabled = !online || genBusy;
     const imp = document.createElement('button');
     imp.type = 'button';
     imp.className = 'mini';
-    imp.textContent = 'Import';
+    tx(imp, 'importImg');
     const fi = document.createElement('input');
     fi.type = 'file';
     fi.accept = 'image/*';
@@ -502,7 +676,7 @@ function renderSlides() {
     const cap = document.createElement('textarea');
     cap.rows = 2;
     cap.className = 'caption-in';
-    cap.placeholder = 'caption — the line shown on the slide';
+    txAttr(cap, 'placeholder', 'phCaption');
     cap.value = slide.caption || '';
     cap.maxLength = 200;
     cap.addEventListener('change', () => { slide.caption = cap.value; touch(); });
@@ -510,7 +684,7 @@ function renderSlides() {
     const long = document.createElement('textarea');
     long.rows = 2;
     long.className = 'caption-in';
-    long.placeholder = 'long-press text (optional) — deeper detail revealed on hold';
+    txAttr(long, 'placeholder', 'phLong');
     long.value = slide.long || '';
     long.maxLength = 600;
     long.addEventListener('change', () => { slide.long = long.value; touch(); });
@@ -519,7 +693,7 @@ function renderSlides() {
     row.className = 'slide__row';
     const num = document.createElement('span');
     num.className = 'coverflag';
-    num.textContent = (i + 1) + '/' + cur.slides.length + (cur.cover === slide.id ? ' · cover' : '');
+    tx(num, cur.cover === slide.id ? 'numCover' : 'num', { i: i + 1, n: cur.slides.length });
     const up = document.createElement('button');
     up.type = 'button'; up.className = 'mini'; up.textContent = '↑'; up.disabled = i === 0;
     up.addEventListener('click', () => { cur.slides.splice(i, 1); cur.slides.splice(i - 1, 0, slide); touch(); renderSlides(); });
@@ -527,12 +701,12 @@ function renderSlides() {
     down.type = 'button'; down.className = 'mini'; down.textContent = '↓'; down.disabled = i === cur.slides.length - 1;
     down.addEventListener('click', () => { cur.slides.splice(i, 1); cur.slides.splice(i + 1, 0, slide); touch(); renderSlides(); });
     const cov = document.createElement('button');
-    cov.type = 'button'; cov.className = 'mini'; cov.textContent = 'Set cover';
+    cov.type = 'button'; cov.className = 'mini'; tx(cov, 'setCover');
     cov.disabled = !slide.hasImage;
     cov.addEventListener('click', () => { cur.cover = slide.id; touch(); renderSlides(); });
     const spacer = document.createElement('span');
     spacer.className = 'spacer';
-    const del = confirmBtn('Delete', async () => {
+    const del = confirmBtn('del', async () => {
       await idbDel(cur.id + '/' + slide.id);
       dropUrl(cur.id + '/' + slide.id);
       cur.slides = cur.slides.filter((x) => x.id !== slide.id);
@@ -547,7 +721,7 @@ function renderSlides() {
     tr.dataset.slideTr = slide.id;
     tr.hidden = true;
     const sum = document.createElement('summary');
-    sum.textContent = 'translations';
+    tx(sum, 'trSlide');
     const rows = document.createElement('div');
     rows.className = 'tr__rows';
     tr.append(sum, rows);
@@ -574,10 +748,10 @@ const blobToDataUrl = (blob) => new Promise((res, rej) => { const r = new FileRe
 
 async function buildBundle() {
   const title = (cur.title || '').trim();
-  if (!title) { setStatus('give the story a title first', 'err'); return null; }
+  if (!title) { setStatus('noTitle', 'err'); return null; }
   const ready = cur.slides.filter((s) => s.hasImage && (s.caption || '').trim());
-  if (!ready.length) { setStatus('need at least one slide with an image and a caption', 'err'); return null; }
-  setStatus('packing…');
+  if (!ready.length) { setStatus('noReady', 'err'); return null; }
+  setStatus('packing');
   const images = {};
   for (const s of ready) {
     const blob = await idbGet(cur.id + '/' + s.id);
@@ -601,29 +775,38 @@ async function buildBundle() {
   };
 }
 
-const LANGS = [['es', 'Español'], ['fr', 'Français'], ['ja', '日本語'], ['pt-BR', 'Português (Brasil)']];
+const LANGS = ['es', 'fr', 'ja', 'pt-BR'];
 const LANG_NAMES = { es: 'Spanish', fr: 'French', ja: 'Japanese', 'pt-BR': 'Brazilian Portuguese' };
 let engine = null;
 let engineTier = '';
 let engineCtx = 2048;
 let translating = false;
 
-function tstate(msg, err) {
+function tstate(key, err, vars) {
+  const el = $('tstate');
+  el.hidden = !key;
+  if (key) tx(el, key, vars);
+  else untx(el, '');
+  el.className = 'tstate' + (err ? ' err' : '');
+}
+
+function tstateRaw(msg, err) {
   const el = $('tstate');
   el.hidden = !msg;
-  el.textContent = msg || '';
+  untx(el, msg || '');
   el.className = 'tstate' + (err ? ' err' : '');
 }
 
 const NOT_SUPPORTED = 'translation is not supported on this device — it needs the 27B on-device model';
+const unsupported = () => Object.assign(new Error(NOT_SUPPORTED), { key: 'notSupported' });
 
 async function loadTranslator() {
   if (engine) return engine;
-  if (!navigator.gpu) throw new Error(NOT_SUPPORTED);
+  if (!navigator.gpu) throw unsupported();
   const Tiers = await import('/assets/js/mentria-tiers.js');
   const candidate = await Tiers.effectiveTier();
-  if (candidate !== '27b') throw new Error(NOT_SUPPORTED);
-  tstate('loading the on-device model…');
+  if (candidate !== '27b') throw unsupported();
+  tstate('loadingModel');
   const { MentriaEngine } = await import('/assets/mentria/dist/mentria.mjs');
   const { ensureModel } = await import('/assets/js/mentria-model.js');
   const res = await ensureModel(() => {
@@ -635,14 +818,15 @@ async function loadTranslator() {
     offerUpgrade: false,
     onProgress: (p) => {
       if (!p) return;
-      const pct = p.loaded != null && p.total > 0 ? ' ' + Math.round(Math.min(1, p.loaded / p.total) * 100) + '%' : '';
-      tstate((p.message || 'loading the on-device model…') + pct + (p.total >= 1048576 ? ' · ' + (p.loaded / 1048576 / 1024).toFixed(2) + ' / ' + (p.total / 1048576 / 1024).toFixed(2) + ' GB' : ''));
+      const pct = p.loaded != null && p.total > 0 ? ' ' + NFP.format(Math.min(1, p.loaded / p.total)) : '';
+      const gb = p.total >= 1048576 ? ' · ' + t('gbOf', { a: NF2.format(p.loaded / 1048576 / 1024), b: NF2.format(p.total / 1048576 / 1024) }) : '';
+      tstateRaw(((L === 'en' && p.message) || t('loadingModel')) + pct + gb);
     },
-    onDeviceLost: () => { engine = null; tstate('the GPU device was lost — reload and try again', true); }
+    onDeviceLost: () => { engine = null; tstate('gpuLost', true); }
   });
   if (res.tier !== '27b') {
     try { res.engine.dispose && res.engine.dispose(); } catch (_) {}
-    throw new Error(NOT_SUPPORTED);
+    throw unsupported();
   }
   engine = res.engine;
   engineTier = res.tier;
@@ -773,7 +957,7 @@ function batches(fields) {
 async function translateDeck() {
   if (translating) return;
   const fields = deckFields();
-  if (!Object.keys(fields).length) { tstate('nothing to translate yet — add a subtitle or captions', true); return; }
+  if (!Object.keys(fields).length) { tstate('nothingToTr', true); return; }
   translating = true;
   $('translate').disabled = true;
   try {
@@ -782,26 +966,27 @@ async function translateDeck() {
     const parts = batches(fields);
     let done = 0, total = LANGS.length * parts.length;
     const failed = [];
-    for (const [lang, label] of LANGS) {
+    for (const lang of LANGS) {
       cur.i18n[lang] = cur.i18n[lang] || {};
       for (const part of parts) {
-        tstate('translating to ' + label + '… (' + (done + 1) + '/' + total + ')');
+        tstate('translatingTo', false, { lang, i: done + 1, n: total });
         try {
           const res = await verifyTranslations(part, await translateBatch(part, lang), lang);
           for (const k of Object.keys(part)) delete cur.i18n[lang][k];
           Object.assign(cur.i18n[lang], res);
         } catch (e) {
-          if (!failed.includes(label)) failed.push(label);
+          if (!failed.includes(lang)) failed.push(lang);
         }
         done++;
         touch();
         renderTranslations();
       }
     }
-    const ok = LANGS.filter((l) => !failed.includes(l[1])).map((l) => l[1]);
-    tstate((ok.length ? 'translated into ' + ok.join(', ') + ' — review and edit below' : 'translation failed') + (failed.length ? ' · could not translate: ' + failed.join(', ') + ' (try again)' : ''), !ok.length);
+    const ok = LANGS.filter((l) => !failed.includes(l));
+    tstate(!ok.length ? 'trNone' : failed.length ? 'trSome' : 'trOk', !ok.length, { langsOk: ok, langsFailed: failed });
   } catch (e) {
-    tstate(String(e.message || e), true);
+    if (e.key) tstate(e.key, true);
+    else tstateRaw(String(e.message || e), true);
   }
   translating = false;
   $('translate').disabled = false;
@@ -809,21 +994,21 @@ async function translateDeck() {
 
 function trValue(lang, key) { return cur.i18n && cur.i18n[lang] && cur.i18n[lang][key] || ''; }
 function setTr(lang, key, v) { cur.i18n = cur.i18n || {}; cur.i18n[lang] = cur.i18n[lang] || {}; if (v.trim()) cur.i18n[lang][key] = v.trim(); else delete cur.i18n[lang][key]; touch(); }
-function hasTranslations() { return !!(cur.i18n && LANGS.some(([l]) => cur.i18n[l] && Object.keys(cur.i18n[l]).length)); }
+function hasTranslations() { return !!(cur.i18n && LANGS.some((l) => cur.i18n[l] && Object.keys(cur.i18n[l]).length)); }
 
 function trRows(container, keys) {
   container.innerHTML = '';
-  for (const [lang, label] of LANGS) {
-    for (const [key, ph] of keys) {
+  for (const lang of LANGS) {
+    for (const [key, kind] of keys) {
       const row = document.createElement('div');
       row.className = 'tr__row';
       const l = document.createElement('span');
       l.className = 'tr__lang';
-      l.textContent = label + ' · ' + ph;
+      tx(l, 'tr_' + kind, { lang });
       const ta = document.createElement('textarea');
       ta.rows = 1;
       ta.value = trValue(lang, key);
-      ta.placeholder = ph;
+      txAttr(ta, 'placeholder', 'f_' + kind);
       ta.addEventListener('change', () => setTr(lang, key, ta.value));
       row.append(l, ta);
       container.appendChild(row);
@@ -837,14 +1022,14 @@ function renderTranslations() {
   if (show) trRows($('deck-tr-rows'), [['subtitle', 'subtitle']]);
   document.querySelectorAll('[data-slide-tr]').forEach((det) => {
     det.hidden = !show;
-    if (show) trRows(det.querySelector('.tr__rows'), [[det.dataset.slideTr + '.caption', 'caption'], [det.dataset.slideTr + '.long', 'long press']]);
+    if (show) trRows(det.querySelector('.tr__rows'), [[det.dataset.slideTr + '.caption', 'caption'], [det.dataset.slideTr + '.long', 'long']]);
   });
 }
 
 function localized(en, key) {
   const v = { en };
   let any = false;
-  for (const [lang] of LANGS) { const t = trValue(lang, key); if (t) { v[lang] = t; any = true; } }
+  for (const lang of LANGS) { const t = trValue(lang, key); if (t) { v[lang] = t; any = true; } }
   return any ? v : en;
 }
 
@@ -931,16 +1116,16 @@ $('submit').addEventListener('click', async () => {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(zip);
   a.download = 'story-' + bundle.deck.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '-submission.zip';
-  document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+  document.body.appendChild(a); a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1500); a.remove();
   let body = issueBody(sub, true);
   let fits = encodeURIComponent(body).length <= URL_BODY_BUDGET;
   if (!fits) body = issueBody(sub, false);
   try { await navigator.clipboard.writeText(jsonText); } catch (_) {}
   const url = ISSUE_URL + '?labels=story-submission&title=' + encodeURIComponent('Story submission: ' + bundle.deck.title) + '&body=' + encodeURIComponent(body);
   if (popup) popup.location = url; else window.open(url, '_blank');
-  $('status').innerHTML = '';
+  untx($('status'), '');
   const steps = document.createElement('span');
-  steps.textContent = 'GitHub opened with the issue pre-filled. Unzip the download, drag the ' + ready.length + ' images into the issue in order' + (fits ? '' : ', paste story.json into the data block (it is also on your clipboard)') + ', then click “Submit new issue”. It goes live on mentria.ai once approved.';
+  tx(steps, fits ? 'submitDone' : 'submitDonePaste', { n: ready.length });
   $('status').append(steps);
   $('status').className = 'status ok';
 });
@@ -956,9 +1141,9 @@ $('export').addEventListener('click', async () => {
   a.download = 'story-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '.json';
   document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   a.remove();
-  setStatus('exported ' + ready.length + ' slides' + (missing ? ' (' + missing + ' skipped: missing image or caption)' : '') + ' — saved to your downloads', 'ok');
+  setStatus(missing ? 'exportedSkip' : 'exported', 'ok', { n: ready.length, k: missing });
 });
 
 let pvIdx = 0;
@@ -970,12 +1155,12 @@ async function pvShow(i) {
   $('pv-img').src = u || '';
   $('pv-caption').textContent = s.caption || '';
   $('pv-long').textContent = s.long || '';
-  $('pv-count').textContent = (pvIdx + 1) + ' / ' + pvSlides.length;
+  tx($('pv-count'), 'pvCount', { i: pvIdx + 1, n: pvSlides.length });
   $('pv-stage').classList.remove('show-long');
 }
 $('pv-open').addEventListener('click', () => {
   pvSlides = cur.slides.filter((s) => s.hasImage);
-  if (!pvSlides.length) { setStatus('no slides with images to preview yet', 'err'); return; }
+  if (!pvSlides.length) { setStatus('noPreview', 'err'); return; }
   $('preview').hidden = false;
   pvShow(0);
 });
@@ -993,7 +1178,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 renderList();
-await room.start();
+room.start();
 hello();
-setInterval(hello, 30000);
+setInterval(() => { if (!document.hidden) hello(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) hello(); });
 </script>

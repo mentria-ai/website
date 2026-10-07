@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.bubble-level.title' | t }}"
   description: "{{ 'tools.bubble-level.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bubble-level</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bubble-level</span></p>
   <h1>{{ "tools.bubble-level.title" | t }}</h1>
   <p>{{ "tools.bubble-level.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -113,7 +114,7 @@ eleventyComputed:
     <p class="bl__panel-body">{{ "tool.bubble-level.unsupported_body" | t }}</p>
     <canvas class="bl__qr" id="bl-qr" width="180" height="180"></canvas>
     <p class="bl__panel-body bl__panel-body--tight">{{ "tool.bubble-level.unsupported_qr" | t }}</p>
-    <p class="bl__qr-url">mentria.ai/tools/bubble-level/</p>
+    <p class="bl__qr-url">{{ site.siteUrl | replace("https://", "") }}{{ page.url }}</p>
   </div>
 
   <div class="bl__panel" id="bl-insecure" hidden>
@@ -137,7 +138,7 @@ eleventyComputed:
 
   var LANG = document.documentElement.lang || undefined;
   var CAL_KEY = 'bubble_level_cal';
-  var PAGE_URL = 'https://mentria.ai/tools/bubble-level/';
+  var PAGE_URL = {{ (site.siteUrl ~ page.url) | dump | safe }};
   var TO_DEG = 180 / Math.PI;
   var TO_RAD = Math.PI / 180;
   var SMOOTH = 0.15;
@@ -233,13 +234,17 @@ eleventyComputed:
     return 0;
   }
 
+  var NF1 = null;
+  try { NF1 = new Intl.NumberFormat(LANG, { minimumFractionDigits: 1, maximumFractionDigits: 1 }); } catch (_) {}
+
   function fmt(v) {
     var r = Math.round(v * 10) / 10;
     if (Object.is(r, -0)) r = 0;
-    var s;
-    try { s = r.toLocaleString(LANG, { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
-    catch (_) { s = r.toFixed(1); }
-    return s + '°';
+    return (NF1 ? NF1.format(r) : r.toFixed(1)) + '°';
+  }
+
+  function setText(node, s) {
+    if (node.textContent !== s) node.textContent = s;
   }
 
   function deviceAngles() {
@@ -285,7 +290,8 @@ eleventyComputed:
   }
 
   function place(node, x, y) {
-    node.setAttribute('transform', 'translate(' + x.toFixed(2) + ',' + y.toFixed(2) + ')');
+    var t = 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')';
+    if (node.getAttribute('transform') !== t) node.setAttribute('transform', t);
   }
 
   function render() {
@@ -312,8 +318,8 @@ eleventyComputed:
         by = (pitch / off) * r;
       }
       place(bubble, bx, by);
-      pitchEl.textContent = fmt(pitch);
-      rollEl.textContent = fmt(roll);
+      setText(pitchEl, fmt(pitch));
+      setText(rollEl, fmt(roll));
       var flatLevel = off <= LEVEL_TOL;
       setLevel(flatLevel);
       setStatus(flatLevel ? 'level' : 'none');
@@ -321,7 +327,7 @@ eleventyComputed:
       var dev = edgeAngle() - cal.edge;
       var vx = Math.max(-1, Math.min(1, dev / EDGE_FULL)) * VIAL_MAX;
       place(vialBubble, vx, 0);
-      devEl.textContent = fmt(Math.abs(dev));
+      setText(devEl, fmt(Math.abs(dev)));
       var edgeLevel = Math.abs(dev) <= LEVEL_TOL;
       setLevel(edgeLevel);
       setStatus(edgeLevel ? 'level' : (dev < 0 ? 'right' : 'left'));
@@ -429,7 +435,10 @@ eleventyComputed:
     updateCalBadge();
     if (!window.isSecureContext) { showPanel('insecure'); return; }
     if (typeof DeviceMotionEvent === 'undefined') { showPanel('unsupported'); return; }
-    if (typeof DeviceMotionEvent.requestPermission === 'function') { showPanel('perm'); return; }
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      MentriaUI.sensorsGranted(['accelerometer']).then(function (ok) { if (ok) startSensor(); else showPanel('perm'); });
+      return;
+    }
     startSensor();
   }
 
@@ -497,7 +506,16 @@ eleventyComputed:
     }
   });
 
-  window.addEventListener('pagehide', stopSensor);
+  var resumeOnShow = false;
+  window.addEventListener('pagehide', function () {
+    resumeOnShow = active;
+    stopSensor();
+  });
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted || !resumeOnShow) return;
+    resumeOnShow = false;
+    startSensor();
+  });
 
   measureViewport();
   boot();

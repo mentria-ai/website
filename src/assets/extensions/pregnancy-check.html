@@ -1,0 +1,3044 @@
+<script type="application/json" id="mentria-ext">
+{
+  "id": "pregnancy-check",
+  "name": "Pregnancy Check & Planner",
+  "version": "1.0.0",
+  "icon": "🤰",
+  "author": "Mentria",
+  "description": "When a home pregnancy test is reliable, planning, due date, weekly notes, appointments, and movement and contraction logs. Information only, not a diagnosis. Data stays on this device.",
+  "permissions": ["storage"],
+  "mounts": {
+    "tool": {}
+  }
+}
+</script>
+<style>
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/assets/fonts/inter-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/assets/fonts/jbm-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  :root {
+    --accent: #6ef3c5;
+    --bg: #0a0a0a;
+    --fg: #e2e8f0;
+    --muted: #8896a8;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --body: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', Meiryo, sans-serif;
+    --line: rgba(255, 255, 255, 0.09);
+    --line2: rgba(255, 255, 255, 0.16);
+    --field: rgba(255, 255, 255, 0.38);
+    --card: rgba(255, 255, 255, 0.035);
+    --card2: rgba(255, 255, 255, 0.06);
+    --urgent: #f472b6;
+    --urgent-bg: rgba(244, 114, 182, 0.1);
+    --warn: #fbbf24;
+    --warn-bg: rgba(251, 191, 36, 0.08);
+    --ok-bg: rgba(110, 243, 197, 0.09);
+    --ink: #04140f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .app { max-width: 44rem; margin: 0 auto; padding: 0 16px 40px; }
+  .top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 8px; min-height: 60px; padding: 8px 0; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .top h1 { flex: 1; min-width: 0; margin: 0; font-size: 0.98rem; font-weight: 650; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow-wrap: anywhere; }
+  .top h1:focus { outline: none; }
+  .iconbtn { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--line2); border-radius: 12px; background: transparent; font-size: 1.15rem; line-height: 1; }
+  .iconbtn:hover { border-color: var(--accent); }
+  .iconbtn[disabled] { opacity: 0.35; cursor: default; }
+  .iconbtn[disabled]:hover { border-color: var(--line2); }
+  .helpbtn { flex: 0 0 auto; min-height: 44px; padding: 0 14px; border: 1px solid var(--urgent); border-radius: 999px; background: var(--urgent-bg); color: var(--urgent); font-weight: 650; font-size: 0.9rem; white-space: nowrap; }
+  .helpbtn[aria-current="page"] { background: var(--urgent); color: var(--ink); }
+  .helpbtn .hs { display: none; }
+  .view { padding-top: 18px; }
+  .eyebrow { margin: 0 0 6px; font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  h2 { margin: 26px 0 10px; font-size: 1.08rem; font-weight: 650; line-height: 1.35; }
+  h2.first { margin-top: 0; }
+  h3 { margin: 18px 0 8px; font-size: 0.98rem; font-weight: 650; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 0.88rem; }
+  .lede { color: var(--muted); margin-bottom: 18px; }
+  ul.plain { margin: 0 0 14px; padding-left: 1.2em; }
+  ul.plain li { margin-bottom: 7px; }
+  .card { margin-bottom: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+  .note { margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--line2); border-left-width: 4px; border-radius: 10px; background: var(--card); font-size: 0.95rem; }
+  .note p:last-child, .card p:last-child { margin-bottom: 0; }
+  .note.warn { border-color: rgba(251, 191, 36, 0.35); border-left-color: var(--warn); background: var(--warn-bg); }
+  .note.urgent { border-color: rgba(244, 114, 182, 0.4); border-left-color: var(--urgent); background: var(--urgent-bg); }
+  .note.ok { border-color: rgba(110, 243, 197, 0.3); border-left-color: var(--accent); background: var(--ok-bg); }
+  .note strong { font-weight: 650; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border: 1px solid var(--line2); border-radius: 12px; background: transparent; font-weight: 600; font-size: 0.95rem; line-height: 1.25; text-align: center; text-decoration: none; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { border-color: var(--accent); background: var(--accent); color: var(--ink); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.danger { border-color: rgba(244, 114, 182, 0.6); color: var(--urgent); }
+  .btn.danger:hover { border-color: var(--urgent); }
+  .btn[disabled] { opacity: 0.4; cursor: default; filter: none; }
+  .btn.wide { width: 100%; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .row.end { justify-content: flex-end; }
+  .row.split { justify-content: space-between; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .actions .btn { flex: 1 1 10rem; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .tile { display: flex; align-items: flex-start; gap: 14px; width: 100%; min-height: 72px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); text-align: left; }
+  .tile:hover { border-color: var(--accent); background: var(--card2); }
+  .tile.urgent { border-color: rgba(244, 114, 182, 0.35); }
+  .tile.urgent:hover { border-color: var(--urgent); }
+  .tile__icon { flex: 0 0 auto; width: 2rem; font-size: 1.45rem; line-height: 1.6rem; text-align: center; }
+  .tile__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .tile__name { font-weight: 650; font-size: 1rem; }
+  .tile__desc { color: var(--muted); font-size: 0.88rem; line-height: 1.45; }
+  .tile__chip { align-self: flex-start; margin-top: 4px; padding: 2px 8px; border-radius: 999px; background: var(--ok-bg); color: var(--accent); font-family: var(--mono); font-size: 0.72rem; }
+  .foot { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.84rem; }
+  .progress { height: 4px; margin: 0 0 18px; border-radius: 999px; background: var(--line); overflow: hidden; }
+  .progress span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width 0.25s ease; }
+  fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+  legend { display: block; width: 100%; margin: 0 0 6px; padding: 0; font-size: 1.15rem; font-weight: 650; line-height: 1.35; }
+  .hint { margin: 0 0 14px; color: var(--muted); font-size: 0.92rem; }
+  .opts { display: grid; gap: 10px; margin-top: 4px; }
+  .opt { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 12px 14px; border: 1px solid var(--line2); border-radius: 12px; background: transparent; cursor: pointer; }
+  .opt:hover { border-color: rgba(110, 243, 197, 0.55); }
+  .opt.is-on { border-color: var(--accent); background: var(--ok-bg); }
+  .opt input { flex: 0 0 auto; width: 22px; height: 22px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+  .opt span { flex: 1; min-width: 0; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field > label, .field > .lbl { font-size: 0.9rem; font-weight: 600; }
+  .field small { color: var(--muted); font-size: 0.85rem; }
+  input[type="date"], input[type="number"], input[type="text"], input[type="tel"], textarea { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 10px; background: rgba(255, 255, 255, 0.04); font-size: 16px; color-scheme: dark; }
+  input[type="date"] { max-width: 16rem; }
+  input:disabled { opacity: 0.45; }
+  textarea { min-height: 88px; resize: vertical; line-height: 1.45; }
+  input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  .stepper { display: flex; align-items: stretch; gap: 8px; max-width: 16rem; }
+  .stepper input { text-align: center; font-family: var(--mono); font-size: 1.05rem; -moz-appearance: textfield; appearance: textfield; }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper .iconbtn { width: 48px; height: 48px; }
+  .err { margin: 6px 0 0; color: var(--urgent); font-size: 0.88rem; }
+  .err:empty { display: none; }
+  .big { margin: 2px 0 6px; font-size: 1.45rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: 10px; margin: 12px 0 4px; }
+  .stat { padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+  .stat b { display: block; margin-top: 2px; font-size: 1.02rem; font-weight: 650; }
+  .stat .eyebrow { display: block; margin: 0; letter-spacing: 0.06em; line-height: 1.35; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--ok-bg); color: var(--accent); font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; vertical-align: middle; }
+  .badge.warn { background: var(--warn-bg); color: var(--warn); }
+  .seg { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+  .seg button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--line2); border-radius: 999px; background: transparent; font-size: 0.9rem; font-weight: 600; }
+  .seg button:hover { border-color: var(--accent); }
+  .seg button[aria-current="true"], .seg button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--ink); }
+  @media (max-width: 559px) {
+    .seg.scroll { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px 16px; padding: 4px 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .seg.scroll::-webkit-scrollbar { display: none; }
+    .seg.scroll button { flex: 0 0 auto; }
+  }
+  .seg.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .seg.grid3 button { min-height: 52px; padding: 6px 8px; border-radius: 12px; font-size: 0.85rem; line-height: 1.2; }
+  .checks { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .checks .opt { align-items: flex-start; }
+  .checks .opt input { margin-top: 1px; }
+  .checks .opt.is-on span { color: var(--muted); }
+  .cal { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
+  .cal th { padding: 4px 0; color: var(--muted); font-family: var(--mono); font-size: 0.7rem; font-weight: 600; text-align: center; }
+  .cal td { height: 42px; padding: 0; text-align: center; vertical-align: middle; }
+  .cal .d { position: relative; display: flex; align-items: center; justify-content: center; height: 42px; border-radius: 10px; font-family: var(--mono); font-size: 0.86rem; }
+  .cal .d.out { color: rgba(255, 255, 255, 0.22); }
+  .cal .d.fertile { background: var(--warn-bg); color: var(--warn); box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.35); }
+  .cal .d.ov { background: rgba(251, 191, 36, 0.22); box-shadow: inset 0 0 0 2px var(--warn); font-weight: 700; }
+  .cal .d.period::after { content: ''; position: absolute; bottom: 5px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--urgent); }
+  .cal .d.today { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .calhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0 4px; }
+  .calhead strong { font-size: 0.98rem; text-transform: capitalize; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 0.82rem; }
+  .legend li { display: flex; align-items: center; gap: 6px; }
+  .sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; }
+  .sw.fertile { background: var(--warn-bg); box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.5); }
+  .sw.ov { background: rgba(251, 191, 36, 0.22); box-shadow: inset 0 0 0 2px var(--warn); }
+  .sw.period { width: 8px; height: 8px; margin: 0 3px; border-radius: 50%; background: var(--urgent); }
+  .sw.today { box-shadow: inset 0 0 0 2px var(--accent); }
+  .tap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%; min-height: 112px; margin: 6px 0 12px; padding: 16px; border: 2px solid var(--accent); border-radius: 20px; background: var(--ok-bg); color: var(--fg); font-size: 1.2rem; font-weight: 700; }
+  .tap small { color: var(--muted); font-size: 0.85rem; font-weight: 500; }
+  .tap:active { transform: scale(0.99); }
+  .tap.running { border-color: var(--urgent); background: var(--urgent-bg); }
+  .timer { font-family: var(--mono); font-size: 2.2rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+  .pulse { display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 50%; background: var(--urgent); animation: pulse 1.4s ease-in-out infinite; vertical-align: middle; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .hist { margin: 0; padding: 0; list-style: none; }
+  .hist li { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .hist li:last-child { border-bottom: 0; }
+  .hist .main { flex: 1; min-width: 0; }
+  .hist .main b { display: block; font-weight: 600; font-size: 0.95rem; }
+  .hist .main span { color: var(--muted); font-size: 0.85rem; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  .tbl th { padding: 8px 6px; border-bottom: 1px solid var(--line2); color: var(--muted); font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-align: left; text-transform: uppercase; }
+  .tbl td { padding: 10px 6px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .weekhead { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .weekhead .title { flex: 1; min-width: 0; text-align: center; }
+  .weekhead .title strong { display: block; font-size: 1.3rem; font-weight: 700; }
+  .wk { margin-bottom: 12px; }
+  .wk p { margin: 0; }
+  .rf { margin: 0 0 16px; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .rf li { padding: 8px 12px 8px 14px; font-size: 0.95rem; border: 1px solid rgba(244, 114, 182, 0.3); border-left: 4px solid var(--urgent); border-radius: 10px; background: var(--urgent-bg); }
+  .callout { margin: 0 0 16px; padding: 14px 16px; border-radius: 14px; background: var(--urgent); color: var(--ink); font-weight: 700; font-size: 1.05rem; line-height: 1.4; }
+  .callout.stick { position: sticky; bottom: 10px; z-index: 4; box-shadow: 0 0 0 6px var(--bg), 0 10px 30px rgba(0, 0, 0, 0.7); }
+  .callbtn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; margin-bottom: 12px; padding: 10px 16px; border: 2px solid var(--accent); border-radius: 14px; color: var(--accent); font-weight: 700; text-decoration: none; }
+  .src { margin: 0 0 14px; padding: 0; list-style: none; }
+  .src li { margin-bottom: 12px; }
+  .src b { display: block; font-weight: 600; font-size: 0.95rem; }
+  .src code { display: block; margin-top: 2px; color: var(--muted); font-family: var(--mono); font-size: 0.74rem; line-height: 1.5; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all; }
+  .formula { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); overflow-wrap: anywhere; }
+  dialog.dlg { width: min(26rem, calc(100vw - 32px)); max-width: none; padding: 20px; border: 1px solid var(--line2); border-radius: 16px; background: #121416; color: var(--fg); }
+  dialog.dlg::backdrop { background: rgba(0, 0, 0, 0.6); }
+  dialog.dlg p { margin: 0 0 18px; font-size: 1rem; }
+  .sep { height: 1px; margin: 22px 0; border: 0; background: var(--line); }
+  @media (max-width: 420px) {
+    .helpbtn .hl { display: none; }
+    .helpbtn .hs { display: inline; }
+  }
+  @media (min-width: 560px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .tile.span { grid-column: 1 / -1; }
+    .top h1 { font-size: 1.08rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+<div class="app" id="app"></div>
+<script>
+(function () {
+  var STR = {};
+  STR.en = {
+    app_title: "Pregnancy Check & Planner",
+    app_sub: "Calm, private information about testing, planning and pregnancy. Everything stays on this device.",
+    back: "Back",
+    help_btn: "Get help now",
+    help_short: "Get help",
+    disclaimer: "Information only, not medical advice. Always follow your clinician.",
+    next: "Next",
+    prev: "Back",
+    see_results: "See what this means",
+    unsure: "I'm not sure",
+    dont_know: "I don't know",
+    cancel: "Cancel",
+    del: "Delete",
+    less: "Fewer days",
+    more: "More days",
+    no_db: "Saving isn't available here, so anything you enter will be lost when you close this page.",
+    save_fail: "Couldn't save on this device.",
+    dy_one: "{n} day",
+    dy_other: "{n} days",
+    wk_one: "{n} week",
+    wk_other: "{n} weeks",
+    ga: "{w}, {d}",
+    min: "{n} min",
+    err_future: "This date is in the future.",
+    err_old: "Please choose a date within the last year.",
+    err_date: "Enter a full date, or choose “I'm not sure”.",
+    err_cycle: "Enter a number of days between 20 and 45.",
+    err_before: "This date is before your last period started.",
+    nav_check: "Could I be pregnant?",
+    nav_check_d: "A few questions, then when a home test is reliable and what to do next.",
+    nav_plan: "Planning a pregnancy",
+    nav_plan_d: "An estimate of your fertile days, and a checklist for before you try.",
+    nav_preg: "My pregnancy",
+    nav_preg_d: "Due date, week by week, appointments, movements and contractions.",
+    nav_help: "Get help now",
+    nav_help_d: "Warning signs that need urgent care, and who to call.",
+    nav_data: "Your data",
+    nav_data_d: "Kept only on this device. Export it or delete it.",
+    nav_about: "About",
+    nav_about_d: "How the dates are worked out, and the sources behind them.",
+    q_of: "Question {i} of {n}",
+    q_lmp: "When did your last period start?",
+    q_lmp_h: "Choose the first day of bleeding. It's fine if you can't remember.",
+    q_lmp_lbl: "First day of your last period",
+    q_cycle: "How long is your usual cycle?",
+    q_cycle_h: "Count from the first day of one period to the first day of the next. Many people's cycles are between 21 and 35 days.",
+    q_cycle_lbl: "Usual cycle length in days",
+    q_reg: "Do your periods usually come when you expect them?",
+    q_reg_h: "Periods can be irregular for a while after stopping hormonal contraception, after a pregnancy, or while breastfeeding.",
+    reg_yes: "Yes, usually within a few days",
+    reg_no: "No, they vary by more than about a week",
+    q_sex: "Since your last period, have you had sex without contraception, or a problem with contraception?",
+    sex_yes: "Yes, sex without contraception",
+    sex_problem: "Yes, a contraception problem, such as a missed pill or a split condom",
+    sex_no: "No",
+    q_sexdate: "When was the most recent time?",
+    q_sexdate_h: "If it happened more than once, choose the most recent date.",
+    q_sexdate_lbl: "Date",
+    q_sym: "Have you noticed any of these recently?",
+    q_sym_h: "Choose all that apply.",
+    sym_late: "My period is late or missed",
+    sym_sick: "Feeling sick, or being sick",
+    sym_breasts: "Sore or tender breasts",
+    sym_tired: "Feeling very tired",
+    sym_pee: "Needing to pee more often",
+    sym_spot: "Light spotting or bleeding",
+    sym_none: "None of these",
+    q_test: "Have you done a home pregnancy test?",
+    test_no: "No, not yet",
+    test_pos: "Yes, it was positive",
+    test_neg: "Yes, it was negative",
+    test_unclear: "Yes, but I couldn't tell, or the line was faint",
+    q_testdate: "When did you do the test?",
+    q_testdate_lbl: "Date of the test",
+    need_answer: "Choose an answer to continue.",
+    r_confirm: "Answers to questions can't confirm or rule out pregnancy. Only a pregnancy test, and a clinician, can do that.",
+    r_when: "When a home test is reliable",
+    r_from: "From {date}",
+    r_basis_period: "This is the day your next period is due: the first day of your last period plus {days}. Most home tests are reliable from the first day of a missed period.",
+    r_basis_sex: "This is 21 days after the last time you had sex without contraception. When periods are irregular or you're not sure when one is due, a test is reliable from 21 days after sex.",
+    r_basis_none: "Most home tests are reliable from the first day of a missed period. If you don't know when your period is due, test at least 21 days after the last time you had sex without contraception.",
+    r_local: "",
+    r_passed: "That date has passed, so a test now should give a reliable result.",
+    r_today: "That's today.",
+    r_future: "That's in {days}.",
+    r_early: "Some tests say they work a few days earlier, but testing early can miss a pregnancy, because the hormone the tests look for (hCG) builds up over time.",
+    r_also21: "A test on or after {date}, 21 days after you last had sex without contraception, is reliable whatever your cycle. If an earlier test is negative and your period still hasn't come, test again then.",
+    r_meaning: "About your answers",
+    m_due_passed: "From your answers, your period was due around {date}.",
+    m_due_future: "From your answers, your next period is due around {date}.",
+    m_late_sex: "A late or missed period after sex without contraception is the most common early sign of pregnancy. Periods can also be late for other reasons, such as stress, illness, weight change, hard exercise, breastfeeding or some kinds of contraception.",
+    m_late: "A late or missed period is a common early sign of pregnancy, but periods can also be late for other reasons, such as stress, illness, weight change, hard exercise, breastfeeding or some kinds of contraception.",
+    m_sym: "The changes you noticed can be early signs of pregnancy, but they often happen before a period too, so on their own they can't confirm or rule out pregnancy.",
+    m_spot: "Light spotting can happen in early pregnancy, around the time a period would be due, and it also has many other causes. Bleeding together with pain in your lower tummy, shoulder-tip pain, or feeling faint needs urgent care.",
+    m_none: "Many people have no symptoms early on, so having none doesn't rule out pregnancy.",
+    m_ec: "Emergency contraception can be used up to 5 days after sex without contraception, and it works best the sooner it's used. If that applies to you, ask a pharmacist, doctor or sexual health clinic today.",
+    m_problem: "A pharmacist, doctor or sexual health clinic can tell you what a contraception problem means for you.",
+    m_nosex: "No contraception works perfectly every time. If your period is late or you're worried, a test is the way to find out.",
+    m_unsure_sex: "If you're not sure, a test from the date above can help you find out.",
+    t_pos: "A positive home test is rarely wrong, though a few things can cause one without an ongoing pregnancy, such as some fertility medicines or a very recent pregnancy. See a clinician soon: they can confirm the result and talk you through your options and care.",
+    t_neg: "A negative result is less certain than a positive one, especially if the test was done early. If your period still hasn't come, test again in a few days. If a second test is negative and there's still no period, see a clinician.",
+    t_neg_early: "Your test was done before {date}, so it may have been too early to show a result.",
+    t_unclear: "Faint or unclear results are hard to read, even for experienced people. Test again in a couple of days with a new test, and read it only within the time given in the leaflet. A clinician can also do a test.",
+    r_next: "What to do next",
+    n_test: "Do a test on or after the date above. First-morning urine works best. Follow the leaflet's instructions and timing.",
+    n_test_nodate: "Do a test from the first day of a missed period, or 21 days after sex without contraception. First-morning urine works best.",
+    n_repeat: "If it's negative and your period still hasn't started, test again in a few days.",
+    n_clin: "If it's positive, or you keep getting negative results with no period, see a doctor, nurse, midwife or clinic.",
+    n_care: "Until you know, consider avoiding alcohol and smoking, and check any medicines with a pharmacist.",
+    n_talk: "Whatever the result, you can talk to a clinician or a sexual health service in confidence about how you feel and what you want to do.",
+    r_urgent: "Get urgent help if you have",
+    r_call: "Call your local emergency number now (for example 112, 911, 999, 108, 119 or 192).",
+    r_change: "Change my answers",
+    r_restart: "Start again",
+    r_saved: "Your answers are saved only on this device.",
+    p_intro: "Enter the first day of your last period and your usual cycle length to see an estimate of your fertile days.",
+    p_lmp: "First day of your last period",
+    p_cycle: "Usual cycle length (days)",
+    p_estimate: "Estimate only. Cycles vary, and ovulation can happen earlier or later than expected. This is not a method of birth control: don't use it to avoid pregnancy.",
+    p_window: "Next fertile window (estimate)",
+    p_window_now: "You may be in your fertile window now (estimate)",
+    p_range: "{a} to {b}",
+    p_ov: "Estimated ovulation: around {date}",
+    p_next: "Next period due: around {date}",
+    p_empty: "Enter the first day of your last period to see the calendar.",
+    p_old: "Your next period was due around {date}. If it has started since, enter the new date for a better estimate. If it hasn't, a pregnancy test can tell you more.",
+    p_how: "Ovulation usually happens about 14 days before the next period. Sperm can survive for up to about 5 days, so the fertile window is the 5 days before ovulation plus the day of ovulation.",
+    p_tip_sex: "Having sex every 2 to 3 days through your cycle covers the fertile window without needing exact timing.",
+    p_tip_irreg: "If your cycles are often shorter than 21 days, longer than 35 days, or vary a lot, these estimates are less reliable, and it's worth talking to a clinician.",
+    p_tip_time: "If you've been trying for a year without a pregnancy, or for 6 months if you're 35 or older, talk to a clinician.",
+    cal_prev: "Previous month",
+    cal_next: "Next month",
+    lg_period: "Period starts",
+    lg_fertile: "Fertile window (estimate)",
+    lg_ov: "Estimated ovulation",
+    lg_today: "Today",
+    p_check: "Before you try: a checklist",
+    p_check_h: "Tick items as you go. Your ticks are saved only on this device.",
+    pc_folic: "Take 400 micrograms of folic acid every day, starting at least a month before trying and continuing until 12 weeks of pregnancy. Some people need a higher dose, so ask a clinician.",
+    pc_meds: "Review your medicines (including over-the-counter and herbal ones) and any long-term conditions, such as diabetes, epilepsy or high blood pressure, with a clinician. Don't stop a prescribed medicine without advice.",
+    pc_vacc: "Check your vaccinations, especially rubella (German measles) and chickenpox. Some vaccines need to be given at least a month before pregnancy.",
+    pc_smoke: "Stop smoking, and avoid other people's smoke.",
+    pc_alcohol: "Stop drinking alcohol. No amount is known to be safe in pregnancy.",
+    pc_drugs: "Stop using recreational drugs, and ask for support if you need it.",
+    pc_weight: "Eat a varied diet, stay active, and aim for a healthy weight.",
+    pc_chem: "Avoid harmful chemicals at home and at work, and avoid handling cat litter and rodent droppings.",
+    pc_history: "Talk to a clinician about your family health history and any previous pregnancies.",
+    pc_mind: "Look after your mental health. If you feel low or anxious, or don't feel safe at home, you can talk to a clinician in confidence.",
+    tab_due: "Due date",
+    tab_week: "Week by week",
+    tab_appts: "Appointments",
+    tab_moves: "Movements",
+    tab_contr: "Contractions",
+    d_method: "Work out my due date from",
+    dm_lmp: "My last period",
+    dm_conc: "Conception date",
+    dm_ivf: "IVF transfer",
+    d_lmp: "First day of your last period",
+    d_cycle: "Usual cycle length (days)",
+    d_conc: "Conception date",
+    d_ivf: "Embryo transfer date",
+    d_ivfday: "Embryo age at transfer",
+    d_day3: "Day 3",
+    d_day5: "Day 5 (blastocyst)",
+    d_clin: "My clinician's due date",
+    d_clin_h: "If a clinician has given you a due date, for example from an early scan, enter it here. It replaces the calculated date.",
+    d_clin_clear: "Remove clinician's date",
+    d_result: "Estimated due date",
+    d_from_clin: "Using your clinician's date",
+    f_lmp_n: "First day of last period + 280 days + ({c} − 28) days",
+    f_conc_n: "Conception date + 266 days",
+    f_ivf3_n: "Transfer date + 263 days (day-3 embryo)",
+    f_ivf5_n: "Transfer date + 261 days (day-5 embryo)",
+    d_ga: "How far along",
+    d_tri: "Trimester",
+    tri_1: "First trimester",
+    tri_2: "Second trimester",
+    tri_3: "Third trimester",
+    d_togo: "Days to go",
+    d_due_today: "Due date is today",
+    d_past: "{days} past the due date",
+    d_range: "Most babies are born between 37 and 42 weeks. Only a small number arrive on their due date.",
+    d_fr41: "",
+    d_err_far: "This works out at more than 44 weeks. Please check the date.",
+    d_err_ahead: "This works out at a due date more than 40 weeks away. Please check the date.",
+    d_empty: "Enter a date to see your estimated due date.",
+    d_clear: "Clear my dates",
+    d_clear_h: "You can clear these dates at any time.",
+    d_clear_q: "Clear the dates in this section? Your logs and checklists stay until you delete them in Your data.",
+    d_clear_ok: "Clear dates",
+    d_cleared: "Dates cleared.",
+    w_title: "Week {n}",
+    w_prev: "Previous week",
+    w_next: "Next week",
+    w_baby: "The baby",
+    w_you: "Your body",
+    w_tip: "Tip",
+    w_current: "This week",
+    w_nodate: "Add a due date to jump to your current week.",
+    w_loading: "Loading…",
+    w_error: "The weekly notes couldn't load. Check your connection and try again.",
+    w_retry: "Try again",
+    w_note: "General information. Every pregnancy is different, so ask your clinician about anything that worries you.",
+    w_after40: "After 40 weeks, your clinician will talk with you about what happens next.",
+    a_intro: "Typical items. Your clinician's schedule may differ.",
+    a_who: "The World Health Organization recommends at least 8 contacts with a health worker during pregnancy.",
+    a_t1: "First trimester (up to 13 weeks 6 days)",
+    a_t2: "Second trimester (14 to 27 weeks)",
+    a_t3: "Third trimester (28 weeks onwards)",
+    a_now: "Now",
+    ap_a1: "First appointment with a doctor, midwife or clinic, ideally in the first 10 to 12 weeks",
+    ap_a2: "Health history, blood pressure, weight and a urine test",
+    ap_a3: "Blood tests, such as blood group, a check for anaemia, and checks for infections like HIV, hepatitis B and syphilis",
+    ap_a4: "Dating ultrasound scan, often in the first trimester",
+    ap_a5: "Information about optional screening for some genetic conditions",
+    ap_a6: "Review of medicines, supplements such as folic acid, and vaccines such as flu",
+    ap_b1: "Regular check-ups: blood pressure, urine and the baby's heartbeat",
+    ap_b2: "Detailed ultrasound scan, often between about 18 and 22 weeks",
+    ap_b3: "Test for gestational diabetes if offered, often between 24 and 28 weeks",
+    ap_b4: "Whooping cough (pertussis) vaccine; the timing differs by country",
+    ap_b5: "Measuring your bump to check the baby's growth",
+    ap_b6: "A chance to talk about how you're feeling and any worries",
+    ap_c1: "More frequent check-ups, often every 2 weeks and then weekly near the end",
+    ap_c2: "Blood tests for anaemia, and anti-D if your blood group is rhesus negative",
+    ap_c3: "Ask which other vaccines are recommended where you live, such as RSV",
+    ap_c4: "Group B strep test in some countries, around 36 to 37 weeks",
+    ap_c5: "Check of the baby's position, around 36 weeks",
+    ap_c6: "Birth plan: where, who with, how you'll get there, and when to call",
+    ap_c7: "If you pass 41 weeks, a talk with your clinician about next steps",
+    ap_c8: "Plans for after the birth: feeding, support and your postnatal check",
+    mv_intro: "Some clinicians ask you to count movements; others suggest getting to know your baby's usual pattern. Use this log only if it helps. It doesn't judge or check the numbers.",
+    mv_safety: "If your baby's movements slow down, stop or change, contact your maternity unit or clinician right away. Don't wait until the next day.",
+    mv_tap: "Movement felt",
+    mv_tap_h: "Tap each time you feel a movement.",
+    mv_session: "Current session",
+    mv_started: "Started {time}",
+    mv_n_one: "{n} movement",
+    mv_n_other: "{n} movements",
+    mv_last: "Last at {time}",
+    mv_undo: "Undo last",
+    mv_finish: "Finish session",
+    mv_idle: "Tap the button to start a session.",
+    mv_history: "History",
+    mv_empty: "No sessions yet.",
+    mv_del: "Delete this session",
+    mv_del_q: "Delete this session from the log?",
+    mv_clear: "Clear movement log",
+    mv_clear_q: "Delete all movement sessions from this device?",
+    ct_intro: "Tap when a contraction starts and again when it ends. The timer shows how long each one lasts and how far apart they start. It doesn't tell you what the pattern means.",
+    ct_safety: "If you're unsure, call your maternity unit.",
+    ct_call: "Call your maternity unit straight away if your waters break, you're bleeding, the baby is moving less, you're less than 37 weeks, or you're worried.",
+    ct_start: "Contraction started",
+    ct_stop: "Contraction ended",
+    ct_start_h: "Tap when a contraction begins.",
+    ct_stop_h: "Tap when it ends.",
+    ct_last_hour: "Last hour",
+    ct_n_one: "{n} contraction",
+    ct_n_other: "{n} contractions",
+    ct_avg_len: "Average length",
+    ct_avg_gap: "Average time apart",
+    ct_hist: "History",
+    ct_col_start: "Started",
+    ct_col_len: "Length",
+    ct_col_gap: "Apart",
+    ct_empty: "No contractions timed yet.",
+    ct_undo: "Undo last",
+    ct_clear: "Clear contraction history",
+    ct_clear_q: "Delete all timed contractions from this device?",
+    ct_note: "What your maternity team told you about when to call",
+    ct_note_ph: "For example, their instructions and phone number",
+    ct_note_h: "Saved only on this device.",
+    h_lead: "Get urgent medical help straight away if you have any of these:",
+    rf_pain: "Severe pain in your lower tummy, especially on one side",
+    rf_shoulder: "Pain in the tip of your shoulder",
+    rf_bleed: "Heavy bleeding from your vagina",
+    rf_faint: "Fainting, or feeling very dizzy or faint",
+    rf_head: "A severe headache that won't go away, or changes in your vision, especially later in pregnancy",
+    rf_swell: "Sudden swelling of your face, hands or feet",
+    rf_fluid: "Fluid leaking from your vagina",
+    rf_moves: "Your baby moving less than usual, or a change in their pattern of movements",
+    rf_chest: "Chest pain, a racing heartbeat, or trouble breathing",
+    rf_fever: "A high temperature, or being sick so often you can't keep fluids down",
+    rf_harm: "Thoughts of harming yourself or your baby",
+    h_other: "For other worries, call your maternity unit, your clinician or a local health advice line. If you're not sure whether it's urgent, call anyway, and trust your instincts.",
+    h_contact: "My maternity unit or clinician",
+    h_contact_h: "Save a name and number so you can call from here. Saved only on this device.",
+    h_name: "Name",
+    h_phone: "Phone number",
+    h_call_btn: "Call {name}",
+    h_call_default: "my maternity unit",
+    dt_where: "Everything you enter here is kept only on this device, in this browser's local database. It isn't included in Mentria backups or device sync, and it's never sent anywhere.",
+    dt_evict: "Browsers can sometimes clear stored data, for example when space runs low. Export a copy if you want to keep it.",
+    dt_export: "Export my data",
+    dt_export_h: "Downloads a JSON file with your answers, dates, checklists and logs.",
+    dt_exported: "Your data file is downloading.",
+    dt_delete: "Delete all my data",
+    dt_delete_q: "Delete everything this extension has saved on this device? This removes your answers, dates, checklists and logs, and can't be undone.",
+    dt_delete_ok: "Delete everything",
+    dt_deleted: "All data deleted.",
+    dt_persist: "Ask this browser to keep my data",
+    dt_persist_yes: "This browser has agreed to keep your data unless you delete it.",
+    dt_persist_no: "This browser didn't agree. Export a copy from time to time to be safe.",
+    dt_persist_na: "This browser can't make that promise. Export a copy from time to time to be safe.",
+    ab_what: "This extension gives general information, simple date calculations and private logs. It doesn't detect, diagnose or monitor pregnancy, and it isn't a medical device.",
+    ab_how: "How the dates are worked out",
+    f_test: "Test date: the day your next period is due (first day of your last period + cycle length). If your periods are irregular or you don't know when they're due: 21 days after you last had sex without contraception.",
+    f_fertile: "Fertile window: ovulation is estimated at 14 days before the next period. The window is the 5 days before that day plus the day itself.",
+    f_lmp: "Due date from your last period: first day of last period + 280 days + (cycle length − 28) days.",
+    f_conc: "Due date from conception: conception date + 266 days.",
+    f_ivf: "Due date from an IVF transfer: transfer date + 263 days for a day-3 embryo, or + 261 days for a day-5 embryo.",
+    f_clin: "A due date from your clinician always replaces the calculated one.",
+    f_tri: "Trimesters: the first runs to 13 weeks 6 days, the second from 14 weeks to 27 weeks 6 days, and the third from 28 weeks.",
+    ab_src: "Sources",
+    ab_src_h: "The facts here are based on these public sources. The wording is our own; nothing is fetched from them.",
+    src_medline: "MedlinePlus (US National Library of Medicine)",
+    src_cdc: "CDC (US Centers for Disease Control and Prevention)",
+    src_who: "World Health Organization",
+    src_nhs: "NHS (UK National Health Service), for facts only",
+    src_acog: "ACOG patient FAQs (American College of Obstetricians and Gynecologists)",
+    src_owh: "US Office on Women's Health",
+    ab_privacy: "No ads, no tracking, no AI, and nothing you enter leaves this device.",
+    ab_version: "Version {v}"
+  };
+  STR.es = {
+    app_title: "Embarazo: comprobar y planificar",
+    app_sub: "Información serena y privada sobre pruebas, planificación y embarazo. Todo se queda en este dispositivo.",
+    back: "Atrás",
+    help_btn: "Obtener ayuda ahora",
+    help_short: "Ayuda",
+    disclaimer: "Solo información, no es consejo médico. Sigue siempre las indicaciones de tu profesional de la salud.",
+    next: "Siguiente",
+    prev: "Atrás",
+    see_results: "Ver qué significa",
+    unsure: "No lo tengo claro",
+    dont_know: "No lo sé",
+    cancel: "Cancelar",
+    del: "Eliminar",
+    less: "Menos días",
+    more: "Más días",
+    no_db: "Aquí no se puede guardar, así que lo que introduzcas se perderá al cerrar esta página.",
+    save_fail: "No se ha podido guardar en este dispositivo.",
+    dy_one: "{n} día",
+    dy_other: "{n} días",
+    wk_one: "{n} semana",
+    wk_other: "{n} semanas",
+    ga: "{w} y {d}",
+    min: "{n} min",
+    err_future: "Esta fecha está en el futuro.",
+    err_old: "Elige una fecha dentro del último año.",
+    err_date: "Introduce una fecha completa o elige «No lo tengo claro».",
+    err_cycle: "Introduce un número de días entre 20 y 45.",
+    err_before: "Esta fecha es anterior al inicio de tu última regla.",
+    nav_check: "¿Podría haber un embarazo?",
+    nav_check_d: "Unas preguntas y, después, cuándo es fiable una prueba casera y qué hacer.",
+    nav_plan: "Planificar un embarazo",
+    nav_plan_d: "Una estimación de tus días fértiles y una lista para antes de intentarlo.",
+    nav_preg: "Mi embarazo",
+    nav_preg_d: "Fecha probable de parto, semana a semana, citas, movimientos y contracciones.",
+    nav_help: "Obtener ayuda ahora",
+    nav_help_d: "Señales de alarma que necesitan atención urgente y a quién llamar.",
+    nav_data: "Tus datos",
+    nav_data_d: "Solo en este dispositivo. Expórtalos o bórralos.",
+    nav_about: "Acerca de",
+    nav_about_d: "Cómo se calculan las fechas y en qué fuentes se basa.",
+    q_of: "Pregunta {i} de {n}",
+    q_lmp: "¿Cuándo empezó tu última regla?",
+    q_lmp_h: "Elige el primer día de sangrado. No pasa nada si no lo recuerdas.",
+    q_lmp_lbl: "Primer día de tu última regla",
+    q_cycle: "¿Cuánto dura tu ciclo habitual?",
+    q_cycle_h: "Cuenta desde el primer día de una regla hasta el primer día de la siguiente. En muchas personas el ciclo dura entre 21 y 35 días.",
+    q_cycle_lbl: "Duración habitual del ciclo en días",
+    q_reg: "¿Te suele venir la regla cuando la esperas?",
+    q_reg_h: "La regla puede ser irregular durante un tiempo después de dejar un anticonceptivo hormonal, tras un embarazo o durante la lactancia.",
+    reg_yes: "Sí, normalmente con pocos días de diferencia",
+    reg_no: "No, varía más de una semana aproximadamente",
+    q_sex: "Desde tu última regla, ¿has tenido relaciones sexuales sin anticonceptivo o algún problema con el anticonceptivo?",
+    sex_yes: "Sí, relaciones sin anticonceptivo",
+    sex_problem: "Sí, un problema con el anticonceptivo, como olvidar una píldora o que se rompa el preservativo",
+    sex_no: "No",
+    q_sexdate: "¿Cuándo fue la última vez?",
+    q_sexdate_h: "Si ocurrió más de una vez, elige la fecha más reciente.",
+    q_sexdate_lbl: "Fecha",
+    q_sym: "¿Has notado alguno de estos cambios últimamente?",
+    q_sym_h: "Elige todos los que correspondan.",
+    sym_late: "La regla se me ha retrasado o no me ha venido",
+    sym_sick: "Náuseas o vómitos",
+    sym_breasts: "Pechos sensibles o doloridos",
+    sym_tired: "Mucho cansancio",
+    sym_pee: "Necesidad de orinar más a menudo",
+    sym_spot: "Manchado o sangrado leve",
+    sym_none: "Ninguno de estos",
+    q_test: "¿Te has hecho una prueba de embarazo casera?",
+    test_no: "No, todavía no",
+    test_pos: "Sí, salió positiva",
+    test_neg: "Sí, salió negativa",
+    test_unclear: "Sí, pero no lo tengo claro o la línea era muy tenue",
+    q_testdate: "¿Cuándo te hiciste la prueba?",
+    q_testdate_lbl: "Fecha de la prueba",
+    need_answer: "Elige una respuesta para continuar.",
+    r_confirm: "Las respuestas a unas preguntas no pueden confirmar ni descartar un embarazo. Solo una prueba de embarazo, y un profesional de la salud, pueden hacerlo.",
+    r_when: "Cuándo es fiable una prueba casera",
+    r_from: "Desde: {date}",
+    r_basis_period: "Es el día en que te toca la próxima regla: el primer día de tu última regla más {days}. La mayoría de las pruebas caseras son fiables desde el primer día de la falta.",
+    r_basis_sex: "Son 21 días después de la última vez que tuviste relaciones sin anticonceptivo. Si tus reglas son irregulares o no sabes cuándo te toca, una prueba es fiable a partir de los 21 días.",
+    r_basis_none: "La mayoría de las pruebas caseras son fiables desde el primer día de la falta de la regla. Si no sabes cuándo te toca, hazla al menos 21 días después de la última vez que tuviste relaciones sin anticonceptivo.",
+    r_passed: "Esa fecha ya ha pasado, así que una prueba ahora debería dar un resultado fiable.",
+    r_today: "Es hoy.",
+    r_future: "Faltan {days}.",
+    r_early: "Algunas pruebas dicen funcionar unos días antes, pero hacerla pronto puede no detectar un embarazo, porque la hormona que buscan (hCG) aumenta con el tiempo.",
+    r_also21: "Una prueba hecha a partir de {date}, 21 días después de la última vez que tuviste relaciones sin anticonceptivo, es fiable sea cual sea tu ciclo. Si una prueba anterior es negativa y la regla sigue sin venir, repítela entonces.",
+    r_meaning: "Sobre tus respuestas",
+    m_due_passed: "Según tus respuestas, la regla te tocaba hacia {date}.",
+    m_due_future: "Según tus respuestas, la próxima regla te toca hacia {date}.",
+    m_late_sex: "Un retraso o falta de la regla después de tener relaciones sin anticonceptivo es el primer signo de embarazo más frecuente. La regla también puede retrasarse por otros motivos, como estrés, enfermedad, cambios de peso, ejercicio intenso, lactancia o algunos anticonceptivos.",
+    m_late: "Un retraso o falta de la regla es un signo temprano frecuente de embarazo, pero la regla también puede retrasarse por otros motivos, como estrés, enfermedad, cambios de peso, ejercicio intenso, lactancia o algunos anticonceptivos.",
+    m_sym: "Los cambios que has notado pueden ser signos tempranos de embarazo, pero también son frecuentes antes de la regla, así que por sí solos no pueden confirmar ni descartar un embarazo.",
+    m_spot: "Un manchado leve puede ocurrir al principio del embarazo, hacia la fecha en que tocaría la regla, y también tiene muchas otras causas. Un sangrado acompañado de dolor en la parte baja del vientre, dolor en la punta del hombro o sensación de desmayo necesita atención urgente.",
+    m_none: "Muchas personas no tienen síntomas al principio, así que no tenerlos no descarta un embarazo.",
+    m_ec: "La anticoncepción de emergencia puede usarse hasta 5 días después de unas relaciones sin anticonceptivo y funciona mejor cuanto antes se use. Si es tu caso, consulta hoy en una farmacia, con un médico o en un centro de salud sexual.",
+    m_problem: "En una farmacia, con un médico o en un centro de salud sexual pueden explicarte qué supone para ti un problema con el anticonceptivo.",
+    m_nosex: "Ningún anticonceptivo funciona a la perfección siempre. Si la regla se retrasa o te preocupa, una prueba es la forma de saberlo.",
+    m_unsure_sex: "Si no lo tienes claro, una prueba a partir de la fecha indicada arriba puede ayudarte a saberlo.",
+    t_pos: "Un resultado positivo en una prueba casera rara vez es erróneo, aunque algunas cosas pueden darlo sin un embarazo en curso, como ciertos medicamentos para la fertilidad o un embarazo muy reciente. Acude pronto a un profesional de la salud: puede confirmar el resultado y explicarte tus opciones y los cuidados.",
+    t_neg: "Un resultado negativo es menos seguro que uno positivo, sobre todo si la prueba se hizo pronto. Si la regla sigue sin venir, repite la prueba en unos días. Si una segunda prueba es negativa y sigue sin venir la regla, consulta a un profesional de la salud.",
+    t_neg_early: "Te hiciste la prueba antes de {date}, así que quizá fue demasiado pronto para mostrar un resultado.",
+    t_unclear: "Los resultados tenues o poco claros son difíciles de leer, incluso para personas con experiencia. Repite la prueba en un par de días con una prueba nueva y léela solo dentro del tiempo que indica el prospecto. Un profesional de la salud también puede hacerte una prueba.",
+    r_next: "Qué hacer ahora",
+    n_test: "Hazte una prueba a partir de la fecha indicada arriba. La primera orina de la mañana es la mejor. Sigue las instrucciones y los tiempos del prospecto.",
+    n_test_nodate: "Hazte una prueba a partir del primer día de la falta de la regla, o 21 días después de unas relaciones sin anticonceptivo. La primera orina de la mañana es la mejor.",
+    n_repeat: "Si sale negativa y la regla sigue sin venir, repítela en unos días.",
+    n_clin: "Si sale positiva, o si sigues obteniendo negativos sin que venga la regla, acude a un profesional de la salud o a un centro de salud.",
+    n_care: "Mientras no lo sepas, plantéate evitar el alcohol y el tabaco, y consulta en la farmacia cualquier medicamento.",
+    n_talk: "Sea cual sea el resultado, puedes hablar de forma confidencial con un profesional de la salud o un servicio de salud sexual sobre cómo te sientes y qué quieres hacer.",
+    r_urgent: "Busca ayuda urgente si tienes",
+    r_call: "Llama ahora a tu número local de emergencias (por ejemplo, 112, 911, 999, 108, 119 o 192).",
+    r_change: "Cambiar mis respuestas",
+    r_restart: "Empezar de nuevo",
+    r_saved: "Tus respuestas solo se guardan en este dispositivo.",
+    p_intro: "Introduce el primer día de tu última regla y la duración habitual de tu ciclo para ver una estimación de tus días fértiles.",
+    p_lmp: "Primer día de tu última regla",
+    p_cycle: "Duración habitual del ciclo (días)",
+    p_estimate: "Solo es una estimación. Los ciclos varían y la ovulación puede producirse antes o después de lo esperado. No es un método anticonceptivo: no lo uses para evitar un embarazo.",
+    p_window: "Próxima ventana fértil (estimación)",
+    p_window_now: "Puede que estés en tu ventana fértil ahora (estimación)",
+    p_range: "Del {a} al {b}",
+    p_ov: "Ovulación estimada: hacia {date}",
+    p_next: "Próxima regla: hacia {date}",
+    p_empty: "Introduce el primer día de tu última regla para ver el calendario.",
+    p_old: "Tu próxima regla tocaba hacia {date}. Si ya te ha venido, introduce la nueva fecha para obtener una mejor estimación. Si no, una prueba de embarazo puede darte más información.",
+    p_how: "La ovulación suele producirse unos 14 días antes de la siguiente regla. Los espermatozoides pueden sobrevivir hasta unos 5 días, así que la ventana fértil son los 5 días anteriores a la ovulación más el día de la ovulación.",
+    p_tip_sex: "Tener relaciones cada 2 o 3 días a lo largo del ciclo cubre la ventana fértil sin necesidad de calcularla con exactitud.",
+    p_tip_irreg: "Si tus ciclos suelen durar menos de 21 días o más de 35, o varían mucho, estas estimaciones son menos fiables y conviene hablarlo con un profesional de la salud.",
+    p_tip_time: "Si llevas un año intentándolo sin embarazo, o 6 meses si tienes 35 años o más, habla con un profesional de la salud.",
+    cal_prev: "Mes anterior",
+    cal_next: "Mes siguiente",
+    lg_period: "Inicio de la regla",
+    lg_fertile: "Ventana fértil (estimación)",
+    lg_ov: "Ovulación estimada",
+    lg_today: "Hoy",
+    p_check: "Antes de intentarlo: una lista",
+    p_check_h: "Marca lo que vayas haciendo. Tus marcas solo se guardan en este dispositivo.",
+    pc_folic: "Toma 400 microgramos de ácido fólico al día, desde al menos un mes antes de intentarlo hasta la semana 12 de embarazo. Algunas personas necesitan una dosis mayor; consulta a un profesional de la salud.",
+    pc_meds: "Revisa con un profesional de la salud tus medicamentos (también los que no necesitan receta y los de plantas) y cualquier enfermedad crónica, como diabetes, epilepsia o hipertensión. No dejes un medicamento recetado sin consultarlo.",
+    pc_vacc: "Comprueba tus vacunas, sobre todo la de la rubéola y la de la varicela. Algunas vacunas deben ponerse al menos un mes antes del embarazo.",
+    pc_smoke: "Deja de fumar y evita el humo de otras personas.",
+    pc_alcohol: "Deja de beber alcohol. No se conoce ninguna cantidad segura durante el embarazo.",
+    pc_drugs: "Deja de consumir drogas y pide apoyo si lo necesitas.",
+    pc_weight: "Come variado, haz actividad física y procura mantener un peso saludable.",
+    pc_chem: "Evita los productos químicos nocivos en casa y en el trabajo, y no manipules la arena de gatos ni excrementos de roedores.",
+    pc_history: "Habla con un profesional de la salud sobre tus antecedentes familiares y cualquier embarazo anterior.",
+    pc_mind: "Cuida tu salud mental. Si estás con el ánimo bajo o con ansiedad, o no te sientes a salvo en casa, puedes hablar con un profesional de la salud de forma confidencial.",
+    tab_due: "Fecha de parto",
+    tab_week: "Semana a semana",
+    tab_appts: "Citas",
+    tab_moves: "Movimientos",
+    tab_contr: "Contracciones",
+    d_method: "Calcular la fecha probable de parto a partir de",
+    dm_lmp: "Mi última regla",
+    dm_conc: "Fecha de concepción",
+    dm_ivf: "Transferencia de FIV",
+    d_lmp: "Primer día de tu última regla",
+    d_cycle: "Duración habitual del ciclo (días)",
+    d_conc: "Fecha de concepción",
+    d_ivf: "Fecha de la transferencia embrionaria",
+    d_ivfday: "Edad del embrión al transferirlo",
+    d_day3: "Día 3",
+    d_day5: "Día 5 (blastocisto)",
+    d_clin: "Fecha de parto indicada por mi profesional de la salud",
+    d_clin_h: "Si un profesional de la salud te ha dado una fecha probable de parto, por ejemplo tras una ecografía temprana, introdúcela aquí. Sustituye a la fecha calculada.",
+    d_clin_clear: "Quitar la fecha del profesional",
+    d_result: "Fecha probable de parto",
+    d_from_clin: "Según la fecha de tu profesional",
+    f_lmp_n: "Primer día de la última regla + 280 días + ({c} − 28) días",
+    f_conc_n: "Fecha de concepción + 266 días",
+    f_ivf3_n: "Fecha de transferencia + 263 días (embrión de día 3)",
+    f_ivf5_n: "Fecha de transferencia + 261 días (embrión de día 5)",
+    d_ga: "Tiempo de embarazo",
+    d_tri: "Trimestre",
+    tri_1: "Primer trimestre",
+    tri_2: "Segundo trimestre",
+    tri_3: "Tercer trimestre",
+    d_togo: "Días que faltan",
+    d_due_today: "La fecha probable de parto es hoy",
+    d_past: "{days} después de la fecha probable de parto",
+    d_range: "La mayoría de los bebés nacen entre las semanas 37 y 42. Solo unos pocos llegan justo en la fecha probable de parto.",
+    d_err_far: "Esto supone más de 44 semanas. Revisa la fecha.",
+    d_err_ahead: "Esto da una fecha de parto a más de 40 semanas. Revisa la fecha.",
+    d_empty: "Introduce una fecha para ver tu fecha probable de parto.",
+    d_clear: "Borrar mis fechas",
+    d_clear_h: "Puedes borrar estas fechas en cualquier momento.",
+    d_clear_q: "¿Borrar las fechas de esta sección? Tus registros y listas se mantienen hasta que los borres en Tus datos.",
+    d_clear_ok: "Borrar fechas",
+    d_cleared: "Fechas borradas.",
+    w_title: "Semana {n}",
+    w_prev: "Semana anterior",
+    w_next: "Semana siguiente",
+    w_baby: "El bebé",
+    w_you: "Tu cuerpo",
+    w_tip: "Consejo",
+    w_current: "Esta semana",
+    w_nodate: "Añade una fecha de parto para ir directamente a tu semana actual.",
+    w_loading: "Cargando…",
+    w_error: "No se han podido cargar las notas semanales. Comprueba tu conexión e inténtalo de nuevo.",
+    w_retry: "Reintentar",
+    w_note: "Información general. Cada embarazo es diferente: consulta a tu profesional de la salud cualquier cosa que te preocupe.",
+    w_after40: "Pasadas las 40 semanas, tu profesional de la salud hablará contigo sobre los siguientes pasos.",
+    a_intro: "Elementos habituales. El calendario de tu profesional de la salud puede ser distinto.",
+    a_who: "La Organización Mundial de la Salud recomienda al menos 8 contactos con personal sanitario durante el embarazo.",
+    a_t1: "Primer trimestre (hasta las 13 semanas y 6 días)",
+    a_t2: "Segundo trimestre (de la semana 14 a la 27)",
+    a_t3: "Tercer trimestre (desde la semana 28)",
+    a_now: "Ahora",
+    ap_a1: "Primera cita con un profesional de la salud o un centro de salud, idealmente en las primeras 10 a 12 semanas",
+    ap_a2: "Historia clínica, tensión arterial, peso y análisis de orina",
+    ap_a3: "Análisis de sangre, como grupo sanguíneo, detección de anemia y de infecciones como VIH, hepatitis B y sífilis",
+    ap_a4: "Ecografía para datar el embarazo, a menudo en el primer trimestre",
+    ap_a5: "Información sobre pruebas opcionales de cribado de algunas enfermedades genéticas",
+    ap_a6: "Revisión de medicamentos, suplementos como el ácido fólico y vacunas como la de la gripe",
+    ap_b1: "Controles periódicos: tensión arterial, orina y latido del bebé",
+    ap_b2: "Ecografía detallada, a menudo entre las semanas 18 y 22",
+    ap_b3: "Prueba de diabetes gestacional si te la ofrecen, a menudo entre las semanas 24 y 28",
+    ap_b4: "Vacuna contra la tos ferina; el momento varía según el país",
+    ap_b5: "Medición de la barriga para comprobar el crecimiento del bebé",
+    ap_b6: "Un momento para hablar de cómo te sientes y de lo que te preocupa",
+    ap_c1: "Controles más frecuentes, a menudo cada 2 semanas y luego semanales al final",
+    ap_c2: "Análisis de sangre para detectar anemia, y anti-D si tu grupo sanguíneo es Rh negativo",
+    ap_c3: "Pregunta qué otras vacunas se recomiendan donde vives, como la del VRS",
+    ap_c4: "Prueba del estreptococo del grupo B en algunos países, hacia las semanas 36 a 37",
+    ap_c5: "Comprobación de la posición del bebé, hacia la semana 36",
+    ap_c6: "Plan de parto: dónde, con quién, cómo llegarás y cuándo llamar",
+    ap_c7: "Si pasas de la semana 41, una conversación con tu profesional sobre los siguientes pasos",
+    ap_c8: "Planes para después del parto: alimentación, apoyo y tu revisión posparto",
+    mv_intro: "Algunos profesionales piden contar los movimientos; otros recomiendan conocer el patrón habitual de tu bebé. Usa este registro solo si te ayuda. No juzga ni revisa las cifras.",
+    mv_safety: "Si los movimientos de tu bebé disminuyen, se detienen o cambian, contacta enseguida con tu servicio de maternidad o tu profesional de la salud. No esperes al día siguiente.",
+    mv_tap: "He notado un movimiento",
+    mv_tap_h: "Toca cada vez que notes un movimiento.",
+    mv_session: "Sesión actual",
+    mv_started: "Empezó a las {time}",
+    mv_n_one: "{n} movimiento",
+    mv_n_other: "{n} movimientos",
+    mv_last: "Último a las {time}",
+    mv_undo: "Deshacer el último",
+    mv_finish: "Terminar sesión",
+    mv_idle: "Toca el botón para empezar una sesión.",
+    mv_history: "Historial",
+    mv_empty: "Aún no hay sesiones.",
+    mv_del: "Eliminar esta sesión",
+    mv_del_q: "¿Eliminar esta sesión del registro?",
+    mv_clear: "Borrar el registro de movimientos",
+    mv_clear_q: "¿Eliminar todas las sesiones de movimientos de este dispositivo?",
+    ct_intro: "Toca cuando empiece una contracción y otra vez cuando termine. El cronómetro muestra cuánto dura cada una y cuánto tiempo pasa entre el inicio de una y la siguiente. No te dice qué significa el patrón.",
+    ct_safety: "Si tienes dudas, llama a tu servicio de maternidad.",
+    ct_call: "Llama enseguida a tu servicio de maternidad si rompes aguas, tienes sangrado, el bebé se mueve menos, estás de menos de 37 semanas o algo te preocupa.",
+    ct_start: "Ha empezado una contracción",
+    ct_stop: "Ha terminado la contracción",
+    ct_start_h: "Toca cuando empiece una contracción.",
+    ct_stop_h: "Toca cuando termine.",
+    ct_last_hour: "Última hora",
+    ct_n_one: "{n} contracción",
+    ct_n_other: "{n} contracciones",
+    ct_avg_len: "Duración media",
+    ct_avg_gap: "Intervalo medio",
+    ct_hist: "Historial",
+    ct_col_start: "Inicio",
+    ct_col_len: "Duración",
+    ct_col_gap: "Intervalo",
+    ct_empty: "Aún no has cronometrado ninguna contracción.",
+    ct_undo: "Deshacer la última",
+    ct_clear: "Borrar el historial de contracciones",
+    ct_clear_q: "¿Eliminar todas las contracciones cronometradas de este dispositivo?",
+    ct_note: "Lo que te dijo tu equipo de maternidad sobre cuándo llamar",
+    ct_note_ph: "Por ejemplo, sus indicaciones y su teléfono",
+    ct_note_h: "Solo se guarda en este dispositivo.",
+    h_lead: "Busca ayuda médica urgente enseguida si tienes alguno de estos signos:",
+    rf_pain: "Dolor intenso en la parte baja del vientre, sobre todo en un lado",
+    rf_shoulder: "Dolor en la punta del hombro",
+    rf_bleed: "Sangrado vaginal abundante",
+    rf_faint: "Desmayo, o mucho mareo o sensación de desmayo",
+    rf_head: "Dolor de cabeza intenso que no se va, o cambios en la vista, sobre todo al final del embarazo",
+    rf_swell: "Hinchazón repentina de la cara, las manos o los pies",
+    rf_fluid: "Pérdida de líquido por la vagina",
+    rf_moves: "Tu bebé se mueve menos de lo habitual, o cambia su patrón de movimientos",
+    rf_chest: "Dolor en el pecho, latidos muy rápidos o dificultad para respirar",
+    rf_fever: "Fiebre alta, o vómitos tan frecuentes que no puedes retener líquidos",
+    rf_harm: "Pensamientos de hacerte daño o de hacer daño a tu bebé",
+    h_other: "Para otras preocupaciones, llama a tu servicio de maternidad, a tu profesional de la salud o a una línea local de consejo sanitario. Si no sabes si es urgente, llama de todos modos y confía en tu intuición.",
+    h_contact: "Mi servicio de maternidad o profesional de la salud",
+    h_contact_h: "Guarda un nombre y un número para llamar desde aquí. Solo se guarda en este dispositivo.",
+    h_name: "Nombre",
+    h_phone: "Número de teléfono",
+    h_call_btn: "Llamar a {name}",
+    h_call_default: "mi servicio de maternidad",
+    dt_where: "Todo lo que introduces aquí se guarda solo en este dispositivo, en la base de datos local de este navegador. No se incluye en las copias de seguridad de Mentria ni en la sincronización entre dispositivos, y nunca se envía a ningún sitio.",
+    dt_evict: "A veces los navegadores borran datos guardados, por ejemplo cuando falta espacio. Exporta una copia si quieres conservarlos.",
+    dt_export: "Exportar mis datos",
+    dt_export_h: "Descarga un archivo JSON con tus respuestas, fechas, listas y registros.",
+    dt_exported: "Se está descargando tu archivo de datos.",
+    dt_delete: "Borrar todos mis datos",
+    dt_delete_q: "¿Borrar todo lo que esta extensión ha guardado en este dispositivo? Se eliminarán tus respuestas, fechas, listas y registros, y no se puede deshacer.",
+    dt_delete_ok: "Borrar todo",
+    dt_deleted: "Se han borrado todos los datos.",
+    dt_persist: "Pedir a este navegador que conserve mis datos",
+    dt_persist_yes: "Este navegador ha aceptado conservar tus datos a menos que los borres.",
+    dt_persist_no: "Este navegador no lo ha aceptado. Exporta una copia de vez en cuando por si acaso.",
+    dt_persist_na: "Este navegador no puede garantizarlo. Exporta una copia de vez en cuando por si acaso.",
+    ab_what: "Esta extensión ofrece información general, cálculos sencillos de fechas y registros privados. No detecta, diagnostica ni vigila un embarazo, y no es un producto sanitario.",
+    ab_how: "Cómo se calculan las fechas",
+    f_test: "Fecha de la prueba: el día en que te toca la próxima regla (primer día de la última regla + duración del ciclo). Si tus reglas son irregulares o no sabes cuándo te tocan: 21 días después de la última vez que tuviste relaciones sin anticonceptivo.",
+    f_fertile: "Ventana fértil: la ovulación se estima 14 días antes de la siguiente regla. La ventana son los 5 días anteriores a ese día más el propio día.",
+    f_lmp: "Fecha de parto según la última regla: primer día de la última regla + 280 días + (duración del ciclo − 28) días.",
+    f_conc: "Fecha de parto según la concepción: fecha de concepción + 266 días.",
+    f_ivf: "Fecha de parto según una transferencia de FIV: fecha de transferencia + 263 días para un embrión de día 3, o + 261 días para uno de día 5.",
+    f_clin: "Una fecha de parto dada por tu profesional de la salud siempre sustituye a la calculada.",
+    f_tri: "Trimestres: el primero llega hasta las 13 semanas y 6 días, el segundo va de la semana 14 a las 27 semanas y 6 días, y el tercero empieza en la semana 28.",
+    ab_src: "Fuentes",
+    ab_src_h: "Los datos se basan en estas fuentes públicas. La redacción es propia y no se descarga nada de ellas.",
+    src_medline: "MedlinePlus (Biblioteca Nacional de Medicina de EE. UU.)",
+    src_cdc: "CDC (Centros para el Control y la Prevención de Enfermedades de EE. UU.)",
+    src_who: "Organización Mundial de la Salud",
+    src_nhs: "NHS (Servicio Nacional de Salud del Reino Unido), solo para datos",
+    src_acog: "Preguntas frecuentes para pacientes del ACOG (Colegio Estadounidense de Obstetras y Ginecólogos)",
+    src_owh: "Oficina de Salud de la Mujer de EE. UU.",
+    ab_privacy: "Sin anuncios, sin seguimiento, sin IA, y nada de lo que introduces sale de este dispositivo.",
+    ab_version: "Versión {v}"
+  };
+  STR.fr = {
+    app_title: "Grossesse : test et planification",
+    app_sub: "Des informations claires et privées sur les tests, le projet de grossesse et la grossesse. Tout reste sur cet appareil.",
+    back: "Retour",
+    help_btn: "Obtenir de l'aide maintenant",
+    help_short: "Urgence",
+    disclaimer: "Information uniquement, pas un avis médical. Suivez toujours les conseils de votre professionnel de santé.",
+    next: "Suivant",
+    prev: "Retour",
+    see_results: "Voir ce que cela signifie",
+    unsure: "Je ne sais pas exactement",
+    dont_know: "Je ne sais pas",
+    cancel: "Annuler",
+    del: "Supprimer",
+    less: "Moins de jours",
+    more: "Plus de jours",
+    no_db: "L'enregistrement n'est pas disponible ici : ce que vous saisissez sera perdu à la fermeture de cette page.",
+    save_fail: "Impossible d'enregistrer sur cet appareil.",
+    dy_one: "{n} jour",
+    dy_other: "{n} jours",
+    wk_one: "{n} semaine",
+    wk_other: "{n} semaines",
+    ga: "{wn} SA + {dn} j",
+    min: "{n} min",
+    err_future: "Cette date est dans le futur.",
+    err_old: "Choisissez une date au cours de la dernière année.",
+    err_date: "Saisissez une date complète ou choisissez « Je ne sais pas exactement ».",
+    err_cycle: "Saisissez un nombre de jours entre 20 et 45.",
+    err_before: "Cette date est antérieure au début de vos dernières règles.",
+    nav_check: "Pourrais-je être enceinte ?",
+    nav_check_d: "Quelques questions, puis le moment où un test urinaire est fiable et quoi faire ensuite.",
+    nav_plan: "Préparer une grossesse",
+    nav_plan_d: "Une estimation de vos jours fertiles et une liste pour avant d'essayer.",
+    nav_preg: "Ma grossesse",
+    nav_preg_d: "Date prévue d'accouchement, semaine par semaine, rendez-vous, mouvements et contractions.",
+    nav_help: "Obtenir de l'aide maintenant",
+    nav_help_d: "Les signes d'alerte qui demandent des soins urgents, et qui appeler.",
+    nav_data: "Vos données",
+    nav_data_d: "Conservées uniquement sur cet appareil. Exportez-les ou supprimez-les.",
+    nav_about: "À propos",
+    nav_about_d: "Comment les dates sont calculées, et les sources utilisées.",
+    q_of: "Question {i} sur {n}",
+    q_lmp: "Quand vos dernières règles ont-elles commencé ?",
+    q_lmp_h: "Choisissez le premier jour des saignements. Ce n'est pas grave si vous ne vous en souvenez pas.",
+    q_lmp_lbl: "Premier jour de vos dernières règles",
+    q_cycle: "Quelle est la durée habituelle de votre cycle ?",
+    q_cycle_h: "Comptez du premier jour de vos règles au premier jour des règles suivantes. Chez beaucoup de personnes, le cycle dure entre 21 et 35 jours.",
+    q_cycle_lbl: "Durée habituelle du cycle en jours",
+    q_reg: "Vos règles arrivent-elles en général quand vous les attendez ?",
+    q_reg_h: "Les règles peuvent être irrégulières pendant un certain temps après l'arrêt d'une contraception hormonale, après une grossesse ou pendant l'allaitement.",
+    reg_yes: "Oui, en général à quelques jours près",
+    reg_no: "Non, elles varient de plus d'une semaine environ",
+    q_sex: "Depuis vos dernières règles, avez-vous eu un rapport sexuel sans contraception, ou un problème de contraception ?",
+    sex_yes: "Oui, un rapport sans contraception",
+    sex_problem: "Oui, un problème de contraception, comme un oubli de pilule ou un préservatif qui s'est rompu",
+    sex_no: "Non",
+    q_sexdate: "Quand était la dernière fois ?",
+    q_sexdate_h: "Si c'est arrivé plusieurs fois, choisissez la date la plus récente.",
+    q_sexdate_lbl: "Date",
+    q_sym: "Avez-vous remarqué l'un de ces changements récemment ?",
+    q_sym_h: "Choisissez toutes les réponses qui s'appliquent.",
+    sym_late: "Mes règles sont en retard ou ne sont pas venues",
+    sym_sick: "Nausées ou vomissements",
+    sym_breasts: "Seins sensibles ou douloureux",
+    sym_tired: "Grande fatigue",
+    sym_pee: "Envie d'uriner plus souvent",
+    sym_spot: "Légers saignements ou spotting",
+    sym_none: "Aucun de ces changements",
+    q_test: "Avez-vous fait un test de grossesse urinaire ?",
+    test_no: "Non, pas encore",
+    test_pos: "Oui, il était positif",
+    test_neg: "Oui, il était négatif",
+    test_unclear: "Oui, mais je n'arrivais pas à lire le résultat, ou la ligne était pâle",
+    q_testdate: "Quand avez-vous fait le test ?",
+    q_testdate_lbl: "Date du test",
+    need_answer: "Choisissez une réponse pour continuer.",
+    r_confirm: "Des réponses à des questions ne peuvent ni confirmer ni exclure une grossesse. Seul un test de grossesse, et un professionnel de santé, peuvent le faire.",
+    r_when: "Quand un test urinaire est fiable",
+    r_from: "À partir du {date}",
+    r_basis_period: "C'est le jour où vos prochaines règles sont attendues : le premier jour de vos dernières règles plus {days}. La plupart des tests urinaires sont fiables dès le premier jour de retard de règles.",
+    r_basis_sex: "C'est 21 jours après le dernier rapport sans contraception. Quand les règles sont irrégulières ou que vous ne savez pas quand elles sont attendues, un test est fiable 21 jours après le rapport.",
+    r_basis_none: "La plupart des tests urinaires sont fiables dès le premier jour de retard de règles. Si vous ne savez pas quand vos règles sont attendues, faites le test au moins 21 jours après le dernier rapport sans contraception.",
+    r_passed: "Cette date est passée : un test fait maintenant devrait donner un résultat fiable.",
+    r_today: "C'est aujourd'hui.",
+    r_future: "C'est dans {days}.",
+    r_early: "Certains tests annoncent fonctionner quelques jours plus tôt, mais un test trop précoce peut passer à côté d'une grossesse, car l'hormone recherchée (hCG) augmente avec le temps.",
+    r_also21: "Un test fait à partir du {date}, 21 jours après votre dernier rapport sans contraception, est fiable quel que soit votre cycle. Si un test plus précoce est négatif et que vos règles ne sont toujours pas venues, refaites-le à ce moment-là.",
+    r_meaning: "À propos de vos réponses",
+    m_due_passed: "D'après vos réponses, vos règles étaient attendues vers le {date}.",
+    m_due_future: "D'après vos réponses, vos prochaines règles sont attendues vers le {date}.",
+    m_late_sex: "Un retard ou une absence de règles après un rapport sans contraception est le signe précoce de grossesse le plus fréquent. Les règles peuvent aussi être en retard pour d'autres raisons : stress, maladie, variation de poids, sport intense, allaitement ou certaines contraceptions.",
+    m_late: "Un retard ou une absence de règles est un signe précoce fréquent de grossesse, mais les règles peuvent aussi être en retard pour d'autres raisons : stress, maladie, variation de poids, sport intense, allaitement ou certaines contraceptions.",
+    m_sym: "Les changements que vous avez remarqués peuvent être des signes précoces de grossesse, mais ils sont aussi fréquents avant les règles : à eux seuls, ils ne peuvent ni confirmer ni exclure une grossesse.",
+    m_spot: "De légers saignements peuvent survenir en début de grossesse, vers la date des règles, et ils ont aussi beaucoup d'autres causes. Des saignements accompagnés de douleurs dans le bas du ventre, d'une douleur à la pointe de l'épaule ou d'un malaise nécessitent des soins urgents.",
+    m_none: "Beaucoup de personnes n'ont aucun symptôme au début : ne pas en avoir n'exclut pas une grossesse.",
+    m_ec: "La contraception d'urgence peut être utilisée jusqu'à 5 jours après un rapport sans contraception, et elle est d'autant plus efficace qu'elle est prise tôt. Si c'est votre cas, parlez-en dès aujourd'hui à un pharmacien, un médecin, une sage-femme ou un centre de santé sexuelle.",
+    m_problem: "Un pharmacien, un médecin, une sage-femme ou un centre de santé sexuelle peut vous dire ce qu'un problème de contraception implique pour vous.",
+    m_nosex: "Aucune contraception n'est efficace à 100 % à chaque fois. Si vos règles sont en retard ou si quelque chose vous inquiète, un test permet de savoir.",
+    m_unsure_sex: "En cas de doute, un test à partir de la date indiquée ci-dessus peut vous aider à savoir.",
+    t_pos: "Un test urinaire positif est rarement faux, même si certaines situations peuvent en donner un sans grossesse en cours, comme certains traitements de fertilité ou une grossesse très récente. Consultez rapidement un professionnel de santé : il pourra confirmer le résultat et vous présenter vos options et le suivi.",
+    t_neg: "Un résultat négatif est moins sûr qu'un résultat positif, surtout si le test a été fait tôt. Si vos règles ne sont toujours pas venues, refaites un test quelques jours plus tard. Si un deuxième test est négatif et que les règles ne viennent toujours pas, consultez un professionnel de santé.",
+    t_neg_early: "Votre test a été fait avant le {date} : il était peut-être trop tôt pour donner un résultat.",
+    t_unclear: "Les résultats pâles ou peu clairs sont difficiles à lire, même pour des personnes expérimentées. Refaites un test dans un ou deux jours avec un test neuf, et lisez-le uniquement dans le délai indiqué sur la notice. Un professionnel de santé peut aussi vous faire faire un test.",
+    r_next: "Que faire maintenant",
+    n_test: "Faites un test à partir de la date indiquée ci-dessus, de préférence avec les premières urines du matin. Suivez les instructions et les délais de la notice.",
+    n_test_nodate: "Faites un test dès le premier jour de retard de règles, ou 21 jours après un rapport sans contraception, de préférence avec les premières urines du matin.",
+    n_repeat: "S'il est négatif et que vos règles ne sont toujours pas venues, refaites-le quelques jours plus tard.",
+    n_clin: "S'il est positif, ou si les tests restent négatifs sans retour des règles, consultez un médecin, une sage-femme ou un centre de santé.",
+    n_care: "En attendant de savoir, envisagez d'éviter l'alcool et le tabac, et vérifiez vos médicaments auprès d'un pharmacien.",
+    n_talk: "Quel que soit le résultat, vous pouvez parler en toute confidentialité à un professionnel de santé ou à un centre de santé sexuelle de ce que vous ressentez et de ce que vous souhaitez faire.",
+    r_urgent: "Demandez une aide urgente en cas de",
+    r_call: "Appelez maintenant le numéro d'urgence local (par exemple 112, 911, 999, 108, 119 ou 192).",
+    r_change: "Modifier mes réponses",
+    r_restart: "Recommencer",
+    r_saved: "Vos réponses sont enregistrées uniquement sur cet appareil.",
+    p_intro: "Saisissez le premier jour de vos dernières règles et la durée habituelle de votre cycle pour voir une estimation de vos jours fertiles.",
+    p_lmp: "Premier jour de vos dernières règles",
+    p_cycle: "Durée habituelle du cycle (jours)",
+    p_estimate: "Simple estimation. Les cycles varient, et l'ovulation peut avoir lieu plus tôt ou plus tard que prévu. Ce n'est pas une méthode de contraception : ne l'utilisez pas pour éviter une grossesse.",
+    p_window: "Prochaine période fertile (estimation)",
+    p_window_now: "Vous êtes peut-être en période fertile (estimation)",
+    p_range: "Du {a} au {b}",
+    p_ov: "Ovulation estimée : vers le {date}",
+    p_next: "Prochaines règles : vers le {date}",
+    p_empty: "Saisissez le premier jour de vos dernières règles pour afficher le calendrier.",
+    p_old: "Vos prochaines règles étaient attendues vers le {date}. Si elles sont arrivées depuis, saisissez la nouvelle date pour une meilleure estimation. Sinon, un test de grossesse peut vous en dire plus.",
+    p_how: "L'ovulation a lieu en général environ 14 jours avant les règles suivantes. Les spermatozoïdes peuvent survivre jusqu'à environ 5 jours : la période fertile comprend donc les 5 jours avant l'ovulation et le jour de l'ovulation.",
+    p_tip_sex: "Avoir des rapports tous les 2 à 3 jours tout au long du cycle couvre la période fertile sans avoir besoin de la calculer précisément.",
+    p_tip_irreg: "Si vos cycles durent souvent moins de 21 jours ou plus de 35 jours, ou varient beaucoup, ces estimations sont moins fiables et il est utile d'en parler à un professionnel de santé.",
+    p_tip_time: "Si vous essayez depuis un an sans grossesse, ou depuis 6 mois si vous avez 35 ans ou plus, parlez-en à un professionnel de santé.",
+    cal_prev: "Mois précédent",
+    cal_next: "Mois suivant",
+    lg_period: "Début des règles",
+    lg_fertile: "Période fertile (estimation)",
+    lg_ov: "Ovulation estimée",
+    lg_today: "Aujourd'hui",
+    p_check: "Avant d'essayer : une liste",
+    p_check_h: "Cochez au fur et à mesure. Vos coches sont enregistrées uniquement sur cet appareil.",
+    pc_folic: "Prenez 400 microgrammes d'acide folique (vitamine B9) par jour, au moins un mois avant d'essayer et jusqu'à 12 semaines de grossesse. Certaines personnes ont besoin d'une dose plus élevée : demandez conseil à un professionnel de santé.",
+    pc_meds: "Faites le point avec un professionnel de santé sur vos médicaments (y compris sans ordonnance et à base de plantes) et sur toute maladie chronique, comme le diabète, l'épilepsie ou l'hypertension. N'arrêtez pas un traitement prescrit sans avis médical.",
+    pc_vacc: "Vérifiez vos vaccins, en particulier contre la rubéole et la varicelle. Certains vaccins doivent être faits au moins un mois avant une grossesse.",
+    pc_smoke: "Arrêtez de fumer et évitez la fumée des autres.",
+    pc_alcohol: "Arrêtez l'alcool. Aucune quantité n'est reconnue comme sans risque pendant la grossesse.",
+    pc_drugs: "Arrêtez les drogues, et demandez de l'aide si besoin.",
+    pc_weight: "Mangez varié, bougez régulièrement et visez un poids de forme.",
+    pc_chem: "Évitez les produits chimiques nocifs à la maison et au travail, et ne manipulez pas la litière des chats ni les déjections de rongeurs.",
+    pc_history: "Parlez à un professionnel de santé de vos antécédents familiaux et de vos éventuelles grossesses précédentes.",
+    pc_mind: "Prenez soin de votre santé mentale. Si vous avez le moral bas ou de l'anxiété, ou si vous ne vous sentez pas en sécurité chez vous, vous pouvez en parler en toute confidentialité à un professionnel de santé.",
+    tab_due: "Date du terme",
+    tab_week: "Semaine par semaine",
+    tab_appts: "Rendez-vous",
+    tab_moves: "Mouvements",
+    tab_contr: "Contractions",
+    d_method: "Calculer ma date prévue d'accouchement à partir de",
+    dm_lmp: "Mes dernières règles",
+    dm_conc: "La date de conception",
+    dm_ivf: "Un transfert de FIV",
+    d_lmp: "Premier jour de vos dernières règles",
+    d_cycle: "Durée habituelle du cycle (jours)",
+    d_conc: "Date de conception",
+    d_ivf: "Date du transfert d'embryon",
+    d_ivfday: "Âge de l'embryon au transfert",
+    d_day3: "J3",
+    d_day5: "J5 (blastocyste)",
+    d_clin: "Date du terme donnée par mon professionnel de santé",
+    d_clin_h: "Si un professionnel de santé vous a donné une date de terme, par exemple après l'échographie de datation, saisissez-la ici. Elle remplace la date calculée.",
+    d_clin_clear: "Supprimer la date du professionnel",
+    d_result: "Date prévue d'accouchement (40 SA)",
+    d_from_clin: "Date de votre professionnel de santé",
+    f_lmp_n: "Premier jour des dernières règles + 280 jours + ({c} − 28) jours",
+    f_conc_n: "Date de conception + 266 jours",
+    f_ivf3_n: "Date du transfert + 263 jours (embryon J3)",
+    f_ivf5_n: "Date du transfert + 261 jours (embryon J5)",
+    d_ga: "Terme actuel",
+    d_tri: "Trimestre",
+    tri_1: "Premier trimestre",
+    tri_2: "Deuxième trimestre",
+    tri_3: "Troisième trimestre",
+    d_togo: "Jours restants",
+    d_due_today: "La date prévue est aujourd'hui",
+    d_past: "{days} après la date prévue",
+    d_range: "La plupart des bébés naissent entre 37 et 42 SA. Seule une petite partie naît le jour prévu.",
+    d_fr41: "En France, le terme est généralement fixé à 41 SA, soit le {date}. Suivez la date donnée par votre sage-femme ou votre médecin.",
+    d_err_far: "Cela correspond à plus de 44 semaines. Vérifiez la date.",
+    d_err_ahead: "Cela donne une date de terme dans plus de 40 semaines. Vérifiez la date.",
+    d_empty: "Saisissez une date pour voir votre date prévue d'accouchement.",
+    d_clear: "Effacer mes dates",
+    d_clear_h: "Vous pouvez effacer ces dates à tout moment.",
+    d_clear_q: "Effacer les dates de cette section ? Vos journaux et vos listes restent enregistrés jusqu'à leur suppression dans Vos données.",
+    d_clear_ok: "Effacer les dates",
+    d_cleared: "Dates effacées.",
+    w_title: "{n} SA",
+    w_prev: "Semaine précédente",
+    w_next: "Semaine suivante",
+    w_baby: "Le bébé",
+    w_you: "Votre corps",
+    w_tip: "Conseil",
+    w_current: "Cette semaine",
+    w_nodate: "Ajoutez une date de terme pour aller directement à votre semaine actuelle.",
+    w_loading: "Chargement…",
+    w_error: "Les notes de la semaine n'ont pas pu être chargées. Vérifiez votre connexion et réessayez.",
+    w_retry: "Réessayer",
+    w_note: "Informations générales. Chaque grossesse est différente : parlez à votre professionnel de santé de tout ce qui vous inquiète.",
+    w_after40: "Après 40 SA, votre professionnel de santé vous expliquera la suite.",
+    a_intro: "Éléments habituels. Le calendrier de votre professionnel de santé peut être différent.",
+    a_who: "L'Organisation mondiale de la santé recommande au moins 8 contacts avec un professionnel de santé pendant la grossesse.",
+    a_t1: "Premier trimestre (jusqu'à 13 SA + 6 j)",
+    a_t2: "Deuxième trimestre (de 14 à 27 SA)",
+    a_t3: "Troisième trimestre (à partir de 28 SA)",
+    a_now: "Maintenant",
+    ap_a1: "Premier rendez-vous avec un médecin, une sage-femme ou un centre de santé, idéalement au cours des 10 à 12 premières semaines",
+    ap_a2: "Antécédents de santé, tension artérielle, poids et analyse d'urine",
+    ap_a3: "Prises de sang : groupe sanguin, recherche d'anémie et dépistage d'infections comme le VIH, l'hépatite B et la syphilis",
+    ap_a4: "Échographie de datation, souvent au premier trimestre",
+    ap_a5: "Information sur le dépistage facultatif de certaines maladies génétiques",
+    ap_a6: "Point sur les médicaments, les compléments comme l'acide folique et les vaccins comme celui contre la grippe",
+    ap_b1: "Consultations régulières : tension artérielle, urines et cœur du bébé",
+    ap_b2: "Échographie détaillée, souvent entre 18 et 22 semaines environ",
+    ap_b3: "Dépistage du diabète gestationnel s'il vous est proposé, souvent entre 24 et 28 semaines",
+    ap_b4: "Vaccin contre la coqueluche ; le moment varie selon les pays",
+    ap_b5: "Mesure du ventre pour suivre la croissance du bébé",
+    ap_b6: "Un temps pour parler de votre ressenti et de vos inquiétudes",
+    ap_c1: "Consultations plus fréquentes, souvent toutes les 2 semaines puis chaque semaine vers la fin",
+    ap_c2: "Prises de sang pour l'anémie, et injection d'anti-D si votre groupe sanguin est rhésus négatif",
+    ap_c3: "Demandez quels autres vaccins sont recommandés là où vous vivez, comme celui contre le VRS",
+    ap_c4: "Dépistage du streptocoque B dans certains pays, vers 36 à 37 semaines",
+    ap_c5: "Vérification de la position du bébé, vers 36 semaines",
+    ap_c6: "Projet de naissance : où, avec qui, comment vous y rendre et quand appeler",
+    ap_c7: "Si vous dépassez 41 SA, un échange avec votre professionnel de santé sur la suite",
+    ap_c8: "Préparer l'après-naissance : alimentation du bébé, soutien et visite postnatale",
+    mv_intro: "Certains professionnels demandent de compter les mouvements ; d'autres conseillent d'apprendre à connaître le rythme habituel de votre bébé. N'utilisez ce journal que s'il vous aide. Il ne juge ni ne vérifie les chiffres.",
+    mv_safety: "Si les mouvements de votre bébé diminuent, s'arrêtent ou changent, contactez immédiatement votre maternité ou votre professionnel de santé. N'attendez pas le lendemain.",
+    mv_tap: "Mouvement ressenti",
+    mv_tap_h: "Touchez à chaque mouvement ressenti.",
+    mv_session: "Séance en cours",
+    mv_started: "Commencée à {time}",
+    mv_n_one: "{n} mouvement",
+    mv_n_other: "{n} mouvements",
+    mv_last: "Dernier à {time}",
+    mv_undo: "Annuler le dernier",
+    mv_finish: "Terminer la séance",
+    mv_idle: "Touchez le bouton pour commencer une séance.",
+    mv_history: "Historique",
+    mv_empty: "Aucune séance pour l'instant.",
+    mv_del: "Supprimer cette séance",
+    mv_del_q: "Supprimer cette séance du journal ?",
+    mv_clear: "Effacer le journal des mouvements",
+    mv_clear_q: "Supprimer toutes les séances de mouvements de cet appareil ?",
+    ct_intro: "Touchez quand une contraction commence, puis à nouveau quand elle se termine. Le minuteur indique la durée de chacune et l'écart entre leurs débuts. Il ne dit pas ce que le rythme signifie.",
+    ct_safety: "En cas de doute, appelez votre maternité.",
+    ct_call: "Appelez votre maternité sans attendre si vous perdez les eaux, si vous saignez, si le bébé bouge moins, si vous êtes à moins de 37 SA ou si quelque chose vous inquiète.",
+    ct_start: "Contraction commencée",
+    ct_stop: "Contraction terminée",
+    ct_start_h: "Touchez au début d'une contraction.",
+    ct_stop_h: "Touchez quand elle se termine.",
+    ct_last_hour: "Dernière heure",
+    ct_n_one: "{n} contraction",
+    ct_n_other: "{n} contractions",
+    ct_avg_len: "Durée moyenne",
+    ct_avg_gap: "Écart moyen",
+    ct_hist: "Historique",
+    ct_col_start: "Début",
+    ct_col_len: "Durée",
+    ct_col_gap: "Écart",
+    ct_empty: "Aucune contraction chronométrée pour l'instant.",
+    ct_undo: "Annuler la dernière",
+    ct_clear: "Effacer l'historique des contractions",
+    ct_clear_q: "Supprimer toutes les contractions chronométrées de cet appareil ?",
+    ct_note: "Ce que l'équipe de votre maternité vous a dit sur le moment d'appeler",
+    ct_note_ph: "Par exemple, leurs consignes et leur numéro de téléphone",
+    ct_note_h: "Enregistré uniquement sur cet appareil.",
+    h_lead: "Demandez immédiatement une aide médicale urgente si vous avez l'un de ces signes :",
+    rf_pain: "Une douleur intense dans le bas du ventre, surtout d'un côté",
+    rf_shoulder: "Une douleur à la pointe de l'épaule",
+    rf_bleed: "Des saignements vaginaux abondants",
+    rf_faint: "Un évanouissement, ou de forts vertiges ou une sensation de malaise",
+    rf_head: "Un mal de tête intense qui ne passe pas, ou des troubles de la vue, surtout en fin de grossesse",
+    rf_swell: "Un gonflement soudain du visage, des mains ou des pieds",
+    rf_fluid: "Une perte de liquide par le vagin",
+    rf_moves: "Votre bébé bouge moins que d'habitude, ou ses mouvements changent",
+    rf_chest: "Une douleur dans la poitrine, un cœur qui bat très vite ou des difficultés à respirer",
+    rf_fever: "Une forte fièvre, ou des vomissements si fréquents que vous ne pouvez rien boire",
+    rf_harm: "Des pensées de vous faire du mal ou de faire du mal à votre bébé",
+    h_other: "Pour les autres inquiétudes, appelez votre maternité, votre professionnel de santé ou une ligne locale de conseil médical. Si vous ne savez pas si c'est urgent, appelez quand même et faites confiance à votre ressenti.",
+    h_contact: "Ma maternité ou mon professionnel de santé",
+    h_contact_h: "Enregistrez un nom et un numéro pour appeler depuis ici. Enregistré uniquement sur cet appareil.",
+    h_name: "Nom",
+    h_phone: "Numéro de téléphone",
+    h_call_btn: "Appeler {name}",
+    h_call_default: "ma maternité",
+    dt_where: "Tout ce que vous saisissez ici est conservé uniquement sur cet appareil, dans la base de données locale de ce navigateur. Rien n'est inclus dans les sauvegardes Mentria ni dans la synchronisation entre appareils, et rien n'est jamais envoyé ailleurs.",
+    dt_evict: "Les navigateurs peuvent parfois effacer des données enregistrées, par exemple quand l'espace manque. Exportez une copie si vous voulez les garder.",
+    dt_export: "Exporter mes données",
+    dt_export_h: "Télécharge un fichier JSON avec vos réponses, dates, listes et journaux.",
+    dt_exported: "Votre fichier de données est en cours de téléchargement.",
+    dt_delete: "Supprimer toutes mes données",
+    dt_delete_q: "Supprimer tout ce que cette extension a enregistré sur cet appareil ? Vos réponses, dates, listes et journaux seront effacés, sans retour possible.",
+    dt_delete_ok: "Tout supprimer",
+    dt_deleted: "Toutes les données ont été supprimées.",
+    dt_persist: "Demander à ce navigateur de conserver mes données",
+    dt_persist_yes: "Ce navigateur a accepté de conserver vos données, sauf si vous les supprimez.",
+    dt_persist_no: "Ce navigateur n'a pas accepté. Exportez une copie de temps en temps par précaution.",
+    dt_persist_na: "Ce navigateur ne peut pas le garantir. Exportez une copie de temps en temps par précaution.",
+    ab_what: "Cette extension donne des informations générales, des calculs de dates simples et des journaux privés. Elle ne détecte pas, ne diagnostique pas et ne surveille pas une grossesse, et ce n'est pas un dispositif médical.",
+    ab_how: "Comment les dates sont calculées",
+    f_test: "Date du test : le jour où vos prochaines règles sont attendues (premier jour des dernières règles + durée du cycle). Si vos règles sont irrégulières ou si vous ne savez pas quand elles sont attendues : 21 jours après le dernier rapport sans contraception.",
+    f_fertile: "Période fertile : l'ovulation est estimée 14 jours avant les règles suivantes. La période comprend les 5 jours précédents et ce jour-là.",
+    f_lmp: "Date du terme à partir des dernières règles : premier jour des dernières règles + 280 jours + (durée du cycle − 28) jours, soit 40 SA.",
+    f_conc: "Date du terme à partir de la conception : date de conception + 266 jours.",
+    f_ivf: "Date du terme à partir d'un transfert de FIV : date du transfert + 263 jours pour un embryon J3, ou + 261 jours pour un embryon J5.",
+    f_clin: "Une date de terme donnée par votre professionnel de santé remplace toujours la date calculée.",
+    f_tri: "Trimestres : le premier va jusqu'à 13 SA + 6 j, le deuxième de 14 SA à 27 SA + 6 j, et le troisième commence à 28 SA. SA : semaines d'aménorrhée, comptées depuis le premier jour des dernières règles.",
+    ab_src: "Sources",
+    ab_src_h: "Les faits présentés ici s'appuient sur ces sources publiques. La rédaction est la nôtre et rien n'est téléchargé depuis ces sites.",
+    src_medline: "MedlinePlus (Bibliothèque nationale de médecine des États-Unis)",
+    src_cdc: "CDC (Centres de contrôle et de prévention des maladies des États-Unis)",
+    src_who: "Organisation mondiale de la santé",
+    src_nhs: "NHS (service de santé publique du Royaume-Uni), pour les faits uniquement",
+    src_acog: "FAQ patientes de l'ACOG (Collège américain des obstétriciens et gynécologues)",
+    src_owh: "Office on Women's Health (États-Unis)",
+    ab_privacy: "Pas de publicité, pas de pistage, pas d'IA, et rien de ce que vous saisissez ne quitte cet appareil.",
+    ab_version: "Version {v}"
+  };
+  STR.ja = {
+    app_title: "妊娠チェック＆プランナー",
+    app_sub: "検査のタイミング、妊娠の準備、妊娠中のことを落ち着いて確認できる、プライベートな情報です。すべてこの端末内にとどまります。",
+    back: "戻る",
+    help_btn: "今すぐ助けを求める",
+    help_short: "緊急時",
+    disclaimer: "情報提供のみを目的としており、医学的な助言ではありません。必ず医師や助産師の指示に従ってください。",
+    next: "次へ",
+    prev: "戻る",
+    see_results: "回答の意味を見る",
+    unsure: "よくわからない",
+    dont_know: "わからない",
+    cancel: "キャンセル",
+    del: "削除",
+    less: "日数を減らす",
+    more: "日数を増やす",
+    no_db: "ここでは保存できないため、入力した内容はこのページを閉じると失われます。",
+    save_fail: "この端末に保存できませんでした。",
+    dy_one: "{n}日",
+    dy_other: "{n}日",
+    wk_one: "{n}週",
+    wk_other: "{n}週",
+    ga: "妊娠{wn}週{dn}日",
+    min: "{n}分",
+    err_future: "未来の日付です。",
+    err_old: "過去1年以内の日付を選んでください。",
+    err_date: "日付をすべて入力するか、「よくわからない」を選んでください。",
+    err_cycle: "20〜45の日数を入力してください。",
+    err_before: "最後の生理が始まった日より前の日付です。",
+    nav_check: "妊娠の可能性は？",
+    nav_check_d: "いくつかの質問に答えると、妊娠検査薬で正確に判定できる時期と、次にすることがわかります。",
+    nav_plan: "妊娠を計画する",
+    nav_plan_d: "妊娠しやすい時期の目安と、妊娠を目指す前のチェックリスト。",
+    nav_preg: "わたしの妊娠",
+    nav_preg_d: "出産予定日、週ごとの情報、健診、胎動、陣痛。",
+    nav_help: "今すぐ助けを求める",
+    nav_help_d: "すぐに受診が必要な危険なサインと、連絡先。",
+    nav_data: "あなたのデータ",
+    nav_data_d: "この端末内にのみ保存。書き出しや削除ができます。",
+    nav_about: "このアプリについて",
+    nav_about_d: "日付の計算方法と、参考にした情報源。",
+    q_of: "質問 {i}/{n}",
+    q_lmp: "最後の生理が始まったのはいつですか？",
+    q_lmp_h: "出血が始まった日を選んでください。覚えていなくても大丈夫です。",
+    q_lmp_lbl: "最後の生理の開始日",
+    q_cycle: "ふだんの生理周期は何日くらいですか？",
+    q_cycle_h: "生理が始まった日から次の生理が始まる前日までの日数です。多くの人は21〜35日の範囲です。",
+    q_cycle_lbl: "ふだんの周期（日数）",
+    q_reg: "生理はたいてい予定どおりに来ますか？",
+    q_reg_h: "ホルモン剤による避妊をやめた後や、出産後、授乳中などは、しばらく生理が不規則になることがあります。",
+    reg_yes: "はい、たいてい数日以内のずれです",
+    reg_no: "いいえ、1週間以上ずれることがよくあります",
+    q_sex: "最後の生理以降に、避妊をしない性交渉、または避妊の失敗がありましたか？",
+    sex_yes: "はい、避妊をしない性交渉がありました",
+    sex_problem: "はい、避妊の失敗がありました（ピルの飲み忘れ、コンドームが破れたなど）",
+    sex_no: "いいえ",
+    q_sexdate: "最後にあったのはいつですか？",
+    q_sexdate_h: "複数回あった場合は、いちばん最近の日付を選んでください。",
+    q_sexdate_lbl: "日付",
+    q_sym: "最近、次のような変化に気づきましたか？",
+    q_sym_h: "当てはまるものをすべて選んでください。",
+    sym_late: "生理が遅れている、または来ていない",
+    sym_sick: "吐き気がある、または吐いた",
+    sym_breasts: "胸が張る、または痛む",
+    sym_tired: "とても疲れやすい",
+    sym_pee: "トイレ（排尿）の回数が増えた",
+    sym_spot: "少量の出血がある",
+    sym_none: "どれも当てはまらない",
+    q_test: "妊娠検査薬を使いましたか？",
+    test_no: "いいえ、まだです",
+    test_pos: "はい、陽性でした",
+    test_neg: "はい、陰性でした",
+    test_unclear: "はい、でも判定がよくわからなかった（線が薄いなど）",
+    q_testdate: "検査をしたのはいつですか？",
+    q_testdate_lbl: "検査をした日",
+    need_answer: "続けるには答えを選んでください。",
+    r_confirm: "質問への回答だけでは、妊娠を確かめることも否定することもできません。それができるのは、妊娠検査と、医師などの専門家だけです。",
+    r_when: "妊娠検査薬で正確に判定できる時期",
+    r_from: "{date} 以降",
+    r_basis_period: "次の生理の予定日です（最後の生理の開始日＋{days}）。多くの妊娠検査薬は、生理予定日以降に正確に判定できます。",
+    r_basis_sex: "避妊をしなかった最後の性交渉から21日後の日付です。生理が不規則な場合や予定日がわからない場合は、性交渉から21日たてば検査で正確に判定できます。",
+    r_basis_none: "多くの妊娠検査薬は、生理予定日以降に正確に判定できます。予定日がわからない場合は、避妊をしなかった最後の性交渉から少なくとも21日後に検査してください。",
+    r_local: "日本で市販されている一般的な妊娠検査薬の多くは、生理予定日の約1週間後から使うものです（生理予定日から使える早期妊娠検査薬もあります）。お使いの検査薬の説明書に書かれた時期に従ってください。",
+    r_passed: "この日付はすでに過ぎているので、今検査すれば正確な判定が期待できます。",
+    r_today: "今日です。",
+    r_future: "あと{days}です。",
+    r_early: "もっと早く使えるとうたう検査薬もありますが、早すぎる検査では妊娠を見逃すことがあります。検査薬が調べるホルモン（hCG）は時間とともに増えていくためです。",
+    r_also21: "避妊をしなかった最後の性交渉から21日後の{date}以降に検査すれば、周期に関係なく正確に判定できます。それより前の検査が陰性で生理がまだ来ていない場合は、その日にもう一度検査してください。",
+    r_meaning: "回答について",
+    m_due_passed: "回答によると、生理の予定日は{date}ごろでした。",
+    m_due_future: "回答によると、次の生理の予定日は{date}ごろです。",
+    m_late_sex: "避妊をしない性交渉の後に生理が遅れたり来なかったりするのは、妊娠初期のもっとも一般的なサインです。ただし、ストレス、病気、体重の変化、激しい運動、授乳、一部の避妊法など、ほかの理由で生理が遅れることもあります。",
+    m_late: "生理の遅れは妊娠初期によくあるサインですが、ストレス、病気、体重の変化、激しい運動、授乳、一部の避妊法など、ほかの理由で遅れることもあります。",
+    m_sym: "気づいた変化は妊娠初期のサインのこともありますが、生理前にもよく起こるため、それだけで妊娠を確かめたり否定したりすることはできません。",
+    m_spot: "少量の出血は、妊娠初期の生理予定日ごろに起こることがあり、ほかにも多くの原因があります。下腹部の痛み、肩の先の痛み、気が遠くなる感じを伴う出血は、すぐに受診が必要です。",
+    m_none: "妊娠初期に症状がない人も多いので、症状がないからといって妊娠を否定することはできません。",
+    m_ec: "緊急避妊は、避妊をしなかった性交渉から5日以内に使うことができ、早いほど効果が高くなります。当てはまる場合は、今日のうちに薬剤師、医師、または医療機関に相談してください。",
+    m_problem: "避妊の失敗が自分にとってどういう意味をもつかは、薬剤師、医師、または医療機関で相談できます。",
+    m_nosex: "どの避妊法も、毎回完全というわけではありません。生理が遅れている場合や心配な場合は、検査で確かめることができます。",
+    m_unsure_sex: "よくわからない場合は、上に示した日付以降に検査すると確かめられます。",
+    t_pos: "妊娠検査薬の陽性が誤っていることはまれですが、一部の不妊治療薬やごく最近の妊娠など、現在の妊娠がなくても陽性になる場合があります。早めに医療機関を受診してください。結果を確認し、選択肢やこれからのケアについて相談できます。",
+    t_neg: "陰性の結果は陽性ほど確実ではなく、特に早い時期の検査ではそうです。生理がまだ来ない場合は、数日後にもう一度検査してください。2回目も陰性で生理が来ない場合は、医療機関に相談してください。",
+    t_neg_early: "検査をしたのが{date}より前なので、早すぎて判定できなかった可能性があります。",
+    t_unclear: "薄い線やはっきりしない結果は、経験のある人でも判断が難しいものです。1〜2日後に新しい検査薬でもう一度検査し、説明書に書かれた判定時間内に結果を見てください。医療機関で検査を受けることもできます。",
+    r_next: "次にすること",
+    n_test: "上に示した日付以降に検査してください。朝いちばんの尿がおすすめです。説明書の使い方と判定時間に従ってください。",
+    n_test_nodate: "生理予定日以降、または避妊をしなかった性交渉から21日後以降に検査してください。朝いちばんの尿がおすすめです。",
+    n_repeat: "陰性で生理がまだ来ない場合は、数日後にもう一度検査してください。",
+    n_clin: "陽性の場合や、陰性が続いても生理が来ない場合は、医師、助産師、または医療機関を受診してください。",
+    n_care: "はっきりするまでは、飲酒と喫煙を控え、薬については薬剤師に確認することを考えてみてください。",
+    n_talk: "どんな結果であっても、自分の気持ちやどうしたいかについて、医師や性の健康の相談窓口に、秘密を守って相談できます。",
+    r_urgent: "次のような場合はすぐに受診を",
+    r_call: "今すぐ地域の緊急番号に電話してください（例：112、911、999、108、119、192）。",
+    r_change: "回答を変更する",
+    r_restart: "最初からやり直す",
+    r_saved: "回答はこの端末にのみ保存されます。",
+    p_intro: "最後の生理の開始日とふだんの周期を入力すると、妊娠しやすい時期の目安が表示されます。",
+    p_lmp: "最後の生理の開始日",
+    p_cycle: "ふだんの周期（日数）",
+    p_estimate: "あくまで目安です。周期にはばらつきがあり、排卵が予想より早まったり遅れたりすることもあります。避妊法ではありません。妊娠を避ける目的で使わないでください。",
+    p_window: "次の妊娠しやすい時期（目安）",
+    p_window_now: "今が妊娠しやすい時期かもしれません（目安）",
+    p_range: "{a}〜{b}",
+    p_ov: "排卵日の目安：{date}ごろ",
+    p_next: "次の生理予定日：{date}ごろ",
+    p_empty: "カレンダーを表示するには、最後の生理の開始日を入力してください。",
+    p_old: "次の生理は{date}ごろの予定でした。その後に生理が来た場合は、新しい日付を入力すると目安がより正確になります。来ていない場合は、妊娠検査で詳しくわかります。",
+    p_how: "排卵はふつう、次の生理の約14日前に起こります。精子は最長で約5日間生きられるため、妊娠しやすい時期は排卵日の前の5日間と排卵日当日です。",
+    p_tip_sex: "周期を通して2〜3日ごとに性交渉をもてば、正確なタイミングを計らなくても妊娠しやすい時期をカバーできます。",
+    p_tip_irreg: "周期が21日より短い、35日より長い、または大きく変動することが多い場合は、この目安が不正確になりやすいので、医師に相談するとよいでしょう。",
+    p_tip_time: "1年間（35歳以上なら6か月間）妊娠を目指しても妊娠しない場合は、医師に相談してください。",
+    cal_prev: "前の月",
+    cal_next: "次の月",
+    lg_period: "生理開始",
+    lg_fertile: "妊娠しやすい時期（目安）",
+    lg_ov: "排卵日の目安",
+    lg_today: "今日",
+    p_check: "妊娠を目指す前に：チェックリスト",
+    p_check_h: "できたものにチェックを入れましょう。チェックはこの端末にのみ保存されます。",
+    pc_folic: "葉酸を1日400マイクログラム、妊娠を目指す少なくとも1か月前から妊娠12週まで、毎日とりましょう。より多い量が必要な人もいるので、医師に相談してください。",
+    pc_meds: "飲んでいる薬（市販薬やハーブ類も含む）や、糖尿病、てんかん、高血圧などの持病について、医師に相談しましょう。処方された薬を自己判断でやめないでください。",
+    pc_vacc: "予防接種の状況、特に風しんと水痘（水ぼうそう）を確認しましょう。妊娠の少なくとも1か月前までに接種が必要なワクチンもあります（必要な期間は医師に確認してください）。",
+    pc_smoke: "たばこをやめ、受動喫煙も避けましょう。",
+    pc_alcohol: "お酒をやめましょう。妊娠中に安全とわかっている飲酒量はありません。",
+    pc_drugs: "違法薬物などの使用をやめ、必要なら支援を求めましょう。",
+    pc_weight: "バランスのよい食事をとり、体を動かし、健康的な体重を目指しましょう。",
+    pc_chem: "家庭や職場で有害な化学物質を避け、猫のトイレの砂やネズミのふんに触れないようにしましょう。",
+    pc_history: "家族の病歴や、これまでの妊娠について医師に話しましょう。",
+    pc_mind: "心の健康も大切にしましょう。気分が落ち込む、不安が強い、家で安全だと感じられないといった場合は、医師に秘密を守って相談できます。",
+    tab_due: "出産予定日",
+    tab_week: "週ごと",
+    tab_appts: "健診",
+    tab_moves: "胎動",
+    tab_contr: "陣痛",
+    d_method: "出産予定日の計算のもとにするもの",
+    dm_lmp: "最終月経",
+    dm_conc: "受胎日",
+    dm_ivf: "体外受精の胚移植",
+    d_lmp: "最終月経の開始日",
+    d_cycle: "ふだんの周期（日数）",
+    d_conc: "受胎日",
+    d_ivf: "胚移植日",
+    d_ivfday: "移植時の胚の日数",
+    d_day3: "3日目（初期胚）",
+    d_day5: "5日目（胚盤胞）",
+    d_clin: "医師から伝えられた出産予定日",
+    d_clin_h: "早い時期の超音波検査などで医師から出産予定日を伝えられている場合は、ここに入力してください。計算した日付より優先されます。",
+    d_clin_clear: "医師の予定日を削除",
+    d_result: "出産予定日（目安）",
+    d_from_clin: "医師から伝えられた日付を使用中",
+    f_lmp_n: "最終月経の開始日＋280日＋（{c}−28）日",
+    f_conc_n: "受胎日＋266日",
+    f_ivf3_n: "胚移植日＋263日（3日目胚）",
+    f_ivf5_n: "胚移植日＋261日（5日目胚）",
+    d_ga: "妊娠週数",
+    d_tri: "時期",
+    tri_1: "妊娠初期",
+    tri_2: "妊娠中期",
+    tri_3: "妊娠後期",
+    d_togo: "予定日まで",
+    d_due_today: "今日が出産予定日です",
+    d_past: "予定日から{days}経過",
+    d_range: "多くの赤ちゃんは妊娠37週から42週の間に生まれます。予定日ちょうどに生まれるのはごく一部です。",
+    d_err_far: "計算すると44週を超えます。日付を確認してください。",
+    d_err_ahead: "計算すると出産予定日が40週以上先になります。日付を確認してください。",
+    d_empty: "日付を入力すると、出産予定日が表示されます。",
+    d_clear: "日付を消去",
+    d_clear_h: "これらの日付はいつでも消去できます。",
+    d_clear_q: "このセクションの日付を消去しますか？記録やチェックリストは「あなたのデータ」で削除するまで残ります。",
+    d_clear_ok: "日付を消去",
+    d_cleared: "日付を消去しました。",
+    w_title: "妊娠{n}週",
+    w_prev: "前の週",
+    w_next: "次の週",
+    w_baby: "赤ちゃん",
+    w_you: "からだの変化",
+    w_tip: "ヒント",
+    w_current: "今週",
+    w_nodate: "出産予定日を入力すると、今の週に移動できます。",
+    w_loading: "読み込み中…",
+    w_error: "週ごとの情報を読み込めませんでした。接続を確認して、もう一度お試しください。",
+    w_retry: "再試行",
+    w_note: "一般的な情報です。妊娠の経過は一人ひとり異なります。気になることは医師や助産師に相談してください。",
+    w_after40: "40週を過ぎたら、今後のことについて医師や助産師から説明があります。",
+    a_intro: "一般的な項目です。実際の健診スケジュールは医療機関によって異なる場合があります。",
+    a_who: "世界保健機関（WHO）は、妊娠中に少なくとも8回、医療者と接する機会をもつことを推奨しています。",
+    a_t1: "妊娠初期（13週6日まで）",
+    a_t2: "妊娠中期（14週〜27週）",
+    a_t3: "妊娠後期（28週以降）",
+    a_now: "現在",
+    ap_a1: "医師、助産師、または医療機関での最初の受診（できれば最初の10〜12週のうちに）",
+    ap_a2: "健康状態の問診、血圧、体重、尿検査",
+    ap_a3: "血液検査（血液型、貧血、HIV・B型肝炎・梅毒などの感染症）",
+    ap_a4: "妊娠週数を確かめる超音波検査（多くは妊娠初期）",
+    ap_a5: "希望する人が受けられる、一部の遺伝性・染色体の疾患のスクリーニング検査についての説明",
+    ap_a6: "薬、葉酸などのサプリメント、インフルエンザなどの予防接種の確認",
+    ap_b1: "定期健診：血圧、尿検査、赤ちゃんの心拍",
+    ap_b2: "詳しい超音波検査（多くは18〜22週ごろ）",
+    ap_b3: "妊娠糖尿病の検査（行われる場合。多くは24〜28週ごろ）",
+    ap_b4: "百日せきのワクチン（時期は国によって異なります）",
+    ap_b5: "赤ちゃんの成長を確かめるための、おなかの大きさ（子宮底長）の測定",
+    ap_b6: "気持ちや心配ごとを話す機会",
+    ap_c1: "より頻繁な健診（多くは2週ごと、終盤は毎週）",
+    ap_c2: "貧血の血液検査と、Rh陰性の場合の抗D免疫グロブリン",
+    ap_c3: "住んでいる地域で勧められているその他のワクチン（RSウイルスなど）の確認",
+    ap_c4: "B群溶血性レンサ球菌（GBS）の検査（国によって。36〜37週ごろ）",
+    ap_c5: "赤ちゃんの向き（胎位）の確認（36週ごろ）",
+    ap_c6: "出産の計画：どこで、誰と、どうやって行くか、いつ連絡するか",
+    ap_c7: "41週を過ぎた場合は、今後について医師と相談",
+    ap_c8: "産後の準備：授乳、サポート、産後健診",
+    mv_intro: "胎動を数えるよう勧める医療者もいれば、赤ちゃんのふだんの動き方を知っておくよう勧める医療者もいます。役に立つ場合にだけ使ってください。この記録は数を評価したり判定したりしません。",
+    mv_safety: "赤ちゃんの動きが少なくなった、止まった、いつもと違うと感じたら、すぐにかかりつけの産院や医師に連絡してください。翌日まで待たないでください。",
+    mv_tap: "胎動を感じた",
+    mv_tap_h: "胎動を感じるたびにタップしてください。",
+    mv_session: "現在のセッション",
+    mv_started: "開始 {time}",
+    mv_n_one: "{n}回",
+    mv_n_other: "{n}回",
+    mv_last: "最後 {time}",
+    mv_undo: "最後の記録を取り消す",
+    mv_finish: "セッションを終了",
+    mv_idle: "ボタンをタップするとセッションが始まります。",
+    mv_history: "履歴",
+    mv_empty: "まだセッションはありません。",
+    mv_del: "このセッションを削除",
+    mv_del_q: "このセッションを記録から削除しますか？",
+    mv_clear: "胎動の記録を消去",
+    mv_clear_q: "この端末から胎動のセッションをすべて削除しますか？",
+    ct_intro: "陣痛（おなかの張り）が始まったらタップし、終わったらもう一度タップします。それぞれの長さと、始まりから次の始まりまでの間隔が表示されます。そのパターンが何を意味するかは判断しません。",
+    ct_safety: "迷ったら、かかりつけの産院に電話してください。",
+    ct_call: "破水した、出血がある、赤ちゃんの動きが少ない、妊娠37週未満である、または心配なときは、すぐにかかりつけの産院に電話してください。",
+    ct_start: "陣痛が始まった",
+    ct_stop: "陣痛が終わった",
+    ct_start_h: "陣痛が始まったらタップ。",
+    ct_stop_h: "終わったらタップ。",
+    ct_last_hour: "直近1時間",
+    ct_n_one: "{n}回",
+    ct_n_other: "{n}回",
+    ct_avg_len: "平均の長さ",
+    ct_avg_gap: "平均の間隔",
+    ct_hist: "履歴",
+    ct_col_start: "開始",
+    ct_col_len: "長さ",
+    ct_col_gap: "間隔",
+    ct_empty: "まだ計測した陣痛はありません。",
+    ct_undo: "最後の記録を取り消す",
+    ct_clear: "陣痛の履歴を消去",
+    ct_clear_q: "この端末から、計測した陣痛をすべて削除しますか？",
+    ct_note: "いつ電話するかについて、産院から言われたこと",
+    ct_note_ph: "例：産院からの指示や電話番号",
+    ct_note_h: "この端末にのみ保存されます。",
+    h_lead: "次のような症状があれば、すぐに医療機関の助けを求めてください。",
+    rf_pain: "下腹部の激しい痛み（特に片側）",
+    rf_shoulder: "肩の先の痛み",
+    rf_bleed: "性器からの多量の出血",
+    rf_faint: "失神、または強いめまいや気が遠くなる感じ",
+    rf_head: "治まらない激しい頭痛、または見え方の変化（特に妊娠後半）",
+    rf_swell: "顔や手足の急なむくみ",
+    rf_fluid: "性器から水のようなものが流れ出る",
+    rf_moves: "赤ちゃんの動きがいつもより少ない、または動き方が変わった",
+    rf_chest: "胸の痛み、激しい動悸、息苦しさ",
+    rf_fever: "高熱、または水分もとれないほど何度も吐く",
+    rf_harm: "自分や赤ちゃんを傷つけてしまいそうな考え",
+    h_other: "そのほかの心配ごとは、かかりつけの産院、医師、または地域の医療相談窓口に電話してください。緊急かどうか迷うときも電話し、自分の感覚を信じてください。",
+    h_contact: "かかりつけの産院・医師",
+    h_contact_h: "名前と電話番号を保存すると、ここから電話をかけられます。この端末にのみ保存されます。",
+    h_name: "名前",
+    h_phone: "電話番号",
+    h_call_btn: "{name}に電話する",
+    h_call_default: "かかりつけの産院",
+    dt_where: "ここに入力した内容はすべて、このブラウザのローカルデータベースに、この端末内でのみ保存されます。Mentriaのバックアップや端末間の同期には含まれず、どこにも送信されません。",
+    dt_evict: "空き容量が少ないときなど、ブラウザが保存データを消去することがあります。残しておきたい場合は、コピーを書き出してください。",
+    dt_export: "データを書き出す",
+    dt_export_h: "回答、日付、チェックリスト、記録を含むJSONファイルをダウンロードします。",
+    dt_exported: "データファイルをダウンロードしています。",
+    dt_delete: "すべてのデータを削除",
+    dt_delete_q: "この拡張機能がこの端末に保存したものをすべて削除しますか？回答、日付、チェックリスト、記録が消え、元に戻せません。",
+    dt_delete_ok: "すべて削除",
+    dt_deleted: "すべてのデータを削除しました。",
+    dt_persist: "このブラウザにデータの保持を求める",
+    dt_persist_yes: "このブラウザは、あなたが削除しない限りデータを保持することに同意しました。",
+    dt_persist_no: "このブラウザは同意しませんでした。念のため、ときどきコピーを書き出してください。",
+    dt_persist_na: "このブラウザでは保持を約束できません。念のため、ときどきコピーを書き出してください。",
+    ab_what: "この拡張機能は、一般的な情報、簡単な日付計算、プライベートな記録を提供します。妊娠を検出、診断、監視するものではなく、医療機器でもありません。",
+    ab_how: "日付の計算方法",
+    f_test: "検査日：次の生理予定日（最後の生理の開始日＋周期の日数）。生理が不規則な場合や予定日がわからない場合は、避妊をしなかった最後の性交渉の21日後。",
+    f_fertile: "妊娠しやすい時期：排卵日を次の生理の14日前と推定し、その前の5日間と排卵日当日を合わせた期間。",
+    f_lmp: "最終月経からの出産予定日：最終月経の開始日＋280日＋（周期の日数−28）日。",
+    f_conc: "受胎日からの出産予定日：受胎日＋266日。",
+    f_ivf: "体外受精の胚移植からの出産予定日：3日目胚は移植日＋263日、5日目胚は移植日＋261日。",
+    f_clin: "医師から伝えられた出産予定日は、常に計算した日付より優先されます。",
+    f_tri: "時期の区分：妊娠初期は13週6日まで、妊娠中期は14週0日から27週6日まで、妊娠後期は28週0日以降。",
+    ab_src: "情報源",
+    ab_src_h: "ここに書かれた事実は、次の公的な情報源にもとづいています。文章は独自に書いたもので、これらのサイトから何かを読み込むことはありません。",
+    src_medline: "MedlinePlus（米国国立医学図書館）",
+    src_cdc: "CDC（米国疾病予防管理センター）",
+    src_who: "世界保健機関（WHO）",
+    src_nhs: "NHS（英国国民保健サービス）※事実の確認のみ",
+    src_acog: "ACOG 患者向けFAQ（米国産科婦人科学会）",
+    src_owh: "米国保健福祉省 女性の健康局（OWH）",
+    ab_privacy: "広告なし、トラッキングなし、AIなし。入力した内容がこの端末から出ることはありません。",
+    ab_version: "バージョン {v}"
+  };
+  STR['pt-BR'] = {
+    app_title: "Gravidez: teste e planejamento",
+    app_sub: "Informações tranquilas e privadas sobre testes, planejamento e gravidez. Tudo fica neste dispositivo.",
+    back: "Voltar",
+    help_btn: "Pedir ajuda agora",
+    help_short: "Ajuda",
+    disclaimer: "Apenas informação, não é orientação médica. Siga sempre as orientações do seu profissional de saúde.",
+    next: "Avançar",
+    prev: "Voltar",
+    see_results: "Ver o que isso significa",
+    unsure: "Não tenho certeza",
+    dont_know: "Não sei",
+    cancel: "Cancelar",
+    del: "Excluir",
+    less: "Menos dias",
+    more: "Mais dias",
+    no_db: "Não é possível salvar aqui, então o que você digitar será perdido ao fechar esta página.",
+    save_fail: "Não foi possível salvar neste dispositivo.",
+    dy_one: "{n} dia",
+    dy_other: "{n} dias",
+    wk_one: "{n} semana",
+    wk_other: "{n} semanas",
+    ga: "{w} e {d}",
+    min: "{n} min",
+    err_future: "Esta data está no futuro.",
+    err_old: "Escolha uma data dentro do último ano.",
+    err_date: "Digite uma data completa ou escolha “Não tenho certeza”.",
+    err_cycle: "Digite um número de dias entre 20 e 45.",
+    err_before: "Esta data é anterior ao início da sua última menstruação.",
+    nav_check: "Pode ser gravidez?",
+    nav_check_d: "Algumas perguntas e, depois, quando um teste de farmácia é confiável e o que fazer em seguida.",
+    nav_plan: "Planejar uma gravidez",
+    nav_plan_d: "Uma estimativa dos seus dias férteis e uma lista para antes de tentar.",
+    nav_preg: "Minha gravidez",
+    nav_preg_d: "Data provável do parto, semana a semana, consultas, movimentos e contrações.",
+    nav_help: "Pedir ajuda agora",
+    nav_help_d: "Sinais de alerta que precisam de atendimento urgente e para quem ligar.",
+    nav_data: "Seus dados",
+    nav_data_d: "Ficam só neste dispositivo. Exporte ou apague quando quiser.",
+    nav_about: "Sobre",
+    nav_about_d: "Como as datas são calculadas e as fontes usadas.",
+    q_of: "Pergunta {i} de {n}",
+    q_lmp: "Quando começou sua última menstruação?",
+    q_lmp_h: "Escolha o primeiro dia do sangramento. Tudo bem se você não lembrar.",
+    q_lmp_lbl: "Primeiro dia da sua última menstruação",
+    q_cycle: "Quanto dura o seu ciclo normalmente?",
+    q_cycle_h: "Conte do primeiro dia de uma menstruação até o primeiro dia da seguinte. O ciclo de muitas pessoas dura entre 21 e 35 dias.",
+    q_cycle_lbl: "Duração habitual do ciclo em dias",
+    q_reg: "Sua menstruação costuma vir quando você espera?",
+    q_reg_h: "A menstruação pode ficar irregular por um tempo depois de parar um anticoncepcional hormonal, depois de uma gravidez ou durante a amamentação.",
+    reg_yes: "Sim, geralmente com poucos dias de diferença",
+    reg_no: "Não, varia mais de uma semana, mais ou menos",
+    q_sex: "Desde a sua última menstruação, você teve relação sexual sem método contraceptivo ou algum problema com o método?",
+    sex_yes: "Sim, relação sem método contraceptivo",
+    sex_problem: "Sim, um problema com o método, como esquecer a pílula ou a camisinha romper",
+    sex_no: "Não",
+    q_sexdate: "Quando foi a última vez?",
+    q_sexdate_h: "Se aconteceu mais de uma vez, escolha a data mais recente.",
+    q_sexdate_lbl: "Data",
+    q_sym: "Você notou alguma destas mudanças recentemente?",
+    q_sym_h: "Escolha todas as que se aplicam.",
+    sym_late: "Minha menstruação está atrasada ou não veio",
+    sym_sick: "Enjoo ou vômitos",
+    sym_breasts: "Seios sensíveis ou doloridos",
+    sym_tired: "Muito cansaço",
+    sym_pee: "Vontade de fazer xixi com mais frequência",
+    sym_spot: "Pequeno sangramento ou escape",
+    sym_none: "Nenhuma destas",
+    q_test: "Você fez um teste de gravidez de farmácia?",
+    test_no: "Não, ainda não",
+    test_pos: "Sim, deu positivo",
+    test_neg: "Sim, deu negativo",
+    test_unclear: "Sim, mas não deu para entender, ou a linha estava fraca",
+    q_testdate: "Quando você fez o teste?",
+    q_testdate_lbl: "Data do teste",
+    need_answer: "Escolha uma resposta para continuar.",
+    r_confirm: "Respostas a perguntas não podem confirmar nem descartar uma gravidez. Só um teste de gravidez, e um profissional de saúde, podem fazer isso.",
+    r_when: "Quando um teste de farmácia é confiável",
+    r_from: "A partir de {date}",
+    r_basis_period: "É o dia em que sua próxima menstruação deve vir: o primeiro dia da sua última menstruação mais {days}. A maioria dos testes de farmácia é confiável a partir do primeiro dia de atraso.",
+    r_basis_sex: "São 21 dias depois da última relação sem método contraceptivo. Quando a menstruação é irregular ou você não sabe quando ela deve vir, o teste é confiável a partir de 21 dias depois da relação.",
+    r_basis_none: "A maioria dos testes de farmácia é confiável a partir do primeiro dia de atraso menstrual. Se você não sabe quando a menstruação deve vir, faça o teste pelo menos 21 dias depois da última relação sem método contraceptivo.",
+    r_passed: "Essa data já passou, então um teste agora deve dar um resultado confiável.",
+    r_today: "É hoje.",
+    r_future: "Faltam {days}.",
+    r_early: "Alguns testes dizem funcionar alguns dias antes, mas testar cedo pode não detectar uma gravidez, porque o hormônio que os testes procuram (hCG) aumenta com o tempo.",
+    r_also21: "Um teste feito a partir de {date}, 21 dias depois da sua última relação sem método contraceptivo, é confiável qualquer que seja o seu ciclo. Se um teste anterior der negativo e a menstruação continuar sem vir, repita nessa data.",
+    r_meaning: "Sobre suas respostas",
+    m_due_passed: "Pelas suas respostas, sua menstruação deveria ter vindo por volta de {date}.",
+    m_due_future: "Pelas suas respostas, sua próxima menstruação deve vir por volta de {date}.",
+    m_late_sex: "Atraso ou falta da menstruação depois de uma relação sem método contraceptivo é o sinal precoce de gravidez mais comum. A menstruação também pode atrasar por outros motivos, como estresse, doença, mudança de peso, exercício intenso, amamentação ou alguns métodos contraceptivos.",
+    m_late: "Atraso ou falta da menstruação é um sinal precoce comum de gravidez, mas a menstruação também pode atrasar por outros motivos, como estresse, doença, mudança de peso, exercício intenso, amamentação ou alguns métodos contraceptivos.",
+    m_sym: "As mudanças que você notou podem ser sinais precoces de gravidez, mas também são comuns antes da menstruação, então sozinhas não podem confirmar nem descartar uma gravidez.",
+    m_spot: "Um pequeno sangramento pode acontecer no início da gravidez, perto da data em que a menstruação viria, e também tem muitas outras causas. Sangramento junto com dor no pé da barriga, dor na ponta do ombro ou sensação de desmaio precisa de atendimento urgente.",
+    m_none: "Muitas pessoas não têm sintomas no início, então não ter sintomas não descarta uma gravidez.",
+    m_ec: "A anticoncepção de emergência (pílula do dia seguinte) pode ser usada até 5 dias depois de uma relação sem método contraceptivo e funciona melhor quanto antes for usada. Se for o seu caso, procure hoje uma farmácia, um médico ou uma unidade de saúde.",
+    m_problem: "Na farmácia, com um médico ou numa unidade de saúde, você pode entender o que um problema com o método significa no seu caso.",
+    m_nosex: "Nenhum método contraceptivo funciona perfeitamente todas as vezes. Se a menstruação atrasar ou se algo te preocupar, um teste é a forma de saber.",
+    m_unsure_sex: "Se você não tiver certeza, um teste a partir da data indicada acima pode ajudar a saber.",
+    t_pos: "Um resultado positivo em teste de farmácia raramente está errado, mas algumas situações podem dar positivo sem uma gravidez em curso, como alguns remédios para fertilidade ou uma gravidez muito recente. Procure logo um profissional de saúde: ele pode confirmar o resultado e explicar suas opções e os cuidados.",
+    t_neg: "Um resultado negativo é menos certo do que um positivo, principalmente se o teste foi feito cedo. Se a menstruação continuar sem vir, repita o teste em alguns dias. Se um segundo teste der negativo e a menstruação ainda não vier, procure um profissional de saúde.",
+    t_neg_early: "Seu teste foi feito antes de {date}, então pode ter sido cedo demais para mostrar um resultado.",
+    t_unclear: "Resultados fracos ou pouco claros são difíceis de ler, até para quem tem experiência. Repita em um ou dois dias com um teste novo e leia o resultado só dentro do tempo indicado na bula. Um profissional de saúde também pode pedir um exame.",
+    r_next: "O que fazer agora",
+    n_test: "Faça um teste a partir da data indicada acima. A primeira urina da manhã é a melhor. Siga as instruções e os tempos da bula.",
+    n_test_nodate: "Faça um teste a partir do primeiro dia de atraso menstrual ou 21 dias depois de uma relação sem método contraceptivo. A primeira urina da manhã é a melhor.",
+    n_repeat: "Se der negativo e a menstruação continuar sem vir, repita em alguns dias.",
+    n_clin: "Se der positivo, ou se os testes continuarem negativos sem a menstruação vir, procure um médico, um enfermeiro ou uma unidade de saúde.",
+    n_care: "Enquanto não souber, considere evitar álcool e cigarro, e confirme qualquer remédio com um farmacêutico.",
+    n_talk: "Seja qual for o resultado, você pode conversar em sigilo com um profissional de saúde ou um serviço de saúde sexual sobre como se sente e o que quer fazer.",
+    r_urgent: "Procure ajuda urgente se você tiver",
+    r_call: "Ligue agora para o número de emergência local (por exemplo, 112, 911, 999, 108, 119 ou 192).",
+    r_change: "Alterar minhas respostas",
+    r_restart: "Começar de novo",
+    r_saved: "Suas respostas ficam salvas só neste dispositivo.",
+    p_intro: "Digite o primeiro dia da sua última menstruação e a duração habitual do seu ciclo para ver uma estimativa dos seus dias férteis.",
+    p_lmp: "Primeiro dia da sua última menstruação",
+    p_cycle: "Duração habitual do ciclo (dias)",
+    p_estimate: "Apenas uma estimativa. Os ciclos variam, e a ovulação pode acontecer antes ou depois do esperado. Isto não é um método contraceptivo: não use para evitar a gravidez.",
+    p_window: "Próximo período fértil (estimativa)",
+    p_window_now: "Você pode estar no seu período fértil agora (estimativa)",
+    p_range: "De {a} a {b}",
+    p_ov: "Ovulação estimada: por volta de {date}",
+    p_next: "Próxima menstruação: por volta de {date}",
+    p_empty: "Digite o primeiro dia da sua última menstruação para ver o calendário.",
+    p_old: "Sua próxima menstruação deveria ter vindo por volta de {date}. Se ela já veio, digite a nova data para uma estimativa melhor. Se não veio, um teste de gravidez pode esclarecer.",
+    p_how: "A ovulação costuma acontecer cerca de 14 dias antes da próxima menstruação. Os espermatozoides podem sobreviver por até cerca de 5 dias, então o período fértil são os 5 dias antes da ovulação mais o dia da ovulação.",
+    p_tip_sex: "Ter relações a cada 2 ou 3 dias ao longo do ciclo cobre o período fértil sem precisar acertar a data exata.",
+    p_tip_irreg: "Se seus ciclos costumam ser menores que 21 dias, maiores que 35 dias ou variam muito, estas estimativas são menos confiáveis, e vale conversar com um profissional de saúde.",
+    p_tip_time: "Se você está tentando há um ano sem engravidar, ou há 6 meses se tem 35 anos ou mais, converse com um profissional de saúde.",
+    cal_prev: "Mês anterior",
+    cal_next: "Próximo mês",
+    lg_period: "Início da menstruação",
+    lg_fertile: "Período fértil (estimativa)",
+    lg_ov: "Ovulação estimada",
+    lg_today: "Hoje",
+    p_check: "Antes de tentar: uma lista",
+    p_check_h: "Marque os itens conforme avançar. Suas marcações ficam salvas só neste dispositivo.",
+    pc_folic: "Tome 400 microgramas de ácido fólico por dia, começando pelo menos um mês antes de tentar e continuando até 12 semanas de gravidez. Algumas pessoas precisam de uma dose maior, então converse com um profissional de saúde.",
+    pc_meds: "Revise com um profissional de saúde os seus remédios (inclusive os sem receita e os fitoterápicos) e qualquer doença crônica, como diabetes, epilepsia ou pressão alta. Não pare um remédio receitado sem orientação.",
+    pc_vacc: "Confira suas vacinas, principalmente rubéola e catapora (varicela). Algumas vacinas precisam ser tomadas pelo menos um mês antes da gravidez.",
+    pc_smoke: "Pare de fumar e evite a fumaça de outras pessoas.",
+    pc_alcohol: "Pare de beber álcool. Nenhuma quantidade é reconhecida como segura na gravidez.",
+    pc_drugs: "Pare de usar drogas e peça apoio se precisar.",
+    pc_weight: "Tenha uma alimentação variada, pratique atividade física e busque um peso saudável.",
+    pc_chem: "Evite produtos químicos nocivos em casa e no trabalho, e não mexa em caixa de areia de gato nem em fezes de roedores.",
+    pc_history: "Converse com um profissional de saúde sobre o histórico de saúde da sua família e sobre gestações anteriores.",
+    pc_mind: "Cuide da sua saúde mental. Se você estiver com o humor para baixo ou com ansiedade, ou não se sentir em segurança em casa, pode conversar em sigilo com um profissional de saúde.",
+    tab_due: "Data do parto",
+    tab_week: "Semana a semana",
+    tab_appts: "Consultas",
+    tab_moves: "Movimentos",
+    tab_contr: "Contrações",
+    d_method: "Calcular a data provável do parto a partir de",
+    dm_lmp: "Minha última menstruação",
+    dm_conc: "Data da concepção",
+    dm_ivf: "Transferência de FIV",
+    d_lmp: "Primeiro dia da sua última menstruação",
+    d_cycle: "Duração habitual do ciclo (dias)",
+    d_conc: "Data da concepção",
+    d_ivf: "Data da transferência de embriões",
+    d_ivfday: "Idade do embrião na transferência",
+    d_day3: "Dia 3",
+    d_day5: "Dia 5 (blastocisto)",
+    d_clin: "Data do parto informada pelo meu profissional de saúde",
+    d_clin_h: "Se um profissional de saúde informou uma data provável do parto, por exemplo depois de um ultrassom no início da gravidez, digite aqui. Ela substitui a data calculada.",
+    d_clin_clear: "Remover a data do profissional",
+    d_result: "Data provável do parto (DPP)",
+    d_from_clin: "Usando a data do seu profissional",
+    f_lmp_n: "Primeiro dia da última menstruação + 280 dias + ({c} − 28) dias",
+    f_conc_n: "Data da concepção + 266 dias",
+    f_ivf3_n: "Data da transferência + 263 dias (embrião de dia 3)",
+    f_ivf5_n: "Data da transferência + 261 dias (embrião de dia 5)",
+    d_ga: "Idade gestacional",
+    d_tri: "Trimestre",
+    tri_1: "Primeiro trimestre",
+    tri_2: "Segundo trimestre",
+    tri_3: "Terceiro trimestre",
+    d_togo: "Dias que faltam",
+    d_due_today: "A data provável do parto é hoje",
+    d_past: "{days} depois da data provável",
+    d_range: "A maioria dos bebês nasce entre 37 e 42 semanas. Só uma pequena parte nasce exatamente na data provável.",
+    d_err_far: "Isso dá mais de 44 semanas. Confira a data.",
+    d_err_ahead: "Isso dá uma data do parto a mais de 40 semanas. Confira a data.",
+    d_empty: "Digite uma data para ver sua data provável do parto.",
+    d_clear: "Apagar minhas datas",
+    d_clear_h: "Você pode apagar essas datas a qualquer momento.",
+    d_clear_q: "Apagar as datas desta seção? Seus registros e listas continuam salvos até você apagá-los em Seus dados.",
+    d_clear_ok: "Apagar datas",
+    d_cleared: "Datas apagadas.",
+    w_title: "Semana {n}",
+    w_prev: "Semana anterior",
+    w_next: "Próxima semana",
+    w_baby: "O bebê",
+    w_you: "Seu corpo",
+    w_tip: "Dica",
+    w_current: "Esta semana",
+    w_nodate: "Adicione uma data do parto para ir direto à sua semana atual.",
+    w_loading: "Carregando…",
+    w_error: "Não foi possível carregar as notas da semana. Verifique sua conexão e tente de novo.",
+    w_retry: "Tentar de novo",
+    w_note: "Informação geral. Cada gravidez é diferente, então converse com seu profissional de saúde sobre qualquer coisa que te preocupe.",
+    w_after40: "Depois de 40 semanas, seu profissional de saúde vai conversar com você sobre os próximos passos.",
+    a_intro: "Itens comuns. O calendário do seu profissional de saúde pode ser diferente.",
+    a_who: "A Organização Mundial da Saúde recomenda pelo menos 8 contatos com profissionais de saúde durante a gravidez.",
+    a_t1: "Primeiro trimestre (até 13 semanas e 6 dias)",
+    a_t2: "Segundo trimestre (de 14 a 27 semanas)",
+    a_t3: "Terceiro trimestre (a partir de 28 semanas)",
+    a_now: "Agora",
+    ap_a1: "Primeira consulta de pré-natal com médico, enfermeiro ou unidade de saúde, de preferência nas primeiras 10 a 12 semanas",
+    ap_a2: "Histórico de saúde, pressão arterial, peso e exame de urina",
+    ap_a3: "Exames de sangue, como tipo sanguíneo, pesquisa de anemia e de infecções como HIV, hepatite B e sífilis",
+    ap_a4: "Ultrassom para datar a gravidez, muitas vezes no primeiro trimestre",
+    ap_a5: "Informações sobre exames opcionais de rastreamento de algumas condições genéticas",
+    ap_a6: "Revisão de remédios, suplementos como o ácido fólico e vacinas como a da gripe",
+    ap_b1: "Consultas regulares: pressão arterial, urina e batimentos do bebê",
+    ap_b2: "Ultrassom detalhado (morfológico), muitas vezes entre 18 e 22 semanas",
+    ap_b3: "Exame para diabetes gestacional, se oferecido, muitas vezes entre 24 e 28 semanas",
+    ap_b4: "Vacina contra coqueluche; o momento varia conforme o país",
+    ap_b5: "Medida da barriga para acompanhar o crescimento do bebê",
+    ap_b6: "Um momento para falar de como você se sente e das suas preocupações",
+    ap_c1: "Consultas mais frequentes, muitas vezes a cada 2 semanas e depois semanais no final",
+    ap_c2: "Exames de sangue para anemia, e imunoglobulina anti-D se o seu sangue for Rh negativo",
+    ap_c3: "Pergunte quais outras vacinas são recomendadas onde você mora, como a do VSR",
+    ap_c4: "Exame para estreptococo do grupo B em alguns países, por volta de 36 a 37 semanas",
+    ap_c5: "Verificação da posição do bebê, por volta de 36 semanas",
+    ap_c6: "Plano de parto: onde, com quem, como você vai chegar e quando ligar",
+    ap_c7: "Se passar de 41 semanas, uma conversa com seu profissional sobre os próximos passos",
+    ap_c8: "Planos para depois do parto: alimentação do bebê, apoio e sua consulta de pós-parto",
+    mv_intro: "Alguns profissionais pedem para contar os movimentos; outros recomendam conhecer o padrão habitual do seu bebê. Use este registro só se ajudar. Ele não julga nem confere os números.",
+    mv_safety: "Se os movimentos do seu bebê diminuírem, pararem ou mudarem, procure a maternidade ou seu profissional de saúde imediatamente. Não espere até o dia seguinte.",
+    mv_tap: "Senti um movimento",
+    mv_tap_h: "Toque cada vez que sentir um movimento.",
+    mv_session: "Sessão atual",
+    mv_started: "Começou às {time}",
+    mv_n_one: "{n} movimento",
+    mv_n_other: "{n} movimentos",
+    mv_last: "Último às {time}",
+    mv_undo: "Desfazer o último",
+    mv_finish: "Encerrar sessão",
+    mv_idle: "Toque no botão para começar uma sessão.",
+    mv_history: "Histórico",
+    mv_empty: "Ainda não há sessões.",
+    mv_del: "Excluir esta sessão",
+    mv_del_q: "Excluir esta sessão do registro?",
+    mv_clear: "Apagar o registro de movimentos",
+    mv_clear_q: "Excluir todas as sessões de movimentos deste dispositivo?",
+    ct_intro: "Toque quando uma contração começar e de novo quando terminar. O cronômetro mostra quanto dura cada uma e o intervalo entre o início de uma e o da seguinte. Ele não diz o que o padrão significa.",
+    ct_safety: "Se tiver dúvida, ligue para a maternidade.",
+    ct_call: "Ligue para a maternidade imediatamente se a bolsa estourar, se houver sangramento, se o bebê estiver se mexendo menos, se a gestação tiver menos de 37 semanas ou se algo te preocupar.",
+    ct_start: "Contração começou",
+    ct_stop: "Contração terminou",
+    ct_start_h: "Toque quando uma contração começar.",
+    ct_stop_h: "Toque quando terminar.",
+    ct_last_hour: "Última hora",
+    ct_n_one: "{n} contração",
+    ct_n_other: "{n} contrações",
+    ct_avg_len: "Duração média",
+    ct_avg_gap: "Intervalo médio",
+    ct_hist: "Histórico",
+    ct_col_start: "Início",
+    ct_col_len: "Duração",
+    ct_col_gap: "Intervalo",
+    ct_empty: "Nenhuma contração cronometrada ainda.",
+    ct_undo: "Desfazer a última",
+    ct_clear: "Apagar o histórico de contrações",
+    ct_clear_q: "Excluir todas as contrações cronometradas deste dispositivo?",
+    ct_note: "O que a equipe da maternidade disse sobre quando ligar",
+    ct_note_ph: "Por exemplo, as orientações e o telefone deles",
+    ct_note_h: "Fica salvo só neste dispositivo.",
+    h_lead: "Procure ajuda médica urgente imediatamente se você tiver algum destes sinais:",
+    rf_pain: "Dor forte no pé da barriga, principalmente de um lado",
+    rf_shoulder: "Dor na ponta do ombro",
+    rf_bleed: "Sangramento vaginal intenso",
+    rf_faint: "Desmaio, ou muita tontura ou sensação de desmaio",
+    rf_head: "Dor de cabeça forte que não passa, ou alterações na visão, principalmente no fim da gravidez",
+    rf_swell: "Inchaço repentino do rosto, das mãos ou dos pés",
+    rf_fluid: "Perda de líquido pela vagina",
+    rf_moves: "O bebê se mexendo menos que o normal, ou uma mudança no padrão dos movimentos",
+    rf_chest: "Dor no peito, coração muito acelerado ou falta de ar",
+    rf_fever: "Febre alta, ou vômitos tão frequentes que você não consegue manter líquidos",
+    rf_harm: "Pensamentos de fazer mal a você ou ao bebê",
+    h_other: "Para outras preocupações, ligue para a maternidade, para seu profissional de saúde ou para um serviço local de orientação em saúde. Se não souber se é urgente, ligue mesmo assim e confie no que você sente.",
+    h_contact: "Minha maternidade ou profissional de saúde",
+    h_contact_h: "Salve um nome e um número para ligar daqui. Fica salvo só neste dispositivo.",
+    h_name: "Nome",
+    h_phone: "Telefone",
+    h_call_btn: "Ligar para {name}",
+    h_call_default: "minha maternidade",
+    dt_where: "Tudo o que você digita aqui fica salvo só neste dispositivo, no banco de dados local deste navegador. Não entra nos backups da Mentria nem na sincronização entre dispositivos, e nunca é enviado para lugar nenhum.",
+    dt_evict: "Às vezes os navegadores apagam dados salvos, por exemplo quando falta espaço. Exporte uma cópia se quiser guardá-los.",
+    dt_export: "Exportar meus dados",
+    dt_export_h: "Baixa um arquivo JSON com suas respostas, datas, listas e registros.",
+    dt_exported: "Seu arquivo de dados está sendo baixado.",
+    dt_delete: "Apagar todos os meus dados",
+    dt_delete_q: "Apagar tudo o que esta extensão salvou neste dispositivo? Isso remove suas respostas, datas, listas e registros, e não pode ser desfeito.",
+    dt_delete_ok: "Apagar tudo",
+    dt_deleted: "Todos os dados foram apagados.",
+    dt_persist: "Pedir a este navegador para manter meus dados",
+    dt_persist_yes: "Este navegador concordou em manter seus dados, a menos que você os apague.",
+    dt_persist_no: "Este navegador não concordou. Exporte uma cópia de vez em quando, por segurança.",
+    dt_persist_na: "Este navegador não pode garantir isso. Exporte uma cópia de vez em quando, por segurança.",
+    ab_what: "Esta extensão oferece informações gerais, cálculos simples de datas e registros privados. Ela não detecta, não diagnostica nem monitora a gravidez, e não é um dispositivo médico.",
+    ab_how: "Como as datas são calculadas",
+    f_test: "Data do teste: o dia em que a próxima menstruação deve vir (primeiro dia da última menstruação + duração do ciclo). Se a menstruação é irregular ou você não sabe quando ela vem: 21 dias depois da última relação sem método contraceptivo.",
+    f_fertile: "Período fértil: a ovulação é estimada 14 dias antes da próxima menstruação. O período são os 5 dias antes desse dia mais o próprio dia.",
+    f_lmp: "Data do parto pela última menstruação: primeiro dia da última menstruação + 280 dias + (duração do ciclo − 28) dias.",
+    f_conc: "Data do parto pela concepção: data da concepção + 266 dias.",
+    f_ivf: "Data do parto por transferência de FIV: data da transferência + 263 dias para embrião de dia 3, ou + 261 dias para embrião de dia 5.",
+    f_clin: "Uma data do parto informada pelo seu profissional de saúde sempre substitui a data calculada.",
+    f_tri: "Trimestres: o primeiro vai até 13 semanas e 6 dias, o segundo de 14 semanas a 27 semanas e 6 dias, e o terceiro começa em 28 semanas.",
+    ab_src: "Fontes",
+    ab_src_h: "Os fatos aqui se baseiam nestas fontes públicas. O texto é nosso e nada é baixado desses sites.",
+    src_medline: "MedlinePlus (Biblioteca Nacional de Medicina dos EUA)",
+    src_cdc: "CDC (Centros de Controle e Prevenção de Doenças dos EUA)",
+    src_who: "Organização Mundial da Saúde",
+    src_nhs: "NHS (Serviço Nacional de Saúde do Reino Unido), só para fatos",
+    src_acog: "Perguntas frequentes para pacientes do ACOG (Colégio Americano de Obstetras e Ginecologistas)",
+    src_owh: "Escritório de Saúde da Mulher dos EUA (OWH)",
+    ab_privacy: "Sem anúncios, sem rastreamento, sem IA, e nada do que você digita sai deste dispositivo.",
+    ab_version: "Versão {v}"
+  };
+
+  var m = window.mentria || {};
+  var VERSION = (m.manifest && m.manifest.version) || '1.0.0';
+  var WEEKS_URL = '/assets/extensions/pregnancy-check/weeks.json';
+  var notify = typeof m.notify === 'function' ? m.notify : function () {};
+  var hasDb = !!(m.db && typeof m.db.get === 'function');
+  var db = hasDb ? m.db : memDb();
+
+  function memDb() {
+    var o = {};
+    return {
+      get: function (k) { return Promise.resolve(Object.prototype.hasOwnProperty.call(o, k) ? o[k] : null); },
+      set: function (k, v) { o[k] = v; return Promise.resolve(true); },
+      remove: function (k) { delete o[k]; return Promise.resolve(true); },
+      keys: function () { return Promise.resolve(Object.keys(o)); },
+      clear: function () { o = {}; return Promise.resolve(true); }
+    };
+  }
+
+  if (m.theme) {
+    var rootEl = document.documentElement;
+    var themeMap = { accent: '--accent', bg: '--bg', fg: '--fg', muted: '--muted', fontMono: '--mono' };
+    Object.keys(themeMap).forEach(function (k) { if (m.theme[k]) rootEl.style.setProperty(themeMap[k], m.theme[k]); });
+  }
+
+  function pick(code) {
+    var c = String(code || 'en');
+    if (STR[c]) return c;
+    var lc = c.toLowerCase();
+    if (lc.indexOf('pt') === 0) return 'pt-BR';
+    var base = lc.split('-')[0];
+    return STR[base] ? base : 'en';
+  }
+  var loc = pick(m.locale);
+
+  function t(key, vars) {
+    var table = STR[loc] || STR.en;
+    var s = table[key] != null ? table[key] : (STR.en[key] != null ? STR.en[key] : key);
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.split('{' + k + '}').join(String(vars[k])); });
+    return s;
+  }
+  function fmtNum(n) {
+    try { return new Intl.NumberFormat(loc).format(n); } catch (e) { return String(n); }
+  }
+  function plural(base, n) {
+    var cat = 'other';
+    try { cat = new Intl.PluralRules(loc).select(n); } catch (e) {}
+    if (n === 0 && loc === 'pt-BR') cat = 'other';
+    return t(base + '_' + (cat === 'one' ? 'one' : 'other'), { n: fmtNum(n) });
+  }
+  function fill(key, vars) {
+    var rest = t(key);
+    var out = [];
+    while (rest.length) {
+      var i = rest.indexOf('{');
+      var j = i < 0 ? -1 : rest.indexOf('}', i);
+      if (i < 0 || j < 0) { out.push(rest); break; }
+      var name = rest.slice(i + 1, j);
+      out.push(rest.slice(0, i));
+      out.push(vars && Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : '{' + name + '}');
+      rest = rest.slice(j + 1);
+    }
+    return out;
+  }
+
+  var DAY = 86400000;
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function dayNum(y, mo, d) { return Math.round(Date.UTC(y, mo, d) / DAY); }
+  function isoDay(n) {
+    var x = new Date(n * DAY);
+    return x.getUTCFullYear() + '-' + pad(x.getUTCMonth() + 1) + '-' + pad(x.getUTCDate());
+  }
+  function parseDay(s) {
+    if (typeof s !== 'string' || s.length !== 10 || s.charAt(4) !== '-' || s.charAt(7) !== '-') return null;
+    var y = Number(s.slice(0, 4));
+    var mo = Number(s.slice(5, 7));
+    var d = Number(s.slice(8, 10));
+    if (!(y >= 1900 && y <= 2200) || !(mo >= 1 && mo <= 12) || !(d >= 1 && d <= 31)) return null;
+    var n = dayNum(y, mo - 1, d);
+    return isoDay(n) === s ? n : null;
+  }
+  function todayNum() {
+    var x = new Date();
+    return dayNum(x.getFullYear(), x.getMonth(), x.getDate());
+  }
+  var fmtCache = {};
+  function dtf(key, opts) {
+    var k = loc + '|' + key;
+    if (!fmtCache[k]) {
+      try { fmtCache[k] = new Intl.DateTimeFormat(loc, opts); } catch (e) { fmtCache[k] = new Intl.DateTimeFormat('en', opts); }
+    }
+    return fmtCache[k];
+  }
+  function fDate(n) { return dtf('date', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(n * DAY)); }
+  function fDateShort(n) { return dtf('dshort', { timeZone: 'UTC', day: 'numeric', month: 'short' }).format(new Date(n * DAY)); }
+  function fMonth(n) { return dtf('month', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(new Date(n * DAY)); }
+  function fWeekday(n) { return dtf('wd', { timeZone: 'UTC', weekday: 'narrow' }).format(new Date(n * DAY)); }
+  function fWeekdayLong(n) { return dtf('wdl', { timeZone: 'UTC', weekday: 'long' }).format(new Date(n * DAY)); }
+  function fTime(ts) { return dtf('time', { hour: 'numeric', minute: '2-digit' }).format(new Date(ts)); }
+  function fDayTime(ts) { return dtf('daytime', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date(ts)); }
+  function fDur(sec) {
+    sec = Math.max(0, Math.round(sec));
+    var hh = Math.floor(sec / 3600);
+    var mi = Math.floor((sec % 3600) / 60);
+    var ss = sec % 60;
+    return (hh ? hh + ':' + pad(mi) : String(mi)) + ':' + pad(ss);
+  }
+  function localDay(ts) { var x = new Date(ts); return dayNum(x.getFullYear(), x.getMonth(), x.getDate()); }
+  function firstWeekday() {
+    try {
+      var L = new Intl.Locale(loc);
+      var wi = typeof L.getWeekInfo === 'function' ? L.getWeekInfo() : L.weekInfo;
+      if (wi && wi.firstDay) return wi.firstDay % 7;
+    } catch (e) {}
+    return { en: 0, es: 1, fr: 1, ja: 0, 'pt-BR': 0 }[loc] || 0;
+  }
+
+  function h(tag, props) {
+    var el = document.createElement(tag);
+    if (props) Object.keys(props).forEach(function (k) {
+      var v = props[k];
+      if (v == null || v === false) return;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k.indexOf('on') === 0) el.addEventListener(k.slice(2), v);
+      else if (k === 'value') el.value = v;
+      else if (k === 'checked') el.checked = true;
+      else el.setAttribute(k, v === true ? '' : String(v));
+    });
+    for (var i = 2; i < arguments.length; i++) addOne(el, arguments[i]);
+    return el;
+  }
+  function addOne(el, c) {
+    if (c == null || c === false) return;
+    if (Array.isArray(c)) { c.forEach(function (x) { addOne(el, x); }); return; }
+    el.appendChild(typeof c === 'object' ? c : document.createTextNode(String(c)));
+  }
+  function add(el) {
+    for (var i = 1; i < arguments.length; i++) addOne(el, arguments[i]);
+    return el;
+  }
+  var ICONS = {
+    back: 'M15 18l-6-6 6-6',
+    next: 'M9 18l6-6-6-6',
+    minus: 'M5 12h14',
+    plus: 'M12 5v14M5 12h14',
+    trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3'
+  };
+  function icon(name) {
+    var tpl = document.createElement('template');
+    tpl.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="' + ICONS[name] + '"></path></svg>';
+    return tpl.content.firstChild;
+  }
+  function iconBtn(name, label, onclick, disabled) {
+    return h('button', { class: 'iconbtn', type: 'button', 'aria-label': label, title: label, onclick: onclick, disabled: !!disabled }, icon(name));
+  }
+  var uidN = 0;
+  function uid(p) { uidN += 1; return 'pc-' + p + '-' + uidN; }
+
+  var KEYS = ['check', 'plan', 'preg', 'appts', 'moves', 'contr', 'contact'];
+  function defaults(k) {
+    if (k === 'check') return { step: 0, done: false, lmp: '', lmpUnsure: false, cycle: 28, cycleUnknown: false, regular: '', sex: '', sexDate: '', sexUnsure: false, symptoms: [], test: '', testDate: '', testUnsure: false };
+    if (k === 'plan') return { lmp: '', cycle: 28, ticks: {} };
+    if (k === 'preg') return { method: 'lmp', lmp: '', cycle: 28, conception: '', ivf: '', ivfDay: 5, clinician: '' };
+    if (k === 'moves') return { open: null, list: [] };
+    if (k === 'contr') return { running: 0, list: [], note: '' };
+    if (k === 'contact') return { name: '', phone: '' };
+    return {};
+  }
+  function copy(v) { return JSON.parse(JSON.stringify(v)); }
+  function clean(k, v) {
+    var d = defaults(k);
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return d;
+    if (k === 'appts') {
+      Object.keys(v).forEach(function (f) { if (v[f] === true) d[f] = true; });
+      return d;
+    }
+    Object.keys(d).forEach(function (f) {
+      var dv = d[f];
+      var vv = v[f];
+      if (vv === undefined || vv === null) return;
+      if (Array.isArray(dv)) { if (Array.isArray(vv)) d[f] = copy(vv); }
+      else if (dv === null || typeof dv === 'object') { if (typeof vv === 'object' && !Array.isArray(vv)) d[f] = copy(vv); }
+      else if (typeof vv === typeof dv) d[f] = vv;
+    });
+    return d;
+  }
+  var S = {};
+  KEYS.forEach(function (k) { S[k] = defaults(k); });
+
+  var saveTimers = {};
+  function writeKey(k) {
+    saveTimers[k] = 0;
+    return Promise.resolve(db.set(k, copy(S[k]))).then(function (ok) {
+      if (ok === false) notify(t('save_fail'));
+    }, function () { notify(t('save_fail')); });
+  }
+  function save(k, delay) {
+    clearTimeout(saveTimers[k]);
+    if (delay) saveTimers[k] = setTimeout(function () { writeKey(k); }, delay);
+    else writeKey(k);
+  }
+  function flush() {
+    Object.keys(saveTimers).forEach(function (k) {
+      if (saveTimers[k]) { clearTimeout(saveTimers[k]); writeKey(k); }
+    });
+  }
+  window.addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
+
+  function load() {
+    return Promise.all(KEYS.map(function (k) {
+      return Promise.resolve(db.get(k)).then(function (v) { S[k] = clean(k, v); }, function () {});
+    }));
+  }
+
+  var app = document.getElementById('app');
+  var view = 'home';
+  var sub = 'due';
+  var stack = [];
+  var tickers = [];
+  var weekSel = null;
+  var calMonth = null;
+
+  function go(v, s) {
+    if (v === view && (s == null || s === sub)) return;
+    stack.push([view, sub]);
+    view = v;
+    if (s) sub = s;
+    render(true);
+  }
+  function back() {
+    var p = stack.pop();
+    if (p) { view = p[0]; sub = p[1]; } else view = 'home';
+    render(true);
+  }
+  function titleFor(v) {
+    return { home: t('app_title'), check: t('nav_check'), plan: t('nav_plan'), preg: t('nav_preg'), help: t('nav_help'), data: t('nav_data'), about: t('nav_about') }[v] || t('app_title');
+  }
+
+  function render(focus) {
+    document.documentElement.lang = loc;
+    tickers = [];
+    var head = h('header', { class: 'top' },
+      view !== 'home' ? iconBtn('back', t('back'), back) : null,
+      h('h1', { tabindex: '-1', id: 'pc-title' }, titleFor(view)),
+      h('button', { class: 'helpbtn', type: 'button', 'aria-label': t('help_btn'), 'aria-current': view === 'help' ? 'page' : null, onclick: function () { go('help'); } },
+        h('span', { class: 'hl' }, t('help_btn')), h('span', { class: 'hs', 'aria-hidden': 'true' }, t('help_short')))
+    );
+    var main = h('main', { class: 'view' });
+    if (!hasDb) add(main, h('div', { class: 'note warn' }, t('no_db')));
+    VIEWS[view](main);
+    var foot = h('p', { class: 'foot' }, t('disclaimer'));
+    app.textContent = '';
+    add(app, [head, main, foot]);
+    if (focus) {
+      window.scrollTo(0, 0);
+      var tt = document.getElementById('pc-title');
+      if (tt) { try { tt.focus({ preventScroll: true }); } catch (e) { tt.focus(); } }
+    }
+  }
+
+  function ask(msgKey, okKey, onOk) {
+    var before = document.activeElement;
+    var msgId = uid('dlg');
+    var dlg = h('dialog', { class: 'dlg', 'aria-labelledby': msgId });
+    var cancel = h('button', { class: 'btn', type: 'button', onclick: function () { close(false); } }, t('cancel'));
+    var ok = h('button', { class: 'btn danger', type: 'button', onclick: function () { close(true); } }, t(okKey));
+    var done = false;
+    function close(yes) {
+      if (done) return;
+      done = true;
+      if (typeof dlg.close === 'function' && dlg.open) dlg.close();
+      dlg.remove();
+      if (yes) onOk();
+      var target = before && document.body.contains(before) ? before : document.getElementById('pc-title');
+      if (target) { try { target.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    add(dlg, [h('p', { id: msgId }, t(msgKey)), h('div', { class: 'row end' }, cancel, ok)]);
+    dlg.addEventListener('cancel', function (e) { e.preventDefault(); close(false); });
+    document.body.appendChild(dlg);
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    cancel.focus();
+  }
+
+  function setOn(input) {
+    var lab = input.closest('.opt');
+    if (lab) lab.classList.toggle('is-on', input.checked);
+  }
+  function syncGroup(container) {
+    Array.prototype.forEach.call(container.querySelectorAll('.opt input'), setOn);
+  }
+  function optRow(type, name, value, label, checked, onchange) {
+    var input = h('input', { type: type, name: name, value: value, checked: !!checked });
+    input.addEventListener('change', function () { onchange(input); });
+    return h('label', { class: 'opt' + (checked ? ' is-on' : '') }, input, h('span', null, label));
+  }
+  function dateField(label, value, opts) {
+    opts = opts || {};
+    var id = uid('d');
+    var input = h('input', { type: 'date', id: id, value: value || '', max: opts.max || null, min: opts.min || null, disabled: !!opts.disabled });
+    var err = h('p', { class: 'err', 'aria-live': 'polite' });
+    input.addEventListener('change', function () { opts.onchange(input.value, err); });
+    input.addEventListener('input', function () { opts.onchange(input.value, err); });
+    return { el: h('div', { class: 'field' }, h('label', { for: id }, label), input, err), input: input, err: err };
+  }
+  function stepper(label, value, onchange) {
+    var id = uid('n');
+    var input = h('input', { type: 'number', id: id, inputmode: 'numeric', min: '20', max: '45', step: '1', value: String(value) });
+    var err = h('p', { class: 'err', 'aria-live': 'polite' });
+    function apply(v) {
+      var n = parseInt(v, 10);
+      if (!(n >= 20 && n <= 45)) { err.textContent = t('err_cycle'); onchange(null); return; }
+      err.textContent = '';
+      onchange(n);
+    }
+    input.addEventListener('input', function () { apply(input.value); });
+    function bump(d) {
+      var n = parseInt(input.value, 10);
+      if (!(n >= 20 && n <= 45)) n = 28;
+      n = Math.min(45, Math.max(20, n + d));
+      input.value = String(n);
+      apply(n);
+    }
+    var wrap = h('div', { class: 'stepper' }, iconBtn('minus', t('less'), function () { bump(-1); }), input, iconBtn('plus', t('more'), function () { bump(1); }));
+    return { el: h('div', { class: 'field' }, h('label', { for: id }, label), wrap, err), input: input, err: err };
+  }
+  function dateErr(n, T, allowFuture) {
+    if (n == null) return 'err_date';
+    if (!allowFuture && n > T) return 'err_future';
+    if (n < T - 366) return 'err_old';
+    return '';
+  }
+
+  function eddInfo() {
+    var p = S.preg;
+    var T = todayNum();
+    var clin = parseDay(p.clinician);
+    var edd = null;
+    var formula = '';
+    var srcErr = '';
+    if (clin != null) edd = clin;
+    else if (p.method === 'lmp') {
+      var l = parseDay(p.lmp);
+      var cyc = p.cycle >= 20 && p.cycle <= 45 ? p.cycle : 28;
+      if (l != null) {
+        if (l > T) srcErr = 'err_future';
+        else { edd = l + 280 + (cyc - 28); formula = t('f_lmp_n', { c: cyc }); }
+      }
+    } else if (p.method === 'conc') {
+      var cd = parseDay(p.conception);
+      if (cd != null) {
+        if (cd > T) srcErr = 'err_future';
+        else { edd = cd + 266; formula = t('f_conc_n'); }
+      }
+    } else if (p.method === 'ivf') {
+      var td = parseDay(p.ivf);
+      if (td != null) {
+        if (td > T) srcErr = 'err_future';
+        else { edd = td + (p.ivfDay === 3 ? 263 : 261); formula = t(p.ivfDay === 3 ? 'f_ivf3_n' : 'f_ivf5_n'); }
+      }
+    }
+    if (edd == null) return srcErr ? { err: srcErr } : null;
+    var ga = 280 - (edd - T);
+    var bad = ga > 308 ? 'd_err_far' : (ga < 0 ? 'd_err_ahead' : '');
+    return { edd: edd, ga: ga, w: Math.floor(ga / 7), d: ((ga % 7) + 7) % 7, tri: ga < 98 ? 1 : (ga < 196 ? 2 : 3), left: edd - T, clin: clin != null, formula: formula, bad: bad };
+  }
+  function gaText(w, d) {
+    return t('ga', { w: plural('wk', w), d: plural('dy', d), wn: fmtNum(w), dn: fmtNum(d) });
+  }
+
+  var VIEWS = {};
+
+  VIEWS.home = function (main) {
+    add(main, h('p', { class: 'lede' }, t('app_sub')));
+    var info = eddInfo();
+    var chip = info && info.edd != null && !info.bad ? gaText(info.w, info.d) + ' · ' + t('tri_' + info.tri) : null;
+    var tiles = [
+      ['check', '🧪', ''],
+      ['plan', '📅', ''],
+      ['preg', '🤰', chip],
+      ['help', '📞', ''],
+      ['data', '🔒', ''],
+      ['about', 'ℹ️', '']
+    ];
+    var grid = h('div', { class: 'grid' });
+    tiles.forEach(function (x) {
+      add(grid, h('button', { class: 'tile' + (x[0] === 'help' ? ' urgent' : ''), type: 'button', onclick: function () { go(x[0]); } },
+        h('span', { class: 'tile__icon', 'aria-hidden': 'true' }, x[1]),
+        h('span', { class: 'tile__text' },
+          h('span', { class: 'tile__name' }, t('nav_' + x[0])),
+          h('span', { class: 'tile__desc' }, t('nav_' + x[0] + '_d')),
+          x[2] ? h('span', { class: 'tile__chip' }, x[2]) : null)));
+    });
+    add(main, grid);
+  };
+
+  var STEP_IDS = ['lmp', 'cycle', 'regular', 'sex', 'sexDate', 'symptoms', 'test', 'testDate'];
+  var SYMS = ['late', 'sick', 'breasts', 'tired', 'pee', 'spot', 'none'];
+  function checkSteps() {
+    var c = S.check;
+    return STEP_IDS.filter(function (id) {
+      if (id === 'sexDate') return c.sex === 'yes' || c.sex === 'problem';
+      if (id === 'testDate') return c.test === 'pos' || c.test === 'neg' || c.test === 'unclear';
+      return true;
+    });
+  }
+  function stepError(id) {
+    var c = S.check;
+    var T = todayNum();
+    if (id === 'lmp') return c.lmpUnsure ? '' : dateErr(parseDay(c.lmp), T);
+    if (id === 'cycle') return c.cycleUnknown || (c.cycle >= 20 && c.cycle <= 45) ? '' : 'err_cycle';
+    if (id === 'regular') return c.regular ? '' : 'need_answer';
+    if (id === 'sex') return c.sex ? '' : 'need_answer';
+    if (id === 'sexDate') {
+      if (c.sexUnsure) return '';
+      var sd = parseDay(c.sexDate);
+      var se = dateErr(sd, T);
+      if (se) return se;
+      var lp = c.lmpUnsure ? null : parseDay(c.lmp);
+      return lp != null && sd < lp ? 'err_before' : '';
+    }
+    if (id === 'symptoms') return c.symptoms.length ? '' : 'need_answer';
+    if (id === 'test') return c.test ? '' : 'need_answer';
+    if (id === 'testDate') return c.testUnsure ? '' : dateErr(parseDay(c.testDate), T);
+    return '';
+  }
+
+  VIEWS.check = function (main) {
+    var c = S.check;
+    if (c.done) { checkResults(main); return; }
+    var list = checkSteps();
+    if (c.step >= list.length) c.step = list.length - 1;
+    if (c.step < 0) c.step = 0;
+    var id = list[c.step];
+    var T = todayNum();
+    var errEl = h('p', { class: 'err', 'aria-live': 'polite' });
+    var eyebrowEl = h('p', { class: 'eyebrow' });
+    var barEl = h('span');
+    var submitBtn = h('button', { class: 'btn primary', type: 'submit' });
+    function updMeta() {
+      var n = checkSteps().length;
+      eyebrowEl.textContent = t('q_of', { i: fmtNum(c.step + 1), n: fmtNum(n) });
+      barEl.style.width = Math.round(((c.step + 1) / n) * 100) + '%';
+      submitBtn.textContent = t(c.step >= n - 1 ? 'see_results' : 'next');
+    }
+    function changed() { errEl.textContent = ''; save('check', 250); updMeta(); }
+    updMeta();
+
+    add(main, eyebrowEl);
+    add(main, h('div', { class: 'progress', 'aria-hidden': 'true' }, barEl));
+
+    var fs = h('fieldset');
+    function legend(key, hintKey) {
+      var hintId = hintKey ? uid('hint') : null;
+      add(fs, h('legend', null, t(key)));
+      if (hintKey) add(fs, h('p', { class: 'hint', id: hintId }, t(hintKey)));
+      return hintId;
+    }
+    function dateStep(qKey, hintKey, lblKey, valKey, unsureKey) {
+      legend(qKey, hintKey);
+      var df = dateField(t(lblKey), c[valKey], { max: isoDay(T), disabled: c[unsureKey], onchange: function (v) { c[valKey] = v; changed(); } });
+      add(fs, df.el);
+      add(fs, h('div', { class: 'opts' }, optRow('checkbox', unsureKey, '1', t('unsure'), c[unsureKey], function (inp) {
+        c[unsureKey] = inp.checked;
+        df.input.disabled = inp.checked;
+        setOn(inp);
+        changed();
+      })));
+    }
+    function radioStep(qKey, hintKey, field, options) {
+      legend(qKey, hintKey);
+      var box = h('div', { class: 'opts', role: 'radiogroup' });
+      options.forEach(function (o) {
+        add(box, optRow('radio', field, o[0], t(o[1]), c[field] === o[0], function (inp) {
+          if (inp.checked) c[field] = o[0];
+          syncGroup(box);
+          changed();
+        }));
+      });
+      add(fs, box);
+    }
+
+    if (id === 'lmp') dateStep('q_lmp', 'q_lmp_h', 'q_lmp_lbl', 'lmp', 'lmpUnsure');
+    else if (id === 'cycle') {
+      legend('q_cycle', 'q_cycle_h');
+      var st = stepper(t('q_cycle_lbl'), c.cycle, function (n) { if (n != null) c.cycle = n; changed(); });
+      st.input.disabled = c.cycleUnknown;
+      add(fs, st.el);
+      add(fs, h('div', { class: 'opts' }, optRow('checkbox', 'cycleUnknown', '1', t('dont_know'), c.cycleUnknown, function (inp) {
+        c.cycleUnknown = inp.checked;
+        st.input.disabled = inp.checked;
+        setOn(inp);
+        changed();
+      })));
+    }
+    else if (id === 'regular') radioStep('q_reg', 'q_reg_h', 'regular', [['yes', 'reg_yes'], ['no', 'reg_no'], ['unsure', 'unsure']]);
+    else if (id === 'sex') radioStep('q_sex', null, 'sex', [['yes', 'sex_yes'], ['problem', 'sex_problem'], ['no', 'sex_no'], ['unsure', 'unsure']]);
+    else if (id === 'sexDate') dateStep('q_sexdate', 'q_sexdate_h', 'q_sexdate_lbl', 'sexDate', 'sexUnsure');
+    else if (id === 'symptoms') {
+      legend('q_sym', 'q_sym_h');
+      var box = h('div', { class: 'opts' });
+      SYMS.forEach(function (s) {
+        add(box, optRow('checkbox', 'sym', s, t('sym_' + s), c.symptoms.indexOf(s) >= 0, function (inp) {
+          var set = c.symptoms.filter(function (x) { return x !== s; });
+          if (inp.checked) {
+            if (s === 'none') set = ['none'];
+            else set = set.filter(function (x) { return x !== 'none'; }).concat([s]);
+          }
+          c.symptoms = set;
+          Array.prototype.forEach.call(box.querySelectorAll('input'), function (el) { el.checked = set.indexOf(el.value) >= 0; });
+          syncGroup(box);
+          changed();
+        }));
+      });
+      add(fs, box);
+    }
+    else if (id === 'test') radioStep('q_test', null, 'test', [['no', 'test_no'], ['pos', 'test_pos'], ['neg', 'test_neg'], ['unclear', 'test_unclear']]);
+    else if (id === 'testDate') dateStep('q_testdate', null, 'q_testdate_lbl', 'testDate', 'testUnsure');
+
+    var form = h('form', { novalidate: true, onsubmit: function (e) {
+      e.preventDefault();
+      var k = stepError(id);
+      if (k) { errEl.textContent = t(k); return; }
+      if (checkSteps().length - 1 <= c.step) c.done = true; else c.step += 1;
+      save('check');
+      render(true);
+    } }, fs, errEl,
+      h('div', { class: 'actions' },
+        c.step > 0 ? h('button', { class: 'btn', type: 'button', onclick: function () { c.step -= 1; save('check'); render(true); } }, t('prev')) : null,
+        submitBtn));
+    add(main, form);
+  };
+
+  function checkResults(main) {
+    var c = S.check;
+    var T = todayNum();
+    var lmp = c.lmpUnsure ? null : parseDay(c.lmp);
+    var cyc = c.cycleUnknown ? null : c.cycle;
+    var sexy = c.sex === 'yes' || c.sex === 'problem';
+    var sexD = sexy && !c.sexUnsure ? parseDay(c.sexDate) : null;
+    var due = c.regular === 'yes' && lmp != null && cyc ? lmp + cyc : null;
+    var d21 = sexD != null ? sexD + 21 : null;
+    var from = due != null ? due : d21;
+    var testD = c.test !== 'no' && !c.testUnsure ? parseDay(c.testDate) : null;
+
+    add(main, h('div', { class: 'note' }, h('strong', null, t('r_confirm'))));
+
+    add(main, h('h2', null, t('r_when')));
+    var card = h('div', { class: 'card' });
+    if (from != null) {
+      add(card, h('p', { class: 'big' }, fill('r_from', { date: fDate(from) })));
+      add(card, h('p', null, due != null ? t('r_basis_period', { days: plural('dy', cyc) }) : t('r_basis_sex')));
+      if (t('r_local')) add(card, h('div', { class: 'note warn' }, t('r_local')));
+      if (from < T) add(card, h('p', null, h('strong', null, t('r_passed'))));
+      else if (from === T) add(card, h('p', null, h('strong', null, t('r_today'))));
+      else {
+        add(card, h('p', null, h('strong', null, t('r_future', { days: plural('dy', from - T) }))));
+        add(card, h('p', { class: 'muted small' }, t('r_early')));
+      }
+      if (due != null && d21 != null && d21 > due) add(card, h('p', null, fill('r_also21', { date: h('strong', null, fDate(d21)) })));
+    } else {
+      add(card, h('p', null, t('r_basis_none')));
+      if (t('r_local')) add(card, h('div', { class: 'note warn' }, t('r_local')));
+    }
+    add(main, card);
+
+    add(main, h('h2', null, t('r_meaning')));
+    var items = [];
+    if (c.test === 'pos') items.push(t('t_pos'));
+    if (c.test === 'neg') {
+      items.push(t('t_neg'));
+      if (testD != null && from != null && testD < from) items.push(t('t_neg_early', { date: fDate(from) }));
+    }
+    if (c.test === 'unclear') items.push(t('t_unclear'));
+    if (due != null) items.push(t(due <= T ? 'm_due_passed' : 'm_due_future', { date: fDate(due) }));
+    var syms = c.symptoms || [];
+    if (syms.indexOf('late') >= 0 || (due != null && due < T)) items.push(t(sexy ? 'm_late_sex' : 'm_late'));
+    var early = syms.filter(function (s) { return s === 'sick' || s === 'breasts' || s === 'tired' || s === 'pee'; });
+    if (early.length) {
+      items.push([h('span', { class: 'row', style: 'gap:6px;margin-bottom:6px' }, early.map(function (s) { return h('span', { class: 'badge warn' }, t('sym_' + s)); })), t('m_sym')]);
+    }
+    if (syms.indexOf('spot') >= 0) items.push(t('m_spot'));
+    if (syms.indexOf('none') >= 0) items.push(t('m_none'));
+    if (sexy && (sexD == null || T - sexD <= 5)) items.push(t('m_ec'));
+    if (c.sex === 'problem') items.push(t('m_problem'));
+    if (c.sex === 'no') items.push(t('m_nosex'));
+    if (c.sex === 'unsure') items.push(t('m_unsure_sex'));
+    add(main, h('ul', { class: 'plain' }, items.map(function (x) { return h('li', null, x); })));
+
+    add(main, h('h2', null, t('r_next')));
+    var nextKeys = c.test === 'pos' ? ['n_clin', 'n_care', 'n_talk'] : [from != null ? 'n_test' : 'n_test_nodate', 'n_repeat', 'n_clin', 'n_care', 'n_talk'];
+    add(main, h('ul', { class: 'plain' }, nextKeys.map(function (k) { return h('li', null, t(k)); })));
+
+    add(main, h('h2', null, t('r_urgent')));
+    add(main, h('ul', { class: 'rf' }, ['pain', 'shoulder', 'bleed', 'faint'].map(function (k) { return h('li', null, t('rf_' + k)); })));
+    add(main, h('p', { class: 'callout' }, t('r_call')));
+    add(main, h('button', { class: 'btn danger wide', type: 'button', onclick: function () { go('help'); } }, t('help_btn')));
+
+    add(main, h('p', { class: 'muted small', style: 'margin-top:16px' }, t('r_saved')));
+    add(main, h('div', { class: 'actions' },
+      h('button', { class: 'btn', type: 'button', onclick: function () { c.done = false; c.step = 0; save('check'); render(true); } }, t('r_change')),
+      h('button', { class: 'btn', type: 'button', onclick: function () { S.check = defaults('check'); save('check'); render(true); } }, t('r_restart'))));
+  }
+
+  var PC_IDS = ['folic', 'meds', 'vacc', 'smoke', 'alcohol', 'drugs', 'weight', 'chem', 'history', 'mind'];
+
+  function cycleMarks(lmp, cyc, dn) {
+    if (lmp == null || dn < lmp) return null;
+    var pos = (dn - lmp) % cyc;
+    return { period: pos === 0, ov: pos === cyc - 14, fertile: pos >= cyc - 19 && pos <= cyc - 14 };
+  }
+  function nextWindow(lmp, cyc, T) {
+    var k = 0;
+    while (lmp + (k + 1) * cyc - 14 < T && k < 400) k += 1;
+    var ov = lmp + (k + 1) * cyc - 14;
+    return { start: ov - 5, ov: ov, next: lmp + (k + 1) * cyc };
+  }
+  function monthStart(n) { var x = new Date(n * DAY); return dayNum(x.getUTCFullYear(), x.getUTCMonth(), 1); }
+  function addMonths(ms, k) { var x = new Date(ms * DAY); return dayNum(x.getUTCFullYear(), x.getUTCMonth() + k, 1); }
+
+  function calendar(lmp, cyc, T, onMove) {
+    var ms = calMonth;
+    var x = new Date(ms * DAY);
+    var daysIn = new Date(Date.UTC(x.getUTCFullYear(), x.getUTCMonth() + 1, 0)).getUTCDate();
+    var fw = firstWeekday();
+    var lead = (x.getUTCDay() - fw + 7) % 7;
+    var head = h('tr');
+    for (var i = 0; i < 7; i++) {
+      var ref = dayNum(2024, 0, 7 + ((fw + i) % 7));
+      add(head, h('th', { scope: 'col', abbr: fWeekdayLong(ref) }, fWeekday(ref)));
+    }
+    var body = h('tbody');
+    var row = h('tr');
+    for (var b = 0; b < lead; b++) add(row, h('td'));
+    for (var d = 0; d < daysIn; d++) {
+      var dn = ms + d;
+      var mk = cycleMarks(lmp, cyc, dn);
+      var cls = 'd';
+      var words = [];
+      if (mk && mk.fertile) { cls += ' fertile'; words.push(t('lg_fertile')); }
+      if (mk && mk.ov) { cls += ' ov'; words.push(t('lg_ov')); }
+      if (mk && mk.period) { cls += ' period'; words.push(t('lg_period')); }
+      if (dn === T) { cls += ' today'; words.push(t('lg_today')); }
+      add(row, h('td', null, h('div', { class: cls }, String(d + 1), words.length ? h('span', { class: 'vh' }, ', ' + words.join(', ')) : null)));
+      if (row.children.length === 7) { add(body, row); row = h('tr'); }
+    }
+    if (row.children.length) { while (row.children.length < 7) add(row, h('td')); add(body, row); }
+    var label = fMonth(ms);
+    return h('div', null,
+      h('div', { class: 'calhead' },
+        iconBtn('back', t('cal_prev'), function () { onMove(-1); }),
+        h('strong', { 'aria-live': 'polite' }, label),
+        iconBtn('next', t('cal_next'), function () { onMove(1); })),
+      h('table', { class: 'cal' }, h('caption', { class: 'vh' }, label), h('thead', null, head), body),
+      h('ul', { class: 'legend' },
+        h('li', null, h('span', { class: 'sw fertile', 'aria-hidden': 'true' }), t('lg_fertile')),
+        h('li', null, h('span', { class: 'sw ov', 'aria-hidden': 'true' }), t('lg_ov')),
+        h('li', null, h('span', { class: 'sw period', 'aria-hidden': 'true' }), t('lg_period')),
+        h('li', null, h('span', { class: 'sw today', 'aria-hidden': 'true' }), t('lg_today'))));
+  }
+
+  VIEWS.plan = function (main) {
+    var p = S.plan;
+    var T = todayNum();
+    if (!p.lmp && S.check.lmp && !S.check.lmpUnsure) {
+      p.lmp = S.check.lmp;
+      if (!S.check.cycleUnknown) p.cycle = S.check.cycle;
+    }
+    add(main, h('p', { class: 'lede' }, t('p_intro')));
+    add(main, h('div', { class: 'note warn' }, h('strong', null, t('p_estimate'))));
+    var out = h('div');
+    var df = dateField(t('p_lmp'), p.lmp, { max: isoDay(T), onchange: function (v, err) {
+      p.lmp = v;
+      var n = parseDay(v);
+      err.textContent = v && n == null ? '' : (n != null ? (n > T ? t('err_future') : (n < T - 366 ? t('err_old') : '')) : '');
+      calMonth = null;
+      save('plan', 250);
+      upd();
+    } });
+    var st = stepper(t('p_cycle'), p.cycle, function (n) {
+      if (n != null) { p.cycle = n; calMonth = null; save('plan', 250); }
+      upd();
+    });
+    add(main, h('div', { class: 'card' }, df.el, st.el));
+    add(main, out);
+
+    function upd() {
+      out.textContent = '';
+      var lmp = parseDay(p.lmp);
+      var cyc = p.cycle >= 20 && p.cycle <= 45 ? p.cycle : 28;
+      if (lmp == null || lmp > T || lmp < T - 366) { add(out, h('p', { class: 'muted' }, t('p_empty'))); return; }
+      var w = nextWindow(lmp, cyc, T);
+      if (calMonth == null) calMonth = monthStart(w.start > T ? w.start : T);
+      var now = T >= w.start && T <= w.ov;
+      var sum = h('div', { class: 'card', 'aria-live': 'polite' },
+        h('p', { class: 'eyebrow' }, t(now ? 'p_window_now' : 'p_window')),
+        h('p', { class: 'big' }, t('p_range', { a: fDateShort(w.start), b: fDateShort(w.ov) })),
+        h('p', null, t('p_ov', { date: fDate(w.ov) })),
+        h('p', null, t('p_next', { date: fDate(w.next) })));
+      add(out, sum);
+      if (lmp + cyc <= T) {
+        add(out, h('div', { class: 'note warn' },
+          h('p', null, t('p_old', { date: fDate(lmp + cyc) })),
+          h('button', { class: 'btn', type: 'button', onclick: function () { go('check'); } }, t('nav_check'))));
+      }
+      add(out, h('div', { class: 'card' }, calendar(lmp, cyc, T, function (k) {
+        calMonth = addMonths(calMonth, k);
+        upd();
+        var btn = out.querySelector(k < 0 ? '.calhead .iconbtn' : '.calhead .iconbtn:last-child');
+        if (btn) btn.focus();
+      })));
+    }
+    upd();
+
+    add(main, h('ul', { class: 'plain' }, ['p_how', 'p_tip_sex', 'p_tip_irreg', 'p_tip_time'].map(function (k) { return h('li', null, t(k)); })));
+
+    add(main, h('h2', null, t('p_check')));
+    add(main, h('p', { class: 'hint' }, t('p_check_h')));
+    var ul = h('ul', { class: 'checks' });
+    PC_IDS.forEach(function (id) {
+      add(ul, h('li', null, optRow('checkbox', 'pc', id, t('pc_' + id), !!p.ticks[id], function (inp) {
+        if (inp.checked) p.ticks[id] = true; else delete p.ticks[id];
+        setOn(inp);
+        save('plan');
+      })));
+    });
+    add(main, ul);
+  };
+
+  var TABS = ['due', 'week', 'appts', 'moves', 'contr'];
+  VIEWS.preg = function (main) {
+    var nav = h('nav', { class: 'seg scroll', 'aria-label': t('nav_preg') });
+    TABS.forEach(function (id) {
+      add(nav, h('button', { type: 'button', 'aria-current': sub === id ? 'true' : null, onclick: function () {
+        if (sub === id) return;
+        sub = id;
+        if (id === 'week') weekSel = null;
+        render(false);
+        var b = document.querySelector('.seg button[aria-current="true"]');
+        if (b) b.focus();
+      } }, t('tab_' + id)));
+    });
+    add(main, nav);
+    PREG[sub] ? PREG[sub](main) : PREG.due(main);
+    var act = nav.querySelector('button[aria-current="true"]');
+    if (act) requestAnimationFrame(function () { nav.scrollLeft = Math.max(0, act.offsetLeft - nav.offsetLeft - 16); });
+  };
+
+  var PREG = {};
+  PREG.due = function (main) {
+    var p = S.preg;
+    var T = todayNum();
+    var res = h('div', { 'aria-live': 'polite' });
+    var groups = {};
+    var methodNav = h('div', { class: 'seg grid3', role: 'group', 'aria-label': t('d_method') });
+    [['lmp', 'dm_lmp'], ['conc', 'dm_conc'], ['ivf', 'dm_ivf']].forEach(function (mm) {
+      add(methodNav, h('button', { type: 'button', 'aria-pressed': p.method === mm[0] ? 'true' : 'false', onclick: function (e) {
+        p.method = mm[0];
+        Array.prototype.forEach.call(methodNav.children, function (b) { b.setAttribute('aria-pressed', b === e.currentTarget ? 'true' : 'false'); });
+        Object.keys(groups).forEach(function (g) { groups[g].hidden = g !== p.method; });
+        save('preg');
+        upd();
+      } }, t(mm[1])));
+    });
+    function onDate(field) {
+      return function (v) { p[field] = v; save('preg', 250); upd(); };
+    }
+    var lmpF = dateField(t('d_lmp'), p.lmp, { max: isoDay(T), onchange: onDate('lmp') });
+    var cycF = stepper(t('d_cycle'), p.cycle, function (n) { if (n != null) { p.cycle = n; save('preg', 250); } upd(); });
+    var concF = dateField(t('d_conc'), p.conception, { max: isoDay(T), onchange: onDate('conception') });
+    var ivfF = dateField(t('d_ivf'), p.ivf, { max: isoDay(T), onchange: onDate('ivf') });
+    var dayBox = h('div', { class: 'opts', role: 'radiogroup', 'aria-label': t('d_ivfday') });
+    [[3, 'd_day3'], [5, 'd_day5']].forEach(function (o) {
+      add(dayBox, optRow('radio', 'ivfday', String(o[0]), t(o[1]), p.ivfDay === o[0], function (inp) {
+        if (inp.checked) p.ivfDay = o[0];
+        syncGroup(dayBox);
+        save('preg');
+        upd();
+      }));
+    });
+    groups.lmp = h('div', { hidden: p.method !== 'lmp' }, lmpF.el, cycF.el);
+    groups.conc = h('div', { hidden: p.method !== 'conc' }, concF.el);
+    groups.ivf = h('div', { hidden: p.method !== 'ivf' }, ivfF.el, h('div', { class: 'field' }, h('span', { class: 'lbl', 'aria-hidden': 'true' }, t('d_ivfday')), dayBox));
+
+    add(main, res);
+    add(main, h('p', { class: 'eyebrow' }, t('d_method')));
+    add(main, methodNav);
+    add(main, h('div', { class: 'card' }, groups.lmp, groups.conc, groups.ivf));
+
+    var clinF = dateField(t('d_clin'), p.clinician, { onchange: function (v) { p.clinician = v; save('preg', 250); upd(); clearBtn.hidden = !v; } });
+    var clearBtn = h('button', { class: 'btn', type: 'button', hidden: !p.clinician, onclick: function () {
+      p.clinician = '';
+      clinF.input.value = '';
+      clearBtn.hidden = true;
+      save('preg');
+      upd();
+      clinF.input.focus();
+    } }, t('d_clin_clear'));
+    add(main, h('div', { class: 'card' }, clinF.el, h('p', { class: 'hint' }, t('d_clin_h')), clearBtn));
+
+    add(main, h('p', { class: 'muted small' }, t('d_range')));
+    add(main, h('div', { class: 'actions' }, h('button', { class: 'btn danger', type: 'button', onclick: function () {
+      ask('d_clear_q', 'd_clear_ok', function () {
+        S.preg = defaults('preg');
+        save('preg');
+        weekSel = null;
+        notify(t('d_cleared'));
+        render(false);
+      });
+    } }, t('d_clear'))));
+    add(main, h('p', { class: 'muted small' }, t('d_clear_h')));
+
+    function upd() {
+      res.textContent = '';
+      var info = eddInfo();
+      if (!info) { add(res, h('p', { class: 'muted' }, t('d_empty'))); return; }
+      if (info.err) { add(res, h('p', { class: 'err' }, t(info.err))); return; }
+      if (info.bad) { add(res, h('div', { class: 'note warn' }, t(info.bad))); return; }
+      var left = info.left > 0 ? plural('dy', info.left) : (info.left === 0 ? t('d_due_today') : t('d_past', { days: plural('dy', -info.left) }));
+      var card = h('div', { class: 'card' },
+        h('p', { class: 'eyebrow' }, t('d_result')),
+        h('p', { class: 'big' }, fDate(info.edd)),
+        info.clin ? h('span', { class: 'badge' }, t('d_from_clin')) : h('p', { class: 'formula' }, info.formula),
+        h('div', { class: 'stats' },
+          h('div', { class: 'stat' }, h('span', { class: 'eyebrow' }, t('d_ga')), h('b', null, gaText(info.w, info.d))),
+          h('div', { class: 'stat' }, h('span', { class: 'eyebrow' }, t('d_tri')), h('b', null, t('tri_' + info.tri))),
+          h('div', { class: 'stat' }, h('span', { class: 'eyebrow' }, t('d_togo')), h('b', null, left))));
+      add(res, card);
+      if (t('d_fr41')) add(res, h('div', { class: 'note' }, t('d_fr41', { date: fDate(info.edd + 7) })));
+    }
+    upd();
+  };
+
+  var weeks = null;
+  var weeksState = '';
+  var weekBox = null;
+  function loadWeeks() {
+    if (weeks || weeksState === 'loading') return;
+    weeksState = 'loading';
+    fetch(WEEKS_URL).then(function (r) {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }).then(function (j) { weeks = j; weeksState = ''; }, function () { weeksState = 'error'; }).then(function () {
+      if (weekBox && document.body.contains(weekBox)) fillWeek();
+    });
+  }
+  function fillWeek() {
+    if (!weekBox) return;
+    weekBox.textContent = '';
+    if (weeks) {
+      var table = weeks[loc] || weeks.en || {};
+      var e = table[String(weekSel)] || (weeks.en && weeks.en[String(weekSel)]);
+      if (!e) return;
+      [['b', 'w_baby'], ['y', 'w_you'], ['t', 'w_tip']].forEach(function (x) {
+        if (e[x[0]]) add(weekBox, h('div', { class: 'card wk' }, h('p', { class: 'eyebrow' }, t(x[1])), h('p', null, e[x[0]])));
+      });
+    } else if (weeksState === 'error') {
+      add(weekBox, h('div', { class: 'note warn' }, h('p', null, t('w_error')),
+        h('button', { class: 'btn', type: 'button', onclick: function () { weeksState = ''; fillWeek(); loadWeeks(); } }, t('w_retry'))));
+    } else {
+      add(weekBox, h('p', { class: 'muted' }, t('w_loading')));
+    }
+  }
+  PREG.week = function (main) {
+    var info = eddInfo();
+    var cur = info && info.edd != null && !info.bad ? info.w : null;
+    if (weekSel == null) weekSel = cur != null ? Math.min(40, Math.max(4, cur)) : 4;
+    var title = h('div', { class: 'title' });
+    var prevB = iconBtn('back', t('w_prev'), function () { move(-1); }, weekSel <= 4);
+    var nextB = iconBtn('next', t('w_next'), function () { move(1); }, weekSel >= 40);
+    function setTitle() {
+      title.textContent = '';
+      add(title, h('strong', null, t('w_title', { n: fmtNum(weekSel) })), weekSel === cur ? h('span', { class: 'badge' }, t('w_current')) : null);
+      prevB.disabled = weekSel <= 4;
+      nextB.disabled = weekSel >= 40;
+    }
+    function move(k) {
+      weekSel = Math.min(40, Math.max(4, weekSel + k));
+      setTitle();
+      fillWeek();
+    }
+    setTitle();
+    add(main, h('div', { class: 'weekhead', 'aria-live': 'polite' }, prevB, title, nextB));
+    if (cur == null) add(main, h('div', { class: 'note' }, t('w_nodate')));
+    else if (info.ga > 280) add(main, h('div', { class: 'note' }, t('w_after40')));
+    weekBox = h('div');
+    add(main, weekBox);
+    fillWeek();
+    loadWeeks();
+    add(main, h('p', { class: 'muted small' }, t('w_note')));
+  };
+
+  var APPTS = [['a_t1', ['a1', 'a2', 'a3', 'a4', 'a5', 'a6']], ['a_t2', ['b1', 'b2', 'b3', 'b4', 'b5', 'b6']], ['a_t3', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8']]];
+  PREG.appts = function (main) {
+    var info = eddInfo();
+    var tri = info && info.edd != null && !info.bad ? info.tri : 0;
+    add(main, h('div', { class: 'note warn' }, h('strong', null, t('a_intro'))));
+    add(main, h('p', { class: 'muted small' }, t('a_who')));
+    APPTS.forEach(function (g, gi) {
+      add(main, h('h2', null, t(g[0]), tri === gi + 1 ? [' ', h('span', { class: 'badge' }, t('a_now'))] : null));
+      var ul = h('ul', { class: 'checks' });
+      g[1].forEach(function (id) {
+        add(ul, h('li', null, optRow('checkbox', 'ap', id, t('ap_' + id), !!S.appts[id], function (inp) {
+          if (inp.checked) S.appts[id] = true; else delete S.appts[id];
+          setOn(inp);
+          save('appts');
+        })));
+      });
+      add(main, ul);
+    });
+  };
+
+  PREG.moves = function (main) {
+    var mv = S.moves;
+    add(main, h('div', { class: 'note urgent' }, h('strong', null, t('mv_safety'))));
+    add(main, h('p', { class: 'muted small' }, t('mv_intro')));
+    var tapBtn = h('button', { class: 'tap', type: 'button', onclick: function () {
+      var now = Date.now();
+      if (!mv.open) mv.open = { s: now, t: [] };
+      mv.open.t.push(now);
+      save('moves');
+      updSession();
+    } }, h('span', null, t('mv_tap')), h('small', null, t('mv_tap_h')));
+    add(main, tapBtn);
+    var sess = h('div', { class: 'card', 'aria-live': 'polite' });
+    add(main, sess);
+    var durEl = null;
+    function updSession() {
+      sess.textContent = '';
+      durEl = null;
+      var o = mv.open;
+      if (!o) { add(sess, h('p', { class: 'muted' }, t('mv_idle'))); return; }
+      var n = o.t.length;
+      durEl = h('span', null, t('min', { n: fmtNum(Math.floor((Date.now() - o.s) / 60000)) }));
+      add(sess,
+        h('p', { class: 'eyebrow' }, t('mv_session')),
+        h('p', { class: 'big' }, plural('mv_n', n)),
+        h('p', { class: 'muted small' }, t('mv_started', { time: fTime(o.s) }), ' · ', durEl, n ? [' · ', t('mv_last', { time: fTime(o.t[n - 1]) })] : null),
+        h('div', { class: 'row' },
+          h('button', { class: 'btn', type: 'button', onclick: function () {
+            o.t.pop();
+            if (!o.t.length) mv.open = null;
+            save('moves');
+            updSession();
+            tapBtn.focus();
+          } }, t('mv_undo')),
+          h('button', { class: 'btn primary', type: 'button', onclick: function () {
+            mv.list.unshift({ s: o.s, e: Date.now(), t: o.t.slice() });
+            if (mv.list.length > 500) mv.list.length = 500;
+            mv.open = null;
+            save('moves');
+            updSession();
+            updHist();
+            tapBtn.focus();
+          } }, t('mv_finish'))));
+    }
+    tickers.push(function () {
+      if (durEl && mv.open) durEl.textContent = t('min', { n: fmtNum(Math.floor((Date.now() - mv.open.s) / 60000)) });
+    });
+    add(main, h('h2', null, t('mv_history')));
+    var hist = h('div');
+    add(main, hist);
+    function updHist() {
+      hist.textContent = '';
+      if (!mv.list.length) { add(hist, h('p', { class: 'muted' }, t('mv_empty'))); return; }
+      var ul = h('ul', { class: 'hist' });
+      mv.list.forEach(function (x, i) {
+        var n = Array.isArray(x.t) ? x.t.length : 0;
+        var mins = Math.max(0, Math.round(((x.e || x.s) - x.s) / 60000));
+        add(ul, h('li', null,
+          h('div', { class: 'main' }, h('b', null, fDayTime(x.s)), h('span', null, plural('mv_n', n) + ' · ' + t('min', { n: fmtNum(mins) }))),
+          iconBtn('trash', t('mv_del'), function () {
+            ask('mv_del_q', 'del', function () {
+              mv.list.splice(i, 1);
+              save('moves');
+              updHist();
+            });
+          })));
+      });
+      add(hist, ul);
+      add(hist, h('div', { class: 'actions' }, h('button', { class: 'btn danger', type: 'button', onclick: function () {
+        ask('mv_clear_q', 'del', function () {
+          mv.list = [];
+          save('moves');
+          updHist();
+        });
+      } }, t('mv_clear'))));
+    }
+    updSession();
+    updHist();
+  };
+
+  PREG.contr = function (main) {
+    var ct = S.contr;
+    add(main, h('div', { class: 'note urgent' }, h('p', null, h('strong', null, t('ct_safety'))), h('p', null, t('ct_call'))));
+    add(main, h('p', { class: 'muted small' }, t('ct_intro')));
+    var noteId = uid('note');
+    var hintId = uid('nh');
+    var ta = h('textarea', { id: noteId, placeholder: t('ct_note_ph'), 'aria-describedby': hintId, value: ct.note, maxlength: '2000' });
+    ta.addEventListener('input', function () { ct.note = ta.value; save('contr', 400); });
+    add(main, h('div', { class: 'field' }, h('label', { for: noteId }, t('ct_note')), ta, h('small', { id: hintId }, t('ct_note_h'))));
+
+    var tapBtn = h('button', { class: 'tap', type: 'button', onclick: function () {
+      var now = Date.now();
+      if (ct.running) {
+        ct.list.push({ s: ct.running, e: now });
+        if (ct.list.length > 1000) ct.list.splice(0, ct.list.length - 1000);
+        ct.running = 0;
+      } else ct.running = now;
+      save('contr');
+      upd();
+    } });
+    add(main, tapBtn);
+    var timerEl = null;
+    var stats = h('div');
+    var tbl = h('div');
+    add(main, stats);
+    add(main, h('h2', null, t('ct_hist')));
+    add(main, tbl);
+    var undoBtn = h('button', { class: 'btn', type: 'button', onclick: function () {
+      if (ct.running) ct.running = 0; else ct.list.pop();
+      save('contr');
+      upd();
+      tapBtn.focus();
+    } }, t('ct_undo'));
+    var clearBtn = h('button', { class: 'btn danger', type: 'button', onclick: function () {
+      ask('ct_clear_q', 'del', function () {
+        ct.list = [];
+        ct.running = 0;
+        save('contr');
+        upd();
+      });
+    } }, t('ct_clear'));
+    add(main, h('div', { class: 'actions' }, undoBtn, clearBtn));
+
+    function upd() {
+      tapBtn.textContent = '';
+      tapBtn.classList.toggle('running', !!ct.running);
+      if (ct.running) {
+        timerEl = h('span', { class: 'timer', role: 'timer' }, fDur((Date.now() - ct.running) / 1000));
+        add(tapBtn, h('span', null, h('span', { class: 'pulse', 'aria-hidden': 'true' }), t('ct_stop')), timerEl, h('small', null, t('ct_stop_h')));
+      } else {
+        timerEl = null;
+        add(tapBtn, h('span', null, t('ct_start')), h('small', null, t('ct_start_h')));
+      }
+      undoBtn.disabled = !ct.running && !ct.list.length;
+      clearBtn.disabled = !ct.list.length && !ct.running;
+
+      stats.textContent = '';
+      var now = Date.now();
+      var hour = ct.list.filter(function (x) { return x.s >= now - 3600000; });
+      if (hour.length) {
+        var lenAvg = hour.reduce(function (a, x) { return a + (x.e - x.s); }, 0) / hour.length / 1000;
+        var gaps = [];
+        for (var i = 1; i < hour.length; i++) gaps.push((hour[i].s - hour[i - 1].s) / 1000);
+        var gapAvg = gaps.length ? gaps.reduce(function (a, g) { return a + g; }, 0) / gaps.length : null;
+        add(stats, h('div', { class: 'card' },
+          h('p', { class: 'eyebrow' }, t('ct_last_hour')),
+          h('div', { class: 'stats' },
+            h('div', { class: 'stat' }, h('span', { class: 'eyebrow' }, t('tab_contr')), h('b', null, plural('ct_n', hour.length))),
+            h('div', { class: 'stat' }, h('span', { class: 'eyebrow' }, t('ct_avg_len')), h('b', null, fDur(lenAvg))),
+            h('div', { class: 'stat' }, h('span', { class: 'eyebrow' }, t('ct_avg_gap')), h('b', null, gapAvg == null ? '—' : fDur(gapAvg))))));
+      }
+
+      tbl.textContent = '';
+      if (!ct.list.length) { add(tbl, h('p', { class: 'muted' }, t('ct_empty'))); return; }
+      var T = todayNum();
+      var rows = [];
+      for (var j = ct.list.length - 1; j >= 0 && rows.length < 40; j--) {
+        var x = ct.list[j];
+        var prev = ct.list[j - 1];
+        var gap = prev && x.s - prev.s < 3 * 3600000 ? fDur((x.s - prev.s) / 1000) : '—';
+        rows.push(h('tr', null,
+          h('td', null, localDay(x.s) === T ? fTime(x.s) : fDayTime(x.s)),
+          h('td', null, fDur((x.e - x.s) / 1000)),
+          h('td', null, gap)));
+      }
+      add(tbl, h('table', { class: 'tbl' },
+        h('thead', null, h('tr', null, h('th', { scope: 'col' }, t('ct_col_start')), h('th', { scope: 'col' }, t('ct_col_len')), h('th', { scope: 'col' }, t('ct_col_gap')))),
+        h('tbody', null, rows)));
+    }
+    tickers.push(function () {
+      if (timerEl && ct.running) timerEl.textContent = fDur((Date.now() - ct.running) / 1000);
+    });
+    upd();
+  };
+
+  var RF = ['pain', 'shoulder', 'bleed', 'faint', 'head', 'swell', 'fluid', 'moves', 'chest', 'fever', 'harm'];
+  VIEWS.help = function (main) {
+    add(main, h('p', null, h('strong', null, t('h_lead'))));
+    add(main, h('ul', { class: 'rf' }, RF.map(function (k) { return h('li', null, t('rf_' + k)); })));
+    add(main, h('p', { class: 'callout stick', role: 'note' }, t('r_call')));
+    add(main, h('p', null, t('h_other')));
+    var c = S.contact;
+    var nameId = uid('cn');
+    var phoneId = uid('cp');
+    var callWrap = h('div');
+    function updCall() {
+      callWrap.textContent = '';
+      var digits = String(c.phone || '').split('').filter(function (ch) { return '0123456789+*#'.indexOf(ch) >= 0; }).join('');
+      if (digits.length >= 2) add(callWrap, h('a', { class: 'callbtn', href: 'tel:' + digits }, t('h_call_btn', { name: c.name.trim() || t('h_call_default') })));
+    }
+    var nameIn = h('input', { type: 'text', id: nameId, value: c.name, autocomplete: 'off', maxlength: '80' });
+    var phoneIn = h('input', { type: 'tel', id: phoneId, value: c.phone, autocomplete: 'off', inputmode: 'tel', maxlength: '40' });
+    nameIn.addEventListener('input', function () { c.name = nameIn.value; save('contact', 400); updCall(); });
+    phoneIn.addEventListener('input', function () { c.phone = phoneIn.value; save('contact', 400); updCall(); });
+    updCall();
+    add(main, h('div', { class: 'card' },
+      h('h2', { class: 'first' }, t('h_contact')),
+      h('p', { class: 'hint' }, t('h_contact_h')),
+      callWrap,
+      h('div', { class: 'field' }, h('label', { for: nameId }, t('h_name')), nameIn),
+      h('div', { class: 'field' }, h('label', { for: phoneId }, t('h_phone')), phoneIn)));
+  };
+
+  VIEWS.data = function (main) {
+    add(main, h('div', { class: 'note ok' }, h('strong', null, t('dt_where'))));
+    add(main, h('p', null, t('dt_evict')));
+    add(main, h('div', { class: 'actions' }, h('button', { class: 'btn primary', type: 'button', onclick: exportData }, t('dt_export'))));
+    add(main, h('p', { class: 'muted small' }, t('dt_export_h')));
+    var persistOut = h('p', { class: 'small', 'aria-live': 'polite' });
+    add(main, h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: function () {
+      var st = navigator.storage;
+      if (!st || typeof st.persist !== 'function') { persistOut.textContent = t('dt_persist_na'); return; }
+      st.persist().then(function (ok) { persistOut.textContent = t(ok ? 'dt_persist_yes' : 'dt_persist_no'); }, function () { persistOut.textContent = t('dt_persist_na'); });
+    } }, t('dt_persist'))));
+    add(main, persistOut);
+    add(main, h('hr', { class: 'sep' }));
+    add(main, h('div', { class: 'actions' }, h('button', { class: 'btn danger', type: 'button', onclick: function () {
+      ask('dt_delete_q', 'dt_delete_ok', function () {
+        Object.keys(saveTimers).forEach(function (k) { clearTimeout(saveTimers[k]); saveTimers[k] = 0; });
+        Promise.resolve(db.clear()).then(function () {
+          KEYS.forEach(function (k) { S[k] = defaults(k); });
+          weekSel = null;
+          calMonth = null;
+          notify(t('dt_deleted'));
+          render(true);
+        }, function () { notify(t('save_fail')); });
+      });
+    } }, t('dt_delete'))));
+  };
+
+  function exportData() {
+    flush();
+    var out = { app: 'pregnancy-check', version: VERSION, exportedAt: new Date().toISOString(), data: {} };
+    Promise.resolve(db.keys()).then(function (keys) {
+      return Promise.all(keys.map(function (k) { return Promise.resolve(db.get(k)).then(function (v) { out.data[k] = v; }); }));
+    }).then(function () {
+      var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = h('a', { href: url, download: 'pregnancy-check-' + isoDay(todayNum()) + '.json', hidden: true });
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 4000);
+      notify(t('dt_exported'));
+    }, function () { notify(t('save_fail')); });
+  }
+
+  var SOURCES = [
+    ['src_medline', ['medlineplus.gov/pregnancy.html', 'medlineplus.gov/lab-tests/pregnancy-test/', 'medlineplus.gov/preconceptioncare.html', 'medlineplus.gov/prenatalcare.html', 'medlineplus.gov/fetalhealthanddevelopment.html', 'medlineplus.gov/ectopicpregnancy.html']],
+    ['src_cdc', ['www.cdc.gov/pregnancy/about/index.html', 'www.cdc.gov/folic-acid/about/index.html', 'www.cdc.gov/hearher/maternal-warning-signs/index.html']],
+    ['src_who', ['www.who.int/publications/i/item/9789241549912', 'www.who.int/tools/elena/interventions/folate-periconceptional', 'www.who.int/news-room/fact-sheets/detail/emergency-contraception']],
+    ['src_nhs', ['www.nhs.uk/pregnancy/trying-for-a-baby/doing-a-pregnancy-test/', 'www.nhs.uk/pregnancy/finding-out/due-date-calculator/', 'www.nhs.uk/pregnancy/keeping-well/your-babys-movements/', 'www.nhs.uk/conditions/ectopic-pregnancy/']],
+    ['src_acog', ['www.acog.org/womens-health/faqs/how-your-fetus-grows-during-pregnancy', 'www.acog.org/womens-health/faqs/fertility-awareness-based-methods-of-family-planning']],
+    ['src_owh', ['womenshealth.gov/pregnancy/youre-pregnant-now-what/stages-pregnancy']]
+  ];
+  VIEWS.about = function (main) {
+    add(main, h('div', { class: 'note warn' }, h('strong', null, t('disclaimer'))));
+    add(main, h('p', null, t('ab_what')));
+    add(main, h('h2', null, t('ab_how')));
+    add(main, h('ul', { class: 'plain' }, ['f_test', 'f_fertile', 'f_lmp', 'f_conc', 'f_ivf', 'f_clin', 'f_tri'].map(function (k) { return h('li', null, t(k)); })));
+    add(main, h('h2', null, t('ab_src')));
+    add(main, h('p', { class: 'muted small' }, t('ab_src_h')));
+    add(main, h('ul', { class: 'src' }, SOURCES.map(function (s) {
+      return h('li', null, h('b', null, t(s[0])), s[1].map(function (u) { return h('code', null, u); }));
+    })));
+    add(main, h('p', null, t('ab_privacy')));
+    add(main, h('p', { class: 'muted small' }, t('ab_version', { v: VERSION })));
+  };
+
+  setInterval(function () { tickers.forEach(function (fn) { fn(); }); }, 1000);
+  if (typeof m.onLocaleChange === 'function') {
+    m.onLocaleChange(function (code) {
+      var next = pick(code);
+      if (next === loc) return;
+      loc = next;
+      render(false);
+    });
+  }
+  var started = false;
+  function start() {
+    if (started) return;
+    started = true;
+    render(false);
+  }
+  load().then(function () { if (started) render(false); else start(); }, start);
+  setTimeout(start, 1500);
+})();
+</script>

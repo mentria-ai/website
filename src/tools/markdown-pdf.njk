@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.markdown-pdf.title' | t }}"
   description: "{{ 'tools.markdown-pdf.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">markdown-pdf</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">markdown-pdf</span></p>
   <h1>{{ "tools.markdown-pdf.title" | t }}</h1>
   <p>{{ "tools.markdown-pdf.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -58,11 +59,15 @@ eleventyComputed:
     </button>
   </div>
   <div class="mp__activity no-print" id="mp-activity"></div>
+  <p class="mp__unsaved no-print" id="mp-unsaved" role="status" aria-live="polite" hidden>
+    <span data-unsaved="blocked" hidden>{{ "tool.markdown-pdf.unsaved_blocked" | t }}</span>
+    <span data-unsaved="full" hidden>{{ "tool.markdown-pdf.unsaved_full" | t }}</span>
+  </p>
 
   <div class="mp__panes">
     <section class="mp__pane mp__pane--editor" data-tab="edit">
       <header class="mp__pane-header no-print">
-        <span class="mp__pane-label">{{ "tool.markdown-pdf.pane_markdown" | t }}</span>
+        <label class="mp__pane-label" for="mp-input">{{ "tool.markdown-pdf.pane_markdown" | t }}</label>
       </header>
       <textarea
         class="mp__input"
@@ -97,6 +102,7 @@ eleventyComputed:
 const COPY = {
   remoteImgBlocked: {{ ("tool.markdown-pdf.remote_img_blocked" | t) | dump | safe }},
   importNoteConfirm: {{ ("tool.markdown-pdf.import_note_confirm" | t) | dump | safe }},
+  importFileConfirm: {{ ("tool.markdown-pdf.import_file_confirm" | t) | dump | safe }},
   saved:              {{ ("tool.markdown-pdf.saved"              | t) | dump | safe }},
   countsFmt:          {{ ("tool.markdown-pdf.counts_format"      | t) | dump | safe }},
   errLoadLib:         {{ ("tool.markdown-pdf.err_load_lib"       | t) | dump | safe }},
@@ -111,6 +117,7 @@ const inputEl     = document.getElementById('mp-input');
 const previewEl   = document.getElementById('mp-preview');
 const countsEl    = document.getElementById('mp-counts');
 const savedEl     = document.getElementById('mp-saved');
+const unsavedEl   = document.getElementById('mp-unsaved');
 const downloadBtn = document.getElementById('mp-download');
 const exportBtn   = document.getElementById('mp-export');
 const shareBtn    = document.getElementById('mp-share');
@@ -123,47 +130,7 @@ const previewPane = document.querySelector('.mp__pane--preview');
 
 const LS_KEY = 'mentria-mdpdf-content';
 
-const SAMPLE = `# Welcome to Markdown → PDF
-
-This is a quick demo so you can see how your document will print.
-**Edit on the left**, see the preview on the right, and click **Download PDF** when you're happy.
-
-## Features
-
-- GitHub-Flavored Markdown — tables, task lists, strikethrough
-- Clean code blocks
-- Fast live preview, debounced
-- Auto-saved to your browser
-
-### Code
-
-\`\`\`js
-function greet(name) {
-  return \`Hello, \${name}!\`;
-}
-\`\`\`
-
-### Table
-
-| Feature      | Status |
-| ------------ | :----: |
-| Tables       | ✓      |
-| Lists        | ✓      |
-| Code blocks  | ✓      |
-| Math (KaTeX) | later  |
-
-### Task list
-
-- [x] Type some markdown
-- [x] Watch the preview update
-- [ ] Hit **Download PDF**
-
-> Tip: in the print dialog, choose **Save as PDF** as the destination, set margins to *Default*, and turn off headers/footers for the cleanest result.
-
----
-
-Made with [Mentria](https://mentria.ai).
-`;
+const SAMPLE = {{ ("tool.markdown-pdf.sample" | traw) | dump | safe }};
 
 if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
 if (typeof window.renderMarkdown !== 'function') {
@@ -180,8 +147,9 @@ function scheduleRender() {
 
 function render() {
   const scroll = previewEl.scrollTop;
-  previewEl.innerHTML = window.renderMarkdown ? window.renderMarkdown(inputEl.value || '') : '';
-  previewEl.querySelectorAll('img').forEach((img) => {
+  const tpl = document.createElement('template');
+  tpl.innerHTML = window.renderMarkdown ? window.renderMarkdown(inputEl.value || '') : '';
+  tpl.content.querySelectorAll('img').forEach((img) => {
     const src = img.getAttribute('src') || '';
     let resolved;
     try { resolved = new URL(src, location.href); } catch (_) { return; }
@@ -192,26 +160,63 @@ function render() {
       img.replaceWith(note);
     }
   });
+  previewEl.replaceChildren(tpl.content);
   previewEl.scrollTop = scroll;
   updateCounts();
+}
+
+const PAGE_LANG = document.documentElement.lang || undefined;
+const wordSegmenter = (() => {
+  try { return new Intl.Segmenter(PAGE_LANG, { granularity: 'word' }); } catch (_) { return null; }
+})();
+function countWords(text) {
+  const t = text.trim();
+  if (!t) return 0;
+  if (!wordSegmenter) return t.split(/\s+/).length;
+  let n = 0;
+  for (const seg of wordSegmenter.segment(t)) if (seg.isWordLike) n++;
+  return n;
 }
 
 function updateCounts() {
   const text = inputEl.value || '';
   const chars = text.length;
-  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const words = countWords(text);
   countsEl.textContent = COPY.countsFmt
-    .replace('{words}', words.toLocaleString())
-    .replace('{chars}', chars.toLocaleString());
+    .replace('{words}', words.toLocaleString(PAGE_LANG))
+    .replace('{chars}', chars.toLocaleString(PAGE_LANG));
 }
 
 /* ── Persistence ────────────────────────────────────────────────── */
+function storageTrouble() {
+  const S = window.MentriaStore;
+  if (S && typeof S.status === 'function') {
+    try {
+      const s = S.status();
+      if (s === 'ok') return null;
+      if (s === 'blocked' || s === 'full') return s;
+    } catch (_) {}
+  }
+  try { window.localStorage.getItem(LS_KEY); return null; } catch (_) { return 'blocked'; }
+}
+
+function showUnsaved(why) {
+  unsavedEl.hidden = !why;
+  unsavedEl.querySelectorAll('[data-unsaved]').forEach((s) => { s.hidden = s.dataset.unsaved !== why; });
+}
+
 const saver = MentriaUI.debouncedSaver(() => {
+  let ok = false;
   try {
-    if (window.MentriaStore) window.MentriaStore.set('tools', 'mdpdf_content', inputEl.value);
-    else localStorage.setItem(LS_KEY, inputEl.value);
-    flashSaved();
+    if (window.MentriaStore) ok = window.MentriaStore.set('tools', 'mdpdf_content', inputEl.value);
+    else { localStorage.setItem(LS_KEY, inputEl.value); ok = true; }
   } catch (_) {}
+  showUnsaved(ok ? null : (storageTrouble() === 'blocked' ? 'blocked' : 'full'));
+  if (ok) flashSaved();
+  else {
+    clearTimeout(flashTimer);
+    savedEl.classList.remove('is-visible');
+  }
 }, 500);
 
 let flashTimer = null;
@@ -244,12 +249,12 @@ function loadInitial() {
 
 /* ── PDF (via browser print) ────────────────────────────────────── */
 function slugify(s) {
-  return String(s || '')
-    .normalize('NFKD').replace(/[̀-ͯ]/g, '')   // strip diacritics
-    .replace(/[^A-Za-z0-9]+/g, '-')
+  const slug = String(s || '')
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '').normalize('NFC')
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '')
-    .toLowerCase()
-    .slice(0, 64) || 'document';
+    .toLowerCase();
+  return Array.from(slug).slice(0, 64).join('') || 'document';
 }
 
 function deriveTitle() {
@@ -445,12 +450,7 @@ function exportMD() {
   const fromInput = (filenameInput.value || '').trim();
   const filename = (fromInput ? slugify(fromInput) : slugify(deriveTitle())) + '.md';
   const blob = new Blob([inputEl.value || ''], { type: 'text/markdown;charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
+  MentriaUI.downloadFile(filename, blob);
 }
 
 async function shareMD() {
@@ -467,15 +467,16 @@ async function shareMD() {
   } catch (_) { /* dismissed */ }
 }
 
-function importMD(file) {
+async function importMD(file) {
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    inputEl.value = e.target.result || '';
-    render();
-    saver.schedule();
-  };
-  reader.readAsText(file);
+  let text = '';
+  try { text = await file.text(); } catch (_) { return; }
+  const current = inputEl.value || '';
+  if (current.trim() && current.trim() !== text.trim() && current !== SAMPLE) {
+    if (!(await window.mentriaConfirm(COPY.importFileConfirm, { danger: true }))) return;
+  }
+  inputEl.value = text;
+  inputEl.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 /* ── Tabs (mobile) ──────────────────────────────────────────────── */
@@ -504,13 +505,10 @@ inputEl.addEventListener('keydown', (e) => {
   if (e.key === 'Tab' && !e.shiftKey) {
     if (tabExit) { tabExit = false; return; }
     e.preventDefault();
-    const start = inputEl.selectionStart;
-    const end   = inputEl.selectionEnd;
-    const v = inputEl.value;
-    inputEl.value = v.slice(0, start) + '  ' + v.slice(end);
-    inputEl.selectionStart = inputEl.selectionEnd = start + 2;
-    scheduleRender();
-    saver.schedule();
+    if (!document.execCommand || !document.execCommand('insertText', false, '  ')) {
+      inputEl.setRangeText('  ', inputEl.selectionStart, inputEl.selectionEnd, 'end');
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    }
     return;
   }
   tabExit = false;
@@ -522,7 +520,7 @@ if (navigator.share) shareBtn.addEventListener('click', shareMD);
 else shareBtn.style.display = 'none';
 aiBtn?.addEventListener('click', runAINameGeneration);
 clearBtn.addEventListener('click', async () => {
-  if (!(await mentriaConfirm(COPY.confirmClear))) return;
+  if (!(await mentriaConfirm(COPY.confirmClear, { danger: true }))) return;
   inputEl.value = '';
   filenameInput.value = '';
   if (window.MentriaStore) window.MentriaStore.remove('tools', 'mdpdf_content');
@@ -542,15 +540,17 @@ tabPreview.addEventListener('click', () => setTab('preview'));
 /* ── Init ───────────────────────────────────────────────────────── */
 loadInitial();
 render();
+if (storageTrouble() === 'blocked') showUnsaved('blocked');
 
 (async function importHandoff() {
   if (!window.MentriaStore) return;
   const h = window.MentriaStore.get('handoff', 'md');
-  if (!h || typeof h.text !== 'string' || !h.text.trim()) return;
+  if (!h) return;
   window.MentriaStore.remove('handoff', 'md');
+  if (typeof h.text !== 'string' || !h.text.trim() || !(Date.now() - (h.ts || 0) < 600000)) return;
   const current = inputEl.value || '';
   if (current.trim() && current.trim() !== h.text.trim() && current !== SAMPLE) {
-    if (!(await window.mentriaConfirm(COPY.importNoteConfirm))) return;
+    if (!(await window.mentriaConfirm(COPY.importNoteConfirm, { danger: true }))) return;
   }
   inputEl.value = h.text;
   inputEl.dispatchEvent(new Event('input', { bubbles: true }));
@@ -728,6 +728,20 @@ if ('launchQueue' in window) {
   transition: opacity 0.3s ease;
 }
 .mp__saved.is-visible { opacity: 1; }
+
+.mp__unsaved {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--term-border);
+  border-left: 3px solid var(--syn-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.07);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--term-fg);
+}
+.mp__unsaved[hidden] { display: none; }
 
 /* Editor */
 .mp__input {

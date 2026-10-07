@@ -1,0 +1,1129 @@
+try {
+(function () {
+  if (window.self !== window.top) return;
+  if (document.documentElement.classList.contains('is-standalone')) return;
+  if (document.documentElement.classList.contains('feed-layout')) return;
+  if (!document.documentElement.classList.contains('app-chrome')) return;
+
+  var DISMISS_KEY   = 'mentria_pwa_install_dismissed_at';
+  var INSTALLED_KEY = 'mentria_pwa_installed_at';
+  var SEEN_KEY      = 'mentria_pwa_install_seen';
+  var SEEN_CAP      = 3;
+  var DISMISS_MS    = 7 * 24 * 60 * 60 * 1000;
+  var SHOW_DELAY    = 3000;
+
+  var ls = null;
+  try { ls = window.localStorage; ls.getItem('__probe__'); } catch (_) { ls = null; }
+
+  if (ls && ls.getItem(INSTALLED_KEY)) return;
+
+  var dismissed = ls ? parseInt(ls.getItem(DISMISS_KEY), 10) : 0;
+  if (dismissed && (Date.now() - dismissed) < DISMISS_MS) return;
+
+  var ua = navigator.userAgent;
+  var isIos = (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isIpad = (/iPad/.test(ua) && !window.MSStream) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isMac = /Macintosh/.test(ua);
+  var isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+  var isChromeLike = /Chrome|CriOS|EdgA?|OPR/.test(ua);
+  var isApplePlatform = isIos || (isMac && isSafari && !isChromeLike);
+  var canInstall = isChromeLike || isApplePlatform;
+
+  if (!canInstall) return;
+
+  var banner       = document.getElementById('pwaInstallBanner');
+  var bannerBtn    = document.getElementById('pwaInstallBannerBtn');
+  var bannerClose  = document.getElementById('pwaInstallBannerClose');
+  var sheet        = document.getElementById('pwaInstallSheet');
+  var sheetTitle   = document.getElementById('pwaInstallSheetTitle');
+  var sheetSteps   = document.getElementById('pwaInstallSheetSteps');
+  var sheetNote    = document.getElementById('pwaInstallSheetNote');
+  var sheetVideo   = document.getElementById('pwaInstallSheetVideo');
+
+  var deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  window.addEventListener('appinstalled', function () {
+    banner.hidden = true;
+    banner.classList.remove('pwa-install-banner--visible');
+    closeSheet();
+    if (ls) { try { ls.setItem(INSTALLED_KEY, String(Date.now())); ls.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {} }
+  });
+
+  if (navigator.getInstalledRelatedApps) {
+    navigator.getInstalledRelatedApps().then(function (apps) {
+      if (apps && apps.length) {
+        if (ls) { try { ls.setItem(INSTALLED_KEY, String(Date.now())); } catch (_) {} }
+        banner.hidden = true;
+        banner.classList.remove('pwa-install-banner--visible');
+        closeSheet();
+      }
+    }).catch(function () {});
+  }
+
+  var bannerDesc = banner.querySelector('.pwa-install-banner__desc');
+  var bannerDescInner = banner.querySelector('.pwa-install-banner__desc-inner');
+  function setupDescMarquee() {
+    if (!bannerDesc || !bannerDescInner || banner.hidden) return;
+    bannerDesc.classList.remove('is-marquee');
+    var overflow = bannerDescInner.scrollWidth - bannerDesc.clientWidth;
+    if (overflow > 2) {
+      bannerDesc.style.setProperty('--marquee-shift', (-overflow) + 'px');
+      bannerDesc.style.setProperty('--marquee-duration', Math.min(16, Math.max(7, 5 + overflow / 16)).toFixed(1) + 's');
+      bannerDesc.classList.add('is-marquee');
+    }
+  }
+  if (window.ResizeObserver) {
+    var descRO = new ResizeObserver(function () { setupDescMarquee(); });
+    if (bannerDesc) descRO.observe(bannerDesc);
+    if (bannerDescInner) descRO.observe(bannerDescInner);
+  }
+
+  function showBanner() {
+    if (document.querySelector('[data-install-quiet]')) return;
+    if (ls && ls.getItem(INSTALLED_KEY)) return;
+    var root = document.documentElement;
+    if (root.classList.contains('is-fullscreen-tool')) {
+      if (!window.MutationObserver) return;
+      var wait = new MutationObserver(function () {
+        if (root.classList.contains('is-fullscreen-tool')) return;
+        wait.disconnect();
+        showBanner();
+      });
+      wait.observe(root, { attributes: true, attributeFilter: ['class'] });
+      return;
+    }
+    if (ls) {
+      var seen = (parseInt(ls.getItem(SEEN_KEY), 10) || 0) + 1;
+      if (seen > SEEN_CAP) {
+        try { ls.removeItem(SEEN_KEY); } catch (_) {}
+        try { ls.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
+        return;
+      }
+      try { ls.setItem(SEEN_KEY, String(seen)); } catch (_) {}
+    }
+    banner.hidden = false;
+    void banner.offsetHeight;
+    banner.classList.add('pwa-install-banner--visible');
+    setupDescMarquee();
+  }
+
+  function dismissBanner() {
+    if (ls) {
+      try { ls.removeItem(SEEN_KEY); } catch (_) {}
+      try { ls.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
+    }
+    banner.classList.remove('pwa-install-banner--visible');
+    setTimeout(function () { banner.hidden = true; }, 280);
+  }
+
+  var sheetOpener = null;
+  function sheetTrapTab(e) {
+    if (e.key !== 'Tab') return;
+    if (!sheet.classList.contains('pwa-install-sheet--open')) return;
+    var focusables = Array.prototype.filter.call(
+      sheet.querySelectorAll('button, video[controls], a[href]'),
+      function (el) { return el.offsetParent; }
+    );
+    if (!focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    else if (!sheet.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+  }
+
+  var sheetBackHandle = null;
+  function openSheet() {
+    sheetOpener = document.activeElement;
+    sheet.classList.add('pwa-install-sheet--open');
+    sheet.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('pwa-sheet-open');
+    document.addEventListener('keydown', sheetTrapTab, true);
+    sheetBackHandle = (window.MentriaUI && window.MentriaUI.backDismiss)
+      ? window.MentriaUI.backDismiss(closeSheet) : null;
+    var closeBtn = sheet.querySelector('.pwa-install-sheet__close');
+    if (closeBtn) closeBtn.focus();
+    var noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!sheetVideo.hidden && !noMotion) {
+      sheetVideo.play().catch(function () {});
+    }
+  }
+
+  function closeSheet() {
+    if (sheetBackHandle) { sheetBackHandle.release(); sheetBackHandle = null; }
+    sheet.classList.remove('pwa-install-sheet--open');
+    sheet.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('pwa-sheet-open');
+    document.removeEventListener('keydown', sheetTrapTab, true);
+    try { sheetVideo.pause(); } catch (_) {}
+    if (sheetOpener && document.contains(sheetOpener)) { try { sheetOpener.focus(); } catch (_) {} }
+    sheetOpener = null;
+  }
+
+  var SHARE_SVG =
+    '<svg class="pwa-inline-icon" width="14" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+  var ADD_SVG =
+    '<svg class="pwa-inline-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+
+  var COPY = {
+    iosTitle:    {{ ("pwa.sheet_title_ios"   | t) | dump | safe }},
+    ipadTitle:   {{ ("pwa.sheet_title_ipad"  | t) | dump | safe }},
+    macosTitle:  {{ ("pwa.sheet_title_macos" | t) | dump | safe }},
+    chromeTitle: {{ ("pwa.sheet_title_chrome"| t) | dump | safe }},
+    iosStep1:    {{ ("pwa.ios_step1"  | t) | dump | safe }},
+    iosStep2:    {{ ("pwa.ios_step2"  | t) | dump | safe }},
+    iosStep3:    {{ ("pwa.ios_step3"  | t) | dump | safe }},
+    ipadStep1:   {{ ("pwa.ipad_step1" | t) | dump | safe }},
+    macosStep1:  {{ ("pwa.macos_step1"| t) | dump | safe }},
+    macosStep2:  {{ ("pwa.macos_step2"| t) | dump | safe }},
+    macosStep3:  {{ ("pwa.macos_step3"| t) | dump | safe }},
+    chromeStep1: {{ ("pwa.chrome_step1"| t) | dump | safe }},
+    chromeStep2: {{ ("pwa.chrome_step2"| t) | dump | safe }},
+    note:        {{ ("pwa.note"       | t) | dump | safe }}
+  };
+
+  function populateSheet() {
+    var stepsHtml = '';
+    var noteHtml  = '';
+    var title     = '';
+    var showVideo = true;
+
+    if (isIos) {
+      title = isIpad ? COPY.ipadTitle : COPY.iosTitle;
+      stepsHtml =
+        '<li>' + (isIpad ? COPY.ipadStep1 : COPY.iosStep1) + ' ' + SHARE_SVG + '</li>' +
+        '<li>' + COPY.iosStep2 + ' ' + ADD_SVG + '</li>' +
+        '<li>' + COPY.iosStep3 + '</li>';
+      noteHtml = COPY.note;
+    } else if (isApplePlatform) {
+      title = COPY.macosTitle;
+      stepsHtml =
+        '<li>' + COPY.macosStep1 + '</li>' +
+        '<li>' + COPY.macosStep2 + '</li>' +
+        '<li>' + COPY.macosStep3 + '</li>';
+      noteHtml = COPY.note;
+    } else {
+      title = COPY.chromeTitle;
+      stepsHtml =
+        '<li>' + COPY.chromeStep1 + '</li>' +
+        '<li>' + COPY.chromeStep2 + '</li>';
+      noteHtml = COPY.note;
+    }
+
+    sheetTitle.textContent = title;
+    sheetSteps.innerHTML   = stepsHtml;
+    sheetNote.innerHTML    = noteHtml || '';
+    sheetNote.hidden       = !noteHtml;
+    sheetVideo.hidden      = !showVideo;
+    if (showVideo) {
+      if (!sheetVideo.getAttribute('poster')) sheetVideo.setAttribute('poster', sheetVideo.dataset.poster);
+      sheetVideo.preload = 'metadata';
+      sheetVideo.load();
+    }
+  }
+
+  bannerBtn.addEventListener('click', function () {
+    if (ls) ls.removeItem(SEEN_KEY);
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function (result) {
+        deferredPrompt = null;
+        if (result.outcome === 'accepted') dismissBanner();
+      });
+      return;
+    }
+    populateSheet();
+    openSheet();
+  });
+
+  bannerClose.addEventListener('click', dismissBanner);
+
+  sheet.addEventListener('click', function (e) {
+    var target = e.target;
+    if (target && target.closest && target.closest('[data-close]')) {
+      closeSheet();
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && sheet.classList.contains('pwa-install-sheet--open')) {
+      closeSheet();
+    }
+  });
+
+  setTimeout(showBanner, SHOW_DELAY);
+
+  document.addEventListener('mentria:localechange', function () {
+    if (!window.MentriaI18n || !window.MentriaI18n.t) return;
+    var t = window.MentriaI18n.t;
+    var map = {
+      iosTitle: 'pwa.sheet_title_ios', ipadTitle: 'pwa.sheet_title_ipad', macosTitle: 'pwa.sheet_title_macos', chromeTitle: 'pwa.sheet_title_chrome',
+      iosStep1: 'pwa.ios_step1', iosStep2: 'pwa.ios_step2', iosStep3: 'pwa.ios_step3', ipadStep1: 'pwa.ipad_step1',
+      macosStep1: 'pwa.macos_step1', macosStep2: 'pwa.macos_step2', macosStep3: 'pwa.macos_step3',
+      chromeStep1: 'pwa.chrome_step1', chromeStep2: 'pwa.chrome_step2', note: 'pwa.note'
+    };
+    for (var k in map) { var v = t(map[k]); if (v != null) COPY[k] = v; }
+    if (sheet.classList.contains('pwa-install-sheet--open')) populateSheet();
+  });
+})();
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        var dlg = document.getElementById('m-dialog');
+        if (!dlg) return;
+        var native = typeof dlg.showPopover === 'function';
+        var scrim = null;
+        if (!native) dlg.hidden = true;
+        function isShown() { return native ? dlg.matches(':popover-open') : !dlg.hidden; }
+        function reveal() {
+          if (native) { dlg.showPopover(); return; }
+          scrim = document.createElement('div');
+          scrim.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483646;background:rgba(0,0,0,.55)';
+          document.body.appendChild(scrim);
+          dlg.style.cssText = 'position:fixed;top:50%;left:50%;right:auto;bottom:auto;margin:0;transform:translate(-50%,-50%);z-index:2147483647;display:flex;flex-direction:column;gap:1.25rem;opacity:1;max-height:calc(100vh - 2rem);overflow:auto';
+          dlg.setAttribute('data-open', '');
+          dlg.hidden = false;
+        }
+        function conceal() {
+          if (native) { dlg.hidePopover(); return; }
+          dlg.hidden = true;
+          dlg.removeAttribute('data-open');
+          dlg.style.cssText = '';
+          if (scrim && scrim.parentNode) scrim.parentNode.removeChild(scrim);
+          scrim = null;
+        }
+        var msgEl = document.getElementById('m-dialog-msg');
+        var okBtn = document.getElementById('m-dialog-ok');
+        var cancelBtn = document.getElementById('m-dialog-cancel');
+        var okLabel = {{ ("common.dialog.ok" | t) | dump | safe }};
+        window.MentriaUICopy = { undo: {{ ("common.undo" | t) | dump | safe }}, sendTo: {{ ("common.send_to" | t) | dump | safe }}, sendLabel: {{ ("common.send_to_label" | t) | dump | safe }}, sendNamed: {{ ("common.send_named" | t) | dump | safe }}, sendFailed: {{ ("common.send_failed" | t) | dump | safe }}, windowLabel: {{ ("common.window.label" | t) | dump | safe }}, windowClose: {{ ("common.close_tool" | t) | dump | safe }}, windowCloseHint: {{ ("common.window.close_hint" | t) | dump | safe }}, windowMinimize: {{ ("common.window.minimize" | t) | dump | safe }}, windowMinimizeHint: {{ ("common.window.minimize_hint" | t) | dump | safe }}, windowFull: {{ ("common.window.fullscreen" | t) | dump | safe }}, windowFullHint: {{ ("common.window.fullscreen_hint" | t) | dump | safe }}, windowExitFull: {{ ("common.window.exit_fullscreen" | t) | dump | safe }}, windowExitFullHint: {{ ("common.window.exit_fullscreen_hint" | t) | dump | safe }}, windowCancel: {{ ("common.dialog.cancel" | t) | dump | safe }} };
+        var confirmLabel = {{ ("common.dialog.confirm" | t) | dump | safe }};
+        var resolver = null;
+        var opener = null;
+        var backHandle = null;
+        var queue = [];
+        var lockUntil = 0;
+        var safeBtn = okBtn;
+        var current = null;
+        var cancelText = cancelBtn.querySelector('i18n-t');
+        if (!cancelText) {
+          cancelText = document.createElement('span');
+          while (cancelBtn.firstChild) cancelText.appendChild(cancelBtn.firstChild);
+          cancelBtn.appendChild(cancelText);
+        }
+        var cancelCustom = document.createElement('span');
+        function setCancel(label) {
+          if (label) {
+            cancelCustom.textContent = label;
+            if (cancelCustom.parentNode !== cancelBtn) cancelBtn.appendChild(cancelCustom);
+            cancelText.style.display = 'none';
+          } else {
+            if (cancelCustom.parentNode) cancelCustom.parentNode.removeChild(cancelCustom);
+            cancelText.style.display = '';
+          }
+        }
+        function okText(item) {
+          if (!item || item.mode === 'alert') return okLabel;
+          return (item.opts && typeof item.opts.ok === 'string' && item.opts.ok) || confirmLabel;
+        }
+        function trapKey(e) {
+          if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); settle(false); return; }
+          if (e.key !== 'Tab') return;
+          var focusables = [okBtn, cancelBtn].filter(function (b) { return !b.hidden; });
+          if (!focusables.length) return;
+          var first = focusables[focusables.length - 1];
+          var last = focusables[0];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          else if (!dlg.contains(document.activeElement)) { e.preventDefault(); safeBtn.focus(); }
+        }
+        function settle(result) {
+          var r = resolver; resolver = null;
+          current = null;
+          if (backHandle) { backHandle.release(); backHandle = null; }
+          if (isShown()) conceal();
+          document.removeEventListener('keydown', trapKey, true);
+          var o = opener; opener = null;
+          if (o && document.contains(o)) { try { o.focus(); } catch (_) {} }
+          if (r) r(result);
+          if (queue.length) setTimeout(function () { show(true); }, 0);
+        }
+        okBtn.addEventListener('click', function () {
+          if (Date.now() < lockUntil) return;
+          settle(true);
+        });
+        cancelBtn.addEventListener('click', function () { settle(false); });
+        function show(queued) {
+          if (resolver || !queue.length) return;
+          var item = queue.shift();
+          current = item;
+          opener = document.activeElement;
+          msgEl.textContent = item.message;
+          cancelBtn.hidden = (item.mode === 'alert');
+          okBtn.textContent = okText(item);
+          setCancel(item.mode === 'confirm' && item.opts && typeof item.opts.cancel === 'string' ? item.opts.cancel : '');
+          safeBtn = (item.mode === 'confirm' && item.opts && item.opts.danger) ? cancelBtn : okBtn;
+          reveal();
+          document.addEventListener('keydown', trapKey, true);
+          backHandle = (window.MentriaUI && window.MentriaUI.backDismiss)
+            ? window.MentriaUI.backDismiss(function () { settle(false); }) : null;
+          safeBtn.focus();
+          lockUntil = queued ? Date.now() + 400 : 0;
+          resolver = item.res;
+        }
+        function open(message, mode, opts) {
+          return new Promise(function (res) {
+            queue.push({ message: message, mode: mode, opts: opts, res: res });
+            show(false);
+          });
+        }
+        window.mentriaConfirm = function (m, opts) { return open(m, 'confirm', opts); };
+        window.mentriaAlert = function (m) { return open(m, 'alert'); };
+        document.addEventListener('mentria:localechange', function () {
+          if (!window.MentriaI18n || !window.MentriaI18n.t) return;
+          var ok = window.MentriaI18n.t('common.dialog.ok');
+          var cf = window.MentriaI18n.t('common.dialog.confirm');
+          if (ok != null) okLabel = ok;
+          if (cf != null) confirmLabel = cf;
+          if (isShown()) okBtn.textContent = okText(current);
+        });
+      })();
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        var storageMsg = { full: {{ ("common.storage_full" | t) | dump | safe }}, blocked: {{ ("common.storage_blocked" | t) | dump | safe }} };
+        document.addEventListener('mentria:localechange', function () {
+          if (window.MentriaI18n && window.MentriaI18n.t) {
+            var m = window.MentriaI18n.t('common.storage_full');
+            if (m != null) storageMsg.full = m;
+            var b = window.MentriaI18n.t('common.storage_blocked');
+            if (b != null) storageMsg.blocked = b;
+          }
+        });
+        var storageErrorActive = false;
+        var storageBlockedTold = false;
+        window.addEventListener('mentria:write', function (e) {
+          var d = e.detail || {};
+          if (d.op !== 'error' || storageErrorActive) return;
+          var blocked = d.reason === 'blocked';
+          if (blocked && storageBlockedTold) return;
+          if (blocked) storageBlockedTold = true;
+          storageErrorActive = true;
+          var msg = blocked ? storageMsg.blocked : storageMsg.full;
+          var ui = window.MentriaUI;
+          if (ui && typeof ui.toast === 'function') {
+            ui.toast(msg, { duration: 6000 });
+            setTimeout(function () { storageErrorActive = false; }, 9000);
+            return;
+          }
+          Promise.resolve(typeof window.mentriaAlert === 'function' ? window.mentriaAlert(msg) : null)
+            .catch(function () {})
+            .then(function () { setTimeout(function () { storageErrorActive = false; }, 3000); });
+        });
+      })();
+} catch (e) { console.error(e); }
+try {
+      window.mentriaConfirmHeavyDownload = async function () {
+        var c = navigator.connection;
+        if (!c) return true;
+        var slow = c.saveData === true || ['slow-2g', '2g', '3g'].indexOf(c.effectiveType) !== -1;
+        if (!slow) return true;
+        try {
+          if ('caches' in window) {
+            var tiers = await import('/assets/js/mentria-tiers.js');
+            var id = await tiers.effectiveTier();
+            if (id && await tiers.isTierCached(id)) return true;
+          }
+        } catch (_) {}
+        if (typeof window.mentriaConfirm === 'function') {
+          var heavy = window.MentriaI18n && window.MentriaI18n.t ? window.MentriaI18n.t('common.heavy_download') : null;
+          return window.mentriaConfirm(typeof heavy === 'string' ? heavy : {{ ("common.heavy_download" | t) | dump | safe }});
+        }
+        return true;
+      };
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        if (!navigator.share) return;
+        var locs = (window.MENTRIA_LOCALES || []).filter(function (l) { return l.prefix; }).map(function (l) { return l.prefix.slice(1); }).join('|');
+        var toolRe = new RegExp('^(\\/(' + locs + '))?\\/tools\\/[^/]+\\/?$');
+        if (!toolRe.test(location.pathname)) return;
+        var h1 = document.querySelector('.hero h1');
+        if (!h1) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tool-share';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span></span>';
+        var shareLabel = document.createElement('i18n-t');
+        shareLabel.setAttribute('data-k', 'common.share');
+        shareLabel.textContent = {{ ("common.share" | t) | dump | safe }};
+        btn.querySelector('span').appendChild(shareLabel);
+        btn.addEventListener('click', function () {
+          var desc = document.querySelector('meta[name="description"]');
+          navigator.share({
+            title: document.title,
+            text: desc ? desc.content : document.title,
+            url: location.href
+          }).catch(function () {});
+        });
+        h1.insertAdjacentElement('afterend', btn);
+      })();
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        var popup = document.getElementById('tools-popup');
+        var FRAG = '/fragments/tools-popup.';
+        var FRAG_V = '.html?v={{ buildHash }}';
+        var fragPromise = null;
+        function loadFrag() {
+          if (!fragPromise) {
+            var get = function (code) { return fetch(FRAG + code + FRAG_V).then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.text(); }); };
+            fragPromise = get(document.documentElement.lang || {{ (lang or 'en') | dump | safe }}).catch(function () { return get('en'); }).catch(function (err) { fragPromise = null; throw err; });
+          }
+          return fragPromise;
+        }
+        function liftSprite(from) {
+          var sym = from.querySelector('symbol[id^="tool-"]');
+          var sprite = sym && sym.closest('svg');
+          if (!sprite) return;
+          var have = document.getElementById(sym.id);
+          if (have && have !== sym) sprite.remove();
+          else document.body.appendChild(sprite);
+        }
+        if (!popup) {
+          var icons = null;
+          window.MentriaToolsPopup = {
+            load: function () {
+              if (!icons) icons = loadFrag().then(function (html) { liftSprite(document.createRange().createContextualFragment(html)); }).catch(function () { icons = null; });
+              return icons;
+            }
+          };
+          return;
+        }
+        var body = popup.querySelector('.tools-popup__body');
+        var panel = popup.querySelector('.tools-popup__panel');
+        var find = document.getElementById('tools-find');
+        var built = null;
+        var prevFocus = null;
+        function build() {
+          if (built) return built;
+          ['pointerdown', 'pointerover', 'focusin'].forEach(function (t) { document.removeEventListener(t, early, true); });
+          built = loadFrag().then(function (html) {
+            body.appendChild(document.createRange().createContextualFragment(html));
+            liftSprite(body);
+            var rv = body.querySelectorAll('.reveal');
+            for (var i = 0; i < rv.length; i++) rv[i].classList.add('revealed');
+            ['/assets/js/tool-launcher.js?v={{ buildHash }}', '/assets/js/mentria-ext-launch.js?v={{ buildHash }}'].forEach(function (src) {
+              var s = document.createElement('script'); s.src = src; s.defer = true; document.body.appendChild(s);
+            });
+          }).catch(function () { built = null; });
+          return built;
+        }
+        var inerted = [];
+        function expanded(on) {
+          var list = document.querySelectorAll('[data-tools-open]');
+          for (var i = 0; i < list.length; i++) {
+            list[i].setAttribute('aria-haspopup', 'dialog');
+            list[i].setAttribute('aria-expanded', on ? 'true' : 'false');
+          }
+        }
+        expanded(false);
+        function onEntry() { return !!(history.state && history.state.tools); }
+        function trigger() {
+          var list = document.querySelectorAll('[data-tools-open]');
+          for (var i = 0; i < list.length; i++) if (list[i].getClientRects().length) return list[i];
+          return null;
+        }
+        function shield(on) {
+          for (var i = 0; i < inerted.length; i++) inerted[i].removeAttribute('inert');
+          inerted = [];
+          if (!on) return;
+          var floor = parseInt(getComputedStyle(popup).zIndex, 10) || 0;
+          var kids = document.body.children;
+          for (var j = 0; j < kids.length; j++) {
+            var k = kids[j];
+            if (k === popup || k.hasAttribute('inert') || k.hasAttribute('popover')) continue;
+            if (['SCRIPT', 'STYLE', 'LINK', 'TEMPLATE', 'NOSCRIPT'].indexOf(k.tagName) !== -1) continue;
+            if ((parseInt(getComputedStyle(k).zIndex, 10) || 0) >= floor) continue;
+            k.setAttribute('inert', '');
+            inerted.push(k);
+          }
+        }
+        function tabbables() {
+          var list = popup.querySelectorAll('a[href], button, input, select, textarea, summary, [tabindex]');
+          var out = [];
+          for (var i = 0; i < list.length; i++) {
+            var el = list[i];
+            if (el.tabIndex < 0 || el.disabled || el.hidden || !el.getClientRects().length) continue;
+            out.push(el);
+          }
+          return out;
+        }
+        function trapTab(e) {
+          if (e.key !== 'Tab' || e.defaultPrevented || popup.hidden || popup.closest('[inert]')) return;
+          var a = document.activeElement;
+          var inside = !!a && a !== panel && popup.contains(a);
+          if (!inside && a && a !== document.body && a !== panel) return;
+          var f = tabbables();
+          if (!f.length) return;
+          var first = f[0], last = f[f.length - 1];
+          if (!inside) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+          else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+        }
+        function open(fromHash) {
+          if (!popup.hidden) return;
+          var was = document.activeElement;
+          prevFocus = (was && was !== document.body && !popup.contains(was)) ? was : trigger();
+          popup.hidden = false;
+          document.body.classList.add('is-tools-open');
+          expanded(true);
+          shield(true);
+          document.addEventListener('keydown', trapTab);
+          if (!fromHash && !onEntry()) history.pushState({ tools: true }, '', '#tools');
+          if (find && find.value) { find.value = ''; find.dispatchEvent(new Event('input')); }
+          panel.scrollTop = 0;
+          popup.scrollTop = 0;
+          panel.focus();
+          if (window.MentriaUI && window.MentriaUI.overlay) window.MentriaUI.overlay(true, 'tools');
+          build().then(function () {
+            if (popup.hidden || !find) return;
+            if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) find.focus();
+          });
+        }
+        window.addEventListener('load', function () {
+          (window.requestIdleCallback || function (fn) { return setTimeout(fn, 2000); })(function () { build(); }, { timeout: 5000 });
+        });
+        function early(e) {
+          if (e.target.closest && e.target.closest('[data-tools-open]')) build();
+        }
+        window.MentriaToolsPopup = { load: build };
+        ['pointerdown', 'pointerover', 'focusin'].forEach(function (t) { document.addEventListener(t, early, true); });
+        function close(fromPop) {
+          if (popup.hidden) return;
+          popup.hidden = true;
+          document.body.classList.remove('is-tools-open');
+          expanded(false);
+          document.removeEventListener('keydown', trapTab);
+          shield(false);
+          if (!fromPop && onEntry()) history.back();
+          var to = prevFocus;
+          prevFocus = null;
+          if (to && to.focus && document.contains(to)) { try { to.focus(); } catch (_) {} }
+          if (window.MentriaUI && window.MentriaUI.overlay) window.MentriaUI.overlay(false, 'tools');
+        }
+        document.addEventListener('click', function (e) {
+          var plain = e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
+          var a = e.target.closest && e.target.closest('[data-tools-open]');
+          if (a && plain) { e.preventDefault(); if (popup.hidden) open(); else close(); return; }
+          var c = e.target.closest && e.target.closest('[data-tools-close]');
+          if (c) { e.preventDefault(); close(); }
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key !== 'Escape' || e.isComposing || e.keyCode === 229 || e.defaultPrevented) return;
+          if (popup.hidden || popup.closest('[inert]')) return;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          close();
+        });
+        window.addEventListener('popstate', function () { if (!onEntry()) close(true); else open(true); });
+        window.addEventListener('pageshow', function (e) { if (e.persisted && onEntry() && popup.hidden) open(true); });
+        if (location.hash === '#tools') {
+          if (!onEntry()) {
+            history.replaceState(history.state, '', location.pathname + location.search);
+            history.pushState({ tools: true }, '', '#tools');
+          }
+          open(true);
+        }
+      })();
+} catch (e) { console.error(e); }
+try {
+      if ('serviceWorker' in navigator) {
+        (function () {
+          var controlledBy = navigator.serviceWorker.controller;
+          var reloaded = false;
+          var requested = false;
+          var staleTab = false;
+          navigator.serviceWorker.addEventListener('controllerchange', function () {
+            var previous = controlledBy;
+            controlledBy = navigator.serviceWorker.controller;
+            if (reloaded) return;
+            if (requested) { reloaded = true; location.reload(); return; }
+            if (!previous) return;
+            staleTab = true;
+            if (!pending) setPending(controlledBy);
+            var chip = document.getElementById('m-update');
+            var later = false;
+            try { later = !!sessionStorage.getItem('m-update-later'); } catch (_) {}
+            if (chip && !later) chip.hidden = false;
+          });
+          var pending = null;
+          var registration = null;
+          var setPending = function (sw) {
+            pending = sw;
+            var dots = document.querySelectorAll('[data-update-dot]');
+            for (var i = 0; i < dots.length; i++) dots[i].hidden = !sw;
+            try { document.dispatchEvent(new CustomEvent('mentria:update', { detail: { pending: !!sw } })); } catch (_) {}
+          };
+          window.MentriaUpdate = {
+            get pending() { return !!pending; },
+            apply: function () {
+              if (staleTab) { reloaded = true; location.reload(); return; }
+              var sw = pending || (registration && registration.waiting);
+              if (!sw) return;
+              requested = true;
+              sw.postMessage({ type: 'SKIP_WAITING' });
+            },
+            check: function () { return registration ? registration.update() : Promise.resolve(); }
+          };
+          var lastCheck = Date.now();
+          var recheck = function (again) {
+            if (!registration || navigator.onLine === false) return;
+            lastCheck = Date.now();
+            registration.update().catch(function () {
+              if (again) setTimeout(function () { recheck(false); }, 15000);
+            });
+          };
+          window.addEventListener('online', function () { setTimeout(function () { recheck(true); }, 1500); });
+          document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible' && Date.now() - lastCheck > 3600000) recheck(false);
+          });
+          navigator.serviceWorker.register('/sw.js').then(function (reg) {
+            registration = reg;
+            var chip = document.getElementById('m-update');
+            if (!chip) return;
+            var show = function (sw) {
+              if (!sw) return;
+              setPending(sw);
+              try { if (sessionStorage.getItem('m-update-later')) return; } catch (_) {}
+              chip.hidden = false;
+            };
+            if (reg.waiting && navigator.serviceWorker.controller) show(reg.waiting);
+            reg.addEventListener('updatefound', function () {
+              var nw = reg.installing;
+              if (!nw) return;
+              nw.addEventListener('statechange', function () {
+                if (nw.state === 'installed' && navigator.serviceWorker.controller) show(nw);
+              });
+            });
+            document.getElementById('m-update-go').addEventListener('click', function () {
+              chip.hidden = true;
+              window.MentriaUpdate.apply();
+            });
+            document.getElementById('m-update-later').addEventListener('click', function () {
+              try { sessionStorage.setItem('m-update-later', '1'); } catch (_) {}
+              chip.hidden = true;
+            });
+          }).catch(function () {});
+        })();
+      }
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        try {
+          var p = location.pathname, locs = window.MENTRIA_LOCALES || [];
+          for (var i = 0; i < locs.length; i++) { var pre = locs[i].prefix; if (pre && p.indexOf(pre + '/') === 0) { p = p.slice(pre.length); break; } }
+          var m = p.match(/^\/tools\/([^/]+)\/?$/);
+          if (!m) return;
+          var KEY = 'mentria_tool_usage', u = {};
+          try { u = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (_) {}
+          var e = u[m[1]] || { count: 0, last: 0 };
+          e.count++; e.last = Date.now(); u[m[1]] = e;
+          localStorage.setItem(KEY, JSON.stringify(u));
+        } catch (_) {}
+      })();
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        var brand = document.querySelector('.brand');
+        var count = 0;
+        function update() { if (brand) brand.classList.toggle('brand--ai', count > 0); }
+        document.addEventListener('mentria:ai-start', function () { count++; update(); });
+        document.addEventListener('mentria:ai-stop', function () { count = Math.max(0, count - 1); update(); });
+      })();
+      window.mentriaWrapEngine = function (engine) {
+        if (!engine || engine.__mTracked || typeof engine.generate !== 'function') return engine;
+        engine.__mTracked = true;
+        var orig = engine.generate.bind(engine);
+        engine.generate = function () {
+          document.dispatchEvent(new CustomEvent('mentria:ai-start'));
+          var settled = false;
+          var stop = function () { if (settled) return; settled = true; document.dispatchEvent(new CustomEvent('mentria:ai-stop')); };
+          try {
+            var r = orig.apply(null, arguments);
+            if (r && typeof r.then === 'function') r.then(stop, stop); else stop();
+            return r;
+          } catch (e) { stop(); throw e; }
+        };
+        return engine;
+      };
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        var els = document.querySelectorAll('.reveal');
+        if (!els.length) return;
+        if (!('IntersectionObserver' in window)) {
+          for (var i = 0; i < els.length; i++) els[i].classList.add('revealed');
+          return;
+        }
+        var io = new IntersectionObserver(function (entries) {
+          for (var i = 0; i < entries.length; i++) {
+            if (entries[i].isIntersecting) {
+              entries[i].target.classList.add('revealed');
+              io.unobserve(entries[i].target);
+            }
+          }
+        }, { threshold: 0 });
+        for (var j = 0; j < els.length; j++) io.observe(els[j]);
+      })();
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        var KEY = 'mentria.navFrom';
+        var FIELD = 'mNavFrom';
+        var live = window.self === window.top && !(window.navigation && typeof window.navigation.entries === 'function');
+        var docFrom = null;
+        function navType() {
+          try {
+            var nav = performance.getEntriesByType('navigation')[0];
+            if (nav && nav.type) return nav.type;
+          } catch (_) {}
+          var legacy = performance.navigation ? performance.navigation.type : 0;
+          return legacy === 1 ? 'reload' : legacy === 2 ? 'back_forward' : 'navigate';
+        }
+        function own(st) { return !!(st && typeof st === 'object' && typeof st[FIELD] === 'string'); }
+        if (live) {
+          var last = null;
+          try { last = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (_) { last = null; }
+          var st = history.state;
+          if (own(st)) {
+            docFrom = st[FIELD] || null;
+          } else if (navType() === 'navigate' && (st == null || typeof st === 'object')) {
+            var since = Date.now() - performance.now();
+            if (last && typeof last.u === 'string' && last.u.charAt(0) === '/' && last.t >= since - 2000) docFrom = last.u;
+            var mark = {};
+            mark[FIELD] = docFrom || '';
+            try { history.replaceState(Object.assign({}, st, mark), ''); } catch (_) {}
+          }
+          window.addEventListener('pagehide', function () {
+            try { sessionStorage.setItem(KEY, JSON.stringify({ u: location.pathname + location.search, t: Date.now() })); } catch (_) {}
+          });
+        }
+        function stored() {
+          if (!live) return null;
+          var st = history.state;
+          var path = own(st) ? st[FIELD] : (st == null ? docFrom : null);
+          if (!path) return null;
+          try { return new URL(location.origin + path); } catch (_) { return null; }
+        }
+        window.MentriaNav = {
+          from: function () {
+            var ref = null;
+            try { ref = document.referrer ? new URL(document.referrer) : null; } catch (_) { ref = null; }
+            return ref || stored();
+          }
+        };
+      })();
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        var FS = 'terminal-frame--fullscreen';
+        var BODY_FS = 'is-fullscreen-tool';
+        function activeFrame() { return document.querySelector('.' + FS); }
+        function toolSlug() {
+          var m = (location.pathname || '').match(/\/tools\/([^/]+)\/|^(?:\/[a-z]{2}(?:-[a-z]{2})?)?\/(comms)\//);
+          return m ? (m[1] || m[2]) : null;
+        }
+        function persist(state) {
+          var slug = toolSlug();
+          if (!slug || !window.MentriaStore || typeof window.MentriaStore.set !== 'function') return;
+          window.MentriaStore.set('ui', 'fullscreen.' + slug, state);
+        }
+        function syncPressed(frame, state) {
+          if (!frame) return;
+          var btns = frame.querySelectorAll('[data-action="toggle-fullscreen"]');
+          for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', state ? 'true' : 'false');
+        }
+        function exit(skipPersist) {
+          var frame = activeFrame();
+          if (!frame) return;
+          frame.classList.remove(FS);
+          document.documentElement.classList.remove(BODY_FS);
+          syncPressed(frame, false);
+          if (!skipPersist) persist(false);
+          window.dispatchEvent(new Event('resize'));
+        }
+        function enter(frame, skipPersist) {
+          var current = activeFrame();
+          if (current && current !== frame) { current.classList.remove(FS); syncPressed(current, false); }
+          frame.classList.add(FS);
+          document.documentElement.classList.add(BODY_FS);
+          syncPressed(frame, true);
+          if (!skipPersist) persist(true);
+          window.dispatchEvent(new Event('resize'));
+        }
+        function withTransition(fn) {
+          if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.startViewTransition(fn);
+          } else {
+            fn();
+          }
+        }
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest && e.target.closest('[data-action="toggle-fullscreen"]');
+          if (!btn) return;
+          var frame = btn.closest('.terminal-frame');
+          if (!frame) return;
+          e.preventDefault();
+          if (frame.classList.contains(FS)) withTransition(function () { exit(); });
+          else withTransition(function () { enter(frame); });
+        });
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest && e.target.closest('[data-action="close-tool"], .terminal-frame__dot--back');
+          if (!btn) return;
+          var link = btn.tagName === 'A' && btn.href;
+          if (link && (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return;
+          e.preventDefault();
+          var here = location.pathname, ref = null;
+          try { ref = window.MentriaNav ? window.MentriaNav.from() : (document.referrer ? new URL(document.referrer) : null); } catch (_) { ref = null; }
+          if (ref && ref.origin === location.origin && ref.pathname !== here && history.length > 1) {
+            var gone = false;
+            window.addEventListener('pagehide', function () { gone = true; }, { once: true });
+            history.back();
+            setTimeout(function () { if (!gone && location.pathname === here) location.href = ref.href; }, 800);
+          } else if (link) {
+            location.href = btn.href;
+          } else {
+            location.href = (window.MentriaUI && window.MentriaUI.localePrefix ? window.MentriaUI.localePrefix() : ((window.MENTRIA_PALETTE_DATA && window.MENTRIA_PALETTE_DATA.prefix) || '')) + '/tools/';
+          }
+        });
+        var TYPING = 'textarea, select, [contenteditable=""], [contenteditable="true"], [contenteditable="plaintext-only"], input:not([type]), input[type="text"], input[type="search"], input[type="email"], input[type="url"], input[type="tel"], input[type="password"], input[type="number"]';
+        function shown(el) {
+          if (typeof el.checkVisibility === 'function') return el.checkVisibility({ visibilityProperty: true });
+          return !!el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden';
+        }
+        function layerOpen() {
+          try { if (document.querySelector(':popover-open')) return true; } catch (_) {}
+          try { if (document.querySelector('dialog:modal')) return true; } catch (_) {}
+          var list = document.querySelectorAll('[aria-modal="true"], .m-modal:not([hidden]), .m-wmenu:not([hidden]), .m-palette:not([hidden]), .hero--peek, .pwa-install-sheet--open');
+          for (var i = 0; i < list.length; i++) if (shown(list[i])) return true;
+          return false;
+        }
+        var pendingEsc = null;
+        window.addEventListener('keydown', function (e) {
+          pendingEsc = null;
+          if (e.key !== 'Escape' || e.isComposing || e.keyCode === 229 || e.defaultPrevented || !activeFrame()) return;
+          if (e.target && e.target.closest && e.target.closest(TYPING)) return;
+          if (layerOpen()) return;
+          pendingEsc = e;
+        }, true);
+        window.addEventListener('keydown', function (e) {
+          if (e !== pendingEsc) return;
+          pendingEsc = null;
+          setTimeout(function () {
+            if (e.defaultPrevented || !activeFrame()) return;
+            withTransition(function () { exit(true); });
+          }, 0);
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+          var slug = toolSlug();
+          var frame = document.querySelector('.terminal-frame');
+          var pref = (slug && window.MentriaStore && typeof window.MentriaStore.get === 'function') ? window.MentriaStore.get('ui', 'fullscreen.' + slug) : null;
+          if (slug && frame && pref !== false) { enter(frame, true); return; }
+          document.documentElement.classList.remove(BODY_FS);
+          var stale = activeFrame();
+          if (stale) { stale.classList.remove(FS); syncPressed(stale, false); }
+        });
+      })();
+} catch (e) { console.error(e); }
+try {
+      document.addEventListener('DOMContentLoaded', function () {
+        if (!document.documentElement.classList.contains('app-chrome')) return;
+        var frame = document.querySelector('.terminal-frame');
+        var hero = document.querySelector('.hero');
+        if (!frame || !hero) return;
+        var titlebar = frame.querySelector('.terminal-frame__titlebar');
+        if (!titlebar) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'terminal-frame__info m-btn m-btn--ghost';
+        btn.textContent = 'ⓘ';
+        btn.setAttribute('aria-label', {{ ("common.tool_info" | t) | dump | safe }});
+        btn.setAttribute('data-i18na', 'aria-label=common.tool_info');
+        btn.setAttribute('aria-expanded', 'false');
+        var filename = titlebar.querySelector('.terminal-frame__filename');
+        if (filename) filename.insertAdjacentElement('afterend', btn);
+        else titlebar.appendChild(btn);
+        var peekBack = null;
+        var peekFrom = null;
+        var peekAttrs = null;
+        var shielded = [];
+        var scrim = document.createElement('div');
+        scrim.className = 'hero-scrim';
+        scrim.setAttribute('aria-hidden', 'true');
+        scrim.addEventListener('click', function () { close(); });
+        function isOpen() { return hero.classList.contains('hero--peek'); }
+        function signal(on) {
+          if (window.MentriaUI && window.MentriaUI.overlay) window.MentriaUI.overlay(on, 'info');
+        }
+        function shield(on) {
+          for (var i = 0; i < shielded.length; i++) shielded[i].removeAttribute('inert');
+          shielded = [];
+          if (!on) return;
+          for (var node = hero; node && node !== document.body && node.parentElement; node = node.parentElement) {
+            for (var c = node.parentElement.firstElementChild; c; c = c.nextElementSibling) {
+              if (c === node || c === scrim || c.hasAttribute('inert') || c.hasAttribute('popover')) continue;
+              if (['SCRIPT', 'STYLE', 'LINK', 'TEMPLATE', 'NOSCRIPT'].indexOf(c.tagName) !== -1) continue;
+              c.setAttribute('inert', '');
+              shielded.push(c);
+            }
+          }
+        }
+        function tabbables() {
+          var list = hero.querySelectorAll('a[href], button, input, select, textarea, summary, [tabindex]');
+          var out = [];
+          for (var i = 0; i < list.length; i++) {
+            var el = list[i];
+            if (el === hero || el.tabIndex < 0 || el.disabled || !el.getClientRects().length) continue;
+            out.push(el);
+          }
+          return out;
+        }
+        function onKey(e) {
+          if (!isOpen()) return;
+          if (e.key === 'Escape') {
+            if (e.isComposing || e.keyCode === 229) return;
+            e.preventDefault();
+            e.stopPropagation();
+            close();
+            return;
+          }
+          if (e.key !== 'Tab') { e.stopPropagation(); return; }
+          var f = tabbables();
+          var a = document.activeElement;
+          if (!f.length) { e.preventDefault(); hero.focus({ preventScroll: true }); return; }
+          var first = f[0], last = f[f.length - 1];
+          var inside = a !== hero && hero.contains(a);
+          if (!inside) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+          else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+        }
+        function open() {
+          if (isOpen()) return;
+          var was = document.activeElement;
+          peekFrom = (was && was !== document.body && !hero.contains(was)) ? was : btn;
+          hero.insertAdjacentElement('beforebegin', scrim);
+          hero.classList.add('hero--peek');
+          btn.setAttribute('aria-expanded', 'true');
+          var d = hero.querySelector('.tldr');
+          if (d) d.open = true;
+          var h1 = hero.querySelector('h1');
+          if (h1 && !h1.id) h1.id = 'hero-peek-title';
+          peekAttrs = {};
+          ['role', 'aria-modal', 'aria-labelledby', 'tabindex'].forEach(function (n) { peekAttrs[n] = hero.getAttribute(n); });
+          hero.setAttribute('role', 'dialog');
+          hero.setAttribute('aria-modal', 'true');
+          if (h1) hero.setAttribute('aria-labelledby', h1.id);
+          hero.setAttribute('tabindex', '-1');
+          shield(true);
+          window.addEventListener('keydown', onKey, true);
+          peekBack = (window.MentriaUI && window.MentriaUI.backDismiss)
+            ? window.MentriaUI.backDismiss(close) : null;
+          try { hero.focus({ preventScroll: true }); } catch (_) {}
+          signal(true);
+        }
+        function close() {
+          if (!isOpen()) return;
+          if (peekBack) { peekBack.release(); peekBack = null; }
+          window.removeEventListener('keydown', onKey, true);
+          shield(false);
+          hero.classList.remove('hero--peek');
+          if (scrim.parentNode) scrim.parentNode.removeChild(scrim);
+          btn.setAttribute('aria-expanded', 'false');
+          if (peekAttrs) {
+            Object.keys(peekAttrs).forEach(function (n) { if (peekAttrs[n] == null) hero.removeAttribute(n); else hero.setAttribute(n, peekAttrs[n]); });
+            peekAttrs = null;
+          }
+          var to = peekFrom;
+          peekFrom = null;
+          if (to && to.focus && document.contains(to)) { try { to.focus({ preventScroll: true }); } catch (_) {} }
+          signal(false);
+        }
+        btn.addEventListener('click', function () {
+          if (isOpen()) close(); else open();
+        });
+        document.addEventListener('click', function (e) {
+          if (!isOpen()) return;
+          var t = e.target;
+          if (t === btn || (t.closest && (t.closest('.terminal-frame__info') || t.closest('.hero') === hero))) return;
+          close();
+        });
+      });
+} catch (e) { console.error(e); }
+try {
+      window.MentriaMiniCopy = {
+        open: {{ ("common.mini.open" | t) | dump | safe }},
+        close: {{ ("common.mini.close" | t) | dump | safe }},
+        timer: {{ ("common.mini.timer" | t) | dump | safe }},
+        timesUp: {{ ("common.mini.times_up" | t) | dump | safe }},
+        alarmTitle: {{ ("tool.countdown-timer.title_alarm" | t) | dump | safe }},
+        stopAlarm: {{ ("tool.countdown-timer.notif_stop_alarm" | t) | dump | safe }},
+        notifTitle: {{ ("tool.countdown-timer.notif_finished_format" | t) | dump | safe }},
+        notifBody: {{ ("tool.countdown-timer.notif_body_open" | t) | dump | safe }},
+        paused: {{ ("common.mini.paused" | t) | dump | safe }},
+        steps: {{ ("common.mini.steps" | t) | dump | safe }},
+        tapResume: {{ ("common.mini.tap_resume" | t) | dump | safe }},
+        stillRunning: {{ ("common.mini.still_running" | t) | dump | safe }},
+        timerTool: {{ ("tools.countdown-timer.title" | t) | dump | safe }},
+        stepsTool: {{ ("tools.step-counter.title" | t) | dump | safe }}
+      };
+} catch (e) { console.error(e); }
+try {
+      (function () {
+        var ring = document.querySelector('[data-week-ring]');
+        if (!ring || !window.MentriaStore) return;
+        var segs = ring.querySelectorAll('.week-ring__seg');
+        var tipTimer = 0;
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+        function key(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+        function explain(n) {
+          var tip = ring.getAttribute('data-toast');
+          if (!tip || !window.MentriaUI || ring.offsetParent === null || window.MentriaStore.get('ui', 'week_ring_told')) return;
+          var r = ring.getBoundingClientRect();
+          if (!r.width || r.bottom <= 0 || r.top >= innerHeight) return;
+          var hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          if (!hit || !ring.contains(hit)) return;
+          window.MentriaStore.set('ui', 'week_ring_told', true);
+          window.MentriaUI.toast(tip.split('{n}').join(String(n)), { duration: 6000 });
+        }
+        function paint() {
+          var days = window.MentriaStore.get('packs', 'days') || {};
+          var d = new Date(), today = key(d), n = 0;
+          var start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+          start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+          for (var i = 0; i < 7 && i < segs.length; i++) {
+            var x = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+            var k = key(x), on = !!days[k];
+            if (on) n++;
+            segs[i].classList.toggle('is-on', on);
+            segs[i].classList.toggle('is-today', k === today);
+          }
+          var labelN = ring.getAttribute('data-label-n') || '';
+          if (labelN) { var l = labelN.split('{n}').join(String(n)); ring.setAttribute('aria-label', l); ring.setAttribute('title', l); }
+          clearTimeout(tipTimer);
+          if (n) tipTimer = setTimeout(function () { explain(n); }, 1500);
+        }
+        paint();
+        window.addEventListener('mentria:write', function (e) {
+          var d = (e && e.detail) || {};
+          if (!d.ns || d.ns === 'packs') paint();
+        });
+        document.addEventListener('mentria:localechange', paint);
+        window.addEventListener('pageshow', function (e) { if (e.persisted) paint(); });
+      })();
+} catch (e) { console.error(e); }

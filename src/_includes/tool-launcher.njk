@@ -3,21 +3,71 @@
   ["Games", "home.launcher.games"], ["Create", "home.launcher.create"],
   ["Dev", "home.launcher.dev"]
 ] -%}
-{%- macro tile(tool, lang, i) -%}
-  <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}"
+{%- macro tile(tool, lang, i, groupKey) -%}
+  {%- set titleKey = "tools." + tool.slug + ".title" -%}
+  {%- set shortKey = "tools." + tool.slug + ".short" -%}
+  {%- set hasShort = shortKey | hasKey -%}
+  {%- set groupLabel = (groupKey | traw) if groupKey else "" -%}
+  {%- set catLabel = ("category." + tool.category) | traw -%}
+  {%- set ledeKey = "tools." + tool.slug + ".lede" -%}
+  <a class="launch-tile" data-slug="{{ tool.slug }}" data-group="{{ tool.group }}" data-cat="{{ tool.category }}"
      {%- if tool.requires %} data-requires="{{ tool.requires }}"{% endif %}
-     data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}"
+     {%- if hasShort %} data-name="{{ titleKey | t }}" data-i18na="data-name={{ titleKey }}"{% endif %}
+     data-search="{{ tool.summary }} {{ tool.category }} {{ tool.group }} {{ tool.slug }}{% if groupLabel and groupLabel != tool.group %} {{ groupLabel }}{% endif %}{% if catLabel != tool.category and catLabel != groupLabel %} {{ catLabel }}{% endif %}{% if lang != 'en' and (ledeKey | hasKey) %} {{ ledeKey | traw }}{% endif %}"
+     data-words="{{ ledeKey }}"
      style="view-transition-name: tool-{{ tool.slug }}; --i: {{ i or 0 }}"
-     href="{% if tool.url %}{{ tool.url }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
+     href="{% if tool.url %}{{ tool.url | localeUrl(lang) }}{% else %}{{ ('/tools/' + tool.slug + '/') | localeUrl(lang) }}{% endif %}">
     <span class="launch-tile__icon" aria-hidden="true">
       <svg viewBox="0 0 48 48"><use href="#tool-{{ tool.slug }}"></use></svg>
     </span>
-    <span class="launch-tile__label">{{ ("tools." + tool.slug + ".title") | t }}</span>
+    <span class="launch-tile__label">{% if hasShort %}{{ shortKey | t }}{% else %}{{ titleKey | t }}{% endif %}</span>
     {%- if tool.added | isNew %}<span class="launch-tile__new">{{ "home.launcher.new_badge" | t }}</span>{% endif %}
   </a>
 {%- endmacro -%}
 {{ toolIconsSvg | safe }}
 <section class="launcher reveal" id="tools-preview" aria-label="{{ 'home.tools_heading' | t }}">
+  <div class="launcher__pinned" id="launcher-pinned" hidden
+       data-label-pin="{{ 'home.launcher.pin_action' | t }}"
+       data-label-unpin="{{ 'home.launcher.unpin_action' | t }}">
+    <div class="launcher__head"><h2 class="launcher__label">{{ "home.launcher.pinned" | t }}</h2></div>
+    <div class="launcher__grid" id="launcher-pinned-row"></div>
+  </div>
+  <div class="launcher__recents" id="launcher-recents" hidden>
+    <div class="launcher__head"><h2 class="launcher__label">{{ "home.launcher.recents" | t }}</h2></div>
+    <div class="launcher__grid" id="launcher-recents-row"></div>
+  </div>
+  <div class="launcher__pages">
+    {%- for g in groups %}
+    {%- set catTools = (tools | groupby("group"))[g[0]] %}
+    <section class="launcher__cat launcher__cat--{{ g[0] | lower }}" data-group="{{ g[0] }}">
+      <div class="launcher__head"><h2 class="launcher__label">{{ g[1] | t }}</h2><span class="launcher__count">{{ catTools | length }}</span></div>
+      <div class="launcher__grid">
+        {%- for tool in catTools %}{{ tile(tool, lang, loop.index0, g[1]) }}{%- endfor %}
+      </div>
+    </section>
+    {%- endfor %}
+    {%- if extensions.length %}
+    {%- set kindLabel = "store.kind" | traw %}
+    {%- set gamesLabel = "home.launcher.games" | traw %}
+    {%- set gameLabel = "category.Game" | traw %}
+    <section class="launcher__cat launcher__cat--store" data-group="Store">
+      <div class="launcher__head"><h2 class="launcher__label">{{ "tool.ext_gallery.title" | t }}</h2><span class="launcher__count">{{ extensions | length }}</span></div>
+      <div class="launcher__grid">
+        {%- for e in extensions %}
+        {%- set isGame = e.schemaCategory == "GameApplication" %}
+        <a class="launch-tile" data-slug="ext-{{ e.id }}" data-store="{{ e.id }}" data-group="Extensions"
+           data-search="{{ e.name }} {{ e.id }} {{ e.manifest.description }} {{ ('tool.ext_gallery.desc.' + e.id) | traw }} Extension{% if kindLabel != 'Extension' %} {{ kindLabel }}{% endif %}{% if isGame %} Game Games{% if gamesLabel != 'Games' %} {{ gamesLabel }}{% endif %}{% if gameLabel != 'Game' and gameLabel != gamesLabel %} {{ gameLabel }}{% endif %}{% endif %}"
+           data-words="tool.ext_gallery.desc.{{ e.id }};store.kind{% if isGame %};home.launcher.games;category.Game{% endif %}"
+           href="{{ ('/extensions/' + e.id + '/') | localeUrl(lang) }}">
+          <span class="launch-tile__icon launch-tile__icon--ext" aria-hidden="true">{% if e.iconIsImage %}<img src="{{ e.icon }}" alt="">{% else %}{{ e.icon }}{% endif %}</span>
+          <span class="launch-tile__label">{{ e.name }}</span>
+        </a>
+        {%- endfor %}
+      </div>
+    </section>
+    {%- endif %}
+  </div>
+  <p class="launcher__nomatch" id="launcher-nomatch" hidden data-label="{{ 'tools_page.no_match' | t }}"></p>
   <div class="launcher__widgets" id="launcher-widgets" hidden
        data-label-steps="{{ 'widgets.steps_label' | t }}"
        data-label-steps-goal="{{ 'widgets.steps_of_goal' | t }}"
@@ -27,27 +77,6 @@
        data-label-untitled="{{ 'widgets.untitled' | t }}"
        data-label-storage="{{ 'widgets.storage_label' | t }}"
        data-label-storage-used="{{ 'widgets.storage_used' | t }}"></div>
-  <div class="launcher__pinned" id="launcher-pinned" hidden
-       data-label-pin="{{ 'home.launcher.pin_action' | t }}"
-       data-label-unpin="{{ 'home.launcher.unpin_action' | t }}">
-    <h2 class="launcher__label">{{ "home.launcher.pinned" | t }}</h2>
-    <div class="launcher__grid" id="launcher-pinned-row"></div>
-  </div>
-  <div class="launcher__recents" id="launcher-recents" hidden>
-    <h2 class="launcher__label">{{ "home.launcher.recents" | t }}</h2>
-    <div class="launcher__grid" id="launcher-recents-row"></div>
-  </div>
-  <div class="launcher__pages">
-    {%- for g in groups %}
-    <section class="launcher__cat launcher__cat--{{ g[0] | lower }}" data-group="{{ g[0] }}">
-      <h2 class="launcher__label">{{ g[1] | t }}</h2>
-      <div class="launcher__grid">
-        {%- for tool in (tools | groupby("group"))[g[0]] %}{{ tile(tool, lang, loop.index0) }}{%- endfor %}
-      </div>
-    </section>
-    {%- endfor %}
-  </div>
-  <p class="launcher__nomatch" id="launcher-nomatch" hidden>{{ "home.launcher.noMatch" | t }}</p>
 </section>
 
 <script>
@@ -103,7 +132,23 @@
     if (a && a.classList && a.classList.contains('launch-tile')) return a;
     return null;
   }
+  function dialogOpen() {
+    var dlg = document.getElementById('m-dialog');
+    if (dlg && dlg.hasAttribute('data-open')) return true;
+    try { return !!(dlg && dlg.matches(':popover-open')); } catch (_) { return false; }
+  }
+  function openPopup() {
+    var p = document.getElementById('tools-popup');
+    return p && !p.hidden && !p.closest('[inert]') ? p : null;
+  }
+  function launcherActive() {
+    if (dialogOpen()) return false;
+    if (openPopup()) return true;
+    var t = currentTile();
+    return !!(t && t.closest('.launcher') && !t.closest('[inert]'));
+  }
   function handleDirection(dir) {
+    if (!launcherActive()) return;
     var from = currentTile();
     if (!from) {
       var first = visibleTiles()[0];
@@ -118,13 +163,45 @@
     if (name === 'a') {
       var el = currentTile();
       if (el) { el.click(); }
-    } else if (name === 'b') {
-      if (history.length > 1) history.back();
+      return;
+    }
+    if (!launcherActive()) return;
+    var popup = openPopup();
+    if (name === 'b') {
+      var closer = popup && popup.querySelector('button[data-tools-close]');
+      if (closer) closer.click();
     } else if (name === 'start') {
-      var cli = document.getElementById('mentria-cli-input') || document.querySelector('.cli__input') || document.querySelector('input[type="text"]');
-      if (cli && typeof cli.focus === 'function') cli.focus();
+      var find = popup && popup.querySelector('#tools-find');
+      if (find) find.focus();
     }
   }
+  function addWords(tile, words) {
+    var s = tile.getAttribute('data-search') || '';
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i] == null ? '' : String(words[i]).trim();
+      if (w && s.indexOf(w) === -1) s += ' ' + w;
+    }
+    tile.setAttribute('data-search', s);
+  }
+  function tr(key) {
+    var I = window.MentriaI18n;
+    return I && typeof I.t === 'function' ? I.t(key) : '';
+  }
+  document.addEventListener('mentria:localechange', function () {
+    var cats = document.querySelectorAll('.launcher .launcher__cat');
+    for (var i = 0; i < cats.length; i++) {
+      var head = cats[i].querySelector('.launcher__label');
+      var group = head ? head.textContent : '';
+      var tiles = cats[i].querySelectorAll('.launch-tile[data-search]');
+      for (var j = 0; j < tiles.length; j++) {
+        var cat = tiles[j].getAttribute('data-cat');
+        var words = [group, cat ? tr('category.' + cat) : ''];
+        var keys = (tiles[j].getAttribute('data-words') || '').split(';');
+        for (var k = 0; k < keys.length; k++) if (keys[k]) words.push(tr(keys[k]));
+        addWords(tiles[j], words);
+      }
+    }
+  });
   window.addEventListener('mentria:gamepad:direction', function (e) { handleDirection(e.detail.direction); });
   window.addEventListener('mentria:gamepad:button', function (e) { handleButton(e.detail.name, e.detail.pressed); });
   window.addEventListener('mentria:gamepad:connect', function () {
@@ -138,41 +215,4 @@
 })();
 </script>
 
-<script>
-(function () {
-  'use strict';
-  var input = document.querySelector('.cli__input');
-  var launcher = document.getElementById('tools-preview');
-  if (!input || !launcher) return;
-  var noMatch = document.getElementById('launcher-nomatch');
-  function normalize(s) {
-    return (s || '').toString().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
-  }
-  function haystack(tile) {
-    var label = tile.querySelector('.launch-tile__label');
-    return normalize((label ? label.textContent : '') + ' ' + (tile.getAttribute('data-search') || ''));
-  }
-  function applyFilter() {
-    var qNorm = normalize(input.value.trim());
-    var tokens = qNorm.split(/\s+/).filter(Boolean);
-    var tiles = launcher.querySelectorAll('.launch-tile');
-    var anyVisible = false;
-    for (var i = 0; i < tiles.length; i++) {
-      var hay = haystack(tiles[i]);
-      var match = !qNorm || hay.indexOf(qNorm) !== -1 ||
-        (tokens.length > 0 && tokens.every(function (t) { return hay.indexOf(t) !== -1; }));
-      tiles[i].hidden = !match;
-      if (match && qNorm) anyVisible = true;
-    }
-    var sections = launcher.querySelectorAll('.launcher__cat, .launcher__recents');
-    for (var j = 0; j < sections.length; j++) {
-      sections[j].hidden = !sections[j].querySelector('.launch-tile:not([hidden])');
-    }
-    if (noMatch) noMatch.hidden = !(qNorm && !anyVisible);
-  }
-  input.addEventListener('input', applyFilter);
-  setTimeout(function () { launcher.classList.add('stag-done'); }, 900);
-  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') setTimeout(applyFilter, 0); });
-})();
-</script>
 <script src="/assets/js/mentria-widgets.js?v={{ buildHash }}"></script>

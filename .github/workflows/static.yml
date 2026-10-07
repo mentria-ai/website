@@ -24,39 +24,44 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      notes: ${{ steps.notes.outputs.notes }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
-      - name: Tag the release
+      - name: Name the release
         id: tag
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           base="v$(date -u +%Y.%m.%d)"
           tag="$base"; n=1
           while git rev-parse -q --verify "refs/tags/$tag" >/dev/null; do n=$((n+1)); tag="$base-$n"; done
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "prev=$(git tag --list 'v*' --sort=-creatordate | head -n1)" >> "$GITHUB_OUTPUT"
-      - name: Publish the release
+      - name: Generate the release notes for the site
+        id: notes
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ steps.tag.outputs.tag }}" --target "$GITHUB_SHA" --generate-notes --title "${{ steps.tag.outputs.tag }}" ${{ steps.tag.outputs.prev && format('--notes-start-tag {0}', steps.tag.outputs.prev) || '' }}
-      - name: Capture the release notes for the site
-        env:
-          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          PREV: ${{ steps.tag.outputs.prev }}
         run: |
-          gh release view "${{ steps.tag.outputs.tag }}" --json tagName,url,publishedAt,body \
-            --jq '{tag: .tagName, url: .url, date: .publishedAt, items: [(.body | split("\n")[] | select(startswith("* ")) | ltrimstr("* ") | select(startswith("Release:") | not) | sub(" by @[^ ]+ in .*$"; ""))]}' \
-            > src/_data/release.json
+          fields=(-f "tag_name=$TAG" -f "target_commitish=$GITHUB_SHA")
+          if [ -n "$PREV" ]; then fields+=(-f "previous_tag_name=$PREV"); fi
+          gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" "${fields[@]}" > "$RUNNER_TEMP/release-notes.json"
+          jq --arg tag "$TAG" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG" --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{tag: $tag, url: $url, date: $date, items: [(.body | split("\n")[] | select(startswith("* ")) | ltrimstr("* ") | select(startswith("Release:") | not) | sub(" by @[^ ]+ in .*$"; ""))]}' \
+            "$RUNNER_TEMP/release-notes.json" > src/_data/release.json
+          delim="NOTES_$(openssl rand -hex 16)"
+          { echo "notes<<$delim"; jq -r .body "$RUNNER_TEMP/release-notes.json"; echo "$delim"; } >> "$GITHUB_OUTPUT"
       - name: Build site
         env:
           RELEASE_TAG: ${{ steps.tag.outputs.tag }}
@@ -64,7 +69,7 @@ jobs:
       - name: Check built scripts and internal links
         run: node .github/scripts/check-build.mjs build
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -79,9 +84,24 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
         continue-on-error: true
       - name: Retry deploy
         id: deployment-retry
         if: steps.deployment.outcome == 'failure'
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
+
+  release:
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Tag and publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.build.outputs.tag }}
+          NOTES: ${{ needs.build.outputs.notes }}
+        run: |
+          printf '%s' "$NOTES" > "$RUNNER_TEMP/release-notes.md"
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$TAG" --notes-file "$RUNNER_TEMP/release-notes.md"

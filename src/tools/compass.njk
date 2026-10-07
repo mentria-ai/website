@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.compass.title' | t }}"
   description: "{{ 'tools.compass.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">compass</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">compass</span></p>
   <h1>{{ "tools.compass.title" | t }}</h1>
   <p>{{ "tools.compass.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -81,7 +82,7 @@ eleventyComputed:
     <p class="cps__panel-body">{{ "tool.compass.unsupported_body" | t }}</p>
     <canvas class="cps__qr" id="cps-qr" role="img" aria-label="{{ 'tool.compass.qr_caption' | t }}" hidden></canvas>
     <p class="cps__qr-caption">{{ "tool.compass.qr_caption" | t }}</p>
-    <a class="cps__qr-link" href="https://mentria.ai/tools/compass/">mentria.ai/tools/compass/</a>
+    <a class="cps__qr-link" href="{{ site.siteUrl }}{{ page.url }}">{{ site.siteUrl | replace("https://", "") }}{{ page.url }}</a>
   </div>
 
 </section>
@@ -111,7 +112,7 @@ eleventyComputed:
   };
 
   var CARDINALS = [COPY.dirN, COPY.dirNE, COPY.dirE, COPY.dirSE, COPY.dirS, COPY.dirSW, COPY.dirW, COPY.dirNW];
-  var QR_URL = 'https://mentria.ai/tools/compass/';
+  var QR_URL = {{ (site.siteUrl ~ page.url) | dump | safe }};
   var SVG_NS = 'http://www.w3.org/2000/svg';
   var SMOOTHING = 0.18;
   var SETTLE_MS = 2200;
@@ -147,6 +148,7 @@ eleventyComputed:
   var rawHeading = 0;
   var display = 0;
   var shownDeg = -1;
+  var shownRot = '';
   var accuracy = null;
   var deltas = [];
   var calibUntil = 0;
@@ -236,7 +238,11 @@ eleventyComputed:
   }
 
   function render() {
-    roseEl.style.transform = 'rotate(' + (-display).toFixed(2) + 'deg)';
+    var rot = 'rotate(' + (-display).toFixed(2) + 'deg)';
+    if (rot !== shownRot) {
+      shownRot = rot;
+      roseEl.style.transform = rot;
+    }
     var deg = Math.round(norm360(display)) % 360;
     if (deg === shownDeg) return;
     shownDeg = deg;
@@ -420,7 +426,10 @@ eleventyComputed:
   function start() {
     if (typeof DeviceOrientationEvent === 'undefined') { showPanel('unsupported'); renderQR(); return; }
     if (!window.isSecureContext) { showPanel('insecure'); return; }
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') { showPanel('perm'); return; }
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      MentriaUI.sensorsGranted(['accelerometer', 'gyroscope', 'magnetometer']).then(function (ok) { if (ok) begin(); else showPanel('perm'); });
+      return;
+    }
     begin();
   }
 
@@ -506,7 +515,10 @@ eleventyComputed:
 
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') stopLoop();
-    else startLoop();
+    else {
+      startLoop();
+      if (running && !wakeLock) requestWakeLock();
+    }
   });
 
   buildRose();
@@ -557,6 +569,7 @@ eleventyComputed:
   padding: 0;
   border: none;
   background: none;
+  font-family: inherit;
   border-radius: 50%;
   cursor: pointer;
   touch-action: manipulation;

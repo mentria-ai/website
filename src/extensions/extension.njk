@@ -1,0 +1,385 @@
+---
+layout: base.njk
+pagination:
+  data: extensionsLocalized
+  size: 1
+  alias: pair
+permalink: "{{ pair.locale.pathPrefix }}/extensions/{{ pair.ext.id }}/index.html"
+eleventyExcludeFromSitemap: true
+eleventyComputed:
+  lang: "{{ pair.locale.code }}"
+  title: "{{ pair.ext.name }} · {{ 'store.kind' | t }}"
+  description: "{{ ('tool.ext_gallery.desc.' + pair.ext.id) | t }}"
+---
+<link rel="stylesheet" href="/assets/css/store.css?v={{ buildHash }}">
+{% set ext = pair.ext %}
+{% set prefix = pair.locale.pathPrefix %}
+{% set cardPrefix = prefix %}
+<section class="hero xs-hero xs-hero--app">
+  <p class="eyebrow eyebrow--crumbs eyebrow--start"><a class="eyebrow__link" href="{{ prefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ prefix }}/extensions/">extensions</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">{{ ext.id }}</span></p>
+  <div class="xs-head">
+    <span class="xs-head__icon" aria-hidden="true">{% if ext.iconIsImage %}<img src="{{ ext.icon }}" alt="" width="40" height="40">{% else %}{{ ext.icon }}{% endif %}</span>
+    <div class="xs-head__text">
+      <h1 class="xs-head__name">{{ ext.name }}</h1>
+      <p class="xs-head__by">{% tvar "store.by", "author", ext.author %}</p>
+    </div>
+  </div>
+</section>
+
+{% set terminalTitle = ext.name %}
+{% set terminalBackHref = prefix + "/extensions/" %}
+{% set terminalMini = "tool" %}
+{% include "terminal-frame-open.njk" %}
+<section class="xr xs-run{% if ext.kind == 'app' %} xr--app{% endif %}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}" data-install-quiet>
+  <p class="xr__error" id="xr-error" hidden></p>
+  <p class="xr__missing" id="xs-offline" hidden>{{ "store.offline_needs_install" | t }}</p>
+  <div class="xs-stopped" id="xs-stopped" hidden>
+    <p class="xs-stopped__text" id="xs-stopped-text">{% tvar "store.removed", "name", ext.name %}</p>
+    <button type="button" class="m-btn m-btn--ghost" id="xs-run-again" aria-describedby="xs-stopped-text">{{ "store.run_again" | t }}</button>
+  </div>
+  <iframe class="xr__frame" id="xr-frame" title="{{ ext.name }}" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay"></iframe>
+</section>
+{% include "terminal-frame-close.njk" %}
+
+<section class="xs-bar" aria-label="{{ ext.name }}">
+  <div class="xs-head__actions">
+    <button type="button" class="m-btn m-btn--primary" id="xs-install">{{ "store.install" | t }} · <span data-bytes="{{ ext.bytes }}">{{ ext.bytes | fileSize }}</span></button>
+    <span class="xs-head__state" id="xs-state" hidden>{{ "store.installed_offline" | t }}</span>
+    <span class="xs-head__state" id="xs-state-plain" hidden>{{ "tool.ext_gallery.installed" | t }}</span>
+    <button type="button" class="m-btn" id="xs-remove" hidden>{{ "store.remove" | t }}</button>
+  </div>
+  <div class="xs-progress" id="xs-progress" hidden>
+    <span class="xs-progress__bar"><i id="xs-progress-fill"></i></span>
+    <span class="xs-progress__text" id="xs-progress-text"></span>
+  </div>
+  <p class="xs-head__error" id="xs-install-error" role="status" hidden></p>
+</section>
+
+<section class="xs-sec xs-about">
+  <p class="xs-lede">{{ ("tool.ext_gallery.desc." + ext.id) | t }}</p>
+</section>
+
+<section class="xs-sec" aria-labelledby="xs-access">
+  <h2 class="xs-sec__h" id="xs-access">{{ "store.access_title" | t }}</h2>
+  {%- if ext.permissions.length %}
+  <dl class="xs-perms">
+    {%- for p in ext.permissions %}
+    {%- set pk = "store.perm_" + p %}
+    {%- set xk = "tool.ext_gallery.perm." + ext.id + "." + p %}
+    <div class="xs-perms__row">
+      <dt>{% if pk | hasKey %}{{ pk | t }}{% else %}{{ p }}{% endif %}</dt>
+      <dd>{% if xk | hasKey %}{{ xk | t }}{% elif (pk + "_desc") | hasKey %}{{ (pk + "_desc") | t }}{% endif %}</dd>
+    </div>
+    {%- endfor %}
+  </dl>
+  {%- else %}
+  <p class="xs-note">{{ "store.access_none" | t }}</p>
+  {%- endif %}
+  <p class="xs-note">{{ "store.access_trust" | t }}</p>
+</section>
+
+<section class="xs-sec" aria-labelledby="xs-info">
+  <h2 class="xs-sec__h" id="xs-info">{{ "store.info_title" | t }}</h2>
+  <dl class="xs-info">
+    <div><dt>{{ "store.info_developer" | t }}</dt><dd>{{ ext.author }}</dd></div>
+    <div><dt>{{ "store.info_version" | t }}</dt><dd>{{ ext.version }}</dd></div>
+    <div><dt>{{ "store.info_size" | t }}</dt><dd data-bytes="{{ ext.bytes }}">{{ ext.bytes | fileSize }}</dd></div>
+    <div><dt>{{ "store.info_price" | t }}</dt><dd>{{ "store.free" | t }}</dd></div>
+  </dl>
+</section>
+
+{%- if extensions.length > 1 %}
+<section class="xs-sec" aria-labelledby="xs-more">
+  <h2 class="xs-sec__h" id="xs-more">{{ "store.more_title" | t }}</h2>
+  <ul class="xs-grid" role="list">
+    {%- for card in extensions %}{% if card.id != ext.id %}
+    <li>{% include "extension-card.njk" %}</li>
+    {%- endif %}{% endfor %}
+  </ul>
+</section>
+{%- endif %}
+
+<p class="xs-links"><a href="{{ prefix }}/extensions/">{{ "store.all_link" | t }}</a><a href="{{ prefix }}/tools/extensions/">{{ "store.manage_link" | t }}</a></p>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": {{ (ext.name | htmlDecode | striptags) | dump | safe }},
+  "description": {{ ((("tool.ext_gallery.desc." + ext.id) | traw) | htmlDecode | striptags) | dump | safe }},
+  "url": "{{ site.siteUrl }}{{ page.url }}",
+  "applicationCategory": "{{ ext.schemaCategory }}",
+  "operatingSystem": "Web browser",
+  "softwareVersion": {{ ext.version | dump | safe }},
+  "fileSize": "{{ ext.size }}",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Organization", "name": {{ ext.author | dump | safe }} },
+  "publisher": { "@id": "{{ site.siteUrl }}/#organization" },
+  "inLanguage": "{{ lang }}"
+}
+</script>
+<script type="application/json" id="xs-data">{{ { id: ext.id, kind: ext.kind, app: ext.app, prefix: prefix, manifest: ext.manifest } | dump | safe }}</script>
+<script>
+  window.XS_COPY = {
+    installing: {{ ("store.installing" | t) | dump | safe }},
+    failed: {{ ("store.install_failed" | t) | dump | safe }},
+    blocked: {{ ("store.install_blocked" | t) | dump | safe }},
+    full: {{ ("store.install_full" | t) | dump | safe }},
+    removeConfirm: {{ ("store.remove_confirm" | t) | dump | safe }},
+    removeLabel: {{ ("store.remove" | t) | dump | safe }}
+  };
+</script>
+<script type="module">
+const D = JSON.parse(document.getElementById('xs-data').textContent);
+const C = window.XS_COPY;
+const installBtn = document.getElementById('xs-install');
+const removeBtn = document.getElementById('xs-remove');
+const stateEl = document.getElementById('xs-state');
+const plainStateEl = document.getElementById('xs-state-plain');
+const progressEl = document.getElementById('xs-progress');
+const fillEl = document.getElementById('xs-progress-fill');
+const progressText = document.getElementById('xs-progress-text');
+const installErr = document.getElementById('xs-install-error');
+let frame = document.getElementById('xr-frame');
+const frameModel = frame.cloneNode(false);
+const runRoot = document.querySelector('.xs-run');
+const runErr = document.getElementById('xr-error');
+const offlineEl = document.getElementById('xs-offline');
+const stoppedEl = document.getElementById('xs-stopped');
+const runAgainBtn = document.getElementById('xs-run-again');
+let X;
+let H;
+let lastPct = 0;
+let stateRun = 0;
+let failKind = 'failed';
+document.addEventListener('mentria:localechange', relocalize);
+try {
+  X = await import('/assets/js/mentria-extensions.js');
+  H = await import('/assets/js/mentria-ext-host.js');
+} catch (_) {
+  installBtn.hidden = true;
+}
+
+function installedEntry() {
+  try { return X ? X.getEntry(D.id) : null; } catch (_) { return null; }
+}
+
+async function filesPresent(entry) {
+  if (!X.offlineReady(D.id) || typeof caches === 'undefined') return false;
+  const m = entry.manifest || {};
+  const main = D.kind === 'app' ? (Array.isArray(m.entry) ? m.entry[0] : null) : '/assets/extensions/' + D.id + '.html';
+  if (!main) return true;
+  try {
+    const cache = await caches.open(X.FILES_CACHE);
+    return !!(await cache.match(main));
+  } catch (_) {
+    return false;
+  }
+}
+
+async function showState() {
+  const run = ++stateRun;
+  const entry = installedEntry();
+  installBtn.hidden = !!entry;
+  removeBtn.hidden = !entry;
+  const offline = !!entry && await filesPresent(entry);
+  if (run !== stateRun) return;
+  stateEl.hidden = !offline;
+  plainStateEl.hidden = !entry || offline;
+}
+
+function showProgress(p) {
+  progressEl.hidden = false;
+  lastPct = Math.round(p * 100);
+  fillEl.style.width = lastPct + '%';
+  progressText.textContent = C.installing.replace('{pct}', String(lastPct));
+}
+
+function relocalize(e) {
+  const I = window.MentriaI18n;
+  if (!I || !I.t) return;
+  const pick = (key, current) => { const v = I.t(key); return typeof v === 'string' && v !== key ? v : current; };
+  C.installing = pick('store.installing', C.installing);
+  C.failed = pick('store.install_failed', C.failed);
+  C.blocked = pick('store.install_blocked', C.blocked);
+  C.full = pick('store.install_full', C.full);
+  C.removeConfirm = pick('store.remove_confirm', C.removeConfirm);
+  C.removeLabel = pick('store.remove', C.removeLabel);
+  const code = (e && e.detail && e.detail.code) || document.documentElement.lang;
+  const locale = (window.MENTRIA_LOCALES || []).find((l) => l.code === code);
+  if (locale) D.prefix = locale.prefix;
+  if (!progressEl.hidden) progressText.textContent = C.installing.replace('{pct}', String(lastPct));
+  if (!installErr.hidden) installErr.textContent = C[failKind];
+  const UI = window.MentriaUI;
+  if (UI && UI.formatBytes) {
+    document.querySelectorAll('[data-bytes]').forEach((el) => {
+      const n = Number(el.dataset.bytes);
+      el.textContent = n >= 1048576 ? UI.formatBytes(n, 1) : UI.formatSize(Math.max(1, Math.round(n / 1024)), 'KB', 0);
+    });
+  }
+}
+
+function storageBlocked() {
+  try { return !window.localStorage; } catch (_) { return true; }
+}
+
+function failureKind(e) {
+  if (storageBlocked() || (e && e.name === 'SecurityError')) return 'blocked';
+  if (e && (e.name === 'QuotaExceededError' || e.code === 'storage-full')) return 'full';
+  return 'failed';
+}
+
+function extraUrls() {
+  return [location.pathname].concat(D.app ? X.appPages(D.app) : []);
+}
+
+async function start() {
+  if (!X || !H) return;
+  const entry = installedEntry();
+  const onError = (msg) => { runErr.textContent = msg; runErr.hidden = false; };
+  if (D.kind === 'app') {
+    if (!navigator.onLine && !(entry && X.offlineReady(D.id))) { offlineEl.hidden = false; frame.remove(); return; }
+    H.mountExtension(frame, { manifest: entry ? entry.manifest : D.manifest, prefix: D.prefix, get blockedTemplate() { return runRoot.dataset.blocked; }, onError, onClose: () => { location.href = D.prefix + '/extensions/'; } });
+    return;
+  }
+  let source = entry && entry.enabled ? X.getSource(D.id) : null;
+  if (!source) {
+    try {
+      const res = await fetch('/assets/extensions/' + D.id + '.html');
+      if (!res.ok) throw new Error(String(res.status));
+      source = await res.text();
+    } catch (_) {
+      offlineEl.hidden = false;
+      frame.remove();
+      return;
+    }
+  }
+  const manifest = entry && entry.enabled ? entry.manifest : X.parseManifest(source);
+  H.mountExtension(frame, { manifest, source, prefix: D.prefix, get blockedTemplate() { return runRoot.dataset.blocked; }, onError, onClose: () => { location.href = D.prefix + '/extensions/'; } });
+}
+
+async function install() {
+  installErr.hidden = true;
+  installBtn.disabled = true;
+  showProgress(0);
+  let created = false;
+  try {
+    const pkg = await X.fetchPackage(D.id);
+    if (pkg.kind === 'app') {
+      X.installApp(pkg.manifest);
+    } else {
+      const res = await fetch('/assets/extensions/' + D.id + '.html', { cache: 'no-store' });
+      if (!res.ok) throw new Error(String(res.status));
+      const html = await res.text();
+      X.install(html, X.inspect(html).manifest);
+    }
+    created = true;
+    await X.downloadFiles(D.id, pkg.files, extraUrls(), showProgress);
+    progressEl.hidden = true;
+    await showState();
+    runAgain();
+    if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast((stateEl.hidden ? plainStateEl : stateEl).textContent);
+  } catch (e) {
+    if (created) X.remove(D.id, { keepData: true });
+    progressEl.hidden = true;
+    failKind = failureKind(e);
+    installErr.textContent = C[failKind];
+    installErr.hidden = false;
+    showState();
+  } finally {
+    installBtn.disabled = false;
+  }
+}
+
+function stopRunning() {
+  frame.remove();
+  frame = frameModel.cloneNode(false);
+  runErr.hidden = true;
+  offlineEl.hidden = true;
+  stoppedEl.hidden = false;
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+function runAgain() {
+  if (stoppedEl.hidden) return;
+  stoppedEl.hidden = true;
+  runRoot.appendChild(frame);
+  start();
+}
+
+async function removeExtension() {
+  const name = (D.manifest && D.manifest.name) || D.id;
+  const ok = window.mentriaConfirm ? await window.mentriaConfirm(C.removeConfirm.replace('{name}', name), { danger: true, ok: C.removeLabel }) : false;
+  if (!ok) return;
+  removeBtn.disabled = true;
+  await stopRunning();
+  X.remove(D.id);
+  removeBtn.disabled = false;
+  await showState();
+  runAgainBtn.focus({ preventScroll: true });
+}
+
+async function refreshInstalled() {
+  const entry = installedEntry();
+  if (!entry || !navigator.onLine) return;
+  try {
+    const pkg = await X.fetchPackage(D.id);
+    if (!installedEntry()) return;
+    if (pkg.kind === 'app' && pkg.manifest && pkg.manifest.version !== entry.manifest.version) X.installApp(pkg.manifest);
+    else if (pkg.kind !== 'app') {
+      const res = await fetch('/assets/extensions/' + D.id + '.html', { cache: 'no-store' });
+      if (res.ok) {
+        const html = await res.text();
+        const m = X.inspect(html).manifest;
+        if (!installedEntry()) return;
+        if (X.compareVersions(m.version, entry.manifest.version) > 0) X.install(html, m);
+      }
+    }
+    await X.downloadFiles(D.id, pkg.files, extraUrls());
+    if (!installedEntry()) { await X.removeFiles(D.id); return; }
+    showState();
+  } catch (_) {}
+}
+
+if (X) {
+  showState();
+  installBtn.addEventListener('click', install);
+  removeBtn.addEventListener('click', removeExtension);
+  runAgainBtn.addEventListener('click', runAgain);
+  await start();
+  refreshInstalled();
+}
+</script>
+<style>
+.xs-run { display: flex; flex-direction: column; height: min(640px, 70vh); }
+.xs-run.xr--app { height: min(820px, 80vh); }
+.xs-run .xr__frame { flex: 1; width: 100%; border: 0; min-height: 0; background: transparent; }
+.xs-run .xr__error, .xs-run .xr__missing { font-family: var(--font-mono); font-size: 0.8rem; color: var(--syn-pink, #f472b6); padding: 0.6rem 0.8rem; margin: 0; }
+.xs-run .xr__missing { color: var(--term-muted); }
+.xs-run .xs-stopped { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 1.5rem 1rem; text-align: center; }
+.xs-run .xs-stopped__text { max-width: 44ch; margin: 0; font-size: 0.95rem; line-height: 1.55; color: var(--term-muted); }
+.xs-run [hidden] { display: none; }
+.xs-bar { margin-top: 1rem; }
+.xs-bar .xs-head__actions { margin-top: 0; }
+.xs-about { margin-top: 1.25rem; }
+.xs-about .xs-lede { max-width: 62ch; margin: 0; }
+.xs-progress { display: flex; align-items: center; gap: 0.7rem; margin-top: 0.7rem; }
+.xs-progress[hidden] { display: none; }
+.xs-progress__bar { flex: 0 1 220px; height: 4px; border-radius: 4px; background: rgba(110, 243, 197, 0.16); overflow: hidden; }
+.xs-progress__bar i { display: block; width: 0; height: 100%; background: var(--accent); transition: width 0.2s ease; }
+.xs-progress__text { font-family: var(--font-mono); font-size: 0.78rem; color: var(--term-muted); font-variant-numeric: tabular-nums; }
+.xs-head__error { margin: 0.6rem 0 0; font-family: var(--font-mono); font-size: 0.78rem; color: var(--syn-amber); }
+.xs-head__error[hidden] { display: none; }
+.xs-head__icon img { display: block; width: 100%; height: 100%; }
+@media (max-width: 480px) {
+  .xs-run { height: min(560px, 68vh); }
+  .xs-run.xr--app { height: min(620px, 70vh); }
+}
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  .terminal-frame:has(.xr--app) { position: fixed; inset: 0; z-index: 9000; margin: 0; max-width: none; border: 0; border-radius: 0; }
+  .terminal-frame:has(.xr--app) .terminal-frame__titlebar { display: none; }
+  .terminal-frame:has(.xr--app) .terminal-frame__body { padding: 0; height: 100%; }
+  .xr.xr--app { height: 100vh; height: 100svh; }
+}
+</style>

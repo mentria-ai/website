@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.qr-scanner.title' | t }}"
   description: "{{ 'tools.qr-scanner.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">qr-scanner</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">qr-scanner</span></p>
   <h1>{{ "tools.qr-scanner.title" | t }}</h1>
   <p>{{ "tools.qr-scanner.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -77,6 +78,7 @@ eleventyComputed:
       </label>
       <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="qr-copy" hidden>{{ "tool.qr-scanner.btn_copy" | t }}</button>
       <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="qr-open" hidden>{{ "tool.qr-scanner.btn_open" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="qr-send" hidden>{{ "common.send_to" | t }}</button>
     </div>
   </div>
 
@@ -119,6 +121,7 @@ eleventyComputed:
     noteCameraErr:  {{ ("tool.qr-scanner.note_camera_error" | t) | dump | safe }},
     noteNoMatch:    {{ ("tool.qr-scanner.note_no_match"   | t) | dump | safe }},
     noteNoMatchQrOnly: {{ ("tool.qr-scanner.note_no_match_qr_only" | t) | dump | safe }},
+    toTotp:         {{ ("tool.qr-scanner.to_totp"         | t) | dump | safe }},
     idlePromptQr:   {{ ("tool.qr-scanner.idle_prompt_qr" | t) | dump | safe }},
     genTooLong:     {{ ("tool.qr-scanner.gen_too_long"    | t) | dump | safe }},
     parsedWifi:     {{ ("tool.qr-scanner.parsed_wifi"     | t) | dump | safe }},
@@ -165,6 +168,7 @@ eleventyComputed:
   const fileInput   = $('qr-file');
   const copyBtn     = $('qr-copy');
   const openBtn     = $('qr-open');
+  const sendBtn     = $('qr-send');
   const torchBtn    = $('qr-torch');
   const zoomWrap    = $('qr-zoom-wrap');
   const zoomSlider  = $('qr-zoom');
@@ -322,6 +326,7 @@ eleventyComputed:
   let detector = null;
   let useJsQR = false;
   let stream = null;
+  let camGen = 0;
   let rafId = 0;
   let lastDetect = 0;
   let scanning = false;
@@ -381,7 +386,7 @@ eleventyComputed:
   function setState(s) {
     qr.className = 'qr qr--' + s;
     copyBtn.hidden = s !== 'result';
-    if (s !== 'result') openBtn.hidden = true;
+    if (s !== 'result') { openBtn.hidden = true; sendBtn.hidden = true; }
   }
 
   function showNote(msg) {
@@ -393,6 +398,7 @@ eleventyComputed:
   }
 
   function stopCamera() {
+    camGen++;
     scanning = false;
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
@@ -758,12 +764,26 @@ eleventyComputed:
     parsedBox.hidden = false;
   }
 
-  function showResult(value, format) {
+  function isTotpUri(v) {
+    return /^otpauth:\/\/totp\/[^?#]*\?(?:[^#]*&)?secret=[^&#]/i.test(v) || /^otpauth-migration:\/\/offline\?(?:[^#]*&)?data=[^&#]/i.test(v);
+  }
+
+  function showResult(value, format, keep) {
+    const text = String(value || '').trim();
+    if (!keep && isTotpUri(text) && MentriaUI.sendTargets({ text }).indexOf('totp') !== -1) {
+      setState('idle');
+      showNote(COPY.toTotp);
+      window.addEventListener('pagehide', hideNote, { once: true });
+      if (navigator.vibrate) navigator.vibrate(40);
+      MentriaUI.sendTo('totp', { text }).then((ok) => { if (!ok) { hideNote(); showResult(value, format, true); } });
+      return;
+    }
     lastValue = value || '';
     resultValue.textContent = lastValue;
     resultFmt.textContent = format ? format.replace(/_/g, ' ') : '';
     setState('result');
     openBtn.hidden = !/^https?:\/\/\S+$/i.test(lastValue.trim());
+    sendBtn.hidden = !MentriaUI.sendTargets({ text: lastValue }).length;
     renderParsed(lastValue);
     if (navigator.vibrate) navigator.vibrate(40);
   }
@@ -816,23 +836,32 @@ eleventyComputed:
       showNote(COPY.noteNoCamera);
       return;
     }
+    const gen = ++camGen;
+    let opened;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
+      opened = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
       });
     } catch (err) {
+      if (gen !== camGen) return;
       const name = err && err.name;
       if (name === 'NotAllowedError' || name === 'SecurityError') showNote(COPY.noteDenied);
       else if (name === 'NotFoundError' || name === 'OverconstrainedError') showNote(COPY.noteNoCamera);
       else showNote(COPY.noteCameraErr);
       return;
     }
+    if (gen !== camGen || document.hidden) {
+      opened.getTracks().forEach(t => t.stop());
+      return;
+    }
+    stream = opened;
     video.srcObject = stream;
     setupTrack();
     missCount = 0;
     scanning = true;
     setState('scanning');
     try { await video.play(); } catch (_) {}
+    if (gen !== camGen) return;
     lastDetect = 0;
     rafId = requestAnimationFrame(scanLoop);
   }
@@ -881,6 +910,13 @@ eleventyComputed:
     applyZoom(parseFloat(zoomSlider.value));
   });
   againBtn.addEventListener('click', () => { hideNote(); setState('idle'); });
+  if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared((f) => { setMode('scan'); scanImage(f); }, (t) => {
+    setMode('generate');
+    genInput.value = t.trim().slice(0, 1000);
+    genRender();
+  });
+  MentriaUI.sendMenu(sendBtn, () => (lastValue ? { text: lastValue } : null));
+
   fileInput.addEventListener('change', e => {
     const f = e.target.files && e.target.files[0];
     if (f) scanImage(f);
@@ -910,6 +946,14 @@ eleventyComputed:
   })();
 
   setState('idle');
+
+  const sharedText = new URLSearchParams(location.search).get('text');
+  if (sharedText && sharedText.trim()) {
+    history.replaceState(null, '', location.pathname);
+    setMode('generate');
+    genInput.value = sharedText.trim().slice(0, 1000);
+    genRender();
+  }
 })();
 </script>
 

@@ -9,10 +9,12 @@
     eyebrow_checkmate: 'checkmate', eyebrow_stalemate: 'stalemate', eyebrow_draw: 'draw', eyebrow_resigned: 'resigned',
     no_moves_yet: 'no moves yet — make your move',
     confirm_resign: 'Resign the game?', confirm_new_color: 'Start a new game as {color}?',
+    confirm_new: 'Start a new game? The game in progress will be lost.',
     color_white: 'white', color_black: 'black',
     chat_you: 'you', chat_peer: 'peer',
     peer_offline: 'offline', peer_waiting: 'waiting for opponent', peer_connecting: 'connecting…',
     peer_connected: 'connected', peer_disconnected: 'opponent left', peer_error: 'connection error',
+    relay_unreachable: "can't reach the game relay", copy_fen: 'copy FEN',
     room_invalid: 'invalid room code', copied: 'copied',
     play_black: 'play black', play_white: 'play white',
     board_label: 'chess board', a11y_empty: 'empty', a11y_target: 'legal move',
@@ -51,7 +53,8 @@
   /* ===== persistence (MentriaStore) ===== */
   function save(){
     if (State.mode === 'online') return;
-    const data = { pos: State.pos, history: State.history.map(h=>({move:h.move,san:h.san,key:h.key,prePos:h.prePos})), mode: State.mode, humanColor: State.humanColor, flipped: State.flipped, skill: State.skill };
+    const resigned = State.over && State.over.type === 'resigned' ? { type: 'resigned', winner: State.over.winner } : null;
+    const data = { pos: State.pos, history: State.history.map(h=>({move:h.move,san:h.san,key:h.key,prePos:h.prePos})), mode: State.mode, humanColor: State.humanColor, flipped: State.flipped, skill: State.skill, over: resigned };
     try {
       if (window.MentriaStore) window.MentriaStore.set('games', 'chess', data);
       else localStorage.setItem('mentria_chess_v1', JSON.stringify(data));
@@ -65,6 +68,8 @@
       State.pos = d.pos; State.history = d.history || [];
       State.mode = d.mode === 'online' ? 'hotseat' : (d.mode || 'hotseat');
       State.humanColor = d.humanColor || 'w'; State.flipped = !!d.flipped; State.skill = d.skill ?? 1;
+      const o = d.over;
+      State.over = o && o.type === 'resigned' && (o.winner === 'w' || o.winner === 'b') ? { type: 'resigned', winner: o.winner } : null;
       return true;
     } catch(e){ return false; }
   }
@@ -154,45 +159,54 @@
   }
 
   /* ===== engine worker ===== */
-  let worker = null;
+  let worker = null, workerUrl = null, jobSeq = 0, engineTimer = null;
+  const jobs = new Map();
   function bootWorker(){
-    if (worker) worker.terminate();
-    const blob = new Blob([workerSource], { type:'application/javascript' });
-    worker = new Worker(URL.createObjectURL(blob));
+    if (worker){ worker.onmessage = null; worker.terminate(); }
+    jobs.clear();
+    if (!workerUrl) workerUrl = URL.createObjectURL(new Blob([workerSource], { type:'application/javascript' }));
+    worker = new Worker(workerUrl);
     worker.onmessage = onWorkerMessage;
   }
-  let pendingEngineCallback = null, pendingHint = false, pendingAnalyze = false;
-  let engineTimer = null;
+  function engineTurn(){ return State.mode === 'engine' && !State.over && State.pos.turn !== State.humanColor; }
   function onWorkerMessage(e){
     const d = e.data;
-    if (d.type !== 'best') return;
+    if (!d || d.type !== 'best') return;
+    const job = jobs.get(d.id);
+    if (!job) return;
+    jobs.delete(d.id);
+    if (job.key !== posKey(State.pos)) return;
     $('stat-depth').textContent = d.depth ?? '—';
-    $('stat-nodes').textContent = (d.nodes||0).toLocaleString();
+    $('stat-nodes').textContent = (d.nodes||0).toLocaleString(document.documentElement.lang || undefined);
     $('stat-time').textContent = (d.time||0) + 'ms';
     const nps = d.time ? Math.round((d.nodes||0)/(d.time/1000)) : 0;
-    $('stat-nps').textContent = nps.toLocaleString();
+    $('stat-nps').textContent = nps.toLocaleString(document.documentElement.lang || undefined);
     const ev = d.eval || 0;
     setEval(State.pos.turn === 'w' ? ev : -ev, d.depth);
     renderLines(d.lines || [], State.pos.turn, d.depth);
-    if (pendingHint && d.move){ drawHintArrow(d.move.from, d.move.to); pendingHint = false; }
-    if (pendingEngineCallback){ const cb = pendingEngineCallback; pendingEngineCallback = null; cb(d.move); }
-    pendingAnalyze = false;
+    if (job.kinds.has('hint') && d.move) drawHintArrow(d.move.from, d.move.to);
+    if (job.kinds.has('move') && d.move && engineTurn()) doMove(d.move);
   }
-  function askEngine(opts = {}){
+  function askEngine(kind){
+    const key = posKey(State.pos);
     if (!worker) bootWorker();
-    const cfg = SKILL_CFG[State.skill];
-    worker.postMessage({ type:'go', pos: State.pos, depth: opts.depth ?? cfg.depth, skill: State.skill });
+    for (const job of jobs.values()){ if (job.key !== key){ bootWorker(); break; } }
+    for (const job of jobs.values()){ if (job.skill === State.skill){ job.kinds.add(kind); return; } }
+    const id = ++jobSeq;
+    jobs.set(id, { key, skill: State.skill, kinds: new Set([kind]) });
+    worker.postMessage({ type:'go', id, pos: State.pos, depth: SKILL_CFG[State.skill].depth, skill: State.skill });
   }
   function cancelPendingEngine(){
-    pendingEngineCallback = null;
     if (engineTimer){ clearTimeout(engineTimer); engineTimer = null; }
+    for (const job of jobs.values()) job.kinds.delete('move');
   }
   function engineMove(){
     if (State.over) return;
-    pendingEngineCallback = (m) => { if (!m || State.over) return; if (State.mode === 'engine' && State.pos.turn === State.humanColor) return; doMove(m); };
-    engineTimer = setTimeout(() => askEngine(), 250 + Math.random()*350);
+    if (engineTimer) clearTimeout(engineTimer);
+    engineTimer = setTimeout(() => { engineTimer = null; if (engineTurn()) askEngine('move'); }, 250 + Math.random()*350);
   }
-  function analyze(){ if (pendingAnalyze) return; pendingAnalyze = true; askEngine(); }
+  function analyze(){ askEngine('analyze'); }
+  function requestHint(){ askEngine('hint'); }
 
   /* ===== eval bar ===== */
   function mateMoves(cp, depth){
@@ -226,20 +240,23 @@
 
   /* ===== move execution ===== */
   function doMove(m){
-    const prePos = clonePos(State.pos);
     const allMoves = genMoves(State.pos);
-    const san = moveToSAN(State.pos, m, allMoves);
-    State.pos = applyMove(State.pos, m);
-    State.history.push({ move: m, san, key: posKey(State.pos), prePos });
+    const move = m && allMoves.find(x => x.from === m.from && x.to === m.to && (x.promo || '') === (m.promo || ''));
+    if (!move) return false;
+    const prePos = clonePos(State.pos);
+    const san = moveToSAN(State.pos, move, allMoves);
+    State.pos = applyMove(State.pos, move);
+    State.history.push({ move, san, key: posKey(State.pos), prePos });
     State.cursor = -1; State.selected = -1; State.legalForSel = []; State.ghostMove = null;
     hideHintArrow(); render(); save();
     const status = gameStatus(State.pos, State.history);
     if (status){ State.over = status; showEnd(status); }
     announceMove(san, status);
-    if (State.mode === 'online' && P2P.action && !m.fromPeer){ P2P.send({ kind:'move', move: m }); }
-    if (status) return;
+    if (State.mode === 'online' && P2P.action && !m.fromPeer){ P2P.send({ kind:'move', move }); }
+    if (status) return true;
     if (State.mode === 'engine' && State.pos.turn !== State.humanColor) engineMove();
     else analyze();
+    return true;
   }
 
   /* ===== render ===== */
@@ -360,8 +377,8 @@
       const wActive = State.cursor === i+1 || (State.cursor < 0 && i+1 === State.history.length);
       const bActive = b && (State.cursor === i+2 || (State.cursor < 0 && i+2 === State.history.length));
       row.innerHTML = `<span class="n">${(i/2)+1}.</span>
-        <span class="m ${wActive?'cur':''}" data-step="${i+1}">${w.san}</span>
-        ${b ? `<span class="m ${bActive?'cur':''}" data-step="${i+2}">${b.san}</span>` : '<span></span>'}`;
+        <span class="m ${wActive?'cur':''}" data-step="${i+1}">${escapeHtml(w.san)}</span>
+        ${b ? `<span class="m ${bActive?'cur':''}" data-step="${i+2}">${escapeHtml(b.san)}</span>` : '<span></span>'}`;
       t.appendChild(row);
     }
     t.querySelectorAll('.m[data-step]').forEach(el => { el.onclick = () => scrubTo(+el.dataset.step); });
@@ -458,6 +475,7 @@
   function onBoardKey(e){
     const cell = e.target.closest && e.target.closest('.sq');
     if (!cell) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar'){
       e.preventDefault(); e.stopPropagation();
       setInputMethod('keyboard');
@@ -557,6 +575,7 @@
   function undo(){
     if (State.history.length === 0 || State.mode === 'online') return;
     cancelPendingEngine();
+    closePromo();
     const posAt = () => State.history.length ? applyMove(State.history[State.history.length-1].prePos, State.history[State.history.length-1].move) : startPos();
     State.history.pop();
     if (State.mode === 'engine'){
@@ -572,6 +591,7 @@
   /* ===== game flow ===== */
   function newGame(keepMode = true){
     cancelPendingEngine();
+    closePromo();
     State.pos = startPos(); State.history = []; State.cursor = -1;
     State.selected = -1; State.legalForSel = []; State.over = null; State.ghostMove = null;
     if (!keepMode){ State.mode = 'hotseat'; State.humanColor = 'w'; State.flipped = false; }
@@ -581,13 +601,26 @@
     if (State.mode === 'online' && P2P.action && P2P.role === 'host'){ P2P.send({ kind:'sync', pos: State.pos, history: [] }); }
     if (State.mode === 'engine' && State.humanColor === 'b') engineMove(); else analyze();
   }
+  let askingNew = false;
+  async function requestNewGame(){
+    if (State.history.length > 0 && !State.over && window.mentriaConfirm){
+      if (askingNew) return;
+      askingNew = true;
+      let ok = false;
+      try { ok = await window.mentriaConfirm(T.confirm_new, { danger: true }); } catch(e){ ok = false; }
+      askingNew = false;
+      if (!ok) return;
+    }
+    newGame(true);
+  }
   async function resign(){
     if (State.over || State.history.length === 0) return;
-    const ok = window.mentriaConfirm ? await window.mentriaConfirm(T.confirm_resign) : confirm(T.confirm_resign);
-    if (!ok) return;
+    const ok = window.mentriaConfirm ? await window.mentriaConfirm(T.confirm_resign, { danger: true }) : true;
+    if (!ok || State.over || State.history.length === 0) return;
     const loser = State.mode === 'online' ? P2P.color : (State.mode === 'engine' ? State.humanColor : State.pos.turn);
     const winner = loser === 'w' ? 'b' : 'w';
     State.over = { type:'resigned', winner };
+    save();
     if (State.mode === 'online' && P2P.action) P2P.send({ kind:'resign', winner });
     showEnd(State.over);
   }
@@ -604,10 +637,10 @@
     $('end-eyebrow').textContent = eyebrow; $('end-title').textContent = title; $('end-reason').textContent = reason;
     openEndDialog();
   }
-  let endReturnFocus = null;
+  let endReturnFocus = null, endBgPress = false;
   function openEndDialog(){
     const bg = $('end-modal');
-    if (!bg.classList.contains('show')) endReturnFocus = document.activeElement;
+    if (!bg.classList.contains('show')){ endReturnFocus = document.activeElement; endBgPress = false; }
     bg.classList.add('show');
     const btn = $('btn-rematch');
     setTimeout(() => { try { btn.focus(); } catch(e){} }, 0);
@@ -639,20 +672,73 @@
     $('btn-swap').style.display = m === 'engine' ? '' : 'none';
     if (m === 'online'){ document.querySelectorAll('.mobile-tabs button').forEach(b => { if (b.dataset.tab==='connect') b.click(); }); }
     if (m !== 'online'){ if (P2P.room) P2P.cleanup(); const hp = $('host-panel'), gp = $('guest-panel'); if (hp) hp.style.display = 'none'; if (gp) gp.style.display = 'none'; }
+    if (m !== 'engine') cancelPendingEngine();
     save();
+    if (engineTurn()) engineMove();
   }
   function flip(){ State.flipped = !State.flipped; buildBoardCells(); render(); save(); }
   async function swapHumanColor(){
     const target = State.humanColor==='w' ? T.color_black : T.color_white;
     if (State.history.length > 0){
       const msg = T.confirm_new_color.replace('{color}', target);
-      const ok = window.mentriaConfirm ? await window.mentriaConfirm(msg) : confirm(msg);
+      const ok = window.mentriaConfirm ? await window.mentriaConfirm(msg, { danger: !State.over }) : true;
       if (!ok) return;
     }
     State.humanColor = State.humanColor === 'w' ? 'b' : 'w';
     State.flipped = State.humanColor === 'b';
+    buildBoardCells();
     $('btn-swap').textContent = State.humanColor === 'w' ? T.play_black : T.play_white;
     newGame(true);
+  }
+
+  function toFEN(pos){
+    const rows = [];
+    for (let r = 0; r < 8; r++){
+      let row = '', empty = 0;
+      for (let c = 0; c < 8; c++){
+        const p = pos.b[r * 8 + c];
+        if (p === ' ') empty++;
+        else { if (empty) { row += empty; empty = 0; } row += p; }
+      }
+      if (empty) row += empty;
+      rows.push(row);
+    }
+    return rows.join('/') + ' ' + pos.turn + ' ' + (pos.cas || '-') + ' ' + (pos.ep >= 0 ? sqName(pos.ep) : '-') + ' ' + (pos.half || 0) + ' ' + (pos.full || 1);
+  }
+  function pgnResult(over){
+    if (!over) return '*';
+    if (over.winner === 'w') return '1-0';
+    if (over.winner === 'b') return '0-1';
+    return '1/2-1/2';
+  }
+  function toPGN(){
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    let white = 'White', black = 'Black';
+    if (State.mode === 'engine'){
+      const eng = 'Mentria engine (level ' + State.skill + ')';
+      white = State.humanColor === 'w' ? 'You' : eng;
+      black = State.humanColor === 'w' ? eng : 'You';
+    } else if (State.mode === 'online' && P2P.color){
+      white = P2P.color === 'w' ? 'You' : 'Opponent';
+      black = P2P.color === 'w' ? 'Opponent' : 'You';
+    }
+    const result = pgnResult(State.over);
+    const tags = [['Event', 'Casual game'], ['Site', 'mentria.ai'], ['Date', d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())], ['Round', '-'], ['White', white], ['Black', black], ['Result', result]];
+    const tokens = [];
+    State.history.forEach((h, i) => {
+      if (i % 2 === 0) tokens.push((i / 2 + 1) + '.');
+      tokens.push(h.san);
+    });
+    tokens.push(result);
+    const lines = [];
+    let line = '';
+    tokens.forEach((t) => {
+      if (line && (line + ' ' + t).length > 79){ lines.push(line); line = t; }
+      else line = line ? line + ' ' + t : t;
+    });
+    if (line) lines.push(line);
+    return tags.map(([k, v]) => '[' + k + ' "' + String(v).replace(/[\\"]/g, '') + '"]').join('\n') + '\n\n' + lines.join('\n') + '\n';
   }
 
   /* ===== P2P (Trystero) ===== */
@@ -676,9 +762,22 @@
       this.room = null; this.action = null; this.role = null; this.color = null; this.peers = new Set();
       this.setLed('', T.peer_offline);
     },
+    relaySockets: null,
+    async waitRelay(ms){
+      const deadline = Date.now() + ms;
+      while (Date.now() < deadline){
+        if (!this.room) return false;
+        const socks = this.relaySockets ? Object.values(this.relaySockets() || {}) : [];
+        if (socks.some(ws => ws && ws.readyState === 1)) return true;
+        await new Promise(r => setTimeout(r, 200));
+      }
+      return false;
+    },
     async start(role, code){
       this.cleanup();
-      const { joinRoom } = await import('/assets/vendor/trystero-nostr.js');
+      if (navigator.onLine === false){ this.setLed('warn', T.relay_unreachable); return false; }
+      const { joinRoom, getRelaySockets } = await import('/assets/vendor/trystero-nostr.js');
+      this.relaySockets = getRelaySockets;
       const ice = await getIce();
       this.role = role; this.color = role === 'host' ? 'w' : 'b';
       this.room = joinRoom({ appId:'mentria-chess', relayConfig:{ urls:['wss://relay.mentria.ai'] }, rtcConfig:{ iceServers: ice } }, 'chess-' + code);
@@ -696,15 +795,27 @@
       else { State.flipped = false; buildBoardCells(); }
       State.focusSq = homeSquare();
       render();
-      this.setLed('warn', role === 'host' ? T.peer_waiting : T.peer_connecting);
+      this.setLed('warn', T.peer_connecting);
+      if (!(await this.waitRelay(10000))){
+        this.cleanup();
+        this.setLed('warn', T.relay_unreachable);
+        return false;
+      }
+      if (!this.peers.size) this.setLed('warn', role === 'host' ? T.peer_waiting : T.peer_connecting);
+      return true;
     },
     send(obj){ if (this.action) this.action.send(obj); },
     onMsg(m){
       if (!m || typeof m !== 'object') return;
       if (m.kind === 'move'){ doMove({ ...m.move, fromPeer: true }); }
       else if (m.kind === 'chat'){ appendChat('peer', m.text); }
-      else if (m.kind === 'resign'){ State.over = { type:'resigned', winner: m.winner || P2P.color }; showEnd(State.over); }
-      else if (m.kind === 'sync'){ State.pos = m.pos; State.history = m.history || []; State.over = null; closeEndDialog(); render(); }
+      else if (m.kind === 'resign'){ State.over = { type:'resigned', winner: (m.winner === 'w' || m.winner === 'b') ? m.winner : P2P.color }; showEnd(State.over); }
+      else if (m.kind === 'sync'){
+        if (!m.pos || typeof m.pos !== 'object') return;
+        State.pos = m.pos;
+        State.history = Array.isArray(m.history) ? m.history.filter((h) => h && typeof h.san === 'string' && h.san.length <= 12).slice(0, 2000) : [];
+        State.over = null; closeEndDialog(); render();
+      }
     }
   };
   function appendChat(who, text){
@@ -722,15 +833,28 @@
 
   /* ===== wire UI ===== */
   function wire(){
-    $('btn-newgame').onclick = () => newGame(true);
+    $('btn-newgame').onclick = requestNewGame;
     $('btn-flip').onclick = flip;
     $('btn-coords').onclick = () => setCoords(!State.coords);
     $('btn-undo').onclick = undo;
     $('btn-resign').onclick = resign;
     $('btn-swap').onclick = swapHumanColor;
     $('btn-rematch').onclick = () => newGame(true);
-    $('btn-hint').onclick = () => { pendingHint = true; askEngine(); };
+    $('btn-end-close').onclick = closeEndDialog;
+    $('btn-hint').onclick = requestHint;
     $('scrub-back').onclick = backToLive;
+    $('btn-pgn').onclick = () => {
+      const name = 'mentria-chess-' + new Date().toISOString().slice(0, 10) + '.pgn';
+      const blob = new Blob([toPGN()], { type: 'application/x-chess-pgn' });
+      if (window.MentriaUI && window.MentriaUI.downloadFile) window.MentriaUI.downloadFile(name, blob);
+    };
+    $('btn-fen').onclick = () => {
+      const b = $('btn-fen');
+      navigator.clipboard.writeText(toFEN(State.pos)).then(
+        () => { b.textContent = T.copied; },
+        () => { b.textContent = T.copy_failed; }
+      ).then(() => { setTimeout(() => { b.textContent = T.copy_fen; }, 1200); });
+    };
 
     document.querySelectorAll('.modes button').forEach(b => { b.onclick = () => setMode(b.dataset.mode); });
     document.querySelectorAll('#skill-pills button').forEach(b => {
@@ -739,8 +863,8 @@
 
     $('btn-host').onclick = async () => {
       const code = randCode();
-      $('room-code').value = code; $('host-panel').style.display = 'flex'; $('guest-panel').style.display = 'none';
-      try { await P2P.start('host', code); } catch(e){ P2P.setLed('warn', T.peer_error); }
+      $('room-code').value = code; $('host-panel').style.display = 'none'; $('guest-panel').style.display = 'none';
+      try { if (await P2P.start('host', code)) $('host-panel').style.display = 'flex'; } catch(e){ P2P.setLed('warn', T.peer_error); }
     };
     $('btn-guest').onclick = () => { $('guest-panel').style.display = 'flex'; $('host-panel').style.display = 'none'; setTimeout(()=>$('join-code').focus(), 50); };
     $('btn-join').onclick = async () => {
@@ -788,10 +912,17 @@
       if (focusIsVisible(cell)) setInputMethod('keyboard');
       paintCursor();
     });
-    $('end-modal').addEventListener('keydown', (e) => {
-      if (!$('end-modal').classList.contains('show')) return;
+    const endBg = $('end-modal');
+    endBg.addEventListener('keydown', (e) => {
+      if (!endModalOpen()) return;
       if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); closeEndDialog(); }
-      else if (e.key === 'Tab'){ e.preventDefault(); $('btn-rematch').focus(); }
+      else if (e.key === 'Tab'){ e.preventDefault(); (document.activeElement === $('btn-rematch') ? $('btn-end-close') : $('btn-rematch')).focus(); }
+    });
+    endBg.addEventListener('pointerdown', (e) => { endBgPress = e.target === endBg; });
+    endBg.addEventListener('click', (e) => {
+      const fromBackdrop = endBgPress && e.target === endBg;
+      endBgPress = false;
+      if (fromBackdrop) closeEndDialog();
     });
 
     const helpEl = $('chess-help');
@@ -814,9 +945,15 @@
     document.addEventListener('keydown', (e) => {
       if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       const k = e.key;
       syncHelpState();
       if (helpShown){ if (k === 'Escape'){ closeHelp(); } return; }
+      if (endModalOpen()){
+        if (k === 'Escape'){ e.preventDefault(); closeEndDialog(); }
+        else if (k === 'Tab' && !endBg.contains(e.target)){ e.preventDefault(); $('btn-rematch').focus(); }
+        return;
+      }
       if (k === 'Escape'){
         if (State.pendingPromo) closePromo();
         State.selected = -1; State.legalForSel = []; render();
@@ -847,7 +984,7 @@
       }
       if (k === 'r' || k === 'R'){ resign(); }
       else if (k === 'f' || k === 'F'){ flip(); }
-      else if (k === 'h' || k === 'H'){ pendingHint = true; askEngine(); }
+      else if (k === 'h' || k === 'H'){ requestHint(); }
       else if (k === '?'){ toggleHelp(); }
     });
 
@@ -885,12 +1022,13 @@
       }
       if (endModalOpen()){
         if (n === 'a') $('btn-rematch').click();
+        else if (n === 'b') closeEndDialog();
         return;
       }
       if (n === 'a'){ activateSquare(State.focusSq); if (!State.pendingPromo) focusSquare(State.focusSq); }
       else if (n === 'b'){ State.selected = -1; State.legalForSel = []; render(); }
       else if (n === 'x'){ flip(); }
-      else if (n === 'y'){ pendingHint = true; askEngine(); }
+      else if (n === 'y'){ requestHint(); }
       else if (n === 'lb'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur > 0) scrubTo(cur - 1); }
       else if (n === 'rb'){ const cur = State.cursor < 0 ? State.history.length : State.cursor; if (cur < State.history.length) scrubTo(cur + 1); }
     });
@@ -912,6 +1050,7 @@
     render(); wire();
     const status = gameStatus(State.pos, State.history);
     if (status){ State.over = status; showEnd(status); }
+    else if (State.over) showEnd(State.over);
     else if (State.mode === 'engine' && State.pos.turn !== State.humanColor) engineMove();
     else analyze();
 

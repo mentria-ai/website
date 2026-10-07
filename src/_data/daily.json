@@ -2,8 +2,20 @@
   {
     "date": "2026-09-19",
     "kind": "note",
-    "title": "Packs are here",
-    "text": "The home feed now schedules learning cards. Import a pack made from a book or your notes, or start with ours. Everything stays on your device.",
+    "title": {
+      "en": "Packs are here",
+      "es": "Ya están aquí los paquetes",
+      "fr": "Les packs sont là",
+      "ja": "パックが登場しました",
+      "pt-BR": "Os pacotes chegaram"
+    },
+    "text": {
+      "en": "The home feed now schedules learning cards. Import a pack made from a book or your notes, or start with ours. Everything stays on your device.",
+      "es": "El feed de Inicio ahora programa tarjetas de estudio. Importa un paquete hecho a partir de un libro o de tus apuntes, o empieza con los nuestros. Todo se queda en tu dispositivo.",
+      "fr": "Le fil d’accueil planifie désormais des cartes d’apprentissage. Importez un pack créé à partir d’un livre ou de vos notes, ou commencez avec les nôtres. Tout reste sur votre appareil.",
+      "ja": "ホームのフィードが学習カードのスケジュールを組むようになりました。本やメモから作ったパックを取り込むことも、用意されたパックから始めることもできます。すべて端末に保存されます。",
+      "pt-BR": "O feed do Início agora agenda cartões de estudo. Importe um pacote feito a partir de um livro ou das suas anotações, ou comece com os nossos. Tudo fica no seu dispositivo."
+    },
     "href": "/learn/"
   }
 ]

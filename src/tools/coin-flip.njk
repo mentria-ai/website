@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.coin-flip.title' | t }}"
   description: "{{ 'tools.coin-flip.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">coin-flip</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">coin-flip</span></p>
   <h1>{{ "tools.coin-flip.title" | t }}</h1>
   <p>{{ "tools.coin-flip.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -203,10 +204,13 @@ eleventyComputed:
 
     var deg = extraTurns * 180;
     flipBtn.disabled = true;
-    coinInner.style.transition = "transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)";
-    coinInner.style.transform = "rotateX(" + deg + "deg)";
+    var settled = false;
+    var safetyTimer = 0;
 
     function settle(e) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(safetyTimer);
       coinInner.removeEventListener("transitionend", settle);
       coinInner.removeEventListener("transitioncancel", settle);
       flipBtn.disabled = false;
@@ -222,6 +226,7 @@ eleventyComputed:
 
       updateScore();
       updateHistory();
+      setCoinFace(isHeads ? COPY.headsLabel : COPY.tailsLabel);
 
       if (bestOf > 1 && checkSeriesWinner()) {
         flipping = false;
@@ -230,11 +235,17 @@ eleventyComputed:
 
       resultText.textContent = isHeads ? COPY.headsLabel : COPY.tailsLabel;
       resultEl.dataset.outcome = isHeads ? "heads" : "tails";
-      setCoinFace(isHeads ? COPY.headsLabel : COPY.tailsLabel);
       flipping = false;
     }
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      settle({ type: "transitionend" });
+      return;
+    }
+    coinInner.style.transition = "transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)";
+    coinInner.style.transform = "rotateX(" + deg + "deg)";
     coinInner.addEventListener("transitionend", settle);
     coinInner.addEventListener("transitioncancel", settle);
+    safetyTimer = setTimeout(function () { settle({ type: "transitionend" }); }, 1200);
   }
 
   function resetSeries() {
@@ -307,6 +318,7 @@ eleventyComputed:
   background: none;
   border: none;
   padding: 0;
+  font: inherit;
   cursor: pointer;
   perspective: 800px;
   outline: none;

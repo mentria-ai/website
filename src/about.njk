@@ -9,11 +9,12 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'about.title' | t }}"
   description: "{{ 'about.meta_description' | t }}"
+localeReload: true
 ---
 <div class="about-page">
 
   <div class="about-hero reveal">
-    <p class="about-crumb"><a href="{{ locale.pathPrefix }}/">~</a><span class="slash">/</span>about</p>
+    <p class="about-crumb"><a href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="slash">/</span>about</p>
     <h1 class="about-wordmark">MENTRIA<span class="underscore">_</span></h1>
     <p class="about-tagline">{{ "about.tagline" | t }}</p>
   </div>
@@ -103,6 +104,7 @@ eleventyComputed:
       <div class="about-stack-row"><span class="bullet">·</span> <span>{{ "about.stack_3" | t }}</span></div>
       <div class="about-stack-row"><span class="bullet">·</span> <span>{{ "about.stack_4" | t }}</span></div>
       <div class="about-stack-row"><span class="bullet">·</span> <span>{{ "about.stack_5" | t }}</span></div>
+      <div class="about-stack-row"><span class="bullet">·</span> <span>{{ "about.stack_6" | t }}</span></div>
     </div>
   </section>
 
@@ -128,13 +130,24 @@ eleventyComputed:
     <h2 class="about-section-h">{{ "about.data_section_title" | t }}</h2>
     <p class="about-tagline" style="margin-bottom: 20px;">{{ "about.data_section_lede" | t }}</p>
 
+    <div class="about-data-scope">
+      <div class="about-data-scope__col">
+        <h3 class="about-data-scope__h">{{ "about.data_in_label" | t }}</h3>
+        <p class="about-data-card__p">{{ "about.data_in_body" | t }}</p>
+      </div>
+      <div class="about-data-scope__col about-data-scope__col--out">
+        <h3 class="about-data-scope__h">{{ "about.data_out_label" | t }}</h3>
+        <p class="about-data-card__p">{{ "about.data_out_body" | t }}</p>
+      </div>
+    </div>
+
     <div class="about-data-stats">
       <div class="about-data-stat">
-        <span class="about-data-stat__label">{{ "about.data_persist_status_granted" | t | upper }}</span>
+        <span class="about-data-stat__label">{{ "about.data_persist_label" | t }}</span>
         <span class="about-data-stat__value" id="about-data-persist">…</span>
       </div>
       <div class="about-data-stat">
-        <span class="about-data-stat__label">USAGE</span>
+        <span class="about-data-stat__label">{{ "about.data_usage_label" | t }}</span>
         <span class="about-data-stat__value" id="about-data-usage">…</span>
       </div>
     </div>
@@ -145,6 +158,8 @@ eleventyComputed:
         <p class="about-data-card__p">{{ "about.data_export_lede" | t }}</p>
         <button type="button" class="about-data-btn about-data-btn--ghost about-reveal-btn" data-reveal="about-export-form">{{ "about.data_export_button" | t }}…</button>
         <div class="about-fold" id="about-export-form" hidden>
+          <p class="about-data-size" id="about-data-size" aria-live="polite"></p>
+          <p class="about-data-size about-data-size--warn" id="about-data-size-warn" hidden>{{ "common.backup_size_large" | t }}</p>
           <label class="about-data-field">
             <span>{{ "about.data_pass_label" | t }}</span>
             <input type="password" id="about-data-pass" autocomplete="new-password" spellcheck="false">
@@ -175,6 +190,13 @@ eleventyComputed:
           <button type="button" class="about-data-btn about-data-btn--ghost" id="about-data-import-btn">{{ "about.data_import_button" | t }}</button>
           <div class="about-data-status" id="about-data-import-status" aria-live="polite"></div>
         </div>
+      </div>
+
+      <div class="about-data-card about-rescue" id="about-rescue" hidden>
+        <h3 class="about-data-card__h">{{ "about.sync_rescue_title" | t }}</h3>
+        <p class="about-data-card__p" id="about-rescue-text"></p>
+        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-rescue-btn">{{ "about.sync_rescue_button" | t }}</button>
+        <div class="about-data-status" id="about-rescue-status" aria-live="polite"></div>
       </div>
     </div>
   </section>
@@ -268,6 +290,7 @@ eleventyComputed:
 
   <div class="about-end reveal">
     <span class="about-build about-copyright" id="about-copyright">{{ "about.copyright" | t }}</span>
+    <span class="about-build"><a class="h" href="{{ '/image-use/' | localeUrl(lang) }}">{{ "about.image_use" | t }}</a></span>
   </div>
 
 </div>
@@ -288,7 +311,7 @@ eleventyComputed:
 
   .about-page section { position: relative; z-index: 1; padding: 56px 0; border-top: 1px solid var(--term-divider); }
   .about-page section:first-of-type { border-top: none; }
-  .about-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--term-muted); font-weight: 500; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+  .about-section-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--term-muted); font-weight: 500; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
   .about-section-label::before { content: "§"; color: var(--syn-cyan); font-weight: 700; }
   .about-section-h { font-family: var(--font-mono); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--term-fg-strong); margin: 0 0 20px; letter-spacing: -0.005em; }
 
@@ -309,8 +332,8 @@ eleventyComputed:
   .about-ship-card:hover::after { color: var(--accent); transform: translate(2px, -2px); }
   .about-ship-num { font-family: var(--font-mono); font-size: 36px; font-weight: 700; line-height: 1; color: var(--accent); letter-spacing: -0.02em; text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.35); }
   .about-ship-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--term-muted); font-weight: 500; }
-  .about-units { margin-top: auto; display: flex; align-items: flex-end; gap: 4px; height: 34px; }
-  .about-units .unit { flex: 1; height: 36%; border-radius: 3px; background: rgba(var(--accent-rgb), 0.12); transform-origin: bottom; }
+  .about-units { margin-top: auto; display: flex; align-items: flex-end; gap: clamp(1px, 1.2%, 4px); height: 34px; }
+  .about-units .unit { flex: 1 1 0; min-width: 1px; height: 36%; border-radius: 3px; background: rgba(var(--accent-rgb), 0.12); transform-origin: bottom; }
   .about-units .unit.on { height: 100%; background: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.45); }
   .reveal .about-units .unit { opacity: 0; transform: scaleY(0.25); }
   .reveal.revealed .about-units .unit { opacity: 1; transform: scaleY(1); transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.2, 1, 0.3, 1); transition-delay: calc(var(--i) * 35ms); }
@@ -332,7 +355,7 @@ eleventyComputed:
   .about-actions__group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .about-actions a { color: var(--term-fg); text-decoration: none; transition: color 120ms; }
   .about-actions a:hover { color: var(--syn-cyan); }
-  .about-end { margin-top: 60px; padding: 24px 0; border-top: 1px solid var(--term-border); display: flex; justify-content: center; align-items: center; font-size: 12px; color: var(--term-muted); }
+  .about-end { margin-top: 60px; padding: 24px 0; border-top: 1px solid var(--term-border); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; font-size: 12px; color: var(--term-muted); }
   .about-socials { display: flex; gap: 10px; }
   .about-socials a { display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center; border: 1px solid var(--term-border); border-radius: 8px; transition: all 150ms; }
   .about-socials a:hover { border-color: var(--cyan-30); color: var(--syn-cyan); box-shadow: var(--glow-cyan-soft); }
@@ -382,9 +405,18 @@ eleventyComputed:
   .about-fold { display: flex; flex-direction: column; gap: 10px; }
   .about-page [hidden] { display: none !important; }
   .about-reveal-btn { align-self: flex-start; }
+  .about-rescue .about-data-btn { align-self: flex-start; }
+  .about-rescue .about-data-status:empty { display: none; }
+  .about-data-scope { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+  .about-data-scope__col { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 2px 0 2px 14px; border-left: 2px solid var(--cyan-30); }
+  .about-data-scope__col--out { border-left-color: var(--term-border); }
+  .about-data-scope__h { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--term-fg); margin: 0; }
+  .about-data-size { font-family: var(--font-mono); font-size: 11px; line-height: 1.5; color: var(--term-muted); margin: 0; overflow-wrap: anywhere; }
+  .about-data-size:empty { display: none; }
+  .about-data-size--warn { color: var(--syn-amber, #f7b015); }
   .about-data-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; font-family: var(--font-mono); font-size: 12px; }
   .about-data-stat { display: flex; flex-direction: column; gap: 4px; }
-  .about-data-stat__label { color: var(--term-subtle); letter-spacing: 0.1em; font-size: 10px; }
+  .about-data-stat__label { color: var(--term-subtle); letter-spacing: 0.1em; font-size: 10px; text-transform: uppercase; }
   .about-data-stat__value { color: var(--term-fg); font-size: 13px; }
   .about-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .about-data-card { border: 1px solid var(--term-border); border-radius: 8px; padding: 18px; background: var(--term-bg-raised); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -394,7 +426,7 @@ eleventyComputed:
   .about-data-field input[type="password"], .about-data-field input[type="file"] { background: var(--term-bg); border: 1px solid var(--term-border); color: var(--term-fg); padding: 7px 9px; border-radius: 5px; font-family: inherit; font-size: 13px; width: 100%; min-width: 0; box-sizing: border-box; }
   .about-data-field input[type="password"]:focus { outline: none; border-color: var(--syn-cyan); }
   .about-data-strength { font-family: var(--font-mono); font-size: 10px; min-height: 14px; letter-spacing: 0.1em; }
-  .about-data-strength[data-level="weak"]   { color: var(--syn-red, #f25fa8); }
+  .about-data-strength[data-level="weak"]   { color: var(--syn-pink); }
   .about-data-strength[data-level="medium"] { color: var(--syn-amber, #f7b015); }
   .about-data-strength[data-level="strong"] { color: var(--syn-green, #34c46a); }
   .about-data-btn { background: transparent; border: 1px solid var(--syn-cyan); color: var(--syn-cyan); padding: 8px 14px; border-radius: 6px; font-family: var(--font-mono); font-size: 12px; cursor: pointer; transition: background 120ms, color 120ms; margin-top: 4px; }
@@ -404,8 +436,8 @@ eleventyComputed:
   .about-data-btn--ghost:hover:not(:disabled) { background: var(--term-bg-raised); color: var(--syn-cyan); border-color: var(--syn-cyan); }
   .about-data-status { font-family: var(--font-mono); font-size: 11px; min-height: 14px; color: var(--term-muted); }
   .about-data-status[data-tone="ok"]   { color: var(--syn-green, #34c46a); }
-  .about-data-status[data-tone="err"]  { color: var(--syn-red, #f25fa8); }
-  @media (max-width: 600px) { .about-data-grid { grid-template-columns: 1fr; } }
+  .about-data-status[data-tone="err"]  { color: var(--syn-pink); }
+  @media (max-width: 600px) { .about-data-grid, .about-data-scope { grid-template-columns: 1fr; } }
 
   .about-identity-card { background: var(--term-bg); border: 1px solid var(--term-border); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
   .about-identity-card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -427,7 +459,7 @@ eleventyComputed:
   .about-sync-status__label { font-family: var(--font-mono); font-size: 12px; color: var(--term-muted); }
   .about-sync-status__label[data-tone="connected"] { color: var(--syn-green, #34c46a); }
   .about-sync-status__label[data-tone="pairing"]   { color: var(--syn-amber, #f7b015); }
-  .about-sync-status__label[data-tone="err"]       { color: var(--syn-red, #f25fa8); }
+  .about-sync-status__label[data-tone="err"]       { color: var(--syn-pink); }
 
   @media (max-width: 760px) {
     .about-ship-grid { grid-template-columns: repeat(2, 1fr); }
@@ -463,7 +495,8 @@ eleventyComputed:
       idle:     {{ ("about.update_check"    | t) | dump | safe }},
       checking: {{ ("about.update_checking" | t) | dump | safe }},
       updating: {{ ("about.update_updating" | t) | dump | safe }},
-      latest:   {{ ("about.update_latest"   | t) | dump | safe }}
+      latest:   {{ ("about.update_latest"   | t) | dump | safe }},
+      offline:  {{ ("about.update_offline"  | t) | dump | safe }}
     };
     function setLabel(txt) {
       var l = btn.querySelector('.about-refresh__label');
@@ -497,14 +530,23 @@ eleventyComputed:
       }
       function onFound() { if (!updating) { updating = true; setLabel(COPY.updating); } takeOver(reg.waiting || reg.installing); }
       reg.addEventListener('updatefound', onFound);
-      try { await reg.update(); } catch (_) {}
+      var failed = navigator.onLine === false;
+      if (!failed) {
+        try {
+          await Promise.race([reg.update(), new Promise(function (_, stop) { setTimeout(function () { stop(new Error('timeout')); }, 15000); })]);
+        } catch (_) { failed = true; }
+      }
       if (reg.installing || reg.waiting) onFound();
+      function settle(label, hold) {
+        checking = false;
+        setLabel(label);
+        btn.classList.remove('is-busy');
+        setTimeout(function () { setLabel(COPY.idle); btn.disabled = false; }, hold);
+      }
+      if (failed && !updating) { settle(COPY.offline, 3500); return; }
       setTimeout(function () {
         if (updating || reloading) return;
-        checking = false;
-        setLabel(COPY.latest);
-        btn.classList.remove('is-busy');
-        setTimeout(function () { setLabel(COPY.idle); btn.disabled = false; }, 2000);
+        settle(COPY.latest, 2000);
       }, 1500);
     });
   })();
@@ -552,16 +594,42 @@ eleventyComputed:
     var btn = document.getElementById('about-clear');
     if (!btn) return;
     var COPY = {
-      idle:     {{ ("about.cache_clear"    | t) | dump | safe }},
-      clearing: {{ ("about.cache_clearing" | t) | dump | safe }},
-      cleared:  {{ ("about.cache_cleared"  | t) | dump | safe }}
+      idle:     {{ ("about.cache_clear"         | t) | dump | safe }},
+      clearing: {{ ("about.cache_clearing"      | t) | dump | safe }},
+      cleared:  {{ ("about.cache_cleared"       | t) | dump | safe }},
+      confirm:  {{ ("about.cache_clear_confirm" | t) | dump | safe }},
+      offline:  {{ ("about.cache_clear_offline" | t) | dump | safe }}
     };
+    var SITE_CACHES = ['mentria-cache-', 'mentria-locale-', 'mentria-decks-', 'mentria-deck-art'];
+    function isSiteCache(name) {
+      return SITE_CACHES.some(function (p) { return name.indexOf(p) === 0; });
+    }
     function setLabel(t) { var l = btn.querySelector('.about-refresh__label'); if (l) l.textContent = t; }
+    function reachable() {
+      if (navigator.onLine === false) return Promise.resolve(false);
+      var probe = fetch('/assets/release.json?_=' + Date.now(), { cache: 'no-store' }).then(function () { return true; }, function () { return false; });
+      var slow = new Promise(function (r) { setTimeout(function () { r(false); }, 6000); });
+      return Promise.race([probe, slow]);
+    }
+    function tell(msg) { if (window.mentriaAlert) window.mentriaAlert(msg); }
+    var asking = false;
     btn.addEventListener('click', async function () {
-      if (btn.disabled) return;
+      if (btn.disabled || asking) return;
+      if (navigator.onLine === false) { tell(COPY.offline); return; }
+      asking = true;
+      var ok = window.mentriaConfirm ? await window.mentriaConfirm(COPY.confirm, { danger: true }) : false;
+      asking = false;
+      if (!ok) return;
       btn.disabled = true;
       btn.classList.add('is-busy');
       setLabel(COPY.clearing);
+      if (!(await reachable())) {
+        btn.disabled = false;
+        btn.classList.remove('is-busy');
+        setLabel(COPY.idle);
+        tell(COPY.offline);
+        return;
+      }
       try {
         if ('serviceWorker' in navigator) {
           var regs = await navigator.serviceWorker.getRegistrations();
@@ -569,7 +637,7 @@ eleventyComputed:
         }
         if (window.caches) {
           var keys = await caches.keys();
-          await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+          await Promise.all(keys.filter(isSiteCache).map(function (k) { return caches.delete(k); }));
         }
       } catch (_) {}
       setLabel(COPY.cleared);
@@ -596,7 +664,33 @@ eleventyComputed:
       exportDone:        {{ ('about.data_export_done'            | t) | dump | safe }},
       importBusy:        {{ ('about.data_import_busy'            | t) | dump | safe }},
       importDone:        {{ ('about.data_import_done'            | t) | dump | safe }},
-      importFail:        {{ ('about.data_import_fail'            | t) | dump | safe }}
+      importFail:        {{ ('about.data_import_fail'            | t) | dump | safe }},
+      importApplying:    {{ ('common.restore_applying'           | t) | dump | safe }},
+      importCancelled:   {{ ('common.restore_cancelled'          | t) | dump | safe }},
+      size:              {{ ('common.backup_size'                | t) | dump | safe }},
+      sizeBusy:          {{ ('common.backup_size_busy'           | t) | dump | safe }},
+      largeConfirm:      {{ ('common.backup_large_confirm'       | t) | dump | safe }},
+      areas: {{ 'common.data_areas' | tsub | dump | safe }},
+      restore: {
+        replace:       {{ ('common.restore_replace'        | t) | dump | safe }},
+        totpVault:     {{ ('common.restore_totp_vault'     | t) | dump | safe }},
+        identityVault: {{ ('common.restore_identity_vault' | t) | dump | safe }},
+        finance:       {{ ('common.restore_finance'        | t) | dump | safe }},
+        summary:       {{ ('common.restore_summary'        | t) | dump | safe }}
+      },
+      restoreErr: {
+        file:  {{ ('common.restore_err_file'  | t) | dump | safe }},
+        pass:  {{ ('common.restore_err_pass'  | t) | dump | safe }},
+        space: {{ ('common.restore_err_space' | t) | dump | safe }},
+        newer: {{ ('common.restore_err_newer' | t) | dump | safe }},
+        blocked: {{ ('common.restore_err_blocked' | t) | dump | safe }},
+        finance: {{ ('common.restore_err_finance' | t) | dump | safe }},
+        db: {{ ('common.restore_err_db' | t) | dump | safe }}
+      },
+      exportErr: {
+        blocked: {{ ('common.backup_err_blocked' | t) | dump | safe }},
+        read:    {{ ('common.backup_err_read'    | t) | dump | safe }}
+      }
     };
 
     var persistEl = document.getElementById('about-data-persist');
@@ -610,13 +704,13 @@ eleventyComputed:
     var importPass= document.getElementById('about-data-import-pass');
     var importBtn = document.getElementById('about-data-import-btn');
     var importStat= document.getElementById('about-data-import-status');
+    var sizeEl    = document.getElementById('about-data-size');
+    var sizeWarn  = document.getElementById('about-data-size-warn');
+    COPY.restore.areas = COPY.areas;
 
     function fmtBytes(n) {
       if (n == null || isNaN(n)) return '—';
-      if (n < 1024) return n + ' B';
-      if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
-      if (n < 1024 * 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
-      return (n / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+      return window.MentriaUI.formatBytes(n, [0, 1, 1, 2]);
     }
 
     async function refreshStats() {
@@ -662,6 +756,43 @@ eleventyComputed:
       if (tone) el.dataset.tone = tone; else delete el.dataset.tone;
     }
 
+    function pct(f) {
+      try { return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'percent' }).format(f); }
+      catch (_) { return Math.round(f * 100) + '%'; }
+    }
+
+    function progressTo(el, label) {
+      var last = -1;
+      return function (f) {
+        var step = Math.floor(f * 100);
+        if (step === last) return;
+        last = step;
+        setStatus(el, label + ' ' + pct(step / 100), null);
+      };
+    }
+
+    function showSize(m) {
+      var parts = m.areas.filter(function (a) { return a.bytes > 0; }).map(function (a) {
+        return (COPY.areas[a.area] || a.area) + ' ' + fmtBytes(a.bytes);
+      });
+      sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', window.MentriaBackup.listJoin(parts));
+      sizeWarn.hidden = m.total <= window.MentriaBackup.LARGE_BYTES;
+    }
+
+    var measuring = false;
+    function measure() {
+      if (measuring) return;
+      measuring = true;
+      sizeEl.textContent = COPY.sizeBusy;
+      window.MentriaBackup.prepareBackup().then(showSize, function (err) {
+        sizeEl.textContent = '';
+        var ecode = window.MentriaBackup.exportErrorCode(err);
+        setStatus(exportStat, ecode ? COPY.exportErr[ecode] : String(err && err.message || err), 'err');
+      }).then(function () { measuring = false; });
+    }
+    var exportReveal = document.querySelector('[data-reveal="about-export-form"]');
+    if (exportReveal) exportReveal.addEventListener('click', measure);
+
     exportBtn.addEventListener('click', async function () {
       setStatus(exportStat, '', null);
       var pw = passEl.value;
@@ -671,12 +802,18 @@ eleventyComputed:
       exportBtn.disabled = true;
       setStatus(exportStat, COPY.exportBusy, null);
       try {
-        var data = window.MentriaStore.exportAll();
-        var env = await window.MentriaBackup.encryptBackup(data, pw);
-        window.MentriaBackup.downloadBackupJson(env, 'mentria-backup');
+        var prepared = await window.MentriaBackup.prepareBackup();
+        showSize(prepared);
+        if (prepared.total > window.MentriaBackup.LARGE_BYTES) {
+          var go = window.mentriaConfirm ? await window.mentriaConfirm(COPY.largeConfirm.replace('{size}', fmtBytes(prepared.total))) : false;
+          if (!go) { setStatus(exportStat, '', null); return; }
+        }
+        var out = await window.MentriaBackup.sealBackup(prepared, pw, { onProgress: progressTo(exportStat, COPY.exportBusy) });
+        window.MentriaBackup.downloadBlob(out.blob, 'mentria-backup');
         setStatus(exportStat, COPY.exportDone, 'ok');
       } catch (err) {
-        setStatus(exportStat, String(err && err.message || err), 'err');
+        var ecode = window.MentriaBackup.exportErrorCode(err);
+        setStatus(exportStat, ecode ? COPY.exportErr[ecode] : String(err && err.message || err), 'err');
       } finally {
         pw = pw2 = ''; passEl.value = ''; pass2El.value = ''; strengthEl.textContent = ''; delete strengthEl.dataset.level;
         exportBtn.disabled = false;
@@ -689,18 +826,19 @@ eleventyComputed:
       var pw = importPass.value;
       if (!f) { setStatus(importStat, COPY.importFail.replace('{err}', 'no file'), 'err'); return; }
       if (!pw) { setStatus(importStat, COPY.passTooShort, 'err'); return; }
-      if (f.size > 32 * 1024 * 1024) { setStatus(importStat, COPY.importFail.replace('{err}', 'file too large'), 'err'); return; }
       importBtn.disabled = true;
       setStatus(importStat, COPY.importBusy, null);
       try {
-        var text = await f.text();
-        var env = JSON.parse(text);
-        var data = await window.MentriaBackup.decryptBackup(env, pw);
-        var result = window.MentriaStore.importAll(data, { mode: 'merge' });
+        var data = await window.MentriaBackup.readBackupFile(f, pw, { onProgress: progressTo(importStat, COPY.importBusy) });
+        pw = ''; importPass.value = '';
+        setStatus(importStat, COPY.importApplying, null);
+        var result = await window.MentriaBackup.applyRestore(data, COPY.restore);
+        if (result.cancelled) { setStatus(importStat, COPY.importCancelled, null); return; }
         setStatus(importStat, COPY.importDone.replace('{n}', result.restored), 'ok');
         setTimeout(function () { location.reload(); }, 1200);
       } catch (err) {
-        setStatus(importStat, COPY.importFail.replace('{err}', String(err && err.message || err)), 'err');
+        var code = window.MentriaBackup.restoreErrorCode(err);
+        setStatus(importStat, code ? COPY.restoreErr[code] : COPY.importFail.replace('{err}', String(err && err.message || err)), 'err');
       } finally {
         pw = ''; importPass.value = '';
         importBtn.disabled = false;
@@ -715,7 +853,8 @@ eleventyComputed:
       statusIdle:      {{ ('about.sync_status_idle'      | t) | dump | safe }},
       statusPairing:   {{ ('about.sync_status_pairing'   | t) | dump | safe }},
       statusConnecting:{{ ('about.sync_status_connecting'| t) | dump | safe }},
-      statusConnected: {{ ('about.sync_status_connected' | t) | dump | safe }},
+      statusConnectedOne:   {{ ('about.sync_status_connected_one'   | t) | dump | safe }},
+      statusConnectedOther: {{ ('about.sync_status_connected_other' | t) | dump | safe }},
       statusError:     {{ ('about.sync_status_error'     | t) | dump | safe }},
       pairButton:      {{ ('about.sync_pair_button'      | t) | dump | safe }},
       joinButton:      {{ ('about.sync_join_button'      | t) | dump | safe }},
@@ -723,8 +862,27 @@ eleventyComputed:
       scanUnsupported: {{ ('about.sync_scan_unsupported' | t) | dump | safe }},
       scanDenied:      {{ ('about.sync_scan_denied'      | t) | dump | safe }},
       scanNoCamera:    {{ ('about.sync_scan_no_camera'   | t) | dump | safe }},
-      scanSecureRequired: {{ ('about.sync_scan_secure_required' | t) | dump | safe }}
+      scanSecureRequired: {{ ('about.sync_scan_secure_required' | t) | dump | safe }},
+      noPeer:          {{ ('about.sync_no_peer'          | t) | dump | safe }},
+      busy:            {{ ('about.sync_busy'             | t) | dump | safe }},
+      rescueText:      {{ ('about.sync_rescue_text'      | t) | dump | safe }},
+      rescueConfirm:   {{ ('about.sync_rescue_confirm'   | t) | dump | safe }},
+      rescueButton:    {{ ('about.sync_rescue_button'    | t) | dump | safe }},
+      rescueDone:      {{ ('about.sync_rescue_done'      | t) | dump | safe }},
+      areas: {{ 'common.data_areas' | tsub | dump | safe }}
     };
+    window.MentriaSyncCopy = {
+      'about.sync_vault_totp':     {{ ('about.sync_vault_totp'     | t) | dump | safe }},
+      'about.sync_vault_identity': {{ ('about.sync_vault_identity' | t) | dump | safe }},
+      'about.sync_vault_keep':     {{ ('about.sync_vault_keep'     | t) | dump | safe }},
+      'about.sync_vault_replace':  {{ ('about.sync_vault_replace'  | t) | dump | safe }},
+      'about.sync_confirm_replace': {{ ('about.sync_confirm_replace' | t) | dump | safe }}
+    };
+    function relabel(key, fallback) {
+      var I = window.MentriaI18n;
+      var v = I && typeof I.t === 'function' ? I.t(key) : null;
+      return typeof v === 'string' && v && v !== key ? v : fallback;
+    }
     var startBtn      = document.getElementById('about-sync-start-btn');
     var joinBtn       = document.getElementById('about-sync-join-btn');
     var disconnectBtn = document.getElementById('about-sync-disconnect-btn');
@@ -740,6 +898,12 @@ eleventyComputed:
       if (tone) statusLabel.dataset.tone = tone; else delete statusLabel.dataset.tone;
     }
 
+    function connectedText(n) {
+      var one = n === 1;
+      try { one = new Intl.PluralRules(document.documentElement.lang || 'en').select(n) === 'one'; } catch (_) {}
+      return (one ? COPY.statusConnectedOne : COPY.statusConnectedOther).replace('{n}', String(n));
+    }
+
     function whenReady(cb) {
       if (window.MentriaSync) return cb();
       var t = 0;
@@ -747,6 +911,62 @@ eleventyComputed:
         if (window.MentriaSync) { clearInterval(iv); cb(); }
         else if (++t > 50) { clearInterval(iv); setStatus(COPY.statusError + ': sync engine not loaded', 'err'); }
       }, 100);
+    }
+
+    var rescueBox = document.getElementById('about-rescue');
+    var rescueText = document.getElementById('about-rescue-text');
+    var rescueBtn = document.getElementById('about-rescue-btn');
+    var rescueStatus = document.getElementById('about-rescue-status');
+    var rescueShown = false;
+
+    function fmtDay(ms) {
+      try { return new Intl.DateTimeFormat(document.documentElement.lang || undefined, { dateStyle: 'medium' }).format(new Date(ms)); }
+      catch (_) { return new Date(ms).toISOString().slice(0, 10); }
+    }
+
+    function rescueAreas(info) {
+      try { return window.MentriaStore.areaNames(info.suffixes, COPY.areas).join(', '); }
+      catch (_) { return info.suffixes.join(', '); }
+    }
+
+    function renderRescue() {
+      if (!rescueBox || !window.MentriaSync || typeof window.MentriaSync.rescueInfo !== 'function') return;
+      var info = window.MentriaSync.rescueInfo();
+      if (!info) { if (!rescueStatus.textContent) rescueBox.hidden = true; return; }
+      rescueText.textContent = relabel('about.sync_rescue_text', COPY.rescueText)
+        .replace('{date}', fmtDay(info.at)).replace('{areas}', rescueAreas(info)).replace('{until}', fmtDay(info.until));
+      rescueBtn.hidden = false;
+      rescueStatus.textContent = '';
+      rescueBox.hidden = false;
+      if (!rescueShown) {
+        rescueShown = true;
+        var adv = document.getElementById('about-advanced');
+        if (adv && !adv.open) adv.open = true;
+      }
+    }
+
+    if (rescueBtn) {
+      rescueBtn.addEventListener('click', function () {
+        whenReady(async function () {
+          var info = window.MentriaSync.rescueInfo();
+          if (!info) { renderRescue(); return; }
+          var areas = rescueAreas(info);
+          var ok = typeof window.mentriaConfirm === 'function'
+            ? await window.mentriaConfirm(relabel('about.sync_rescue_confirm', COPY.rescueConfirm).replace('{areas}', areas), { ok: relabel('about.sync_rescue_button', COPY.rescueButton) })
+            : false;
+          if (!ok) return;
+          try {
+            window.MentriaSync.restoreRescue();
+            rescueBtn.hidden = true;
+            rescueText.textContent = '';
+            rescueStatus.textContent = relabel('about.sync_rescue_done', COPY.rescueDone).replace('{areas}', areas);
+            rescueStatus.setAttribute('tabindex', '-1');
+            try { rescueStatus.focus({ preventScroll: true }); } catch (_) {}
+          } catch (err) {
+            rescueStatus.textContent = COPY.statusError + ': ' + (err && err.message || err);
+          }
+        });
+      });
     }
 
     whenReady(function () {
@@ -764,13 +984,17 @@ eleventyComputed:
           setStatus(COPY.statusConnecting, 'pairing');
           disconnectBtn.hidden = false;
         } else if (st.status === 'connected') {
-          setStatus(COPY.statusConnected.replace('{n}', String(st.peers || 1)), 'connected');
+          setStatus(connectedText(st.peers || 1), 'connected');
           disconnectBtn.hidden = false;
         }
       });
       window.MentriaSync.on('error', function (err) {
+        if (err && err.code === 'no-peer') { setStatus(relabel('about.sync_no_peer', COPY.noPeer), 'err'); return; }
+        if (err && err.code === 'busy') { setStatus(relabel('about.sync_busy', COPY.busy), 'err'); return; }
         setStatus(COPY.statusError + ': ' + (err && err.message || err), 'err');
       });
+      window.MentriaSync.on('synced', renderRescue);
+      renderRescue();
     });
 
     var qrCanvas = document.getElementById('about-sync-qr');
@@ -1124,7 +1348,7 @@ eleventyComputed:
     });
 
     pkRemoveBtn.addEventListener('click', async function () {
-      var ok = await window.mentriaConfirm(COPY.passkeyRemoveConfirm);
+      var ok = await window.mentriaConfirm(COPY.passkeyRemoveConfirm, { danger: true });
       if (!ok) return;
       window.MentriaIdentity.removePasskey();
       refresh();

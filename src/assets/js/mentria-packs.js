@@ -5,9 +5,12 @@
   var INTERACTIVE = { mcq: 1, cloze: 1, order: 1, match: 1, ask: 1 };
   var MAX_BYTES = 25 * 1024 * 1024;
   var INTERVALS = [1, 3, 7, 16, 35];
-  var DAY = 86400000;
   var ID_RE = /^[a-z0-9][a-z0-9._-]{0,99}$/i;
+  var ID_RULE = 'letters, digits, dots, dashes and underscores, starting with a letter or digit; 1-100 chars';
   var DB = 'mentria-packs', STORE = 'packs', VER = 1;
+  var CONNECT_HOSTS = ['cdn.mentria.ai', 'mentria-ai.github.io', 'relay.mentria.ai', 'huggingface.co'];
+  var CONNECT_SUFFIXES = ['.huggingface.co', '.hf.co'];
+  var LINK_RULE = 'links must point to mentria.ai, cdn.mentria.ai, mentria-ai.github.io or huggingface.co';
 
   function isText(v) {
     if (typeof v === 'string') return true;
@@ -26,21 +29,40 @@
     if (v[lang]) return v[lang];
     var base = String(lang).split('-')[0];
     if (v[base]) return v[base];
-    if (v.en) return v.en;
     var k = Object.keys(v);
+    var near = function (code) {
+      code = code.toLowerCase();
+      for (var i = 0; i < k.length; i++) if (k[i].toLowerCase() === code && v[k[i]]) return v[k[i]];
+      return '';
+    };
+    var hit = near(String(lang)) || near(base);
+    if (hit) return hit;
+    if (v.en) return v.en;
     return k.length ? v[k[0]] : '';
+  }
+
+  function fail(code, message, extra) {
+    return Object.assign(new Error(message || code), extra || {}, { code: code });
   }
 
   function bytesOf(obj) {
     try { return new Blob([JSON.stringify(obj)]).size; } catch (_) { return JSON.stringify(obj).length; }
   }
 
+  function safeCover(u) {
+    if (typeof u !== 'string' || !u || u.length > 4096 || /[\s"'<>`]/.test(u)) return null;
+    if (/^data:image\/(png|jpe?g|gif|webp|avif);base64,/i.test(u) || /^https:\/\//i.test(u)) return u;
+    return /^[a-z][a-z0-9+.-]*:/i.test(u) || /^\/\//.test(u) ? null : u;
+  }
+
+  function blanksIn(s) { return (String(s || '').match(/\{\{[^}]*\}\}/g) || []).length; }
+
   function validate(pack) {
     var errors = [], warnings = [];
     var err = function (m) { errors.push(m); };
     var warn = function (m) { warnings.push(m); };
     if (!pack || typeof pack !== 'object' || Array.isArray(pack)) { err('pack must be an object'); return { ok: false, errors: errors, warnings: warnings }; }
-    if (typeof pack.id !== 'string' || !ID_RE.test(pack.id)) err('id: letters, digits, dots, dashes; 1-100 chars');
+    if (typeof pack.id !== 'string' || !ID_RE.test(pack.id)) err('id: ' + ID_RULE);
     if (pack.version != null && !(Number.isInteger(pack.version) && pack.version >= 1)) err('version: integer >= 1');
     if (!isText(pack.title)) err('title: required text');
     if (pack.subtitle != null && !isText(pack.subtitle)) err('subtitle: text');
@@ -55,7 +77,7 @@
     pack.cards.forEach(function (c, i) {
       var at = 'cards[' + i + ']';
       if (!c || typeof c !== 'object') { err(at + ': object'); return; }
-      if (typeof c.id !== 'string' || !ID_RE.test(c.id)) err(at + '.id: required, letters/digits/dots/dashes');
+      if (typeof c.id !== 'string' || !ID_RE.test(c.id)) err(at + '.id: required; ' + ID_RULE);
       else if (ids[c.id]) err(at + '.id: duplicate ' + c.id);
       else ids[c.id] = true;
       if (typeof c.type !== 'string') { err(at + '.type: required'); return; }
@@ -113,10 +135,16 @@
         case 'cloze':
           if (!isText(c.text)) err(at + '.text: text with {{blank}} markers');
           else {
-            var n = (text(c.text, 'en').match(/\{\{[^}]*\}\}/g) || []).length;
+            var n = blanksIn(text(c.text, 'en'));
             if (!n) err(at + '.text: needs at least one {{blank}}');
             if (!Array.isArray(c.answers) || c.answers.length !== n) err(at + '.answers: one per blank (' + n + ')');
-            else c.answers.forEach(function (a, j) { if (!isText(a) && !(Array.isArray(a) && a.length && a.every(isText))) err(at + '.answers[' + j + ']: text or array of accepted texts'); });
+            else {
+              c.answers.forEach(function (a, j) { if (!isText(a) && !(Array.isArray(a) && a.length && a.every(isText))) err(at + '.answers[' + j + ']: text or array of accepted texts'); });
+              if (typeof c.text === 'object') Object.keys(c.text).forEach(function (code) {
+                var m = blanksIn(c.text[code]);
+                if (m !== n) warn(at + '.text.' + code + ': one blank per answer (' + n + '), found ' + m);
+              });
+            }
           }
           if (c.chips != null && (!Array.isArray(c.chips) || !c.chips.every(isText))) err(at + '.chips: array of text');
           break;
@@ -157,7 +185,7 @@
         pack.sections.forEach(function (s, i) {
           var sat = 'sections[' + i + ']';
           if (!s || typeof s !== 'object') { err(sat + ': object'); return; }
-          if (typeof s.id !== 'string' || !ID_RE.test(s.id)) err(sat + '.id: required');
+          if (typeof s.id !== 'string' || !ID_RE.test(s.id)) err(sat + '.id: required; ' + ID_RULE);
           if (!isText(s.title)) err(sat + '.title: text');
           if (!Array.isArray(s.cards) || !s.cards.length) err(sat + '.cards: non-empty array of card ids');
           else s.cards.forEach(function (cid) {
@@ -195,15 +223,27 @@
     return p;
   }
 
+  function answerable(card) { return !!(card && (INTERACTIVE[card.type] || card.guess)); }
+  function isDue(rec, now) { return !!(rec && (rec.r === 'wrong' || rec.r === 'right') && rec.d && rec.d <= (now || Date.now())); }
+  function isDone(card, rec) {
+    if (!rec) return false;
+    if (rec.r === 'right' || rec.r === 'wrong') return true;
+    return !(rec.q || (card && answerable(card)));
+  }
+  function doneCount(progress) {
+    var cards = (progress && progress.cards) || {};
+    return Object.keys(cards).filter(function (id) { return isDone(null, cards[id]); }).length;
+  }
   function gradable(pack) {
-    return (pack.cards || []).some(function (c) { return c && (INTERACTIVE[c.type] || c.guess); });
+    return (pack.cards || []).some(answerable);
   }
   function availableModes(pack, progress) {
     var declared = pack.modes && pack.modes.length ? pack.modes : ['read', 'quiz', 'review', 'budget'];
     var modes = ['read'];
     if (gradable(pack)) {
       if (declared.indexOf('quiz') >= 0) modes.push('quiz');
-      var wrong = progress && progress.cards ? Object.keys(progress.cards).some(function (id) { return progress.cards[id].r === 'wrong'; }) : false;
+      var now = Date.now();
+      var wrong = progress && progress.cards ? Object.keys(progress.cards).some(function (id) { return progress.cards[id].r === 'wrong' || isDue(progress.cards[id], now); }) : false;
       if (wrong && declared.indexOf('review') >= 0) modes.push('review');
       if (declared.indexOf('budget') >= 0) modes.push('budget');
     }
@@ -213,24 +253,43 @@
   function isCourse(obj) {
     return !!(obj && typeof obj === 'object' && !Array.isArray(obj) && (obj.kind === 'course' || (Array.isArray(obj.packs) && !obj.cards)));
   }
+  function siteUrl() {
+    var l = global.location;
+    return l && (l.protocol === 'https:' || l.protocol === 'http:') ? l.href : 'https://mentria.ai/';
+  }
+  function linkProblem(url) {
+    var site = new URL(siteUrl()), u;
+    try { u = new URL(url, site); } catch (_) { return fail('url', 'bad url'); }
+    if (u.origin === site.origin) return null;
+    var h = u.hostname, local = h === 'localhost' || h === '127.0.0.1';
+    if (u.protocol !== 'https:' && !local) return fail('url', 'https only');
+    if (local) return null;
+    if (!u.port && (CONNECT_HOSTS.indexOf(h) >= 0 || CONNECT_SUFFIXES.some(function (end) { return h.length > end.length && h.slice(-end.length) === end; }))) return null;
+    return fail('host', h + ' is not an allowed host; ' + LINK_RULE, { host: h });
+  }
   function validateCourse(course) {
-    var errors = [], warnings = [];
+    var errors = [], warnings = [], blocked = null;
     if (!isCourse(course)) { errors.push('not a course'); return { ok: false, errors: errors, warnings: warnings }; }
-    if (typeof course.id !== 'string' || !ID_RE.test(course.id)) errors.push('id: letters, digits, dots, dashes; 1-100 chars');
+    if (typeof course.id !== 'string' || !ID_RE.test(course.id)) errors.push('id: ' + ID_RULE);
     if (!isText(course.title)) errors.push('title: required text');
     if (!Array.isArray(course.packs) || !course.packs.length) errors.push('packs: non-empty array of packs or https URLs');
     else {
       if (course.packs.length > 200) errors.push('packs: at most 200');
       var seen = {};
       course.packs.forEach(function (p, i) {
-        if (typeof p === 'string') { if (!/^https:\/\//.test(p) && !/^\/learn\//.test(p)) errors.push('packs[' + i + ']: https URL or an object'); return; }
+        if (typeof p === 'string') {
+          var bad = /^https:\/\//.test(p) || /^\/learn\//.test(p) ? linkProblem(p) : fail('url', 'https URL or an object');
+          if (bad) errors.push('packs[' + i + ']: ' + bad.message);
+          if (bad && bad.code === 'host' && !blocked) blocked = { host: bad.host, message: 'packs[' + i + ']: ' + bad.message };
+          return;
+        }
         var v = validate(p);
         if (!v.ok) errors.push('packs[' + i + '] (' + (p && p.id) + '): ' + v.errors[0]);
         v.warnings.forEach(function (w) { warnings.push('packs[' + i + ']: ' + w); });
         if (p && p.id) { if (seen[p.id]) errors.push('packs[' + i + ']: duplicate pack id ' + p.id); seen[p.id] = true; }
       });
     }
-    return { ok: !errors.length, errors: errors, warnings: warnings };
+    return { ok: !errors.length, errors: errors, warnings: warnings, blocked: blocked };
   }
   function getCourses() {
     var c = global.MentriaStore ? global.MentriaStore.get('packs', 'courses') : null;
@@ -238,11 +297,29 @@
   }
   function saveCourses(c) { if (global.MentriaStore) global.MentriaStore.set('packs', 'courses', c); }
   function fetchPack(url) {
-    return fetch(url, { mode: 'cors' }).then(function (r) { if (!r.ok) throw new Error('fetch failed: ' + r.status + ' ' + url); return r.json(); });
+    return fetch(url, { mode: 'cors' }).catch(function (e) { throw fail('network', e && e.message); }).then(function (r) {
+      if (!r.ok) throw fail('network', 'fetch failed: ' + r.status + ' ' + url, { status: r.status });
+      return r.text().catch(function (e) { throw fail('network', e && e.message); });
+    }).then(parse);
+  }
+  function leaveCourse(cid, keep) {
+    return tx('readonly', function (s) { return s.getAll(); }).then(function (rows) {
+      var chain = Promise.resolve();
+      (rows || []).forEach(function (r) {
+        if (!r || !r.course || r.course.id !== cid || keep.indexOf(r.id) >= 0) return;
+        chain = chain.then(function () {
+          if (!r.solo && !Object.keys(getProgress(r.id).cards).length) return remove(r.id);
+          r.course = null;
+          return tx('readwrite', function (s) { s.put(r); }).then(function () { emit('put', r); });
+        });
+      });
+      return chain;
+    });
   }
   function importCourse(course, meta) {
     var v = validateCourse(course);
-    if (!v.ok) return Promise.reject(Object.assign(new Error(v.errors[0]), { errors: v.errors }));
+    if (v.blocked) return Promise.reject(fail('course_host', v.blocked.message, { host: v.blocked.host }));
+    if (!v.ok) return Promise.reject(fail('invalid', v.errors[0], { errors: v.errors }));
     return Promise.all(course.packs.map(function (p) { return typeof p === 'string' ? fetchPack(p) : Promise.resolve(p); })).then(function (packs) {
       var order = 0, results = [];
       var chain = Promise.resolve();
@@ -253,10 +330,12 @@
         });
       });
       return chain.then(function () {
+        return leaveCourse(course.id, packs.map(function (p) { return p.id; }));
+      }).then(function () {
         var courses = getCourses();
         var prev = courses[course.id];
         courses[course.id] = {
-          id: course.id, version: course.version || 1, title: course.title, subtitle: course.subtitle || null, cover: course.cover || (packs[0] && packs[0].cover) || null,
+          id: course.id, version: course.version || 1, title: course.title, subtitle: course.subtitle || null, cover: safeCover(course.cover) || (packs[0] && safeCover(packs[0].cover)) || null,
           packs: packs.map(function (p) { return p.id; }), added: prev ? prev.added : Date.now(), updated: Date.now(), source: (meta && meta.source) || 'import'
         };
         saveCourses(courses);
@@ -269,7 +348,9 @@
     var courses = getCourses(), c = courses[id];
     if (!c) return Promise.resolve();
     var chain = Promise.resolve();
-    c.packs.forEach(function (pid) { chain = chain.then(function () { return remove(pid); }); });
+    c.packs.forEach(function (pid) {
+      chain = chain.then(function () { return get(pid).then(function (row) { if (!row || courseOf(row) === id) return remove(pid); }); });
+    });
     return chain.then(function () { delete courses[id]; saveCourses(courses); emit('course', { id: id }); });
   }
   function courseOf(row) { return row && row.course ? row.course.id : null; }
@@ -305,22 +386,25 @@
       return new Promise(function (resolve, reject) {
         var t = db.transaction(STORE, mode), s = t.objectStore(STORE), out = fn(s);
         t.oncomplete = function () { db.close(); resolve(out && out.result !== undefined ? out.result : undefined); };
-        t.onerror = function () { db.close(); reject(t.error); };
+        t.onerror = function (e) { db.close(); reject((e && e.target && e.target.error) || t.error || new Error('transaction failed')); };
+        t.onabort = function () { db.close(); reject(t.error || new Error('transaction aborted')); };
       });
     });
   }
 
   function put(pack, meta) {
     var v = validate(pack);
-    if (!v.ok) return Promise.reject(Object.assign(new Error(v.errors[0]), { errors: v.errors }));
+    if (!v.ok) return Promise.reject(fail(v.bytes > MAX_BYTES ? 'size' : 'invalid', v.errors[0], { errors: v.errors }));
     var p = normalize(pack);
+    var viaCourse = !!(meta && meta.course);
     var row = {
-      id: p.id, version: p.version, title: p.title, subtitle: p.subtitle || null, cover: p.cover || null,
+      id: p.id, version: p.version, title: p.title, subtitle: p.subtitle || null, cover: safeCover(p.cover),
       cards: p.cards.length, bytes: v.bytes, added: Date.now(), source: (meta && meta.source) || 'import', from: (meta && meta.from) || null, pack: p,
       course: (meta && meta.course) || p.course || null
     };
     return get(p.id).then(function (existing) {
       if (existing) row.added = existing.added;
+      row.solo = !viaCourse || !!(existing && (existing.solo || !existing.course));
       row.updated = Date.now();
       return tx('readwrite', function (s) { s.put(row); }).then(function () {
         emit('put', row);
@@ -331,11 +415,17 @@
   function get(id) { return tx('readonly', function (s) { return s.get(id); }).catch(function () { return undefined; }); }
   function list() {
     return tx('readonly', function (s) { return s.getAll(); }).then(function (rows) {
-      return (rows || []).map(function (r) { var o = Object.assign({}, r); delete o.pack; return o; }).sort(function (a, b) { return (b.updated || b.added) - (a.updated || a.added); });
+      return (rows || []).map(function (r) {
+        var o = Object.assign({}, r);
+        if (r.pack && Array.isArray(r.pack.cards)) o.cardList = r.pack.cards.map(function (c) { return { id: c.id, type: c.type, guess: !!c.guess }; });
+        delete o.pack;
+        return o;
+      }).sort(function (a, b) { return (b.updated || b.added) - (a.updated || a.added); });
     }).catch(function () { return []; });
   }
   function remove(id) {
     return tx('readwrite', function (s) { s.delete(id); }).then(function () {
+      delete unsaved[id];
       if (global.MentriaStore) global.MentriaStore.remove('packs', 'p.' + id);
       emit('remove', { id: id });
     });
@@ -344,27 +434,39 @@
     try { global.dispatchEvent(new CustomEvent('mentria:packs', { detail: { kind: kind, id: detail && detail.id } })); } catch (_) {}
   }
 
+  function spot(err, raw, t) {
+    var msg = String((err && err.message) || ''), pos = -1, m;
+    if ((m = /position (\d+)/.exec(msg))) pos = +m[1];
+    else if ((m = /line (\d+) column (\d+)/.exec(msg))) {
+      var lines = t.split('\n'), at = 0;
+      for (var k = 0; k < +m[1] - 1 && k < lines.length; k++) at += lines[k].length + 1;
+      pos = at + +m[2] - 1;
+    }
+    if (pos < 0) return {};
+    var before = raw.slice(0, raw.length - raw.replace(/^\s+/, '').length + pos).split('\n');
+    return { line: before.length, column: before[before.length - 1].length + 1 };
+  }
   function parse(textIn) {
-    var t = String(textIn || '').trim();
-    if (!t) throw new Error('empty');
-    if (t.charAt(0) !== '{') throw new Error('not a pack or course file');
-    return JSON.parse(t);
+    var raw = String(textIn || ''), t = raw.trim();
+    if (!t) throw fail('empty', 'empty');
+    if (t.charAt(0) !== '{') throw fail('kind', 'not a pack or course file');
+    try { return JSON.parse(t); } catch (e) { throw fail('json', e && e.message, spot(e, raw, t)); }
   }
   function importText(textIn, meta) { return Promise.resolve().then(function () { return importAny(parse(textIn), meta); }); }
   function importFile(file, meta) {
-    if (!file) return Promise.reject(new Error('no file'));
-    if (file.size > MAX_BYTES) return Promise.reject(new Error('file is larger than 25 MB'));
+    if (!file) return Promise.reject(fail('empty', 'no file'));
+    if (file.size > MAX_BYTES) return Promise.reject(fail('size', 'file is larger than 25 MB'));
     return file.text().then(function (t) { return importAny(parse(t), Object.assign({ from: file.name }, meta || {})); });
   }
   function importUrl(url, meta) {
-    var u;
-    try { u = new URL(url, global.location && global.location.href); } catch (_) { return Promise.reject(new Error('bad url')); }
-    if (u.protocol !== 'https:' && u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') return Promise.reject(new Error('https only'));
-    return fetch(u.href, { mode: 'cors' }).then(function (r) {
-      if (!r.ok) throw new Error('fetch failed: ' + r.status);
+    var bad = linkProblem(url);
+    if (bad) return Promise.reject(bad);
+    var u = new URL(url, siteUrl());
+    return fetch(u.href, { mode: 'cors' }).catch(function (e) { throw fail('network', e && e.message); }).then(function (r) {
+      if (!r.ok) throw fail('network', 'fetch failed: ' + r.status, { status: r.status });
       var len = +r.headers.get('content-length') || 0;
-      if (len > MAX_BYTES) throw new Error('file is larger than 25 MB');
-      return r.text();
+      if (len > MAX_BYTES) throw fail('size', 'file is larger than 25 MB');
+      return r.text().catch(function (e) { throw fail('network', e && e.message); });
     }).then(function (t) { return importAny(parse(t), Object.assign({ from: u.href }, meta || {})); });
   }
 
@@ -394,61 +496,80 @@
     return out;
   }
   function progressKey(id) { return 'p.' + id; }
+  var unsaved = {};
   function getProgress(id) {
-    var p = global.MentriaStore ? global.MentriaStore.get('packs', progressKey(id)) : null;
+    var p = unsaved[id] ? JSON.parse(JSON.stringify(unsaved[id])) : global.MentriaStore ? global.MentriaStore.get('packs', progressKey(id)) : null;
     if (!p || typeof p !== 'object') p = { cards: {}, mode: null, last: 0 };
     if (!p.cards) p.cards = {};
     return p;
   }
   function saveProgress(id, p) {
     p.last = Date.now();
-    if (global.MentriaStore) global.MentriaStore.set('packs', progressKey(id), p);
+    if (global.MentriaStore && global.MentriaStore.set('packs', progressKey(id), p)) delete unsaved[id];
+    else unsaved[id] = JSON.parse(JSON.stringify(p));
     return p;
   }
-  function recordSeen(id, cardId) {
+  function progressSaved(id) { return !unsaved[id]; }
+  function touchDay(c) {
+    var k = dayKey();
+    if (c.day === k) return;
+    c.day = k;
+    markDay();
+  }
+  function localDaysFromNow(n) {
+    var d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n).getTime();
+  }
+  function recordSeen(id, cardId, isAnswerable) {
     var p = getProgress(id), c = p.cards[cardId] || { n: 0, s: 0 };
     c.n = (c.n || 0) + 1;
     if (!c.r) c.r = 'seen';
+    if (isAnswerable) c.q = 1;
     c.t = Date.now();
+    touchDay(c);
     p.cards[cardId] = c;
-    markDay();
     return saveProgress(id, p);
   }
   function recordAnswer(id, cardId, right, extra) {
     var p = getProgress(id), c = p.cards[cardId] || { n: 0, s: 0 };
+    var early = right && c.d && c.d > Date.now();
     c.n = (c.n || 0) + 1;
     c.r = right ? 'right' : 'wrong';
-    c.s = right ? Math.min((c.s || 0) + 1, INTERVALS.length - 1) : 0;
-    c.d = Date.now() + INTERVALS[c.s] * DAY;
+    if (!early) {
+      c.s = right ? Math.min((c.s || 0) + 1, INTERVALS.length - 1) : 0;
+      c.d = localDaysFromNow(INTERVALS[c.s]);
+    }
     c.t = Date.now();
     if (extra && typeof extra.distance === 'number') c.g = extra.distance;
+    touchDay(c);
     p.cards[cardId] = c;
-    markDay();
     return saveProgress(id, p);
   }
   function setMode(id, mode) { var p = getProgress(id); p.mode = mode; return saveProgress(id, p); }
   function resetProgress(id) { return saveProgress(id, { cards: {}, mode: getProgress(id).mode, last: 0 }); }
   function summary(pack, p) {
     p = p || getProgress(pack.id);
-    var seen = 0, right = 0, wrong = 0, due = 0, now = Date.now();
+    var seen = 0, viewed = 0, right = 0, wrong = 0, due = 0, now = Date.now();
     pack.cards.forEach(function (c) {
       var r = p.cards[c.id];
-      if (!r) return;
+      if (r) viewed++;
+      if (!isDone(c, r)) return;
       seen++;
       if (r.r === 'right') right++;
       if (r.r === 'wrong') wrong++;
-      if (r.d && r.d <= now) due++;
+      if (isDue(r, now)) due++;
     });
-    return { total: pack.cards.length, seen: seen, right: right, wrong: wrong, due: due, done: seen >= pack.cards.length };
+    return { total: pack.cards.length, seen: seen, viewed: viewed, right: right, wrong: wrong, due: due, done: seen >= pack.cards.length };
   }
 
   var api = {
     TYPES: TYPES, INTERACTIVE: INTERACTIVE, MAX_BYTES: MAX_BYTES, INTERVALS: INTERVALS,
     text: text, isText: isText, validate: validate, normalize: normalize, outline: outline, gradable: gradable, availableModes: availableModes,
+    answerable: answerable, isDue: isDue, isDone: isDone, doneCount: doneCount,
     isCourse: isCourse, validateCourse: validateCourse, importCourse: importCourse, importAny: importAny, getCourses: getCourses, removeCourse: removeCourse, courseOf: courseOf,
     put: put, get: get, list: list, remove: remove,
-    importText: importText, importFile: importFile, importUrl: importUrl,
-    getProgress: getProgress, recordSeen: recordSeen, recordAnswer: recordAnswer, setMode: setMode, resetProgress: resetProgress, summary: summary,
+    importText: importText, importFile: importFile, importUrl: importUrl, linkProblem: linkProblem,
+    getProgress: getProgress, recordSeen: recordSeen, recordAnswer: recordAnswer, setMode: setMode, resetProgress: resetProgress, summary: summary, progressSaved: progressSaved,
     dayKey: dayKey, getDays: getDays, week: week
   };
   global.MentriaPacks = api;

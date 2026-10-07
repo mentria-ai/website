@@ -1,9 +1,9 @@
 <a class="skip-link" href="#main-content">{{ "common.skip_to_content" | t }}</a>
 <header class="site-header">
     <div class="site-header__inner">
-        <a class="brand" href="{{ '/' | localeUrl(lang) }}" aria-label="Mentria home">MENTRIA<span class="brand__ai" aria-hidden="true"><span class="brand__ai-text"><span class="brand__ai-a">A</span><span class="brand__ai-i">I</span></span><svg class="brand__star" viewBox="0 0 48 48" aria-hidden="true"><path class="brand__spark" d="M24 1c1.8 16.5 4.7 19.2 23 23-18.3 3.8-21.2 6.5-23 23-1.8-16.5-4.7-19.2-23-23 18.3-3.8 21.2-6.5 23-23z" fill="currentColor"/></svg></span><span class="brand__cursor">_</span></a>
+        <a class="brand" href="{{ '/' | localeUrl(lang) }}" aria-label="{{ 'nav.brand_home' | t }}">MENTRIA<span class="brand__ai" aria-hidden="true"><span class="brand__ai-text"><span class="brand__ai-a">A</span><span class="brand__ai-i">I</span></span><svg class="brand__star" viewBox="0 0 48 48" aria-hidden="true"><path class="brand__spark" d="M24 1c1.8 16.5 4.7 19.2 23 23-18.3 3.8-21.2 6.5-23 23-1.8-16.5-4.7-19.2-23-23 18.3-3.8 21.2-6.5 23-23z" fill="currentColor"/></svg></span><span class="brand__cursor">_</span></a>
         <nav class="site-nav">
-            <a class="week-ring" href="{{ '/learn/' | localeUrl(lang) }}" data-week-ring data-label-n="{{ 'nav.week_ring_n' | t }}" aria-label="{{ 'nav.week_ring' | t }}" title="{{ 'nav.week_ring' | t }}">
+            <a class="week-ring" href="{{ '/learn/' | localeUrl(lang) }}" data-week-ring data-label-n="{{ 'nav.week_ring_n' | t }}" data-toast="{{ 'nav.week_ring_toast' | t }}" aria-label="{{ 'nav.week_ring' | t }}" title="{{ 'nav.week_ring' | t }}">
                 <svg viewBox="0 0 24 24" aria-hidden="true">{% for i in range(0, 7) %}<circle class="week-ring__seg" cx="12" cy="12" r="9" transform="rotate({{ i * 51.43 }} 12 12)"/>{% endfor %}</svg>
             </a>
             {% set learnHref = '/learn/' | localeUrl(lang) %}
@@ -17,7 +17,8 @@
                 <svg class="nav-link__i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.8 3.6a5.2 5.2 0 0 0-5.8 7l-5.4 5.4a1.6 1.6 0 0 0 0 2.3l1.1 1.1a1.6 1.6 0 0 0 2.3 0l5.4-5.4a5.2 5.2 0 0 0 7-5.8l-3 3-2.6-.7-.7-2.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
                 <span class="nav-link__t">{{ "nav.tools" | t }}</span>
             </a>
-            <a href="/comms/" class="nav-link nav-link--comms{% if page.url | startsWith('/comms/') %} active{% endif %}"{% if page.url | startsWith('/comms/') %} aria-current="page"{% endif %} title="{{ 'nav.comms' | t }}" data-comms-link>
+            {% set commsHref = '/comms/' | localeUrl(lang) %}
+            <a href="{{ commsHref }}" class="nav-link nav-link--comms{% if page.url | startsWith(commsHref) %} active{% endif %}"{% if page.url | startsWith(commsHref) %} aria-current="page"{% endif %} title="{{ 'nav.comms' | t }}" data-comms-link>
                 <svg class="nav-link__i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 4.8h14.8a1.4 1.4 0 0 1 1.4 1.4v8.6a1.4 1.4 0 0 1-1.4 1.4H9.4l-5.2 3.8V6.2a1.4 1.4 0 0 1 1.4-1.4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
                 <span class="nav-link__t">{{ "nav.comms" | t }}</span>
                 <span class="nav-badge" data-comms-badge hidden>0</span>
@@ -29,9 +30,10 @@
                 <span class="nav-dot" data-update-dot hidden></span>
             </a>
 
-            {%- set currentLocale = lang | findLocale -%}
-            <button type="button" class="nav-cmdk" data-palette-open aria-label="{{ 'palette.open' | t }}" aria-keyshortcuts="Meta+K Control+K">⌘K</button>
-            <details class="lang-switcher">
+            {%- set currentLocale = (lang or "en") | findLocale -%}
+            <button type="button" class="nav-cmdk" data-palette-open aria-label="{{ 'palette.open' | t }}" aria-keyshortcuts="Meta+K Control+K"><span class="nav-cmdk__keys" aria-hidden="true">⌘K</span><svg class="nav-cmdk__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.6"></circle><path d="M10.4 10.4L14 14"></path></svg></button>
+            <script>(function () { if (/Macintosh|iPhone|iPad|iPod/.test(navigator.userAgent)) return; var b = document.querySelector('.nav-cmdk'), k = b && b.querySelector('.nav-cmdk__keys'); if (!k) return; k.textContent = 'Ctrl K'; b.setAttribute('aria-label', {{ ("palette.open_ctrl" | t) | dump | safe }}); b.setAttribute('data-i18na', 'aria-label=palette.open_ctrl'); })();</script>
+            <details class="lang-switcher" data-offline-msg="{{ 'lang_switcher.offline' | t }}">
                 <summary aria-label="{{ 'lang_switcher.current_label' | t }}: {{ currentLocale.nativeName }}">
                     <span aria-hidden="true">🌐</span>
                     <span class="lang-switcher__current" lang="{{ currentLocale.code }}">{{ currentLocale.nativeName }}</span>
@@ -42,7 +44,7 @@
                     <li>
                         <a hreflang="{{ loc.code }}"
                            href="{% if englishOnly %}{{ '/' | switchLocale(loc.code) }}{% else %}{{ page.url | switchLocale(loc.code) }}{% endif %}"
-                           class="lang-switcher__item{% if loc.code == lang %} is-active{% endif %}">
+                           class="lang-switcher__item{% if loc.code == currentLocale.code %} is-active{% endif %}">
                             <span class="lang-switcher__name" lang="{{ loc.code }}">{{ loc.nativeName }}</span>
                             <span class="lang-switcher__code">{{ loc.code }}</span>
                         </a>
@@ -52,4 +54,5 @@
             </details>
         </nav>
     </div>
+    <div class="m-offline" id="m-offline" role="status" hidden>{{ "common.offline_strip" | t }}</div>
 </header>

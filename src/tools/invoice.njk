@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.invoice.title' | t }}"
   description: "{{ 'tools.invoice.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">invoice</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">invoice</span></p>
   <h1>{{ "tools.invoice.title" | t }}</h1>
   <p>{{ "tools.invoice.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -24,6 +25,10 @@ eleventyComputed:
     <button class="m-btn m-btn--primary" id="iv-print" title="{{ 'tool.invoice.title_print' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       {{ "tool.invoice.btn_print" | t }}
+    </button>
+    <button type="button" class="m-btn m-btn--ghost" id="iv-new" title="{{ 'tool.invoice.title_new' | t }}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      {{ "tool.invoice.btn_new" | t }}
     </button>
     <button class="m-btn m-btn--ghost" id="iv-export" title="{{ 'tool.invoice.title_export' | t }}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -39,6 +44,17 @@ eleventyComputed:
       {{ "tool.invoice.btn_clear" | t }}
     </button>
   </div>
+
+  <p class="iv__unsaved no-print" id="iv-unsaved" role="status" aria-live="polite" hidden>
+    <span data-unsaved="blocked" hidden>{{ "tool.invoice.unsaved_blocked" | t }}</span>
+    <span data-unsaved="full" hidden>{{ "tool.invoice.unsaved_full" | t }}</span>
+  </p>
+
+  <details class="iv__saved no-print" id="iv-saved">
+    <summary class="iv__saved-sum">{{ "tool.invoice.saved_title" | t }} <span class="iv__saved-count" id="iv-saved-count"></span></summary>
+    <p class="iv__saved-hint">{{ "tool.invoice.saved_hint" | t }}</p>
+    <ul class="iv__saved-list" id="iv-saved-list"></ul>
+  </details>
 
   <div class="iv__doc" id="iv-doc">
     <div class="iv__header">
@@ -73,15 +89,15 @@ eleventyComputed:
     <div class="iv__meta">
       <div class="iv__meta-left">
         <p>
-          <span class="iv__meta-label">{{ "tool.invoice.meta_invoice_no" | t }}</span>
+          <label class="iv__meta-label" for="invnoInp">{{ "tool.invoice.meta_invoice_no" | t }}</label>
           <input class="iv__meta-input m-input" type="text" id="invnoInp" placeholder="{{ 'tool.invoice.ph_invno' | t }}">
         </p>
         <p>
-          <span class="iv__meta-label">{{ "tool.invoice.meta_invoice_date" | t }}</span>
+          <label class="iv__meta-label" for="invoiceDate">{{ "tool.invoice.meta_invoice_date" | t }}</label>
           <input class="iv__meta-input iv__meta-input--date m-input" type="date" id="invoiceDate">
         </p>
         <p class="no-print">
-          <span class="iv__meta-label">{{ "tool.invoice.meta_currency" | t }}</span>
+          <label class="iv__meta-label" for="currencyInp">{{ "tool.invoice.meta_currency" | t }}</label>
           <select class="iv__meta-input m-input" id="currencyInp">
             <option value="₹">INR ₹</option>
             <option value="€">EUR €</option>
@@ -115,10 +131,10 @@ eleventyComputed:
             <textarea id="desc1Inp" placeholder="{{ 'tool.invoice.ph_line_desc' | t }}" rows="1"></textarea>
           </td>
           <td data-label="{{ 'tool.invoice.tbl_sac' | t }}"><input id="sac1Inp" type="text" value="998314" placeholder="______"></td>
-          <td data-label="{{ 'tool.invoice.tbl_quantity' | t }}"><input id="qty1Inp" class="input-qty-cell" type="text" value="1" placeholder="{{ 'tool.invoice.ph_qty' | t }}" pattern="^[0-9]+(\.[0-9]+)?$" inputmode="decimal"></td>
+          <td data-label="{{ 'tool.invoice.tbl_quantity' | t }}"><input id="qty1Inp" class="input-qty-cell" type="text" value="1" placeholder="{{ 'tool.invoice.ph_qty' | t }}" inputmode="decimal"></td>
           <td data-label="{{ 'tool.invoice.tbl_unit_price' | t }}">
             <span class="iv__cell-price">
-              <input id="price1Inp" class="input-price-cell" type="text" value="0" placeholder="{{ 'tool.invoice.ph_price' | t }}" pattern="^[0-9]+(\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
+              <input id="price1Inp" class="input-price-cell" type="text" value="0" placeholder="{{ 'tool.invoice.ph_price' | t }}" inputmode="decimal"><span class="currency">₹</span>
             </span>
           </td>
           <td data-label="{{ 'tool.invoice.tbl_total' | t }}"><span class="line-total">0</span></td>
@@ -168,13 +184,21 @@ eleventyComputed:
 (() => {
   const COPY = {
     rowRemove:        {{ ("tool.invoice.row_remove"        | t) | dump | safe }},
+    rowRemoved:       {{ ("tool.invoice.row_removed"       | t) | dump | safe }},
     phLineDesc:       {{ ("tool.invoice.ph_line_desc"      | t) | dump | safe }},
     phQty:            {{ ("tool.invoice.ph_qty"            | t) | dump | safe }},
     phPrice:          {{ ("tool.invoice.ph_price"          | t) | dump | safe }},
     alertInvalidJson: {{ ("tool.invoice.alert_invalid_json" | t) | dump | safe }},
     alertUnknownFmt:  {{ ("tool.invoice.alert_unknown_format" | t) | dump | safe }},
     alertSelectJson:  {{ ("tool.invoice.alert_select_json" | t) | dump | safe }},
-    confirmClear:     {{ ("tool.invoice.confirm_clear"     | t) | dump | safe }}
+    confirmClear:     {{ ("tool.invoice.confirm_clear"     | t) | dump | safe }},
+    savedEmpty:       {{ ("tool.invoice.saved_empty"       | t) | dump | safe }},
+    savedNoClient:    {{ ("tool.invoice.saved_no_client"   | t) | dump | safe }},
+    savedOpen:        {{ ("tool.invoice.saved_open"        | t) | dump | safe }},
+    savedDuplicate:   {{ ("tool.invoice.saved_duplicate"   | t) | dump | safe }},
+    savedDelete:      {{ ("tool.invoice.saved_delete"      | t) | dump | safe }},
+    savedEditing:     {{ ("tool.invoice.saved_editing"     | t) | dump | safe }},
+    savedDeleted:     {{ ("tool.invoice.saved_deleted"     | t) | dump | safe }}
   };
 
   const LS = 'mentria-iv-';
@@ -209,15 +233,57 @@ eleventyComputed:
   })();
   const restore = (el) => {
     const v = window.MentriaStore ? window.MentriaStore.get(NS, el.id) : localStorage.getItem(LS + el.id);
-    if (v != null) el.value = v;
+    if (!isAmountField(el)) {
+      if (v != null) el.value = v;
+      return;
+    }
+    if (v == null) {
+      if (!amounts.has(el)) setAmount(el, fromStored(el.value));
+      return;
+    }
+    setAmount(el, fromStored(v));
+    if (String(v) !== amounts.get(el)) persist(el);
   };
+  const unsavedEl = document.getElementById('iv-unsaved');
+  const unsavedKeys = new Set();
+  let unsavedWhy = null;
+  const storageTrouble = () => {
+    const S = window.MentriaStore;
+    if (S && typeof S.status === 'function') {
+      try {
+        const s = S.status();
+        if (s === 'ok') return null;
+        if (s === 'blocked' || s === 'full') return s;
+      } catch (_) {}
+    }
+    try { window.localStorage.getItem(LS + 'probe'); return null; } catch (_) { return 'blocked'; }
+  };
+  const showUnsaved = (why) => {
+    if (why === unsavedWhy) return;
+    unsavedWhy = why;
+    unsavedEl.hidden = !why;
+    unsavedEl.querySelectorAll('[data-unsaved]').forEach((s) => { s.hidden = s.dataset.unsaved !== why; });
+  };
+  const noteWrite = (key, ok) => {
+    if (ok) unsavedKeys.delete(key);
+    else unsavedKeys.add(key);
+    showUnsaved(unsavedKeys.size ? (storageTrouble() === 'blocked' ? 'blocked' : 'full') : null);
+    return ok;
+  };
+  if (storageTrouble() === 'blocked') showUnsaved('blocked');
   const persist = (el) => {
-    if (window.MentriaStore) window.MentriaStore.set(NS, el.id, el.value);
-    else localStorage.setItem(LS + el.id, el.value);
+    const value = isAmountField(el) ? amountOf(el) : el.value;
+    let ok = false;
+    if (window.MentriaStore) ok = window.MentriaStore.set(NS, el.id, value);
+    else {
+      try { localStorage.setItem(LS + el.id, value); ok = true; } catch (_) {}
+    }
+    noteWrite(el.id, ok);
   };
   const dropField = (id) => {
-    if (window.MentriaStore) window.MentriaStore.remove(NS, id);
-    else localStorage.removeItem(LS + id);
+    if (window.MentriaStore) {
+      if (window.MentriaStore.remove(NS, id)) noteWrite(id, true);
+    } else localStorage.removeItem(LS + id);
   };
   const hasField = (id) => {
     if (window.MentriaStore) return window.MentriaStore.get(NS, id) != null;
@@ -229,17 +295,40 @@ eleventyComputed:
     try { return (new Intl.NumberFormat(document.documentElement.lang || undefined).formatToParts(1.1).find(p => p.type === 'decimal') || {}).value || '.'; }
     catch (_) { return '.'; }
   })();
-  const sanitizeDecimalInput = (value) => {
-    let s = String(value);
-    if (DECIMAL_SEP === ',') s = s.replace(/,/g, '.');
-    s = s.replace(/[^0-9.]/g, '');
-    const dot = s.indexOf('.');
-    if (dot !== -1) {
-      s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, '');
+  const FIELD_SEP = DECIMAL_SEP === ',' ? ',' : '.';
+  const sanitizeDecimalInput = (value) => String(value).replace(/[^0-9.,\s\u00a0\u202f]/g, '');
+  const tidyAmount = (int, frac) => (int.replace(/^0+(?=\d)/, '') || '0') + (frac ? '.' + frac : '');
+  const parseTyped = (value) => {
+    const s = String(value == null ? '' : value).replace(/[\s\u00a0\u202f']/g, '');
+    if (!/\d/.test(s)) return '';
+    const lastComma = s.lastIndexOf(','), lastDot = s.lastIndexOf('.');
+    let dec = '';
+    if (lastComma !== -1 && lastDot !== -1) dec = lastComma > lastDot ? ',' : '.';
+    else if (lastComma !== -1 || lastDot !== -1) {
+      const sep = lastComma !== -1 ? ',' : '.';
+      const parts = s.split(sep);
+      const grouping = parts.length > 2 || (sep !== DECIMAL_SEP && /^[1-9]\d{0,2}$/.test(parts[0]) && /^\d{3}$/.test(parts[1]));
+      if (!grouping) dec = sep;
     }
-    if (s.startsWith('.')) s = '0' + s;
-    return s;
+    const at = dec ? s.lastIndexOf(dec) : s.length;
+    return tidyAmount(s.slice(0, at).replace(/\D/g, ''), s.slice(at + 1).replace(/\D/g, ''));
   };
+  const fromStored = (value) => {
+    const s = typeof value === 'number'
+      ? (isFinite(value) ? Math.abs(value).toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 20 }) : '')
+      : String(value == null ? '' : value).trim();
+    const m = /^(\d*)(?:\.(\d*))?$/.exec(s);
+    return m && (m[1] || m[2]) ? tidyAmount(m[1], m[2] || '') : parseTyped(s);
+  };
+  const amountText = (canon) => FIELD_SEP === '.' ? canon : canon.replace('.', FIELD_SEP);
+  const amountNum = (canon) => canon === '' ? NaN : Number(canon);
+  const amounts = new WeakMap();
+  const isAmountField = (el) => !!el && el.tagName === 'INPUT' && (el.classList.contains('input-qty-cell') || el.classList.contains('input-price-cell'));
+  const setAmount = (el, canon) => {
+    amounts.set(el, canon);
+    el.value = amountText(canon);
+  };
+  const amountOf = (el) => !el ? '' : amounts.has(el) ? amounts.get(el) : fromStored(el.value);
 
   /* ── Layout / dates ────────────────────────────────── */
   const nativeFieldSizing = CSS.supports('field-sizing', 'content');
@@ -261,27 +350,29 @@ eleventyComputed:
 
   /* ── Math ──────────────────────────────────────────── */
   const roundToTwo = (n) => (typeof n !== 'number' || isNaN(n))
-    ? 0 : Math.round((n + Number.EPSILON) * 100) / 100;
+    ? 0 : Math.round(Number((n * 100).toPrecision(15))) / 100;
   const SYMBOL_TO_CODE = { '₹': 'INR', '€': 'EUR', '$': 'USD' };
   const fmtMoney = (n) => new Intl.NumberFormat(document.documentElement.lang || undefined, {
     style: 'currency',
     currency: SYMBOL_TO_CODE[currencyInput.value] || 'USD',
+    currencyDisplay: 'narrowSymbol',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(roundToTwo(n));
 
   const calculateLineTotal = (row) => {
-    const qty   = parseFloat(row.querySelector('.input-qty-cell')?.value);
-    const price = parseFloat(row.querySelector('.input-price-cell')?.value);
+    const qty   = amountNum(amountOf(row.querySelector('.input-qty-cell')));
+    const price = amountNum(amountOf(row.querySelector('.input-price-cell')));
     const total = (!isNaN(qty) && !isNaN(price)) ? qty * price : 0;
-    row.querySelector('.line-total').textContent = fmtMoney(total);
+    const cell = row.querySelector('.line-total');
+    if (cell) cell.textContent = fmtMoney(total);
   };
   const calculateGrandTotal = () => {
     let grand = 0;
     document.querySelectorAll('.input-qty-cell').forEach(qtyEl => {
       const row = qtyEl.closest('tr');
-      const qty = parseFloat(qtyEl.value);
-      const price = parseFloat(row.querySelector('.input-price-cell')?.value);
+      const qty = amountNum(amountOf(qtyEl));
+      const price = amountNum(amountOf(row.querySelector('.input-price-cell')));
       if (!isNaN(qty) && !isNaN(price)) grand += roundToTwo(qty * price);
     });
     document.querySelectorAll('.grand-total').forEach(el => {
@@ -314,6 +405,8 @@ eleventyComputed:
     if (isEmpty) {
       data = { Description: '', 'SAC code': '998314', Quantity: '1', 'Unit Price': '0' };
     }
+    const qtyCanon = fromStored(data.Quantity ?? '1');
+    const priceCanon = fromStored(data['Unit Price'] ?? '0');
 
     const labels = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
     const newRow = document.createElement('tr');
@@ -323,21 +416,23 @@ eleventyComputed:
         <textarea id="desc${rowIndex}Inp" placeholder="${esc(COPY.phLineDesc)}" rows="1">${esc(data.Description)}</textarea>
       </td>
       <td data-label="${esc(labels[1] || '')}"><input id="sac${rowIndex}Inp" type="text" value="${esc(data['SAC code'] ?? '')}" placeholder="______"></td>
-      <td data-label="${esc(labels[2] || '')}"><input id="qty${rowIndex}Inp" class="input-qty-cell" type="text" value="${esc(data.Quantity ?? '1')}" placeholder="${esc(COPY.phQty)}" pattern="^[0-9]+(\\.[0-9]+)?$" inputmode="decimal"></td>
+      <td data-label="${esc(labels[2] || '')}"><input id="qty${rowIndex}Inp" class="input-qty-cell" type="text" value="${esc(amountText(qtyCanon))}" placeholder="${esc(COPY.phQty)}" inputmode="decimal"></td>
       <td data-label="${esc(labels[3] || '')}">
         <span class="iv__cell-price">
-          <input id="price${rowIndex}Inp" class="input-price-cell" type="text" value="${esc(data['Unit Price'] ?? '0')}" placeholder="${esc(COPY.phPrice)}" pattern="^[0-9]+(\\.[0-9]+)?$" inputmode="decimal"><span class="currency">₹</span>
+          <input id="price${rowIndex}Inp" class="input-price-cell" type="text" value="${esc(amountText(priceCanon))}" placeholder="${esc(COPY.phPrice)}" inputmode="decimal"><span class="currency">₹</span>
         </span>
       </td>
       <td data-label="${esc(labels[4] || '')}"><span class="line-total">0</span></td>
     `;
     tbody.insertBefore(newRow, tbody.lastElementChild);
+    amounts.set(newRow.querySelector('.input-qty-cell'), qtyCanon);
+    amounts.set(newRow.querySelector('.input-price-cell'), priceCanon);
 
     // Wire persistence for this row's fields
     newRow.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
       // If we're rebuilding from LS replay, prefer LS value over the templated one
       restore(el);
-      el.addEventListener('input', () => persist(el));
+      if (!isAmountField(el)) el.addEventListener('input', () => persist(el));
       el.dataset.wired = '1';
     });
     newRow.querySelectorAll('textarea').forEach(autoResizeTextarea);
@@ -354,22 +449,41 @@ eleventyComputed:
 
   const renumberRows = () => {
     const rows = Array.from(table.querySelector('tbody').children).slice(0, -1);
+    const moves = [];
     rows.forEach((row, i) => {
       const idx = i + 1;
       row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
         const newId = el.id.replace(/\d+Inp$/, idx + 'Inp');
-        if (newId !== el.id) {
-          dropField(el.id);
-          el.id = newId;
-          persist(el);
-        }
+        if (newId !== el.id) moves.push({ el, newId });
       });
     });
+    moves.forEach(({ el }) => dropField(el.id));
+    moves.forEach(({ el, newId }) => { el.id = newId; persist(el); });
+  };
+
+  const restoreRow = (data, index) => {
+    addRow(data);
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.children).slice(0, -1);
+    const added = rows[rows.length - 1];
+    const ref = rows[index];
+    if (added && ref && ref !== added) tbody.insertBefore(added, ref);
+    renumberRows();
+    calculateGrandTotal();
+    const focusEl = added && added.querySelector('textarea');
+    if (focusEl) focusEl.focus();
   };
 
   const removeRow = (event) => {
     if (!event.target.classList.contains('remove-row')) return;
     const row = event.target.closest('tr');
+    const index = Array.from(table.querySelector('tbody').children).indexOf(row);
+    const data = {
+      Description: row.querySelector('textarea')?.value || '',
+      'SAC code': row.querySelector('input[id^="sac"]')?.value || '',
+      Quantity: amountOf(row.querySelector('.input-qty-cell')),
+      'Unit Price': amountOf(row.querySelector('.input-price-cell'))
+    };
     row.querySelectorAll('input[id$="Inp"], textarea[id$="Inp"]').forEach(el => {
       dropField(el.id);
     });
@@ -380,6 +494,8 @@ eleventyComputed:
     const target = nextRow && (nextRow.querySelector('.remove-row') || nextRow.querySelector('.add-row'));
     if (target) target.focus();
     else { const add = table.querySelector('.add-row'); if (add) add.focus(); }
+    scheduleSync();
+    if (window.MentriaUI && MentriaUI.undoToast) MentriaUI.undoToast(COPY.rowRemoved, () => { restoreRow(data, index); scheduleSync(); });
   };
 
   /* ── Import / Export ───────────────────────────────── */
@@ -403,30 +519,27 @@ eleventyComputed:
     return rows.map(row => ({
       Description:  row.querySelector('textarea')?.value || '',
       'SAC code':   row.querySelector('input[id^="sac"]')?.value || '',
-      Quantity:     row.querySelector('.input-qty-cell')?.value || '',
-      'Unit Price': row.querySelector('.input-price-cell')?.value || ''
+      Quantity:     amountOf(row.querySelector('.input-qty-cell')),
+      'Unit Price': amountOf(row.querySelector('.input-price-cell'))
     }));
   };
 
+  const collectPayload = () => ({
+    version: 1,
+    from:    collectFields(FROM_FIELDS),
+    billTo:  collectFields(BILL_FIELDS),
+    meta:    collectFields(META_FIELDS),
+    lines:   collectLines(),
+    notes:   document.getElementById('notesInp')?.value || '',
+    bank:    collectFields(BANK_FIELDS)
+  });
+
   const exportJSON = () => {
-    const payload = {
-      version: 1,
-      from:    collectFields(FROM_FIELDS),
-      billTo:  collectFields(BILL_FIELDS),
-      meta:    collectFields(META_FIELDS),
-      lines:   collectLines(),
-      notes:   document.getElementById('notesInp')?.value || '',
-      bank:    collectFields(BANK_FIELDS)
-    };
+    const payload = collectPayload();
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
     const inv  = (document.getElementById('invnoInp')?.value || 'draft').replace(/[^A-Za-z0-9_-]/g, '');
     const date = invoiceDateInput.value || localDateStr();
-    a.href = url;
-    a.download = `invoice-${inv || 'draft'}-${date}.json`;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+    MentriaUI.downloadFile(`invoice-${inv || 'draft'}-${date}.json`, blob);
   };
 
   const applyFields = (ids, obj) => {
@@ -454,17 +567,21 @@ eleventyComputed:
       row.remove();
     });
 
-    if (lines.length === 0) {
+    if (lines.length === 0) lines = [{ Description: '', 'SAC code': '', Quantity: '1', 'Unit Price': '0' }];
+
+    const firstRow = tbody.children[0];
+    if (!firstRow || firstRow.classList.contains('last-row')) {
+      lines.forEach((line) => addRow(line));
       calculateGrandTotal();
       return;
     }
 
     // Apply first line into existing row 1
-    const firstRow = tbody.children[0];
     const setIf = (sel, val) => {
       const el = firstRow.querySelector(sel);
       if (el && val !== undefined) {
-        el.value = val;
+        if (isAmountField(el)) setAmount(el, fromStored(val));
+        else el.value = val;
         persist(el);
       }
     };
@@ -481,6 +598,24 @@ eleventyComputed:
     calculateGrandTotal();
   };
 
+  const applyPayload = (parsed) => {
+    applyFields(FROM_FIELDS, parsed.from);
+    applyFields(BILL_FIELDS, parsed.billTo);
+    applyFields(META_FIELDS, parsed.meta);
+    applyFields(BANK_FIELDS, parsed.bank);
+    if (typeof parsed.notes === 'string') {
+      const notesEl = document.getElementById('notesInp');
+      if (notesEl) {
+        notesEl.value = parsed.notes;
+        persist(notesEl);
+        autoResizeTextarea(notesEl);
+      }
+    }
+    changeCurrency();
+    replaceLines(parsed.lines || []);
+    document.querySelectorAll('.iv__doc textarea').forEach(autoResizeTextarea);
+  };
+
   const importJSON = (text) => {
     let parsed;
     try { parsed = JSON.parse(text); }
@@ -490,24 +625,211 @@ eleventyComputed:
       // Legacy: array of line items
       replaceLines(parsed);
     } else if (parsed && typeof parsed === 'object') {
-      applyFields(FROM_FIELDS, parsed.from);
-      applyFields(BILL_FIELDS, parsed.billTo);
-      applyFields(META_FIELDS, parsed.meta);
-      applyFields(BANK_FIELDS, parsed.bank);
-      if (typeof parsed.notes === 'string') {
-        const notesEl = document.getElementById('notesInp');
-        if (notesEl) {
-          notesEl.value = parsed.notes;
-          persist(notesEl);
-          autoResizeTextarea(notesEl);
-        }
-      }
-      changeCurrency();
-      replaceLines(parsed.lines || []);
+      applyPayload(parsed);
     } else {
       mentriaAlert(COPY.alertUnknownFmt);
     }
   };
+
+  const DOCS_KEY = 'docs';
+  const CUR_KEY = 'current_id';
+  const savedList = document.getElementById('iv-saved-list');
+  const savedCount = document.getElementById('iv-saved-count');
+  const getDocs = () => {
+    const v = window.MentriaStore ? window.MentriaStore.get(NS, DOCS_KEY) : null;
+    return Array.isArray(v) ? v.filter((d) => d && d.id && d.data) : [];
+  };
+  const setDocs = (docs) => { if (window.MentriaStore) noteWrite(DOCS_KEY, window.MentriaStore.set(NS, DOCS_KEY, docs)); };
+  const getCur = () => (window.MentriaStore ? window.MentriaStore.get(NS, CUR_KEY) : null) || null;
+  const setCur = (id) => {
+    if (!window.MentriaStore) return;
+    if (id) noteWrite(CUR_KEY, window.MentriaStore.set(NS, CUR_KEY, id));
+    else if (window.MentriaStore.remove(NS, CUR_KEY)) noteWrite(CUR_KEY, true);
+  };
+  const newDocId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const hasContent = (p) => !!(String((p.billTo && p.billTo.companyNameInp) || '').trim()
+    || (p.lines || []).some((l) => String(l.Description || '').trim() || amountNum(fromStored(l['Unit Price'])) > 0));
+  const blankFields = (ids) => ids.reduce((o, id) => { o[id] = ''; return o; }, {});
+  const blankLine = (src) => ({ Description: '', 'SAC code': (src && src.lines && src.lines[0] && src.lines[0]['SAC code']) || '', Quantity: '1', 'Unit Price': '0' });
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+
+  const nextNumber = () => {
+    const nums = getDocs().map((d) => d.data.meta && d.data.meta.invnoInp).concat([document.getElementById('invnoInp')?.value]).filter(Boolean);
+    let best = null;
+    nums.forEach((raw) => {
+      const m = String(raw).match(/^(.*?)(\d+)(\D*)$/);
+      if (!m) return;
+      const n = parseInt(m[2], 10);
+      if (!best || n > best.n) best = { pre: m[1], n, width: m[2].length, post: m[3] };
+    });
+    if (!best) return '0001';
+    return best.pre + String(best.n + 1).padStart(best.width, '0') + best.post;
+  };
+
+  const totalOf = (p) => {
+    let sum = 0;
+    (p.lines || []).forEach((l) => {
+      const q = amountNum(fromStored(l.Quantity)), pr = amountNum(fromStored(l['Unit Price']));
+      if (!isNaN(q) && !isNaN(pr)) sum += roundToTwo(q * pr);
+    });
+    try {
+      return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'currency', currency: SYMBOL_TO_CODE[p.meta && p.meta.currencyInp] || 'USD', currencyDisplay: 'narrowSymbol' }).format(roundToTwo(sum));
+    } catch (_) { return String(roundToTwo(sum)); }
+  };
+
+  let syncTimer = 0;
+  const syncNow = () => {
+    clearTimeout(syncTimer);
+    syncTimer = 0;
+    if (!window.MentriaStore) return;
+    const p = collectPayload();
+    const docs = getDocs();
+    let id = getCur();
+    const i = id ? docs.findIndex((d) => d.id === id) : -1;
+    if (i === -1) {
+      if (!hasContent(p)) { renderSaved(); return; }
+      id = newDocId();
+      setCur(id);
+      docs.push({ id, savedAt: Date.now(), data: p });
+    } else {
+      docs[i] = { id, savedAt: Date.now(), data: p };
+    }
+    setDocs(docs);
+    renderSaved();
+  };
+  const scheduleSync = () => { clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 600); };
+
+  const showDoc = (id) => {
+    const doc = getDocs().find((d) => d.id === id);
+    if (!doc) return;
+    setCur(id);
+    applyPayload(clone(doc.data));
+    renderSaved();
+  };
+  const openDoc = (id) => { syncNow(); showDoc(id); };
+  const startDoc = (payload) => {
+    syncNow();
+    const id = newDocId();
+    const docs = getDocs();
+    docs.push({ id, savedAt: Date.now(), data: payload });
+    setDocs(docs);
+    showDoc(id);
+    document.getElementById('iv-doc').scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
+  const newInvoice = () => {
+    const cur = collectPayload();
+    startDoc({
+      version: 1,
+      from: cur.from,
+      billTo: blankFields(BILL_FIELDS),
+      meta: { invnoInp: nextNumber(), invoiceDate: localDateStr(), currencyInp: cur.meta.currencyInp },
+      lines: [blankLine(cur)],
+      notes: '',
+      bank: cur.bank
+    });
+  };
+  const duplicateDoc = (id) => {
+    syncNow();
+    const doc = getDocs().find((d) => d.id === id);
+    if (!doc) return;
+    const src = clone(doc.data);
+    src.meta = Object.assign({}, src.meta, { invnoInp: nextNumber(), invoiceDate: localDateStr() });
+    src.lines = [blankLine(doc.data)];
+    startDoc(src);
+  };
+  const deleteDoc = (id) => {
+    syncNow();
+    const docs = getDocs();
+    const i = docs.findIndex((d) => d.id === id);
+    if (i === -1) return;
+    const removed = docs.splice(i, 1)[0];
+    setDocs(docs);
+    const wasCur = getCur() === id;
+    if (wasCur) {
+      setCur(null);
+      const recent = docs.slice().sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))[0];
+      if (recent) showDoc(recent.id);
+      else {
+        const cur = removed.data;
+        applyPayload({ version: 1, from: cur.from, billTo: blankFields(BILL_FIELDS), meta: { invnoInp: nextNumber(), invoiceDate: localDateStr(), currencyInp: (cur.meta || {}).currencyInp }, lines: [blankLine(cur)], notes: '', bank: cur.bank });
+      }
+    }
+    renderSaved();
+    const label = (removed.data.meta && removed.data.meta.invnoInp) || '';
+    if (window.MentriaUI && MentriaUI.undoToast) MentriaUI.undoToast(COPY.savedDeleted.replace('{n}', label), () => {
+      const now = getDocs();
+      if (now.some((d) => d.id === removed.id)) return;
+      if (wasCur) syncNow();
+      const after = getDocs();
+      after.splice(Math.min(i, after.length), 0, removed);
+      setDocs(after);
+      if (wasCur) showDoc(removed.id);
+      else renderSaved();
+    });
+  };
+
+  const renderSaved = () => {
+    const docs = getDocs().slice().sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+    const cur = getCur();
+    savedCount.textContent = docs.length ? String(docs.length) : '';
+    savedList.textContent = '';
+    if (!docs.length) {
+      const li = document.createElement('li');
+      li.className = 'iv__saved-empty';
+      li.textContent = COPY.savedEmpty;
+      savedList.appendChild(li);
+      return;
+    }
+    docs.forEach((d) => {
+      const p = d.data;
+      const li = document.createElement('li');
+      li.className = 'iv__saved-item' + (d.id === cur ? ' is-current' : '');
+      const meta = document.createElement('div');
+      meta.className = 'iv__saved-meta';
+      [['iv__saved-no', '#' + ((p.meta && p.meta.invnoInp) || '—')],
+       ['iv__saved-client', String((p.billTo && p.billTo.companyNameInp) || '').trim() || COPY.savedNoClient],
+       ['iv__saved-date', (p.meta && p.meta.invoiceDate) || ''],
+       ['iv__saved-total', totalOf(p)]].forEach(([cls, text]) => {
+        const sp = document.createElement('span');
+        sp.className = cls;
+        sp.textContent = text;
+        meta.appendChild(sp);
+      });
+      const actions = document.createElement('div');
+      actions.className = 'iv__saved-actions';
+      const btn = (act, label, variant) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'm-btn ' + variant + ' iv__saved-btn';
+        b.dataset.act = act;
+        b.dataset.id = d.id;
+        b.textContent = label;
+        actions.appendChild(b);
+      };
+      if (d.id === cur) {
+        const badge = document.createElement('span');
+        badge.className = 'iv__saved-badge';
+        badge.textContent = COPY.savedEditing;
+        actions.appendChild(badge);
+      } else btn('open', COPY.savedOpen, 'm-btn--ghost');
+      btn('duplicate', COPY.savedDuplicate, 'm-btn--ghost');
+      btn('delete', COPY.savedDelete, 'm-btn--danger');
+      li.append(meta, actions);
+      savedList.appendChild(li);
+    });
+  };
+
+  savedList.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'open') openDoc(b.dataset.id);
+    else if (b.dataset.act === 'duplicate') duplicateDoc(b.dataset.id);
+    else if (b.dataset.act === 'delete') deleteDoc(b.dataset.id);
+  });
+  document.getElementById('iv-new').addEventListener('click', newInvoice);
+  document.getElementById('iv-doc').addEventListener('input', scheduleSync);
+  document.getElementById('iv-doc').addEventListener('change', scheduleSync);
+  window.addEventListener('pagehide', () => { if (syncTimer) syncNow(); });
 
   /* ── Event wiring ──────────────────────────────────── */
   table.addEventListener('click', removeRow);
@@ -515,7 +837,7 @@ eleventyComputed:
   table.addEventListener('input', (e) => {
     const t = e.target;
     if (t.tagName === 'INPUT') {
-      if (t.classList.contains('input-price-cell') || t.classList.contains('input-qty-cell')) {
+      if (isAmountField(t)) {
         const before = t.value;
         const after  = sanitizeDecimalInput(before);
         if (before !== after) {
@@ -523,6 +845,8 @@ eleventyComputed:
           t.value = after;
           if (!isNaN(pos)) t.setSelectionRange(Math.max(0, pos), Math.max(0, pos));
         }
+        amounts.set(t, parseTyped(t.value));
+        persist(t);
         calculateLineTotal(t.closest('tr'));
         calculateGrandTotal();
       }
@@ -531,15 +855,16 @@ eleventyComputed:
     }
   });
 
-  table.addEventListener('focusout', (e) => {
+  table.addEventListener('change', (e) => {
     const t = e.target;
-    if (t.tagName !== 'INPUT') return;
-    if (t.classList.contains('input-price-cell') || t.classList.contains('input-qty-cell')) {
-      if (t.value === '.') t.value = '0';
-      else if (/^\d+\.$/.test(t.value)) t.value = t.value.slice(0, -1);
-      calculateLineTotal(t.closest('tr'));
-      calculateGrandTotal();
-    }
+    if (!isAmountField(t)) return;
+    const canon = parseTyped(t.value) || (t.value.trim() ? '0' : '');
+    if (canon === amounts.get(t) && amountText(canon) === t.value) return;
+    setAmount(t, canon);
+    persist(t);
+    calculateLineTotal(t.closest('tr'));
+    calculateGrandTotal();
+    scheduleSync();
   });
 
   fileInput.addEventListener('change', (e) => {
@@ -552,13 +877,33 @@ eleventyComputed:
     }
     const reader = new FileReader();
     reader.onload = (ev) => {
+      if (syncTimer) syncNow();
+      setCur(null);
       importJSON(ev.target.result);
+      scheduleSync();
       fileInput.value = '';
     };
     reader.readAsText(file);
   });
 
+  const printDate = (value) => {
+    const [y, m, d] = String(value || '').split('-').map(Number);
+    if (!y || !m || !d) return '';
+    const ui = document.documentElement.lang || 'en';
+    const nav = (navigator.languages && navigator.languages[0]) || navigator.language || ui;
+    const loc = nav.toLowerCase().startsWith(ui.slice(0, 2).toLowerCase()) ? nav : ui;
+    const opts = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    try { return new Date(y, m - 1, d).toLocaleDateString(loc, opts); }
+    catch (_) { return new Date(y, m - 1, d).toLocaleDateString(undefined, opts); }
+  };
   const buildPrintMirrors = () => {
+    if (invoiceDateInput) {
+      const copy = document.querySelector('.iv__date-print') || document.createElement('span');
+      copy.className = 'iv__date-print';
+      copy.setAttribute('aria-hidden', 'true');
+      copy.textContent = printDate(invoiceDateInput.value);
+      if (!copy.isConnected) invoiceDateInput.insertAdjacentElement('beforebegin', copy);
+    }
     document.querySelectorAll('.iv__table textarea, .iv__notes-input').forEach(ta => {
       const mirror = document.createElement('div');
       mirror.className = 'iv__print-mirror';
@@ -566,19 +911,32 @@ eleventyComputed:
       mirror.textContent = ta.value;
       ta.insertAdjacentElement('afterend', mirror);
     });
+    document.querySelectorAll('.iv__table tbody tr:not(.last-row)').forEach(tr => {
+      const desc = tr.querySelector('textarea');
+      const price = tr.querySelector('.input-price-cell');
+      const untouched = desc && !desc.value.trim() && !(amountNum(amountOf(price)) || 0);
+      tr.classList.toggle('is-print-skip', !!untouched);
+    });
+    const bank = document.querySelector('.iv__bank');
+    if (bank) bank.classList.toggle('is-print-empty', Array.from(bank.querySelectorAll('input')).every(i => !i.value.trim()));
   };
   const clearPrintMirrors = () => {
-    document.querySelectorAll('.iv__print-mirror').forEach(el => el.remove());
+    document.querySelectorAll('.iv__print-mirror, .iv__date-print').forEach(el => el.remove());
+    document.querySelectorAll('.is-print-skip').forEach(el => el.classList.remove('is-print-skip'));
+    const bank = document.querySelector('.iv__bank');
+    if (bank) bank.classList.remove('is-print-empty');
   };
   window.addEventListener('beforeprint', buildPrintMirrors);
   window.addEventListener('afterprint', clearPrintMirrors);
 
-  document.querySelector('.add-row').addEventListener('click', () => addRow());
+  document.querySelector('.add-row').addEventListener('click', () => { addRow(); scheduleSync(); });
   currencyInput.addEventListener('change', changeCurrency);
   printBtn.addEventListener('click', () => window.print());
   exportBtn.addEventListener('click', exportJSON);
   clearBtn.addEventListener('click', async () => {
-    if (!(await mentriaConfirm(COPY.confirmClear))) return;
+    if (!(await mentriaConfirm(COPY.confirmClear, { danger: true }))) return;
+    clearTimeout(syncTimer);
+    syncTimer = 0;
     if (window.MentriaStore) window.MentriaStore.clear(NS);
     try {
       Object.keys(localStorage)
@@ -605,10 +963,11 @@ eleventyComputed:
     .forEach(el => {
       if (el.dataset.wired) return;
       restore(el);
+      el.dataset.wired = '1';
+      if (isAmountField(el)) return;
       const handler = () => persist(el);
       el.addEventListener('input', handler);
       el.addEventListener('change', handler);
-      el.dataset.wired = '1';
     });
 
   // 3. Apply currency, recompute totals, resize textareas
@@ -627,11 +986,31 @@ eleventyComputed:
 
   // 4. Auto-set today's date (only if no stored value)
   setCurrentDateIfEmpty();
+  syncNow();
 })();
 </script>
 
 <style>
 /* ─── Edit mode (terminal/synthwave aesthetic) ────────────────────────── */
+.iv__saved { margin: 0 0 1rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-md, 6px); background: var(--term-bg-raised); }
+.iv__saved-sum { cursor: pointer; padding: 0.65rem 0.9rem; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--term-muted); }
+.iv__saved-count { display: inline-block; min-width: 1.4em; margin-left: 0.3rem; padding: 0 0.4em; border-radius: 999px; background: var(--term-border-strong); color: var(--term-fg); text-align: center; }
+.iv__saved-count:empty { display: none; }
+.iv__saved-hint { margin: 0 0.9rem 0.6rem; font-size: 0.78rem; color: var(--term-subtle); }
+.iv__saved-list { list-style: none; margin: 0; padding: 0 0.6rem 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.iv__saved-empty { padding: 0.4rem 0.3rem; font-size: 0.82rem; color: var(--term-muted); }
+.iv__saved-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 0.8rem; padding: 0.55rem 0.7rem; border: 1px solid var(--term-border); border-radius: var(--radius-sm, 4px); }
+.iv__saved-item.is-current { border-color: var(--syn-cyan, #22d3ee); }
+.iv__saved-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.9rem; min-width: 0; font-size: 0.85rem; }
+.iv__saved-no { font-family: var(--font-mono); color: var(--term-fg-strong); }
+.iv__saved-client { color: var(--term-fg); overflow-wrap: anywhere; }
+.iv__saved-date, .iv__saved-total { font-family: var(--font-mono); font-size: 0.78rem; color: var(--term-muted); font-variant-numeric: tabular-nums; }
+.iv__saved-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+.iv__saved-btn { padding: 0.3rem 0.65rem; font-size: 0.75rem; }
+.iv__saved-badge { font-family: var(--font-mono); font-size: 0.72rem; color: var(--syn-cyan, #22d3ee); padding: 0 0.3rem; }
+.iv__unsaved { margin: 0; padding: 0.6rem 0.9rem; border: 1px solid var(--syn-amber, #fbbf24); border-radius: var(--radius-md, 6px); font-family: var(--font-body); font-size: 0.85rem; line-height: 1.5; color: var(--term-fg); }
+.iv__unsaved[hidden] { display: none; }
+
 .iv {
   display: flex;
   flex-direction: column;
@@ -807,7 +1186,8 @@ eleventyComputed:
 .iv__table input:focus,
 .iv__table textarea:focus {
   outline: none;
-  border-color: rgba(34,211,238,0.45);
+  border-color: var(--syn-cyan);
+  border-style: solid;
   background: rgba(255,255,255,0.03);
 }
 .iv__table textarea {
@@ -891,6 +1271,7 @@ td.total .currency {
   white-space: pre-wrap;
 }
 .iv__print-mirror { display: none; }
+.iv__date-print { display: none; }
 
 /* Bank */
 .iv__bank .iv__declaration {
@@ -922,6 +1303,16 @@ td.total .currency {
   input[type="date"] {
     -webkit-appearance: none !important;
     appearance: none !important;
+  }
+  @supports (-moz-appearance: none) {
+    .iv__date-print {
+      display: inline !important;
+      color: #111 !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 10pt !important;
+      line-height: 1.35 !important;
+    }
+    .iv__date-print + .iv__meta-input--date { display: none !important; }
   }
 
   /* Page setup */
@@ -1133,6 +1524,11 @@ td.total .currency {
 
   /* Bank */
   .iv__bank { page-break-inside: avoid; }
+  .iv__table tr.is-print-skip { display: none !important; }
+  .iv__cell-price .currency { display: none !important; }
+  .iv__bank.is-print-empty .iv__section-title,
+  .iv__bank.is-print-empty .iv__label,
+  .iv__bank.is-print-empty .iv__input { display: none !important; }
   .iv__bank .iv__declaration {
     color: #444 !important;
     font-size: 8pt !important;

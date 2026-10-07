@@ -11,7 +11,7 @@ eleventyComputed:
   description: "{{ 'tools.extensions-sdk.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/extensions/">extensions</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">sdk</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/extensions/">extensions</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">sdk</span></p>
   <h1>{{ "tools.extensions-sdk.title" | t }}</h1>
   <p>{{ "tools.extensions-sdk.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -20,6 +20,7 @@ eleventyComputed:
 {% set terminalTitle = "sdk.md" %}
 {% include "terminal-frame-open.njk" %}
 <section class="sdk">
+  <p class="sdk__lang" role="note">{{ "tool.extensions-sdk.english_only" | t }}</p>
   <p class="sdk__lead">A Mentria extension is a single <code>.html</code> file — markup, styles and script in one document. There is no build step, no bundler and no upload: the file lives only on your device, in local storage, and runs on the site the moment you install it.</p>
 
   <div class="sdk__callout" role="note">
@@ -32,13 +33,13 @@ eleventyComputed:
 
   <div class="sdk__code">
     <div class="sdk__code-bar">
-      <span class="sdk__code-name">starter.html</span>
+      <span class="sdk__code-name" id="sdk-code-name">starter.html</span>
       <span class="sdk__code-actions">
         <button type="button" class="m-btn m-btn--ghost sdk__btn" id="sdk-copy">copy</button>
         <button type="button" class="m-btn m-btn--primary sdk__btn" id="sdk-download">download</button>
       </span>
     </div>
-    <pre class="sdk__pre"><code id="sdk-starter-code">{% raw %}&lt;script type="application/json" id="mentria-ext"&gt;
+    <pre class="sdk__pre" tabindex="0" role="region" aria-labelledby="sdk-code-name"><code id="sdk-starter-code">{% raw %}&lt;script type="application/json" id="mentria-ext"&gt;
 {
   "id": "starter",
   "name": "Starter",
@@ -81,7 +82,7 @@ eleventyComputed:
 
   const box = document.getElementById('note');
 
-  // Storage roundtrip: last saved note, or text passed on the command line.
+  // Storage roundtrip: last saved note, or text passed in a run link (#cmd=starter&amp;args=…).
   box.value = storage.get('note') || (args &amp;&amp; args.args) || '';
 
   document.getElementById('save').addEventListener('click', () =&gt; {
@@ -90,13 +91,13 @@ eleventyComputed:
   });
 &lt;/script&gt;{% endraw %}</code></pre>
   </div>
-  <p class="sdk__note">Install it: open the <a href="{{ locale.pathPrefix }}/tools/extensions/">manager</a>, expand <em>paste source</em>, paste the file, and confirm the trust prompt. Because it declares <code>mounts.tool</code> it also gets a launcher tile, and its <code>starter</code> command shows up in the terminal.</p>
+  <p class="sdk__note">Install it: open the <a href="{{ locale.pathPrefix }}/tools/extensions/">manager</a>, expand <em>paste source</em>, paste the file, and confirm the trust prompt. Because it declares <code>mounts.tool</code> it also gets a launcher tile, and its <code>starter</code> command shows up in the command palette (⌘K).</p>
 
   <h2 class="sdk__h2">{{ "tool.extensions-sdk.heading_reference" | t }}</h2>
 
-  <h3 class="sdk__h3">Manifest</h3>
+  <h3 class="sdk__h3" id="sdk-manifest">Manifest</h3>
   <p>The manifest is a JSON block with <code>id="mentria-ext"</code>. It is the only required piece of structure; everything else is ordinary HTML.</p>
-  <div class="sdk__tablewrap">
+  <div class="sdk__tablewrap" tabindex="0" role="region" aria-labelledby="sdk-manifest">
     <table class="sdk__table">
       <thead><tr><th>Field</th><th>Type</th><th>Req</th><th>Rules</th></tr></thead>
       <tbody>
@@ -106,18 +107,18 @@ eleventyComputed:
         <tr><td><code>icon</code></td><td>string</td><td>no</td><td>An emoji (≤8 chars) <em>or</em> a <code>data:image/…</code> URI up to 8 KB.</td></tr>
         <tr><td><code>author</code></td><td>string</td><td>no</td><td>≤200 chars.</td></tr>
         <tr><td><code>description</code></td><td>string</td><td>no</td><td>≤200 chars.</td></tr>
-        <tr><td><code>permissions</code></td><td>string[]</td><td>no</td><td>Up to 16 labels (≤32 chars each). Vocabulary: <code>storage ai bluetooth usb serial network notifications share</code>. Advisory only — surfaced in the trust prompt and the manager row; not enforced by a sandbox.</td></tr>
+        <tr><td><code>permissions</code></td><td>string[]</td><td>no</td><td>Up to 16 labels (≤32 chars each). Vocabulary: <code>storage ai bluetooth usb serial network notifications share</code>. Advisory only — surfaced in the trust prompt and the manager row; not enforced by a sandbox. Network access is limited separately by the site’s content security policy (see <a href="#sdk-network">Network</a>).</td></tr>
         <tr><td><code>mounts</code></td><td>object</td><td>no</td><td>Where the extension appears (below).</td></tr>
         <tr><td><code>mounts.tool</code></td><td>object</td><td>no</td><td>Present (usually <code>{}</code>) → a launcher tile plus the manager's <em>open</em> button.</td></tr>
-        <tr><td><code>mounts.commands</code></td><td>object[]</td><td>no</td><td>Each <code>{ name, description, usage? }</code> registers a terminal/palette command. <code>name</code> kebab-case 2–16 chars; <code>description</code> required; <code>usage</code> is an optional hint. Colliding names are skipped.</td></tr>
+        <tr><td><code>mounts.commands</code></td><td>object[]</td><td>no</td><td>Each <code>{ name, description, usage? }</code> adds an entry to the command palette (⌘K) that opens the extension with <code>args</code> set to <code>{ cmd: name, args: '' }</code>. <code>name</code> kebab-case 2–16 chars; <code>description</code> required, shown beside the entry; <code>usage</code> is an optional hint the palette does not show.</td></tr>
         <tr><td><code>mounts.widget</code></td><td>object</td><td>no</td><td><code>{ key, label }</code> → a live status tile on the home launcher (see <em>Widgets</em>). <code>key</code> (1–64 chars) is the storage key the tile watches; <code>label</code> (1–48 chars) names the tile.</td></tr>
       </tbody>
     </table>
   </div>
 
-  <h3 class="sdk__h3">The host object — <code>window.mentria</code></h3>
+  <h3 class="sdk__h3" id="sdk-host">The host object — <code>window.mentria</code></h3>
   <p>The run host injects a frozen <code>window.mentria</code> before your script executes. Everything an extension can do goes through it.</p>
-  <div class="sdk__tablewrap">
+  <div class="sdk__tablewrap" tabindex="0" role="region" aria-labelledby="sdk-host">
     <table class="sdk__table">
       <thead><tr><th>Member</th><th>Shape</th><th>What it does</th></tr></thead>
       <tbody>
@@ -126,14 +127,21 @@ eleventyComputed:
         <tr><td><code>storage.set</code></td><td><code>(key, value) → bool</code></td><td>Write any JSON value. Returns <code>false</code> when storage is full. <code>storage.set('note', text)</code></td></tr>
         <tr><td><code>storage.remove</code></td><td><code>(key) → bool</code></td><td>Delete one key. <code>storage.remove('note')</code></td></tr>
         <tr><td><code>storage.list</code></td><td><code>() → string[]</code></td><td>List your keys. <code>storage.list()</code></td></tr>
+        <tr><td><code>db.get</code></td><td><code>(key) → Promise&lt;value | null&gt;</code></td><td>Read from your local-only database. <code>await db.get('log')</code></td></tr>
+        <tr><td><code>db.set</code></td><td><code>(key, value) → Promise&lt;bool&gt;</code></td><td>Store objects, arrays, dates or Blobs. Resolves <code>false</code> if the browser refuses. <code>await db.set('log', entries)</code></td></tr>
+        <tr><td><code>db.remove</code></td><td><code>(key) → Promise&lt;bool&gt;</code></td><td>Delete one key. <code>await db.remove('log')</code></td></tr>
+        <tr><td><code>db.keys</code></td><td><code>() → Promise&lt;string[]&gt;</code></td><td>List your keys. <code>await db.keys()</code></td></tr>
+        <tr><td><code>db.clear</code></td><td><code>() → Promise&lt;bool&gt;</code></td><td>Delete everything in your database. <code>await db.clear()</code></td></tr>
+        <tr><td><code>locale</code></td><td>string</td><td>The page's current language code, such as <code>en</code>, <code>es</code>, <code>fr</code>, <code>ja</code> or <code>pt-BR</code>. Read it when you render.</td></tr>
+        <tr><td><code>onLocaleChange</code></td><td><code>(fn) → void</code></td><td>Calls <code>fn(code)</code> when the visitor switches language without reloading. <code>onLocaleChange(render)</code></td></tr>
         <tr><td><code>theme</code></td><td><code>{ accent, bg, fg, muted, fontMono }</code></td><td>The site's live CSS token values. <code>root.style.setProperty('--x', theme.accent)</code></td></tr>
-        <tr><td><code>args</code></td><td><code>null | { cmd, args }</code></td><td>Set when opened via a command (<code>#cmd=…&amp;args=…</code>); otherwise <code>null</code>. <code>if (args) run(args.args)</code></td></tr>
+        <tr><td><code>args</code></td><td><code>null | { cmd, args }</code></td><td>Set when opened from a palette command (<code>args</code> is then <code>''</code>) or from a link to the run page, <code>/tools/extensions/run/?id=…</code>, ending in <code>#cmd=starter&amp;args=hello</code>; otherwise <code>null</code>. <code>if (args &amp;&amp; args.args) run(args.args)</code></td></tr>
         <tr><td><code>notify</code></td><td><code>(msg) → void</code></td><td>Host toast, bottom-center, first 120 chars. <code>notify('saved')</code></td></tr>
         <tr><td><code>close</code></td><td><code>() → void</code></td><td>Leave the extension and return to the home launcher. <code>close()</code></td></tr>
       </tbody>
     </table>
   </div>
-  <p class="sdk__note">The run frame is granted the feature policy <code>bluetooth; usb; serial; camera; microphone</code>, so those Web APIs work from inside an extension when the browser and user allow them.</p>
+  <p class="sdk__note">The run frame is granted the feature policy <code>bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay</code>, so those Web APIs work from inside an extension when the browser and user allow them.</p>
 
   <h3 class="sdk__h3">Storage</h3>
   <p>Each extension owns a private namespace, <code>extdata.&lt;id&gt;</code>, reachable only through <code>window.mentria.storage</code>. It is backed by the browser's <code>localStorage</code> (via MentriaStore), so reads and writes are synchronous and every value must be JSON-serializable.</p>
@@ -144,24 +152,37 @@ eleventyComputed:
     <li>The whole <code>.html</code> is stored too: over 512 KB warns at install, over 1536 KB is rejected outright.</li>
   </ul>
 
-  <h3 class="sdk__h3">Widgets</h3>
+  <h3 class="sdk__h3">Local-only data</h3>
+  <p><code>window.mentria.db</code> is a second store for data that should stay on this device: health logs, private journals, anything large. It lives in IndexedDB, so it holds structured values (objects, arrays, dates, Blobs) well beyond <code>localStorage</code> limits, and every call returns a promise.</p>
+  <ul class="sdk__list">
+    <li>It is never included in the encrypted backup or in device sync. Offer your own export if people need a copy.</li>
+    <li>Values come back as copies made by the host page, so test them with <code>Array.isArray</code> or by their fields rather than <code>instanceof</code>.</li>
+    <li>Removing the extension in the manager deletes it.</li>
+    <li>Browsers can evict site storage under pressure unless the site has persistent storage; treat it as local, not guaranteed forever.</li>
+  </ul>
+
+  <h3 class="sdk__h3" id="sdk-widgets">Widgets</h3>
   <p>Declare <code>mounts.widget</code> and the home launcher shows a live status tile for your extension, named by <code>label</code> and linking to your run page. The tile renders the snapshot object stored under <code>key</code> in your own storage — e.g. <code>storage.set('note', { text: 'bought milk', progress: 0.4 })</code> — and refreshes on every write.</p>
-  <div class="sdk__tablewrap">
+  <div class="sdk__tablewrap" tabindex="0" role="region" aria-labelledby="sdk-widgets">
     <table class="sdk__table">
       <thead><tr><th>Snapshot field</th><th>Type</th><th>Req</th><th>Rules</th></tr></thead>
       <tbody>
         <tr><td><code>text</code></td><td>string</td><td>yes</td><td>The tile's value line. Trimmed, capped at 80 chars; must be non-empty.</td></tr>
         <tr><td><code>detail</code></td><td>string</td><td>no</td><td>A secondary line below the value. Trimmed, capped at 120 chars.</td></tr>
         <tr><td><code>progress</code></td><td>number</td><td>no</td><td>Drawn as a progress bar; clamped to 0–1.</td></tr>
+        <tr><td><code>locales</code></td><td>object</td><td>no</td><td>The same <code>text</code> and <code>detail</code> per site language, keyed by language code (<code>en</code>, <code>es</code>, <code>fr</code>, <code>ja</code>, <code>pt-BR</code>), e.g. <code>{ es: { text: 'compré leche' } }</code>. The tile shows the entry for the current language, so it follows a language switch even while your extension isn't running; without a matching entry it shows <code>text</code> and <code>detail</code>.</td></tr>
       </tbody>
     </table>
   </div>
   <p class="sdk__note">Anything else under that key — a plain string, an array, an empty <code>text</code> — is ignored silently: the tile simply stays hidden until the key holds a valid snapshot object.</p>
 
+  <h3 class="sdk__h3" id="sdk-network">Network</h3>
+  <p class="sdk__note">Extensions run inside this site’s content security policy, the same one that keeps Mentria free of third-party requests. An extension’s <code>fetch</code>, WebSocket, image and media requests can reach this site, <code>cdn.mentria.ai</code>, <code>relay.mentria.ai</code> (https and wss), <code>mentria-ai.github.io</code> and Hugging Face (<code>huggingface.co</code>, <code>*.hf.co</code>). The browser refuses every other host, and the run page shows a notice naming the blocked host so the failure is never silent. Declare <code>network</code> in <code>permissions</code> when an extension uses these endpoints.</p>
+
   <h3 class="sdk__h3">Install &amp; share</h3>
   <ul class="sdk__list">
-    <li><strong>Manager</strong> (<a href="{{ locale.pathPrefix }}/tools/extensions/">/tools/extensions/</a>): drop an <code>.html</code> file, choose a file, or paste the source. Every install shows a human trust prompt naming the extension, its version and its declared permissions; updates call out permissions the new version adds or drops, and installing an older version is labeled as a replacement, not an update.</li>
-    <li><strong>Share over comms</strong>: from an installed row, <em>share</em> hands the file to an open <a href="/comms/">comms</a> session; the peer gets the same trust prompt, attributed <em>from you</em>, before anything installs. If comms is closed it points you there.</li>
+    <li><strong>Manager</strong> (<a href="{{ locale.pathPrefix }}/tools/extensions/">/tools/extensions/</a>): drop an <code>.html</code> file, choose a file, or paste the source. Every install shows a human trust prompt naming the extension, its version and its declared permissions; updates call out permissions the new version adds or drops, installing an older version is labeled as a replacement, not an update, and installing the same version again is labeled as a reinstall.</li>
+    <li><strong>Share over comms</strong>: from an installed row, <em>share</em> hands the file to an open <a href="{{ locale.pathPrefix }}/comms/">comms</a> session; the peer gets the same trust prompt, attributed <em>from you</em>, before anything installs. If comms is closed it points you there.</li>
     <li><strong>Export</strong>: <em>export</em> downloads the stored source back out as <code>&lt;id&gt;.html</code>, so an extension is always portable.</li>
   </ul>
 </section>
@@ -184,9 +205,11 @@ eleventyComputed:
 </script>
 
 <style>
-.sdk { font-family: var(--font-mono, 'JetBrains Mono', monospace); max-width: 900px; margin: 0 auto; padding: 0.5rem 0.25rem; color: var(--term-fg); line-height: 1.65; }
+.sdk { font-family: var(--font-mono, 'JetBrains Mono', monospace); width: 100%; max-width: 900px; margin: 0 auto; padding: 0.5rem 0.25rem; color: var(--term-fg); line-height: 1.65; }
 .sdk p { margin: 0.75rem 0; }
 .sdk__lead { font-size: 1rem; color: var(--term-fg); }
+.sdk__lang { padding: 0.5rem 0.8rem; border: 1px solid var(--term-border, #2a3138); border-left: 3px solid var(--syn-cyan, #22d3ee); border-radius: 6px; background: var(--term-bg-raised, #0d0f12); font-size: 0.85rem; color: var(--term-fg); }
+html:lang(en) .sdk__lang { display: none; }
 .sdk code { background: var(--term-bg-raised, #0d0f12); border: 1px solid var(--term-border, #2a3138); border-radius: 4px; padding: 0.05em 0.35em; font-size: 0.85em; color: var(--accent, #6ef3c5); }
 .sdk a { color: var(--accent, #6ef3c5); }
 .sdk__callout { border: 1px solid var(--term-border, #2a3138); border-left: 3px solid var(--syn-pink, #f472b6); border-radius: 8px; background: var(--term-bg-raised, #0d0f12); padding: 0.9rem 1.1rem; margin: 1.25rem 0; }
@@ -199,6 +222,7 @@ eleventyComputed:
 .sdk__code-actions { display: flex; gap: 0.5rem; }
 .sdk__btn { font-size: 0.72rem; padding: 0.22rem 0.7rem; }
 .sdk__pre { margin: 0; padding: 0.9rem 1rem; overflow-x: auto; font-size: 0.78rem; line-height: 1.55; }
+.sdk__pre:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: -2px; }
 .sdk__pre code { background: none; border: 0; padding: 0; color: var(--term-fg); }
 .sdk__note { font-size: 0.85rem; color: var(--term-muted); }
 .sdk__tablewrap { overflow-x: auto; margin: 0.75rem 0; border: 1px solid var(--term-border, #2a3138); border-radius: 8px; }

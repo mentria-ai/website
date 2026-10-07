@@ -9,11 +9,12 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.tetris.title' | t }}"
   description: "{{ 'tools.tetris.lede' | t }}"
+localeReload: true
 ---
 <div class="game-page">
 
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">tetris</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">tetris</span></p>
   <h1>{{ "tools.tetris.title" | t }}<span style="color:var(--syn-cyan)">.</span>js</h1>
   <p>{{ "tools.tetris.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -27,20 +28,20 @@ eleventyComputed:
   <div class="help-head">
     <p class="game-help-title">{{ "tool.tetris.controls_title" | t }}</p>
     <span class="help-badge" id="input-badge" hidden></span>
-    <button type="button" class="help-close" popovertarget="tetris-help" popovertargetaction="hide" aria-label="{{ 'tool.tetris.close' | t }}">{% include "icon-x.njk" %}</button>
+    <button type="button" class="game-help-x" popovertarget="tetris-help" popovertargetaction="hide" aria-label="{{ 'tool.tetris.close' | t }}">{% include "icon-x.njk" %}</button>
   </div>
 
   <section class="help-sec" id="help-kb" data-input="keyboard">
-    <h3 class="help-sec-title">
+    <h2 class="help-sec-title">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.2"/><path d="M6 9.6h.01M9.5 9.6h.01M13 9.6h.01M16.5 9.6h.01M6 13.1h.01M9.5 13.1h.01M13 13.1h.01M16.5 13.1h.01M8.4 16.1h7.2"/></svg>
       {{ "tool.tetris.sec_keyboard" | t }}
-    </h3>
+    </h2>
     <ul class="game-help-list">
       <li><span class="help-keys"><span class="kbd">←</span><span class="kbd">→</span><span class="kbd">A</span><span class="kbd">D</span></span><span class="game-help-label">{{ "tool.tetris.act_move" | t }}</span></li>
       <li><span class="help-keys"><span class="kbd">↑</span><span class="kbd">W</span><span class="kbd">X</span></span><span class="game-help-label">{{ "tool.tetris.act_rotate_cw" | t }}</span></li>
       <li><span class="help-keys"><span class="kbd">Z</span></span><span class="game-help-label">{{ "tool.tetris.act_rotate_ccw" | t }}</span></li>
       <li><span class="help-keys"><span class="kbd">↓</span><span class="kbd">S</span></span><span class="game-help-label">{{ "tool.tetris.act_soft_drop" | t }}</span></li>
-      <li><span class="help-keys"><span class="kbd">SPACE</span></span><span class="game-help-label">{{ "tool.tetris.act_hard_drop" | t }}</span></li>
+      <li><span class="help-keys"><span class="kbd">{{ "common.key_space" | t }}</span></span><span class="game-help-label">{{ "tool.tetris.act_hard_drop" | t }}</span></li>
       <li><span class="help-keys"><span class="kbd">C</span><span class="kbd">⇧</span></span><span class="game-help-label">{{ "tool.tetris.act_hold" | t }}</span></li>
       <li><span class="help-keys"><span class="kbd">G</span></span><span class="game-help-label">{{ "tool.tetris.act_ghost" | t }}</span></li>
       <li><span class="help-keys"><span class="kbd">P</span><span class="kbd">ESC</span></span><span class="game-help-label">{{ "tool.tetris.act_pause" | t }}</span></li>
@@ -49,10 +50,10 @@ eleventyComputed:
   </section>
 
   <section class="help-sec" id="help-pad" data-input="gamepad">
-    <h3 class="help-sec-title">
+    <h2 class="help-sec-title">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.4 8h9.2a4.4 4.4 0 0 1 4.3 5.3l-.7 3.3a2.5 2.5 0 0 1-4.1 1.4l-1.8-1.6H9.7l-1.8 1.6a2.5 2.5 0 0 1-4.1-1.4l-.7-3.3A4.4 4.4 0 0 1 7.4 8Z"/><path d="M7.6 11.1v2.6M6.3 12.4h2.6"/><circle cx="15.9" cy="11.9" r=".95" fill="currentColor" stroke="none"/><circle cx="18" cy="13.7" r=".95" fill="currentColor" stroke="none"/></svg>
       {{ "tool.tetris.sec_controller" | t }}
-    </h3>
+    </h2>
     <ul class="game-help-list">
       <li><span class="help-keys"><span class="kbd">{{ "tool.tetris.pad_dpad" | t }}</span></span><span class="game-help-label">{{ "tool.tetris.act_move" | t }}</span></li>
       <li><span class="help-keys"><span class="kbd">↓</span></span><span class="game-help-label">{{ "tool.tetris.act_soft_drop" | t }}</span></li>
@@ -65,10 +66,10 @@ eleventyComputed:
   </section>
 
   <section class="help-sec" id="help-touch" data-input="touch">
-    <h3 class="help-sec-title">
+    <h2 class="help-sec-title">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.1 12.4V6.1a1.7 1.7 0 0 1 3.4 0v5.6"/><path d="M12.5 11.4v-1a1.6 1.6 0 0 1 3.2 0v1.4"/><path d="M15.7 12.2a1.6 1.6 0 0 1 3.2 0v3.2a5.5 5.5 0 0 1-5.5 5.5h-1a4.9 4.9 0 0 1-3.8-1.8l-3-3.7a1.6 1.6 0 0 1 2.4-2.1l1.1 1.2"/></svg>
       {{ "tool.tetris.sec_touch" | t }}
-    </h3>
+    </h2>
     <ul class="game-help-list">
       <li><span class="help-glyph">◎</span><span class="game-help-label">{{ "tool.tetris.touch_tap" | t }}</span></li>
       <li><span class="help-glyph">⇄</span><span class="game-help-label">{{ "tool.tetris.touch_drag" | t }}</span></li>
@@ -107,6 +108,7 @@ eleventyComputed:
   <div class="board-wrap">
     <canvas id="game" width="320" height="640"></canvas>
     <div class="toast" id="toast"></div>
+    <p class="sr-only" id="sr-live" role="status" aria-live="polite"></p>
 
     <div class="overlay" id="ov-start">
       <div class="modal">
@@ -177,7 +179,7 @@ eleventyComputed:
     <span><span class="kbd">↑</span> {{ "tool.tetris.act_rotate_cw" | t }}</span>
     <span><span class="kbd">Z</span> {{ "tool.tetris.act_rotate_ccw" | t }}</span>
     <span><span class="kbd">↓</span> {{ "tool.tetris.act_soft_drop" | t }}</span>
-    <span><span class="kbd">SPACE</span> {{ "tool.tetris.act_hard_drop" | t }}</span>
+    <span><span class="kbd">{{ "common.key_space" | t }}</span> {{ "tool.tetris.act_hard_drop" | t }}</span>
     <span><span class="kbd">C</span> {{ "tool.tetris.act_hold" | t }}</span>
     <span><span class="kbd">G</span> {{ "tool.tetris.act_ghost" | t }}</span>
     <span><span class="kbd">P</span> {{ "tool.tetris.act_pause" | t }}</span>
@@ -274,12 +276,6 @@ canvas#game {
   background: var(--cyan-8); border: 1px solid var(--cyan-30); color: var(--syn-cyan);
 }
 .help-badge[hidden] { display: none; }
-.help-close {
-  appearance: none; background: transparent; border: 1px solid var(--term-border);
-  border-radius: var(--radius-sm); color: var(--term-muted);
-  width: 24px; height: 24px; line-height: 1; cursor: pointer; font-size: 11px; padding: 0;
-}
-.help-close:hover { color: var(--syn-cyan); border-color: var(--cyan-30); }
 
 .help-sec { margin-bottom: 12px; padding: 8px 9px; border: 1px solid transparent; border-radius: var(--radius-md); transition: border-color 160ms ease, background 160ms ease; }
 .help-sec.is-active { border-color: var(--cyan-30); background: var(--cyan-8); }
@@ -703,6 +699,7 @@ canvas#game {
   }
 
   function toggleGhost() {
+    settleUntil = performance.now() + 600;
     State.ghost = !State.ghost;
     writePref('tetris_ghost', State.ghost);
     syncGhostUi();
@@ -844,16 +841,24 @@ canvas#game {
   window.addEventListener('resize', relayout);
 
   function updateHUD() {
-    $('stat-score').textContent = State.score.toLocaleString();
+    $('stat-score').textContent = State.score.toLocaleString(document.documentElement.lang || undefined);
     $('stat-level').textContent = String(State.level).padStart(2, '0');
     $('stat-lines').textContent = State.lines;
-    $('stat-best').textContent = State.best.toLocaleString();
+    $('stat-best').textContent = State.best.toLocaleString(document.documentElement.lang || undefined);
     $('stat-combo').textContent = State.combo > 1 ? '×' + State.combo : '—';
+  }
+
+  function announce(msg) {
+    const el = document.getElementById('sr-live');
+    if (!el) return;
+    el.textContent = '';
+    setTimeout(() => { el.textContent = msg; }, 60);
   }
 
   let toastTimer = 0;
   function showToast(msg) {
     const t = $('toast');
+    announce(msg);
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toastTimer);
@@ -895,6 +900,7 @@ canvas#game {
       clearButtonStates();
     }
     ovPause.classList.toggle('hidden', !want);
+    if (want) announce(ovPause.querySelector('h2').textContent);
   }
   function togglePause() {
     if (!State.running || State.over) return;
@@ -913,12 +919,16 @@ canvas#game {
       State.best = State.score;
       writeBest(State.best);
     }
-    $('fin-score').textContent = State.score.toLocaleString();
+    $('fin-score').textContent = State.score.toLocaleString(document.documentElement.lang || undefined);
     $('fin-level').textContent = State.level;
     $('fin-lines').textContent = State.lines;
-    $('fin-best').textContent = State.best.toLocaleString();
+    $('fin-best').textContent = State.best.toLocaleString(document.documentElement.lang || undefined);
     $('fin-record').classList.toggle('hidden', !isRecord);
     ovOver.classList.remove('hidden');
+    announce([ovOver.querySelector('h2').textContent]
+      .concat(Array.from(ovOver.querySelectorAll('.stats-mini .k'), (k) => k.textContent + ' ' + k.nextElementSibling.textContent))
+      .concat(isRecord ? [$('fin-record').textContent] : []).join('. '));
+    $('btn-again').focus({ preventScroll: true });
     buzz(60);
     updateHUD();
   }
@@ -944,6 +954,9 @@ canvas#game {
     updateHUD();
   }
 
+  let wasLive = true;
+  let idleDrawnAt = 0;
+  let settleUntil = 0;
   function loop(now) {
     try {
       if (!State.lastTime) State.lastTime = now;
@@ -973,7 +986,13 @@ canvas#game {
           }
         }
       }
-      render();
+      const live = State.running && !State.paused && !State.over;
+      if (wasLive && !live) settleUntil = now + 600;
+      if (live || now < settleUntil || now - idleDrawnAt >= 250) {
+        idleDrawnAt = now;
+        render();
+      }
+      wasLive = live;
     } catch (err) {
       console.error('loop error', err);
     }
@@ -1021,10 +1040,17 @@ canvas#game {
   const HOLD_KEYS = ['c', 'C', 'Shift'];
   const PAUSE_KEYS = ['p', 'P', 'Escape'];
 
+  function controlKey(e) {
+    if (e.key !== 'Enter' && e.code !== 'Space') return false;
+    const ctl = e.target && e.target.closest ? e.target.closest('button, a[href], summary, [role="button"]') : null;
+    return !!ctl && !!(window.MentriaUI && typeof window.MentriaUI.tabFocused === 'function' && window.MentriaUI.tabFocused());
+  }
+
   document.addEventListener('keydown', (e) => {
     if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     markInput('keyboard');
+    if (controlKey(e)) return;
     if (helpOpen) return;
 
     if (State.over) {
@@ -1121,6 +1147,13 @@ canvas#game {
       State.softDropTouch = false;
       if (State.running && !State.over) setPaused(true);
     }
+  });
+  document.addEventListener('mentria:overlay', (e) => {
+    if (!e.detail || !e.detail.open) return;
+    stopDas();
+    State.softDropKey = false;
+    State.softDropTouch = false;
+    if (State.running && !State.over) setPaused(true);
   });
 
   const tcRoot = $('touch-controls');

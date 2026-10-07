@@ -53,6 +53,7 @@ export default {
       { type: 'box', min: [-4, 0, -40], max: [-1.6, 1.05, -37.6], mat: 'concrete' },
       { type: 'box', min: [18, 0, -10], max: [20.4, 0.95, -7.6], mat: 'concrete' }
     ],
+    mood: { preset: 'sunset', backdrop: 'coast-cliffs', wet: 0.7 },
     sun: { dir: [0.79, -0.24, -0.565], color: [1, 0.66, 0.36], intensity: 2.8 },
     ambient: [0.09, 0.1, 0.14],
     fog: { color: [0.18, 0.17, 0.22], density: 0.016, heightFalloff: 0.11, heightRef: 0 },

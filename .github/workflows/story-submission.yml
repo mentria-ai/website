@@ -7,7 +7,7 @@ on:
 permissions:
   contents: write
   issues: write
-  actions: write
+  pull-requests: write
 
 concurrency:
   group: story-submission
@@ -18,10 +18,10 @@ jobs:
     if: github.event.label.name == 'story-approved' && contains(github.event.issue.labels.*.name, 'story-submission')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
-          ref: main
-      - uses: actions/setup-node@v4
+          ref: develop
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Install image encoder
@@ -32,8 +32,40 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: node scripts/publish-submission.mjs
+        run: |
+          PENDING_IDS="$(git ls-remote --heads origin 'story/*' | sed 's|.*refs/heads/story/||')"
+          export PENDING_IDS
+          node scripts/publish-submission.mjs
+      - name: Commit to a story branch
+        id: branch
+        env:
+          STORY_ID: ${{ steps.publish.outputs.story_id }}
+          STORY_TITLE: ${{ steps.publish.outputs.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          git config user.name "mentria-bot"
+          git config user.email "agent@mentria.ai"
+          git switch -c "story/${STORY_ID}"
+          git add src/_data/stories.json src/_data/feed.json
+          git commit -m "stories: ${STORY_TITLE} (#${ISSUE_NUMBER})"
+          git push origin "story/${STORY_ID}"
+          echo "name=story/${STORY_ID}" >> "$GITHUB_OUTPUT"
+      - name: Open a pull request to develop
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+          STORY_ID: ${{ steps.publish.outputs.story_id }}
+          STORY_TITLE: ${{ steps.publish.outputs.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          body=$(printf '%s\n\n%s\n' \
+            "Community story from #${ISSUE_NUMBER}, approved with the story-approved label. It goes live with the next release at https://mentria.ai/feed/story/${STORY_ID}/" \
+            "The owner merges this pull request. Pull requests opened by the workflow don't start CI: close and reopen it to run the build check, or merge it as admin.")
+          url=$(gh pr create --base develop --head "$BRANCH" --title "Community story: ${STORY_TITLE}" --body "$body")
+          echo "url=${url}" >> "$GITHUB_OUTPUT"
       - name: Upload images to the CDN
+        id: cdn
         env:
           CDN_DEPLOY_KEY: ${{ secrets.CDN_DEPLOY_KEY }}
           CDN_KNOWN_HOSTS: ${{ secrets.CDN_KNOWN_HOSTS }}
@@ -47,29 +79,26 @@ jobs:
             code=$(curl -s -o /dev/null -w '%{http_code}' "https://cdn.mentria.ai/stories/${{ steps.publish.outputs.story_id }}/$f")
             [ "$code" = "200" ] || { echo "CDN verify failed for $f ($code)"; exit 1; }
           done
-      - name: Commit
-        run: |
-          git config user.name "mentria-bot"
-          git config user.email "agent@mentria.ai"
-          git add src/_data/stories.json src/_data/feed.json
-          git commit -m "stories: ${{ steps.publish.outputs.title }} (#${{ github.event.issue.number }})"
-          git push origin main
-      - name: Deploy
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run static.yml --ref main
       - name: Close the issue
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ steps.pr.outputs.url }}
         run: |
-          gh issue comment ${{ github.event.issue.number }} --body "Published: https://mentria.ai/feed/story/${{ steps.publish.outputs.story_id }}/ (live once the deploy finishes, a few minutes)."
+          gh issue comment ${{ github.event.issue.number }} --body "Approved. The story is in ${PR_URL} and goes live with the next release at https://mentria.ai/feed/story/${{ steps.publish.outputs.story_id }}/"
           gh issue edit ${{ github.event.issue.number }} --add-label story-published
           gh issue close ${{ github.event.issue.number }}
       - name: Report failure
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          IMAGES_UPLOADED: ${{ steps.cdn.outcome == 'success' }}
         run: |
+          if [ -n "$BRANCH" ] && [ "$IMAGES_UPLOADED" != "true" ]; then
+            if [ -n "$PR_URL" ]; then gh pr close "$PR_URL" --comment "Publishing failed, see #${{ github.event.issue.number }}." || true; fi
+            git push origin --delete "$BRANCH" || true
+          fi
           gh issue comment ${{ github.event.issue.number }} --body "Publishing failed — see the workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Fix the issue body (image count must match the slides, story data must be valid JSON) and re-add the story-approved label."
           gh issue edit ${{ github.event.issue.number }} --remove-label story-approved
 

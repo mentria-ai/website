@@ -8,8 +8,11 @@ permalink: "{{ pair.locale.pathPrefix }}/feed/chapter/{{ pair.chapter.id }}/"
 eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
+  englishOnly: true
+  robots: "{% if not pair.locale.isDefault %}noindex, follow{% endif %}"
   title: "{{ pair.chapter.title }} · Chapter {{ pair.chapter.order }}"
   description: "{{ pair.chapter.subtitle }}"
+  preloadImage: "{% set s = pair.chapter.slides[0] %}{% if s.image and s.image_status != 'pending' %}{{ s.image }}{% endif %}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 
@@ -17,7 +20,6 @@ eleventyComputed:
      id="deckRoot"
      style="view-transition-name: deck-{{ pair.chapter.id }}"
      data-chapter-id="{{ pair.chapter.id }}"
-     data-chapter-title="{{ pair.chapter.title }}"
      data-slide-count="{{ pair.chapter.slides.length }}">
   <h1 class="sr-only">{{ pair.chapter.subtitle | tloc(pair.locale.code) }}</h1>
 
@@ -56,26 +58,26 @@ eleventyComputed:
       <span class="deck__placeholder-tag">{{ slide.story_type }}</span>
     </div>
     {% else %}
-    <img class="deck__slide-img" src="{{ slide.image }}" alt="{{ slide.caption | tloc(pair.locale.code) }}" loading="lazy">
+    <img class="deck__slide-img" src="{{ slide.image }}" onerror="this.classList.add('is-broken')" alt="{{ slide.caption | tloc(pair.locale.code) | striptags }}" loading="{{ 'eager' if loop.first else 'lazy' }}"{% if loop.first %} fetchpriority="high"{% endif %}>
     {% endif %}
 
     <div class="deck__slide-overlay">
       <p class="deck__caption">{{ slide.caption | tloc(pair.locale.code) }}</p>
 
       {% if slide.long_press %}
-      <div class="deck__body">{{ slide.long_press | tloc(pair.locale.code) | safe }}</div>
+      <div class="deck__body">{{ slide.long_press | tloc(pair.locale.code) | emph | safe }}</div>
       {% endif %}
 
       {% if slide.actions.length %}
       <div class="deck__actions">
         {% for action in slide.actions %}
           {% if action.type == "open_url" %}
-          <a class="deck__action deck__action--link" href="{{ action.url }}" target="_blank" rel="noopener">
+          <a class="deck__action deck__action--link" href="{{ (action.url | localeUrl(pair.locale.code)) if (action.url | startsWith('/')) else action.url }}" target="_blank" rel="noopener">
             {{ action.label }} →
           </a>
           {% elif action.type == "goto_chapter" %}
           {%- if action.to | chapterExists %}
-          <a class="deck__action deck__action--next" href="/feed/chapter/{{ action.to }}/">
+          <a class="deck__action deck__action--next" href="{{ pair.locale.pathPrefix }}/feed/chapter/{{ action.to }}/">
             {{ action.label }}
           </a>
           {%- else %}
@@ -83,10 +85,6 @@ eleventyComputed:
           {%- endif %}
           {% elif action.type == "goto_slide" %}
           <button class="deck__action" data-action="goto_slide" data-target="{{ action.to }}">
-            {{ action.label }}
-          </button>
-          {% elif action.type == "share" %}
-          <button class="deck__action deck__action--share" data-action="share">
             {{ action.label }}
           </button>
           {% endif %}
@@ -98,12 +96,13 @@ eleventyComputed:
   {% endfor %}
 
   <div class="deck__hint" id="deckHint">
-    <span>{{ "feed_deck.hint_tap" | t }}</span><span>{{ "feed_deck.hint_depth" | t }}</span><span>{{ "feed_deck.hint_exit" | t }}</span>
+    <span class="deck__hint-touch">{{ "feed_deck.hint_tap" | t }}</span><span class="deck__hint-touch">{{ "feed_deck.hint_depth" | t }}</span><span class="deck__hint-touch">{{ "feed_deck.hint_exit" | t }}</span><span class="deck__hint-keys">{{ "feed_deck.hint_keys_next" | t }}</span><span class="deck__hint-keys">{{ "feed_deck.hint_keys_depth" | t }}</span><span class="deck__hint-keys">{{ "feed_deck.hint_keys_exit" | t }}</span>
   </div>
   <div class="sr-only" id="deckLive" role="status" aria-live="polite"></div>
 
 {% if devMode %}{% include "dev-feedback.njk" %}{% endif %}
 </div>
 
+{% set schemaDeck = pair.chapter %}{% include "deck-schema.njk" %}
 <script src="/assets/js/share-card.js?v={{ buildHash }}" defer></script>
 <script src="/assets/js/feed-deck.js?v={{ buildHash }}" defer></script>

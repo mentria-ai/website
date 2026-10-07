@@ -9,9 +9,10 @@ eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.exif.title' | t }}"
   description: "{{ 'tools.exif.lede' | t }}"
+localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">exif</span></p>
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">exif</span></p>
   <h1>{{ "tools.exif.title" | t }}</h1>
   <p>{{ "tools.exif.lede" | t }}</p>
   {% include "tldr.njk" %}
@@ -32,9 +33,10 @@ eleventyComputed:
       {{ "tool.exif.btn_browse" | t }}
       <input type="file" id="ex-file" accept="image/*" hidden>
     </label>
+    <p class="ex__note" id="ex-drop-note" role="alert" hidden></p>
   </div>
 
-  <div class="ex__report" id="ex-report" hidden>
+  <div class="ex__report" id="ex-report" tabindex="-1" hidden>
     <div class="ex__head">
       <img class="ex__thumb" id="ex-thumb" alt="">
       <dl class="ex__facts" id="ex-facts"></dl>
@@ -71,6 +73,7 @@ eleventyComputed:
     <div class="ex__controls">
       <button type="button" class="m-btn m-btn--primary m-btn--pill" id="ex-strip" hidden>{{ "tool.exif.btn_strip" | t }}</button>
       <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-share" hidden>{{ "common.share" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-send" hidden>{{ "common.send_to" | t }}</button>
       <button type="button" class="m-btn m-btn--ghost m-btn--pill" id="ex-again">{{ "tool.exif.btn_another" | t }}</button>
     </div>
 
@@ -81,6 +84,7 @@ eleventyComputed:
 {% include "terminal-frame-close.njk" %}
 {% include "tool-schema.njk" %}
 
+<script src="/assets/js/mentria-meta-strip.js?v={{ buildHash }}"></script>
 <script>
 (() => {
   const COPY = {
@@ -99,12 +103,15 @@ eleventyComputed:
     fieldCoords:   {{ ("tool.exif.field_coords"    | t) | dump | safe }},
     fieldAltitude: {{ ("tool.exif.field_altitude"  | t) | dump | safe }},
     segExif:       {{ ("tool.exif.seg_exif"        | t) | dump | safe }},
+    segOrientation: {{ ("tool.exif.seg_orientation" | t) | dump | safe }},
     segXmp:        {{ ("tool.exif.seg_xmp"         | t) | dump | safe }},
     segIptc:       {{ ("tool.exif.seg_iptc"        | t) | dump | safe }},
     segIcc:        {{ ("tool.exif.seg_icc"         | t) | dump | safe }},
     segComment:    {{ ("tool.exif.seg_comment"     | t) | dump | safe }},
     segText:       {{ ("tool.exif.seg_text"        | t) | dump | safe }},
     segTime:       {{ ("tool.exif.seg_time"        | t) | dump | safe }},
+    segOther:      {{ ("tool.exif.seg_other"       | t) | dump | safe }},
+    segTrailer:    {{ ("tool.exif.seg_trailer"     | t) | dump | safe }},
     embExif:       {{ ("tool.exif.emb_exif"        | t) | dump | safe }},
     embXmp:        {{ ("tool.exif.emb_xmp"         | t) | dump | safe }},
     embIptc:       {{ ("tool.exif.emb_iptc"        | t) | dump | safe }},
@@ -118,6 +125,19 @@ eleventyComputed:
     embMakernote:  {{ ("tool.exif.emb_makernote"   | t) | dump | safe }},
     embValues:     {{ ("tool.exif.emb_values"      | t) | dump | safe }},
     embCompressed: {{ ("tool.exif.emb_compressed"  | t) | dump | safe }},
+    iccDescription: {{ ("tool.exif.icc_description" | t) | dump | safe }},
+    iccCopyright:  {{ ("tool.exif.icc_copyright"   | t) | dump | safe }},
+    iccVersion:    {{ ("tool.exif.icc_version"     | t) | dump | safe }},
+    iccDeviceClass: {{ ("tool.exif.icc_device_class" | t) | dump | safe }},
+    iccColorSpace: {{ ("tool.exif.icc_color_space" | t) | dump | safe }},
+    iccCreated:    {{ ("tool.exif.icc_created"     | t) | dump | safe }},
+    iccClassScnr:  {{ ("tool.exif.icc_class_scnr"  | t) | dump | safe }},
+    iccClassMntr:  {{ ("tool.exif.icc_class_mntr"  | t) | dump | safe }},
+    iccClassPrtr:  {{ ("tool.exif.icc_class_prtr"  | t) | dump | safe }},
+    iccClassLink:  {{ ("tool.exif.icc_class_link"  | t) | dump | safe }},
+    iccClassSpac:  {{ ("tool.exif.icc_class_spac"  | t) | dump | safe }},
+    iccClassAbst:  {{ ("tool.exif.icc_class_abst"  | t) | dump | safe }},
+    iccClassNmcl:  {{ ("tool.exif.icc_class_nmcl"  | t) | dump | safe }},
     removedLabel:  {{ ("tool.exif.removed_label"   | t) | dump | safe }},
     verifiedClean: {{ ("tool.exif.verified_clean"  | t) | dump | safe }},
     stripUnsupported: {{ ("tool.exif.strip_unsupported" | t) | dump | safe }},
@@ -145,14 +165,18 @@ eleventyComputed:
   const iccNote   = $('ex-icc-note');
   const embeddedEl = $('ex-embedded');
   const noteEl    = $('ex-note');
+  const dropNoteEl = $('ex-drop-note');
   const stripBtn  = $('ex-strip');
   const shareBtn  = $('ex-share');
+  const sendBtn   = $('ex-send');
   const canShareClean = window.MentriaUI && MentriaUI.canShareFile && MentriaUI.canShareFile('img-clean.jpg', 'image/jpeg');
   const againBtn  = $('ex-again');
   const resultEl  = $('ex-result');
 
   let origBuf = null;
   let origName = '';
+  let origFile = null;
+  let sendClean = false;
   let origKind = '';
   let objUrl = null;
   let coordsText = '';
@@ -222,6 +246,13 @@ eleventyComputed:
       }
       return { ifd0, exif, gps, interop, ifd1, dv, base, le };
     } catch (_) { return null; }
+  }
+
+  function isOrientationOnly(tiff) {
+    if (!tiff) return false;
+    const keys = Object.keys(tiff.ifd0 || {});
+    if (keys.length !== 1 || Number(keys[0]) !== 0x0112) return false;
+    return !Object.keys(tiff.exif || {}).length && !Object.keys(tiff.gps || {}).length && !Object.keys(tiff.interop || {}).length && !Object.keys(tiff.ifd1 || {}).length;
   }
 
   function rat(v) {
@@ -310,39 +341,16 @@ eleventyComputed:
         else meta.segments.push({ kind: 'icc', bytes: len + 2, rawParts: [chunk] });
       } else if (marker === 0xFE) {
         meta.segments.push({ kind: 'comment', bytes: len + 2, raw: u8.subarray(dataOff, dataEnd) });
+      } else if (!MentriaMetaStrip.keepJpegSegment(u8, marker, dataOff)) {
+        meta.segments.push({ kind: 'other', bytes: len + 2 });
       }
       p += 2 + len;
     }
+    const end = MentriaMetaStrip.jpegEnd(u8, p);
+    if (end < u8.length) meta.segments.push({ kind: 'trailer', bytes: u8.length - end });
     meta.tiff = exifParsed;
     meta.exif = extractExifSummary(exifParsed);
     return meta;
-  }
-
-  function stripJpeg(buf) {
-    const u8 = new Uint8Array(buf);
-    const dv = new DataView(buf);
-    const parts = [u8.subarray(0, 2)];
-    const removed = new Set();
-    let p = 2;
-    while (p + 4 <= u8.length) {
-      if (u8[p] !== 0xFF) break;
-      const marker = u8[p + 1];
-      if (marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) { parts.push(u8.subarray(p, p + 2)); p += 2; continue; }
-      if (marker === 0xDA || marker === 0xD9) break;
-      const len = dv.getUint16(p + 2, false);
-      if (len < 2 || p + 2 + len > u8.length) break;
-      const dataOff = p + 4;
-      let drop = null;
-      if (marker === 0xE1 && matchBytes(u8, dataOff, 'Exif')) drop = 'exif';
-      else if (marker === 0xE1 && matchBytes(u8, dataOff, 'http://ns.adobe.com/xap/1.0/')) drop = 'xmp';
-      else if (marker === 0xED && matchBytes(u8, dataOff, 'Photoshop 3.0')) drop = 'iptc';
-      else if (marker === 0xFE) drop = 'comment';
-      if (drop) removed.add(drop);
-      else parts.push(u8.subarray(p, p + 2 + len));
-      p += 2 + len;
-    }
-    parts.push(u8.subarray(p));
-    return { blob: new Blob(parts, { type: 'image/jpeg' }), removed: Array.from(removed) };
   }
 
   function parsePng(buf) {
@@ -374,25 +382,6 @@ eleventyComputed:
     return meta;
   }
 
-  function stripPng(buf) {
-    const u8 = new Uint8Array(buf);
-    const dv = new DataView(buf);
-    const parts = [u8.subarray(0, 8)];
-    const removed = new Set();
-    const DROP = { tEXt: 'text', zTXt: 'text', iTXt: 'text', eXIf: 'exif', tIME: 'time' };
-    let p = 8;
-    while (p + 8 <= u8.length) {
-      const len = dv.getUint32(p, false);
-      const type = String.fromCharCode(u8[p + 4], u8[p + 5], u8[p + 6], u8[p + 7]);
-      if (p + 12 + len > u8.length) break;
-      if (DROP[type]) removed.add(DROP[type]);
-      else parts.push(u8.subarray(p, p + 12 + len));
-      if (type === 'IEND') { p += 12 + len; break; }
-      p += 12 + len;
-    }
-    return { blob: new Blob(parts, { type: 'image/png' }), removed: Array.from(removed) };
-  }
-
   function parseWebp(buf) {
     const u8 = new Uint8Array(buf);
     const dv = new DataView(buf);
@@ -420,39 +409,10 @@ eleventyComputed:
     return meta;
   }
 
-  function stripWebp(buf) {
-    const u8 = new Uint8Array(buf);
-    const dv = new DataView(buf);
-    const parts = [];
-    const removed = new Set();
-    let p = 12;
-    while (p + 8 <= u8.length) {
-      const fourcc = String.fromCharCode(u8[p], u8[p + 1], u8[p + 2], u8[p + 3]);
-      const len = dv.getUint32(p + 4, true);
-      if (p + 8 + len > u8.length) break;
-      const total = 8 + len + (len % 2);
-      if (fourcc === 'EXIF') removed.add('exif');
-      else if (fourcc === 'XMP ') removed.add('xmp');
-      else {
-        const chunk = new Uint8Array(u8.subarray(p, p + total));
-        if (fourcc === 'VP8X' && chunk.length >= 9) chunk[8] = chunk[8] & 0xF3;
-        parts.push(chunk);
-      }
-      p += total;
-    }
-    let bodyLen = 4;
-    for (const c of parts) bodyLen += c.length;
-    const header = new Uint8Array(12);
-    header.set([0x52, 0x49, 0x46, 0x46], 0);
-    new DataView(header.buffer).setUint32(4, bodyLen, true);
-    header.set([0x57, 0x45, 0x42, 0x50], 8);
-    return { blob: new Blob([header, ...parts], { type: 'image/webp' }), removed: Array.from(removed) };
-  }
-
   const KINDS = {
-    jpeg: { parse: parseJpeg, strip: stripJpeg, ext: 'jpg' },
-    png:  { parse: parsePng,  strip: stripPng,  ext: 'png' },
-    webp: { parse: parseWebp, strip: stripWebp, ext: 'webp' }
+    jpeg: { parse: parseJpeg, strip: (buf) => MentriaMetaStrip.strip(buf, 'jpeg'), ext: 'jpg' },
+    png:  { parse: parsePng,  strip: (buf) => MentriaMetaStrip.strip(buf, 'png'),  ext: 'png' },
+    webp: { parse: parseWebp, strip: (buf) => MentriaMetaStrip.strip(buf, 'webp'), ext: 'webp' }
   };
 
   function sniffKind(u8) {
@@ -485,7 +445,7 @@ eleventyComputed:
     interop: { 0x0001: 'InteroperabilityIndex', 0x0002: 'InteroperabilityVersion' }
   };
   const IPTC_NAMES = { '1:90': 'CodedCharacterSet', '2:0': 'RecordVersion', '2:5': 'ObjectName', '2:7': 'EditStatus', '2:10': 'Urgency', '2:15': 'Category', '2:20': 'SupplementalCategories', '2:25': 'Keywords', '2:40': 'SpecialInstructions', '2:55': 'DateCreated', '2:60': 'TimeCreated', '2:62': 'DigitalCreationDate', '2:63': 'DigitalCreationTime', '2:65': 'OriginatingProgram', '2:70': 'ProgramVersion', '2:80': 'By-line', '2:85': 'By-lineTitle', '2:90': 'City', '2:92': 'Sub-location', '2:95': 'Province-State', '2:100': 'Country-PrimaryLocationCode', '2:101': 'Country-PrimaryLocationName', '2:103': 'OriginalTransmissionReference', '2:105': 'Headline', '2:110': 'Credit', '2:115': 'Source', '2:116': 'CopyrightNotice', '2:118': 'Contact', '2:120': 'Caption-Abstract', '2:122': 'Writer-Editor', '2:135': 'LanguageIdentifier' };
-  const ICC_CLASS = { scnr: 'Input (scanner/camera)', mntr: 'Display', prtr: 'Output (printer)', link: 'Device link', spac: 'Color space', abst: 'Abstract', nmcl: 'Named color' };
+  const ICC_CLASS = { scnr: COPY.iccClassScnr, mntr: COPY.iccClassMntr, prtr: COPY.iccClassPrtr, link: COPY.iccClassLink, spac: COPY.iccClassSpac, abst: COPY.iccClassAbst, nmcl: COPY.iccClassNmcl };
 
   const utf8 = new TextDecoder('utf-8');
   const latin1 = new TextDecoder('latin1');
@@ -662,18 +622,18 @@ eleventyComputed:
       const off = dv.getUint32(e + 4, false), size = dv.getUint32(e + 8, false);
       if (off + size <= bytes.length) tags[sig(e)] = { off, size };
     }
-    if (tags.desc) { try { const d = iccString(bytes, tags.desc.off, tags.desc.size); if (d) rows.push(['Description', d]); } catch (_) {} }
-    if (tags.cprt) { try { const c = iccString(bytes, tags.cprt.off, tags.cprt.size); if (c) rows.push(['Copyright', c]); } catch (_) {} }
-    rows.push(['Version', bytes[8] + '.' + (bytes[9] >> 4)]);
+    if (tags.desc) { try { const d = iccString(bytes, tags.desc.off, tags.desc.size); if (d) rows.push([COPY.iccDescription, d]); } catch (_) {} }
+    if (tags.cprt) { try { const c = iccString(bytes, tags.cprt.off, tags.cprt.size); if (c) rows.push([COPY.iccCopyright, c]); } catch (_) {} }
+    rows.push([COPY.iccVersion, bytes[8] + '.' + (bytes[9] >> 4)]);
     const cls = sig(12);
-    rows.push(['Device class', (ICC_CLASS[cls] || cls)]);
-    rows.push(['Color space', sig(16)]);
+    rows.push([COPY.iccDeviceClass, (ICC_CLASS[cls] || cls)]);
+    rows.push([COPY.iccColorSpace, sig(16)]);
     rows.push(['PCS', sig(20)]);
     const y = dv.getUint16(24, false), mo = dv.getUint16(26, false), d = dv.getUint16(28, false);
-    if (y) rows.push(['Created', y + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0')]);
+    if (y) rows.push([COPY.iccCreated, y + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0')]);
     const cmm = sig(4);
     if (cmm) rows.push(['CMM', cmm]);
-    rows.push(['Size', fmtBytes(dv.getUint32(0, false))]);
+    rows.push([COPY.fieldSize, fmtBytes(dv.getUint32(0, false))]);
     return rows;
   }
 
@@ -729,9 +689,14 @@ eleventyComputed:
   }
 
   let embToken = 0;
+  let embThumbUrl = null;
+  function revokeEmbThumb() {
+    if (embThumbUrl) { URL.revokeObjectURL(embThumbUrl); embThumbUrl = null; }
+  }
   async function renderEmbedded(meta) {
     const token = ++embToken;
     embeddedEl.innerHTML = '';
+    revokeEmbThumb();
     if (!meta) return;
     const blocks = [];
     const tiff = meta.tiff;
@@ -757,7 +722,8 @@ eleventyComputed:
         const img = document.createElement('img');
         img.className = 'ex__emb-thumb';
         img.alt = '';
-        img.src = URL.createObjectURL(tb);
+        embThumbUrl = URL.createObjectURL(tb);
+        img.src = embThumbUrl;
         img.onload = () => { if (img.naturalWidth) det.querySelector('summary').textContent = COPY.embThumb + ' · ' + img.naturalWidth + ' × ' + img.naturalHeight + ' · ' + fmtBytes(tb.size); };
         det.append(note, img);
         blocks.push(det);
@@ -791,7 +757,7 @@ eleventyComputed:
           if (z >= 0) bytes = await inflate(seg.pngIcc.subarray(z + 2));
         }
         const rows = decodeIcc(bytes);
-        if (rows.length) { const det = detailBlock(COPY.embIcc, rows[0][0] === 'Description' ? rows[0][1] : null); det.appendChild(rowsToDl(rows)); blocks.push(det); }
+        if (rows.length) { const det = detailBlock(COPY.embIcc, rows[0][0] === COPY.iccDescription ? rows[0][1] : null); det.appendChild(rowsToDl(rows)); blocks.push(det); }
       } else if (seg.kind === 'comment' && seg.raw) {
         const text = utf8.decode(seg.raw).replace(/\0+$/, '').trim();
         if (text) { const det = detailBlock(COPY.embComment, fmtBytes(seg.raw.length)); const pre = document.createElement('pre'); pre.className = 'ex__emb-pre'; pre.textContent = text.slice(0, 5000); det.appendChild(pre); blocks.push(det); }
@@ -807,7 +773,7 @@ eleventyComputed:
     blocks.forEach(b => embeddedEl.appendChild(b));
   }
 
-  const SEG_LABELS = { exif: 'segExif', xmp: 'segXmp', iptc: 'segIptc', icc: 'segIcc', comment: 'segComment', text: 'segText', time: 'segTime' };
+  const SEG_LABELS = { exif: 'segExif', xmp: 'segXmp', iptc: 'segIptc', icc: 'segIcc', comment: 'segComment', text: 'segText', time: 'segTime', other: 'segOther', trailer: 'segTrailer' };
 
   function renderReport(meta, file) {
     factsEl.innerHTML = '';
@@ -845,11 +811,13 @@ eleventyComputed:
 
     badgesEl.innerHTML = '';
     const segs = (meta && meta.segments) || [];
+    const orientOnly = isOrientationOnly(meta && meta.tiff);
+    const kept = (s) => s.kind === 'icc' || (s.kind === 'exif' && orientOnly);
     let hasIcc = false;
     for (const s of segs) {
       const b = document.createElement('span');
-      b.className = 'ex__badge' + (s.kind === 'icc' ? ' ex__badge--kept' : '');
-      b.textContent = COPY[SEG_LABELS[s.kind]] + ' · ' + fmtBytes(s.bytes);
+      b.className = 'ex__badge' + (kept(s) ? ' ex__badge--kept' : '');
+      b.textContent = (s.kind === 'exif' && orientOnly ? COPY.segOrientation : COPY[SEG_LABELS[s.kind]]) + ' · ' + fmtBytes(s.bytes);
       badgesEl.appendChild(b);
       if (s.kind === 'icc') hasIcc = true;
     }
@@ -857,11 +825,13 @@ eleventyComputed:
     iccNote.hidden = !hasIcc;
     renderEmbedded(meta);
 
-    const removable = segs.some(s => s.kind !== 'icc');
+    const removable = segs.some(s => !kept(s));
     const canStrip = !!KINDS[origKind];
     cleanEl.hidden = removable || !canStrip;
     stripBtn.hidden = !(canStrip && removable);
     shareBtn.hidden = !(canStrip && removable && canShareClean);
+    sendClean = canStrip && removable;
+    sendBtn.hidden = !(origFile && MentriaUI.sendTargets({ blob: origFile, name: origName }).length);
     noteEl.hidden = canStrip;
     if (!canStrip) { noteEl.textContent = COPY.stripUnsupported; noteEl.hidden = false; }
     resultEl.hidden = true;
@@ -884,6 +854,7 @@ eleventyComputed:
     origBuf = buf;
     origName = file.name || 'image';
     origKind = kind;
+    origFile = file;
     if (objUrl) URL.revokeObjectURL(objUrl);
     objUrl = URL.createObjectURL(file);
     thumbEl.src = objUrl;
@@ -896,33 +867,41 @@ eleventyComputed:
       }
     };
     renderReport(meta, file);
+    const had = document.activeElement;
     dropEl.hidden = true;
     reportEl.hidden = false;
+    if (!had || had === document.body || dropEl.contains(had)) { try { reportEl.focus({ preventScroll: true }); } catch (_) {} }
   }
 
   function showError() {
-    noteEl.textContent = COPY.errRead;
-    noteEl.hidden = false;
-    setTimeout(() => { noteEl.hidden = true; }, 4000);
+    const el = reportEl.hidden ? dropNoteEl : noteEl;
+    el.textContent = COPY.errRead;
+    el.hidden = false;
+    setTimeout(() => { el.hidden = true; }, 6000);
   }
 
   function reset() {
+    const had = document.activeElement;
     dropEl.hidden = false;
     reportEl.hidden = true;
+    if (!had || had === document.body || reportEl.contains(had)) { try { dropEl.focus({ preventScroll: true }); } catch (_) {} }
     resultEl.hidden = true;
     if (objUrl) { URL.revokeObjectURL(objUrl); objUrl = null; }
+    revokeEmbThumb();
     thumbEl.src = '';
     origBuf = null;
+    origFile = null;
     fileInput.value = '';
   }
 
   function stripCleanCopy() {
-    const { blob, removed } = KINDS[origKind].strip(origBuf);
+    const out = KINDS[origKind].strip(origBuf);
+    const { blob, removed } = out;
     const dot = origName.lastIndexOf('.');
     const base = dot > 0 ? origName.slice(0, dot) : origName;
     blob.arrayBuffer().then(cleanBuf => {
       const recheck = KINDS[origKind].parse(cleanBuf);
-      const leftover = recheck && recheck.segments.some(s => s.kind !== 'icc');
+      const leftover = recheck && recheck.segments.some(s => s.kind !== 'icc' && !(s.kind === 'exif' && isOrientationOnly(recheck.tiff)));
       const names = removed.map(k => COPY[SEG_LABELS[k]]).join(', ');
       let line = COPY.removedLabel + ': ' + names + ' · ' + fmtBytes(origBuf.byteLength) + ' → ' + fmtBytes(blob.size);
       if (!leftover) line += ' · ' + COPY.verifiedClean;
@@ -931,6 +910,16 @@ eleventyComputed:
     });
     return { blob, name: base + '-clean.' + KINDS[origKind].ext };
   }
+
+  function sendPayload() {
+    if (!origFile) return null;
+    if (!sendClean || !origBuf || !KINDS[origKind]) return { blob: origFile, name: origName };
+    const { blob } = KINDS[origKind].strip(origBuf);
+    const dot = origName.lastIndexOf('.');
+    return { blob, name: (dot > 0 ? origName.slice(0, dot) : origName) + '-clean.' + KINDS[origKind].ext };
+  }
+
+  MentriaUI.sendMenu(sendBtn, sendPayload);
 
   stripBtn.addEventListener('click', () => {
     if (!origBuf || !KINDS[origKind]) return;
@@ -951,6 +940,7 @@ eleventyComputed:
     const f = e.target.files && e.target.files[0];
     if (f) inspect(f);
   });
+  if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(inspect);
   dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('is-over'); });
   dropEl.addEventListener('dragleave', () => dropEl.classList.remove('is-over'));
   dropEl.addEventListener('drop', e => {
@@ -961,6 +951,10 @@ eleventyComputed:
   });
   dropEl.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+  dropEl.addEventListener('click', e => {
+    if (e.target.closest('label, input, .ex__note')) return;
+    fileInput.click();
   });
   document.addEventListener('paste', e => {
     const items = e.clipboardData && e.clipboardData.items;

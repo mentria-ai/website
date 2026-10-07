@@ -11,21 +11,18 @@ eleventyComputed:
   title: "{{ pair.pack.title | tloc(pair.locale.code) }} · {{ 'learn.title' | t }}"
   description: "{{ pair.pack.title | tloc(pair.locale.code) }} · {{ pair.pack.subtitle | tloc(pair.locale.code) }}"
   socialImageOverride: "{{ pair.pack.cover }}"
-  robots: "noindex, follow"
+  preloadImage: "{% for c in pair.pack.cards %}{% if c.id == pair.pack.sections[0].cards[0] and c.image %}{{ c.image }}{% endif %}{% endfor %}"
+  robots: "{% if not pair.deckPath %}noindex, follow{% endif %}"
+  canonicalPath: "{{ pair.deckPath or '' }}"
 ---
 <link rel="stylesheet" href="/assets/css/feed-deck.css?v={{ buildHash }}">
 <link rel="stylesheet" href="/assets/css/pack.css?v={{ buildHash }}">
 
+<h1 class="sr-only">{{ pair.pack.title | tloc(pair.locale.code) }}</h1>
 <div class="deck deck--pack" id="packRoot" data-prefix="{{ pair.locale.pathPrefix }}" data-pack-id="{{ pair.pack.id }}">
-  <h1 class="sr-only">{{ pair.pack.title | tloc(pair.locale.code) }}</h1>
   <noscript><p class="pack-card pack-card--center">{{ "learn.no_js" | t }}</p></noscript>
 </div>
 
 <script type="application/json" id="pack-data">{{ (pair.pack | dump) | replace("</", "<\\/") | safe }}</script>
-{% include "learn-i18n.njk" %}
-<script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
-<script src="/assets/js/mentria-backdrop.js?v={{ buildHash }}"></script>
-<script src="/assets/js/mentria-packs.js?v={{ buildHash }}"></script>
-<script src="/assets/js/pack-cards.js?v={{ buildHash }}"></script>
-<script src="/assets/js/share-card.js?v={{ buildHash }}"></script>
-<script src="/assets/js/pack-player.js?v={{ buildHash }}" defer></script>
+{% if pair.next %}<script type="application/json" id="pack-next">{{ ({ id: pair.next.id, title: pair.next.title, cover: (pair.next.cover | coverThumb), cards: pair.next.cards, minutes: pair.next.minutes } | dump) | replace("</", "<\\/") | safe }}</script>{% endif %}
+{% include "pack-player-scripts.njk" %}

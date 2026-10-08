@@ -9,6 +9,7 @@
 .stream-hero__lede { margin: 0; font-size: 1.05rem; line-height: 1.5; color: rgba(255, 255, 255, 0.72); text-wrap: pretty; }
 .stream-hero__actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 0.5rem; }
 .stream-card--hero .stream-hero { position: relative; z-index: 2; }
+html.stream-pending .stream-hero { visibility: hidden; }
 .stream-hero__bg { z-index: 0; }
 .stream-hero__shade { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.62) 45%, rgba(0, 0, 0, 0.88) 100%); pointer-events: none; }
 .stream-hero__title--pack { font-size: clamp(1.35rem, 4.6vw, 1.9rem); line-height: 1.2; }

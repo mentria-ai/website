@@ -1,6 +1,6 @@
 /* ── Feed deck — fullscreen story-style chapter reader ─────────── */
 
-html.feed-layout body { overflow: hidden; }
+html.feed-layout body { overflow: hidden; min-height: 0; padding-bottom: 0; }
 
 .deck {
   position: fixed;

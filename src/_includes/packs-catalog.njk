@@ -1,0 +1,3 @@
+<script>
+  window.MENTRIA_PACKS = [{% for pack in packs %}{% if packsTiles %}{{ { id: pack.id, title: (pack.title | tloc(locale.code)), cover: pack.cover, thumb: (pack.cover | coverThumb), cards: pack.cards.length, minutes: pack.minutes, collection: pack.collection } | dump | safe }}{% else %}{{ { id: pack.id, title: (pack.title | tloc(locale.code)), cover: pack.cover, cards: pack.cards.length, minutes: pack.minutes, collection: pack.collection } | dump | safe }}{% endif %}{% if not loop.last %},{% endif %}{% endfor %}];
+</script>

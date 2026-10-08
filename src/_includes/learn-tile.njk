@@ -1,0 +1,10 @@
+<li class="learn-tile{% if tileExtra %} is-extra{% endif %}" data-pack-id="{{ pack.id }}" data-cards="{{ pack.cards.length }}">
+    <a class="learn-tile__link" href="{{ locale.pathPrefix }}/learn/{{ pack.id }}/">
+        {% if pack.cover %}<img class="learn-tile__cover" src="{{ pack.cover | coverThumb }}" data-full="{{ pack.cover }}" alt="" loading="lazy" decoding="async" onerror="if(this.dataset.full&&this.getAttribute('src')!==this.dataset.full){this.src=this.dataset.full}else{this.classList.add('is-broken')}">{% else %}<span class="learn-tile__cover learn-tile__cover--blank"></span>{% endif %}
+        <span class="learn-tile__body">
+            <span class="learn-tile__title">{{ pack.title | tloc(locale.code) }}</span>
+            <span class="learn-tile__meta">{{ (("learn.cards_n_one" if pack.cards.length == 1 else "learn.cards_n") | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</span>
+            <span class="learn-tile__progress" hidden><span class="learn-tile__progress-fill"></span></span>
+        </span>
+    </a>
+</li>

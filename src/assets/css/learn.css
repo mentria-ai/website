@@ -46,9 +46,10 @@
 .learn-search__none { margin-top: 1rem; }
 .learn-section-head .learn-shelf__all { margin-left: auto; }
 .learn-shelf__all[hidden] { display: none; }
-.learn-grid--row, .learn-shelf.is-row .learn-grid--native:not(.is-expanded) { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; gap: 12px; padding-bottom: 8px; scrollbar-width: thin; }
-.learn-grid--row > .learn-tile, .learn-shelf.is-row .learn-grid--native:not(.is-expanded) > .learn-tile { flex: 0 0 150px; scroll-snap-align: start; }
-.learn-shelf.is-row .learn-grid--native:not(.is-expanded) > .learn-tile.is-extra { display: none; }
+html:not(.learn-js) .learn-shelf__all { display: none; }
+.learn-grid--row, :where(.learn-js) .learn-shelf.is-row .learn-grid--native:not(.is-expanded) { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; gap: 12px; padding-bottom: 8px; scrollbar-width: thin; }
+.learn-grid--row > .learn-tile, :where(.learn-js) .learn-shelf.is-row .learn-grid--native:not(.is-expanded) > .learn-tile { flex: 0 0 150px; scroll-snap-align: start; }
+:where(.learn-js) .learn-shelf.is-row .learn-grid--native:not(.is-expanded) > .learn-tile.is-extra { display: none; }
 .learn-searching .learn-shelf.is-row .learn-grid--native { display: grid; overflow: visible; padding-bottom: 0; }
 .learn-searching .learn-shelf.is-row .learn-grid--native > .learn-tile { flex: none; }
 .learn-searching .learn-shelf.is-row .learn-grid--native > .learn-tile.is-extra { display: block; }

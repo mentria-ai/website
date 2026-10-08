@@ -1,8 +1,8 @@
 (function () {
   'use strict';
-  var P = window.MentriaPacks;
+  var P = window.MentriaPacks, LP = window.MentriaLearnProgress;
   var T = window.MENTRIA_LEARN_PAGE || {};
-  if (!P) return;
+  if (!P || !LP) return;
   var t = function (k, vars) {
     var s = T[k] || k;
     if (vars) Object.keys(vars).forEach(function (v) { s = s.split('{' + v + '}').join(String(vars[v])); });
@@ -33,22 +33,6 @@
     var small = document.createElement('small');
     small.textContent = detail;
     status.append(' ', document.createElement('br'), small);
-  }
-
-  function mark(li, seen, total) {
-    var done = !!total && seen >= total;
-    li.classList.toggle('is-done', done);
-    li.classList.toggle('is-started', seen > 0 && !done);
-    var text = done ? t('finished') : (seen ? t('progress_n', { n: Math.min(99, Math.round((seen / total) * 100)) }) : '');
-    var badge = li.querySelector('.learn-tile__badge');
-    if (!text) { if (badge) badge.remove(); return; }
-    if (!badge) {
-      badge = document.createElement('span');
-      badge.className = 'learn-tile__badge';
-      var link = li.querySelector('.learn-tile__link');
-      link.insertBefore(badge, link.firstChild);
-    }
-    badge.textContent = text;
   }
 
   function blankCover(img) {
@@ -83,7 +67,7 @@
       '</button>';
     var blank = li.querySelector('.learn-tile__cover--blank');
     if (blank && window.MentriaBackdrop) window.MentriaBackdrop.apply(blank, 'tile/' + row.id, { square: true });
-    if (sum) mark(li, sum.seen, sum.total);
+    if (sum) LP.mark(li, sum.seen, sum.total);
     li.querySelector('.learn-tile__share').addEventListener('click', function () {
       P.get(row.id).then(function (full) {
         if (!full || !full.pack) return;
@@ -167,52 +151,31 @@
     filter();
   }
 
-  function nativeProgress() {
-    var tiles = document.querySelectorAll('.learn-grid--native .learn-tile');
-    Array.prototype.forEach.call(tiles, function (li) {
-      var p = P.getProgress(li.dataset.packId);
-      var seen = P.doneCount(p);
-      if (!seen) return;
-      var total = +li.dataset.cards || 0;
-      var bar = li.querySelector('.learn-tile__progress');
-      if (!bar || !total) return;
-      bar.hidden = false;
-      bar.querySelector('.learn-tile__progress-fill').style.width = Math.min(100, Math.round((seen / total) * 100)) + '%';
-      mark(li, seen, total);
-    });
+  function summaryOf(row) {
+    try { return P.summary(row.pack || { id: row.id, cards: row.cardList || [] }, P.getProgress(row.id)); } catch (_) { return null; }
   }
-
+  function continueTile(row) {
+    var li = tile(row);
+    Array.prototype.forEach.call(li.querySelectorAll('.learn-tile__share, .learn-tile__remove'), function (b) { b.remove(); });
+    return li;
+  }
   function renderContinue() {
-    var box = document.getElementById('learn-continue');
-    var row = document.getElementById('learn-continue-list');
-    if (!box || !row) return;
-    var picks = [];
-    Array.prototype.forEach.call(document.querySelectorAll('.learn-grid--native .learn-tile.is-started, #learn-list .learn-tile.is-started'), function (li) {
-      picks.push({ last: P.getProgress(li.dataset.packId).last || 0, li: li });
-    });
-    picks.sort(function (a, b) { return b.last - a.last; });
-    row.innerHTML = '';
-    picks.slice(0, 10).forEach(function (x) {
-      var c = x.li.cloneNode(true);
-      c.classList.remove('is-extra', 'is-miss');
-      Array.prototype.forEach.call(c.querySelectorAll('.learn-tile__share, .learn-tile__remove'), function (b) { b.remove(); });
-      row.appendChild(c);
-    });
-    box.hidden = !picks.length;
+    LP.renderContinue((shelf || []).map(function (row) {
+      var sum = summaryOf(row);
+      if (!sum || !sum.seen || sum.seen >= sum.total) return null;
+      return { id: row.id, sig: 'mine:' + (row.updated || row.added || 0), last: P.getProgress(row.id).last || 0, seen: sum.seen, total: sum.total, make: function () { return continueTile(row); } };
+    }).filter(Boolean));
   }
 
-  var ROW = 12;
   function shelves() {
-    Array.prototype.forEach.call(document.querySelectorAll('.learn-shelf--native'), function (sec) {
+    Array.prototype.forEach.call(document.querySelectorAll('.learn-shelf--native.is-row'), function (sec) {
       var grid = sec.querySelector('.learn-grid--native');
       var btn = sec.querySelector('.learn-shelf__all');
-      var tiles = grid ? grid.querySelectorAll('.learn-tile') : [];
-      if (!btn || tiles.length <= ROW) return;
-      sec.classList.add('is-row');
-      Array.prototype.forEach.call(tiles, function (li, i) { if (i >= ROW) li.classList.add('is-extra'); });
+      if (!grid || !btn) return;
+      var count = grid.querySelectorAll('.learn-tile').length;
       function label() {
         var open = grid.classList.contains('is-expanded');
-        btn.textContent = open ? t('show_less') : tn('see_all', tiles.length);
+        btn.textContent = open ? t('show_less') : tn('see_all', count);
         btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       }
       label();
@@ -374,10 +337,10 @@
   }
   window.addEventListener('pageshow', function (e) {
     if (!e.persisted) return;
-    nativeProgress();
+    LP.paintShelves();
     refresh().then(revealFocus, revealFocus);
   });
-  nativeProgress();
+  LP.paintShelves();
   shelves();
   refresh().then(function () { if (revealStatus) status.scrollIntoView({ block: 'center' }); });
 })();

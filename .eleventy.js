@@ -294,6 +294,10 @@ module.exports = function(eleventyConfig) {
     return String(value == null ? "" : value).indexOf(part) !== -1;
   });
 
+  eleventyConfig.addFilter("where", function (array, key, value) {
+    return Array.isArray(array) ? array.filter((item) => item && item[key] === value) : [];
+  });
+
   eleventyConfig.addFilter("head", function(array, n) {
     if (!Array.isArray(array)) return [];
     if (n < 0) {

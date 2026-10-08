@@ -24,69 +24,8 @@ localeReload: true
 </div>
 <p class="learn-empty learn-search__none" id="learn-none" role="status" hidden></p>
 
-<section class="learn-shelf learn-continue" id="learn-continue" aria-labelledby="learn-continue-h" hidden>
-    <div class="learn-section-head">
-        <h2 id="learn-continue-h">{{ "learn.continue" | t }}</h2>
-    </div>
-    <ul class="learn-grid learn-grid--row" id="learn-continue-list"></ul>
-</section>
-
-<section class="learn-mine" id="learn-mine" aria-labelledby="learn-mine-h">
-    <div class="learn-section-head">
-        <h2 id="learn-mine-h">{{ "learn.your_packs" | t }}</h2>
-        <button type="button" class="learn-btn learn-btn--primary" id="learn-import-toggle" aria-expanded="false" aria-controls="learn-import">{{ "learn.import" | t }}</button>
-    </div>
-    <div class="learn-import" id="learn-import" hidden>
-        <label class="learn-import__drop" id="learn-drop">
-            <input type="file" id="learn-file" accept=".json,application/json" hidden>
-            <span class="learn-import__drop-text">{{ "learn.import_file" | t }}</span>
-            <span class="learn-import__drop-hint">{{ "learn.drop_hint" | t }}</span>
-        </label>
-        <div class="learn-import__row">
-            <input type="url" class="learn-input" id="learn-url" placeholder="{{ 'learn.url_placeholder' | t }}" autocomplete="off" spellcheck="false">
-            <button type="button" class="learn-btn" id="learn-url-go">{{ "learn.import_url" | t }}</button>
-        </div>
-        <details class="learn-import__paste">
-            <summary>{{ "learn.import_paste" | t }}</summary>
-            <textarea class="learn-input learn-textarea" id="learn-paste" rows="6" placeholder="{{ 'learn.paste_placeholder' | t }}" spellcheck="false"></textarea>
-            <button type="button" class="learn-btn" id="learn-paste-go">{{ "learn.import" | t }}</button>
-        </details>
-        <p class="learn-import__hint">{{ "learn.import_hint" | t }} <button type="button" class="learn-link" id="learn-example">{{ "learn.try_example" | t }}</button> · <a class="learn-link" href="{{ locale.pathPrefix }}/learn/format/">{{ "learn.format_link" | t }}</a></p>
-        <p class="learn-import__status" id="learn-status" role="status" aria-live="polite"></p>
-    </div>
-    <p class="learn-empty" id="learn-empty">{{ "learn.empty_packs" | t }}</p>
-    <ul class="learn-grid" id="learn-list" hidden></ul>
-    <noscript><p class="learn-empty">{{ "learn.no_js" | t }}</p></noscript>
-</section>
-
-{% set groups = [
-  { key: "source", title: ("learn.source_shelf" | t), lede: ("learn.source_lede" | t) },
-  { key: "deepcuts", title: ("learn.deepcuts_shelf" | t), lede: ("learn.deepcuts_lede" | t) }
-] %}
-{% for g in groups %}
-<section class="learn-shelf learn-shelf--native" aria-labelledby="learn-shelf-{{ g.key }}">
-    <div class="learn-section-head">
-        <h2 id="learn-shelf-{{ g.key }}">{{ g.title }}</h2>
-        <button type="button" class="learn-btn learn-shelf__all" hidden></button>
-        <p class="learn-section-lede">{{ g.lede }}</p>
-    </div>
-    <ul class="learn-grid learn-grid--native" data-collection="{{ g.key }}">
-        {% for pack in packs %}{% if pack.collection == g.key %}
-        <li class="learn-tile" data-pack-id="{{ pack.id }}" data-cards="{{ pack.cards.length }}">
-            <a class="learn-tile__link" href="{{ locale.pathPrefix }}/learn/{{ pack.id }}/">
-                {% if pack.cover %}<img class="learn-tile__cover" src="{{ pack.cover | coverThumb }}" data-full="{{ pack.cover }}" alt="" loading="lazy" decoding="async" onerror="if(this.dataset.full&&this.getAttribute('src')!==this.dataset.full){this.src=this.dataset.full}else{this.classList.add('is-broken')}">{% else %}<span class="learn-tile__cover learn-tile__cover--blank"></span>{% endif %}
-                <span class="learn-tile__body">
-                    <span class="learn-tile__title">{{ pack.title | tloc(locale.code) }}</span>
-                    <span class="learn-tile__meta">{{ (("learn.cards_n_one" if pack.cards.length == 1 else "learn.cards_n") | t) | replace("{n}", pack.cards.length) }} · {{ ("learn.minutes_n" | t) | replace("{n}", pack.minutes) }}</span>
-                    <span class="learn-tile__progress" hidden><span class="learn-tile__progress-fill"></span></span>
-                </span>
-            </a>
-        </li>
-        {% endif %}{% endfor %}
-    </ul>
-</section>
-{% endfor %}
-
+{% set packsTiles = true %}
+{% include "packs-catalog.njk" %}
 <script>
   window.MENTRIA_LEARN_PAGE = {
     prefix: {{ locale.pathPrefix | dump | safe }},
@@ -134,6 +73,65 @@ localeReload: true
     show_less: {{ ("learn.show_less" | t) | dump | safe }}
   };
 </script>
-<script src="/assets/js/mentria-backdrop.js?v={{ buildHash }}"></script>
 <script src="/assets/js/mentria-packs.js?v={{ buildHash }}"></script>
+<script src="/assets/js/learn-progress.js?v={{ buildHash }}"></script>
+
+{% set pack = packs[0] %}{% set tileExtra = false %}
+<template id="learn-tile-tpl">{% include "learn-tile.njk" %}</template>
+<section class="learn-shelf learn-continue" id="learn-continue" aria-labelledby="learn-continue-h" hidden>
+    <div class="learn-section-head">
+        <h2 id="learn-continue-h">{{ "learn.continue" | t }}</h2>
+    </div>
+    <ul class="learn-grid learn-grid--row" id="learn-continue-list"></ul>
+</section>
+<script>if (window.MentriaLearnProgress) window.MentriaLearnProgress.boot();</script>
+
+<section class="learn-mine" id="learn-mine" aria-labelledby="learn-mine-h">
+    <div class="learn-section-head">
+        <h2 id="learn-mine-h">{{ "learn.your_packs" | t }}</h2>
+        <button type="button" class="learn-btn learn-btn--primary" id="learn-import-toggle" aria-expanded="false" aria-controls="learn-import">{{ "learn.import" | t }}</button>
+    </div>
+    <div class="learn-import" id="learn-import" hidden>
+        <label class="learn-import__drop" id="learn-drop">
+            <input type="file" id="learn-file" accept=".json,application/json" hidden>
+            <span class="learn-import__drop-text">{{ "learn.import_file" | t }}</span>
+            <span class="learn-import__drop-hint">{{ "learn.drop_hint" | t }}</span>
+        </label>
+        <div class="learn-import__row">
+            <input type="url" class="learn-input" id="learn-url" placeholder="{{ 'learn.url_placeholder' | t }}" autocomplete="off" spellcheck="false">
+            <button type="button" class="learn-btn" id="learn-url-go">{{ "learn.import_url" | t }}</button>
+        </div>
+        <details class="learn-import__paste">
+            <summary>{{ "learn.import_paste" | t }}</summary>
+            <textarea class="learn-input learn-textarea" id="learn-paste" rows="6" placeholder="{{ 'learn.paste_placeholder' | t }}" spellcheck="false"></textarea>
+            <button type="button" class="learn-btn" id="learn-paste-go">{{ "learn.import" | t }}</button>
+        </details>
+        <p class="learn-import__hint">{{ "learn.import_hint" | t }} <button type="button" class="learn-link" id="learn-example">{{ "learn.try_example" | t }}</button> · <a class="learn-link" href="{{ locale.pathPrefix }}/learn/format/">{{ "learn.format_link" | t }}</a></p>
+        <p class="learn-import__status" id="learn-status" role="status" aria-live="polite"></p>
+    </div>
+    <p class="learn-empty" id="learn-empty">{{ "learn.empty_packs" | t }}</p>
+    <ul class="learn-grid" id="learn-list" hidden></ul>
+    <noscript><p class="learn-empty">{{ "learn.no_js" | t }}</p></noscript>
+</section>
+
+{% set groups = [
+  { key: "source", title: ("learn.source_shelf" | t), lede: ("learn.source_lede" | t) },
+  { key: "deepcuts", title: ("learn.deepcuts_shelf" | t), lede: ("learn.deepcuts_lede" | t) }
+] %}
+{% for g in groups %}
+{% set shelfPacks = packs | where("collection", g.key) %}
+{% set rowMode = shelfPacks.length > 12 %}
+<section class="learn-shelf learn-shelf--native{% if rowMode %} is-row{% endif %}" aria-labelledby="learn-shelf-{{ g.key }}">
+    <div class="learn-section-head">
+        <h2 id="learn-shelf-{{ g.key }}">{{ g.title }}</h2>
+        <button type="button" class="learn-btn learn-shelf__all" aria-expanded="false"{% if not rowMode %} hidden{% endif %}>{% if rowMode %}{{ ("learn.see_all" | t) | replace("{n}", shelfPacks.length) }}{% endif %}</button>
+        <p class="learn-section-lede">{{ g.lede }}</p>
+    </div>
+    <ul class="learn-grid learn-grid--native" data-collection="{{ g.key }}">
+        {% for pack in shelfPacks %}{% set tileExtra = rowMode and loop.index0 >= 12 %}{% include "learn-tile.njk" %}{% endfor %}
+    </ul>
+</section>
+{% endfor %}
+
+<script src="/assets/js/mentria-backdrop.js?v={{ buildHash }}"></script>
 <script src="/assets/js/learn-library.js?v={{ buildHash }}" defer></script>

@@ -1,6 +1,6 @@
 .scan { position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden; color: var(--term-fg); background: var(--term-bg); font-family: var(--font-body, system-ui, sans-serif); -webkit-tap-highlight-color: transparent; }
 .scan [hidden], .sc-sheet [hidden] { display: none !important; }
-.scan button, .sc-sheet button { font: inherit; color: inherit; }
+:where(.scan, .sc-sheet) button { font: inherit; color: inherit; }
 .scan :focus-visible, .sc-sheet :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sc-top { flex: none; display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px; padding-top: calc(8px + env(safe-area-inset-top, 0px)); border-bottom: 1px solid var(--term-border); background: var(--term-bg-raised); }
 .sc-top__title { flex: 1; min-width: 0; margin: 0; font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--term-fg-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

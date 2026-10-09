@@ -393,7 +393,8 @@
     "coin-flip": {
       "title": "Coin Flip",
       "lede": "Heads or tails — flip a coin instantly. Run a best-of series for tiebreakers. Works offline.",
-      "tldr": "A no-frills coin flip backed by the browser's secure RNG (Web Crypto). Heads or tails is decided locally; nothing is logged or sent to a server. Keeps a running history per session. Useful for quick decisions, fair starts, or settling tabletop arguments — instant on every device."
+      "tldr": "A no-frills coin flip backed by the browser's secure RNG (Web Crypto). Heads or tails is decided locally; nothing is logged or sent to a server. Keeps a running history per session. Useful for quick decisions, fair starts, or settling tabletop arguments — instant on every device.",
+      "seo_title": "Coin Flip Online: Heads or Tails"
     },
     "color-picker": {
       "title": "Color Picker",
@@ -428,7 +429,8 @@
     "minesweeper": {
       "title": "Minesweeper",
       "lede": "Classic logic puzzle in terminal dress. Click to dig, right-click (or F-mode) to flag. Numbers count adjacent mines. Don't pop the pink ones.",
-      "tldr": "Classic Minesweeper rebuilt with a synthwave terminal aesthetic. Difficulty presets (easy, medium, hard, extreme), keyboard and touch controls, persistent best times via localStorage. No installs, no signup, no analytics; the game logic and timer all run locally in your browser. Works offline once the page loads."
+      "tldr": "Classic Minesweeper rebuilt with a synthwave terminal aesthetic. Difficulty presets (easy, medium, hard, extreme), keyboard and touch controls, persistent best times via localStorage. No installs, no signup, no analytics; the game logic and timer all run locally in your browser. Works offline once the page loads.",
+      "seo_title": "Minesweeper Online: Easy to Extreme"
     },
     "quick-notes": {
       "title": "Quick Notes",

@@ -393,7 +393,8 @@
     "coin-flip": {
       "title": "Lanzar moneda",
       "lede": "Cara o cruz — lanza una moneda al instante. Ejecuta una serie al mejor de N para desempates. Funciona sin conexión.",
-      "tldr": "Un cara o cruz simple respaldado por el RNG seguro del navegador (Web Crypto). El resultado se decide localmente; nada se registra ni se envía a un servidor. Mantiene un historial por sesión. Útil para decisiones rápidas, sorteos justos o resolver discusiones de mesa — instantáneo en cualquier dispositivo."
+      "tldr": "Un cara o cruz simple respaldado por el RNG seguro del navegador (Web Crypto). El resultado se decide localmente; nada se registra ni se envía a un servidor. Mantiene un historial por sesión. Útil para decisiones rápidas, sorteos justos o resolver discusiones de mesa — instantáneo en cualquier dispositivo.",
+      "seo_title": "Lanzar una moneda online: cara o cruz"
     },
     "color-picker": {
       "title": "Selector de color",
@@ -428,7 +429,8 @@
     "minesweeper": {
       "title": "Buscaminas",
       "lede": "Clásico rompecabezas lógico con vestimenta de terminal. Haz clic para cavar, clic derecho (o modo F) para marcar bandera. Los números cuentan minas adyacentes. No pulses los rosas.",
-      "tldr": "El clásico Buscaminas reconstruido con estética synthwave/terminal. Niveles preestablecidos (fácil, medio, difícil, extremo), controles de teclado y táctil, mejores tiempos persistentes en localStorage. Sin instalación, sin registro, sin analítica; la lógica del juego y el cronómetro se ejecutan localmente en tu navegador. Funciona sin conexión una vez cargada la página."
+      "tldr": "El clásico Buscaminas reconstruido con estética synthwave/terminal. Niveles preestablecidos (fácil, medio, difícil, extremo), controles de teclado y táctil, mejores tiempos persistentes en localStorage. Sin instalación, sin registro, sin analítica; la lógica del juego y el cronómetro se ejecutan localmente en tu navegador. Funciona sin conexión una vez cargada la página.",
+      "seo_title": "Buscaminas online: de fácil a extremo, con teclado"
     },
     "quick-notes": {
       "title": "Notas rápidas",

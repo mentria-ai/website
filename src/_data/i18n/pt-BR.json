@@ -393,7 +393,8 @@
     "coin-flip": {
       "title": "Cara ou coroa",
       "lede": "Cara ou coroa — jogue uma moeda instantaneamente. Faça uma série de melhor-de-N para desempates. Funciona offline.",
-      "tldr": "Cara ou coroa simples apoiado no RNG seguro do navegador (Web Crypto). O resultado é decidido localmente; nada é registrado nem enviado a servidor. Mantém histórico por sessão. Útil para decisões rápidas, sorteios justos ou resolver discussões de mesa — instantâneo em qualquer dispositivo."
+      "tldr": "Cara ou coroa simples apoiado no RNG seguro do navegador (Web Crypto). O resultado é decidido localmente; nada é registrado nem enviado a servidor. Mantém histórico por sessão. Útil para decisões rápidas, sorteios justos ou resolver discussões de mesa — instantâneo em qualquer dispositivo.",
+      "seo_title": "Cara ou coroa online: jogar uma moeda"
     },
     "color-picker": {
       "title": "Seletor de cores",
@@ -428,7 +429,8 @@
     "minesweeper": {
       "title": "Campo Minado",
       "lede": "Quebra-cabeça lógico clássico em traje de terminal. Clique para escavar, clique-direito (ou modo F) para marcar bandeira. Os números contam minas adjacentes. Não toque nas rosas.",
-      "tldr": "Campo Minado clássico reconstruído com estética synthwave/terminal. Presets de dificuldade (fácil, médio, difícil, extremo), controles por teclado e toque, melhores tempos persistentes via localStorage. Sem instalação, sem cadastro, sem analítica; lógica do jogo e cronômetro rodam localmente no navegador. Funciona offline depois que a página carrega."
+      "tldr": "Campo Minado clássico reconstruído com estética synthwave/terminal. Presets de dificuldade (fácil, médio, difícil, extremo), controles por teclado e toque, melhores tempos persistentes via localStorage. Sem instalação, sem cadastro, sem analítica; lógica do jogo e cronômetro rodam localmente no navegador. Funciona offline depois que a página carrega.",
+      "seo_title": "Campo Minado online: do fácil ao extremo"
     },
     "quick-notes": {
       "title": "Notas rápidas",

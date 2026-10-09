@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "À propos",
-    "meta_description": "Mentria est un petit studio créatif. Des outils, des jeux et une IA respectueux de la vie privée qui s'exécutent entièrement dans votre navigateur — sans serveurs, sans comptes, sans pistage.",
+    "meta_description": "Mentria est un petit studio créatif. Des outils, des jeux et une IA respectueux de la vie privée qui tournent dans votre navigateur. Sans comptes, sans pistage, et vos données restent privées.",
     "tagline": "Apprenez et expérimentez avec une IA qui tourne sur votre appareil.",
     "copyright": "© 2026 Mentria. Tous droits réservés.",
     "image_use": "Utilisation des images",
@@ -421,7 +421,7 @@
     },
     "markdown-pdf": {
       "title": "Markdown → PDF",
-      "lede": "Écrivez du markdown, voyez un aperçu en direct, et téléchargez un PDF professionnel et propre. Sauvegarde automatique dans votre navigateur. Vos données restent sur votre appareil.",
+      "lede": "Écrivez du markdown, voyez un aperçu en direct, et téléchargez un PDF professionnel et propre. Sauvegarde automatique dans votre navigateur. Vos documents restent privés.",
       "tldr": "Un éditeur markdown avec aperçu en direct et export PDF en un clic via la boîte de dialogue d'impression du navigateur. Importe et exporte des fichiers .md, sauvegarde les brouillons localement, prend en charge le markdown GitHub-flavored avec tableaux et listes de tâches. Pas d'envoi, pas de compte, pas de serveur — tout fonctionne en JavaScript côté client et hors ligne."
     },
     "minesweeper": {
@@ -507,12 +507,12 @@
     },
     "quote": {
       "title": "Citation motivante",
-      "lede": "Citations originales générées par IA, fonctionnant localement dans votre navigateur. Vos données restent sur votre appareil.",
+      "lede": "Citations originales générées par IA, fonctionnant localement dans votre navigateur.",
       "tldr": "Citation motivante génère des aphorismes originaux avec un modèle Qwen3.5 affiné sur des données de citations sélectionnées, fonctionnant entièrement dans votre navigateur via WebGPU. Pas de serveur, pas de clé API, pas de compte. Le modèle se charge à la première visite et reste en cache localement pour une réutilisation instantanée."
     },
     "radio": {
       "title": "Radio infinie",
-      "lede": "Musique cinématographique épique générée par IA, en streaming infini. Apprend vos goûts localement — vos données restent sur votre appareil.",
+      "lede": "Musique cinématographique épique générée par IA, en streaming infini. Apprend vos goûts sur votre appareil, et votre écoute reste privée.",
       "tldr": "Musique cinématographique infinie générée par IA, en streaming direct dans votre navigateur. Les pistes proviennent d'un catalogue public et sont lues via l'élément audio HTML5 natif du navigateur (avec un fondu enchaîné entre deux lecteurs) ; votre historique d'écoute et vos « j'aime » restent sur l'appareil dans IndexedDB pour apprendre vos goûts localement avec le temps. Pas de compte, pas de tracking, pas de personnalisation côté serveur."
     },
     "tetris": {
@@ -538,7 +538,7 @@
     },
     "breakout": {
       "title": "Breakout",
-      "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne localement — vos données restent sur votre appareil.",
+      "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne dans votre navigateur, même hors ligne.",
       "tldr": "Un casse-briques façon Breakout : renvoyez la balle avec votre raquette pour détruire des murs de briques au fil de niveaux de plus en plus rapides, en attrapant les bonus qui tombent (et en évitant les mauvais). Construit sur HTML5 Canvas avec une physique déterministe et des commandes souris, clavier et tactiles. Score, vies et tableau des records vivent dans le JavaScript côté client — aucun script tiers, aucun serveur, et ça marche hors ligne une fois en cache."
     },
     "totp": {
@@ -553,7 +553,7 @@
     },
     "sudoku": {
       "title": "Sudoku",
-      "lede": "Casse-tête logique en habit de terminal. Générateur à solution unique, quatre difficultés, annotations au crayon. Fonctionne localement — aucune donnée ne quitte votre appareil.",
+      "lede": "Casse-tête logique en habit de terminal. Générateur à solution unique, quatre difficultés, annotations au crayon. Fonctionne dans votre navigateur, même hors ligne.",
       "tldr": "Sudoku 9×9 classique repensé avec une esthétique synthwave de terminal. Un générateur par retour sur trace garantit exactement une solution à quatre difficultés (facile → expert) ; annotations au crayon, surbrillance des pairs et du même chiffre, détection de conflits en direct, trois erreurs avant la fin et jusqu'à trois indices. Les meilleurs temps par difficulté sont enregistrés sur l'appareil. Clavier, souris et tactile fonctionnent. Sans installation, sans inscription, sans analytique — la génération et la résolution s'exécutent localement dans votre navigateur, et ça marche hors ligne."
     },
     "ludo": {
@@ -563,7 +563,7 @@
     },
     "chess": {
       "title": "Échecs",
-      "lede": "Moteur local, chacun son tour et jeu en ligne — sans serveurs. Règles complètes avec roque, prise en passant et promotion ; moteur alpha-bêta à quatre niveaux, barre d'évaluation et indices.",
+      "lede": "Moteur local, chacun son tour et jeu en ligne de pair à pair. Règles complètes avec roque, prise en passant et promotion ; moteur alpha-bêta à quatre niveaux, barre d'évaluation et indices.",
       "tldr": "Une implémentation d'échecs complète qui s'exécute entièrement dans votre navigateur. Le moteur de règles couvre le roque, la prise en passant, la promotion, échec/échec et mat/pat et les nulles (règle des 50 coups, matériel insuffisant, triple répétition), avec notation SAN complète. Jouez chacun son tour sur un appareil, contre un moteur alpha-bêta intégré (quatre niveaux, de Débutant à Brutal, exécuté dans un Web Worker pour que l'interface ne gèle jamais) avec barre d'évaluation en direct, lignes candidates et indices — ou en ligne contre un ami via une connexion P2P chiffrée à l'aide d'un code. Glissez ou touchez pour jouer, parcourez l'historique, retournez l'échiquier, annulez et abandonnez. Sans comptes, sans analytique, fonctionne hors ligne."
     },
     "annotate-image": {
@@ -584,7 +584,7 @@
     },
     "comms": {
       "title": "Comms",
-      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte et sans serveur au milieu.",
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages.",
       "seo_title": "Messagerie, appels et fichiers P2P chiffrés"
     },
     "bubble-level": {
@@ -5127,8 +5127,8 @@
       }
     },
     "comms": {
-      "meta_description": "Chat pair-à-pair, appels et partage de fichiers — chiffré de bout en bout, sans compte et sans serveur au milieu.",
-      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte et sans serveur au milieu. Partagez l’URL d’un salon, ou échangez vos codes de contact pour écrire directement aux gens.",
+      "meta_description": "Chat pair-à-pair, appels et partage de fichiers — chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages.",
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages. Partagez l’URL d’un salon, ou échangez vos codes de contact pour écrire directement aux gens.",
       "unknown": "inconnu",
       "onboard": {
         "insecure_title": "Cette page a besoin d’une connexion sécurisée",

@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "Acerca de",
-    "meta_description": "Mentria es un pequeño estudio creativo. Herramientas, juegos e IA centrados en la privacidad que se ejecutan por completo en tu navegador, sin servidores, sin cuentas, sin rastreo.",
+    "meta_description": "Mentria es un pequeño estudio creativo. Herramientas, juegos e IA centrados en la privacidad que funcionan en tu navegador. Sin cuentas, sin rastreo, y tus datos se mantienen privados.",
     "tagline": "Aprende y experimenta con IA que funciona en tu dispositivo.",
     "copyright": "© 2026 Mentria. Todos los derechos reservados.",
     "image_use": "Uso de imágenes",
@@ -421,7 +421,7 @@
     },
     "markdown-pdf": {
       "title": "Markdown → PDF",
-      "lede": "Escribe markdown, ve una vista previa en vivo, y descarga un PDF profesional y limpio. Se guarda automáticamente en tu navegador. Tus datos no salen de tu dispositivo.",
+      "lede": "Escribe markdown, ve una vista previa en vivo, y descarga un PDF profesional y limpio. Se guarda automáticamente en tu navegador. Tus documentos se mantienen privados.",
       "tldr": "Un editor de markdown con vista previa en vivo y exportación a PDF de un clic mediante el diálogo de impresión del navegador. Importa y exporta archivos .md, autoguarda borradores localmente, admite markdown estilo GitHub incluyendo tablas y listas de tareas. Sin subida, sin cuenta, sin servidor — todo corre en JavaScript del lado del cliente y funciona sin conexión."
     },
     "minesweeper": {
@@ -507,12 +507,12 @@
     },
     "quote": {
       "title": "Cita motivadora",
-      "lede": "Citas originales generadas por IA, ejecutándose localmente en tu navegador. Tus datos no salen de tu dispositivo.",
+      "lede": "Citas originales generadas por IA, ejecutándose localmente en tu navegador.",
       "tldr": "Frase Motivacional genera aforismos originales con un modelo Qwen3.5 afinado sobre datos de citas curados, ejecutándose por completo en tu navegador mediante WebGPU. Sin servidor, sin clave de API, sin cuenta. El modelo se descarga en la primera visita y queda en caché localmente para reutilizarlo al instante."
     },
     "radio": {
       "title": "Radio infinita",
-      "lede": "Música cinematográfica épica generada por IA, transmitiendo infinitamente. Aprende tu gusto localmente — tus datos no salen de tu dispositivo.",
+      "lede": "Música cinematográfica épica generada por IA, transmitiendo infinitamente. Aprende tus gustos en tu dispositivo, y lo que escuchas se mantiene privado.",
       "tldr": "Música cinematográfica infinita generada por IA, en streaming directo en tu navegador. Las pistas vienen de un catálogo público y se reproducen con el elemento de audio HTML5 nativo del navegador (con crossfade entre dos reproductores); tu historial de escucha y tus 'me gusta' permanecen en el dispositivo en IndexedDB para aprender tu gusto localmente con el tiempo. Sin cuentas, sin tracking, sin personalización del lado del servidor — puramente cliente."
     },
     "tetris": {
@@ -538,7 +538,7 @@
     },
     "breakout": {
       "title": "Breakout",
-      "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Se ejecuta localmente — tus datos no salen de tu dispositivo.",
+      "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Funciona en tu navegador, también sin conexión.",
       "tldr": "Un rompeladrillos estilo Breakout: rebota la bola con tu pala para romper muros de ladrillos en niveles que se aceleran, atrapando potenciadores que caen (y esquivando los malos). Construido sobre HTML5 Canvas con física determinista y controles de ratón, teclado y táctiles. La puntuación, las vidas y la tabla de récords viven en JavaScript del lado del cliente: sin scripts de terceros, sin servidor, y funciona sin conexión una vez en caché."
     },
     "totp": {
@@ -553,7 +553,7 @@
     },
     "sudoku": {
       "title": "Sudoku",
-      "lede": "Rompecabezas lógico con estética de terminal. Generador de solución única, cuatro dificultades, anotaciones a lápiz. Funciona localmente: ningún dato sale de tu dispositivo.",
+      "lede": "Rompecabezas lógico con estética de terminal. Generador de solución única, cuatro dificultades, anotaciones a lápiz. Funciona en tu navegador, también sin conexión.",
       "tldr": "Sudoku 9×9 clásico reconstruido con una estética synthwave de terminal. Un generador por backtracking garantiza exactamente una solución en cuatro dificultades (fácil → experto); anotaciones a lápiz, resaltado de pares y del mismo número, detección de conflictos en vivo, tres errores antes de perder y hasta tres pistas. Los mejores tiempos por dificultad se guardan en tu dispositivo. Funciona con teclado, ratón y táctil. Sin instalaciones, sin registro, sin analíticas: la generación y resolución se ejecutan localmente en tu navegador, y funciona sin conexión."
     },
     "ludo": {
@@ -563,7 +563,7 @@
     },
     "chess": {
       "title": "Ajedrez",
-      "lede": "Motor local, por turnos y juego en línea — sin servidores. Reglas completas con enroque, al paso y coronación; motor alfa-beta con cuatro niveles, barra de evaluación y pistas.",
+      "lede": "Motor local, por turnos y juego en línea de igual a igual. Reglas completas con enroque, al paso y coronación; motor alfa-beta con cuatro niveles, barra de evaluación y pistas.",
       "tldr": "Una implementación completa de ajedrez que se ejecuta enteramente en tu navegador. El motor de reglas cubre enroque, captura al paso, coronación, jaque/jaque mate/ahogado y tablas (regla de 50 movimientos, material insuficiente, triple repetición), con notación SAN completa. Juega por turnos en un dispositivo, contra un motor alfa-beta integrado (cuatro niveles, de Principiante a Brutal, ejecutándose en un Web Worker para que la interfaz nunca se congele) con barra de evaluación en vivo, líneas candidatas y pistas — o en línea contra un amigo por una conexión P2P cifrada usando un código. Arrastra o toca para mover, repasa el historial, gira el tablero, deshaz y abandona. Sin cuentas, sin analíticas, funciona sin conexión."
     },
     "annotate-image": {
@@ -584,7 +584,7 @@
     },
     "comms": {
       "title": "Comms",
-      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin servidor de por medio.",
+      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes.",
       "seo_title": "Chat, llamadas y archivos P2P cifrados"
     },
     "bubble-level": {
@@ -5127,8 +5127,8 @@
       }
     },
     "comms": {
-      "meta_description": "Chat entre pares, llamadas y envío de archivos — cifrado de extremo a extremo, sin cuentas y sin servidor de por medio.",
-      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin servidor de por medio. Comparte la URL de una sala, o intercambia códigos de contacto y escribe directamente a otras personas.",
+      "meta_description": "Chat entre pares, llamadas y envío de archivos — cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes.",
+      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes. Comparte la URL de una sala, o intercambia códigos de contacto y escribe directamente a otras personas.",
       "unknown": "desconocido",
       "onboard": {
         "insecure_title": "Esta página necesita una conexión segura",

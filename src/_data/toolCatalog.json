@@ -141,7 +141,7 @@
   {
     "slug": "ai-chat",
     "title": "AI Chat",
-    "summary": "Chat with Qwen3.5 running locally in your browser via WebGPU. Supports vision. No data leaves your device.",
+    "summary": "Chat with Qwen3.5 running locally in your browser via WebGPU. Supports vision. Your chats stay private.",
     "category": "AI",
     "group": "AI",
     "offline": "model"
@@ -182,7 +182,7 @@
   {
     "slug": "radio",
     "title": "Infinite Radio",
-    "summary": "AI-generated epic cinematic music streaming infinitely. Learns your taste locally. No data leaves your device.",
+    "summary": "AI-generated epic cinematic music streaming infinitely. Learns your taste on your device.",
     "category": "AI",
     "group": "AI",
     "offline": "network"
@@ -190,14 +190,14 @@
   {
     "slug": "invoice",
     "title": "Invoice Generator",
-    "summary": "Build clean, single-page invoices in your browser. Auto-saves, prints to A4, exports/imports JSON. No data leaves your device.",
+    "summary": "Build clean, single-page invoices in your browser. Auto-saves, prints to A4, exports/imports JSON. Your invoices stay private.",
     "category": "Utility",
     "group": "Create"
   },
   {
     "slug": "markdown-pdf",
     "title": "Markdown → PDF",
-    "summary": "Write markdown, see a live preview, and download a clean professional PDF. Auto-saves to your browser. No data leaves your device.",
+    "summary": "Write markdown, see a live preview, and download a clean professional PDF. Auto-saves to your browser. Your documents stay private.",
     "category": "Utility",
     "group": "Create"
   },
@@ -268,7 +268,7 @@
   {
     "slug": "files",
     "title": "Files",
-    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, TOTP vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all. Nothing leaves your device.",
+    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, TOTP vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all. Your data stays private.",
     "category": "Utility",
     "group": "Dev",
     "added": "2026-07-02"
@@ -276,7 +276,7 @@
   {
     "slug": "comms",
     "title": "Comms",
-    "summary": "Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted rooms, contact codes, and private DMs derived from your identity. No accounts, no server in the middle.",
+    "summary": "Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted rooms, contact codes, and private DMs derived from your identity. No accounts, and no server can read your messages.",
     "category": "Social",
     "group": "Everyday",
     "url": "/comms/",

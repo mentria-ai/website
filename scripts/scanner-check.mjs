@@ -74,6 +74,46 @@ test('geometry: big photos are scaled under the pixel cap and keep their shape',
   assert.deepEqual(G.fitPixels(1200, 900, 16e6), { width: 1200, height: 900 });
 });
 
+const S = await local('scanner-scenes.mjs');
+const D = await mod('detect.js');
+
+function cornerError(quadNorm, truth, w, h) {
+  let best = Infinity;
+  for (let k = 0; k < 4; k++) {
+    let worst = 0;
+    for (let i = 0; i < 4; i++) {
+      const p = quadNorm[(i + k) % 4];
+      worst = Math.max(worst, Math.hypot(p[0] * w - truth[i][0], p[1] * h - truth[i][1]));
+    }
+    best = Math.min(best, worst);
+  }
+  return best;
+}
+
+test('detect: finds the page in at least 90% of 200 synthetic scenes', () => {
+  let ok = 0;
+  const misses = [];
+  for (let seed = 1; seed <= 200; seed++) {
+    const s = S.makeScene(seed);
+    const r = D.detectQuad(s.rgba, s.w, s.h);
+    if (r.quad && cornerError(r.quad, s.truth, s.w, s.h) <= 0.025 * Math.max(s.w, s.h)) ok++;
+    else misses.push(seed + ':' + s.kind);
+  }
+  assert.ok(ok >= 180, ok + '/200 found; misses ' + misses.slice(0, 25).join(' '));
+});
+
+test('detect: reports no page on 30 empty scenes', () => {
+  for (let seed = 1001; seed <= 1030; seed++) {
+    const s = S.makeScene(seed, { empty: true });
+    assert.equal(D.detectQuad(s.rgba, s.w, s.h).quad, null, 'seed ' + seed + ' ' + s.kind);
+  }
+});
+
+test('detect: a sharp scene scores higher sharpness than a blurred copy', () => {
+  const sharp = S.makeScene(7, { blur: 0 }), soft = S.makeScene(7, { blur: 3 });
+  assert.ok(D.detectQuad(sharp.rgba, sharp.w, sharp.h).sharpness > D.detectQuad(soft.rgba, soft.w, soft.h).sharpness);
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

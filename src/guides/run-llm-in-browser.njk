@@ -46,6 +46,7 @@ speedsNote: "Measured with Mentria's benchmark on an Apple M4 Pro with 24 GB of 
         <div><dt id="llm-demo-ttft-label">First word after</dt><dd id="llm-demo-ttft"></dd></div>
         <div><dt>Speed</dt><dd id="llm-demo-speed"></dd></div>
       </dl>
+      <a class="llm-demo__share" id="llm-demo-share" href="https://github.com/mentria-ai/website/discussions/categories/show-and-tell" target="_blank" rel="noopener" hidden>Share this result on GitHub</a>
     </div>
     <p class="guide__note">Your prompt is processed on this device, not on a server. See <a href="/privacy/">Privacy</a>.</p>
   </section>
@@ -184,6 +185,7 @@ speedsNote: "Measured with Mentria's benchmark on an Apple M4 Pro with 24 GB of 
   .llm-demo__stats div { display: grid; }
   .llm-demo__stats dt { color: var(--term-muted); font-size: 0.8rem; }
   .llm-demo__stats dd { margin: 0; color: var(--term-fg); font-variant-numeric: tabular-nums; }
+  .llm-demo__share { justify-self: start; font-size: 0.9rem; }
 </style>
 
 <script type="module">
@@ -195,6 +197,26 @@ const out = $('llm-demo-out');
 const stats = $('llm-demo-stats');
 const NAMES = { '0.8b': 'Qwen3.5 0.8B', '2b': 'Qwen3.5 2B', '4b': 'Qwen3.5 4B', '27b': 'Bonsai 27B' };
 const SYSTEM = 'You are a helpful assistant. Reply briefly in plain text, without markdown, headings or lists.';
+const shareEl = $('llm-demo-share');
+function browserName() {
+  const brands = navigator.userAgentData && navigator.userAgentData.brands;
+  const known = brands && brands.find((b) => /Edge|Opera|Brave|Chrome/.test(b.brand) && !/Not/.test(b.brand) && b.brand !== 'Chromium');
+  const os = (navigator.userAgentData && navigator.userAgentData.platform) || ((navigator.userAgent.match(/Android|iPhone|iPad|Mac OS X|Windows|Linux|CrOS/) || [''])[0].replace('Mac OS X', 'macOS').replace('CrOS', 'ChromeOS'));
+  let name = known ? known.brand + ' ' + known.version : '';
+  if (!name) {
+    const ua = navigator.userAgent;
+    const m = ua.match(/Firefox\/(\d+)/) || ua.match(/Edg\/(\d+)/) || ua.match(/Chrome\/(\d+)/) || ua.match(/Version\/(\d+[.\d]*).*Safari/);
+    name = m ? (/Firefox/.test(m[0]) ? 'Firefox ' : /Edg/.test(m[0]) ? 'Edge ' : /Chrome/.test(m[0]) ? 'Chrome ' : 'Safari ') + m[1] : '';
+  }
+  return [name, os].filter(Boolean).join(' on ');
+}
+async function gpuName() {
+  try {
+    const a = await navigator.gpu.requestAdapter();
+    const i = a && (a.info || (a.requestAdapterInfo ? await a.requestAdapterInfo() : null));
+    return i ? [i.vendor, i.architecture, i.description].filter(Boolean).join(' ') : '';
+  } catch (_) { return ''; }
+}
 for (const b of document.querySelectorAll('.llm-demo__examples [data-prompt]')) {
   b.addEventListener('click', () => { input.value = b.dataset.prompt; input.focus(); });
 }
@@ -221,6 +243,7 @@ if (!navigator.gpu) {
     out.hidden = true;
     out.textContent = '';
     stats.hidden = true;
+    shareEl.hidden = true;
     statusEl.textContent = 'Starting the model…';
     const onEvent = (e) => {
       const d = e.detail || {};
@@ -252,6 +275,19 @@ if (!navigator.gpu) {
       $('llm-demo-speed').textContent = tokens > 1 && tLast > tFirst ? Math.round((tokens - 1) / ((tLast - tFirst) / 1000)) + ' tokens/s' : '';
       stats.hidden = false;
       statusEl.textContent = 'Done. Run it again, or try another prompt.';
+      const speed = $('llm-demo-speed').textContent;
+      if (speed) {
+        const model = $('llm-demo-model').textContent;
+        const lines = ['**Model:** ' + model, '**Speed:** ' + speed];
+        if (loadedBefore) lines.push('**First word after:** ' + $('llm-demo-ttft').textContent);
+        const browser = browserName();
+        if (browser) lines.push('**Browser:** ' + browser);
+        const gpu = await gpuName();
+        if (gpu) lines.push('**GPU:** ' + gpu);
+        lines.push('**Device:** (add your device, for example: MacBook Air M2, 16 GB)', '', 'Measured with the demo on https://mentria.ai/guides/run-llm-in-browser/');
+        shareEl.href = 'https://github.com/mentria-ai/website/discussions/new?category=show-and-tell&title=' + encodeURIComponent('Benchmark: ' + model + ' at ' + speed) + '&body=' + encodeURIComponent(lines.join('\n'));
+        shareEl.hidden = false;
+      }
     } catch (e) {
       const msg = (e && e.message) || '';
       statusEl.textContent = msg === 'download-postponed' ? 'Download postponed. Run it again when you are on a faster connection.' : 'The model could not run here: ' + msg.slice(0, 120);

@@ -393,7 +393,8 @@
     "coin-flip": {
       "title": "Pile ou face",
       "lede": "Pile ou face — lancez une pièce instantanément. Lancez une série au meilleur des N pour départager. Fonctionne hors ligne.",
-      "tldr": "Un pile ou face minimaliste appuyé sur le RNG sécurisé du navigateur (Web Crypto). Le résultat est décidé localement ; rien n'est enregistré ni envoyé à un serveur. Conserve un historique par session. Pratique pour des décisions rapides, des départs équitables ou trancher des débats de table — instantané sur tout appareil."
+      "tldr": "Un pile ou face minimaliste appuyé sur le RNG sécurisé du navigateur (Web Crypto). Le résultat est décidé localement ; rien n'est enregistré ni envoyé à un serveur. Conserve un historique par session. Pratique pour des décisions rapides, des départs équitables ou trancher des débats de table — instantané sur tout appareil.",
+      "seo_title": "Pile ou face en ligne : lancer une pièce"
     },
     "color-picker": {
       "title": "Sélecteur de couleurs",
@@ -428,7 +429,8 @@
     "minesweeper": {
       "title": "Démineur",
       "lede": "Casse-tête logique classique en tenue de terminal. Cliquez pour creuser, clic droit (ou mode F) pour marquer un drapeau. Les chiffres comptent les mines adjacentes. Ne touchez pas aux roses.",
-      "tldr": "Le Démineur classique reconstruit avec une esthétique synthwave/terminal. Préréglages de difficulté (facile, moyen, difficile, extrême), commandes clavier et tactiles, meilleurs temps persistants dans localStorage. Pas d'installation, pas d'inscription, pas d'analytique ; la logique de jeu et le chrono fonctionnent localement. Hors ligne une fois la page chargée."
+      "tldr": "Le Démineur classique reconstruit avec une esthétique synthwave/terminal. Préréglages de difficulté (facile, moyen, difficile, extrême), commandes clavier et tactiles, meilleurs temps persistants dans localStorage. Pas d'installation, pas d'inscription, pas d'analytique ; la logique de jeu et le chrono fonctionnent localement. Hors ligne une fois la page chargée.",
+      "seo_title": "Démineur en ligne : de facile à extrême"
     },
     "quick-notes": {
       "title": "Notes rapides",

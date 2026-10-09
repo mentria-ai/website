@@ -324,6 +324,27 @@ check('export: a PDF has one page per scan and JPGs download as a ZIP', async (p
   if (zip.readUInt32LE(end) !== 0x06054b50 || zip.readUInt16LE(end + 10) !== 2) throw new Error('ZIP entries');
 });
 
+check('host: the store page runs the scanner, goes full screen for the camera and back', async (page) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto(ORIGIN + '/extensions/scanner/', { waitUntil: 'load' });
+  await page.waitForSelector('#xr-frame');
+  const frameHandle = await page.$('#xr-frame');
+  const frame = await frameHandle.contentFrame();
+  await frame.waitForSelector('.sc-lib__actions .sc-btn--primary', { timeout: 20000 });
+  await frame.click('.sc-lib__actions .sc-btn--primary');
+  await page.waitForFunction(() => document.getElementById('xr-frame').classList.contains('xr__frame--full'), { timeout: 10000 });
+  await frame.waitForFunction(() => {
+    const c = document.querySelector('.sc-cam__count');
+    return c && c.textContent === '1';
+  }, { timeout: 30000, polling: 250 });
+  await frame.click('.sc-cam__right .sc-btn--primary');
+  await frame.waitForSelector('.sc-rev');
+  const full = await page.evaluate(() => document.getElementById('xr-frame').classList.contains('xr__frame--full') || document.documentElement.classList.contains('ext-full'));
+  if (full) throw new Error('frame stayed full screen after leaving the camera');
+  if (errors.length) throw new Error(errors.join(' | '));
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   const page = await browser.newPage();

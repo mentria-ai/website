@@ -5793,7 +5793,9 @@
     "all_link": "Todas as extensões",
     "build_title": "Crie a sua",
     "build_body": "Uma extensão é um único arquivo HTML. O SDK explica o formato e o que uma extensão pode usar.",
-    "manage_link": "Gerenciar extensões instaladas"
+    "manage_link": "Gerenciar extensões instaladas",
+    "perm_camera": "Câmera",
+    "perm_camera_desc": "Pode usar a câmera depois que você permitir."
   },
   "image_use": {
     "title": "Uso das imagens do Mentria",

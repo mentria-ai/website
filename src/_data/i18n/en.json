@@ -176,7 +176,8 @@
     "tldr": {
       "read_more": "What is this?",
       "read_less": "Hide details",
-      "what_is": "What is {name}?"
+      "what_is": "What is {name}?",
+      "llm_guide": "Guide: how a language model runs in your browser"
     },
     "dialog": {
       "ok": "OK",

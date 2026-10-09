@@ -315,6 +315,13 @@ check('export: a PDF has one page per scan and JPGs download as a ZIP', async (p
   await page.waitForSelector('.sc-rev .sc-thumb:nth-of-type(2)', { timeout: 60000 });
   await page.click('.sc-rev .sc-top .sc-btn--primary');
   await page.waitForSelector('.sc-sheet .sc-seg');
+  for (let i = 0; i < 8; i++) await page.keyboard.press('Tab');
+  const inSheet = await page.evaluate(() => !!document.activeElement && !!document.activeElement.closest('.sc-sheet'));
+  if (!inSheet) throw new Error('focus left the open sheet');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('.sc-sheet'), { timeout: 3000 });
+  await page.click('.sc-rev .sc-top .sc-btn--primary');
+  await page.waitForSelector('.sc-sheet .sc-seg');
   await page.click('.sc-sheet .sc-field:nth-of-type(2) .sc-seg button:nth-child(2)');
   await page.click('.sc-sheet .sc-sheet__actions .sc-btn--primary');
   const pdf = readFileSync(await nextDownload('.pdf')).toString('latin1');

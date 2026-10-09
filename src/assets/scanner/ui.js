@@ -121,23 +121,45 @@ export function toast(msg) {
   toastTimer = setTimeout(() => toastEl.classList.remove('is-on'), 2600);
 }
 
+let sheets = 0;
+
 export function overlay(children, onDismiss) {
   const prev = document.activeElement;
+  const root = document.getElementById('scan');
   const panel = h('div', { class: 'sc-sheet__panel', role: 'dialog', 'aria-modal': 'true' }, children);
   const el = h('div', { class: 'sc-sheet' }, panel);
+  const focusables = () => [...panel.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])')].filter((n) => !n.disabled && n.getClientRects().length);
+  const onKey = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      onDismiss();
+    } else if (e.key === 'Tab') {
+      const f = focusables();
+      if (!f.length) return;
+      const inside = panel.contains(document.activeElement);
+      if (e.shiftKey && (!inside || document.activeElement === f[0])) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && (!inside || document.activeElement === f[f.length - 1])) { e.preventDefault(); f[0].focus(); }
+    }
+  };
   el.addEventListener('click', (e) => { if (e.target === el) onDismiss(); });
-  el.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    e.preventDefault();
-    e.stopPropagation();
-    onDismiss();
-  });
+  document.addEventListener('keydown', onKey);
   document.body.append(el);
+  sheets++;
+  if (root) root.inert = true;
+  queueMicrotask(() => {
+    if (panel.contains(document.activeElement)) return;
+    const f = focusables();
+    if (f[0]) f[0].focus();
+  });
   return {
     el,
     panel,
     close: () => {
+      document.removeEventListener('keydown', onKey);
       el.remove();
+      sheets = Math.max(0, sheets - 1);
+      if (root && !sheets) root.inert = false;
       try { if (prev && prev.focus) prev.focus(); } catch (_) {}
     }
   };

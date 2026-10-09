@@ -114,6 +114,56 @@ test('detect: a sharp scene scores higher sharpness than a blurred copy', () => 
   assert.ok(D.detectQuad(sharp.rgba, sharp.w, sharp.h).sharpness > D.detectQuad(soft.rgba, soft.w, soft.h).sharpness);
 });
 
+const T = await mod('tracker.js');
+const basePage = [[0.2, 0.2], [0.8, 0.22], [0.78, 0.8], [0.22, 0.78]];
+const sample = (q, conf = 0.9, sharp = 100) => ({ quad: q, confidence: conf, sharpness: sharp, w: 384, h: 288 });
+
+test('tracker: a steady page fires once the window and fill time pass', () => {
+  const tr = T.createTracker();
+  let fired = -1;
+  for (let t = 0; t <= 3000; t += 66) {
+    const s = tr.push(sample(basePage), t);
+    if (s.state === 'fire' && fired < 0) fired = t;
+  }
+  const due = T.STEADY_WINDOW_MS + T.FIRE_AFTER_MS;
+  assert.ok(fired >= due - 66 && fired <= due + 200, 'fired at ' + fired);
+});
+
+test('tracker: a shaking page never fires', () => {
+  const tr = T.createTracker();
+  const r = S.rng(5);
+  for (let t = 0; t <= 4000; t += 66) {
+    const q = basePage.map(([x, y]) => [x + (r() - 0.5) * 0.08, y + (r() - 0.5) * 0.08]);
+    assert.notEqual(tr.push(sample(q), t).state, 'fire');
+  }
+});
+
+test('tracker: no second capture until the page changes', () => {
+  const tr = T.createTracker();
+  let t = 0;
+  for (; t <= 1500; t += 66) tr.push(sample(basePage), t);
+  tr.markCaptured(t);
+  for (let k = 0; k < 60; k++, t += 66) assert.notEqual(tr.push(k % 10 === 5 ? null : sample(basePage), t).state, 'fire');
+  const moved = basePage.map(([x, y]) => [x + 0.2, y]);
+  let fired = false;
+  for (let k = 0; k < 60; k++, t += 66) if (tr.push(sample(moved), t).state === 'fire') fired = true;
+  assert.ok(fired);
+});
+
+test('tracker: losing the page clears the outline after 300 ms', () => {
+  const tr = T.createTracker();
+  tr.push(sample(basePage), 0);
+  assert.equal(tr.push(null, 200).state, 'found');
+  assert.equal(tr.push(null, 400).state, 'none');
+});
+
+test('tracker: a blurry frame holds back the capture', () => {
+  const tr = T.createTracker();
+  let t = 0;
+  for (; t <= 900; t += 66) tr.push(sample(basePage, 0.9, 100), t);
+  for (let k = 0; k < 20; k++, t += 66) assert.notEqual(tr.push(sample(basePage, 0.9, 40), t).state, 'fire');
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

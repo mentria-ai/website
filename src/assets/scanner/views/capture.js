@@ -261,9 +261,8 @@ export function mount(root, ctx, params) {
       if (doc && !existing) {
         await db.deleteDoc(doc.id);
       } else if (doc) {
-        for (const id of added) await db.deletePage(id);
         doc.pageIds = doc.pageIds.filter((id) => !added.includes(id));
-        await db.saveDoc(doc);
+        await db.saveDoc(doc, added);
       }
     }
     leave();

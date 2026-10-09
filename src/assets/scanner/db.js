@@ -46,10 +46,11 @@ export async function getDoc(id) {
   return (await ask(d.transaction('docs').objectStore('docs').get(id))) || null;
 }
 
-export async function saveDoc(doc) {
+export async function saveDoc(doc, drop = []) {
   const d = await open();
-  const tx = d.transaction('docs', 'readwrite');
+  const tx = d.transaction(drop.length ? ['docs', 'pages'] : 'docs', 'readwrite');
   tx.objectStore('docs').put(doc);
+  for (const id of drop) tx.objectStore('pages').delete(id);
   return finish(tx);
 }
 
@@ -62,13 +63,6 @@ export async function savePage(page) {
   const d = await open();
   const tx = d.transaction('pages', 'readwrite');
   tx.objectStore('pages').put(page);
-  return finish(tx);
-}
-
-export async function deletePage(id) {
-  const d = await open();
-  const tx = d.transaction('pages', 'readwrite');
-  tx.objectStore('pages').delete(id);
   return finish(tx);
 }
 

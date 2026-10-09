@@ -84,12 +84,11 @@ export async function addPage(doc, bmp, quad, opts = {}) {
     const i = doc.pageIds.indexOf(opts.replace);
     if (i >= 0) doc.pageIds[i] = page.id;
     else doc.pageIds.push(page.id);
-    await db.deletePage(opts.replace);
   } else {
     doc.pageIds.push(page.id);
   }
   doc.updatedAt = Date.now();
-  await db.saveDoc(doc);
+  await db.saveDoc(doc, opts.replace ? [opts.replace] : []);
   persistOnce();
   return page;
 }

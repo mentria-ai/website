@@ -1,4 +1,5 @@
 import { rmSync, mkdirSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import puppeteer from 'puppeteer-core';
 import { serve } from './scanner-serve.mjs';
 import { writeY4m } from './scanner-y4m.mjs';
@@ -129,6 +130,8 @@ check('app: the empty library renders in every locale without errors', async (pa
     const title = await page.$eval('.sc-top__title', (e) => e.textContent);
     if (!title || title.includes('library.')) throw new Error(prefix + ' title ' + title);
   }
+  const ink = await page.$eval('.sc-lib__actions .sc-btn--primary', (b) => getComputedStyle(b).color);
+  if (ink !== 'rgb(4, 19, 13)') throw new Error('primary button text is ' + ink);
   if (errors.length) throw new Error(errors.join(' | '));
 });
 
@@ -256,6 +259,8 @@ check('review: rotate, filter, reorder and delete update the saved document', as
   await waitFor(page, (s) => s.ids[0] === first.ids[1] && s.ids[1] === first.ids[0]);
   await page.click('.sc-rev__tools .sc-tool:nth-child(5)');
   await page.waitForSelector('.sc-sheet .sc-btn--danger');
+  const danger = await page.$eval('.sc-sheet .sc-btn--danger', (b) => getComputedStyle(b).color);
+  if (danger !== 'rgb(26, 6, 6)') throw new Error('danger button text is ' + danger);
   await page.click('.sc-sheet .sc-btn--danger');
   await waitFor(page, (s) => s.ids.length === 1);
 });
@@ -279,6 +284,46 @@ check('adjust: whole photo and detect again change the saved outline', async (pa
   await waitFor(page, (s) => Array.isArray(s.quads[0]));
 });
 
+const DOWNLOADS = '/Volumes/Mac ext storage/games-tmp/orch/scanner-downloads';
+
+async function nextDownload(ext, ms = 60000) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) {
+    const f = readdirSync(DOWNLOADS).find((n) => n.endsWith(ext));
+    if (f) return DOWNLOADS + '/' + f;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  throw new Error('no ' + ext + ' download');
+}
+
+check('export: a PDF has one page per scan and JPGs download as a ZIP', async (page) => {
+  rmSync(DOWNLOADS, { recursive: true, force: true });
+  mkdirSync(DOWNLOADS, { recursive: true });
+  const session = await browser.target().createCDPSession();
+  await session.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: DOWNLOADS });
+  await page.goto(ORIGIN + '/extensions/scanner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.sc-lib input[type=file]');
+  await page.evaluate(() => localStorage.removeItem('mentria.scanner.export'));
+  const files = await makeFixtures(page, 2);
+  await (await page.$('.sc-lib input[type=file]')).uploadFile(...files);
+  await page.waitForSelector('.sc-rev .sc-thumb:nth-of-type(2)', { timeout: 60000 });
+  await page.click('.sc-rev .sc-top .sc-btn--primary');
+  await page.waitForSelector('.sc-sheet .sc-seg');
+  await page.click('.sc-sheet .sc-field:nth-of-type(2) .sc-seg button:nth-child(2)');
+  await page.click('.sc-sheet .sc-sheet__actions .sc-btn--primary');
+  const pdf = readFileSync(await nextDownload('.pdf')).toString('latin1');
+  if (!pdf.startsWith('%PDF-1.4')) throw new Error('not a PDF');
+  if ((pdf.match(/\/Type \/Page /g) || []).length !== 2) throw new Error('PDF page count');
+  if (!/\/MediaBox \[0 0 (595\.28 841\.89|841\.89 595\.28)\]/.test(pdf)) throw new Error('PDF is not A4');
+  await page.click('.sc-rev .sc-top .sc-btn--primary');
+  await page.waitForSelector('.sc-sheet .sc-seg');
+  await page.click('.sc-sheet .sc-field:nth-of-type(1) .sc-seg button:nth-child(2)');
+  await page.click('.sc-sheet .sc-sheet__actions .sc-btn--primary');
+  const zip = readFileSync(await nextDownload('.zip'));
+  const end = zip.length - 22;
+  if (zip.readUInt32LE(end) !== 0x06054b50 || zip.readUInt16LE(end + 10) !== 2) throw new Error('ZIP entries');
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   const page = await browser.newPage();
@@ -296,5 +341,6 @@ server.close();
 rmSync(PROFILE, { recursive: true, force: true });
 rmSync(FIXTURES, { recursive: true, force: true });
 rmSync(VIDEO, { force: true });
+rmSync(DOWNLOADS, { recursive: true, force: true });
 console.log(checks.length - failed + '/' + checks.length + ' passed');
 if (failed) process.exit(1);

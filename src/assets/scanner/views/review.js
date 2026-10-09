@@ -16,6 +16,7 @@ export function mount(root, ctx, params) {
   const previews = new Map();
 
   const back = h('button', { class: 'sc-icon-btn', type: 'button', 'aria-label': t('review.back'), onclick: () => ctx.go('library') }, icon('back'));
+  const exportBtn = h('button', { class: 'sc-btn sc-btn--primary', type: 'button', onclick: () => openExport() }, icon('share'), t('review.export'));
   const nameBtn = h('button', { class: 'sc-rev__name', type: 'button', title: t('review.rename'), onclick: rename });
   const img = h('img', { class: 'sc-rev__img', alt: '' });
   const counter = h('p', { class: 'sc-rev__count', 'aria-live': 'polite' });
@@ -33,7 +34,7 @@ export function mount(root, ctx, params) {
   const strip = h('div', { class: 'sc-rev__strip', 'aria-label': t('review.reorder_hint') });
   const live = h('p', { class: 'sc-live', 'aria-live': 'polite' });
   root.append(h('section', { class: 'sc-rev' },
-    h('header', { class: 'sc-top' }, back, nameBtn),
+    h('header', { class: 'sc-top' }, back, nameBtn, exportBtn),
     stage, filters,
     h('div', { class: 'sc-rev__tools' }, cropBtn, rotateBtn, filterBtn, retakeBtn, deleteBtn),
     strip, live));
@@ -48,7 +49,7 @@ export function mount(root, ctx, params) {
   });
 
   function setTools(off) {
-    [cropBtn, rotateBtn, filterBtn, retakeBtn, deleteBtn].forEach((b) => { b.disabled = off; });
+    [cropBtn, rotateBtn, filterBtn, retakeBtn, deleteBtn, exportBtn].forEach((b) => { b.disabled = off; });
   }
 
   function show(i) {
@@ -265,6 +266,13 @@ export function mount(root, ctx, params) {
     index = Math.min(index, pages.length - 1);
     buildStrip();
     show(index);
+    if (params.exportNow) openExport();
+  }
+
+  async function openExport() {
+    if (!doc || !pages.length || working) return;
+    const mod = await import('./export.js');
+    if (alive) mod.openExport({ doc, pages });
   }
 
   window.addEventListener('keydown', onKey);

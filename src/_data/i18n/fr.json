@@ -318,7 +318,7 @@
       "requires_js": "Nécessite JavaScript",
       "requires_webgpu": "Nécessite WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
       "feature_browser": "Tourne entièrement dans votre navigateur",
-      "feature_private": "Aucune donnée ne quitte votre appareil",
+      "feature_private": "Vos données restent privées",
       "feature_no_key": "Aucune clé d'API requise",
       "feature_offline": "Fonctionne hors ligne une fois en cache"
     },
@@ -480,7 +480,7 @@
       "total": "total",
       "collapse": "Fermer le panneau",
       "details": "Détails de l’appareil",
-      "nothingLeaves": "rien ne quitte votre appareil"
+      "dataPrivate": "vos données restent privées"
     },
     "model": {
       "checking": "Vérification de votre appareil…",
@@ -548,7 +548,7 @@
     "exif": {
       "title": "Inspecteur EXIF",
       "lede": "Découvrez ce qu'une photo transporte en secret — détails de l'appareil, horodatages, position GPS — et téléchargez une copie propre, tout retiré. Rien n'est envoyé.",
-      "tldr": "Lit les métadonnées EXIF, XMP, IPTC et autres intégrées aux images JPEG, PNG et WebP, entièrement dans votre navigateur : modèle d'appareil, date de prise de vue et la position GPS que beaucoup de téléphones ajoutent silencieusement. Un appui produit une copie nettoyée au niveau des octets — pixels intacts, profil colorimétrique conservé — et la copie est réanalysée pour vérifier qu'elle est propre avant le téléchargement. Rien ne quitte votre appareil."
+      "tldr": "Lit les métadonnées EXIF, XMP, IPTC et autres intégrées aux images JPEG, PNG et WebP, entièrement dans votre navigateur : modèle d'appareil, date de prise de vue et la position GPS que beaucoup de téléphones ajoutent silencieusement. Un appui produit une copie nettoyée au niveau des octets — pixels intacts, profil colorimétrique conservé — et la copie est réanalysée pour vérifier qu'elle est propre avant le téléchargement. Vos photos ne sont jamais envoyées."
     },
     "sudoku": {
       "title": "Sudoku",
@@ -589,7 +589,7 @@
     "bubble-level": {
       "title": "Niveau à bulle",
       "lede": "Transformez votre téléphone en niveau à bulle en ligne : un vrai niveau sans installer d'application, précis à 0,1° et utilisable hors ligne.",
-      "tldr": "Posez le téléphone sur une étagère : l'outil lit l'inclinaison directement depuis l'accéléromètre. À plat, vous obtenez une bulle ronde à deux axes ; posé sur la tranche, une fiole de niveau de menuisier. Rien ne quitte votre appareil, et un simple appui corrige le biais propre au téléphone."
+      "tldr": "Posez le téléphone sur une étagère : l'outil lit l'inclinaison directement depuis l'accéléromètre. À plat, vous obtenez une bulle ronde à deux axes ; posé sur la tranche, une fiole de niveau de menuisier. Vos mesures restent privées, et un simple appui corrige le biais propre au téléphone."
     },
     "decibel-meter": {
       "title": "Sonomètre",
@@ -625,7 +625,7 @@
     "console": {
       "title": "Console",
       "lede": "Discutez avec le modèle local pendant qu'il utilise les apps Mentria sur un écran de téléphone partagé — ou laissez-le jouer un utilisateur test et rapporter ce qu'il trouve.",
-      "tldr": "La Console place un écran Mentria au format téléphone à côté d'un chat. Demandez au modèle 27B local de faire quelque chose (« lance un minuteur de 5 minutes ») : il ouvre l'app et la manipule sous vos yeux — chaque action est visible et il doit citer l'écran pour déclarer la tâche terminée. Lancez une session test : il explore une app comme une personne fictive, puis rédige un rapport de bugs à transformer en issues. Rien ne quitte votre appareil."
+      "tldr": "La Console place un écran Mentria au format téléphone à côté d'un chat. Demandez au modèle 27B local de faire quelque chose (« lance un minuteur de 5 minutes ») : il ouvre l'app et la manipule sous vos yeux — chaque action est visible et il doit citer l'écran pour déclarer la tâche terminée. Lancez une session test : il explore une app comme une personne fictive, puis rédige un rapport de bugs à transformer en issues. Vos conversations restent privées."
     },
     "forge": {
       "title": "Forge",

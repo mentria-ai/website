@@ -318,7 +318,7 @@
       "requires_js": "Requiere JavaScript",
       "requires_webgpu": "Requiere WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
       "feature_browser": "Funciona por completo en tu navegador",
-      "feature_private": "Ningún dato sale de tu dispositivo",
+      "feature_private": "Tus datos se mantienen privados",
       "feature_no_key": "No necesita clave de API",
       "feature_offline": "Funciona sin conexión una vez en caché"
     },
@@ -480,7 +480,7 @@
       "total": "total",
       "collapse": "Cerrar el panel",
       "details": "Detalles del dispositivo",
-      "nothingLeaves": "nada sale de tu dispositivo"
+      "dataPrivate": "tus datos se mantienen privados"
     },
     "model": {
       "checking": "Comprobando tu dispositivo…",
@@ -548,7 +548,7 @@
     "exif": {
       "title": "Inspector EXIF",
       "lede": "Descubre lo que una foto lleva oculto — datos de cámara, fechas, ubicación GPS — y descarga una copia limpia sin nada de eso. No se sube nada.",
-      "tldr": "Lee metadatos EXIF, XMP, IPTC y otros incrustados en imágenes JPEG, PNG y WebP directamente en tu navegador: modelo de cámara, fecha de captura y la posición GPS que muchos teléfonos añaden en silencio. Con un toque genera una copia con los metadatos eliminados a nivel de bytes — los píxeles no se tocan y el perfil de color se conserva — y la copia se vuelve a analizar para verificar que está limpia antes de descargarla. Nada sale de tu dispositivo."
+      "tldr": "Lee metadatos EXIF, XMP, IPTC y otros incrustados en imágenes JPEG, PNG y WebP directamente en tu navegador: modelo de cámara, fecha de captura y la posición GPS que muchos teléfonos añaden en silencio. Con un toque genera una copia con los metadatos eliminados a nivel de bytes — los píxeles no se tocan y el perfil de color se conserva — y la copia se vuelve a analizar para verificar que está limpia antes de descargarla. Tus fotos nunca se suben."
     },
     "sudoku": {
       "title": "Sudoku",
@@ -589,7 +589,7 @@
     "bubble-level": {
       "title": "Nivel de burbuja",
       "lede": "Convierte tu móvil en un nivel de burbuja online: un nivel de albañil sin instalar ninguna app, con precisión de 0,1° y que funciona sin conexión.",
-      "tldr": "Apoya el móvil en una estantería y la herramienta lee la inclinación directamente del acelerómetro. Túmbalo en plano para ver una burbuja circular de dos ejes, o ponlo de canto para usar el tubo de un nivel de carpintero. Nada sale de tu dispositivo, y con un toque corriges el sesgo del propio móvil."
+      "tldr": "Apoya el móvil en una estantería y la herramienta lee la inclinación directamente del acelerómetro. Túmbalo en plano para ver una burbuja circular de dos ejes, o ponlo de canto para usar el tubo de un nivel de carpintero. Tus mediciones se mantienen privadas, y con un toque corriges el sesgo del propio móvil."
     },
     "decibel-meter": {
       "title": "Medidor de decibelios",
@@ -625,7 +625,7 @@
     "console": {
       "title": "Consola",
       "lede": "Chatea con el modelo local mientras usa las apps de Mentria en una pantalla de móvil compartida, o deja que actúe como usuario de prueba y te cuente lo que encuentra.",
-      "tldr": "La Consola pone una pantalla de Mentria tamaño móvil junto a un chat. Pide al modelo 27B local que haga algo (\"pon un temporizador de 5 minutos\") y abrirá la app y la usará delante de ti: cada acción se muestra y debe citar la pantalla para afirmar que terminó. Inicia una sesión de prueba y explorará una app como una persona inventada, con un informe de fallos que puedes convertir en issues. Nada sale de tu dispositivo."
+      "tldr": "La Consola pone una pantalla de Mentria tamaño móvil junto a un chat. Pide al modelo 27B local que haga algo (\"pon un temporizador de 5 minutos\") y abrirá la app y la usará delante de ti: cada acción se muestra y debe citar la pantalla para afirmar que terminó. Inicia una sesión de prueba y explorará una app como una persona inventada, con un informe de fallos que puedes convertir en issues. Tus conversaciones se mantienen privadas."
     },
     "forge": {
       "title": "Forge",

@@ -318,7 +318,7 @@
       "requires_js": "Requer JavaScript",
       "requires_webgpu": "Requer WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
       "feature_browser": "Roda inteiramente no seu navegador",
-      "feature_private": "Nenhum dado sai do seu dispositivo",
+      "feature_private": "Seus dados continuam privados",
       "feature_no_key": "Não precisa de chave de API",
       "feature_offline": "Funciona offline depois de ficar em cache"
     },
@@ -480,7 +480,7 @@
       "total": "total",
       "collapse": "Fechar o painel",
       "details": "Detalhes do dispositivo",
-      "nothingLeaves": "nada sai do seu dispositivo"
+      "dataPrivate": "seus dados continuam privados"
     },
     "model": {
       "checking": "Verificando seu dispositivo…",
@@ -548,7 +548,7 @@
     "exif": {
       "title": "Inspetor EXIF",
       "lede": "Veja o que uma foto carrega em segredo — dados da câmera, datas, localização GPS — e baixe uma cópia limpa sem nada disso. Nada é enviado.",
-      "tldr": "Lê metadados EXIF, XMP, IPTC e outros incorporados em imagens JPEG, PNG e WebP inteiramente no seu navegador: modelo da câmera, data da captura e a posição GPS que muitos celulares gravam em silêncio. Um toque gera uma cópia com os metadados removidos em nível de bytes — pixels intactos, perfil de cores mantido — e a cópia é reanalisada para confirmar que está limpa antes do download. Nada sai do seu dispositivo."
+      "tldr": "Lê metadados EXIF, XMP, IPTC e outros incorporados em imagens JPEG, PNG e WebP inteiramente no seu navegador: modelo da câmera, data da captura e a posição GPS que muitos celulares gravam em silêncio. Um toque gera uma cópia com os metadados removidos em nível de bytes — pixels intactos, perfil de cores mantido — e a cópia é reanalisada para confirmar que está limpa antes do download. Suas fotos nunca são enviadas."
     },
     "sudoku": {
       "title": "Sudoku",
@@ -589,7 +589,7 @@
     "bubble-level": {
       "title": "Nível de bolha",
       "lede": "Transforme o celular em um nível de bolha online: um nível de pedreiro sem instalar aplicativo, com precisão de 0,1° e que funciona offline.",
-      "tldr": "Apoie o celular na prateleira e a ferramenta lê a inclinação direto do acelerômetro. Deitado, você vê uma bolha redonda de dois eixos; em pé sobre uma das bordas, o tubo de um nível de marceneiro. Nada sai do seu aparelho, e um toque zera o desvio do próprio celular."
+      "tldr": "Apoie o celular na prateleira e a ferramenta lê a inclinação direto do acelerômetro. Deitado, você vê uma bolha redonda de dois eixos; em pé sobre uma das bordas, o tubo de um nível de marceneiro. Suas medições continuam privadas, e um toque zera o desvio do próprio celular."
     },
     "decibel-meter": {
       "title": "Medidor de decibéis",
@@ -625,7 +625,7 @@
     "console": {
       "title": "Console",
       "lede": "Converse com o modelo local enquanto ele usa os apps da Mentria em uma tela de celular compartilhada — ou deixe que ele atue como usuário de teste e relate o que encontrar.",
-      "tldr": "O Console coloca uma tela da Mentria do tamanho de um celular ao lado de um chat. Peça ao modelo 27B local para fazer algo (\"crie um timer de 5 minutos\") e ele abre o app e o usa na sua frente — cada ação é exibida e ele precisa citar a tela para dizer que concluiu. Inicie uma sessão de teste e ele explora um app como uma pessoa fictícia, depois escreve um relatório com bugs que você pode registrar como issues. Nada sai do seu dispositivo."
+      "tldr": "O Console coloca uma tela da Mentria do tamanho de um celular ao lado de um chat. Peça ao modelo 27B local para fazer algo (\"crie um timer de 5 minutos\") e ele abre o app e o usa na sua frente — cada ação é exibida e ele precisa citar a tela para dizer que concluiu. Inicie uma sessão de teste e ele explora um app como uma pessoa fictícia, depois escreve um relatório com bugs que você pode registrar como issues. Suas conversas continuam privadas."
     },
     "forge": {
       "title": "Forge",

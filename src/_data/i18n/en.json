@@ -318,7 +318,7 @@
       "requires_js": "Requires JavaScript",
       "requires_webgpu": "Requires WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
       "feature_browser": "Runs entirely in your browser",
-      "feature_private": "No data leaves your device",
+      "feature_private": "Your data stays private",
       "feature_no_key": "No API key required",
       "feature_offline": "Works offline once cached"
     },
@@ -480,7 +480,7 @@
       "total": "total",
       "collapse": "Collapse panel",
       "details": "Device details",
-      "nothingLeaves": "nothing leaves your device"
+      "dataPrivate": "your data stays private"
     },
     "model": {
       "checking": "Checking your device…",
@@ -517,7 +517,7 @@
     "exif": {
       "title": "EXIF Inspector",
       "lede": "See what a photo secretly carries — camera details, timestamps, GPS location — and download a clean copy with it all removed. Nothing is uploaded.",
-      "tldr": "Reads EXIF, XMP, IPTC and other embedded metadata from JPEG, PNG and WebP images entirely in your browser: camera model, capture time, and the GPS position many phones embed silently. One tap produces a stripped copy with the metadata removed at byte level — pixels untouched, color profile kept — and the copy is re-parsed to verify it is clean before download. Nothing ever leaves your device."
+      "tldr": "Reads EXIF, XMP, IPTC and other embedded metadata from JPEG, PNG and WebP images entirely in your browser: camera model, capture time, and the GPS position many phones embed silently. One tap produces a stripped copy with the metadata removed at byte level — pixels untouched, color profile kept — and the copy is re-parsed to verify it is clean before download. Your photos are never uploaded."
     },
     "radio": {
       "title": "Infinite Radio",
@@ -589,7 +589,7 @@
     "bubble-level": {
       "title": "Bubble Level",
       "lede": "Turn your phone into a spirit level online — a bubble level online with no app needed, accurate to 0.1°, that works offline.",
-      "tldr": "Rest your phone on a shelf and this reads the tilt straight from its accelerometer. Lay it flat for a round two-axis bubble, or stand it on an edge for a carpenter's vial. Nothing leaves your device, and one tap calibrates out your phone's own bias."
+      "tldr": "Rest your phone on a shelf and this reads the tilt straight from its accelerometer. Lay it flat for a round two-axis bubble, or stand it on an edge for a carpenter's vial. Your readings stay private, and one tap calibrates out your phone's own bias."
     },
     "decibel-meter": {
       "title": "Decibel Meter",
@@ -625,7 +625,7 @@
     "console": {
       "title": "Console",
       "lede": "Chat with the on-device model while it uses Mentria apps on a shared phone screen — or let it play a test user and report what it finds.",
-      "tldr": "The Console puts a phone-sized Mentria screen next to a chat. Ask the 27B on-device model to do something (\"set a 5 minute timer\") and it opens the app and taps through it in front of you — every action is shown, and it must quote the screen to claim success. Start a test session and it explores an app as a made-up person, then writes a report with bugs you can file as issues. Nothing leaves your device."
+      "tldr": "The Console puts a phone-sized Mentria screen next to a chat. Ask the 27B on-device model to do something (\"set a 5 minute timer\") and it opens the app and taps through it in front of you — every action is shown, and it must quote the screen to claim success. Start a test session and it explores an app as a made-up person, then writes a report with bugs you can file as issues. Your conversations stay private."
     },
     "forge": {
       "title": "Forge",

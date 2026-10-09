@@ -1,0 +1,87 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/privacy/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'privacy.title' | t }}"
+  description: "{{ 'privacy.desc' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">privacy</span></p>
+  <h1>{{ "privacy.title" | t }}</h1>
+  <p>{{ "privacy.lede" | t }}</p>
+</section>
+
+<div class="privacy">
+  <section class="privacy__part" aria-labelledby="privacy-device">
+    <h2 id="privacy-device">{{ "privacy.device_h" | t }}</h2>
+    <ul class="privacy__list">
+      {%- for key in ["ai", "files", "sensors", "saved", "backup"] %}
+      <li><strong>{{ ("privacy.device_" ~ key ~ "_b") | t }}</strong> {{ ("privacy.device_" ~ key) | t }}</li>
+      {%- endfor %}
+    </ul>
+  </section>
+
+  <section class="privacy__part" aria-labelledby="privacy-net">
+    <h2 id="privacy-net">{{ "privacy.net_h" | t }}</h2>
+    <p>{{ "privacy.net_lede" | t }}</p>
+    <dl class="privacy__net">
+      {%- for key in ["site", "models", "comms", "mirror", "push", "github", "local", "assistant", "ext"] %}
+      <div class="privacy__row">
+        <dt>{{ ("privacy.net_" ~ key ~ "_name") | t }}</dt>
+        <dd><span class="privacy__when">{{ ("privacy.net_" ~ key ~ "_when") | t }}</span> {{ ("privacy.net_" ~ key ~ "_sees") | t }}</dd>
+      </div>
+      {%- endfor %}
+    </dl>
+  </section>
+
+  <section class="privacy__part" aria-labelledby="privacy-keep">
+    <h2 id="privacy-keep">{{ "privacy.keep_h" | t }}</h2>
+    <ul class="privacy__list">
+      {%- for key in ["none", "logs"] %}
+      <li>{{ ("privacy.keep_" ~ key) | t }}</li>
+      {%- endfor %}
+    </ul>
+  </section>
+
+  <section class="privacy__part" aria-labelledby="privacy-check">
+    <h2 id="privacy-check">{{ "privacy.check_h" | t }}</h2>
+    <p>{{ "privacy.check_lede" | t }}</p>
+    <ol class="privacy__steps">
+      {%- for n in [1, 2, 3] %}
+      <li>{{ ("privacy.check_step_" ~ n) | t }}</li>
+      {%- endfor %}
+      <li>{{ "privacy.check_step_4" | t }} <a href="https://github.com/mentria-ai/website" rel="noopener">github.com/mentria-ai/website</a></li>
+    </ol>
+  </section>
+
+  <section class="privacy__part" aria-labelledby="privacy-ask">
+    <h2 id="privacy-ask">{{ "privacy.ask_h" | t }}</h2>
+    <p>{{ "privacy.ask_body" | t }} <a href="https://github.com/mentria-ai/website/issues" rel="noopener">{{ "privacy.ask_github" | t }}</a> · <a href="https://x.com/mentria_ai" rel="noopener">{{ "privacy.ask_x" | t }}</a></p>
+    <p class="privacy__updated">{{ "privacy.updated" | t }}</p>
+  </section>
+</div>
+
+<style>
+  .privacy { max-width: 720px; margin: 0 auto 3rem; display: grid; gap: 2.2rem; line-height: 1.6; }
+  .privacy p, .privacy ul, .privacy ol, .privacy dl { margin: 0; }
+  .privacy__part { display: grid; gap: 0.8rem; }
+  .privacy__part h2 { margin: 0; font-size: 1.25rem; }
+  .privacy__list { padding-left: 1.2rem; display: grid; gap: 0.55rem; }
+  .privacy__list strong, .privacy__row dt { color: var(--term-fg); }
+  .privacy__net { display: grid; border-top: 1px solid var(--term-border); }
+  .privacy__row { display: grid; grid-template-columns: minmax(0, 13rem) minmax(0, 1fr); gap: 0.4rem 1.2rem; padding: 0.85rem 0; border-bottom: 1px solid var(--term-border); }
+  .privacy__row dt { font-weight: 600; }
+  .privacy__row dd { margin: 0; }
+  .privacy__when { display: block; color: var(--term-muted); font-size: 0.9rem; }
+  .privacy__steps { padding-left: 1.3rem; display: grid; gap: 0.45rem; }
+  .privacy__updated { font-size: 0.9rem; color: var(--term-muted); }
+  .privacy a { color: var(--syn-cyan); text-decoration: underline; text-underline-offset: 0.2em; overflow-wrap: anywhere; }
+  @media (max-width: 560px) {
+    .privacy__row { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

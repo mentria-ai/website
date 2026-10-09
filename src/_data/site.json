@@ -1,15 +1,15 @@
 {
   "title": "Mentria",
-  "tagline": "creative studio. tools & transmissions.",
-  "description": "A creative studio for tools, experiments, and visual transmissions.",
+  "tagline": "Learn and experiment with AI that runs on your device.",
+  "description": "Mentria runs open AI models in your browser. Chat with them, learn with card packs, and use 40+ private tools. No account, no server, and nothing leaves your device.",
   "author": "Mentria",
   "baseUrl": "/",
   "siteUrl": "https://mentria.ai",
-  "metaTitle": "Mentria — Creative Studio",
-  "metaDescription": "A creative studio for tools, experiments, and visual transmissions. Built with craft.",
-  "keywords": "creative studio, web tools, experiments, mentria",
+  "metaTitle": "Mentria — Learn and experiment with AI that runs on your device",
+  "metaDescription": "Mentria runs open AI models in your browser. Chat with them, learn with card packs, and use 40+ private tools. No account, no server, and nothing leaves your device.",
   "revisitAfter": "7 days",
   "socialImage": "/assets/img/social-card.png",
   "robots": "index, follow",
-  "language": "en"
+  "language": "en",
+  "indexNowKey": "a68ba7dfc1dc7cbfb9aab1d197d2aded"
 }

@@ -2,7 +2,7 @@
   "name": "Mentria",
   "short_name": "Mentria",
   "id": "/",
-  "description": "A creative studio for tools, experiments, and visual transmissions.",
+  "description": "Mentria runs open AI models in your browser. Chat with them, learn with card packs, and use 40+ private tools. No account, no server, and nothing leaves your device.",
   "start_url": "/",
   "display": "standalone",
   "launch_handler": {

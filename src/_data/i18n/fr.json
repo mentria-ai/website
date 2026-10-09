@@ -11,10 +11,10 @@
     "loading_model": "Chargement du modèle sur l'appareil pour une tâche d'IA privée…"
   },
   "site": {
-    "tagline": "studio créatif. outils & transmissions.",
-    "description": "Un studio créatif d'outils, d'expériences et de transmissions visuelles.",
-    "metaTitle": "Mentria — Studio Créatif",
-    "metaDescription": "Un studio créatif d'outils, d'expériences et de transmissions visuelles. Conçu avec soin.",
+    "tagline": "Apprenez et expérimentez avec une IA qui tourne sur votre appareil.",
+    "description": "Mentria fait tourner des modèles d’IA ouverts dans votre navigateur. Discutez avec eux, apprenez avec des packs de cartes et utilisez plus de 40 outils privés. Sans compte, sans serveur, et rien ne quitte votre appareil.",
+    "metaTitle": "Mentria — Apprenez et expérimentez avec une IA qui tourne sur votre appareil",
+    "metaDescription": "Mentria fait tourner des modèles d’IA ouverts dans votre navigateur. Discutez avec eux, apprenez avec des packs de cartes et utilisez plus de 40 outils privés. Sans compte, sans serveur, et rien ne quitte votre appareil.",
     "socialImageAlt": "Mentria — des outils, des jeux et de l'IA qui tournent entièrement dans votre navigateur"
   },
   "nav": {
@@ -32,7 +32,7 @@
   "about": {
     "title": "À propos",
     "meta_description": "Mentria est un petit studio créatif. Des outils, des jeux et une IA respectueux de la vie privée qui s'exécutent entièrement dans votre navigateur — sans serveurs, sans comptes, sans pistage.",
-    "tagline": "studio créatif. outils & transmissions.",
+    "tagline": "Apprenez et expérimentez avec une IA qui tourne sur votre appareil.",
     "copyright": "© 2026 Mentria. Tous droits réservés.",
     "image_use": "Utilisation des images",
     "s1_label": "ce que c'est",
@@ -373,7 +373,8 @@
     "ai-chat": {
       "title": "Chat IA",
       "lede": "Qwen3.5 fonctionnant localement dans votre navigateur. Pas de serveur, pas de clés API. Prend en charge la vision.",
-      "tldr": "AI Chat exécute Qwen3.5 localement dans votre navigateur via WebGPU. Vos messages et toute image envoyée ne quittent jamais votre appareil — pas de serveur, pas de clé API, pas de compte. Prend en charge l'entrée visuelle. Le modèle se charge au premier clic ; les visites suivantes démarrent instantanément depuis le cache local."
+      "tldr": "AI Chat exécute Qwen3.5 localement dans votre navigateur via WebGPU. Vos messages et toute image envoyée ne quittent jamais votre appareil — pas de serveur, pas de clé API, pas de compte. Prend en charge l'entrée visuelle. Le modèle se charge au premier clic ; les visites suivantes démarrent instantanément depuis le cache local.",
+      "seo_title": "Chat IA privé qui tourne dans votre navigateur"
     },
     "base64-codec": {
       "title": "Codec Base64",
@@ -565,7 +566,8 @@
     "annotate-image": {
       "title": "Annoter une image",
       "lede": "Importez une image et obtenez instantanément une description IA, un texte alternatif, une transcription ou des étiquettes — avec des prompts testés en un toucher. S'exécute localement dans votre navigateur, rien n'est envoyé.",
-      "tldr": "Un compagnon ciblé doté de vision pour AI Chat : déposez une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Basculez entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5 sur l'appareil qu'AI Chat (cache partagé — si vous avez déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans votre navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais votre appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis votre gestionnaire de fichiers une fois installé. Copiez ou téléchargez le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+)."
+      "tldr": "Un compagnon ciblé doté de vision pour AI Chat : déposez une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Basculez entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5 sur l'appareil qu'AI Chat (cache partagé — si vous avez déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans votre navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais votre appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis votre gestionnaire de fichiers une fois installé. Copiez ou téléchargez le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+).",
+      "seo_title": "Annotation d’images par IA : texte alternatif et OCR"
     },
     "files": {
       "title": "Fichiers",
@@ -579,7 +581,8 @@
     },
     "comms": {
       "title": "Comms",
-      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte et sans serveur au milieu."
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte et sans serveur au milieu.",
+      "seo_title": "Messagerie, appels et fichiers P2P chiffrés"
     },
     "bubble-level": {
       "title": "Niveau à bulle",
@@ -604,7 +607,8 @@
     "ruler": {
       "title": "Règle en ligne",
       "lede": "Une règle en ligne à taille réelle : mesurez en cm, mm et pouces directement à l'écran, et calibrez-la avec une carte bancaire pour que les millimètres soient justes.",
-      "tldr": "Une règle dessinée directement sur votre écran, avec les centimètres et les millimètres sur un bord et les pouces jusqu'au 1/16 sur l'autre. Aucun navigateur ne peut connaître la taille réelle de votre écran : vous calibrez donc une fois en ajustant un contour sur une carte bancaire, ou en saisissant une longueur que vous connaissez déjà, et les graduations deviennent fidèles. Faites glisser les deux repères pour mesurer ce que vous posez sur la vitre ; tout fonctionne hors ligne et le calibrage reste sur cet appareil."
+      "tldr": "Une règle dessinée directement sur votre écran, avec les centimètres et les millimètres sur un bord et les pouces jusqu'au 1/16 sur l'autre. Aucun navigateur ne peut connaître la taille réelle de votre écran : vous calibrez donc une fois en ajustant un contour sur une carte bancaire, ou en saisissant une longueur que vous connaissez déjà, et les graduations deviennent fidèles. Faites glisser les deux repères pour mesurer ce que vous posez sur la vitre ; tout fonctionne hors ligne et le calibrage reste sur cet appareil.",
+      "seo_title": "Règle en ligne taille réelle (cm et mm)"
     },
     "phosphor": {
       "title": "PHOSPHOR",

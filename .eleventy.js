@@ -294,6 +294,25 @@ module.exports = function(eleventyConfig) {
     return String(value == null ? "" : value).indexOf(part) !== -1;
   });
 
+  let gitDates = null;
+  const readGitDates = () => {
+    const dates = new Map();
+    try {
+      const log = execSync("git log --format=@%cs --name-only -- src", { maxBuffer: 64 * 1024 * 1024 }).toString();
+      let current = "";
+      for (const line of log.split("\n")) {
+        if (line.startsWith("@")) current = line.slice(1);
+        else if (line && !dates.has(line)) dates.set(line, current);
+      }
+    } catch {}
+    return dates;
+  };
+  eleventyConfig.addFilter("gitDate", function (inputPath) {
+    if (!inputPath) return "";
+    if (!gitDates) gitDates = readGitDates();
+    return gitDates.get(String(inputPath).replace(/^\.\//, "")) || "";
+  });
+
   eleventyConfig.addFilter("where", function (array, key, value) {
     return Array.isArray(array) ? array.filter((item) => item && item[key] === value) : [];
   });

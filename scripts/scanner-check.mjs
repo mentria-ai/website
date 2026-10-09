@@ -216,6 +216,37 @@ test('pdf: titles are escaped, and non-Latin titles are stored as UTF-16', () =>
   assert.match(s, /\/Title <FEFF8ACB6C4266F8>/);
 });
 
+const Z = await mod('zip.js');
+
+test('zip: entries, CRCs and the central directory', () => {
+  const a = new TextEncoder().encode('hello'), b = new Uint8Array([1, 2, 3, 4]);
+  const z = Z.zipStoreBytes([{ name: 'Scan - 01.jpg', data: a }, { name: 'スキャン - 02.jpg', data: b }]);
+  const v = new DataView(z.buffer, z.byteOffset, z.byteLength);
+  assert.equal(Z.crc32(new TextEncoder().encode('123456789')), 0xcbf43926);
+  assert.equal(v.getUint32(0, true), 0x04034b50);
+  assert.equal(v.getUint32(14, true), Z.crc32(a));
+  const e = z.length - 22;
+  assert.equal(v.getUint32(e, true), 0x06054b50);
+  assert.equal(v.getUint16(e + 10, true), 2);
+  let cd = v.getUint32(e + 16, true);
+  const names = [];
+  for (let k = 0; k < 2; k++) {
+    assert.equal(v.getUint32(cd, true), 0x02014b50);
+    const len = v.getUint16(cd + 28, true);
+    names.push(new TextDecoder().decode(z.slice(cd + 46, cd + 46 + len)));
+    cd += 46 + len;
+  }
+  assert.deepEqual(names, ['Scan - 01.jpg', 'スキャン - 02.jpg']);
+});
+
+test('zip: names are safe for file systems', () => {
+  assert.equal(Z.safeName('Tax: 2026/Q3 <draft>?'), 'Tax- 2026-Q3 -draft-');
+  assert.equal(Z.safeName('   '), 'Scan');
+  assert.equal(Z.safeName('..hidden'), 'hidden');
+  assert.equal(Z.safeName('請求書 2026'), '請求書 2026');
+  assert.equal(Z.safeName('x'.repeat(200)).length, 80);
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

@@ -1594,3 +1594,6 @@ body.is-tools-open { overflow: hidden; }
 .week-ring__seg.is-today.is-on { stroke: var(--syn-cyan); }
 .week-ring:hover .week-ring__seg:not(.is-on) { stroke: rgba(255, 255, 255, 0.25); }
 .week-ring:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+iframe.xr__frame.xr__frame--full { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; z-index: 9000; margin: 0; border: 0; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); box-sizing: border-box; background: #000; }
+html.ext-full, html.ext-full body { overflow: hidden; }
+html.ext-full .app-bar, html.ext-full .m-update, html.ext-full .m-mini-dock, html.ext-full .pwa-install-banner, html.ext-full .pwa-install-sheet, html.ext-full .scanlines::after { display: none !important; }

@@ -107,7 +107,7 @@ eleventyComputed:
         <tr><td><code>icon</code></td><td>string</td><td>no</td><td>An emoji (≤8 chars) <em>or</em> a <code>data:image/…</code> URI up to 8 KB.</td></tr>
         <tr><td><code>author</code></td><td>string</td><td>no</td><td>≤200 chars.</td></tr>
         <tr><td><code>description</code></td><td>string</td><td>no</td><td>≤200 chars.</td></tr>
-        <tr><td><code>permissions</code></td><td>string[]</td><td>no</td><td>Up to 16 labels (≤32 chars each). Vocabulary: <code>storage ai bluetooth usb serial network notifications share</code>. Advisory only — surfaced in the trust prompt and the manager row; not enforced by a sandbox. Network access is limited separately by the site’s content security policy (see <a href="#sdk-network">Network</a>).</td></tr>
+        <tr><td><code>permissions</code></td><td>string[]</td><td>no</td><td>Up to 16 labels (≤32 chars each). Vocabulary: <code>storage ai bluetooth usb serial network notifications share camera</code>. Advisory only — surfaced in the trust prompt and the manager row; not enforced by a sandbox. Network access is limited separately by the site’s content security policy (see <a href="#sdk-network">Network</a>).</td></tr>
         <tr><td><code>mounts</code></td><td>object</td><td>no</td><td>Where the extension appears (below).</td></tr>
         <tr><td><code>mounts.tool</code></td><td>object</td><td>no</td><td>Present (usually <code>{}</code>) → a launcher tile plus the manager's <em>open</em> button.</td></tr>
         <tr><td><code>mounts.commands</code></td><td>object[]</td><td>no</td><td>Each <code>{ name, description, usage? }</code> adds an entry to the command palette (⌘K) that opens the extension with <code>args</code> set to <code>{ cmd: name, args: '' }</code>. <code>name</code> kebab-case 2–16 chars; <code>description</code> required, shown beside the entry; <code>usage</code> is an optional hint the palette does not show.</td></tr>
@@ -137,6 +137,7 @@ eleventyComputed:
         <tr><td><code>theme</code></td><td><code>{ accent, bg, fg, muted, fontMono }</code></td><td>The site's live CSS token values. <code>root.style.setProperty('--x', theme.accent)</code></td></tr>
         <tr><td><code>args</code></td><td><code>null | { cmd, args }</code></td><td>Set when opened from a palette command (<code>args</code> is then <code>''</code>) or from a link to the run page, <code>/tools/extensions/run/?id=…</code>, ending in <code>#cmd=starter&amp;args=hello</code>; otherwise <code>null</code>. <code>if (args &amp;&amp; args.args) run(args.args)</code></td></tr>
         <tr><td><code>notify</code></td><td><code>(msg) → void</code></td><td>Host toast, bottom-center, first 120 chars. <code>notify('saved')</code></td></tr>
+        <tr><td><code>fullscreen</code></td><td><code>(on) → void</code></td><td>Gives your frame the whole screen, for example while a camera view is open. Call <code>fullscreen(false)</code> when you leave that view. <code>fullscreen(true)</code></td></tr>
         <tr><td><code>close</code></td><td><code>() → void</code></td><td>Leave the extension and return to the home launcher. <code>close()</code></td></tr>
       </tbody>
     </table>

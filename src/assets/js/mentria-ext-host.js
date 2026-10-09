@@ -81,6 +81,11 @@ export function mountExtension(frame, opts) {
   });
   const subs = [];
   localeSubs = subs;
+  const setFull = (on) => {
+    frame.classList.toggle('xr__frame--full', !!on);
+    document.documentElement.classList.toggle('ext-full', !!on);
+  };
+  setFull(false);
   window.__mentriaExtHost = Object.freeze({
     manifest: Object.freeze(JSON.parse(JSON.stringify(m))),
     storage: dataApiFor(id),
@@ -92,6 +97,7 @@ export function mountExtension(frame, opts) {
     theme,
     args: opts.args || null,
     notify: toast,
+    fullscreen: setFull,
     close: () => { if (typeof opts.onClose === 'function') opts.onClose(); else location.href = (opts.prefix || '') + '/'; }
   });
   window.__mentriaExtReportError = (msg) => { if (typeof opts.onError === 'function') opts.onError(m.name + ': ' + msg); };

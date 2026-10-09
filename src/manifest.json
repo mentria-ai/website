@@ -2,7 +2,7 @@
   "name": "Mentria",
   "short_name": "Mentria",
   "id": "/",
-  "description": "Mentria runs open AI models in your browser. Chat with them, learn with card packs, and use 40+ private tools. No account, no server, and nothing leaves your device.",
+  "description": "AI that runs in your browser, with 40+ built-in tools, an extensions library and card decks for learning. Add your own extensions and decks. Nothing leaves your device.",
   "start_url": "/",
   "display": "standalone",
   "launch_handler": {

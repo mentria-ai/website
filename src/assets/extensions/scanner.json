@@ -1,0 +1,16 @@
+{
+  "id": "scanner",
+  "name": "Document Scanner",
+  "version": "1.0.0",
+  "author": "Mentria",
+  "icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%230b1015'/%3E%3Cpath d='M15 11h13l7 7v19H15z' fill='%23e6edf3'/%3E%3Cpath d='M28 11v7h7' fill='%23c3ccd6'/%3E%3Cpath d='M19 23h12M19 28h12M19 33h8' stroke='%2356606b' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M9 15V9h6M39 15V9h-6M9 33v6h6M39 33v6h-6' fill='none' stroke='%236ef3c5' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
+  "description": "Scan pages with your camera. Edges are found automatically, pages are straightened and cleaned up, and you can export a PDF or images.",
+  "permissions": ["camera", "storage", "share"],
+  "mounts": {
+    "tool": true,
+    "commands": [{ "name": "scan", "usage": "scan", "description": "scan a document" }]
+  },
+  "app": "/extensions/scanner/app/",
+  "entry": ["/assets/scanner/app.js"],
+  "assets": ["/assets/scanner/"]
+}

@@ -1919,7 +1919,8 @@
         "pregnancy-check": "Información y el momento de hacer la prueba, no un diagnóstico: cuándo es fiable una prueba de embarazo casera, cómo planificar un embarazo y tu fecha de parto, semanas y citas. Todo se queda en este dispositivo.",
         "fpv-drone": "Pilota un dron de carreras entre puertas luminosas sobre colinas, un patio de contenedores y un cañón del desierto. Vuelo acrobático o autonivelado, medallas, carreras contra fantasmas y un mapa de vuelo libre. Funciona con pantalla táctil, mando o teclado.",
         "nitro-racer": "Carreras arcade callejeras contra cinco rivales: derrapa para llenar el nitro, salta las rampas y consigue medallas en un circuito urbano de neón, una autopista costera y un cañón del desierto. Funciona con pantalla táctil, inclinación, mando o teclado.",
-        "finance": "Controla gastos, presupuestos, facturas, inversiones e impuestos, con previsiones. Cifrado en tu dispositivo y sincronizado solo entre tus propios dispositivos."
+        "finance": "Controla gastos, presupuestos, facturas, inversiones e impuestos, con previsiones. Cifrado en tu dispositivo y sincronizado solo entre tus propios dispositivos.",
+        "scanner": "Escanea páginas con la cámara. Los bordes se detectan solos, las páginas se enderezan y se limpian, y puedes exportar un PDF o imágenes. Tus escaneos se mantienen privados."
       },
       "cmd": {
         "finance": {
@@ -1933,11 +1934,17 @@
         },
         "pomodoro-timer": {
           "pomodoro": "empezar una sesión de concentración"
+        },
+        "scanner": {
+          "scan": "escanear un documento"
         }
       },
       "perm": {
         "finance": {
           "network": "Solo para sincronizar tus propios dispositivos y para los recordatorios de pagos opcionales. La sincronización pasa cifrada por el relé de Mentria, que no puede leer tu libro de cuentas; los recordatorios solo envían una hora de aviso. No se guarda nada legible."
+        },
+        "scanner": {
+          "camera": "Solo mientras la pantalla de escaneo está abierta. Las fotos se procesan en este dispositivo."
         }
       }
     },
@@ -5520,6 +5527,129 @@
         "overconstrained": "el dispositivo no admite esta configuración",
         "security": "bloqueado por seguridad",
         "abort": "se canceló"
+      }
+    },
+    "scanner": {
+      "app": {
+        "name": "Escáner de documentos",
+        "close": "Cerrar"
+      },
+      "library": {
+        "title": "Escaneos",
+        "scan": "Escanear",
+        "import": "Importar fotos",
+        "empty_title": "Aún no hay escaneos",
+        "empty_body": "Apunta la cámara a una página. El escáner encuentra los bordes, endereza la página y la guarda aquí.",
+        "pages": {
+          "one": "{n} página",
+          "other": "{n} páginas"
+        },
+        "more": "Más opciones para {name}",
+        "rename": "Cambiar nombre",
+        "export": "Exportar",
+        "delete": "Eliminar",
+        "delete_confirm": "¿Eliminar «{name}»? No se puede deshacer.",
+        "storage": "{used} de {quota} usados en este dispositivo",
+        "rename_label": "Nombre del documento",
+        "save": "Guardar",
+        "cancel": "Cancelar"
+      },
+      "capture": {
+        "starting": "Iniciando la cámara…",
+        "looking": "Buscando una página…",
+        "hold": "No te muevas",
+        "captured": "Capturada",
+        "tip_contrast": "Prueba con una superficie más oscura debajo de la página",
+        "auto": "Auto",
+        "manual": "Manual",
+        "shutter": "Hacer foto",
+        "flash": "Flash",
+        "done": "Listo",
+        "import": "Importar fotos",
+        "count": {
+          "one": "{n} página",
+          "other": "{n} páginas"
+        },
+        "discard_confirm": "¿Descartar las páginas que acabas de escanear?",
+        "discard": "Descartar"
+      },
+      "camera": {
+        "denied": "Se bloqueó el acceso a la cámara. Permítelo en los ajustes del navegador o importa fotos.",
+        "no_camera": "No se encontró ninguna cámara. Puedes importar fotos.",
+        "error": "La cámara no pudo iniciarse. Puedes importar fotos.",
+        "insecure": "La cámara necesita una página segura (https)."
+      },
+      "review": {
+        "back": "Volver a los escaneos",
+        "rename": "Cambiar nombre del documento",
+        "crop": "Recortar",
+        "rotate": "Girar",
+        "filter": "Filtro",
+        "retake": "Repetir",
+        "delete_page": "Eliminar",
+        "delete_page_confirm": "¿Eliminar esta página?",
+        "add": "Añadir páginas",
+        "export": "Exportar",
+        "page_of": "Página {n} de {total}",
+        "prev": "Página anterior",
+        "next": "Página siguiente",
+        "reorder_hint": "Mantén pulsada una página para arrastrarla a otro lugar."
+      },
+      "filter": {
+        "original": "Original",
+        "auto": "Color automático",
+        "gray": "Escala de grises",
+        "bw": "Blanco y negro",
+        "whiteboard": "Pizarra"
+      },
+      "adjust": {
+        "title": "Ajustar esquinas",
+        "detect": "Detectar de nuevo",
+        "whole": "Foto completa",
+        "cancel": "Cancelar",
+        "apply": "Aplicar",
+        "not_found": "No se encontraron los bordes de la página. Arrastra las esquinas a su sitio.",
+        "corner": "Esquina {n}",
+        "edge": "Borde {n}"
+      },
+      "export": {
+        "title": "Exportar",
+        "format": "Formato",
+        "pdf": "PDF",
+        "jpg": "JPG",
+        "png": "PNG",
+        "page_size": "Tamaño de página",
+        "size_fit": "Ajustar",
+        "size_a4": "A4",
+        "size_letter": "Carta",
+        "quality": "Tamaño del archivo",
+        "q_high": "Alto",
+        "q_balanced": "Equilibrado",
+        "q_small": "Pequeño",
+        "share": "Compartir",
+        "share_ready": "Toca para compartir",
+        "download": "Descargar",
+        "cancel": "Cancelar",
+        "working": "Preparando la página {n} de {total}…",
+        "done": "Guardado: {name}",
+        "shared": "Compartido",
+        "failed": "Error al exportar: {msg}"
+      },
+      "import": {
+        "working": "Añadiendo la foto {n} de {total}…",
+        "failed": "No se pudo abrir {name}"
+      },
+      "doc": {
+        "default_name": "Escaneo {date}"
+      },
+      "errors": {
+        "storage_full": "No queda espacio para escaneos en este dispositivo. Exporta y elimina escaneos antiguos e inténtalo de nuevo.",
+        "render": "No se pudo procesar esta página.",
+        "no_js": "El escáner de documentos necesita JavaScript."
+      },
+      "a11y": {
+        "captured": "Página {n} capturada",
+        "page": "Página {n}"
       }
     }
   },

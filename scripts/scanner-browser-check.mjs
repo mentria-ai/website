@@ -1,4 +1,4 @@
-import { rmSync } from 'node:fs';
+import { rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import puppeteer from 'puppeteer-core';
 import { serve } from './scanner-serve.mjs';
 
@@ -18,6 +18,39 @@ const browser = await puppeteer.launch({
 
 const checks = [];
 const check = (name, fn) => checks.push([name, fn]);
+const FIXTURES = '/Volumes/Mac ext storage/games-tmp/orch/scanner-fixtures';
+
+async function makeFixtures(page, count) {
+  const files = await page.evaluate(async (count) => {
+    const out = [];
+    for (let k = 0; k < count; k++) {
+      const c = new OffscreenCanvas(1600, 1200);
+      const x = c.getContext('2d');
+      x.fillStyle = k % 2 ? '#3a2a1c' : '#1d2630';
+      x.fillRect(0, 0, 1600, 1200);
+      const q = [[300 + k * 20, 180], [1290, 220 - k * 10], [1250, 1050], [340, 1010]];
+      x.fillStyle = '#f4f3ee';
+      x.beginPath();
+      q.forEach((p, i) => (i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1])));
+      x.closePath();
+      x.fill();
+      x.fillStyle = '#2b2b2b';
+      for (let i = 0; i < 18; i++) x.fillRect(430, 300 + i * 38, 700 - (i % 3) * 90, 12);
+      const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.9 });
+      const buf = new Uint8Array(await blob.arrayBuffer());
+      let s = '';
+      for (let i = 0; i < buf.length; i += 32768) s += String.fromCharCode.apply(null, buf.subarray(i, i + 32768));
+      out.push(btoa(s));
+    }
+    return out;
+  }, count);
+  mkdirSync(FIXTURES, { recursive: true });
+  return files.map((b64, i) => {
+    const p = FIXTURES + '/page-' + (i + 1) + '.jpg';
+    writeFileSync(p, Buffer.from(b64, 'base64'));
+    return p;
+  });
+}
 
 check('renderer: GPU and CPU agree, rotation keeps orientation, filters and detection work', async (page) => {
   await page.goto(ORIGIN + '/about/', { waitUntil: 'load' });
@@ -84,6 +117,39 @@ check('renderer: GPU and CPU agree, rotation keeps orientation, filters and dete
   if (r.cornerErr > 24) throw new Error('detection corner error ' + r.cornerErr);
 });
 
+check('app: the empty library renders in every locale without errors', async (page) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  for (const prefix of ['', '/es', '/pt-br', '/fr', '/ja']) {
+    await page.goto(ORIGIN + prefix + '/extensions/scanner/app/', { waitUntil: 'load' });
+    await page.waitForSelector('.sc-lib .sc-empty:not([hidden])', { timeout: 15000 });
+    const title = await page.$eval('.sc-top__title', (e) => e.textContent);
+    if (!title || title.includes('library.')) throw new Error(prefix + ' title ' + title);
+  }
+  if (errors.length) throw new Error(errors.join(' | '));
+});
+
+check('library: importing two photos creates a document with rendered pages', async (page) => {
+  await page.goto(ORIGIN + '/extensions/scanner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.sc-lib');
+  const files = await makeFixtures(page, 2);
+  const input = await page.$('.sc-lib input[type=file]');
+  await input.uploadFile(...files);
+  await page.waitForFunction(async () => {
+    const db = await import('/assets/scanner/db.js');
+    const docs = await db.listDocs();
+    return docs.length === 1 && docs[0].pageIds.length === 2;
+  }, { timeout: 60000, polling: 500 });
+  const r = await page.evaluate(async () => {
+    const db = await import('/assets/scanner/db.js');
+    const [doc] = await db.listDocs();
+    const p = await db.getPage(doc.pageIds[0]);
+    return { thumb: p.thumb && p.thumb.size, render: p.render && p.render.size, quad: !!p.quad };
+  });
+  if (!r.thumb || !r.render) throw new Error('missing renders ' + JSON.stringify(r));
+  if (!r.quad) throw new Error('no page outline detected on import');
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   const page = await browser.newPage();
@@ -99,5 +165,6 @@ for (const [name, fn] of checks) {
 await browser.close();
 server.close();
 rmSync(PROFILE, { recursive: true, force: true });
+rmSync(FIXTURES, { recursive: true, force: true });
 console.log(checks.length - failed + '/' + checks.length + ' passed');
 if (failed) process.exit(1);

@@ -5891,7 +5891,6 @@
     "net_ext_sees": "Anyone can build an extension, so each one works in its own way, and some send what you give them over the internet. Check what an extension does before you use it, and only add ones you trust.",
     "keep_h": "What Mentria's servers keep",
     "keep_none": "No accounts, no profiles and no cookies, so there's no database of users.",
-    "keep_logs": "Like any website, Mentria's servers keep logs of requests, which include IP addresses.",
     "check_h": "Check it yourself",
     "check_lede": "Every Mentria page gives your browser a list of the servers it may fetch from, and the browser blocks requests to any other. You can watch it work:",
     "check_step_1": "Open your browser's developer tools (F12, or Option-Command-I on a Mac) and choose the Network tab.",

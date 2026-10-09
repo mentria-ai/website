@@ -5891,7 +5891,6 @@
     "net_ext_sees": "Cualquiera puede crear una extensión, así que cada una funciona a su manera, y algunas envían por internet lo que les das. Mira qué hace una extensión antes de usarla y añade solo las que te den confianza.",
     "keep_h": "Qué guardan los servidores de Mentria",
     "keep_none": "Ni cuentas, ni perfiles, ni cookies, así que no hay una base de datos de usuarios.",
-    "keep_logs": "Como cualquier sitio web, los servidores de Mentria guardan registros de las solicitudes, que incluyen direcciones IP.",
     "check_h": "Compruébalo tú mismo",
     "check_lede": "Cada página de Mentria le da a tu navegador una lista de los servidores a los que puede pedir datos, y el navegador bloquea las solicitudes a cualquier otro. Puedes verlo funcionar:",
     "check_step_1": "Abre las herramientas para desarrolladores de tu navegador (F12, u Opción-Comando-I en un Mac) y elige la pestaña Red.",

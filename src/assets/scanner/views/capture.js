@@ -2,7 +2,7 @@ import { h, t, tp, icon, setFull, toast, confirmSheet, objectUrl } from '../ui.j
 import * as camera from '../camera.js';
 import { detect, detectIn } from '../detector.js';
 import { createTracker } from '../tracker.js';
-import { mapVideoQuadToPhoto } from '../geometry.js';
+import { mapVideoQuadToPhoto, agrees } from '../geometry.js';
 import { addPage, fitBitmap, newDoc } from '../pages.js';
 import { importFiles } from '../importer.js';
 import * as db from '../db.js';
@@ -169,7 +169,7 @@ export function mount(root, ctx, params) {
       let quad = vq ? mapVideoQuadToPhoto(vq, vw, vh, bmp.width, bmp.height) : null;
       try {
         const found = await detectIn(bmp, 640);
-        if (found.quad) quad = found.quad;
+        if (found.quad && (!quad || agrees(quad, found.quad, bmp.width, bmp.height))) quad = found.quad;
       } catch (_) {}
       const d = await getDoc();
       const old = replace ? await db.getPage(replace) : null;

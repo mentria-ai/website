@@ -134,3 +134,8 @@ export function fitPixels(w, h, max) {
   const s = Math.sqrt(max / (w * h));
   return { width: Math.max(1, Math.floor(w * s)), height: Math.max(1, Math.floor(h * s)) };
 }
+
+export function agrees(a, b, w, h, tol = 0.05) {
+  const p = orderQuad(a), q = orderQuad(b), lim = tol * Math.max(w, h);
+  return p.every((c, i) => Math.hypot(c[0] - q[i][0], c[1] - q[i][1]) <= lim);
+}

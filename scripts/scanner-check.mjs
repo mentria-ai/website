@@ -67,6 +67,16 @@ test('geometry: a 16:9 preview outline lands in the central band of a 4:3 photo'
   near(same[0][1], 1080, 1e-9);
 });
 
+test('geometry: a refined outline is used only when every corner agrees with the live one', () => {
+  const live = [[400, 300], [1600, 320], [1580, 1400], [420, 1380]];
+  const near = live.map(([x, y]) => [x + 30, y - 25]);
+  const board = [[250, 120], [1760, 140], [1740, 1600], [260, 1580]];
+  assert.equal(G.agrees(live, near, 2000, 1500), true);
+  assert.equal(G.agrees(live, [near[2], near[3], near[0], near[1]], 2000, 1500), true);
+  assert.equal(G.agrees(live, board, 2000, 1500), false);
+  assert.equal(G.agrees(live, [live[0], live[1], live[2], [700, 1380]], 2000, 1500), false);
+});
+
 test('geometry: big photos are scaled under the pixel cap and keep their shape', () => {
   const f = G.fitPixels(8000, 6000, 16e6);
   assert.ok(f.width * f.height <= 16e6);

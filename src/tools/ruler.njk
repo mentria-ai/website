@@ -8,8 +8,10 @@ permalink: "{{ locale.pathPrefix }}/tools/ruler/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.ruler.title' | t }}"
+  seoTitle: "{{ 'tools.ruler.seo_title' | t }}"
   description: "{{ 'tools.ruler.lede' | t }}"
 localeReload: true
+relatedInFrame: true
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">ruler</span></p>
@@ -1412,6 +1414,7 @@ html.rl-ov-on .app-bar { display: none !important; }
     dragging = false;
     dragPointer = null;
     ov.classList.remove('is-dragging');
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('ruler');
   }
   surface.addEventListener('pointerup', endDrag);
   surface.addEventListener('pointercancel', endDrag);
@@ -1583,6 +1586,7 @@ html.rl-ov-on .app-bar { display: none !important; }
     layoutOverlay();
     renderAll();
     toast(COPY.applied);
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('ruler');
   });
 
   clearBtn.addEventListener('click', function () {

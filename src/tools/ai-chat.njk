@@ -8,6 +8,7 @@ permalink: "{{ locale.pathPrefix }}/tools/ai-chat/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.ai-chat.title' | t }}"
+  seoTitle: "{{ 'tools.ai-chat.seo_title' | t }}"
   description: "{{ 'tools.ai-chat.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
@@ -1923,6 +1924,7 @@ function runApp(MentriaEngine, Tiers) {
       if (epoch === genEpoch) {
         for (const t of toolTurns) messages.push(t);
         finalize('done');
+        if (window.MentriaUI && MentriaUI.success) MentriaUI.success('ai-chat');
         if (searchesDone.length) attachSources(bodyEl, searchesDone, searchSources, searchErrored);
       }
     } catch (err) {

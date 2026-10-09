@@ -11,10 +11,10 @@
     "loading_model": "Chargement du modèle sur l'appareil pour une tâche d'IA privée…"
   },
   "site": {
-    "tagline": "studio créatif. outils & transmissions.",
-    "description": "Un studio créatif d'outils, d'expériences et de transmissions visuelles.",
-    "metaTitle": "Mentria — Studio Créatif",
-    "metaDescription": "Un studio créatif d'outils, d'expériences et de transmissions visuelles. Conçu avec soin.",
+    "tagline": "Apprenez et expérimentez avec une IA qui tourne sur votre appareil.",
+    "description": "Une IA qui tourne dans votre navigateur, avec des outils intégrés, une bibliothèque d’extensions et des packs de cartes pour apprendre. Ajoutez vos propres extensions et packs. Vos données restent privées.",
+    "metaTitle": "Mentria — Apprenez et expérimentez avec une IA qui tourne sur votre appareil",
+    "metaDescription": "Une IA qui tourne dans votre navigateur, avec des outils intégrés, une bibliothèque d’extensions et des packs de cartes pour apprendre. Ajoutez vos propres extensions et packs. Vos données restent privées.",
     "socialImageAlt": "Mentria — des outils, des jeux et de l'IA qui tournent entièrement dans votre navigateur"
   },
   "nav": {
@@ -31,8 +31,8 @@
   },
   "about": {
     "title": "À propos",
-    "meta_description": "Mentria est un petit studio créatif. Des outils, des jeux et une IA respectueux de la vie privée qui s'exécutent entièrement dans votre navigateur — sans serveurs, sans comptes, sans pistage.",
-    "tagline": "studio créatif. outils & transmissions.",
+    "meta_description": "Mentria est un petit studio créatif. Des outils, des jeux et une IA respectueux de la vie privée qui tournent dans votre navigateur. Sans comptes, sans pistage, et vos données restent privées.",
+    "tagline": "Apprenez et expérimentez avec une IA qui tourne sur votre appareil.",
     "copyright": "© 2026 Mentria. Tous droits réservés.",
     "image_use": "Utilisation des images",
     "s1_label": "ce que c'est",
@@ -168,14 +168,16 @@
     "identity_device_note": "Se souvenir de cet appareil déverrouille automatiquement sur ce navigateur : pratique, mais quiconque utilise ce profil pourrait l'ouvrir. La clé d'accès et la phrase restent disponibles.",
     "whats_new": "Nouveautés de {tag}",
     "update_now": "Mettre à jour maintenant",
-    "release_notes": "Notes de version sur GitHub"
+    "release_notes": "Notes de version sur GitHub",
+    "privacy": "Confidentialité"
   },
   "common": {
     "undo": "Annuler",
     "tldr": {
       "read_more": "Qu'est-ce que c'est ?",
       "read_less": "Masquer les détails",
-      "what_is": "Qu'est-ce que {name} ?"
+      "what_is": "Qu'est-ce que {name} ?",
+      "llm_guide": "Guide (en anglais) : comment un modèle de langage tourne dans votre navigateur"
     },
     "dialog": {
       "ok": "OK",
@@ -318,10 +320,12 @@
       "requires_js": "Nécessite JavaScript",
       "requires_webgpu": "Nécessite WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
       "feature_browser": "Tourne entièrement dans votre navigateur",
-      "feature_private": "Aucune donnée ne quitte votre appareil",
+      "feature_private": "Vos données restent privées",
       "feature_no_key": "Aucune clé d'API requise",
       "feature_offline": "Fonctionne hors ligne une fois en cache"
-    }
+    },
+    "related_ai": "Mentria fait aussi tourner une IA sur votre appareil, en toute confidentialité.",
+    "related_ai_link": "Essayer le chat IA"
   },
   "feed_page": {
     "title": "Fil",
@@ -373,7 +377,8 @@
     "ai-chat": {
       "title": "Chat IA",
       "lede": "Qwen3.5 fonctionnant localement dans votre navigateur. Pas de serveur, pas de clés API. Prend en charge la vision.",
-      "tldr": "AI Chat exécute Qwen3.5 localement dans votre navigateur via WebGPU. Vos messages et toute image envoyée ne quittent jamais votre appareil — pas de serveur, pas de clé API, pas de compte. Prend en charge l'entrée visuelle. Le modèle se charge au premier clic ; les visites suivantes démarrent instantanément depuis le cache local."
+      "tldr": "AI Chat exécute Qwen3.5 localement dans votre navigateur via WebGPU. Vos messages et toute image envoyée ne quittent jamais votre appareil — pas de serveur, pas de clé API, pas de compte. Prend en charge l'entrée visuelle. Le modèle se charge au premier clic ; les visites suivantes démarrent instantanément depuis le cache local.",
+      "seo_title": "Chat IA privé qui tourne dans votre navigateur"
     },
     "base64-codec": {
       "title": "Codec Base64",
@@ -388,7 +393,8 @@
     "coin-flip": {
       "title": "Pile ou face",
       "lede": "Pile ou face — lancez une pièce instantanément. Lancez une série au meilleur des N pour départager. Fonctionne hors ligne.",
-      "tldr": "Un pile ou face minimaliste appuyé sur le RNG sécurisé du navigateur (Web Crypto). Le résultat est décidé localement ; rien n'est enregistré ni envoyé à un serveur. Conserve un historique par session. Pratique pour des décisions rapides, des départs équitables ou trancher des débats de table — instantané sur tout appareil."
+      "tldr": "Un pile ou face minimaliste appuyé sur le RNG sécurisé du navigateur (Web Crypto). Le résultat est décidé localement ; rien n'est enregistré ni envoyé à un serveur. Conserve un historique par session. Pratique pour des décisions rapides, des départs équitables ou trancher des débats de table — instantané sur tout appareil.",
+      "seo_title": "Pile ou face en ligne : lancer une pièce"
     },
     "color-picker": {
       "title": "Sélecteur de couleurs",
@@ -417,13 +423,14 @@
     },
     "markdown-pdf": {
       "title": "Markdown → PDF",
-      "lede": "Écrivez du markdown, voyez un aperçu en direct, et téléchargez un PDF professionnel et propre. Sauvegarde automatique dans votre navigateur. Vos données restent sur votre appareil.",
+      "lede": "Écrivez du markdown, voyez un aperçu en direct, et téléchargez un PDF professionnel et propre. Sauvegarde automatique dans votre navigateur. Vos documents restent privés.",
       "tldr": "Un éditeur markdown avec aperçu en direct et export PDF en un clic via la boîte de dialogue d'impression du navigateur. Importe et exporte des fichiers .md, sauvegarde les brouillons localement, prend en charge le markdown GitHub-flavored avec tableaux et listes de tâches. Pas d'envoi, pas de compte, pas de serveur — tout fonctionne en JavaScript côté client et hors ligne."
     },
     "minesweeper": {
       "title": "Démineur",
       "lede": "Casse-tête logique classique en tenue de terminal. Cliquez pour creuser, clic droit (ou mode F) pour marquer un drapeau. Les chiffres comptent les mines adjacentes. Ne touchez pas aux roses.",
-      "tldr": "Le Démineur classique reconstruit avec une esthétique synthwave/terminal. Préréglages de difficulté (facile, moyen, difficile, extrême), commandes clavier et tactiles, meilleurs temps persistants dans localStorage. Pas d'installation, pas d'inscription, pas d'analytique ; la logique de jeu et le chrono fonctionnent localement. Hors ligne une fois la page chargée."
+      "tldr": "Le Démineur classique reconstruit avec une esthétique synthwave/terminal. Préréglages de difficulté (facile, moyen, difficile, extrême), commandes clavier et tactiles, meilleurs temps persistants dans localStorage. Pas d'installation, pas d'inscription, pas d'analytique ; la logique de jeu et le chrono fonctionnent localement. Hors ligne une fois la page chargée.",
+      "seo_title": "Démineur en ligne : de facile à extrême"
     },
     "quick-notes": {
       "title": "Notes rapides",
@@ -477,7 +484,7 @@
       "total": "total",
       "collapse": "Fermer le panneau",
       "details": "Détails de l’appareil",
-      "nothingLeaves": "rien ne quitte votre appareil"
+      "dataPrivate": "vos données restent privées"
     },
     "model": {
       "checking": "Vérification de votre appareil…",
@@ -503,12 +510,12 @@
     },
     "quote": {
       "title": "Citation motivante",
-      "lede": "Citations originales générées par IA, fonctionnant localement dans votre navigateur. Vos données restent sur votre appareil.",
+      "lede": "Citations originales générées par IA, fonctionnant localement dans votre navigateur.",
       "tldr": "Citation motivante génère des aphorismes originaux avec un modèle Qwen3.5 affiné sur des données de citations sélectionnées, fonctionnant entièrement dans votre navigateur via WebGPU. Pas de serveur, pas de clé API, pas de compte. Le modèle se charge à la première visite et reste en cache localement pour une réutilisation instantanée."
     },
     "radio": {
       "title": "Radio infinie",
-      "lede": "Musique cinématographique épique générée par IA, en streaming infini. Apprend vos goûts localement — vos données restent sur votre appareil.",
+      "lede": "Musique cinématographique épique générée par IA, en streaming infini. Apprend vos goûts sur votre appareil, et votre écoute reste privée.",
       "tldr": "Musique cinématographique infinie générée par IA, en streaming direct dans votre navigateur. Les pistes proviennent d'un catalogue public et sont lues via l'élément audio HTML5 natif du navigateur (avec un fondu enchaîné entre deux lecteurs) ; votre historique d'écoute et vos « j'aime » restent sur l'appareil dans IndexedDB pour apprendre vos goûts localement avec le temps. Pas de compte, pas de tracking, pas de personnalisation côté serveur."
     },
     "tetris": {
@@ -534,7 +541,7 @@
     },
     "breakout": {
       "title": "Breakout",
-      "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne localement — vos données restent sur votre appareil.",
+      "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne dans votre navigateur, même hors ligne.",
       "tldr": "Un casse-briques façon Breakout : renvoyez la balle avec votre raquette pour détruire des murs de briques au fil de niveaux de plus en plus rapides, en attrapant les bonus qui tombent (et en évitant les mauvais). Construit sur HTML5 Canvas avec une physique déterministe et des commandes souris, clavier et tactiles. Score, vies et tableau des records vivent dans le JavaScript côté client — aucun script tiers, aucun serveur, et ça marche hors ligne une fois en cache."
     },
     "totp": {
@@ -545,11 +552,11 @@
     "exif": {
       "title": "Inspecteur EXIF",
       "lede": "Découvrez ce qu'une photo transporte en secret — détails de l'appareil, horodatages, position GPS — et téléchargez une copie propre, tout retiré. Rien n'est envoyé.",
-      "tldr": "Lit les métadonnées EXIF, XMP, IPTC et autres intégrées aux images JPEG, PNG et WebP, entièrement dans votre navigateur : modèle d'appareil, date de prise de vue et la position GPS que beaucoup de téléphones ajoutent silencieusement. Un appui produit une copie nettoyée au niveau des octets — pixels intacts, profil colorimétrique conservé — et la copie est réanalysée pour vérifier qu'elle est propre avant le téléchargement. Rien ne quitte votre appareil."
+      "tldr": "Lit les métadonnées EXIF, XMP, IPTC et autres intégrées aux images JPEG, PNG et WebP, entièrement dans votre navigateur : modèle d'appareil, date de prise de vue et la position GPS que beaucoup de téléphones ajoutent silencieusement. Un appui produit une copie nettoyée au niveau des octets — pixels intacts, profil colorimétrique conservé — et la copie est réanalysée pour vérifier qu'elle est propre avant le téléchargement. Vos photos ne sont jamais envoyées."
     },
     "sudoku": {
       "title": "Sudoku",
-      "lede": "Casse-tête logique en habit de terminal. Générateur à solution unique, quatre difficultés, annotations au crayon. Fonctionne localement — aucune donnée ne quitte votre appareil.",
+      "lede": "Casse-tête logique en habit de terminal. Générateur à solution unique, quatre difficultés, annotations au crayon. Fonctionne dans votre navigateur, même hors ligne.",
       "tldr": "Sudoku 9×9 classique repensé avec une esthétique synthwave de terminal. Un générateur par retour sur trace garantit exactement une solution à quatre difficultés (facile → expert) ; annotations au crayon, surbrillance des pairs et du même chiffre, détection de conflits en direct, trois erreurs avant la fin et jusqu'à trois indices. Les meilleurs temps par difficulté sont enregistrés sur l'appareil. Clavier, souris et tactile fonctionnent. Sans installation, sans inscription, sans analytique — la génération et la résolution s'exécutent localement dans votre navigateur, et ça marche hors ligne."
     },
     "ludo": {
@@ -559,13 +566,14 @@
     },
     "chess": {
       "title": "Échecs",
-      "lede": "Moteur local, chacun son tour et jeu en ligne — sans serveurs. Règles complètes avec roque, prise en passant et promotion ; moteur alpha-bêta à quatre niveaux, barre d'évaluation et indices.",
+      "lede": "Moteur local, chacun son tour et jeu en ligne de pair à pair. Règles complètes avec roque, prise en passant et promotion ; moteur alpha-bêta à quatre niveaux, barre d'évaluation et indices.",
       "tldr": "Une implémentation d'échecs complète qui s'exécute entièrement dans votre navigateur. Le moteur de règles couvre le roque, la prise en passant, la promotion, échec/échec et mat/pat et les nulles (règle des 50 coups, matériel insuffisant, triple répétition), avec notation SAN complète. Jouez chacun son tour sur un appareil, contre un moteur alpha-bêta intégré (quatre niveaux, de Débutant à Brutal, exécuté dans un Web Worker pour que l'interface ne gèle jamais) avec barre d'évaluation en direct, lignes candidates et indices — ou en ligne contre un ami via une connexion P2P chiffrée à l'aide d'un code. Glissez ou touchez pour jouer, parcourez l'historique, retournez l'échiquier, annulez et abandonnez. Sans comptes, sans analytique, fonctionne hors ligne."
     },
     "annotate-image": {
       "title": "Annoter une image",
       "lede": "Importez une image et obtenez instantanément une description IA, un texte alternatif, une transcription ou des étiquettes — avec des prompts testés en un toucher. S'exécute localement dans votre navigateur, rien n'est envoyé.",
-      "tldr": "Un compagnon ciblé doté de vision pour AI Chat : déposez une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Basculez entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5 sur l'appareil qu'AI Chat (cache partagé — si vous avez déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans votre navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais votre appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis votre gestionnaire de fichiers une fois installé. Copiez ou téléchargez le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+)."
+      "tldr": "Un compagnon ciblé doté de vision pour AI Chat : déposez une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Basculez entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle de vision Qwen3.5 sur l'appareil qu'AI Chat (cache partagé — si vous avez déjà utilisé AI Chat, aucun téléchargement supplémentaire), entièrement dans votre navigateur via WebGPU. Rien n'est envoyé ; l'image ne quitte jamais votre appareil. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis votre gestionnaire de fichiers une fois installé. Copiez ou téléchargez le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+).",
+      "seo_title": "Annotation d’images par IA : texte alternatif et OCR"
     },
     "files": {
       "title": "Fichiers",
@@ -579,12 +587,13 @@
     },
     "comms": {
       "title": "Comms",
-      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte et sans serveur au milieu."
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages.",
+      "seo_title": "Messagerie, appels et fichiers P2P chiffrés"
     },
     "bubble-level": {
       "title": "Niveau à bulle",
       "lede": "Transformez votre téléphone en niveau à bulle en ligne : un vrai niveau sans installer d'application, précis à 0,1° et utilisable hors ligne.",
-      "tldr": "Posez le téléphone sur une étagère : l'outil lit l'inclinaison directement depuis l'accéléromètre. À plat, vous obtenez une bulle ronde à deux axes ; posé sur la tranche, une fiole de niveau de menuisier. Rien ne quitte votre appareil, et un simple appui corrige le biais propre au téléphone."
+      "tldr": "Posez le téléphone sur une étagère : l'outil lit l'inclinaison directement depuis l'accéléromètre. À plat, vous obtenez une bulle ronde à deux axes ; posé sur la tranche, une fiole de niveau de menuisier. Vos mesures restent privées, et un simple appui corrige le biais propre au téléphone."
     },
     "decibel-meter": {
       "title": "Sonomètre",
@@ -604,7 +613,8 @@
     "ruler": {
       "title": "Règle en ligne",
       "lede": "Une règle en ligne à taille réelle : mesurez en cm, mm et pouces directement à l'écran, et calibrez-la avec une carte bancaire pour que les millimètres soient justes.",
-      "tldr": "Une règle dessinée directement sur votre écran, avec les centimètres et les millimètres sur un bord et les pouces jusqu'au 1/16 sur l'autre. Aucun navigateur ne peut connaître la taille réelle de votre écran : vous calibrez donc une fois en ajustant un contour sur une carte bancaire, ou en saisissant une longueur que vous connaissez déjà, et les graduations deviennent fidèles. Faites glisser les deux repères pour mesurer ce que vous posez sur la vitre ; tout fonctionne hors ligne et le calibrage reste sur cet appareil."
+      "tldr": "Une règle dessinée directement sur votre écran, avec les centimètres et les millimètres sur un bord et les pouces jusqu'au 1/16 sur l'autre. Aucun navigateur ne peut connaître la taille réelle de votre écran : vous calibrez donc une fois en ajustant un contour sur une carte bancaire, ou en saisissant une longueur que vous connaissez déjà, et les graduations deviennent fidèles. Faites glisser les deux repères pour mesurer ce que vous posez sur la vitre ; tout fonctionne hors ligne et le calibrage reste sur cet appareil.",
+      "seo_title": "Règle en ligne taille réelle (cm et mm)"
     },
     "phosphor": {
       "title": "PHOSPHOR",
@@ -619,7 +629,7 @@
     "console": {
       "title": "Console",
       "lede": "Discutez avec le modèle local pendant qu'il utilise les apps Mentria sur un écran de téléphone partagé — ou laissez-le jouer un utilisateur test et rapporter ce qu'il trouve.",
-      "tldr": "La Console place un écran Mentria au format téléphone à côté d'un chat. Demandez au modèle 27B local de faire quelque chose (« lance un minuteur de 5 minutes ») : il ouvre l'app et la manipule sous vos yeux — chaque action est visible et il doit citer l'écran pour déclarer la tâche terminée. Lancez une session test : il explore une app comme une personne fictive, puis rédige un rapport de bugs à transformer en issues. Rien ne quitte votre appareil."
+      "tldr": "La Console place un écran Mentria au format téléphone à côté d'un chat. Demandez au modèle 27B local de faire quelque chose (« lance un minuteur de 5 minutes ») : il ouvre l'app et la manipule sous vos yeux — chaque action est visible et il doit citer l'écran pour déclarer la tâche terminée. Lancez une session test : il explore une app comme une personne fictive, puis rédige un rapport de bugs à transformer en issues. Vos conversations restent privées."
     },
     "forge": {
       "title": "Forge",
@@ -5120,8 +5130,8 @@
       }
     },
     "comms": {
-      "meta_description": "Chat pair-à-pair, appels et partage de fichiers — chiffré de bout en bout, sans compte et sans serveur au milieu.",
-      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte et sans serveur au milieu. Partagez l’URL d’un salon, ou échangez vos codes de contact pour écrire directement aux gens.",
+      "meta_description": "Chat pair-à-pair, appels et partage de fichiers — chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages.",
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages. Partagez l’URL d’un salon, ou échangez vos codes de contact pour écrire directement aux gens.",
       "unknown": "inconnu",
       "onboard": {
         "insecure_title": "Cette page a besoin d’une connexion sécurisée",
@@ -5836,5 +5846,63 @@
       "tilt_unavailable": "La direction par inclinaison n'est pas disponible sur cet appareil",
       "tilt_centered": "Inclinaison recentrée"
     }
+  },
+  "privacy": {
+    "title": "Confidentialité",
+    "desc": "Ce qui reste sur votre appareil, ce qui utilise le réseau et quand, et comment le vérifier vous-même.",
+    "lede": "Mentria n’a ni comptes, ni publicités, ni pistage. L’IA tourne sur votre appareil, et ce que vous créez ici est enregistré dans votre navigateur. Voici ce qui utilise le réseau, pour que vous puissiez le vérifier vous-même.",
+    "device_h": "Reste sur votre appareil",
+    "device_ai_b": "Conversations et requêtes à l’IA.",
+    "device_ai": "Les outils d’IA intégrés à Mentria font tourner le modèle sur la puce graphique de votre appareil : vos questions, les réponses et les images que vous montrez à l’IA sont traitées dans votre navigateur et ne sont envoyées à aucun serveur.",
+    "device_files_b": "Les fichiers que vous ouvrez.",
+    "device_files": "Photos, vidéos, musique, PDF et documents sont lus dans la page. Les outils qui modifient un fichier vous en donnent une nouvelle copie à enregistrer, sans rien mettre en ligne.",
+    "device_sensors_b": "Caméra, micro, mouvement et position.",
+    "device_sensors": "Les outils pour téléphone les lisent dans la page pendant que vous les utilisez, et les mesures ne sont envoyées nulle part.",
+    "device_saved_b": "Ce que vous enregistrez.",
+    "device_saved": "Notes, réglages, progression d’apprentissage, packs importés, extensions que vous ajoutez, sauvegardes de jeux et votre identité Mentria restent dans le stockage de ce navigateur. Effacer les données du site les supprime.",
+    "device_backup_b": "Sauvegardes.",
+    "device_backup": "Une sauvegarde est un seul fichier chiffré que vous téléchargez et conservez. Mentria n’en reçoit jamais de copie, et personne ne peut l’ouvrir sans votre phrase.",
+    "net_h": "Ce qui utilise le réseau",
+    "net_lede": "Ce qui se connecte, quand, et ce que l’autre côté peut voir.",
+    "net_site_name": "Charger Mentria",
+    "net_site_when": "À chaque visite.",
+    "net_site_sees": "Les pages, les images, la musique et les fichiers de l’app viennent des serveurs qui hébergent Mentria. Comme pour tout site web, ils voient votre adresse IP, la page que vous ouvrez et le nom de votre navigateur. Les pages de Mentria n’ont ni scripts d’analyse, ni publicités, ni traceurs.",
+    "net_models_name": "Modèles d’IA",
+    "net_models_when": "Quand vous ouvrez un outil d’IA dont le modèle n’est pas encore enregistré.",
+    "net_models_sees": "Le modèle se télécharge une fois et reste enregistré dans votre navigateur, si bien que l’IA continue de fonctionner hors ligne. Le serveur qui l’envoie voit le téléchargement, comme pour n’importe quel fichier.",
+    "net_comms_name": "Comms, échecs en ligne et synchronisation des appareils",
+    "net_comms_when": "Seulement quand vous les utilisez.",
+    "net_comms_sees": "Ce que vous envoyez est d’abord chiffré sur votre appareil. Pour se connecter, votre appareil et l’autre voient l’adresse IP l’un de l’autre, et le relais de Mentria les aide à se trouver. Les messages destinés à quelqu’un hors ligne attendent sur le relais, chiffrés, jusqu’à 30 jours. Dans Comms, activez « masquer mon ip » pour tout faire passer par le relais : l’autre personne ne voit alors pas votre adresse.",
+    "net_mirror_name": "Miroir de modèles",
+    "net_mirror_when": "Seulement si vous l’activez.",
+    "net_mirror_sees": "Votre navigateur partage des fichiers de modèles d’IA avec d’autres visiteurs, de pair à pair. Comme pour tout partage en P2P, ils peuvent voir votre adresse IP.",
+    "net_push_name": "Notifications",
+    "net_push_when": "Seulement si vous les activez pour des minuteurs ou pour Comms.",
+    "net_push_sees": "Le service de notifications de l’éditeur de votre navigateur livre une alerte qui indique seulement Mentria. Les détails sont complétés sur votre appareil.",
+    "net_github_name": "Publier sur GitHub",
+    "net_github_when": "Seulement quand vous choisissez de publier quelque chose, comme une histoire ou un rapport de bug.",
+    "net_github_sees": "Vous le publiez vous-même, avec votre propre compte GitHub, et c’est public là-bas.",
+    "net_local_name": "Recherche web du Chat IA",
+    "net_local_when": "Seulement si vous reliez le Chat IA à un serveur de recherche que vous faites tourner vous-même.",
+    "net_local_sees": "Les recherches vont uniquement vers ce serveur, que vous contrôlez.",
+    "net_assistant_name": "L’assistant IA de votre navigateur",
+    "net_assistant_when": "Seulement si votre navigateur en a un et que vous lui demandez d’utiliser Mentria.",
+    "net_assistant_sees": "Mentria lui propose des outils, comme la recherche et les titres de vos notes. Ce qu’un outil renvoie va à cet assistant, qui peut fonctionner dans le cloud.",
+    "net_ext_name": "Extensions",
+    "net_ext_when": "Quand vous en lancez une.",
+    "net_ext_sees": "N’importe qui peut créer une extension : chacune fonctionne à sa façon, et certaines envoient sur internet ce que vous leur donnez. Vérifiez ce que fait une extension avant de l’utiliser, et n’ajoutez que celles en qui vous avez confiance.",
+    "keep_h": "Ce que gardent les serveurs de Mentria",
+    "keep_none": "Pas de comptes, pas de profils et pas de cookies : il n’y a donc pas de base de données d’utilisateurs.",
+    "check_h": "Vérifiez par vous-même",
+    "check_lede": "Chaque page de Mentria donne à votre navigateur la liste des serveurs auprès desquels elle peut récupérer des données, et le navigateur bloque les requêtes vers tous les autres. Vous pouvez le constater :",
+    "check_step_1": "Ouvrez les outils de développement de votre navigateur (F12, ou Option-Commande-I sur Mac) et choisissez l’onglet Réseau.",
+    "check_step_2": "Utilisez n’importe quel outil ou discutez avec un modèle d’IA. Chaque requête apparaît dans la liste, avec le serveur auquel elle a été envoyée.",
+    "check_step_3": "Une fois un modèle enregistré, discuter avec lui n’ajoute aucune requête. Vous pouvez couper le Wi-Fi et continuer.",
+    "check_step_4": "Lisez le code. Le site de Mentria est open source :",
+    "ask_h": "Questions",
+    "ask_body": "Vous avez repéré une erreur sur cette page ou vous avez une question ?",
+    "ask_github": "Ouvrez une issue sur GitHub",
+    "ask_x": "écrivez-nous sur X",
+    "updated": "Dernière mise à jour : 9 octobre 2026."
   }
 }

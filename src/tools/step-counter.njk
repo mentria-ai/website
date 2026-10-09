@@ -10,6 +10,7 @@ eleventyComputed:
   title: "{{ 'tools.step-counter.title' | t }}"
   description: "{{ 'tools.step-counter.lede' | t }}"
 localeReload: true
+relatedInFrame: true
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">step-counter</span></p>
@@ -424,6 +425,7 @@ localeReload: true
     const wasUnderGoal = state.steps + state.estSteps < state.goal;
     state.steps += 1;
     sessionSteps += 1;
+    if (sessionSteps === 20) if (window.MentriaUI && MentriaUI.success) MentriaUI.success('step-counter');
     const now = Date.now();
     stepTimes.push(now);
     if (stepTimes.length > 240) stepTimes.shift();

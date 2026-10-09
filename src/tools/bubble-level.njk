@@ -10,6 +10,7 @@ eleventyComputed:
   title: "{{ 'tools.bubble-level.title' | t }}"
   description: "{{ 'tools.bubble-level.lede' | t }}"
 localeReload: true
+relatedInFrame: true
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">bubble-level</span></p>
@@ -338,6 +339,7 @@ localeReload: true
     var a = e.accelerationIncludingGravity;
     if (!a || a.x == null || a.y == null || a.z == null) return;
     if (a.x === 0 && a.y === 0 && a.z === 0) return;
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('bubble-level', { after: 5000 });
     if (!hasSample) {
       gx = a.x; gy = a.y; gz = a.z;
       hasSample = true;

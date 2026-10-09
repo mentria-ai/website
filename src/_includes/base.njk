@@ -100,14 +100,13 @@
     </script>
     {% set baseUrl = site.siteUrl | default('/') %}
     {% set pageUrl = baseUrl ~ page.url %}
-    {% set metaTitle = ((title and (title ~ " | " ~ site.title)) or ("site.metaTitle" | t)) | htmlDecode %}
+    {% set metaTitle = (fullTitle or (seoTitle and (seoTitle ~ " | " ~ site.title)) or (title and (title ~ " | " ~ site.title)) or ("site.metaTitle" | t)) | htmlDecode %}
     {% set metaDescription = (description | default(("site.metaDescription" | t))) | htmlDecode %}
     {% set socialImage = socialImageOverride or (site.siteUrl ~ (site.socialImage | default('/assets/img/icon-512x512.png'))) %}
     {% set isPost = tags and ('post' in tags) %}
     {% macro ogLocale(code) %}{% set region = { 'en': 'US', 'ja': 'JP' }[code] %}{{ code | replace('-', '_') if '-' in code else code ~ '_' ~ (region or code | upper) }}{% endmacro %}
     <title>{{ metaTitle }}</title>
     <meta name="description" content="{{ metaDescription }}">
-    <meta name="keywords" content="{{ site.keywords }}">
     <meta name="robots" content="{{ robots or (site.robots | default('index, follow')) }}">
     <meta name="author" content="{{ site.author }}">
     <meta name="theme-color" content="#0a0a0a">

@@ -275,6 +275,7 @@
   }
 
   function renderFinish() {
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('learn');
     var s = el('article', 'deck__slide pack-slide pack-slide--finish');
     s.dataset.idx = String(order.length);
     var p = el('div', 'pack-card pack-card--center');

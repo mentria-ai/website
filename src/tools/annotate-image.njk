@@ -8,6 +8,7 @@ permalink: "{{ locale.pathPrefix }}/tools/annotate-image/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.annotate-image.title' | t }}"
+  seoTitle: "{{ 'tools.annotate-image.seo_title' | t }}"
   description: "{{ 'tools.annotate-image.lede' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
@@ -340,6 +341,7 @@ eleventyComputed:
       if (window.renderMarkdown) resultEl.innerHTML = renderMarkdown(display) || ('<p>' + esc(COPY.emptyResponse) + '</p>');
       else resultEl.textContent = display || COPY.emptyResponse;
       setStatus('ready', COPY.statusReady);
+      if (window.MentriaUI && MentriaUI.success) MentriaUI.success('annotate-image');
     } catch (err){
       close();
       if (stale()) return;

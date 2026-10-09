@@ -10,6 +10,7 @@ eleventyComputed:
   title: "{{ 'tools.speedometer.title' | t }}"
   description: "{{ 'tools.speedometer.lede' | t }}"
 localeReload: true
+relatedInFrame: true
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">speedometer</span></p>
@@ -351,6 +352,7 @@ localeReload: true
   function onPosition(pos) {
     var c = pos && pos.coords;
     if (!c) return;
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('speedometer', { after: 5000 });
     var tMs = (typeof pos.timestamp === 'number' && isFinite(pos.timestamp)) ? pos.timestamp : Date.now();
     var acc = (typeof c.accuracy === 'number' && isFinite(c.accuracy)) ? c.accuracy : null;
     var fine = acc !== null && acc <= ACC_MAX;

@@ -8,11 +8,12 @@ layout: null
 {%- set listed = collections.all | groupby("url") -%}
 {%- for page in collections.all -%}
 {%- if not page.data.eleventyExcludeFromSitemap and not (page.url | startsWith('/assets/')) and not ((page.data.robots or '') | startsWith('noindex')) -%}
+{%- set lastmod = page.inputPath | gitDate -%}
 {%- if page.data.englishOnly %}
-  <url><loc>{{ site.siteUrl }}{{ page.url }}</loc></url>
+  <url><loc>{{ site.siteUrl }}{{ page.url }}</loc>{% if lastmod %}<lastmod>{{ lastmod }}</lastmod>{% endif %}</url>
 {%- else -%}
 {%- for locale in locales %}
-  <url><loc>{{ site.siteUrl }}{{ locale.pathPrefix }}{{ page.url }}</loc></url>
+  <url><loc>{{ site.siteUrl }}{{ locale.pathPrefix }}{{ page.url }}</loc>{% if lastmod %}<lastmod>{{ lastmod }}</lastmod>{% endif %}</url>
 {%- endfor -%}
 {%- endif -%}
 {%- endif -%}

@@ -113,7 +113,7 @@ localeReload: true
     <h2 class="about-section-h">{{ "about.principles_h" | t }}</h2>
     <div class="about-principles">
       <div class="about-principle"><span class="num">01</span><span class="text">{{ "about.principle_1" | t }}</span></div>
-      <div class="about-principle"><span class="num">02</span><span class="text">{{ "about.principle_2" | t }}</span></div>
+      <div class="about-principle"><span class="num">02</span><span class="text"><a href="{{ '/privacy/' | localeUrl(lang) }}">{{ "about.principle_2" | t }}</a></span></div>
       <div class="about-principle"><span class="num">03</span><span class="text">{{ "about.principle_3" | t }}</span></div>
     </div>
   </section>
@@ -290,6 +290,7 @@ localeReload: true
 
   <div class="about-end reveal">
     <span class="about-build about-copyright" id="about-copyright">{{ "about.copyright" | t }}</span>
+    <span class="about-build"><a class="h" href="{{ '/privacy/' | localeUrl(lang) }}">{{ "about.privacy" | t }}</a></span>
     <span class="about-build"><a class="h" href="{{ '/image-use/' | localeUrl(lang) }}">{{ "about.image_use" | t }}</a></span>
   </div>
 
@@ -348,6 +349,8 @@ localeReload: true
   .about-principles { display: flex; flex-direction: column; gap: 18px; }
   .about-principle { display: flex; align-items: baseline; gap: 24px; padding: 14px 0; border-bottom: 1px solid var(--term-divider); }
   .about-principle:last-child { border-bottom: none; }
+  .about-principle .text a { color: inherit; text-decoration: underline; text-decoration-color: var(--term-border-strong); text-decoration-thickness: 2px; text-underline-offset: 0.25em; }
+  .about-principle .text a:hover, .about-principle .text a:focus-visible { text-decoration-color: var(--syn-cyan); }
   .about-principle .num { font-family: var(--font-mono); font-weight: 700; font-size: clamp(2rem, 5vw, 3rem); color: var(--syn-cyan); line-height: 1; text-shadow: 0 0 14px rgba(34,211,238,0.35); letter-spacing: -0.02em; flex-shrink: 0; min-width: 80px; }
   .about-principle .text { font-family: var(--font-mono); font-weight: 600; font-size: clamp(1.1rem, 2.4vw, 1.6rem); color: var(--term-fg-strong); letter-spacing: -0.005em; }
 

@@ -1,6 +1,6 @@
 {%- set relatedList = page.url | relatedTools -%}
 {%- if relatedList.length -%}
-<nav class="related-tools" aria-label="{{ 'tools_page.related_heading' | t }}">
+<nav class="related-tools{% if relatedInFrame %} related-tools--in-frame{% endif %}" aria-label="{{ 'tools_page.related_heading' | t }}">
   <span class="related-tools__label">{{ "tools_page.related_heading" | t }}</span>
   <ul class="related-tools__list">
     {%- for tool in relatedList %}
@@ -15,5 +15,8 @@
       <a class="related-tools__chip related-tools__chip--all" href="{{ '/tools/' | localeUrl(lang) }}">{{ "tools_page.related_all" | t }} →</a>
     </li>
   </ul>
+  {%- if relatedInFrame %}
+  <p class="related-tools__ai">{{ "tools_page.related_ai" | t }} <a href="{{ '/tools/ai-chat/' | localeUrl(lang) }}">{{ "tools_page.related_ai_link" | t }} →</a></p>
+  {%- endif %}
 </nav>
 {%- endif -%}

@@ -11,10 +11,10 @@
     "loading_model": "Cargando el modelo en el dispositivo para una tarea de IA privada…"
   },
   "site": {
-    "tagline": "estudio creativo. herramientas y transmisiones.",
-    "description": "Un estudio creativo de herramientas, experimentos y transmisiones visuales.",
-    "metaTitle": "Mentria — Estudio Creativo",
-    "metaDescription": "Un estudio creativo de herramientas, experimentos y transmisiones visuales. Hecho con cuidado.",
+    "tagline": "Aprende y experimenta con IA que funciona en tu dispositivo.",
+    "description": "IA que funciona en tu navegador, con herramientas integradas, una biblioteca de extensiones y paquetes de tarjetas para aprender. Añade tus propias extensiones y paquetes. Tus datos se mantienen privados.",
+    "metaTitle": "Mentria — Aprende y experimenta con IA que funciona en tu dispositivo",
+    "metaDescription": "IA que funciona en tu navegador, con herramientas integradas, una biblioteca de extensiones y paquetes de tarjetas para aprender. Añade tus propias extensiones y paquetes. Tus datos se mantienen privados.",
     "socialImageAlt": "Mentria — herramientas, juegos e IA que funcionan por completo en tu navegador"
   },
   "nav": {
@@ -31,8 +31,8 @@
   },
   "about": {
     "title": "Acerca de",
-    "meta_description": "Mentria es un pequeño estudio creativo. Herramientas, juegos e IA centrados en la privacidad que se ejecutan por completo en tu navegador, sin servidores, sin cuentas, sin rastreo.",
-    "tagline": "estudio creativo. herramientas y transmisiones.",
+    "meta_description": "Mentria es un pequeño estudio creativo. Herramientas, juegos e IA centrados en la privacidad que funcionan en tu navegador. Sin cuentas, sin rastreo, y tus datos se mantienen privados.",
+    "tagline": "Aprende y experimenta con IA que funciona en tu dispositivo.",
     "copyright": "© 2026 Mentria. Todos los derechos reservados.",
     "image_use": "Uso de imágenes",
     "s1_label": "qué es esto",
@@ -168,14 +168,16 @@
     "identity_device_note": "Recordar este dispositivo desbloquea automáticamente en este navegador: cómodo, pero cualquiera que use este perfil podría abrirlo. La llave de acceso y la frase siguen disponibles.",
     "whats_new": "Novedades en {tag}",
     "update_now": "Actualizar ahora",
-    "release_notes": "Notas de la versión en GitHub"
+    "release_notes": "Notas de la versión en GitHub",
+    "privacy": "Privacidad"
   },
   "common": {
     "undo": "Deshacer",
     "tldr": {
       "read_more": "¿Qué es esto?",
       "read_less": "Ocultar detalles",
-      "what_is": "¿Qué es {name}?"
+      "what_is": "¿Qué es {name}?",
+      "llm_guide": "Guía (en inglés): cómo funciona un modelo de lenguaje en tu navegador"
     },
     "dialog": {
       "ok": "Aceptar",
@@ -318,10 +320,12 @@
       "requires_js": "Requiere JavaScript",
       "requires_webgpu": "Requiere WebGPU. Chrome 113+, Edge 113+, Firefox 141+, Safari 26+",
       "feature_browser": "Funciona por completo en tu navegador",
-      "feature_private": "Ningún dato sale de tu dispositivo",
+      "feature_private": "Tus datos se mantienen privados",
       "feature_no_key": "No necesita clave de API",
       "feature_offline": "Funciona sin conexión una vez en caché"
-    }
+    },
+    "related_ai": "Mentria también ejecuta IA en tu dispositivo, de forma privada.",
+    "related_ai_link": "Probar el chat de IA"
   },
   "feed_page": {
     "title": "Feed",
@@ -373,7 +377,8 @@
     "ai-chat": {
       "title": "Chat IA",
       "lede": "Qwen3.5 ejecutándose localmente en tu navegador. Sin servidor, sin claves de API. Compatible con imágenes.",
-      "tldr": "AI Chat ejecuta Qwen3.5 localmente en tu navegador mediante WebGPU. Tus mensajes y cualquier imagen subida nunca salen de tu dispositivo — sin servidor, sin clave de API, sin cuenta. Admite entrada visual. El modelo se descarga al primer clic; las visitas posteriores arrancan al instante desde la caché local."
+      "tldr": "AI Chat ejecuta Qwen3.5 localmente en tu navegador mediante WebGPU. Tus mensajes y cualquier imagen subida nunca salen de tu dispositivo — sin servidor, sin clave de API, sin cuenta. Admite entrada visual. El modelo se descarga al primer clic; las visitas posteriores arrancan al instante desde la caché local.",
+      "seo_title": "Chat de IA privado que funciona en tu navegador"
     },
     "base64-codec": {
       "title": "Codificador Base64",
@@ -388,7 +393,8 @@
     "coin-flip": {
       "title": "Lanzar moneda",
       "lede": "Cara o cruz — lanza una moneda al instante. Ejecuta una serie al mejor de N para desempates. Funciona sin conexión.",
-      "tldr": "Un cara o cruz simple respaldado por el RNG seguro del navegador (Web Crypto). El resultado se decide localmente; nada se registra ni se envía a un servidor. Mantiene un historial por sesión. Útil para decisiones rápidas, sorteos justos o resolver discusiones de mesa — instantáneo en cualquier dispositivo."
+      "tldr": "Un cara o cruz simple respaldado por el RNG seguro del navegador (Web Crypto). El resultado se decide localmente; nada se registra ni se envía a un servidor. Mantiene un historial por sesión. Útil para decisiones rápidas, sorteos justos o resolver discusiones de mesa — instantáneo en cualquier dispositivo.",
+      "seo_title": "Lanzar una moneda online: cara o cruz"
     },
     "color-picker": {
       "title": "Selector de color",
@@ -417,13 +423,14 @@
     },
     "markdown-pdf": {
       "title": "Markdown → PDF",
-      "lede": "Escribe markdown, ve una vista previa en vivo, y descarga un PDF profesional y limpio. Se guarda automáticamente en tu navegador. Tus datos no salen de tu dispositivo.",
+      "lede": "Escribe markdown, ve una vista previa en vivo, y descarga un PDF profesional y limpio. Se guarda automáticamente en tu navegador. Tus documentos se mantienen privados.",
       "tldr": "Un editor de markdown con vista previa en vivo y exportación a PDF de un clic mediante el diálogo de impresión del navegador. Importa y exporta archivos .md, autoguarda borradores localmente, admite markdown estilo GitHub incluyendo tablas y listas de tareas. Sin subida, sin cuenta, sin servidor — todo corre en JavaScript del lado del cliente y funciona sin conexión."
     },
     "minesweeper": {
       "title": "Buscaminas",
       "lede": "Clásico rompecabezas lógico con vestimenta de terminal. Haz clic para cavar, clic derecho (o modo F) para marcar bandera. Los números cuentan minas adyacentes. No pulses los rosas.",
-      "tldr": "El clásico Buscaminas reconstruido con estética synthwave/terminal. Niveles preestablecidos (fácil, medio, difícil, extremo), controles de teclado y táctil, mejores tiempos persistentes en localStorage. Sin instalación, sin registro, sin analítica; la lógica del juego y el cronómetro se ejecutan localmente en tu navegador. Funciona sin conexión una vez cargada la página."
+      "tldr": "El clásico Buscaminas reconstruido con estética synthwave/terminal. Niveles preestablecidos (fácil, medio, difícil, extremo), controles de teclado y táctil, mejores tiempos persistentes en localStorage. Sin instalación, sin registro, sin analítica; la lógica del juego y el cronómetro se ejecutan localmente en tu navegador. Funciona sin conexión una vez cargada la página.",
+      "seo_title": "Buscaminas online: de fácil a extremo, con teclado"
     },
     "quick-notes": {
       "title": "Notas rápidas",
@@ -477,7 +484,7 @@
       "total": "total",
       "collapse": "Cerrar el panel",
       "details": "Detalles del dispositivo",
-      "nothingLeaves": "nada sale de tu dispositivo"
+      "dataPrivate": "tus datos se mantienen privados"
     },
     "model": {
       "checking": "Comprobando tu dispositivo…",
@@ -503,12 +510,12 @@
     },
     "quote": {
       "title": "Cita motivadora",
-      "lede": "Citas originales generadas por IA, ejecutándose localmente en tu navegador. Tus datos no salen de tu dispositivo.",
+      "lede": "Citas originales generadas por IA, ejecutándose localmente en tu navegador.",
       "tldr": "Frase Motivacional genera aforismos originales con un modelo Qwen3.5 afinado sobre datos de citas curados, ejecutándose por completo en tu navegador mediante WebGPU. Sin servidor, sin clave de API, sin cuenta. El modelo se descarga en la primera visita y queda en caché localmente para reutilizarlo al instante."
     },
     "radio": {
       "title": "Radio infinita",
-      "lede": "Música cinematográfica épica generada por IA, transmitiendo infinitamente. Aprende tu gusto localmente — tus datos no salen de tu dispositivo.",
+      "lede": "Música cinematográfica épica generada por IA, transmitiendo infinitamente. Aprende tus gustos en tu dispositivo, y lo que escuchas se mantiene privado.",
       "tldr": "Música cinematográfica infinita generada por IA, en streaming directo en tu navegador. Las pistas vienen de un catálogo público y se reproducen con el elemento de audio HTML5 nativo del navegador (con crossfade entre dos reproductores); tu historial de escucha y tus 'me gusta' permanecen en el dispositivo en IndexedDB para aprender tu gusto localmente con el tiempo. Sin cuentas, sin tracking, sin personalización del lado del servidor — puramente cliente."
     },
     "tetris": {
@@ -534,7 +541,7 @@
     },
     "breakout": {
       "title": "Breakout",
-      "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Se ejecuta localmente — tus datos no salen de tu dispositivo.",
+      "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Funciona en tu navegador, también sin conexión.",
       "tldr": "Un rompeladrillos estilo Breakout: rebota la bola con tu pala para romper muros de ladrillos en niveles que se aceleran, atrapando potenciadores que caen (y esquivando los malos). Construido sobre HTML5 Canvas con física determinista y controles de ratón, teclado y táctiles. La puntuación, las vidas y la tabla de récords viven en JavaScript del lado del cliente: sin scripts de terceros, sin servidor, y funciona sin conexión una vez en caché."
     },
     "totp": {
@@ -545,11 +552,11 @@
     "exif": {
       "title": "Inspector EXIF",
       "lede": "Descubre lo que una foto lleva oculto — datos de cámara, fechas, ubicación GPS — y descarga una copia limpia sin nada de eso. No se sube nada.",
-      "tldr": "Lee metadatos EXIF, XMP, IPTC y otros incrustados en imágenes JPEG, PNG y WebP directamente en tu navegador: modelo de cámara, fecha de captura y la posición GPS que muchos teléfonos añaden en silencio. Con un toque genera una copia con los metadatos eliminados a nivel de bytes — los píxeles no se tocan y el perfil de color se conserva — y la copia se vuelve a analizar para verificar que está limpia antes de descargarla. Nada sale de tu dispositivo."
+      "tldr": "Lee metadatos EXIF, XMP, IPTC y otros incrustados en imágenes JPEG, PNG y WebP directamente en tu navegador: modelo de cámara, fecha de captura y la posición GPS que muchos teléfonos añaden en silencio. Con un toque genera una copia con los metadatos eliminados a nivel de bytes — los píxeles no se tocan y el perfil de color se conserva — y la copia se vuelve a analizar para verificar que está limpia antes de descargarla. Tus fotos nunca se suben."
     },
     "sudoku": {
       "title": "Sudoku",
-      "lede": "Rompecabezas lógico con estética de terminal. Generador de solución única, cuatro dificultades, anotaciones a lápiz. Funciona localmente: ningún dato sale de tu dispositivo.",
+      "lede": "Rompecabezas lógico con estética de terminal. Generador de solución única, cuatro dificultades, anotaciones a lápiz. Funciona en tu navegador, también sin conexión.",
       "tldr": "Sudoku 9×9 clásico reconstruido con una estética synthwave de terminal. Un generador por backtracking garantiza exactamente una solución en cuatro dificultades (fácil → experto); anotaciones a lápiz, resaltado de pares y del mismo número, detección de conflictos en vivo, tres errores antes de perder y hasta tres pistas. Los mejores tiempos por dificultad se guardan en tu dispositivo. Funciona con teclado, ratón y táctil. Sin instalaciones, sin registro, sin analíticas: la generación y resolución se ejecutan localmente en tu navegador, y funciona sin conexión."
     },
     "ludo": {
@@ -559,13 +566,14 @@
     },
     "chess": {
       "title": "Ajedrez",
-      "lede": "Motor local, por turnos y juego en línea — sin servidores. Reglas completas con enroque, al paso y coronación; motor alfa-beta con cuatro niveles, barra de evaluación y pistas.",
+      "lede": "Motor local, por turnos y juego en línea de igual a igual. Reglas completas con enroque, al paso y coronación; motor alfa-beta con cuatro niveles, barra de evaluación y pistas.",
       "tldr": "Una implementación completa de ajedrez que se ejecuta enteramente en tu navegador. El motor de reglas cubre enroque, captura al paso, coronación, jaque/jaque mate/ahogado y tablas (regla de 50 movimientos, material insuficiente, triple repetición), con notación SAN completa. Juega por turnos en un dispositivo, contra un motor alfa-beta integrado (cuatro niveles, de Principiante a Brutal, ejecutándose en un Web Worker para que la interfaz nunca se congele) con barra de evaluación en vivo, líneas candidatas y pistas — o en línea contra un amigo por una conexión P2P cifrada usando un código. Arrastra o toca para mover, repasa el historial, gira el tablero, deshaz y abandona. Sin cuentas, sin analíticas, funciona sin conexión."
     },
     "annotate-image": {
       "title": "Anotar imagen",
       "lede": "Sube una imagen y obtén al instante una descripción de IA, texto alternativo, transcripción o etiquetas — con prompts probados de un toque. Se ejecuta localmente en tu navegador, nada se sube.",
-      "tldr": "Un complemento enfocado y con visión para AI Chat: suelta una imagen y se ejecuta automáticamente un prompt probado — sin necesidad de escribir uno. Cambia entre Describir, Leer texto (OCR), Texto alternativo y Objetos/etiquetas con un toque. Ejecuta el mismo modelo de visión Qwen3.5 en el dispositivo que AI Chat (caché compartida — si ya has usado AI Chat, no hay descarga extra), enteramente en tu navegador mediante WebGPU. Nada se sube; la imagen nunca sale de tu dispositivo. Arrastra y suelta, pega, elige un archivo o usa «abrir con» desde tu gestor de archivos una vez instalado. Copia o descarga el resultado. Requiere WebGPU (Chrome/Edge reciente o Safari 26+)."
+      "tldr": "Un complemento enfocado y con visión para AI Chat: suelta una imagen y se ejecuta automáticamente un prompt probado — sin necesidad de escribir uno. Cambia entre Describir, Leer texto (OCR), Texto alternativo y Objetos/etiquetas con un toque. Ejecuta el mismo modelo de visión Qwen3.5 en el dispositivo que AI Chat (caché compartida — si ya has usado AI Chat, no hay descarga extra), enteramente en tu navegador mediante WebGPU. Nada se sube; la imagen nunca sale de tu dispositivo. Arrastra y suelta, pega, elige un archivo o usa «abrir con» desde tu gestor de archivos una vez instalado. Copia o descarga el resultado. Requiere WebGPU (Chrome/Edge reciente o Safari 26+).",
+      "seo_title": "Anotación de imágenes con IA: texto alternativo y OCR"
     },
     "files": {
       "title": "Archivos",
@@ -579,12 +587,13 @@
     },
     "comms": {
       "title": "Comms",
-      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin servidor de por medio."
+      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes.",
+      "seo_title": "Chat, llamadas y archivos P2P cifrados"
     },
     "bubble-level": {
       "title": "Nivel de burbuja",
       "lede": "Convierte tu móvil en un nivel de burbuja online: un nivel de albañil sin instalar ninguna app, con precisión de 0,1° y que funciona sin conexión.",
-      "tldr": "Apoya el móvil en una estantería y la herramienta lee la inclinación directamente del acelerómetro. Túmbalo en plano para ver una burbuja circular de dos ejes, o ponlo de canto para usar el tubo de un nivel de carpintero. Nada sale de tu dispositivo, y con un toque corriges el sesgo del propio móvil."
+      "tldr": "Apoya el móvil en una estantería y la herramienta lee la inclinación directamente del acelerómetro. Túmbalo en plano para ver una burbuja circular de dos ejes, o ponlo de canto para usar el tubo de un nivel de carpintero. Tus mediciones se mantienen privadas, y con un toque corriges el sesgo del propio móvil."
     },
     "decibel-meter": {
       "title": "Medidor de decibelios",
@@ -604,7 +613,8 @@
     "ruler": {
       "title": "Regla online",
       "lede": "Una regla online a tamaño real: mide en cm, mm y pulgadas en la propia pantalla y calíbrala con una tarjeta bancaria para que los milímetros sean de verdad.",
-      "tldr": "Una regla dibujada directamente sobre tu pantalla, con centímetros y milímetros en un borde y pulgadas hasta 1/16 en el otro. Ningún navegador puede saber cuánto mide tu pantalla, así que la calibras una vez ajustando un contorno a una tarjeta bancaria (o escribiendo una medida que ya conozcas) y a partir de ahí las marcas son fieles. Arrastra los dos marcadores para medir lo que apoyes sobre el cristal: funciona sin conexión y guarda la calibración en este dispositivo."
+      "tldr": "Una regla dibujada directamente sobre tu pantalla, con centímetros y milímetros en un borde y pulgadas hasta 1/16 en el otro. Ningún navegador puede saber cuánto mide tu pantalla, así que la calibras una vez ajustando un contorno a una tarjeta bancaria (o escribiendo una medida que ya conozcas) y a partir de ahí las marcas son fieles. Arrastra los dos marcadores para medir lo que apoyes sobre el cristal: funciona sin conexión y guarda la calibración en este dispositivo.",
+      "seo_title": "Regla online a tamaño real (cm y mm)"
     },
     "phosphor": {
       "title": "PHOSPHOR",
@@ -619,7 +629,7 @@
     "console": {
       "title": "Consola",
       "lede": "Chatea con el modelo local mientras usa las apps de Mentria en una pantalla de móvil compartida, o deja que actúe como usuario de prueba y te cuente lo que encuentra.",
-      "tldr": "La Consola pone una pantalla de Mentria tamaño móvil junto a un chat. Pide al modelo 27B local que haga algo (\"pon un temporizador de 5 minutos\") y abrirá la app y la usará delante de ti: cada acción se muestra y debe citar la pantalla para afirmar que terminó. Inicia una sesión de prueba y explorará una app como una persona inventada, con un informe de fallos que puedes convertir en issues. Nada sale de tu dispositivo."
+      "tldr": "La Consola pone una pantalla de Mentria tamaño móvil junto a un chat. Pide al modelo 27B local que haga algo (\"pon un temporizador de 5 minutos\") y abrirá la app y la usará delante de ti: cada acción se muestra y debe citar la pantalla para afirmar que terminó. Inicia una sesión de prueba y explorará una app como una persona inventada, con un informe de fallos que puedes convertir en issues. Tus conversaciones se mantienen privadas."
     },
     "forge": {
       "title": "Forge",
@@ -5120,8 +5130,8 @@
       }
     },
     "comms": {
-      "meta_description": "Chat entre pares, llamadas y envío de archivos — cifrado de extremo a extremo, sin cuentas y sin servidor de por medio.",
-      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin servidor de por medio. Comparte la URL de una sala, o intercambia códigos de contacto y escribe directamente a otras personas.",
+      "meta_description": "Chat entre pares, llamadas y envío de archivos — cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes.",
+      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes. Comparte la URL de una sala, o intercambia códigos de contacto y escribe directamente a otras personas.",
       "unknown": "desconocido",
       "onboard": {
         "insecure_title": "Esta página necesita una conexión segura",
@@ -5836,5 +5846,63 @@
       "tilt_unavailable": "La dirección por inclinación no está disponible en este dispositivo",
       "tilt_centered": "Inclinación centrada"
     }
+  },
+  "privacy": {
+    "title": "Privacidad",
+    "desc": "Qué se queda en tu dispositivo, qué usa la red y cuándo, y cómo comprobarlo tú mismo.",
+    "lede": "Mentria no tiene cuentas, ni anuncios, ni seguimiento. La IA funciona en tu dispositivo y lo que creas aquí se guarda en tu navegador. Esto es lo que sí usa la red, para que puedas comprobarlo tú mismo.",
+    "device_h": "Se queda en tu dispositivo",
+    "device_ai_b": "Chats y peticiones a la IA.",
+    "device_ai": "Las herramientas de IA integradas en Mentria ejecutan el modelo en el chip gráfico de tu dispositivo, así que tus preguntas, las respuestas y las imágenes que le muestras a la IA se procesan en tu navegador y no se envían a ningún servidor.",
+    "device_files_b": "Los archivos que abres.",
+    "device_files": "Las fotos, los vídeos, la música, los PDF y los documentos se leen dentro de la página. Las herramientas que modifican un archivo te dan una copia nueva para guardar, sin subir nada.",
+    "device_sensors_b": "Cámara, micrófono, movimiento y ubicación.",
+    "device_sensors": "Las herramientas para el móvil los leen dentro de la página mientras las usas, y las lecturas no se envían a ningún sitio.",
+    "device_saved_b": "Lo que guardas.",
+    "device_saved": "Las notas, los ajustes, tu progreso de aprendizaje, los paquetes importados, las extensiones que añades, las partidas guardadas y tu identidad de Mentria se guardan en el almacenamiento de este navegador. Si borras los datos del sitio, se eliminan.",
+    "device_backup_b": "Copias de seguridad.",
+    "device_backup": "Una copia de seguridad es un único archivo cifrado que descargas y guardas tú. Mentria nunca recibe una copia, y nadie puede abrirla sin tu frase.",
+    "net_h": "Qué usa la red",
+    "net_lede": "Qué se conecta, cuándo y qué puede ver el otro lado.",
+    "net_site_name": "Cargar Mentria",
+    "net_site_when": "En cada visita.",
+    "net_site_sees": "Las páginas, las imágenes, la música y los archivos de la app vienen de los servidores que alojan Mentria. Como cualquier sitio web, ven tu dirección IP, la página que abres y el nombre de tu navegador. Las páginas de Mentria no llevan scripts de analítica, anuncios ni rastreadores.",
+    "net_models_name": "Modelos de IA",
+    "net_models_when": "Cuando abres una herramienta de IA y su modelo aún no está guardado.",
+    "net_models_sees": "El modelo se descarga una vez y se guarda en tu navegador, así que la IA sigue funcionando sin conexión. El servidor que lo envía ve la descarga, como con cualquier archivo.",
+    "net_comms_name": "Comms, ajedrez en línea y sincronización de dispositivos",
+    "net_comms_when": "Solo cuando los usas.",
+    "net_comms_sees": "Lo que envías se cifra primero en tu dispositivo. Para conectarse, tu dispositivo y el otro ven la dirección IP del otro, y el servidor de Mentria les ayuda a encontrarse. Los mensajes para alguien que no está conectado esperan en el servidor, cifrados, hasta 30 días. En Comms, activa «ocultar mi ip» para enviarlo todo a través del servidor, así la otra persona no ve tu dirección.",
+    "net_mirror_name": "Espejo de modelos",
+    "net_mirror_when": "Solo si lo activas.",
+    "net_mirror_sees": "Tu navegador comparte archivos de modelos de IA con otros visitantes, de igual a igual. Como en cualquier intercambio P2P, pueden ver tu dirección IP.",
+    "net_push_name": "Notificaciones",
+    "net_push_when": "Solo si las activas para temporizadores o Comms.",
+    "net_push_sees": "El servicio de notificaciones del fabricante de tu navegador entrega un aviso que solo dice Mentria. Los detalles se completan en tu dispositivo.",
+    "net_github_name": "Publicar en GitHub",
+    "net_github_when": "Solo cuando decides publicar algo, como una historia o un informe de error.",
+    "net_github_sees": "Lo publicas tú, con tu propia cuenta de GitHub, y allí es público.",
+    "net_local_name": "Búsqueda web del Chat IA",
+    "net_local_when": "Solo si conectas el Chat IA a un servidor de búsqueda que ejecutas tú.",
+    "net_local_sees": "Las búsquedas van solo a ese servidor, que controlas tú.",
+    "net_assistant_name": "El asistente de IA de tu navegador",
+    "net_assistant_when": "Solo si tu navegador tiene uno y le pides que use Mentria.",
+    "net_assistant_sees": "Mentria le ofrece herramientas, como la búsqueda y los títulos de tus notas. Lo que devuelve una herramienta va a ese asistente, que puede funcionar en la nube.",
+    "net_ext_name": "Extensiones",
+    "net_ext_when": "Cuando ejecutas una.",
+    "net_ext_sees": "Cualquiera puede crear una extensión, así que cada una funciona a su manera, y algunas envían por internet lo que les das. Mira qué hace una extensión antes de usarla y añade solo las que te den confianza.",
+    "keep_h": "Qué guardan los servidores de Mentria",
+    "keep_none": "Ni cuentas, ni perfiles, ni cookies, así que no hay una base de datos de usuarios.",
+    "check_h": "Compruébalo tú mismo",
+    "check_lede": "Cada página de Mentria le da a tu navegador una lista de los servidores a los que puede pedir datos, y el navegador bloquea las solicitudes a cualquier otro. Puedes verlo funcionar:",
+    "check_step_1": "Abre las herramientas para desarrolladores de tu navegador (F12, u Opción-Comando-I en un Mac) y elige la pestaña Red.",
+    "check_step_2": "Usa cualquier herramienta o chatea con un modelo de IA. Cada solicitud aparece en la lista, con el servidor al que fue.",
+    "check_step_3": "Cuando un modelo ya está guardado, chatear con él no añade solicitudes. Puedes desactivar el wifi y seguir.",
+    "check_step_4": "Lee el código. La web de Mentria es de código abierto:",
+    "ask_h": "Preguntas",
+    "ask_body": "¿Has visto algo incorrecto en esta página o tienes una pregunta?",
+    "ask_github": "Abre una incidencia en GitHub",
+    "ask_x": "escríbenos en X",
+    "updated": "Última actualización: 9 de octubre de 2026."
   }
 }

@@ -224,11 +224,14 @@ module.exports = function(eleventyConfig) {
     const current = toolsCatalog.find(t =>
       t.url ? pageUrl.includes(t.url) : pageUrl.includes("/tools/" + t.slug + "/"));
     if (!current) return [];
-    const same = toolsCatalog.filter(t => t.slug !== current.slug && t.category === current.category);
-    const rest = toolsCatalog.filter(t => t.slug !== current.slug && t.category !== current.category);
+    const picked = (current.related || []).map(slug => toolsCatalog.find(t => t.slug === slug)).filter(Boolean);
+    const taken = new Set([current.slug].concat(picked.map(t => t.slug)));
+    const same = toolsCatalog.filter(t => !taken.has(t.slug) && t.category === current.category);
+    const rest = toolsCatalog.filter(t => !taken.has(t.slug) && t.category !== current.category);
     const seed = current.slug.length + current.slug.charCodeAt(0);
     const rot = arr => arr.length ? arr.slice(seed % arr.length).concat(arr.slice(0, seed % arr.length)) : arr;
-    return rot(same).slice(0, 3).concat(rot(rest)).slice(0, 4);
+    if (picked.length >= 3) return picked.slice(0, 4);
+    return picked.concat(rot(same).slice(0, Math.max(0, 3 - picked.length)), rot(rest)).slice(0, 4);
   });
 
   eleventyConfig.addFilter("localeUrl", function (urlPath, lang) {
@@ -292,6 +295,25 @@ module.exports = function(eleventyConfig) {
 
   eleventyConfig.addFilter("contains", function (value, part) {
     return String(value == null ? "" : value).indexOf(part) !== -1;
+  });
+
+  let gitDates = null;
+  const readGitDates = () => {
+    const dates = new Map();
+    try {
+      const log = execSync("git log --format=@%cs --name-only -- src", { maxBuffer: 64 * 1024 * 1024 }).toString();
+      let current = "";
+      for (const line of log.split("\n")) {
+        if (line.startsWith("@")) current = line.slice(1);
+        else if (line && !dates.has(line)) dates.set(line, current);
+      }
+    } catch {}
+    return dates;
+  };
+  eleventyConfig.addFilter("gitDate", function (inputPath) {
+    if (!inputPath) return "";
+    if (!gitDates) gitDates = readGitDates();
+    return gitDates.get(String(inputPath).replace(/^\.\//, "")) || "";
   });
 
   eleventyConfig.addFilter("where", function (array, key, value) {

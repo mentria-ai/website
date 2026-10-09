@@ -10,6 +10,9 @@
   <div class="tldr__panel">
     <h2 class="tldr__heading">{% tvar "common.tldr.what_is", "name", titleKey %}</h2>
     <p class="tldr__body">{{ tldrKey | t }}</p>
+    {%- if page.fileSlug in ["ai-chat", "annotate-image", "quote"] %}
+    <p class="tldr__body"><a href="/guides/run-llm-in-browser/">{{ "common.tldr.llm_guide" | t }}</a></p>
+    {%- endif %}
   </div>
 </details>
 {%- endif %}

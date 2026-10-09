@@ -218,7 +218,7 @@ function loadLocalModel(needVision) {
         import(DIST + 'mentria.mjs'),
         tiers()
       ]);
-      const tier = await chooseTier(Tiers, !(currentReq && currentReq.source === 'agent'));
+      const tier = await chooseTier(Tiers, !(currentReq && (currentReq.source === 'agent' || currentReq.noOffer)));
       if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast(tr('webmcp.loading_model', 'Loading the on-device model for a private AI task…'));
       const make = () => {
         const e = new MentriaEngine(DIST + 'worker.mjs');
@@ -345,7 +345,7 @@ export function askLocal(system, user, opts) {
   const maxTokens = o.maxTokens || 220;
   const run = queue.then(async () => {
     emit('start', { source: o.source || '', prompt: shown });
-    currentReq = { source: o.source || '', prompt: shown, onProgress: o.onProgress || null };
+    currentReq = { source: o.source || '', prompt: shown, onProgress: o.onProgress || null, noOffer: !!o.noOffer };
     try {
       const image = o.image ? await imageToRgb(o.image, o.imageMaxSide) : null;
       let answer = null;

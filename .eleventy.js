@@ -224,11 +224,14 @@ module.exports = function(eleventyConfig) {
     const current = toolsCatalog.find(t =>
       t.url ? pageUrl.includes(t.url) : pageUrl.includes("/tools/" + t.slug + "/"));
     if (!current) return [];
-    const same = toolsCatalog.filter(t => t.slug !== current.slug && t.category === current.category);
-    const rest = toolsCatalog.filter(t => t.slug !== current.slug && t.category !== current.category);
+    const picked = (current.related || []).map(slug => toolsCatalog.find(t => t.slug === slug)).filter(Boolean);
+    const taken = new Set([current.slug].concat(picked.map(t => t.slug)));
+    const same = toolsCatalog.filter(t => !taken.has(t.slug) && t.category === current.category);
+    const rest = toolsCatalog.filter(t => !taken.has(t.slug) && t.category !== current.category);
     const seed = current.slug.length + current.slug.charCodeAt(0);
     const rot = arr => arr.length ? arr.slice(seed % arr.length).concat(arr.slice(0, seed % arr.length)) : arr;
-    return rot(same).slice(0, 3).concat(rot(rest)).slice(0, 4);
+    if (picked.length >= 3) return picked.slice(0, 4);
+    return picked.concat(rot(same).slice(0, Math.max(0, 3 - picked.length)), rot(rest)).slice(0, 4);
   });
 
   eleventyConfig.addFilter("localeUrl", function (urlPath, lang) {

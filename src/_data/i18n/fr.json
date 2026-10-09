@@ -321,7 +321,9 @@
       "feature_private": "Aucune donnée ne quitte votre appareil",
       "feature_no_key": "Aucune clé d'API requise",
       "feature_offline": "Fonctionne hors ligne une fois en cache"
-    }
+    },
+    "related_ai": "Mentria fait aussi tourner une IA sur votre appareil, en toute confidentialité.",
+    "related_ai_link": "Essayer le chat IA"
   },
   "feed_page": {
     "title": "Fil",

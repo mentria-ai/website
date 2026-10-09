@@ -1,3 +1,6 @@
+{%- if relatedInFrame %}
+{% include "related-tools.njk" %}
+{%- endif %}
     </div>
 </div>
-{% include "related-tools.njk" %}
+{% if not relatedInFrame %}{% include "related-tools.njk" %}{% endif %}

@@ -321,7 +321,9 @@
       "feature_private": "No data leaves your device",
       "feature_no_key": "No API key required",
       "feature_offline": "Works offline once cached"
-    }
+    },
+    "related_ai": "Mentria also runs AI on your device, privately.",
+    "related_ai_link": "Try AI Chat"
   },
   "feed_page": {
     "title": "Feed",

@@ -162,6 +162,30 @@ test('tracker: after a capture it reports the page as captured until a new page 
   assert.equal(s.captured, false);
 });
 
+test('tracker: a shot taken with no outline leaves auto-capture armed', () => {
+  const tr = T.createTracker();
+  let t = 0;
+  for (; t <= 600; t += 66) tr.push(null, t);
+  tr.markCaptured(t);
+  let fired = false;
+  for (let k = 0; k < 60; k++, t += 66) if (tr.push(sample(basePage), t).state === 'fire') fired = true;
+  assert.ok(fired);
+});
+
+test('tracker: single dropped frames neither restart nor empty the ring', () => {
+  const tr = T.createTracker();
+  let fired = -1, prev = 0, emptied = 0;
+  for (let t = 0, k = 0; t <= 3000; t += 66, k++) {
+    const s = tr.push(k % 5 === 4 ? null : sample(basePage), t);
+    if (fired < 0 && prev > 0 && s.progress === 0) emptied++;
+    prev = s.progress;
+    if (s.state === 'fire' && fired < 0) fired = t;
+  }
+  const due = T.STEADY_WINDOW_MS + T.FIRE_AFTER_MS;
+  assert.ok(fired >= 0 && fired <= due + 300, 'fired at ' + fired);
+  assert.equal(emptied, 0);
+});
+
 test('tracker: losing the page clears the outline after 300 ms', () => {
   const tr = T.createTracker();
   tr.push(sample(basePage), 0);

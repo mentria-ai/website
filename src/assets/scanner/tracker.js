@@ -39,8 +39,9 @@ export function createTracker() {
     if (!ok) {
       if (captured && t - lastSeen > LOST_AFTER_MS) dipped = true;
       if (t - lastSeen > LOST_AFTER_MS) clear();
-      steadySince = 0;
-      return { quad: smooth, state: smooth ? 'found' : 'none', progress: 0 };
+      if (!smooth) return { quad: null, state: 'none', progress: 0 };
+      const armed = steadySince && changed && t >= cooldownUntil;
+      return { quad: smooth, state: steadySince ? 'steady' : 'found', progress: armed ? Math.min(0.99, (t - steadySince) / FIRE_AFTER_MS) : 0 };
     }
     lastSeen = t;
     if (!smooth || shift(smooth, r.quad, w, h) > 0.1) {
@@ -81,7 +82,7 @@ export function createTracker() {
   function markCaptured(t) {
     captured = smooth ? smooth.map((p) => [p[0], p[1]]) : null;
     cooldownUntil = t + COOLDOWN_MS;
-    changed = false;
+    changed = !captured;
     dipped = false;
     steadySince = 0;
   }

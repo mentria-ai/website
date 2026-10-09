@@ -1463,6 +1463,9 @@ html.mentria-no-motion [data-requires="motion"] { display: none !important; }
   color: var(--term-muted);
 }
 .related-tools__chip--all { color: var(--accent, #6ef3c5); }
+.related-tools--in-frame { max-width: none; margin: 2rem 0 0.5rem; padding: 0; flex-shrink: 0; }
+.related-tools__ai { margin: 0.9rem 0 0; font-size: 0.78rem; line-height: 1.5; color: var(--term-muted); }
+.related-tools__ai a { color: var(--accent, #6ef3c5); white-space: nowrap; }
 
 .nav-link__i { width: 18px; height: 18px; flex: none; }
 .nav-link { display: inline-flex; align-items: center; gap: .4rem; }

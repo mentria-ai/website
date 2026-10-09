@@ -321,7 +321,9 @@
       "feature_private": "Nenhum dado sai do seu dispositivo",
       "feature_no_key": "Não precisa de chave de API",
       "feature_offline": "Funciona offline depois de ficar em cache"
-    }
+    },
+    "related_ai": "A Mentria também roda IA no seu dispositivo, com privacidade.",
+    "related_ai_link": "Experimentar o chat de IA"
   },
   "feed_page": {
     "title": "Feed",

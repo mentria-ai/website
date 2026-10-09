@@ -12,7 +12,12 @@
     "summary": "Session pedometer using your phone's motion sensor — goal ring, 7-day history, streaks, a black-screen pocket mode that keeps counting in your pocket, and honest estimates for locked-screen gaps. All on-device.",
     "category": "Health",
     "group": "Everyday",
-    "requires": "motion"
+    "requires": "motion",
+    "related": [
+      "speedometer",
+      "compass",
+      "decibel-meter"
+    ]
   },
   {
     "slug": "qr-scanner",
@@ -284,7 +289,12 @@
     "category": "Utility",
     "group": "Everyday",
     "requires": "motion",
-    "added": "2026-07-28"
+    "added": "2026-07-28",
+    "related": [
+      "ruler",
+      "compass",
+      "decibel-meter"
+    ]
   },
   {
     "slug": "decibel-meter",
@@ -292,7 +302,12 @@
     "summary": "Sound level meter online — measure noise in decibels with your phone or laptop mic, no app to install. Live dB reading with color ramp, peak-hold meter, session min/average/peak, adjustable calibration offset, and a ladder of everyday sounds for context. Honest estimates, not a calibrated instrument. Audio is analysed on-device and never recorded or uploaded.",
     "category": "Utility",
     "group": "Everyday",
-    "added": "2026-07-28"
+    "added": "2026-07-28",
+    "related": [
+      "bubble-level",
+      "ruler",
+      "step-counter"
+    ]
   },
   {
     "slug": "compass",
@@ -301,7 +316,12 @@
     "category": "Utility",
     "group": "Everyday",
     "requires": "motion",
-    "added": "2026-07-28"
+    "added": "2026-07-28",
+    "related": [
+      "bubble-level",
+      "speedometer",
+      "ruler"
+    ]
   },
   {
     "slug": "speedometer",
@@ -309,7 +329,12 @@
     "summary": "GPS speedometer online without an app — live speed in km/h, mph or knots on a big auto-ranging dial, plus trip distance, moving time, average and top speed. Reads your device GPS in the browser; the position never leaves the device.",
     "category": "Utility",
     "group": "Everyday",
-    "added": "2026-07-28"
+    "added": "2026-07-28",
+    "related": [
+      "step-counter",
+      "compass",
+      "decibel-meter"
+    ]
   },
   {
     "slug": "ruler",
@@ -317,7 +342,12 @@
     "summary": "Online ruler at actual size — centimetres, millimetres and inches down to 1/16 on screen. Calibrate once with a bank card (or a length you already know) so the marks are true to size, then drag two markers to measure anything you lay on the glass. Works offline; calibration stays on your device.",
     "category": "Utility",
     "group": "Everyday",
-    "added": "2026-07-28"
+    "added": "2026-07-28",
+    "related": [
+      "bubble-level",
+      "compass",
+      "decibel-meter"
+    ]
   },
   {
     "slug": "gallery",

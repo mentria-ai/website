@@ -321,7 +321,9 @@
       "feature_private": "データは端末の外に出ません",
       "feature_no_key": "APIキーは不要",
       "feature_offline": "キャッシュ後はオフラインでも動作"
-    }
+    },
+    "related_ai": "Mentriaは端末の中でAIも動かせます。データは外に出ません。",
+    "related_ai_link": "AIチャットを試す"
   },
   "feed_page": {
     "title": "フィード",

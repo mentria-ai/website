@@ -1,19 +1,22 @@
 import { rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import puppeteer from 'puppeteer-core';
 import { serve } from './scanner-serve.mjs';
+import { writeY4m } from './scanner-y4m.mjs';
 
 const BUILD = process.argv[2];
 if (!BUILD) { console.log('usage: node scripts/scanner-browser-check.mjs <build dir>'); process.exit(2); }
 const ORIGIN = 'http://localhost:8098';
 const PROFILE = '/Volumes/Mac ext storage/games-tmp/orch/scanner-check-profile';
 rmSync(PROFILE, { recursive: true, force: true });
+const VIDEO = '/Volumes/Mac ext storage/games-tmp/orch/scanner-page.y4m';
+writeY4m(VIDEO);
 const server = await serve(BUILD, 8098);
 const browser = await puppeteer.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   headless: true,
   userDataDir: PROFILE,
   protocolTimeout: 600000,
-  args: ['--enable-gpu', '--ignore-gpu-blocklist', '--use-angle=metal']
+  args: ['--enable-gpu', '--ignore-gpu-blocklist', '--use-angle=metal', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--use-file-for-fake-video-capture=' + VIDEO]
 });
 
 const checks = [];
@@ -150,6 +153,34 @@ check('library: importing two photos creates a document with rendered pages', as
   if (!r.quad) throw new Error('no page outline detected on import');
 });
 
+check('capture: the camera page is outlined and captured automatically', async (page) => {
+  await page.goto(ORIGIN + '/extensions/scanner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.sc-lib');
+  await page.evaluate(async () => {
+    const db = await import('/assets/scanner/db.js');
+    for (const d of await db.listDocs()) await db.deleteDoc(d.id);
+    localStorage.removeItem('mentria.scanner.auto');
+  });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('.sc-lib__actions .sc-btn--primary');
+  await page.click('.sc-lib__actions .sc-btn--primary');
+  await page.waitForSelector('.sc-cam');
+  await page.waitForFunction(() => {
+    const c = document.querySelector('.sc-cam__count');
+    return c && c.textContent === '1';
+  }, { timeout: 30000, polling: 250 });
+  const r = await page.evaluate(async () => {
+    const db = await import('/assets/scanner/db.js');
+    const [doc] = await db.listDocs();
+    const p = doc ? await db.getPage(doc.pageIds[0]) : null;
+    return p ? { quad: p.quad, w: p.width, h: p.height } : null;
+  });
+  if (!r || !r.quad) throw new Error('no captured page with an outline: ' + JSON.stringify(r));
+  await new Promise((res) => setTimeout(res, 800));
+  const said = await page.$eval('.sc-cam__status', (el) => [el.textContent, window.SCAN_COPY.capture.captured]);
+  if (said[0] !== said[1]) throw new Error('status after the capture: ' + said[0]);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   const page = await browser.newPage();
@@ -166,5 +197,6 @@ await browser.close();
 server.close();
 rmSync(PROFILE, { recursive: true, force: true });
 rmSync(FIXTURES, { recursive: true, force: true });
+rmSync(VIDEO, { force: true });
 console.log(checks.length - failed + '/' + checks.length + ' passed');
 if (failed) process.exit(1);

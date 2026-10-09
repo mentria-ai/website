@@ -32,7 +32,7 @@ export function createTracker() {
     steadySince = 0;
   }
 
-  function push(r, t) {
+  function step(r, t) {
     const ok = !!(r && r.quad && r.confidence > 0);
     if (r && r.w) dims = [r.w, r.h];
     const [w, h] = dims;
@@ -70,6 +70,12 @@ export function createTracker() {
     if (!(changed && t >= cooldownUntil)) return { quad: smooth, state: 'steady', progress: 0 };
     const progress = Math.min(1, (t - steadySince) / FIRE_AFTER_MS);
     return { quad: smooth, state: progress >= 1 ? 'fire' : 'steady', progress };
+  }
+
+  function push(r, t) {
+    const s = step(r, t);
+    s.captured = !!captured && !changed;
+    return s;
   }
 
   function markCaptured(t) {

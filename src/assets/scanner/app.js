@@ -3,7 +3,8 @@ import { setCopy, setFull, host } from './ui.js';
 setCopy(window.SCAN_COPY || {});
 const root = document.getElementById('scan');
 const ROUTES = {
-  library: () => import('./views/library.js')
+  library: () => import('./views/library.js'),
+  capture: () => import('./views/capture.js')
 };
 let unmount = null;
 let token = 0;

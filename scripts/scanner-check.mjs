@@ -150,6 +150,18 @@ test('tracker: no second capture until the page changes', () => {
   assert.ok(fired);
 });
 
+test('tracker: after a capture it reports the page as captured until a new page appears', () => {
+  const tr = T.createTracker();
+  let t = 0;
+  for (; t <= 1500; t += 66) assert.equal(tr.push(sample(basePage), t).captured, false);
+  tr.markCaptured(t);
+  for (let k = 0; k < 20; k++, t += 66) assert.equal(tr.push(k % 10 === 5 ? null : sample(basePage), t).captured, true);
+  const moved = basePage.map(([x, y]) => [x + 0.2, y]);
+  let s = null;
+  for (let k = 0; k < 5; k++, t += 66) s = tr.push(sample(moved), t);
+  assert.equal(s.captured, false);
+});
+
 test('tracker: losing the page clears the outline after 300 ms', () => {
   const tr = T.createTracker();
   tr.push(sample(basePage), 0);

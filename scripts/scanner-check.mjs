@@ -164,6 +164,58 @@ test('tracker: a blurry frame holds back the capture', () => {
   for (let k = 0; k < 20; k++, t += 66) assert.notEqual(tr.push(sample(basePage, 0.9, 40), t).state, 'fire');
 });
 
+const P = await mod('pdf.js');
+const fakeJpeg = (n) => Uint8Array.from({ length: n }, (_, i) => (i === 0 ? 0xff : i === 1 ? 0xd8 : i % 251));
+
+function parsePdf(bytes) {
+  const s = Buffer.from(bytes).toString('latin1');
+  assert.ok(s.startsWith('%PDF-1.4\n'));
+  const at = s.lastIndexOf('startxref\n');
+  const xref = parseInt(s.slice(at + 10), 10);
+  assert.ok(s.slice(xref).startsWith('xref\n0 '));
+  const count = parseInt(s.slice(xref + 7), 10);
+  const rows = s.slice(xref).split('\n').slice(2, 2 + count);
+  rows.forEach((row, k) => {
+    assert.equal(row.length, 19, 'xref row ' + k);
+    if (k) assert.ok(s.slice(parseInt(row.slice(0, 10), 10)).startsWith(k + ' 0 obj'), 'object ' + k);
+  });
+  assert.ok(s.trimEnd().endsWith('%%EOF'));
+  return s;
+}
+
+test('pdf: two A4 pages with a valid cross-reference table', () => {
+  const s = parsePdf(P.buildPdfBytes([
+    { jpeg: fakeJpeg(500), width: 1000, height: 1414 },
+    { jpeg: fakeJpeg(300), width: 1414, height: 1000 }
+  ], { pageSize: 'a4', title: 'Scan', date: new Date(2026, 9, 9, 14, 32, 5) }));
+  assert.match(s, /\/Type \/Pages \/Kids \[4 0 R 7 0 R\] \/Count 2/);
+  assert.match(s, /\/MediaBox \[0 0 595.28 841.89\]/);
+  assert.match(s, /\/MediaBox \[0 0 841.89 595.28\]/);
+  assert.match(s, /\/CreationDate \(D:20261009143205\)/);
+  assert.equal((s.match(/\/Subtype \/Image/g) || []).length, 2);
+});
+
+test('pdf: fit pages take the image shape', () => {
+  const s = parsePdf(P.buildPdfBytes([{ jpeg: fakeJpeg(100), width: 800, height: 1600 }], { pageSize: 'fit' }));
+  assert.match(s, /\/MediaBox \[0 0 595.28 1190.56\]/);
+  assert.match(s, /q 595.28 0 0 1190.56 0 0 cm \/Im0 Do Q/);
+});
+
+test('pdf: images are centered on Letter pages', () => {
+  const b = P.pageBox(1000, 1000, 'letter');
+  assert.equal(b.pw, 612);
+  assert.equal(b.ph, 792);
+  near(b.dw, 612, 1e-9);
+  near(b.y, 90, 1e-9);
+});
+
+test('pdf: titles are escaped, and non-Latin titles are stored as UTF-16', () => {
+  assert.equal(P.pdfString('Scan (1)'), '(Scan \\(1\\))');
+  assert.equal(P.pdfString('請求書'), '<FEFF8ACB6C4266F8>');
+  const s = parsePdf(P.buildPdfBytes([{ jpeg: fakeJpeg(50), width: 100, height: 100 }], { title: '請求書' }));
+  assert.match(s, /\/Title <FEFF8ACB6C4266F8>/);
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

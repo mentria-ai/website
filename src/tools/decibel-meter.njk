@@ -304,6 +304,7 @@ localeReload: true
   }
 
   function render(now, fast, slow) {
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('decibel-meter', { after: 5000 });
     var v = toDisplay(fast);
     var sv = toDisplay(slow);
     if (now - lastTextAt >= TEXT_INTERVAL_MS) {

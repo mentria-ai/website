@@ -901,7 +901,20 @@
     return formatSize(parseFloat(m[1]), m[2].toUpperCase(), dot < 0 ? 0 : m[1].length - dot - 1, lang);
   }
 
+  var successSent = false, successTimer = 0;
+  function success(tool, opts) {
+    if (successSent) return;
+    var after = opts && opts.after;
+    if (after) {
+      if (!successTimer) successTimer = setTimeout(function () { successTimer = 0; success(tool); }, after);
+      return;
+    }
+    successSent = true;
+    try { window.dispatchEvent(new CustomEvent('mentria:success', { detail: { tool: tool || '' } })); } catch (_) {}
+  }
+
   Object.assign(window.MentriaUI, {
+    success: success,
     searchRank: searchRank,
     formatNumber: formatNumber,
     formatSize: formatSize,

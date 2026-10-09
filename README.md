@@ -7,7 +7,7 @@
 <p align="center">
   🌐 <a href="https://mentria.ai">mentria.ai</a> &nbsp;·&nbsp;
   🧰 <a href="https://mentria.ai/tools/">Tools</a> &nbsp;·&nbsp;
-  📡 <a href="https://mentria.ai/feed/">Feed</a> &nbsp;·&nbsp;
+  📚 <a href="https://mentria.ai/learn/">Learn</a> &nbsp;·&nbsp;
   📊 <a href="benchmarks/">Benchmarks</a>
 </p>
 

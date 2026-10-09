@@ -37,14 +37,16 @@ function pdfDate(d) {
   return 'D:' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
 }
 
-export function buildPdfBytes(pages, { pageSize = 'fit', title = 'Scan', date = new Date() } = {}) {
+const len = (b) => (b instanceof Uint8Array ? b.length : b.size);
+
+function pdfParts(pages, { pageSize = 'fit', title = 'Scan', date = new Date() } = {}) {
   const parts = [];
   const offsets = [];
   let size = 0;
   const add = (x) => {
     const b = typeof x === 'string' ? te.encode(x) : x;
     parts.push(b);
-    size += b.length;
+    size += len(b);
   };
   const obj = (n, body) => {
     offsets[n] = size;
@@ -60,7 +62,7 @@ export function buildPdfBytes(pages, { pageSize = 'fit', title = 'Scan', date = 
     obj(4 + 3 * i, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + num(b.pw) + ' ' + num(b.ph) + '] /Resources << /XObject << /Im0 ' + (6 + 3 * i) + ' 0 R >> >> /Contents ' + (5 + 3 * i) + ' 0 R >>');
     obj(5 + 3 * i, '<< /Length ' + te.encode(content).length + ' >>\nstream\n' + content + '\nendstream');
     offsets[6 + 3 * i] = size;
-    add((6 + 3 * i) + ' 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + p.width + ' /Height ' + p.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + p.jpeg.length + ' >>\nstream\n');
+    add((6 + 3 * i) + ' 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + p.width + ' /Height ' + p.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + len(p.jpeg) + ' >>\nstream\n');
     add(p.jpeg);
     add('\nendstream\nendobj\n');
   });
@@ -69,12 +71,17 @@ export function buildPdfBytes(pages, { pageSize = 'fit', title = 'Scan', date = 
   let table = 'xref\n0 ' + count + '\n0000000000 65535 f \n';
   for (let k = 1; k < count; k++) table += String(offsets[k]).padStart(10, '0') + ' 00000 n \n';
   add(table + 'trailer\n<< /Size ' + count + ' /Root 1 0 R /Info 3 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
-  const out = new Uint8Array(size);
+  return parts;
+}
+
+export function buildPdfBytes(pages, opts) {
+  const parts = pdfParts(pages, opts);
+  const out = new Uint8Array(parts.reduce((n, b) => n + b.length, 0));
   let o = 0;
   for (const b of parts) { out.set(b, o); o += b.length; }
   return out;
 }
 
 export function buildPdf(pages, opts) {
-  return new Blob([buildPdfBytes(pages, opts)], { type: 'application/pdf' });
+  return new Blob(pdfParts(pages, opts), { type: 'application/pdf' });
 }

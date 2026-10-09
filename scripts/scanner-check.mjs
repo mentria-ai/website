@@ -285,6 +285,22 @@ test('zip: entries, CRCs and the central directory', () => {
   assert.deepEqual(names, ['Scan - 01.jpg', 'スキャン - 02.jpg']);
 });
 
+test('pdf: building from page blobs gives the same file as from byte arrays', async () => {
+  const pages = [{ jpeg: fakeJpeg(300), width: 1200, height: 1700 }, { jpeg: fakeJpeg(180), width: 1700, height: 1200 }];
+  const date = new Date(2026, 9, 9, 12, 0, 0);
+  const want = P.buildPdfBytes(pages, { pageSize: 'a4', title: 'Scan', date });
+  const blob = P.buildPdf(pages.map((p) => ({ jpeg: new Blob([p.jpeg]), width: p.width, height: p.height })), { pageSize: 'a4', title: 'Scan', date });
+  assert.deepEqual(new Uint8Array(await blob.arrayBuffer()), want);
+});
+
+test('zip: zipping blobs gives the same archive as zipping byte arrays', async () => {
+  const a = fakeJpeg(1000), b = fakeJpeg(2048);
+  const date = new Date(2026, 9, 9, 12, 0, 0);
+  const want = Z.zipStoreBytes([{ name: 'Scan - 01.jpg', data: a }, { name: 'Scan - 02.jpg', data: b }], date);
+  const blob = await Z.zipStore([{ name: 'Scan - 01.jpg', data: new Blob([a]) }, { name: 'Scan - 02.jpg', data: new Blob([b]) }], date);
+  assert.deepEqual(new Uint8Array(await blob.arrayBuffer()), want);
+});
+
 test('zip: names are safe for file systems', () => {
   assert.equal(Z.safeName('Tax: 2026/Q3 <draft>?'), 'Tax- 2026-Q3 -draft-');
   assert.equal(Z.safeName('   '), 'Scan');

@@ -88,8 +88,7 @@ export function openExport({ doc, pages }) {
     progress.textContent = '';
     const base = safeName(doc.name);
     if (fmt === 'pdf') {
-      const list = [];
-      for (const r of outs) list.push({ jpeg: new Uint8Array(await r.blob.arrayBuffer()), width: r.width, height: r.height });
+      const list = outs.map((r) => ({ jpeg: r.blob, width: r.width, height: r.height }));
       return [new File([buildPdf(list, { pageSize: prefs.size, title: doc.name })], base + '.pdf', { type: 'application/pdf' })];
     }
     const ext = fmt === 'png' ? '.png' : '.jpg';
@@ -98,9 +97,8 @@ export function openExport({ doc, pages }) {
   }
 
   async function zipOf(files) {
-    const list = [];
-    for (const f of files) list.push({ name: f.name, data: new Uint8Array(await f.arrayBuffer()) });
-    return new File([zipStore(list)], safeName(doc.name) + '.zip', { type: 'application/zip' });
+    const zip = await zipStore(files.map((f) => ({ name: f.name, data: f })));
+    return new File([zip], safeName(doc.name) + '.zip', { type: 'application/zip' });
   }
 
   async function download() {

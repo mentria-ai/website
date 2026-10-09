@@ -327,10 +327,24 @@ check('export: a PDF has one page per scan and JPGs download as a ZIP', async (p
 check('host: the store page runs the scanner, goes full screen for the camera and back', async (page) => {
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
+  await page.setViewport({ width: 390, height: 844 });
   await page.goto(ORIGIN + '/extensions/scanner/', { waitUntil: 'load' });
   await page.waitForSelector('#xr-frame');
+  await page.evaluate(() => {
+    document.documentElement.classList.add('is-standalone');
+    const u = document.getElementById('m-update');
+    if (u) u.hidden = false;
+  });
   const frameHandle = await page.$('#xr-frame');
   const frame = await frameHandle.contentFrame();
+  const reachable = async (sel) => {
+    const pts = await frame.$eval(sel, (el) => { const b = el.getBoundingClientRect(); return [0.25, 0.5, 0.75].map((k) => [b.left + b.width / 2, b.top + b.height * k]); });
+    return page.evaluate((pts) => {
+      const f = document.getElementById('xr-frame');
+      const r = f.getBoundingClientRect(), cs = getComputedStyle(f);
+      return pts.every(([x, y]) => document.elementFromPoint(r.left + f.clientLeft + parseFloat(cs.paddingLeft) + x, r.top + f.clientTop + parseFloat(cs.paddingTop) + y) === f);
+    }, pts);
+  };
   await frame.waitForSelector('.sc-lib__actions .sc-btn--primary', { timeout: 20000 });
   await frame.click('.sc-lib__actions .sc-btn--primary');
   await page.waitForFunction(() => document.getElementById('xr-frame').classList.contains('xr__frame--full'), { timeout: 10000 });
@@ -338,7 +352,15 @@ check('host: the store page runs the scanner, goes full screen for the camera an
     const c = document.querySelector('.sc-cam__count');
     return c && c.textContent === '1';
   }, { timeout: 30000, polling: 250 });
+  for (const sel of ['.sc-cam__shutter', '.sc-cam__bottom .sc-icon-btn', '.sc-cam__right .sc-btn--primary']) {
+    if (!(await reachable(sel))) throw new Error(sel + ' is covered by the page around the frame');
+  }
   await frame.click('.sc-cam__right .sc-btn--primary');
+  await frame.waitForSelector('.sc-rev');
+  await frame.click('.sc-rev__tools .sc-tool:nth-child(1)');
+  await frame.waitForSelector('.sc-adj__poly[points]');
+  if (!(await reachable('.sc-adj__bar > .sc-btn--primary'))) throw new Error('Apply is covered by the page around the frame');
+  await frame.click('.sc-adj__bar > .sc-btn:not(.sc-btn--primary)');
   await frame.waitForSelector('.sc-rev');
   const full = await page.evaluate(() => document.getElementById('xr-frame').classList.contains('xr__frame--full') || document.documentElement.classList.contains('ext-full'));
   if (full) throw new Error('frame stayed full screen after leaving the camera');

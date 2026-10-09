@@ -5891,7 +5891,6 @@
     "net_ext_sees": "N’importe qui peut créer une extension : chacune fonctionne à sa façon, et certaines envoient sur internet ce que vous leur donnez. Vérifiez ce que fait une extension avant de l’utiliser, et n’ajoutez que celles en qui vous avez confiance.",
     "keep_h": "Ce que gardent les serveurs de Mentria",
     "keep_none": "Pas de comptes, pas de profils et pas de cookies : il n’y a donc pas de base de données d’utilisateurs.",
-    "keep_logs": "Comme tout site web, les serveurs de Mentria conservent des journaux des requêtes, qui incluent des adresses IP.",
     "check_h": "Vérifiez par vous-même",
     "check_lede": "Chaque page de Mentria donne à votre navigateur la liste des serveurs auprès desquels elle peut récupérer des données, et le navigateur bloque les requêtes vers tous les autres. Vous pouvez le constater :",
     "check_step_1": "Ouvrez les outils de développement de votre navigateur (F12, ou Option-Commande-I sur Mac) et choisissez l’onglet Réseau.",

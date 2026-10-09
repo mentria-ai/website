@@ -41,11 +41,7 @@ eleventyComputed:
 
   <section class="privacy__part" aria-labelledby="privacy-keep">
     <h2 id="privacy-keep">{{ "privacy.keep_h" | t }}</h2>
-    <ul class="privacy__list">
-      {%- for key in ["none", "logs"] %}
-      <li>{{ ("privacy.keep_" ~ key) | t }}</li>
-      {%- endfor %}
-    </ul>
+    <p>{{ "privacy.keep_none" | t }}</p>
   </section>
 
   <section class="privacy__part" aria-labelledby="privacy-check">

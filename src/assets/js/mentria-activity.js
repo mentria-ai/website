@@ -49,7 +49,7 @@ const DEFAULT_COPY = {
   details: 'Device details',
   srDone: 'done, {n} tokens',
   srError: 'error: {msg}',
-  nothingLeaves: 'nothing leaves your device'
+  dataPrivate: 'your data stays private'
 };
 
 function tr(key, vars) {
@@ -462,7 +462,7 @@ export function createActivityStrip(host, opts = {}) {
     if (!panelEl || panelEl.hidden) return;
     panelEl.querySelector('.es-panel__lb').textContent = tr('thisDevice');
     panelEl.querySelector('.es-panel__x').setAttribute('aria-label', tr('collapse'));
-    panelEl.querySelector('.es-panel__note').textContent = tr('nothingLeaves');
+    panelEl.querySelector('.es-panel__note').textContent = tr('dataPrivate');
     const dev = panelEl.querySelector('.es-dev');
     const plog = panelEl.querySelector('.es-plog');
     const kv = (k, v, cls) => { const r = document.createElement('div'); r.className = 'es-dev__kv' + (cls ? ' ' + cls : ''); const a = document.createElement('span'); a.textContent = k; const b = document.createElement('b'); b.textContent = v; r.append(a, b); return r; };

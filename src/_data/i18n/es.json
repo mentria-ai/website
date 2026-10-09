@@ -176,7 +176,8 @@
     "tldr": {
       "read_more": "¿Qué es esto?",
       "read_less": "Ocultar detalles",
-      "what_is": "¿Qué es {name}?"
+      "what_is": "¿Qué es {name}?",
+      "llm_guide": "Guía (en inglés): cómo funciona un modelo de lenguaje en tu navegador"
     },
     "dialog": {
       "ok": "Aceptar",

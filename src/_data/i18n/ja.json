@@ -176,7 +176,8 @@
     "tldr": {
       "read_more": "これは何?",
       "read_less": "詳細を隠す",
-      "what_is": "{name}とは?"
+      "what_is": "{name}とは?",
+      "llm_guide": "ガイド（英語）：ブラウザで言語モデルが動く仕組み"
     },
     "dialog": {
       "ok": "OK",

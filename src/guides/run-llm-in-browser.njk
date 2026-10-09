@@ -1,0 +1,265 @@
+---
+layout: base.njk
+permalink: /guides/run-llm-in-browser/index.html
+englishOnly: true
+lang: en
+title: "Run an LLM in your browser"
+seoTitle: "How to Run an LLM in Your Browser with WebGPU"
+description: "Run a language model on your own GPU inside a web page, with no install or account. Try a small model live, then see download sizes, measured speeds, browser support and the limits."
+models:
+  - { id: "0.8b", name: "Qwen3.5 0.8B", size: "490 MB", where: "Every device with WebGPU, including phones." }
+  - { id: "2b", name: "Qwen3.5 2B", size: "1.4 GB", where: "Devices with at least 8 GB of memory." }
+  - { id: "4b", name: "Qwen3.5 4B", size: "2.8 GB", where: "Computers that can hold it, and some flagship Android phones." }
+  - { id: "27b", name: "Bonsai 27B", size: "3.8 GB", where: "Computers with a dedicated graphics card, and Apple-silicon Macs." }
+speeds:
+  - { name: "Qwen3.5 0.8B", load: "2.5 s", ttft: "0.1 s", speed: "157 tokens/s" }
+  - { name: "Qwen3.5 2B", load: "4.1 s", ttft: "0.2 s", speed: "62 tokens/s" }
+  - { name: "Qwen3.5 4B", load: "7.4 s", ttft: "0.4 s", speed: "25 tokens/s" }
+  - { name: "Bonsai 27B", load: "9.0 s", ttft: "1.2 s", speed: "39 tokens/s" }
+speedsNote: "Measured with Mentria's benchmark on an Apple M4 Pro with 24 GB of memory, in Chrome 154, October 2026. Starts in: loading a model that is already saved. First word and speed: medians of three runs of a 120-token answer. Your device will differ, and the demo above shows its own numbers."
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">guides/run-llm-in-browser</span></p>
+  <h1>Run an LLM in your browser</h1>
+  <p>A language model can run inside a web page on your own graphics chip, with no install and no account. Try one below, then see what it takes: download sizes, measured speeds, browser support and the limits.</p>
+</section>
+
+<div class="guide">
+  <section class="guide__part" aria-labelledby="try">
+    <h2 id="try">Try it here</h2>
+    <p>Mentria's engine runs the model in this tab. The first run downloads the model and saves it in your browser. After that it starts in seconds and works offline.</p>
+    <div class="llm-demo" id="llm-demo">
+      <label class="llm-demo__label" for="llm-demo-input">Your prompt</label>
+      <textarea class="llm-demo__input" id="llm-demo-input" rows="3" spellcheck="false">Summarize in one sentence: WebGPU is a web standard that lets pages use the graphics chip for fast parallel math. Browsers added it so games, photo editors and AI models can run in a tab without plugins.</textarea>
+      <div class="llm-demo__examples" aria-label="Example prompts">
+        <button type="button" data-prompt="Summarize in one sentence: WebGPU is a web standard that lets pages use the graphics chip for fast parallel math. Browsers added it so games, photo editors and AI models can run in a tab without plugins.">Summarize a paragraph</button>
+        <button type="button" data-prompt="Explain what a graphics chip does, in two simple sentences for a ten-year-old.">Explain it simply</button>
+        <button type="button" data-prompt="Write a four-line poem about a computer that keeps working when the internet is down.">Write a short poem</button>
+      </div>
+      <div class="llm-demo__bar">
+        <button type="button" class="llm-demo__run" id="llm-demo-run">Run on my device</button>
+        <span class="llm-demo__status" id="llm-demo-status" aria-live="polite">Checking this browser…</span>
+      </div>
+      <div class="llm-demo__out" id="llm-demo-out" aria-live="polite" hidden></div>
+      <dl class="llm-demo__stats" id="llm-demo-stats" hidden>
+        <div><dt>Model</dt><dd id="llm-demo-model"></dd></div>
+        <div><dt id="llm-demo-ttft-label">First word after</dt><dd id="llm-demo-ttft"></dd></div>
+        <div><dt>Speed</dt><dd id="llm-demo-speed"></dd></div>
+      </dl>
+    </div>
+    <p class="guide__note">Your prompt is processed on this device, not on a server. See <a href="/privacy/">Privacy</a>.</p>
+  </section>
+
+  <section class="guide__part" aria-labelledby="how">
+    <h2 id="how">How it works</h2>
+    <p><strong>WebGPU gives a web page your graphics chip.</strong> Browsers now let pages run their own programs on the GPU, the same chip games use. Mentria's engine, written from scratch for WebGPU, runs every step of the model as small GPU programs.</p>
+    <p><strong>The model is compressed to fit.</strong> Each of its numbers is stored in 4 bits, or about 1 bit for the 27B, instead of the usual 16. That's how a model with 0.8 billion numbers becomes a 490 MB download.</p>
+    <p><strong>It writes one token at a time.</strong> Your prompt is split into tokens, pieces of words, and the model predicts the next token again and again on your GPU, at the speeds measured below.</p>
+  </section>
+
+  <section class="guide__part" aria-labelledby="need">
+    <h2 id="need">What you need</h2>
+    <ul class="guide__list">
+      <li><strong>A browser with WebGPU.</strong> Most current browsers have it; the table below shows where.</li>
+      <li><strong>Room in memory.</strong> The model and its working memory have to fit in your device's graphics memory. On phones and Macs that memory is shared with everything else that's open.</li>
+      <li><strong>Disk space for the download.</strong> The browser keeps the model until you clear the site's data or it needs the space.</li>
+      <li><strong>A few minutes the first time</strong> on a slow connection.</li>
+    </ul>
+    <div class="guide__table">
+      <table>
+        <caption>WebGPU support, October 2026</caption>
+        <thead><tr><th scope="col">Browser</th><th scope="col">Where it works today</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Chrome, Edge and other Chromium browsers</th><td>On by default on Windows, macOS and ChromeOS (since version 113), on most Android 12+ phones (since 121), and on Linux with some GPUs (since 144).</td></tr>
+          <tr><th scope="row">Safari</th><td>On by default in Safari 26 on macOS, iOS and iPadOS.</td></tr>
+          <tr><th scope="row">Firefox</th><td>On by default on Windows (since 141) and on Apple-silicon Macs (since 145 on macOS 26, and 147 on earlier macOS). Not yet on Linux or Android.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="guide__note">From the WebGPU group's <a href="https://github.com/gpuweb/gpuweb/wiki/Implementation-Status" rel="noopener">implementation status</a> page.</p>
+  </section>
+
+  <section class="guide__part" aria-labelledby="models">
+    <h2 id="models">Which model your device runs</h2>
+    <div class="guide__table">
+      <table>
+        <thead><tr><th scope="col">Model</th><th scope="col">Download</th><th scope="col">Where Mentria uses it</th></tr></thead>
+        <tbody>
+          {%- for m in models %}
+          <tr><th scope="row">{{ m.name }}</th><td class="guide__num">{{ m.size }}</td><td>{{ m.where }}</td></tr>
+          {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p>Mentria starts with the smallest model and offers a bigger one when your device can take it. You can switch in <a href="/tools/ai-chat/">AI Chat</a>. All four can also look at pictures.</p>
+  </section>
+
+  {%- if speeds.length %}
+  <section class="guide__part" aria-labelledby="speed">
+    <h2 id="speed">How fast it runs</h2>
+    <div class="guide__table">
+      <table>
+        <thead><tr><th scope="col">Model</th><th scope="col">Starts in</th><th scope="col">First word</th><th scope="col">Speed</th></tr></thead>
+        <tbody>
+          {%- for s in speeds %}
+          <tr><th scope="row">{{ s.name }}</th><td class="guide__num">{{ s.load }}</td><td class="guide__num">{{ s.ttft }}</td><td class="guide__num">{{ s.speed }}</td></tr>
+          {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p>A token is about three-quarters of a word, so 25 tokens a second is faster than most people read. The 27B beats the 4B here because the engine runs it with settings tuned for Apple GPUs, which the smaller models don't use yet.</p>
+    <p class="guide__note">{{ speedsNote }}</p>
+  </section>
+  {%- endif %}
+
+  <section class="guide__part" aria-labelledby="limits">
+    <h2 id="limits">The limits</h2>
+    <ul class="guide__list">
+      <li><strong>The first download is big.</strong> From 490 MB to 3.8 GB. On mobile data that matters, so Mentria asks first on slow or metered connections.</li>
+      <li><strong>Phones have the least room.</strong> Phone browsers close a tab that uses too much memory, so phones get the smaller models.</li>
+      <li><strong>Small models make more mistakes.</strong> They're good at explaining, rewriting and summarizing, and much weaker than large cloud models on facts and reasoning. Check anything that matters.</li>
+      <li><strong>They read a few pages at a time.</strong> A browser model works with a limited context, so very long documents need to be split up.</li>
+      <li><strong>It works your GPU hard.</strong> Long answers use battery and warm the device, the way a game does.</li>
+      <li><strong>The browser can clear it.</strong> If your disk runs low, the browser may delete the saved model, and the next run downloads it again.</li>
+    </ul>
+  </section>
+
+  <section class="guide__part" aria-labelledby="more">
+    <h2 id="more">Use it on Mentria</h2>
+    <ul class="guide__list">
+      <li><a href="/tools/ai-chat/">AI Chat</a>: chat with the model, show it pictures and pick a bigger model.</li>
+      <li><a href="/tools/annotate-image/">Annotate Image</a>: get a description, the text or tags for a picture.</li>
+      <li><a href="/tools/quote/">Motivational Quote</a>: a small model tuned to write original quotes.</li>
+      <li><a href="/privacy/">Privacy</a>: what stays on your device and what uses the network.</li>
+    </ul>
+    <p class="guide__updated">Updated 9 October 2026.</p>
+  </section>
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Run an LLM in your browser",
+  "description": {{ description | dump | safe }},
+  "inLanguage": "en",
+  "datePublished": "2026-10-09",
+  "dateModified": "2026-10-09",
+  "mainEntityOfPage": "{{ site.siteUrl }}/guides/run-llm-in-browser/",
+  "author": { "@type": "Organization", "name": "Mentria", "url": "{{ site.siteUrl }}/" },
+  "publisher": { "@type": "Organization", "name": "Mentria", "url": "{{ site.siteUrl }}/" }
+}
+</script>
+
+<style>
+  .guide { max-width: 720px; margin: 0 auto 3rem; display: grid; gap: 2.2rem; line-height: 1.6; }
+  .guide p, .guide ul { margin: 0; }
+  .guide__part { display: grid; gap: 0.8rem; }
+  .guide__part h2 { margin: 0; font-size: 1.25rem; }
+  .guide__list { padding-left: 1.2rem; display: grid; gap: 0.55rem; }
+  .guide strong { color: var(--term-fg); }
+  .guide a { color: var(--syn-cyan); text-decoration: underline; text-underline-offset: 0.2em; }
+  .guide__note, .guide__updated { font-size: 0.9rem; color: var(--term-muted); }
+  .guide__table { overflow-x: auto; }
+  .guide__table table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  .guide__table caption { text-align: left; font-size: 0.86rem; color: var(--term-muted); padding-bottom: 0.4rem; }
+  .guide__table th, .guide__table td { text-align: left; vertical-align: top; padding: 0.55rem 0.7rem 0.55rem 0; border-bottom: 1px solid var(--term-border); }
+  .guide__table thead th { font-size: 0.8rem; font-weight: 600; color: var(--term-muted); }
+  .guide__table tbody th { color: var(--term-fg); font-weight: 600; }
+  .guide__num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .llm-demo { display: grid; gap: 0.7rem; padding: 16px; border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); background: var(--term-bg-raised); }
+  .llm-demo [hidden] { display: none; }
+  .llm-demo__label { font-size: 0.86rem; color: var(--term-muted); }
+  .llm-demo__input { width: 100%; box-sizing: border-box; resize: vertical; min-height: 4.5rem; padding: 10px 12px; font: inherit; color: var(--term-fg); background: var(--term-bg); border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); }
+  .llm-demo__input:focus-visible, .llm-demo button:focus-visible { outline: 2px solid var(--syn-cyan); outline-offset: 2px; }
+  .llm-demo__examples { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .llm-demo__examples button { font: inherit; font-size: 0.86rem; color: var(--term-fg); background: transparent; border: 1px solid var(--term-border-strong); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .llm-demo__examples button:hover { border-color: var(--syn-cyan); }
+  .llm-demo__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; }
+  .llm-demo__run { font: inherit; font-weight: 600; color: var(--term-bg); background: var(--syn-cyan); border: 0; border-radius: var(--radius-md); padding: 8px 16px; cursor: pointer; }
+  .llm-demo__run:disabled { opacity: 0.55; cursor: default; }
+  .llm-demo__status { font-size: 0.9rem; color: var(--term-muted); min-width: 0; overflow-wrap: anywhere; }
+  .llm-demo__out { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; border-left: 2px solid var(--syn-cyan); background: var(--term-bg); border-radius: 0 var(--radius-md) var(--radius-md) 0; color: var(--term-fg); }
+  .llm-demo__stats { display: flex; flex-wrap: wrap; gap: 0.4rem 1.6rem; margin: 0; font-size: 0.9rem; }
+  .llm-demo__stats div { display: grid; }
+  .llm-demo__stats dt { color: var(--term-muted); font-size: 0.8rem; }
+  .llm-demo__stats dd { margin: 0; color: var(--term-fg); font-variant-numeric: tabular-nums; }
+</style>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const runBtn = $('llm-demo-run');
+const input = $('llm-demo-input');
+const statusEl = $('llm-demo-status');
+const out = $('llm-demo-out');
+const stats = $('llm-demo-stats');
+const NAMES = { '0.8b': 'Qwen3.5 0.8B', '2b': 'Qwen3.5 2B', '4b': 'Qwen3.5 4B', '27b': 'Bonsai 27B' };
+const SYSTEM = 'You are a helpful assistant. Reply briefly in plain text, without markdown, headings or lists.';
+for (const b of document.querySelectorAll('.llm-demo__examples [data-prompt]')) {
+  b.addEventListener('click', () => { input.value = b.dataset.prompt; input.focus(); });
+}
+if (!navigator.gpu) {
+  runBtn.disabled = true;
+  statusEl.textContent = "This browser doesn't support WebGPU yet. The table below shows which browsers do.";
+} else {
+  let Ask = null;
+  try {
+    Ask = await import('/assets/js/mentria-local-ask.js');
+    const info = await Ask.modelInfo();
+    statusEl.textContent = info.cached
+      ? NAMES[info.tier] + ' is saved on this device.'
+      : 'The first run downloads ' + NAMES[info.tier] + ' (' + info.sizeLabel + ') once.';
+  } catch (_) {
+    statusEl.textContent = '';
+  }
+  let busy = false;
+  runBtn.addEventListener('click', async () => {
+    const prompt = input.value.trim();
+    if (!prompt || busy || !Ask) return;
+    busy = true;
+    runBtn.disabled = true;
+    out.hidden = true;
+    out.textContent = '';
+    stats.hidden = true;
+    statusEl.textContent = 'Starting the model…';
+    const onEvent = (e) => {
+      const d = e.detail || {};
+      if (d.phase === 'progress' && d.message) statusEl.textContent = d.message;
+    };
+    window.addEventListener('mentria:localask', onEvent);
+    const loadedBefore = !!(Ask.debugState && Ask.debugState().loaded);
+    const tStart = performance.now();
+    let tFirst = 0;
+    let tLast = 0;
+    let tokens = 0;
+    try {
+      await Ask.askLocal(SYSTEM, prompt, {
+        source: 'guide',
+        noOffer: true,
+        maxTokens: 200,
+        onToken: (_, all) => {
+          const now = performance.now();
+          if (!tFirst) { tFirst = now; statusEl.textContent = 'Writing…'; out.hidden = false; }
+          tLast = now;
+          tokens += 1;
+          out.textContent = all;
+        }
+      });
+      const info = await Ask.modelInfo().catch(() => null);
+      $('llm-demo-model').textContent = info ? NAMES[info.tier] : '';
+      $('llm-demo-ttft-label').textContent = loadedBefore ? 'First word after' : 'Loaded and answering after';
+      $('llm-demo-ttft').textContent = tFirst ? ((tFirst - tStart) / 1000).toFixed(1) + ' s' : '';
+      $('llm-demo-speed').textContent = tokens > 1 && tLast > tFirst ? Math.round((tokens - 1) / ((tLast - tFirst) / 1000)) + ' tokens/s' : '';
+      stats.hidden = false;
+      statusEl.textContent = 'Done. Run it again, or try another prompt.';
+    } catch (e) {
+      const msg = (e && e.message) || '';
+      statusEl.textContent = msg === 'download-postponed' ? 'Download postponed. Run it again when you are on a faster connection.' : 'The model could not run here: ' + msg.slice(0, 120);
+    } finally {
+      window.removeEventListener('mentria:localask', onEvent);
+      busy = false;
+      runBtn.disabled = false;
+    }
+  });
+}
+</script>

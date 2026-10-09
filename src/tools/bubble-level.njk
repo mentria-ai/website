@@ -338,6 +338,7 @@ localeReload: true
     var a = e.accelerationIncludingGravity;
     if (!a || a.x == null || a.y == null || a.z == null) return;
     if (a.x === 0 && a.y === 0 && a.z === 0) return;
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('bubble-level', { after: 5000 });
     if (!hasSample) {
       gx = a.x; gy = a.y; gz = a.z;
       hasSample = true;

@@ -337,6 +337,7 @@ localeReload: true
     } else {
       return;
     }
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('compass', { after: 5000 });
     onHeading(norm360(heading));
   }
 

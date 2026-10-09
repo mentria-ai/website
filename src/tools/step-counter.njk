@@ -424,6 +424,7 @@ localeReload: true
     const wasUnderGoal = state.steps + state.estSteps < state.goal;
     state.steps += 1;
     sessionSteps += 1;
+    if (sessionSteps === 20) if (window.MentriaUI && MentriaUI.success) MentriaUI.success('step-counter');
     const now = Date.now();
     stepTimes.push(now);
     if (stepTimes.length > 240) stepTimes.shift();

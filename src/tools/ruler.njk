@@ -1413,6 +1413,7 @@ html.rl-ov-on .app-bar { display: none !important; }
     dragging = false;
     dragPointer = null;
     ov.classList.remove('is-dragging');
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('ruler');
   }
   surface.addEventListener('pointerup', endDrag);
   surface.addEventListener('pointercancel', endDrag);
@@ -1584,6 +1585,7 @@ html.rl-ov-on .app-bar { display: none !important; }
     layoutOverlay();
     renderAll();
     toast(COPY.applied);
+    if (window.MentriaUI && MentriaUI.success) MentriaUI.success('ruler');
   });
 
   clearBtn.addEventListener('click', function () {

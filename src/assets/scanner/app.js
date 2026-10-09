@@ -5,7 +5,8 @@ const root = document.getElementById('scan');
 const ROUTES = {
   library: () => import('./views/library.js'),
   capture: () => import('./views/capture.js'),
-  review: () => import('./views/review.js')
+  review: () => import('./views/review.js'),
+  adjust: () => import('./views/adjust.js')
 };
 let unmount = null;
 let token = 0;

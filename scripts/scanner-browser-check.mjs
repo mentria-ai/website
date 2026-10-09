@@ -260,6 +260,25 @@ check('review: rotate, filter, reorder and delete update the saved document', as
   await waitFor(page, (s) => s.ids.length === 1);
 });
 
+check('adjust: whole photo and detect again change the saved outline', async (page) => {
+  await page.goto(ORIGIN + '/extensions/scanner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.sc-card__open');
+  await page.click('.sc-card__open');
+  await page.waitForSelector('.sc-rev__tools');
+  await page.click('.sc-rev__tools .sc-tool:nth-child(1)');
+  await page.waitForSelector('.sc-adj__poly[points]');
+  await page.click('.sc-adj__tools .sc-btn:nth-child(2)');
+  await page.click('.sc-adj__bar > .sc-btn--primary');
+  await waitFor(page, (s) => s.quads[0] === null);
+  await page.waitForSelector('.sc-rev__tools');
+  await page.click('.sc-rev__tools .sc-tool:nth-child(1)');
+  await page.waitForSelector('.sc-adj__poly[points]');
+  await page.click('.sc-adj__tools .sc-btn:nth-child(1)');
+  await page.waitForFunction(() => !document.querySelector('.sc-adj__tools .sc-btn:nth-child(1)').disabled);
+  await page.click('.sc-adj__bar > .sc-btn--primary');
+  await waitFor(page, (s) => Array.isArray(s.quads[0]));
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   const page = await browser.newPage();

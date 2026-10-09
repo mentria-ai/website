@@ -4,7 +4,8 @@ setCopy(window.SCAN_COPY || {});
 const root = document.getElementById('scan');
 const ROUTES = {
   library: () => import('./views/library.js'),
-  capture: () => import('./views/capture.js')
+  capture: () => import('./views/capture.js'),
+  review: () => import('./views/review.js')
 };
 let unmount = null;
 let token = 0;

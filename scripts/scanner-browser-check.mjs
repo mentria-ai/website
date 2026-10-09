@@ -181,6 +181,85 @@ check('capture: the camera page is outlined and captured automatically', async (
   if (said[0] !== said[1]) throw new Error('status after the capture: ' + said[0]);
 });
 
+check('db: pages dropped with a document save disappear in the same step', async (page) => {
+  await page.goto(ORIGIN + '/extensions/scanner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.sc-lib');
+  const r = await page.evaluate(async () => {
+    const db = await import('/assets/scanner/db.js');
+    const doc = { id: db.newId(), name: 'T', pageIds: [], createdAt: Date.now(), updatedAt: Date.now() };
+    const a = { id: db.newId(), docId: doc.id }, b = { id: db.newId(), docId: doc.id };
+    await db.savePage(a);
+    await db.savePage(b);
+    doc.pageIds = [a.id, b.id];
+    await db.saveDoc(doc);
+    doc.pageIds = [b.id];
+    await db.saveDoc(doc, [a.id]);
+    const out = { ids: (await db.getDoc(doc.id)).pageIds, a: await db.getPage(a.id), b: !!(await db.getPage(b.id)) };
+    await db.deleteDoc(doc.id);
+    return out;
+  });
+  if (r.a !== null || !r.b || r.ids.length !== 1) throw new Error('dropped page still stored: ' + JSON.stringify(r));
+});
+
+async function docState(page) {
+  return page.evaluate(async () => {
+    const db = await import('/assets/scanner/db.js');
+    const [d] = await db.listDocs();
+    if (!d) return null;
+    const ps = await Promise.all(d.pageIds.map((id) => db.getPage(id)));
+    return { ids: d.pageIds, rot: ps.map((p) => p.rotation), filters: ps.map((p) => p.filter), quads: ps.map((p) => p.quad) };
+  });
+}
+
+async function waitFor(page, test, ms = 30000) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) {
+    const s = await docState(page);
+    if (s && test(s)) return s;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  throw new Error('timed out; last state ' + JSON.stringify(await docState(page)));
+}
+
+check('review: rotate, filter, reorder and delete update the saved document', async (page) => {
+  await page.goto(ORIGIN + '/extensions/scanner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.sc-lib');
+  await page.evaluate(async () => {
+    const db = await import('/assets/scanner/db.js');
+    for (const d of await db.listDocs()) await db.deleteDoc(d.id);
+  });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('.sc-lib input[type=file]');
+  const files = await makeFixtures(page, 2);
+  await (await page.$('.sc-lib input[type=file]')).uploadFile(...files);
+  await page.waitForSelector('.sc-rev .sc-thumb:nth-of-type(2)', { timeout: 60000 });
+  await page.waitForFunction(() => { const im = document.querySelector('.sc-rev__img'); return im && im.complete && im.naturalWidth > 0; });
+  const layout = await page.evaluate(() => {
+    const st = document.querySelector('.sc-rev__stage').getBoundingClientRect();
+    const im = document.querySelector('.sc-rev__img').getBoundingClientRect();
+    const b = document.querySelector('.sc-rev__tools .sc-tool:nth-child(2)');
+    const r = b.getBoundingClientRect();
+    return { inside: im.top >= st.top - 1 && im.bottom <= st.bottom + 1 && im.left >= st.left - 1 && im.right <= st.right + 1, reachable: b.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)), img: [im.top, im.bottom].map(Math.round), stage: [st.top, st.bottom].map(Math.round) };
+  });
+  if (!layout.inside || !layout.reachable) throw new Error('page image spills out of its stage: ' + JSON.stringify(layout));
+  const first = await docState(page);
+  await page.click('.sc-rev__tools .sc-tool:nth-child(2)');
+  await waitFor(page, (s) => s.rot[s.ids.indexOf(first.ids[1])] === 90 || s.rot[s.ids.indexOf(first.ids[0])] === 90);
+  await page.click('.sc-rev__tools .sc-tool:nth-child(3)');
+  await page.waitForSelector('.sc-rev__filters .sc-filter:nth-child(4)');
+  await page.click('.sc-rev__filters .sc-filter:nth-child(4)');
+  await waitFor(page, (s) => s.filters.includes('bw'));
+  await page.focus('.sc-rev__strip .sc-thumb:nth-of-type(1)');
+  await page.keyboard.down('Alt');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.up('Alt');
+  await waitFor(page, (s) => s.ids[0] === first.ids[1] && s.ids[1] === first.ids[0]);
+  await page.click('.sc-rev__tools .sc-tool:nth-child(5)');
+  await page.waitForSelector('.sc-sheet .sc-btn--danger');
+  await page.click('.sc-sheet .sc-btn--danger');
+  await waitFor(page, (s) => s.ids.length === 1);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   const page = await browser.newPage();

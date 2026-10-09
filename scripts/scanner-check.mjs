@@ -247,6 +247,58 @@ test('zip: names are safe for file systems', () => {
   assert.equal(Z.safeName('x'.repeat(200)).length, 80);
 });
 
+const CPU = await mod('cpu.js');
+
+function warpedPage(seed) {
+  const s = S.makeScene(seed);
+  const size = G.outputSize(s.truth, 0);
+  const data = CPU.warpCPU(s.rgba, s.w, s.h, G.quadToRect(s.truth, size.width, size.height), size.width, size.height);
+  return { data, w: size.width, h: size.height };
+}
+
+test('cpu: identity warp returns the source', () => {
+  const w = 8, h = 6, src = new Uint8ClampedArray(w * h * 4);
+  for (let p = 0; p < w * h; p++) {
+    src[p * 4] = p * 5; src[p * 4 + 1] = 255 - p * 5; src[p * 4 + 2] = (p * 37) % 256; src[p * 4 + 3] = 255;
+  }
+  const out = CPU.warpCPU(src, w, h, G.quadToRect(G.fullQuad(w, h), w, h), w, h);
+  for (let i = 0; i < src.length; i++) near(out[i], src[i], 1, 'byte ' + i);
+});
+
+test('cpu: warping a scene page yields mostly paper', () => {
+  const p = warpedPage(11);
+  let sum = 0;
+  for (let i = 0; i < p.w * p.h; i++) sum += p.data[i * 4];
+  assert.ok(sum / (p.w * p.h) > 170, 'mean ' + sum / (p.w * p.h));
+});
+
+test('cpu: quarter turns swap the sides without mirroring', () => {
+  const w = 3, h = 2, src = new Uint8ClampedArray(w * h * 4);
+  ['A', 'B', 'C', 'D', 'E', 'F'].forEach((ch, p) => { src[p * 4] = ch.charCodeAt(0); src[p * 4 + 3] = 255; });
+  const read = (r) => Array.from({ length: r.w * r.h }, (_, p) => String.fromCharCode(r.data[p * 4])).join('');
+  const r1 = CPU.rotateCPU(src, w, h, 1), r2 = CPU.rotateCPU(src, w, h, 2), r3 = CPU.rotateCPU(src, w, h, 3);
+  assert.deepEqual([r1.w, r1.h], [2, 3]);
+  assert.equal(read(r1), 'DAEBFC');
+  assert.equal(read(r2), 'FEDCBA');
+  assert.equal(read(r3), 'CFBEAD');
+});
+
+test('cpu: black & white turns a page into ink and paper', () => {
+  const p = warpedPage(11);
+  const bw = CPU.filterCPU(p.data, p.w, p.h, 'bw', null);
+  let extreme = 0;
+  for (let i = 0; i < p.w * p.h; i++) if (bw[i * 4] < 40 || bw[i * 4] > 215) extreme++;
+  assert.ok(extreme / (p.w * p.h) > 0.8, 'share ' + extreme / (p.w * p.h));
+});
+
+test('cpu: auto color stretches paper towards white', () => {
+  const p = warpedPage(11);
+  const st = CPU.stats(p.data, p.w, p.h);
+  const after = CPU.stats(CPU.filterCPU(p.data, p.w, p.h, 'auto', st), p.w, p.h);
+  assert.ok(after.yhi >= 245, 'yhi ' + after.yhi);
+  assert.ok(after.yhi >= st.yhi);
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

@@ -2,7 +2,7 @@
   "name": "Mentria",
   "short_name": "Mentria",
   "id": "/",
-  "description": "AI that runs in your browser, with 40+ built-in tools, an extensions library and card decks for learning. Add your own extensions and decks. Nothing leaves your device.",
+  "description": "AI that runs in your browser, with built-in tools, an extensions library and card decks for learning. Add your own extensions and decks. Your data stays private.",
   "start_url": "/",
   "display": "standalone",
   "launch_handler": {

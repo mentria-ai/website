@@ -168,6 +168,10 @@ check('capture: the camera page is outlined and captured automatically', async (
   await page.waitForSelector('.sc-lib__actions .sc-btn--primary');
   await page.click('.sc-lib__actions .sc-btn--primary');
   await page.waitForSelector('.sc-cam');
+  await page.evaluate(() => {
+    window.__statusWrites = 0;
+    new MutationObserver((list) => { window.__statusWrites += list.length; }).observe(document.querySelector('.sc-cam__status'), { childList: true, characterData: true, subtree: true });
+  });
   await page.waitForFunction(() => {
     const c = document.querySelector('.sc-cam__count');
     return c && c.textContent === '1';
@@ -182,6 +186,8 @@ check('capture: the camera page is outlined and captured automatically', async (
   await new Promise((res) => setTimeout(res, 800));
   const said = await page.$eval('.sc-cam__status', (el) => [el.textContent, window.SCAN_COPY.capture.captured]);
   if (said[0] !== said[1]) throw new Error('status after the capture: ' + said[0]);
+  const writes = await page.evaluate(() => window.__statusWrites);
+  if (writes > 12) throw new Error('status line rewritten ' + writes + ' times');
 });
 
 check('db: pages dropped with a document save disappear in the same step', async (page) => {
@@ -322,6 +328,51 @@ check('export: a PDF has one page per scan and JPGs download as a ZIP', async (p
   const zip = readFileSync(await nextDownload('.zip'));
   const end = zip.length - 22;
   if (zip.readUInt32LE(end) !== 0x06054b50 || zip.readUInt16LE(end + 10) !== 2) throw new Error('ZIP entries');
+});
+
+check('retake: one shot replaces the page and presses during processing are ignored', async (page) => {
+  await page.goto(ORIGIN + '/extensions/scanner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.sc-lib');
+  await page.evaluate(async () => {
+    const db = await import('/assets/scanner/db.js');
+    for (const d of await db.listDocs()) await db.deleteDoc(d.id);
+    localStorage.removeItem('mentria.scanner.auto');
+  });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('.sc-lib input[type=file]');
+  const files = await makeFixtures(page, 2);
+  await (await page.$('.sc-lib input[type=file]')).uploadFile(...files);
+  await page.waitForSelector('.sc-rev .sc-thumb:nth-of-type(2)', { timeout: 60000 });
+  const before = await docState(page);
+  await page.click('.sc-rev__tools .sc-tool:nth-child(4)');
+  await page.waitForSelector('.sc-cam');
+  await page.evaluate(() => new Promise((resolve) => {
+    window.__hold = true;
+    const req = indexedDB.open('mentria-ext-scanner');
+    req.onsuccess = () => {
+      const st = req.result.transaction(['docs', 'pages'], 'readwrite').objectStore('pages');
+      const spin = () => { if (window.__hold) st.get('none').onsuccess = spin; };
+      spin();
+      resolve();
+    };
+  }));
+  await page.waitForFunction(() => {
+    const s = document.querySelector('.sc-cam__status');
+    return s && s.textContent === window.SCAN_COPY.capture.captured;
+  }, { timeout: 30000, polling: 50 });
+  await page.evaluate(async () => {
+    for (let i = 0; i < 12; i++) {
+      const b = document.querySelector('.sc-cam__shutter');
+      if (b) b.click();
+      await new Promise((res) => setTimeout(res, 100));
+    }
+    window.__hold = false;
+  });
+  await page.waitForSelector('.sc-rev', { timeout: 30000 });
+  await new Promise((res) => setTimeout(res, 1500));
+  const after = await docState(page);
+  if (after.ids.length !== before.ids.length) throw new Error('retake changed the page count: ' + before.ids.length + ' -> ' + after.ids.length);
+  if (after.ids[0] === before.ids[0] || after.ids[1] !== before.ids[1]) throw new Error('retake did not replace only the first page');
 });
 
 check('host: the store page runs the scanner, goes full screen for the camera and back', async (page) => {

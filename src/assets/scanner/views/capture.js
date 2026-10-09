@@ -73,7 +73,7 @@ export function mount(root, ctx, params) {
       const info = await camera.open(video);
       if (!alive || !info) return;
       flashBtn.hidden = !info.torch;
-      shutter.disabled = false;
+      shutter.disabled = !!(replace && added.length);
       status.hidden = false;
       status.textContent = t('capture.looking');
       noneSince = performance.now();
@@ -143,7 +143,8 @@ export function mount(root, ctx, params) {
       const now = performance.now();
       last = tracker.push(r, now);
       draw(last);
-      status.textContent = statusText(last, now);
+      const text = statusText(last, now);
+      if (status.textContent !== text) status.textContent = text;
       ring.style.setProperty('--p', auto ? String(last.progress || 0) : '0');
       if (auto && last.state === 'fire') shoot();
     }, () => { busy = false; });
@@ -175,6 +176,7 @@ export function mount(root, ctx, params) {
       const old = replace ? await db.getPage(replace) : null;
       const page = await addPage(d, bmp, quad, { replace, filter: old ? old.filter : undefined });
       added.push(page.id);
+      if (replace) shutter.disabled = true;
       showStack(page, d);
     } finally {
       bmp.close();
@@ -182,7 +184,7 @@ export function mount(root, ctx, params) {
   }
 
   async function shoot() {
-    if (shooting || pending >= 2 || !alive || shutter.disabled) return;
+    if (shooting || pending >= 2 || !alive || shutter.disabled || (replace && (pending || added.length))) return;
     shooting = true;
     pending++;
     tracker.markCaptured(performance.now());

@@ -304,6 +304,96 @@ test('engine: changing the key while singing does not click', () => {
   assert.ok(maxJump < maxJumpIn * 1.6, 'jump ' + maxJump + ' vs input ' + maxJumpIn);
 });
 
+const KF = await mod('dsp/keyfind.js');
+const HG = await mod('dsp/howl.js');
+const WV = await mod('wav.js');
+const RC = await mod('recorder.js');
+
+test('keyfind: tonal melodies in all 24 keys find the key or its relative', () => {
+  const MAJ = [0, 2, 4, 5, 7, 9, 11], MIN = [0, 2, 3, 5, 7, 8, 10];
+  let ok = 0, total = 0;
+  for (let root = 0; root < 12; root++) for (const mode of ['major', 'minor']) for (let seed = 1; seed <= 4; seed++) {
+    const r = S.rng(root * 100 + seed * 7 + (mode === 'minor' ? 50 : 0));
+    const scale = mode === 'major' ? MAJ : MIN;
+    const kf = KF.createKeyFinder();
+    let deg = 0, t = 0, n = 0;
+    while (t < 15) {
+      n++;
+      const u = r();
+      if (n % 8 === 0 || u < 0.25) deg = 0;
+      else if (u < 0.4) deg = 4;
+      else if (u < 0.5) deg = 2;
+      else deg = Math.max(-3, Math.min(9, deg + [-2, -1, -1, 1, 1, 2][Math.floor(r() * 6)]));
+      const m = 60 + root + scale[((deg % 7) + 7) % 7] + 12 * Math.floor(deg / 7) + (r() - 0.5) * 0.4;
+      const dur = (n % 8 === 0 ? 0.6 : 0.15) + r() * 0.4;
+      for (let q = 0; q < dur; q += 0.00267) kf.add(S.hz(m), 0.95, 0.00267);
+      t += dur;
+    }
+    const res = kf.result(), rel = KF.relativeOf({ root, mode });
+    total++;
+    if ((res.key.root === root && res.key.mode === mode) || (res.key.root === rel.root && res.key.mode === rel.mode)) ok++;
+  }
+  assert.ok(ok / total >= 0.95, ok + '/' + total);
+});
+
+test('keyfind: under 5 seconds of singing gives no clear key', () => {
+  const kf = KF.createKeyFinder();
+  for (let q = 0; q < 3; q += 0.00267) kf.add(261.63, 0.95, 0.00267);
+  assert.equal(kf.result().confidence, 'none');
+  assert.ok(Math.abs(kf.voicedSeconds() - 3) < 0.01);
+});
+
+test('howl: a rising pure tone trips the guard; singing and quiet monitors never do', () => {
+  const step = 128 / FS;
+  const run = (g, fn, seconds) => { for (let t = 0; t < seconds; t += step) { const s = fn(t); if (g.update(s.voiced, s.clarity, s.pitch, s.level, step)) return t; } return -1; };
+  const make = (armed, db) => { const g = HG.createHowlGuard(); g.armed = armed; g.monitorDb = db; return g; };
+  const rising = (t) => ({ voiced: true, clarity: 0.99, pitch: 1000, level: -40 + 20 * t });
+  const at = run(make(true, -12), rising, 2);
+  assert.ok(at >= 0.25 && at <= 0.4, 'tripped at ' + at);
+  assert.equal(run(make(true, -12), (t) => ({ voiced: true, clarity: 0.97, pitch: 220 * Math.pow(2, (40 / 1200) * Math.sin(2 * Math.PI * 5 * t)), level: -20 }), 5), -1);
+  assert.equal(run(make(true, -12), () => ({ voiced: true, clarity: 0.99, pitch: 440, level: -20 }), 5), -1);
+  assert.equal(run(make(true, -36), rising, 2), -1);
+  assert.equal(run(make(false, -6), rising, 2), -1);
+});
+
+test('wav: encode and decode round trip, chunked input and stereo files', async () => {
+  const a = new Float32Array(1001).map((_, i) => Math.sin(i / 7) * 0.8);
+  const c = new Int16Array(1001);
+  WV.floatToInt16(a, c);
+  const blob = WV.encodeWav([c.slice(0, 600), c.slice(600)], 44100);
+  assert.equal(blob.type, 'audio/wav');
+  const buf = await blob.arrayBuffer();
+  assert.equal(buf.byteLength, 44 + 1001 * 2);
+  const back = WV.decodeWav(buf);
+  assert.equal(back.sampleRate, 44100);
+  assert.equal(back.samples.length, 1001);
+  for (let i = 0; i < 1001; i++) assert.ok(Math.abs(back.samples[i] - a[i]) < 1e-4);
+  const st = new ArrayBuffer(44 + 8);
+  const v = new DataView(st);
+  const text = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  text(0, 'RIFF'); v.setUint32(4, 44, true); text(8, 'WAVE'); text(12, 'fmt '); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 2, true); v.setUint32(24, 48000, true); v.setUint32(28, 192000, true);
+  v.setUint16(32, 4, true); v.setUint16(34, 16, true); text(36, 'data'); v.setUint32(40, 8, true);
+  v.setInt16(44, 16384, true); v.setInt16(46, -16384, true); v.setInt16(48, -8192, true); v.setInt16(50, 8192, true);
+  assert.deepEqual([...WV.decodeWav(st).samples], [0.5, -0.25]);
+  assert.throws(() => WV.decodeWav(new ArrayBuffer(10)));
+});
+
+test('recorder: stops exactly at the cap and writes both WAVs', async () => {
+  const rec = RC.createRecorder(48000, 1);
+  const chunk = new Int16Array(8192).map((_, i) => (i % 100) * 10);
+  let full = false, adds = 0;
+  while (!full) { full = rec.add(chunk, chunk); adds++; }
+  assert.equal(adds, 6);
+  assert.equal(rec.add(chunk, chunk), true);
+  const out = rec.finish();
+  assert.equal(out.frames, 48000);
+  assert.equal(out.duration, 1);
+  assert.equal(WV.decodeWav(await out.tuned.arrayBuffer()).samples.length, 48000);
+  assert.equal(WV.decodeWav(await out.dry.arrayBuffer()).samples.length, 48000);
+  assert.equal(rec.frames(), 0);
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

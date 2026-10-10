@@ -260,3 +260,17 @@ export function keyName(key) {
 export function takeLabel(settings) {
   return styleName(settings.correction) + ' · ' + keyName(settings.key);
 }
+
+export function prefersShare() {
+  try { return installedApp() || matchMedia('(pointer: coarse)').matches; } catch (_) { return false; }
+}
+
+export async function deliverFile(name, blob, title) {
+  const file = new File([blob], name, { type: blob.type || 'application/octet-stream' });
+  if (prefersShare() && canShareFiles([file])) {
+    const r = await shareFiles([file], title || name);
+    if (r !== 'failed') return r;
+  }
+  downloadBlob(name, blob);
+  return 'downloaded';
+}

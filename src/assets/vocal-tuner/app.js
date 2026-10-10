@@ -4,7 +4,8 @@ setCopy(window.VT_COPY || {});
 const root = document.getElementById('vt');
 const ROUTES = {
   takes: () => import('./views/takes.js'),
-  live: () => import('./views/live.js')
+  live: () => import('./views/live.js'),
+  take: () => import('./views/take.js')
 };
 let unmount = null;
 let token = 0;

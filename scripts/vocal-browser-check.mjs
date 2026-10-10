@@ -125,6 +125,29 @@ async function takeCount(page, n, timeout = 15000) {
   }, { timeout, polling: 300 }, n);
 }
 
+const DOWNLOADS = '/Volumes/Mac ext storage/games-tmp/orch/vocal-downloads';
+
+async function nextDownload(suffix, ms = 30000) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) {
+    const f = readdirSync(DOWNLOADS).find((n) => n.endsWith(suffix));
+    if (f) return DOWNLOADS + '/' + f;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  throw new Error('no download ending in ' + suffix);
+}
+
+async function seedTake(page, settings) {
+  return page.evaluate(async (settings) => {
+    const db = await import('/assets/vocal-tuner/db.js');
+    const bytes = await (await fetch('/__vt-test/voice.wav')).arrayBuffer();
+    const now = Date.now();
+    const take = { id: db.newId(), name: 'Seeded take', createdAt: now, updatedAt: now, duration: 8, sampleRate: 48000, settings, renderedWith: settings };
+    await db.saveTake(take, { dry: new Blob([bytes], { type: 'audio/wav' }), tuned: new Blob([bytes], { type: 'audio/wav' }) });
+    return take.id;
+  }, settings);
+}
+
 const A_MINOR = [9, 11, 0, 2, 4, 5, 7];
 const E_MAJOR = [4, 6, 8, 9, 11, 1, 3];
 function onScale(notes, scale, cents) {
@@ -378,6 +401,119 @@ check('live: speaker mode starts quiet and capped, and feedback mutes it until t
   if (after.msg.includes('Feedback') || !after.reset) throw new Error(JSON.stringify(after));
 });
 
+check('render: the worker re-tunes a flat take onto E major and can be cancelled', async (page) => {
+  await addB64(page);
+  await page.goto(ORIGIN + '/extensions/vocal-tuner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.vt-takes');
+  const b64 = await page.evaluate(async () => {
+    const { renderTake } = await import('/assets/vocal-tuner/render.js');
+    const dry = await (await fetch('/__vt-test/voice.wav')).blob();
+    const out = await renderTake(dry, { correction: 1, key: { root: 4, mode: 'major' } }).promise;
+    return window.__vtB64(out);
+  });
+  const notes = notesOfWav(b64);
+  if (notes.length < 300) throw new Error('too few clear frames ' + notes.length);
+  if (onScale(notes, E_MAJOR, 10) < notes.length * 0.9) throw new Error('on E major ' + onScale(notes, E_MAJOR, 10) + '/' + notes.length);
+  const cancelled = await page.evaluate(async () => {
+    const { renderTake } = await import('/assets/vocal-tuner/render.js');
+    const wav = await import('/assets/vocal-tuner/wav.js');
+    const job = renderTake(wav.encodeWav([new Int16Array(48000 * 120)], 48000), { correction: 1, key: null });
+    setTimeout(() => job.cancel(), 50);
+    try {
+      await job.promise;
+      return 'finished';
+    } catch (e) {
+      return e.name;
+    }
+  });
+  if (cancelled !== 'AbortError') throw new Error('cancel gave ' + cancelled);
+});
+
+check('take: A/B keeps the position, and a new key re-renders and replaces the tuned audio', async (page) => {
+  await addB64(page);
+  await freshApp(page);
+  const id = await seedTake(page, { correction: 1, key: { root: 9, mode: 'minor' } });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('.vt-item__open');
+  await page.click('.vt-item__open');
+  await page.waitForSelector('.vt-take .vt-player__play:not([disabled])', { timeout: 15000 });
+  await page.click('.vt-player__play');
+  await new Promise((r) => setTimeout(r, 1500));
+  await page.click('.vt-ab button:nth-child(2)');
+  await new Promise((r) => setTimeout(r, 300));
+  const ab = await page.evaluate(() => ({ cur: document.querySelector('.vt-player__cur').textContent, label: document.querySelector('.vt-player__play').getAttribute('aria-label'), pressed: document.querySelector('.vt-ab button:nth-child(2)').getAttribute('aria-pressed') }));
+  if (ab.cur === '0:00' || ab.label !== 'Pause' || ab.pressed !== 'true') throw new Error('A/B ' + JSON.stringify(ab));
+  await page.click('.vt-player__play');
+  await page.click('.vt-take .vt-keychip');
+  await page.waitForSelector('.vt-sheet .vt-keys button');
+  if (await page.$('.vt-sheet .vt-find-btn')) throw new Error('find my key shows on the take screen');
+  await page.click('.vt-sheet .vt-keys button:nth-child(5)');
+  await page.click('.vt-sheet .vt-seg button:nth-child(1)');
+  await page.click('.vt-sheet .vt-sheet__actions .vt-btn--primary');
+  await page.waitForSelector('.vt-take .vt-apply');
+  await page.click('.vt-take .vt-apply');
+  await page.waitForFunction(async (id) => {
+    const db = await import('/assets/vocal-tuner/db.js');
+    const tk = await db.getTake(id);
+    return !!(tk && tk.renderedWith.key && tk.renderedWith.key.root === 4);
+  }, { timeout: 30000, polling: 300 }, id);
+  await page.waitForFunction(() => document.querySelector('.vt-take__apply').hidden, { timeout: 10000 });
+  const notes = notesOfWav(await page.evaluate(async (id) => {
+    const db = await import('/assets/vocal-tuner/db.js');
+    return window.__vtB64(await db.getAudio(id, 'tuned'));
+  }, id));
+  if (onScale(notes, E_MAJOR, 10) < notes.length * 0.9) throw new Error('the re-rendered take is not on E major');
+  await page.click('.vt-take .vt-top .vt-icon-btn');
+  await page.waitForSelector('.vt-item');
+  const row = await page.$eval('.vt-item', (e) => e.textContent);
+  if (!row.includes('E major')) throw new Error(row);
+  await clearData(page);
+});
+
+check('take: export downloads valid tuned and original WAV files', async (page) => {
+  rmSync(DOWNLOADS, { recursive: true, force: true });
+  mkdirSync(DOWNLOADS, { recursive: true });
+  const session = await browser.target().createCDPSession();
+  await session.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: DOWNLOADS });
+  await freshApp(page);
+  await seedTake(page, { correction: 0.35, key: null });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('.vt-item__more');
+  await page.click('.vt-item__more');
+  await page.click('.vt-menu__item:nth-child(2)');
+  await page.waitForSelector('.vt-sheet .vt-export-tuned', { timeout: 15000 });
+  await page.click('.vt-sheet .vt-export-tuned');
+  const tuned = readFileSync(await nextDownload('Seeded take.wav'));
+  await page.waitForSelector('.vt-take-export:not([disabled])');
+  await page.click('.vt-take-export');
+  await page.waitForSelector('.vt-sheet .vt-export-dry');
+  await page.click('.vt-sheet .vt-export-dry');
+  const dry = readFileSync(await nextDownload('(original).wav'));
+  for (const [name, buf] of [['tuned', tuned], ['original', dry]]) {
+    if (buf.toString('latin1', 0, 4) !== 'RIFF' || buf.toString('latin1', 8, 12) !== 'WAVE') throw new Error(name + ' is not a WAV');
+    if (buf.length !== 44 + 8 * 48000 * 2) throw new Error(name + ' size ' + buf.length);
+  }
+  await clearData(page);
+});
+
+check('take: delete asks first, then removes the take and its audio', async (page) => {
+  await freshApp(page);
+  const id = await seedTake(page, { correction: 0.35, key: null });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('.vt-item__open');
+  await page.click('.vt-item__open');
+  await page.waitForSelector('.vt-take-delete');
+  await page.click('.vt-take-delete');
+  await page.waitForSelector('.vt-sheet .vt-btn--danger');
+  await page.click('.vt-sheet .vt-btn--danger');
+  await page.waitForSelector('.vt-takes .vt-empty:not([hidden])');
+  const gone = await page.evaluate(async (id) => {
+    const db = await import('/assets/vocal-tuner/db.js');
+    return !(await db.getTake(id)) && !(await db.getAudio(id, 'dry')) && !(await db.getAudio(id, 'tuned'));
+  }, id);
+  if (!gone) throw new Error('the take or its audio was left behind');
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   const page = await browser.newPage();
@@ -394,5 +530,6 @@ await browser.close();
 server.close();
 rmSync(PROFILE, { recursive: true, force: true });
 rmSync(TESTDIR, { recursive: true, force: true });
+rmSync(DOWNLOADS, { recursive: true, force: true });
 console.log(checks.length - failed + '/' + checks.length + ' passed');
 if (failed) process.exit(1);

@@ -1919,7 +1919,8 @@
         "pregnancy-check": "Informação e o momento certo do teste, não um diagnóstico: quando um teste de gravidez de farmácia é confiável, como planejar uma gravidez e sua data do parto, semanas e consultas. Tudo fica neste dispositivo.",
         "fpv-drone": "Pilote um drone de corrida por portais luminosos sobre colinas, um pátio de contêineres e um cânion no deserto. Voo acrobático ou autonivelado, medalhas, corridas contra fantasmas e um mapa de voo livre. Funciona com toque, controle ou teclado.",
         "nitro-racer": "Corrida de rua arcade contra cinco rivais: drifte para encher o nitro, salte nas rampas e conquiste medalhas num circuito urbano neon, numa rodovia litorânea e num cânion no deserto. Funciona com toque, inclinação, controle ou teclado.",
-        "finance": "Acompanhe gastos, orçamentos, contas a pagar, investimentos e impostos, com previsões. Tudo criptografado no seu dispositivo e sincronizado só entre os seus próprios dispositivos."
+        "finance": "Acompanhe gastos, orçamentos, contas a pagar, investimentos e impostos, com previsões. Tudo criptografado no seu dispositivo e sincronizado só entre os seus próprios dispositivos.",
+        "scanner": "Digitalize páginas com a câmera. As bordas são encontradas automaticamente, as páginas são endireitadas e limpas, e você pode exportar um PDF ou imagens. Suas digitalizações continuam privadas."
       },
       "cmd": {
         "finance": {
@@ -1933,11 +1934,17 @@
         },
         "pomodoro-timer": {
           "pomodoro": "começar uma sessão de foco"
+        },
+        "scanner": {
+          "scan": "digitalizar um documento"
         }
       },
       "perm": {
         "finance": {
           "network": "Só para sincronizar seus próprios aparelhos e para os lembretes de contas opcionais. A sincronização passa criptografada pelo servidor de retransmissão do Mentria, que não consegue ler seu livro-caixa; os lembretes enviam só um horário de aviso. Nada legível fica guardado."
+        },
+        "scanner": {
+          "camera": "Só enquanto a tela de digitalização está aberta. As fotos são processadas neste dispositivo."
         }
       }
     },
@@ -5521,6 +5528,129 @@
         "security": "bloqueado por segurança",
         "abort": "a operação foi interrompida"
       }
+    },
+    "scanner": {
+      "app": {
+        "name": "Scanner de documentos",
+        "close": "Fechar"
+      },
+      "library": {
+        "title": "Digitalizações",
+        "scan": "Digitalizar",
+        "import": "Importar fotos",
+        "empty_title": "Nenhuma digitalização ainda",
+        "empty_body": "Aponte a câmera para uma página. O scanner encontra as bordas, endireita a página e a guarda aqui.",
+        "pages": {
+          "one": "{n} página",
+          "other": "{n} páginas"
+        },
+        "more": "Mais opções para {name}",
+        "rename": "Renomear",
+        "export": "Exportar",
+        "delete": "Excluir",
+        "delete_confirm": "Excluir “{name}”? Isso não pode ser desfeito.",
+        "storage": "{used} de {quota} usados neste dispositivo",
+        "rename_label": "Nome do documento",
+        "save": "Salvar",
+        "cancel": "Cancelar"
+      },
+      "capture": {
+        "starting": "Iniciando a câmera…",
+        "looking": "Procurando uma página…",
+        "hold": "Segure firme",
+        "captured": "Capturada",
+        "tip_contrast": "Tente uma superfície mais escura embaixo da página",
+        "auto": "Auto",
+        "manual": "Manual",
+        "shutter": "Tirar foto",
+        "flash": "Flash",
+        "done": "Concluir",
+        "import": "Importar fotos",
+        "count": {
+          "one": "{n} página",
+          "other": "{n} páginas"
+        },
+        "discard_confirm": "Descartar as páginas que você acabou de digitalizar?",
+        "discard": "Descartar"
+      },
+      "camera": {
+        "denied": "O acesso à câmera foi bloqueado. Permita nas configurações do navegador ou importe fotos.",
+        "no_camera": "Nenhuma câmera encontrada. Você pode importar fotos.",
+        "error": "Não foi possível iniciar a câmera. Você pode importar fotos.",
+        "insecure": "A câmera precisa de uma página segura (https)."
+      },
+      "review": {
+        "back": "Voltar às digitalizações",
+        "rename": "Renomear documento",
+        "crop": "Cortar",
+        "rotate": "Girar",
+        "filter": "Filtro",
+        "retake": "Refazer",
+        "delete_page": "Excluir",
+        "delete_page_confirm": "Excluir esta página?",
+        "add": "Adicionar páginas",
+        "export": "Exportar",
+        "page_of": "Página {n} de {total}",
+        "prev": "Página anterior",
+        "next": "Próxima página",
+        "reorder_hint": "Toque e segure uma página para arrastá-la para outro lugar."
+      },
+      "filter": {
+        "original": "Original",
+        "auto": "Cor automática",
+        "gray": "Tons de cinza",
+        "bw": "Preto e branco",
+        "whiteboard": "Quadro branco"
+      },
+      "adjust": {
+        "title": "Ajustar cantos",
+        "detect": "Detectar de novo",
+        "whole": "Foto inteira",
+        "cancel": "Cancelar",
+        "apply": "Aplicar",
+        "not_found": "As bordas da página não foram encontradas. Arraste os cantos para o lugar.",
+        "corner": "Canto {n}",
+        "edge": "Borda {n}"
+      },
+      "export": {
+        "title": "Exportar",
+        "format": "Formato",
+        "pdf": "PDF",
+        "jpg": "JPG",
+        "png": "PNG",
+        "page_size": "Tamanho da página",
+        "size_fit": "Ajustar",
+        "size_a4": "A4",
+        "size_letter": "Carta",
+        "quality": "Tamanho do arquivo",
+        "q_high": "Alto",
+        "q_balanced": "Equilibrado",
+        "q_small": "Pequeno",
+        "share": "Compartilhar",
+        "share_ready": "Toque para compartilhar",
+        "download": "Baixar",
+        "cancel": "Cancelar",
+        "working": "Preparando a página {n} de {total}…",
+        "done": "Salvo: {name}",
+        "shared": "Compartilhado",
+        "failed": "Falha ao exportar: {msg}"
+      },
+      "import": {
+        "working": "Adicionando a foto {n} de {total}…",
+        "failed": "Não foi possível abrir {name}"
+      },
+      "doc": {
+        "default_name": "Digitalização {date}"
+      },
+      "errors": {
+        "storage_full": "Não há mais espaço para digitalizações neste dispositivo. Exporte e exclua digitalizações antigas e tente de novo.",
+        "render": "Não foi possível processar esta página.",
+        "no_js": "O scanner de documentos precisa de JavaScript."
+      },
+      "a11y": {
+        "captured": "Página {n} capturada",
+        "page": "Página {n}"
+      }
     }
   },
   "category": {
@@ -5793,7 +5923,9 @@
     "all_link": "Todas as extensões",
     "build_title": "Crie a sua",
     "build_body": "Uma extensão é um único arquivo HTML. O SDK explica o formato e o que uma extensão pode usar.",
-    "manage_link": "Gerenciar extensões instaladas"
+    "manage_link": "Gerenciar extensões instaladas",
+    "perm_camera": "Câmera",
+    "perm_camera_desc": "Pode usar a câmera depois que você permitir."
   },
   "image_use": {
     "title": "Uso das imagens do Mentria",

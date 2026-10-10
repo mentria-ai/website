@@ -1919,7 +1919,8 @@
         "pregnancy-check": "Des informations et le bon moment pour faire un test, pas un diagnostic : quand un test de grossesse urinaire est fiable, la préparation d'une grossesse, la date du terme, les semaines et les rendez-vous. Tout reste sur cet appareil.",
         "fpv-drone": "Pilotez un drone de course à travers des portes lumineuses au-dessus de collines, d'un parc à conteneurs et d'un canyon désertique. Vol acrobatique ou auto-stabilisé, médailles, courses contre des fantômes et une carte de vol libre. Fonctionne au toucher, à la manette ou au clavier.",
         "nitro-racer": "Course de rue arcade contre cinq rivaux : driftez pour remplir votre nitro, prenez les tremplins et visez les médailles sur un circuit urbain néon, une route côtière et un canyon désertique. Fonctionne au toucher, à l'inclinaison, à la manette ou au clavier.",
-        "finance": "Suivez vos dépenses, budgets, factures, placements et impôts, avec des prévisions. Chiffré sur votre appareil et synchronisé uniquement entre vos propres appareils."
+        "finance": "Suivez vos dépenses, budgets, factures, placements et impôts, avec des prévisions. Chiffré sur votre appareil et synchronisé uniquement entre vos propres appareils.",
+        "scanner": "Numérisez des pages avec l’appareil photo. Les bords sont détectés automatiquement, les pages sont redressées et nettoyées, et vous pouvez exporter un PDF ou des images. Vos numérisations restent privées."
       },
       "cmd": {
         "finance": {
@@ -1933,11 +1934,17 @@
         },
         "pomodoro-timer": {
           "pomodoro": "lancer une session de concentration"
+        },
+        "scanner": {
+          "scan": "numériser un document"
         }
       },
       "perm": {
         "finance": {
           "network": "Uniquement pour synchroniser vos propres appareils et pour les rappels de paiement facultatifs. La synchronisation passe chiffrée par le relais de Mentria, qui ne peut pas lire votre livre de comptes ; les rappels n'envoient qu'une heure de réveil. Rien de lisible n'est conservé."
+        },
+        "scanner": {
+          "camera": "Uniquement quand l’écran de numérisation est ouvert. Les photos sont traitées sur cet appareil."
         }
       }
     },
@@ -5521,6 +5528,129 @@
         "security": "bloqué pour des raisons de sécurité",
         "abort": "opération interrompue"
       }
+    },
+    "scanner": {
+      "app": {
+        "name": "Scanner de documents",
+        "close": "Fermer"
+      },
+      "library": {
+        "title": "Numérisations",
+        "scan": "Numériser",
+        "import": "Importer des photos",
+        "empty_title": "Aucune numérisation pour l’instant",
+        "empty_body": "Pointez l’appareil photo vers une page. Le scanner trouve les bords, redresse la page et la garde ici.",
+        "pages": {
+          "one": "{n} page",
+          "other": "{n} pages"
+        },
+        "more": "Plus d’options pour {name}",
+        "rename": "Renommer",
+        "export": "Exporter",
+        "delete": "Supprimer",
+        "delete_confirm": "Supprimer « {name} » ? Cette action est définitive.",
+        "storage": "{used} sur {quota} utilisés sur cet appareil",
+        "rename_label": "Nom du document",
+        "save": "Enregistrer",
+        "cancel": "Annuler"
+      },
+      "capture": {
+        "starting": "Démarrage de la caméra…",
+        "looking": "Recherche d’une page…",
+        "hold": "Ne bougez plus",
+        "captured": "Capturée",
+        "tip_contrast": "Essayez une surface plus sombre sous la page",
+        "auto": "Auto",
+        "manual": "Manuel",
+        "shutter": "Prendre la photo",
+        "flash": "Flash",
+        "done": "Terminé",
+        "import": "Importer des photos",
+        "count": {
+          "one": "{n} page",
+          "other": "{n} pages"
+        },
+        "discard_confirm": "Abandonner les pages que vous venez de numériser ?",
+        "discard": "Abandonner"
+      },
+      "camera": {
+        "denied": "L’accès à la caméra est bloqué. Autorisez-le dans les réglages du navigateur, ou importez des photos.",
+        "no_camera": "Aucune caméra trouvée. Vous pouvez importer des photos.",
+        "error": "La caméra n’a pas pu démarrer. Vous pouvez importer des photos.",
+        "insecure": "La caméra nécessite une page sécurisée (https)."
+      },
+      "review": {
+        "back": "Retour aux numérisations",
+        "rename": "Renommer le document",
+        "crop": "Recadrer",
+        "rotate": "Pivoter",
+        "filter": "Filtre",
+        "retake": "Reprendre",
+        "delete_page": "Supprimer",
+        "delete_page_confirm": "Supprimer cette page ?",
+        "add": "Ajouter des pages",
+        "export": "Exporter",
+        "page_of": "Page {n} sur {total}",
+        "prev": "Page précédente",
+        "next": "Page suivante",
+        "reorder_hint": "Maintenez une page appuyée pour la déplacer."
+      },
+      "filter": {
+        "original": "Original",
+        "auto": "Couleur auto",
+        "gray": "Niveaux de gris",
+        "bw": "Noir et blanc",
+        "whiteboard": "Tableau blanc"
+      },
+      "adjust": {
+        "title": "Ajuster les coins",
+        "detect": "Détecter à nouveau",
+        "whole": "Photo entière",
+        "cancel": "Annuler",
+        "apply": "Appliquer",
+        "not_found": "Bords de la page introuvables. Faites glisser les coins à leur place.",
+        "corner": "Coin {n}",
+        "edge": "Bord {n}"
+      },
+      "export": {
+        "title": "Exporter",
+        "format": "Format",
+        "pdf": "PDF",
+        "jpg": "JPG",
+        "png": "PNG",
+        "page_size": "Format de page",
+        "size_fit": "Ajusté",
+        "size_a4": "A4",
+        "size_letter": "Lettre US",
+        "quality": "Taille du fichier",
+        "q_high": "Haute",
+        "q_balanced": "Équilibrée",
+        "q_small": "Réduite",
+        "share": "Partager",
+        "share_ready": "Touchez pour partager",
+        "download": "Télécharger",
+        "cancel": "Annuler",
+        "working": "Préparation de la page {n} sur {total}…",
+        "done": "Enregistré : {name}",
+        "shared": "Partagé",
+        "failed": "Échec de l’export : {msg}"
+      },
+      "import": {
+        "working": "Ajout de la photo {n} sur {total}…",
+        "failed": "Impossible d’ouvrir {name}"
+      },
+      "doc": {
+        "default_name": "Numérisation {date}"
+      },
+      "errors": {
+        "storage_full": "Plus assez d’espace pour les numérisations sur cet appareil. Exportez et supprimez d’anciennes numérisations, puis réessayez.",
+        "render": "Impossible de traiter cette page.",
+        "no_js": "Le scanner de documents nécessite JavaScript."
+      },
+      "a11y": {
+        "captured": "Page {n} capturée",
+        "page": "Page {n}"
+      }
     }
   },
   "category": {
@@ -5793,7 +5923,9 @@
     "all_link": "Toutes les extensions",
     "build_title": "Créez la vôtre",
     "build_body": "Une extension est un seul fichier HTML. Le SDK explique le format et ce qu’une extension peut utiliser.",
-    "manage_link": "Gérer les extensions installées"
+    "manage_link": "Gérer les extensions installées",
+    "perm_camera": "Caméra",
+    "perm_camera_desc": "Peut utiliser la caméra une fois que vous l’autorisez."
   },
   "image_use": {
     "title": "Utiliser les images de Mentria",

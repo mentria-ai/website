@@ -1919,7 +1919,8 @@
         "pregnancy-check": "Information and test timing, not a diagnosis: when a home pregnancy test is reliable, planning a pregnancy, and your due date, weeks and appointments. Everything stays on this device.",
         "fpv-drone": "Fly a racing drone through glowing gates over hills, a container yard and a desert canyon. Acro or self-level flight, medals, ghost races and a free-flight map. Works with touch, controller or keyboard.",
         "nitro-racer": "Arcade street racing against five rivals: drift to fill your nitro, hit the jumps and chase medals on a neon city circuit, a coastal highway and a desert canyon. Works with touch, tilt, controller or keyboard.",
-        "finance": "Track spending, budgets, bills, investments and taxes, with forecasts. Encrypted on your device and synced only between your own devices."
+        "finance": "Track spending, budgets, bills, investments and taxes, with forecasts. Encrypted on your device and synced only between your own devices.",
+        "scanner": "Scan pages with your camera. Edges are found automatically, pages are straightened and cleaned up, and you can export a PDF or images. Your scans stay private."
       },
       "cmd": {
         "finance": {
@@ -1933,11 +1934,17 @@
         },
         "pomodoro-timer": {
           "pomodoro": "start a focus session"
+        },
+        "scanner": {
+          "scan": "scan a document"
         }
       },
       "perm": {
         "finance": {
           "network": "Only for syncing your own devices and for optional bill reminders. Sync passes through Mentria's relay encrypted, so the relay can't read your ledger; reminders send just a wake-up time. Nothing readable is stored."
+        },
+        "scanner": {
+          "camera": "Only while the scan screen is open. Photos are processed on this device."
         }
       }
     },
@@ -5521,6 +5528,129 @@
         "security": "{detail}",
         "abort": "{detail}"
       }
+    },
+    "scanner": {
+      "app": {
+        "name": "Document Scanner",
+        "close": "Close"
+      },
+      "library": {
+        "title": "Scans",
+        "scan": "Scan",
+        "import": "Import photos",
+        "empty_title": "No scans yet",
+        "empty_body": "Point your camera at a page. The scanner finds the edges, straightens the page and keeps it here.",
+        "pages": {
+          "one": "{n} page",
+          "other": "{n} pages"
+        },
+        "more": "More options for {name}",
+        "rename": "Rename",
+        "export": "Export",
+        "delete": "Delete",
+        "delete_confirm": "Delete “{name}”? This can't be undone.",
+        "storage": "{used} of {quota} used on this device",
+        "rename_label": "Document name",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "capture": {
+        "starting": "Starting the camera…",
+        "looking": "Looking for a page…",
+        "hold": "Hold steady",
+        "captured": "Captured",
+        "tip_contrast": "Try a darker surface under the page",
+        "auto": "Auto",
+        "manual": "Manual",
+        "shutter": "Take photo",
+        "flash": "Flash",
+        "done": "Done",
+        "import": "Import photos",
+        "count": {
+          "one": "{n} page",
+          "other": "{n} pages"
+        },
+        "discard_confirm": "Discard the pages you just scanned?",
+        "discard": "Discard"
+      },
+      "camera": {
+        "denied": "Camera access was blocked. Allow it in your browser settings, or import photos instead.",
+        "no_camera": "No camera was found. You can import photos instead.",
+        "error": "The camera couldn't start. You can import photos instead.",
+        "insecure": "The camera needs a secure (https) page."
+      },
+      "review": {
+        "back": "Back to scans",
+        "rename": "Rename document",
+        "crop": "Crop",
+        "rotate": "Rotate",
+        "filter": "Filter",
+        "retake": "Retake",
+        "delete_page": "Delete",
+        "delete_page_confirm": "Delete this page?",
+        "add": "Add pages",
+        "export": "Export",
+        "page_of": "Page {n} of {total}",
+        "prev": "Previous page",
+        "next": "Next page",
+        "reorder_hint": "Hold a page to drag it to a new spot."
+      },
+      "filter": {
+        "original": "Original",
+        "auto": "Auto color",
+        "gray": "Grayscale",
+        "bw": "Black & white",
+        "whiteboard": "Whiteboard"
+      },
+      "adjust": {
+        "title": "Adjust corners",
+        "detect": "Detect again",
+        "whole": "Whole photo",
+        "cancel": "Cancel",
+        "apply": "Apply",
+        "not_found": "No page edges found. Drag the corners into place.",
+        "corner": "Corner {n}",
+        "edge": "Edge {n}"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Format",
+        "pdf": "PDF",
+        "jpg": "JPG",
+        "png": "PNG",
+        "page_size": "Page size",
+        "size_fit": "Fit",
+        "size_a4": "A4",
+        "size_letter": "Letter",
+        "quality": "File size",
+        "q_high": "High",
+        "q_balanced": "Balanced",
+        "q_small": "Small",
+        "share": "Share",
+        "share_ready": "Tap to share",
+        "download": "Download",
+        "cancel": "Cancel",
+        "working": "Preparing page {n} of {total}…",
+        "done": "Saved {name}",
+        "shared": "Shared",
+        "failed": "Export failed: {msg}"
+      },
+      "import": {
+        "working": "Adding photo {n} of {total}…",
+        "failed": "Couldn't open {name}"
+      },
+      "doc": {
+        "default_name": "Scan {date}"
+      },
+      "errors": {
+        "storage_full": "This device is out of space for scans. Export and delete old scans, then try again.",
+        "render": "This page couldn't be processed.",
+        "no_js": "Document Scanner needs JavaScript."
+      },
+      "a11y": {
+        "captured": "Page {n} captured",
+        "page": "Page {n}"
+      }
     }
   },
   "category": {
@@ -5793,7 +5923,9 @@
     "all_link": "All extensions",
     "build_title": "Make your own",
     "build_body": "An extension is one HTML file. The SDK explains the format and what an extension can use.",
-    "manage_link": "Manage installed extensions"
+    "manage_link": "Manage installed extensions",
+    "perm_camera": "Camera",
+    "perm_camera_desc": "Can use your camera once you allow it."
   },
   "image_use": {
     "title": "Using Mentria's images",

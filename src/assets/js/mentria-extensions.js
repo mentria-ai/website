@@ -1,6 +1,6 @@
 const NS = 'ext';
 const DATA_NS_PREFIX = 'extdata.';
-const KNOWN_PERMISSIONS = ['storage', 'ai', 'bluetooth', 'usb', 'serial', 'network', 'notifications', 'share'];
+const KNOWN_PERMISSIONS = ['storage', 'ai', 'bluetooth', 'usb', 'serial', 'network', 'notifications', 'share', 'camera'];
 const RESERVED_IDS = ['extensions', 'run', 'tools', 'feed', 'search', 'about', 'comms'];
 const WARN_BYTES = 512 * 1024;
 const REJECT_BYTES = 1536 * 1024;
@@ -356,12 +356,101 @@ export function clearDb(id) {
   return dbRun('readwrite', (s) => s.delete(idRange(id))).then(() => true, () => false);
 }
 
+function hasBlob(v, seen = new Set()) {
+  if (v instanceof Blob) return true;
+  if (!v || typeof v !== 'object' || seen.has(v)) return false;
+  seen.add(v);
+  if (v instanceof Map) {
+    for (const [k, x] of v) if (hasBlob(k, seen) || hasBlob(x, seen)) return true;
+    return false;
+  }
+  if (v instanceof Set) {
+    for (const x of v) if (hasBlob(x, seen)) return true;
+    return false;
+  }
+  if (Array.isArray(v) || Object.getPrototypeOf(v) === Object.prototype) {
+    for (const k of Object.keys(v)) if (hasBlob(v[k], seen)) return true;
+  }
+  return false;
+}
+
+async function freshBlobs(v, seen = new Map()) {
+  if (!v || typeof v !== 'object') return v;
+  if (seen.has(v)) return seen.get(v);
+  if (v instanceof Blob) {
+    const buf = await v.arrayBuffer();
+    const out = v instanceof File ? new File([buf], v.name, { type: v.type, lastModified: v.lastModified }) : new Blob([buf], { type: v.type });
+    seen.set(v, out);
+    return out;
+  }
+  if (v instanceof Map) {
+    const out = new Map();
+    seen.set(v, out);
+    for (const [k, x] of v) out.set(await freshBlobs(k, seen), await freshBlobs(x, seen));
+    return out;
+  }
+  if (v instanceof Set) {
+    const out = new Set();
+    seen.set(v, out);
+    for (const x of v) out.add(await freshBlobs(x, seen));
+    return out;
+  }
+  if (Array.isArray(v)) {
+    const out = [];
+    seen.set(v, out);
+    for (const x of v) out.push(await freshBlobs(x, seen));
+    return out;
+  }
+  if (Object.getPrototypeOf(v) === Object.prototype) {
+    const out = {};
+    seen.set(v, out);
+    for (const k of Object.keys(v)) out[k] = await freshBlobs(v[k], seen);
+    return out;
+  }
+  return v;
+}
+
+function adoptBlobs(v, seen, done = new Set()) {
+  if (!v || typeof v !== 'object' || v instanceof Blob || done.has(v)) return;
+  done.add(v);
+  const swap = (x) => (x instanceof Blob && seen.has(x) ? seen.get(x) : x);
+  try {
+    if (v instanceof Map) {
+      for (const [k, x] of [...v]) {
+        if (x instanceof Blob) v.set(k, swap(x));
+        else adoptBlobs(x, seen, done);
+      }
+    } else if (v instanceof Set) {
+      const items = [...v];
+      if (items.some((x) => x instanceof Blob)) {
+        v.clear();
+        for (const x of items) v.add(swap(x));
+      }
+      for (const x of items) adoptBlobs(x, seen, done);
+    } else if (Array.isArray(v) || Object.getPrototypeOf(v) === Object.prototype) {
+      for (const k of Object.keys(v)) {
+        const x = v[k];
+        if (x instanceof Blob) v[k] = swap(x);
+        else adoptBlobs(x, seen, done);
+      }
+    }
+  } catch (_) {}
+}
+
+async function storable(value) {
+  if (!hasBlob(value)) return value;
+  const seen = new Map();
+  const copy = await freshBlobs(value, seen);
+  adoptBlobs(value, seen);
+  return copy;
+}
+
 export function dbApiFor(id) {
   const full = (key) => id + '/' + String(key);
   const cut = id.length + 1;
   return Object.freeze({
     get: (key) => dbRun('readonly', (s) => s.get(full(key))).then((v) => (v === undefined ? null : v)),
-    set: (key, value) => dbRun('readwrite', (s) => s.put(value, full(key))).then(() => true, () => false),
+    set: (key, value) => storable(value).then((v) => dbRun('readwrite', (s) => s.put(v, full(key)))).then(() => true, () => false),
     remove: (key) => dbRun('readwrite', (s) => s.delete(full(key))).then(() => true, () => false),
     keys: () => dbRun('readonly', (s) => s.getAllKeys(idRange(id))).then((list) => (list || []).map((k) => String(k).slice(cut))),
     clear: () => clearDb(id)

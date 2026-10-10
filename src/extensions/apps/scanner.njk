@@ -1,0 +1,19 @@
+---
+layout: ext-app.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/extensions/scanner/app/index.html"
+appPlain: true
+eleventyExcludeFromSitemap: true
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tool.scanner.app.name' | traw }}"
+  description: "{{ 'tool.ext_gallery.desc.scanner' | traw }}"
+---
+<link rel="stylesheet" href="/assets/scanner/scanner.css?v={{ buildHash }}">
+<div id="scan" class="scan" data-install-quiet></div>
+<noscript><p style="padding:24px;color:#e2e8f0;font-family:sans-serif">{{ "tool.scanner.errors.no_js" | traw }}</p></noscript>
+<script>window.SCAN_COPY = {{ "tool.scanner" | tsub | dump | safe }};</script>
+<script type="module" src="/assets/scanner/app.js?v={{ buildHash }}"></script>

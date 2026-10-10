@@ -1920,7 +1920,8 @@
         "fpv-drone": "Fly a racing drone through glowing gates over hills, a container yard and a desert canyon. Acro or self-level flight, medals, ghost races and a free-flight map. Works with touch, controller or keyboard.",
         "nitro-racer": "Arcade street racing against five rivals: drift to fill your nitro, hit the jumps and chase medals on a neon city circuit, a coastal highway and a desert canyon. Works with touch, tilt, controller or keyboard.",
         "finance": "Track spending, budgets, bills, investments and taxes, with forecasts. Encrypted on your device and synced only between your own devices.",
-        "scanner": "Scan pages with your camera. Edges are found automatically, pages are straightened and cleaned up, and you can export a PDF or images. Your scans stay private."
+        "scanner": "Scan pages with your camera. Edges are found automatically, pages are straightened and cleaned up, and you can export a PDF or images. Your scans stay private.",
+        "vocal-tuner": "Sing and hear your voice pitch-corrected live. Record takes, change the key or style afterwards, and export a WAV."
       },
       "cmd": {
         "finance": {
@@ -1937,6 +1938,9 @@
         },
         "scanner": {
           "scan": "scan a document"
+        },
+        "vocal-tuner": {
+          "sing": "start singing with live pitch correction"
         }
       },
       "perm": {
@@ -1945,6 +1949,9 @@
         },
         "scanner": {
           "camera": "Only while the scan screen is open. Photos are processed on this device."
+        },
+        "vocal-tuner": {
+          "microphone": "Only while the live screen is open. Your voice is processed on this device."
         }
       }
     },
@@ -5651,6 +5658,128 @@
         "captured": "Page {n} captured",
         "page": "Page {n}"
       }
+    },
+    "vocal_tuner": {
+      "app": {
+        "name": "Vocal Tuner",
+        "close": "Close"
+      },
+      "takes": {
+        "title": "Takes",
+        "sing": "Sing",
+        "empty_title": "No takes yet",
+        "empty_body": "Sing and hear your voice tuned live. Takes are saved here.",
+        "more": "More options for {name}",
+        "rename": "Rename",
+        "rename_label": "Take name",
+        "save": "Save",
+        "cancel": "Cancel",
+        "export": "Export",
+        "delete": "Delete",
+        "delete_confirm": "Delete “{name}”? This can’t be undone.",
+        "default_name": "Take {date}",
+        "storage": "Storage used: {used} of {quota}"
+      },
+      "live": {
+        "listening": "Listening: {mode}",
+        "bypass": "Hold for original",
+        "record": "Record",
+        "stop": "Stop",
+        "remaining": "{time} left",
+        "saved": "Take saved",
+        "too_loud": "Too loud — move back or sing softer",
+        "hard_hint": "Set a key for the classic hard sound",
+        "monitor": "Monitor volume",
+        "reset_audio": "Reset audio",
+        "resume": "Tap to resume",
+        "dead_hint": "No sound coming out? Try Reset audio.",
+        "feedback": "Feedback — use headphones or lower the volume",
+        "style": "Style",
+        "correction": "Correction",
+        "presets": {
+          "natural": "Natural",
+          "tight": "Tight",
+          "hard": "Hard"
+        },
+        "key": "Key",
+        "any_key": "Any key",
+        "latency": {
+          "good": "Delay: low ({ms} ms)",
+          "ok": "Delay: noticeable ({ms} ms)",
+          "high": "Delay: high ({ms} ms)",
+          "high_tip": "If the echo is distracting, choose Bluetooth mode to record now and listen right after."
+        },
+        "starting": "Starting the microphone…",
+        "listen_take": "Listen"
+      },
+      "listen": {
+        "title": "How are you listening?",
+        "wired": "Wired headphones",
+        "wired_desc": "Best for hearing yourself live.",
+        "speaker": "Phone or computer speaker",
+        "speaker_desc": "Live sound starts quiet. Raise it slowly — speakers can feed back into the mic.",
+        "bluetooth": "Bluetooth headphones or speaker",
+        "bluetooth_desc": "Bluetooth delays sound too much to listen live. Record, then hear it tuned right after.",
+        "echo_on": "This browser kept its echo cancellation on, which can soften the sound.",
+        "short": {
+          "wired": "Headphones",
+          "speaker": "Speaker",
+          "bluetooth": "Bluetooth"
+        }
+      },
+      "key": {
+        "title": "Key",
+        "major": "Major",
+        "minor": "Minor",
+        "any": "Any key",
+        "find": "Find my key",
+        "find_body": "Sing or hum for about 15 seconds.",
+        "best": "Best match: {key}",
+        "or": "or {key}",
+        "strong": "Strong match",
+        "likely": "Likely match",
+        "none": "No clear key yet — sing a longer phrase",
+        "use": "Use this key",
+        "retry": "Try again",
+        "major_name": "{note} major",
+        "minor_name": "{note} minor"
+      },
+      "take": {
+        "tuned": "Tuned",
+        "original": "Original",
+        "play": "Play",
+        "pause": "Pause",
+        "apply": "Apply",
+        "revert": "Revert",
+        "rendering": "Tuning… {pct}%",
+        "render_failed": "Couldn’t re-tune this take.",
+        "retry": "Retry",
+        "export_title": "Export",
+        "export_tuned": "Tuned WAV",
+        "export_original": "Original WAV",
+        "shared": "Shared",
+        "downloaded": "Saved {name}",
+        "position": "Playback position",
+        "back": "Back to takes"
+      },
+      "errors": {
+        "denied": "Allow the microphone to sing.",
+        "denied_ios": "On iPhone: Settings › Safari › Microphone.",
+        "no_mic": "No microphone found.",
+        "insecure": "Open the secure (https) page to use the microphone.",
+        "unsupported": "This browser can’t run live audio processing.",
+        "failed": "Couldn’t start the microphone.",
+        "storage_full": "Storage is full — export and delete old takes.",
+        "save_failed": "Couldn’t save this take.",
+        "no_js": "Vocal Tuner needs JavaScript.",
+        "retry": "Try again"
+      },
+      "a11y": {
+        "note": "Current note {note}",
+        "meter": "Input level",
+        "trail": "Pitch trail",
+        "needle": "Pitch correction meter"
+      }
     }
   },
   "category": {
@@ -5925,7 +6054,9 @@
     "build_body": "An extension is one HTML file. The SDK explains the format and what an extension can use.",
     "manage_link": "Manage installed extensions",
     "perm_camera": "Camera",
-    "perm_camera_desc": "Can use your camera once you allow it."
+    "perm_camera_desc": "Can use your camera once you allow it.",
+    "perm_microphone": "Microphone",
+    "perm_microphone_desc": "Can use your microphone once you allow it."
   },
   "image_use": {
     "title": "Using Mentria's images",

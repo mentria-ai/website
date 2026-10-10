@@ -1920,7 +1920,8 @@
         "fpv-drone": "Pilotez un drone de course à travers des portes lumineuses au-dessus de collines, d'un parc à conteneurs et d'un canyon désertique. Vol acrobatique ou auto-stabilisé, médailles, courses contre des fantômes et une carte de vol libre. Fonctionne au toucher, à la manette ou au clavier.",
         "nitro-racer": "Course de rue arcade contre cinq rivaux : driftez pour remplir votre nitro, prenez les tremplins et visez les médailles sur un circuit urbain néon, une route côtière et un canyon désertique. Fonctionne au toucher, à l'inclinaison, à la manette ou au clavier.",
         "finance": "Suivez vos dépenses, budgets, factures, placements et impôts, avec des prévisions. Chiffré sur votre appareil et synchronisé uniquement entre vos propres appareils.",
-        "scanner": "Numérisez des pages avec l’appareil photo. Les bords sont détectés automatiquement, les pages sont redressées et nettoyées, et vous pouvez exporter un PDF ou des images. Vos numérisations restent privées."
+        "scanner": "Numérisez des pages avec l’appareil photo. Les bords sont détectés automatiquement, les pages sont redressées et nettoyées, et vous pouvez exporter un PDF ou des images. Vos numérisations restent privées.",
+        "vocal-tuner": "Chantez et entendez votre voix accordée en direct. Enregistrez des prises, changez la tonalité ou le style ensuite et exportez un WAV."
       },
       "cmd": {
         "finance": {
@@ -1937,6 +1938,9 @@
         },
         "scanner": {
           "scan": "numériser un document"
+        },
+        "vocal-tuner": {
+          "sing": "chanter avec correction de justesse en direct"
         }
       },
       "perm": {
@@ -1945,6 +1949,9 @@
         },
         "scanner": {
           "camera": "Uniquement quand l’écran de numérisation est ouvert. Les photos sont traitées sur cet appareil."
+        },
+        "vocal-tuner": {
+          "microphone": "Uniquement quand l’écran en direct est ouvert. Votre voix est traitée sur cet appareil."
         }
       }
     },
@@ -5651,6 +5658,128 @@
         "captured": "Page {n} capturée",
         "page": "Page {n}"
       }
+    },
+    "vocal_tuner": {
+      "app": {
+        "name": "Vocal Tuner",
+        "close": "Fermer"
+      },
+      "takes": {
+        "title": "Prises",
+        "sing": "Chanter",
+        "empty_title": "Aucune prise pour l’instant",
+        "empty_body": "Chantez et entendez votre voix accordée en direct. Les prises sont enregistrées ici.",
+        "more": "Plus d’options pour {name}",
+        "rename": "Renommer",
+        "rename_label": "Nom de la prise",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "export": "Exporter",
+        "delete": "Supprimer",
+        "delete_confirm": "Supprimer « {name} » ? Cette action est définitive.",
+        "default_name": "Prise {date}",
+        "storage": "Stockage utilisé : {used} sur {quota}"
+      },
+      "live": {
+        "listening": "Écoute : {mode}",
+        "bypass": "Maintenir pour l’original",
+        "record": "Enregistrer",
+        "stop": "Arrêter",
+        "remaining": "Encore {time}",
+        "saved": "Prise enregistrée",
+        "too_loud": "Trop fort — reculez ou chantez plus doucement",
+        "hard_hint": "Choisissez une tonalité pour le son dur classique",
+        "monitor": "Volume d’écoute",
+        "reset_audio": "Réinitialiser l’audio",
+        "resume": "Touchez pour reprendre",
+        "dead_hint": "Aucun son ? Essayez Réinitialiser l’audio.",
+        "feedback": "Larsen — utilisez un casque ou baissez le volume",
+        "style": "Style",
+        "correction": "Correction",
+        "presets": {
+          "natural": "Naturel",
+          "tight": "Serré",
+          "hard": "Dur"
+        },
+        "key": "Tonalité",
+        "any_key": "Toute tonalité",
+        "latency": {
+          "good": "Délai : faible ({ms} ms)",
+          "ok": "Délai : perceptible ({ms} ms)",
+          "high": "Délai : élevé ({ms} ms)",
+          "high_tip": "Si l’écho gêne, choisissez le mode Bluetooth pour enregistrer maintenant et écouter juste après."
+        },
+        "starting": "Démarrage du micro…",
+        "listen_take": "Écouter"
+      },
+      "listen": {
+        "title": "Comment écoutez-vous ?",
+        "wired": "Casque filaire",
+        "wired_desc": "Idéal pour vous entendre en direct.",
+        "speaker": "Haut-parleur du téléphone ou de l’ordinateur",
+        "speaker_desc": "Le son en direct démarre bas. Montez-le doucement — les haut-parleurs peuvent provoquer un larsen.",
+        "bluetooth": "Casque ou enceinte Bluetooth",
+        "bluetooth_desc": "Le Bluetooth retarde trop le son pour une écoute en direct. Enregistrez, puis écoutez la prise accordée juste après.",
+        "echo_on": "Ce navigateur a gardé l’annulation d’écho, ce qui peut adoucir le son.",
+        "short": {
+          "wired": "Casque",
+          "speaker": "Haut-parleur",
+          "bluetooth": "Bluetooth"
+        }
+      },
+      "key": {
+        "title": "Tonalité",
+        "major": "Majeur",
+        "minor": "Mineur",
+        "any": "Toute tonalité",
+        "find": "Trouver ma tonalité",
+        "find_body": "Chantez ou fredonnez pendant environ 15 secondes.",
+        "best": "Meilleure correspondance : {key}",
+        "or": "ou {key}",
+        "strong": "Correspondance nette",
+        "likely": "Correspondance probable",
+        "none": "Pas encore de tonalité claire — chantez une phrase plus longue",
+        "use": "Utiliser cette tonalité",
+        "retry": "Réessayer",
+        "major_name": "{note} majeur",
+        "minor_name": "{note} mineur"
+      },
+      "take": {
+        "tuned": "Accordée",
+        "original": "Originale",
+        "play": "Lire",
+        "pause": "Pause",
+        "apply": "Appliquer",
+        "revert": "Annuler",
+        "rendering": "Accordage… {pct} %",
+        "render_failed": "Impossible de réaccorder cette prise.",
+        "retry": "Réessayer",
+        "export_title": "Exporter",
+        "export_tuned": "WAV accordé",
+        "export_original": "WAV original",
+        "shared": "Partagé",
+        "downloaded": "{name} enregistré",
+        "position": "Position de lecture",
+        "back": "Retour aux prises"
+      },
+      "errors": {
+        "denied": "Autorisez le micro pour chanter.",
+        "denied_ios": "Sur iPhone : Réglages › Safari › Micro.",
+        "no_mic": "Aucun micro trouvé.",
+        "insecure": "Ouvrez la page sécurisée (https) pour utiliser le micro.",
+        "unsupported": "Ce navigateur ne peut pas traiter l’audio en direct.",
+        "failed": "Impossible de démarrer le micro.",
+        "storage_full": "Le stockage est plein — exportez puis supprimez d’anciennes prises.",
+        "save_failed": "Impossible d’enregistrer cette prise.",
+        "no_js": "Vocal Tuner a besoin de JavaScript.",
+        "retry": "Réessayer"
+      },
+      "a11y": {
+        "note": "Note actuelle {note}",
+        "meter": "Niveau d’entrée",
+        "trail": "Tracé de la hauteur",
+        "needle": "Indicateur de correction"
+      }
     }
   },
   "category": {
@@ -5925,7 +6054,9 @@
     "build_body": "Une extension est un seul fichier HTML. Le SDK explique le format et ce qu’une extension peut utiliser.",
     "manage_link": "Gérer les extensions installées",
     "perm_camera": "Caméra",
-    "perm_camera_desc": "Peut utiliser la caméra une fois que vous l’autorisez."
+    "perm_camera_desc": "Peut utiliser la caméra une fois que vous l’autorisez.",
+    "perm_microphone": "Micro",
+    "perm_microphone_desc": "Peut utiliser votre micro une fois que vous l’autorisez."
   },
   "image_use": {
     "title": "Utiliser les images de Mentria",

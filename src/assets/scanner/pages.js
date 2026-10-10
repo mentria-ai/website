@@ -99,6 +99,7 @@ export function loadBitmap(page) {
 
 export async function updatePage(page, patch) {
   Object.assign(page, patch);
+  page.original = new Blob([await page.original.arrayBuffer()], { type: page.original.type || 'image/jpeg' });
   const bmp = await loadBitmap(page);
   try { await renderViews(page, bmp); } finally { bmp.close(); }
   await db.savePage(page);

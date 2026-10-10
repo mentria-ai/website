@@ -8,10 +8,16 @@ const TYPES = {
   '.woff2': 'font/woff2', '.txt': 'text/plain', '.xml': 'application/xml', '.ico': 'image/x-icon', '.pdf': 'application/pdf'
 };
 
-export function serve(dir, port) {
+export function serve(dir, port, onPost) {
   const root = resolve(dir);
   const server = http.createServer((req, res) => {
     const path = decodeURIComponent(new URL(req.url, 'http://local').pathname);
+    if (req.method === 'POST' && onPost) {
+      let body = '';
+      req.on('data', (c) => { body += c; });
+      req.on('end', () => { res.writeHead(204); res.end(); onPost(path, body); });
+      return;
+    }
     let file = normalize(join(root, path));
     if (!file.startsWith(root)) { res.writeHead(403); res.end(); return; }
     try {

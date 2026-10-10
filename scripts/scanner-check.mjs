@@ -196,6 +196,43 @@ test('tracker: single dropped frames neither restart nor empty the ring', () => 
   assert.equal(emptied, 0);
 });
 
+test('tracker: noisy sharpness only delays the shot, it does not restart the ring', () => {
+  const tr = T.createTracker();
+  const r = S.rng(11);
+  let fired = -1;
+  for (let t = 0, k = 0; t <= 3000; t += 66, k++) {
+    const sharp = k % 9 === 4 ? 55 : 72 + r() * 28;
+    const s = tr.push(sample(basePage, 0.9, sharp), t);
+    if (s.state === 'fire' && fired < 0) fired = t;
+  }
+  const due = T.STEADY_WINDOW_MS + T.FIRE_AFTER_MS;
+  assert.ok(fired >= 0 && fired <= due + 300, 'fired at ' + fired);
+});
+
+test('tracker: a hand-held page with tremor, jitter and confidence dips fires promptly', () => {
+  const tr = T.createTracker();
+  const r = S.rng(23);
+  let fired = -1;
+  for (let t = 0, k = 0; t <= 3000; t += 66, k++) {
+    const ox = 0.006 * Math.sin(k * 2.6) + 0.004 * (r() - 0.5) + 0.000003 * t;
+    const oy = 0.006 * Math.cos(k * 2.1) + 0.004 * (r() - 0.5);
+    const q = basePage.map(([x, y]) => [x + ox + 0.002 * (r() - 0.5), y + oy + 0.002 * (r() - 0.5)]);
+    const conf = k % 7 === 3 ? 0.5 : 0.65 + r() * 0.3;
+    const s = tr.push(sample(q, conf, 80 + r() * 20), t);
+    if (s.state === 'fire' && fired < 0) fired = t;
+  }
+  const due = T.STEADY_WINDOW_MS + T.FIRE_AFTER_MS;
+  assert.ok(fired >= 0 && fired <= due + 400, 'fired at ' + fired);
+});
+
+test('tracker: a page panning across the view never fires', () => {
+  const tr = T.createTracker();
+  for (let t = 0, k = 0; t <= 4000; t += 66, k++) {
+    const q = basePage.map(([x, y]) => [x - 0.15 + 0.004 * k, y]);
+    assert.notEqual(tr.push(sample(q), t).state, 'fire', 'fired while panning at ' + t);
+  }
+});
+
 test('tracker: losing the page clears the outline after 300 ms', () => {
   const tr = T.createTracker();
   tr.push(sample(basePage), 0);

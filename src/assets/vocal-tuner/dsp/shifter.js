@@ -52,9 +52,9 @@ export function createShifter(fs, opts = {}) {
         y = (1 - g) * read(r) + g * read(r2);
         r2 += ratio;
         xf++;
-        if (xf > F) { r = r2; xf = -1; }
       } else y = read(r);
       r += ratio;
+      if (xf > F) { r = r2; xf = -1; }
       const d = w - r;
       if (xf < 0 && voiced && period > 1) {
         if (ratio > 1 && d < dlo) {

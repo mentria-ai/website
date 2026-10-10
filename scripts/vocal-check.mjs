@@ -301,7 +301,28 @@ test('engine: changing the key while singing does not click', () => {
       prev = outB[j];
     }
   }
-  assert.ok(maxJump < maxJumpIn * 1.6, 'jump ' + maxJump + ' vs input ' + maxJumpIn);
+  assert.ok(maxJump < maxJumpIn * 1.1, 'jump ' + maxJump + ' vs input ' + maxJumpIn);
+});
+
+test('engine: splices are seamless on a pure tone', () => {
+  const x = S.makeSignal({ kind: 'sine', pitch: S.steady(680), seconds: 1.5 });
+  const eng = EN.createEngine(FS, { correction: 1, key: null });
+  const inB = new Float32Array(128), outB = new Float32Array(128);
+  let p1 = 0, p2 = 0, worst = 0, worstIn = 0;
+  for (let i = 0; i + 128 <= x.length; i += 128) {
+    for (let j = 0; j < 128; j++) inB[j] = x[i + j];
+    eng.process(inB, outB);
+    for (let j = 0; j < 128; j++) {
+      const k = i + j;
+      if (k > 4800) {
+        worst = Math.max(worst, Math.abs(outB[j] - 2 * p1 + p2));
+        worstIn = Math.max(worstIn, Math.abs(x[k] - 2 * x[k - 1] + x[k - 2]));
+      }
+      p2 = p1;
+      p1 = outB[j];
+    }
+  }
+  assert.ok(worst < worstIn * 1.5, 'second difference ' + worst + ' vs input ' + worstIn);
 });
 
 const KF = await mod('dsp/keyfind.js');

@@ -47,6 +47,7 @@ class VocalTuner extends AudioWorkletProcessor {
       this.howl.armed = !!m.speaker;
       this.howl.monitorDb = typeof m.db === 'number' ? m.db : -120;
     } else if (m.type === 'howl-reset') this.howl.reset();
+    else if (m.type === 'lite') this.engine.detectEvery = m.on ? 2 : 1;
     else if (m.type === 'keyfind') {
       this.keying = !!m.on;
       if (m.on) this.keys.reset();

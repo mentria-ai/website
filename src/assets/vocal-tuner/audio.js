@@ -170,6 +170,7 @@ export function createAudio(handlers = {}) {
   a.keyFind = (on) => post({ type: 'keyfind', on: !!on });
   a.keyResult = () => post({ type: 'keyresult' });
   a.howlReset = () => post({ type: 'howl-reset' });
+  a.setLite = (on) => post({ type: 'lite', on: !!on });
 
   a.latencyMs = () => {
     if (!ctx) return 0;

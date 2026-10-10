@@ -514,6 +514,113 @@ check('take: delete asks first, then removes the take and its audio', async (pag
   if (!gone) throw new Error('the take or its audio was left behind');
 });
 
+check('lifecycle: hiding the app while recording saves the take and asks to resume', async (page) => {
+  await stubMic(page);
+  await freshApp(page);
+  await openLive(page, 0);
+  await page.click('.vt-rec');
+  await new Promise((r) => setTimeout(r, 2500));
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await takeCount(page, 1);
+  const d = await page.evaluate(async () => {
+    const db = await import('/assets/vocal-tuner/db.js');
+    return (await db.listTakes())[0].duration;
+  });
+  if (d < 1.5) throw new Error('partial take ' + d);
+  await page.waitForFunction(() => document.body.dataset.vtState === 'resume', { timeout: 5000 });
+  await page.evaluate(() => {
+    delete document.visibilityState;
+    delete document.hidden;
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.click('.vt-resume-btn');
+  await page.waitForFunction(() => document.body.dataset.vtState === 'live', { timeout: 15000 });
+  const calls = await page.evaluate(() => window.__vtMic.calls);
+  if (calls !== 2) throw new Error('microphone requests ' + calls);
+  await clearData(page);
+});
+
+check('lifecycle: a muted microphone track asks to resume', async (page) => {
+  await stubMic(page);
+  await freshApp(page);
+  await openLive(page, 0);
+  await page.evaluate(() => window.__vtStream.getAudioTracks()[0].dispatchEvent(new Event('mute')));
+  await page.waitForFunction(() => document.body.dataset.vtState === 'resume', { timeout: 5000 });
+  await page.click('.vt-resume-btn');
+  await page.waitForFunction(() => document.body.dataset.vtState === 'live', { timeout: 15000 });
+});
+
+check('lifecycle: a new audio device rebuilds the audio and asks how you are listening', async (page) => {
+  await stubMic(page);
+  await page.evaluateOnNewDocument(() => {
+    window.__vtDevices = [{ kind: 'audioinput', deviceId: 'mic', label: 'Mic' }, { kind: 'audiooutput', deviceId: 'spk', label: 'Speaker' }];
+    navigator.mediaDevices.enumerateDevices = async () => window.__vtDevices;
+  });
+  await freshApp(page);
+  await openLive(page, 0);
+  await new Promise((r) => setTimeout(r, 500));
+  await page.evaluate(() => navigator.mediaDevices.dispatchEvent(new Event('devicechange')));
+  await new Promise((r) => setTimeout(r, 1800));
+  if (await page.$('.vt-sheet .vt-option')) throw new Error('an unchanged device list reopened the listening sheet');
+  await page.evaluate(() => {
+    window.__vtDevices = window.__vtDevices.concat([{ kind: 'audiooutput', deviceId: 'bt', label: 'Headphones' }]);
+    navigator.mediaDevices.dispatchEvent(new Event('devicechange'));
+  });
+  await page.waitForSelector('.vt-sheet .vt-option', { timeout: 5000 });
+  await page.click('.vt-sheet .vt-option:nth-of-type(3)');
+  await page.waitForFunction(() => document.body.dataset.vtState === 'live', { timeout: 15000 });
+  const r = await page.evaluate(() => ({ calls: window.__vtMic.calls, mode: JSON.parse(localStorage.getItem('mentria.vocaltuner.listen')).mode }));
+  if (r.calls !== 2 || r.mode !== 'bluetooth') throw new Error(JSON.stringify(r));
+});
+
+check('storage: a full disk keeps the take with retry and export until it is saved', async (page) => {
+  await stubMic(page);
+  await freshApp(page);
+  await openLive(page, 0);
+  await page.evaluate(() => {
+    const put = IDBObjectStore.prototype.put;
+    window.__vtRestorePut = () => { IDBObjectStore.prototype.put = put; };
+    IDBObjectStore.prototype.put = function (...args) {
+      if (this.name === 'audio') throw new DOMException('full', 'QuotaExceededError');
+      return put.apply(this, args);
+    };
+  });
+  await page.click('.vt-rec');
+  await new Promise((r) => setTimeout(r, 2000));
+  await page.click('.vt-rec');
+  await page.waitForSelector('.vt-sheet .vt-retry', { timeout: 10000 });
+  const text = await page.$eval('.vt-sheet', (e) => e.textContent);
+  if (!text.includes('Storage is full') || !(await page.$('.vt-sheet .vt-export-tuned')) || !(await page.$('.vt-sheet .vt-export-dry'))) throw new Error(text);
+  const before = await page.evaluate(async () => (await (await import('/assets/vocal-tuner/db.js')).listTakes()).length);
+  if (before !== 0) throw new Error('a take was saved without its audio');
+  await page.keyboard.press('Escape');
+  if (!(await page.$('.vt-sheet .vt-retry'))) throw new Error('the unsaved take was dismissed before it was saved or exported');
+  await page.evaluate(() => window.__vtRestorePut());
+  await page.click('.vt-sheet .vt-retry');
+  await page.waitForFunction(() => !document.querySelector('.vt-sheet'), { timeout: 10000 });
+  await takeCount(page, 1);
+  await clearData(page);
+});
+
+check('watchdog: when the audio stops reporting it hints at Reset audio and lightens detection', async (page) => {
+  await stubMic(page);
+  await captureNode(page);
+  await freshApp(page);
+  await openLive(page, 0);
+  await new Promise((r) => setTimeout(r, 1500));
+  await page.evaluate(() => { window.__vtNode.port.onmessage = null; });
+  await page.waitForFunction(() => document.querySelector('.vt-msg').textContent.includes('Reset audio'), { timeout: 8000 });
+  await page.waitForFunction(() => window.__vtPosted.includes('lite'), { timeout: 8000 });
+  await page.click('.vt-reset');
+  await page.waitForFunction(() => document.body.dataset.vtState === 'live' && !document.querySelector('.vt-msg').textContent.includes('Reset audio'), { timeout: 15000 });
+  const calls = await page.evaluate(() => window.__vtMic.calls);
+  if (calls !== 2) throw new Error('microphone requests ' + calls);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   const page = await browser.newPage();

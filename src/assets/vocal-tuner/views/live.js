@@ -1,4 +1,4 @@
-import { h, t, icon, toast, overlay, setFull, fmtDuration, fmtDateTime, keyName } from '../ui.js';
+import { h, t, icon, toast, overlay, setFull, fmtDuration, fmtDateTime, keyName, safeName, deliverFile } from '../ui.js';
 import { normalize, PRESETS, presetOf, NOTE_NAMES, scaleMask } from '../dsp/settings.js';
 import { createAudio } from '../audio.js';
 import { createRecorder } from '../recorder.js';
@@ -479,8 +479,45 @@ export function mount(root, ctx) {
       await db.saveTake(take, { dry: out.dry, tuned: out.tuned });
       toast(t('live.saved'));
     } catch (e) {
-      toast(e && e.name === 'QuotaExceededError' ? t('errors.storage_full') : t('errors.save_failed'));
+      if (alive) holdUnsaved(take, out, saveError(e));
     }
+  }
+
+  function saveError(e) {
+    return e && e.name === 'QuotaExceededError' ? t('errors.storage_full') : t('errors.save_failed');
+  }
+
+  function holdUnsaved(take, out, message) {
+    let o = null, exported = false;
+    const note = h('p', { class: 'vt-sheet__msg', role: 'alert' }, message);
+    const closeBtn = h('button', { class: 'vt-btn', type: 'button', hidden: true, onclick: () => o.close() }, t('app.close'));
+    const exportAs = (kind) => {
+      const name = safeName(take.name) + (kind === 'dry' ? ' (original)' : '') + '.wav';
+      deliverFile(name, out[kind], take.name).then((r) => {
+        if (r === 'cancelled') return;
+        exported = true;
+        closeBtn.hidden = false;
+      });
+    };
+    const retry = async () => {
+      try {
+        await db.saveTake(take, { dry: out.dry, tuned: out.tuned });
+        o.close();
+        toast(t('live.saved'));
+      } catch (e) {
+        note.textContent = saveError(e);
+      }
+    };
+    const option = (kind, label) => h('button', { class: 'vt-option vt-export-' + kind, type: 'button', onclick: () => exportAs(kind) },
+      icon('download'),
+      h('span', { class: 'vt-option__title' }, label),
+      h('span', { class: 'vt-option__desc' }, fmtDuration(take.duration) + ' · WAV'));
+    o = overlay([
+      note,
+      option('tuned', t('take.export_tuned')),
+      option('dry', t('take.export_original')),
+      h('div', { class: 'vt-sheet__actions' }, closeBtn, h('button', { class: 'vt-btn vt-btn--primary vt-retry', type: 'button', onclick: retry }, t('errors.retry')))
+    ], () => { if (exported) o.close(); });
   }
 
   function resetAudio() {
@@ -490,13 +527,95 @@ export function mount(root, ctx) {
     start();
   }
 
-  function onStarted() {}
+  let deviceSig = '', deviceTimer = 0, lastTeleAt = 0, teleCount = 0, windowStart = 0, slowWindows = 0, lite = false, deadSince = 0;
+  const watchTimer = setInterval(watchdog, 1000);
 
-  function onState(s) {}
+  subscribe((m) => {
+    if (m.type !== 'telemetry') return;
+    lastTeleAt = performance.now();
+    teleCount++;
+    const monitoring = listen.mode !== 'bluetooth' && bypass.getAttribute('aria-pressed') !== 'true';
+    if (monitoring && m.level > -60 && m.outLevel < -90) {
+      if (!deadSince) deadSince = lastTeleAt;
+    } else deadSince = 0;
+  });
 
-  function onDevice() {}
+  async function deviceSignature() {
+    try {
+      const list = await navigator.mediaDevices.enumerateDevices();
+      return list.filter((d) => d.kind === 'audioinput' || d.kind === 'audiooutput').map((d) => d.kind + ':' + d.deviceId + ':' + d.label).sort().join('|');
+    } catch (_) {
+      return '';
+    }
+  }
 
-  function onVisibility() {}
+  function onStarted() {
+    lastTeleAt = performance.now();
+    deadSince = 0;
+    windowStart = 0;
+    slowWindows = 0;
+    lite = false;
+    deviceSignature().then((sig) => { deviceSig = sig; });
+  }
+
+  function watchdog() {
+    if (!alive) { clearInterval(watchTimer); return; }
+    if (!audio || audio.state !== 'running' || document.body.dataset.vtState !== 'live') { windowStart = 0; return; }
+    const now = performance.now();
+    const hintText = t('live.dead_hint');
+    const dead = now - lastTeleAt > 2000 || (deadSince && now - deadSince > 2000);
+    if (dead && !warn) { warn = hintText; showMessage(); }
+    else if (!dead && warn === hintText) { warn = ''; showMessage(); }
+    if (!windowStart) { windowStart = now; teleCount = 0; return; }
+    if (now - windowStart < 2000) return;
+    slowWindows = teleCount < 30 ? slowWindows + 1 : 0;
+    windowStart = now;
+    teleCount = 0;
+    if (slowWindows >= 2 && !lite) {
+      lite = true;
+      audio.setLite(true);
+    }
+  }
+
+  async function pauseForResume() {
+    if (document.body.dataset.vtState === 'resume') return;
+    document.body.dataset.vtState = 'resume';
+    await stopRecording(true);
+    if (audio) audio.stop();
+    audio = null;
+    if (alive) showResume();
+  }
+
+  function onState(s) {
+    if (s === 'interrupted' && alive) pauseForResume();
+  }
+
+  function onDevice() {
+    clearTimeout(deviceTimer);
+    deviceTimer = setTimeout(async () => {
+      if (!alive || !audio) return;
+      const sig = await deviceSignature();
+      if (!alive || !audio || sig === deviceSig) return;
+      deviceSig = sig;
+      audio.muteMonitor();
+      await stopRecording(true);
+      if (audio) audio.stop();
+      audio = null;
+      const mode = await openListenSheet(listen.mode);
+      if (!alive) return;
+      if (mode) {
+        listen.mode = mode;
+        saveListen(listen);
+        howled = false;
+        paintListen();
+      }
+      start();
+    }, 1000);
+  }
+
+  function onVisibility() {
+    if (document.visibilityState === 'hidden' && (audio || recording)) pauseForResume();
+  }
 
   async function leave() {
     await stopRecording();

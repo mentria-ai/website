@@ -16,7 +16,7 @@ export function mount(root, ctx, params) {
   let take = null, pending = null, job = null, failed = '';
   let blobs = { dry: null, tuned: null };
   let buffers = { dry: null, tuned: null };
-  let ac = null, gains = null, sources = [], which = 'tuned', playing = false, offset = 0, startedAt = 0, raf = 0;
+  let ac = null, gains = null, sources = [], which = 'tuned', playing = false, offset = 0, startedAt = 0, raf = 0, playbackSession = false;
 
   const back = h('button', { class: 'vt-icon-btn', type: 'button', 'aria-label': t('take.back'), onclick: () => ctx.go('takes') }, icon('back'));
   const nameBtn = h('button', { class: 'vt-take__name', type: 'button', onclick: () => rename() });
@@ -170,6 +170,8 @@ export function mount(root, ctx, params) {
 
   function play() {
     if (!buffers.tuned || !buffers.dry) return;
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {}
+    playbackSession = true;
     if (!ac) {
       const C = window.AudioContext || window.webkitAudioContext;
       ac = new C();
@@ -310,5 +312,6 @@ export function mount(root, ctx, params) {
     if (job) job.cancel();
     stopSources();
     if (ac) { try { ac.close(); } catch (_) {} }
+    if (playbackSession) { try { if (navigator.audioSession) navigator.audioSession.type = 'auto'; } catch (_) {} }
   };
 }

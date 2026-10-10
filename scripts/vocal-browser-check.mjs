@@ -693,6 +693,26 @@ check('live: tapping Reset audio twice leaves one working session', async (page)
   if (r.state !== 'live' || r.error || r.session !== 'play-and-record') throw new Error(JSON.stringify(r));
 });
 
+check('take: playback switches the audio session to playback and back', async (page) => {
+  await page.evaluateOnNewDocument(() => {
+    window.__vtSession = { type: 'auto' };
+    Object.defineProperty(navigator, 'audioSession', { configurable: true, get: () => window.__vtSession });
+  });
+  await freshApp(page);
+  await seedTake(page, { correction: 0.35, key: null });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('.vt-item__open');
+  await page.click('.vt-item__open');
+  await page.waitForSelector('.vt-take .vt-player__play:not([disabled])', { timeout: 15000 });
+  await page.click('.vt-player__play');
+  const during = await page.evaluate(() => window.__vtSession.type);
+  await page.click('.vt-take .vt-top .vt-icon-btn');
+  await page.waitForSelector('.vt-takes');
+  const after = await page.evaluate(() => window.__vtSession.type);
+  if (during !== 'playback' || after !== 'auto') throw new Error(JSON.stringify({ during, after }));
+  await clearData(page);
+});
+
 const only = process.env.VT_ONLY || '';
 const selected = checks.filter(([name]) => name.includes(only));
 let failed = 0;

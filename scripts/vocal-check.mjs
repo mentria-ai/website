@@ -304,6 +304,35 @@ test('engine: changing the key while singing does not click', () => {
   assert.ok(maxJump < maxJumpIn * 1.1, 'jump ' + maxJump + ' vs input ' + maxJumpIn);
 });
 
+test('dsp: the filters and the shifter allocate nothing per block', async () => {
+  const { PerformanceObserver } = await import('node:perf_hooks');
+  const SH = await mod('dsp/shifter.js');
+  const f0 = S.hz(57.3);
+  const x = S.makeSignal({ pitch: S.steady(f0), seconds: 1 });
+  const hp = FL.createHighpass(FS), dec = FL.createDecimator(), sh = SH.createShifter(FS);
+  const inB = new Float32Array(128), mid = new Float32Array(128), half = new Float32Array(64), outB = new Float32Array(128);
+  const period = FS / f0;
+  const run = (blocks) => {
+    let i = 0;
+    for (let b = 0; b < blocks; b++) {
+      if (i + 128 > x.length) i = 0;
+      for (let j = 0; j < 128; j++) inB[j] = x[i + j];
+      hp.process(inB, mid, 128);
+      dec.process(mid, half, 128);
+      sh.process(mid, outB, 1.02, period, true, 128);
+      i += 128;
+    }
+  };
+  run(3000);
+  let gcs = 0;
+  const obs = new PerformanceObserver((list) => { gcs += list.getEntries().length; });
+  obs.observe({ entryTypes: ['gc'] });
+  run(100000);
+  await new Promise((r) => setTimeout(r, 100));
+  obs.disconnect();
+  assert.ok(gcs <= 1, gcs + ' garbage collections in 100000 blocks');
+});
+
 test('engine: splices are seamless on a pure tone', () => {
   const x = S.makeSignal({ kind: 'sine', pitch: S.steady(680), seconds: 1.5 });
   const eng = EN.createEngine(FS, { correction: 1, key: null });

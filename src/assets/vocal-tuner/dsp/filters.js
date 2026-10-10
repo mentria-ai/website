@@ -1,17 +1,20 @@
 export function createHighpass(fs, fc = 60) {
   const rc = 1 / (2 * Math.PI * fc), dt = 1 / fs;
   const a = rc / (rc + dt);
-  let px = 0, py = 0;
+  const st = new Float64Array(2);
   return {
     process(input, output, n = input.length) {
+      let px = st[0], py = st[1];
       for (let i = 0; i < n; i++) {
         const x = input[i];
         py = a * (py + x - px);
         px = x;
         output[i] = py;
       }
+      st[0] = px;
+      st[1] = py;
     },
-    reset() { px = 0; py = 0; }
+    reset() { st.fill(0); }
   };
 }
 

@@ -72,6 +72,78 @@ test('signals: generated pitches and noise levels are what they claim', () => {
   assert.ok(Math.abs(10 * Math.log10(sp / np) - 10) < 0.5);
 });
 
+const DT = await mod('dsp/detector.js');
+
+function track(x, fs = FS, opts) {
+  const det = DT.createDetector(fs, opts);
+  const out = [];
+  const blk = new Float32Array(128);
+  for (let i = 0; i + 128 <= x.length; i += 128) {
+    for (let j = 0; j < 128; j++) blk[j] = x[i + j];
+    det.push(blk);
+    det.analyze();
+    out.push({ t: (i + 128) / fs, voiced: det.voiced, pitch: det.pitch, clarity: det.clarity, level: det.level });
+  }
+  return out;
+}
+
+test('detector: voice, sawtooth and sine from 82 to 1000 Hz down to 10 dB SNR, no octave errors', () => {
+  for (const kind of ['sine', 'saw', 'vocal']) {
+    for (const f of [82, 110, 165, 220, 330, 440, 660, 880, 1000]) {
+      for (const snr of [Infinity, 20, 10]) {
+        const tr = track(S.makeSignal({ pitch: S.steady(f), kind, snr, seconds: 1, seed: f })).filter((r) => r.t > 0.1);
+        const voiced = tr.filter((r) => r.voiced);
+        const gross = voiced.filter((r) => Math.abs(cents(r.pitch, f)) > 50).length;
+        const octave = voiced.filter((r) => Math.abs(Math.abs(cents(r.pitch, f)) - 1200) < 100).length;
+        assert.ok(voiced.length >= tr.length * 0.95, kind + ' ' + f + ' ' + snr + ' voiced ' + voiced.length + '/' + tr.length);
+        assert.ok(gross <= voiced.length * 0.02, kind + ' ' + f + ' ' + snr + ' gross ' + gross);
+        assert.equal(octave, 0, kind + ' ' + f + ' ' + snr + ' octave errors');
+      }
+    }
+  }
+});
+
+test('detector: clean pitch is within 2 cents (p95) and vibrato is tracked', () => {
+  let worst = 0;
+  for (const kind of ['saw', 'vocal']) {
+    for (const f of [82, 147, 220, 440, 880]) {
+      const e = track(S.makeSignal({ pitch: S.steady(f), kind, seconds: 1 })).filter((r) => r.t > 0.1 && r.voiced).map((r) => Math.abs(cents(r.pitch, f))).sort((a, b) => a - b);
+      worst = Math.max(worst, e[Math.floor(e.length * 0.95)]);
+    }
+  }
+  assert.ok(worst < 2, 'p95 ' + worst);
+  const vib = S.vibrato(220, 6, 50);
+  const e = track(S.makeSignal({ pitch: vib, seconds: 2 })).filter((r) => r.t > 0.2 && r.voiced).map((r) => Math.abs(cents(r.pitch, vib(r.t - 0.008)))).sort((a, b) => a - b);
+  assert.ok(e[Math.floor(e.length * 0.95)] < 8, 'vibrato p95 ' + e[Math.floor(e.length * 0.95)]);
+});
+
+test('detector: settles within 30 ms of a note change', () => {
+  for (const [a, b] of [[220, 262], [147, 196], [330, 247]]) {
+    const tr = track(S.makeSignal({ pitch: S.steps([a, b], 0.5), seconds: 1 }));
+    const hit = tr.find((r) => r.t > 0.5 && r.voiced && Math.abs(cents(r.pitch, b)) < 50);
+    assert.ok(hit && hit.t - 0.5 <= 0.03, a + '->' + b + ' ' + (hit ? (hit.t - 0.5) * 1000 : 'never'));
+  }
+});
+
+test('detector: noise alone and thirds stay unvoiced', () => {
+  const r = S.rng(99);
+  const white = new Float32Array(FS * 3);
+  for (let i = 0; i < white.length; i++) white[i] = (r() - 0.5) * 0.2;
+  assert.ok(track(white).filter((q) => q.voiced).length <= 11, 'white noise');
+  for (const pair of [[220, 277.18], [220, 261.63]]) {
+    const tr = track(S.makeChord(pair)).filter((q) => q.t > 0.1);
+    assert.ok(tr.filter((q) => !q.voiced).length >= tr.length * 0.9, 'third ' + pair);
+  }
+});
+
+test('detector: quiet singing around -40 dBFS is detected and silence below the gate is not', () => {
+  const quiet = S.makeSignal({ pitch: S.steady(196), seconds: 1, amp: 0.02 });
+  const tr = track(quiet).filter((q) => q.t > 0.1);
+  assert.ok(tr.filter((q) => q.voiced && Math.abs(cents(q.pitch, 196)) < 10).length >= tr.length * 0.95, 'quiet voice');
+  const faint = S.makeSignal({ pitch: S.steady(196), seconds: 1, amp: 0.002 });
+  assert.equal(track(faint).filter((q) => q.voiced).length, 0, 'below gate');
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

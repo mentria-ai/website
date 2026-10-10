@@ -216,6 +216,94 @@ test('corrector: natural keeps a deliberate C sharp in C major, hard pulls it in
   assert.ok(Math.abs(Math.abs(hard[hard.length - 1].corr) - 100) < 0.5, 'hard ' + hard[hard.length - 1].corr);
 });
 
+const EN = await mod('dsp/engine.js');
+
+function render(x, settings, fs = FS, opts) {
+  const eng = EN.createEngine(fs, settings, opts);
+  const out = new Float32Array(x.length);
+  const inB = new Float32Array(128), outB = new Float32Array(128);
+  const delays = [];
+  for (let i = 0; i + 128 <= x.length; i += 128) {
+    for (let j = 0; j < 128; j++) inB[j] = x[i + j];
+    eng.process(inB, outB);
+    for (let j = 0; j < 128; j++) out[i + j] = outB[j];
+    if (eng.voiced) delays.push(eng.delayMs);
+  }
+  return { out, delays, eng };
+}
+
+test('engine: notes sung 30 cents sharp come out within 2 cents of the note and stay clean', () => {
+  for (const f0 of [110, 196, 330, 523]) {
+    const off = S.hz(Math.round(S.midi(f0)) + 0.3), target = S.hz(Math.round(S.midi(f0)));
+    const { out, delays } = render(S.makeSignal({ pitch: S.steady(off), seconds: 1.5 }), { correction: 1, key: null });
+    const fr = S.analyzePitch(out, FS).filter((q) => q.t > 0.3 && q.f > 0);
+    const errs = fr.map((q) => Math.abs(cents(q.f, target))).sort((a, b) => a - b);
+    const clar = fr.map((q) => q.clarity).sort((a, b) => a - b);
+    assert.ok(errs[Math.floor(errs.length * 0.95)] < 2, f0 + ' p95 ' + errs[Math.floor(errs.length * 0.95)]);
+    assert.ok(clar[Math.floor(clar.length * 0.05)] >= 0.99, f0 + ' clarity ' + clar[Math.floor(clar.length * 0.05)]);
+    const mean = delays.reduce((a, b) => a + b, 0) / delays.length;
+    assert.ok(mean >= 1 && mean <= (f0 < 150 ? 6 : 3.5), f0 + ' delay ' + mean);
+  }
+});
+
+test('engine: the shifter delay stays under 13 ms for an 82 Hz voice', () => {
+  const { delays } = render(S.makeSignal({ pitch: S.steady(82.41 * Math.pow(2, 0.3 / 12)), seconds: 1.5 }), { correction: 1, key: null });
+  assert.ok(Math.max(...delays) < 13, 'max ' + Math.max(...delays));
+});
+
+test('engine: an in-tune voice passes through unchanged apart from a short delay', () => {
+  const x = S.makeSignal({ pitch: S.steady(220), seconds: 1 });
+  const { out } = render(x, { correction: 1, key: null });
+  let best = -1, bc = -2;
+  for (let lag = 0; lag < 200; lag++) {
+    let xy = 0, xx = 0, yy = 0;
+    for (let i = 10000; i < 40000; i++) { xy += x[i] * out[i + lag]; xx += x[i] * x[i]; yy += out[i + lag] * out[i + lag]; }
+    const c = xy / Math.sqrt(xx * yy);
+    if (c > bc) { bc = c; best = lag; }
+  }
+  assert.ok(bc > 0.9999 && best > 0 && best < 200, 'lag ' + best + ' corr ' + bc);
+});
+
+test('engine: hard flattens vibrato, tight and natural keep it', () => {
+  const x = S.makeSignal({ pitch: (t) => S.hz(57.2 + 0.5 * Math.sin(2 * Math.PI * 6 * t)), seconds: 2 });
+  const extent = (c) => {
+    const fr = S.analyzePitch(render(x, { correction: c, key: null }).out, FS).filter((q) => q.t > 0.4 && q.f > 0).map((q) => S.midi(q.f));
+    return { centre: (fr.reduce((a, b) => a + b, 0) / fr.length - 57) * 100, ext: (Math.max(...fr) - Math.min(...fr)) * 50 };
+  };
+  const hard = extent(1), tight = extent(0.65);
+  assert.ok(Math.abs(hard.centre) < 3 && hard.ext < 12, 'hard ' + JSON.stringify(hard));
+  assert.ok(tight.ext > 35, 'tight ' + JSON.stringify(tight));
+});
+
+test('engine: works at 44.1 kHz too', () => {
+  const fs = 44100, off = S.hz(57.3), target = S.hz(57);
+  const { out } = render(S.makeSignal({ fs, pitch: S.steady(off), seconds: 1.5 }), { correction: 1, key: null }, fs);
+  const fr = S.analyzePitch(out, fs).filter((q) => q.t > 0.3 && q.f > 0);
+  const errs = fr.map((q) => Math.abs(cents(q.f, target))).sort((a, b) => a - b);
+  assert.ok(errs[Math.floor(errs.length * 0.95)] < 2, 'p95 ' + errs[Math.floor(errs.length * 0.95)]);
+});
+
+test('engine: changing the key while singing does not click', () => {
+  const x = S.makeSignal({ pitch: S.steady(S.hz(57.3)), seconds: 1.5 });
+  const eng = EN.createEngine(FS, { correction: 1, key: null });
+  const inB = new Float32Array(128), outB = new Float32Array(128);
+  let prev = 0, maxJump = 0, maxJumpIn = 0;
+  for (let i = 0, b = 0; i + 128 <= x.length; i += 128, b++) {
+    for (let j = 0; j < 128; j++) inB[j] = x[i + j];
+    if (b === 280) eng.setSettings({ correction: 1, key: { root: 7, mode: 'major' } });
+    if (b === 400) eng.setSettings({ correction: 0.35, key: null });
+    eng.process(inB, outB);
+    for (let j = 0; j < 128; j++) {
+      if (i + j > 4800) {
+        maxJump = Math.max(maxJump, Math.abs(outB[j] - prev));
+        if (i + j > 0) maxJumpIn = Math.max(maxJumpIn, Math.abs(x[i + j] - x[i + j - 1]));
+      }
+      prev = outB[j];
+    }
+  }
+  assert.ok(maxJump < maxJumpIn * 1.6, 'jump ' + maxJump + ' vs input ' + maxJumpIn);
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

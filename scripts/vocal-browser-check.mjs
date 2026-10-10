@@ -43,6 +43,7 @@ async function stubMic(page, file = 'voice.wav') {
     navigator.mediaDevices.getUserMedia = async () => {
       window.__vtMic.calls++;
       if (window.__vtMic.fail) throw new DOMException('denied', window.__vtMic.fail);
+      if (window.__vtMic.delay) await new Promise((r) => setTimeout(r, window.__vtMic.delay));
       const ctx = new AudioContext();
       const res = await fetch(window.__vtMic.url);
       const buf = await ctx.decodeAudioData(await res.arrayBuffer());
@@ -670,6 +671,26 @@ check('live: the monitor path has no look-ahead limiter node', async (page) => {
   await openLive(page, 0);
   const n = await page.evaluate(() => window.__vtCompressors);
   if (n !== 0) throw new Error(n + ' compressor node(s) in the live path');
+});
+
+check('live: tapping Reset audio twice leaves one working session', async (page) => {
+  await stubMic(page);
+  await page.evaluateOnNewDocument(() => {
+    window.__vtSession = { type: 'auto' };
+    Object.defineProperty(navigator, 'audioSession', { configurable: true, get: () => window.__vtSession });
+  });
+  await freshApp(page);
+  await openLive(page, 0);
+  await page.evaluate(() => { window.__vtMic.delay = 400; });
+  await page.click('.vt-reset');
+  await new Promise((r) => setTimeout(r, 60));
+  await page.click('.vt-reset');
+  await new Promise((r) => setTimeout(r, 2500));
+  const r = await page.evaluate(() => {
+    const panel = document.querySelector('.vt-error');
+    return { state: document.body.dataset.vtState, error: !panel.hidden && !!panel.querySelector('.vt-error__msg'), session: window.__vtSession.type };
+  });
+  if (r.state !== 'live' || r.error || r.session !== 'play-and-record') throw new Error(JSON.stringify(r));
 });
 
 const only = process.env.VT_ONLY || '';

@@ -317,10 +317,11 @@ export function mount(root, ctx) {
     msg.textContent = t('live.starting');
     ignoreLast = false;
     if (!audio) audio = createAudio(handlers);
-    audio.setSettings(settings);
+    const mine = audio;
+    mine.setSettings(settings);
     try {
-      const r = await audio.start();
-      if (!alive) { audio.stop(); return; }
+      const r = await mine.start();
+      if (!alive || audio !== mine) { mine.stop(); return; }
       speakerSince = performance.now();
       paintListen();
       audio.setMonitor(listen.mode, monitorDb());
@@ -331,7 +332,7 @@ export function mount(root, ctx) {
       showMessage();
       onStarted();
     } catch (e) {
-      if (!alive) return;
+      if (!alive || audio !== mine) return;
       if (e && e.code === 'suspended') showResume();
       else showError((e && e.code) || 'failed');
     }

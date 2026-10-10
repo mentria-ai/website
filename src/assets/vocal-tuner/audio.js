@@ -9,6 +9,7 @@ function code(name) {
 }
 
 let primed = null;
+let sessionOwner = null;
 
 export function primeAudio() {
   const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -66,6 +67,7 @@ export function createAudio(handlers = {}) {
     if (!Ctx || typeof AudioWorkletNode === 'undefined') throw code('unsupported');
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw code('no-mic');
     try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (_) {}
+    sessionOwner = a;
     if (!ctx || ctx.state === 'closed') {
       ctx = primed && primed.state !== 'closed' ? primed : new Ctx({ latencyHint: 'interactive' });
       primed = null;
@@ -123,7 +125,10 @@ export function createAudio(handlers = {}) {
     for (const n of [source, node]) { if (n) try { n.disconnect(); } catch (_) {} }
     if (node) node.port.onmessage = null;
     if (ctx) { ctx.onstatechange = null; try { ctx.close(); } catch (_) {} }
-    try { if (navigator.audioSession) navigator.audioSession.type = 'auto'; } catch (_) {}
+    if (sessionOwner === a) {
+      sessionOwner = null;
+      try { if (navigator.audioSession) navigator.audioSession.type = 'auto'; } catch (_) {}
+    }
     ctx = stream = source = node = null;
     setState('idle');
   };

@@ -1,6 +1,7 @@
 import { createEngine } from './dsp/engine.js';
 import { createKeyFinder } from './dsp/keyfind.js';
 import { createHowlGuard } from './dsp/howl.js';
+import { createMonitor } from './dsp/monitor.js';
 
 const CHUNK = 8192;
 const POOL = 8;
@@ -17,7 +18,9 @@ class VocalTuner extends AudioWorkletProcessor {
     this.engine = createEngine(sampleRate, opts.settings || null);
     this.keys = createKeyFinder();
     this.howl = createHowlGuard();
+    this.monitor = createMonitor(sampleRate);
     this.out = new Float32Array(128);
+    this.mon = new Float32Array(128);
     this.free = [];
     for (let i = 0; i < POOL; i++) this.free.push([new Int16Array(CHUNK), new Int16Array(CHUNK)]);
     this.cur = null;
@@ -44,9 +47,12 @@ class VocalTuner extends AudioWorkletProcessor {
     } else if (m.type === 'return') {
       if (m.dry && m.tuned && m.dry.length === CHUNK && this.free.length < POOL * 2) this.free.push([m.dry, m.tuned]);
     } else if (m.type === 'monitor') {
+      const level = typeof m.db === 'number' ? m.db : -120;
       this.howl.armed = !!m.speaker;
-      this.howl.monitorDb = typeof m.db === 'number' ? m.db : -120;
-    } else if (m.type === 'howl-reset') this.howl.reset();
+      this.howl.monitorDb = level;
+      this.monitor.setTarget(level <= -120 ? 0 : Math.pow(10, level / 20));
+    } else if (m.type === 'mute') this.monitor.setTarget(0);
+    else if (m.type === 'howl-reset') this.howl.reset();
     else if (m.type === 'lite') this.engine.detectEvery = m.on ? 2 : 1;
     else if (m.type === 'keyfind') {
       this.keying = !!m.on;
@@ -104,9 +110,10 @@ class VocalTuner extends AudioWorkletProcessor {
     const n = input.length;
     const e = this.engine;
     e.process(input, this.out, n);
+    this.monitor.process(this.out, this.mon, n);
     for (let c = 0; c < out.length; c++) {
       const ch = out[c];
-      for (let i = 0; i < n; i++) ch[i] = this.out[i];
+      for (let i = 0; i < n; i++) ch[i] = this.mon[i];
     }
     const sums = this.sums;
     for (let i = 0; i < n; i++) {

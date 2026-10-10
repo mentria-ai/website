@@ -358,6 +358,36 @@ const KF = await mod('dsp/keyfind.js');
 const HG = await mod('dsp/howl.js');
 const WV = await mod('wav.js');
 const RC = await mod('recorder.js');
+const MO = await mod('dsp/monitor.js');
+
+test('monitor: never exceeds -3 dBFS, adds no delay, and ramps and mutes quickly', () => {
+  const n = 128;
+  const inB = new Float32Array(n), outB = new Float32Array(n);
+  const hot = MO.createMonitor(FS);
+  hot.setTarget(1);
+  let peak = 0;
+  for (let b = 0; b < 400; b++) {
+    for (let j = 0; j < n; j++) inB[j] = 2 * Math.sin((2 * Math.PI * 440 * (b * n + j)) / FS);
+    hot.process(inB, outB, n);
+    for (let j = 0; j < n; j++) peak = Math.max(peak, Math.abs(outB[j]));
+  }
+  assert.ok(peak <= Math.pow(10, -3 / 20) + 1e-6, 'peak ' + peak);
+  const q = MO.createMonitor(FS);
+  q.setTarget(0.5);
+  for (let b = 0; b < 40; b++) { inB.fill(0.1); q.process(inB, outB, n); }
+  for (let j = 0; j < n; j++) inB[j] = 0.1 * Math.sin(j / 3);
+  q.process(inB, outB, n);
+  for (let j = 0; j < n; j++) assert.ok(Math.abs(outB[j] - 0.5 * inB[j]) < 1e-3, 'gain or delay error at sample ' + j);
+  q.setTarget(0);
+  let blocks = 0;
+  while (blocks < 100) {
+    inB.fill(0.1);
+    q.process(inB, outB, n);
+    blocks++;
+    if (Math.abs(outB[n - 1]) < 0.001) break;
+  }
+  assert.ok((blocks * n) / FS <= 0.06, 'mute took ' + (blocks * n) / FS + ' s');
+});
 
 test('keyfind: tonal melodies in all 24 keys find the key or its relative', () => {
   const MAJ = [0, 2, 4, 5, 7, 9, 11], MIN = [0, 2, 3, 5, 7, 8, 10];

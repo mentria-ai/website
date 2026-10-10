@@ -23,7 +23,7 @@ export function primeAudio() {
 }
 
 export function createAudio(handlers = {}) {
-  let ctx = null, stream = null, source = null, node = null, gain = null, limiter = null;
+  let ctx = null, stream = null, source = null, node = null;
   let mode = 'wired', monitorDb = -6, settings = normalize(null), state = 'idle', lastDelay = 3;
   const a = {};
   Object.defineProperty(a, 'state', { get: () => state });
@@ -57,10 +57,6 @@ export function createAudio(handlers = {}) {
   }
 
   function applyMonitor() {
-    if (!gain || !ctx) return;
-    const target = mode === 'bluetooth' ? 0 : Math.pow(10, monitorDb / 20);
-    gain.gain.cancelScheduledValues(ctx.currentTime);
-    gain.gain.setTargetAtTime(target, ctx.currentTime, 0.01);
     post({ type: 'monitor', speaker: mode === 'speaker', db: mode === 'bluetooth' ? -120 : monitorDb });
   }
 
@@ -104,18 +100,8 @@ export function createAudio(handlers = {}) {
     }
     node.port.onmessage = (e) => onMessage(e.data);
     source = ctx.createMediaStreamSource(stream);
-    gain = ctx.createGain();
-    gain.gain.value = 0;
-    limiter = ctx.createDynamicsCompressor();
-    limiter.threshold.value = -3;
-    limiter.knee.value = 0;
-    limiter.ratio.value = 20;
-    limiter.attack.value = 0.001;
-    limiter.release.value = 0.05;
     source.connect(node);
-    node.connect(gain);
-    gain.connect(limiter);
-    limiter.connect(ctx.destination);
+    node.connect(ctx.destination);
     applyMonitor();
     const track = stream.getAudioTracks()[0];
     if (track) {
@@ -134,11 +120,11 @@ export function createAudio(handlers = {}) {
   a.stop = () => {
     try { navigator.mediaDevices.removeEventListener('devicechange', onDeviceChange); } catch (_) {}
     if (stream) stream.getTracks().forEach((tr) => { try { tr.stop(); } catch (_) {} });
-    for (const n of [source, node, gain, limiter]) { if (n) try { n.disconnect(); } catch (_) {} }
+    for (const n of [source, node]) { if (n) try { n.disconnect(); } catch (_) {} }
     if (node) node.port.onmessage = null;
     if (ctx) { ctx.onstatechange = null; try { ctx.close(); } catch (_) {} }
     try { if (navigator.audioSession) navigator.audioSession.type = 'auto'; } catch (_) {}
-    ctx = stream = source = node = gain = limiter = null;
+    ctx = stream = source = node = null;
     setState('idle');
   };
 
@@ -155,11 +141,7 @@ export function createAudio(handlers = {}) {
     applyMonitor();
   };
 
-  a.muteMonitor = () => {
-    if (!gain || !ctx) return;
-    gain.gain.cancelScheduledValues(ctx.currentTime);
-    gain.gain.setTargetAtTime(0, ctx.currentTime, 0.015);
-  };
+  a.muteMonitor = () => post({ type: 'mute' });
 
   a.record = (on) => post({ type: 'record', on: !!on });
 

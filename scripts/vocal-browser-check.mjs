@@ -656,8 +656,26 @@ check('host: the store page runs the tuner full screen on a phone and every cont
   if (errors.length) throw new Error(errors.join(' | '));
 });
 
+check('live: the monitor path has no look-ahead limiter node', async (page) => {
+  await stubMic(page);
+  await page.evaluateOnNewDocument(() => {
+    window.__vtCompressors = 0;
+    const make = AudioContext.prototype.createDynamicsCompressor;
+    AudioContext.prototype.createDynamicsCompressor = function () {
+      window.__vtCompressors++;
+      return make.call(this);
+    };
+  });
+  await freshApp(page);
+  await openLive(page, 0);
+  const n = await page.evaluate(() => window.__vtCompressors);
+  if (n !== 0) throw new Error(n + ' compressor node(s) in the live path');
+});
+
+const only = process.env.VT_ONLY || '';
+const selected = checks.filter(([name]) => name.includes(only));
 let failed = 0;
-for (const [name, fn] of checks) {
+for (const [name, fn] of selected) {
   const page = await browser.newPage();
   try {
     await fn(page);
@@ -673,5 +691,5 @@ server.close();
 rmSync(PROFILE, { recursive: true, force: true });
 rmSync(TESTDIR, { recursive: true, force: true });
 rmSync(DOWNLOADS, { recursive: true, force: true });
-console.log(checks.length - failed + '/' + checks.length + ' passed');
+console.log(selected.length - failed + '/' + selected.length + ' passed');
 if (failed) process.exit(1);

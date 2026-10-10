@@ -1,6 +1,6 @@
 const NS = 'ext';
 const DATA_NS_PREFIX = 'extdata.';
-const KNOWN_PERMISSIONS = ['storage', 'ai', 'bluetooth', 'usb', 'serial', 'network', 'notifications', 'share', 'camera', 'microphone'];
+const KNOWN_PERMISSIONS = ['storage', 'ai', 'bluetooth', 'usb', 'serial', 'network', 'notifications', 'share', 'camera'];
 const RESERVED_IDS = ['extensions', 'run', 'tools', 'feed', 'search', 'about', 'comms'];
 const WARN_BYTES = 512 * 1024;
 const REJECT_BYTES = 1536 * 1024;

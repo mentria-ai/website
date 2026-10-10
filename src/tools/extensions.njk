@@ -107,7 +107,7 @@ const COPY = {
   galFailed:     {{ ("store.install_failed" | t) | dump | safe }}
 };
 const PERMS = {
-  {%- for p in ["storage", "ai", "bluetooth", "usb", "serial", "network", "notifications", "share", "camera", "microphone"] %}
+  {%- for p in ["storage", "ai", "bluetooth", "usb", "serial", "network", "notifications", "share", "camera"] %}
   {{ p | dump | safe }}: {{ (("store.perm_" + p) | t) | dump | safe }}{% if not loop.last %},{% endif %}
   {%- endfor %}
 };

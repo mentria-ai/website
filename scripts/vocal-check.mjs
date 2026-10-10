@@ -144,6 +144,78 @@ test('detector: quiet singing around -40 dBFS is detected and silence below the 
   assert.equal(track(faint).filter((q) => q.voiced).length, 0, 'below gate');
 });
 
+const ST = await mod('dsp/settings.js');
+const CO = await mod('dsp/corrector.js');
+
+function correct(c, pitchAt, seconds) {
+  const det = { voiced: true, pitch: 0 };
+  const out = [];
+  for (let t = 0; t < seconds; t += 128 / FS) {
+    det.pitch = pitchAt(t);
+    c.update(det, 128);
+    out.push({ t, note: c.note, corr: c.correctionCents, m: S.midi(det.pitch) });
+  }
+  return out;
+}
+
+test('settings: the correction curve hits its anchors and interpolates', () => {
+  const near = (a, b) => Math.abs(a - b) < 1e-9;
+  let k = ST.curve(0.35);
+  assert.ok(near(k.tau, 0.04) && near(k.humanize, 1) && near(k.keep, 40));
+  k = ST.curve(1);
+  assert.ok(near(k.tau, 0) && near(k.humanize, 0) && k.keep === 1000);
+  k = ST.curve(0.5);
+  assert.ok(near(k.tau, 0.0275) && near(k.humanize, 0.7) && near(k.keep, 55));
+  assert.equal(ST.presetOf(0.65), 'tight');
+  assert.equal(ST.presetOf(0.5), null);
+  assert.deepEqual([...ST.scaleMask({ root: 9, mode: 'minor' })], [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]);
+  assert.deepEqual([...ST.scaleMask(null)], new Array(12).fill(1));
+  assert.deepEqual(ST.normalize({ correction: 7, key: { root: 13 } }), { correction: 1, key: null });
+  assert.equal(ST.keyLabel({ root: 9, mode: 'minor' }), 'Am');
+});
+
+test('corrector: hard snaps a note sung 30 cents sharp onto the note', () => {
+  const r = correct(CO.createCorrector(FS, { correction: 1, key: null }), () => S.hz(57.3), 0.5);
+  const last = r[r.length - 1];
+  assert.equal(last.note, 57);
+  assert.ok(Math.abs(last.corr + 30) < 0.01, 'corr ' + last.corr);
+});
+
+test('corrector: vibrato around a sharp centre never flips notes', () => {
+  const r = correct(CO.createCorrector(FS, { correction: 1, key: null }), (t) => S.hz(57.2 + 0.5 * Math.sin(2 * Math.PI * 6 * t)), 1.5).slice(20);
+  let flips = 0;
+  for (let i = 1; i < r.length; i++) if (r[i].note !== r[i - 1].note) flips++;
+  assert.equal(flips, 0);
+});
+
+test('corrector: injected octave errors never move the voice by more than 2 semitones', () => {
+  let i = 0;
+  const r = correct(CO.createCorrector(FS, { correction: 1, key: null }), () => S.hz(57.3 + (++i % 20 === 7 ? 12 : 0)), 2);
+  assert.ok(r.every((q) => Math.abs(q.corr) <= 200), 'max ' + Math.max(...r.map((q) => Math.abs(q.corr))));
+});
+
+test('corrector: unvoiced input releases the correction within about 100 ms', () => {
+  const c = CO.createCorrector(FS, { correction: 1, key: null });
+  correct(c, () => S.hz(57.3), 0.3);
+  const det = { voiced: false, pitch: 0 };
+  let t = 0;
+  while (Math.abs(c.correctionCents) >= 0.5 && t < 0.5) { c.update(det, 128); t += 128 / FS; }
+  assert.ok(t <= 0.11, 'released after ' + t);
+});
+
+test('corrector: a glide in hard mode becomes a staircase of notes', () => {
+  const r = correct(CO.createCorrector(FS, { correction: 1, key: null }), (t) => S.hz(57 + 3 * Math.min(1, t / 0.4)), 0.5);
+  assert.ok(r.every((q) => Math.abs(q.m + q.corr / 100 - Math.round(q.m + q.corr / 100)) < 0.05));
+  assert.deepEqual([...new Set(r.map((q) => q.note))], [57, 58, 59, 60]);
+});
+
+test('corrector: natural keeps a deliberate C sharp in C major, hard pulls it in', () => {
+  const nat = correct(CO.createCorrector(FS, { correction: 0.35, key: { root: 0, mode: 'major' } }), () => S.hz(61), 0.6);
+  assert.ok(Math.abs(nat[nat.length - 1].corr) < 0.5, 'natural ' + nat[nat.length - 1].corr);
+  const hard = correct(CO.createCorrector(FS, { correction: 1, key: { root: 0, mode: 'major' } }), () => S.hz(61), 0.6);
+  assert.ok(Math.abs(Math.abs(hard[hard.length - 1].corr) - 100) < 0.5, 'hard ' + hard[hard.length - 1].corr);
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

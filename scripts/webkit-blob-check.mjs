@@ -5,16 +5,17 @@ import { serve } from './scanner-serve.mjs';
 
 const BUILD = process.argv[2];
 if (!BUILD) {
-  console.error('usage: node scripts/scanner-webkit-check.mjs <build dir>');
+  console.error('usage: node scripts/webkit-blob-check.mjs <build dir>');
   process.exit(2);
 }
-const PAGE = '__scanner-webkit-check.html';
+const PAGE = '__webkit-blob-check.html';
 const sim = (...args) => execFileSync('xcrun', ['simctl', ...args], { encoding: 'utf8' });
 
-const html = `<!doctype html><meta charset="utf-8"><title>scanner webkit check</title>
+const html = `<!doctype html><meta charset="utf-8"><title>webkit blob check</title>
 <script type="module">
 import * as db from '/assets/scanner/db.js';
 import { addPage, newDoc, updatePage } from '/assets/scanner/pages.js';
+import { dbApiFor } from '/assets/js/mentria-extensions.js';
 const lines = [];
 const report = (ok) => fetch('/__report', { method: 'POST', body: JSON.stringify({ ok, ua: navigator.userAgent, lines }) });
 const decodes = async (label, blob) => {
@@ -54,6 +55,26 @@ try {
   }
   try { await updatePage(pages[0], { filter: 'gray' }); lines.push('ok   second edit of page 1'); }
   catch (e) { ok = false; lines.push('FAIL second edit of page 1: ' + e.message); }
+  const ext = dbApiFor('webkit-check');
+  await ext.clear();
+  for (let k = 0; k < 8; k++) {
+    const bmp = await photo(200 + k);
+    const c = new OffscreenCanvas(bmp.width, bmp.height);
+    c.getContext('2d').drawImage(bmp, 0, 0);
+    bmp.close();
+    await ext.set('item' + k, { name: 'item ' + k, photo: await c.convertToBlob({ type: 'image/jpeg', quality: 0.92 }) });
+  }
+  const held = await ext.get('item0');
+  held.name = 'renamed';
+  await ext.set('item0', held);
+  ok = (await decodes('extension db: photo after a rename, held copy', held.photo)) && ok;
+  ok = (await decodes('extension db: photo read again', (await ext.get('item0')).photo)) && ok;
+  await ext.set('meta', { list: [1, 2, 3], tags: new Set(['a']), file: new File(['hello'], 'note.txt', { type: 'text/plain' }) });
+  const meta = await ext.get('meta');
+  const kept = meta && meta.list.length === 3 && meta.tags.has('a') && meta.file.name === 'note.txt' && (await meta.file.text()) === 'hello';
+  lines.push((kept ? 'ok   ' : 'FAIL ') + 'extension db: plain data, sets and file names survive');
+  ok = kept && ok;
+  await ext.clear();
   await report(ok);
 } catch (e) {
   lines.push('ERROR ' + e.message);

@@ -5925,7 +5925,9 @@
     "build_body": "Uma extensão é um único arquivo HTML. O SDK explica o formato e o que uma extensão pode usar.",
     "manage_link": "Gerenciar extensões instaladas",
     "perm_camera": "Câmera",
-    "perm_camera_desc": "Pode usar a câmera depois que você permitir."
+    "perm_camera_desc": "Pode usar a câmera depois que você permitir.",
+    "perm_microphone": "Microfone",
+    "perm_microphone_desc": "Pode usar seu microfone depois que você permitir."
   },
   "image_use": {
     "title": "Uso das imagens do Mentria",

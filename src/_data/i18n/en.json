@@ -5925,7 +5925,9 @@
     "build_body": "An extension is one HTML file. The SDK explains the format and what an extension can use.",
     "manage_link": "Manage installed extensions",
     "perm_camera": "Camera",
-    "perm_camera_desc": "Can use your camera once you allow it."
+    "perm_camera_desc": "Can use your camera once you allow it.",
+    "perm_microphone": "Microphone",
+    "perm_microphone_desc": "Can use your microphone once you allow it."
   },
   "image_use": {
     "title": "Using Mentria's images",

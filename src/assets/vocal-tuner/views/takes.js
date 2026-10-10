@@ -1,5 +1,6 @@
 import { h, t, icon, confirmSheet, promptSheet, fmtDate, fmtDuration, fmtBytes, takeLabel, host } from '../ui.js';
 import * as db from '../db.js';
+import { primeAudio } from '../audio.js';
 
 export function mount(root, ctx) {
   let alive = true;
@@ -10,7 +11,7 @@ export function mount(root, ctx) {
     h('h2', { class: 'vt-empty__title' }, t('takes.empty_title')),
     h('p', { class: 'vt-empty__body' }, t('takes.empty_body')));
   const closeBtn = h('button', { class: 'vt-icon-btn', type: 'button', 'aria-label': t('app.close'), onclick: () => { if (host) host.close(); else history.back(); } }, icon('close'));
-  const singBtn = h('button', { class: 'vt-btn vt-btn--primary vt-btn--lg', type: 'button', onclick: () => ctx.go('live') }, icon('mic'), t('takes.sing'));
+  const singBtn = h('button', { class: 'vt-btn vt-btn--primary vt-btn--lg', type: 'button', onclick: () => { primeAudio(); ctx.go('live'); } }, icon('mic'), t('takes.sing'));
   root.append(h('section', { class: 'vt-takes' },
     h('header', { class: 'vt-top' }, closeBtn, h('h1', { class: 'vt-top__title' }, t('takes.title'))),
     h('div', { class: 'vt-takes__body' }, h('div', { class: 'vt-takes__actions' }, singBtn), empty, list, storage)));

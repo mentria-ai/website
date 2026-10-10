@@ -3,7 +3,8 @@ import { setCopy, setFull, host } from './ui.js';
 setCopy(window.VT_COPY || {});
 const root = document.getElementById('vt');
 const ROUTES = {
-  takes: () => import('./views/takes.js')
+  takes: () => import('./views/takes.js'),
+  live: () => import('./views/live.js')
 };
 let unmount = null;
 let token = 0;

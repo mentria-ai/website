@@ -84,6 +84,47 @@ function notesOfWav(b64) {
   return analyzePitch(samples, sampleRate).filter((q) => q.f > 0 && q.clarity > 0.9).map((q) => midi(q.f));
 }
 
+async function captureNode(page) {
+  await page.evaluateOnNewDocument(() => {
+    const Native = window.AudioWorkletNode;
+    window.__vtPosted = [];
+    window.AudioWorkletNode = class extends Native {
+      constructor(...args) {
+        super(...args);
+        window.__vtNode = this;
+        const post = this.port.postMessage.bind(this.port);
+        this.port.postMessage = (msg, transfer) => {
+          window.__vtPosted.push(msg && msg.type);
+          return post(msg, transfer);
+        };
+      }
+    };
+  });
+}
+
+async function openLive(page, mode = 0) {
+  await page.waitForSelector('.vt-takes__actions .vt-btn--primary');
+  await page.click('.vt-takes__actions .vt-btn--primary');
+  await page.waitForSelector('.vt-sheet .vt-option');
+  await page.click('.vt-sheet .vt-option:nth-of-type(' + (mode + 1) + ')');
+  await page.waitForFunction(() => document.body.dataset.vtState === 'live', { timeout: 20000 });
+}
+
+async function freshApp(page) {
+  await page.goto(ORIGIN + '/extensions/vocal-tuner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.vt-takes');
+  await clearData(page);
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('.vt-takes');
+}
+
+async function takeCount(page, n, timeout = 15000) {
+  await page.waitForFunction(async (n) => {
+    const db = await import('/assets/vocal-tuner/db.js');
+    return (await db.listTakes()).length === n;
+  }, { timeout, polling: 300 }, n);
+}
+
 const A_MINOR = [9, 11, 0, 2, 4, 5, 7];
 const E_MAJOR = [4, 6, 8, 9, 11, 1, 3];
 function onScale(notes, scale, cents) {
@@ -183,6 +224,158 @@ check('runtime: the tuned recording of a flat A-minor melody lands on A-minor no
   if (onScale(tuned, A_MINOR, 10) < tuned.length * 0.9) throw new Error('tuned on scale ' + onScale(tuned, A_MINOR, 10) + '/' + tuned.length);
   if (onScale(dry, A_MINOR, 10) > dry.length * 0.2) throw new Error('the dry take should stay 30 cents flat');
   await page.evaluate(() => window.__audio.stop());
+});
+
+check('live: sing in A minor with the hard style, record, and the take is kept', async (page) => {
+  await stubMic(page);
+  await freshApp(page);
+  await openLive(page, 0);
+  await page.waitForFunction(() => { const n = document.querySelector('.vt-note__name'); return n && n.textContent !== '–'; }, { timeout: 10000 });
+  await page.click('.vt-keychip');
+  await page.waitForSelector('.vt-sheet .vt-keys button');
+  await page.click('.vt-sheet .vt-keys button:nth-child(10)');
+  await page.click('.vt-sheet .vt-seg button:nth-child(2)');
+  await page.click('.vt-sheet .vt-sheet__actions .vt-btn--primary');
+  await page.waitForFunction(() => !document.querySelector('.vt-sheet'));
+  await page.click('.vt-live .vt-seg button:nth-child(3)');
+  const hint = await page.$eval('.vt-hint', (e) => e.hidden);
+  if (!hint) throw new Error('the hard-style hint shows although a key is set');
+  await page.click('.vt-rec');
+  await new Promise((r) => setTimeout(r, 5000));
+  await page.click('.vt-rec');
+  await takeCount(page, 1);
+  const take = await page.evaluate(async () => {
+    const db = await import('/assets/vocal-tuner/db.js');
+    const [tk] = await db.listTakes();
+    return { duration: tk.duration, settings: tk.settings, tuned: !!(await db.getAudio(tk.id, 'tuned')), dry: !!(await db.getAudio(tk.id, 'dry')) };
+  });
+  if (take.duration < 4.5 || take.duration > 6 || take.settings.correction !== 1 || !take.settings.key || take.settings.key.root !== 9 || take.settings.key.mode !== 'minor' || !take.tuned || !take.dry) throw new Error(JSON.stringify(take));
+  await page.click('.vt-live .vt-top .vt-icon-btn');
+  await page.waitForSelector('.vt-item');
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('.vt-item');
+  const row = await page.$eval('.vt-item', (e) => e.textContent);
+  if (!row.includes('Hard') || !row.includes('A minor') || !row.includes('0:05')) throw new Error(row);
+  await clearData(page);
+});
+
+check('live: find my key hears an A minor melody', async (page) => {
+  await stubMic(page);
+  await freshApp(page);
+  await openLive(page, 0);
+  await page.click('.vt-keychip');
+  await page.waitForSelector('.vt-sheet .vt-find-btn');
+  await page.click('.vt-sheet .vt-find-btn');
+  await page.waitForSelector('.vt-sheet .vt-find__result', { timeout: 30000 });
+  const text = await page.$eval('.vt-sheet .vt-find__result', (e) => e.textContent);
+  if (!/A minor|C major/.test(text)) throw new Error('result ' + text);
+  await page.click('.vt-sheet .vt-find-use');
+  await page.waitForFunction(() => !document.querySelector('.vt-sheet'));
+  const chip = await page.$eval('.vt-keychip', (e) => e.textContent);
+  if (!/A minor|C major/.test(chip)) throw new Error('chip ' + chip);
+});
+
+check('live: a denied microphone shows the allow screen with try again', async (page) => {
+  await stubMic(page);
+  await page.evaluateOnNewDocument(() => { window.__vtMic.fail = 'NotAllowedError'; });
+  await page.goto(ORIGIN + '/extensions/vocal-tuner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.vt-takes');
+  await page.evaluate(() => localStorage.setItem('mentria.vocaltuner.listen', JSON.stringify({ mode: 'wired', db: { wired: -6, speaker: -18 } })));
+  await page.click('.vt-takes__actions .vt-btn--primary');
+  await page.waitForFunction(() => document.body.dataset.vtState === 'error', { timeout: 10000 });
+  const msg = await page.$eval('.vt-error__msg', (e) => e.textContent);
+  if (!msg.toLowerCase().includes('microphone')) throw new Error(msg);
+  if (!(await page.$('.vt-error .vt-btn--primary'))) throw new Error('no try again');
+});
+
+async function errorScreen(page, setup) {
+  await stubMic(page);
+  await page.evaluateOnNewDocument(setup);
+  await page.goto(ORIGIN + '/extensions/vocal-tuner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.vt-takes');
+  await page.evaluate(() => localStorage.setItem('mentria.vocaltuner.listen', JSON.stringify({ mode: 'wired', db: { wired: -6, speaker: -18 } })));
+  await page.click('.vt-takes__actions .vt-btn--primary');
+  await page.waitForFunction(() => document.body.dataset.vtState === 'error', { timeout: 10000 });
+  return page.evaluate(() => ({ msg: document.querySelector('.vt-error__msg').textContent, retry: !!document.querySelector('.vt-error .vt-btn--primary') }));
+}
+
+check('live: no microphone gets its own screen with try again', async (page) => {
+  const r = await errorScreen(page, () => { window.__vtMic.fail = 'NotFoundError'; });
+  if (r.msg !== 'No microphone found.' || !r.retry) throw new Error(JSON.stringify(r));
+});
+
+check('live: a browser without AudioWorklet gets the unsupported screen and no retry', async (page) => {
+  const r = await errorScreen(page, () => { delete window.AudioWorkletNode; });
+  if (!r.msg.includes('live audio processing') || r.retry) throw new Error(JSON.stringify(r));
+});
+
+check('live: an audio context that cannot start asks for a tap, and the tap starts it', async (page) => {
+  await stubMic(page);
+  await page.evaluateOnNewDocument(() => {
+    const Native = window.AudioContext;
+    window.__vtBlockStart = true;
+    window.AudioContext = class extends Native {
+      constructor(...args) {
+        super(...args);
+        if (window.__vtBlockStart) {
+          this.suspend();
+          this.resume = () => new Promise(() => {});
+        }
+      }
+    };
+  });
+  await page.goto(ORIGIN + '/extensions/vocal-tuner/app/', { waitUntil: 'load' });
+  await page.waitForSelector('.vt-takes');
+  await page.evaluate(() => localStorage.setItem('mentria.vocaltuner.listen', JSON.stringify({ mode: 'wired', db: { wired: -6, speaker: -18 } })));
+  await page.click('.vt-takes__actions .vt-btn--primary');
+  await page.waitForFunction(() => document.body.dataset.vtState === 'resume', { timeout: 15000 });
+  await page.evaluate(() => { window.__vtBlockStart = false; });
+  await page.click('.vt-resume-btn');
+  await page.waitForFunction(() => document.body.dataset.vtState === 'live', { timeout: 15000 });
+});
+
+check('live: recording stops by itself at the 5-minute cap and saves exactly 5:00', async (page) => {
+  await stubMic(page);
+  await captureNode(page);
+  await freshApp(page);
+  await openLive(page, 0);
+  await page.click('.vt-rec');
+  await page.evaluate(() => {
+    const port = window.__vtNode.port;
+    for (let i = 0; i < 2400 && document.querySelector('.vt-rec').getAttribute('aria-pressed') === 'true'; i++) {
+      port.onmessage({ data: { type: 'chunk', dry: new Int16Array(8192), tuned: new Int16Array(8192), last: false } });
+    }
+  });
+  const stopped = await page.$eval('.vt-rec', (e) => e.getAttribute('aria-pressed'));
+  if (stopped !== 'false') throw new Error('recording did not stop at the cap');
+  await takeCount(page, 1, 60000);
+  const r = await page.evaluate(async () => {
+    const db = await import('/assets/vocal-tuner/db.js');
+    const [tk] = await db.listTakes();
+    return { duration: tk.duration, rate: tk.sampleRate, dry: (await db.getAudio(tk.id, 'dry')).size, tuned: (await db.getAudio(tk.id, 'tuned')).size };
+  });
+  if (r.duration !== 300 || r.dry !== 44 + 300 * r.rate * 2 || r.tuned !== r.dry) throw new Error(JSON.stringify(r));
+  await clearData(page);
+});
+
+check('live: speaker mode starts quiet and capped, and feedback mutes it until the chip is used', async (page) => {
+  await stubMic(page);
+  await captureNode(page);
+  await freshApp(page);
+  await openLive(page, 1);
+  const slider = await page.$eval('.vt-monitor', (e) => ({ value: e.value, max: e.max }));
+  if (slider.value !== '-18' || slider.max !== '-6') throw new Error(JSON.stringify(slider));
+  await page.evaluate(() => window.__vtNode.port.onmessage({ data: { type: 'howl' } }));
+  const msg = await page.$eval('.vt-msg', (e) => e.textContent);
+  if (!msg.includes('Feedback')) throw new Error('message ' + msg);
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('mentria.vocaltuner.listen')).db.speaker);
+  if (stored !== -24) throw new Error('speaker volume ' + stored);
+  await page.click('.vt-listen');
+  await page.waitForSelector('.vt-sheet .vt-option');
+  await page.click('.vt-sheet .vt-option:nth-of-type(2)');
+  await page.waitForFunction(() => !document.querySelector('.vt-sheet'));
+  const after = await page.evaluate(() => ({ msg: document.querySelector('.vt-msg').textContent, reset: window.__vtPosted.includes('howl-reset') }));
+  if (after.msg.includes('Feedback') || !after.reset) throw new Error(JSON.stringify(after));
 });
 
 let failed = 0;

@@ -5709,7 +5709,8 @@
           "high": "Délai : élevé ({ms} ms)",
           "high_tip": "Si l’écho gêne, choisissez le mode Bluetooth pour enregistrer maintenant et écouter juste après."
         },
-        "starting": "Démarrage du micro…"
+        "starting": "Démarrage du micro…",
+        "listen_take": "Écouter"
       },
       "listen": {
         "title": "Comment écoutez-vous ?",

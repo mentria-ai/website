@@ -16,7 +16,7 @@ export function mount(root, ctx, params) {
   let take = null, pending = null, job = null, failed = '';
   let blobs = { dry: null, tuned: null };
   let buffers = { dry: null, tuned: null };
-  let ac = null, gains = null, sources = [], which = 'tuned', playing = false, offset = 0, startedAt = 0, raf = 0, playbackSession = false;
+  let ac = params.playCtx || null, gains = null, sources = [], which = 'tuned', playing = false, offset = 0, startedAt = 0, raf = 0, playbackSession = false;
 
   const back = h('button', { class: 'vt-icon-btn', type: 'button', 'aria-label': t('take.back'), onclick: () => ctx.go('takes') }, icon('back'));
   const nameBtn = h('button', { class: 'vt-take__name', type: 'button', onclick: () => rename() });
@@ -172,9 +172,11 @@ export function mount(root, ctx, params) {
     if (!buffers.tuned || !buffers.dry) return;
     try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {}
     playbackSession = true;
-    if (!ac) {
-      const C = window.AudioContext || window.webkitAudioContext;
-      ac = new C();
+    if (!gains) {
+      if (!ac) {
+        const C = window.AudioContext || window.webkitAudioContext;
+        ac = new C();
+      }
       gains = { tuned: ac.createGain(), dry: ac.createGain() };
       gains.tuned.connect(ac.destination);
       gains.dry.connect(ac.destination);
@@ -206,7 +208,7 @@ export function mount(root, ctx, params) {
   function choose(k) {
     which = k;
     [...ab.children].forEach((b, i) => b.setAttribute('aria-pressed', String((i === 0 ? 'tuned' : 'dry') === k)));
-    if (!ac) return;
+    if (!ac || !gains) return;
     const now = ac.currentTime;
     for (const name of ['tuned', 'dry']) {
       const g = gains[name].gain;
@@ -299,6 +301,7 @@ export function mount(root, ctx, params) {
       playBtn.disabled = scrub.disabled = false;
       scrub.max = String(duration());
       paintTime();
+      if (params.autoplay) play();
     } catch (_) {
       failed = t('take.render_failed');
       paintApply();

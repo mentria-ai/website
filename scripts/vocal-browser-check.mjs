@@ -713,6 +713,23 @@ check('take: playback switches the audio session to playback and back', async (p
   await clearData(page);
 });
 
+check('live: after a take is saved, Listen plays it on the take screen', async (page) => {
+  await stubMic(page);
+  await freshApp(page);
+  await openLive(page, 2);
+  await page.click('.vt-rec');
+  await new Promise((r) => setTimeout(r, 2000));
+  await page.click('.vt-rec');
+  await page.waitForSelector('.vt-listen-take:not([hidden])', { timeout: 15000 });
+  await page.click('.vt-listen-take');
+  await page.waitForSelector('.vt-take');
+  await page.waitForFunction(() => {
+    const b = document.querySelector('.vt-player__play');
+    return !!b && b.getAttribute('aria-label') === 'Pause';
+  }, { timeout: 15000 });
+  await clearData(page);
+});
+
 const only = process.env.VT_ONLY || '';
 const selected = checks.filter(([name]) => name.includes(only));
 let failed = 0;

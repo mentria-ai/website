@@ -57,6 +57,8 @@ export function mount(root, ctx) {
   const recBtn = h('button', { class: 'vt-rec', type: 'button', 'aria-pressed': 'false', 'aria-label': t('live.record'), disabled: true, onclick: () => (recording ? stopRecording() : startRecording()) });
   const recTime = h('span', { class: 'vt-rec__time' }, '0:00');
   const recLeft = h('span', { class: 'vt-rec__left', hidden: true });
+  const listenBtn = h('button', { class: 'vt-btn vt-listen-take', type: 'button', hidden: true, onclick: () => listenTake() }, icon('play'), t('live.listen_take'));
+  let lastTakeId = null;
   const closeBtn = h('button', { class: 'vt-icon-btn', type: 'button', 'aria-label': t('app.close'), onclick: () => leave() }, icon('close'));
   const resetBtn = h('button', { class: 'vt-icon-btn vt-reset', type: 'button', 'aria-label': t('live.reset_audio'), title: t('live.reset_audio'), onclick: () => resetAudio() }, icon('reset'));
   const stage = h('div', { class: 'vt-live__stage' }, h('div', { class: 'vt-note', 'aria-hidden': 'true' }, noteName, noteOct), needle, trailCanvas, msg);
@@ -66,7 +68,7 @@ export function mount(root, ctx) {
     h('label', { class: 'vt-slider' }, h('span', {}, t('live.correction')), slider, h('span', {}, '')),
     h('div', { class: 'vt-row' }, keyChip, bypass, meter),
     h('label', { class: 'vt-slider' }, h('span', {}, t('live.monitor')), monitor, h('span', {}, '')));
-  const recbar = h('div', { class: 'vt-recbar' }, recBtn, recTime, recLeft);
+  const recbar = h('div', { class: 'vt-recbar' }, recBtn, recTime, recLeft, listenBtn);
   const errorPanel = h('div', { class: 'vt-error', hidden: true });
   const section = h('section', { class: 'vt-live' },
     h('header', { class: 'vt-top' }, closeBtn, h('h1', { class: 'vt-top__title' }, t('app.name')), listenChip, badge, resetBtn),
@@ -419,6 +421,7 @@ export function mount(root, ctx) {
     if (!audio || audio.state !== 'running' || recording || pendingSave) return;
     rec = createRecorder(audio.sampleRate, MAX_SECONDS);
     recording = true;
+    listenBtn.hidden = true;
     recBtn.setAttribute('aria-pressed', 'true');
     recBtn.setAttribute('aria-label', t('live.stop'));
     recTime.textContent = '0:00';
@@ -479,9 +482,28 @@ export function mount(root, ctx) {
     try {
       await db.saveTake(take, { dry: out.dry, tuned: out.tuned });
       toast(t('live.saved'));
+      offerListen(take);
     } catch (e) {
       if (alive) holdUnsaved(take, out, saveError(e));
     }
+  }
+
+  function offerListen(take) {
+    lastTakeId = take.id;
+    if (alive && !recording) listenBtn.hidden = false;
+  }
+
+  function listenTake() {
+    if (!lastTakeId) return;
+    let playCtx = null;
+    try {
+      const C = window.AudioContext || window.webkitAudioContext;
+      playCtx = new C();
+      playCtx.resume().catch(() => {});
+    } catch (_) {
+      playCtx = null;
+    }
+    ctx.go('take', { takeId: lastTakeId, autoplay: true, playCtx });
   }
 
   function saveError(e) {
@@ -505,6 +527,7 @@ export function mount(root, ctx) {
         await db.saveTake(take, { dry: out.dry, tuned: out.tuned });
         o.close();
         toast(t('live.saved'));
+        offerListen(take);
       } catch (e) {
         note.textContent = saveError(e);
       }

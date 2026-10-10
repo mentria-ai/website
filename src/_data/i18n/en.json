@@ -5709,7 +5709,8 @@
           "high": "Delay: high ({ms} ms)",
           "high_tip": "If the echo is distracting, choose Bluetooth mode to record now and listen right after."
         },
-        "starting": "Starting the microphone…"
+        "starting": "Starting the microphone…",
+        "listen_take": "Listen"
       },
       "listen": {
         "title": "How are you listening?",

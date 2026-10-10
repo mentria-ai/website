@@ -5709,7 +5709,8 @@
           "high": "Atraso: alto ({ms} ms)",
           "high_tip": "Se o eco atrapalhar, escolha o modo Bluetooth para gravar agora e ouvir logo depois."
         },
-        "starting": "Iniciando o microfone…"
+        "starting": "Iniciando o microfone…",
+        "listen_take": "Ouvir"
       },
       "listen": {
         "title": "Como você vai ouvir?",

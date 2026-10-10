@@ -28,8 +28,6 @@ jobs:
         run: node scripts/finance-check.mjs
       - name: Check Document Scanner geometry, detection and export logic
         run: node scripts/scanner-check.mjs
-      - name: Check Vocal Tuner pitch detection, correction and recording logic
-        run: node --no-warnings scripts/vocal-check.mjs
       - name: Check learning pack review, text and validation logic
         run: node scripts/packs-logic-check.mjs
       - name: Check the bundled learning packs

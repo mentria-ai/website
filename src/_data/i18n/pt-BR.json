@@ -1920,8 +1920,7 @@
         "fpv-drone": "Pilote um drone de corrida por portais luminosos sobre colinas, um pátio de contêineres e um cânion no deserto. Voo acrobático ou autonivelado, medalhas, corridas contra fantasmas e um mapa de voo livre. Funciona com toque, controle ou teclado.",
         "nitro-racer": "Corrida de rua arcade contra cinco rivais: drifte para encher o nitro, salte nas rampas e conquiste medalhas num circuito urbano neon, numa rodovia litorânea e num cânion no deserto. Funciona com toque, inclinação, controle ou teclado.",
         "finance": "Acompanhe gastos, orçamentos, contas a pagar, investimentos e impostos, com previsões. Tudo criptografado no seu dispositivo e sincronizado só entre os seus próprios dispositivos.",
-        "scanner": "Digitalize páginas com a câmera. As bordas são encontradas automaticamente, as páginas são endireitadas e limpas, e você pode exportar um PDF ou imagens. Suas digitalizações continuam privadas.",
-        "vocal-tuner": "Cante e ouça sua voz afinada ao vivo. Grave, mude o tom ou o estilo depois e exporte um WAV."
+        "scanner": "Digitalize páginas com a câmera. As bordas são encontradas automaticamente, as páginas são endireitadas e limpas, e você pode exportar um PDF ou imagens. Suas digitalizações continuam privadas."
       },
       "cmd": {
         "finance": {
@@ -1938,9 +1937,6 @@
         },
         "scanner": {
           "scan": "digitalizar um documento"
-        },
-        "vocal-tuner": {
-          "sing": "começar a cantar com afinação ao vivo"
         }
       },
       "perm": {
@@ -1949,9 +1945,6 @@
         },
         "scanner": {
           "camera": "Só enquanto a tela de digitalização está aberta. As fotos são processadas neste dispositivo."
-        },
-        "vocal-tuner": {
-          "microphone": "Só enquanto a tela ao vivo está aberta. Sua voz é processada neste dispositivo."
         }
       }
     },
@@ -5658,128 +5651,6 @@
         "captured": "Página {n} capturada",
         "page": "Página {n}"
       }
-    },
-    "vocal_tuner": {
-      "app": {
-        "name": "Vocal Tuner",
-        "close": "Fechar"
-      },
-      "takes": {
-        "title": "Gravações",
-        "sing": "Cantar",
-        "empty_title": "Nenhuma gravação ainda",
-        "empty_body": "Cante e ouça sua voz afinada ao vivo. As gravações ficam salvas aqui.",
-        "more": "Mais opções para {name}",
-        "rename": "Renomear",
-        "rename_label": "Nome da gravação",
-        "save": "Salvar",
-        "cancel": "Cancelar",
-        "export": "Exportar",
-        "delete": "Excluir",
-        "delete_confirm": "Excluir “{name}”? Isso não pode ser desfeito.",
-        "default_name": "Gravação {date}",
-        "storage": "Armazenamento usado: {used} de {quota}"
-      },
-      "live": {
-        "listening": "Ouvindo: {mode}",
-        "bypass": "Segure para o original",
-        "record": "Gravar",
-        "stop": "Parar",
-        "remaining": "Faltam {time}",
-        "saved": "Gravação salva",
-        "too_loud": "Alto demais — afaste-se ou cante mais baixo",
-        "hard_hint": "Escolha um tom para o som duro clássico",
-        "monitor": "Volume de retorno",
-        "reset_audio": "Reiniciar áudio",
-        "resume": "Toque para continuar",
-        "dead_hint": "Nenhum som saindo? Tente Reiniciar áudio.",
-        "feedback": "Microfonia — use fones ou abaixe o volume",
-        "style": "Estilo",
-        "correction": "Correção",
-        "presets": {
-          "natural": "Natural",
-          "tight": "Firme",
-          "hard": "Duro"
-        },
-        "key": "Tom",
-        "any_key": "Qualquer tom",
-        "latency": {
-          "good": "Atraso: baixo ({ms} ms)",
-          "ok": "Atraso: perceptível ({ms} ms)",
-          "high": "Atraso: alto ({ms} ms)",
-          "high_tip": "Se o eco atrapalhar, escolha o modo Bluetooth para gravar agora e ouvir logo depois."
-        },
-        "starting": "Iniciando o microfone…",
-        "listen_take": "Ouvir"
-      },
-      "listen": {
-        "title": "Como você vai ouvir?",
-        "wired": "Fones com fio",
-        "wired_desc": "O melhor para se ouvir ao vivo.",
-        "speaker": "Alto-falante do celular ou computador",
-        "speaker_desc": "O som ao vivo começa baixo. Aumente devagar — alto-falantes podem causar microfonia.",
-        "bluetooth": "Fones ou caixa Bluetooth",
-        "bluetooth_desc": "O Bluetooth atrasa demais o som para ouvir ao vivo. Grave e ouça afinado logo depois.",
-        "echo_on": "Este navegador manteve o cancelamento de eco ligado, o que pode suavizar o som.",
-        "short": {
-          "wired": "Fones",
-          "speaker": "Alto-falante",
-          "bluetooth": "Bluetooth"
-        }
-      },
-      "key": {
-        "title": "Tom",
-        "major": "Maior",
-        "minor": "Menor",
-        "any": "Qualquer tom",
-        "find": "Descobrir meu tom",
-        "find_body": "Cante ou cantarole por uns 15 segundos.",
-        "best": "Melhor resultado: {key}",
-        "or": "ou {key}",
-        "strong": "Resultado claro",
-        "likely": "Resultado provável",
-        "none": "Ainda sem um tom claro — cante uma frase mais longa",
-        "use": "Usar este tom",
-        "retry": "Tentar de novo",
-        "major_name": "{note} maior",
-        "minor_name": "{note} menor"
-      },
-      "take": {
-        "tuned": "Afinada",
-        "original": "Original",
-        "play": "Tocar",
-        "pause": "Pausar",
-        "apply": "Aplicar",
-        "revert": "Desfazer",
-        "rendering": "Afinando… {pct}%",
-        "render_failed": "Não foi possível afinar de novo esta gravação.",
-        "retry": "Tentar de novo",
-        "export_title": "Exportar",
-        "export_tuned": "WAV afinado",
-        "export_original": "WAV original",
-        "shared": "Compartilhado",
-        "downloaded": "{name} salvo",
-        "position": "Posição de reprodução",
-        "back": "Voltar às gravações"
-      },
-      "errors": {
-        "denied": "Permita o microfone para cantar.",
-        "denied_ios": "No iPhone: Ajustes › Safari › Microfone.",
-        "no_mic": "Nenhum microfone encontrado.",
-        "insecure": "Abra a página segura (https) para usar o microfone.",
-        "unsupported": "Este navegador não consegue processar áudio ao vivo.",
-        "failed": "Não foi possível iniciar o microfone.",
-        "storage_full": "O armazenamento está cheio — exporte e exclua gravações antigas.",
-        "save_failed": "Não foi possível salvar esta gravação.",
-        "no_js": "O Vocal Tuner precisa de JavaScript.",
-        "retry": "Tentar de novo"
-      },
-      "a11y": {
-        "note": "Nota atual {note}",
-        "meter": "Nível de entrada",
-        "trail": "Trilha da afinação",
-        "needle": "Medidor de correção"
-      }
     }
   },
   "category": {
@@ -6054,9 +5925,7 @@
     "build_body": "Uma extensão é um único arquivo HTML. O SDK explica o formato e o que uma extensão pode usar.",
     "manage_link": "Gerenciar extensões instaladas",
     "perm_camera": "Câmera",
-    "perm_camera_desc": "Pode usar a câmera depois que você permitir.",
-    "perm_microphone": "Microfone",
-    "perm_microphone_desc": "Pode usar seu microfone depois que você permitir."
+    "perm_camera_desc": "Pode usar a câmera depois que você permitir."
   },
   "image_use": {
     "title": "Uso das imagens do Mentria",

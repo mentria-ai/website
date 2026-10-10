@@ -31,7 +31,7 @@ const browser = await puppeteer.launch({
   headless: true,
   userDataDir: PROFILE,
   protocolTimeout: 600000,
-  args: ['--autoplay-policy=no-user-gesture-required', '--enable-gpu', '--ignore-gpu-blocklist']
+  args: ['--autoplay-policy=no-user-gesture-required', '--enable-gpu', '--ignore-gpu-blocklist', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']
 });
 
 const checks = [];
@@ -619,6 +619,41 @@ check('watchdog: when the audio stops reporting it hints at Reset audio and ligh
   await page.waitForFunction(() => document.body.dataset.vtState === 'live' && !document.querySelector('.vt-msg').textContent.includes('Reset audio'), { timeout: 15000 });
   const calls = await page.evaluate(() => window.__vtMic.calls);
   if (calls !== 2) throw new Error('microphone requests ' + calls);
+});
+
+check('host: the store page runs the tuner full screen on a phone and every control is reachable', async (page) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.setViewport({ width: 390, height: 844 });
+  await page.goto(ORIGIN + '/extensions/vocal-tuner/', { waitUntil: 'load' });
+  await page.waitForSelector('#xr-frame');
+  await page.evaluate(() => {
+    document.documentElement.classList.add('is-standalone');
+    const u = document.getElementById('m-update');
+    if (u) u.hidden = false;
+  });
+  const frame = await (await page.$('#xr-frame')).contentFrame();
+  const reachable = async (sel) => {
+    const pts = await frame.$eval(sel, (el) => { const b = el.getBoundingClientRect(); return [0.25, 0.5, 0.75].map((k) => [b.left + b.width / 2, b.top + b.height * k]); });
+    return page.evaluate((pts) => {
+      const f = document.getElementById('xr-frame');
+      const r = f.getBoundingClientRect(), cs = getComputedStyle(f);
+      return pts.every(([x, y]) => document.elementFromPoint(r.left + f.clientLeft + parseFloat(cs.paddingLeft) + x, r.top + f.clientTop + parseFloat(cs.paddingTop) + y) === f);
+    }, pts);
+  };
+  await frame.waitForSelector('.vt-takes__actions .vt-btn--primary', { timeout: 20000 });
+  await frame.evaluate(() => localStorage.setItem('mentria.vocaltuner.listen', JSON.stringify({ mode: 'wired', db: { wired: -6, speaker: -18 } })));
+  await frame.click('.vt-takes__actions .vt-btn--primary');
+  await page.waitForFunction(() => document.getElementById('xr-frame').classList.contains('xr__frame--full'), { timeout: 10000 });
+  await frame.waitForFunction(() => document.body.dataset.vtState === 'live', { timeout: 20000 });
+  for (const sel of ['.vt-rec', '.vt-live .vt-top .vt-icon-btn', '.vt-reset', '.vt-keychip', '.vt-monitor', '.vt-live .vt-seg button:nth-child(3)']) {
+    if (!(await reachable(sel))) throw new Error(sel + ' is covered by the page around the frame');
+  }
+  await frame.click('.vt-live .vt-top .vt-icon-btn');
+  await frame.waitForSelector('.vt-takes');
+  const full = await page.evaluate(() => document.getElementById('xr-frame').classList.contains('xr__frame--full') || document.documentElement.classList.contains('ext-full'));
+  if (full) throw new Error('the frame stayed full screen after leaving the live screen');
+  if (errors.length) throw new Error(errors.join(' | '));
 });
 
 let failed = 0;

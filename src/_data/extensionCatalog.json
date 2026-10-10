@@ -5,6 +5,7 @@
   { "id": "story-studio", "schemaCategory": "MultimediaApplication" },
   { "id": "meal-planner", "schemaCategory": "LifestyleApplication" },
   { "id": "scanner", "schemaCategory": "UtilitiesApplication", "app": "/extensions/scanner/app/" },
+  { "id": "vocal-tuner", "schemaCategory": "MultimediaApplication", "app": "/extensions/vocal-tuner/app/" },
   { "id": "fpv-drone", "schemaCategory": "GameApplication", "app": "/extensions/fpv-drone/app/" },
   { "id": "nitro-racer", "schemaCategory": "GameApplication", "app": "/extensions/nitro-racer/app/" },
   { "id": "finance", "schemaCategory": "FinanceApplication", "app": "/extensions/finance/app/" },

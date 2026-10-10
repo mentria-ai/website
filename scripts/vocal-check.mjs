@@ -401,9 +401,16 @@ test('howl: a rising pure tone trips the guard; singing and quiet monitors never
   const at = run(make(true, -12), rising, 2);
   assert.ok(at >= 0.25 && at <= 0.4, 'tripped at ' + at);
   assert.equal(run(make(true, -12), (t) => ({ voiced: true, clarity: 0.97, pitch: 220 * Math.pow(2, (40 / 1200) * Math.sin(2 * Math.PI * 5 * t)), level: -20 }), 5), -1);
-  assert.equal(run(make(true, -12), () => ({ voiced: true, clarity: 0.99, pitch: 440, level: -20 }), 5), -1);
+  const held = (t) => ({ voiced: true, clarity: 0.97, pitch: 440 * Math.pow(2, (8 * Math.sin(2 * Math.PI * 0.7 * t) + 3 * Math.sin(2 * Math.PI * 3.1 * t)) / 1200), level: -20 });
+  assert.equal(run(make(true, -12), held, 10), -1);
   assert.equal(run(make(true, -36), rising, 2), -1);
   assert.equal(run(make(false, -6), rising, 2), -1);
+  const saturated = () => ({ voiced: true, clarity: 0.99, pitch: 1000, level: -6 });
+  const sat = run(make(true, -12), saturated, 5);
+  assert.ok(sat >= 1.9 && sat <= 2.3, 'saturated feedback tripped at ' + sat);
+  const slow = run(make(true, -12), (t) => ({ voiced: true, clarity: 0.99, pitch: 1000, level: Math.min(-6, -50 + 3 * t) }), 12);
+  assert.ok(slow > 0 && slow <= 6, 'slow feedback tripped at ' + slow);
+  assert.equal(run(make(true, -36), saturated, 5), -1);
 });
 
 test('wav: encode and decode round trip, chunked input and stereo files', async () => {

@@ -386,6 +386,9 @@ function runApp(MentriaEngine, Tiers) {
   /* ── State ───────────────────────────────────────── */
   let engine = null;
   let prefixCache = null;
+  let warmPromise = null;
+  let warmWanted = false;
+  let warming = false;
   let generating = false;
   let abortCtrl = null;
   let genEpoch = 0;
@@ -399,6 +402,7 @@ function runApp(MentriaEngine, Tiers) {
   // {type:'image'} placeholder needs its corresponding rgbHwc on every call —
   // not just the turn the image was first attached on.
   let conversationImages = [];
+  const assistantModels = new WeakMap();
   function modelFamilyFor(tier) {
     return tier === '27b' ? 'Bonsai 27B' : 'Qwen3.5';
   }
@@ -406,8 +410,8 @@ function runApp(MentriaEngine, Tiers) {
   function systemPromptFor(tier, turn) {
     const family = modelFamilyFor(tier);
     const small = tier === '0.8b';
-    const prompt = "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were fine-tuned and shipped by mentria.ai.\n\n" +
-      "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running " + family + " in their browser. When asked about Mentria itself: it is a small privacy-first creative studio at mentria.ai, building tools, games, and AI experiences that run entirely client-side with no servers, no accounts, and no telemetry. Notable parts of the site: TOTP, quick notes, QR scanner, color picker, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, a P2P chat and file drop at /comms/, and a daily image-fact feed called Deep Cuts.\n\n" +
+    const prompt = "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were prepared for the browser and shipped by mentria.ai.\n\n" +
+      "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running " + family + " in their browser. When asked about Mentria itself: it is a small privacy-first studio at mentria.ai, building tools, games, and AI experiences that run in the browser, with no account needed. Notable parts of the site: an AI chat, a QR scanner, a document scanner, quick notes, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, private peer-to-peer chat and calls at /comms/, and card decks for learning about AI.\n\n" +
       "Be helpful, accurate, and brief. Don't over-apologize." +
       (!small || (turn && turn.image) ? " When the user shares an image, describe what you see directly." : '') +
       (small ? '' : " You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.") + "\n\n" +
@@ -457,7 +461,7 @@ function runApp(MentriaEngine, Tiers) {
         const txt = m.content.filter(p => p && p.type === 'text').map(p => p.text).join(' ');
         turns.push({ role: m.role, text: txt, img: m.content.some(p => p && p.type === 'image') || undefined });
       } else {
-        turns.push({ role: m.role, text: String(m.content || '') });
+        turns.push({ role: m.role, text: String(m.content || ''), model: assistantModels.get(m) });
       }
     }
     const capped = turns.slice(-40);
@@ -477,6 +481,7 @@ function runApp(MentriaEngine, Tiers) {
       emptyEl.style.display = '';
     }
     clearChatBtn.style.display = 'none';
+    warmSystemPrompt();
   }
 
   async function restoreConversation() {
@@ -501,10 +506,12 @@ function runApp(MentriaEngine, Tiers) {
         messages.push({ role: 'user', content: [{ type: 'text', text: engineText }] });
         if (!next) addGhost('unanswered', true);
       } else {
-        const bodyEl = addMessage('assistant', '');
+        const bodyEl = addMessage('assistant', '', null, t.model || savedTierLabel());
         if (window.renderMarkdown) bodyEl.innerHTML = renderMarkdown(t.text) || '';
         else bodyEl.textContent = t.text;
-        messages.push({ role: 'assistant', content: t.text });
+        const msg = { role: 'assistant', content: t.text };
+        if (t.model) assistantModels.set(msg, t.model);
+        messages.push(msg);
         addAssistantActions(bodyEl, () => t.text);
       }
     });
@@ -524,7 +531,25 @@ function runApp(MentriaEngine, Tiers) {
     inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
   }
 
-  function addMessage(role, content, imageUrl) {
+  function modelLabel() {
+    return (currentTier === '27b' ? 'bonsai-' : 'qwen-') + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B') + (pinned ? ' · ' + pinned.name : '');
+  }
+
+  function savedTierLabel() {
+    let id = null;
+    try { id = localStorage.getItem('mentria-tier'); } catch (_) {}
+    if (!id || !/^(0\.8|2|4|27)b$/.test(id)) return null;
+    return (id === '27b' ? 'bonsai-' : 'qwen-') + id.toUpperCase();
+  }
+
+  function pushAssistant(content, bodyEl) {
+    const msg = { role: 'assistant', content };
+    const label = bodyEl && bodyEl.parentNode ? bodyEl.parentNode.querySelector('.ac__msg-label') : null;
+    if (label && label.dataset.model) assistantModels.set(msg, label.dataset.model);
+    messages.push(msg);
+  }
+
+  function addMessage(role, content, imageUrl, model) {
     if (emptyEl) emptyEl.style.display = 'none';
     const bubble = document.createElement('div');
     bubble.className = 'ac__msg ac__msg--' + role;
@@ -532,7 +557,7 @@ function runApp(MentriaEngine, Tiers) {
     label.className = 'ac__msg-label';
     if (role === 'user') label.textContent = COPY.labelYou;
     else {
-      label.dataset.model = (currentTier === '27b' ? 'bonsai-' : 'qwen-') + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B') + (pinned ? ' · ' + pinned.name : '');
+      label.dataset.model = model || modelLabel();
       label.textContent = label.dataset.model;
     }
     bubble.appendChild(label);
@@ -765,7 +790,42 @@ function runApp(MentriaEngine, Tiers) {
     strip = Activity.createActivityStrip(activityHost);
     return strip;
   }
-  function onEngineProgress(p) { if (strip) strip.onProgress(p); }
+  function onEngineProgress(p) {
+    if (warming && !generating) return;
+    if (strip) strip.onProgress(p);
+  }
+
+  async function engineIdle() {
+    const w = warmPromise;
+    if (w) { try { await w; } catch (_) {} }
+  }
+
+  function warmSystemPrompt() {
+    if (currentTier !== '27b' || !engine || typeof engine.prefillOnly !== 'function' || deviceLost) return;
+    if (webSearchOn && !pinned && !!(getSearchCfg() || {}).url) return;
+    if (generating) { warmWanted = true; return; }
+    const e = engine;
+    const prev = warmPromise;
+    const sys = { role: 'system', content: systemMessage.content };
+    const run = (async () => {
+      if (prev) { try { await prev; } catch (_) {} }
+      if (e !== engine || generating) return;
+      const a = (await e.encodeChat([sys, { role: 'user', content: 'a' }], { enableThinking: false })).ids;
+      const b = (await e.encodeChat([sys, { role: 'user', content: 'b' }], { enableThinking: false })).ids;
+      let n = 0;
+      while (n < a.length && n < b.length && a[n] === b[n]) n++;
+      if (e !== engine || n < 64) return;
+      warming = true;
+      try {
+        await e.prefillOnly({ tokenIds: a.slice(0, n), onProgress: () => {} });
+      } finally {
+        warming = false;
+      }
+      if (prefixCache && e === engine) prefixCache.noteLedger(a.slice(0, n));
+    })();
+    warmPromise = run;
+    run.then(() => {}, () => {}).then(() => { if (warmPromise === run) warmPromise = null; });
+  }
 
   /* ── Tier selection ──────────────────────────────── */
   let tierDecision = null;
@@ -1065,6 +1125,7 @@ function runApp(MentriaEngine, Tiers) {
         if (digest !== String(entry.system_sha256).toLowerCase()) throw new Error(COPY.adaptersSha);
       }
       if (generating) stopGeneration();
+      await engineIdle();
       const outgoing = pinned;
       if (searchAdapterActive) { await engine.swapAdapter({ name: null }); searchAdapterActive = false; }
       if (outgoing) {
@@ -1444,6 +1505,7 @@ function runApp(MentriaEngine, Tiers) {
       inputEl.disabled = false;
       sendBtn.disabled = false;
       inputEl.focus();
+      warmSystemPrompt();
       return true;
     } catch (err) {
       if (err && err.message === 'download-postponed') {
@@ -1513,6 +1575,29 @@ function runApp(MentriaEngine, Tiers) {
       ? (huge ? 6000 : big ? 3400 : 512)
       : (big ? 768 : contextTokens >= 2048 ? MAX_TOKENS : 320);
     return { chars, tokens: Math.max(256, contextTokens - replyReserve - 160) };
+  }
+
+  function trimRepeatTail(text) {
+    const n = text.length;
+    const maxLen = Math.min(1200, Math.floor(n / 4));
+    for (let len = 16; len <= maxLen; len++) {
+      let periodic = true;
+      for (let j = 1; j <= 3 * len && periodic; j++) periodic = text.charCodeAt(n - j) === text.charCodeAt(n - j - len);
+      if (!periodic) continue;
+      const unit = text.slice(n - len);
+      if (new Set(unit.replace(/\s+/g, '')).size < 5) continue;
+      let p = n - len;
+      while (p > 0 && text.charCodeAt(p - 1) === text.charCodeAt(p - 1 + len)) p--;
+      const stop = Math.min(n, p + 2 * len);
+      const lineEnd = unit.indexOf('\n') >= 0;
+      let end = p + len;
+      for (let e = p + len; e <= stop; e++) {
+        const c = text[e - 1];
+        if (lineEnd ? c === '\n' : (/[.!?]/.test(c) && (e === n || /\s/.test(text[e])))) { end = e; break; }
+      }
+      return text.slice(0, end);
+    }
+    return null;
   }
 
   function roundFit(n) {
@@ -1633,6 +1718,7 @@ function runApp(MentriaEngine, Tiers) {
     setStatus('generating', deepThink ? 'thinking' : 'statusGenerating');
     counterReset();
     abortCtrl = new AbortController();
+    await engineIdle();
 
     if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
     if (epoch !== genEpoch) {
@@ -1645,6 +1731,7 @@ function runApp(MentriaEngine, Tiers) {
     bodyEl.inert = true;
     bodyEl.classList.add('ac__streaming');
     let fullText = '';
+    let loopCut = false;
     let pendingPaint = false;
 
     const genStart = performance.now();
@@ -1750,7 +1837,7 @@ function runApp(MentriaEngine, Tiers) {
         bodyEl.textContent = COPY.thinkCut;
         bodyEl.dataset.copy = 'thinkCut';
         bodyEl.classList.add('ac__msg-body--muted');
-        messages.push({ role: 'assistant', content: COPY.thinkCut });
+        pushAssistant(COPY.thinkCut, bodyEl);
         persistConversation();
         addAssistantActions(bodyEl, null);
         if (stick) scrollToBottom();
@@ -1759,7 +1846,7 @@ function runApp(MentriaEngine, Tiers) {
       const escEmpty = COPY.emptyResponse.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       if (window.renderMarkdown) bodyEl.innerHTML = renderMarkdown(display) || `<p>${escEmpty}</p>`;
       else bodyEl.textContent = display || COPY.emptyResponse;
-      messages.push({ role: 'assistant', content: display });
+      pushAssistant(display, bodyEl);
       persistConversation();
       addAssistantActions(bodyEl, () => display);
       if (stick) scrollToBottom();
@@ -1871,6 +1958,7 @@ function runApp(MentriaEngine, Tiers) {
         const replyIds = [];
         let committedTokens = 0;
         await engine.generate(params, (event) => {
+          if (loopCut) return;
           if (typeof event.tokenId === 'number' && event.tokenId >= 0) replyIds.push(event.tokenId);
           if (event.finished && typeof event.committedTokens === 'number') committedTokens = event.committedTokens;
           if (typeof event.token === 'string' && event.token.length > 0) {
@@ -1879,18 +1967,26 @@ function runApp(MentriaEngine, Tiers) {
             counterTick();
             if (strip) strip.token(counterN, { ctxUsed: estPromptTokens + counterN, ctxWindow: contextTokens });
             fullText += event.token;
+            const cut = trimRepeatTail(fullText);
+            if (cut !== null) {
+              fullText = cut;
+              loopCut = true;
+              abortCtrl.abort();
+            }
             if (!pendingPaint) {
               pendingPaint = true;
               requestAnimationFrame(paintToken);
             }
           }
+        }).catch((err) => {
+          if (!loopCut || !err || err.name !== 'AbortError') throw err;
         });
         if (prefixCache) {
           if (promptIds && committedTokens > 0) prefixCache.noteLedger(promptIds.concat(replyIds).slice(0, committedTokens));
           else prefixCache.invalidate();
         }
 
-        if (!useTool || round >= 2 || epoch !== genEpoch) break;
+        if (!useTool || round >= 2 || loopCut || epoch !== genEpoch) break;
         const answerPart = deepThink ? splitThink().answer : fullText.replace(/<think>[\s\S]*?<\/think>/g, '');
         const query = parseToolCall(answerPart);
         if (!query) break;
@@ -1972,6 +2068,7 @@ function runApp(MentriaEngine, Tiers) {
   function settleGeneration(focus) {
     generating = false;
     abortCtrl = null;
+    if (warmWanted) { warmWanted = false; warmSystemPrompt(); }
     setSendMode(false);
     if (deviceLost) { showLostState(focus); return; }
     setStatus('ready', 'statusReady');

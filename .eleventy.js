@@ -542,6 +542,7 @@ module.exports = function(eleventyConfig) {
       if (!file.endsWith(".json")) continue;
       const dict = JSON.parse(fs.readFileSync(path.join(I18N_DIR, file), "utf8"));
       if (dict.tool) { delete dict.tool.finance; delete dict.tool.comms; delete dict.tool.scanner; }
+      delete dict.guide_llm;
       fs.writeFileSync(path.join(dir, file), JSON.stringify(dict));
     }
   }

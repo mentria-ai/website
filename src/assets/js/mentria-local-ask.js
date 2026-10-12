@@ -26,7 +26,7 @@ function progress(p) {
   const pct = p.loaded != null && p.total > 0 ? Math.round(Math.min(1, p.loaded / p.total) * 100) : null;
   const message = (p.message || '') + (pct != null ? ' ' + pct + '%' : '');
   const req = currentReq || {};
-  emit('progress', { source: req.source || '', prompt: req.prompt || '', message: message, pct: pct });
+  emit('progress', { source: req.source || '', prompt: req.prompt || '', message: message, pct: pct, stage: p.stage || '' });
   if (req.onProgress) { try { req.onProgress(message, pct); } catch (_) {} }
 }
 

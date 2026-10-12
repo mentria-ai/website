@@ -1581,6 +1581,8 @@ html:not(.is-fullscreen-tool):has(.pwa-install-banner--visible) .m-update { bott
 .tools-popup .launcher.is-searching .launcher__pinned, .tools-popup .launcher.is-searching .launcher__recents, .tools-popup .launcher.is-searching .launcher__widgets:not([hidden]) { display: none; }
 body.is-tools-open { overflow: hidden; }
 @media (max-width: 640px) {
+  body.is-tools-open { background: var(--term-bg-raised); }
+  body.is-tools-open > :is(.site-header, main) { visibility: hidden; transition: visibility 0s 160ms; }
   .tools-popup { padding: 0; align-items: stretch; }
   .tools-popup__panel { --tp-bar-h: calc(44px + 1.5rem + 1px + env(safe-area-inset-top, 0px)); width: 100%; max-height: none; min-height: 100dvh; border: 0; border-radius: 0; padding: 0 1rem 6rem; }
   .tools-popup__bar { margin: 0 -1rem 0.25rem; padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1rem 0.75rem; }

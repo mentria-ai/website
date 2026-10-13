@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "id": "story-pipeline-test",
+    "type": "story",
+    "order": 1,
+    "title": "Pipeline Test",
+    "subtitle": "Checking the story workflow",
+    "cover_image": "https://cdn.mentria.ai/stories/story-pipeline-test/00_cover.webp",
+    "status": "published",
+    "slides": [
+      {
+        "id": "story-pipeline-test-s01",
+        "story_type": "story",
+        "caption": "Testing the story pipeline.",
+        "long_press": "This is a test submission. It won't be published.",
+        "image": "https://cdn.mentria.ai/stories/story-pipeline-test/01.webp",
+        "image_status": "rendered",
+        "actions": []
+      },
+      {
+        "id": "story-pipeline-test-s02",
+        "story_type": "story",
+        "caption": "Second card.",
+        "image": "https://cdn.mentria.ai/stories/story-pipeline-test/02.webp",
+        "image_status": "rendered",
+        "actions": []
+      }
+    ],
+    "cdn_files": {
+      "01.webp": "6adf4a485f2705b3412539b33684a6661493a277d36c12b413472746aa6b6d35",
+      "00_cover.webp": "6adf4a485f2705b3412539b33684a6661493a277d36c12b413472746aa6b6d35",
+      "02.webp": "12a843b4a909b30598406bdb6eaa105e8ca85ecb9c345cb570d066295e9ff97e"
+    },
+    "credit": "Mentria",
+    "submission": 1516
+  }
+]

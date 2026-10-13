@@ -7295,5 +7295,20 @@
     ],
     "date": "2026-05-02",
     "link": "/feed/chapter/chapter01/"
+  },
+  {
+    "type": "chapter",
+    "id": "story-pipeline-test",
+    "src": "https://cdn.mentria.ai/stories/story-pipeline-test/00_cover.webp",
+    "color": "linear-gradient(160deg, #0e1a15 0%, #14352a 50%, #0a0f0d 100%)",
+    "title": "Pipeline Test",
+    "caption": "Checking the story workflow 2 cards.",
+    "badge": "STORY",
+    "tags": [
+      "story",
+      "community"
+    ],
+    "date": "2026-10-13",
+    "link": "/feed/story/story-pipeline-test/"
   }
 ]

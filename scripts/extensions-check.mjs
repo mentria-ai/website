@@ -7,7 +7,7 @@ const MANIFEST = /<script type="application[/]json" id="mentria-ext">([\s\S]*?)<
 const SEMVER = /^[0-9]+[.][0-9]+[.][0-9]+$/;
 
 function git(args) {
-  return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  return execFileSync('git', args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
 }
 
 function manifestOf(html) {
@@ -30,7 +30,7 @@ if (!haveBase && process.env.CI) {
   process.exit(1);
 }
 
-const files = git(['ls-files', 'src/assets/extensions/*.html']).split('\n').filter(Boolean);
+const files = git(['ls-files', ':(glob)src/assets/extensions/*.html']).split('\n').filter(Boolean);
 const problems = [];
 let bumped = 0;
 for (const file of files) {

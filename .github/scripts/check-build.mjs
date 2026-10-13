@@ -84,7 +84,10 @@ try {
       if (!type || !JSON_TYPE.test(type[1])) continue;
       jsonBlocks++;
       try { JSON.parse(m[2]); } catch (e) { dataErrors++; console.error(`JSON ${rel(page)} <script ${m[1].trim()}> ${e.message}`); }
+      if (m[2].includes('<') && !rel(page).startsWith('/assets/')) { dataErrors++; console.error(`JSON ${rel(page)} <script ${m[1].trim()}> has a raw "<"; render data with | dump so it is escaped`); }
     }
+    const badClose = html.match(/<\/script(?!>)/gi);
+    if (badClose) { dataErrors++; console.error(`SCRIPT ${rel(page)} has ${badClose.length} "</script" not followed by ">": text is breaking out of a script element`); }
     for (const m of html.matchAll(/(?:href|src)="(\/[^"#?]*)/g)) checkPath(m[1], rel(page));
     for (const m of html.matchAll(CSS_URL)) checkPath(m[1], rel(page));
     checkCdn(html, rel(page));

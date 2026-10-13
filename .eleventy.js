@@ -148,6 +148,12 @@ module.exports = function(eleventyConfig) {
     return I18N_S0 + key + I18N_S1 + str + I18N_S2;
   });
 
+  eleventyConfig.addFilter("dump", function (value, spaces) {
+    const json = JSON.stringify(value, null, spaces);
+    if (json === undefined) return json;
+    return json.replace(/[<>&\u2028\u2029]/g, (c) => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"));
+  });
+
   eleventyConfig.addFilter("traw", function (key) {
     const lang = (this.ctx && this.ctx.lang) || DEFAULT_LANG;
     const str = tResolve(lang, key);

@@ -1,0 +1,87 @@
+name: Upload merged story images
+
+on:
+  push:
+    branches: [develop]
+    paths: ['src/_data/stories.json']
+  workflow_dispatch:
+    inputs:
+      story_id:
+        description: Story id to upload again, for example story-the-lighthouse. Run this from the develop branch.
+        required: true
+      dry_run:
+        description: Fetch and verify the images without uploading them
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: List the stories to upload
+        id: ids
+        env:
+          BEFORE: ${{ github.event.before }}
+          INPUT_ID: ${{ inputs.story_id }}
+        run: |
+          if [ -n "$INPUT_ID" ]; then ids="$INPUT_ID"; else ids="$(node scripts/story/added.mjs "$BEFORE")"; fi
+          ids="$(printf '%s\n' "$ids" | grep -E '^story-[a-z0-9-]+$' | tr '\n' ' ' | sed 's/ *$//')"
+          echo "ids=$ids" >> "$GITHUB_OUTPUT"
+          echo "Stories to upload: ${ids:-none}"
+      - name: Fetch the reviewed images and check them against the merged story
+        if: steps.ids.outputs.ids != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IDS: ${{ steps.ids.outputs.ids }}
+        run: |
+          for id in $IDS; do
+            found=""
+            for url in $(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=story-$id&per_page=20" -q '.artifacts[] | select(.expired | not) | .archive_download_url'); do
+              rm -rf "$RUNNER_TEMP/a" && mkdir -p "$RUNNER_TEMP/a"
+              gh api "$url" > "$RUNNER_TEMP/a.zip"
+              unzip -q -o "$RUNNER_TEMP/a.zip" -d "$RUNNER_TEMP/a"
+              if node scripts/story/verify.mjs "$id" "$RUNNER_TEMP/a/images"; then
+                mkdir -p "$RUNNER_TEMP/upload/$id"
+                cp "$RUNNER_TEMP/a/images/"* "$RUNNER_TEMP/upload/$id/"
+                found=1
+                break
+              fi
+            done
+            if [ -z "$found" ]; then
+              echo "::error::No unexpired artifact for $id matches the merged story. Add the story-approved label to its issue again to rebuild it."
+              exit 1
+            fi
+          done
+      - name: Upload to the CDN
+        if: steps.ids.outputs.ids != '' && inputs.dry_run != true
+        env:
+          CDN_DEPLOY_KEY: ${{ secrets.CDN_DEPLOY_KEY }}
+          CDN_KNOWN_HOSTS: ${{ secrets.CDN_KNOWN_HOSTS }}
+          IDS: ${{ steps.ids.outputs.ids }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$CDN_DEPLOY_KEY" > ~/.ssh/cdn_deploy
+          printf '%s\n' "$CDN_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/cdn_deploy ~/.ssh/known_hosts
+          for id in $IDS; do
+            rsync -az -e "ssh -i ~/.ssh/cdn_deploy -o IdentitiesOnly=yes" "$RUNNER_TEMP/upload/$id/" "cdnpub@91.99.55.13:$id/"
+            for f in "$RUNNER_TEMP/upload/$id/"*; do
+              name="$(basename "$f")"
+              code=$(curl -s -o /dev/null -w '%{http_code}' "https://cdn.mentria.ai/stories/$id/$name")
+              [ "$code" = "200" ] || { echo "CDN check failed for $id/$name ($code)"; exit 1; }
+            done
+          done
+          rm -f ~/.ssh/cdn_deploy

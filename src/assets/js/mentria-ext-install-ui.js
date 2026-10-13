@@ -45,5 +45,5 @@ export async function confirmInstall(html, opts) {
   if (ins.warnLarge) msg += ' ' + fmt(copy.large, { kb: Math.round(ins.size / 1024) });
   const ok = await (typeof window !== 'undefined' && window.mentriaConfirm ? window.mentriaConfirm(msg, { danger }) : Promise.resolve(false));
   if (!ok) return null;
-  return X.install(html, m);
+  return X.install(html, m, opts.meta);
 }

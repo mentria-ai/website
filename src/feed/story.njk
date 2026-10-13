@@ -8,7 +8,7 @@ permalink: "{{ pair.locale.pathPrefix }}/feed/story/{{ pair.deck.id }}/"
 eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
-  title: "{{ pair.deck.subtitle | tloc(pair.locale.code) }} · Mentria"
+  title: "{{ pair.deck.subtitle | tloc(pair.locale.code) }}"
   description: "{{ pair.deck.subtitle | tloc(pair.locale.code) }}"
   socialImageOverride: "{{ pair.deck.cover_image }}"
   preloadImage: "{% set s = pair.deck.slides[0] %}{% if s.image and s.image_status != 'pending' %}{{ s.image }}{% endif %}"
@@ -64,7 +64,7 @@ eleventyComputed:
       <p class="deck__caption">{{ slide.caption | tloc(pair.locale.code) }}</p>
 
       {% if slide.long_press %}
-      <div class="deck__body">{{ slide.long_press | tloc(pair.locale.code) | safe }}</div>
+      <div class="deck__body">{{ slide.long_press | tloc(pair.locale.code) }}</div>
       {% endif %}
 
       {% if slide.actions.length %}

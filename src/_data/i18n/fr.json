@@ -1231,6 +1231,7 @@
       "err_app_only": "les extensions de type appli s'installent depuis leur page dans la Galerie d'extensions.",
       "err_manifest": "le manifeste n'est pas valide ({detail}).",
       "err_download": "impossible de télécharger {url}",
+      "err_mismatch": "Ce fichier d’extension ne correspond pas à la version publiée par Mentria, il n’a donc pas été installé. Rechargez la page et réessayez.",
       "choose_file": "Choisir un fichier"
     },
     "search": {

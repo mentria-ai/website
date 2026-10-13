@@ -91,6 +91,7 @@ const COPY = {
   errApp:        {{ ("tool.extensions.err_app_only"   | t) | dump | safe }},
   errManifest:   {{ ("tool.extensions.err_manifest"   | t) | dump | safe }},
   errDownload:   {{ ("tool.extensions.err_download"   | t) | dump | safe }},
+  errMismatch:   {{ ("tool.extensions.err_mismatch"   | t) | dump | safe }},
   btnOpen:       {{ ("tool.extensions.btn_open"       | t) | dump | safe }},
   btnExport:     {{ ("tool.extensions.btn_export"     | t) | dump | safe }},
   btnRemove:     {{ ("tool.extensions.btn_remove"     | t) | dump | safe }},
@@ -126,63 +127,45 @@ const ERROR_CODES = new Map([
   ['storage-full', 'errFull'],
   ['storage-blocked', 'errBlocked'],
   ['app-only', 'errApp'],
-  ['bad-manifest', 'errManifest']
+  ['bad-manifest', 'errManifest'],
+  ['mismatch', 'errMismatch']
 ]);
 const CATALOG = [
   {%- for e in extensions %}
   { id: {{ e.id | dump | safe }}, page: true, desc: {{ (("tool.ext_gallery.desc." + e.id) | t) | dump | safe }}, size: {{ (e.bytes | fileSize) | dump | safe }}, version: {{ e.version | dump | safe }}{% if e.kind == 'app' %}, app: {{ e.app | dump | safe }}, manifest: {{ e.manifest | dump | safe }}{% endif %} }{% if not loop.last %},{% endif %}
   {%- endfor %}
 ];
-const BUNDLED = new Map(CATALOG.map((e) => [e.id, e.version]));
-const CATALOG_URL = 'https://mentria-ai.github.io/extensions/catalog.json';
-const CATALOG_TIMEOUT = 3500;
+const HASHES = {{ extensionHashes | dump | safe }};
 const HIDDEN = [{% for e in extensionCatalog %}{% if e.held or e.retired %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
 const HELD = [{% for e in extensionCatalog %}{% if e.held %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
-let remoteCatalog = null;
-async function loadRemoteCatalog() {
-  const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), CATALOG_TIMEOUT);
-  try {
-    const res = await fetch(CATALOG_URL, { cache: 'no-store', signal: ctl.signal });
-    if (!res.ok) return null;
-    const c = await res.json();
-    if (!c || !Array.isArray(c.extensions)) return null;
-    for (const e of c.extensions) if (HIDDEN.indexOf(e.id) === -1 && !CATALOG.some((k) => k.id === e.id)) CATALOG.push({ id: e.id, desc: e.summary || '' });
-    return c;
-  } catch (_) {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
+async function sha256Hex(buf) {
+  if (!window.isSecureContext) return null;
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
+  let hex = '';
+  for (const b of digest) hex += b.toString(16).padStart(2, '0');
+  return hex;
 }
-function remoteIsNewer(id, version) {
-  const bundled = BUNDLED.get(id);
-  if (!bundled) return true;
-  try { return X.compareVersions(String(version), bundled) > 0; } catch (_) { return true; }
-}
-function sourceUrls(id) {
-  const urls = [];
-  const r = remoteCatalog && remoteCatalog.extensions.find((e) => e.id === id);
-  if (r && remoteIsNewer(id, r.version)) urls.push((remoteCatalog.base || 'https://mentria-ai.github.io/extensions/') + r.file);
-  urls.push('/assets/extensions/' + id + '.html');
-  return urls;
+function mismatchError() {
+  const e = new Error('mismatch');
+  e.code = 'mismatch';
+  return e;
 }
 async function fetchSource(id) {
-  let lastErr = null;
-  let best = null;
-  for (const u of sourceUrls(id)) {
-    try {
-      const r = await fetch(u, { cache: 'no-store' });
-      if (!r.ok) throw new Error(String(r.status));
-      const html = await r.text();
-      let ins = null;
-      try { ins = X.inspect(html); } catch (_) {}
-      const version = ins ? ins.manifest.version : null;
-      if (best === null || (version && (!best.version || X.compareVersions(version, best.version) > 0))) best = { html, ins, version };
-    } catch (e) { lastErr = e; }
+  const published = HASHES[id];
+  if (!published) throw mismatchError();
+  const url = '/assets/extensions/' + id + '.html';
+  for (const src of [url, url + '?v=' + published.sha256.slice(0, 12)]) {
+    const r = await fetch(src, { cache: 'no-store' });
+    if (!r.ok) throw new Error(String(r.status));
+    const buf = await r.arrayBuffer();
+    const sha256 = await sha256Hex(buf);
+    if (sha256 !== null && sha256 !== published.sha256) continue;
+    const html = new TextDecoder().decode(buf);
+    let ins = null;
+    try { ins = X.inspect(html); } catch (_) {}
+    return { html, ins, version: ins ? ins.manifest.version : null, sha256 };
   }
-  if (best === null) throw lastErr || new Error('unavailable');
-  return best;
+  throw mismatchError();
 }
 
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
@@ -266,7 +249,7 @@ function row(entry) {
   title.textContent = m.name;
   const sub = document.createElement('div');
   sub.className = 'xt__sub';
-  sub.textContent = 'v' + m.version + (m.author ? ' · ' + m.author : '');
+  sub.textContent = 'v' + m.version + (m.author ? ' · ' + m.author : '') + (entry.sha256 ? ' · SHA-256 ' + entry.sha256.slice(0, 12) : '');
   const perms = document.createElement('div');
   perms.className = 'xt__perms';
   const cat = CATALOG.find((c) => c.id === m.id && c.version === m.version);
@@ -505,15 +488,17 @@ async function galInstall(entry, card, b) {
   let html = entry.html;
   if (!html) {
     try {
-      html = (await fetchSource(entry.id)).html;
-    } catch (_) {
+      const src = await fetchSource(entry.id);
+      html = src.html;
+      entry.sha256 = src.sha256;
+    } catch (e) {
       b.disabled = false;
-      galStatus(card, COPY.galFailed);
+      galStatus(card, e && e.code === 'mismatch' ? errText(e) : COPY.galFailed);
       return;
     }
   }
   try {
-    const result = await confirmInstall(html, INSTALL_OPTS);
+    const result = await confirmInstall(html, entry.sha256 ? Object.assign({}, INSTALL_OPTS, { meta: { sha256: entry.sha256 } }) : INSTALL_OPTS);
     if (!result) { b.disabled = false; return; }
     render();
     announceInstall(result, before);
@@ -545,10 +530,11 @@ async function galLoad(entry, card) {
   try {
     src = await fetchSource(entry.id);
   } catch (e) {
-    galStatus(card, COPY.galErrLoad);
+    galStatus(card, e && e.code === 'mismatch' ? errText(e) : COPY.galErrLoad);
     return;
   }
   entry.html = src.html;
+  entry.sha256 = src.sha256;
   let ins = src.ins;
   if (!ins) {
     try {
@@ -578,7 +564,6 @@ refreshGallery = () => {
 };
 
 render();
-remoteCatalog = await loadRemoteCatalog();
 const wanted = new URLSearchParams(location.search).get('add');
 if (wanted && HELD.indexOf(wanted) !== -1 && !CATALOG.some((k) => k.id === wanted)) CATALOG.push({ id: wanted, desc: '' });
 CATALOG.forEach((entry) => {

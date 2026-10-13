@@ -1231,6 +1231,7 @@
       "err_app_only": "app extensions install from their page in the Extension Gallery.",
       "err_manifest": "the manifest is invalid ({detail}).",
       "err_download": "couldn't download {url}",
+      "err_mismatch": "This extension file doesn't match the version Mentria published, so it wasn't installed. Reload the page and try again.",
       "choose_file": "Choose file"
     },
     "search": {

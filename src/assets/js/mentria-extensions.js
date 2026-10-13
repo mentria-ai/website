@@ -113,7 +113,7 @@ export function inspect(html) {
   return { manifest, size, warnLarge: size > WARN_BYTES, existing: getEntry(manifest.id), mounts: mountSummary(manifest) };
 }
 
-export function install(html, manifest) {
+export function install(html, manifest, meta) {
   const size = new Blob([html]).size;
   validateManifest(manifest, size);
   const prevSource = store().get(NS, 'src.' + manifest.id);
@@ -128,6 +128,7 @@ export function install(html, manifest) {
     updatedAt: new Date().toISOString(),
     size
   };
+  if (meta && typeof meta.sha256 === 'string' && /^[0-9a-f]{64}$/.test(meta.sha256)) entry.sha256 = meta.sha256;
   registry.push(entry);
   if (!store().set(NS, 'registry', registry)) {
     const err = storageError();

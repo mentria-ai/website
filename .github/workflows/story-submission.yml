@@ -4,30 +4,34 @@ on:
   issues:
     types: [labeled]
 
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+permissions: {}
 
 concurrency:
-  group: story-submission
+  group: story-${{ github.event.issue.number }}
   cancel-in-progress: false
 
 jobs:
-  publish:
+  prepare:
     if: github.event.label.name == 'story-approved' && contains(github.event.issue.labels.*.name, 'story-submission')
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      story_id: ${{ steps.prepare.outputs.story_id }}
+      title: ${{ steps.prepare.outputs.title }}
     steps:
       - uses: actions/checkout@v5
         with:
           ref: develop
+          persist-credentials: false
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Install image encoder
-        run: npm install --no-save --no-audit --no-fund sharp@0.33.5
+      - name: Install the image encoder from its lockfile
+        run: npm ci --ignore-scripts --no-audit --no-fund --prefix scripts/story
       - name: Build the story from the issue
-        id: publish
+        id: prepare
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -35,80 +39,112 @@ jobs:
         run: |
           PENDING_IDS="$(git ls-remote --heads origin 'story/*' | sed 's|.*refs/heads/story/||')"
           export PENDING_IDS
-          node scripts/publish-submission.mjs
-      - name: Commit to a story branch
-        id: branch
+          node scripts/story/prepare.mjs "$RUNNER_TEMP/story"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: story-${{ steps.prepare.outputs.story_id }}
+          path: ${{ runner.temp }}/story
+          retention-days: 90
+          if-no-files-found: error
+
+  pr:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    outputs:
+      url: ${{ steps.pr.outputs.url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: develop
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: story-${{ needs.prepare.outputs.story_id }}
+          path: ${{ runner.temp }}/story
+      - name: Add the story to a branch
         env:
-          STORY_ID: ${{ steps.publish.outputs.story_id }}
-          STORY_TITLE: ${{ steps.publish.outputs.title }}
+          STORY_ID: ${{ needs.prepare.outputs.story_id }}
+          STORY_TITLE: ${{ needs.prepare.outputs.title }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
+          node scripts/story/apply.mjs "$RUNNER_TEMP/story"
           git config user.name "mentria-bot"
           git config user.email "agent@mentria.ai"
-          git switch -c "story/${STORY_ID}"
+          git switch -c "story/$STORY_ID"
           git add src/_data/stories.json src/_data/feed.json
-          git commit -m "stories: ${STORY_TITLE} (#${ISSUE_NUMBER})"
-          git push origin "story/${STORY_ID}"
-          echo "name=story/${STORY_ID}" >> "$GITHUB_OUTPUT"
-      - name: Open a pull request to develop
+          git commit -m "stories: $STORY_TITLE (#$ISSUE_NUMBER)"
+          git push origin "story/$STORY_ID"
+      - name: Open a pull request to develop and start CI
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH: ${{ steps.branch.outputs.name }}
-          STORY_ID: ${{ steps.publish.outputs.story_id }}
-          STORY_TITLE: ${{ steps.publish.outputs.title }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          STORY_ID: ${{ needs.prepare.outputs.story_id }}
+          STORY_TITLE: ${{ needs.prepare.outputs.title }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          body=$(printf '%s\n\n%s\n' \
-            "Community story from #${ISSUE_NUMBER}, approved with the story-approved label. It goes live with the next release at https://mentria.ai/feed/story/${STORY_ID}/" \
-            "The owner merges this pull request. Pull requests opened by the workflow don't start CI: close and reopen it to run the build check, or merge it as admin.")
-          url=$(gh pr create --base develop --head "$BRANCH" --title "Community story: ${STORY_TITLE}" --body "$body")
-          echo "url=${url}" >> "$GITHUB_OUTPUT"
-      - name: Upload images to the CDN
-        id: cdn
+          node scripts/story/pr-body.mjs "$RUNNER_TEMP/story" > "$RUNNER_TEMP/body.md"
+          url=$(gh pr create --base develop --head "story/$STORY_ID" --title "Community story: $STORY_TITLE" --body-file "$RUNNER_TEMP/body.md")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          gh workflow run ci.yml --ref "story/$STORY_ID"
+      - name: Remove the branch when no pull request was opened
+        if: failure() && steps.pr.outputs.url == ''
         env:
-          CDN_DEPLOY_KEY: ${{ secrets.CDN_DEPLOY_KEY }}
-          CDN_KNOWN_HOSTS: ${{ secrets.CDN_KNOWN_HOSTS }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$CDN_DEPLOY_KEY" > ~/.ssh/cdn_deploy
-          printf '%s\n' "$CDN_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/cdn_deploy ~/.ssh/known_hosts
-          rsync -az -e "ssh -i ~/.ssh/cdn_deploy -o IdentitiesOnly=yes" "out/${{ steps.publish.outputs.story_id }}/" "cdnpub@91.99.55.13:${{ steps.publish.outputs.story_id }}/"
-          for f in $(ls out/${{ steps.publish.outputs.story_id }}); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "https://cdn.mentria.ai/stories/${{ steps.publish.outputs.story_id }}/$f")
-            [ "$code" = "200" ] || { echo "CDN verify failed for $f ($code)"; exit 1; }
-          done
-      - name: Close the issue
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_URL: ${{ steps.pr.outputs.url }}
-        run: |
-          gh issue comment ${{ github.event.issue.number }} --body "Approved. The story is in ${PR_URL} and goes live with the next release at https://mentria.ai/feed/story/${{ steps.publish.outputs.story_id }}/"
-          gh issue edit ${{ github.event.issue.number }} --add-label story-published
-          gh issue close ${{ github.event.issue.number }}
-      - name: Report failure
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BRANCH: ${{ steps.branch.outputs.name }}
-          PR_URL: ${{ steps.pr.outputs.url }}
-          IMAGES_UPLOADED: ${{ steps.cdn.outcome == 'success' }}
-        run: |
-          if [ -n "$BRANCH" ] && [ "$IMAGES_UPLOADED" != "true" ]; then
-            if [ -n "$PR_URL" ]; then gh pr close "$PR_URL" --comment "Publishing failed, see #${{ github.event.issue.number }}." || true; fi
-            git push origin --delete "$BRANCH" || true
-          fi
-          gh issue comment ${{ github.event.issue.number }} --body "Publishing failed — see the workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Fix the issue body (image count must match the slides, story data must be valid JSON) and re-add the story-approved label."
-          gh issue edit ${{ github.event.issue.number }} --remove-label story-approved
+          STORY_ID: ${{ needs.prepare.outputs.story_id }}
+        run: git push origin --delete "story/$STORY_ID" || true
 
-  rejected:
-    if: github.event.label.name == 'story-rejected' && contains(github.event.issue.labels.*.name, 'story-submission')
+  notify:
+    needs: [prepare, pr]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
     steps:
       - name: Close the issue
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ needs.pr.outputs.url }}
+          STORY_ID: ${{ needs.prepare.outputs.story_id }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
-          gh issue comment ${{ github.event.issue.number }} --body "Thanks for submitting — this one won't be published."
-          gh issue close ${{ github.event.issue.number }} --reason "not planned"
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Approved. The story is in $PR_URL. Once it's merged, it goes live with the next release at https://mentria.ai/feed/story/$STORY_ID/"
+          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label story-published
+          gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY"
+
+  failed:
+    needs: [prepare, pr]
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Report the failure on the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Publishing failed. See the workflow run: $RUN_URL. Check the issue body: one image per slide, uploaded to the issue itself, plain text without HTML, and valid story JSON. Then add the story-approved label again."
+          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label story-approved
+
+  rejected:
+    if: github.event.label.name == 'story-rejected' && contains(github.event.issue.labels.*.name, 'story-submission')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Close the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Thanks for submitting — this one won't be published."
+          gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --reason "not planned"

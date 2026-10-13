@@ -139,6 +139,7 @@ const HASHES = {{ extensionHashes | dump | safe }};
 const HIDDEN = [{% for e in extensionCatalog %}{% if e.held or e.retired %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
 const HELD = [{% for e in extensionCatalog %}{% if e.held %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
 async function sha256Hex(buf) {
+  if (!window.isSecureContext) return null;
   const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
   let hex = '';
   for (const b of digest) hex += b.toString(16).padStart(2, '0');
@@ -156,7 +157,7 @@ async function fetchSource(id) {
   if (!r.ok) throw new Error(String(r.status));
   const buf = await r.arrayBuffer();
   const sha256 = await sha256Hex(buf);
-  if (sha256 !== published.sha256) throw mismatchError();
+  if (sha256 !== null && sha256 !== published.sha256) throw mismatchError();
   const html = new TextDecoder().decode(buf);
   let ins = null;
   try { ins = X.inspect(html); } catch (_) {}

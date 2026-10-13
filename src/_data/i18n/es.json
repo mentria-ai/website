@@ -1231,6 +1231,7 @@
       "err_app_only": "las extensiones de tipo app se instalan desde su página en la Galería de extensiones.",
       "err_manifest": "el manifiesto no es válido ({detail}).",
       "err_download": "no se pudo descargar {url}",
+      "err_mismatch": "Este archivo de extensión no coincide con la versión que publicó Mentria, así que no se instaló. Recarga la página y vuelve a intentarlo.",
       "choose_file": "Elegir archivo"
     },
     "search": {

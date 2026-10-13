@@ -33,6 +33,10 @@ jobs:
         run: node scripts/packs-logic-check.mjs
       - name: Check story submission parsing, validation and upload checks
         run: node scripts/story-check.mjs
+      - name: Check extension manifests and version bumps
+        run: |
+          git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+          node scripts/extensions-check.mjs origin/main
       - name: Check the bundled learning packs
         run: for f in src/assets/packs/*.mentria.json; do node scripts/pack-check.mjs "$f"; done
       - run: npm run build

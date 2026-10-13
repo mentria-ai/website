@@ -153,15 +153,19 @@ function mismatchError() {
 async function fetchSource(id) {
   const published = HASHES[id];
   if (!published) throw mismatchError();
-  const r = await fetch('/assets/extensions/' + id + '.html', { cache: 'no-store' });
-  if (!r.ok) throw new Error(String(r.status));
-  const buf = await r.arrayBuffer();
-  const sha256 = await sha256Hex(buf);
-  if (sha256 !== null && sha256 !== published.sha256) throw mismatchError();
-  const html = new TextDecoder().decode(buf);
-  let ins = null;
-  try { ins = X.inspect(html); } catch (_) {}
-  return { html, ins, version: ins ? ins.manifest.version : null, sha256 };
+  const url = '/assets/extensions/' + id + '.html';
+  for (const src of [url, url + '?v=' + published.sha256.slice(0, 12)]) {
+    const r = await fetch(src, { cache: 'no-store' });
+    if (!r.ok) throw new Error(String(r.status));
+    const buf = await r.arrayBuffer();
+    const sha256 = await sha256Hex(buf);
+    if (sha256 !== null && sha256 !== published.sha256) continue;
+    const html = new TextDecoder().decode(buf);
+    let ins = null;
+    try { ins = X.inspect(html); } catch (_) {}
+    return { html, ins, version: ins ? ins.manifest.version : null, sha256 };
+  }
+  throw mismatchError();
 }
 
 const PREFIX = {{ locale.pathPrefix | dump | safe }};

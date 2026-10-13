@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       story_id:
-        description: Story id to upload again, for example story-the-lighthouse
+        description: Story id to upload again, for example story-the-lighthouse. Run this from the develop branch.
         required: true
       dry_run:
         description: Fetch and verify the images without uploading them
@@ -15,10 +15,6 @@ on:
         default: false
 
 permissions: {}
-
-concurrency:
-  group: story-publish
-  cancel-in-progress: false
 
 jobs:
   upload:

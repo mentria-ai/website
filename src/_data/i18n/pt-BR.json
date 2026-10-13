@@ -1231,6 +1231,7 @@
       "err_app_only": "extensões do tipo app são instaladas pela página delas na Galeria de extensões.",
       "err_manifest": "o manifesto é inválido ({detail}).",
       "err_download": "não foi possível baixar {url}",
+      "err_mismatch": "Este arquivo de extensão não corresponde à versão publicada pela Mentria, por isso não foi instalado. Recarregue a página e tente de novo.",
       "choose_file": "Escolher arquivo"
     },
     "search": {

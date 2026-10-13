@@ -2,7 +2,7 @@
 {
   "id": "forge",
   "name": "Forge",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "icon": "⚒️",
   "author": "Mentria",
   "description": "Describe a small app; the model on this phone writes it, checks it, repairs it and installs it.",
@@ -540,14 +540,14 @@
     $('make').disabled = false; $('adapter').disabled = false; setWorking(false);
     showAdapter();
   });
-  var UPDATE_URLS = ['https://mentria-ai.github.io/extensions/extensions/forge.html', 'https://raw.githubusercontent.com/mentria-ai/extensions/main/extensions/forge.html'];
+  var UPDATE_URLS = ['/assets/extensions/forge.html'];
   $('update').addEventListener('click', async function () {
-    setStatus('fetching the latest Forge from GitHub…');
+    setStatus('fetching the latest Forge…');
     setWorking(true);
     try {
       var html = null, lastErr = null;
       for (var u = 0; u < UPDATE_URLS.length && html == null; u++) {
-        try { var res = await fetch(UPDATE_URLS[u] + '?t=' + Date.now(), { cache: 'no-store' }); if (!res.ok) throw new Error('GitHub answered ' + res.status); html = await res.text(); } catch (e) { lastErr = e; }
+        try { var res = await fetch(UPDATE_URLS[u] + '?t=' + Date.now(), { cache: 'no-store' }); if (!res.ok) throw new Error('the site answered ' + res.status); html = await res.text(); } catch (e) { lastErr = e; }
       }
       if (html == null) throw lastErr || new Error('no source reachable');
       var m = html.match(/"version":\s*"([^"]+)"/);

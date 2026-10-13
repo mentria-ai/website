@@ -5,6 +5,7 @@ on:
     branches: ["main", "develop"]
   push:
     branches: ["develop"]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -30,6 +31,8 @@ jobs:
         run: node scripts/scanner-check.mjs
       - name: Check learning pack review, text and validation logic
         run: node scripts/packs-logic-check.mjs
+      - name: Check story submission parsing, validation and upload checks
+        run: node scripts/story-check.mjs
       - name: Check the bundled learning packs
         run: for f in src/assets/packs/*.mentria.json; do node scripts/pack-check.mjs "$f"; done
       - run: npm run build

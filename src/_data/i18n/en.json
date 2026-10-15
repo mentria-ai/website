@@ -366,10 +366,7 @@
     "notif_reminder": "You have a reminder.",
     "update_title": "New version available",
     "update_btn": "Update",
-    "update_later": "Later",
-    "ios_note": "The Home Screen app keeps its own data, separate from this browser. To bring your data along, export it here with the <strong>Files</strong> tool and restore it in the app. If you remove the app from the Home Screen, its data is deleted, so keep a backup.",
-    "backup_nudge": "Keep an encrypted backup of your saved data.",
-    "backup_btn": "Back up"
+    "update_later": "Later"
   },
   "lang_switcher": {
     "label": "Language",
@@ -1896,10 +1893,7 @@
       "cache_locale": "{lang} pages for offline use",
       "cache_phosphor": "PHOSPHOR HD graphics",
       "cache_share": "Items shared to Mentria",
-      "cache_radio": "Radio station list",
-      "ios_app_note": "This Home Screen app keeps its own data, separate from your browser. If you remove Mentria from the Home Screen, this data is deleted too. Export a backup to keep it.",
-      "backup_last": "Last backup: {date}",
-      "backup_never": "Not backed up yet"
+      "cache_radio": "Radio station list"
     },
     "extensions-sdk": {
       "heading_start": "Quick start",

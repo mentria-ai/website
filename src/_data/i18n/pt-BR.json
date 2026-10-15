@@ -366,10 +366,7 @@
     "notif_reminder": "Você tem um lembrete.",
     "update_title": "Nova versão disponível",
     "update_btn": "Atualizar",
-    "update_later": "Depois",
-    "ios_note": "O app da Tela de Início guarda os próprios dados, separados deste navegador. Para levar seus dados, exporte-os aqui com a ferramenta <strong>Arquivos</strong> e restaure-os no app. Se você remover o app da Tela de Início, os dados dele são apagados, então mantenha um backup.",
-    "backup_nudge": "Mantenha um backup criptografado dos seus dados.",
-    "backup_btn": "Fazer backup"
+    "update_later": "Depois"
   },
   "lang_switcher": {
     "label": "Idioma",
@@ -1896,10 +1893,7 @@
       "cache_locale": "Páginas em {lang} para uso offline",
       "cache_phosphor": "Gráficos HD do PHOSPHOR",
       "cache_share": "Itens compartilhados com o Mentria",
-      "cache_radio": "Lista de estações do rádio",
-      "ios_app_note": "Este app da Tela de Início guarda os próprios dados, separados do seu navegador. Se você remover a Mentria da Tela de Início, esses dados também são apagados. Exporte um backup para mantê-los.",
-      "backup_last": "Último backup: {date}",
-      "backup_never": "Ainda sem backup"
+      "cache_radio": "Lista de estações do rádio"
     },
     "extensions-sdk": {
       "heading_start": "Início rápido",

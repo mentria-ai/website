@@ -187,7 +187,6 @@ try {
     chromeStep1: {{ ("pwa.chrome_step1"| t) | dump | safe }},
     chromeStep2: {{ ("pwa.chrome_step2"| t) | dump | safe }},
     note:        {{ ("pwa.note"       | t) | dump | safe }},
-    iosNote:     {{ ("pwa.ios_note"   | t) | dump | safe }},
     installBtn:  {{ ("pwa.install_btn"  | t) | dump | safe }},
     installLabel: {{ ("pwa.banner_title" | t) | dump | safe }}
   };
@@ -204,7 +203,7 @@ try {
         '<li>' + (isIpad ? COPY.ipadStep1 : COPY.iosStep1) + ' ' + SHARE_SVG + '</li>' +
         '<li>' + COPY.iosStep2 + ' ' + ADD_SVG + '</li>' +
         '<li>' + COPY.iosStep3 + '</li>';
-      noteHtml = COPY.iosNote;
+      noteHtml = COPY.note;
     } else if (isApplePlatform) {
       title = COPY.macosTitle;
       stepsHtml =
@@ -314,7 +313,7 @@ try {
       iosTitle: 'pwa.sheet_title_ios', ipadTitle: 'pwa.sheet_title_ipad', macosTitle: 'pwa.sheet_title_macos', chromeTitle: 'pwa.sheet_title_chrome',
       iosStep1: 'pwa.ios_step1', iosStep2: 'pwa.ios_step2', iosStep3: 'pwa.ios_step3', ipadStep1: 'pwa.ipad_step1',
       macosStep1: 'pwa.macos_step1', macosStep2: 'pwa.macos_step2', macosStep3: 'pwa.macos_step3',
-      chromeStep1: 'pwa.chrome_step1', chromeStep2: 'pwa.chrome_step2', note: 'pwa.note', iosNote: 'pwa.ios_note',
+      chromeStep1: 'pwa.chrome_step1', chromeStep2: 'pwa.chrome_step2', note: 'pwa.note',
       installBtn: 'pwa.install_btn', installLabel: 'pwa.banner_title'
     };
     for (var k in map) { var v = t(map[k]); if (v != null) COPY[k] = v; }
@@ -1177,64 +1176,4 @@ try {
         document.addEventListener('mentria:localechange', paint);
         window.addEventListener('pageshow', function (e) { if (e.persisted) paint(); });
       })();
-} catch (e) { console.error(e); }
-try {
-(function () {
-  if (window.self !== window.top) return;
-  var chip = document.getElementById('m-backup');
-  if (!chip) return;
-  var ua = navigator.userAgent;
-  var onIos = (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (!onIos) return;
-  if (location.pathname.indexOf('/tools/files/') !== -1) return;
-  var ls = null;
-  try { ls = window.localStorage; ls.getItem('mentria_backup_at'); } catch (_) { return; }
-  var WAIT = 14 * 24 * 60 * 60 * 1000;
-  var now = Date.now();
-  var last = parseInt(ls.getItem('mentria_backup_at'), 10) || 0;
-  var snoozed = parseInt(ls.getItem('mentria_backup_nudge_at'), 10) || 0;
-  if (now - last < WAIT || now - snoozed < WAIT) return;
-  var KEEP = ['quick_notes', 'totp', 'identity', 'packs', 'ext'];
-  var inStore = false;
-  try {
-    var names = window.MentriaStore && window.MentriaStore.listNamespaces ? window.MentriaStore.listNamespaces() : [];
-    for (var i = 0; i < names.length; i++) {
-      if (KEEP.indexOf(names[i]) !== -1 || names[i].indexOf('extdata.') === 0) { inStore = true; break; }
-    }
-  } catch (_) {}
-  var inDatabases = function () {
-    try {
-      if (!window.indexedDB || typeof window.indexedDB.databases !== 'function') return Promise.resolve(false);
-      return window.indexedDB.databases().then(function (list) {
-        return (list || []).some(function (d) { return !!d && typeof d.name === 'string' && (d.name.indexOf('mentria-ext-') === 0 || d.name === 'mentria-packs'); });
-      }, function () { return false; });
-    } catch (_) { return Promise.resolve(false); }
-  };
-  var snooze = function () { try { ls.setItem('mentria_backup_nudge_at', String(Date.now())); } catch (_) {} };
-  var prefix = function () {
-    var lang = String(document.documentElement.lang || 'en').toLowerCase();
-    var list = window.MENTRIA_LOCALES || [];
-    for (var j = 0; j < list.length; j++) if (String(list[j].code).toLowerCase() === lang) return list[j].prefix || '';
-    return '';
-  };
-  document.getElementById('m-backup-go').addEventListener('click', function () {
-    snooze();
-    chip.hidden = true;
-    location.href = prefix() + '/tools/files/#backup';
-  });
-  document.getElementById('m-backup-later').addEventListener('click', function () {
-    snooze();
-    chip.hidden = true;
-  });
-  document.addEventListener('mentria:update', function (e) { if (e && e.detail && e.detail.pending) chip.hidden = true; });
-  (inStore ? Promise.resolve(true) : inDatabases()).then(function (real) {
-    if (!real) return;
-    setTimeout(function () {
-      var update = document.getElementById('m-update');
-      if (update && !update.hidden) return;
-      if (document.documentElement.classList.contains('is-fullscreen-tool')) return;
-      chip.hidden = false;
-    }, 4000);
-  });
-})();
 } catch (e) { console.error(e); }

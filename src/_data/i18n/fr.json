@@ -366,10 +366,7 @@
     "notif_reminder": "Vous avez un rappel.",
     "update_title": "Nouvelle version disponible",
     "update_btn": "Mettre à jour",
-    "update_later": "Plus tard",
-    "ios_note": "L'app de l'écran d'accueil garde ses propres données, séparées de ce navigateur. Pour emporter vos données, exportez-les ici avec l'outil <strong>Fichiers</strong>, puis restaurez-les dans l'app. Si vous retirez l'app de l'écran d'accueil, ses données sont supprimées : gardez une sauvegarde.",
-    "backup_nudge": "Gardez une sauvegarde chiffrée de vos données.",
-    "backup_btn": "Sauvegarder"
+    "update_later": "Plus tard"
   },
   "lang_switcher": {
     "label": "Langue",
@@ -1896,10 +1893,7 @@
       "cache_locale": "Pages en {lang} pour le hors-ligne",
       "cache_phosphor": "Graphismes HD de PHOSPHOR",
       "cache_share": "Éléments partagés avec Mentria",
-      "cache_radio": "Liste des stations de la radio",
-      "ios_app_note": "Cette app de l'écran d'accueil garde ses propres données, séparées de votre navigateur. Si vous retirez Mentria de l'écran d'accueil, ces données sont aussi supprimées. Exportez une sauvegarde pour les conserver.",
-      "backup_last": "Dernière sauvegarde : {date}",
-      "backup_never": "Pas encore de sauvegarde"
+      "cache_radio": "Liste des stations de la radio"
     },
     "extensions-sdk": {
       "heading_start": "Démarrage rapide",

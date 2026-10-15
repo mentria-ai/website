@@ -733,6 +733,8 @@
     const head = JSON.stringify({ v: FILE_VERSION, kdf: 'PBKDF2', iter: ITER, hash: HASH, salt: b64uEncode(salt), iv: b64uEncode(base), z: CAN_GZIP ? 1 : 0, n: index });
     const blob = new Blob([head.slice(0, -1) + CT_OPEN + '\n'].concat(lines, [']}\n']), { type: 'application/json' });
     if (onProgress) onProgress(1);
+    try { global.localStorage.setItem('mentria_backup_at', String(Date.now())); } catch (_) {}
+    try { global.dispatchEvent(new CustomEvent('mentria:backup')); } catch (_) {}
     return { blob, size: blob.size, records: prepared.records, skipped: prepared.skipped };
   };
 

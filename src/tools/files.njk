@@ -23,10 +23,7 @@ localeReload: true
 <section class="files" id="files">
 
   <div class="files__toolbar">
-    <div class="files__status">
-      <p class="files__summary" id="files-summary"></p>
-      <p class="files__summary" id="files-backup-age"></p>
-    </div>
+    <p class="files__summary" id="files-summary"></p>
     <div class="files__toolbar-actions">
       <button type="button" class="m-btn m-btn--ghost" id="files-export-all">{{ "tool.files.export_all" | t }}</button>
       <button type="button" class="m-btn m-btn--ghost" id="files-restore">{{ "about.data_import_button" | t }}…</button>
@@ -34,8 +31,6 @@ localeReload: true
       <button type="button" class="m-btn m-btn--danger" id="files-erase">{{ "tool.files.erase_button" | t }}</button>
     </div>
   </div>
-
-  <p class="files__ios-note" id="files-ios-note" hidden>{{ "tool.files.ios_app_note" | t }}</p>
 
   <div class="files__body">
     <nav class="files__tree" id="files-tree" aria-label="{{ 'tool.files.tree_label' | t }}"></nav>
@@ -212,8 +207,6 @@ localeReload: true
     eraseWord: {{ ("tool.files.erase_word" | t) | dump | safe }},
     eraseWorking: {{ ("tool.files.erase_working" | t) | dump | safe }},
     eraseDone: {{ ("tool.files.erase_done" | t) | dump | safe }},
-    backupLast: {{ ("tool.files.backup_last" | t) | dump | safe }},
-    backupNever: {{ ("tool.files.backup_never" | t) | dump | safe }},
     statusCleared: {{ ("tool.files.status_cleared" | t) | dump | safe }},
     restoreBusy:  {{ ("about.data_import_busy" | t) | dump | safe }},
     restoreDone:  {{ ("about.data_import_done" | t) | dump | safe }},
@@ -1140,25 +1133,6 @@ localeReload: true
 
   window.addEventListener('mentria:write', () => { refresh(); });
 
-  const backupAgeEl = $('files-backup-age');
-  const renderBackupAge = () => {
-    let at = 0;
-    try { at = parseInt(localStorage.getItem('mentria_backup_at'), 10) || 0; } catch (_) {}
-    if (!at) { backupAgeEl.textContent = COPY.backupNever; return; }
-    let when = '';
-    try { when = new Date(at).toLocaleDateString(document.documentElement.lang || undefined, { year: 'numeric', month: 'short', day: 'numeric' }); } catch (_) { when = new Date(at).toDateString(); }
-    backupAgeEl.textContent = COPY.backupLast.replace('{date}', when);
-  };
-  renderBackupAge();
-  window.addEventListener('mentria:backup', renderBackupAge);
-  const ua = navigator.userAgent;
-  const onIos = (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  $('files-ios-note').hidden = !(onIos && document.documentElement.classList.contains('is-standalone'));
-  if (location.hash === '#backup') {
-    try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
-    $('files-export-all').click();
-  }
-
   refresh();
 })();
 </script>
@@ -1181,21 +1155,6 @@ localeReload: true
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-}
-.files__status {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.files__ios-note {
-  margin: 0;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--syn-amber, #fbbf24);
-  border-radius: 8px;
-  font-size: var(--text-xs);
-  line-height: 1.5;
-  color: var(--term-fg);
 }
 .files__summary {
   margin: 0;

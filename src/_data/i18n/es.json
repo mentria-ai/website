@@ -366,10 +366,7 @@
     "notif_reminder": "Tienes un recordatorio.",
     "update_title": "Nueva versión disponible",
     "update_btn": "Actualizar",
-    "update_later": "Más tarde",
-    "ios_note": "La app de la pantalla de inicio guarda sus propios datos, separados de este navegador. Para llevar tus datos, expórtalos aquí con la herramienta <strong>Archivos</strong> y restáuralos en la app. Si quitas la app de la pantalla de inicio, sus datos se borran, así que guarda una copia de seguridad.",
-    "backup_nudge": "Guarda una copia de seguridad cifrada de tus datos.",
-    "backup_btn": "Hacer copia"
+    "update_later": "Más tarde"
   },
   "lang_switcher": {
     "label": "Idioma",
@@ -1896,10 +1893,7 @@
       "cache_locale": "Páginas en {lang} para usar sin conexión",
       "cache_phosphor": "Gráficos HD de PHOSPHOR",
       "cache_share": "Elementos compartidos con Mentria",
-      "cache_radio": "Lista de emisoras de la radio",
-      "ios_app_note": "Esta app de la pantalla de inicio guarda sus propios datos, separados de tu navegador. Si quitas Mentria de la pantalla de inicio, estos datos también se borran. Exporta una copia de seguridad para conservarlos.",
-      "backup_last": "Última copia de seguridad: {date}",
-      "backup_never": "Aún sin copia de seguridad"
+      "cache_radio": "Lista de emisoras de la radio"
     },
     "extensions-sdk": {
       "heading_start": "Inicio rápido",

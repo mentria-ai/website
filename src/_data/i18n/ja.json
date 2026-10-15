@@ -366,10 +366,7 @@
     "notif_reminder": "リマインダーがあります。",
     "update_title": "新しいバージョンがあります",
     "update_btn": "更新",
-    "update_later": "あとで",
-    "ios_note": "ホーム画面のアプリは、このブラウザとは別に独自のデータを保存します。データを引き継ぐには、ここで<strong>ファイル</strong>ツールからエクスポートし、アプリで復元してください。ホーム画面からアプリを削除するとそのデータも消えるため、バックアップを残しておきましょう。",
-    "backup_nudge": "保存したデータの暗号化バックアップを残しましょう。",
-    "backup_btn": "バックアップ"
+    "update_later": "あとで"
   },
   "lang_switcher": {
     "label": "言語",
@@ -1896,10 +1893,7 @@
       "cache_locale": "オフライン用の{lang}のページ",
       "cache_phosphor": "PHOSPHOR の HD グラフィック",
       "cache_share": "Mentria に共有された項目",
-      "cache_radio": "ラジオの局リスト",
-      "ios_app_note": "このホーム画面のアプリは、ブラウザとは別に独自のデータを保存しています。ホーム画面からMentriaを削除すると、このデータも消えます。残しておくにはバックアップをエクスポートしてください。",
-      "backup_last": "最終バックアップ：{date}",
-      "backup_never": "まだバックアップがありません"
+      "cache_radio": "ラジオの局リスト"
     },
     "extensions-sdk": {
       "heading_start": "クイックスタート",

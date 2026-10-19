@@ -54,7 +54,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      actions: write
     outputs:
       url: ${{ steps.pr.outputs.url }}
     steps:
@@ -81,7 +80,7 @@ jobs:
           git add src/_data/stories.json src/_data/feed.json
           git commit -m "stories: $STORY_TITLE (#$ISSUE_NUMBER)"
           git push origin "story/$STORY_ID"
-      - name: Open a pull request to develop and start CI
+      - name: Open a pull request to develop
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
@@ -92,7 +91,6 @@ jobs:
           node scripts/story/pr-body.mjs "$RUNNER_TEMP/story" > "$RUNNER_TEMP/body.md"
           url=$(gh pr create --base develop --head "story/$STORY_ID" --title "Community story: $STORY_TITLE" --body-file "$RUNNER_TEMP/body.md")
           echo "url=$url" >> "$GITHUB_OUTPUT"
-          gh workflow run ci.yml --ref "story/$STORY_ID"
       - name: Remove the branch when no pull request was opened
         if: failure() && steps.pr.outputs.url == ''
         env:

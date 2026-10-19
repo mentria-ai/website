@@ -14,5 +14,5 @@ const lines = [
 ];
 urls.forEach((u, i) => lines.push('![Slide ' + (i + 1) + '](' + u + ')', ''));
 lines.push('**On merge**, the "Upload merged story images" workflow fetches the converted WebP files from ' + (runUrl.startsWith('https://github.com/') ? runUrl : 'the approval run') + ', checks each one against the SHA-256 in `stories.json`, and uploads them to `cdn.mentria.ai/stories/' + entry.id + '/`. The story goes live with the next release.');
-lines.push('', '**Before merging**, approve the waiting CI run with the **Approve and run** button in the merge box below. GitHub holds CI on pull requests that a workflow opened until someone approves it. Merge once the `build` check passes.');
+lines.push('', 'CI runs on this branch automatically.');
 process.stdout.write(lines.join('\n') + '\n');

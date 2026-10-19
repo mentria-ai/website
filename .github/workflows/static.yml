@@ -59,8 +59,7 @@ jobs:
           if [ -n "$PREV" ]; then fields+=(-f "previous_tag_name=$PREV"); fi
           gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" "${fields[@]}" > "$RUNNER_TEMP/release-notes.json"
           jq --arg tag "$TAG" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG" --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{tag: $tag, url: $url, date: $date, items: [(.body | split("\n")[] | select(startswith("* ")) | ltrimstr("* ") | select(startswith("Release:") | not) | sub(" by @[^ ]+ in .*$"; ""))]}' \
-            "$RUNNER_TEMP/release-notes.json" > src/_data/release.json
+            -f .github/scripts/release-items.jq "$RUNNER_TEMP/release-notes.json" > src/_data/release.json
           delim="NOTES_$(openssl rand -hex 16)"
           { echo "notes<<$delim"; jq -r .body "$RUNNER_TEMP/release-notes.json"; echo "$delim"; } >> "$GITHUB_OUTPUT"
       - name: Fetch the live sitemap

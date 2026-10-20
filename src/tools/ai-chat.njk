@@ -1942,7 +1942,7 @@ function runApp(MentriaEngine, Tiers) {
           temperature: smp ? num(smp.temperature, 0.7) : deepThink ? 0.7 : 0,
           topK: smp ? num(smp.topK, 50) : deepThink ? 20 : 1,
           topP: smp ? num(smp.topP, 0.9) : deepThink ? 0.95 : 1.0,
-          repetitionPenalty: smp ? num(smp.repetitionPenalty, 1.0) : currentTier === '27b' ? 1.0 : 1.15,
+          repetitionPenalty: smp ? num(smp.repetitionPenalty, 1.0) : 1.0,
           enableThinking: pinned ? !!pinned.enableThinking : deepThink,
           signal: abortCtrl.signal,
         };

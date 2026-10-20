@@ -192,9 +192,76 @@ const ASSETS = [
 ];
 
 const REVISIONS = {/*REVISIONS*/};
+const INTEGRITY = /*INTEGRITY*/null;
+const DECK_INTEGRITY = /*DECKS*/null;
+const DECK_KEY = /^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(?:feed|learn)\//;
+const ASSET_PATHS = new Set(ASSETS);
 
 function precacheUrl(u) {
   return u.indexOf('?') >= 0 ? u : u + '?v=' + (REVISIONS[u] || '{{ buildHash }}');
+}
+
+function integrityKey(p) {
+  try { p = decodeURIComponent(p); } catch (_) { return null; }
+  return p.endsWith('/index.html') ? p.slice(0, -10) : p;
+}
+
+async function digestOf(buf) {
+  const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function loadDeckDigests() {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const held = await cache.match(DECK_INTEGRITY.url);
+    let buf = held ? await held.arrayBuffer() : null;
+    if (!buf || await digestOf(buf) !== DECK_INTEGRITY.sha) {
+      const fresh = await fetch(DECK_INTEGRITY.url);
+      if (!fresh.ok) return null;
+      buf = await fresh.arrayBuffer();
+      if (await digestOf(buf) !== DECK_INTEGRITY.sha) return null;
+      await cache.put(DECK_INTEGRITY.url, new Response(buf, { headers: { 'content-type': 'application/json' } }));
+    }
+    return JSON.parse(new TextDecoder().decode(buf));
+  } catch (_) {
+    return null;
+  }
+}
+
+let deckDigestsLoad = null;
+function deckDigests() {
+  if (!DECK_INTEGRITY) return Promise.resolve(null);
+  if (!deckDigestsLoad) deckDigestsLoad = loadDeckDigests().then((map) => { if (!map) deckDigestsLoad = null; return map; });
+  return deckDigestsLoad;
+}
+
+async function trusted(resp, key, navigate) {
+  if (!resp || !INTEGRITY) return resp;
+  let want = key ? INTEGRITY[key] : null;
+  const deck = !want && !!key && DECK_KEY.test(key);
+  if (deck) { const decks = await deckDigests(); want = decks ? decks[key] : null; }
+  if (!want) return navigate || deck ? null : resp;
+  try { return await digestOf(await resp.clone().arrayBuffer()) === want ? resp : null; } catch (_) { return null; }
+}
+
+async function findTrusted(request, key, navigate, skip) {
+  for (const name of await caches.keys()) {
+    if (!name.startsWith('mentria-') || name === MODELS_CACHE || name === skip) continue;
+    const cache = await caches.open(name);
+    const hit = await cache.match(request, { ignoreSearch: true });
+    if (!hit) continue;
+    const ok = await trusted(hit, key, navigate);
+    if (ok) return ok;
+    await cache.delete(request, { ignoreSearch: true }).catch(() => {});
+  }
+  return null;
+}
+
+async function restorePrecache(cache, path, key, resp) {
+  try { if (await trusted(resp, key, false)) await cache.put(precacheUrl(path), resp); } catch (_) {}
 }
 
 self.addEventListener('install', event => {
@@ -205,11 +272,16 @@ self.addEventListener('install', event => {
     const fetchList = [];
     await Promise.all(ASSETS.map(async (u) => {
       const url = precacheUrl(u);
-      if (await cache.match(url)) return;
+      const key = integrityKey(u);
+      const have = await cache.match(url);
+      if (have) {
+        if (await trusted(have, key, false)) return;
+        await cache.delete(url);
+      }
       if (REVISIONS[u]) {
         for (const old of previous) {
           const hit = await old.match(url);
-          if (hit) { await cache.put(url, hit); return; }
+          if (hit && await trusted(hit, key, false)) { await cache.put(url, hit); return; }
         }
       }
       fetchList.push(url);
@@ -250,6 +322,7 @@ async function refreshDecks() {
   try {
     const names = (await caches.keys()).filter(k => k.startsWith('mentria-decks-') && k !== DECKS_CACHE);
     if (!names.length) return;
+    await deckDigests();
     const target = await caches.open(DECKS_CACHE);
     const seen = new Set((await target.keys()).map(r => r.url));
     const saved = [];
@@ -476,6 +549,7 @@ async function wtRelay(request) {
 }
 
 async function stashCapped(cacheName, key, response, limit) {
+  if (cacheName === DECKS_CACHE) await deckDigests();
   const cache = await caches.open(cacheName);
   await cache.delete(key);
   await cache.put(key, response);
@@ -647,11 +721,15 @@ self.addEventListener('fetch', event => {
   if (url.pathname.startsWith('/assets/mentria/dist/')) event.waitUntil(keepEngineOffline());
 
   event.respondWith((async () => {
+    const key = integrityKey(url.pathname);
     if (url.pathname.startsWith('/assets/mentria/dist/')) {
-      const hit = await caches.match(event.request, { ignoreSearch: true });
-      if (hit) return hit;
+      const models = await caches.open(MODELS_CACHE);
+      const hit = await models.match(event.request, { ignoreSearch: true });
+      const ok = await trusted(hit, key, false);
+      if (ok) return ok;
+      if (hit) await models.delete(event.request, { ignoreSearch: true });
       const resp = await fetch(event.request);
-      if (resp && resp.ok) { const copy = resp.clone(); caches.open(MODELS_CACHE).then(c => c.put(event.request, copy)); }
+      if (resp && resp.ok) { const copy = resp.clone(); event.waitUntil(models.put(event.request, copy).catch(() => {})); }
       return resp;
     }
     if (/^\/assets\/extensions\/[^/]+\//.test(url.pathname)) {
@@ -661,9 +739,9 @@ self.addEventListener('fetch', event => {
         if (resp && resp.ok) event.waitUntil(data.put(url.pathname, resp.clone()).catch(() => {}));
         return resp;
       } catch (err) {
-        const kept = await data.match(url.pathname)
-          || await caches.match(url.pathname, { cacheName: EXT_FILES_CACHE })
-          || await caches.match(url.pathname, { cacheName: CACHE_NAME, ignoreSearch: true });
+        const kept = await trusted(await data.match(url.pathname), key, false)
+          || await trusted(await caches.match(url.pathname, { cacheName: EXT_FILES_CACHE }), key, false)
+          || await trusted(await caches.match(url.pathname, { cacheName: CACHE_NAME, ignoreSearch: true }), key, false);
         if (kept) return kept;
         throw err;
       }
@@ -671,9 +749,11 @@ self.addEventListener('fetch', event => {
     const precache = await caches.open(CACHE_NAME);
     const loose = event.request.mode === 'navigate' || !url.searchParams.has('v');
     const cached = await precache.match(event.request) || (loose ? await precache.match(event.request, { ignoreSearch: true }) : null);
-    if (cached) return cached;
+    const checked = await trusted(cached, key, event.request.mode === 'navigate');
+    if (checked) return checked;
+    if (cached) await precache.delete(event.request, { ignoreSearch: true });
     if (event.request.mode === 'navigate') {
-      const saved = await caches.match(event.request, { ignoreSearch: true });
+      const saved = await findTrusted(event.request, key, true, CACHE_NAME);
       if (saved) {
         const net = fetch(event.request).then((resp) => {
           if (resp && resp.ok && FEED_PAGE.test(url.pathname)) event.waitUntil(stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT).catch(() => {}));
@@ -686,6 +766,7 @@ self.addEventListener('fetch', event => {
     }
     try {
       const resp = await fetch(event.request);
+      if (cached && resp && resp.ok && !resp.redirected && ASSET_PATHS.has(url.pathname)) event.waitUntil(restorePrecache(precache, url.pathname, key, resp.clone()));
       if (resp && resp.ok && event.request.mode === 'navigate' && FEED_PAGE.test(url.pathname)) {
         event.waitUntil(stashCapped(DECKS_CACHE, event.request.url, resp.clone(), DECKS_LIMIT).catch(() => {}));
         const pack = url.pathname.match(PACK_PAGE);
@@ -702,18 +783,19 @@ self.addEventListener('fetch', event => {
     } catch (err) {
       if (event.request.mode !== 'navigate') {
         if (event.request.headers.has('x-mentria-fill')) throw err;
-        const kept = await caches.match(event.request, { ignoreSearch: true });
+        const kept = await findTrusted(event.request, key, false);
         if (kept) return kept;
       }
       if (event.request.mode === 'navigate') {
-        const localized = await caches.match(event.request, { ignoreSearch: true });
+        const localized = await findTrusted(event.request, key, true);
         if (localized) return localized;
         for (const path of altPaths(url.pathname)) {
-          const alt = await caches.match(path, { ignoreSearch: true });
+          const alt = await findTrusted(path, integrityKey(path), true);
           if (alt) return alt;
         }
         const lp = url.pathname.match(LOCALE_PATH);
-        const offline = (lp && await caches.match('/' + lp[1] + '/offline/', { ignoreSearch: true })) || await precache.match('/offline/', { ignoreSearch: true });
+        const home = lp ? '/' + lp[1] + '/offline/' : null;
+        const offline = (home && await findTrusted(home, home, true)) || await trusted(await precache.match('/offline/', { ignoreSearch: true }), '/offline/', true);
         if (offline) return offline;
       }
       throw err;

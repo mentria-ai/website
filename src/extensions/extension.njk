@@ -119,13 +119,15 @@ eleventyComputed:
   "inLanguage": "{{ lang }}"
 }
 </script>
-<script type="application/json" id="xs-data">{{ { id: ext.id, kind: ext.kind, app: ext.app, prefix: prefix, manifest: ext.manifest } | dump | safe }}</script>
+{% set published = extensionHashes[ext.id] %}
+<script type="application/json" id="xs-data">{{ { id: ext.id, kind: ext.kind, app: ext.app, prefix: prefix, manifest: ext.manifest, sha256: (published.sha256 if published else "") } | dump | safe }}</script>
 <script>
   window.XS_COPY = {
     installing: {{ ("store.installing" | t) | dump | safe }},
     failed: {{ ("store.install_failed" | t) | dump | safe }},
     blocked: {{ ("store.install_blocked" | t) | dump | safe }},
     full: {{ ("store.install_full" | t) | dump | safe }},
+    mismatch: {{ ("tool.extensions.err_mismatch" | t) | dump | safe }},
     removeConfirm: {{ ("store.remove_confirm" | t) | dump | safe }},
     removeLabel: {{ ("store.remove" | t) | dump | safe }}
   };
@@ -227,6 +229,7 @@ function storageBlocked() {
 function failureKind(e) {
   if (storageBlocked() || (e && e.name === 'SecurityError')) return 'blocked';
   if (e && (e.name === 'QuotaExceededError' || e.code === 'storage-full')) return 'full';
+  if (e && e.code === 'mismatch') return 'mismatch';
   return 'failed';
 }
 
@@ -269,10 +272,8 @@ async function install() {
     if (pkg.kind === 'app') {
       X.installApp(pkg.manifest);
     } else {
-      const res = await fetch('/assets/extensions/' + D.id + '.html', { cache: 'no-store' });
-      if (!res.ok) throw new Error(String(res.status));
-      const html = await res.text();
-      X.install(html, X.inspect(html).manifest);
+      const { html, sha256 } = await X.fetchVerified(D.id, D.sha256);
+      X.install(html, X.inspect(html).manifest, { sha256 });
     }
     created = true;
     await X.downloadFiles(D.id, pkg.files, extraUrls(), showProgress);

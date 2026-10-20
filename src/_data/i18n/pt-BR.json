@@ -1410,7 +1410,7 @@
       "paste_uri_label": "Colar URI otpauth://",
       "or_manual": "— ou preencha manualmente —",
       "issuer_label": "Emissor (ex. GitHub)",
-      "account_label": "Conta (ex. usuario@exemplo.com)",
+      "account_label": "Conta (ex. seu e-mail ou usuário)",
       "secret_label": "Segredo (base32)",
       "cancel": "Cancelar",
       "save_button": "Salvar",

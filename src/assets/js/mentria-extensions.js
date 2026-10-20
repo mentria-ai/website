@@ -167,6 +167,28 @@ export async function fetchPackage(id) {
   return res.json();
 }
 
+async function sha256Hex(buf) {
+  if (!globalThis.isSecureContext || !globalThis.crypto || !crypto.subtle) return null;
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
+  let hex = '';
+  for (const b of digest) hex += b.toString(16).padStart(2, '0');
+  return hex;
+}
+
+export async function fetchVerified(id, sha256) {
+  if (typeof sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(sha256)) throw codedError('mismatch', 'mismatch');
+  const url = '/assets/extensions/' + encodeURIComponent(id) + '.html';
+  for (const src of [url, url + '?v=' + sha256.slice(0, 12)]) {
+    const r = await fetch(src, { cache: 'no-store' });
+    if (!r.ok) throw new Error(String(r.status));
+    const buf = await r.arrayBuffer();
+    const got = await sha256Hex(buf);
+    if (got !== null && got !== sha256) continue;
+    return { html: new TextDecoder().decode(buf), sha256: got };
+  }
+  throw codedError('mismatch', 'mismatch');
+}
+
 function ownedFiles(id) {
   return store().get(NS, FILES_KEY + id) || null;
 }

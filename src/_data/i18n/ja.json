@@ -1410,7 +1410,7 @@
       "paste_uri_label": "otpauth:// URI を貼り付け",
       "or_manual": "— または手動入力 —",
       "issuer_label": "発行者 (例: GitHub)",
-      "account_label": "アカウント (例: user@example.com)",
+      "account_label": "アカウント (例: メールアドレスやユーザー名)",
       "secret_label": "シークレット (base32)",
       "cancel": "キャンセル",
       "save_button": "保存",

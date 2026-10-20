@@ -573,8 +573,39 @@ module.exports = function(eleventyConfig) {
       if (url.endsWith("/")) file = path.join(file, "index.html");
       try { revisions[url] = crypto.createHash("sha1").update(fs.readFileSync(file)).digest("hex").slice(0, 10); } catch {}
     }
-    fs.writeFileSync(swPath, sw.replace(marker, JSON.stringify(revisions).slice(1, -1)));
+    let next = sw.replace(marker, JSON.stringify(revisions).slice(1, -1));
+    if (process.env.ELEVENTY_RUN_MODE === "build") {
+      const precached = new Set(Object.keys(revisions));
+      const deckKey = /^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(?:feed|learn)\//;
+      const core = {};
+      const decks = {};
+      for (const [key, sha] of Object.entries(integrityMap(out))) (deckKey.test(key) && !precached.has(key) ? decks : core)[key] = sha;
+      const deckJson = JSON.stringify(decks);
+      const deckSha = crypto.createHash("sha256").update(deckJson).digest("base64url");
+      const deckUrl = "/assets/integrity/decks-" + deckSha.slice(0, 16).replace(/[-_]/g, "0") + ".json";
+      fs.rmSync(path.join(out, "assets", "integrity"), { recursive: true, force: true });
+      fs.mkdirSync(path.join(out, "assets", "integrity"), { recursive: true });
+      fs.writeFileSync(path.join(out, deckUrl), deckJson);
+      next = next.replace("/*INTEGRITY*/null", JSON.stringify(core)).replace("/*DECKS*/null", JSON.stringify({ url: deckUrl, sha: deckSha }));
+    }
+    fs.writeFileSync(swPath, next);
   });
+
+  function integrityMap(out) {
+    const media = /\.(png|jpe?g|gif|webp|avif|ico|bmp|woff2?|ttf|otf|eot|mp3|ogg|oga|opus|wav|m4a|aac|flac|mp4|webm|mov|m4v|glb|bin|torrent|zip|gz|br|pdf|safetensors)$/i;
+    const map = {};
+    const walk = (rel) => {
+      for (const e of fs.readdirSync(path.join(out, rel), { withFileTypes: true })) {
+        const child = rel ? rel + "/" + e.name : e.name;
+        if (e.isDirectory()) { if (child !== "assets/integrity") walk(child); continue; }
+        if (child === "sw.js" || media.test(e.name)) continue;
+        const key = "/" + (e.name === "index.html" ? child.slice(0, -10) : child);
+        map[key] = crypto.createHash("sha256").update(fs.readFileSync(path.join(out, child))).digest("base64url");
+      }
+    };
+    walk("");
+    return map;
+  }
 
   return {
     dir: {

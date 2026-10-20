@@ -1123,6 +1123,7 @@
       "thinking": "Pensando…",
       "thought_for": "Pensou por {s}s",
       "think_cut": "A resposta ficou sem espaço ao pensar — tente uma pergunta mais curta ou um novo chat.",
+      "repeat_cut": "Encerrada antes: a resposta começou a se repetir.",
       "tier_confirm": "Trocar de modelo? Serão baixados {size} uma única vez e mantidos neste dispositivo.",
       "tier_fallback": "Esse modelo não coube na memória — mudamos para o modelo {tier}.",
       "btn_new_chat": "Novo chat",

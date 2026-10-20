@@ -214,9 +214,10 @@
         var missed = false;
         var lower = code.toLowerCase();
         var routes = shellRoutes(loc.prefix).concat([dictUrl(code), '/fragments/tools-popup.' + code + '.html?v=' + i18nBuild(), '/assets/js/site-palette.' + lower + '.js', '/assets/js/site-end.' + lower + '.js']);
+        var stamp = Date.now().toString(36);
         routes.forEach(function (route) {
           chain = chain.then(function () {
-            return fetch(route, { cache: 'no-cache', headers: { 'x-mentria-fill': '1' } }).then(function (resp) {
+            return fetch(route + (route.indexOf('?') === -1 ? '?' : '&') + 'fill=' + stamp, { cache: 'no-cache', headers: { 'x-mentria-fill': '1' } }).then(function (resp) {
               if (resp && resp.ok) return shell.put(route, resp.clone());
             }, function () { missed = true; }).catch(function () {});
           });

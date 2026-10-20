@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { Script } from 'node:vm';
+import { createHash } from 'node:crypto';
 
 const root = resolve(process.argv[2] || 'build');
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -168,6 +169,26 @@ try {
           console.error(`PRECACHE ${m[0]} (from ${rel(f)}) doesn't match the precached version ${want}, so it bypasses the offline copy`);
         }
       }
+    }
+    let integrity = null;
+    try {
+      const deckRef = JSON.parse(sw.match(/const DECK_INTEGRITY = (\{.*?\});\n/)[1]);
+      const deckBuf = readFileSync(join(root, deckRef.url));
+      if (createHash('sha256').update(deckBuf).digest('base64url') === deckRef.sha) {
+        integrity = Object.assign(JSON.parse(sw.match(/const INTEGRITY = (\{.*?\});\n/s)[1]), JSON.parse(deckBuf.toString('utf8')));
+      }
+    } catch (_) {}
+    if (!integrity) { precacheErrors++; console.error('PRECACHE the file fingerprints in sw.js are missing or unreadable (build with npm run build)'); }
+    else {
+      let stale = 0;
+      for (const [key, want] of Object.entries(integrity)) {
+        const target = key.endsWith('/') ? join(root, key, 'index.html') : join(root, key);
+        let got = null;
+        try { got = createHash('sha256').update(readFileSync(target)).digest('base64url'); } catch (_) {}
+        if (got === want) continue;
+        if (stale++ < 10) console.error(`PRECACHE ${key} changed after its fingerprint was taken, so the service worker won't serve it offline`);
+      }
+      precacheErrors += stale;
     }
   }
 

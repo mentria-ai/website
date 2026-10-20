@@ -104,6 +104,21 @@ jobs:
         if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v5
 
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check the live files match the build
+        run: node .github/scripts/check-live.mjs https://mentria.ai "$GITHUB_SHA"
+
   release:
     needs: [build, deploy]
     runs-on: ubuntu-latest

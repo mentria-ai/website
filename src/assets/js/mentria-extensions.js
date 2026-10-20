@@ -216,7 +216,7 @@ export async function downloadFiles(id, files, extra, onProgress) {
       try {
         const fresh = f.h && prevHash.get(f.u) === f.h && await cache.match(f.u);
         if (!fresh) {
-          const resp = await fetch(f.u, { cache: 'no-cache' });
+          const resp = await fetch(f.h ? f.u + (f.u.indexOf('?') === -1 ? '?' : '&') + 'h=' + f.h : f.u, { cache: 'no-cache' });
           if (!resp.ok) throw codedError('download-failed', f.u + ' (' + resp.status + ')', { url: f.u, status: resp.status });
           const body = await resp.arrayBuffer();
           await cache.put(f.u, new Response(body, { status: resp.status, statusText: resp.statusText, headers: { 'content-type': resp.headers.get('content-type') || 'application/octet-stream' } }));

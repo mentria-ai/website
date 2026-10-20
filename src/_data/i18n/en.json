@@ -1410,7 +1410,7 @@
       "paste_uri_label": "Paste otpauth:// URI",
       "or_manual": "— or fill in manually —",
       "issuer_label": "Issuer (e.g. GitHub)",
-      "account_label": "Account (e.g. user@example.com)",
+      "account_label": "Account (e.g. your email or username)",
       "secret_label": "Secret (base32)",
       "cancel": "Cancel",
       "save_button": "Save",

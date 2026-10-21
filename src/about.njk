@@ -2065,6 +2065,7 @@ localeReload: true
         await window.MentriaIdentity.setDeviceUnlock(deviceToggle.checked);
         var I = window.MentriaIdentity;
         if (!deviceToggle.checked && (I.rememberPending() || I.rememberDecision())) I.setRememberDecision('off');
+        else if (deviceToggle.checked && I.rememberDecision() === 'off') I.setRememberDecision('');
       } catch (err) {
         window.mentriaAlert(String(err && err.message || err));
       } finally {

@@ -1807,6 +1807,43 @@ check('a legacy switch-off clears a pending Remember', async () => {
   clean_(rigs.get(tools));
 });
 
+check('turning the old Remember back on clears an off and keeps the pending Remember', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  const { tools, code } = await seedSilentLink(page);
+  assert((await rememberUi(page)).pending, 'seed: Remember is pending');
+  await tools.close();
+  await setSwitch(page, false);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'the old device key opens the identity with the switch off');
+  await waitVisible(page, '#about-identity-device', 15000);
+  await page.click('#about-identity-device');
+  await until(() => readJson(page, IDENTITY).then((v) => !v.device), 15000, 'the old device unlock turns off');
+  await until(() => rememberUi(page).then((u) => u.decision === 'off'), 10000, 'the old toggle records off');
+  await until(() => page.$eval('#about-identity-device', (el) => !el.disabled), 10000, 'the toggle settles');
+  await page.click('#about-identity-device');
+  await until(() => readJson(page, IDENTITY).then((v) => !!(v && v.device)), 15000, 'the old device unlock turns back on');
+  await until(() => rememberUi(page).then((u) => u.decision === null), 10000, 'turning it back on clears the off');
+  await until(() => deviceWrapKept(page), 10000, 'the new old-style device key is stored');
+  const vault1 = await readJson(page, IDENTITY);
+  await setSwitch(page, true);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the identity opens from the keyring again');
+  await page.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
+  await waitVisible(page, '#about-identity-card-slot .m-unlock', 15000);
+  await cardCode(page, '#about-identity-card-slot', code);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the card opens the identity');
+  await until(() => runtime(page).then((st) => st.hasDevice === true), 20000, 'Remember this device turns on after the card unlock');
+  const ui = await rememberUi(page);
+  assert(!ui.pending && ui.decision === 'on' && ui.checked, 'the pending Remember is carried out', ui);
+  assert(JSON.stringify((await readJson(page, IDENTITY)).device) === JSON.stringify(vault1.device) && await deviceWrapKept(page), 'the old device key is kept until retirement');
+  clean_(rig);
+  clean_(rigs.get(tools));
+});
+
 check('Comms turns a pending Remember on at its next card unlock', async () => {
   await fresh(false);
   const page = await open('/comms/', { auth: true });

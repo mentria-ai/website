@@ -454,9 +454,14 @@ async function switchOffFlow(prod) {
   await typeInto(page, '#totp-unlock-pass', PASS);
   await press(page, '#totp-unlock-btn');
   await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await press(page, '#totp-backup-btn');
+  await backupModal(page);
   await page.evaluate(() => { window.__realNow = Date.now; const real = Date.now; Date.now = () => real() + 3600000; });
   await until(async () => (await screen(page)).unlock, 8000, 'auto-lock to fire on the old flow');
   await page.evaluate(() => { Date.now = window.__realNow; });
+  assert(await page.evaluate(() => !document.getElementById('totp-backup-modal').hidden), 'an auto-lock leaves the backup gate open, as today');
+  await press(page, '#totp-backup-modal .totp-modal__actions [data-close]');
+  await page.waitForFunction(() => document.getElementById('totp-backup-modal').hidden, { timeout: 5000 });
   await press(page, '#totp-prf-btn');
   await expectCodes(page, ACCOUNTS.slice(0, 1));
   if (prod) {
@@ -1084,6 +1089,38 @@ check('a card that cannot load still says what to do', async () => {
   await page.evaluate((k) => localStorage.removeItem(k), VAULT);
   await page.reload({ waitUntil: 'load' });
   await until(async () => (await screen(page)).create, 10000, 'Create vault');
+  await done(r);
+});
+
+check('a late one unlock attaches without a reload', async () => {
+  const r = await rig('late runtime', { authenticator: false });
+  const { page } = r;
+  const code = await newLinkedVault(r);
+  await addAccount(page, ACCOUNTS[0]);
+  await backupModal(page);
+  await press(page, '#totp-backup-confirm-btn');
+  await closedBackup(page);
+  await ringLock(page);
+  await until(async () => (await screen(page)).card, 10000, 'the card');
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    if (q.url().includes('/assets/js/mentria-unlock.js')) { setTimeout(() => { try { q.continue(); } catch (_) {} }, 7500); return; }
+    q.continue();
+  });
+  await page.reload({ waitUntil: 'load' });
+  await until(async () => (await screen(page)).unlock, 9000, 'the old unlock after the wait');
+  assert(!(await screen(page)).card, 'no card while the one unlock is still loading');
+  await until(async () => (await screen(page)).card, 12000, 'the card once the one unlock is ready');
+  const s1 = await screen(page);
+  assert(!s1.unlock && !s1.setup && !s1.vault, 'the card replaces the old unlock without a reload', s1);
+  await cardUnlock(page, '#totp-ring-card', { code });
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await page.reload({ waitUntil: 'load' });
+  await until(async () => (await screen(page)).unlock, 9000, 'the old unlock after the wait');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  assert((await screen(page)).vault, 'with the session open the vault opens directly once the one unlock is ready');
   await done(r);
 });
 

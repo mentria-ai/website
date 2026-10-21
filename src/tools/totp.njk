@@ -735,15 +735,23 @@ unlockTool: true
       return mods;
     })().catch(() => null);
     const mods = await Promise.race([start, new Promise((resolve) => setTimeout(() => resolve(null), RING_WAIT_MS))]);
-    if (!mods) {
-      ring.on = false;
-      return false;
+    if (mods) {
+      attachRing(mods);
+      route();
+      return;
     }
+    showLocked();
+    const late = await start;
+    if (!late || ring.on) return;
+    attachRing(late);
+    if (!state.masterKey) route();
+  }
+
+  function attachRing(mods) {
     ring.mod = mods[0];
     ring.ui = mods[1];
     ring.on = true;
     ring.mod.onChange(onRingChange);
-    return true;
   }
 
   function onRingChange(s) {
@@ -1089,14 +1097,14 @@ unlockTool: true
   function lock() {
     if (state.timer) { clearInterval(state.timer); state.timer = null; }
     if (typeof exportModalReady !== 'undefined' && exportModalReady) closeExport();
-    backupModal.close();
-    pendingAdd = null;
     state.masterKey = null;
     state.accounts = [];
     state.mode = null;
     lastCodes.clear();
     $('totp-list').replaceChildren();
     if (ring.on) {
+      backupModal.close();
+      pendingAdd = null;
       ring.raw = null;
       hideLinkPanel();
       route();
@@ -1896,7 +1904,7 @@ unlockTool: true
     state.vault = loadVault();
     if (storageTrouble() === 'blocked') showUnsaved('blocked');
     if (keyringWanted()) {
-      keyringStart().then((on) => { if (on) route(); else showLocked(); });
+      keyringStart();
       return;
     }
     showLocked();

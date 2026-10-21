@@ -1875,7 +1875,7 @@
       "value_label": "Valor",
       "export_modal_title": "Exportar todos los datos (cifrado)",
       "export_modal_lede": "Cifra un único archivo de copia de seguridad con tus notas, ajustes, bóvedas, paquetes de aprendizaje, libro de cuentas de Finanzas y datos de extensiones. No incluye los modelos de IA, las copias sin conexión ni tu biblioteca de fotos, vídeos y música: se vuelven a descargar o se reconstruyen. Guarda bien la contraseña: es la única forma de abrir el archivo.",
-      "export_modal_lede_code": "Cifra un único archivo de copia de seguridad con tus notas, ajustes, bóvedas, paquetes de aprendizaje, libro de cuentas de Finanzas y datos de extensiones. No incluye los modelos de IA, las copias sin conexión ni tu biblioteca de fotos, vídeos y música: se vuelven a descargar o se reconstruyen. El archivo está protegido con tu código de recuperación. Guarda bien el código: abre este archivo en cualquier dispositivo.",
+      "export_modal_lede_code": "Cifra un único archivo de copia de seguridad con tus notas, ajustes, bóvedas, paquetes de aprendizaje, libro de cuentas de Finanzas y datos de extensiones. No incluye los modelos de IA, las copias sin conexión ni tu biblioteca de fotos, vídeos y música: se vuelven a descargar o se reconstruyen. Guarda bien tu código de recuperación: abre este archivo en cualquier dispositivo.",
       "passphrase_label": "Contraseña",
       "export_confirm": "Descargar copia",
       "cancel": "Cancelar",

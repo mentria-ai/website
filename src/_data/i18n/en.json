@@ -1875,7 +1875,7 @@
       "value_label": "Value",
       "export_modal_title": "Export all data (encrypted)",
       "export_modal_lede": "Encrypt one backup file with your notes, settings, vaults, learning packs, Finance ledger and extension data. AI models, offline copies and your photo, video and music library aren't included; they download or rebuild again. Keep the passphrase safe — it's the only way to open the file.",
-      "export_modal_lede_code": "Encrypt one backup file with your notes, settings, vaults, learning packs, Finance ledger and extension data. AI models, offline copies and your photo, video and music library aren't included; they download or rebuild again. The file is protected by your recovery code. Keep the code safe: it opens this file on any device.",
+      "export_modal_lede_code": "Encrypt one backup file with your notes, settings, vaults, learning packs, Finance ledger and extension data. AI models, offline copies and your photo, video and music library aren't included; they download or rebuild again. Keep your recovery code safe: it opens this file on any device.",
       "passphrase_label": "Passphrase",
       "export_confirm": "Download backup",
       "cancel": "Cancel",

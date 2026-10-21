@@ -1875,7 +1875,7 @@
       "value_label": "Valor",
       "export_modal_title": "Exportar todos os dados (criptografado)",
       "export_modal_lede": "Criptografe um único arquivo de backup com suas notas, configurações, cofres, pacotes de aprendizado, livro-caixa do Finanças e dados de extensões. Modelos de IA, cópias offline e sua biblioteca de fotos, vídeos e músicas não entram: eles são baixados ou reconstruídos de novo. Guarde bem a senha: é a única forma de abrir o arquivo.",
-      "export_modal_lede_code": "Criptografe um único arquivo de backup com suas notas, configurações, cofres, pacotes de aprendizado, livro-caixa do Finanças e dados de extensões. Modelos de IA, cópias offline e sua biblioteca de fotos, vídeos e músicas não entram: eles são baixados ou reconstruídos de novo. O arquivo é protegido pelo seu código de recuperação. Guarde bem o código: ele abre este arquivo em qualquer aparelho.",
+      "export_modal_lede_code": "Criptografe um único arquivo de backup com suas notas, configurações, cofres, pacotes de aprendizado, livro-caixa do Finanças e dados de extensões. Modelos de IA, cópias offline e sua biblioteca de fotos, vídeos e músicas não entram: eles são baixados ou reconstruídos de novo. Guarde bem seu código de recuperação: ele abre este arquivo em qualquer aparelho.",
       "passphrase_label": "Senha",
       "export_confirm": "Baixar backup",
       "cancel": "Cancelar",

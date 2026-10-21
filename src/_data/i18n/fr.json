@@ -1875,7 +1875,7 @@
       "value_label": "Valeur",
       "export_modal_title": "Exporter toutes les données (chiffré)",
       "export_modal_lede": "Chiffrez un seul fichier de sauvegarde avec vos notes, réglages, coffres, packs d’apprentissage, livre de comptes Finances et données d’extensions. Les modèles d’IA, les copies hors ligne et votre bibliothèque de photos, vidéos et musiques n’y sont pas : ils se téléchargent ou se reconstruisent à nouveau. Gardez bien la phrase secrète : c'est le seul moyen d'ouvrir le fichier.",
-      "export_modal_lede_code": "Chiffrez un seul fichier de sauvegarde avec vos notes, réglages, coffres, packs d’apprentissage, livre de comptes Finances et données d’extensions. Les modèles d’IA, les copies hors ligne et votre bibliothèque de photos, vidéos et musiques n’y sont pas : ils se téléchargent ou se reconstruisent à nouveau. Le fichier est protégé par votre code de récupération. Conservez bien ce code : il ouvre ce fichier sur n'importe quel appareil.",
+      "export_modal_lede_code": "Chiffrez un seul fichier de sauvegarde avec vos notes, réglages, coffres, packs d’apprentissage, livre de comptes Finances et données d’extensions. Les modèles d’IA, les copies hors ligne et votre bibliothèque de photos, vidéos et musiques n’y sont pas : ils se téléchargent ou se reconstruisent à nouveau. Conservez bien votre code de récupération : il ouvre ce fichier sur n'importe quel appareil.",
       "passphrase_label": "Phrase secrète",
       "export_confirm": "Télécharger la sauvegarde",
       "cancel": "Annuler",

@@ -221,7 +221,8 @@
   const LOCAL_KEYS = ['tools.ruler_calibration', 'tools.decibel_settings', 'tools.countdown_active', 'ui.mini', 'ui.mini_tool', 'ui.mini_pos', 'handoff.md', 'comms.ring_token', 'comms.selftest_token', 'comms.ring_announced', 'comms.topic_v2_since'];
   const LOCAL_KEY_PREFIXES = ['ui.fullscreen.'];
   const LOCAL_LEGACY = ['mentria_lang', 'mentria_lang_redirected_at', 'mentria_seen', 'mentria_caps', 'mentria_pwa_installed_at', 'mentria_pwa_install_dismissed_at', 'mentria_pwa_install_seen'];
-  const VAULTS = ['totp.vault', 'identity.vault'];
+  const VAULTS = ['totp.vault', 'identity.vault', 'keyring.vault'];
+  const MERGE_VAULTS = ['keyring.vault'];
   const NOTE_LISTS = ['quick_notes.blob', 'quick_notes.inbox'];
   const DELETE_MAPS = ['quick_notes.deleted', 'tools.color_picker_deleted'];
 
@@ -232,6 +233,14 @@
     if (raw == null) return null;
     try { return JSON.parse(raw); } catch (_) { return null; }
   };
+
+  const sameKcv = (a, b) => {
+    const x = parseJson(a);
+    const y = parseJson(b);
+    return !!x && !!y && typeof x === 'object' && typeof y === 'object' && typeof x.kcv === 'string' && x.kcv !== '' && x.kcv === y.kcv;
+  };
+
+  const mergesVault = (suffix, local, incoming) => MERGE_VAULTS.indexOf(suffix) >= 0 && sameKcv(local, incoming);
 
   const portable = (suffix, raw) => {
     if (suffix !== 'identity.vault') return raw;
@@ -319,7 +328,7 @@
       const local = global.localStorage.getItem(PREFIX + suffix);
       if (local == null) { plan.add.push(suffix); return; }
       if (local === incoming) { plan.same.push(suffix); return; }
-      if (NOTE_LISTS.indexOf(suffix) >= 0 || DELETE_MAPS.indexOf(suffix) >= 0) { plan.merge.push(suffix); return; }
+      if (NOTE_LISTS.indexOf(suffix) >= 0 || DELETE_MAPS.indexOf(suffix) >= 0 || mergesVault(suffix, local, incoming)) { plan.merge.push(suffix); return; }
       if (VAULTS.indexOf(suffix) >= 0) { plan.vaults.push(suffix); return; }
       plan.replace.push(suffix);
     });
@@ -337,7 +346,8 @@
   const AREA_NAMES = {
     invoice: 'invoices', totp: 'TOTP accounts', identity: 'Comms identity', comms: 'Comms rooms and contacts',
     quick_notes: 'notes', packs: 'learning progress', games: 'game saves and scores', tools: 'tool settings',
-    ui: 'layout settings', ai_chat: 'AI chat', ext: 'extensions', extdata: 'extension data', feed: 'feed progress'
+    ui: 'layout settings', ai_chat: 'AI chat', ext: 'extensions', extdata: 'extension data', feed: 'feed progress',
+    keyring: 'one unlock'
   };
 
   const areaOf = (suffix) => {
@@ -391,6 +401,13 @@
       if (local != null && local !== raw) {
         if (NOTE_LISTS.indexOf(suffix) >= 0) { raw = JSON.stringify(mergeNotes(parseJson(local), parseJson(raw), deletedNotes)); mtime = Date.now(); }
         else if (DELETE_MAPS.indexOf(suffix) >= 0) { raw = JSON.stringify(maxMergeMap(parseJson(local), parseJson(raw), 200)); mtime = Date.now(); }
+        else if (mergesVault(suffix, local, raw)) {
+          let merged = null;
+          try { merged = typeof opts.mergeVault === 'function' ? opts.mergeVault(suffix, local, raw) : null; } catch (_) { merged = null; }
+          if (typeof merged !== 'string' || !merged) return;
+          raw = merged;
+          mtime = Date.now();
+        }
       }
       if (local != null && local === raw) return;
       writes.push({ key: PREFIX + suffix, meta: META_PREFIX + suffix, raw, mtime });

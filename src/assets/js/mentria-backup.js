@@ -7,7 +7,13 @@
   const IV_BYTES = 12;
   const KEY_LENGTH = 256;
   const ENVELOPE_VERSION = 2;
-  const FILE_VERSION = 3;
+  const CODE_ENVELOPE_VERSION = 4;
+  const PASS_FILE_VERSION = 3;
+  const CODE_FILE_VERSION = 5;
+  const FILE_VERSION = 5;
+  const CHUNKED_VERSIONS = [PASS_FILE_VERSION, CODE_FILE_VERSION];
+  const CODE_KDF = 'keyring-code';
+  const CORE_URL = '/assets/js/mentria-unlock-core.js';
   const ARCHIVE_VERSION = 2;
   const ARCHIVE_FORMAT = 'mentria-backup';
   const MAX_PAYLOAD_BYTES = 32 * 1024 * 1024;
@@ -63,15 +69,71 @@
     return deriveFrom(passphrase, saltBytes, ITER, ['encrypt', 'decrypt']);
   };
 
-  const encryptBackup = async (data, passphrase) => {
+  let corePromise = null;
+  const loadCore = () => corePromise || (corePromise = import(CORE_URL).catch((err) => { corePromise = null; throw err; }));
+  const coreUnavailable = (err) => new Error('restore module unavailable: ' + String((err && err.message) || err));
+
+  const keyringOf = (secret) => (secret && typeof secret === 'object' && secret.keyring && typeof secret.keyring === 'object' ? secret.keyring : null);
+  const rawBytes = (v) => {
+    if (v instanceof Uint8Array) return v;
+    if (ArrayBuffer.isView(v)) return new Uint8Array(v.buffer, v.byteOffset, v.byteLength);
+    if (v instanceof ArrayBuffer) return new Uint8Array(v);
+    return null;
+  };
+  const codeSaltOk = (s) => {
+    if (typeof s !== 'string' || !s || s.length > 128) return false;
+    let n = 0;
+    try { n = b64uDecode(s).byteLength; } catch (_) { return false; }
+    return n >= 16 && n <= 64;
+  };
+  const kcvOk = (s) => typeof s === 'string' && s.length > 0 && s.length <= 128;
+  const envelopeAad = (v) => toUtf8.encode(ARCHIVE_FORMAT + '/' + v);
+
+  const codeSealer = async (secret) => {
+    const k = keyringOf(secret);
+    const bytes = k ? rawBytes(k.key) : null;
+    if (!bytes || bytes.byteLength !== 32 || !codeSaltOk(k.salt) || !kcvOk(k.kcv)) throw new Error('backup key missing');
+    return { key: await crypto.subtle.importKey('raw', bytes, { name: 'AES-GCM' }, false, ['encrypt']), salt: k.salt, kcv: k.kcv };
+  };
+
+  const codeOpener = async (env, secret) => {
+    const k = keyringOf(secret);
+    let bytes = null;
+    if (k) {
+      if (k.salt !== env.salt || k.kcv !== env.kcv) throw damaged();
+      bytes = rawBytes(k.key);
+    } else if (typeof secret === 'string') {
+      let core;
+      try { core = await loadCore(); } catch (err) { throw coreUnavailable(err); }
+      try { bytes = await core.backupKeyFromCode(secret, env.salt); } catch (_) { throw damaged(); }
+    }
+    if (!bytes || bytes.byteLength !== 32) throw damaged();
+    try { return await crypto.subtle.importKey('raw', bytes, { name: 'AES-GCM' }, false, ['decrypt']); } catch (_) { throw damaged(); }
+  };
+
+  const encryptBackup = async (data, secret) => {
     const json = JSON.stringify(data);
     const plaintext = new TextEncoder().encode(json);
     if (plaintext.byteLength > MAX_PAYLOAD_BYTES) {
       throw new Error('payload too large');
     }
+    if (keyringOf(secret)) {
+      const sealer = await codeSealer(secret);
+      const codeIv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
+      const codeBody = CAN_GZIP ? await pipeBytes(plaintext, new CompressionStream('gzip')) : plaintext;
+      const codeCt = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: codeIv, additionalData: envelopeAad(CODE_ENVELOPE_VERSION) }, sealer.key, codeBody);
+      return {
+        v: CODE_ENVELOPE_VERSION,
+        kdf: CODE_KDF,
+        salt: sealer.salt,
+        kcv: sealer.kcv,
+        iv: b64uEncode(codeIv),
+        ct: b64uEncode(new Uint8Array(codeCt))
+      };
+    }
     const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
     const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
-    const key = await deriveKey(passphrase, salt);
+    const key = await deriveKey(secret, salt);
     const body = CAN_GZIP ? await pipeBytes(plaintext, new CompressionStream('gzip')) : plaintext;
     const ctBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, body);
     return {
@@ -87,11 +149,16 @@
 
   const validateEnvelope = (env) => {
     if (!env || typeof env !== 'object') throw new Error('not an envelope');
-    if (env.v !== 1 && env.v !== ENVELOPE_VERSION) throw new Error('unsupported envelope version: ' + env.v);
-    if (env.kdf !== 'PBKDF2') throw new Error('unsupported kdf: ' + env.kdf);
-    if (env.hash !== 'SHA-256') throw new Error('unsupported hash: ' + env.hash);
-    if (typeof env.iter !== 'number' || env.iter < 100000 || env.iter > 10000000) {
-      throw new Error('iteration count out of range');
+    if (env.v === CODE_ENVELOPE_VERSION) {
+      if (env.kdf !== CODE_KDF) throw new Error('unsupported kdf: ' + env.kdf);
+      if (!kcvOk(env.kcv)) throw new Error('missing or oversized field: kcv');
+    } else {
+      if (env.v !== 1 && env.v !== ENVELOPE_VERSION) throw new Error('unsupported envelope version: ' + env.v);
+      if (env.kdf !== 'PBKDF2') throw new Error('unsupported kdf: ' + env.kdf);
+      if (env.hash !== 'SHA-256') throw new Error('unsupported hash: ' + env.hash);
+      if (typeof env.iter !== 'number' || env.iter < 100000 || env.iter > 10000000) {
+        throw new Error('iteration count out of range');
+      }
     }
     for (const k of ['salt', 'iv', 'ct']) {
       if (typeof env[k] !== 'string' || env[k].length === 0 || env[k].length > 8 * 1024 * 1024) {
@@ -100,19 +167,22 @@
     }
   };
 
-  const decryptBackup = async (envelope, passphrase) => {
+  const decryptBackup = async (envelope, secret) => {
     validateEnvelope(envelope);
+    const code = envelope.v === CODE_ENVELOPE_VERSION;
     const salt = b64uDecode(envelope.salt);
     const iv = b64uDecode(envelope.iv);
     const ct = b64uDecode(envelope.ct);
-    if (salt.byteLength !== SALT_BYTES) throw new Error('bad salt length');
+    if (code ? !codeSaltOk(envelope.salt) : salt.byteLength !== SALT_BYTES) throw new Error('bad salt length');
     if (iv.byteLength !== IV_BYTES) throw new Error('bad iv length');
+    if (!code && typeof secret !== 'string') throw damaged();
 
-    const key = await deriveFrom(passphrase, salt, envelope.iter, ['decrypt']);
+    const key = code ? await codeOpener(envelope, secret) : await deriveFrom(secret, salt, envelope.iter, ['decrypt']);
+    const params = code ? { name: 'AES-GCM', iv: iv, additionalData: envelopeAad(CODE_ENVELOPE_VERSION) } : { name: 'AES-GCM', iv: iv };
 
     let ptBuf;
     try {
-      ptBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ct);
+      ptBuf = await crypto.subtle.decrypt(params, key, ct);
     } catch (_) {
       throw new Error('wrong passphrase or corrupted file');
     }
@@ -676,13 +746,15 @@
     iv[11] ^= i & 255;
     return iv;
   };
-  const chunkAad = (i, last) => toUtf8.encode(ARCHIVE_FORMAT + '/' + FILE_VERSION + '/' + i + '/' + (last ? 1 : 0));
+  const chunkAad = (version, i, last) => toUtf8.encode(ARCHIVE_FORMAT + '/' + version + '/' + i + '/' + (last ? 1 : 0));
 
-  const sealBackup = async (prepared, passphrase, opts) => {
+  const sealBackup = async (prepared, secret, opts) => {
     const onProgress = opts && typeof opts.onProgress === 'function' ? opts.onProgress : null;
-    const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
+    const sealer = keyringOf(secret) ? await codeSealer(secret) : null;
+    const version = sealer ? CODE_FILE_VERSION : PASS_FILE_VERSION;
+    const salt = sealer ? null : crypto.getRandomValues(new Uint8Array(SALT_BYTES));
     const base = crypto.getRandomValues(new Uint8Array(IV_BYTES));
-    const key = await deriveKey(passphrase, salt);
+    const key = sealer ? sealer.key : await deriveKey(secret, salt);
     const total = prepared.archive.size || 1;
     let seen = 0;
     let source = prepared.archive.stream();
@@ -699,7 +771,7 @@
     const lines = [];
     let index = 0;
     const seal = async (bytes, last) => {
-      const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: chunkIv(base, index), additionalData: chunkAad(index, last) }, key, bytes);
+      const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: chunkIv(base, index), additionalData: chunkAad(version, index, last) }, key, bytes);
       lines.push(new Blob(['"' + b64uEncode(new Uint8Array(ct)) + '"' + (last ? '' : ',') + '\n']));
       index++;
     };
@@ -730,13 +802,15 @@
     } else {
       await seal(pending, true);
     }
-    const head = JSON.stringify({ v: FILE_VERSION, kdf: 'PBKDF2', iter: ITER, hash: HASH, salt: b64uEncode(salt), iv: b64uEncode(base), z: CAN_GZIP ? 1 : 0, n: index });
+    const head = JSON.stringify(sealer
+      ? { v: version, kdf: CODE_KDF, salt: sealer.salt, kcv: sealer.kcv, iv: b64uEncode(base), z: CAN_GZIP ? 1 : 0, n: index }
+      : { v: version, kdf: 'PBKDF2', iter: ITER, hash: HASH, salt: b64uEncode(salt), iv: b64uEncode(base), z: CAN_GZIP ? 1 : 0, n: index });
     const blob = new Blob([head.slice(0, -1) + CT_OPEN + '\n'].concat(lines, [']}\n']), { type: 'application/json' });
     if (onProgress) onProgress(1);
     return { blob, size: blob.size, records: prepared.records, skipped: prepared.skipped };
   };
 
-  const exportFull = async (passphrase, opts) => sealBackup(await prepareBackup(), passphrase, opts);
+  const exportFull = async (secret, opts) => sealBackup(await prepareBackup(), secret, opts);
 
   const lineReader = (file, start) => {
     let pos = start;
@@ -943,15 +1017,17 @@
     };
   };
 
-  const readV3 = async (env, nextChunk, passphrase, onProgress) => {
-    if (env.kdf !== 'PBKDF2' || env.hash !== HASH) throw notBackup();
-    if (typeof env.iter !== 'number' || env.iter < 100000 || env.iter > 10000000) throw notBackup();
+  const readChunked = async (env, nextChunk, secret, onProgress) => {
+    const code = env.v === CODE_FILE_VERSION;
+    if (code ? env.kdf !== CODE_KDF || !kcvOk(env.kcv) : env.kdf !== 'PBKDF2' || env.hash !== HASH) throw notBackup();
+    if (!code && (typeof env.iter !== 'number' || env.iter < 100000 || env.iter > 10000000)) throw notBackup();
     if (!Number.isInteger(env.n) || env.n < 1 || (env.z !== 0 && env.z !== 1)) throw notBackup();
-    const salt = b64uDecode(env.salt);
+    const salt = code ? null : b64uDecode(env.salt);
     const base = b64uDecode(env.iv);
-    if (salt.byteLength !== SALT_BYTES || base.byteLength !== IV_BYTES) throw notBackup();
+    if ((code ? !codeSaltOk(env.salt) : salt.byteLength !== SALT_BYTES) || base.byteLength !== IV_BYTES) throw notBackup();
     if (env.z && !CAN_GZIP) throw new Error('this browser cannot open compressed backups');
-    const key = await deriveFrom(String(passphrase), salt, env.iter, ['decrypt']);
+    if (!code && typeof secret !== 'string') throw damaged();
+    const key = code ? await codeOpener(env, secret) : await deriveFrom(secret, salt, env.iter, ['decrypt']);
     const archive = archiveReader();
     const sink = env.z ? gunzipInto(archive.push) : {
       write: async (bytes) => archive.push(bytes),
@@ -967,7 +1043,7 @@
         if (i >= env.n || c.last !== last) throw damaged();
         let plain;
         try {
-          plain = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: chunkIv(base, i), additionalData: chunkAad(i, last) }, key, b64uDecode(c.b64)));
+          plain = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: chunkIv(base, i), additionalData: chunkAad(env.v, i, last) }, key, b64uDecode(c.b64)));
         } catch (_) {
           throw damaged();
         }
@@ -984,8 +1060,7 @@
     return archive.finish();
   };
 
-  const readBackupFile = async (file, passphrase, opts) => {
-    const onProgress = opts && typeof opts.onProgress === 'function' ? opts.onProgress : null;
+  const fileHead = async (file) => {
     if (!file || typeof file.slice !== 'function' || typeof file.size !== 'number') throw notBackup();
     const head = await file.slice(0, Math.min(file.size, 4096)).text();
     const nl = head.indexOf('\n');
@@ -995,17 +1070,36 @@
       try { env = JSON.parse(first.slice(0, -CT_OPEN.length) + '}'); } catch (_) { throw notBackup(); }
       if (!env || typeof env.v !== 'number') throw notBackup();
       if (env.v > FILE_VERSION) throw newer(env.v);
-      if (env.v !== FILE_VERSION) throw notBackup();
-      return readV3(env, streamChunks(file, toUtf8.encode(head.slice(0, nl + 1)).length), passphrase, onProgress);
+      if (CHUNKED_VERSIONS.indexOf(env.v) < 0) throw notBackup();
+      return { env, start: toUtf8.encode(head.slice(0, nl + 1)).length };
     }
     if (file.size > MEMORY_FILE_BYTES) throw notBackup();
     const env = JSON.parse(await file.text());
     if (env && typeof env.v === 'number' && env.v > FILE_VERSION) throw newer(env.v);
-    if (env && env.v === FILE_VERSION) {
+    return { env, start: -1 };
+  };
+
+  const readBackupFile = async (file, secret, opts) => {
+    const onProgress = opts && typeof opts.onProgress === 'function' ? opts.onProgress : null;
+    const { env, start } = await fileHead(file);
+    if (start >= 0) return readChunked(env, streamChunks(file, start), secret, onProgress);
+    if (env && CHUNKED_VERSIONS.indexOf(env.v) >= 0) {
       if (!Array.isArray(env.ct)) throw notBackup();
-      return readV3(env, arrayChunks(env.ct), passphrase, onProgress);
+      return readChunked(env, arrayChunks(env.ct), secret, onProgress);
     }
-    return decryptBackup(env, passphrase);
+    return decryptBackup(env, secret);
+  };
+
+  const backupHeader = async (file) => {
+    const { env } = await fileHead(file);
+    if (!env || typeof env !== 'object' || typeof env.v !== 'number') throw notBackup();
+    const code = env.v === CODE_ENVELOPE_VERSION || env.v === CODE_FILE_VERSION;
+    return {
+      v: env.v,
+      code,
+      salt: code && typeof env.salt === 'string' ? env.salt : null,
+      kcv: code && typeof env.kcv === 'string' ? env.kcv : null
+    };
   };
 
   const planDatabases = async (dbs) => {
@@ -1231,6 +1325,16 @@
     return out;
   };
 
+  const keyringMerger = async () => {
+    let core;
+    try { core = await loadCore(); } catch (_) { return null; }
+    return (suffix, localRaw, incomingRaw) => {
+      if (suffix !== 'keyring.vault') return null;
+      const merged = core.mergeRecords(JSON.parse(localRaw), JSON.parse(incomingRaw));
+      return merged ? JSON.stringify(merged) : null;
+    };
+  };
+
   async function applyRestore(data, copy) {
     const S = global.MentriaStore;
     copy = copy || {};
@@ -1250,7 +1354,9 @@
     }
     const skip = [];
     for (const suffix of plan.vaults) {
-      if (!(await ask(suffix === 'totp.vault' ? copy.totpVault : copy.identityVault))) skip.push(suffix);
+      if (suffix === 'keyring.vault' && !copy.keyringVault) { skip.push(suffix); continue; }
+      const text = suffix === 'totp.vault' ? copy.totpVault : suffix === 'keyring.vault' ? copy.keyringVault : copy.identityVault;
+      if (!(await ask(text))) skip.push(suffix);
     }
     for (const p of dbPlans) {
       if (!p.whole || !p.conflict) continue;
@@ -1267,11 +1373,12 @@
       skip.push.apply(skip, plan.replace);
       merging.forEach((p) => { p.keepReplaced = true; });
     }
+    const mergeVault = plan.merge.indexOf('keyring.vault') >= 0 && skip.indexOf('keyring.vault') < 0 ? await keyringMerger() : null;
     await checkSpace(dbPlans);
     const done = await commitDatabases(dbPlans);
     let result;
     try {
-      result = S.importAll(local, { mode: 'merge', skip });
+      result = S.importAll(local, { mode: 'merge', skip, mergeVault });
     } catch (err) {
       await rollbackDatabases(done);
       throw err;
@@ -1306,7 +1413,7 @@
   global.MentriaBackup = {
     encryptBackup, decryptBackup, validateEnvelope,
     downloadBackupJson, downloadBlob, scorePassphrase, backupName, listJoin,
-    prepareBackup, sealBackup, exportFull, readBackupFile,
+    prepareBackup, sealBackup, exportFull, readBackupFile, backupHeader,
     applyRestore, restoreErrorCode, exportErrorCode, financeAdopt,
     ITER, ENVELOPE_VERSION, FILE_VERSION, LARGE_BYTES
   };

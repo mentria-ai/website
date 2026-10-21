@@ -222,6 +222,7 @@ localeReload: true
       replace:       {{ ("common.restore_replace"        | t) | dump | safe }},
       totpVault:     {{ ("common.restore_totp_vault"     | t) | dump | safe }},
       identityVault: {{ ("common.restore_identity_vault" | t) | dump | safe }},
+      keyringVault:  {{ ("common.restore_keyring_vault"  | t) | dump | safe }},
       finance:       {{ ("common.restore_finance"        | t) | dump | safe }},
       summary:       {{ ("common.restore_summary"        | t) | dump | safe }}
     },

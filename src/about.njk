@@ -678,6 +678,7 @@ localeReload: true
         replace:       {{ ('common.restore_replace'        | t) | dump | safe }},
         totpVault:     {{ ('common.restore_totp_vault'     | t) | dump | safe }},
         identityVault: {{ ('common.restore_identity_vault' | t) | dump | safe }},
+        keyringVault:  {{ ('common.restore_keyring_vault'  | t) | dump | safe }},
         finance:       {{ ('common.restore_finance'        | t) | dump | safe }},
         summary:       {{ ('common.restore_summary'        | t) | dump | safe }}
       },
@@ -877,6 +878,7 @@ localeReload: true
     window.MentriaSyncCopy = {
       'about.sync_vault_totp':     {{ ('about.sync_vault_totp'     | t) | dump | safe }},
       'about.sync_vault_identity': {{ ('about.sync_vault_identity' | t) | dump | safe }},
+      'about.sync_vault_keyring':  {{ ('about.sync_vault_keyring'  | t) | dump | safe }},
       'about.sync_vault_keep':     {{ ('about.sync_vault_keep'     | t) | dump | safe }},
       'about.sync_vault_replace':  {{ ('about.sync_vault_replace'  | t) | dump | safe }},
       'about.sync_confirm_replace': {{ ('about.sync_confirm_replace' | t) | dump | safe }}

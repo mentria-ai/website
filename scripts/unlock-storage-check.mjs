@@ -1,0 +1,513 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { register } from 'node:module';
+import { tmpdir } from 'node:os';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const repo = resolve(here, '..');
+const OLD_COMMIT = '9570a53e6e846d421cd25ef638d808d5ff55bcba';
+const tmp = mkdtempSync(join(tmpdir(), 'unlock-storage-'));
+process.on('exit', () => rmSync(tmp, { recursive: true, force: true }));
+
+const stubPath = join(tmp, 'trystero.mjs');
+writeFileSync(stubPath, [
+  "export const selfId = 'self-peer';",
+  'export function joinRoom(config, roomId) { return globalThis.__fakeRoom(config, roomId); }'
+].join('\n'));
+const hooksPath = join(tmp, 'hooks.mjs');
+writeFileSync(hooksPath, [
+  "let root = '';",
+  "let stub = '';",
+  'export async function initialize(data) { root = data.root; stub = data.stub; }',
+  'export async function resolve(specifier, context, next) {',
+  "  if (specifier === '/assets/vendor/trystero-nostr.js') return { url: stub, shortCircuit: true };",
+  "  if (specifier.startsWith('/assets/')) return { url: root + specifier, shortCircuit: true };",
+  '  return next(specifier, context);',
+  '}'
+].join('\n'));
+register(pathToFileURL(hooksPath).href, import.meta.url, { data: { root: pathToFileURL(join(repo, 'src')).href, stub: pathToFileURL(stubPath).href } });
+
+class MemoryStorage {
+  constructor() { this.map = new Map(); }
+  get length() { return this.map.size; }
+  key(i) { const k = Array.from(this.map.keys())[i]; return k === undefined ? null : k; }
+  getItem(k) { return this.map.has(String(k)) ? this.map.get(String(k)) : null; }
+  setItem(k, v) { this.map.set(String(k), String(v)); }
+  removeItem(k) { this.map.delete(String(k)); }
+  clear() { this.map.clear(); }
+}
+const ls = new MemoryStorage();
+Object.defineProperty(globalThis, 'localStorage', { value: ls, configurable: true, writable: true });
+const bus = new EventTarget();
+globalThis.window = globalThis;
+globalThis.addEventListener = bus.addEventListener.bind(bus);
+globalThis.removeEventListener = bus.removeEventListener.bind(bus);
+globalThis.dispatchEvent = bus.dispatchEvent.bind(bus);
+globalThis.document = { documentElement: { dataset: { release: 'beta' }, lang: 'en' } };
+globalThis.fetch = async () => { throw new Error('offline'); };
+const asked = [];
+let answer = () => true;
+globalThis.mentriaConfirm = async (msg, opts) => { asked.push(msg); return answer(msg, opts); };
+const rooms = [];
+globalThis.__fakeRoom = (config, roomId) => {
+  const room = {
+    roomId, sent: [], action: null, onPeerJoin: null, onPeerLeave: null,
+    makeAction(name) {
+      const a = { name, onMessage: null, send: (payload, to) => { room.sent.push({ payload, to }); } };
+      room.action = a;
+      return a;
+    },
+    leave: async () => {}
+  };
+  rooms.push(room);
+  return room;
+};
+
+const fileUrl = (rel) => pathToFileURL(join(repo, rel)).href;
+const U = await import(fileUrl('src/assets/js/mentria-unlock-core.js'));
+await import(fileUrl('src/assets/js/mentria-store.js'));
+const Store = globalThis.MentriaStore;
+const oldPath = join(tmp, 'old-backup.cjs');
+writeFileSync(oldPath, execFileSync('git', ['show', OLD_COMMIT + ':src/assets/js/mentria-backup.js'], { cwd: repo, encoding: 'utf8', maxBuffer: 1 << 26 }));
+await import(pathToFileURL(oldPath).href);
+const OLD = globalThis.MentriaBackup;
+delete globalThis.MentriaBackup;
+await import(fileUrl('src/assets/js/mentria-backup.js'));
+const BK = globalThis.MentriaBackup;
+await import(fileUrl('src/assets/js/mentria-sync.js'));
+const Sync = globalThis.MentriaSync;
+
+const checks = [];
+const check = (name, fn) => checks.push([name, fn]);
+
+const te = new TextEncoder();
+const td = new TextDecoder();
+const PASS = 'old pass 1234';
+const SECRET = new Uint8Array(32).fill(7);
+const COPY = {
+  replace: 'REPLACE {areas}', totpVault: 'TOTP?', identityVault: 'IDENTITY?', keyringVault: 'KEYRING?',
+  finance: 'FINANCE?', summary: 'SUMMARY {date} {areas}'
+};
+const rand = (n) => crypto.getRandomValues(new Uint8Array(n));
+const clone = (v) => JSON.parse(JSON.stringify(v));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const until = async (fn, ms = 4000) => {
+  const end = Date.now() + ms;
+  for (;;) {
+    const v = await fn();
+    if (v) return v;
+    if (Date.now() > end) throw new Error('timed out');
+    await sleep(10);
+  }
+};
+const raw = (suffix) => ls.getItem('mentria.store.' + suffix);
+const put = (suffix, value, mtime) => {
+  const dot = suffix.indexOf('.');
+  assert.ok(Store.set(suffix.slice(0, dot), suffix.slice(dot + 1), value, { remote: true, mtime: mtime == null ? Date.now() : mtime }));
+};
+const reset = (opts = {}) => {
+  ls.clear();
+  asked.length = 0;
+  answer = () => true;
+  delete globalThis.MentriaSyncCopy;
+  globalThis.document.documentElement.dataset.release = 'beta';
+  if (opts.enabled !== false) ls.setItem('mentria.keyring.local', JSON.stringify({ enabled: true, deviceId: 'dev-a' }));
+};
+const errCode = async (p, mod = BK) => {
+  try { await p; } catch (e) { return mod.restoreErrorCode(e); }
+  throw new Error('expected a failure');
+};
+const b64 = (bytes) => Buffer.from(bytes).toString('base64');
+const unb64 = (s) => new Uint8Array(Buffer.from(s, 'base64'));
+
+async function keyring(deviceId = 'dev-a', deviceName = 'Laptop') {
+  const code = U.newRecoveryCode();
+  const { record, rootBytes } = await U.createRecord({ code, deviceId, deviceName, app: 'beta' });
+  const rootKey = await U.rootKeyFrom(rootBytes);
+  const key = await U.backupKeyFromEntry(rootKey, record.backup);
+  return { code, record, rootBytes, rootKey, secret: { keyring: { key, salt: record.backup.salt, kcv: record.kcv } } };
+}
+
+async function withPasskey(k, record) {
+  const r = clone(record);
+  r.wraps.prf.push(await U.wrapWithPrf(k.rootBytes, rand(32), { id: U.b64u(rand(16)), salt: U.b64u(rand(32)), label: 'key' }));
+  return r;
+}
+
+const legacyIdentity = (kcv) => ({ v: 1, kcv, pass: { salt: U.b64u(rand(16)), iv: U.b64u(rand(12)), ct: U.b64u(rand(48)) } });
+const legacyTotp = () => ({ v: 1, pass: { salt: U.b64u(rand(16)), wrap: U.b64u(rand(48)) }, iv: U.b64u(rand(12)), ct: U.b64u(rand(64)) });
+const bigValue = () => randomBytes(4700000).toString('base64url');
+
+async function roomKey(secret) {
+  const bucket = String(Math.floor(Date.now() / (7 * 24 * 3600 * 1000)));
+  const base = await crypto.subtle.importKey('raw', secret, 'HKDF', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'HKDF', hash: 'SHA-256', salt: te.encode('mentria-identity-key-v1'), info: te.encode('aes-gcm-256|w' + bucket) },
+    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
+}
+const sealMsg = async (key, obj) => {
+  const iv = rand(12);
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(obj)));
+  return { iv: b64(iv), ct: b64(new Uint8Array(ct)) };
+};
+const openMsg = async (key, p) => JSON.parse(td.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(p.iv) }, key, unb64(p.ct))));
+
+async function joinRoom() {
+  const before = rooms.length;
+  await Sync.joinWithIdentity(SECRET);
+  const room = rooms[before];
+  assert.ok(room && room.action, 'room joined');
+  const key = await roomKey(SECRET);
+  const messages = async () => Promise.all(room.sent.map((s) => openMsg(key, s.payload)));
+  const deliver = async (msg) => room.action.onMessage(await sealMsg(key, msg), { peerId: 'peer-1' });
+  return { room, key, messages, deliver };
+}
+
+const snapshotOf = (store, extra) => Object.assign({
+  op: 'snapshot', v: 2,
+  data: { version: 1, exportedAt: new Date().toISOString(), store, legacy: {} },
+  meta: Object.fromEntries(Object.keys(store).map((k) => [k, Date.now() - 60000])),
+  tombs: {}
+}, extra || {});
+
+const headerOf = async (blob) => JSON.parse((await blob.slice(0, 4096).text()).split('\n')[0].replace(/,"ct":\[$/, '}'));
+const seedForBackup = (big) => {
+  put('quick_notes.blob', [{ id: 'n1', body: 'hello', updatedAt: 5 }]);
+  put('tools.color_picker_palette', ['#6ef3c5']);
+  if (big) put('tools.big', bigValue());
+};
+
+check('v3 file still opens after the change', async () => {
+  reset();
+  seedForBackup(true);
+  const expected = Store.exportAll().store;
+  const out = await OLD.sealBackup(await OLD.prepareBackup(), PASS);
+  const head = await headerOf(out.blob);
+  assert.equal(head.v, 3);
+  assert.equal(head.kdf, 'PBKDF2');
+  assert.ok(head.n >= 2, 'several chunks');
+  const data = await BK.readBackupFile(out.blob, PASS);
+  assert.equal(data.format, 'mentria-backup');
+  assert.deepEqual(data.local.store, expected);
+  const oneLine = new Blob([JSON.stringify(JSON.parse(await out.blob.text()))]);
+  assert.deepEqual((await BK.readBackupFile(oneLine, PASS)).local.store, expected);
+  assert.equal(await errCode(BK.readBackupFile(out.blob, 'wrong pass 1234')), 'pass');
+});
+
+check('v2 envelope still opens after the change', async () => {
+  const data = { version: 1, exportedAt: new Date().toISOString(), store: { 'totp.vault': '{"v":1}' }, legacy: {} };
+  const env = await BK.encryptBackup(data, PASS);
+  assert.equal(env.v, 2);
+  assert.equal(env.kdf, 'PBKDF2');
+  assert.deepEqual(await BK.readBackupFile(new Blob([JSON.stringify(env)]), PASS), data);
+  const old = await OLD.encryptBackup(data, PASS);
+  assert.deepEqual(await BK.readBackupFile(new Blob([JSON.stringify(old)]), PASS), data);
+});
+
+check('v4 roundtrip with recovery code', async () => {
+  const k = await keyring();
+  const data = { version: 1, exportedAt: new Date().toISOString(), store: { 'totp.vault': JSON.stringify(legacyTotp()) }, legacy: {} };
+  const env = await BK.encryptBackup(data, k.secret);
+  assert.deepEqual(Object.keys(env).sort(), ['ct', 'iv', 'kcv', 'kdf', 'salt', 'v']);
+  assert.equal(env.v, 4);
+  assert.equal(env.kdf, 'keyring-code');
+  assert.equal(env.salt, k.record.backup.salt);
+  assert.equal(env.kcv, k.record.kcv);
+  const file = new Blob([JSON.stringify(env)]);
+  assert.deepEqual(await BK.readBackupFile(file, k.code), data);
+  assert.deepEqual(await BK.readBackupFile(file, '  ' + k.code.toLowerCase().replace(/-/g, ' ') + ' '), data);
+  assert.deepEqual(await BK.readBackupFile(file, k.secret), data);
+  const fileKey = await crypto.subtle.importKey('raw', await U.backupKeyFromCode(k.code, env.salt), 'AES-GCM', false, ['decrypt']);
+  const plain = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: U.unb64u(env.iv), additionalData: te.encode('mentria-backup/4') }, fileKey, U.unb64u(env.ct)));
+  assert.equal(plain[0], 0x1f);
+  assert.equal(plain[1], 0x8b);
+  await assert.rejects(crypto.subtle.decrypt({ name: 'AES-GCM', iv: U.unb64u(env.iv) }, fileKey, U.unb64u(env.ct)));
+});
+
+check('v5 roundtrip with keyring key and with code', async () => {
+  reset();
+  seedForBackup(true);
+  const expected = Store.exportAll().store;
+  const k = await keyring();
+  let last = 0;
+  const out = await BK.sealBackup(await BK.prepareBackup(), k.secret, { onProgress: (p) => { last = p; } });
+  assert.equal(last, 1);
+  const head = await headerOf(out.blob);
+  assert.deepEqual(Object.keys(head).sort(), ['iv', 'kcv', 'kdf', 'n', 'salt', 'v', 'z']);
+  assert.equal(head.v, 5);
+  assert.equal(head.kdf, 'keyring-code');
+  assert.equal(head.salt, k.record.backup.salt);
+  assert.equal(head.kcv, k.record.kcv);
+  assert.ok(head.n >= 2, 'several chunks');
+  assert.deepEqual((await BK.readBackupFile(out.blob, k.secret)).local.store, expected);
+  assert.deepEqual((await BK.readBackupFile(out.blob, k.code)).local.store, expected);
+  const oneLine = new Blob([JSON.stringify(JSON.parse(await out.blob.text()))]);
+  assert.deepEqual((await BK.readBackupFile(oneLine, k.code)).local.store, expected);
+  assert.equal(BK.FILE_VERSION, 5);
+  const info = await BK.backupHeader(out.blob);
+  assert.deepEqual(info, { v: 5, code: true, salt: k.record.backup.salt, kcv: k.record.kcv });
+  const v3 = await BK.backupHeader((await BK.sealBackup(await BK.prepareBackup(), PASS)).blob);
+  assert.deepEqual(v3, { v: 3, code: false, salt: null, kcv: null });
+});
+
+check('v4 wrong code fails with restore_err_pass code', async () => {
+  const k = await keyring();
+  const other = await keyring();
+  const data = { version: 1, exportedAt: new Date().toISOString(), store: {}, legacy: {} };
+  const file = new Blob([JSON.stringify(await BK.encryptBackup(data, k.secret))]);
+  assert.equal(await errCode(BK.readBackupFile(file, other.code)), 'pass');
+  assert.equal(await errCode(BK.readBackupFile(file, 'nope')), 'pass');
+  assert.equal(await errCode(BK.readBackupFile(file, PASS)), 'pass');
+  assert.equal(await errCode(BK.readBackupFile(file, '')), 'pass');
+  assert.equal(await errCode(BK.readBackupFile(file, other.secret)), 'pass');
+  const wrongKey = { keyring: Object.assign({}, k.secret.keyring, { key: rand(32) }) };
+  assert.equal(await errCode(BK.readBackupFile(file, wrongKey)), 'pass');
+  reset();
+  seedForBackup(false);
+  const v5 = (await BK.sealBackup(await BK.prepareBackup(), k.secret)).blob;
+  assert.equal(await errCode(BK.readBackupFile(v5, other.code)), 'pass');
+  assert.equal(await errCode(BK.readBackupFile(v5, wrongKey)), 'pass');
+  const v3 = (await BK.sealBackup(await BK.prepareBackup(), PASS)).blob;
+  assert.equal(await errCode(BK.readBackupFile(v3, k.secret)), 'pass');
+});
+
+check('old reader says newer for v4 and v5', async () => {
+  reset();
+  seedForBackup(false);
+  const k = await keyring();
+  const v4 = new Blob([JSON.stringify(await BK.encryptBackup({ version: 1, store: {}, legacy: {} }, k.secret))]);
+  const v5 = (await BK.sealBackup(await BK.prepareBackup(), k.secret)).blob;
+  assert.equal(await errCode(OLD.readBackupFile(v4, k.code), OLD), 'newer');
+  assert.equal(await errCode(OLD.readBackupFile(v5, k.code), OLD), 'newer');
+  const v6 = new Blob([JSON.stringify({ v: 6, kdf: 'keyring-code', salt: 'a', kcv: 'b', iv: 'c', ct: 'd' })]);
+  assert.equal(await errCode(BK.readBackupFile(v6, k.code)), 'newer');
+});
+
+check('planImport same-kcv keyring goes to merge', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record);
+  const same = await withPasskey(k, k.record);
+  const plan = Store.planImport({ version: 1, store: { 'keyring.vault': JSON.stringify(same) }, legacy: {} });
+  assert.deepEqual(plan.merge, ['keyring.vault']);
+  assert.deepEqual(plan.vaults, []);
+  const other = await keyring();
+  const conflict = Store.planImport({ version: 1, store: { 'keyring.vault': JSON.stringify(other.record) }, legacy: {} });
+  assert.deepEqual(conflict.vaults, ['keyring.vault']);
+  assert.deepEqual(conflict.merge, []);
+  const equal = Store.planImport({ version: 1, store: { 'keyring.vault': raw('keyring.vault') }, legacy: {} });
+  assert.deepEqual(equal.same, ['keyring.vault']);
+  assert.deepEqual(Store.areaNames(['keyring.vault']), ['one unlock']);
+});
+
+check('importAll mergeVault unions passkeys', async () => {
+  reset();
+  const k = await keyring();
+  const local = await withPasskey(k, k.record);
+  const incoming = await withPasskey(k, k.record);
+  put('keyring.vault', local);
+  const before = raw('keyring.vault');
+  const payload = { version: 1, exportedAt: new Date().toISOString(), store: { 'keyring.vault': JSON.stringify(incoming) }, legacy: {} };
+  Store.importAll(payload, { mode: 'merge' });
+  assert.equal(raw('keyring.vault'), before, 'no merge function keeps this device\'s copy');
+  const calls = [];
+  const mergeVault = (suffix, a, b) => { calls.push(suffix); return JSON.stringify(U.mergeRecords(JSON.parse(a), JSON.parse(b))); };
+  Store.importAll(payload, { mode: 'merge', mergeVault });
+  assert.deepEqual(calls, ['keyring.vault']);
+  const merged = Store.get('keyring', 'vault');
+  assert.deepEqual(merged.wraps.prf.map((p) => p.id).sort(), [local.wraps.prf[0].id, incoming.wraps.prf[0].id].sort());
+  assert.ok(Store.getMeta('keyring', 'vault'));
+  Store.importAll(payload, { mode: 'merge', mergeVault: () => null });
+  assert.equal(raw('keyring.vault'), JSON.stringify(merged), 'a failed merge keeps this device\'s copy');
+  Store.importAll(payload, { mode: 'merge', mergeVault: () => { throw new Error('boom'); } });
+  assert.equal(raw('keyring.vault'), JSON.stringify(merged));
+});
+
+check('restore merges a same-kcv keyring and asks for a different one', async () => {
+  reset();
+  const k = await keyring();
+  const local = await withPasskey(k, k.record);
+  const incoming = await withPasskey(k, k.record);
+  put('keyring.vault', local);
+  const payload = (rec) => ({ version: 1, exportedAt: new Date().toISOString(), store: { 'keyring.vault': JSON.stringify(rec) }, legacy: {} });
+  await BK.applyRestore(payload(incoming), COPY);
+  assert.ok(!asked.includes('KEYRING?'));
+  assert.equal(Store.get('keyring', 'vault').wraps.prf.length, 2);
+  const merged = raw('keyring.vault');
+  const other = await keyring('dev-z');
+  asked.length = 0;
+  answer = (msg) => msg !== 'KEYRING?';
+  await BK.applyRestore(payload(other.record), COPY);
+  assert.ok(asked.includes('KEYRING?'));
+  assert.equal(raw('keyring.vault'), merged);
+  asked.length = 0;
+  await BK.applyRestore(payload(other.record), Object.assign({}, COPY, { keyringVault: undefined }));
+  assert.equal(raw('keyring.vault'), merged, 'no keyring copy never replaces it');
+  answer = () => true;
+  await BK.applyRestore(payload(other.record), COPY);
+  assert.equal(Store.get('keyring', 'vault').kcv, other.record.kcv);
+});
+
+check('restore v3 with keyring present', async () => {
+  reset();
+  const backupIdentity = legacyIdentity('kcv-backup');
+  put('identity.vault', backupIdentity);
+  put('quick_notes.blob', [{ id: 'n1', body: 'old', updatedAt: 1 }]);
+  const file = (await OLD.sealBackup(await OLD.prepareBackup(), PASS)).blob;
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record);
+  put('identity.vault', legacyIdentity('kcv-local'));
+  const before = raw('keyring.vault');
+  const data = await BK.readBackupFile(file, PASS);
+  const result = await BK.applyRestore(data, COPY);
+  assert.ok(result.restored >= 2);
+  assert.ok(asked.includes('IDENTITY?'));
+  assert.ok(!asked.includes('KEYRING?'));
+  assert.equal(raw('keyring.vault'), before);
+  assert.deepEqual(Store.get('identity', 'vault'), backupIdentity);
+  assert.equal(Store.get('quick_notes', 'blob')[0].body, 'old');
+});
+
+check('snapshot carries app, keyring and device', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record);
+  const r = await joinRoom();
+  r.room.onPeerJoin('peer-1');
+  const snap = await until(async () => (await r.messages()).find((m) => m.op === 'snapshot'));
+  assert.equal(snap.app, 'beta');
+  assert.equal(snap.keyring, 1);
+  assert.deepEqual(snap.device, { id: 'dev-a', name: 'Laptop' });
+  assert.equal(snap.v, 2);
+  await Sync.disconnect();
+  reset({ enabled: false });
+  globalThis.document.documentElement.dataset.release = 'v2026.10.21';
+  put('keyring.vault', k.record);
+  const off = await joinRoom();
+  off.room.onPeerJoin('peer-1');
+  const plain = await until(async () => (await off.messages()).find((m) => m.op === 'snapshot'));
+  assert.equal(plain.app, 'v2026.10.21');
+  assert.equal(plain.keyring, undefined);
+  assert.equal(plain.device, undefined);
+  await off.deliver(snapshotOf({ 'keyring.vault': JSON.stringify(k.record) }));
+  await sleep(150);
+  assert.equal(raw('keyring.vault'), JSON.stringify(k.record), 'switch off records nobody');
+  await Sync.disconnect();
+});
+
+check('old peer keeps legacy wraps', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record);
+  const identity = JSON.stringify(legacyIdentity('kcv-id'));
+  const totp = JSON.stringify(legacyTotp());
+  put('identity.vault', JSON.parse(identity));
+  put('totp.vault', JSON.parse(totp));
+  const idRaw = raw('identity.vault');
+  const totpRaw = raw('totp.vault');
+  const r = await joinRoom();
+  r.room.onPeerJoin('peer-1');
+  await r.deliver(snapshotOf({ 'identity.vault': idRaw, 'totp.vault': totpRaw, 'keyring.vault': raw('keyring.vault') }));
+  const rec = await until(() => { const v = Store.get('keyring', 'vault'); return v.devices.legacy ? v : null; });
+  assert.equal(rec.devices.legacy.name, 'older version');
+  assert.equal(rec.devices.legacy.app, '');
+  assert.equal(rec.devices.legacy.keyring, 0);
+  assert.ok(Math.abs(Date.parse(rec.devices.legacy.lastSeen) - Date.now()) < 60000);
+  assert.equal(rec.devices['dev-a'].keyring, 1);
+  assert.ok(U.retirementStatus(rec, 'identity').blockers.includes('old-device'));
+  assert.equal(raw('identity.vault'), idRaw);
+  assert.equal(raw('totp.vault'), totpRaw);
+  const sent = await until(async () => (await r.messages()).find((m) => m.op === 'set' && m.ns === 'keyring' && m.key === 'vault'));
+  assert.equal(sent.value.devices.legacy.keyring, 0);
+  const again = raw('keyring.vault');
+  await r.deliver(snapshotOf({ 'identity.vault': idRaw }));
+  await sleep(150);
+  assert.equal(raw('keyring.vault'), again, 'seen today is not written again');
+  await r.deliver(snapshotOf({}, { app: 'beta', keyring: 1, device: { id: 'dev-b', name: 'Phone' } }));
+  const both = await until(() => { const v = Store.get('keyring', 'vault'); return v.devices['dev-b'] ? v : null; });
+  assert.deepEqual({ name: both.devices['dev-b'].name, app: both.devices['dev-b'].app, keyring: both.devices['dev-b'].keyring }, { name: 'Phone', app: 'beta', keyring: 1 });
+  assert.equal(both.devices.legacy.keyring, 0);
+  await r.deliver(snapshotOf({}, { keyring: 1, device: { id: 'legacy', name: 'x' } }));
+  await r.deliver(snapshotOf({}, { keyring: 1, device: { id: '__proto__', name: 'x' } }));
+  await sleep(150);
+  const last = Store.get('keyring', 'vault');
+  assert.equal(last.devices.legacy.keyring, 0);
+  assert.deepEqual(Object.keys(last.devices).sort(), ['dev-a', 'dev-b', 'legacy']);
+  assert.ok(U.isRecord(last));
+  await Sync.disconnect();
+});
+
+check('sync merges a same-kcv keyring', async () => {
+  reset();
+  const k = await keyring();
+  const local = await withPasskey(k, k.record);
+  put('keyring.vault', local, Date.now());
+  const incoming = U.touchDevice(await withPasskey(k, k.record), 'dev-b', { name: 'Phone', app: 'beta', keyring: 1 });
+  const r = await joinRoom();
+  await r.deliver(snapshotOf({ 'keyring.vault': JSON.stringify(incoming) }, { app: 'beta', keyring: 1, device: { id: 'dev-b', name: 'Phone' } }));
+  const merged = await until(() => { const v = Store.get('keyring', 'vault'); return v.wraps.prf.length === 2 ? v : null; });
+  assert.ok(merged.devices['dev-a'] && merged.devices['dev-b']);
+  assert.deepEqual(asked, []);
+  const back = await until(async () => (await r.messages()).find((m) => m.op === 'snapshot-back' && m.data.store['keyring.vault']));
+  assert.equal(JSON.parse(back.data.store['keyring.vault']).wraps.prf.length, 2);
+  assert.equal(back.keyring, 1);
+  const third = await withPasskey(k, incoming);
+  await r.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: third, mtime: Date.now() });
+  await until(() => Store.get('keyring', 'vault').wraps.prf.length === 3);
+  const kept = raw('keyring.vault');
+  const other = await keyring('dev-z');
+  await r.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: other.record, mtime: Date.now() });
+  await sleep(150);
+  assert.equal(raw('keyring.vault'), kept, 'a different keyring never replaces it silently');
+  const broken = clone(third);
+  delete broken.wraps;
+  await r.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: broken, mtime: Date.now() });
+  await sleep(150);
+  assert.equal(raw('keyring.vault'), kept, 'an unreadable copy never overwrites it');
+  await r.deliver({ op: 'remove', ns: 'keyring', key: 'vault', mtime: Date.now() });
+  await r.deliver(Object.assign(snapshotOf({}, { keyring: 1 }), { tombs: { 'keyring.vault': Date.now() + 60000 } }));
+  await sleep(150);
+  assert.equal(raw('keyring.vault'), kept, 'a peer never deletes it');
+  await Sync.disconnect();
+});
+
+check('sync asks before replacing a different keyring', async () => {
+  reset();
+  globalThis.MentriaSyncCopy = { 'about.sync_vault_keyring': 'SYNC KEYRING?' };
+  const k = await keyring();
+  put('keyring.vault', k.record, Date.now() - 3600000);
+  const before = raw('keyring.vault');
+  const other = await keyring('dev-z');
+  answer = () => false;
+  const r = await joinRoom();
+  await r.deliver(Object.assign(snapshotOf({ 'keyring.vault': JSON.stringify(other.record) }, { keyring: 1 }), { meta: { 'keyring.vault': Date.now() } }));
+  await until(() => asked.length);
+  assert.deepEqual(asked, ['SYNC KEYRING?']);
+  const choice = await until(async () => (await r.messages()).find((m) => m.op === 'vault'));
+  assert.deepEqual({ suffix: choice.suffix, keep: choice.keep }, { suffix: 'keyring.vault', keep: true });
+  await sleep(50);
+  assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv);
+  assert.deepEqual(Object.keys(Store.get('keyring', 'vault').devices), Object.keys(JSON.parse(before).devices));
+  await Sync.disconnect();
+});
+
+let failed = 0;
+for (const [name, fn] of checks) {
+  try {
+    await fn();
+    console.log('PASS ' + name);
+  } catch (e) {
+    failed++;
+    console.log('FAIL ' + name);
+    console.log('     ' + (e && e.stack ? e.stack.split('\n').slice(0, 4).join('\n     ') : e));
+    try { await Sync.disconnect(); } catch (_) {}
+  }
+}
+console.log(checks.length - failed + '/' + checks.length + ' passed');
+process.exit(failed ? 1 : 0);

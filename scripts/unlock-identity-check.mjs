@@ -622,9 +622,13 @@ check('identity card lock locks everything', async () => {
   const a = await about.evaluate(() => ({
     status: document.getElementById('about-identity-status').textContent.trim(),
     unlocked: !!document.getElementById('about-identity-unlocked').getClientRects().length,
-    legacy: !!document.getElementById('about-identity-unlock').getClientRects().length
+    legacy: !!document.getElementById('about-identity-unlock').getClientRects().length,
+    cardH: document.querySelector('#about-identity-card-slot .m-unlock__title').tagName,
+    cardH2: document.querySelectorAll('.about-identity-card h2').length,
+    cardText: document.querySelector('#about-identity-card-slot .m-unlock__title').textContent.trim()
   }));
   assert(a.status === EN.about.identity_status_locked && !a.unlocked && !a.legacy, 'About shows the card, not the old unlock', a);
+  assert(a.cardH === 'H4' && a.cardH2 === 0 && a.cardText === EN.unlock.card_title, 'the card title is a level below the identity card heading', a);
   await about.bringToFront();
   await shot(about, 'about-card', '.about-identity-card');
   await cardCode(about, '#about-identity-card-slot', shared.comms.code);
@@ -934,13 +938,16 @@ check('retirement drops the old lock after 30 days', async () => {
   clean_(rig);
 });
 
-check('a keyring link with no identity vault offers a new identity', async () => {
+check('a keyring identity entry without a vault is rebuilt, never replaced', async () => {
   await fresh(true);
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
   const code = await aboutCreate(page, { passkey: false });
-  const oldRing = await keyringSecret(page);
-  await page.evaluate((k) => localStorage.removeItem(k), IDENTITY);
+  const ring0 = await keyringSecret(page);
+  const entry0 = (await readJson(page, KEYRING)).services.identity;
+  await page.evaluate(() => window.MentriaStore.remove('identity', 'vault'));
+  const tomb0 = await readJson(page, 'mentria-sync-tombstones');
+  assert(tomb0 && typeof tomb0['identity.vault'] === 'number', 'seed: a local identity tombstone', tomb0);
   await page.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
@@ -956,12 +963,199 @@ check('a keyring link with no identity vault offers a new identity', async () =>
   await page.click('#about-identity-create');
   await waitVisible(page, '#about-identity-card-slot .m-unlock');
   await cardCode(page, '#about-identity-card-slot', code);
-  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'a new identity opens');
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the identity reopens');
+  const rec = await readJson(page, KEYRING);
   const vault = await readJson(page, IDENTITY);
+  const meta = await readJson(page, 'mentria.meta.identity.vault');
   const ring = await keyringSecret(page);
-  assert(vault && vault.v === 3 && vault.linked === true && await vaultKcvMatches(page, ring), 'the new identity is linked', vault);
-  assert(JSON.stringify(ring) !== JSON.stringify(oldRing), 'with a fresh secret');
+  assert(JSON.stringify(rec.services.identity) === JSON.stringify(entry0), 'the keyring identity entry is never overwritten', { before: entry0.linked, after: rec.services.identity.linked });
+  assert(JSON.stringify(ring) === JSON.stringify(ring0), 'the keyring secret is unchanged');
+  assert(vault && vault.v === 3 && vault.linked === true && !vault.pass && await vaultKcvMatches(page, ring), 'the rebuilt vault opens with the keyring secret', vault);
+  assert(meta && meta.m === 0, 'the rebuilt vault cannot win against a real vault elsewhere', meta);
+  assert(JSON.stringify(await identityBytes(page)) === JSON.stringify(ring), 'the page holds the keyring secret');
   assert(!(await visible(page, '#about-identity-card-slot')), 'the card is gone');
+  clean_(rig);
+});
+
+check('a wrap-less vault that does not match is rebuilt from the keyring', async () => {
+  await fresh(true);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  await aboutCreate(page, { passkey: false });
+  const entry0 = (await readJson(page, KEYRING)).services.identity;
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ v: 3, kcv: 'AAAAAAAAAAAAAAAAAAAAAA', linked: true })), IDENTITY);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'the identity opens from the keyring');
+  const vault = await readJson(page, IDENTITY);
+  const meta = await readJson(page, 'mentria.meta.identity.vault');
+  assert(await vaultKcvMatches(page, await keyringSecret(page)) && vault.linked === true, 'the vault is rebuilt with the keyring secret', vault);
+  assert(meta && meta.m === 0, 'the rebuilt vault has mtime 0', meta);
+  assert(JSON.stringify((await readJson(page, KEYRING)).services.identity) === JSON.stringify(entry0), 'the keyring entry is untouched');
+  assert(await visible(page, '#about-identity-keyring'), 'keyring settings shown');
+  clean_(rig);
+});
+
+check('comms rebuilds a linked identity instead of making a new one', async () => {
+  await fresh(true);
+  const page = await open('/comms/', { auth: true });
+  const rig = rigs.get(page);
+  await commsOnboard(page, 'Same Sam');
+  const code = await setupNew(page, { passkey: false });
+  await waitVisible(page, '#comms-id-on', 30000);
+  const fp = await fingerprint(page);
+  await until(() => readJson(page, IDKEYS).then((v) => !!(v && v.wrapped)), 10000, 'comms keys written');
+  const entry0 = (await readJson(page, KEYRING)).services.identity;
+  await page.evaluate(() => window.MentriaStore.remove('identity', 'vault'));
+  await lockAndWaitReload(page);
+  await waitVisible(page, '#comms-onboard', 20000);
+  await commsOnboard(page, 'Same Sam');
+  await waitVisible(page, '#comms-onboard-card .m-unlock', 20000);
+  assert(!(await page.$('.m-ulayer')), 'no setup sheet for a keyring that exists');
+  await cardCode(page, '#comms-onboard-card', code);
+  await waitVisible(page, '#comms-id-on', 30000);
+  assert(await fingerprint(page) === fp, 'the same Comms identity comes back');
+  const rec = await readJson(page, KEYRING);
+  assert(JSON.stringify(rec.services.identity) === JSON.stringify(entry0), 'the keyring identity entry is never overwritten');
+  const vault = await readJson(page, IDENTITY);
+  assert(vault && vault.v === 3 && await vaultKcvMatches(page, await keyringSecret(page)), 'rebuilt from the keyring', vault);
+  clean_(rig);
+});
+
+check('leaving setup partway stores nothing', async () => {
+  await fresh(true);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  const nothing = async (what) => {
+    const r = await page.evaluate((a, b) => ({ vault: localStorage.getItem(a), ring: localStorage.getItem(b), unlocked: !!(window.MentriaIdentity && MentriaIdentity.isUnlocked()) }), IDENTITY, KEYRING);
+    assert(r.vault === null && r.ring === null && !r.unlocked, 'nothing stored after ' + what, r);
+  };
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-create');
+  await page.click('#about-identity-create');
+  await waitStep(page, 'intro');
+  await nothing('opening setup');
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-create');
+  await nothing('a reload on the intro');
+  await page.click('#about-identity-create');
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-create');
+  await nothing('a reload on the code step');
+  await page.click('#about-identity-create');
+  await waitStep(page, 'intro');
+  await page.keyboard.press('Escape');
+  await sheetClosed(page, 10000);
+  await waitVisible(page, '#about-identity-create');
+  await nothing('Not now');
+  await page.click('#about-identity-create');
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  const code = await page.$eval('.m-ulayer .m-ucode', (el) => el.textContent.replace(/\s+/g, ''));
+  await page.type('.m-ulayer input[name="code-check"]', code.replace(/[^A-Z2-7]/g, '').slice(-4));
+  await until(() => page.$eval('.m-ulayer [data-act="next"]', (b) => !b.disabled), 5000, 'Next enabled');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'passkey', 20000);
+  const entry0 = (await readJson(page, KEYRING)).services.identity;
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-create');
+  assert(!(await readJson(page, IDENTITY)), 'no half-made identity vault after leaving on the passkey step');
+  await page.click('#about-identity-create');
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'Create finishes the linked identity');
+  const rec = await readJson(page, KEYRING);
+  assert(JSON.stringify(rec.services.identity) === JSON.stringify(entry0), 'the link made during setup is kept');
+  assert(await vaultKcvMatches(page, await keyringSecret(page)), 'the vault opens with the keyring secret');
+  await fresh(true);
+  const comms = await open('/comms/', { auth: true });
+  await commsOnboard(comms, 'Half Hal');
+  await waitStep(comms, 'intro');
+  await comms.reload({ waitUntil: 'load' });
+  await waitVisible(comms, '#comms-onboard', 20000);
+  const c = await comms.evaluate((a, b) => ({ vault: localStorage.getItem(a), ring: localStorage.getItem(b), state: document.getElementById('comms-onboard-intro').hidden }), IDENTITY, KEYRING);
+  assert(c.vault === null && c.ring === null && c.state === false, 'Comms starts onboarding again with nothing stored', c);
+  clean_(rig);
+  clean_(rigs.get(comms));
+});
+
+check('a mismatched link never takes over an old-way session', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  await openAdvanced(page);
+  await press(page, '[data-reveal="about-identity-setup-form"]');
+  await page.type('#about-identity-setup-pass', PASSPHRASE);
+  await page.type('#about-identity-setup-pass2', PASSPHRASE);
+  await page.click('#about-identity-setup-btn');
+  await answerDialog(page);
+  await waitVisible(page, '#about-identity-unlocked');
+  await setSwitch(page, true);
+  const tools = await open('/tools/');
+  const code = await tools.evaluate(async (u) => {
+    const m = await import(u);
+    await m.ready();
+    const made = await m.create({});
+    await m.lock();
+    return made.code;
+  }, RUNTIME);
+  await page.bringToFront();
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-unlock');
+  await page.type('#about-identity-unlock-pass', PASSPHRASE);
+  await page.click('#about-identity-unlock-btn');
+  await waitVisible(page, '#about-identity-card-slot .m-unlock', 20000);
+  await page.click('#about-identity-later');
+  await waitHidden(page, '#about-identity-card-slot');
+  await tools.evaluate(async (u, c) => {
+    const m = await import(u);
+    await m.unlockWithCode(c);
+    await m.link('identity', crypto.getRandomValues(new Uint8Array(32)));
+  }, RUNTIME, code);
+  await sleep(1200);
+  const mid = await page.evaluate(() => ({ unlocked: MentriaIdentity.isUnlocked(), keyring: !!document.getElementById('about-identity-keyring').getClientRects().length }));
+  assert(mid.unlocked && !mid.keyring, 'the old-way session stays and is not shown as the keyring', mid);
+  await tools.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
+  await sleep(1200);
+  assert(await page.evaluate(() => MentriaIdentity.isUnlocked()), 'a keyring lock does not drop the old-way session');
+  const vault = await readJson(page, IDENTITY);
+  assert(vault.pass && !(((await readJson(page, KEYRING)).retired || {}).identity), 'nothing retired', Object.keys(vault));
+  clean_(rig);
+});
+
+check('comms shows its lock screen even when the keyring boot fails', async () => {
+  await fresh(false);
+  const page = await open('/comms/', { auth: true });
+  const rig = rigs.get(page);
+  await commsOnboard(page, 'Boot Bea');
+  await waitVisible(page, '#comms-onboard-done', 40000);
+  await page.click('#comms-onboard-continue');
+  await waitVisible(page, '#comms-id-on');
+  await setSwitch(page, true);
+  await page.evaluateOnNewDocument(() => {
+    let held;
+    let armed = true;
+    Object.defineProperty(window, 'MentriaIdentity', {
+      configurable: true,
+      get() { return held; },
+      set(v) {
+        const orig = v.isLinked;
+        v.isLinked = function () {
+          if (armed) { armed = false; throw new Error('boot fault'); }
+          return orig.apply(this, arguments);
+        };
+        held = v;
+      }
+    });
+  });
+  await page.reload({ waitUntil: 'load' });
+  await waitVisible(page, '#comms-id-locked', 15000);
   clean_(rig);
 });
 

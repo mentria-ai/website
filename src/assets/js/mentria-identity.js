@@ -336,23 +336,36 @@
   async function createLinked() {
     requireCrypto();
     if (isSetUp()) throw new Error('already-set-up');
-    const secret = crypto.getRandomValues(new Uint8Array(SECRET_BYTES));
-    const kcv = await kcvOf(secret);
-    if (isSetUp()) throw new Error('already-set-up');
-    saveVault({ v: 3, kcv: kcv, linked: true });
-    state.secret = secret;
-    return new Uint8Array(secret);
+    return crypto.getRandomValues(new Uint8Array(SECRET_BYTES));
   }
 
-  async function discardLinked(bytes) {
+  function hasWraps(v) {
+    return !!(v && (v.pass || v.prf || v.device));
+  }
+
+  async function saveLinked(bytes, opts) {
+    requireCrypto();
+    const rebuild = !!(opts && opts.rebuild);
+    const secret = secretBytes(bytes);
+    const kcv = await kcvOf(secret);
     const vault = loadVault();
-    if (!vault || vault.linked !== true || vault.pass || vault.prf || vault.device) return false;
-    if (!vault.kcv || await kcvOf(secretBytes(bytes)) !== vault.kcv) return false;
-    const fresh = loadVault();
-    if (!fresh || fresh.kcv !== vault.kcv || fresh.pass || fresh.prf || fresh.device) return false;
-    global.MentriaStore.remove(NS, KEY);
-    state.secret = null;
-    return true;
+    if (hasWraps(vault) || (vault && !rebuild)) throw new Error('already-set-up');
+    if (!vault || vault.kcv !== kcv || vault.v !== 3 || vault.linked !== true) {
+      if (!global.MentriaStore) throw new Error('storage unavailable');
+      const value = { v: 3, kcv: kcv, linked: true };
+      const ok = rebuild ? global.MentriaStore.set(NS, KEY, value, { remote: true, mtime: 0 }) : global.MentriaStore.set(NS, KEY, value);
+      if (!ok) throw new Error('storage-full');
+    }
+    state.secret = secret;
+  }
+
+  async function openLinked(bytes) {
+    try {
+      await useSecret(bytes);
+    } catch (e) {
+      if (!e || e.message !== 'kcv-mismatch' || hasWraps(loadVault())) throw e;
+      await saveLinked(bytes, { rebuild: true });
+    }
   }
 
   function legacyPasskeyId() {
@@ -425,6 +438,6 @@
     setup, unlock, lock, isSetUp, isUnlocked, getSecret, clearVault,
     passkeySupport, hasPasskey, enrollPasskey, unlockWithPasskey, removePasskey,
     hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock,
-    useSecret, isLinked, createLinked, discardLinked, retireLegacy, legacyPasskeyId
+    useSecret, isLinked, createLinked, saveLinked, openLinked, retireLegacy, legacyPasskeyId
   };
 })(typeof window !== 'undefined' ? window : globalThis);

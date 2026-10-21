@@ -1586,6 +1586,15 @@ localeReload: true
       if (!want) return;
       cardP = ui().then(function (m) {
         return m.mountCard(slot, { onUnlocked: function () { reconcile(); } });
+      }).then(function (h) {
+        var t = slot.querySelector('h2.m-unlock__title');
+        if (t) {
+          var h4 = document.createElement('h4');
+          for (var i = 0; i < t.attributes.length; i++) h4.setAttribute(t.attributes[i].name, t.attributes[i].value);
+          while (t.firstChild) h4.appendChild(t.firstChild);
+          t.replaceWith(h4);
+        }
+        return h;
       }).catch(function () { return null; });
     }
 
@@ -1704,7 +1713,7 @@ localeReload: true
       try {
         var b = await kr.secret('identity');
         if (!b) return;
-        await I.useSecret(b);
+        await I.openLinked(b);
       } catch (_) {
         krBroken = true;
         return;
@@ -1717,13 +1726,17 @@ localeReload: true
 
     async function createInKeyring() {
       var I = window.MentriaIdentity;
-      var b = await I.createLinked();
-      try {
-        await kr.link('identity', b);
-      } catch (e) {
-        try { await I.discardLinked(b); } catch (_) {}
-        throw e;
+      if (I.isLinked()) {
+        var have = await kr.secret('identity');
+        if (!have) throw new Error('locked');
+        await I.saveLinked(have, { rebuild: true });
+        fromKeyring = true;
+        return;
       }
+      var b = await I.createLinked();
+      if (I.isLinked()) return createInKeyring();
+      await kr.link('identity', b);
+      await I.saveLinked(b);
       fromKeyring = true;
     }
 
@@ -1750,8 +1763,7 @@ localeReload: true
       }
       if (setupBusy) return;
       if (linkedHere()) {
-        if (!I.isUnlocked()) await openFromKeyring();
-        else fromKeyring = true;
+        if (!I.isUnlocked() || !fromKeyring) await openFromKeyring();
         return;
       }
       if (!I.isSetUp()) {
@@ -1849,8 +1861,10 @@ localeReload: true
           setupBusy = true;
           try { ok = await m.showSetup({ service: 'identity', secret: b }); } catch (_) { ok = false; }
           setupBusy = false;
-          if (ok && I.isLinked()) fromKeyring = true;
-          else await I.discardLinked(b);
+          if (ok && I.isLinked()) {
+            await I.saveLinked(b);
+            fromKeyring = true;
+          }
         } else if (s.unlocked) {
           await createInKeyring();
         } else {

@@ -3114,7 +3114,7 @@ const krOpen = () => {
     try {
       const bytes = await KR.secret('identity');
       if (!bytes) return false;
-      await I.useSecret(bytes);
+      await I.openLinked(bytes);
     } catch (_) {
       krBroken = true;
       refreshIdUI();
@@ -3227,22 +3227,27 @@ const krCreateIdentity = async () => {
     krSetupBusy = true;
     try { ok = await ui.showSetup({ service: 'identity', secret: bytes }); } catch (_) { ok = false; }
     krSetupBusy = false;
-    if (ok && I.isLinked()) { krOpened = true; return true; }
-    try { await I.discardLinked(bytes); } catch (_) {}
-    return false;
+    if (!ok || !I.isLinked()) return false;
+    await I.saveLinked(bytes);
+    krOpened = true;
+    return true;
   }
   if (!s.unlocked) {
     krSlot(els.obCard, true, () => { krSlot(els.obCard, false); els.obCreate.click(); });
     return false;
   }
   krSlot(els.obCard, false);
-  const bytes = await I.createLinked();
-  try {
-    await KR.link('identity', bytes);
-  } catch (e) {
-    try { await I.discardLinked(bytes); } catch (_) {}
-    throw e;
+  if (I.isLinked()) {
+    const have = await KR.secret('identity');
+    if (!have) throw new Error('locked');
+    await I.saveLinked(have, { rebuild: true });
+    krOpened = true;
+    return true;
   }
+  const bytes = await I.createLinked();
+  if (I.isLinked()) return krCreateIdentity();
+  await KR.link('identity', bytes);
+  await I.saveLinked(bytes);
   krOpened = true;
   return true;
 };
@@ -4012,7 +4017,7 @@ const legacyBoot = () => {
   }
   return null;
 };
-const krBoot = async () => {
+const krBootSteps = async () => {
   try {
     const mods = await Promise.all([import('/assets/js/mentria-unlock.js'), import('/assets/js/mentria-unlock-core.js')]);
     try { await mods[0].ready(); } catch (_) {}
@@ -4043,6 +4048,18 @@ const krBoot = async () => {
     }
   }
   return null;
+};
+const krBoot = async () => {
+  try {
+    return await krBootSteps();
+  } catch (_) {
+    return null;
+  } finally {
+    if (krPending) {
+      krPending = false;
+      try { refreshIdUI(); } catch (_) {}
+    }
+  }
 };
 bootUnlock = KR_WANTED ? krBoot() : legacyBoot();
 

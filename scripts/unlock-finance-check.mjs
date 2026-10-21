@@ -265,11 +265,18 @@ async function ledgerOf(frame, pass) {
     const E = await import('/assets/finance/engine.js');
     const L = await import('/assets/finance/oplog.js');
     const D = await import('/assets/finance/db.js');
-    let s;
+    let s = null;
     if (pw) s = await V.unlockPass(pw);
     else {
       const M = await import('/assets/js/mentria-unlock.js');
-      s = await V.openLinked(await M.secret('finance'));
+      const C = await import('/assets/finance/crypto.js');
+      const kcv = await D.getMeta('kcv');
+      for (const x of await M.secrets('finance')) {
+        const keys = await C.deriveKeys(x.bytes);
+        if (!s && keys.kcv === kcv) s = { root: new Uint8Array(x.bytes), keys };
+        x.bytes.fill(0);
+      }
+      if (!s) throw new Error('no kept secret opens this ledger');
     }
     const engine = new E.Engine({ root: s.root, keys: s.keys, deviceId: await D.getMeta('device_id') });
     await engine.load();
@@ -283,6 +290,21 @@ async function ledgerOf(frame, pass) {
       notes: L.list(st, 'transaction').map((t) => t.note)
     };
   }, pass || null);
+}
+
+async function keptFinance(scope) {
+  at('kept');
+  return scope.evaluate(async () => {
+    const M = await import('/assets/js/mentria-unlock.js');
+    await M.ready();
+    const C = await import('/assets/finance/crypto.js');
+    const out = [];
+    for (const x of await M.secrets('finance')) {
+      out.push({ id: x.id, kcv: (await C.deriveKeys(x.bytes)).kcv });
+      x.bytes.fill(0);
+    }
+    return { list: out, current: M.secretId('finance') };
+  });
 }
 
 async function runtimeState(scope) {
@@ -639,6 +661,64 @@ check('adding a passkey after a reload asks to confirm', async () => {
   assert(s.passkeyRows === 2, 'both passkeys are listed', s);
 });
 
+check('a ledger kept under prior still opens', async () => {
+  const r = shared.fresh;
+  assert(r, 'needs the new ledger');
+  const page = r.page;
+  let frame = await frameOf(page);
+  await opened(frame);
+  const mine = (await metaOf(frame)).kcv;
+  await page.evaluate(async () => {
+    const M = await import('/assets/js/mentria-unlock.js');
+    await M.ready();
+    await M.link('finance', crypto.getRandomValues(new Uint8Array(32)));
+  });
+  const kept = await keptFinance(page);
+  assert(kept.list.length >= 2 && kept.list[0].id === kept.current && kept.list[0].kcv !== mine && kept.list.slice(1).some((x) => x.kcv === mine), 'another ledger is current and this one is kept under prior', { kept, mine });
+  await page.reload({ waitUntil: 'load' });
+  frame = await frameOf(page);
+  await opened(frame);
+  assert(!(await frame.evaluate(() => window.__sawLock)), 'this ledger opens with the session and no screen');
+  assert((await metaOf(frame)).kcv === mine, 'the same ledger is open');
+  const l = await ledgerOf(frame);
+  assert(Array.isArray(l.notes), 'the ledger reads with its kept secret', l);
+});
+
+check('after Erase a new ledger links normally', async () => {
+  const r = shared.fresh;
+  assert(r, 'needs the new ledger');
+  const page = r.page;
+  let frame = await frameOf(page);
+  await opened(frame);
+  const old = (await metaOf(frame)).kcv;
+  const before = await keptFinance(page);
+  await route(frame, 'settings');
+  await pressText(frame, '#fin-main', FIN.lock.erase);
+  await pressText(frame, 'dialog.fsheet', FIN.lock.erase_ok);
+  at('welcome after erase');
+  await page.waitForFunction((start) => {
+    const f = document.getElementById('xr-frame');
+    try { return [...f.contentDocument.querySelectorAll('.flock button')].some((b) => b.textContent.trim() === start); } catch (_) { return false; }
+  }, { timeout: 60000, polling: 150 }, FIN.setup.start);
+  frame = await frameOf(page);
+  await pressText(frame, '.flock', FIN.setup.start);
+  at('basics after erase');
+  await buttonByText(frame, '.flock', FIN.setup.finish);
+  assert(!(await frame.$('.flock input[type="password"]')) && !(await frame.$('.m-ulayer')), 'setup goes straight to the basics with the session open');
+  await pressText(frame, '.flock', FIN.setup.finish);
+  await opened(frame);
+  const meta = await metaOf(frame);
+  const kept = await keptFinance(page);
+  assert(meta.linked && meta.wrapKinds.length === 0 && meta.kcv !== old, 'a new linked ledger with no old wraps', meta);
+  assert(kept.list[0].kcv === meta.kcv && kept.list[0].id === kept.current, 'the new ledger is the current Finance entry', kept);
+  assert(before.list.every((b) => kept.list.some((k) => k.kcv === b.kcv)), 'every earlier entry is still kept', { before, kept });
+  await page.reload({ waitUntil: 'load' });
+  frame = await frameOf(page);
+  await opened(frame);
+  assert(!(await frame.evaluate(() => window.__sawLock)), 'the new ledger opens with the session');
+  assert((await metaOf(frame)).kcv === meta.kcv, 'the new ledger is the one that opens');
+});
+
 check('legacy device unlock turns on remember', async () => {
   const r = await rig();
   const page = r.page;
@@ -756,15 +836,17 @@ check('retirement deletes the old locks', async () => {
   assert(before.wrapKinds.join() === 'pass,prf,recovery', 'nothing retires inside 30 days', before);
   shared.wrapsBefore = await rawWraps(frame);
   const legacyIds = before.prfIds.map((id) => id.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
-  await page.evaluate((k) => {
+  await page.goto(ORIGIN + '/robots.txt', { waitUntil: 'load' });
+  const dated = await page.evaluate((k) => {
     const rec = JSON.parse(localStorage.getItem(k));
     rec.services.finance.linked = new Date(Date.now() - 31 * 86400000).toISOString();
     localStorage.setItem(k, JSON.stringify(rec));
+    return rec.services.finance.linked;
   }, RECORD);
-  await page.reload({ waitUntil: 'load' });
-  frame = await frameOf(page);
+  frame = await store(page);
   await opened(frame);
   const ok = await until(async () => (await metaOf(frame)).wrapKinds.length === 0, 20000);
+  assert((await record(page)).services.finance.linked === dated, 'the backdated link time held');
   const meta = await metaOf(frame);
   const rec = await record(page);
   const l = await ledgerOf(frame);

@@ -125,7 +125,6 @@ function passStep(root, opts, draft) {
   frame(root,
     steps(1, 3),
     h('h2', null, t('setup.pass_title')),
-    draft.note ? h('div', { class: 'fbanner' }, icon('info'), h('span', null, draft.note)) : null,
     h('p', { class: 'flock__lede' }, t('setup.pass_body')),
     U.field(t('setup.pass_label'), p1),
     meter, meterLabel,
@@ -232,10 +231,6 @@ async function keyringStart(root, opts) {
     } catch (_) {}
     s = K.state();
     if (!s.setUp) return;
-  }
-  if (s.linked.indexOf('finance') >= 0) {
-    passStep(root, opts, { note: t('setup.keyring_taken') });
-    return;
   }
   if (s.unlocked) {
     basicsStep(root, opts, { linked: true });

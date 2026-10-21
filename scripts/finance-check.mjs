@@ -1279,6 +1279,24 @@ test('vault: retirement drops every legacy wrap and lists passkey ids for the si
   assert.equal(VT.urlSafeId(C.b64(new Uint8Array([251, 255, 191]))), '-_-_');
 });
 
+test('vault: a linked ledger opens with whichever kept secret matches its key', async () => {
+  const mine = C.randomBytes(32);
+  const other = C.randomBytes(32);
+  const kcv = (await C.deriveKeys(mine)).kcv;
+  const list = [{ id: 'now', bytes: other }, { id: 'before', bytes: mine }];
+  const hit = await VT.matchLinked(list, kcv);
+  assert.equal(hit.index, 1);
+  assert.equal(hit.id, 'before');
+  assert.equal(hit.linked, true);
+  assert.equal(hit.keys.kcv, kcv);
+  assert.deepEqual(Array.from(hit.root), Array.from(mine));
+  assert.notEqual(hit.root, mine);
+  assert.equal(await VT.matchLinked([{ id: 'now', bytes: other }], kcv), null);
+  assert.equal(await VT.matchLinked([], kcv), null);
+  assert.equal((await VT.matchLinked(list, null)).index, 0);
+  assert.deepEqual(Array.from(list[0].bytes), Array.from(other));
+});
+
 test('vault: pairing takes a ledger without wraps only into an open one unlock', () => {
   assert.equal(VT.pairPlan({ pass: { ct: 'p' } }, false), 'legacy');
   assert.equal(VT.pairPlan({ pass: { ct: 'p' } }, true), 'legacy');

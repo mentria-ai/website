@@ -71,6 +71,7 @@ const app = {
   K: null,
   linked: false,
   linkDeclined: false,
+  current: false,
   opening: false
 };
 
@@ -369,7 +370,7 @@ export async function publishWrap(kind) {
 
 async function retireLegacy() {
   const K = app.K;
-  if (!K || !app.linked || !app.engine || app.engine.readOnly) return false;
+  if (!K || !app.linked || !app.current || !app.engine || app.engine.readOnly) return false;
   let r = null;
   try { r = K.retirement('finance'); } catch (_) { return false; }
   if (!r) return false;
@@ -388,9 +389,9 @@ async function retireLegacy() {
   return true;
 }
 
-async function sameAsKeyring(bytes) {
-  const cur = await app.K.secret('finance');
-  try { return !!cur && KR.sameBytes(cur, bytes); } finally { if (cur) cur.fill(0); }
+async function inKeyring(bytes) {
+  const list = await app.K.secrets('finance');
+  try { return list.some((x) => KR.sameBytes(x.bytes, bytes)); } finally { for (const x of list) x.bytes.fill(0); }
 }
 
 function keyringLockedNow() {
@@ -410,10 +411,6 @@ async function convertDevice() {
 async function ensureLinked(bytes) {
   const K = app.K;
   if (!K || !K.state().unlocked) throw new Error('locked');
-  if (K.state().linked.indexOf('finance') >= 0) {
-    if (!(await sameAsKeyring(bytes))) throw new Error('wrong-key');
-    return;
-  }
   await K.link('finance', new Uint8Array(bytes));
 }
 
@@ -486,7 +483,7 @@ async function linkLegacy(bytes, info) {
     let ok = false;
     try { ok = await ui.showSetup(opts); } finally { secret.fill(0); }
     const after = K.state();
-    if (!ok && !(after.unlocked && after.linked.indexOf('finance') >= 0 && await sameAsKeyring(bytes))) {
+    if (!ok && !(after.unlocked && await inKeyring(bytes))) {
       app.linkDeclined = true;
       return false;
     }
@@ -504,10 +501,11 @@ async function openLinked() {
   if (!K) return false;
   app.opening = true;
   try {
-    const bytes = await K.secret('finance');
-    if (!bytes) throw new Error('not-linked');
+    const list = await K.secrets('finance');
+    if (!list.length) throw new Error('not-linked');
     let s;
-    try { s = await V.openLinked(bytes); } finally { bytes.fill(0); }
+    try { s = await V.openLinked(list); } finally { for (const x of list) x.bytes.fill(0); }
+    app.current = s.index === 0 && list[0].id === K.secretId('finance');
     if (!(await db.getMeta('linked'))) {
       await V.markLinked();
       await convertDevice();
@@ -522,7 +520,6 @@ async function openLinked() {
 async function createLinked(pending) {
   const K = app.K;
   if (!K || !K.state().unlocked) throw new Error('locked');
-  if (K.state().linked.indexOf('finance') >= 0) throw new Error('taken');
   const v = await V.buildVault(null, { linked: true, pending });
   await K.link('finance', new Uint8Array(v.root));
   const created = await V.saveVault(v);
@@ -694,16 +691,17 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-export function lock() {
+export function lock(stay) {
   U.closeAllSheets();
   import('./agents.js').then((A) => A.disableAgents()).catch(() => {});
   if (app.sync) { app.sync.stop(); app.sync = null; }
   if (app.engine) { app.engine.close(); app.engine = null; }
   app.ledger = null;
   app.linked = false;
+  app.current = false;
   clearTimeout(widgetTimer);
   updateWidget();
-  start();
+  if (!stay) start();
 }
 
 window.addEventListener('hashchange', () => { if (app.engine) render(); });

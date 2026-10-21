@@ -212,7 +212,7 @@ export function render(ctx) {
     h('button', { type: 'button', class: 'fb fb--danger fb--sm', style: { alignSelf: 'flex-start' }, onclick: async () => {
       const ok = await U.confirmDialog({ title: t('lock.erase_title'), body: t('lock.erase_body'), ok: t('lock.erase_ok'), danger: true });
       if (!ok) return;
-      ctx.lock();
+      ctx.lock(true);
       await db.wipe();
       try { if (window.MentriaStore) window.MentriaStore.remove('extdata.finance', 'widget'); } catch (_) {}
       location.reload();

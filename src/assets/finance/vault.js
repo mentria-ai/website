@@ -55,14 +55,21 @@ export async function markLinked() {
   await db.setMeta({ linked: true });
 }
 
-export async function openLinked(bytes) {
-  const root = new Uint8Array(bytes);
-  try {
-    return { root, keys: await verify(root), linked: true };
-  } catch (e) {
+export async function matchLinked(list, kcv) {
+  const items = Array.isArray(list) ? list : [];
+  for (let i = 0; i < items.length; i++) {
+    const root = new Uint8Array(items[i].bytes);
+    const keys = await C.deriveKeys(root);
+    if (!kcv || keys.kcv === kcv) return { root, keys, linked: true, index: i, id: items[i].id || null };
     root.fill(0);
-    throw e;
   }
+  return null;
+}
+
+export async function openLinked(list) {
+  const hit = await matchLinked(list, await db.getMeta('kcv'));
+  if (!hit) throw new Error('wrong-key');
+  return hit;
 }
 
 export function newDeviceId() {

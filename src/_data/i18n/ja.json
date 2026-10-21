@@ -3832,8 +3832,7 @@
         "device_unlock": "このデバイスでは自動でロック解除する",
         "device_hint": "このデバイスではパスフレーズの入力を省略します。自分しか使わないパソコンの場合のみオンにしてください。",
         "finish": "家計簿を作成",
-        "creating": "暗号化しています…",
-        "keyring_taken": "Your one unlock already opens a Finance ledger from another device. To use that ledger here, go back and choose “I use Finance on another device”. To keep a separate ledger on this device, choose a passphrase for it."
+        "creating": "暗号化しています…"
       },
       "lock": {
         "locked": "ロック中",

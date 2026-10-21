@@ -1794,6 +1794,124 @@ check('fold in another keyring with its passkey', async () => {
   assert(r.others === 0 && r.notes.includes(r.want.na) && r.notes.includes(r.want.nb), 'the passkey fold-in brings the secrets', r);
 });
 
+const TRYSTERO_STUB = "export const selfId = 'self-peer';\nexport function joinRoom(config, roomId) { return window.__fakeRoom(config, roomId); }\n";
+
+async function device(name, services) {
+  const ctx = await browser.createBrowserContext();
+  const page = await ctx.newPage();
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  page.on('request', (r) => {
+    const u = new URL(r.url());
+    if (u.origin !== ORIGIN) { r.abort().catch(() => {}); return; }
+    if (u.pathname === '/assets/vendor/trystero-nostr.js') { r.respond({ status: 200, contentType: 'text/javascript', body: TRYSTERO_STUB }).catch(() => {}); return; }
+    r.continue().catch(() => {});
+  });
+  await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
+  await enableOnLab(page);
+  const c = await createOnLab(page);
+  await runtime(page);
+  const secrets = await page.evaluate(async (list) => {
+    const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+    const out = {};
+    for (const n of list) {
+      const s = crypto.getRandomValues(new Uint8Array(32));
+      await window.__m.link(n, s);
+      out[n] = hex(s);
+    }
+    window.mentriaConfirm = async (msg) => { (window.__asked = window.__asked || []).push(msg); return true; };
+    return out;
+  }, services);
+  const rec = await readLocal(page, 'mentria.store.keyring.vault');
+  return { name, ctx, page, code: c, secrets, kcv: rec.kcv, raw: await page.evaluate(() => localStorage.getItem('mentria.store.keyring.vault')) };
+}
+
+async function allSecrets(page) {
+  return page.evaluate(async () => {
+    const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+    const out = {};
+    for (const n of ['identity', 'totp', 'notes', 'finance']) out[n] = (await window.__m.secrets(n)).map((x) => hex(x.bytes));
+    return out;
+  });
+}
+
+function opensAll(have, ...devices) {
+  const missing = [];
+  for (const d of devices) for (const [n, s] of Object.entries(d.secrets)) if (!(have[n] || []).includes(s)) missing.push(d.name + ':' + n);
+  return missing;
+}
+
+async function syncSnapshot(page, raw) {
+  return page.evaluate(async (raw) => {
+    window.__rooms = [];
+    window.__fakeRoom = (config, roomId) => {
+      const room = { roomId, sent: [], action: null, onPeerJoin: null, onPeerLeave: null, leave: async () => {} };
+      room.makeAction = (name) => { const a = { name, onMessage: null, send: (p, to) => room.sent.push({ p, to }) }; room.action = a; return a; };
+      window.__rooms.push(room);
+      return room;
+    };
+    await import('/assets/js/mentria-sync.js');
+    const S = window.MentriaSync;
+    const secret = new Uint8Array(32).fill(7);
+    await S.joinWithIdentity(secret);
+    const room = window.__rooms[window.__rooms.length - 1];
+    const te = new TextEncoder();
+    const bucket = String(Math.floor(Date.now() / (7 * 24 * 3600 * 1000)));
+    const base = await crypto.subtle.importKey('raw', secret, 'HKDF', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: te.encode('mentria-identity-key-v1'), info: te.encode('aes-gcm-256|w' + bucket) }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    const b64 = (u) => { let s = ''; for (const x of u) s += String.fromCharCode(x); return btoa(s); };
+    const msg = { op: 'snapshot', v: 2, data: { version: 1, exportedAt: new Date().toISOString(), store: { 'keyring.vault': raw }, legacy: {} }, meta: { 'keyring.vault': Date.now() + 60000 }, tombs: {}, app: 'beta', keyring: 1, device: { id: 'dev-other', name: 'Other' } };
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(msg))));
+    const n = S.status().handled;
+    room.action.onMessage({ iv: b64(iv), ct: b64(ct) }, { peerId: 'peer-1' });
+    for (let i = 0; i < 200 && S.status().handled === n; i++) await new Promise((r) => setTimeout(r, 50));
+    const handled = S.status().handled > n;
+    await S.disconnect();
+    return { handled, asked: (window.__asked || []).length };
+  }, raw);
+}
+
+check('two keyrings meeting through sync or restore: everything opens after a fold-in', async () => {
+  await clean();
+  const A = await device('A', ['notes', 'totp']);
+  const B = await device('B', ['notes', 'identity']);
+  const C = await device('C', ['notes', 'finance']);
+  try {
+    const s = await syncSnapshot(A.page, B.raw);
+    assert(s.handled && s.asked === 1, 'harness: the snapshot was handled and the replace prompt answered', s);
+    const a1 = await A.page.evaluate(() => ({ kcv: JSON.parse(localStorage.getItem('mentria.store.keyring.vault')).kcv, others: window.__m.others(), unlocked: window.__m.state().unlocked }));
+    assert(a1.kcv === B.kcv && !a1.unlocked, 'sync replaced A\'s keyring with B\'s', a1);
+    assert(a1.others.length === 1 && a1.others[0].kcv === A.kcv && JSON.stringify(a1.others[0].services) === '["totp","notes"]', 'A\'s own keyring is kept on the side', a1.others);
+    await A.page.evaluate((c) => window.__m.unlockWithCode(c), B.code);
+    const before = await allSecrets(A.page);
+    assert(opensAll(before, A).length === 2 && !opensAll(before, B).length, 'before the fold-in only B\'s secrets open on A', { missing: opensAll(before, A, B) });
+    await A.page.evaluate(([k, c]) => window.__m.foldIn(k, { code: c }), [A.kcv, A.code]);
+    const after = await allSecrets(A.page);
+    assert(!opensAll(after, A, B).length, 'after the fold-in A opens its own and B\'s secrets', { missing: opensAll(after, A, B) });
+    assert(after.notes[0] === B.secrets.notes, 'B\'s notes secret stays current', after.notes);
+    await A.page.reload({ waitUntil: 'load' });
+    await runtime(A.page);
+    await A.page.evaluate(() => window.__m.lock());
+    await A.page.evaluate((c) => window.__m.unlockWithCode(c), B.code);
+    const again = await allSecrets(A.page);
+    assert(!opensAll(again, A, B).length && (await A.page.evaluate(() => window.__m.others().length)) === 0, 'it all still opens after a reload and a fresh unlock', { missing: opensAll(again, A, B) });
+
+    const r = await C.page.evaluate(async (raw) => {
+      const data = { version: 1, exportedAt: new Date().toISOString(), store: { 'keyring.vault': raw }, legacy: {} };
+      const res = await window.MentriaBackup.applyRestore(data, { replace: 'R {areas}', keyringVault: 'KEYRING?', totpVault: 'T?', identityVault: 'I?' });
+      return { res, asked: window.__asked || [], kcv: JSON.parse(localStorage.getItem('mentria.store.keyring.vault')).kcv, others: window.__m.others().map((o) => o.kcv) };
+    }, B.raw);
+    assert(r.asked.includes('KEYRING?') && r.kcv === B.kcv && JSON.stringify(r.others) === JSON.stringify([C.kcv]), 'restore replaced C\'s keyring and kept C\'s on the side', r);
+    await C.page.evaluate((c) => window.__m.unlockWithCode(c), B.code);
+    await C.page.evaluate(([k, c]) => window.__m.foldIn(k, { code: c }), [C.kcv, C.code]);
+    const c2 = await allSecrets(C.page);
+    assert(!opensAll(c2, C, B).length, 'after the fold-in C opens its own and B\'s secrets', { missing: opensAll(c2, C, B) });
+  } finally {
+    for (const d of [A, B, C]) await d.ctx.close().catch(() => {});
+  }
+});
+
 let failed = 0;
 const ONLY = process.env.ONLY || '';
 for (const [name, fn] of checks.filter(([n]) => !ONLY || n.includes(ONLY))) {

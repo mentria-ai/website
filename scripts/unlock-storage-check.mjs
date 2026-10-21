@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, readFileSync } from 'node:fs';
 import { register } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
@@ -811,6 +811,175 @@ check('a v1 snapshot marks an old peer', async () => {
   const next = await until(async () => lastSnapshot(r, m2));
   assert.equal(next.data.store['identity.vault'], undefined, 'the next snapshot omits it too');
   assert.equal(next.data.store['totp.vault'], undefined);
+  await Sync.disconnect();
+});
+
+const OTHERS = 'mentria.keyring.others';
+const stash = () => { try { return JSON.parse(ls.getItem(OTHERS)); } catch (_) { return 'unreadable'; } };
+const stashKcvs = () => (Array.isArray(stash()) ? stash().map((r) => r && r.kcv) : stash());
+const enNow = () => JSON.parse(readFileSync(join(repo, 'src/_data/i18n/en.json'), 'utf8'));
+
+check('sync replace keeps this device\'s keyring on the side', async () => {
+  reset();
+  const k = await keyring();
+  const mine = await withPasskey(k, k.record);
+  put('keyring.vault', mine, Date.now() - 3600000);
+  const other = await keyring('dev-z');
+  answer = () => true;
+  const r = await joinRoom();
+  await r.deliver(Object.assign(snapshotOf({ 'keyring.vault': JSON.stringify(other.record) }, { keyring: 1 }), { meta: { 'keyring.vault': Date.now() } }));
+  assert.equal(Store.get('keyring', 'vault').kcv, other.record.kcv, 'replaced');
+  assert.deepEqual(stashKcvs(), [mine.kcv], 'this device\'s keyring is kept in mentria.keyring.others');
+  assert.equal(stash()[0].wraps.prf.length, 1, 'kept whole');
+  assert.equal(Store.exportAll().store[OTHERS.slice('mentria.store.'.length)], undefined);
+  assert.ok(!Object.keys(Store.exportAll().store).some((s) => s.indexOf('others') >= 0) && !Object.keys(Store.exportAll().legacy).some((s) => s.indexOf('others') >= 0), 'never exported, synced or backed up');
+  await Sync.disconnect();
+});
+
+check('sync keep keeps the other keyring on the side', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record, Date.now() - 3600000);
+  const before = raw('keyring.vault');
+  const other = await keyring('dev-z');
+  answer = () => false;
+  const r = await joinRoom();
+  await r.deliver(Object.assign(snapshotOf({ 'keyring.vault': JSON.stringify(other.record) }, { keyring: 1 }), { meta: { 'keyring.vault': Date.now() } }));
+  assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv);
+  assert.deepEqual(stashKcvs(), [other.record.kcv], 'Keep stashes the other device\'s keyring');
+  const more = clone(other.record);
+  more.services.notes = await U.sealService(other.rootKey, 'notes', rand(32), Date.now());
+  await r.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: more, mtime: Date.now() });
+  assert.deepEqual(stashKcvs(), [other.record.kcv], 'one entry per kcv');
+  assert.ok(stash()[0].services.notes, 'a later copy of the kept keyring merges into its entry');
+  assert.equal(raw('keyring.vault').length > 0 && Store.get('keyring', 'vault').kcv, k.record.kcv);
+  assert.deepEqual(JSON.parse(raw('keyring.vault')).wraps, JSON.parse(before).wraps);
+  await Sync.disconnect();
+});
+
+check('an older different keyring kept without asking goes on the side', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record, Date.now());
+  const other = await keyring('dev-z');
+  const r = await joinRoom();
+  await r.deliver(Object.assign(snapshotOf({ 'keyring.vault': JSON.stringify(other.record) }, { keyring: 1 }), { meta: { 'keyring.vault': Date.now() - 3600000 } }));
+  assert.deepEqual(asked, []);
+  assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv);
+  assert.deepEqual(stashKcvs(), [other.record.kcv]);
+  await Sync.disconnect();
+});
+
+check('a v1 snapshot with a different keyring keeps it on the side', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record);
+  const other = await keyring('dev-z');
+  const r = await joinRoom();
+  await r.deliver({ op: 'snapshot', data: { version: 1, exportedAt: new Date().toISOString(), store: { 'keyring.vault': JSON.stringify(other.record) }, legacy: {} } });
+  assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv);
+  assert.deepEqual(stashKcvs(), [other.record.kcv]);
+  await Sync.disconnect();
+});
+
+check('a different keyring that arrives after this device made one goes on the side', async () => {
+  reset();
+  const other = await keyring('dev-z');
+  const k = await keyring();
+  const r = await joinRoom();
+  answer = async () => {
+    ls.setItem('mentria.store.keyring.vault', JSON.stringify(k.record));
+    return true;
+  };
+  put('tools.x', { a: 1 }, Date.now() - 3600000);
+  const snap = snapshotOf({ 'keyring.vault': JSON.stringify(other.record), 'tools.x': JSON.stringify({ a: 2 }) }, { keyring: 1 });
+  snap.meta['tools.x'] = Date.now();
+  await r.deliver(snap);
+  assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv, 'the keyring made during the prompt stays');
+  assert.deepEqual(stashKcvs(), [other.record.kcv], 'the arriving one is kept on the side');
+  await Sync.disconnect();
+});
+
+check('sync never replaces the keyring when it cannot keep this device\'s copy', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record, Date.now() - 3600000);
+  const before = raw('keyring.vault');
+  const other = await keyring('dev-z');
+  const set = ls.setItem.bind(ls);
+  ls.setItem = (key, v) => { if (key === OTHERS) throw new Error('QuotaExceededError'); return set(key, v); };
+  try {
+    const r = await joinRoom();
+    await r.deliver(Object.assign(snapshotOf({ 'keyring.vault': JSON.stringify(other.record) }, { keyring: 1 }), { meta: { 'keyring.vault': Date.now() } }));
+    assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv, 'no stash, no replace');
+    assert.deepEqual(Store.get('keyring', 'vault').wraps, JSON.parse(before).wraps);
+  } finally {
+    ls.setItem = set;
+    await Sync.disconnect();
+  }
+});
+
+check('undoing a sync keeps the keyring it took away on the side', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record, Date.now() - 3600000);
+  const other = await keyring('dev-z');
+  const r = await joinRoom();
+  await r.deliver(Object.assign(snapshotOf({ 'keyring.vault': JSON.stringify(other.record) }, { keyring: 1 }), { meta: { 'keyring.vault': Date.now() } }));
+  await Sync.disconnect();
+  assert.equal(Store.get('keyring', 'vault').kcv, other.record.kcv);
+  ls.removeItem(OTHERS);
+  const back = Sync.restoreRescue();
+  assert.ok(back && back.restored >= 1);
+  assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv, 'the undo brings this device\'s keyring back');
+  assert.deepEqual(stashKcvs(), [other.record.kcv], 'the replaced one is kept on the side');
+});
+
+check('restore replace and keep both keep the other keyring on the side', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record);
+  const other = await keyring('dev-z');
+  const payload = (rec) => ({ version: 1, exportedAt: new Date().toISOString(), store: { 'keyring.vault': JSON.stringify(rec) }, legacy: {} });
+  answer = (msg) => msg !== 'KEYRING?';
+  await BK.applyRestore(payload(other.record), COPY);
+  assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv);
+  assert.deepEqual(stashKcvs(), [other.record.kcv], 'Keep stashes the backup\'s keyring');
+  ls.removeItem(OTHERS);
+  await BK.applyRestore(payload(other.record), Object.assign({}, COPY, { keyringVault: undefined }));
+  assert.deepEqual(stashKcvs(), [other.record.kcv], 'a restore that cannot ask stashes it too');
+  ls.removeItem(OTHERS);
+  answer = () => true;
+  await BK.applyRestore(payload(other.record), COPY);
+  assert.equal(Store.get('keyring', 'vault').kcv, other.record.kcv, 'replaced');
+  assert.deepEqual(stashKcvs(), [k.record.kcv], 'Replace stashes this device\'s keyring');
+  const set = ls.setItem.bind(ls);
+  const third = await keyring('dev-y');
+  const now = raw('keyring.vault');
+  ls.setItem = (key, v) => { if (key === OTHERS) throw new Error('QuotaExceededError'); return set(key, v); };
+  try {
+    await BK.applyRestore(payload(third.record), COPY);
+  } finally {
+    ls.setItem = set;
+  }
+  assert.equal(raw('keyring.vault'), now, 'no stash, no replace');
+});
+
+check('both keyring prompts say what stops opening until it is brought back in', async () => {
+  const en = enNow();
+  for (const text of [en.about.sync_vault_keyring, en.common.restore_keyring_vault]) {
+    assert.ok(/won['’]t open here until you bring that unlock back in from About/.test(text), text);
+    assert.ok(/kept on this device/.test(text), text);
+  }
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record, Date.now() - 3600000);
+  const other = await keyring('dev-z');
+  answer = () => false;
+  const r = await joinRoom();
+  await r.deliver(Object.assign(snapshotOf({ 'keyring.vault': JSON.stringify(other.record) }, { keyring: 1 }), { meta: { 'keyring.vault': Date.now() } }));
+  assert.equal(asked.length, 1);
+  assert.equal(asked[0], en.about.sync_vault_keyring, 'the built-in English prompt matches the copy');
   await Sync.disconnect();
 });
 

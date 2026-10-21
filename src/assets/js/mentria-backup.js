@@ -1344,6 +1344,22 @@
     };
   };
 
+  const OTHERS_KEY = 'mentria.keyring.others';
+
+  const keepOther = (core, raw) => {
+    try {
+      const rec = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!core || !core.isRecord(rec)) return false;
+      const was = global.localStorage.getItem(OTHERS_KEY);
+      const list = was == null ? [] : JSON.parse(was);
+      if (!Array.isArray(list)) return false;
+      global.localStorage.setItem(OTHERS_KEY, JSON.stringify(core.addOther(list, rec)));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
   async function applyRestore(data, copy) {
     const S = global.MentriaStore;
     copy = copy || {};
@@ -1363,10 +1379,21 @@
     }
     const keyring = await keyringCheck(local, plan);
     const skip = keyring.bad ? ['keyring.vault'] : [];
+    const incomingKeyring = local.store && local.store['keyring.vault'] != null ? String(local.store['keyring.vault']) : null;
+    let replaceKeyring = false;
     for (const suffix of plan.vaults) {
-      if (suffix === 'keyring.vault' && (keyring.bad || !copy.keyringVault)) { if (skip.indexOf(suffix) < 0) skip.push(suffix); continue; }
+      if (suffix === 'keyring.vault' && (keyring.bad || !copy.keyringVault)) {
+        if (skip.indexOf(suffix) < 0) skip.push(suffix);
+        if (!keyring.bad) keepOther(keyring.core, incomingKeyring);
+        continue;
+      }
       const text = suffix === 'totp.vault' ? copy.totpVault : suffix === 'keyring.vault' ? copy.keyringVault : copy.identityVault;
-      if (!(await ask(text))) skip.push(suffix);
+      if (await ask(text)) {
+        if (suffix === 'keyring.vault') replaceKeyring = true;
+      } else {
+        skip.push(suffix);
+        if (suffix === 'keyring.vault') keepOther(keyring.core, incomingKeyring);
+      }
     }
     for (const p of dbPlans) {
       if (!p.whole || !p.conflict) continue;
@@ -1384,6 +1411,10 @@
       merging.forEach((p) => { p.keepReplaced = true; });
     }
     const mergeVault = plan.merge.indexOf('keyring.vault') >= 0 && skip.indexOf('keyring.vault') < 0 ? keyringMerger(keyring.core) : null;
+    if (replaceKeyring && skip.indexOf('keyring.vault') < 0 && !keepOther(keyring.core, S.get('keyring', 'vault'))) {
+      skip.push('keyring.vault');
+      keepOther(keyring.core, incomingKeyring);
+    }
     await checkSpace(dbPlans);
     const done = await commitDatabases(dbPlans);
     let result;

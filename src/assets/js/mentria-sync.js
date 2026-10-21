@@ -127,8 +127,11 @@ const DEVICE_ID = /^[A-Za-z0-9_-]{1,64}$/;
 const RESERVED_IDS = ['legacy', '__proto__', 'constructor', 'prototype'];
 const VAULT_COPY = { 'totp.vault': 'about.sync_vault_totp', 'keyring.vault': 'about.sync_vault_keyring' };
 
+const OTHERS_KEY = 'mentria.keyring.others';
+
 let corePromise = null;
-const loadCore = () => corePromise || (corePromise = import(CORE_URL).catch((err) => { corePromise = null; throw err; }));
+let coreLoaded = null;
+const loadCore = () => corePromise || (corePromise = import(CORE_URL).then((m) => { coreLoaded = m; return m; }, (err) => { corePromise = null; throw err; }));
 
 const state = {
   status: 'idle',
@@ -183,7 +186,7 @@ const sendToPartner = (payload) => {
 const COPY_FALLBACK = {
   'about.sync_vault_totp': 'This device has its own TOTP vault, and the other device has a different one. Replace this device’s vault with the other device’s? TOTP accounts that are only on this device will be lost, and the other device’s passphrase will unlock it.',
   'about.sync_vault_identity': 'This device has its own Mentria identity, and the other device has a different one. Replace it with the other device’s? This device’s identity will be lost, and the other device’s passphrase will unlock it.',
-  'about.sync_vault_keyring': 'This device has its own one unlock, and the other device has a different one. Replace this device’s with the other device’s? This device’s recovery code and passkeys will stop working, and the other device’s recovery code will unlock it.',
+  'about.sync_vault_keyring': 'This device has its own one unlock, and the other device has a different one. Replace this device’s with the other device’s? The other device’s recovery code will unlock it. Notes, codes, chats and finances set up with this device’s unlock won’t open here until you bring that unlock back in from About. It is kept on this device.',
   'about.sync_vault_keep': 'Keep this device’s',
   'about.sync_vault_replace': 'Replace'
 };
@@ -317,12 +320,44 @@ const currentKeyring = () => {
   try { return localStorage.getItem(STORE_PREFIX + KEYRING); } catch (_) { return null; }
 };
 
+const readOthers = () => {
+  const raw = localStorage.getItem(OTHERS_KEY);
+  if (raw == null) return [];
+  const list = JSON.parse(raw);
+  if (!Array.isArray(list)) throw new Error('others');
+  return list;
+};
+
+const keepOther = (core, value) => {
+  const rec = parseRaw(value);
+  try {
+    if (core && typeof core.addOther === 'function') {
+      if (!core.isRecord(rec)) return false;
+      localStorage.setItem(OTHERS_KEY, JSON.stringify(core.addOther(readOthers(), rec)));
+      return true;
+    }
+    if (!rec || typeof rec !== 'object' || typeof rec.kcv !== 'string' || !rec.kcv) return false;
+    const list = readOthers();
+    if (!list.some((r) => r && r.kcv === rec.kcv)) localStorage.setItem(OTHERS_KEY, JSON.stringify(list.concat([rec])));
+    return true;
+  } catch (_) {
+    return false;
+  }
+};
+
+const keepIfOther = (core, value) => {
+  const current = currentKeyring();
+  if (current == null || sameVault(KEYRING, current, value)) return true;
+  return keepOther(core, value);
+};
+
 const keyringWrite = (core, value, replace) => {
   const current = currentKeyring();
   if (current == null) return value;
   const merged = core.mergeRecords(parseRaw(current), value);
   if (merged) return JSON.stringify(merged) === current ? null : merged;
-  return replace && !sameVault(KEYRING, current, value) ? value : null;
+  if (!replace || sameVault(KEYRING, current, value)) return null;
+  return keepOther(core, current) ? value : null;
 };
 
 const validKeyring = async (raw) => {
@@ -334,7 +369,11 @@ const keyringFollow = async (value) => {
   try { core = await loadCore(); } catch (_) { return undefined; }
   if (!core.isRecord(value)) return undefined;
   const next = keyringWrite(core, value, false);
-  return next == null ? undefined : next;
+  if (next == null) {
+    keepIfOther(core, value);
+    return undefined;
+  }
+  return next;
 };
 
 const readRescue = () => {
@@ -394,6 +433,10 @@ const restoreRescue = () => {
   Object.keys(rec.entries).forEach((suffix) => {
     const e = rec.entries[suffix];
     if (!e || typeof e.raw !== 'string') return;
+    if (suffix === KEYRING) {
+      const now = currentKeyring();
+      if (now != null && !sameVault(KEYRING, now, e.raw) && !keepOther(coreLoaded, now)) return;
+    }
     const { ns, key } = splitSuffix(suffix);
     let mtime = null;
     try { const m = JSON.parse(e.meta || 'null'); if (m && typeof m.m === 'number') mtime = m.m; } catch (_) {}
@@ -602,10 +645,12 @@ const mergeV2 = async (msg, isBack) => {
     if (isVault(suffix) && (suffix === 'totp.vault' || !sameVault(suffix, rawLocal, rawIn))) {
       if (state.vaultKept.has(suffix)) {
         keeps.push(suffix); summary.kept++;
+        if (suffix === KEYRING) keepOther(core, rawIn);
       } else if (inMtime != null && localMtime != null && inMtime > localMtime) {
         vaultAsks.push({ suffix, ns, key, raw: rawIn, mtime: inMtime });
       } else {
         keeps.push(suffix); summary.kept++; summary.flagged.push(suffix);
+        if (suffix === KEYRING) keepOther(core, rawIn);
       }
       return;
     }
@@ -666,6 +711,7 @@ const mergeV2 = async (msg, isBack) => {
       keeps.push(v.suffix); summary.kept++;
       state.vaultKept.add(v.suffix);
       state.vaultLinked.delete(v.suffix);
+      if (v.suffix === KEYRING) keepOther(core, v.raw);
     }
     sendVaultChoice(v.suffix, !ok);
   }
@@ -682,7 +728,10 @@ const mergeV2 = async (msg, isBack) => {
   });
   keyrings.forEach((k) => {
     const next = keyringWrite(core, k.value, false);
-    if (next == null) return;
+    if (next == null) {
+      keepIfOther(core, k.value);
+      return;
+    }
     const added = next === k.value;
     window.MentriaStore.set(k.ns, k.key, next, { mtime: added && k.mtime != null ? k.mtime : Date.now(), remote: true });
     if (added) summary.applied++;
@@ -690,7 +739,10 @@ const mergeV2 = async (msg, isBack) => {
   });
   lwwReplace.concat(vaultReplace).forEach((l) => {
     const value = l.suffix === KEYRING ? keyringWrite(core, parseRaw(l.raw), true) : parseRaw(l.raw);
-    if (l.suffix === KEYRING && value == null) return;
+    if (l.suffix === KEYRING && value == null) {
+      keepIfOther(core, l.raw);
+      return;
+    }
     window.MentriaStore.set(l.ns, l.key, value, { mtime: l.mtime != null ? l.mtime : Date.now(), remote: true });
     summary.applied++;
   });
@@ -787,6 +839,7 @@ const handleMessage = async (payload, from) => {
       const vaultSkip = conflicts.filter(isVault);
       const oldStore = msg.data.store && typeof msg.data.store === 'object' ? msg.data.store : {};
       if (oldStore[KEYRING] != null && vaultSkip.indexOf(KEYRING) < 0 && !(await validKeyring(oldStore[KEYRING]))) vaultSkip.push(KEYRING);
+      if (oldStore[KEYRING] != null && vaultSkip.indexOf(KEYRING) >= 0 && (await validKeyring(oldStore[KEYRING]))) keepIfOther(coreLoaded, String(oldStore[KEYRING]));
       const others = conflicts.filter((k) => !isVault(k));
       if (!state.applyApproved && others.length && !(await approveReplace(others))) { emit('synced', { restored: 0, declined: true }); return; }
       state.applyApproved = true;
@@ -806,7 +859,15 @@ const handleMessage = async (payload, from) => {
     let value = msg.value;
     const suffix = msg.ns + '.' + msg.key;
     if (isVault(suffix)) {
-      if (!vaultFollows(suffix, value)) return;
+      if (!vaultFollows(suffix, value)) {
+        if (suffix === KEYRING) {
+          try {
+            const core = await loadCore();
+            if (core.isRecord(value)) keepIfOther(core, value);
+          } catch (_) {}
+        }
+        return;
+      }
       if (suffix === KEYRING) {
         value = await keyringFollow(value);
         if (value === undefined) return;

@@ -433,6 +433,7 @@ check('sync button still joins with the linked secret', async () => {
   const ring = await keyringSecret(page);
   assert(join.ok && join.bytes.length === 32, 'joinWithIdentity gets 32 bytes', join);
   assert(JSON.stringify(join.bytes) === JSON.stringify(ring), 'the bytes are the linked identity secret');
+  assert(JSON.stringify(join.bytes) === JSON.stringify(await identityBytes(page)), 'the bytes are the identity this page opened');
   clean_(rig);
 });
 
@@ -1159,6 +1160,116 @@ check('comms shows its lock screen even when the keyring boot fails', async () =
   clean_(rig);
 });
 
+check('a replaced identity entry still opens from its prior', async () => {
+  await fresh(true);
+  const page = await open('/comms/', { auth: true });
+  const rig = rigs.get(page);
+  await commsOnboard(page, 'Prior Pia');
+  await setupNew(page, { passkey: false });
+  await waitVisible(page, '#comms-id-on', 30000);
+  const fp = await fingerprint(page);
+  await until(() => readJson(page, IDKEYS).then((v) => !!(v && v.wrapped)), 10000, 'comms keys written');
+  const mine = await keyringSecret(page);
+  const vault0 = await page.evaluate((k) => localStorage.getItem(k), IDENTITY);
+  await page.evaluate(async (u, k) => {
+    const m = await import(u);
+    await m.link('identity', crypto.getRandomValues(new Uint8Array(32)));
+    const r = JSON.parse(localStorage.getItem(k));
+    const old = new Date(Date.now() - 31 * 86400000).toISOString();
+    r.services.identity.linked = old;
+    for (const p of r.services.identity.prior || []) p.linked = old;
+    localStorage.setItem(k, JSON.stringify(r));
+  }, RUNTIME, KEYRING);
+  const rec = await readJson(page, KEYRING);
+  const current = await keyringSecret(page);
+  assert(JSON.stringify(current) !== JSON.stringify(mine), 'seed: the current entry is another identity');
+  assert(Array.isArray(rec.services.identity.prior) && rec.services.identity.prior.length >= 1, 'seed: this identity is kept as a prior entry', rec.services.identity);
+  assert((await page.evaluate(async (u) => (await import(u)).retirement('identity'), RUNTIME)).ready === true, 'seed: retirement would be ready for the current entry');
+  await page.reload({ waitUntil: 'load' });
+  await waitVisible(page, '#comms-id-on', 30000);
+  assert(await fingerprint(page) === fp, 'the same Comms identity and keypair open');
+  await sleep(800);
+  assert(!((await readJson(page, KEYRING)).retired || {}).identity, 'Comms does not retire through a prior entry');
+  assert(await idkeysOpenWith(page, mine), 'the ECDH keypair is still wrapped by this identity');
+  assert(await page.evaluate((k) => localStorage.getItem(k), IDENTITY) === vault0, 'the vault is not rebuilt');
+  assert(JSON.stringify(await page.evaluate(() => Array.from(MentriaIdentity.getSecret()))) === JSON.stringify(mine), 'Comms holds the prior secret, not the current one');
+  const about = await open('/about/');
+  await openAdvanced(about);
+  await until(() => about.evaluate(() => window.MentriaIdentity && MentriaIdentity.isUnlocked()), 15000, 'About opens it too');
+  await about.waitForFunction(() => !!window.MentriaSync, { timeout: 20000 });
+  await about.evaluate(() => {
+    window.__joins = [];
+    window.MentriaSync.joinWithIdentity = async (b) => { window.__joins.push(Array.from(b)); };
+  });
+  await about.click('#about-identity-sync-btn');
+  await until(() => about.evaluate(() => window.__joins.length === 1), 10000, 'joinWithIdentity called');
+  assert(JSON.stringify(await about.evaluate(() => window.__joins[0])) === JSON.stringify(mine), 'sync joins with the identity this device holds');
+  clean_(rig);
+  clean_(rigs.get(about));
+});
+
+check('about opens from a prior entry and never retires through it', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  await openAdvanced(page);
+  await press(page, '[data-reveal="about-identity-setup-form"]');
+  await page.type('#about-identity-setup-pass', PASSPHRASE);
+  await page.type('#about-identity-setup-pass2', PASSPHRASE);
+  await page.click('#about-identity-setup-btn');
+  await answerDialog(page);
+  await waitVisible(page, '#about-identity-unlocked');
+  await page.click('#about-identity-passkey-add');
+  await answerDialog(page);
+  await page.click('#about-identity-device');
+  await until(() => readJson(page, IDENTITY).then((v) => !!(v && v.device)), 15000, 'seed: device unlock on');
+  const vault0 = await readJson(page, IDENTITY);
+  assert(vault0.pass && vault0.prf && vault0.device, 'seed: pass, prf and device wraps', Object.keys(vault0));
+  await setSwitch(page, true);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-link-btn', 20000);
+  await page.click('#about-identity-link-btn');
+  await waitStep(page, 'intro', 30000);
+  await setupNew(page, { passkey: false });
+  await waitVisible(page, '#about-identity-keyring', 30000);
+  const mine = await identityBytes(page);
+  await page.evaluate(async (u, k) => {
+    const m = await import(u);
+    await m.link('identity', crypto.getRandomValues(new Uint8Array(32)));
+    const r = JSON.parse(localStorage.getItem(k));
+    const old = new Date(Date.now() - 31 * 86400000).toISOString();
+    r.services.identity.linked = old;
+    for (const p of r.services.identity.prior || []) p.linked = old;
+    localStorage.setItem(k, JSON.stringify(r));
+  }, RUNTIME, KEYRING);
+  const status = await page.evaluate(async (u) => (await import(u)).retirement('identity'), RUNTIME);
+  assert(status.ready === true, 'seed: retirement would be ready for the current entry', status);
+  await page.evaluateOnNewDocument(SIGNAL_PROBE);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'the identity opens from its prior entry');
+  await sleep(1000);
+  assert(JSON.stringify(await identityBytes(page)) === JSON.stringify(mine), 'About holds this vault\'s secret');
+  assert(await visible(page, '#about-identity-keyring'), 'opened from the keyring, not the old way');
+  const vault = await readJson(page, IDENTITY);
+  const rec = await readJson(page, KEYRING);
+  assert(JSON.stringify(vault.pass) === JSON.stringify(vault0.pass) && JSON.stringify(vault.prf) === JSON.stringify(vault0.prf) && !!vault.device, 'pass, prf and device are kept', Object.keys(vault));
+  assert(!(rec.retired || {}).identity, 'identity is not retired', rec.retired);
+  assert(!(await page.evaluate(() => window.__signals.length)), 'no passkey signal');
+  const key = await page.evaluate(() => new Promise((ok) => {
+    const req = indexedDB.open('mentria-identity');
+    req.onsuccess = () => {
+      const g = req.result.transaction('keys', 'readonly').objectStore('keys').get('device-wrap');
+      g.onsuccess = () => { ok(!!g.result); req.result.close(); };
+      g.onerror = () => ok(false);
+    };
+    req.onerror = () => ok(false);
+  }));
+  assert(key, 'the device key is kept');
+  clean_(rig);
+});
+
 check('a link that does not open the vault keeps the old lock', async () => {
   await fresh(false);
   const page = await open('/about/', { auth: true });
@@ -1185,8 +1296,10 @@ check('a link that does not open the vault keeps the old lock', async () => {
     await m.link('identity', crypto.getRandomValues(new Uint8Array(32)));
     const r = JSON.parse(localStorage.getItem(k));
     r.services.identity.linked = new Date(Date.now() - 31 * 86400000).toISOString();
+    delete r.services.identity.prior;
     localStorage.setItem(k, JSON.stringify(r));
   }, RUNTIME, KEYRING);
+  assert(!(await readJson(page, KEYRING)).services.identity.prior, 'seed: no keyring entry opens this vault');
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-unlock', 15000);

@@ -148,6 +148,7 @@ const state = {
   helloTimer: 0,
   refused: false,
   snapshotSent: false,
+  oldPeer: false,
   vaultChoice: {},
   vaultLinked: new Set(),
   vaultKept: new Set(),
@@ -232,6 +233,16 @@ const sameVault = (suffix, a, b) => {
   const x = vaultId(suffix, a);
   return !!x && x === vaultId(suffix, b);
 };
+
+const LINKED_VAULTS = ['identity.vault', 'totp.vault'];
+
+const wraplessLinked = (suffix, value) => {
+  if (LINKED_VAULTS.indexOf(suffix) < 0) return false;
+  const v = parseRaw(value);
+  return !!v && typeof v === 'object' && v.linked === true && !v.pass && !v.prf;
+};
+
+const heldFromPeer = (suffix, value) => state.oldPeer && wraplessLinked(suffix, value);
 
 const releaseTag = () => {
   try { return String(document.documentElement.dataset.release || ''); } catch (_) { return ''; }
@@ -710,7 +721,7 @@ const mergeV2 = async (msg, isBack) => {
     const replyStore = {};
     const replyMeta = {};
     replySuffixes.forEach((suffix) => {
-      if (!(suffix in afterStore)) return;
+      if (!(suffix in afterStore) || heldFromPeer(suffix, afterStore[suffix])) return;
       const { ns, key } = splitSuffix(suffix);
       replyStore[suffix] = afterStore[suffix];
       replyMeta[suffix] = localMtimeOf(ns, key);
@@ -757,6 +768,7 @@ const handleMessage = async (payload, from) => {
   }
 
   if ((msg.op === 'snapshot' || msg.op === 'snapshot-back') && msg.v === 2 && msg.data) {
+    if (msg.keyring !== 1) state.oldPeer = true;
     try {
       await mergeV2(msg, msg.op === 'snapshot-back');
       state.exchanged = true;
@@ -768,6 +780,7 @@ const handleMessage = async (payload, from) => {
   }
 
   if (msg.op === 'snapshot' && msg.data) {
+    state.oldPeer = true;
     await notePeer(msg);
     try {
       const conflicts = collectConflicts(msg.data).filter((k) => !window.MentriaStore.isLocalOnly(k) && !window.MentriaStore.isLocalLegacy(k));
@@ -831,6 +844,7 @@ const onLocalWrite = async (event) => {
   if (d.op !== 'set' && d.op !== 'remove') return;
   if (window.MentriaStore.isLocalOnly(d.ns + '.' + d.key)) return;
   if (state.vaultKept.has(d.ns + '.' + d.key)) return;
+  if (d.op === 'set' && heldFromPeer(d.ns + '.' + d.key, d.value)) return;
   try {
     const mtime = (typeof d.mtime === 'number') ? d.mtime : Date.now();
     let value = d.value;
@@ -849,6 +863,7 @@ const sendSnapshot = async () => {
   if (!state.action || !state.key) return;
   try {
     const snap = window.MentriaStore.exportAll();
+    if (state.oldPeer && snap.store) Object.keys(snap.store).forEach((suffix) => { if (wraplessLinked(suffix, snap.store[suffix])) delete snap.store[suffix]; });
     const payload = await encryptPayload(state.key, Object.assign({ op: 'snapshot', v: 2, data: snap, meta: buildMeta(snap.store || {}), tombs: loadTombs() }, peerInfo()));
     sendToPartner(payload);
   } catch (err) {
@@ -866,6 +881,7 @@ const resetSession = () => {
   state.exchanged = false;
   state.refused = false;
   state.snapshotSent = false;
+  state.oldPeer = false;
   state.vaultChoice = {};
   state.vaultLinked.clear();
   state.vaultKept.clear();
@@ -1083,6 +1099,7 @@ const disconnect = async () => {
   state.partner = null;
   state.exchanged = false;
   state.snapshotSent = false;
+  state.oldPeer = false;
   setStatus('idle');
 };
 

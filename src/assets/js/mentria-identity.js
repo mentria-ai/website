@@ -359,13 +359,34 @@
     state.secret = secret;
   }
 
-  async function openLinked(bytes) {
+  async function matchesVault(bytes) {
+    const vault = loadVault();
+    if (!vault || !vault.kcv) return false;
     try {
-      await useSecret(bytes);
-    } catch (e) {
-      if (!e || e.message !== 'kcv-mismatch' || hasWraps(loadVault())) throw e;
-      await saveLinked(bytes, { rebuild: true });
+      return timingSafeEq(b64uDec(await kcvOf(secretBytes(bytes))), b64uDec(vault.kcv));
+    } catch (_) {
+      return false;
     }
+  }
+
+  async function openLinked(candidates) {
+    requireCrypto();
+    const list = (Array.isArray(candidates) ? candidates : [candidates]).map(secretBytes);
+    if (!list.length) throw new Error('locked');
+    const vault = loadVault();
+    if (!vault) throw new Error('no-vault');
+    if (vault.kcv) {
+      const want = b64uDec(vault.kcv);
+      for (let i = 0; i < list.length; i++) {
+        if (timingSafeEq(b64uDec(await kcvOf(list[i])), want)) {
+          state.secret = list[i];
+          return i;
+        }
+      }
+    }
+    if (hasWraps(loadVault())) throw new Error('kcv-mismatch');
+    await saveLinked(list[0], { rebuild: true });
+    return -1;
   }
 
   function legacyPasskeyId() {
@@ -438,6 +459,6 @@
     setup, unlock, lock, isSetUp, isUnlocked, getSecret, clearVault,
     passkeySupport, hasPasskey, enrollPasskey, unlockWithPasskey, removePasskey,
     hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock,
-    useSecret, isLinked, createLinked, saveLinked, openLinked, retireLegacy, legacyPasskeyId
+    useSecret, isLinked, createLinked, saveLinked, openLinked, matchesVault, retireLegacy, legacyPasskeyId
   };
 })(typeof window !== 'undefined' ? window : globalThis);

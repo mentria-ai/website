@@ -637,6 +637,49 @@ check('a new linked totp vault is identified by its kid', async () => {
   await Sync.disconnect();
 });
 
+check('a legacy peer never receives wrap-less linked vaults', async () => {
+  reset();
+  const k = await keyring();
+  const idLinked = { v: 3, kcv: 'kcv-linked', linked: true };
+  const totpLinked = { v: 2, linked: true, kid: U.b64u(rand(16)), secrets: { iv: U.b64u(rand(12)), ct: U.b64u(rand(64)) } };
+  const seed = () => {
+    put('keyring.vault', k.record);
+    put('identity.vault', idLinked);
+    put('totp.vault', totpLinked);
+    put('tools.mine', { a: 1 });
+  };
+  seed();
+  let r = await joinRoom();
+  await r.deliver(snapshotOf({ 'tools.theirs': JSON.stringify({ b: 2 }) }));
+  const back = await until(async () => (await r.messages()).find((m) => m.op === 'snapshot-back'));
+  assert.ok(back.data.store['tools.mine'], 'other data still goes back');
+  assert.equal(back.data.store['identity.vault'], undefined, 'no wrap-less identity vault in the reply to a legacy peer');
+  assert.equal(back.data.store['totp.vault'], undefined, 'no wrap-less totp vault in the reply to a legacy peer');
+  assert.equal(back.meta['identity.vault'], undefined);
+  const n = (await r.messages()).length;
+  assert.ok(Store.set('identity', 'vault', Object.assign({}, idLinked, { n: 2 })));
+  assert.ok(Store.set('totp', 'vault', Object.assign({}, totpLinked, { n: 2 })));
+  assert.ok(Store.set('tools', 'later', { c: 3 }));
+  const after = await until(async () => {
+    const all = (await r.messages()).slice(n);
+    return all.find((m) => m.op === 'set' && m.ns === 'tools' && m.key === 'later') ? all : null;
+  });
+  assert.ok(!after.some((m) => m.op === 'set' && (m.ns === 'identity' || m.ns === 'totp')), 'no live wrap-less vault writes to a legacy peer');
+  assert.ok(Store.set('identity', 'vault', legacyIdentity('kcv-linked')));
+  await until(async () => (await r.messages()).find((m) => m.op === 'set' && m.ns === 'identity' && m.value && m.value.pass));
+  await Sync.disconnect();
+  reset();
+  seed();
+  r = await joinRoom();
+  await r.deliver(snapshotOf({ 'tools.theirs': JSON.stringify({ b: 2 }) }, { app: 'beta', keyring: 1, device: { id: 'dev-b', name: 'Phone' } }));
+  const back2 = await until(async () => (await r.messages()).find((m) => m.op === 'snapshot-back'));
+  assert.equal(back2.data.store['identity.vault'], raw('identity.vault'), 'a keyring peer still gets the linked identity vault');
+  assert.equal(back2.data.store['totp.vault'], raw('totp.vault'), 'a keyring peer still gets the linked totp vault');
+  assert.ok(Store.set('identity', 'vault', Object.assign({}, idLinked, { n: 3 })));
+  await until(async () => (await r.messages()).find((m) => m.op === 'set' && m.ns === 'identity' && m.value && m.value.n === 3));
+  await Sync.disconnect();
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

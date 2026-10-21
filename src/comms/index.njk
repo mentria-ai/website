@@ -3111,14 +3111,17 @@ const krOpen = () => {
   krOpening = (async () => {
     const I = window.MentriaIdentity;
     if (!krLinked() || (krOpened && I.isUnlocked())) return false;
+    let list = [];
     try {
-      const bytes = await KR.secret('identity');
-      if (!bytes) return false;
-      await I.openLinked(bytes);
+      list = await KR.secrets('identity');
+      if (!list.length) return false;
+      await I.openLinked(list.map((x) => x.bytes));
     } catch (_) {
       krBroken = true;
       refreshIdUI();
       return false;
+    } finally {
+      list.forEach((x) => { try { x.bytes.fill(0); } catch (_) {} });
     }
     krOpened = true;
     await initIdentity();
@@ -3135,7 +3138,10 @@ const krRetire = async () => {
   const r = KR.retirement('identity');
   if (!r || !r.ready) return;
   krRetiring = true;
+  let cur = null;
   try {
+    cur = await KR.secret('identity');
+    if (!cur || !(await I.matchesVault(cur))) return;
     const id = I.legacyPasskeyId();
     I.retireLegacy();
     if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
@@ -3144,6 +3150,7 @@ const krRetire = async () => {
     await KR.markRetired('identity');
   } catch (_) {
   } finally {
+    if (cur) cur.fill(0);
     krRetiring = false;
   }
 };

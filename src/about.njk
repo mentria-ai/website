@@ -1695,7 +1695,10 @@ localeReload: true
       var r = kr.retirement('identity');
       if (!r || !r.ready) return;
       retiring = true;
+      var cur = null;
       try {
+        cur = await kr.secret('identity');
+        if (!cur || !(await I.matchesVault(cur))) return;
         var id = I.legacyPasskeyId();
         I.retireLegacy();
         if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
@@ -1704,19 +1707,23 @@ localeReload: true
         await kr.markRetired('identity');
       } catch (_) {
       } finally {
+        if (cur) cur.fill(0);
         retiring = false;
       }
     }
 
     async function openFromKeyring() {
       var I = window.MentriaIdentity;
+      var list = [];
       try {
-        var b = await kr.secret('identity');
-        if (!b) return;
-        await I.openLinked(b);
+        list = await kr.secrets('identity');
+        if (!list.length) return;
+        await I.openLinked(list.map(function (x) { return x.bytes; }));
       } catch (_) {
         krBroken = true;
         return;
+      } finally {
+        list.forEach(function (x) { try { x.bytes.fill(0); } catch (_) {} });
       }
       fromKeyring = true;
       pendingCreate = false;
@@ -2050,8 +2057,7 @@ localeReload: true
       if (!window.MentriaSync) return;
       syncBtn.disabled = true;
       try {
-        var secret = krActive() && fromKeyring ? await kr.secret('identity') : null;
-        if (!secret) secret = window.MentriaIdentity.getSecret();
+        var secret = window.MentriaIdentity.getSecret();
         await window.MentriaSync.joinWithIdentity(secret);
       } catch (err) {
         window.mentriaAlert(String(err && err.message || err));

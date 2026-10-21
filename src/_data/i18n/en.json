@@ -3819,7 +3819,8 @@
         "device_unlock": "Unlock automatically on this device",
         "device_hint": "Skips the passphrase here. Only turn this on for a computer you alone use.",
         "finish": "Create my ledger",
-        "creating": "Encrypting…"
+        "creating": "Encrypting…",
+        "keyring_taken": "Your one unlock already opens a Finance ledger from another device. To use that ledger here, go back and choose “I use Finance on another device”. To keep a separate ledger on this device, choose a passphrase for it."
       },
       "lock": {
         "locked": "Locked",
@@ -3856,7 +3857,8 @@
         "erase": "Erase Finance on this device",
         "erase_title": "Erase Finance on this device?",
         "erase_body": "This deletes your encrypted ledger, keys and settings from this browser. Paired devices and backup files keep their copies. This can't be undone.",
-        "erase_ok": "Erase"
+        "erase_ok": "Erase",
+        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here."
       },
       "pair": {
         "title": "Add this device",
@@ -4323,7 +4325,10 @@
           "other": "{n} days before"
         },
         "reminder_names": "Show bill names in reminders",
-        "reminder_amounts": "Show amounts in reminders"
+        "reminder_amounts": "Show amounts in reminders",
+        "keyring_note": "Finance opens with your one unlock. Changes here apply to everything Mentria keeps locked.",
+        "keyring_no_passkeys": "No passkeys yet. A passkey uses your device's face, fingerprint or PIN unlock.",
+        "keyring_again": "Confirmed. Choose Add a passkey again to finish."
       },
       "subs": {
         "add": "Add a bill",

@@ -3819,7 +3819,8 @@
         "device_unlock": "Déverrouiller automatiquement sur cet appareil",
         "device_hint": "La phrase secrète n'est plus demandée ici. N'activez cette option que sur un ordinateur que personne d'autre n'utilise.",
         "finish": "Créer mon livre de comptes",
-        "creating": "Chiffrement…"
+        "creating": "Chiffrement…",
+        "keyring_taken": "Your one unlock already opens a Finance ledger from another device. To use that ledger here, go back and choose “I use Finance on another device”. To keep a separate ledger on this device, choose a passphrase for it."
       },
       "lock": {
         "locked": "Verrouillé",
@@ -3856,7 +3857,8 @@
         "erase": "Effacer Finances sur cet appareil",
         "erase_title": "Effacer Finances sur cet appareil ?",
         "erase_body": "Cela supprime de ce navigateur votre livre de comptes chiffré, vos clés et vos réglages. Les appareils appairés et les fichiers de sauvegarde gardent leurs copies. Cette action est irréversible.",
-        "erase_ok": "Effacer"
+        "erase_ok": "Effacer",
+        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here."
       },
       "pair": {
         "title": "Ajouter cet appareil",
@@ -4323,7 +4325,10 @@
           "other": "{n} jours avant"
         },
         "reminder_names": "Afficher le nom du paiement dans les rappels",
-        "reminder_amounts": "Afficher les montants dans les rappels"
+        "reminder_amounts": "Afficher les montants dans les rappels",
+        "keyring_note": "Finance opens with your one unlock. Changes here apply to everything Mentria keeps locked.",
+        "keyring_no_passkeys": "No passkeys yet. A passkey uses your device's face, fingerprint or PIN unlock.",
+        "keyring_again": "Confirmed. Choose Add a passkey again to finish."
       },
       "subs": {
         "add": "Ajouter une facture",

@@ -3819,7 +3819,8 @@
         "device_unlock": "このデバイスでは自動でロック解除する",
         "device_hint": "このデバイスではパスフレーズの入力を省略します。自分しか使わないパソコンの場合のみオンにしてください。",
         "finish": "家計簿を作成",
-        "creating": "暗号化しています…"
+        "creating": "暗号化しています…",
+        "keyring_taken": "Your one unlock already opens a Finance ledger from another device. To use that ledger here, go back and choose “I use Finance on another device”. To keep a separate ledger on this device, choose a passphrase for it."
       },
       "lock": {
         "locked": "ロック中",
@@ -3856,7 +3857,8 @@
         "erase": "このデバイスの家計簿を消去",
         "erase_title": "このデバイスの家計簿を消去しますか？",
         "erase_body": "このブラウザーから、暗号化された家計簿のデータ、キー、設定を削除します。ペアリング済みのデバイスやバックアップファイルにあるコピーは残ります。この操作は元に戻せません。",
-        "erase_ok": "消去"
+        "erase_ok": "消去",
+        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here."
       },
       "pair": {
         "title": "このデバイスを追加",
@@ -4323,7 +4325,10 @@
           "other": "{n} 日前"
         },
         "reminder_names": "リマインダーに支払い名を表示する",
-        "reminder_amounts": "リマインダーに金額を表示する"
+        "reminder_amounts": "リマインダーに金額を表示する",
+        "keyring_note": "Finance opens with your one unlock. Changes here apply to everything Mentria keeps locked.",
+        "keyring_no_passkeys": "No passkeys yet. A passkey uses your device's face, fingerprint or PIN unlock.",
+        "keyring_again": "Confirmed. Choose Add a passkey again to finish."
       },
       "subs": {
         "add": "支払いを追加",

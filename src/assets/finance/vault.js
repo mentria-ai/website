@@ -1,16 +1,68 @@
 import * as db from './db.js';
 import * as C from './crypto.js';
 
-export async function status() {
-  const m = await db.getMetaMany(['wraps', 'device_id', 'device_name', 'kcv']);
+const RETIRED = ['pass', 'recovery', 'prf', 'device'];
+
+export function statusOf(meta, keyringLinked) {
+  const m = meta || {};
   const w = m.wraps || null;
+  const linked = m.linked === true;
   return {
-    setup: !!(w && w.pass && m.kcv && m.device_id),
+    setup: !!(((w && w.pass) || linked || keyringLinked) && m.kcv && m.device_id),
+    linked,
+    keyringLinked: !!keyringLinked,
+    hasPass: !!(w && w.pass),
     hasDevice: !!(w && w.device),
     prf: w && Array.isArray(w.prf) ? w.prf.map((p) => ({ id: p.id, label: p.label, created: p.created })) : [],
     deviceId: m.device_id || null,
     deviceName: m.device_name || ''
   };
+}
+
+export async function status(opts) {
+  const m = await db.getMetaMany(['wraps', 'device_id', 'device_name', 'kcv', 'linked']);
+  return statusOf(m, !!(opts && opts.keyringLinked));
+}
+
+export function pairPlan(wraps, keyringOpen) {
+  if (wraps && wraps.pass) return 'legacy';
+  return keyringOpen ? 'linked' : 'no-wraps';
+}
+
+export function urlSafeId(id) {
+  return String(id || '').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+export function hasLegacyWraps(wraps) {
+  const w = wraps || {};
+  return RETIRED.some((k) => w[k] != null && !(Array.isArray(w[k]) && !w[k].length));
+}
+
+export function retiredWraps(wraps) {
+  const next = Object.assign({}, wraps || {});
+  const ids = Array.isArray(next.prf) ? next.prf.filter((p) => p && typeof p.id === 'string' && p.id).map((p) => urlSafeId(p.id)) : [];
+  for (const k of RETIRED) delete next[k];
+  return { wraps: next, ids };
+}
+
+export async function retireLegacy() {
+  const r = retiredWraps(await db.getMeta('wraps'));
+  await db.setMeta({ wraps: r.wraps });
+  return r.ids;
+}
+
+export async function markLinked() {
+  await db.setMeta({ linked: true });
+}
+
+export async function openLinked(bytes) {
+  const root = new Uint8Array(bytes);
+  try {
+    return { root, keys: await verify(root), linked: true };
+  } catch (e) {
+    root.fill(0);
+    throw e;
+  }
 }
 
 export function newDeviceId() {
@@ -32,30 +84,45 @@ export async function refreshDeviceName() {
   if (typeof cur === 'string' && cur !== next && AUTO_NAME.test(cur)) await db.setMeta({ device_name: next });
 }
 
-export async function create(passphrase, opts) {
+export async function buildVault(passphrase, opts) {
   const o = opts || {};
+  const linked = o.linked === true;
   const root = o.root ? new Uint8Array(o.root) : C.randomBytes(32);
   const keys = await C.deriveKeys(root);
-  const recoveryCode = o.recoveryWrap ? null : o.recoveryCode || C.newRecoveryCode();
-  const [pass, recovery] = await Promise.all([
-    o.passWrap ? Object.assign({ kind: 'pass' }, o.passWrap) : C.makePassWrap(root, passphrase),
-    o.recoveryWrap ? Object.assign({ kind: 'recovery' }, o.recoveryWrap) : C.makeRecoveryWrap(root, recoveryCode)
-  ]);
+  const recoveryCode = linked || o.recoveryWrap ? null : o.recoveryCode || C.newRecoveryCode();
+  let wraps = { prf: [] };
+  if (!linked) {
+    const [pass, recovery] = await Promise.all([
+      o.passWrap ? Object.assign({ kind: 'pass' }, o.passWrap) : C.makePassWrap(root, passphrase),
+      o.recoveryWrap ? Object.assign({ kind: 'recovery' }, o.recoveryWrap) : C.makeRecoveryWrap(root, recoveryCode)
+    ]);
+    wraps = { pass, recovery, prf: [] };
+  }
   const inbox = await C.newInboxKeys(keys.inboxWrap);
   const deviceId = newDeviceId();
-  await db.setMeta({
+  const meta = {
     schema: 1,
     device_id: deviceId,
     device_name: o.deviceName || defaultDeviceName(),
     kcv: keys.kcv,
-    wraps: { pass, recovery, prf: [] },
+    wraps,
+    linked: linked ? true : undefined,
     inbox_pub: inbox.pub,
     inbox_priv: inbox.sealed,
     seq: 0,
     created_at: new Date().toISOString(),
     pending_setup: o.pending || undefined
-  });
-  return { root, keys, recoveryCode, deviceId };
+  };
+  return { meta, root, keys, recoveryCode, deviceId };
+}
+
+export async function saveVault(vault) {
+  await db.setMeta(vault.meta);
+  return { root: vault.root, keys: vault.keys, recoveryCode: vault.recoveryCode, deviceId: vault.deviceId };
+}
+
+export async function create(passphrase, opts) {
+  return saveVault(await buildVault(passphrase, opts));
 }
 
 async function verify(root) {

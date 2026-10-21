@@ -6,6 +6,7 @@ import { COMMON_CCY } from '../defaults.js';
 import { exportPayload, encryptExport, readFileJson, decryptExport, mergeInto, plainExport, storageSummary } from '../backup.js';
 import { localTimeZone, monthEnd, isISODate } from '../dates.js';
 import { remindersSupported, remindersAllowed, enableReminders, armReminders } from '../reminders.js';
+import * as KR from '../keyring.js';
 
 const { h, t, icon } = U;
 const LOCALES = ['en-US', 'en-GB', 'en-IN', 'en-CA', 'en-AU', 'es-ES', 'es-MX', 'fr-FR', 'fr-CA', 'de-DE', 'it-IT', 'pt-BR', 'pt-PT', 'ja-JP', 'nl-NL', 'sv-SE', 'pl-PL', 'tr-TR', 'hi-IN', 'zh-CN', 'ko-KR'];
@@ -160,22 +161,7 @@ export function render(ctx) {
   buffer.addEventListener('change', () => ctx.commit(ctx.save('settings', 'main', { buffer_minor: Math.abs(U.parseAmount(buffer.value, L.base()) || 0) }), t('settings.saved')));
   node.append(section(t('settings.general'),
     h('div', { class: 'ff-grid' }, U.field(t('setup.base'), base, t('settings.base_hint')), U.field(t('settings.number_format'), loc, t('settings.number_hint', { sample: U.money(123456789, L.base()) })), U.field(t('settings.time_zone'), tz), U.field(t('settings.week_start'), week), U.field(t('settings.buffer'), buffer, t('settings.buffer_hint')))));
-  const lockSel = U.select([1, 5, 15, 30, 0].map((m) => ({ value: String(m), label: m ? U.tp('settings.minutes', m) : t('settings.never') })), String(ctx.local.auto_lock_min == null ? 5 : ctx.local.auto_lock_min), { onchange: (e) => ctx.saveLocal({ auto_lock_min: Number(e.target.value) }).then(() => U.toast(t('settings.saved'))) });
-  const sec = section(t('settings.security'), U.field(t('settings.auto_lock'), lockSel, t('settings.auto_lock_hint')));
-  const pkBox = h('div', { class: 'fstack' });
-  sec.querySelector('.fstack').append(pkBox);
-  V.status().then((st) => {
-    pkBox.append(h('span', { class: 'ff__label' }, t('settings.passkeys')));
-    if (!st.prf.length) pkBox.append(h('p', { class: 'fsmall fmuted' }, V.prfSupported ? t('settings.no_passkeys') : t('settings.passkey_unsupported')));
-    for (const p of st.prf) pkBox.append(h('div', { class: 'frow frow--static' }, U.mono('', '#6ef3c5', true, 'passkey'), h('span', { class: 'frow__main' }, h('span', { class: 'frow__title' }, p.label || t('settings.passkey')), h('span', { class: 'frow__meta' }, U.date(String(p.created || '').slice(0, 10)))), h('button', { type: 'button', class: 'fb fb--sm fb--ghost', onclick: async () => { await V.removePrf(p.id); U.toast(t('settings.passkey_removed')); ctx.rerender(); } }, t('common.remove'))));
-    if (V.prfSupported) pkBox.append(h('button', { type: 'button', class: 'fb fb--sm', style: { alignSelf: 'flex-start' }, onclick: async () => {
-      try { await V.enrollPrf(ctx.engine.root, V.defaultDeviceName()); U.toast(t('settings.passkey_added')); ctx.rerender(); }
-      catch (e) { U.toast(String(e && e.message) === 'prf-unsupported' ? t('settings.passkey_unsupported') : t('setup.passkey_failed'), { ms: 5000 }); }
-    } }, icon('passkey'), t('settings.add_passkey')));
-    pkBox.append(U.checkbox(t('setup.device_unlock'), st.hasDevice, async (v) => { await V.setDeviceUnlock(ctx.engine.root, v); U.toast(v ? t('settings.device_on') : t('settings.device_off')); }), h('p', { class: 'ff__hint' }, t('setup.device_hint')));
-  });
-  sec.querySelector('.fstack').append(h('div', { class: 'fb-row' }, h('button', { type: 'button', class: 'fb fb--sm', onclick: () => passSheet(ctx) }, icon('key'), t('settings.change_pass')), h('button', { type: 'button', class: 'fb fb--sm', onclick: () => newCode(ctx) }, t('settings.new_code')), h('button', { type: 'button', class: 'fb fb--sm', onclick: () => ctx.lock() }, icon('lock'), t('lock.lock_now'))));
-  node.append(sec);
+  node.append(ctx.keyring ? keyringSection(ctx) : securitySection(ctx));
   const storage = h('p', { class: 'fsmall fmuted' }, '…');
   storageSummary().then((sum) => {
     storage.textContent = t('settings.storage', { used: (sum.usage / 1048576).toFixed(1), quota: sum.quota ? (sum.quota / 1073741824).toFixed(1) : '?', pages: sum.pages }) + ' · ' + (sum.persisted ? t('settings.persisted') : t('settings.not_persisted'));
@@ -232,4 +218,81 @@ export function render(ctx) {
       location.reload();
     } }, icon('trash'), t('lock.erase'))));
   return { title: t('nav.settings'), node };
+}
+
+function securitySection(ctx) {
+  const lockSel = U.select([1, 5, 15, 30, 0].map((m) => ({ value: String(m), label: m ? U.tp('settings.minutes', m) : t('settings.never') })), String(ctx.local.auto_lock_min == null ? 5 : ctx.local.auto_lock_min), { onchange: (e) => ctx.saveLocal({ auto_lock_min: Number(e.target.value) }).then(() => U.toast(t('settings.saved'))) });
+  const sec = section(t('settings.security'), U.field(t('settings.auto_lock'), lockSel, t('settings.auto_lock_hint')));
+  const pkBox = h('div', { class: 'fstack' });
+  sec.querySelector('.fstack').append(pkBox);
+  V.status().then((st) => {
+    pkBox.append(h('span', { class: 'ff__label' }, t('settings.passkeys')));
+    if (!st.prf.length) pkBox.append(h('p', { class: 'fsmall fmuted' }, V.prfSupported ? t('settings.no_passkeys') : t('settings.passkey_unsupported')));
+    for (const p of st.prf) pkBox.append(h('div', { class: 'frow frow--static' }, U.mono('', '#6ef3c5', true, 'passkey'), h('span', { class: 'frow__main' }, h('span', { class: 'frow__title' }, p.label || t('settings.passkey')), h('span', { class: 'frow__meta' }, U.date(String(p.created || '').slice(0, 10)))), h('button', { type: 'button', class: 'fb fb--sm fb--ghost', onclick: async () => { await V.removePrf(p.id); U.toast(t('settings.passkey_removed')); ctx.rerender(); } }, t('common.remove'))));
+    if (V.prfSupported) pkBox.append(h('button', { type: 'button', class: 'fb fb--sm', style: { alignSelf: 'flex-start' }, onclick: async () => {
+      try { await V.enrollPrf(ctx.engine.root, V.defaultDeviceName()); U.toast(t('settings.passkey_added')); ctx.rerender(); }
+      catch (e) { U.toast(String(e && e.message) === 'prf-unsupported' ? t('settings.passkey_unsupported') : t('setup.passkey_failed'), { ms: 5000 }); }
+    } }, icon('passkey'), t('settings.add_passkey')));
+    pkBox.append(U.checkbox(t('setup.device_unlock'), st.hasDevice, async (v) => { await V.setDeviceUnlock(ctx.engine.root, v); U.toast(v ? t('settings.device_on') : t('settings.device_off')); }), h('p', { class: 'ff__hint' }, t('setup.device_hint')));
+  });
+  sec.querySelector('.fstack').append(h('div', { class: 'fb-row' }, h('button', { type: 'button', class: 'fb fb--sm', onclick: () => passSheet(ctx) }, icon('key'), t('settings.change_pass')), h('button', { type: 'button', class: 'fb fb--sm', onclick: () => newCode(ctx) }, t('settings.new_code')), h('button', { type: 'button', class: 'fb fb--sm', onclick: () => ctx.lock() }, icon('lock'), t('lock.lock_now'))));
+  return sec;
+}
+
+function passkeyRow(label, created, onRemove) {
+  return h('div', { class: 'frow frow--static' }, U.mono('', '#6ef3c5', true, 'passkey'), h('span', { class: 'frow__main' }, h('span', { class: 'frow__title' }, label || t('settings.passkey')), h('span', { class: 'frow__meta' }, created ? U.date(String(created).slice(0, 10)) : '')), h('button', { type: 'button', class: 'fb fb--sm fb--ghost', onclick: onRemove }, t('common.remove')));
+}
+
+function keyringSection(ctx) {
+  const K = ctx.keyring;
+  const sec = section(t('settings.security'), h('p', { class: 'fsmall fmuted' }, t('settings.keyring_note')));
+  const stack = sec.querySelector('.fstack');
+  const pkBox = h('div', { class: 'fstack' });
+  stack.append(pkBox);
+  Promise.all([KR.copy(), K.prfSupport().catch(() => 'unknown')]).then(([T, prf]) => {
+    const st = K.state();
+    const list = K.passkeys();
+    pkBox.append(h('span', { class: 'ff__label' }, T.passkeys_title || t('settings.passkeys')));
+    if (!list.length) pkBox.append(h('p', { class: 'fsmall fmuted' }, t('settings.keyring_no_passkeys')));
+    for (const p of list) {
+      pkBox.append(passkeyRow(p.label, p.created, async () => {
+        try {
+          await KR.withConfirm(() => K.removePasskey(p.id));
+          U.toast(t('settings.passkey_removed'));
+        } catch (e) { if (KR.errCode(e) !== 'confirm-needed') U.toast(t('errors.write') + ' ' + KR.errCode(e)); }
+        ctx.rerender();
+      }));
+    }
+    if (prf !== 'no') {
+      const add = h('button', { type: 'button', class: 'fb fb--sm', style: { alignSelf: 'flex-start' } }, icon('passkey'), t('settings.add_passkey'));
+      add.addEventListener('click', () => {
+        const run = K.addPasskey(V.defaultDeviceName());
+        add.disabled = true;
+        run.then(() => { U.toast(t('settings.passkey_added')); ctx.rerender(); }, async (e) => {
+          add.disabled = false;
+          const n = KR.errCode(e);
+          if (n === 'confirm-needed') {
+            let ok = false;
+            try { ok = await (await KR.ui()).showConfirm(); } catch (_) {}
+            if (ok) U.toast(t('settings.keyring_again'), { ms: 6000 });
+            ctx.rerender();
+            return;
+          }
+          U.toast(n === 'NotAllowedError' || n === 'AbortError' ? t('lock.passkey_cancelled') : n === 'no-prf' ? (T.no_prf_title || t('setup.passkey_failed')) : t('setup.passkey_failed'), { ms: 5000 });
+        });
+      });
+      pkBox.append(add);
+    }
+    if (prf === 'no' || st.hasDevice) {
+      pkBox.append(U.checkbox(T.remember_label || t('setup.device_unlock'), st.hasDevice, async (v) => {
+        try {
+          await KR.withConfirm(() => K.setRemember(v));
+          U.toast(v ? t('settings.device_on') : t('settings.device_off'));
+        } catch (e) { if (KR.errCode(e) !== 'confirm-needed') U.toast(t('errors.write') + ' ' + KR.errCode(e)); }
+        ctx.rerender();
+      }), T.remember_note ? h('p', { class: 'ff__hint' }, T.remember_note) : null);
+    }
+  });
+  stack.append(h('div', { class: 'fb-row' }, h('button', { type: 'button', class: 'fb fb--sm', onclick: () => ctx.lockNow() }, icon('lock'), t('lock.lock_now'))));
+  return sec;
 }

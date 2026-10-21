@@ -15,6 +15,8 @@ const TAB_KEY = 'mentria.keyring.tab';
 const DB_NAME = 'mentria-keyring';
 const CHANNEL = 'mentria-unlock';
 const LOCK_NAME = 'mentria-open';
+const WRITE_LOCK = 'mentria-keyring-write';
+const LINK_TRIES = 4;
 const RP_NAME = 'Mentria';
 const WEBAUTHN_MS = 90000;
 const SEEN_MS = 15000;
@@ -98,10 +100,37 @@ function storeReady() {
   });
 }
 
-async function writeRecord(rec) {
-  const S = await storeReady();
+function store(S, rec) {
   if (!S || S.set(NS, KEY, rec) !== true) throw new Error('storage');
   post('record');
+}
+
+async function writeRecord(rec) {
+  store(await storeReady(), rec);
+}
+
+function exclusive(fn) {
+  if (!navigator.locks || typeof navigator.locks.request !== 'function') return Promise.resolve().then(fn);
+  return navigator.locks.request(WRITE_LOCK, { mode: 'exclusive' }, fn);
+}
+
+function canon(v) {
+  if (Array.isArray(v)) return '[' + v.map((x) => (x === undefined ? 'null' : canon(x))).join(',') + ']';
+  if (isObj(v)) return '{' + Object.keys(v).filter((k) => v[k] !== undefined).sort().map((k) => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
+  return JSON.stringify(v);
+}
+
+function heal(e) {
+  if (e.newValue == null || e.oldValue == null || !enabled()) return;
+  const old = parse(e.oldValue);
+  if (!isRecord(old)) return;
+  exclusive(async () => {
+    const S = await storeReady();
+    const now = readRecord();
+    if (!now) return;
+    const next = mergeRecords(now, old);
+    if (next && canon(next) !== canon(now)) store(S, next);
+  }).catch(() => {});
 }
 
 function livePasskeys(rec) {
@@ -181,6 +210,8 @@ function sessionLive() {
   const rec = readRecord();
   return !!rec && rec.kcv === mem.kcv;
 }
+
+function sessionTag() { return mem.root ? mem.epoch + '|' + mem.kcv : ''; }
 
 function drop() {
   mem.root = null;
@@ -289,6 +320,7 @@ function attach() {
   attached = true;
   openChannel();
   window.addEventListener('storage', (e) => {
+    if (e.key === RECORD_KEY) heal(e);
     if (e.key === null || e.key === EPOCH_KEY || e.key === RECORD_KEY) refresh(true);
     else if (e.key === LOCAL_KEY) refresh(false);
   });
@@ -669,7 +701,12 @@ export async function secret(name) {
   if (!rec || !sessionLive()) return null;
   const entry = own(rec.services, name);
   if (!isObj(entry) || !entry.ct) return null;
-  return openService(mem.root, name, entry);
+  const root = mem.root;
+  const tag = sessionTag();
+  const bytes = await openService(root, name, entry);
+  if (sessionLive() && sessionTag() === tag) return bytes;
+  bytes.fill(0);
+  return null;
 }
 
 export async function secrets(name) {
@@ -677,6 +714,7 @@ export async function secrets(name) {
   const rec = readRecord();
   if (!rec || !sessionLive()) return [];
   const root = mem.root;
+  const tag = sessionTag();
   const cur = linkedEntry(rec, name);
   const list = listServiceEntries(rec, name);
   const out = [];
@@ -687,7 +725,9 @@ export async function secrets(name) {
       if (i === 0 && cur) throw e;
     }
   }
-  return out;
+  if (sessionLive() && sessionTag() === tag) return out;
+  for (const x of out) x.bytes.fill(0);
+  return [];
 }
 
 export function secretId(name) {
@@ -702,23 +742,48 @@ export async function link(name, bytes) {
   if (!rec || !sessionLive()) throw new Error('locked');
   if (!SERVICES.includes(name)) throw new Error('bad-service');
   const root = mem.root;
-  const was = linkedEntry(rec, name);
+  const tag = sessionTag();
+  const live = () => {
+    const fresh = readRecord();
+    if (!fresh || !sessionLive() || sessionTag() !== tag) throw new Error('locked');
+    return fresh;
+  };
+  const wrote = await exclusive(async () => {
+    const S = await storeReady();
+    let prev = linkedEntry(live(), name);
+    for (let i = 1; ; i++) {
+      const last = i >= LINK_TRIES;
+      const entry = await sealOver(root, name, prev, bytes, last);
+      const fresh = live();
+      const now = linkedEntry(fresh, name);
+      if (!last && entrySig(now) !== entrySig(prev)) {
+        prev = now;
+        continue;
+      }
+      if (!entry) return false;
+      const next = mergeRecords(fresh, Object.assign({}, fresh, { services: Object.assign({}, fresh.services, { [name]: entry }), changed: entry.linked }));
+      if (!next) throw new Error('locked');
+      store(S, next);
+      return true;
+    }
+  });
+  if (wrote) notify(true);
+}
+
+function entrySig(e) { return e ? [e.id, e.ct, e.linked].join('|') : ''; }
+
+async function sealOver(root, name, prev, bytes, force) {
   let at = Date.now();
-  if (was) {
-    let have = null;
-    try { have = await openService(root, name, was); } catch (_) {}
-    if (sameBytes(have, bytesOf(bytes))) return;
-    const t = Date.parse(was.linked);
+  if (prev) {
+    if (!force) {
+      let have = null;
+      try { have = await openService(root, name, prev); } catch (_) {}
+      if (sameBytes(have, bytesOf(bytes))) return null;
+    }
+    const t = Date.parse(prev.linked);
     if (Number.isFinite(t) && t >= at) at = t + 1;
   }
-  const entry = await sealService(root, name, bytes, at);
-  const S = await storeReady();
-  const fresh = readRecord();
-  if (!fresh || fresh.kcv !== mem.kcv) throw new Error('locked');
-  const next = mergeRecords(fresh, Object.assign({}, fresh, { services: Object.assign({}, fresh.services, { [name]: entry }), changed: entry.linked }));
-  if (!S || !next || S.set(NS, KEY, next) !== true) throw new Error('storage');
-  post('record');
-  notify(true);
+  return sealService(root, name, bytes, at);
 }
 
 export function hasRootBytes() {

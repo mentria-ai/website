@@ -745,6 +745,25 @@ unlockTool: true
     if (!late || ring.on) return;
     attachRing(late);
     if (!state.masterKey) route();
+    else if (state.mode !== 'linked') await adoptLinked();
+  }
+
+  async function adoptLinked() {
+    let list = [];
+    try { list = await ring.mod.secrets('totp'); } catch (_) { list = []; }
+    let hit = false;
+    try {
+      for (const c of list) {
+        try {
+          await accountsWith(await importRaw(c.bytes));
+          hit = true;
+          break;
+        } catch (_) {}
+      }
+    } finally {
+      for (const c of list) c.bytes.fill(0);
+    }
+    if (hit && state.masterKey) becameLinked();
   }
 
   function attachRing(mods) {
@@ -798,6 +817,7 @@ unlockTool: true
     if (!old) {
       $('totp-setup').hidden = true;
       $('totp-unlock').hidden = true;
+      $('totp-unlock-pass').value = '';
     }
     if (kind === 'create') $('totp-locked-lede').textContent = COPY.create_lede;
     if (kind === 'missing') $('totp-locked-lede').textContent = COPY.linked_missing;
@@ -832,25 +852,29 @@ unlockTool: true
   async function openLinked() {
     let list = [];
     try { list = await ring.mod.secrets('totp'); } catch (_) { list = []; }
-    for (const c of list) {
-      let key = null;
-      let accounts = null;
-      try {
-        key = await importRaw(c.bytes);
-        accounts = await accountsWith(key);
-      } catch (_) {
-        continue;
+    let key = null;
+    let accounts = null;
+    try {
+      for (const c of list) {
+        try {
+          const k = await importRaw(c.bytes);
+          accounts = await accountsWith(k);
+          key = k;
+          break;
+        } catch (_) {}
       }
-      if (state.masterKey) return true;
-      state.masterKey = key;
-      state.accounts = accounts;
-      state.mode = 'linked';
-      setStatus('', null);
-      showVault();
-      retire().catch(() => {});
-      return true;
+    } finally {
+      for (const c of list) c.bytes.fill(0);
     }
-    return !!state.masterKey;
+    if (!key || state.masterKey) return !!state.masterKey;
+    state.masterKey = key;
+    state.accounts = accounts;
+    state.mode = 'linked';
+    $('totp-unlock-pass').value = '';
+    setStatus('', null);
+    showVault();
+    retire().catch(() => {});
+    return true;
   }
 
   async function createLinked() {
@@ -900,6 +924,7 @@ unlockTool: true
   }
 
   async function afterLegacy(bytes, pass) {
+    if (state.mode === 'linked') return;
     state.mode = 'legacy';
     const s = ring.mod.state();
     if (!bytes || isLinked(s)) return;
@@ -933,7 +958,9 @@ unlockTool: true
     if (!bytes || !state.masterKey) return;
     try {
       const have = await ring.mod.secrets('totp');
-      if (have.some((c) => sameBytes(c.bytes, bytes))) {
+      const match = have.some((c) => sameBytes(c.bytes, bytes));
+      for (const c of have) c.bytes.fill(0);
+      if (match) {
         becameLinked();
         return;
       }
@@ -996,7 +1023,16 @@ unlockTool: true
     if (v.pass || v.prf) {
       const stored = loadVault();
       if (!stored || !stored.secrets || !state.masterKey || JSON.stringify(stored) !== JSON.stringify(v)) return;
-      try { await decryptWith(state.masterKey, stored.secrets); } catch (_) { return; }
+      let current = null;
+      try { current = await ring.mod.secret('totp'); } catch (_) { current = null; }
+      if (!current) return;
+      try {
+        await decryptWith(await importRaw(current), stored.secrets);
+      } catch (_) {
+        return;
+      } finally {
+        current.fill(0);
+      }
       if (state.mode !== 'linked' || JSON.stringify(loadVault()) !== JSON.stringify(stored)) return;
       const next = Object.assign({}, stored, { v: 2, linked: true, kid: kidOf(stored) });
       delete next.pass;
@@ -1104,7 +1140,10 @@ unlockTool: true
     $('totp-list').replaceChildren();
     if (ring.on) {
       backupModal.close();
+      addModal.close();
+      importModal.close();
       pendingAdd = null;
+      pendingImport = null;
       ring.raw = null;
       hideLinkPanel();
       route();

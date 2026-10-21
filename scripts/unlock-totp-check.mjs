@@ -86,6 +86,19 @@ const WATCH = () => {
   new MutationObserver(look).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
 };
 
+const SLOW_PBKDF2 = () => {
+  const orig = crypto.subtle.deriveKey.bind(crypto.subtle);
+  window.__pbkdf = 0;
+  crypto.subtle.deriveKey = async (alg, ...rest) => {
+    const out = await orig(alg, ...rest);
+    if (alg && alg.name === 'PBKDF2') {
+      if (window.__slowPbkdf) await new Promise((r) => setTimeout(r, window.__slowPbkdf));
+      window.__pbkdf++;
+    }
+    return out;
+  };
+};
+
 const SIGNALS = () => {
   window.__signals = [];
   if (!window.PublicKeyCredential) return;
@@ -372,6 +385,37 @@ async function keptWithKid(page, before) {
   delete got.kid;
   assert(JSON.stringify(got) === before && kid === old.pass.salt + '.' + old.pass.wrap, 'linking only adds the sync id; the old wraps are untouched', { kid, keys: Object.keys(got) });
   return now;
+}
+
+async function delayRuntime(page, ms) {
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    if (q.url().includes('/assets/js/mentria-unlock.js')) { setTimeout(() => { try { q.continue(); } catch (_) {} }, ms); return; }
+    q.continue();
+  });
+}
+
+function migrationUri(secret, name, issuer) {
+  const field = (n, bytes) => Buffer.concat([Buffer.from([(n << 3) | 2, bytes.length]), bytes]);
+  const num = (n, v) => Buffer.from([n << 3, v]);
+  const params = Buffer.concat([field(1, b32(secret)), field(2, Buffer.from(name)), field(3, Buffer.from(issuer)), num(4, 1), num(5, 1), num(6, 2)]);
+  const payload = Buffer.concat([field(1, params), num(2, 1), num(3, 1), num(4, 0)]);
+  return 'otpauth-migration://offline?data=' + encodeURIComponent(payload.toString('base64'));
+}
+
+async function legacyLinked(r) {
+  const { page } = r;
+  const vault = await legacySetup(r, { passkey: !!r.page.__auth, accounts: ACCOUNTS.slice(0, 1) });
+  await setSwitch(page, true);
+  await openTotp(page);
+  const code = await makeKeyring(page);
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await until(async () => (await ringState(page)).linked.includes('totp'), 10000, 'totp linked');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  return { vault, code };
 }
 
 async function finishSetup(page) {
@@ -1102,25 +1146,117 @@ check('a late one unlock attaches without a reload', async () => {
   await closedBackup(page);
   await ringLock(page);
   await until(async () => (await screen(page)).card, 10000, 'the card');
-  await page.setBypassServiceWorker(true);
-  await page.setRequestInterception(true);
-  page.on('request', (q) => {
-    if (q.isInterceptResolutionHandled()) return;
-    if (q.url().includes('/assets/js/mentria-unlock.js')) { setTimeout(() => { try { q.continue(); } catch (_) {} }, 7500); return; }
-    q.continue();
-  });
+  await delayRuntime(page, 7500);
   await page.reload({ waitUntil: 'load' });
   await until(async () => (await screen(page)).unlock, 9000, 'the old unlock after the wait');
   assert(!(await screen(page)).card, 'no card while the one unlock is still loading');
+  await typeInto(page, '#totp-unlock-pass', 'half typed');
   await until(async () => (await screen(page)).card, 12000, 'the card once the one unlock is ready');
   const s1 = await screen(page);
   assert(!s1.unlock && !s1.setup && !s1.vault, 'the card replaces the old unlock without a reload', s1);
+  assert(await page.$eval('#totp-unlock-pass', (el) => el.value) === '', 'the hidden passphrase field is cleared');
   await cardUnlock(page, '#totp-ring-card', { code });
   await expectCodes(page, ACCOUNTS.slice(0, 1));
   await page.reload({ waitUntil: 'load' });
   await until(async () => (await screen(page)).unlock, 9000, 'the old unlock after the wait');
   await expectCodes(page, ACCOUNTS.slice(0, 1));
   assert((await screen(page)).vault, 'with the session open the vault opens directly once the one unlock is ready');
+  await done(r);
+});
+
+check('retirement waits for the current key', async () => {
+  const r = await rig('retire current');
+  const { page } = r;
+  await legacyLinked(r);
+  await page.evaluate(async (u, days) => {
+    const m = await import(u);
+    await m.link('totp', crypto.getRandomValues(new Uint8Array(32)));
+    const rec = window.MentriaStore.get('keyring', 'vault');
+    rec.services.totp.linked = new Date(Date.now() - days).toISOString();
+    window.MentriaStore.set('keyring', 'vault', rec);
+  }, RUNTIME, 31 * DAY);
+  assert((await page.evaluate(async (u) => (await import(u)).retirement('totp'), RUNTIME)).ready, 'retirement is ready');
+  const before = await readRaw(page, VAULT);
+  await page.evaluateOnNewDocument(SIGNALS);
+  await openTotp(page);
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await sleep(1500);
+  const after = await readJson(page, VAULT);
+  assert(await readRaw(page, VAULT) === before && after.pass && after.prf, 'a vault opened with a prior key keeps its old wraps', Object.keys(after));
+  assert(!((await readJson(page, RECORD)).retired || {}).totp, 'totp is not marked retired');
+  assert((await page.evaluate(() => window.__signals.length)) === 0, 'no passkey is signalled');
+  await done(r);
+});
+
+check('a passphrase unlock that ends after the late attach stays linked', async () => {
+  const r = await rig('late attach then passphrase', { authenticator: false });
+  const { page } = r;
+  await legacyLinked(r);
+  await page.evaluateOnNewDocument(SLOW_PBKDF2);
+  await delayRuntime(page, 7500);
+  await page.reload({ waitUntil: 'load' });
+  await until(async () => (await screen(page)).unlock, 9000, 'the old unlock after the wait');
+  await page.evaluate(() => { window.__slowPbkdf = 5000; });
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await until(async () => (await screen(page)).vault, 10000, 'the late attach opens the vault');
+  assert(await page.evaluate(() => window.__pbkdf) === 0, 'the vault opened before the passphrase finished');
+  await page.waitForFunction(() => window.__pbkdf > 0, { timeout: 15000 });
+  await sleep(600);
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await press(page, '#totp-lock-btn');
+  await until(async () => (await screen(page)).card, 10000, 'the card after Lock');
+  assert(!(await ringState(page)).unlocked, 'Lock still locks the one unlock');
+  await done(r);
+});
+
+check('a vault opened the old way during the wait joins the one unlock', async () => {
+  const r = await rig('late attach joins', { authenticator: false });
+  const { page } = r;
+  await legacyLinked(r);
+  await delayRuntime(page, 9500);
+  await page.reload({ waitUntil: 'load' });
+  await until(async () => (await screen(page)).unlock, 9000, 'the old unlock after the wait');
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  assert((await screen(page)).autolock, 'it opened the old way first');
+  await until(async () => !(await screen(page)).autolock, 12000, 'the vault to join the one unlock');
+  const other = await addPage(r, false);
+  await other.goto(ORIGIN + '/about/', { waitUntil: 'load' });
+  await ringLock(other);
+  await until(async () => (await screen(page)).card, 10000, 'the card after a lock in another tab');
+  await other.close();
+  await done(r);
+});
+
+check('a keyring lock closes the add and import windows', async () => {
+  const r = await rig('lock closes add', { authenticator: false });
+  const { page } = r;
+  const code = await newLinkedVault(r);
+  await addAccount(page, ACCOUNTS[0]);
+  await backupModal(page);
+  await press(page, '#totp-backup-confirm-btn');
+  await closedBackup(page);
+  await waitRows(page, 1);
+  await press(page, '#totp-add-btn');
+  await page.waitForSelector('#totp-add-modal:not([hidden])', { timeout: 10000 });
+  await typeInto(page, '#totp-secret', ACCOUNTS[1].secret);
+  await ringLock(page);
+  await until(async () => (await screen(page)).card, 10000, 'the card');
+  assert(await page.evaluate(() => document.getElementById('totp-add-modal').hidden), 'the add window closes on lock');
+  await cardUnlock(page, '#totp-ring-card', { code });
+  await waitRows(page, 1);
+  await press(page, '#totp-add-btn');
+  await page.waitForSelector('#totp-add-modal:not([hidden])', { timeout: 10000 });
+  await typeInto(page, '#totp-uri', migrationUri(ACCOUNTS[1].secret, ACCOUNTS[1].account, ACCOUNTS[1].issuer));
+  await press(page, '#totp-save-btn');
+  await page.waitForSelector('#totp-import-modal:not([hidden])', { timeout: 10000 });
+  await ringLock(page);
+  await until(async () => (await screen(page)).card, 10000, 'the card');
+  assert(await page.evaluate(() => document.getElementById('totp-import-modal').hidden), 'the import window closes on lock');
+  await cardUnlock(page, '#totp-ring-card', { code });
+  await waitRows(page, 1);
   await done(r);
 });
 

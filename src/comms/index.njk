@@ -2745,6 +2745,7 @@ let krSetupBusy = false;
 let krSawLocked = false;
 let krOpening = null;
 let krRetiring = false;
+let krSettling = false;
 let krLinkMode = null;
 const krSlots = new Map();
 const krUi = () => {
@@ -3161,7 +3162,25 @@ const krKeepRemembered = async () => {
   if (!I || !I.hasDeviceUnlock()) return;
   try {
     if (!KR.state().hasDevice) await KR.setRemember(true);
-  } catch (_) {}
+    I.setRememberPending(false);
+  } catch (e) {
+    if (e && e.message === 'confirm-needed') I.setRememberPending(true);
+  }
+};
+
+const krSettleRemember = async () => {
+  const I = window.MentriaIdentity;
+  if (krSettling || !I || !I.rememberPending()) return;
+  if (!I.hasDeviceUnlock() || KR.state().hasDevice) { I.setRememberPending(false); return; }
+  if (!KR.hasRootBytes()) return;
+  krSettling = true;
+  try {
+    await KR.setRemember(true);
+    I.setRememberPending(false);
+  } catch (_) {
+  } finally {
+    krSettling = false;
+  }
 };
 
 const krLinkNow = async () => {
@@ -3183,6 +3202,7 @@ const krChanged = (s) => {
   if (krLinkMode === 'offer' && s.setUp) krLinkMode = 'card';
   const I = window.MentriaIdentity;
   if (s.unlocked && I && !krSetupBusy) {
+    krSettleRemember();
     if (krLinked() && !I.isUnlocked()) krOpen();
     else if (I.isSetUp() && I.isUnlocked() && !I.isLinked() && !krBroken) krLinkNow();
   }

@@ -15,6 +15,7 @@
   const IDB_DEVICE_KEY = 'device-wrap';
   const KEYRING_NS = 'keyring';
   const KEYRING_KEY = 'vault';
+  const LOCAL_KEY = 'mentria.identity.local';
 
   function b64uEnc(bytes) {
     const u8 = new Uint8Array(bytes);
@@ -475,6 +476,29 @@
     return !!(v && v.device);
   }
 
+  function readLocal() {
+    try {
+      const v = JSON.parse(global.localStorage.getItem(LOCAL_KEY) || 'null');
+      return v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function rememberPending() {
+    return readLocal().rememberPending === true;
+  }
+
+  function setRememberPending(on) {
+    try {
+      const v = readLocal();
+      if (on) v.rememberPending = true;
+      else delete v.rememberPending;
+      if (Object.keys(v).length) global.localStorage.setItem(LOCAL_KEY, JSON.stringify(v));
+      else global.localStorage.removeItem(LOCAL_KEY);
+    } catch (_) {}
+  }
+
   async function setDeviceUnlock(on) {
     const vault = loadVault();
     if (!vault) throw new Error('no-vault');
@@ -520,7 +544,7 @@
     cryptoReady,
     setup, unlock, lock, isSetUp, isUnlocked, getSecret, clearVault,
     passkeySupport, hasPasskey, enrollPasskey, unlockWithPasskey, removePasskey,
-    hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock,
+    hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock, rememberPending, setRememberPending,
     useSecret, isLinked, createLinked, saveLinked, openLinked, rebuildLinked, matchesVault, retireLegacy, legacyPasskeyId
   };
 })(typeof window !== 'undefined' ? window : globalThis);

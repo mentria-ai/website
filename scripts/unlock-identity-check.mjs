@@ -22,6 +22,7 @@ const IDENTITY = 'mentria.store.identity.vault';
 const KEYRING = 'mentria.store.keyring.vault';
 const IDKEYS = 'mentria.store.comms.idkeys';
 const LOCAL = 'mentria.keyring.local';
+const LOCAL_IDENTITY = 'mentria.identity.local';
 const CODE_SHAPE = /^[a-hj-km-np-z2-9]{5}(-[a-hj-km-np-z2-9]{5}){3}$/;
 const AUTH = { protocol: 'ctap2', ctap2Version: 'ctap2_1', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, automaticPresenceSimulation: true, hasPrf: true };
 const PASSPHRASE = 'correct horse 42';
@@ -372,6 +373,44 @@ function deviceWrapKept(page) {
     };
     req.onerror = () => ok(false);
   }));
+}
+
+function rememberUi(page) {
+  return page.evaluate((k) => ({
+    row: !!document.getElementById('about-identity-device-row').getClientRects().length,
+    checked: document.getElementById('about-identity-device').checked,
+    layer: !!document.querySelector('.m-ulayer'),
+    pending: (JSON.parse(localStorage.getItem(k) || 'null') || {}).rememberPending === true
+  }), LOCAL_IDENTITY);
+}
+
+async function seedSilentLink(page) {
+  await openAdvanced(page);
+  await press(page, '[data-reveal="about-identity-setup-form"]');
+  await page.type('#about-identity-setup-pass', PASSPHRASE);
+  await page.type('#about-identity-setup-pass2', PASSPHRASE);
+  await page.click('#about-identity-setup-btn');
+  await answerDialog(page);
+  await waitVisible(page, '#about-identity-unlocked');
+  await page.click('#about-identity-device');
+  await until(() => readJson(page, IDENTITY).then((v) => !!(v && v.device)), 15000, 'seed: device unlock on');
+  const vault0 = await readJson(page, IDENTITY);
+  assert(vault0.pass && vault0.device, 'seed: pass and device wraps', Object.keys(vault0));
+  await setSwitch(page, true);
+  const tools = await open('/tools/');
+  const code = await tools.evaluate(async (u) => {
+    const m = await import(u);
+    await m.ready();
+    const made = await m.create({});
+    if (!m.confirmCode(made.code.replace(/-/g, '').slice(-4))) throw new Error('code not confirmed');
+    return made.code;
+  }, RUNTIME);
+  await page.bringToFront();
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => readJson(page, KEYRING).then((r) => !!(r && r.services.identity)), 20000, 'the identity opened by the old device key links into the open keyring');
+  await waitVisible(page, '#about-identity-keyring', 15000);
+  return { vault0, tools, code };
 }
 
 async function backdateIdentityLink(page) {
@@ -1487,41 +1526,14 @@ check('a legacy device key survives retirement while the keyring has none', asyn
   await fresh(false);
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
-  await openAdvanced(page);
-  await press(page, '[data-reveal="about-identity-setup-form"]');
-  await page.type('#about-identity-setup-pass', PASSPHRASE);
-  await page.type('#about-identity-setup-pass2', PASSPHRASE);
-  await page.click('#about-identity-setup-btn');
-  await answerDialog(page);
-  await waitVisible(page, '#about-identity-unlocked');
-  await page.click('#about-identity-device');
-  await until(() => readJson(page, IDENTITY).then((v) => !!(v && v.device)), 15000, 'seed: device unlock on');
-  const vault0 = await readJson(page, IDENTITY);
-  assert(vault0.pass && vault0.device, 'seed: pass and device wraps', Object.keys(vault0));
-  await setSwitch(page, true);
-  const tools = await open('/tools/');
-  await tools.evaluate(async (u) => {
-    const m = await import(u);
-    await m.ready();
-    const made = await m.create({});
-    if (!m.confirmCode(made.code.replace(/-/g, '').slice(-4))) throw new Error('code not confirmed');
-  }, RUNTIME);
-  await page.bringToFront();
-  await page.reload({ waitUntil: 'load' });
-  await openAdvanced(page);
-  await until(() => readJson(page, KEYRING).then((r) => !!(r && r.services.identity)), 20000, 'the identity opened by the old device key links into the open keyring');
-  await waitVisible(page, '#about-identity-keyring', 15000);
+  const { vault0, tools } = await seedSilentLink(page);
   const st = await page.evaluate(async (u) => {
     const m = await import(u);
     return { hasDevice: m.state().hasDevice, bytes: m.hasRootBytes() };
   }, RUNTIME);
   assert(!st.bytes && !st.hasDevice, 'seed: the keyring could not take Remember this device without a confirm', st);
-  const ui = await page.evaluate(() => ({
-    row: !!document.getElementById('about-identity-device-row').getClientRects().length,
-    checked: document.getElementById('about-identity-device').checked,
-    layer: !!document.querySelector('.m-ulayer')
-  }));
-  assert(ui.row && !ui.checked && !ui.layer, 'Remember this device is offered, off, with no sheet', ui);
+  const ui = await rememberUi(page);
+  assert(ui.row && ui.checked && ui.pending && !ui.layer, 'Remember this device shows as on, pending the next unlock, with no sheet', ui);
   const kept = await readJson(page, IDENTITY);
   assert(JSON.stringify(kept.device) === JSON.stringify(vault0.device), 'the old device wrap is kept at link time');
   await tools.close();
@@ -1544,6 +1556,40 @@ check('a legacy device key survives retirement while the keyring has none', asyn
   await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'with the switch off the old device key still opens the identity');
   clean_(rig);
   clean_(rigs.get(tools));
+});
+
+check('a silent link turns Remember this device on at the next unlock on About', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  const { vault0, tools, code } = await seedSilentLink(page);
+  const st0 = await runtime(page);
+  assert(!st0.hasDevice, 'seed: the link could not take Remember this device without a confirm', st0);
+  const ui0 = await rememberUi(page);
+  assert(ui0.checked && ui0.pending, 'seed: Remember this device shows as on, pending', ui0);
+  await tools.close();
+  await page.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
+  await waitVisible(page, '#about-identity-card-slot .m-unlock', 15000);
+  await cardCode(page, '#about-identity-card-slot', code);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the card opens the identity');
+  await until(() => runtime(page).then((s) => s.hasDevice === true), 15000, 'Remember this device turns on after the unlock');
+  await until(() => rememberUi(page).then((u) => !u.pending), 10000, 'the pending flag clears');
+  const ui = await rememberUi(page);
+  assert(ui.row && ui.checked && !ui.layer, 'Remember this device shows on, with no extra sheet', ui);
+  assert(JSON.stringify((await readJson(page, IDENTITY)).device) === JSON.stringify(vault0.device), 'the old device wrap is kept until retirement');
+  await closeAll();
+  const again = await open('/about/');
+  await openAdvanced(again);
+  await until(() => again.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the next reopen opens the identity by itself');
+  const r = await again.evaluate(async (u) => {
+    const m = await import(u);
+    const s = m.state();
+    return { unlocked: s.unlocked, hasDevice: s.hasDevice, launch: s.launch, card: !!document.querySelector('#about-identity-card-slot .m-unlock'), layer: !!document.querySelector('.m-ulayer'), wa: window.__wa.slice() };
+  }, RUNTIME);
+  assert(r.launch === 'reopen' && r.unlocked && r.hasDevice && !r.card && !r.layer && !r.wa.length, 'a reopen opens without asking', r);
+  clean_(rig);
+  clean_(rigs.get(tools));
+  clean_(rigs.get(again));
 });
 
 check('production build never loads the runtime', async () => {

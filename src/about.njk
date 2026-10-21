@@ -1493,6 +1493,7 @@ localeReload: true
     var cardP = null;
     var listKey = null;
     var retiring = false;
+    var settling = false;
     var reconciling = null;
     var again = false;
 
@@ -1670,11 +1671,12 @@ localeReload: true
         pkUnlockBtn.hidden = true;
         pkAddBtn.hidden = true;
         pkRemoveBtn.hidden = true;
-        var remember = krPrf === 'no' || !!s.hasDevice || I.hasDeviceUnlock();
+        var pending = I.rememberPending();
+        var remember = krPrf === 'no' || !!s.hasDevice || pending || I.hasDeviceUnlock();
         deviceRow.hidden = !remember;
         deviceNote.hidden = !remember;
         deviceNote.textContent = COPY.rememberNote;
-        deviceToggle.checked = !!s.hasDevice;
+        deviceToggle.checked = !!s.hasDevice || pending;
         krBox.hidden = !s.unlocked;
         if (s.unlocked) renderKeyring(s);
       } else {
@@ -1757,7 +1759,25 @@ localeReload: true
       if (!I.hasDeviceUnlock()) return;
       try {
         if (!kr.state().hasDevice) await kr.setRemember(true);
-      } catch (_) {}
+        I.setRememberPending(false);
+      } catch (e) {
+        if (errName(e) === 'confirm-needed') I.setRememberPending(true);
+      }
+    }
+
+    async function settleRemember() {
+      var I = window.MentriaIdentity;
+      if (settling || !I.rememberPending()) return;
+      if (!I.hasDeviceUnlock() || kr.state().hasDevice) { I.setRememberPending(false); return; }
+      if (!kr.hasRootBytes()) return;
+      settling = true;
+      try {
+        await kr.setRemember(true);
+        I.setRememberPending(false);
+      } catch (_) {
+      } finally {
+        settling = false;
+      }
     }
 
     async function linkNow() {
@@ -1783,6 +1803,7 @@ localeReload: true
         return;
       }
       if (setupBusy) return;
+      await settleRemember();
       if (linkedHere()) {
         if (!I.isUnlocked() || !fromKeyring) await openFromKeyring();
         return;
@@ -1989,6 +2010,7 @@ localeReload: true
       deviceToggle.disabled = true;
       if (krActive() && fromKeyring) {
         var on = deviceToggle.checked;
+        window.MentriaIdentity.setRememberPending(false);
         try {
           await withConfirm(function () { return kr.setRemember(on); });
         } catch (err) {

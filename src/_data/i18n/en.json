@@ -6238,6 +6238,8 @@
     "foldin_submit": "Bring it in",
     "foldin_done": "Done. What it opened now opens with this unlock.",
     "code_close_again": "Your new code isn't saved yet. Type its last four characters to switch to it, or close again to keep your old code.",
+    "err_passkey_exists": "This device already has a passkey for Mentria.",
+    "tester_retired": "Old locks are already gone for {services}. With this off, those stay locked until you turn it back on.",
     "services": {
       "identity": "chats",
       "totp": "codes",

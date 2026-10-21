@@ -21,6 +21,7 @@
   <div class="ulab__box">
     <label class="ulab__row"><input type="checkbox" id="unlock-switch"> <span>{{ "unlock.tester_switch" | t }}</span></label>
     <p class="ulab__note">{{ "unlock.tester_note" | t }}</p>
+    <p class="ulab__note ulab__warn" id="unlock-retired" hidden data-text="{{ 'unlock.tester_retired' | traw }}" data-identity="{{ 'unlock.services.identity' | traw }}" data-totp="{{ 'unlock.services.totp' | traw }}" data-notes="{{ 'unlock.services.notes' | traw }}" data-finance="{{ 'unlock.services.finance' | traw }}"></p>
     <label class="ulab__row"><input type="checkbox" id="unlock-ask"> <span>{{ "unlock.launch_setting" | t }}</span></label>
     <p class="ulab__note">{{ "unlock.launch_setting_note" | t }}</p>
     <div class="ulab__actions">
@@ -58,6 +59,7 @@
   .ulab__code { margin: 1rem 0 0; overflow-wrap: anywhere; }
   .ulab__code code { font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.04em; }
   .ulab__status { min-height: 1.4em; margin: 0.75rem 0 0; color: var(--term-muted); }
+  .ulab__warn { color: var(--term-text, inherit); border-left: 3px solid var(--accent, #6ef3c5); padding-left: 0.6rem; }
   .ulab__demo:not(:empty) { margin-top: 1rem; }
   .ulab__table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem; }
   .ulab__table caption { text-align: left; padding-bottom: 0.5rem; color: var(--term-muted); font-family: inherit; }
@@ -111,8 +113,20 @@
   }
 
   const say = (text) => { status.textContent = text; };
+  const retiredEl = $('unlock-retired');
+
+  function paintRetired() {
+    let rec = null;
+    try { rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault')); } catch (_) {}
+    const retired = rec && rec.retired && typeof rec.retired === 'object' ? rec.retired : {};
+    const names = ['identity', 'totp', 'notes', 'finance'].filter((n) => Object.prototype.hasOwnProperty.call(retired, n) && retired[n]).map((n) => retiredEl.dataset[n]);
+    const text = names.length ? retiredEl.dataset.text.replace('{services}', names.join(', ')) : '';
+    if (retiredEl.textContent !== text) retiredEl.textContent = text;
+    retiredEl.hidden = !names.length;
+  }
 
   function paint() {
+    paintRetired();
     const s = U.state();
     const d = U.diagnostics();
     toggle.checked = s.enabled;

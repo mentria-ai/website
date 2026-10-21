@@ -100,7 +100,8 @@ export function newRecoveryCode() {
 
 export function normalizeCode(input) {
   if (typeof input !== 'string') return null;
-  const s = input.replace(/[\s\u2010-\u2015\u2212-]+/g, '');
+  let s = input.replace(/[\s\u2010-\u2015\u2212-]+/g, '');
+  if (s.length === 32) s = s.replace(/0/g, 'O').replace(/1/g, 'I').replace(/8/g, 'B');
   if (B32_RE.test(s)) return { kind: 'b32', text: s.toUpperCase() };
   if (C20_RE.test(s)) return { kind: 'c20', text: s.toLowerCase() };
   return null;

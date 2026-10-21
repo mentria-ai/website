@@ -138,7 +138,7 @@ check('normalizeCode rejects 31 and 21 symbol inputs', () => {
   assert.equal(U.normalizeCode('abcdefghjkmnpqrstuv'), null);
   assert.equal(U.normalizeCode('abcde-fghjk-mnpqr-stuvi'), null);
   assert.equal(U.normalizeCode('abcde-fghjk-mnpqr-stuv0'), null);
-  assert.equal(U.normalizeCode(b.slice(0, 31) + '1'), null);
+  assert.equal(U.normalizeCode(b.slice(0, 31) + '9'), null);
   assert.equal(U.normalizeCode(b.slice(0, 31) + '.'), null);
   assert.equal(U.normalizeCode(b.slice(0, 31) + '\u017f'), null);
   assert.equal(U.normalizeCode('abcde-fghj\u212a-mnpqr-stuvw'), null);
@@ -862,6 +862,23 @@ check('decideLaunch table', () => {
     [{ liveOther: false, marker: false, seenAgeMs: Infinity, wasDiscarded: false, mobile: false }, 'reopen']
   ];
   for (const [input, want] of rows) assert.equal(U.decideLaunch(input), want, JSON.stringify(input));
+});
+
+check('normalizeCode reads 0, 1 and 8 as O, I and B in a 32-symbol code', async () => {
+  const text = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  const typed = text.replace('O', '0').replace('I', '1').replace('B', '8');
+  assert.notEqual(typed, text);
+  assert.deepEqual(U.normalizeCode(typed), { kind: 'b32', text });
+  assert.deepEqual(U.normalizeCode(typed.toLowerCase().match(/.{4}/g).join('-')), { kind: 'b32', text });
+  assert.deepEqual(U.normalizeCode('0'.repeat(32)), { kind: 'b32', text: 'O'.repeat(32) });
+  assert.deepEqual(U.normalizeCode('1'.repeat(16) + '8'.repeat(16)), { kind: 'b32', text: 'I'.repeat(16) + 'B'.repeat(16) });
+  assert.equal(U.normalizeCode(typed.slice(0, 31)), null, '31 symbols still fail');
+  assert.equal(U.normalizeCode(typed + '0'), null, '33 symbols still fail');
+  assert.equal(U.normalizeCode('abcde-fghjk-mnpqr-stuv0'), null, 'the 20-symbol format is unchanged');
+  assert.equal(U.normalizeCode('abcde-fghjk-mnpqr-stuv1'), null);
+  const root = rand(32);
+  const wrap = await U.wrapWithCode(root, U.formatCode(text));
+  assert.deepEqual(await U.openWithCode(wrap, typed.match(/.{4}/g).join(' ')), root);
 });
 
 check('addOther keeps every other keyring once by kcv', async () => {

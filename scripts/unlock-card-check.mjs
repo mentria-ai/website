@@ -1485,6 +1485,70 @@ check('inputs are read-only while busy', async () => {
   await p3.waitForFunction(() => window.__m.state().unlocked === true, { timeout: 15000 });
   assert(card.msg === EN.working && card.code && card.pass && typed === code, 'card fields are read-only while it unlocks', { card, typed });
 });
+const PASSKEY_EXISTS = () => {
+  if (window.PublicKeyCredential) PublicKeyCredential.getClientCapabilities = async () => ({ 'extension:prf': true });
+  const c = navigator.credentials;
+  if (c) c.create = () => Promise.reject(new DOMException('The authenticator already holds a credential for this account', 'InvalidStateError'));
+};
+
+check('a passkey this device already holds gets its own message', async () => {
+  await clean();
+  const page = await open('/beta/unlock/', PASSKEY_EXISTS);
+  await enableOnLab(page);
+  await modules(page);
+  await start(page, "(ui) => ui.showSetup({ knownCode: 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ23-4567' })");
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'passkey');
+  await page.click('.m-ulayer [data-act="add-passkey"]');
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_passkey_exists);
+  assert(EN.err_passkey_exists === 'This device already has a passkey for Mentria.', 'the copy', EN.err_passkey_exists);
+});
+
+check('setup offers the card when another page locked before the link', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await modules(page);
+  await page.evaluate(() => {
+    const put = IDBObjectStore.prototype.put;
+    window.__lockOnce = true;
+    IDBObjectStore.prototype.put = function (...a) {
+      if (window.__lockOnce && this.name === 'session') {
+        window.__lockOnce = false;
+        const n = Number(localStorage.getItem('mentria.keyring.epoch') || 0) + 1;
+        const l = JSON.parse(localStorage.getItem('mentria.keyring.local'));
+        l.manualLock = n;
+        localStorage.setItem('mentria.keyring.local', JSON.stringify(l));
+        localStorage.setItem('mentria.keyring.epoch', String(n));
+      }
+      return put.apply(this, a);
+    };
+  });
+  await start(page, "(ui) => ui.showSetup({ service: 'identity', secret: new Uint8Array(32).fill(9) })");
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  const code = await shownCode(page);
+  await page.type('.m-ulayer input[name="code-check"]', code.slice(-4));
+  await page.click('.m-ulayer [data-act="next"]');
+  const card = await page.waitForSelector('.m-ulayer:not([hidden]) .m-unlock', { timeout: 15000 }).then(() => true, () => false);
+  const msgs = await page.evaluate(() => [...document.querySelectorAll('.m-usheet__msg')].map((m) => m.textContent));
+  assert(await page.evaluate(() => window.__lockOnce === false), 'harness: the other page\'s lock landed during create');
+  assert(card && !msgs.includes(EN.err_other), 'the link failure offers the unlock card, not a generic error', { card, msgs });
+  await openCode(page, '.m-ulayer:not([hidden])');
+  await page.type('.m-ulayer:not([hidden]) input[name="recovery-code"]', code);
+  await page.keyboard.press('Enter');
+  await until(async () => ['passkey', 'no-prf'].includes(await step(page)), 15000);
+  if ((await step(page)) === 'passkey') await page.click('.m-ulayer [data-act="skip-passkey"]');
+  else await page.click('.m-ulayer [data-act="done"]');
+  const res = await settled(page, 15000);
+  const linked = await page.evaluate(async () => { const s = await window.__m.secret('identity'); return !!s && s.every((b) => b === 9); });
+  assert(res.ok && res.v === true && linked, 'after the card the setup links and finishes', { res, linked });
+});
+
 async function plantOther(page, fakePasskey) {
   return page.evaluate(async (fake) => {
     const m = window.__m;

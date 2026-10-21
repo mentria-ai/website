@@ -158,7 +158,7 @@ function errKey(e, webauthn) {
   if (PRF_ERRORS.has(n)) return 'err_prf';
   if (webauthn && CANCEL_ERRORS.has(n)) return 'err_cancelled';
   if (webauthn && WEBAUTHN_PRF.has(n)) return 'err_prf';
-  if (webauthn && n === 'InvalidStateError') return 'err_other';
+  if (webauthn && n === 'InvalidStateError') return 'err_passkey_exists';
   if (STORAGE_ERRORS.has(n)) return 'err_storage';
   return 'err_other';
 }
@@ -969,13 +969,25 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase, 
         busyOn(true);
       }
       if (wantsLink && !prog.linked) {
-        try {
-          await link(service, secret);
-          prog.linked = true;
-        } catch (err) {
-          busyOn(false);
-          fail(err);
-          return;
+        for (let tries = 0; !prog.linked; tries++) {
+          try {
+            await link(service, secret);
+            prog.linked = true;
+          } catch (err) {
+            busyOn(false);
+            if (errName(err) !== 'locked' || tries > 0 || closed) {
+              fail(err);
+              return;
+            }
+            say(msg, T, null);
+            const ok = await askUnlock(T);
+            if (closed) return;
+            if (!ok) {
+              focusEl(next);
+              return;
+            }
+            busyOn(true);
+          }
         }
       }
       const support = await supportP;

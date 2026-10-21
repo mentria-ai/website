@@ -17,6 +17,7 @@ node scripts/unlock-browser-check.mjs "$TMPDIR/unlock-beta" "$TMPDIR/unlock-lega
 node scripts/unlock-browser-check.mjs - "$TMPDIR/unlock-legacy-build"
 ```
 
+- Never run `git fetch --depth` in a local clone: it makes the whole clone shallow. A local checkout already has 9570a53; the CI step for `unlock-storage-check.mjs` fetches it only when `git cat-file -e` says it is missing.
 - The first argument is the new build, which must be a beta build (`RELEASE_TAG=beta`); `-` means seed only.
 - The script needs Chrome at `/Applications/Google Chrome.app`, `puppeteer-core` in `node_modules` (link the main checkout's folder in a worktree) and port 8099 free. `UNLOCK_PORT=<port>` picks another port.
 - A full run (seed and migrate) takes about six minutes: seeding about two, 90 s of it in G2b, and the migrate phase about four, one of them a real wait with every page closed. `--only=` takes a comma list and runs the same steps for those groups only.
@@ -112,3 +113,8 @@ const state = await seed(rig.page, 'G4');
 - TOTP: Add quick unlock after a passphrase unlock fails with "key is not extractable" and leaves a passkey on the authenticator that the vault never records. Right after setup, in the same page load, it works; G4 enrols there.
 - Comms: when the passkey step cannot reach an authenticator, onboarding waits out its 90 s timeout before it shows the code and the "add a passkey" fallback.
 - The legacy worker does not precache `/extensions/finance/`, so after the root switch it serves that page from the network (the new build) while it still controls the tab.
+
+## Beta notes
+
+- Pages that never load the bootstrap (pages with `layout: null`, such as some games) send no heartbeat and hold no open lock. With only such a page open for longer than the grace, the next Mentria page that opens counts as a reopen and asks to unlock again.
+- A same-origin frame (the Finance app inside its store page) runs the runtime but holds no open lock and makes no launch decision; its parent page does both.

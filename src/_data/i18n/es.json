@@ -6238,6 +6238,8 @@
     "foldin_submit": "Incluirlo",
     "foldin_done": "Listo. Lo que abría ahora se abre con este desbloqueo.",
     "code_close_again": "Tu código nuevo aún no se ha guardado. Escribe sus cuatro últimos caracteres para cambiar a él, o vuelve a cerrar para conservar el código anterior.",
+    "err_passkey_exists": "Este dispositivo ya tiene una llave de acceso para Mentria.",
+    "tester_retired": "Los bloqueos anteriores ya no existen para {services}. Con esto desactivado, siguen bloqueados hasta que vuelvas a activarlo.",
     "services": {
       "identity": "chats",
       "totp": "códigos",

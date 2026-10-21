@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { createReadStream, statSync, rmSync } from 'node:fs';
+import { createReadStream, statSync, rmSync, readFileSync } from 'node:fs';
 import { join, extname, normalize, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import puppeteer from 'puppeteer-core';
@@ -10,6 +10,7 @@ const PORT = Number(process.env.UNLOCK_PORT) || 8096;
 const ORIGIN = 'http://localhost:' + PORT;
 const PROFILE = join(tmpdir(), PORT === 8096 ? 'unlock-runtime-check-profile' : 'unlock-runtime-check-profile-' + PORT);
 const MODULE = '/assets/js/mentria-unlock.js';
+const EN = JSON.parse(readFileSync(new URL('../src/_data/i18n/en.json', import.meta.url), 'utf8')).unlock;
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
@@ -692,13 +693,18 @@ check('create rolls back when the session write fails', async () => {
     try { await window.__m.create({}); } catch (x) { e = x.message || x.name; }
     IDBObjectStore.prototype.put = put;
     const out = { e, record: localStorage.getItem('mentria.store.keyring.vault'), tomb: localStorage.getItem('mentria-sync-tombstones'), setUp: window.__m.state().setUp };
+    let kept = null;
+    try { kept = JSON.parse(localStorage.getItem('mentria.keyring.others')); } catch (_) {}
+    out.kept = Array.isArray(kept) ? kept.map((x) => x && x.kcv) : kept;
     const again = await window.__m.create({});
     out.again = !!again.code && window.__m.state().unlocked;
+    out.others = window.__m.others().map((o) => o.kcv);
     return out;
   });
   assert(r.e && r.record === null && r.setUp === false, 'create rejects and removes the record', r);
   assert(!(r.tomb || '').includes('keyring.vault'), 'rollback writes no sync tombstone', r.tomb);
-  assert(r.again, 'a later create works', r);
+  assert(Array.isArray(r.kept) && r.kept.length === 1 && typeof r.kept[0] === 'string', 'the rolled-back record is kept on the side', r.kept);
+  assert(r.again && JSON.stringify(r.others) === JSON.stringify(r.kept), 'a later create works and lists the kept one', r);
 });
 
 check('unlock rejects when another tab locks during the write', async () => {
@@ -1923,6 +1929,117 @@ check('every record write merges with what is stored now', async () => {
   assert(r.passGone && r.passKept, 'removing the passphrase keeps a write that landed after its read', r);
   assert(r.retired && r.retireKept, 'markRetired keeps a write that landed after its read', r);
   assert(r.healNew && r.valid, 'healing merges the event\'s new value too', r);
+});
+
+check('switch off deletes the session and the lab names retired locks', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await createOnLab(page);
+  await runtime(page);
+  assert(await sessionRow(page), 'setup: a session row');
+  await page.evaluate(() => window.__m.setEnabled(false));
+  assert(await until(async () => (await sessionRow(page)) === null, 6000), 'turning the switch off deletes the session row');
+  const s = await page.evaluate(() => { window.__m.setEnabled(true); return window.__m.state(); });
+  assert(s.enabled && s.setUp && !s.unlocked, 'turning it on again finds the keyring locked', s);
+  const warn0 = await page.evaluate(() => { const el = document.getElementById('unlock-retired'); return el ? { hidden: el.hidden, text: el.textContent.trim() } : null; });
+  assert(warn0 && warn0.hidden, 'no retired line while nothing is retired', warn0);
+  await page.evaluate(() => {
+    const rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+    rec.retired = { notes: new Date().toISOString(), totp: new Date().toISOString() };
+    localStorage.setItem('mentria.store.keyring.vault', JSON.stringify(rec));
+  });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => { const el = document.getElementById('unlock-retired'); return el && !el.hidden; }, { timeout: 5000 }).catch(() => {});
+  const warn = await page.evaluate(() => { const el = document.getElementById('unlock-retired'); return el ? { hidden: el.hidden, text: el.textContent.trim() } : null; });
+  const want = EN.tester_retired.replace('{services}', [EN.services.totp, EN.services.notes].join(', '));
+  assert(warn && !warn.hidden && warn.text === want, 'the lab says which old locks are gone', { warn, want });
+});
+
+check('a stuck database times out and Lock still tells other pages', async () => {
+  await clean();
+  const a = await open('/beta/unlock/');
+  await enableOnLab(a);
+  const c = await createOnLab(a);
+  await runtime(a);
+  const b = await open('/about/');
+  await runtime(b);
+  await b.evaluate(() => {
+    window.__bc = [];
+    const ch = new BroadcastChannel('mentria-unlock');
+    ch.onmessage = (e) => window.__bc.push(e.data && e.data.type);
+    window.__bcKeep = ch;
+  });
+  await installHold(a);
+  await a.evaluate(() => { window.__h = window.__hold('mentria-unlock.js'); });
+  const r = await a.evaluate(() => new Promise((res) => {
+    const t = Date.now();
+    window.__m.lock().then(() => res({ ok: true, ms: Date.now() - t }), (e) => res({ ok: false, e: e.message, ms: Date.now() - t }));
+    setTimeout(() => res({ ok: false, e: 'hung', ms: Date.now() - t }), 12000);
+  }));
+  assert(await a.evaluate(() => window.__h.state) === 'held', 'harness: a database open is stuck');
+  assert(r.ok && r.ms < 10000, 'Lock settles after the database timeout', r);
+  assert(await until(() => b.evaluate(() => window.__bc.includes('lock')), 3000), 'the other page hears the lock');
+  await a.evaluate(() => { window.__h2 = window.__hold('mentria-unlock.js'); });
+  const u = await a.evaluate((code) => new Promise((res) => {
+    const t = Date.now();
+    window.__m.unlockWithCode(code).then(() => res({ ok: true }), (e) => res({ ok: false, e: e.message, ms: Date.now() - t }));
+    setTimeout(() => res({ ok: false, e: 'hung' }), 12000);
+  }), c);
+  assert(!u.ok && u.e === 'idb' && u.ms < 10000, 'an unlock with a stuck database rejects with idb', u);
+});
+
+check('create waits for the keyring write lock', async () => {
+  await clean();
+  const a = await open('/beta/unlock/');
+  await enableOnLab(a);
+  await runtime(a);
+  const b = await open('/about/');
+  await b.waitForFunction(() => document.readyState === 'complete' && !!window.MentriaStore);
+  await holdWriteLock(b);
+  await a.evaluate(() => {
+    window.__res = undefined;
+    window.__m.create({}).then(() => { window.__res = { ok: true }; }, (e) => { window.__res = { ok: false, e: e.message }; });
+  });
+  await new Promise((r) => setTimeout(r, 1500));
+  const mid = await a.evaluate(() => ({ raw: localStorage.getItem('mentria.store.keyring.vault'), res: window.__res === undefined ? 'pending' : window.__res }));
+  assert(mid.raw === null && mid.res === 'pending', 'create writes nothing while another page holds the write lock', mid);
+  const planted = await b.evaluate(async () => {
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const { record } = await C.createRecord({ code: C.newRecoveryCode(), deviceId: 'other' });
+    localStorage.setItem('mentria.store.keyring.vault', JSON.stringify(record));
+    window.__wlRelease();
+    return localStorage.getItem('mentria.store.keyring.vault');
+  });
+  assert(await until(() => a.evaluate(() => window.__res !== undefined), 10000), 'harness: the create settles');
+  const r = await a.evaluate(() => ({ res: window.__res, raw: localStorage.getItem('mentria.store.keyring.vault') }));
+  assert(r.res.ok === false && r.res.e === 'exists' && r.raw === planted, 'after the lock it sees the other record and stops', r);
+});
+
+check('frames never hold the open lock', async () => {
+  await clean();
+  const FRAME = '/extensions/finance/app/';
+  const lab = await open('/beta/unlock/');
+  await enableOnLab(lab);
+  await createOnLab(lab);
+  await closeAll();
+  const host = await open('/robots.txt');
+  await host.evaluate((src) => new Promise((res) => {
+    const f = document.createElement('iframe');
+    f.src = src;
+    f.onload = () => res();
+    document.body.appendChild(f);
+  }), FRAME);
+  const frame = host.frames().find((f) => f.url().includes(FRAME));
+  await bootFrom(frame);
+  const fs = await frame.evaluate(async (url) => { const m = await import(url); await m.ready(); return m.state(); }, MODULE);
+  await new Promise((r) => setTimeout(r, 300));
+  const held = await host.evaluate(async () => ((await navigator.locks.query()).held || []).filter((l) => l.name === 'mentria-open').length);
+  assert(fs.setUp && held === 0, 'a frame holds no open lock', { held, fs });
+  const top = await open('/tools/');
+  await runtime(top);
+  const held2 = await top.evaluate(async () => ((await navigator.locks.query()).held || []).filter((l) => l.name === 'mentria-open').length);
+  assert(held2 === 1, 'control: a top page holds it', held2);
 });
 
 const TRYSTERO_STUB = "export const selfId = 'self-peer';\nexport function joinRoom(config, roomId) { return window.__fakeRoom(config, roomId); }\n";

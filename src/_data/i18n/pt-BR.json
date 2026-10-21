@@ -6238,6 +6238,8 @@
     "foldin_submit": "Trazer",
     "foldin_done": "Pronto. O que ele abria agora abre com este desbloqueio.",
     "code_close_again": "Seu código novo ainda não foi salvo. Digite os quatro últimos caracteres para passar a usá-lo, ou feche de novo para manter o código antigo.",
+    "err_passkey_exists": "Este dispositivo já tem uma chave de acesso para a Mentria.",
+    "tester_retired": "Os bloqueios antigos já não existem para {services}. Com isto desativado, eles continuam bloqueados até você ativar de novo.",
     "services": {
       "identity": "conversas",
       "totp": "códigos",

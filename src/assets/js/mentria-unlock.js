@@ -23,6 +23,7 @@ const WEBAUTHN_MS = 90000;
 const SEEN_MS = 15000;
 const DAY_MS = 86400000;
 const PROBE_MS = 2000;
+const IDB_MS = 4000;
 
 const mem = { root: null, bytes: null, kcv: null, epoch: null, code: null, codeSalt: null, pending: null, hasDevice: false, prf: 'unknown', launch: null };
 const diag = { liveOther: null, marker: null, seenAgeMs: null, wasDiscarded: null, mobile: null, navType: null, standalone: null, decision: null };
@@ -208,19 +209,32 @@ function openDb() {
   });
 }
 
-async function idb(store, mode, fn) {
-  const db = await openDb();
-  try {
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction(store, mode);
-      const req = fn(tx.objectStore(store));
-      tx.oncomplete = () => resolve(req ? req.result : undefined);
-      tx.onerror = () => reject(tx.error || new Error('idb'));
-      tx.onabort = () => reject(tx.error || new Error('idb'));
-    });
-  } finally {
-    db.close();
-  }
+function idb(store, mode, fn) {
+  let dead = false;
+  let tx = null;
+  const run = (async () => {
+    const db = await openDb();
+    try {
+      if (dead) throw new Error('idb');
+      return await new Promise((resolve, reject) => {
+        tx = db.transaction(store, mode);
+        const req = fn(tx.objectStore(store));
+        tx.oncomplete = () => resolve(req ? req.result : undefined);
+        tx.onerror = () => reject(tx.error || new Error('idb'));
+        tx.onabort = () => reject(tx.error || new Error('idb'));
+      });
+    } finally {
+      db.close();
+    }
+  })();
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => {
+      dead = true;
+      try { if (tx) tx.abort(); } catch (_) {}
+      reject(new Error('idb'));
+    }, IDB_MS);
+    run.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+  });
 }
 
 const idbGet = (store, key) => idb(store, 'readonly', (s) => s.get(key));
@@ -371,7 +385,7 @@ function attach() {
     if (!e.persisted) return;
     openChannel();
     if (started) {
-      hold();
+      if (!framed()) hold();
       seen();
     }
     refresh(false);
@@ -386,7 +400,7 @@ function start() {
   if (started) return;
   started = true;
   attach();
-  hold();
+  if (!framed()) hold();
   mark();
   seen();
   prfP = prfSupport().then(() => notify(false), () => {});
@@ -589,6 +603,10 @@ export function enabled() {
 
 export function setEnabled(on) {
   saveLocal({ enabled: !!on });
+  if (!on) {
+    forget();
+    if (readRecord()) serial(async () => { try { await idbDel('session', 'current'); } catch (_) {} });
+  }
   if (on && readRecord()) ready().catch(() => {});
   refresh(false);
 }
@@ -645,8 +663,10 @@ export async function create({ code, confirmed, deviceName } = {}) {
   const { record, rootBytes } = await createRecord({ code: text, deviceId: deviceId(), deviceName, app: release() });
   if (given && confirmed === true) record.codeConfirmed = record.wraps.recovery.created;
   const S = await storeReady();
-  if (lsGet(RECORD_KEY) != null || readRecord()) throw new Error('exists');
-  if (!S || S.set(NS, KEY, record) !== true) throw new Error('storage');
+  await exclusive(async () => {
+    if (lsGet(RECORD_KEY) != null || readRecord()) throw new Error('exists');
+    if (!S || S.set(NS, KEY, record) !== true) throw new Error('storage');
+  });
   if (!bootP) {
     bootP = Promise.resolve();
     start();
@@ -664,6 +684,7 @@ export async function create({ code, confirmed, deviceName } = {}) {
       return { code: text };
     }
     if (mine) {
+      keepOther(now);
       try { S.remove(NS, KEY, { remote: true }); } catch (_) {}
       post('record');
     }

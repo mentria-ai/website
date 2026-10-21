@@ -31,7 +31,7 @@ jobs:
         run: node scripts/unlock-check.mjs
       - name: Check one-unlock storage, sync and backups
         run: |
-          git fetch --no-tags --depth=1 origin 9570a53e6e846d421cd25ef638d808d5ff55bcba
+          git cat-file -e 9570a53e6e846d421cd25ef638d808d5ff55bcba 2>/dev/null || git fetch --no-tags --depth=1 origin 9570a53e6e846d421cd25ef638d808d5ff55bcba
           node scripts/unlock-storage-check.mjs
       - name: Check Document Scanner geometry, detection and export logic
         run: node scripts/scanner-check.mjs

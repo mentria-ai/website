@@ -160,15 +160,19 @@ localeReload: true
         <div class="about-fold" id="about-export-form" hidden>
           <p class="about-data-size" id="about-data-size" aria-live="polite"></p>
           <p class="about-data-size about-data-size--warn" id="about-data-size-warn" hidden>{{ "common.backup_size_large" | t }}</p>
-          <label class="about-data-field">
-            <span>{{ "about.data_pass_label" | t }}</span>
-            <input type="password" id="about-data-pass" autocomplete="new-password" spellcheck="false">
-          </label>
-          <div class="about-data-strength" id="about-data-strength" aria-live="polite"></div>
-          <label class="about-data-field">
-            <span>{{ "about.data_pass_confirm" | t }}</span>
-            <input type="password" id="about-data-pass2" autocomplete="new-password" spellcheck="false">
-          </label>
+          <p class="about-data-code" id="about-data-code" hidden>{{ "unlock.backup_default" | t }}</p>
+          <button type="button" class="about-data-btn about-data-btn--ghost about-data-other" id="about-data-other" aria-expanded="false" aria-controls="about-data-pass-box" hidden>{{ "unlock.backup_other" | t }}</button>
+          <div class="about-fold" id="about-data-pass-box">
+            <label class="about-data-field">
+              <span>{{ "about.data_pass_label" | t }}</span>
+              <input type="password" id="about-data-pass" autocomplete="new-password" spellcheck="false">
+            </label>
+            <div class="about-data-strength" id="about-data-strength" aria-live="polite"></div>
+            <label class="about-data-field">
+              <span>{{ "about.data_pass_confirm" | t }}</span>
+              <input type="password" id="about-data-pass2" autocomplete="new-password" spellcheck="false">
+            </label>
+          </div>
           <button type="button" class="about-data-btn" id="about-data-export-btn">{{ "about.data_export_button" | t }}</button>
           <div class="about-data-status" id="about-data-export-status" aria-live="polite"></div>
         </div>
@@ -183,10 +187,18 @@ localeReload: true
             <span>{{ "about.data_import_choose" | t }}</span>
             <input type="file" id="about-data-import-file" accept="application/json,.json">
           </label>
-          <label class="about-data-field">
+          <label class="about-data-field" id="about-data-import-pass-field">
             <span>{{ "about.data_pass_label" | t }}</span>
             <input type="password" id="about-data-import-pass" autocomplete="current-password" spellcheck="false">
           </label>
+          <div class="about-fold" id="about-data-import-code-box" hidden>
+            <p class="about-data-card__p" id="about-data-import-code-note">{{ "unlock.backup_code_prompt" | t }}</p>
+            <label class="about-data-field">
+              <span>{{ "unlock.code_label" | t }}</span>
+              <input type="text" id="about-data-import-code" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" aria-describedby="about-data-import-code-note">
+            </label>
+          </div>
+          <p class="about-data-code" id="about-data-import-key" hidden>{{ "unlock.backup_default" | t }}</p>
           <button type="button" class="about-data-btn about-data-btn--ghost" id="about-data-import-btn">{{ "about.data_import_button" | t }}</button>
           <div class="about-data-status" id="about-data-import-status" aria-live="polite"></div>
         </div>
@@ -410,6 +422,9 @@ localeReload: true
   .about-reveal-btn { align-self: flex-start; }
   .about-rescue .about-data-btn { align-self: flex-start; }
   .about-rescue .about-data-status:empty { display: none; }
+  .about-data-code { font-family: var(--font-mono); font-size: 12px; line-height: 1.5; color: var(--syn-green, #34c46a); margin: 0; overflow-wrap: anywhere; }
+  .about-data-code::before { content: "✓ " / ""; }
+  .about-data-other { align-self: flex-start; max-width: 100%; text-align: left; white-space: normal; }
   .about-data-scope { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
   .about-data-scope__col { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 2px 0 2px 14px; border-left: 2px solid var(--cyan-30); }
   .about-data-scope__col--out { border-left-color: var(--term-border); }
@@ -670,6 +685,7 @@ localeReload: true
       importFail:        {{ ('about.data_import_fail'            | t) | dump | safe }},
       importApplying:    {{ ('common.restore_applying'           | t) | dump | safe }},
       importCancelled:   {{ ('common.restore_cancelled'          | t) | dump | safe }},
+      codePrompt:        {{ ('unlock.backup_code_prompt'         | t) | dump | safe }},
       size:              {{ ('common.backup_size'                | t) | dump | safe }},
       sizeBusy:          {{ ('common.backup_size_busy'           | t) | dump | safe }},
       largeConfirm:      {{ ('common.backup_large_confirm'       | t) | dump | safe }},
@@ -710,7 +726,128 @@ localeReload: true
     var importStat= document.getElementById('about-data-import-status');
     var sizeEl    = document.getElementById('about-data-size');
     var sizeWarn  = document.getElementById('about-data-size-warn');
+    var codeNote  = document.getElementById('about-data-code');
+    var otherBtn  = document.getElementById('about-data-other');
+    var passBox   = document.getElementById('about-data-pass-box');
+    var importPassField = document.getElementById('about-data-import-pass-field');
+    var importCodeBox   = document.getElementById('about-data-import-code-box');
+    var importCode= document.getElementById('about-data-import-code');
+    var importKey = document.getElementById('about-data-import-key');
     COPY.restore.areas = COPY.areas;
+
+    var unlock = null;
+    var unlockLoad = null;
+    var codeShown = false;
+    var restoreSeq = 0;
+    var restoring = false;
+
+    function unlockWanted(needRecord) {
+      if (document.documentElement.dataset.release !== 'beta' || window.__mentriaRedirecting) return false;
+      try {
+        var l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
+        return !!l && l.enabled === true && (!needRecord || localStorage.getItem('mentria.store.keyring.vault') != null);
+      } catch (_) { return false; }
+    }
+
+    function loadUnlock() {
+      if (!unlockLoad) {
+        unlockLoad = import('/assets/js/mentria-unlock.js').then(function (m) {
+          return Promise.resolve().then(function () { return m.ready(); }).catch(function () {}).then(function () {
+            m.onChange(syncUnlock);
+            unlock = m;
+            syncUnlock();
+            return m;
+          });
+        }).catch(function () {
+          unlockLoad = null;
+          return null;
+        });
+      }
+      return unlockLoad;
+    }
+
+    function wipeKey(k) {
+      try { if (k && k.key && k.key.fill) k.key.fill(0); } catch (_) {}
+    }
+
+    function codeExport() {
+      try { return !!unlock && unlock.enabled() && unlock.state().unlocked; } catch (_) { return false; }
+    }
+
+    function otherOpen() { return otherBtn.getAttribute('aria-expanded') === 'true'; }
+
+    function renderExport() {
+      var on = codeExport();
+      if (!on) otherBtn.setAttribute('aria-expanded', 'false');
+      else if (!codeShown && (passEl.value || pass2El.value)) otherBtn.setAttribute('aria-expanded', 'true');
+      codeShown = on;
+      if (!on) { codeNote.remove(); otherBtn.remove(); }
+      else if (!otherBtn.isConnected) passBox.before(codeNote, otherBtn);
+      codeNote.hidden = !on || otherOpen();
+      otherBtn.hidden = !on;
+      passBox.hidden = on && !otherOpen();
+      if (passBox.hidden && passBox.contains(document.activeElement)) { try { otherBtn.focus({ preventScroll: true }); } catch (_) {} }
+    }
+
+    function showRestore(kind) {
+      var lost = importPassField.contains(document.activeElement) || importCodeBox.contains(document.activeElement);
+      importPassField.hidden = kind !== 'pass';
+      importCodeBox.hidden = kind !== 'code';
+      importKey.hidden = kind !== 'key';
+      if (kind !== 'pass') importPass.value = '';
+      if (kind !== 'code') importCode.value = '';
+      if (lost && !document.activeElement.getClientRects().length) {
+        try { (kind === 'code' ? importCode : kind === 'pass' ? importPass : importBtn).focus({ preventScroll: true }); } catch (_) {}
+      }
+    }
+
+    async function restoreMode(f) {
+      if (!f || !unlockWanted(false)) return { kind: 'pass' };
+      var h = null;
+      try { h = await window.MentriaBackup.backupHeader(f); } catch (_) { return { kind: 'pass' }; }
+      if (!h || !h.code) return { kind: 'pass' };
+      var k = null;
+      if (unlockWanted(true)) {
+        var m = await loadUnlock();
+        try { if (m && m.enabled() && m.state().unlocked) k = await m.backupKey(); } catch (_) { k = null; }
+      }
+      if (k && k.salt === h.salt && k.kcv === h.kcv) return { kind: 'key', key: k };
+      wipeKey(k);
+      return { kind: 'code' };
+    }
+
+    async function refreshRestore() {
+      if (restoring) return;
+      var seq = ++restoreSeq;
+      var mode = await restoreMode(fileEl.files && fileEl.files[0]);
+      wipeKey(mode.key);
+      if (seq === restoreSeq && !restoring) showRestore(mode.kind);
+    }
+
+    function syncUnlock() {
+      renderExport();
+      refreshRestore();
+    }
+
+    otherBtn.addEventListener('click', function () {
+      var open = !otherOpen();
+      otherBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open) { passEl.value = ''; pass2El.value = ''; strengthEl.textContent = ''; delete strengthEl.dataset.level; }
+      renderExport();
+      if (open) { try { passEl.focus({ preventScroll: true }); } catch (_) {} }
+    });
+    fileEl.addEventListener('change', refreshRestore);
+    window.addEventListener('storage', function (e) {
+      if (unlock || (e.key !== null && e.key !== 'mentria.keyring.local' && e.key !== 'mentria.store.keyring.vault')) return;
+      if (unlockWanted(true)) loadUnlock();
+      else refreshRestore();
+    });
+    window.addEventListener('mentria:write', function (e) {
+      var d = e.detail || {};
+      if (!unlock && d.ns === 'keyring' && d.key === 'vault' && unlockWanted(true)) loadUnlock();
+    });
+    renderExport();
+    if (unlockWanted(true)) loadUnlock();
 
     function fmtBytes(n) {
       if (n == null || isNaN(n)) return '—';
@@ -799,26 +936,40 @@ localeReload: true
 
     exportBtn.addEventListener('click', async function () {
       setStatus(exportStat, '', null);
+      var useCode = codeExport() && !otherOpen();
       var pw = passEl.value;
       var pw2 = pass2El.value;
-      if (!pw || pw.length < 8) { setStatus(exportStat, COPY.passTooShort, 'err'); return; }
-      if (pw !== pw2) { setStatus(exportStat, COPY.passMismatch, 'err'); return; }
+      if (!useCode) {
+        if (!pw || pw.length < 8) { setStatus(exportStat, COPY.passTooShort, 'err'); return; }
+        if (pw !== pw2) { setStatus(exportStat, COPY.passMismatch, 'err'); return; }
+      }
       exportBtn.disabled = true;
       setStatus(exportStat, COPY.exportBusy, null);
+      var key = null;
       try {
+        if (useCode) {
+          key = await unlock.backupKey();
+          if (!key) {
+            otherBtn.setAttribute('aria-expanded', 'true');
+            renderExport();
+            setStatus(exportStat, COPY.passTooShort, 'err');
+            return;
+          }
+        }
         var prepared = await window.MentriaBackup.prepareBackup();
         showSize(prepared);
         if (prepared.total > window.MentriaBackup.LARGE_BYTES) {
           var go = window.mentriaConfirm ? await window.mentriaConfirm(COPY.largeConfirm.replace('{size}', fmtBytes(prepared.total))) : false;
           if (!go) { setStatus(exportStat, '', null); return; }
         }
-        var out = await window.MentriaBackup.sealBackup(prepared, pw, { onProgress: progressTo(exportStat, COPY.exportBusy) });
+        var out = await window.MentriaBackup.sealBackup(prepared, key ? { keyring: key } : pw, { onProgress: progressTo(exportStat, COPY.exportBusy) });
         window.MentriaBackup.downloadBlob(out.blob, 'mentria-backup');
         setStatus(exportStat, COPY.exportDone, 'ok');
       } catch (err) {
         var ecode = window.MentriaBackup.exportErrorCode(err);
         setStatus(exportStat, ecode ? COPY.exportErr[ecode] : String(err && err.message || err), 'err');
       } finally {
+        wipeKey(key);
         pw = pw2 = ''; passEl.value = ''; pass2El.value = ''; strengthEl.textContent = ''; delete strengthEl.dataset.level;
         exportBtn.disabled = false;
       }
@@ -827,14 +978,28 @@ localeReload: true
     importBtn.addEventListener('click', async function () {
       setStatus(importStat, '', null);
       var f = fileEl.files && fileEl.files[0];
-      var pw = importPass.value;
       if (!f) { setStatus(importStat, COPY.importFail.replace('{err}', 'no file'), 'err'); return; }
-      if (!pw) { setStatus(importStat, COPY.passTooShort, 'err'); return; }
       importBtn.disabled = true;
+      restoring = true;
+      restoreSeq++;
+      var mode = await restoreMode(f).catch(function () { return { kind: 'pass' }; });
+      showRestore(mode.kind);
+      var pw = mode.kind === 'key' ? { keyring: mode.key } : mode.kind === 'code' ? importCode.value.trim() : importPass.value;
+      if (!pw) {
+        restoring = false;
+        importBtn.disabled = false;
+        if (mode.kind === 'code') {
+          setStatus(importStat, COPY.codePrompt, 'err');
+          try { importCode.focus({ preventScroll: true }); } catch (_) {}
+        } else {
+          setStatus(importStat, COPY.passTooShort, 'err');
+        }
+        return;
+      }
       setStatus(importStat, COPY.importBusy, null);
       try {
         var data = await window.MentriaBackup.readBackupFile(f, pw, { onProgress: progressTo(importStat, COPY.importBusy) });
-        pw = ''; importPass.value = '';
+        pw = ''; importPass.value = ''; importCode.value = ''; wipeKey(mode.key);
         setStatus(importStat, COPY.importApplying, null);
         var result = await window.MentriaBackup.applyRestore(data, COPY.restore);
         if (result.cancelled) { setStatus(importStat, COPY.importCancelled, null); return; }
@@ -844,7 +1009,8 @@ localeReload: true
         var code = window.MentriaBackup.restoreErrorCode(err);
         setStatus(importStat, code ? COPY.restoreErr[code] : COPY.importFail.replace('{err}', String(err && err.message || err)), 'err');
       } finally {
-        pw = ''; importPass.value = '';
+        pw = ''; importPass.value = ''; importCode.value = ''; wipeKey(mode.key);
+        restoring = false;
         importBtn.disabled = false;
       }
     });

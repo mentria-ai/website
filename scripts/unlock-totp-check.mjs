@@ -7,7 +7,8 @@ import puppeteer from 'puppeteer-core';
 import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
-if (!BUILD) { console.log('usage: node scripts/unlock-totp-check.mjs <beta build dir>'); process.exit(2); }
+const PROD = process.argv[3] || '';
+if (!BUILD) { console.log('usage: node scripts/unlock-totp-check.mjs <beta build dir> [<production build dir>]'); process.exit(2); }
 const PORT = 8092;
 const ORIGIN = 'http://localhost:' + PORT;
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -430,8 +431,8 @@ async function newLinkedVault(r) {
   return code;
 }
 
-check('switch off keeps the old flow', async () => {
-  const r = await rig('switch off');
+async function switchOffFlow(prod) {
+  const r = await rig(prod ? 'switch off prod' : 'switch off');
   const { page } = r;
   const vault = await legacySetup(r, { passkey: true, accounts: ACCOUNTS.slice(0, 1) });
   const file = await waitFile(r.downloads, 'mentria-totp-backup-');
@@ -458,19 +459,37 @@ check('switch off keeps the old flow', async () => {
   await page.evaluate(() => { Date.now = window.__realNow; });
   await press(page, '#totp-prf-btn');
   await expectCodes(page, ACCOUNTS.slice(0, 1));
-  await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
-  await setSwitch(page, true);
-  await page.evaluate(async (u) => { const m = await import(u); await m.create(); }, RUNTIME);
-  await setSwitch(page, false);
+  if (prod) {
+    assert(await page.evaluate(() => document.documentElement.dataset.release) === '', 'this is a production build');
+    await page.evaluate(async () => {
+      const c = await import('/assets/js/mentria-unlock-core.js');
+      const { record } = await c.createRecord({ code: c.newRecoveryCode(), deviceId: 'dev-p', deviceName: 'Prod', app: '' });
+      window.MentriaStore.set('keyring', 'vault', record);
+    });
+    await setSwitch(page, true);
+  } else {
+    await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
+    await setSwitch(page, true);
+    await page.evaluate(async (u) => { const m = await import(u); await m.create(); }, RUNTIME);
+    await setSwitch(page, false);
+  }
   r.requests.length = 0;
   await openTotp(page);
   const s3 = await screen(page);
-  assert(s3.unlock && !s3.card && !s3.linkNote && !s3.layer, 'with a keyring present but the switch off, the old unlock stays', s3);
+  assert(s3.unlock && !s3.card && !s3.linkNote && !s3.layer, prod ? 'a production page keeps the old unlock even with the switch and a keyring' : 'with a keyring present but the switch off, the old unlock stays', s3);
   await sleep(500);
   assert(!r.requests.some((u) => u.includes('/assets/js/mentria-unlock')), 'the switch-off page never loads the one unlock', r.requests.filter((u) => u.includes('unlock')));
   const after = await readJson(page, VAULT);
   assert(JSON.stringify(after) === JSON.stringify(vault), 'the vault is unchanged');
   await done(r);
+}
+
+check('switch off keeps the old flow', () => switchOffFlow(false));
+
+check('switch off keeps the old flow on the production build', async () => {
+  if (!PROD) throw new Error('SKIP no production build given');
+  server.setRoot(PROD);
+  try { await switchOffFlow(true); } finally { server.setRoot(BUILD); }
 });
 
 check('new vault with no keyring runs setup first', async () => {
@@ -943,6 +962,148 @@ check('a linked vault without its keyring says so', async () => {
   await done(r);
 });
 
+check('the vault opens with an earlier link when another key is current', async () => {
+  const r = await rig('prior link', { authenticator: false });
+  const { page } = r;
+  await newLinkedVault(r);
+  await addAccount(page, ACCOUNTS[0]);
+  await backupModal(page);
+  await press(page, '#totp-backup-confirm-btn');
+  await closedBackup(page);
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  const first = (await readJson(page, RECORD)).services.totp;
+  await page.evaluate(async (u) => { await (await import(u)).link('totp', crypto.getRandomValues(new Uint8Array(32))); }, RUNTIME);
+  const moved = (await readJson(page, RECORD)).services.totp;
+  assert(moved.id !== first.id && Array.isArray(moved.prior) && moved.prior.some((p) => p.id === first.id), 'another key is current and this vault\'s key is prior', { first: first.id, moved: moved.id });
+  await page.evaluateOnNewDocument(WATCH);
+  await page.reload({ waitUntil: 'load' });
+  await settle(page);
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  const seen = await page.evaluate(() => window.__seen);
+  assert(!seen.locked && !seen.card, 'the vault opens without a screen', seen);
+  assert(JSON.stringify((await readJson(page, RECORD)).services.totp) === JSON.stringify(moved), 'opening does not change the link');
+  await done(r);
+});
+
+check('retirement keeps the old wraps when it cannot prove the key', async () => {
+  const r = await rig('retire unproven');
+  const { page } = r;
+  await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
+  await setSwitch(page, true);
+  await openTotp(page);
+  await makeKeyring(page);
+  await page.evaluate(async (u, k, days) => {
+    const m = await import(u);
+    await m.link('totp', crypto.getRandomValues(new Uint8Array(32)));
+    const v = JSON.parse(localStorage.getItem(k));
+    delete v.secrets;
+    localStorage.setItem(k, JSON.stringify(v));
+    const rec = window.MentriaStore.get('keyring', 'vault');
+    rec.services.totp.linked = new Date(Date.now() - days).toISOString();
+    window.MentriaStore.set('keyring', 'vault', rec);
+  }, RUNTIME, VAULT, 31 * DAY);
+  const before = await readRaw(page, VAULT);
+  assert((await page.evaluate(async (u) => (await import(u)).retirement('totp'), RUNTIME)).ready, 'retirement is ready');
+  await openTotp(page);
+  await sleep(1500);
+  const after = await readJson(page, VAULT);
+  assert(await readRaw(page, VAULT) === before && after.pass, 'the pass wrap stays when the stored accounts do not decrypt', Object.keys(after));
+  assert(!((await readJson(page, RECORD)).retired || {}).totp, 'totp is not marked retired');
+  await done(r);
+});
+
+check('the sync id is never written over a newer vault', async () => {
+  const r = await rig('kid fresh', { authenticator: false });
+  const { page } = r;
+  await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
+  await setSwitch(page, true);
+  await openTotp(page);
+  const code = await makeKeyring(page);
+  await ringLock(page);
+  await sleep(300);
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await until(async () => (await screen(page)).linkPanel, 15000, 'the link panel');
+  const newer = await page.evaluate((k) => {
+    const v = JSON.parse(localStorage.getItem(k));
+    v.note = 'written by another tab';
+    const raw = JSON.stringify(v);
+    localStorage.setItem(k, raw);
+    return raw;
+  }, VAULT);
+  await cardUnlock(page, '#totp-link-panel', { code });
+  await until(async () => (await ringState(page)).linked.includes('totp'), 10000, 'totp linked');
+  await sleep(800);
+  assert(await readRaw(page, VAULT) === newer, 'the newer vault is kept and gets no sync id from a stale copy');
+  await done(r);
+});
+
+check('a stalled one unlock falls back to the old unlock', async () => {
+  const r = await rig('stalled runtime', { authenticator: false });
+  const { page } = r;
+  await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
+  await setSwitch(page, true);
+  await openTotp(page);
+  await makeKeyring(page);
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  const held = [];
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    if (q.url().includes('/assets/js/mentria-unlock')) { held.push(q.url()); return; }
+    q.continue();
+  });
+  const t0 = Date.now();
+  await page.goto(ORIGIN + '/tools/totp/', { waitUntil: 'load' });
+  await until(async () => (await screen(page)).unlock, 12000, 'the old unlock after the wait');
+  const waited = Date.now() - t0;
+  assert(held.length > 0 && waited >= 4000, 'the page waited for the one unlock first', { held: held.length, waited });
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await done(r);
+});
+
+check('a card that cannot load still says what to do', async () => {
+  const r = await rig('card fails', { authenticator: false });
+  const { page } = r;
+  await newLinkedVault(r);
+  await ringLock(page);
+  await until(async () => (await screen(page)).card, 10000, 'the card');
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    if (q.url().includes('/assets/js/unlock-copy.')) { q.abort(); return; }
+    q.continue();
+  });
+  await page.reload({ waitUntil: 'load' });
+  await until(async () => (await screen(page)).lede === T.linked_missing, 10000, 'the missing line');
+  const s1 = await screen(page);
+  assert(!s1.card && !s1.setup && !s1.unlock, 'no empty card and no old forms', s1);
+  await page.evaluate((k) => localStorage.removeItem(k), VAULT);
+  await page.reload({ waitUntil: 'load' });
+  await until(async () => (await screen(page)).create, 10000, 'Create vault');
+  await done(r);
+});
+
+check('a lock closes the backup gate', async () => {
+  const r = await rig('lock closes gate', { authenticator: false });
+  const { page } = r;
+  const code = await newLinkedVault(r);
+  await addAccount(page, ACCOUNTS[0]);
+  await backupModal(page);
+  await ringLock(page);
+  await until(async () => (await screen(page)).card, 10000, 'the card');
+  const st = await page.evaluate(() => ({ gate: !document.getElementById('totp-backup-modal').hidden, inert: !!document.getElementById('totp-ring-card').closest('[inert]') }));
+  assert(!st.gate && !st.inert, 'the gate closes and the card can be used', st);
+  await cardUnlock(page, '#totp-ring-card', { code });
+  await page.waitForFunction(() => !document.getElementById('totp-vault').hidden, { timeout: 20000 });
+  await sleep(500);
+  assert((await screen(page)).rows === 0, 'the account that was never backed up is dropped');
+  await done(r);
+});
+
 let failed = 0;
 let ran = 0;
 for (const [name, fn] of checks) {
@@ -952,6 +1113,7 @@ for (const [name, fn] of checks) {
     await fn();
     console.log('PASS ' + name);
   } catch (e) {
+    if (String(e && e.message).startsWith('SKIP')) { ran--; console.log('SKIP ' + name + ': ' + e.message.slice(5)); continue; }
     failed++;
     console.log('FAIL ' + name + ': ' + String((e && e.message) || e).slice(0, 600));
     for (const x of rigs) {

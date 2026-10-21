@@ -630,6 +630,7 @@ unlockTool: true
 
   const RING_URL = '/assets/js/mentria-unlock.js';
   const RING_UI_URL = '/assets/js/mentria-unlock-ui.js';
+  const RING_WAIT_MS = 5000;
   const ring = { on: false, mod: null, ui: null, chain: Promise.resolve(), cardP: null, linkP: null, raw: null, busy: 0, declined: false };
 
   const AUTOLOCK_KEY = 'autolock_min';
@@ -727,19 +728,22 @@ unlockTool: true
   }
 
   async function keyringStart() {
-    try {
+    const start = (async () => {
       const mods = await Promise.all([import(RING_URL), import(RING_UI_URL)]);
-      if (!mods[0].enabled()) return false;
-      ring.mod = mods[0];
-      ring.ui = mods[1];
-      await ring.mod.ready();
-      ring.on = true;
-      ring.mod.onChange(onRingChange);
-      return true;
-    } catch (_) {
+      if (!mods[0].enabled()) return null;
+      await mods[0].ready();
+      return mods;
+    })().catch(() => null);
+    const mods = await Promise.race([start, new Promise((resolve) => setTimeout(() => resolve(null), RING_WAIT_MS))]);
+    if (!mods) {
       ring.on = false;
       return false;
     }
+    ring.mod = mods[0];
+    ring.ui = mods[1];
+    ring.on = true;
+    ring.mod.onChange(onRingChange);
+    return true;
   }
 
   function onRingChange(s) {
@@ -797,7 +801,9 @@ unlockTool: true
     ring.cardP = ring.ui.mountCard($('totp-ring-card'), { onUnlocked: () => { route(); } }).catch(() => {
       ring.cardP = null;
       const v = state.vault;
-      if (v && (v.pass || v.prf) && !state.masterKey) showRing('old');
+      if (state.masterKey) return null;
+      if (!v) showRing('create');
+      else showRing(v.pass || v.prf ? 'old' : 'missing');
       return null;
     });
   }
@@ -809,23 +815,34 @@ unlockTool: true
     p.then((c) => { if (c) c.destroy(); });
   }
 
+  async function accountsWith(key) {
+    if (!state.vault || !state.vault.secrets) return [];
+    const pt = await decryptWith(key, state.vault.secrets);
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+
   async function openLinked() {
-    let bytes = null;
-    try { bytes = await ring.mod.secret('totp'); } catch (_) { bytes = null; }
-    if (!bytes || state.masterKey) return !!state.masterKey;
-    try {
-      state.masterKey = await importRaw(bytes);
-      await decryptSecrets();
-    } catch (_) {
-      state.masterKey = null;
-      state.accounts = [];
-      return false;
+    let list = [];
+    try { list = await ring.mod.secrets('totp'); } catch (_) { list = []; }
+    for (const c of list) {
+      let key = null;
+      let accounts = null;
+      try {
+        key = await importRaw(c.bytes);
+        accounts = await accountsWith(key);
+      } catch (_) {
+        continue;
+      }
+      if (state.masterKey) return true;
+      state.masterKey = key;
+      state.accounts = accounts;
+      state.mode = 'linked';
+      setStatus('', null);
+      showVault();
+      retire().catch(() => {});
+      return true;
     }
-    state.mode = 'linked';
-    setStatus('', null);
-    showVault();
-    retire().catch(() => {});
-    return true;
+    return !!state.masterKey;
   }
 
   async function createLinked() {
@@ -907,11 +924,14 @@ unlockTool: true
     const bytes = ring.raw;
     if (!bytes || !state.masterKey) return;
     try {
-      const have = await ring.mod.secret('totp');
-      if (have) {
+      const have = await ring.mod.secrets('totp');
+      if (have.some((c) => sameBytes(c.bytes, bytes))) {
+        becameLinked();
+        return;
+      }
+      if (await ring.mod.secret('totp')) {
         ring.raw = null;
         hideLinkPanel();
-        if (sameBytes(have, bytes)) becameLinked();
         return;
       }
       await ring.mod.link('totp', bytes);
@@ -935,7 +955,7 @@ unlockTool: true
     state.mode = 'linked';
     applyMode();
     const v = state.vault;
-    if (v && !(typeof v.kid === 'string' && v.kid)) {
+    if (v && !(typeof v.kid === 'string' && v.kid) && JSON.stringify(loadVault()) === JSON.stringify(v)) {
       const next = Object.assign({}, v, { kid: kidOf(v) });
       if (saveVault(next)) state.vault = next;
     }
@@ -966,8 +986,11 @@ unlockTool: true
     if (!r || !r.ready) return;
     const credId = v.prf && typeof v.prf.cred_id === 'string' ? v.prf.cred_id : null;
     if (v.pass || v.prf) {
-      if (JSON.stringify(loadVault()) !== JSON.stringify(v)) return;
-      const next = Object.assign({}, v, { v: 2, linked: true, kid: kidOf(v) });
+      const stored = loadVault();
+      if (!stored || !stored.secrets || !state.masterKey || JSON.stringify(stored) !== JSON.stringify(v)) return;
+      try { await decryptWith(state.masterKey, stored.secrets); } catch (_) { return; }
+      if (state.mode !== 'linked' || JSON.stringify(loadVault()) !== JSON.stringify(stored)) return;
+      const next = Object.assign({}, stored, { v: 2, linked: true, kid: kidOf(stored) });
       delete next.pass;
       delete next.prf;
       if (!saveVault(next)) return;
@@ -1066,6 +1089,8 @@ unlockTool: true
   function lock() {
     if (state.timer) { clearInterval(state.timer); state.timer = null; }
     if (typeof exportModalReady !== 'undefined' && exportModalReady) closeExport();
+    backupModal.close();
+    pendingAdd = null;
     state.masterKey = null;
     state.accounts = [];
     state.mode = null;

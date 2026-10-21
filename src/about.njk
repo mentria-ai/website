@@ -1698,9 +1698,10 @@ localeReload: true
       var cur = null;
       try {
         cur = await kr.secret('identity');
-        if (!cur || !(await I.matchesVault(cur))) return;
+        var kcv = cur ? await I.matchesVault(cur) : '';
+        if (!kcv) return;
         var id = I.legacyPasskeyId();
-        I.retireLegacy();
+        if (!I.retireLegacy(kcv)) return;
         if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
           try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: id }); } catch (_) {}
         }
@@ -1734,9 +1735,13 @@ localeReload: true
     async function createInKeyring() {
       var I = window.MentriaIdentity;
       if (I.isLinked()) {
-        var have = await kr.secret('identity');
-        if (!have) throw new Error('locked');
-        await I.saveLinked(have, { rebuild: true });
+        var have = await kr.secrets('identity');
+        try {
+          if (!have.length) throw new Error('locked');
+          await I.rebuildLinked(have.map(function (x) { return x.bytes; }));
+        } finally {
+          have.forEach(function (x) { try { x.bytes.fill(0); } catch (_) {} });
+        }
         fromKeyring = true;
         return;
       }

@@ -361,32 +361,92 @@
 
   async function matchesVault(bytes) {
     const vault = loadVault();
-    if (!vault || !vault.kcv) return false;
+    if (!vault || !vault.kcv) return '';
+    let secret = null;
     try {
-      return timingSafeEq(b64uDec(await kcvOf(secretBytes(bytes))), b64uDec(vault.kcv));
+      secret = secretBytes(bytes);
+      return timingSafeEq(b64uDec(await kcvOf(secret)), b64uDec(vault.kcv)) ? vault.kcv : '';
+    } catch (_) {
+      return '';
+    } finally {
+      if (secret) secret.fill(0);
+    }
+  }
+
+  function copies(candidates) {
+    const out = [];
+    (Array.isArray(candidates) ? candidates : [candidates]).forEach(function (c, i) {
+      try { out.push({ i: i, b: secretBytes(c) }); } catch (_) {}
+    });
+    return out;
+  }
+
+  function wipe(list, keep) {
+    list.forEach(function (x) { if (x.b !== keep) x.b.fill(0); });
+  }
+
+  async function opensCommsKeys(secret) {
+    const k = global.MentriaStore ? global.MentriaStore.get('comms', 'idkeys') : null;
+    const w = k && typeof k === 'object' ? k.wrapped : null;
+    if (!w || typeof w.iv !== 'string' || typeof w.ct !== 'string') return null;
+    try {
+      const key = await crypto.subtle.importKey('raw', secret, { name: 'AES-GCM' }, false, ['decrypt']);
+      await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64uDec(w.iv) }, key, b64uDec(w.ct));
+      return true;
     } catch (_) {
       return false;
     }
   }
 
+  async function rebuildPick(list) {
+    for (let j = 0; j < list.length; j++) {
+      const ok = await opensCommsKeys(list[j].b);
+      if (ok === null) break;
+      if (ok) return list[j];
+    }
+    return list[0];
+  }
+
+  async function rebuildLinked(candidates) {
+    requireCrypto();
+    const list = copies(candidates);
+    if (!list.length) throw new Error('locked');
+    try {
+      const pick = await rebuildPick(list);
+      await saveLinked(pick.b, { rebuild: true });
+      return pick.i;
+    } finally {
+      wipe(list, null);
+    }
+  }
+
   async function openLinked(candidates) {
     requireCrypto();
-    const list = (Array.isArray(candidates) ? candidates : [candidates]).map(secretBytes);
+    const list = copies(candidates);
     if (!list.length) throw new Error('locked');
-    const vault = loadVault();
-    if (!vault) throw new Error('no-vault');
-    if (vault.kcv) {
-      const want = b64uDec(vault.kcv);
-      for (let i = 0; i < list.length; i++) {
-        if (timingSafeEq(b64uDec(await kcvOf(list[i])), want)) {
-          state.secret = list[i];
-          return i;
+    let chosen = null;
+    try {
+      const vault = loadVault();
+      if (!vault) throw new Error('no-vault');
+      if (vault.kcv) {
+        const want = b64uDec(vault.kcv);
+        for (let j = 0; j < list.length; j++) {
+          if (timingSafeEq(b64uDec(await kcvOf(list[j].b)), want)) {
+            chosen = list[j];
+            break;
+          }
         }
       }
+      if (chosen) {
+        state.secret = chosen.b;
+        return chosen.i;
+      }
+      if (hasWraps(loadVault())) throw new Error('kcv-mismatch');
+      await saveLinked((await rebuildPick(list)).b, { rebuild: true });
+      return -1;
+    } finally {
+      wipe(list, chosen ? chosen.b : null);
     }
-    if (hasWraps(loadVault())) throw new Error('kcv-mismatch');
-    await saveLinked(list[0], { rebuild: true });
-    return -1;
   }
 
   function legacyPasskeyId() {
@@ -394,9 +454,9 @@
     return v && v.prf && typeof v.prf.credId === 'string' && v.prf.credId ? v.prf.credId : null;
   }
 
-  function retireLegacy() {
+  function retireLegacy(expectedKcv) {
     const vault = loadVault();
-    if (!vault) return;
+    if (!vault || typeof expectedKcv !== 'string' || !expectedKcv || vault.kcv !== expectedKcv) return false;
     if (vault.pass || vault.prf || vault.device || vault.v !== 3 || vault.linked !== true) {
       delete vault.pass;
       delete vault.prf;
@@ -406,6 +466,7 @@
       saveVault(vault);
     }
     dropDeviceKey();
+    return true;
   }
 
   function hasDeviceUnlock() {
@@ -459,6 +520,6 @@
     setup, unlock, lock, isSetUp, isUnlocked, getSecret, clearVault,
     passkeySupport, hasPasskey, enrollPasskey, unlockWithPasskey, removePasskey,
     hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock,
-    useSecret, isLinked, createLinked, saveLinked, openLinked, matchesVault, retireLegacy, legacyPasskeyId
+    useSecret, isLinked, createLinked, saveLinked, openLinked, rebuildLinked, matchesVault, retireLegacy, legacyPasskeyId
   };
 })(typeof window !== 'undefined' ? window : globalThis);

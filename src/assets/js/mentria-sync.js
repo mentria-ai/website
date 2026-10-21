@@ -890,7 +890,9 @@ const resetSession = () => {
 
 const sendControl = async (op, to) => {
   if (!state.action || !state.key) return;
-  try { state.action.send(await encryptPayload(state.key, { op, initiator: state.isInitiator }), to); } catch (_) {}
+  const msg = { op, initiator: state.isInitiator };
+  if (keyringOn()) msg.keyring = 1;
+  try { state.action.send(await encryptPayload(state.key, msg), to); } catch (_) {}
 };
 
 const armJoinTimer = () => {
@@ -925,6 +927,7 @@ const handshake = async (msg, from) => {
   if (msg.op === 'hello') {
     if (!state.isInitiator || msg.initiator) return;
     if (state.partner && state.partner !== from) { sendControl('busy', from); return; }
+    if (msg.keyring !== 1) state.oldPeer = true;
     acceptPartner(from);
     sendControl('welcome', from);
     startSync();
@@ -984,6 +987,7 @@ const joinRoomWithCode = async (codeRaw, opts) => {
     clearTimeout(state.helloTimer);
     state.helloTimer = setTimeout(() => {
       if (state.partner || !state.room) return;
+      state.oldPeer = true;
       acceptPartner(peerId);
       startSync();
     }, HELLO_FALLBACK_MS);

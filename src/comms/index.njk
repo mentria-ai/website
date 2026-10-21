@@ -3141,9 +3141,10 @@ const krRetire = async () => {
   let cur = null;
   try {
     cur = await KR.secret('identity');
-    if (!cur || !(await I.matchesVault(cur))) return;
+    const kcv = cur ? await I.matchesVault(cur) : '';
+    if (!kcv) return;
     const id = I.legacyPasskeyId();
-    I.retireLegacy();
+    if (!I.retireLegacy(kcv)) return;
     if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
       try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: id }); } catch (_) {}
     }
@@ -3245,9 +3246,13 @@ const krCreateIdentity = async () => {
   }
   krSlot(els.obCard, false);
   if (I.isLinked()) {
-    const have = await KR.secret('identity');
-    if (!have) throw new Error('locked');
-    await I.saveLinked(have, { rebuild: true });
+    const have = await KR.secrets('identity');
+    try {
+      if (!have.length) throw new Error('locked');
+      await I.rebuildLinked(have.map((x) => x.bytes));
+    } finally {
+      have.forEach((x) => { try { x.bytes.fill(0); } catch (_) {} });
+    }
     krOpened = true;
     return true;
   }

@@ -1270,6 +1270,96 @@ check('about opens from a prior entry and never retires through it', async () =>
   clean_(rig);
 });
 
+check('a rebuild prefers the identity that opens the comms keys', async () => {
+  await fresh(true);
+  const page = await open('/comms/', { auth: true });
+  const rig = rigs.get(page);
+  await commsOnboard(page, 'Keys Kai');
+  const code = await setupNew(page, { passkey: false });
+  await waitVisible(page, '#comms-id-on', 30000);
+  const fp = await fingerprint(page);
+  await until(() => readJson(page, IDKEYS).then((v) => !!(v && v.wrapped)), 10000, 'comms keys written');
+  const mine = await keyringSecret(page);
+  await page.evaluate(async (u) => {
+    const m = await import(u);
+    await m.link('identity', crypto.getRandomValues(new Uint8Array(32)));
+    window.MentriaStore.remove('identity', 'vault');
+  }, RUNTIME);
+  assert(JSON.stringify(await keyringSecret(page)) !== JSON.stringify(mine), 'seed: the current entry is another identity');
+  await lockAndWaitReload(page);
+  await waitVisible(page, '#comms-onboard', 20000);
+  await commsOnboard(page, 'Keys Kai');
+  await waitVisible(page, '#comms-onboard-card .m-unlock', 20000);
+  await cardCode(page, '#comms-onboard-card', code);
+  await waitVisible(page, '#comms-id-on', 30000);
+  assert(await fingerprint(page) === fp, 'Create rebuilds the identity that opens the comms keys');
+  assert(await vaultKcvMatches(page, mine), 'the rebuilt vault uses the prior identity');
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ v: 3, kcv: 'AAAAAAAAAAAAAAAAAAAAAA', linked: true })), IDENTITY);
+  await page.reload({ waitUntil: 'load' });
+  await waitVisible(page, '#comms-id-on', 30000);
+  assert(await fingerprint(page) === fp, 'the open-time rebuild picks it too');
+  assert(await vaultKcvMatches(page, mine), 'the vault uses the prior identity again');
+  clean_(rig);
+});
+
+check('retireLegacy only touches the vault it was checked against', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  await openAdvanced(page);
+  await press(page, '[data-reveal="about-identity-setup-form"]');
+  await page.type('#about-identity-setup-pass', PASSPHRASE);
+  await page.type('#about-identity-setup-pass2', PASSPHRASE);
+  await page.click('#about-identity-setup-btn');
+  await answerDialog(page);
+  await waitVisible(page, '#about-identity-unlocked');
+  const r = await page.evaluate((k) => {
+    const out = {};
+    out.none = MentriaIdentity.retireLegacy();
+    out.noneKept = !!JSON.parse(localStorage.getItem(k)).pass;
+    out.wrong = MentriaIdentity.retireLegacy('AAAAAAAAAAAAAAAAAAAAAA');
+    out.wrongKept = !!JSON.parse(localStorage.getItem(k)).pass;
+    out.right = MentriaIdentity.retireLegacy(JSON.parse(localStorage.getItem(k)).kcv);
+    const v = JSON.parse(localStorage.getItem(k));
+    out.after = { pass: !!v.pass, v: v.v, linked: v.linked };
+    return out;
+  }, IDENTITY);
+  assert(r.none === false && r.noneKept && r.wrong === false && r.wrongKept, 'nothing is deleted without the matching kcv', r);
+  assert(r.right === true && !r.after.pass && r.after.v === 3 && r.after.linked === true, 'the matching kcv retires', r);
+  clean_(rig);
+});
+
+check('openLinked skips malformed candidates and wipes the others', async () => {
+  await fresh(true);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  await aboutCreate(page, { passkey: false });
+  const mine = await keyringSecret(page);
+  const r = await page.evaluate(async (good) => {
+    MentriaIdentity.lock();
+    const fills = [];
+    const orig = Uint8Array.prototype.fill;
+    Uint8Array.prototype.fill = function (v) {
+      if (v === 0 && this.length === 32) fills.push(Array.from(this.slice(0, 4)).join(','));
+      return orig.apply(this, arguments);
+    };
+    const other = crypto.getRandomValues(new Uint8Array(32));
+    let at = null;
+    let err = null;
+    try { at = await MentriaIdentity.openLinked([new Uint8Array(3), 'nope', null, other, new Uint8Array(good)]); } catch (e) { err = e.message; }
+    const held = MentriaIdentity.isUnlocked() ? Array.from(MentriaIdentity.getSecret()) : null;
+    let all = null;
+    try { await MentriaIdentity.openLinked([new Uint8Array(3), 'nope']); all = 'opened'; } catch (e) { all = e.message; }
+    Uint8Array.prototype.fill = orig;
+    return { at, err, held, fills: fills.length, other: Array.from(other.slice(0, 4)).join(','), all };
+  }, mine);
+  assert(r.err === null && r.at === 4, 'the good candidate is used after malformed ones', r);
+  assert(JSON.stringify(r.held) === JSON.stringify(mine), 'the page holds the chosen secret', r.held && r.held.length);
+  assert(r.fills >= 1, 'the copy of the candidate not chosen is wiped', r);
+  assert(r.all === 'locked', 'only malformed candidates throws', r);
+  clean_(rig);
+});
+
 check('a link that does not open the vault keeps the old lock', async () => {
   await fresh(false);
   const page = await open('/about/', { auth: true });

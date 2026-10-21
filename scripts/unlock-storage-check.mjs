@@ -680,6 +680,140 @@ check('a legacy peer never receives wrap-less linked vaults', async () => {
   await Sync.disconnect();
 });
 
+const B32A = 'abcdefghijklmnopqrstuvwxyz234567';
+const b32e = (bytes) => {
+  let bits = 0, value = 0, out = '';
+  for (const b of bytes) {
+    value = (value << 8) | b;
+    bits += 8;
+    while (bits >= 5) { out += B32A[(value >>> (bits - 5)) & 31]; bits -= 5; }
+  }
+  if (bits > 0) out += B32A[(value << (5 - bits)) & 31];
+  return out;
+};
+const b32d = (s) => {
+  const clean = String(s).toLowerCase().replace(/[^a-z2-7]/g, '');
+  const out = [];
+  let bits = 0, value = 0;
+  for (const ch of clean) {
+    value = (value << 5) | B32A.indexOf(ch);
+    bits += 5;
+    if (bits >= 8) { out.push((value >>> (bits - 8)) & 255); bits -= 8; }
+  }
+  return new Uint8Array(out);
+};
+async function codeKey(code) {
+  const base = await crypto.subtle.importKey('raw', b32d(code), 'HKDF', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: te.encode('mentria-sync-key-v1'), info: te.encode('aes-gcm-256') }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function pairRoom(asInitiator) {
+  const before = rooms.length;
+  let code;
+  if (asInitiator) code = await Sync.start();
+  else {
+    code = b32e(rand(10)).match(/.{1,4}/g).join('-').toUpperCase();
+    await Sync.joinWithCode(code);
+  }
+  const room = rooms[before];
+  assert.ok(room && room.action, 'pairing room joined');
+  const key = await codeKey(code);
+  const messages = async () => Promise.all(room.sent.map((s) => openMsg(key, s.payload)));
+  const deliver = async (msg, peerId) => {
+    const n = Sync.status().handled;
+    room.action.onMessage(await sealMsg(key, msg), { peerId: peerId || 'peer-1' });
+    await until(() => Sync.status().handled > n);
+  };
+  return { room, key, messages, deliver };
+}
+const linkedVaults = () => ({
+  id: { v: 3, kcv: 'kcv-linked', linked: true },
+  totp: { v: 2, linked: true, kid: U.b64u(rand(16)), secrets: { iv: U.b64u(rand(12)), ct: U.b64u(rand(64)) } }
+});
+const seedLinked = async () => {
+  const k = await keyring();
+  const v = linkedVaults();
+  put('keyring.vault', k.record);
+  put('identity.vault', v.id);
+  put('totp.vault', v.totp);
+  put('tools.mine', { a: 1 });
+};
+const lastSnapshot = async (r, n) => (await r.messages()).slice(n).filter((m) => m.op === 'snapshot').pop();
+
+check('code pairing: the joiner says keyring in its hello', async () => {
+  reset();
+  let p = await pairRoom(false);
+  p.room.onPeerJoin('peer-1');
+  const hello = await until(async () => (await p.messages()).find((m) => m.op === 'hello'));
+  assert.equal(hello.keyring, 1, 'a keyring device says so');
+  assert.equal(hello.initiator, false);
+  await Sync.disconnect();
+  reset({ enabled: false });
+  p = await pairRoom(false);
+  p.room.onPeerJoin('peer-1');
+  const plain = await until(async () => (await p.messages()).find((m) => m.op === 'hello'));
+  assert.equal(plain.keyring, undefined, 'with the switch off the hello is unchanged');
+  await Sync.disconnect();
+});
+
+check('code pairing: an old joiner gets no wrap-less vaults in the first snapshot', async () => {
+  reset();
+  await seedLinked();
+  let p = await pairRoom(true);
+  await p.deliver({ op: 'hello', initiator: false });
+  const snap = await until(async () => (await p.messages()).find((m) => m.op === 'snapshot'));
+  assert.ok(snap.data.store['tools.mine'], 'other data is still sent');
+  assert.equal(snap.data.store['identity.vault'], undefined, 'no wrap-less identity vault for an old joiner');
+  assert.equal(snap.data.store['totp.vault'], undefined, 'no wrap-less totp vault for an old joiner');
+  assert.equal(snap.meta['identity.vault'], undefined);
+  await Sync.disconnect();
+  reset();
+  await seedLinked();
+  p = await pairRoom(true);
+  await p.deliver({ op: 'hello', initiator: false, keyring: 1 });
+  const snap2 = await until(async () => (await p.messages()).find((m) => m.op === 'snapshot'));
+  assert.equal(snap2.data.store['identity.vault'], raw('identity.vault'), 'a keyring joiner gets the identity vault');
+  assert.equal(snap2.data.store['totp.vault'], raw('totp.vault'), 'a keyring joiner gets the totp vault');
+  await Sync.disconnect();
+});
+
+check('after an old peer, later snapshots omit wrap-less vaults', async () => {
+  reset();
+  await seedLinked();
+  const r = await joinRoom();
+  r.room.onPeerJoin('peer-0');
+  const first = await until(async () => lastSnapshot(r, 0));
+  assert.equal(first.data.store['identity.vault'], raw('identity.vault'), 'before any old peer the snapshot is as before');
+  await r.deliver(snapshotOf({ 'tools.theirs': JSON.stringify({ b: 2 }) }));
+  const n = (await r.messages()).length;
+  r.room.onPeerJoin('peer-2');
+  const next = await until(async () => lastSnapshot(r, n));
+  assert.ok(next.data.store['tools.mine'], 'other data is still sent');
+  assert.equal(next.data.store['identity.vault'], undefined, 'no wrap-less identity vault after an old peer');
+  assert.equal(next.data.store['totp.vault'], undefined, 'no wrap-less totp vault after an old peer');
+  await Sync.disconnect();
+});
+
+check('a v1 snapshot marks an old peer', async () => {
+  reset();
+  await seedLinked();
+  const r = await joinRoom();
+  await r.deliver({ op: 'snapshot', data: { version: 1, exportedAt: new Date().toISOString(), store: { 'tools.theirs': JSON.stringify({ b: 2 }) }, legacy: {} } });
+  const n = (await r.messages()).length;
+  assert.ok(Store.set('identity', 'vault', { v: 3, kcv: 'kcv-linked', linked: true, n: 2 }));
+  assert.ok(Store.set('tools', 'later', { c: 3 }));
+  const after = await until(async () => {
+    const all = (await r.messages()).slice(n);
+    return all.find((m) => m.op === 'set' && m.ns === 'tools' && m.key === 'later') ? all : null;
+  });
+  assert.ok(!after.some((m) => m.op === 'set' && m.ns === 'identity'), 'no live wrap-less identity vault after a v1 snapshot');
+  const m2 = (await r.messages()).length;
+  r.room.onPeerJoin('peer-2');
+  const next = await until(async () => lastSnapshot(r, m2));
+  assert.equal(next.data.store['identity.vault'], undefined, 'the next snapshot omits it too');
+  assert.equal(next.data.store['totp.vault'], undefined);
+  await Sync.disconnect();
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

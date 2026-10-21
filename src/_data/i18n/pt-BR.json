@@ -6194,6 +6194,11 @@
     "done": "Concluir",
     "code_copied": "Código de recuperação copiado",
     "err_other": "Algo deu errado. Tente de novo.",
+    "passkey_step_title": "Desbloqueie com seu dispositivo da próxima vez",
+    "skip_for_now": "Pular por enquanto",
+    "passkey_skipped": "Nenhuma chave de acesso foi adicionada.",
+    "code_save_first": "Guarde este código primeiro. Ele substituiu o antigo.",
+    "passphrase_too_short_keep": "Sua frase secreta antiga tem menos de 12 caracteres, então ela não será mantida.",
     "services": {
       "identity": "conversas",
       "totp": "códigos",

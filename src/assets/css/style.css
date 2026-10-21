@@ -1673,6 +1673,8 @@ html.ext-full .app-bar, html.ext-full .m-update, html.ext-full .m-mini-dock, htm
 .m-unlock__input[aria-invalid="true"] { border-color: var(--syn-pink); }
 .m-unlock__msg, .m-usheet__msg { min-height: 1.45em; margin: var(--space-3) 0 0; font-size: var(--text-sm); line-height: 1.45; color: var(--term-muted); }
 .m-unlock__msg.is-error, .m-usheet__msg.is-error { color: var(--syn-pink); }
+.m-unlock__msg.is-warn, .m-usheet__msg.is-warn { color: var(--syn-amber); }
+.m-usheet[aria-busy] .m-unlock__btn:disabled { cursor: progress; }
 .m-unlock__msg:empty, .m-usheet__msg:empty { min-height: 0; margin: 0; }
 .m-unlock__later { display: grid; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--term-border); }
 .m-unlock__note { margin: 0; font-size: var(--text-xs); line-height: 1.5; color: var(--term-subtle); }

@@ -59,6 +59,45 @@ const pageLog = new WeakMap();
 const NO_PRF = () => {
   if (window.PublicKeyCredential) PublicKeyCredential.getClientCapabilities = async () => ({ 'extension:prf': false });
 };
+const NO_CLOSE_WATCHER = () => {
+  try { delete window.CloseWatcher; } catch (_) {}
+};
+const CLICK_PROBE = () => {
+  window.__tick = false;
+  window.__wa = [];
+  window.addEventListener('click', () => {
+    window.__tick = true;
+    setTimeout(() => { window.__tick = false; }, 0);
+  }, true);
+  const c = navigator.credentials;
+  if (!c) return;
+  const create = c.create.bind(c);
+  const get = c.get.bind(c);
+  c.create = (o) => { window.__wa.push('create:' + window.__tick); return create(o); };
+  c.get = (o) => { window.__wa.push('get:' + window.__tick); return get(o); };
+};
+const LIVE_PROBE = () => {
+  window.__frame = 0;
+  window.__live = [];
+  const tick = () => { window.__frame += 1; requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+  const born = new WeakMap();
+  const SEL = '.m-usheet__msg, .m-unlock__msg';
+  new MutationObserver((list) => {
+    for (const m of list) {
+      for (const n of m.addedNodes) {
+        if (n.nodeType !== 1) continue;
+        const found = (n.matches(SEL) ? [n] : []).concat([...n.querySelectorAll(SEL)]);
+        for (const r of found) {
+          if (!born.has(r)) born.set(r, window.__frame);
+          if (r.textContent) window.__live.push({ born: born.get(r), frame: window.__frame, text: r.textContent });
+        }
+      }
+      const t = m.target;
+      if (t && t.nodeType === 1 && t.matches(SEL) && t.textContent) window.__live.push({ born: born.has(t) ? born.get(t) : -1, frame: window.__frame, text: t.textContent });
+    }
+  }).observe(document, { childList: true, subtree: true });
+};
 const AUTH = { protocol: 'ctap2', ctap2Version: 'ctap2_1', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, automaticPresenceSimulation: true };
 
 function assert(cond, msg, extra) {
@@ -233,6 +272,20 @@ async function targets(target, root) {
     .filter((el) => el.getBoundingClientRect().height > 0)
     .map((el) => ({ tag: el.tagName, act: el.dataset.act || el.name || el.className, h: Math.round(el.getBoundingClientRect().height) }))
     .filter((x) => x.h < 44), root);
+}
+
+async function busyInfo(target) {
+  return target.evaluate(() => {
+    const d = document.querySelector('.m-ulayer [role="dialog"]');
+    if (!d) return null;
+    const m = d.querySelector('.m-usheet__msg');
+    return { buttons: [...d.querySelectorAll('button')].map((b) => b.disabled), msg: m ? m.textContent : null, busy: d.hasAttribute('aria-busy') };
+  });
+}
+
+async function busyNow(target) {
+  const i = await busyInfo(target);
+  return !!i && i.buttons.length > 0 && i.buttons.every(Boolean) && i.msg === EN.working && i.busy;
 }
 
 async function axe(target, sel) {
@@ -447,16 +500,43 @@ check('setup with new code requires last four', async () => {
   assert(await page.$eval('.m-ulayer [data-act="next"]', (b) => b.disabled), 'Next stays off with the wrong four');
   await typeInto(page, '.m-ulayer input[name="code-check"]', code.slice(-4).toLowerCase());
   await page.waitForFunction(() => !document.querySelector('.m-ulayer [data-act="next"]').disabled);
-  assert(await record(page) === null, 'still nothing written before the last step');
+  assert(await record(page) === null, 'nothing written before Next');
+  await page.evaluate(() => {
+    const enc = crypto.subtle.encrypt.bind(crypto.subtle);
+    window.__slow = true;
+    crypto.subtle.encrypt = async (...a) => {
+      if (window.__slow) await new Promise((r) => setTimeout(r, 700));
+      return enc(...a);
+    };
+  });
   await page.keyboard.press('Enter');
+  const busy = await until(() => busyNow(page), 5000);
+  await page.evaluate(() => { window.__slow = false; });
+  assert(busy, 'buttons off and the working line shown while the keyring is made', await busyInfo(page));
+  await until(async () => ['passkey', 'no-prf'].includes(await step(page)), 15000);
+  const made = await page.evaluate(() => ({ st: window.__m.state(), rec: !!localStorage.getItem('mentria.store.keyring.vault') }));
+  assert(made.rec && made.st.setUp && made.st.unlocked && made.st.codeConfirmed, 'Next on the code step makes the confirmed keyring', made);
   const s3 = await step(page);
-  await waitStep(page, s3 === 'passkey' ? 'passkey' : 'no-prf');
-  if (s3 === 'passkey') await page.click('.m-ulayer [data-act="skip-passkey"]');
-  else await page.click('.m-ulayer [data-act="done"]');
+  if (s3 === 'passkey') {
+    const pk = await page.evaluate(() => {
+      const d = document.querySelector('.m-ulayer [role="dialog"]');
+      return {
+        title: document.getElementById(d.getAttribute('aria-labelledby')).textContent.trim(),
+        add: (d.querySelector('[data-act="add-passkey"]') || {}).textContent,
+        skip: (d.querySelector('[data-act="skip-passkey"]') || {}).textContent,
+        notNow: !!d.querySelector('[data-act="not-now"]')
+      };
+    });
+    assert(pk.title === EN.passkey_step_title && pk.title !== EN.add_passkey, 'the passkey step title differs from its button', pk);
+    assert(pk.add && pk.add.trim() === EN.add_passkey && pk.skip && pk.skip.trim() === EN.skip_for_now && !pk.notNow, 'Add a passkey and Skip for now, no Later', pk);
+    await page.click('.m-ulayer [data-act="skip-passkey"]');
+  } else {
+    await page.click('.m-ulayer [data-act="done"]');
+  }
   await page.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 15000 });
   const res = await page.evaluate(() => window.__setupResult);
   const st = await page.evaluate(() => window.__m.state());
-  assert(res === true && st.setUp && st.unlocked && st.codeConfirmed, 'setup creates a confirmed keyring', { res, st });
+  assert(res === true && st.setUp && st.unlocked && st.codeConfirmed && st.passkeys === 0, 'skip finishes a confirmed keyring', { res, st });
   const r = await page.evaluate(async (c) => {
     await window.__m.lock();
     await window.__m.unlockWithCode(c);
@@ -479,11 +559,18 @@ check('setup Later writes nothing', async () => {
   await waitStep(page, 'intro');
   await page.click('.m-ulayer [data-act="next"]');
   await waitStep(page, 'code');
-  const code = await shownCode(page);
-  await page.type('.m-ulayer input[name="code-check"]', code.slice(-4));
-  await page.click('.m-ulayer [data-act="next"]');
-  await until(async () => ['passkey', 'no-prf'].includes(await step(page)), 10000);
+  const first = await shownCode(page);
+  await page.type('.m-ulayer input[name="code-check"]', first.slice(-4));
   await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 5000 });
+  assert(await page.evaluate(() => window.__setupResult) === false, 'Escape on the code step returns false');
+  await page.click('#unlock-demo-setup');
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  const again = await shownCode(page);
+  assert(again === first, 'reopening setup shows the code already shown', { first, again });
+  await page.click('.m-ulayer [data-act="not-now"]');
   await page.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 5000 });
   const r = await page.evaluate(async () => ({
     res: window.__setupResult,
@@ -492,6 +579,23 @@ check('setup Later writes nothing', async () => {
     st: window.__m.state()
   }));
   assert(r.res === false && r.rec === null && !r.st.setUp && !r.dbs.includes('mentria-keyring'), 'nothing written on Later or Escape', r);
+  await page.click('#unlock-demo-setup');
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  await page.type('.m-ulayer input[name="code-check"]', first.slice(-4));
+  await page.click('.m-ulayer [data-act="next"]');
+  await until(async () => ['passkey', 'no-prf'].includes(await step(page)), 15000);
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 5000 });
+  const made = await page.evaluate(async (c) => {
+    const out = { res: window.__setupResult, setUp: window.__m.state().setUp };
+    await window.__m.lock();
+    await window.__m.unlockWithCode(c);
+    out.unlocked = window.__m.state().unlocked;
+    return out;
+  }, first);
+  assert(made.res === true && made.setUp && made.unlocked, 'the reused code is the one the keyring was made with', made);
 });
 
 check('setup with knownCode skips the check', async () => {
@@ -544,7 +648,7 @@ check('setup with verifyCode checks the typed code', async () => {
   await enableOnLab(page);
   await modules(page);
   const saved = 'WXYZ-2345-ABCD-EFGH-IJKL-MNOP-QRST-UV67';
-  await start(page, "(ui) => ui.showSetup({ verifyCode: async (c) => { window.__verified = (window.__verified || []).concat([c]); return c.replace(/-/g, '').toUpperCase() === '" + saved.replace(/-/g, '') + "'; } })");
+  await start(page, "(ui) => ui.showSetup({ verifyCode: async (c) => { window.__verified = (window.__verified || []).concat([c]); await new Promise((r) => setTimeout(r, 700)); return c.replace(/-/g, '').toUpperCase() === '" + saved.replace(/-/g, '') + "'; } })");
   await waitStep(page, 'intro');
   await page.click('.m-ulayer [data-act="next"]');
   await waitStep(page, 'code');
@@ -553,6 +657,7 @@ check('setup with verifyCode checks the typed code', async () => {
   assert(attrs.ac === 'one-time-code' && attrs.cap === 'characters' && attrs.label === EN.code_label, 'saved code field', attrs);
   await page.type('.m-ulayer input[name="saved-code"]', 'AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA');
   await page.click('.m-ulayer [data-act="next"]');
+  assert(await until(() => busyNow(page), 3000), 'busy while the saved code is checked', await busyInfo(page));
   await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_code);
   assert(await step(page) === 'code' && await record(page) === null, 'a wrong saved code stays on the step, nothing written');
   await typeInto(page, '.m-ulayer input[name="saved-code"]', saved.toLowerCase());
@@ -592,12 +697,14 @@ check('setup on a no-PRF device offers passphrase and remember', async () => {
       pass: lab('set-pass'),
       remember: lab('remember'),
       passkey: !!d.querySelector('[data-act="add-passkey"]'),
-      rememberOn: d.querySelector('input[name="remember"]').checked
+      notNow: !!d.querySelector('[data-act="not-now"]'),
+      rememberOn: d.querySelector('input[name="remember"]').checked,
+      setUp: window.__m.state().setUp
     };
   });
   assert(ui.title === EN.no_prf_title && ui.body === EN.no_prf_body, 'no-PRF copy', ui);
   assert(ui.pass && ui.pass.startsWith(EN.set_passphrase) && ui.remember && ui.remember.startsWith(EN.remember_label), 'passphrase and remember offered', ui);
-  assert(!ui.passkey && !ui.rememberOn, 'no passkey button; remember off by default', ui);
+  assert(!ui.passkey && !ui.rememberOn && !ui.notNow && ui.setUp, 'keyring made, no passkey button, no Later, remember off by default', ui);
   await page.click('.m-ulayer input[name="set-pass"]');
   await page.waitForFunction(() => { const el = document.querySelector('.m-ulayer input[name="new-pass"]'); return el && el.getBoundingClientRect().height > 0; });
   const pa = await page.$eval('.m-ulayer input[name="new-pass"]', (el) => ({ type: el.type, ac: el.getAttribute('autocomplete'), label: el.labels.length ? el.labels[0].textContent.trim() : null }));
@@ -605,7 +712,7 @@ check('setup on a no-PRF device offers passphrase and remember', async () => {
   await page.type('.m-ulayer input[name="new-pass"]', 'short');
   await page.click('.m-ulayer [data-act="done"]');
   await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.passphrase_rule);
-  assert(await record(page) === null, 'a short passphrase writes nothing');
+  assert(!(await page.evaluate(() => window.__m.state().hasPass)), 'a short passphrase sets nothing');
   await typeInto(page, '.m-ulayer input[name="new-pass"]', 'correct horse battery');
   await page.click('.m-ulayer input[name="remember"]');
   await page.click('.m-ulayer [data-act="done"]');
@@ -646,9 +753,9 @@ check('setup adds a passkey and the card unlocks with it', async () => {
   const ui = await page.evaluate(() => {
     const d = document.querySelector('.m-ulayer [role="dialog"]');
     const k = d.querySelector('input[name="keep-pass"]');
-    return { btn: (d.querySelector('[data-act="add-passkey"]') || {}).textContent, keep: !!k && k.checked, keepLabel: k && k.labels.length ? k.labels[0].textContent.trim() : null };
+    return { title: document.getElementById(d.getAttribute('aria-labelledby')).textContent.trim(), btn: (d.querySelector('[data-act="add-passkey"]') || {}).textContent, keep: !!k && k.checked, keepLabel: k && k.labels.length ? k.labels[0].textContent.trim() : null };
   });
-  assert(ui.btn && ui.btn.trim() === EN.add_passkey && ui.keep && ui.keepLabel === EN.keep_passphrase, 'passkey step with keep passphrase on', ui);
+  assert(ui.title === EN.passkey_step_title && ui.btn && ui.btn.trim() === EN.add_passkey && ui.keep && ui.keepLabel === EN.keep_passphrase, 'passkey step with keep passphrase on', ui);
   await page.click('.m-ulayer [data-act="add-passkey"]');
   const res = await settled(page, 40000);
   const st = await page.evaluate(() => window.__m.state());
@@ -665,7 +772,7 @@ check('setup adds a passkey and the card unlocks with it', async () => {
 
 check('setup falls back when the passkey has no PRF', async () => {
   await clean();
-  const page = await open('/beta/unlock/');
+  const page = await open('/beta/unlock/', LIVE_PROBE);
   const cdp = await page.createCDPSession();
   await cdp.send('WebAuthn.enable');
   const a = (await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: false }, AUTH) })).authenticatorId;
@@ -685,6 +792,9 @@ check('setup falls back when the passkey has no PRF', async () => {
   await waitStep(page, 'no-prf');
   const mid = await page.evaluate(() => ({ s: window.__m.state(), notNow: !!document.querySelector('.m-ulayer [data-act="not-now"]') }));
   assert(mid.s.setUp && mid.s.passkeys === 0 && !mid.notNow, 'keyring made, no-PRF options offered, no Later once written', mid);
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.passkey_skipped);
+  const live = await page.evaluate(() => window.__live.filter((x) => x.text === document.querySelector('.m-ulayer .m-usheet__msg').textContent));
+  assert(live.length > 0 && live.every((x) => x.frame > x.born), 'the new step fills its live region a frame after the region is in the DOM', live);
   await page.click('.m-ulayer input[name="remember"]');
   await page.click('.m-ulayer [data-act="done"]');
   await page.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 15000 });
@@ -824,6 +934,229 @@ check('card and sheets pass axe', async () => {
   assert(!small.length, '44 px targets on the setup sheet', small);
 });
 
+check('passkey clicks reach WebAuthn first', async () => {
+  await clean();
+  const page = await open('/beta/unlock/', CLICK_PROBE);
+  const cdp = await page.createCDPSession();
+  await cdp.send('WebAuthn.enable');
+  const a = (await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: true }, AUTH) })).authenticatorId;
+  await enableOnLab(page);
+  await modules(page);
+  await page.click('#unlock-demo-setup');
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  const code = await shownCode(page);
+  await page.type('.m-ulayer input[name="code-check"]', code.slice(-4));
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'passkey');
+  await page.evaluate(() => { window.__wa = []; });
+  await page.click('.m-ulayer [data-act="add-passkey"]');
+  await until(() => page.evaluate(() => window.__wa.length > 0), 30000);
+  const setupCalls = await page.evaluate(() => window.__wa);
+  assert(setupCalls[0] === 'create:true', 'setup: Add a passkey reaches navigator.credentials.create inside the click', setupCalls);
+  await page.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 30000 });
+  await page.evaluate(() => window.__m.lock());
+  await page.click('#unlock-demo-card');
+  await page.waitForSelector('#unlock-demo [data-act="passkey"]');
+  await page.evaluate(() => { window.__wa = []; });
+  await page.click('#unlock-demo [data-act="passkey"]');
+  await until(() => page.evaluate(() => window.__wa.length > 0), 30000);
+  const cardCalls = await page.evaluate(() => window.__wa);
+  assert(cardCalls[0] === 'get:true', 'card: the passkey button reaches navigator.credentials.get inside the click', cardCalls);
+  await page.waitForFunction(() => window.__m.state().unlocked === true, { timeout: 30000 });
+  await page.reload({ waitUntil: 'load' });
+  await modules(page);
+  await start(page, '(ui) => ui.showConfirm()');
+  await page.waitForSelector('.m-ulayer [data-act="passkey"]');
+  await page.evaluate(() => { window.__wa = []; });
+  await page.click('.m-ulayer [data-act="passkey"]');
+  await until(() => page.evaluate(() => window.__wa.length > 0), 30000);
+  const confirmCalls = await page.evaluate(() => window.__wa);
+  assert(confirmCalls[0] === 'get:true', 'confirm: the passkey button reaches navigator.credentials.get inside the click', confirmCalls);
+  await settled(page, 30000);
+  const cred = (await cdp.send('WebAuthn.getCredentials', { authenticatorId: a })).credentials[0];
+  await page.evaluate(async () => { window.__m.setAskAtLaunch(true); await window.__m.lock(); });
+  await closeAll();
+  const about = await open('/about/', CLICK_PROBE);
+  const cdp2 = await about.createCDPSession();
+  await cdp2.send('WebAuthn.enable');
+  const a2 = (await cdp2.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: true }, AUTH) })).authenticatorId;
+  await cdp2.send('WebAuthn.addCredential', { authenticatorId: a2, credential: cred });
+  assert(await until(() => layerOpen(about), 12000), 'launch overlay shows');
+  await about.waitForSelector('.m-ulayer [data-act="passkey"]');
+  await about.evaluate(() => { window.__wa = []; });
+  await about.click('.m-ulayer [data-act="passkey"]');
+  await until(() => about.evaluate(() => window.__wa.length > 0), 30000);
+  const launchCalls = await about.evaluate(() => window.__wa);
+  assert(launchCalls[0] === 'get:true', 'launch: the passkey button reaches navigator.credentials.get inside the click', launchCalls);
+});
+
+check('showCode cannot be dismissed before the check', async () => {
+  await clean();
+  const page = await open('/beta/unlock/', NO_CLOSE_WATCHER);
+  await enableOnLab(page);
+  await createOnLab(page);
+  await modules(page);
+  const fresh = await page.evaluate(async () => { window.__fresh = await window.__m.regenerateCode(); return window.__fresh; });
+  await start(page, '(ui) => ui.showCode(window.__fresh)');
+  await page.waitForSelector('.m-ulayer .m-ucode');
+  const ui = await page.evaluate(() => {
+    const d = document.querySelector('.m-ulayer [role="dialog"]');
+    return { notNow: !!d.querySelector('[data-act="not-now"]'), copy: !!d.querySelector('[data-act="copy"]'), save: !!d.querySelector('[data-act="save"]'), closeWatcher: typeof window.CloseWatcher };
+  });
+  assert(!ui.notNow && ui.copy && ui.save && ui.closeWatcher === 'undefined', 'no Not now; Copy and Save as file stay', ui);
+  await page.keyboard.press('Escape');
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.code_save_first);
+  assert(await layerOpen(page) && await page.evaluate(() => window.__r === null), 'Escape keeps the code on screen');
+  for (let i = 0; i < 2; i++) {
+    await page.evaluate(() => {
+      const el = document.querySelector('.m-ulayer .m-usheet__msg');
+      el.textContent = '';
+      history.back();
+    });
+    await sleep(600);
+    assert(await layerOpen(page), 'Back keeps the code on screen', i);
+    await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.code_save_first);
+  }
+  assert(await page.evaluate(() => window.__r === null && location.pathname === '/beta/unlock/'), 'still on the page, not resolved');
+  await page.type('.m-ulayer input[name="code-check"]', fresh.slice(-4));
+  await page.click('.m-ulayer [data-act="done"]');
+  const r = await settled(page, 10000);
+  assert(r.ok && r.v === true && !(await layerOpen(page)) && await page.evaluate(() => window.__m.state().codeConfirmed), 'the last four close it and confirm the code', r);
+});
+
+check('setup resolves true only when the service is linked', async () => {
+  for (const retry of [true, false]) {
+    await clean();
+    const page = await open('/beta/unlock/');
+    await enableOnLab(page);
+    await modules(page);
+    await page.evaluate(() => {
+      const S = window.MentriaStore;
+      const set = S.set.bind(S);
+      window.__failLink = true;
+      S.set = (ns, key, v, o) => (window.__failLink && ns === 'keyring' && v && v.services && v.services.identity ? false : set(ns, key, v, o));
+    });
+    await start(page, "(ui) => ui.showSetup({ service: 'identity', secret: new Uint8Array(32).fill(9) })");
+    await waitStep(page, 'intro');
+    await page.click('.m-ulayer [data-act="next"]');
+    await waitStep(page, 'code');
+    const code = await shownCode(page);
+    await page.type('.m-ulayer input[name="code-check"]', code.slice(-4));
+    await page.click('.m-ulayer [data-act="next"]');
+    await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_storage);
+    const mid = await page.evaluate(() => ({ step: document.querySelector('.m-ulayer [data-step]').dataset.step, notNow: !!document.querySelector('.m-ulayer [data-act="not-now"]'), s: window.__m.state(), r: window.__r }));
+    assert(mid.step === 'code' && !mid.notNow && mid.s.setUp && mid.s.linked.length === 0 && mid.r === null, 'the link error stays on the step with a retry, no Later', mid);
+    if (retry) {
+      const before = await page.evaluate(() => JSON.parse(localStorage.getItem('mentria.store.keyring.vault')).kcv);
+      await page.evaluate(() => { window.__failLink = false; });
+      await page.click('.m-ulayer [data-act="next"]');
+      await until(async () => ['passkey', 'no-prf'].includes(await step(page)), 15000);
+      if ((await step(page)) === 'passkey') await page.click('.m-ulayer [data-act="skip-passkey"]');
+      else await page.click('.m-ulayer [data-act="done"]');
+      const res = await settled(page, 15000);
+      const after = await page.evaluate(async () => {
+        const s = await window.__m.secret('identity');
+        return { kcv: JSON.parse(localStorage.getItem('mentria.store.keyring.vault')).kcv, linked: !!s && s.every((b) => b === 9) };
+      });
+      assert(res.ok && res.v === true && after.linked && after.kcv === before, 'the retry links without a new keyring and resolves true', { res, after, before });
+    } else {
+      await page.keyboard.press('Escape');
+      const res = await settled(page, 10000);
+      const s = await page.evaluate(() => window.__m.state());
+      assert(res.ok && res.v === false && s.setUp && s.linked.length === 0, 'closing with the service unlinked resolves false', { res, s });
+    }
+  }
+});
+
+check('setup passkey cancel and the short passphrase line', async () => {
+  await clean();
+  const page = await open('/beta/unlock/', LIVE_PROBE);
+  await enableOnLab(page);
+  await modules(page);
+  await page.evaluate(() => {
+    navigator.credentials.create = () => Promise.reject(new DOMException('The operation either timed out or was not allowed.', 'NotAllowedError'));
+  });
+  await start(page, "(ui) => ui.showSetup({ knownCode: 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ23-4567', knownPassphrase: 'short one' })");
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'passkey');
+  const ui = await page.evaluate(() => {
+    const d = document.querySelector('.m-ulayer [role="dialog"]');
+    return { keep: !!d.querySelector('input[name="keep-pass"]'), text: d.textContent };
+  });
+  assert(!ui.keep && ui.text.includes(EN.passphrase_too_short_keep), 'a short old passphrase is not offered and the sheet says why', ui);
+  await page.click('.m-ulayer [data-act="add-passkey"]');
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.passkey_skipped);
+  const mid = await page.evaluate(() => ({ step: document.querySelector('.m-ulayer [data-step]').dataset.step, add: !!document.querySelector('.m-ulayer [data-act="add-passkey"]'), skip: !!document.querySelector('.m-ulayer [data-act="skip-passkey"]') }));
+  assert(mid.step === 'passkey' && mid.add && mid.skip, 'after a cancel the step offers Add again and Skip', mid);
+  const live = await page.evaluate(() => window.__live);
+  const early = live.filter((x) => x.text && x.frame <= x.born);
+  assert(live.length > 0 && !early.length, 'live-region text is filled at least one frame after the region is in the DOM', live);
+  await page.click('.m-ulayer [data-act="skip-passkey"]');
+  const res = await settled(page, 15000);
+  const st = await page.evaluate(() => window.__m.state());
+  assert(res.ok && res.v === true && st.passkeys === 0 && !st.hasPass, 'skip finishes without a passkey or a passphrase', { res, st });
+});
+
+check('back while busy keeps the handler', async () => {
+  await clean();
+  const page = await open('/beta/unlock/', NO_CLOSE_WATCHER);
+  await enableOnLab(page);
+  await modules(page);
+  await start(page, '(ui) => ui.showSetup({ verifyCode: () => new Promise((r) => { window.__release = () => r(false); }) })');
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  await page.type('.m-ulayer input[name="saved-code"]', 'WXYZ-2345-ABCD-EFGH-IJKL-MNOP-QRST-UV67');
+  await page.click('.m-ulayer [data-act="next"]');
+  assert(await until(() => busyNow(page), 3000), 'busy while the code is checked', await busyInfo(page));
+  await page.evaluate(() => history.back());
+  await sleep(600);
+  assert(await layerOpen(page) && await busyNow(page) && await page.evaluate(() => window.__r === null), 'Back while busy is ignored');
+  await page.evaluate(() => window.__release());
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_code);
+  await page.evaluate(() => history.back());
+  const res = await settled(page, 5000);
+  assert(res.ok && res.v === false && !(await layerOpen(page)) && await page.evaluate(() => location.pathname) === '/beta/unlock/', 'the next Back still closes the sheet', res);
+});
+
+check('a storage AbortError is not shown as cancelled', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  const cdp = await page.createCDPSession();
+  await cdp.send('WebAuthn.enable');
+  await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: true }, AUTH) });
+  await enableOnLab(page);
+  const code = await createOnLab(page);
+  await modules(page);
+  await start(page, "(ui, m) => m.addPasskey('')");
+  assert((await settled(page, 30000)).ok, 'passkey enrolled');
+  await page.evaluate(() => window.__m.lock());
+  await page.click('#unlock-demo-card');
+  await page.waitForSelector('#unlock-demo [data-act="passkey"]');
+  await page.evaluate(() => {
+    window.__get = navigator.credentials.get.bind(navigator.credentials);
+    navigator.credentials.get = () => Promise.reject(new DOMException('aborted', 'AbortError'));
+  });
+  await page.click('#unlock-demo [data-act="passkey"]');
+  await waitMsg(page, '#unlock-demo .m-unlock__msg', EN.err_cancelled);
+  await page.evaluate(() => {
+    navigator.credentials.get = window.__get;
+    const t = IDBDatabase.prototype.transaction;
+    IDBDatabase.prototype.transaction = function (...a) {
+      if (a[1] === 'readwrite') throw new DOMException('aborted', 'AbortError');
+      return t.apply(this, a);
+    };
+  });
+  await openCode(page, '#unlock-demo .m-unlock');
+  await page.type('#unlock-demo input[name="recovery-code"]', code);
+  await page.keyboard.press('Enter');
+  await waitMsg(page, '#unlock-demo .m-unlock__msg', EN.err_storage);
+});
 let failed = 0;
 const ONLY = process.env.ONLY || '';
 const run = checks.filter(([n]) => !ONLY || n.includes(ONLY));

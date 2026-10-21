@@ -6194,6 +6194,11 @@
     "done": "Terminé",
     "code_copied": "Code de récupération copié",
     "err_other": "Une erreur s'est produite. Réessayez.",
+    "passkey_step_title": "Déverrouillez avec votre appareil la prochaine fois",
+    "skip_for_now": "Passer pour l'instant",
+    "passkey_skipped": "Aucune clé d'accès n'a été ajoutée.",
+    "code_save_first": "Conservez d'abord ce code. Il remplace l'ancien.",
+    "passphrase_too_short_keep": "Votre ancienne phrase secrète fait moins de 12 caractères, elle ne sera donc pas reprise.",
     "services": {
       "identity": "discussions",
       "totp": "codes",

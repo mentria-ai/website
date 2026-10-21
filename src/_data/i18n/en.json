@@ -6194,6 +6194,11 @@
     "done": "Done",
     "code_copied": "Recovery code copied",
     "err_other": "Something went wrong. Try again.",
+    "passkey_step_title": "Unlock with your device next time",
+    "skip_for_now": "Skip for now",
+    "passkey_skipped": "No passkey was added.",
+    "code_save_first": "Save this code first. It replaced your old one.",
+    "passphrase_too_short_keep": "Your old passphrase is shorter than 12 characters, so it won't carry over.",
     "services": {
       "identity": "chats",
       "totp": "codes",

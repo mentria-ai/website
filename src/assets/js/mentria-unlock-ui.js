@@ -6,14 +6,16 @@ import {
 import { newRecoveryCode, normalizeCode, formatCode } from './mentria-unlock-core.js';
 
 const SAVE_NAME = 'mentria-recovery-code.txt';
-const PRF_ERRORS = new Set(['no-prf', 'bad-prf', 'unknown-passkey', 'no-credential', 'webauthn-timeout', 'no-passkey', 'SecurityError', 'NotSupportedError']);
+const PRF_ERRORS = new Set(['no-prf', 'bad-prf', 'unknown-passkey', 'no-credential', 'webauthn-timeout', 'no-passkey']);
+const WEBAUTHN_PRF = new Set(['SecurityError', 'NotSupportedError']);
 const CANCEL_ERRORS = new Set(['NotAllowedError', 'AbortError']);
-const STORAGE_ERRORS = new Set(['storage', 'idb', 'QuotaExceededError', 'UnknownError']);
+const STORAGE_ERRORS = new Set(['storage', 'idb', 'QuotaExceededError', 'UnknownError', 'AbortError', 'SecurityError', 'InvalidStateError', 'DataError', 'VersionError']);
 const FOCUSABLE = 'button, a[href], input, select, textarea, [tabindex]';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const LOCK_ICON = '<rect x="5" y="10.5" width="14" height="9.5" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="15.2" r="1.3" fill="currentColor"/>';
 
 const copies = new Map();
+const regions = new WeakMap();
 const live = new Set();
 const layers = [];
 let localeOverride = null;
@@ -21,6 +23,7 @@ let seq = 0;
 let pageState = null;
 let launchP = null;
 let setupP = null;
+let pendingCode = null;
 let noteEl = null;
 let noteTimer = null;
 
@@ -96,31 +99,65 @@ function paint(root, T) {
   }
 }
 
+function nextFrame(fn) {
+  if (typeof requestAnimationFrame === 'function' && document.visibilityState === 'visible') requestAnimationFrame(() => fn());
+  else setTimeout(fn, 50);
+}
+
+function region(cls, id) {
+  const el = h('p', { class: cls, id, 'aria-live': 'polite' });
+  const r = { ready: false, token: 0 };
+  regions.set(el, r);
+  nextFrame(() => { r.ready = el.isConnected; });
+  return el;
+}
+
 function say(el, T, key, tone) {
-  if (key) {
-    el.dataset.uk = key;
-    el.textContent = typeof T[key] === 'string' ? T[key] : '';
-  } else {
+  let r = regions.get(el);
+  if (!r) {
+    r = { ready: true, token: 0 };
+    regions.set(el, r);
+  }
+  r.token += 1;
+  const token = r.token;
+  el.classList.toggle('is-error', tone === 'error');
+  el.classList.toggle('is-warn', tone === 'warn');
+  if (!key) {
     delete el.dataset.uk;
     el.textContent = '';
+    return;
   }
-  el.classList.toggle('is-error', tone === 'error');
+  el.dataset.uk = key;
+  const fill = () => {
+    if (r.token === token) el.textContent = typeof T[key] === 'string' ? T[key] : '';
+  };
+  if (r.ready && el.isConnected) {
+    fill();
+    return;
+  }
+  el.textContent = '';
+  nextFrame(() => {
+    r.ready = true;
+    fill();
+  });
 }
 
 function errName(e) {
   if (!e) return '';
   const name = String(e.name || '');
-  if (CANCEL_ERRORS.has(name) || PRF_ERRORS.has(name) || STORAGE_ERRORS.has(name)) return name;
+  if (name && name !== 'Error' && /^[A-Z][A-Za-z]*Error$/.test(name) && !/^(Type|Range|Reference|Syntax|Eval|URI)Error$/.test(name)) return name;
   return String(e.message || name);
 }
 
-function errKey(e) {
+function errKey(e, webauthn) {
   const n = errName(e);
   if (n === 'bad-code') return 'err_code';
   if (n === 'bad-pass' || n === 'no-pass') return 'err_pass';
   if (n === 'weak-pass') return 'passphrase_rule';
   if (PRF_ERRORS.has(n)) return 'err_prf';
-  if (CANCEL_ERRORS.has(n)) return 'err_cancelled';
+  if (webauthn && CANCEL_ERRORS.has(n)) return 'err_cancelled';
+  if (webauthn && WEBAUTHN_PRF.has(n)) return 'err_prf';
+  if (webauthn && n === 'InvalidStateError') return 'err_other';
   if (STORAGE_ERRORS.has(n)) return 'err_storage';
   return 'err_other';
 }
@@ -315,17 +352,28 @@ function openLayer({ labelledby, describedby, onDismiss }) {
   document.body.append(root);
   setPage(true);
   if (layers.length === 1) document.addEventListener('keydown', onKey, true);
-  const ui = window.MentriaUI;
-  if (ui && typeof ui.backDismiss === 'function') {
-    try { L.back = ui.backDismiss(() => { L.back = null; dismiss(L); }); } catch (_) { L.back = null; }
-  }
+  arm(L);
   return L;
 }
 
+function arm(L) {
+  const ui = window.MentriaUI;
+  if (L.closed || L.back || !ui || typeof ui.backDismiss !== 'function') return;
+  try {
+    L.back = ui.backDismiss(() => {
+      L.back = null;
+      if (!dismiss(L) && !L.closed) arm(L);
+    });
+  } catch (_) {
+    L.back = null;
+  }
+}
+
 function dismiss(L) {
-  if (L.closed) return;
-  if (typeof L.onDismiss === 'function') L.onDismiss();
-  else closeLayer(L);
+  if (L.closed) return true;
+  if (typeof L.onDismiss === 'function') return L.onDismiss() !== false;
+  closeLayer(L);
+  return true;
 }
 
 function closeLayer(L) {
@@ -359,7 +407,7 @@ function buildCard(T0, { mode, onDone, titleId }) {
   let done = false;
   let primary = null;
 
-  const msg = h('p', { class: 'm-unlock__msg', id: ids.msg, 'aria-live': 'polite' });
+  const msg = region('m-unlock__msg', ids.msg);
   const passkeyBtn = h('button', { type: 'button', class: 'm-unlock__btn m-unlock__btn--primary', 'data-act': 'passkey', 'aria-describedby': ids.gloss }, h('span', { uk: 'passkey_button' }));
   const passkeyBox = h('div', { class: 'm-unlock__passkey' }, passkeyBtn, h('p', { class: 'm-unlock__gloss', id: ids.gloss, uk: 'passkey_gloss' }));
 
@@ -447,7 +495,7 @@ function buildCard(T0, { mode, onDone, titleId }) {
       finish();
       return;
     }
-    const key = errKey(err);
+    const key = errKey(err, kind === 'passkey');
     say(msg, T, key, 'error');
     if (key === 'err_prf') {
       setOpen(codeToggle, codeForm, true);
@@ -614,7 +662,7 @@ async function withConfirm(fn) {
 }
 
 function sheetForm(ids, name, dots) {
-  const msg = h('p', { class: 'm-usheet__msg', id: ids.msg, 'aria-live': 'polite' });
+  const msg = region('m-usheet__msg', ids.msg);
   const form = h('form', { class: 'm-usheet__step', 'data-step': name, novalidate: true });
   const head = [];
   if (dots) {
@@ -685,6 +733,32 @@ function codeShown(code, getMsg, getT) {
   return { box, tools: h('div', { class: 'm-usheet__tools' }, copyBtn, saveBtn), check, watch };
 }
 
+function busyHolder(getLayer, getMsg, getT) {
+  let held = null;
+  return function busyOn(on) {
+    const L = getLayer();
+    if (!L) return;
+    const msg = getMsg();
+    if (on) {
+      if (held) return;
+      const active = document.activeElement;
+      held = { focus: L.panel.contains(active) ? active : null, buttons: [...L.panel.querySelectorAll('button')].filter((b) => !b.disabled) };
+      for (const b of held.buttons) b.disabled = true;
+      L.panel.setAttribute('aria-busy', 'true');
+      if (held.focus && held.focus.disabled) focusEl(L.panel);
+      if (msg) say(msg, getT(), 'working');
+      return;
+    }
+    L.panel.removeAttribute('aria-busy');
+    if (!held) return;
+    const was = held;
+    held = null;
+    for (const b of was.buttons) if (b.isConnected) b.disabled = false;
+    if (msg && msg.dataset.uk === 'working') say(msg, getT(), null);
+    if (was.focus && was.focus.isConnected && !was.focus.disabled && document.activeElement === L.panel) focusEl(was.focus);
+  };
+}
+
 export function showSetup(opts) {
   if (!setupP) setupP = setup(opts || {}).catch(() => false).finally(() => { setupP = null; });
   return setupP;
@@ -699,10 +773,14 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
   let T = T0;
   const getT = () => T;
   const getMsg = () => msg;
-  const keepPass = typeof knownPassphrase === 'string' && Array.from(knownPassphrase.normalize('NFC')).length >= 12 ? knownPassphrase : null;
+  const wantsLink = !!(service && secret);
+  const passLong = typeof knownPassphrase === 'string' && Array.from(knownPassphrase.normalize('NFC')).length >= 12;
+  const keepPass = passLong ? knownPassphrase : null;
+  const shortPass = typeof knownPassphrase === 'string' && knownPassphrase !== '' && !passLong;
   const saved = knownCode != null && normalizeCode(String(knownCode)) ? formatCode(String(knownCode)) : null;
   const verify = !saved && typeof verifyCode === 'function' ? verifyCode : null;
-  const fresh = newRecoveryCode();
+  if (!pendingCode) pendingCode = newRecoveryCode();
+  const fresh = pendingCode;
   const ids = { title: uid('title'), lede: uid('lede'), msg: uid('msg') };
   const draft = { choice: saved || verify ? 'keep' : 'new', checked: false, typed: null, keepPass: !!keepPass, setPass: false, pass: '', remember: false };
   const prog = { created: false, linked: false, passkey: false, pass: false, remember: false };
@@ -714,6 +792,12 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
   let resolveSetup = null;
   const result = new Promise((r) => { resolveSetup = r; });
   const view = { repaint(T2) { T = T2; if (L) paint(L.panel, T); } };
+  const hold = busyHolder(() => L, getMsg, getT);
+  const busyOn = (on) => {
+    busy = on;
+    hold(on);
+  };
+  const complete = () => prog.created && (!wantsLink || prog.linked);
 
   const finish = (v) => {
     if (closed) return;
@@ -723,10 +807,10 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     resolveSetup(v);
   };
 
-  function show(form, focus) {
+  function show(form) {
     L.panel.replaceChildren(form);
     paint(form, T);
-    focusEl(focus || form.querySelector('.m-usheet__title'));
+    focusEl(form.querySelector('.m-usheet__title'));
   }
 
   function later() {
@@ -736,9 +820,13 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     return b;
   }
 
-  function busyOn(on) {
-    busy = on;
-    if (L) L.panel.toggleAttribute('aria-busy', on);
+  function shortNote() {
+    return shortPass ? h('p', { class: 'm-usheet__text', uk: 'passphrase_too_short_keep' }) : null;
+  }
+
+  function fail(err, webauthn) {
+    if (closed) return;
+    say(msg, T, errKey(err, webauthn), 'error');
   }
 
   function intro() {
@@ -761,7 +849,8 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     const body = [];
     let savedField = null;
     const sync = () => {
-      if (draft.choice === 'keep') next.disabled = !!verify && !savedField.input.value.trim();
+      if (prog.created) next.disabled = false;
+      else if (draft.choice === 'keep') next.disabled = !!verify && !savedField.input.value.trim();
       else next.disabled = !draft.checked;
     };
     shown.watch((ok) => {
@@ -803,27 +892,58 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     sync();
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (busy || next.disabled) return;
-      if (draft.choice === 'keep' && verify) {
-        const n = normalizeCode(savedField.input.value.trim());
-        const typed = n ? formatCode(n) : null;
-        let ok = false;
-        if (typed) {
-          busyOn(true);
-          try { ok = (await verify(typed)) === true; } catch (_) { ok = false; }
-          busyOn(false);
-          if (closed) return;
+      if (busy || next.disabled || closed) return;
+      if (!prog.created) {
+        let code = fresh;
+        if (draft.choice === 'keep' && verify) {
+          const n = normalizeCode(savedField.input.value.trim());
+          const typed = n ? formatCode(n) : null;
+          let ok = false;
+          if (typed) {
+            busyOn(true);
+            try { ok = (await verify(typed)) === true; } catch (_) { ok = false; }
+            busyOn(false);
+            if (closed) return;
+          }
+          if (!ok) {
+            say(msg, T, 'err_code', 'error');
+            savedField.input.setAttribute('aria-invalid', 'true');
+            focusEl(savedField.input);
+            try { savedField.input.select(); } catch (_) {}
+            return;
+          }
+          draft.typed = typed;
+          code = typed;
+        } else if (draft.choice === 'keep') {
+          code = saved;
         }
-        if (!ok) {
-          say(msg, T, 'err_code', 'error');
-          savedField.input.setAttribute('aria-invalid', 'true');
-          focusEl(savedField.input);
-          try { savedField.input.select(); } catch (_) {}
+        busyOn(true);
+        try {
+          await create({ code, confirmed: true });
+        } catch (err) {
+          busyOn(false);
+          const n = errName(err);
+          if (n === 'exists' || n === 'disabled') finish(false);
+          else fail(err);
           return;
         }
-        draft.typed = typed;
+        prog.created = true;
+        pendingCode = null;
+        for (const b of form.querySelectorAll('[data-act="not-now"]')) b.remove();
+        for (const i of form.querySelectorAll('input')) i.disabled = true;
+      } else {
+        busyOn(true);
       }
-      busyOn(true);
+      if (wantsLink && !prog.linked) {
+        try {
+          await link(service, secret);
+          prog.linked = true;
+        } catch (err) {
+          busyOn(false);
+          fail(err);
+          return;
+        }
+      }
       const support = await supportP;
       busyOn(false);
       if (closed) return;
@@ -844,30 +964,73 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     return o;
   }
 
-  function passkeyStep(errorKey) {
-    const parts = sheetForm(ids, 'passkey', [3, 3]);
-    msg = parts.msg;
-    const actions = [button('add-passkey', 'add_passkey', true, 'submit')];
-    if (prog.created) {
-      const doneBtn = button('done', 'done', false);
-      doneBtn.addEventListener('click', () => { if (!busy) commit(false); });
-      actions.push(doneBtn);
-    } else {
-      const skip = button('skip-passkey', 'code_link', false);
-      skip.addEventListener('click', () => { if (!busy) commit(false); });
-      actions.push(skip, later());
+  async function wrapUp(alreadyBusy) {
+    if (!alreadyBusy) busyOn(true);
+    try {
+      if (!prog.pass) {
+        const pass = keepPass && draft.keepPass ? keepPass : (noPrf && draft.setPass ? draft.pass : null);
+        if (pass) {
+          await withConfirm(() => setPassphrase(pass));
+          prog.pass = true;
+        }
+      }
+      if (noPrf && draft.remember && !prog.remember) {
+        await withConfirm(() => setRemember(true));
+        prog.remember = true;
+      }
+    } catch (err) {
+      busyOn(false);
+      fail(err);
+      return;
     }
-    const keep = keepPassOption();
-    const form = assemble(parts, 'add_passkey', 'passkey_gloss', [keep ? keep.wrap : null], actions);
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (!busy) commit(true);
-    });
-    show(form);
-    if (errorKey) say(msg, T, errorKey, 'error');
+    busyOn(false);
+    if (closed) return;
+    finish(complete());
+    if (prog.passkey) toast(T.passkey_added);
   }
 
-  function noPrfStep(errorKey) {
+  function addKey() {
+    const p = (async () => addPasskey(''))();
+    busyOn(true);
+    p.then(() => {
+      prog.passkey = true;
+      return wrapUp(true);
+    }, async (err) => {
+      busyOn(false);
+      if (closed) return;
+      const n = errName(err);
+      if (n === 'no-prf') {
+        noPrf = true;
+        noPrfStep();
+        say(msg, T, 'passkey_skipped', 'warn');
+        return;
+      }
+      if (n === 'confirm-needed') {
+        const ok = await showConfirm();
+        if (!closed && !ok) fail(err);
+        return;
+      }
+      const key = errKey(err, true);
+      if (key === 'err_cancelled') say(msg, T, 'passkey_skipped', 'warn');
+      else say(msg, T, key, 'error');
+    });
+  }
+
+  function passkeyStep() {
+    const parts = sheetForm(ids, 'passkey', [3, 3]);
+    msg = parts.msg;
+    const skip = button('skip-passkey', 'skip_for_now', false);
+    skip.addEventListener('click', () => { if (!busy && !closed) wrapUp(false); });
+    const keep = keepPassOption();
+    const form = assemble(parts, 'passkey_step_title', 'passkey_gloss', [keep ? keep.wrap : null, shortNote()], [button('add-passkey', 'add_passkey', true, 'submit'), skip]);
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!busy && !closed) addKey();
+    });
+    show(form);
+  }
+
+  function noPrfStep() {
     const parts = sheetForm(ids, 'no-prf', [3, 3]);
     msg = parts.msg;
     const body = [];
@@ -881,6 +1044,7 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     };
     const keep = keepPassOption(syncPass);
     if (keep) body.push(keep.wrap);
+    body.push(shortNote());
     if (!prog.pass) {
       setPass = option('checkbox', 'set-pass', '1', 'set_passphrase', draft.setPass);
       passField = field('new-pass', 'passphrase_label', { type: 'password', autocomplete: 'new-password', autocapitalize: 'off', spellcheck: 'false' }, 'passphrase_rule');
@@ -903,88 +1067,31 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
       rem.input.addEventListener('change', () => { draft.remember = rem.input.checked; });
       body.push(rem.wrap);
     }
-    const form = assemble(parts, 'no_prf_title', 'no_prf_body', body, [button('done', 'done', true, 'submit'), later()]);
+    const form = assemble(parts, 'no_prf_title', 'no_prf_body', body, [button('done', 'done', true, 'submit')]);
     syncPass();
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      if (busy) return;
+      if (busy || closed) return;
       if (passField && !passPart.hidden && Array.from(draft.pass.normalize('NFC')).length < 12) {
         say(msg, T, 'passphrase_rule', 'error');
         passField.input.setAttribute('aria-invalid', 'true');
         focusEl(passField.input);
         return;
       }
-      commit(false);
+      wrapUp(false);
     });
     show(form);
-    if (errorKey) say(msg, T, errorKey, 'error');
   }
 
-  async function commit(withPasskey) {
-    if (busy || closed) return;
-    busyOn(true);
-    say(msg, T, null);
-    let passkeyErr = null;
-    try {
-      if (!prog.created) {
-        try {
-          await create({ code: draft.choice === 'keep' ? (saved || draft.typed) : fresh, confirmed: true });
-        } catch (e) {
-          const n = errName(e);
-          if (n === 'exists' || n === 'disabled') {
-            busyOn(false);
-            finish(false);
-            return;
-          }
-          throw e;
-        }
-        prog.created = true;
-        for (const b of L.panel.querySelectorAll('[data-act="not-now"]')) b.remove();
-      }
-      if (!prog.linked && service && secret) {
-        await link(service, secret);
-        prog.linked = true;
-      }
-      if (withPasskey && !prog.passkey) {
-        try {
-          await withConfirm(() => addPasskey(''));
-          prog.passkey = true;
-        } catch (e) {
-          passkeyErr = e;
-        }
-      }
-      if (!prog.pass) {
-        const pass = keepPass && draft.keepPass ? keepPass : (noPrf && draft.setPass ? draft.pass : null);
-        if (pass) {
-          await withConfirm(() => setPassphrase(pass));
-          prog.pass = true;
-        }
-      }
-      if (noPrf && draft.remember && !prog.remember) {
-        await withConfirm(() => setRemember(true));
-        prog.remember = true;
-      }
-    } catch (e) {
-      busyOn(false);
-      if (!closed) say(msg, T, errKey(e), 'error');
-      return;
+  L = openLayer({
+    labelledby: ids.title,
+    describedby: ids.lede,
+    onDismiss: () => {
+      if (busy) return false;
+      finish(complete());
+      return true;
     }
-    busyOn(false);
-    if (closed) return;
-    if (passkeyErr) {
-      if (errName(passkeyErr) === 'no-prf') {
-        noPrf = true;
-        noPrfStep();
-      } else {
-        passkeyStep(errKey(passkeyErr));
-      }
-      return;
-    }
-    finish(true);
-    if (prog.passkey) toast(T.passkey_added);
-  }
-
-  L = openLayer({ labelledby: ids.title, describedby: ids.lede, onDismiss: () => { if (!busy) finish(prog.created); } });
+  });
   live.add(view);
   intro();
   return result;
@@ -999,6 +1106,7 @@ export async function showCode(code) {
   const ids = { title: uid('title'), lede: uid('lede'), msg: uid('msg') };
   return new Promise((resolve) => {
     let closed = false;
+    let free = false;
     let L = null;
     const view = { repaint(T2) { T = T2; if (L) paint(L.panel, T); } };
     const finish = (v) => {
@@ -1008,9 +1116,20 @@ export async function showCode(code) {
       if (L) L.close();
       resolve(v);
     };
-    L = openLayer({ labelledby: ids.title, describedby: ids.lede, onDismiss: () => finish(false) });
-    live.add(view);
     const parts = sheetForm(ids, 'code', null);
+    L = openLayer({
+      labelledby: ids.title,
+      describedby: ids.lede,
+      onDismiss: () => {
+        if (free) {
+          finish(false);
+          return true;
+        }
+        say(parts.msg, T, 'code_save_first', 'warn');
+        return false;
+      }
+    });
+    live.add(view);
     const shown = codeShown(text, () => parts.msg, () => T);
     const doneBtn = button('done', 'done', true, 'submit');
     doneBtn.disabled = true;
@@ -1019,14 +1138,16 @@ export async function showCode(code) {
       doneBtn.disabled = !ok;
       typed = got;
     });
-    const notNow = button('not-now', 'not_now', false);
-    notNow.addEventListener('click', () => finish(false));
-    const form = assemble(parts, 'code_title', 'code_body', [h('p', { class: 'm-usheet__text', uk: 'regenerate_note' }), shown.box, shown.tools, shown.check.wrap], [doneBtn, notNow]);
+    const form = assemble(parts, 'code_title', 'code_body', [h('p', { class: 'm-usheet__text', uk: 'regenerate_note' }), shown.box, shown.tools, shown.check.wrap], [doneBtn]);
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if (doneBtn.disabled) return;
-      if (confirmCode(typed)) finish(true);
-      else say(parts.msg, T, 'err_other', 'error');
+      if (confirmCode(typed)) {
+        finish(true);
+        return;
+      }
+      free = true;
+      say(parts.msg, T, 'err_other', 'error');
     });
     L.panel.append(form);
     paint(form, T);

@@ -6194,6 +6194,11 @@
     "done": "Listo",
     "code_copied": "Código de recuperación copiado",
     "err_other": "Algo salió mal. Inténtalo de nuevo.",
+    "passkey_step_title": "Desbloquea con tu dispositivo la próxima vez",
+    "skip_for_now": "Omitir por ahora",
+    "passkey_skipped": "No se añadió ninguna llave de acceso.",
+    "code_save_first": "Guarda este código primero. Ha reemplazado al anterior.",
+    "passphrase_too_short_keep": "Tu frase de contraseña anterior tiene menos de 12 caracteres, así que no se conservará.",
     "services": {
       "identity": "chats",
       "totp": "códigos",

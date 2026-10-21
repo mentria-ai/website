@@ -1,7 +1,7 @@
 import {
   ready, state, onChange, prfSupport, create, link, lock, hasRootBytes,
   unlockWithCode, unlockWithPassphrase, unlockWithPasskey, confirmWithCode, confirmWithPasskey,
-  addPasskey, setPassphrase, setRemember, confirmCode
+  addPasskey, setPassphrase, setRemember, confirmCode, others, foldIn
 } from './mentria-unlock.js';
 import { newRecoveryCode, normalizeCode, formatCode } from './mentria-unlock-core.js';
 
@@ -1208,6 +1208,147 @@ export async function showCode(code) {
       free = true;
       say(parts.msg, T, 'err_other', 'error');
     });
+    L.panel.append(form);
+    paint(form, T);
+    focusEl(parts.title);
+  });
+}
+
+function askUnlock(T) {
+  return new Promise((resolve) => {
+    const titleId = uid('title');
+    let L = null;
+    let closed = false;
+    const done = (v) => {
+      if (closed) return;
+      closed = true;
+      card.destroy();
+      if (L) L.close();
+      resolve(v);
+    };
+    const card = buildCard(T, { mode: 'unlock', titleId, onDone: () => done(true) });
+    const notNow = h('button', { type: 'button', class: 'm-unlock__btn m-unlock__btn--ghost', 'data-act': 'not-now' }, h('span', { uk: 'not_now' }));
+    const later = h('div', { class: 'm-unlock__later' }, notNow);
+    paint(later, T);
+    card.root.append(later);
+    notNow.addEventListener('click', () => done(false));
+    L = openLayer({ labelledby: titleId, describedby: card.ledeId, onDismiss: () => done(false) });
+    L.panel.append(card.root);
+    card.focus();
+    queueMicrotask(() => card.check());
+  });
+}
+
+function pickOther(kcv) {
+  const list = others();
+  return kcv ? list.find((o) => o.kcv === kcv) || null : list[0] || null;
+}
+
+let foldP = null;
+
+export function showFoldIn(opts) {
+  const kcv = opts && typeof opts.kcv === 'string' ? opts.kcv : null;
+  const s = state();
+  if (!s.enabled || !s.setUp || !s.unlocked || !pickOther(kcv)) return Promise.resolve(false);
+  if (!foldP) foldP = foldSheet(kcv).catch(() => false).finally(() => { foldP = null; });
+  return foldP;
+}
+
+async function foldSheet(kcv) {
+  const T0 = await copy();
+  await domReady();
+  const target = pickOther(kcv);
+  if (!target || !state().unlocked) return false;
+  let T = T0;
+  const ids = { title: uid('title'), lede: uid('lede'), msg: uid('msg') };
+  return new Promise((resolve) => {
+    let L = null;
+    let closed = false;
+    let busy = false;
+    const view = { repaint(T2) { T = T2; if (L) paint(L.panel, T); } };
+    const finish = (v) => {
+      if (closed) return;
+      closed = true;
+      live.delete(view);
+      if (L) L.close();
+      resolve(v);
+    };
+    const parts = sheetForm(ids, 'fold-in', null);
+    const msg = parts.msg;
+    const hold = busyHolder(() => L, () => msg, () => T);
+    const busyOn = (on, key) => {
+      busy = on;
+      hold(on, key);
+    };
+    const code = field('fold-code', 'code_label', Object.assign({ autocomplete: 'off', enterkeyhint: 'go', class: 'm-unlock__input m-unlock__input--code' }, CODE_ATTRS));
+    code.input.addEventListener('input', () => {
+      code.input.removeAttribute('aria-invalid');
+      if (msg.dataset.uk === 'err_code') say(msg, T, null);
+    });
+    let passBox = null;
+    if (target.passkeys > 0) {
+      const glossId = uid('gloss');
+      const pass = h('button', { type: 'button', class: 'm-unlock__btn m-unlock__btn--primary', 'data-act': 'fold-passkey', 'aria-describedby': glossId }, h('span', { uk: 'foldin_passkey' }));
+      passBox = h('div', { class: 'm-unlock__passkey' }, pass, h('p', { class: 'm-unlock__gloss', id: glossId, uk: 'passkey_gloss' }));
+      pass.addEventListener('click', () => run('passkey', () => foldIn(target.kcv, { passkey: true })));
+    }
+    const submit = button('fold-in', 'foldin_submit', !passBox, 'submit');
+    const later = button('not-now', 'not_now', false);
+    later.addEventListener('click', () => { if (!busy) finish(false); });
+    const form = assemble(parts, 'foldin_title', 'foldin_lede', [passBox, code.wrap], [submit, later]);
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (busy || closed) return;
+      const v = code.input.value.trim();
+      if (!v) { focusEl(code.input); return; }
+      run('code', () => foldIn(target.kcv, { code: v }));
+    });
+
+    async function run(kind, fn) {
+      if (busy || closed) return;
+      code.input.removeAttribute('aria-invalid');
+      const p = (async () => fn())();
+      busyOn(true, 'working');
+      let err = null;
+      try { await p; } catch (e) { err = e || new Error('err'); }
+      busyOn(false);
+      if (closed) return;
+      if (!err) {
+        finish(true);
+        toast(T.foldin_done);
+        return;
+      }
+      const n = errName(err);
+      if (n === 'no-keyring') {
+        finish(!pickOther(target.kcv));
+        return;
+      }
+      if (n === 'locked') {
+        say(msg, T, null);
+        if (!(await askUnlock(T)) && !closed) say(msg, T, 'err_other', 'error');
+        return;
+      }
+      const key = errKey(err, kind === 'passkey');
+      say(msg, T, key, 'error');
+      if (kind === 'code' && key === 'err_code') {
+        code.input.setAttribute('aria-invalid', 'true');
+        focusEl(code.input);
+        try { code.input.select(); } catch (_) {}
+      } else if (key === 'err_prf') {
+        focusEl(code.input);
+      }
+    }
+
+    L = openLayer({
+      labelledby: ids.title,
+      describedby: ids.lede,
+      onDismiss: () => {
+        if (busy) return false;
+        finish(false);
+        return true;
+      }
+    });
+    live.add(view);
     L.panel.append(form);
     paint(form, T);
     focusEl(parts.title);

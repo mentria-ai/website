@@ -6231,6 +6231,12 @@
     "not_saved": "Votre phrase secrète n'a pas été enregistrée.",
     "code_save_first": "Conservez d'abord ce code. Il remplace l'ancien.",
     "passphrase_too_short_keep": "Votre ancienne phrase secrète fait moins de 12 caractères, elle ne sera donc pas reprise.",
+    "foldin_line": "Vous avez un autre déverrouillage unique venant d'un autre appareil : intégrez-le",
+    "foldin_title": "Intégrer votre autre déverrouillage unique",
+    "foldin_lede": "Saisissez le code de récupération de ce déverrouillage unique. Les notes, codes, discussions et finances qu'il ouvrait s'ouvriront aussi avec celui-ci.",
+    "foldin_passkey": "Utiliser sa clé d'accès",
+    "foldin_submit": "L'intégrer",
+    "foldin_done": "C'est fait. Ce qu'il ouvrait s'ouvre maintenant avec ce déverrouillage.",
     "services": {
       "identity": "discussions",
       "totp": "codes",

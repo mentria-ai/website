@@ -6231,6 +6231,12 @@
     "not_saved": "Sua frase secreta não foi salva.",
     "code_save_first": "Guarde este código primeiro. Ele substituiu o antigo.",
     "passphrase_too_short_keep": "Sua frase secreta antiga tem menos de 12 caracteres, então ela não será mantida.",
+    "foldin_line": "Você tem outro desbloqueio único de outro dispositivo: traga-o para cá",
+    "foldin_title": "Trazer seu outro desbloqueio único",
+    "foldin_lede": "Digite o código de recuperação desse desbloqueio único. As notas, os códigos, as conversas e as finanças que ele abria vão abrir com este também.",
+    "foldin_passkey": "Usar a chave de acesso dele",
+    "foldin_submit": "Trazer",
+    "foldin_done": "Pronto. O que ele abria agora abre com este desbloqueio.",
     "services": {
       "identity": "conversas",
       "totp": "códigos",

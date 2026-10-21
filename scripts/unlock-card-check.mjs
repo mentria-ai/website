@@ -1473,6 +1473,88 @@ check('inputs are read-only while busy', async () => {
   await p3.waitForFunction(() => window.__m.state().unlocked === true, { timeout: 15000 });
   assert(card.msg === EN.working && card.code && card.pass && typed === code, 'card fields are read-only while it unlocks', { card, typed });
 });
+async function plantOther(page, fakePasskey) {
+  return page.evaluate(async (fake) => {
+    const m = window.__m;
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const rnd = () => crypto.getRandomValues(new Uint8Array(32));
+    const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+    const na = rnd();
+    await m.link('notes', na);
+    const recA = JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+    const codeB = C.newRecoveryCode();
+    const made = await C.createRecord({ code: codeB, deviceId: 'dev-b' });
+    if (fake) recA.wraps.prf.push(await C.wrapWithPrf(made.rootBytes, rnd(), { id: C.b64u(rnd().slice(0, 16)), salt: C.b64u(rnd()), label: 'x' }));
+    localStorage.setItem('mentria.keyring.others', JSON.stringify([recA]));
+    window.MentriaStore.set('keyring', 'vault', made.record);
+    await m.unlockWithCode(codeB);
+    return { codeB, kcvA: recA.kcv, na: hex(na) };
+  }, !!fakePasskey);
+}
+
+check('fold-in sheet brings in another keyring', async () => {
+  const { page, code } = await labWithKeyring();
+  assert(await page.evaluate(() => typeof window.__ui.showFoldIn === 'function'), 'the card module exports showFoldIn');
+  await start(page, '(ui) => ui.showFoldIn()');
+  const none = await settled(page, 5000);
+  assert(none.ok && none.v === false && !(await layerOpen(page)), 'nothing to bring in: no sheet, false', none);
+  const f = await plantOther(page, false);
+  await start(page, '(ui) => ui.showFoldIn()');
+  await page.waitForSelector('.m-ulayer [data-step="fold-in"]');
+  const c = await page.evaluate(() => {
+    const d = document.querySelector('.m-ulayer [role="dialog"]');
+    return {
+      title: document.getElementById(d.getAttribute('aria-labelledby')).textContent.trim(),
+      lede: document.getElementById(d.getAttribute('aria-describedby')).textContent.trim(),
+      passkey: !!d.querySelector('[data-act="fold-passkey"]'),
+      code: !!d.querySelector('input[name="fold-code"]'),
+      notNow: !!d.querySelector('[data-act="not-now"]')
+    };
+  });
+  assert(c.title === EN.foldin_title && c.lede === EN.foldin_lede && !c.passkey && c.code && c.notNow, 'the sheet asks for that keyring\'s code; no passkey button when it has none', c);
+  const v = await axe(page, '.m-ulayer');
+  assert(v.length === 0, 'fold-in sheet passes axe', v);
+  assert(!(await targets(page, '.m-ulayer')).length, 'targets are at least 44 px', await targets(page, '.m-ulayer'));
+  await page.click('.m-ulayer [data-act="not-now"]');
+  const no = await settled(page, 5000);
+  assert(no.ok && no.v === false && !(await layerOpen(page)) && (await page.evaluate(() => window.__m.others().length)) === 1, 'Not now closes and keeps the other keyring', no);
+  await start(page, '(ui) => ui.showFoldIn()');
+  await page.waitForSelector('.m-ulayer input[name="fold-code"]');
+  await page.type('.m-ulayer input[name="fold-code"]', f.codeB);
+  await page.keyboard.press('Enter');
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_code);
+  assert(await page.$eval('.m-ulayer input[name="fold-code"]', (el) => el.getAttribute('aria-invalid')) === 'true', 'a wrong code marks the field');
+  await typeInto(page, '.m-ulayer input[name="fold-code"]', code.toLowerCase());
+  await page.keyboard.press('Enter');
+  const ok = await settled(page, 15000);
+  assert(ok.ok && ok.v === true && !(await layerOpen(page)), 'the right code brings it in and closes', ok);
+  const after = await page.evaluate(async () => {
+    const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+    return { others: window.__m.others().length, notes: (await window.__m.secrets('notes')).map((x) => hex(x.bytes)), toast: (document.querySelector('.m-toast') || {}).textContent };
+  });
+  assert(after.others === 0 && after.notes.includes(f.na) && after.toast === EN.foldin_done, 'its secrets open here and the page says so', after);
+  await page.evaluate(() => window.__m.lock());
+  await start(page, '(ui) => ui.showFoldIn()');
+  const locked = await settled(page, 5000);
+  assert(locked.ok && locked.v === false && !(await layerOpen(page)), 'locked: no sheet', locked);
+});
+
+check('fold-in sheet offers the other keyring\'s passkey', async () => {
+  const { page } = await labWithKeyring();
+  await plantOther(page, true);
+  await start(page, '(ui) => ui.showFoldIn()');
+  await page.waitForSelector('.m-ulayer [data-step="fold-in"]');
+  const c = await page.evaluate(() => {
+    const d = document.querySelector('.m-ulayer [role="dialog"]');
+    const b = d.querySelector('[data-act="fold-passkey"]');
+    return { passkey: !!b, label: b ? b.textContent.trim() : '', code: !!d.querySelector('input[name="fold-code"]') };
+  });
+  assert(c.passkey && c.label === EN.foldin_passkey && c.code, 'a passkey button and the code field', c);
+  await page.keyboard.press('Escape');
+  const no = await settled(page, 5000);
+  assert(no.ok && no.v === false && !(await layerOpen(page)), 'Escape closes', no);
+});
+
 let failed = 0;
 const ONLY = process.env.ONLY || '';
 const run = checks.filter(([n]) => !ONLY || n.includes(ONLY));

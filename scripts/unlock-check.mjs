@@ -864,6 +864,31 @@ check('decideLaunch table', () => {
   for (const [input, want] of rows) assert.equal(U.decideLaunch(input), want, JSON.stringify(input));
 });
 
+check('addOther keeps every other keyring once by kcv', async () => {
+  assert.equal(typeof U.addOther, 'function');
+  const a = await fresh();
+  const b = await fresh();
+  const one = U.addOther(undefined, a.record);
+  assert.equal(one.length, 1);
+  assert.equal(one[0].kcv, a.record.kcv);
+  assert.notEqual(one[0], a.record, 'stores a copy');
+  const two = U.addOther(one, b.record);
+  assert.deepEqual(two.map((r) => r.kcv), [a.record.kcv, b.record.kcv]);
+  assert.equal(one.length, 1, 'the list passed in is not changed');
+  const more = clone(a.record);
+  more.services.notes = await U.sealService(a.rootKey, 'notes', rand(32), NOW);
+  const merged = U.addOther(two, more);
+  assert.equal(merged.length, 2);
+  assert.ok(merged[0].services.notes, 'the same kcv merges into its entry');
+  const older = clone(a.record);
+  const again = U.addOther(merged, older);
+  assert.ok(again[0].services.notes, 'an older copy never drops what the entry has');
+  assert.deepEqual(U.addOther(two, { v: 1, kcv: 'x' }), two, 'an invalid record is not added');
+  const junk = U.addOther(['junk', null], a.record);
+  assert.equal(junk.length, 3, 'unreadable entries stay');
+  assert.equal(junk[2].kcv, a.record.kcv);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

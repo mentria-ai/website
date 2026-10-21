@@ -1617,6 +1617,183 @@ check('link gives up with busy when the entry keeps changing', async () => {
   assert(r.raw === planted.raw && r.id === planted.id, 'nothing is written over the newest entry', { same: r.raw === planted.raw, id: [r.id, planted.id] });
 });
 
+check('remember decision and pending flags', async () => {
+  await clean();
+  let page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await createOnLab(page);
+  await runtime(page);
+  const r = await page.evaluate(async () => {
+    const m = window.__m;
+    const loc = () => JSON.parse(localStorage.getItem('mentria.keyring.local'));
+    const out = {};
+    out.api = ['rememberDecision', 'setRememberDecision', 'rememberPending', 'setRememberPending'].every((k) => typeof m[k] === 'function');
+    if (!out.api) return out;
+    out.start = [m.rememberDecision(), m.rememberPending()];
+    m.setRememberDecision('on');
+    out.on = [m.rememberDecision(), loc().remember];
+    m.setRememberDecision('off');
+    out.off = [m.rememberDecision(), loc().remember];
+    m.setRememberDecision('maybe');
+    out.bad = [m.rememberDecision(), 'remember' in loc()];
+    m.setRememberPending(true);
+    out.pending = [m.rememberPending(), loc().rememberPending];
+    m.setRememberPending(false);
+    out.unpending = [m.rememberPending(), 'rememberPending' in loc()];
+    await m.setRemember(true);
+    out.plainOn = [m.rememberDecision(), m.rememberPending(), m.state().hasDevice];
+    m.setRememberPending(true);
+    await m.setRemember(false, { decided: true });
+    out.decidedOff = [m.rememberDecision(), m.rememberPending(), m.state().hasDevice];
+    m.setRememberPending(true);
+    await m.setRemember(true, { decided: true });
+    out.decidedOn = [m.rememberDecision(), m.rememberPending(), m.state().hasDevice];
+    await m.setRemember(false);
+    out.plainOff = [m.rememberDecision(), m.state().hasDevice];
+    out.kept = loc().enabled === true && typeof loc().deviceId === 'string';
+    m.setRememberDecision('');
+    return out;
+  });
+  assert(r.api, 'the runtime has the remember decision API', r);
+  assert(JSON.stringify(r.start) === '["",false]', 'nothing decided and nothing pending at first', r.start);
+  assert(JSON.stringify(r.on) === '["on","on"]' && JSON.stringify(r.off) === '["off","off"]', 'setRememberDecision stores on and off in mentria.keyring.local', r);
+  assert(JSON.stringify(r.bad) === '["",false]', 'any other value clears the decision', r.bad);
+  assert(JSON.stringify(r.pending) === '[true,true]' && JSON.stringify(r.unpending) === '[false,false]', 'setRememberPending sets and clears the flag', r);
+  assert(JSON.stringify(r.plainOn) === '["",false,true]', 'setRemember without decided records nothing', r.plainOn);
+  assert(JSON.stringify(r.decidedOff) === '["off",false,false]', 'setRemember(false, decided) records off and clears pending', r.decidedOff);
+  assert(JSON.stringify(r.decidedOn) === '["on",false,true]', 'setRemember(true, decided) records on and clears pending', r.decidedOn);
+  assert(JSON.stringify(r.plainOff) === '["on",false]' && r.kept, 'setRemember(false) without decided keeps the decision and the other local fields', r);
+  await page.reload({ waitUntil: 'load' });
+  await runtime(page);
+  const silent = await page.evaluate(async () => {
+    const m = window.__m;
+    m.setRememberPending(true);
+    let e = 'no error';
+    try { await m.setRemember(true, { decided: true }); } catch (x) { e = x.message; }
+    return { e, decision: m.rememberDecision(), pending: m.rememberPending(), root: m.hasRootBytes() };
+  });
+  assert(silent.e === 'confirm-needed' && silent.decision === '' && silent.pending === true && silent.root === false, 'a decided turn-on that needs a confirm records nothing', silent);
+});
+
+async function foldSetup(page, codeA, opts) {
+  return page.evaluate(async ([codeA, opts]) => {
+    const m = window.__m;
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const rd = () => JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+    const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+    const rnd = () => crypto.getRandomValues(new Uint8Array(32));
+    const na0 = rnd();
+    const na = rnd();
+    const ia = rnd();
+    await m.link('notes', na0);
+    await m.link('notes', na);
+    await m.link('identity', ia);
+    const recA = rd();
+    const codeB = C.newRecoveryCode();
+    const made = await C.createRecord({ code: codeB, deviceId: 'dev-b', deviceName: 'Phone' });
+    const b0 = made.record;
+    const kb = await C.rootKeyFrom(made.rootBytes);
+    const nb = rnd();
+    const tb = rnd();
+    b0.services.notes = await C.sealService(kb, 'notes', nb, Date.now() - 5000);
+    b0.services.totp = await C.sealService(kb, 'totp', tb, Date.now() - 5000);
+    if (opts && opts.fakePasskey) b0.wraps.prf.push(await C.wrapWithPrf(made.rootBytes, rnd(), { id: C.b64u(rnd().slice(0, 16)), salt: C.b64u(rnd()), label: 'x' }));
+    localStorage.setItem('mentria.keyring.others', JSON.stringify([recA]));
+    if (window.MentriaStore.set('keyring', 'vault', b0) !== true) throw new Error('harness: write failed');
+    window.__fold = { codeB, kcvA: recA.kcv, kcvB: b0.kcv, b0, ids: { na0: recA.services.notes.prior[0].id, na: recA.services.notes.id, ia: recA.services.identity.id, nb: b0.services.notes.id }, hex: { na0: hex(na0), na: hex(na), ia: hex(ia), nb: hex(nb), tb: hex(tb) } };
+    return { codeB, kcvA: recA.kcv, kcvB: b0.kcv };
+  }, [codeA, opts || {}]);
+}
+
+check('fold in another keyring with its recovery code', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  const codeA = await createOnLab(page);
+  await runtime(page);
+  const api = await page.evaluate(() => typeof window.__m.others === 'function' && typeof window.__m.foldIn === 'function');
+  assert(api, 'the runtime has others() and foldIn()');
+  const none = await page.evaluate(() => window.__m.others());
+  assert(Array.isArray(none) && none.length === 0, 'no other keyring at first', none);
+  await foldSetup(page, codeA);
+  const r = await page.evaluate(async (codeA) => {
+    const m = window.__m;
+    const F = window.__fold;
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const rd = () => JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+    const hex = (b) => (b ? Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('') : null);
+    const err = async (fn) => { try { await fn(); return 'no error'; } catch (e) { return e.message; } };
+    const out = { kcvB: F.kcvB };
+    out.locked = m.state().unlocked;
+    out.lockedFold = await err(() => m.foldIn(F.kcvA, { code: codeA }));
+    await m.unlockWithCode(F.codeB);
+    out.list = m.others();
+    localStorage.setItem('mentria.keyring.others', JSON.stringify([rd(), JSON.parse(localStorage.getItem('mentria.keyring.others'))[0], { junk: 1 }]));
+    out.listMixed = m.others().map((o) => o.kcv);
+    out.wrong = await err(() => m.foldIn(F.kcvA, { code: F.codeB }));
+    out.unknown = await err(() => m.foldIn('nope', { code: codeA }));
+    out.noPass = await err(() => m.foldIn(F.kcvA, { passphrase: 'a long passphrase here' }));
+    out.noMethod = await err(() => m.foldIn(F.kcvA, {}));
+    out.stashed = JSON.parse(localStorage.getItem('mentria.keyring.others')).length;
+    const before = Date.now();
+    out.fold = await err(() => m.foldIn(F.kcvA, { code: codeA }));
+    out.after = m.others();
+    out.stash = JSON.parse(localStorage.getItem('mentria.keyring.others'));
+    out.notes = (await m.secrets('notes')).map((x) => [x.id, hex(x.bytes)]);
+    out.wantNotes = [[F.ids.nb, F.hex.nb], [F.ids.na, F.hex.na], [F.ids.na0, F.hex.na0]];
+    out.notesCur = hex(await m.secret('notes')) === F.hex.nb && m.secretId('notes') === F.ids.nb;
+    out.identity = hex(await m.secret('identity')) === F.hex.ia && m.secretId('identity') === F.ids.ia;
+    out.totp = hex(await m.secret('totp')) === F.hex.tb;
+    out.linked = m.state().linked;
+    const rec = rd();
+    out.older = rec.services.notes.prior.every((p) => Date.parse(p.linked) < Date.parse(rec.services.notes.linked));
+    out.fresh = Date.parse(rec.services.identity.linked) >= before - 1000;
+    out.valid = C.isRecord(rec) && rec.kcv === F.kcvB;
+    out.again = await err(() => m.foldIn(F.kcvA, { code: codeA }));
+    out.peer = C.mergeRecords(F.b0, rec).services.notes.prior.length === 2 && C.mergeRecords(rec, F.b0).services.identity.id === F.ids.ia;
+    m.setEnabled(false);
+    out.off = m.others();
+    m.setEnabled(true);
+    return out;
+  }, codeA);
+  assert(r.locked === false && r.lockedFold === 'locked', 'foldIn needs the current session', r);
+  assert(r.list.length === 1 && r.list[0].kcv !== undefined && JSON.stringify(r.list[0].services) === '["identity","notes"]' && typeof r.list[0].created === 'string', 'others() lists the stashed keyring and what it holds', r.list);
+  assert(r.listMixed.length === 1, 'others() skips the current keyring and unreadable entries', r.listMixed);
+  assert(r.wrong === 'bad-code' && r.unknown === 'no-keyring' && r.noPass === 'no-pass' && r.noMethod === 'bad-input' && r.stashed === 3, 'failed fold-ins keep the stash', r);
+  assert(r.fold === 'no error' && r.after.length === 0, 'the fold-in succeeds and others() is empty', r);
+  assert(Array.isArray(r.stash) && r.stash.length === 2 && r.stash[0].kcv === r.kcvB && r.stash[1].junk === 1, 'only the folded entry leaves the stash', r.stash);
+  assert(JSON.stringify(r.notes) === JSON.stringify(r.wantNotes) && r.notesCur && r.older, 'the other keyring\'s notes secrets join as prior entries with their ids, the current one stays', r);
+  assert(r.identity && r.fresh && r.totp && JSON.stringify(r.linked) === '["identity","totp","notes"]', 'a service only the other keyring had becomes current here', r);
+  assert(r.valid && r.again === 'no-keyring' && r.peer, 'the record stays valid and merges with another device on this keyring', r);
+  assert(JSON.stringify(r.off) === '[]', 'switch off lists nothing', r.off);
+});
+
+check('fold in another keyring with its passkey', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  const cdp = await page.createCDPSession();
+  await cdp.send('WebAuthn.enable');
+  await cdp.send('WebAuthn.addVirtualAuthenticator', {
+    options: { protocol: 'ctap2', ctap2Version: 'ctap2_1', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, hasPrf: true, automaticPresenceSimulation: true }
+  });
+  await enableOnLab(page);
+  const codeA = await createOnLab(page);
+  await runtime(page);
+  const add = await clickCall(page, "(m) => m.addPasskey('Old')");
+  assert(add.ok, 'setup: passkey on the first keyring', add);
+  const f = await foldSetup(page, codeA);
+  await page.evaluate((c) => window.__m.unlockWithCode(c), f.codeB);
+  const list = await page.evaluate(() => window.__m.others());
+  assert(list.length === 1 && list[0].passkeys === 1, 'others() says the stashed keyring has a passkey', list);
+  const fold = await clickCall(page, "(m) => m.foldIn(window.__fold.kcvA, { passkey: true })");
+  assert(fold.ok, 'foldIn with the stashed keyring\'s passkey from a click', fold);
+  const r = await page.evaluate(async () => {
+    const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+    return { others: window.__m.others().length, notes: (await window.__m.secrets('notes')).map((x) => hex(x.bytes)), want: window.__fold.hex };
+  });
+  assert(r.others === 0 && r.notes.includes(r.want.na) && r.notes.includes(r.want.nb), 'the passkey fold-in brings the secrets', r);
+});
+
 let failed = 0;
 const ONLY = process.env.ONLY || '';
 for (const [name, fn] of checks.filter(([n]) => !ONLY || n.includes(ONLY))) {

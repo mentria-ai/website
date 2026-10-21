@@ -6231,6 +6231,12 @@
     "not_saved": "Your passphrase wasn't saved.",
     "code_save_first": "Save this code first. It replaced your old one.",
     "passphrase_too_short_keep": "Your old passphrase is shorter than 12 characters, so it won't carry over.",
+    "foldin_line": "You have another one unlock from a different device — bring it in",
+    "foldin_title": "Bring in your other one unlock",
+    "foldin_lede": "Type the recovery code from that one unlock. The notes, codes, chats and finances it opened will open with this one too.",
+    "foldin_passkey": "Use its passkey",
+    "foldin_submit": "Bring it in",
+    "foldin_done": "Done. What it opened now opens with this unlock.",
     "services": {
       "identity": "chats",
       "totp": "codes",

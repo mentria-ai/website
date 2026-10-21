@@ -2,7 +2,7 @@ import {
   SERVICES, b64u, unb64u, newRecoveryCode, normalizeCode, formatCode, rootKeyFrom,
   wrapWithCode, openWithCode, wrapWithPassphrase, openWithPassphrase, wrapWithPrf, openWithPrf,
   wrapWithDeviceKey, openWithDeviceKey, sealService, openService, makeBackupEntry, backupKeyFromEntry,
-  createRecord, verifyRoot, isRecord, mergeRecords, listServiceEntries, touchDevice, retirementStatus, decideLaunch
+  createRecord, verifyRoot, isRecord, mergeRecords, listServiceEntries, addOther, touchDevice, retirementStatus, decideLaunch
 } from './mentria-unlock-core.js';
 
 const NS = 'keyring';
@@ -12,6 +12,7 @@ const LOCAL_KEY = 'mentria.keyring.local';
 const EPOCH_KEY = 'mentria.keyring.epoch';
 const SEEN_KEY = 'mentria.keyring.seen';
 const TAB_KEY = 'mentria.keyring.tab';
+const OTHERS_KEY = 'mentria.keyring.others';
 const DB_NAME = 'mentria-keyring';
 const CHANNEL = 'mentria-unlock';
 const LOCK_NAME = 'mentria-open';
@@ -56,6 +57,27 @@ function saveLocal(patch) {
   const next = Object.assign(local(), patch);
   lsSet(LOCAL_KEY, JSON.stringify(next));
   return next;
+}
+
+function writeLocal(l) {
+  lsSet(LOCAL_KEY, JSON.stringify(l));
+}
+
+function decide(v) {
+  const l = local();
+  l.remember = v;
+  delete l.rememberPending;
+  writeLocal(l);
+}
+
+function readOthers() {
+  const v = parse(lsGet(OTHERS_KEY));
+  return Array.isArray(v) ? v : [];
+}
+
+function keepOther(rec) {
+  if (!isRecord(rec)) return false;
+  return lsSet(OTHERS_KEY, JSON.stringify(addOther(readOthers(), rec)));
 }
 
 function clearManualLock(epoch) {
@@ -885,11 +907,13 @@ export async function setPassphrase(pass) {
   notify(true);
 }
 
-export async function setRemember(on) {
+export async function setRemember(on, opts) {
+  const decided = isObj(opts) && opts.decided === true;
   const rec = need();
   if (!on) {
     try { await idbDel('keys', 'device'); } catch (_) {}
     mem.hasDevice = false;
+    if (decided) decide('off');
     post('record');
     notify(false);
     return;
@@ -899,8 +923,161 @@ export async function setRemember(on) {
   const box = await wrapWithDeviceKey(mem.bytes, key);
   await idbPut('keys', 'device', { kcv: rec.kcv, key, box });
   mem.hasDevice = true;
+  if (decided) decide('on');
   post('record');
   notify(false);
+}
+
+export function rememberDecision() {
+  const v = local().remember;
+  return v === 'on' || v === 'off' ? v : '';
+}
+
+export function setRememberDecision(v) {
+  const l = local();
+  if (v === 'on' || v === 'off') l.remember = v;
+  else delete l.remember;
+  writeLocal(l);
+}
+
+export function rememberPending() {
+  return local().rememberPending === true;
+}
+
+export function setRememberPending(on) {
+  const l = local();
+  if (on) l.rememberPending = true;
+  else delete l.rememberPending;
+  writeLocal(l);
+}
+
+export function others() {
+  if (!enabled()) return [];
+  const rec = readRecord();
+  const seen = new Set();
+  const out = [];
+  for (const o of readOthers()) {
+    if (!isRecord(o) || (rec && o.kcv === rec.kcv) || seen.has(o.kcv)) continue;
+    seen.add(o.kcv);
+    out.push({
+      kcv: o.kcv,
+      created: typeof o.created === 'string' ? o.created : null,
+      services: SERVICES.filter((n) => listServiceEntries(o, n).length > 0),
+      passkeys: livePasskeys(o).length
+    });
+  }
+  return out;
+}
+
+function otherRoot(other, m) {
+  if (m.passkey === true) return passkeyRoot(other);
+  if (typeof m.passphrase === 'string') {
+    if (!livePass(other.wraps.pass)) return Promise.reject(new Error('no-pass'));
+    return openWithPassphrase(other.wraps.pass, m.passphrase);
+  }
+  if (m.code != null && m.code !== '') return openWithCode(other.wraps.recovery, String(m.code));
+  return Promise.reject(new Error('bad-input'));
+}
+
+async function openAll(root, rec, name) {
+  const out = [];
+  for (const x of listServiceEntries(rec, name)) {
+    try { out.push({ id: x.id, linked: x.entry.linked, bytes: await openService(root, name, x.entry) }); } catch (_) {}
+  }
+  return out;
+}
+
+async function sealFolded(root, name, item, at) {
+  const e = await sealService(root, name, item.bytes, at);
+  if (item.id) e.id = item.id;
+  else delete e.id;
+  return e;
+}
+
+async function foldService(root, fresh, name, found) {
+  const have = await openAll(root, fresh, name);
+  const add = found.filter((f) => !have.some((h) => sameBytes(h.bytes, f.bytes)));
+  for (const h of have) h.bytes.fill(0);
+  if (!add.length) return null;
+  const cur = linkedEntry(fresh, name);
+  const was = own(fresh.services, name);
+  const before = isObj(was) && Array.isArray(was.prior) ? was.prior : [];
+  const sealed = [];
+  if (cur) {
+    const top = Date.parse(cur.linked);
+    for (let i = 0; i < add.length; i++) {
+      const t = Date.parse(add[i].linked);
+      const cap = Number.isFinite(top) ? top - 1 - i : Date.now() - 1 - i;
+      sealed.push(await sealFolded(root, name, add[i], Number.isFinite(t) ? Math.min(t, cap) : cap));
+    }
+    return Object.assign({}, cur, { prior: before.concat(sealed) });
+  }
+  const now = Date.now();
+  const head = await sealFolded(root, name, add[0], now);
+  for (let i = 1; i < add.length; i++) {
+    const t = Date.parse(add[i].linked);
+    const cap = now - i;
+    sealed.push(await sealFolded(root, name, add[i], Number.isFinite(t) ? Math.min(t, cap) : cap));
+  }
+  const prior = before.concat(sealed);
+  return prior.length ? Object.assign(head, { prior }) : head;
+}
+
+export async function foldIn(kcv, method) {
+  const rec = need();
+  if (!sessionLive()) throw new Error('locked');
+  const other = readOthers().find((o) => isRecord(o) && o.kcv === kcv && o.kcv !== rec.kcv);
+  if (!other) throw new Error('no-keyring');
+  const bytes = await otherRoot(other, isObj(method) ? method : {});
+  let theirs;
+  try {
+    await verifyRoot(other, bytes);
+    theirs = await rootKeyFrom(bytes);
+  } finally {
+    bytes.fill(0);
+  }
+  const found = {};
+  for (const n of SERVICES) {
+    const list = await openAll(theirs, other, n);
+    if (list.length) found[n] = list;
+  }
+  const root = mem.root;
+  const tag = sessionTag();
+  const live = () => {
+    const fresh = readRecord();
+    if (!fresh || fresh.kcv !== rec.kcv || !sessionLive() || sessionTag() !== tag) throw new Error('locked');
+    return fresh;
+  };
+  try {
+    const wrote = await exclusive(async () => {
+      const S = await storeReady();
+      let base = live();
+      let services;
+      let fresh;
+      for (let i = 1; ; i++) {
+        services = {};
+        for (const n of Object.keys(found)) {
+          const next = await foldService(root, base, n, found[n]);
+          if (next) services[n] = next;
+        }
+        fresh = live();
+        if (!Object.keys(found).some((n) => entrySig(linkedEntry(fresh, n)) !== entrySig(linkedEntry(base, n)))) break;
+        if (i >= LINK_TRIES) throw new Error('busy');
+        base = fresh;
+      }
+      if (Object.keys(services).length) {
+        const next = mergeRecords(fresh, Object.assign({}, fresh, { services: Object.assign({}, fresh.services, services), changed: iso() }));
+        if (!next) throw new Error('locked');
+        store(S, next);
+      }
+      const left = readOthers().filter((o) => !(isObj(o) && o.kcv === kcv));
+      if (!lsSet(OTHERS_KEY, JSON.stringify(left))) throw new Error('storage');
+      return Object.keys(services).length > 0;
+    });
+    notify(wrote);
+  } finally {
+    for (const n of Object.keys(found)) for (const f of found[n]) f.bytes.fill(0);
+  }
 }
 
 export async function regenerateCode() {

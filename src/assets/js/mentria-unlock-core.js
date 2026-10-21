@@ -450,6 +450,16 @@ export function mergeRecords(local, incoming) {
   }));
 }
 
+export function addOther(list, record) {
+  const out = Array.isArray(list) ? list.slice() : [];
+  if (!isRecord(record)) return out;
+  const i = out.findIndex((r) => isObj(r) && r.kcv === record.kcv);
+  if (i < 0) return out.concat([clone(record)]);
+  const merged = isRecord(out[i]) ? mergeRecords(out[i], record) : clone(record);
+  if (merged) out[i] = merged;
+  return out;
+}
+
 export function touchDevice(record, deviceId, { name, app, keyring, now } = {}) {
   const devices = isObj(record.devices) ? record.devices : {};
   const prev = isObj(own(devices, deviceId)) ? devices[deviceId] : {};

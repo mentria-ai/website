@@ -361,6 +361,7 @@ unlockTool: true
     create_lede:              {{ ('tool.totp.create_lede'              | t) | dump | safe }},
     linked_missing:           {{ ('tool.totp.linked_missing'           | t) | dump | safe }},
     backup_gate_lede_code:    {{ ('tool.totp.backup_gate_lede_code'    | t) | dump | safe }},
+    backup_gate_lede_linked:  {{ ('tool.totp.backup_gate_lede_linked'  | t) | dump | safe }},
     link_failed:              {{ ('unlock.err_other'                   | t) | dump | safe }}
   };
 
@@ -1859,7 +1860,7 @@ unlockTool: true
     try { key = await ring.mod.backupKey(); } catch (_) { key = null; }
     if (key) return { keyring: key };
     $('totp-backup-pass-field').hidden = false;
-    if (!backupUnsaved) $('totp-backup-lede').textContent = COPY.backup_gate_lede;
+    if (!backupUnsaved) $('totp-backup-lede').textContent = COPY.backup_gate_lede_linked;
     $('totp-backup-pass').focus();
     return null;
   }

@@ -86,7 +86,7 @@
     "data_persist_request": "Solicitar persistência",
     "data_export_title": "Backup criptografado",
     "data_export_lede": "Escolha uma frase e baixe um único arquivo criptografado com tudo o que aparece em “No backup”. Frase perdida = arquivo que não abre.",
-    "data_export_lede_code": "Seu backup é protegido pelo seu código de recuperação. Guarde bem o código: ele abre este arquivo em qualquer aparelho.",
+    "data_export_lede_code": "Baixe um único arquivo criptografado com tudo o que aparece em “No backup”. Guarde bem seu código de recuperação: ele abre este arquivo em qualquer aparelho.",
     "data_pass_label": "Frase (mín. 8 caracteres)",
     "data_pass_confirm": "Confirmar frase",
     "data_pass_mismatch": "As frases não coincidem",
@@ -169,10 +169,10 @@
     "identity_passkey_remove_confirm": "Remover o desbloqueio por chave de acesso? A chave continua no seu gerenciador, mas não vai mais desbloquear este cofre.",
     "identity_device_label": "Lembrar deste aparelho",
     "identity_device_note": "Lembrar deste aparelho desbloqueia automaticamente neste navegador — conveniente, mas qualquer pessoa usando este perfil pode abrir. A chave de acesso e a frase-senha continuam disponíveis.",
-    "identity_link_button": "Set up the one unlock",
-    "identity_passkey_added_on": "Added {date}",
-    "identity_kr_remove_confirm": "Remove this passkey? It will no longer unlock Mentria. Your recovery code still works.",
-    "identity_regenerate_confirm": "Make a new recovery code? The code you saved will stop unlocking Mentria.",
+    "identity_link_button": "Configurar o desbloqueio único",
+    "identity_passkey_added_on": "Adicionada em {date}",
+    "identity_kr_remove_confirm": "Remover esta chave de acesso? Ela não vai mais desbloquear a Mentria. Seu código de recuperação continua funcionando.",
+    "identity_regenerate_confirm": "Criar um novo código de recuperação? O código que você guardou vai deixar de desbloquear a Mentria.",
     "whats_new": "Novidades em {tag}",
     "update_now": "Atualizar agora",
     "release_notes": "Notas da versão no GitHub",
@@ -228,7 +228,7 @@
     "restore_cancelled": "Restauração cancelada. Nada mudou neste aparelho.",
     "restore_err_file": "Este arquivo não é um backup do Mentria.",
     "restore_err_pass": "Senha incorreta, ou o arquivo está danificado.",
-    "restore_err_code": "Esse código de recuperação não abre este arquivo. Se você criou um código novo depois deste backup, use o código que tinha na época.",
+    "restore_err_code": "Esse código de recuperação não abre este arquivo, ou o arquivo está danificado. Se você criou um código novo depois deste backup, use o código que tinha na época.",
     "restore_err_space": "Não há espaço suficiente neste aparelho para restaurar. Nada foi alterado.",
     "restore_err_blocked": "Seu navegador está bloqueando o armazenamento deste site, então o backup não pode ser restaurado. Permita dados de sites nas configurações do navegador e tente de novo. Nada foi alterado.",
     "restore_err_newer": "Este backup foi feito com uma versão mais nova do Mentria. Atualize o app e tente de novo.",
@@ -557,7 +557,7 @@
     "totp": {
       "title": "TOTP",
       "lede": "Códigos de dois fatores que ficam no seu navegador, criptografados em repouso. Nada em um servidor.",
-      "tldr": "TOTP em conformidade com o padrão (RFC 6238) rodando totalmente no seu navegador. Os segredos são criptografados em repouso com AES-GCM-256; uma chave mestra é embalada por uma senha (PBKDF2-SHA256 × 600k) e opcionalmente por uma chave derivada de WebAuthn PRF para o desbloqueio do seu dispositivo por rosto, digital ou PIN. Backup JSON criptografado obrigatório antes do primeiro segredo — perder seu único autenticador significa bloqueio. Funciona offline. Sem contas, sem servidor de sincronização."
+      "tldr": "TOTP em conformidade com o padrão (RFC 6238) rodando totalmente no seu navegador. Os segredos são criptografados em repouso com AES-GCM-256; uma chave mestra é embalada por uma frase secreta (PBKDF2-SHA256 × 600k) e opcionalmente por uma chave derivada de WebAuthn PRF para o desbloqueio do seu dispositivo por rosto, digital ou PIN. Backup JSON criptografado obrigatório antes do primeiro segredo — perder seu único autenticador significa bloqueio. Funciona offline. Sem contas, sem servidor de sincronização."
     },
     "exif": {
       "title": "Inspetor EXIF",
@@ -793,21 +793,21 @@
       "confirm_remove_lock": "Remover a criptografia desta nota? Ela será salva novamente como texto simples.",
       "lock_failed": "Não foi possível bloquear a nota — a chave de acesso do dispositivo não estava disponível.",
       "unlock_failed": "Não foi possível desbloquear a nota — a chave de acesso não correspondeu ou não estava disponível.",
-      "prf_unsupported": "Este navegador ou dispositivo não pode usar uma chave de acesso para criptografia. Tente uma versão recente do seu navegador.",
+      "prf_unsupported": "Este navegador ou dispositivo não pode usar uma chave de acesso para criptografia. Tente uma versão recente do seu navegador ou outro navegador.",
       "count_summary": "{words} palavras · {chars} caracteres",
       "empty_preview": "Vazia",
       "to_mdpdf_btn": "→ PDF",
       "to_mdpdf_failed": "Não foi possível abrir esta nota no Markdown → PDF: este navegador não consegue salvar dados deste site agora. Copie o texto manualmente.",
       "to_mdpdf_title": "Abrir esta nota no Markdown → PDF",
-      "lock_title_one": "Encrypt this note. Your one unlock opens it.",
-      "relock_title": "Lock everything your one unlock opens",
-      "confirm_lock_one": "Locking encrypts this note. Your one unlock opens it. The note's title stays visible and is NOT encrypted — keep secrets out of the title. Lock it?",
-      "lock_failed_one": "Couldn't lock the note. Try again.",
-      "key_missing": "This note was locked on another device, and its key isn't here yet. Sync with that device, then try again.",
-      "one_unlock_off": "This note opens with the one unlock, which is off on this device.",
-      "convert_skipped": "Locked notes this device couldn't open: {n}. They stay as they are.",
-      "lock_key_missing": "Another locked note's key isn't on this device yet. Unlock on the device that locked it, then sync.",
-      "relock_old_title": "Lock your locked notes again"
+      "lock_title_one": "Criptografar esta nota. Seu desbloqueio único a abre.",
+      "relock_title": "Bloquear tudo o que seu desbloqueio único abre",
+      "confirm_lock_one": "Bloquear criptografa esta nota. Seu desbloqueio único a abre. O título da nota permanece visível e NÃO é criptografado — não coloque segredos no título. Bloquear?",
+      "lock_failed_one": "Não foi possível bloquear a nota. Tente de novo.",
+      "key_missing": "Esta nota foi bloqueada em outro dispositivo, e a chave dela ainda não está aqui. Sincronize com esse dispositivo e tente de novo.",
+      "one_unlock_off": "Esta nota abre com o desbloqueio único, que está desativado neste dispositivo.",
+      "convert_skipped": "Notas bloqueadas que este dispositivo não conseguiu abrir: {n}. Elas continuam como estão.",
+      "lock_key_missing": "A chave de outra nota bloqueada ainda não está neste dispositivo. Desbloqueie no dispositivo que a bloqueou e depois sincronize.",
+      "relock_old_title": "Bloquear de novo suas notas bloqueadas"
     },
     "color-picker": {
       "btn_link": "Link",
@@ -1416,7 +1416,7 @@
       "pass_confirm": "Confirmar senha",
       "setup_button": "Criar cofre",
       "unlock_button": "Desbloquear",
-      "unlock_prf": "Usar o desbloqueio do seu dispositivo por rosto, digital ou PIN",
+      "unlock_prf": "Usar rosto, digital ou PIN",
       "or": "ou",
       "strength_weak": "fraca",
       "strength_medium": "média",
@@ -1444,9 +1444,9 @@
       "empty_state": "Ainda sem contas. Clique em \"Adicionar conta\" para começar.",
       "lock_button": "Bloquear",
       "backup_button": "Baixar backup",
-      "enroll_prf": "+ Adicionar o desbloqueio do seu dispositivo por rosto, digital ou PIN",
-      "prf_enroll_done": "Desbloqueio rápido registrado neste dispositivo.",
-      "prf_enroll_failed": "Falha ao registrar desbloqueio rápido",
+      "enroll_prf": "+ Adicionar rosto, digital ou PIN",
+      "prf_enroll_done": "Desbloqueio por rosto, digital ou PIN adicionado neste dispositivo.",
+      "prf_enroll_failed": "Não foi possível adicionar o desbloqueio por rosto, digital ou PIN",
       "backup_gate_title": "Faça backup antes de salvar",
       "backup_gate_lede": "Segredos TOTP não podem ser recuperados se você perder este dispositivo ou esquecer a senha. Baixe um backup criptografado agora — usa uma senha de sua escolha (pode ser a mesma do cofre).",
       "backup_gate_confirm": "Baixar backup e salvar",
@@ -1471,7 +1471,8 @@
       "autolock_off": "não",
       "create_lede": "Crie seu cofre. Seu desbloqueio único o abre.",
       "linked_missing": "Este cofre abre com um desbloqueio único que não está neste dispositivo. Restaure um backup que o inclua ou sincronize com um dispositivo que o tenha.",
-      "backup_gate_lede_code": "Segredos TOTP não podem ser recuperados se você perder este dispositivo. Baixe um backup agora. Ele é protegido pelo seu código de recuperação."
+      "backup_gate_lede_code": "Segredos TOTP não podem ser recuperados se você perder este dispositivo. Baixe um backup agora. Ele é protegido pelo seu código de recuperação.",
+      "backup_gate_lede_linked": "Segredos TOTP não podem ser recuperados se você perder este dispositivo. Agora seu código de recuperação não consegue proteger este backup, então escolha uma frase secreta para o arquivo. Você vai precisar dela para restaurar."
     },
     "exif": {
       "aria_drop": "Área para soltar imagens",
@@ -3833,7 +3834,7 @@
         "device_hint": "Dispensa a frase secreta aqui. Só ative em um computador que apenas você usa.",
         "finish": "Criar meu livro-caixa",
         "creating": "Criptografando…",
-        "keyring_other": "Your one unlock already opens another Finance ledger. To use that ledger on this device, go back and choose “I use Finance on another device”."
+        "keyring_other": "Seu desbloqueio único já abre outro livro-caixa do Finanças. Para usar esse livro-caixa neste dispositivo, volte e escolha \"Já uso o app Finanças em outro dispositivo\"."
       },
       "lock": {
         "locked": "Bloqueado",
@@ -3871,9 +3872,9 @@
         "erase_title": "Apagar o app Finanças neste dispositivo?",
         "erase_body": "Isso exclui deste navegador seu livro-caixa criptografado, suas chaves e configurações. Dispositivos pareados e arquivos de backup mantêm as cópias deles. Não dá para desfazer.",
         "erase_ok": "Apagar",
-        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here.",
-        "linked_failed": "This ledger opens with your one unlock, which didn't load on this page. Reload to try again.",
-        "linked_missing": "This ledger's key isn't in the one unlock on this device. Restore your Mentria backup here, or open Finance on a device where it opens."
+        "linked_off": "Este livro-caixa abre com seu desbloqueio único, que está desativado neste dispositivo. Ative-o de novo para abrir o app Finanças aqui.",
+        "linked_failed": "Este livro-caixa abre com seu desbloqueio único, que não carregou nesta página. Recarregue para tentar de novo.",
+        "linked_missing": "A chave deste livro-caixa não está no desbloqueio único deste dispositivo. Restaure aqui seu backup da Mentria ou abra o app Finanças em um dispositivo onde ele abre."
       },
       "pair": {
         "title": "Adicionar este dispositivo",
@@ -4341,9 +4342,9 @@
         },
         "reminder_names": "Mostrar o nome da conta nos lembretes",
         "reminder_amounts": "Mostrar valores nos lembretes",
-        "keyring_note": "Finance opens with your one unlock. Changes here apply to everything Mentria keeps locked.",
-        "keyring_no_passkeys": "No passkeys yet. A passkey uses your device's face, fingerprint or PIN unlock.",
-        "keyring_again": "Confirmed. Choose Add a passkey again to finish."
+        "keyring_note": "O app Finanças abre com seu desbloqueio único. As mudanças feitas aqui valem para tudo o que a Mentria mantém bloqueado.",
+        "keyring_no_passkeys": "Ainda não há chaves de acesso. Uma chave de acesso usa o desbloqueio do seu dispositivo por rosto, digital ou PIN.",
+        "keyring_again": "Confirmado. Escolha \"Adicionar uma chave de acesso\" de novo para concluir."
       },
       "subs": {
         "add": "Adicionar conta a pagar",
@@ -6225,7 +6226,7 @@
     "passkey_step_title": "Desbloqueie com seu dispositivo da próxima vez",
     "skip_for_now": "Pular por enquanto",
     "passkey_skipped": "Nenhuma chave de acesso foi adicionada.",
-    "passkey_unusable": "Seu dispositivo salvou uma chave de acesso que a Mentria não pode usar. Você pode excluí-la nas configurações do seu dispositivo.",
+    "passkey_unusable": "Seu dispositivo salvou uma chave de acesso que a Mentria não pode usar. Você pode excluí-la no lugar onde guarda suas chaves de acesso.",
     "not_saved": "Sua frase secreta não foi salva.",
     "code_save_first": "Guarde este código primeiro. Ele substituiu o antigo.",
     "passphrase_too_short_keep": "Sua frase secreta antiga tem menos de 12 caracteres, então ela não será mantida.",

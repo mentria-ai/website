@@ -9,7 +9,7 @@ import { serve } from './unlock-serve.mjs';
 export const PORT = Number(process.env.UNLOCK_PORT) || 8099;
 export const ORIGIN = 'http://localhost:' + PORT;
 export const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-export const PROFILE = join(tmpdir(), 'unlock-check-profile');
+export const PROFILE = join(tmpdir(), PORT === 8099 ? 'unlock-check-profile' : 'unlock-check-profile-' + PORT);
 export const FIXTURES = join(tmpdir(), 'unlock-fixtures');
 export const AUTHENTICATOR = { protocol: 'ctap2', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, hasPrf: true };
 export const GROUPS = ['G2a', 'G2b', 'G2c', 'G3', 'G4', 'G4n', 'G5', 'G6', 'G6p', 'G9'];
@@ -142,12 +142,19 @@ async function pressText(scope, within, text, timeout = 20000, contains = false)
 async function pollUntil(read, test, timeout, what) {
   const end = Date.now() + timeout;
   let v;
+  let err = null;
   while (Date.now() < end) {
-    try { v = await read(); } catch (_) { v = undefined; }
+    try {
+      v = await read();
+      err = null;
+    } catch (e) {
+      v = undefined;
+      err = String((e && e.message) || e).split('\n')[0].slice(0, 200);
+    }
     if (test(v)) return v;
     await sleep(150);
   }
-  throw new Error('timed out waiting for ' + what + (v === undefined ? '' : ' (last: ' + JSON.stringify(v).slice(0, 300) + ')'));
+  throw new Error('timed out waiting for ' + what + (v === undefined ? '' : ' (last: ' + JSON.stringify(v).slice(0, 300) + ')') + (err ? ' (last error: ' + err + ')' : ''));
 }
 
 const dialogOpen = (page) => page.evaluate(() => {
@@ -674,7 +681,7 @@ const PROBE = () => {
       c.get = (o) => { window.__wa.push('get'); return get(o); };
     }
   } catch (_) {}
-  const SCREENS = ['.m-unlock', '.m-ulayer', '#about-identity-unlock', '#comms-id-locked', '#comms-onboard', '#totp-locked', '.flock'];
+  const SCREENS = ['.m-unlock', '.m-ulayer', '#about-identity-unlock', '#comms-id-locked', '#comms-onboard', '#totp-locked', '#qn-unlock-btn', '.flock'];
   const look = () => {
     for (const s of SCREENS) {
       if (window.__screens.includes(s)) continue;
@@ -784,6 +791,77 @@ const LEGACY_OF = {
 };
 
 const RETIRES = { identity: ['pass', 'prf', 'device', 'deviceWrap'], totp: ['pass', 'prf'], notes: ['salt', 'credId', 'oldSalt', 'oldCred'], finance: ['pass', 'recovery', 'prf', 'device'] };
+const DEVICE_FIELDS = { identity: ['device', 'deviceWrap'], finance: ['device'] };
+
+const LINK_ALLOWED = {
+  common: [/^ls:mentria\.(store|meta)\.keyring\.vault added$/, /^idb:mentria-keyring\/session\/"current" added$/],
+  remember: [/^idb:mentria-keyring\/keys\/"device" added$/],
+  identity: [],
+  identityHandover: [/^ls:mentria\.(store|meta)\.identity\.vault changed$/, /^idb:mentria-identity\/keys\/"device-wrap" removed$/],
+  totp: [/^ls:mentria\.(store|meta)\.totp\.vault changed$/],
+  notes: [/^ls:mentria\.(store|meta)\.quick_notes\.blob changed$/],
+  finance: [/^idb:mentria-ext-finance\/meta\/"linked" added$/],
+  financeHandover: [/^idb:mentria-ext-finance\/meta\/"wraps" changed$/]
+};
+
+function handedOver(G, name) {
+  if (!DEVICE_FIELDS[name] || !G.rememberOn) return false;
+  const was = LEGACY_OF[name](G.legacySnap);
+  return DEVICE_FIELDS[name].some((k) => was[k] != null);
+}
+
+function assertLegacyKept(G, name, snap, when) {
+  const was = LEGACY_OF[name](G.legacySnap);
+  const is = LEGACY_OF[name](snap);
+  const handed = handedOver(G, name);
+  for (const k of Object.keys(was)) {
+    if (was[k] == null) continue;
+    if (handed && DEVICE_FIELDS[name].includes(k)) {
+      assert(is[k] == null || is[k] === was[k], name + ' ' + k + ' is either kept as it was or gone after the hand-over to Remember this device (' + when + ')', { was: was[k].slice(0, 80), is: (is[k] || '').slice(0, 80) });
+      continue;
+    }
+    assert(is[k] === was[k], name + ' ' + k + ' is unchanged ' + when, { was: was[k].slice(0, 80), is: (is[k] || '').slice(0, 80) });
+  }
+  return Object.keys(was).filter((k) => was[k] != null);
+}
+
+async function identityDeviceOpens(page) {
+  return page.evaluate(async (vk) => {
+    const v = JSON.parse(localStorage.getItem(vk) || 'null');
+    if (!v || !v.device) return { device: false };
+    const names = (await indexedDB.databases()).map((d) => d.name);
+    if (!names.includes('mentria-identity')) return { device: true, key: false };
+    const db = await new Promise((ok, no) => { const r = indexedDB.open('mentria-identity'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
+    const key = await new Promise((ok, no) => { const r = db.transaction('keys', 'readonly').objectStore('keys').get('device-wrap'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
+    db.close();
+    if (!key) return { device: true, key: false };
+    const unb = (x) => Uint8Array.from(atob(x.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (x.length % 4)) % 4)), (c) => c.charCodeAt(0));
+    let secret;
+    try {
+      secret = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb(v.device.iv) }, key, unb(v.device.ct)));
+    } catch (_) {
+      return { device: true, key: true, opens: false };
+    }
+    const pre = new TextEncoder().encode('mentria-kcv-v1');
+    const data = new Uint8Array(pre.length + secret.length);
+    data.set(pre, 0);
+    data.set(secret, pre.length);
+    const d = new Uint8Array(await crypto.subtle.digest('SHA-256', data)).slice(0, 16);
+    let t = '';
+    for (const b of d) t += String.fromCharCode(b);
+    secret.fill(0);
+    return { device: true, key: true, opens: btoa(t).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') === v.kcv };
+  }, VAULT_IDENTITY);
+}
+
+async function assertDeviceWrapWorks(G, when) {
+  const was = LEGACY_OF.identity(G.legacySnap);
+  if (!G.linked.includes('identity') || was.device == null) return null;
+  const r = await identityDeviceOpens(G.rig.page);
+  if (handedOver(G, 'identity') && !r.device) return 'identity device wrap handed over';
+  assert(r.device && r.key && r.opens, 'the old identity device key still decrypts the vault\'s device wrap to the identity (kcv) ' + when, r);
+  return 'the old identity device key still opens the identity';
+}
 
 function legacyPasskeyIds(name, snap) {
   if (name === 'identity') { const v = parse(snap.ls[VAULT_IDENTITY]); return v && v.prf && v.prf.credId ? [v.prf.credId] : []; }
@@ -1223,8 +1301,9 @@ async function step(G, name, fn, soft) {
     const dialogs = G.rig.nativeDialogs.slice(dialogs0);
     assert(!dialogs.length, 'no native dialogs', dialogs);
     const errs = [...new Set(G.rig.pageErrors.slice(errs0))];
-    console.log('PASS ' + G.g + ': ' + name + ' (' + secs() + ')' + (note ? '\n     ' + note : '') + (errs.length ? '\n     page errors: ' + errs.slice(0, 3).join(' | ') : ''));
-    G.results.push({ name, status: 'PASS', note, errors: errs });
+    assert(!errs.length, 'no uncaught page errors', errs.slice(0, 3));
+    console.log('PASS ' + G.g + ': ' + name + ' (' + secs() + ')' + (note ? '\n     ' + note : ''));
+    G.results.push({ name, status: 'PASS', note });
   } catch (e) {
     if (!soft) G.failed = name;
     const where = String((e && e.stack) || '').split('\n').filter((l) => l.includes('unlock-browser-check')).slice(0, 3).map((l) => l.trim().replace(/^at /, '').replace(/\(?file:\/\/[^)]*\//, '').replace(/\)$/, '')).join(' < ');
@@ -1249,6 +1328,7 @@ async function toNewBuild(G) {
     return 'legacy worker unregistered and Cache Storage cleared; site data left alone';
   }
   const svc = SVC[G.plan.svc];
+  G.baseSnap = await snapshot(page);
   await page.goto(ORIGIN + svc.path, { waitUntil: 'load' });
   const before = await page.evaluate(async () => ({ release: document.documentElement.dataset.release || '', controlled: !!navigator.serviceWorker.controller, caches: await caches.keys() }));
   assert(before.controlled && legacyCaches.length && legacyCaches.every((n) => before.caches.includes(n)), 'the legacy worker still controls the page', before);
@@ -1261,7 +1341,6 @@ async function toNewBuild(G) {
     controlled: !!navigator.serviceWorker.controller,
     caches: await caches.keys()
   })), (v) => v && v.release === 'beta' && v.controlled && !v.caches.some((n) => legacyCaches.includes(n)), 60000, 'the new worker to take over');
-  G.baseSnap = await snapshot(page);
   return 'legacy worker served ' + svc.path + (before.release === 'beta' ? ' from the network (not precached)' : ' from its cache') + '; Update chip pressed: the page reloaded under the new worker (' + after.caches.filter((n) => n.startsWith('mentria-cache-')).join(', ') + '), legacy caches ' + legacyCaches.join(', ') + ' gone';
 }
 
@@ -1351,25 +1430,22 @@ async function stepLink(G) {
 }
 
 async function stepKept(G) {
-  const { rig, plan } = G;
+  const { rig } = G;
+  const st0 = await keyringState(rig.page);
+  G.rememberOn = !!st0.hasDevice;
   const now = await snapshot(rig.page);
   const notes = [];
   for (const name of G.linked) {
-    const was = LEGACY_OF[name](G.legacySnap);
-    const is = LEGACY_OF[name](now);
-    for (const k of Object.keys(was)) {
-      if (was[k] == null) continue;
-      if (name === 'finance' && k === 'device') {
-        assert(is.device == null, 'the Finance device unlock moved to Remember this device', is);
-        continue;
-      }
-      assert(is[k] === was[k], name + ' ' + k + ' is unchanged after linking', { was: (was[k] || '').slice(0, 80), is: (is[k] || '').slice(0, 80) });
-    }
-    notes.push(name + ': ' + Object.keys(was).filter((k) => was[k] != null).join(', '));
+    const kept = assertLegacyKept(G, name, now, 'after linking');
+    notes.push(name + ': ' + kept.join(', ') + (handedOver(G, name) ? ' (device unlock handed to Remember this device)' : ''));
   }
+  const dev = await assertDeviceWrapWorks(G, 'after linking');
+  if (dev) notes.push(dev);
   if (G.linked.includes('totp')) {
     const v = parse(now.ls[VAULT_TOTP]);
-    assert(v && v.kid === v.pass.salt + '.' + v.pass.wrap, 'the TOTP vault gained only its sync id', v && Object.keys(v));
+    const w = parse(G.legacySnap.ls[VAULT_TOTP]);
+    assert(J(Object.keys(v).sort()) === J(Object.keys(w).concat(['kid']).sort()), 'the TOTP vault gained only its sync id', { was: Object.keys(w), now: Object.keys(v) });
+    assert(v.v === w.v && v.kid === w.pass.salt + '.' + w.pass.wrap, 'the TOTP sync id is the old pass id and the version is unchanged', { v: v.v, kid: v.kid && v.kid.length });
   }
   if (G.linked.includes('notes')) {
     const blob = parse(now.ls[NOTES_BLOB]) || [];
@@ -1394,10 +1470,16 @@ async function stepKept(G) {
     if (parse(G.legacySnap.idb['mentria-ext-finance/meta/"wraps"']).device) {
       const st = await keyringState(rig.page);
       assert(st.hasDevice, 'Remember this device is on in the keyring', st);
-      notes.push('finance device unlock handed to Remember this device');
     }
   }
   const changes = diffSnap(G.legacySnap, now);
+  const allowed = LINK_ALLOWED.common.concat(G.rememberOn ? LINK_ALLOWED.remember : []);
+  for (const n of G.linked) {
+    allowed.push(...LINK_ALLOWED[n]);
+    if (handedOver(G, n) && LINK_ALLOWED[n + 'Handover']) allowed.push(...LINK_ALLOWED[n + 'Handover']);
+  }
+  const bad = unexpected(changes, allowed);
+  assert(!bad.length, 'linking writes nothing outside LINK_ALLOWED', bad);
   return 'legacy wraps kept: ' + notes.join('; ') + '\n     changed since the legacy state: ' + unexpected(changes, []).join(', ');
 }
 
@@ -1501,7 +1583,9 @@ async function stepOldDevice(G) {
   const rec = await writeRecord(rig, { linked: Object.fromEntries(G.linked.map((n) => [n, at])), devices: { legacy: { name: '', lastSeen: seen, app: '', keyring: 0 } } });
   assert(G.linked.every((n) => rec.services[n].linked === at) && rec.devices.legacy.lastSeen === seen, 'the record holds the back-dated links and the old device', rec.devices);
   const before = await snapshot(rig.page);
+  for (const n of G.linked) assertLegacyKept(G, n, before, 'from linking until the 31-day mark');
   await openAll(G);
+  const dev = await assertDeviceWrapWorks(G, 'before retirement');
   await sleep(3000);
   const r = await recordOf(rig.page);
   assert(G.linked.every((n) => r.services[n].linked === at), 'the back-dated link times held', G.linked.map((n) => r.services[n].linked));
@@ -1520,7 +1604,7 @@ async function stepOldDevice(G) {
   assert(!r.retired || !G.linked.some((n) => r.retired[n]), 'nothing is marked retired', r.retired);
   const sig = await probe(rig.page);
   assert(!sig.signals.length, 'no passkey is signalled', sig.signals);
-  return 'links back-dated 31 days, devices.legacy seen 5 days ago: blockers ' + G.linked.map((n) => n + '=[' + plans[n].blockers.join(',') + ']').join(' ') + '; old wraps kept';
+  return 'links back-dated 31 days, devices.legacy seen 5 days ago: blockers ' + G.linked.map((n) => n + '=[' + plans[n].blockers.join(',') + ']').join(' ') + '; old wraps kept and still the ones from link time' + (dev ? '; ' + dev : '');
 }
 
 const RETIRE_ALLOWED = {
@@ -1554,6 +1638,9 @@ async function stepRetire(G) {
     const was = LEGACY_OF[n](before);
     const is = LEGACY_OF[n](after);
     const gone = RETIRES[n].filter((k) => was[k] != null);
+    const atLink = LEGACY_OF[n](G.legacySnap);
+    const want = RETIRES[n].filter((k) => atLink[k] != null && !(handedOver(G, n) && DEVICE_FIELDS[n].includes(k) && was[k] == null));
+    assert(want.length > 0 && J(gone) === J(want), n + ': the wraps deleted are exactly the legacy wraps present at link time', { gone, want });
     for (const k of RETIRES[n]) assert(is[k] == null, n + ' ' + k + ' is deleted', is);
     for (const k of Object.keys(was)) if (!RETIRES[n].includes(k)) assert(is[k] === was[k], n + ' ' + k + ' is kept', { was: was[k], is: is[k] });
     notes.push(n + ' deleted ' + (gone.join(', ') || 'nothing (no legacy wraps)'));
@@ -1581,6 +1668,10 @@ async function stepRetire(G) {
   const want = Object.values(ids).flat().sort();
   const got = signals.map((s) => s.credentialId).sort();
   assert(J(want) === J(got) && signals.every((s) => s.rpId === 'localhost'), 'each old passkey is signalled unknown once', { want, got });
+  const onAuth = (await credentials(rig)).map((c) => stdToB64u(c.credentialId));
+  const ring = ((await recordOf(rig.page)).wraps.prf || []).map((e) => e && e.id).filter(Boolean);
+  assert(got.every((id) => onAuth.includes(id)), 'every signalled id is a credential on this device\'s authenticator', { got, onAuth });
+  assert(!got.some((id) => ring.includes(id)), 'no keyring passkey is signalled', { got, ring });
   for (const key of groupServices(G)) {
     const o = SVC[key];
     await visit(rig, o);
@@ -1791,6 +1882,8 @@ async function main(argv) {
   let failed = 0;
   let checks = [];
   const t0 = Date.now();
+  let seedMs = 0;
+  let migrateMs = 0;
   try {
     for (const g of groups) {
       const s0 = Date.now();
@@ -1806,11 +1899,14 @@ async function main(argv) {
         if (rig.pageErrors.length) console.log('     page errors: ' + [...new Set(rig.pageErrors)].slice(0, 3).join(' | '));
       }
     }
+    seedMs = Date.now() - t0;
     console.log(seeded.length + '/' + groups.length + ' groups seeded; fixture files under ' + FIXTURES);
     if (migrating && seeded.length) {
       server.setRoot(resolve(newBuild));
       console.log('migrate: new build ' + resolve(newBuild) + ' on ' + ORIGIN);
+      const m0 = Date.now();
       const done = await migrate(browser, seeded);
+      migrateMs = Date.now() - m0;
       checks = done.flatMap((G) => G.results.map((r) => Object.assign({ group: G.g }, r)));
     }
   } finally {
@@ -1820,7 +1916,7 @@ async function main(argv) {
   }
   if (checks.length) {
     const by = (s) => checks.filter((c) => c.status === s).length;
-    console.log('migrate: ' + by('PASS') + ' passed, ' + by('FAIL') + ' failed, ' + by('SKIP') + ' skipped (' + ((Date.now() - t0) / 1000).toFixed(0) + ' s)');
+    console.log('seed: ' + seeded.length + '/' + groups.length + ' groups (' + (seedMs / 1000).toFixed(0) + ' s); migrate: ' + by('PASS') + ' passed, ' + by('FAIL') + ' failed, ' + by('SKIP') + ' skipped (' + (migrateMs / 1000).toFixed(0) + ' s); total ' + ((Date.now() - t0) / 1000).toFixed(0) + ' s');
     for (const g of [...new Set(checks.map((c) => c.group))]) {
       const mine = checks.filter((c) => c.group === g);
       const bad = mine.filter((c) => c.status !== 'PASS');

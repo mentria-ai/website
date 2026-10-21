@@ -43,6 +43,14 @@ const aesOpen = async (key, box, aad) => new Uint8Array(await S.decrypt(
   { name: 'AES-GCM', iv: U.unb64u(box.iv), additionalData: te.encode(aad) }, key, U.unb64u(box.ct)
 ));
 const deviceKey = () => S.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+const passWrap = async (root, pass, iter) => {
+  const salt = rand(32);
+  const iv = rand(12);
+  const base = await S.importKey('raw', te.encode(pass.normalize('NFC')), 'PBKDF2', false, ['deriveKey']);
+  const key = await S.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+  const ct = new Uint8Array(await S.encrypt({ name: 'AES-GCM', iv, additionalData: te.encode('mentria-keyring|wrap|pass') }, key, root));
+  return { salt: U.b64u(salt), iter, iv: U.b64u(iv), ct: U.b64u(ct), created: iso(NOW) };
+};
 
 async function fresh(now = NOW) {
   const code = U.newRecoveryCode();
@@ -51,7 +59,7 @@ async function fresh(now = NOW) {
 }
 
 async function linked(service, linkedAt) {
-  const f = await fresh();
+  const f = await fresh(linkedAt);
   f.record.services[service] = await U.sealService(f.rootKey, service, rand(32), linkedAt);
   f.record.codeConfirmed = iso(linkedAt);
   return f;
@@ -175,6 +183,23 @@ check('passphrase default is 600000 iterations', async () => {
   assert.equal(wrap.iter, 600000);
 });
 
+check('passphrase iterations stay in range', async () => {
+  const root = rand(32);
+  const pass = 'a long passphrase';
+  for (const bad of [999, 0, -1, 1.5, 10000001, '2000', NaN]) {
+    await assert.rejects(U.wrapWithPassphrase(root, pass, bad), { message: 'bad-input' }, String(bad));
+  }
+  assert.deepEqual(await U.openWithPassphrase(await U.wrapWithPassphrase(root, pass, 1000), pass), root);
+  assert.deepEqual(await U.openWithPassphrase(await passWrap(root, pass, 1000), pass), root);
+  await assert.rejects(U.openWithPassphrase(await passWrap(root, pass, 999), pass), { message: 'bad-pass' });
+  const legacy = await passWrap(root, pass, 600000);
+  delete legacy.iter;
+  await assert.rejects(U.openWithPassphrase(legacy, pass), { message: 'bad-pass' });
+  for (const iter of [10000001, '1000', 1000.5, null]) {
+    await assert.rejects(U.openWithPassphrase(Object.assign(await passWrap(root, pass, 1000), { iter }), pass), { message: 'bad-pass' }, String(iter));
+  }
+});
+
 check('openWithPrf wrong output throws bad-prf', async () => {
   const root = rand(32);
   const prf = rand(32);
@@ -197,6 +222,21 @@ check('openWithPrf wrong output throws bad-prf', async () => {
   assert.deepEqual(await U.openWithPrf(fromBytes, prf), root);
 });
 
+check('wrapWithPrf with missing output throws bad-input', async () => {
+  const root = rand(32);
+  const opts = { id: 'cred-1', salt: U.b64u(rand(32)), label: 'Laptop' };
+  for (const bad of [undefined, null, '', 'a prf output passed as a long string', 32, rand(31), new ArrayBuffer(0), {}]) {
+    await assert.rejects(U.wrapWithPrf(root, bad, opts), { message: 'bad-input' }, String(bad));
+  }
+  for (const part of [{ id: undefined }, { id: '' }, { id: new Uint8Array(0) }, { salt: undefined }, { salt: '' }, { salt: 5 }]) {
+    await assert.rejects(U.wrapWithPrf(root, rand(32), Object.assign({}, opts, part)), { message: 'bad-input' }, JSON.stringify(part));
+  }
+  await assert.rejects(U.wrapWithPrf(root, rand(32)), { message: 'bad-input' });
+  const long = rand(64);
+  assert.deepEqual(await U.openWithPrf(await U.wrapWithPrf(root, long, opts), long), root);
+  await assert.rejects(U.openWithPrf(await U.wrapWithPrf(root, long, opts), long.subarray(0, 31)), { message: 'bad-prf' });
+});
+
 check('device wrap roundtrip and wrong key throws bad-device', async () => {
   const root = rand(32);
   const key = await deviceKey();
@@ -205,6 +245,29 @@ check('device wrap roundtrip and wrong key throws bad-device', async () => {
   assert.deepEqual(await U.openWithDeviceKey(box, key), root);
   await assert.rejects(U.openWithDeviceKey(box, await deviceKey()), { message: 'bad-device' });
   await assert.rejects(U.openWithDeviceKey(tamper(box, 'ct'), key), { message: 'bad-device' });
+  await assert.rejects(U.openWithDeviceKey(box, undefined), { message: 'bad-device' });
+});
+
+check('wrapWithCode with a CryptoKey as root throws bad-input', async () => {
+  const root = rand(32);
+  const rootKey = await U.rootKeyFrom(root);
+  const aes = await deviceKey();
+  const code = U.newRecoveryCode();
+  for (const bad of [rootKey, undefined, null, 'x'.repeat(32), 32, rand(31), rand(33), new ArrayBuffer(0), Array.from(root)]) {
+    const label = String(bad && bad.constructor && bad.constructor.name);
+    await assert.rejects(U.wrapWithCode(bad, code), { message: 'bad-input' }, label);
+    await assert.rejects(U.wrapWithPassphrase(bad, 'a long passphrase', ITER), { message: 'bad-input' }, label);
+    await assert.rejects(U.wrapWithPrf(bad, rand(32), { id: 'c', salt: 's' }), { message: 'bad-input' }, label);
+    await assert.rejects(U.wrapWithDeviceKey(bad, aes), { message: 'bad-input' }, label);
+    await assert.rejects(U.kcvOf(bad), { message: 'bad-input' }, label);
+    await assert.rejects(U.rootKeyFrom(bad), { message: 'bad-input' }, label);
+  }
+  for (const bad of [rootKey, root, undefined, { type: 'secret', algorithm: { name: 'AES-GCM' } }]) {
+    await assert.rejects(U.wrapWithDeviceKey(root, bad), { message: 'bad-input' });
+  }
+  const view = new DataView(new Uint8Array([0, ...root, 0]).buffer, 1, 32);
+  assert.deepEqual(await U.openWithCode(await U.wrapWithCode(view, code), code), root);
+  assert.deepEqual(await U.openWithCode(await U.wrapWithCode(root.buffer, code), code), root);
 });
 
 check('service seal/open per name', async () => {
@@ -228,6 +291,31 @@ check('service seal/open per name', async () => {
   }
   await assert.rejects(U.sealService(rootKey, 'backup', secret, NOW), { message: 'bad-service' });
   await assert.rejects(U.openService(rootKey, 'backup', entry), { message: 'bad-service' });
+});
+
+check('sealService with empty secret throws bad-input', async () => {
+  const rootKey = await U.rootKeyFrom(rand(32));
+  for (const bad of [undefined, null, new Uint8Array(0), new ArrayBuffer(0), 'secret', 7, {}]) {
+    await assert.rejects(U.sealService(rootKey, 'identity', bad, NOW), { message: 'bad-input' }, String(bad));
+  }
+  const one = new Uint8Array([7]);
+  assert.deepEqual(await U.openService(rootKey, 'identity', await U.sealService(rootKey, 'identity', one, NOW)), one);
+  const buf = rand(32);
+  assert.deepEqual(await U.openService(rootKey, 'totp', await U.sealService(rootKey, 'totp', buf.buffer, NOW)), buf);
+});
+
+check('sealService with bytes as rootKey throws bad-input', async () => {
+  const root = rand(32);
+  const secret = rand(32);
+  const aes = await deviceKey();
+  const entry = { salt: U.b64u(rand(16)), iv: U.b64u(rand(12)), ct: U.b64u(rand(48)) };
+  for (const bad of [root, root.buffer, aes, undefined, null, {}, { type: 'secret', algorithm: { name: 'HKDF' } }]) {
+    const label = String(bad && bad.constructor && bad.constructor.name);
+    await assert.rejects(U.sealService(bad, 'identity', secret, NOW), { message: 'bad-input' }, label);
+    await assert.rejects(U.openService(bad, 'identity', entry), { message: 'bad-input' }, label);
+    await assert.rejects(U.makeBackupEntry(bad, U.newRecoveryCode()), { message: 'bad-input' }, label);
+    await assert.rejects(U.backupKeyFromEntry(bad, entry), { message: 'bad-input' }, label);
+  }
 });
 
 check('backup key from entry equals key from code', async () => {
@@ -254,6 +342,15 @@ check('backup key from a wrong code differs', async () => {
   assert.notDeepEqual(await U.backupKeyFromEntry(rootKey, await U.makeBackupEntry(rootKey, code)), right);
   await assert.rejects(U.backupKeyFromCode('nope', entry.salt), { message: 'bad-code' });
   await assert.rejects(U.backupKeyFromEntry(await U.rootKeyFrom(rand(32)), entry), { message: 'bad-backup' });
+});
+
+check('backup key from a malformed salt throws bad-backup', async () => {
+  const code = U.newRecoveryCode();
+  for (const bad of ['!!!!', 'a', 123, undefined, null, {}, rand(8), U.b64u(rand(8))]) {
+    await assert.rejects(U.backupKeyFromCode(code, bad), { message: 'bad-backup' }, String(bad));
+  }
+  await assert.rejects(U.backupKeyFromCode('nope', '!!!!'), { message: 'bad-code' });
+  assert.equal((await U.backupKeyFromCode(code, rand(16).buffer)).length, 32);
 });
 
 check('createRecord shape', async () => {
@@ -381,18 +478,36 @@ check('merge removed passkey wins over older live copy', async () => {
   const a = clone(record);
   a.wraps.prf = [live];
   const b = clone(record);
-  b.wraps.prf = [Object.assign(clone(live), { removed: iso(NOW + 2000) })];
+  b.wraps.prf = [{ id: 'cred-a', removed: iso(NOW + 2000) }];
   for (const m of [U.mergeRecords(a, b), U.mergeRecords(b, a)]) {
-    assert.equal(m.wraps.prf.length, 1);
-    assert.equal(m.wraps.prf[0].removed, iso(NOW + 2000));
+    assert.deepEqual(m.wraps.prf, [{ id: 'cred-a', removed: iso(NOW + 2000) }]);
   }
   const c = clone(record);
   c.wraps.prf = [Object.assign(clone(live), { created: iso(NOW + 3000) })];
   for (const m of [U.mergeRecords(b, c), U.mergeRecords(c, b)]) {
-    assert.equal(m.wraps.prf.length, 1);
-    assert.equal(m.wraps.prf[0].removed, undefined);
-    assert.equal(m.wraps.prf[0].created, iso(NOW + 3000));
+    assert.deepEqual(m.wraps.prf, c.wraps.prf);
   }
+});
+
+check('merged tombstone carries no ciphertext', async () => {
+  const { record, rootBytes } = await fresh();
+  const live = Object.assign(await U.wrapWithPrf(rootBytes, rand(32), { id: 'cred-a', salt: U.b64u(rand(32)), label: 'Laptop' }), { created: iso(NOW + 1000) });
+  const other = Object.assign(await U.wrapWithPrf(rootBytes, rand(32), { id: 'cred-b', salt: U.b64u(rand(32)), label: 'Phone' }), { created: iso(NOW + 1500) });
+  const pass = Object.assign(await U.wrapWithPassphrase(rootBytes, 'first passphrase', ITER), { created: iso(NOW + 1000) });
+  const a = clone(record);
+  a.wraps.prf = [live];
+  a.wraps.pass = pass;
+  const b = clone(record);
+  b.wraps.prf = [Object.assign(clone(live), { removed: iso(NOW + 2000) }), Object.assign(clone(other), { removed: iso(NOW + 2500) })];
+  b.wraps.pass = Object.assign(clone(pass), { removed: iso(NOW + 2000) });
+  for (const m of [U.mergeRecords(a, b), U.mergeRecords(b, a)]) {
+    assert.ok(U.isRecord(m));
+    assert.deepEqual(m.wraps.prf, [{ id: 'cred-a', removed: iso(NOW + 2000) }, { id: 'cred-b', removed: iso(NOW + 2500) }]);
+    assert.deepEqual(m.wraps.pass, { removed: iso(NOW + 2000) });
+  }
+  const back = clone(record);
+  back.wraps.pass = Object.assign(clone(pass), { created: iso(NOW + 3000) });
+  assert.deepEqual(U.mergeRecords(U.mergeRecords(a, b), back).wraps.pass, back.wraps.pass);
 });
 
 check('merge different kcv returns null', async () => {
@@ -400,9 +515,50 @@ check('merge different kcv returns null', async () => {
   const two = await fresh();
   assert.equal(U.mergeRecords(one.record, two.record), null);
   assert.equal(U.mergeRecords(two.record, one.record), null);
-  assert.deepEqual(U.mergeRecords(one.record, null), one.record);
-  assert.deepEqual(U.mergeRecords(null, one.record), one.record);
+  assert.equal(U.mergeRecords(one.record, null), null);
+  assert.equal(U.mergeRecords(null, one.record), null);
+  assert.equal(U.mergeRecords(one.record, Object.assign(clone(one.record), { v: 2 })), null);
   assert.equal(U.mergeRecords(null, { v: 1 }), null);
+});
+
+check('merge takes the backup entry only from the winning recovery side', async () => {
+  const { record, rootBytes } = await fresh();
+  const a = clone(record);
+  const b = clone(record);
+  b.wraps.recovery = Object.assign(await U.wrapWithCode(rootBytes, U.newRecoveryCode()), { created: iso(NOW + DAY) });
+  delete b.backup;
+  for (const m of [U.mergeRecords(a, b), U.mergeRecords(b, a)]) {
+    assert.ok(U.isRecord(m));
+    assert.deepEqual(m.wraps.recovery, b.wraps.recovery);
+    assert.equal(m.backup, undefined);
+  }
+});
+
+check('regenerated code is unconfirmed after merge with an older confirmation', async () => {
+  const { record, rootBytes, rootKey } = await fresh();
+  const a = clone(record);
+  a.codeConfirmed = iso(NOW + 1000);
+  const b = clone(record);
+  const code2 = U.newRecoveryCode();
+  b.wraps.recovery = Object.assign(await U.wrapWithCode(rootBytes, code2), { created: iso(NOW + DAY) });
+  b.backup = await U.makeBackupEntry(rootKey, code2);
+  b.codeConfirmed = null;
+  for (const m of [U.mergeRecords(a, b), U.mergeRecords(b, a)]) {
+    assert.deepEqual(m.wraps.recovery, b.wraps.recovery);
+    assert.equal(m.codeConfirmed, null);
+  }
+  b.codeConfirmed = iso(NOW + DAY + 5000);
+  a.codeConfirmed = iso(NOW + DAY + 9000);
+  for (const m of [U.mergeRecords(a, b), U.mergeRecords(b, a)]) assert.equal(m.codeConfirmed, iso(NOW + DAY + 5000));
+  b.codeConfirmed = iso(NOW + DAY);
+  a.codeConfirmed = iso(NOW + 1000);
+  for (const m of [U.mergeRecords(a, b), U.mergeRecords(b, a)]) assert.equal(m.codeConfirmed, iso(NOW + DAY));
+  const c = clone(record);
+  c.codeConfirmed = iso(NOW + 500);
+  a.codeConfirmed = iso(NOW + 600);
+  assert.equal(U.mergeRecords(a, c).codeConfirmed, iso(NOW + 500));
+  c.codeConfirmed = iso(NOW - 1);
+  assert.equal(U.mergeRecords(a, c).codeConfirmed, iso(NOW + 600));
 });
 
 check('merge keeps the newest wraps and services and the earliest dates', async () => {
@@ -413,7 +569,7 @@ check('merge keeps the newest wraps and services and the earliest dates', async 
   b.wraps.recovery = Object.assign(await U.wrapWithCode(rootBytes, code2), { created: iso(NOW + DAY) });
   b.backup = await U.makeBackupEntry(rootKey, code2);
   a.wraps.pass = Object.assign(await U.wrapWithPassphrase(rootBytes, 'first passphrase', ITER), { created: iso(NOW + 1000) });
-  b.wraps.pass = Object.assign(clone(a.wraps.pass), { removed: iso(NOW + 2000) });
+  b.wraps.pass = { removed: iso(NOW + 2000) };
   a.services.identity = await U.sealService(rootKey, 'identity', rand(32), NOW + 5000);
   b.services.identity = await U.sealService(rootKey, 'identity', rand(32), NOW + 4000);
   b.services.totp = await U.sealService(rootKey, 'totp', rand(20), NOW + 4000);
@@ -428,21 +584,18 @@ check('merge keeps the newest wraps and services and the earliest dates', async 
     assert.deepEqual(m.backup, b.backup);
     assert.deepEqual(await U.openWithCode(m.wraps.recovery, code2), rootBytes);
     assert.deepEqual(await U.backupKeyFromEntry(rootKey, m.backup), await U.backupKeyFromCode(code2, m.backup.salt));
-    assert.equal(m.wraps.pass.removed, iso(NOW + 2000));
+    assert.deepEqual(m.wraps.pass, { removed: iso(NOW + 2000) });
     assert.deepEqual(m.services.identity, a.services.identity);
     assert.deepEqual(m.services.totp, b.services.totp);
     assert.deepEqual(m.retired, { identity: iso(NOW + 8000), totp: iso(NOW + 7000) });
-    assert.equal(m.codeConfirmed, iso(NOW + 600));
+    assert.equal(m.codeConfirmed, null);
     assert.equal(m.changed, iso(NOW + 200));
   }
   const c = clone(record);
   c.wraps.pass = Object.assign(await U.wrapWithPassphrase(rootBytes, 'second passphrase', ITER), { created: iso(NOW + 3000) });
-  c.codeConfirmed = iso(NOW + 500);
   for (const m of [U.mergeRecords(b, c), U.mergeRecords(c, b)]) {
     assert.deepEqual(m.wraps.pass, c.wraps.pass);
-    assert.equal(m.codeConfirmed, iso(NOW + 500));
   }
-  assert.equal(U.mergeRecords(a, c).codeConfirmed, iso(NOW + 500));
   assert.equal(U.mergeRecords(record, clone(record)).wraps.pass, undefined);
 });
 
@@ -477,7 +630,8 @@ check('retirement blocked by keyring-0 device', async () => {
   assert.notEqual(withOld, record);
   assert.equal(record.devices['old-phone'], undefined);
   assert.deepEqual(withOld.devices['old-phone'], { name: 'Phone', lastSeen: iso(NOW - 5 * DAY), app: 'v2026.10.07', keyring: 0 });
-  assert.equal(withOld.changed, record.changed);
+  assert.equal(withOld.changed, iso(NOW - 5 * DAY));
+  assert.equal(U.touchDevice(withOld, 'dev-a', { now: NOW - 10 * DAY }).changed, iso(NOW - 5 * DAY));
   assert.deepEqual(U.retirementStatus(withOld, 'identity', { now: NOW }), { ready: false, blockers: ['old-device'] });
   const gone = U.touchDevice(record, 'old-phone', { name: 'Phone', app: 'v2026.10.07', keyring: 0, now: NOW - 31 * DAY });
   assert.deepEqual(U.retirementStatus(gone, 'identity', { now: NOW }), { ready: true, blockers: [] });
@@ -498,6 +652,31 @@ check('retirement notes needs conversion', async () => {
   assert.deepEqual(U.retirementStatus(record, 'notes', { now: NOW, notesConverted: true }), { ready: true, blockers: [] });
   const id = (await linked('identity', NOW - 31 * DAY)).record;
   assert.deepEqual(U.retirementStatus(id, 'identity', { now: NOW, notesConverted: false }), { ready: true, blockers: [] });
+});
+
+check('retirement blocked when confirmation predates the recovery wrap', async () => {
+  const { record, rootBytes } = await linked('identity', NOW - 31 * DAY);
+  assert.deepEqual(U.retirementStatus(record, 'identity', { now: NOW }), { ready: true, blockers: [] });
+  const regen = clone(record);
+  regen.wraps.recovery = Object.assign(await U.wrapWithCode(rootBytes, U.newRecoveryCode()), { created: iso(NOW - DAY) });
+  assert.deepEqual(U.retirementStatus(regen, 'identity', { now: NOW }), { ready: false, blockers: ['code-unconfirmed'] });
+  regen.codeConfirmed = iso(NOW - DAY - 1);
+  assert.deepEqual(U.retirementStatus(regen, 'identity', { now: NOW }), { ready: false, blockers: ['code-unconfirmed'] });
+  regen.codeConfirmed = iso(NOW - DAY);
+  assert.deepEqual(U.retirementStatus(regen, 'identity', { now: NOW }), { ready: true, blockers: [] });
+  regen.codeConfirmed = 'not a date';
+  assert.deepEqual(U.retirementStatus(regen, 'identity', { now: NOW }), { ready: false, blockers: ['code-unconfirmed'] });
+  const undated = clone(record);
+  delete undated.wraps.recovery.created;
+  assert.deepEqual(U.retirementStatus(undated, 'identity', { now: NOW }), { ready: false, blockers: ['code-unconfirmed'] });
+});
+
+check('retirement of an unknown service is not-linked only', async () => {
+  const { record } = await fresh();
+  record.retired.backup = iso(NOW);
+  for (const name of ['backup', 'constructor', '__proto__', 'Identity', undefined]) {
+    assert.deepEqual(U.retirementStatus(record, name, { now: NOW }), { ready: false, blockers: ['not-linked'] }, String(name));
+  }
 });
 
 check('decideLaunch table', () => {

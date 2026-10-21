@@ -2,6 +2,8 @@ const enc = new TextEncoder();
 const SALT = enc.encode('mentria-keyring-v1');
 const KCV_PREFIX = 'mentria-keyring-kcv-v1';
 const PBKDF2_ITER = 600000;
+const ITER_MIN = 1000;
+const ITER_MAX = 10000000;
 const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const B32_RE = /^[A-Za-z2-7]{32}$/;
 const C20_RE = /^[abcdefghjkmnpqrstuvwxyz23456789]{20}$/i;
@@ -12,15 +14,36 @@ export const RETIRE_AFTER_MS = 30 * 86400000;
 
 function randomBytes(n) { return crypto.getRandomValues(new Uint8Array(n)); }
 
-function u8(v) {
+function bytesOf(v) {
   if (v instanceof Uint8Array) return v;
   if (ArrayBuffer.isView(v)) return new Uint8Array(v.buffer, v.byteOffset, v.byteLength);
-  return new Uint8Array(v || 0);
+  if (Object.prototype.toString.call(v) === '[object ArrayBuffer]') return new Uint8Array(v);
+  return null;
 }
+
+function needBytes(v, min, max) {
+  const b = bytesOf(v);
+  if (!b || b.length < min || b.length > max) throw new Error('bad-input');
+  return b;
+}
+
+function needRoot(v) { return needBytes(v, 32, 32); }
+
+function needKey(k, alg) {
+  const shaped = typeof CryptoKey === 'function' ? k instanceof CryptoKey : !!k && typeof k === 'object' && typeof k.type === 'string';
+  if (!shaped || !k.algorithm || k.algorithm.name !== alg) throw new Error('bad-input');
+  return k;
+}
+
+function iterOk(n) { return Number.isInteger(n) && n >= ITER_MIN && n <= ITER_MAX; }
 
 function stamp(now) { return new Date(now == null ? Date.now() : now).toISOString(); }
 
-function text(v) { return typeof v === 'string' ? v : b64u(v); }
+function idText(v) {
+  const s = typeof v === 'string' ? v : b64u(needBytes(v, 1, Infinity));
+  if (!s) throw new Error('bad-input');
+  return s;
+}
 
 function isObj(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
 
@@ -31,7 +54,8 @@ function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k) ? o[k] : 
 function clone(v) { return JSON.parse(JSON.stringify(v)); }
 
 export function b64u(bytes) {
-  const u = u8(bytes);
+  const u = bytesOf(bytes);
+  if (!u) throw new Error('bad-input');
   let s = '';
   for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
   return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -97,11 +121,11 @@ function needCode(code) {
 function codeBytes(n) { return n.kind === 'b32' ? unb32(n.text) : enc.encode(n.text); }
 
 async function hkdfBase(bytes) {
-  return crypto.subtle.importKey('raw', u8(bytes), 'HKDF', false, ['deriveKey', 'deriveBits']);
+  return crypto.subtle.importKey('raw', bytes, 'HKDF', false, ['deriveKey', 'deriveBits']);
 }
 
 function hkdfParams(salt, info) {
-  return { name: 'HKDF', hash: 'SHA-256', salt: u8(salt), info: enc.encode(info) };
+  return { name: 'HKDF', hash: 'SHA-256', salt, info: enc.encode(info) };
 }
 
 async function aesFrom(base, salt, info) {
@@ -110,7 +134,7 @@ async function aesFrom(base, salt, info) {
 
 async function seal(key, plain, aad) {
   const iv = randomBytes(12);
-  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: enc.encode(aad) }, key, u8(plain)));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: enc.encode(aad) }, key, plain));
   return { iv: b64u(iv), ct: b64u(ct) };
 }
 
@@ -124,11 +148,11 @@ async function guarded(code, fn) {
 }
 
 export async function rootKeyFrom(bytes) {
-  return hkdfBase(bytes);
+  return hkdfBase(needRoot(bytes));
 }
 
 export async function kcvOf(rootBytes) {
-  const r = u8(rootBytes);
+  const r = needRoot(rootBytes);
   const prefix = enc.encode(KCV_PREFIX);
   const data = new Uint8Array(prefix.length + r.length);
   data.set(prefix, 0);
@@ -142,9 +166,10 @@ async function codeKey(n, salt) {
 }
 
 export async function wrapWithCode(rootBytes, code) {
+  const root = needRoot(rootBytes);
   const n = needCode(code);
   const salt = randomBytes(16);
-  const box = await seal(await codeKey(n, salt), rootBytes, 'mentria-keyring|wrap|recovery');
+  const box = await seal(await codeKey(n, salt), root, 'mentria-keyring|wrap|recovery');
   return { fmt: n.kind, salt: b64u(salt), iv: box.iv, ct: box.ct, created: stamp() };
 }
 
@@ -160,20 +185,25 @@ function nfc(pass) { return String(pass == null ? '' : pass).normalize('NFC'); }
 
 async function passKey(pass, salt, iterations) {
   const base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: u8(salt), iterations }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
 }
 
 export async function wrapWithPassphrase(rootBytes, pass, iterations) {
+  const root = needRoot(rootBytes);
+  const iter = iterations == null ? PBKDF2_ITER : iterations;
+  if (!iterOk(iter)) throw new Error('bad-input');
   const p = nfc(pass);
   if (Array.from(p).length < 12) throw new Error('weak-pass');
   const salt = randomBytes(32);
-  const iter = iterations || PBKDF2_ITER;
-  const box = await seal(await passKey(p, salt, iter), rootBytes, 'mentria-keyring|wrap|pass');
+  const box = await seal(await passKey(p, salt, iter), root, 'mentria-keyring|wrap|pass');
   return { salt: b64u(salt), iter, iv: box.iv, ct: box.ct, created: stamp() };
 }
 
 export async function openWithPassphrase(wrap, pass) {
-  return guarded('bad-pass', async () => open(await passKey(nfc(pass), unb64u(wrap.salt), wrap.iter || PBKDF2_ITER), wrap, 'mentria-keyring|wrap|pass'));
+  return guarded('bad-pass', async () => {
+    if (!iterOk(wrap.iter)) throw new Error('bad-pass');
+    return open(await passKey(nfc(pass), unb64u(wrap.salt), wrap.iter), wrap, 'mentria-keyring|wrap|pass');
+  });
 }
 
 async function prfKey(prfOutput, hkdf) {
@@ -181,22 +211,26 @@ async function prfKey(prfOutput, hkdf) {
 }
 
 export async function wrapWithPrf(rootBytes, prfOutput, { id, salt, label } = {}) {
+  const root = needRoot(rootBytes);
+  const output = needBytes(prfOutput, 32, Infinity);
+  const meta = { id: idText(id), salt: idText(salt) };
   const hkdf = randomBytes(32);
-  const box = await seal(await prfKey(prfOutput, hkdf), rootBytes, 'mentria-keyring|wrap|prf');
-  return { id: text(id), salt: text(salt), hkdf: b64u(hkdf), label: label == null ? '' : String(label), created: stamp(), iv: box.iv, ct: box.ct };
+  const box = await seal(await prfKey(output, hkdf), root, 'mentria-keyring|wrap|prf');
+  return { id: meta.id, salt: meta.salt, hkdf: b64u(hkdf), label: label == null ? '' : String(label), created: stamp(), iv: box.iv, ct: box.ct };
 }
 
 export async function openWithPrf(wrap, prfOutput) {
-  return guarded('bad-prf', async () => open(await prfKey(prfOutput, unb64u(wrap.hkdf)), wrap, 'mentria-keyring|wrap|prf'));
+  return guarded('bad-prf', async () => open(await prfKey(needBytes(prfOutput, 32, Infinity), unb64u(wrap.hkdf)), wrap, 'mentria-keyring|wrap|prf'));
 }
 
 export async function wrapWithDeviceKey(rootBytes, aesKey) {
-  const box = await seal(aesKey, rootBytes, 'mentria-keyring|wrap|device');
+  const root = needRoot(rootBytes);
+  const box = await seal(needKey(aesKey, 'AES-GCM'), root, 'mentria-keyring|wrap|device');
   return { iv: box.iv, ct: box.ct, created: stamp() };
 }
 
 export async function openWithDeviceKey(box, aesKey) {
-  return guarded('bad-device', () => open(aesKey, box, 'mentria-keyring|wrap|device'));
+  return guarded('bad-device', async () => open(needKey(aesKey, 'AES-GCM'), box, 'mentria-keyring|wrap|device'));
 }
 
 function serviceKey(rootKey, name) {
@@ -205,11 +239,14 @@ function serviceKey(rootKey, name) {
 }
 
 export async function sealService(rootKey, name, secretBytes, now) {
-  const box = await seal(await serviceKey(rootKey, name), secretBytes, 'mentria-keyring|svc|' + name);
+  needKey(rootKey, 'HKDF');
+  const secret = needBytes(secretBytes, 1, Infinity);
+  const box = await seal(await serviceKey(rootKey, name), secret, 'mentria-keyring|svc|' + name);
   return { iv: box.iv, ct: box.ct, linked: stamp(now) };
 }
 
 export async function openService(rootKey, name, entry) {
+  needKey(rootKey, 'HKDF');
   return guarded('bad-service', async () => open(await serviceKey(rootKey, name), entry, 'mentria-keyring|svc|' + name));
 }
 
@@ -218,7 +255,16 @@ async function backupBits(n, salt) {
   return new Uint8Array(bits);
 }
 
+function backupSalt(salt) {
+  try {
+    const s = typeof salt === 'string' ? unb64u(salt) : bytesOf(salt);
+    if (s && s.length >= 16) return s;
+  } catch (_) {}
+  throw new Error('bad-backup');
+}
+
 export async function makeBackupEntry(rootKey, code) {
+  needKey(rootKey, 'HKDF');
   const n = needCode(code);
   const salt = randomBytes(16);
   const box = await seal(await aesFrom(rootKey, SALT, 'svc:backup'), await backupBits(n, salt), 'mentria-keyring|backup');
@@ -226,6 +272,7 @@ export async function makeBackupEntry(rootKey, code) {
 }
 
 export async function backupKeyFromEntry(rootKey, entry) {
+  needKey(rootKey, 'HKDF');
   return guarded('bad-backup', async () => {
     const key = await open(await aesFrom(rootKey, SALT, 'svc:backup'), entry, 'mentria-keyring|backup');
     if (key.length !== 32) throw new Error('bad-backup');
@@ -235,7 +282,7 @@ export async function backupKeyFromEntry(rootKey, entry) {
 
 export async function backupKeyFromCode(code, salt) {
   const n = needCode(code);
-  return backupBits(n, typeof salt === 'string' ? unb64u(salt) : salt);
+  return backupBits(n, backupSalt(salt));
 }
 
 export async function createRecord({ code, deviceId, deviceName, app, now } = {}) {
@@ -308,7 +355,9 @@ function mergePrf(a, b) {
     if (!isObj(e) || typeof e.id !== 'string') continue;
     byId.set(e.id, byId.has(e.id) ? prfWinner(byId.get(e.id), e) : e);
   }
-  return [...byId.values()].sort((x, y) => (ms(x.created) - ms(y.created)) || (x.id < y.id ? -1 : x.id > y.id ? 1 : 0));
+  return [...byId.values()]
+    .map((e) => (e.removed ? { id: e.id, removed: e.removed } : e))
+    .sort((x, y) => (ms(x.created) - ms(y.created)) || (x.id < y.id ? -1 : x.id > y.id ? 1 : 0));
 }
 
 function mergeMap(a, b, pick) {
@@ -325,15 +374,15 @@ function firstRecord(a, b) {
 }
 
 export function mergeRecords(local, incoming) {
-  const okLocal = isRecord(local);
-  const okIncoming = isRecord(incoming);
-  if (!okLocal || !okIncoming) return okLocal ? clone(local) : okIncoming ? clone(incoming) : null;
-  if (local.kcv !== incoming.kcv) return null;
+  if (!isRecord(local) || !isRecord(incoming) || local.kcv !== incoming.kcv) return null;
   const a = local, b = incoming;
   const wa = a.wraps, wb = b.wraps;
   const recovery = later(wa.recovery, wb.recovery, (w) => ms(w.created));
   const sameRecovery = JSON.stringify(wa.recovery) === JSON.stringify(wb.recovery);
-  const backup = sameRecovery ? later(a.backup, b.backup, () => 0) : recovery === wa.recovery ? (a.backup || b.backup) : (b.backup || a.backup);
+  const backup = sameRecovery ? later(a.backup, b.backup, () => 0) : recovery === wa.recovery ? a.backup : b.backup;
+  const since = Date.parse(recovery.created);
+  const current = (c) => (c != null && Date.parse(c) >= since ? c : null);
+  const pass = later(wa.pass, wb.pass, (w) => Math.max(ms(w.created), ms(w.removed)));
   const first = firstRecord(a, b);
   return clone(Object.assign({}, b, a, {
     v: 1,
@@ -341,11 +390,11 @@ export function mergeRecords(local, incoming) {
     kcv: a.kcv,
     created: first.created,
     changed: later(a.changed, b.changed, ms),
-    codeConfirmed: earlier(a.codeConfirmed, b.codeConfirmed) || null,
+    codeConfirmed: earlier(current(a.codeConfirmed), current(b.codeConfirmed)) || null,
     wraps: Object.assign({}, wb, wa, {
       recovery,
       prf: mergePrf(wa.prf, wb.prf),
-      pass: later(wa.pass, wb.pass, (w) => Math.max(ms(w.created), ms(w.removed)))
+      pass: pass && pass.removed ? { removed: pass.removed } : pass
     }),
     backup,
     services: mergeMap(a.services, b.services, (x, y) => later(x, y, (e) => ms(e.linked))),
@@ -368,13 +417,15 @@ export function touchDevice(record, deviceId, { name, app, keyring, now } = {}) 
 }
 
 export function retirementStatus(record, service, { now, notesConverted } = {}) {
+  if (!SERVICES.includes(service)) return { ready: false, blockers: ['not-linked'] };
   const at = now == null ? Date.now() : now;
   const rec = isObj(record) ? record : {};
   const entry = isObj(rec.services) ? own(rec.services, service) : undefined;
+  const recovery = isObj(rec.wraps) && isObj(rec.wraps.recovery) ? rec.wraps.recovery : {};
   const settled = (iso) => at - Date.parse(iso) >= RETIRE_AFTER_MS;
   const blockers = [];
   if (!entry) blockers.push('not-linked');
-  if (!rec.codeConfirmed) blockers.push('code-unconfirmed');
+  if (!rec.codeConfirmed || !(Date.parse(rec.codeConfirmed) >= Date.parse(recovery.created))) blockers.push('code-unconfirmed');
   if (entry && !settled(entry.linked)) blockers.push('too-recent');
   if (Object.values(isObj(rec.devices) ? rec.devices : {}).some((d) => isObj(d) && d.keyring !== 1 && !settled(d.lastSeen))) blockers.push('old-device');
   if (service === 'notes' && notesConverted !== true) blockers.push('notes-unconverted');

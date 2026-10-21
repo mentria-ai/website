@@ -1067,6 +1067,8 @@ check('showCode warns once before a close keeps the old code', async () => {
     };
   }, [raw0, old, fresh]);
   assert(kept.same && kept.old && !kept.fresh, 'closing keeps the old code', kept);
+  const late = await page.evaluate((f) => ({ ok: window.__m.confirmCode(f.replace(/-/g, '').slice(-4)), raw: localStorage.getItem('mentria.store.keyring.vault') }), fresh);
+  assert(late.ok === false && late.raw === raw0, 'closing drops the new code, so its last four confirm nothing later', { ok: late.ok, same: late.raw === raw0 });
   const next = await page.evaluate(async () => { window.__fresh = await window.__m.regenerateCode(); return window.__fresh; });
   await start(page, '(ui) => ui.showCode(window.__fresh)');
   await page.waitForSelector('.m-ulayer .m-ucode');
@@ -1505,6 +1507,38 @@ check('a passkey this device already holds gets its own message', async () => {
   await page.click('.m-ulayer [data-act="add-passkey"]');
   await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_passkey_exists);
   assert(EN.err_passkey_exists === 'This device already has a passkey for Mentria.', 'the copy', EN.err_passkey_exists);
+});
+
+const GET_INVALID = () => {
+  const c = navigator.credentials;
+  if (c) c.get = () => Promise.reject(new DOMException('The request is not valid in this state', 'InvalidStateError'));
+};
+
+check('only adding a passkey calls InvalidStateError a passkey this device has', async () => {
+  const { page, code } = await labWithKeyring(GET_INVALID);
+  await page.evaluate(async (code) => {
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const rnd = (n) => crypto.getRandomValues(new Uint8Array(n));
+    const rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+    const bytes = await C.openWithCode(rec.wraps.recovery, code);
+    rec.wraps.prf.push(await C.wrapWithPrf(bytes, rnd(32), { id: C.b64u(rnd(16)), salt: C.b64u(rnd(32)), label: 'x' }));
+    window.MentriaStore.set('keyring', 'vault', rec);
+    await window.__m.lock();
+  }, code);
+  await page.click('#unlock-demo-card');
+  await page.waitForSelector('#unlock-demo [data-act="passkey"]');
+  await page.click('#unlock-demo [data-act="passkey"]');
+  await until(async () => (await text(page, '#unlock-demo .m-unlock__msg')) !== EN.working && (await text(page, '#unlock-demo .m-unlock__msg')) !== '', 15000);
+  const signIn = await text(page, '#unlock-demo .m-unlock__msg');
+  assert(signIn !== EN.err_passkey_exists, 'a sign-in InvalidStateError is not called a passkey this device has', signIn);
+  await page.evaluate((c) => window.__m.unlockWithCode(c), code);
+  await plantOther(page, true);
+  await start(page, '(ui) => ui.showFoldIn()');
+  await page.waitForSelector('.m-ulayer [data-act="fold-passkey"]');
+  await page.click('.m-ulayer [data-act="fold-passkey"]');
+  await until(async () => { const t = await text(page, '.m-ulayer .m-usheet__msg'); return t && t !== EN.working; }, 15000);
+  const fold = await text(page, '.m-ulayer .m-usheet__msg');
+  assert(fold !== EN.err_passkey_exists && fold === EN.err_other, 'a fold-in InvalidStateError is not called a passkey this device has', fold);
 });
 
 check('setup offers the card when another page locked before the link', async () => {

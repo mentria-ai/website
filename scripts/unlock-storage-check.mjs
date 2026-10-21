@@ -25,6 +25,7 @@ writeFileSync(hooksPath, [
   'export async function initialize(data) { root = data.root; stub = data.stub; }',
   'export async function resolve(specifier, context, next) {',
   "  if (specifier === '/assets/vendor/trystero-nostr.js') return { url: stub, shortCircuit: true };",
+  "  if (specifier === '/assets/js/mentria-unlock-core.js' && String(context.parentURL || '').includes('nocore=1')) return { url: root + '/assets/js/no-core-for-this-check.js', shortCircuit: true };",
   "  if (specifier.startsWith('/assets/')) return { url: root + specifier, shortCircuit: true };",
   '  return next(specifier, context);',
   '}'
@@ -929,7 +930,7 @@ check('undoing a sync keeps the keyring it took away on the side', async () => {
   await Sync.disconnect();
   assert.equal(Store.get('keyring', 'vault').kcv, other.record.kcv);
   ls.removeItem(OTHERS);
-  const back = Sync.restoreRescue();
+  const back = await Sync.restoreRescue();
   assert.ok(back && back.restored >= 1);
   assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv, 'the undo brings this device\'s keyring back');
   assert.deepEqual(stashKcvs(), [other.record.kcv], 'the replaced one is kept on the side');
@@ -1027,6 +1028,68 @@ check('both keyring prompts say what stops opening until it is brought back in',
   assert.equal(asked.length, 1);
   assert.equal(asked[0], en.about.sync_vault_keyring, 'the built-in English prompt matches the copy');
   await Sync.disconnect();
+});
+
+const freshSync = async (query) => {
+  const keep = globalThis.MentriaSync;
+  await import(fileUrl('src/assets/js/mentria-sync.js') + '?' + query + '&n=' + Math.random().toString(36).slice(2));
+  const mod = globalThis.MentriaSync;
+  globalThis.MentriaSync = keep;
+  assert.notEqual(mod, keep, 'harness: a fresh sync module');
+  return mod;
+};
+
+async function undoScene() {
+  reset();
+  const A = await keyring('dev-a');
+  const B = await keyring('dev-b');
+  const bOld = clone(B.record);
+  const bNew = clone(B.record);
+  bNew.services.notes = await U.sealService(B.rootKey, 'notes', rand(32), Date.now());
+  put('keyring.vault', bNew);
+  ls.setItem(OTHERS, JSON.stringify([bOld]));
+  ls.setItem('mentria-sync-rescue', JSON.stringify({ v: 2, at: Date.now(), entries: { 'keyring.vault': { raw: JSON.stringify(A.record), meta: null }, 'tools.undo': { raw: JSON.stringify({ u: 1 }), meta: null } } }));
+  const hasNew = (rec) => !!(rec && rec.services && rec.services.notes && rec.services.notes.id === bNew.services.notes.id);
+  return { A, B, bOld, bNew, hasNew };
+}
+
+check('undo sync on a fresh page keeps the newer copy of the keyring it takes away', async () => {
+  const sc = await undoScene();
+  const S2 = await freshSync('fresh=1');
+  assert.ok(S2.rescueInfo(), 'harness: a rescue is waiting');
+  const back = await S2.restoreRescue();
+  assert.ok(back && back.restored >= 2, 'the undo ran');
+  const cur = Store.get('keyring', 'vault');
+  const kept = stash();
+  assert.equal(cur.kcv, sc.A.record.kcv, 'the undo brings the rescued keyring back');
+  assert.ok(kept.some((r) => r.kcv === sc.B.record.kcv && sc.hasNew(r)), 'the stash holds the newer copy of the keyring it took away');
+  assert.equal(Store.get('tools', 'undo').u, 1);
+});
+
+check('undo sync without the core leaves the keyring alone when that keyring is already kept', async () => {
+  const sc = await undoScene();
+  const S2 = await freshSync('nocore=1');
+  const back = await S2.restoreRescue();
+  const cur = Store.get('keyring', 'vault');
+  assert.ok(back, 'the undo ran');
+  assert.equal(cur.kcv, sc.B.record.kcv, 'the keyring is left alone');
+  assert.ok(sc.hasNew(cur), 'its newer content stays');
+  assert.equal(Store.get('tools', 'undo').u, 1, 'the rest of the undo still applies');
+});
+
+check('undo sync merges a rescued copy of the same keyring', async () => {
+  reset();
+  const k = await keyring('dev-a');
+  const older = await withPasskey(k, k.record);
+  const newer = clone(k.record);
+  newer.services.notes = await U.sealService(k.rootKey, 'notes', rand(32), Date.now());
+  put('keyring.vault', newer);
+  ls.setItem('mentria-sync-rescue', JSON.stringify({ v: 2, at: Date.now(), entries: { 'keyring.vault': { raw: JSON.stringify(older), meta: null } } }));
+  const S2 = await freshSync('fresh=1');
+  await S2.restoreRescue();
+  const cur = Store.get('keyring', 'vault');
+  assert.ok(cur.services.notes && cur.services.notes.id === newer.services.notes.id, 'what this device had stays');
+  assert.equal(cur.wraps.prf.length, 1, 'what the rescued copy had comes back');
 });
 
 let failed = 0;

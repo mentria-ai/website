@@ -1954,7 +1954,8 @@ check('switch off deletes the session and the lab names retired locks', async ()
   await page.reload({ waitUntil: 'load' });
   await page.waitForFunction(() => { const el = document.getElementById('unlock-retired'); return el && !el.hidden; }, { timeout: 5000 }).catch(() => {});
   const warn = await page.evaluate(() => { const el = document.getElementById('unlock-retired'); return el ? { hidden: el.hidden, text: el.textContent.trim() } : null; });
-  const want = EN.tester_retired.replace('{services}', [EN.services.totp, EN.services.notes].join(', '));
+  const lang = await page.evaluate(() => document.documentElement.lang || 'en');
+  const want = EN.tester_retired.replace('{services}', new Intl.ListFormat(lang, { type: 'conjunction' }).format([EN.services.totp, EN.services.notes]));
   assert(warn && !warn.hidden && warn.text === want, 'the lab says which old locks are gone', { warn, want });
 });
 
@@ -2082,6 +2083,65 @@ check('frames never hold the open lock', async () => {
   await runtime(top);
   const held2 = await top.evaluate(async () => ((await navigator.locks.query()).held || []).filter((l) => l.name === 'mentria-open').length);
   assert(held2 === 1, 'control: a top page holds it', held2);
+});
+
+check('a fold-in keeps the stash when one of its entries does not open', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  const codeA = await createOnLab(page);
+  await runtime(page);
+  await foldSetup(page, codeA);
+  const r = await page.evaluate(async (codeA) => {
+    const m = window.__m;
+    const F = window.__fold;
+    const hex = (b) => (b ? Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('') : null);
+    const list = JSON.parse(localStorage.getItem('mentria.keyring.others'));
+    const bad = list[0].services.notes.prior[0];
+    bad.ct = (bad.ct[0] === 'A' ? 'B' : 'A') + bad.ct.slice(1);
+    localStorage.setItem('mentria.keyring.others', JSON.stringify(list));
+    await m.unlockWithCode(F.codeB);
+    let e = 'no error';
+    try { await m.foldIn(F.kcvA, { code: codeA }); } catch (x) { e = x.message; }
+    const notes = (await m.secrets('notes')).map((x) => hex(x.bytes));
+    return { e, others: m.others().map((o) => o.kcv), kcvA: F.kcvA, na: notes.includes(F.hex.na), ia: hex(await m.secret('identity')) === F.hex.ia };
+  }, codeA);
+  assert(r.e === 'no error' && r.na && r.ia, 'what opened is brought in', r);
+  assert(r.others.length === 1 && r.others[0] === r.kcvA, 'the stash stays while one of its entries did not open', r);
+});
+
+check('create drops a pending new code', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await createOnLab(page);
+  await runtime(page);
+  const r = await page.evaluate(async () => {
+    const m = window.__m;
+    const pending = await m.regenerateCode();
+    localStorage.removeItem('mentria.store.keyring.vault');
+    const made = await m.create({});
+    const fresh = m.confirmCode(made.code.replace(/-/g, '').slice(-4));
+    return { fresh, stale: m.confirmCode(pending.replace(/-/g, '').slice(-4)), confirmed: m.state().codeConfirmed };
+  });
+  assert(r.stale === false && r.fresh === true && r.confirmed, 'after create only the new keyring\'s code confirms', r);
+});
+
+check('an unreadable stash is never overwritten', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await runtime(page);
+  const r = await page.evaluate(async () => {
+    localStorage.setItem('mentria.keyring.others', '{broken');
+    const put = IDBObjectStore.prototype.put;
+    IDBObjectStore.prototype.put = function () { throw new DOMException('blocked for the check', 'UnknownError'); };
+    let e = null;
+    try { await window.__m.create({}); } catch (x) { e = x.message || x.name; }
+    IDBObjectStore.prototype.put = put;
+    return { e, stash: localStorage.getItem('mentria.keyring.others'), others: window.__m.others() };
+  });
+  assert(r.e && r.stash === '{broken' && JSON.stringify(r.others) === '[]', 'a rollback leaves an unreadable stash as it is', r);
 });
 
 const TRYSTERO_STUB = "export const selfId = 'self-peer';\nexport function joinRoom(config, roomId) { return window.__fakeRoom(config, roomId); }\n";

@@ -341,7 +341,8 @@ const keepOther = (core, value) => {
     }
     if (!rec || typeof rec !== 'object' || typeof rec.kcv !== 'string' || !rec.kcv) return false;
     const list = readOthers();
-    if (!list.some((r) => r && r.kcv === rec.kcv)) localStorage.setItem(OTHERS_KEY, JSON.stringify(list.concat([rec])));
+    if (list.some((r) => r && r.kcv === rec.kcv)) return false;
+    localStorage.setItem(OTHERS_KEY, JSON.stringify(list.concat([rec])));
     return true;
   } catch (_) {
     return false;
@@ -426,24 +427,37 @@ const saveRescue = (suffixes) => {
 const rescueInfo = () => {
   const rec = readRescue();
   if (!rec) return null;
+  if (rec.entries[KEYRING]) loadCore().catch(() => {});
   return { at: rec.at, until: rec.at + RESCUE_MS, suffixes: Object.keys(rec.entries) };
 };
 
-const restoreRescue = () => {
+const restoreRescue = async () => {
+  const first = readRescue();
+  if (!first) return null;
+  let core = null;
+  if (first.entries[KEYRING]) {
+    try { core = await loadCore(); } catch (_) { core = null; }
+  }
   const rec = readRescue();
   if (!rec) return null;
   let restored = 0;
   Object.keys(rec.entries).forEach((suffix) => {
     const e = rec.entries[suffix];
     if (!e || typeof e.raw !== 'string') return;
+    let value = parseRaw(e.raw);
     if (suffix === KEYRING) {
       const now = currentKeyring();
-      if (now != null && !sameVault(KEYRING, now, e.raw) && !keepOther(coreLoaded, now)) return;
+      if (now != null && sameVault(KEYRING, now, e.raw)) {
+        value = core ? core.mergeRecords(parseRaw(now), value) : null;
+        if (!value) return;
+      } else if (now != null && !keepOther(core, now)) {
+        return;
+      }
     }
     const { ns, key } = splitSuffix(suffix);
     let mtime = null;
     try { const m = JSON.parse(e.meta || 'null'); if (m && typeof m.m === 'number') mtime = m.m; } catch (_) {}
-    if (window.MentriaStore.set(ns, key, parseRaw(e.raw), { remote: true, mtime: mtime != null ? mtime : Date.now() })) restored++;
+    if (window.MentriaStore.set(ns, key, value, { remote: true, mtime: mtime != null ? mtime : Date.now() })) restored++;
     state.vaultLinked.delete(suffix);
     if (isVault(suffix)) state.vaultKept.add(suffix);
   });

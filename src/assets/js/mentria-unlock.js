@@ -73,13 +73,16 @@ function decide(v) {
 }
 
 function readOthers() {
-  const v = parse(lsGet(OTHERS_KEY));
-  return Array.isArray(v) ? v : [];
+  const raw = lsGet(OTHERS_KEY);
+  if (raw == null) return [];
+  const v = parse(raw);
+  return Array.isArray(v) ? v : null;
 }
 
 function keepOther(rec) {
-  if (!isRecord(rec)) return false;
-  return lsSet(OTHERS_KEY, JSON.stringify(addOther(readOthers(), rec)));
+  const list = readOthers();
+  if (!isRecord(rec) || !list) return false;
+  return lsSet(OTHERS_KEY, JSON.stringify(addOther(list, rec)));
 }
 
 function clearManualLock(epoch) {
@@ -650,6 +653,7 @@ export function onChange(fn) {
 
 export async function create({ code, confirmed, deviceName } = {}) {
   if (!enabled()) throw new Error('disabled');
+  mem.pending = null;
   if (lsGet(RECORD_KEY) != null || readRecord()) throw new Error('exists');
   const given = code != null && code !== '';
   let text;
@@ -987,7 +991,7 @@ export function others() {
   const rec = readRecord();
   const seen = new Set();
   const out = [];
-  for (const o of readOthers()) {
+  for (const o of readOthers() || []) {
     if (!isRecord(o) || (rec && o.kcv === rec.kcv) || seen.has(o.kcv)) continue;
     const services = SERVICES.filter((n) => listServiceEntries(o, n).length > 0);
     if (!services.length) continue;
@@ -1012,10 +1016,14 @@ function otherRoot(other, m) {
   return Promise.reject(new Error('bad-input'));
 }
 
-async function openAll(root, rec, name) {
+async function openAll(root, rec, name, missed) {
   const out = [];
   for (const x of listServiceEntries(rec, name)) {
-    try { out.push({ id: x.id, linked: x.entry.linked, bytes: await openService(root, name, x.entry) }); } catch (_) {}
+    try {
+      out.push({ id: x.id, linked: x.entry.linked, bytes: await openService(root, name, x.entry) });
+    } catch (_) {
+      if (missed) missed.count += 1;
+    }
   }
   return out;
 }
@@ -1059,7 +1067,7 @@ async function foldService(root, fresh, name, found) {
 export async function foldIn(kcv, method) {
   const rec = need();
   if (!sessionLive()) throw new Error('locked');
-  const other = readOthers().find((o) => isRecord(o) && o.kcv === kcv && o.kcv !== rec.kcv);
+  const other = (readOthers() || []).find((o) => isRecord(o) && o.kcv === kcv && o.kcv !== rec.kcv);
   if (!other) throw new Error('no-keyring');
   const bytes = await otherRoot(other, isObj(method) ? method : {});
   let theirs;
@@ -1070,8 +1078,9 @@ export async function foldIn(kcv, method) {
     bytes.fill(0);
   }
   const found = {};
+  const missed = { count: 0 };
   for (const n of SERVICES) {
-    const list = await openAll(theirs, other, n);
+    const list = await openAll(theirs, other, n, missed);
     if (list.length) found[n] = list;
   }
   const root = mem.root;
@@ -1103,8 +1112,8 @@ export async function foldIn(kcv, method) {
         if (!next) throw new Error('locked');
         store(S, next);
       }
-      const left = readOthers().filter((o) => !(isObj(o) && o.kcv === kcv));
-      if (!lsSet(OTHERS_KEY, JSON.stringify(left))) throw new Error('storage');
+      const list = readOthers();
+      if (list && !missed.count && !lsSet(OTHERS_KEY, JSON.stringify(list.filter((o) => !(isObj(o) && o.kcv === kcv))))) throw new Error('storage');
       return Object.keys(services).length > 0;
     });
     notify(wrote);
@@ -1125,7 +1134,13 @@ export async function regenerateCode() {
   return text;
 }
 
+export function dropPendingCode() {
+  mem.pending = null;
+}
+
 export function confirmCode(last4) {
+  const cur = readRecord();
+  if (mem.pending && (!cur || cur.kcv !== mem.pending.kcv)) mem.pending = null;
   const p = mem.pending;
   const text = p ? p.text : mem.code;
   if (!text) return false;

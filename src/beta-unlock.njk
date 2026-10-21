@@ -120,7 +120,9 @@
     try { rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault')); } catch (_) {}
     const retired = rec && rec.retired && typeof rec.retired === 'object' ? rec.retired : {};
     const names = ['identity', 'totp', 'notes', 'finance'].filter((n) => Object.prototype.hasOwnProperty.call(retired, n) && retired[n]).map((n) => retiredEl.dataset[n]);
-    const text = names.length ? retiredEl.dataset.text.replace('{services}', names.join(', ')) : '';
+    let joined = names.join(', ');
+    try { if (names.length && typeof Intl.ListFormat === 'function') joined = new Intl.ListFormat(document.documentElement.lang || 'en', { type: 'conjunction' }).format(names); } catch (_) {}
+    const text = names.length ? retiredEl.dataset.text.replace('{services}', joined) : '';
     if (retiredEl.textContent !== text) retiredEl.textContent = text;
     retiredEl.hidden = !names.length;
   }

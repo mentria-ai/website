@@ -1,7 +1,7 @@
 import {
   ready, state, onChange, prfSupport, create, link, lock, hasRootBytes,
   unlockWithCode, unlockWithPassphrase, unlockWithPasskey, confirmWithCode, confirmWithPasskey,
-  addPasskey, setPassphrase, setRemember, confirmCode, others, foldIn
+  addPasskey, setPassphrase, setRemember, confirmCode, dropPendingCode, others, foldIn
 } from './mentria-unlock.js';
 import { newRecoveryCode, normalizeCode, formatCode } from './mentria-unlock-core.js';
 
@@ -150,7 +150,7 @@ function errName(e) {
   return String(e.message || name);
 }
 
-function errKey(e, webauthn) {
+function errKey(e, webauthn, creating) {
   const n = errName(e);
   if (n === 'bad-code') return 'err_code';
   if (n === 'bad-pass' || n === 'no-pass') return 'err_pass';
@@ -158,7 +158,7 @@ function errKey(e, webauthn) {
   if (PRF_ERRORS.has(n)) return 'err_prf';
   if (webauthn && CANCEL_ERRORS.has(n)) return 'err_cancelled';
   if (webauthn && WEBAUTHN_PRF.has(n)) return 'err_prf';
-  if (webauthn && n === 'InvalidStateError') return 'err_passkey_exists';
+  if (webauthn && n === 'InvalidStateError') return creating ? 'err_passkey_exists' : 'err_other';
   if (STORAGE_ERRORS.has(n)) return 'err_storage';
   return 'err_other';
 }
@@ -1066,7 +1066,7 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase, 
         if (!closed && !ok) fail(err);
         return;
       }
-      const key = errKey(err, true);
+      const key = errKey(err, true, true);
       if (key === 'err_cancelled' || SKIPPED_ERRORS.has(n)) say(msg, T, 'passkey_skipped', 'warn');
       else say(msg, T, key, 'error');
     });
@@ -1183,6 +1183,7 @@ export async function showCode(code) {
     const finish = (v) => {
       if (closed) return;
       closed = true;
+      if (v !== true) dropPendingCode();
       live.delete(view);
       if (L) L.close();
       resolve(v);

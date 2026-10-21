@@ -64,7 +64,10 @@ function clearManualLock(epoch) {
   lsSet(LOCAL_KEY, JSON.stringify(l));
 }
 
-function manuallyLocked() { return local().manualLock === readEpoch(); }
+function manuallyLocked() {
+  const m = local().manualLock;
+  return typeof m === 'number' && m >= readEpoch();
+}
 
 function framed() {
   try { return window.top !== window && !!window.parent.document; } catch (_) { return false; }
@@ -388,8 +391,8 @@ async function openSession(bytes, rec, silent) {
   const root = await rootKeyFrom(bytes);
   const live = await serial(async () => {
     const epoch = readEpoch();
-    const openedAt = Date.now();
-    await idbPut('session', 'current', { epoch, openedAt, kcv: rec.kcv, root });
+    const nonce = b64u(random(16));
+    await idbPut('session', 'current', { epoch, openedAt: Date.now(), kcv: rec.kcv, root, nonce });
     mem.root = root;
     mem.bytes = silent ? null : new Uint8Array(bytes);
     mem.kcv = rec.kcv;
@@ -399,7 +402,7 @@ async function openSession(bytes, rec, silent) {
       return true;
     }
     drop();
-    try { await idbDelIf('session', 'current', (row) => isObj(row) && row.epoch === epoch && row.openedAt === openedAt); } catch (_) {}
+    try { await idbDelIf('session', 'current', (row) => isObj(row) && row.epoch === epoch && row.nonce === nonce); } catch (_) {}
     return false;
   });
   if (!live) {
@@ -557,6 +560,7 @@ export async function create({ code, confirmed, deviceName } = {}) {
   const { record, rootBytes } = await createRecord({ code: text, deviceId: deviceId(), deviceName, app: release() });
   if (given && confirmed === true) record.codeConfirmed = record.wraps.recovery.created;
   const S = await storeReady();
+  if (lsGet(RECORD_KEY) != null || readRecord()) throw new Error('exists');
   if (!S || S.set(NS, KEY, record) !== true) throw new Error('storage');
   if (!bootP) {
     bootP = Promise.resolve();
@@ -567,14 +571,17 @@ export async function create({ code, confirmed, deviceName } = {}) {
     await openSession(rootBytes, record);
   } catch (e) {
     const now = readRecord();
-    if (now && now.kcv !== record.kcv) throw new Error('exists');
-    if (now && e && e.message === 'locked') {
+    const mine = !!now && now.kcv === record.kcv;
+    if (!mine && lsGet(RECORD_KEY) != null) throw new Error('exists');
+    if (mine && e && e.message === 'locked') {
       mem.code = text;
       mem.codeSalt = record.wraps.recovery.salt;
       return { code: text };
     }
-    try { S.remove(NS, KEY, { remote: true }); } catch (_) {}
-    post('record');
+    if (mine) {
+      try { S.remove(NS, KEY, { remote: true }); } catch (_) {}
+      post('record');
+    }
     throw e;
   }
   mem.code = text;
@@ -620,7 +627,9 @@ export async function unlockWithDevice() {
 
 export async function lock() {
   forget();
-  saveLocal({ manualLock: bumpEpoch() });
+  const next = readEpoch() + 1;
+  saveLocal({ manualLock: next });
+  lsSet(EPOCH_KEY, String(next));
   if (started) {
     mark();
     seen();

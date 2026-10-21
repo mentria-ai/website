@@ -871,7 +871,7 @@ check('a rejected unlock leaves no session row', async () => {
   assert(row === null, 'the rejected unlock leaves no session row', row);
 });
 
-check('an explicit unlock keeps a newer manual lock', async () => {
+check('a Lock caught between its two writes still wins', async () => {
   await clean();
   const a = await open('/beta/unlock/');
   await enableOnLab(a);
@@ -881,28 +881,67 @@ check('an explicit unlock keeps a newer manual lock', async () => {
   const b = await open('/about/');
   const sb = await runtime(b);
   assert(sb.launch === 'continue' && sb.unlocked, 'setup: the second page is unlocked', sb);
-  await a.evaluate(async () => {
+  const e0 = Number(await readLocal(b, 'mentria.keyring.epoch') || 0);
+  const paused = await b.evaluate(async () => {
+    const set = Storage.prototype.setItem;
+    window.__set = set;
+    window.__deferred = null;
+    Storage.prototype.setItem = function (k, v) {
+      if (k === 'mentria.keyring.epoch' && !window.__deferred) {
+        window.__deferred = [k, v];
+        Storage.prototype.setItem = set;
+        return;
+      }
+      return set.call(this, k, v);
+    };
     await window.__m.lock();
-    const get = Storage.prototype.getItem;
-    window.__frozen = localStorage.getItem('mentria.keyring.epoch');
-    Storage.prototype.getItem = function (k) { return k === 'mentria.keyring.epoch' && window.__frozen != null ? window.__frozen : get.call(this, k); };
+    return window.__deferred;
   });
-  const e0 = Number(await a.evaluate(() => window.__frozen));
-  await b.evaluate(() => window.__m.lock());
-  const e1 = await readLocal(b, 'mentria.keyring.epoch');
-  assert(e1 === e0 + 1, 'harness: Lock bumps the epoch', { e0, e1 });
-  assert(await until(() => a.evaluate((n) => { try { return JSON.parse(localStorage.getItem('mentria.keyring.local')).manualLock === n; } catch (_) { return false; } }, e1), 5000), 'harness: the first page sees the newer manual lock');
+  assert(paused && paused[1] === String(e0 + 1), 'harness: the epoch write of the Lock is paused', paused);
+  assert(await until(() => a.evaluate((n) => {
+    try { return Number(localStorage.getItem('mentria.keyring.epoch') || 0) === n && JSON.parse(localStorage.getItem('mentria.keyring.local')).manualLock === n + 1 && !window.__m.state().unlocked; } catch (_) { return false; }
+  }, e0), 5000), 'harness: the first page sees the manual lock, the old epoch and no session');
   const r = await a.evaluate(async (x) => {
-    let e = null;
-    try { await window.__m.unlockWithCode(x); } catch (err) { e = err.message; }
-    const ml = JSON.parse(localStorage.getItem('mentria.keyring.local')).manualLock;
-    window.__frozen = null;
-    return { e, ml };
+    const out = { device: await window.__m.unlockWithDevice() };
+    out.deviceUnlocked = window.__m.state().unlocked;
+    try { await window.__m.unlockWithCode(x); out.code = 'no error'; } catch (err) { out.code = err.message; }
+    out.ml = JSON.parse(localStorage.getItem('mentria.keyring.local')).manualLock;
+    return out;
   }, c);
-  assert(r.e === null && r.ml === e1, 'an explicit unlock at an older epoch keeps the newer manual lock', { r, e1 });
+  await b.evaluate(() => window.__set.call(localStorage, window.__deferred[0], window.__deferred[1]));
+  assert(r.device === false && r.deviceUnlocked === false, 'a silent unlock refuses while a Lock is half written', r);
+  assert(r.code === 'no error' && r.ml === e0 + 1, 'an explicit unlock at the old epoch keeps the newer manual lock', { r, e0 });
   await b.reload({ waitUntil: 'load' });
   const s2 = await runtime(b);
   assert(s2.launch === 'continue' && !s2.unlocked && s2.hasDevice, 'a remembered page still honours the Lock', s2);
+});
+
+check('another page never sees the new epoch without the manual lock', async () => {
+  await clean();
+  const a = await open('/beta/unlock/');
+  await enableOnLab(a);
+  await createOnLab(a);
+  await runtime(a);
+  const b = await open('/about/');
+  const sb = await runtime(b);
+  assert(sb.launch === 'continue' && sb.unlocked, 'setup: the second page is unlocked', sb);
+  await a.evaluate(() => {
+    window.__seen = [];
+    window.addEventListener('storage', (e) => {
+      if (e.key !== 'mentria.keyring.epoch' && e.key !== 'mentria.keyring.local') return;
+      let ml = null;
+      try { ml = JSON.parse(localStorage.getItem('mentria.keyring.local')).manualLock; } catch (_) {}
+      window.__seen.push({ key: e.key, epoch: Number(localStorage.getItem('mentria.keyring.epoch') || 0), ml });
+    });
+  });
+  await b.evaluate(() => window.__m.lock());
+  const e1 = Number(await readLocal(b, 'mentria.keyring.epoch'));
+  assert(await until(() => a.evaluate(() => window.__seen.some((x) => x.key === 'mentria.keyring.epoch')), 5000), 'harness: the first page saw the epoch change');
+  const seen = await a.evaluate(() => window.__seen);
+  const keys = seen.map((x) => x.key);
+  const at = seen.find((x) => x.key === 'mentria.keyring.epoch');
+  assert(keys.includes('mentria.keyring.local') && keys.indexOf('mentria.keyring.local') < keys.indexOf('mentria.keyring.epoch'), 'the manual lock is written before the epoch', seen);
+  assert(at.epoch === e1 && at.ml === e1, 'the page that sees the new epoch also sees the manual lock', { at, e1 });
 });
 
 check('ready() makes no decision on a redirecting page', async () => {
@@ -929,6 +968,43 @@ check('ready() makes no decision on a redirecting page', async () => {
   assert(r.q === 0 && r.marker === null && e1 === e0, 'a redirecting page queries no lock, writes no marker and bumps nothing', { r, e0, e1 });
 });
 
+check('create re-checks for a record right before its write', async () => {
+  await clean();
+  const a = await open('/beta/unlock/');
+  await enableOnLab(a);
+  await runtime(a);
+  const b = await open('/about/');
+  await b.waitForFunction(() => document.readyState === 'complete' && !!window.MentriaStore);
+  await runtime(b);
+  await a.evaluate(() => {
+    const h = { state: 'armed' };
+    h.gate = new Promise((r) => { h.release = r; });
+    window.__h = h;
+    const digest = crypto.subtle.digest;
+    crypto.subtle.digest = function (...x) {
+      if (!String(new Error().stack).includes('kcvOf')) return digest.apply(crypto.subtle, x);
+      delete crypto.subtle.digest;
+      h.state = 'held';
+      return h.gate.then(() => crypto.subtle.digest(...x));
+    };
+    window.__res = undefined;
+    window.__m.create({}).then((v) => { window.__res = { ok: true, code: !!(v && v.code) }; }, (e) => { window.__res = { ok: false, e: e.message || e.name }; });
+  });
+  assert(await until(() => a.evaluate(() => window.__h.state === 'held'), 15000), 'harness: the record crypto is held');
+  const other = await b.evaluate(async () => {
+    const r = await window.__m.create({});
+    return { code: !!(r && r.code), raw: localStorage.getItem('mentria.store.keyring.vault') };
+  });
+  assert(other.code && other.raw, 'setup: the other page created a keyring', other);
+  assert(await until(() => a.evaluate((raw) => localStorage.getItem('mentria.store.keyring.vault') === raw, other.raw), 5000), 'harness: the first page sees the other record');
+  await a.evaluate(() => window.__h.release());
+  assert(await until(() => a.evaluate(() => window.__res !== undefined), 15000), 'harness: the create settles');
+  const r = await a.evaluate(() => ({ res: window.__res, same: localStorage.getItem('mentria.store.keyring.vault') }));
+  const bUnlocked = await b.evaluate(() => window.__m.state().unlocked);
+  assert(r.res.ok === false && r.res.e === 'exists', 'the late create rejects with exists and returns no code', r.res);
+  assert(r.same === other.raw && bUnlocked === true, 'the other record stays and its page stays unlocked', { same: r.same === other.raw, bUnlocked });
+});
+
 check('create reports exists when another tab\'s create wins', async () => {
   await clean();
   const a = await open('/beta/unlock/');
@@ -937,15 +1013,24 @@ check('create reports exists when another tab\'s create wins', async () => {
   const b = await open('/about/');
   await b.waitForFunction(() => document.readyState === 'complete' && !!window.MentriaStore);
   await installHold(a);
-  for (const failPut of [false, true]) {
-    const tag = failPut ? 'when the session write also fails' : 'after the session write';
-    const winner = await b.evaluate(async () => {
+  const cases = [
+    { failPut: false, valid: true },
+    { failPut: true, valid: true },
+    { failPut: false, valid: false },
+    { failPut: true, valid: false }
+  ];
+  for (const { failPut, valid } of cases) {
+    const tag = (valid ? 'with a valid record ' : 'with a value isRecord rejects ') + (failPut ? 'when the session write also fails' : 'after the session write');
+    await b.evaluate(async (ok) => {
       localStorage.removeItem('mentria.store.keyring.vault');
-      const C = await import('/assets/js/mentria-unlock-core.js');
-      const { record } = await C.createRecord({ code: C.newRecoveryCode(), deviceId: 'other-tab' });
-      window.__rec = record;
-      return record.kcv;
-    });
+      if (ok) {
+        const C = await import('/assets/js/mentria-unlock-core.js');
+        window.__rec = (await C.createRecord({ code: C.newRecoveryCode(), deviceId: 'other-tab' })).record;
+      } else {
+        window.__rec = null;
+      }
+    }, valid);
+    assert(await until(() => a.evaluate(() => localStorage.getItem('mentria.store.keyring.vault') === null), 5000), 'harness: the first page sees no record ' + tag);
     await a.evaluate((fail) => {
       window.__h = window.__hold('idbPut');
       window.__res = undefined;
@@ -960,22 +1045,73 @@ check('create reports exists when another tab\'s create wins', async () => {
       window.__m.create({}).then((v) => { window.__res = { ok: true, code: !!(v && v.code) }; }, (e) => { window.__res = { ok: false, e: e.message || e.name }; });
     }, failPut);
     assert(await until(() => a.evaluate(() => window.__h.state !== 'armed'), 15000), 'harness: the session write is held ' + tag);
-    await b.evaluate(() => { if (window.MentriaStore.set('keyring', 'vault', window.__rec) !== true) throw new Error('write failed'); });
-    assert(await until(() => a.evaluate((k) => { try { return JSON.parse(localStorage.getItem('mentria.store.keyring.vault')).kcv === k; } catch (_) { return false; } }, winner), 5000), 'harness: the first page sees the other record ' + tag);
+    const winner = await b.evaluate(() => {
+      if (window.__rec) {
+        if (window.MentriaStore.set('keyring', 'vault', window.__rec) !== true) throw new Error('write failed');
+      } else {
+        localStorage.setItem('mentria.store.keyring.vault', JSON.stringify({ v: 2, kcv: 'future' }));
+      }
+      return localStorage.getItem('mentria.store.keyring.vault');
+    });
+    assert(await until(() => a.evaluate((raw) => localStorage.getItem('mentria.store.keyring.vault') === raw, winner), 5000), 'harness: the first page sees the other value ' + tag);
     await a.evaluate(() => window.__h.release());
     assert(await until(() => a.evaluate(() => window.__res !== undefined), 15000), 'harness: the create settles ' + tag);
     const r = await a.evaluate(() => {
       IDBObjectStore.prototype.put = window.__put;
-      let kcv = null;
-      try { kcv = JSON.parse(localStorage.getItem('mentria.store.keyring.vault')).kcv; } catch (_) {}
-      return { res: window.__res, tx: window.__h.tx, kcv, unlocked: window.__m.state().unlocked };
+      return { res: window.__res, tx: window.__h.tx, raw: localStorage.getItem('mentria.store.keyring.vault'), unlocked: window.__m.state().unlocked };
     });
     const row = await sessionRow(a);
     assert(JSON.stringify(r.tx) === '["session","readwrite"]', 'harness: the held connection wrote the session ' + tag, r.tx);
     assert(r.res.ok === false && r.res.e === 'exists', 'the losing create rejects with exists and returns no code ' + tag, r);
-    assert(r.kcv === winner && r.unlocked === false, 'the winning record stays and nothing is unlocked ' + tag, { r, winner });
+    assert(r.raw === winner && r.unlocked === false, 'the other value stays and nothing is unlocked ' + tag, { res: r.res, kept: r.raw === winner, unlocked: r.unlocked });
     assert(row === null, 'the losing create leaves no session row ' + tag, row);
   }
+});
+
+check('a rejected unlock keeps another page\'s newer row', async () => {
+  await clean();
+  const lab = await open('/beta/unlock/');
+  await enableOnLab(lab);
+  const c = await createOnLab(lab);
+  await runtime(lab);
+  await lab.evaluate(() => window.__m.setRemember(true));
+  await closeAll();
+  const a = await open('/about/');
+  const sa = await runtime(a);
+  assert(sa.launch === 'reopen' && sa.unlocked, 'setup: a reopen unlocks the remembered device', sa);
+  const b = await open('/tools/');
+  const sb = await runtime(b);
+  assert(sb.launch === 'continue' && sb.unlocked, 'setup: the second page is unlocked', sb);
+  await installHold(a);
+  const T = Date.now();
+  for (const p of [a, b]) await p.evaluate((t) => { window.__now = Date.now; Date.now = () => t; }, T);
+  const caught = await a.evaluate(() => {
+    window.__h1 = window.__hold('unlockWithDevice');
+    window.__res = undefined;
+    window.__m.unlockWithDevice().then((v) => { window.__res = v; }, (e) => { window.__res = 'error ' + e.message; });
+    return window.__h1.state;
+  });
+  assert(caught === 'caught', 'harness: the device key read is held', caught);
+  await b.evaluate(() => window.__m.lock());
+  const e1 = await readLocal(b, 'mentria.keyring.epoch');
+  assert(await sees(a, e1), 'harness: the first page sees the Lock before the release');
+  await a.evaluate(() => { window.__h2 = window.__hold('idbDelIf'); window.__h1.release(); });
+  assert(await until(() => a.evaluate(() => window.__h2.state !== 'armed'), 15000), 'harness: the delete of the rejected row is held');
+  await b.evaluate((x) => window.__m.unlockWithCode(x), c);
+  const mid = await sessionRow(a);
+  assert(mid && mid.epoch === e1 && mid.openedAt === T, 'harness: the other page wrote its row at the same epoch and time', { mid, e1, T });
+  await a.evaluate(() => window.__h2.release());
+  assert(await until(() => a.evaluate(() => window.__res !== undefined), 15000), 'harness: the call settles');
+  for (const p of [a, b]) await p.evaluate(() => { Date.now = window.__now; });
+  const r = await a.evaluate(() => ({ res: window.__res, tx: window.__h2.tx }));
+  const row = await sessionRow(a);
+  assert(JSON.stringify(r.tx) === '["session","readwrite"]', 'harness: the held connection deleted from the session store', r.tx);
+  assert(r.res === false, 'the silent unlock still loses', r);
+  assert(row && row.epoch === e1, 'the other page\'s row survives the delete', row);
+  assert(await until(() => a.evaluate(() => window.__m.state().unlocked), 5000), 'the first page follows the other page\'s unlock');
+  await b.reload({ waitUntil: 'load' });
+  const s2 = await runtime(b);
+  assert(s2.launch === 'continue' && s2.unlocked, 'a reload continues the surviving session', s2);
 });
 
 check('removing a passkey or the passphrase after a silent unlock asks for a confirm', async () => {

@@ -155,7 +155,8 @@ localeReload: true
     <div class="about-data-grid">
       <div class="about-data-card">
         <h3 class="about-data-card__h">{{ "about.data_export_title" | t }}</h3>
-        <p class="about-data-card__p">{{ "about.data_export_lede" | t }}</p>
+        <p class="about-data-card__p" id="about-data-export-lede">{{ "about.data_export_lede" | t }}</p>
+        <p class="about-data-card__p" id="about-data-export-lede-code" hidden>{{ "about.data_export_lede_code" | t }}</p>
         <button type="button" class="about-data-btn about-data-btn--ghost about-reveal-btn" data-reveal="about-export-form">{{ "about.data_export_button" | t }}…</button>
         <div class="about-fold" id="about-export-form" hidden>
           <p class="about-data-size" id="about-data-size" aria-live="polite"></p>
@@ -180,7 +181,8 @@ localeReload: true
 
       <div class="about-data-card">
         <h3 class="about-data-card__h">{{ "about.data_import_title" | t }}</h3>
-        <p class="about-data-card__p">{{ "about.data_import_lede" | t }}</p>
+        <p class="about-data-card__p" id="about-data-import-lede">{{ "about.data_import_lede" | t }}</p>
+        <p class="about-data-card__p" id="about-data-import-lede-code" hidden>{{ "about.data_import_lede_code" | t }}</p>
         <button type="button" class="about-data-btn about-data-btn--ghost about-reveal-btn" data-reveal="about-import-form">{{ "about.data_import_button" | t }}…</button>
         <div class="about-fold" id="about-import-form" hidden>
           <label class="about-data-field">
@@ -195,7 +197,7 @@ localeReload: true
             <p class="about-data-card__p" id="about-data-import-code-note">{{ "unlock.backup_code_prompt" | t }}</p>
             <label class="about-data-field">
               <span>{{ "unlock.code_label" | t }}</span>
-              <input type="text" id="about-data-import-code" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" aria-describedby="about-data-import-code-note">
+              <input type="text" id="about-data-import-code" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-describedby="about-data-import-code-note">
             </label>
           </div>
           <p class="about-data-code" id="about-data-import-key" hidden>{{ "unlock.backup_default" | t }}</p>
@@ -701,6 +703,7 @@ localeReload: true
       restoreErr: {
         file:  {{ ('common.restore_err_file'  | t) | dump | safe }},
         pass:  {{ ('common.restore_err_pass'  | t) | dump | safe }},
+        code:  {{ ('common.restore_err_code'  | t) | dump | safe }},
         space: {{ ('common.restore_err_space' | t) | dump | safe }},
         newer: {{ ('common.restore_err_newer' | t) | dump | safe }},
         blocked: {{ ('common.restore_err_blocked' | t) | dump | safe }},
@@ -733,6 +736,10 @@ localeReload: true
     var importCodeBox   = document.getElementById('about-data-import-code-box');
     var importCode= document.getElementById('about-data-import-code');
     var importKey = document.getElementById('about-data-import-key');
+    var exportLede = document.getElementById('about-data-export-lede');
+    var exportLedeCode = document.getElementById('about-data-export-lede-code');
+    var importLede = document.getElementById('about-data-import-lede');
+    var importLedeCode = document.getElementById('about-data-import-lede-code');
     COPY.restore.areas = COPY.areas;
 
     var unlock = null;
@@ -786,6 +793,8 @@ localeReload: true
       codeNote.hidden = !on || otherOpen();
       otherBtn.hidden = !on;
       passBox.hidden = on && !otherOpen();
+      exportLede.hidden = passBox.hidden;
+      exportLedeCode.hidden = !passBox.hidden;
       if (passBox.hidden && passBox.contains(document.activeElement)) { try { otherBtn.focus({ preventScroll: true }); } catch (_) {} }
     }
 
@@ -794,6 +803,8 @@ localeReload: true
       importPassField.hidden = kind !== 'pass';
       importCodeBox.hidden = kind !== 'code';
       importKey.hidden = kind !== 'key';
+      importLede.hidden = kind !== 'pass';
+      importLedeCode.hidden = kind === 'pass';
       if (kind !== 'pass') importPass.value = '';
       if (kind !== 'code') importCode.value = '';
       if (lost && !document.activeElement.getClientRects().length) {
@@ -994,9 +1005,11 @@ localeReload: true
         } else {
           setStatus(importStat, COPY.passTooShort, 'err');
         }
+        refreshRestore();
         return;
       }
       setStatus(importStat, COPY.importBusy, null);
+      var reloading = false;
       try {
         var data = await window.MentriaBackup.readBackupFile(f, pw, { onProgress: progressTo(importStat, COPY.importBusy) });
         pw = ''; importPass.value = ''; importCode.value = ''; wipeKey(mode.key);
@@ -1004,14 +1017,17 @@ localeReload: true
         var result = await window.MentriaBackup.applyRestore(data, COPY.restore);
         if (result.cancelled) { setStatus(importStat, COPY.importCancelled, null); return; }
         setStatus(importStat, COPY.importDone.replace('{n}', result.restored), 'ok');
+        reloading = true;
         setTimeout(function () { location.reload(); }, 1200);
       } catch (err) {
         var code = window.MentriaBackup.restoreErrorCode(err);
+        if (code === 'pass' && mode.kind === 'code') code = 'code';
         setStatus(importStat, code ? COPY.restoreErr[code] : COPY.importFail.replace('{err}', String(err && err.message || err)), 'err');
       } finally {
         pw = ''; importPass.value = ''; importCode.value = ''; wipeKey(mode.key);
         restoring = false;
         importBtn.disabled = false;
+        if (!reloading) refreshRestore();
       }
     });
   }

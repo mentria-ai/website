@@ -80,7 +80,8 @@ localeReload: true
   <div class="files-modal__backdrop" data-close></div>
   <div class="files-modal__card m-modal__card">
     <h3 class="files-modal__h">{{ "tool.files.export_modal_title" | t }}</h3>
-    <p class="files-modal__p">{{ "tool.files.export_modal_lede" | t }}</p>
+    <p class="files-modal__p" id="files-export-lede">{{ "tool.files.export_modal_lede" | t }}</p>
+    <p class="files-modal__p" id="files-export-lede-code" hidden>{{ "tool.files.export_modal_lede_code" | t }}</p>
     <p class="files-modal__p" id="files-export-size" aria-live="polite"></p>
     <p class="files-modal__note" id="files-export-warn" hidden>{{ "common.backup_size_large" | t }}</p>
     <p class="files-modal__code" id="files-export-code" hidden>{{ "unlock.backup_default" | t }}</p>
@@ -101,7 +102,8 @@ localeReload: true
   <div class="files-modal__backdrop" data-close></div>
   <div class="files-modal__card m-modal__card">
     <h3 class="files-modal__h">{{ "about.data_import_title" | t }}</h3>
-    <p class="files-modal__p">{{ "about.data_import_lede" | t }}</p>
+    <p class="files-modal__p" id="files-restore-lede">{{ "about.data_import_lede" | t }}</p>
+    <p class="files-modal__p" id="files-restore-lede-code" hidden>{{ "about.data_import_lede_code" | t }}</p>
     <div class="m-field">
       <label for="files-restore-file">{{ "about.data_import_choose" | t }}</label>
       <input class="m-input" type="file" id="files-restore-file" accept="application/json,.json">
@@ -113,7 +115,7 @@ localeReload: true
     <div class="m-field" id="files-restore-code-box" hidden>
       <p class="files-modal__p" id="files-restore-code-note">{{ "unlock.backup_code_prompt" | t }}</p>
       <label for="files-restore-code">{{ "unlock.code_label" | t }}</label>
-      <input class="m-input" type="text" id="files-restore-code" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" aria-describedby="files-restore-code-note">
+      <input class="m-input" type="text" id="files-restore-code" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-describedby="files-restore-code-note">
     </div>
     <p class="files-modal__code" id="files-restore-key" hidden>{{ "unlock.backup_default" | t }}</p>
     <p class="files-modal__strength" id="files-restore-status" aria-live="polite"></p>
@@ -237,6 +239,7 @@ localeReload: true
     restoreErr: {
       file:  {{ ("common.restore_err_file"  | t) | dump | safe }},
       pass:  {{ ("common.restore_err_pass"  | t) | dump | safe }},
+      code:  {{ ("common.restore_err_code"  | t) | dump | safe }},
       space: {{ ("common.restore_err_space" | t) | dump | safe }},
       newer: {{ ("common.restore_err_newer" | t) | dump | safe }},
       blocked: {{ ("common.restore_err_blocked" | t) | dump | safe }},
@@ -977,6 +980,10 @@ localeReload: true
   const restoreCodeBox = $('files-restore-code-box');
   const restoreCode = $('files-restore-code');
   const restoreKey = $('files-restore-key');
+  const exportLede = $('files-export-lede');
+  const exportLedeCode = $('files-export-lede-code');
+  const restoreLede = $('files-restore-lede');
+  const restoreLedeCode = $('files-restore-lede-code');
   let unlock = null;
   let unlockLoad = null;
   let codeShown = false;
@@ -1022,6 +1029,8 @@ localeReload: true
     exportCode.hidden = !on || otherOpen();
     otherBtn.hidden = !on;
     exportPassBox.hidden = on && !otherOpen();
+    exportLede.hidden = exportPassBox.hidden;
+    exportLedeCode.hidden = !exportPassBox.hidden;
     if (exportPassBox.hidden && exportPassBox.contains(document.activeElement)) $('files-export-confirm').focus();
   }
 
@@ -1030,6 +1039,8 @@ localeReload: true
     restorePassBox.hidden = kind !== 'pass';
     restoreCodeBox.hidden = kind !== 'code';
     restoreKey.hidden = kind !== 'key';
+    restoreLede.hidden = kind !== 'pass';
+    restoreLedeCode.hidden = kind === 'pass';
     if (kind !== 'pass') $('files-restore-pass').value = '';
     if (kind !== 'code') restoreCode.value = '';
     if (lost && !document.activeElement.getClientRects().length) {
@@ -1207,9 +1218,11 @@ localeReload: true
       btn.disabled = false;
       if (!secret) (mode.kind === 'code' ? restoreCode : passEl).focus();
       else out.textContent = COPY.restoreFail.replace('{err}', 'MentriaBackup');
+      refreshRestore();
       return;
     }
     out.textContent = COPY.restoreBusy;
+    let reloading = false;
     try {
       const data = await MentriaBackup.readBackupFile(f, secret, { onProgress: progressTo(out, COPY.restoreBusy) });
       passEl.value = '';
@@ -1223,9 +1236,11 @@ localeReload: true
         return;
       }
       out.textContent = COPY.restoreDone.replace('{n}', result.restored);
+      reloading = true;
       setTimeout(() => { location.reload(); }, 1200);
     } catch (err) {
-      const code = MentriaBackup.restoreErrorCode(err);
+      const raw = MentriaBackup.restoreErrorCode(err);
+      const code = raw === 'pass' && mode.kind === 'code' ? 'code' : raw;
       out.textContent = code ? COPY.restoreErr[code] : COPY.restoreFail.replace('{err}', String(err && err.message || err));
       btn.disabled = false;
     } finally {
@@ -1233,6 +1248,7 @@ localeReload: true
       restoreCode.value = '';
       wipeKey(mode.key);
       restoring = false;
+      if (!reloading) refreshRestore();
     }
   });
 

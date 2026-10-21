@@ -1,15 +1,15 @@
-import http from 'node:http';
-import { createReadStream, statSync, rmSync, mkdirSync, readdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
-import { join, extname, normalize, resolve, sep } from 'node:path';
+import { statSync, rmSync, mkdirSync, readdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import puppeteer from 'puppeteer-core';
+import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
 const PROD = process.argv[3] || '';
 if (!BUILD) { console.log('usage: node scripts/unlock-backup-check.mjs <beta build dir> [<production build dir>]'); process.exit(2); }
 const PORT = 8094;
 const ORIGIN = 'http://localhost:' + PORT;
-const WORK = join(tmpdir(), 'unlock-backup-check');
+const WORK = join(tmpdir(), 'unlock-backup-check-' + process.pid);
 const PROFILE = join(WORK, 'profile');
 const SHOTS = join(WORK, 'shots');
 const MODULE = '/assets/js/mentria-unlock.js';
@@ -19,37 +19,11 @@ const WRONG = 'AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA';
 const CT_OPEN = ',"ct":[';
 const EN = JSON.parse(readFileSync(new URL('../src/_data/i18n/en.json', import.meta.url), 'utf8'));
 
-const TYPES = {
-  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
-  '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp',
-  '.woff2': 'font/woff2', '.txt': 'text/plain', '.xml': 'application/xml', '.ico': 'image/x-icon', '.pdf': 'application/pdf'
-};
-
-let root = resolve(BUILD);
-
-function serve(port) {
-  const server = http.createServer((req, res) => {
-    let path;
-    try { path = decodeURIComponent(new URL(req.url, 'http://local').pathname); } catch (_) { res.writeHead(400); res.end(); return; }
-    let file = normalize(join(root, path));
-    if (file !== root && !file.startsWith(root + sep)) { res.writeHead(403); res.end(); return; }
-    try {
-      if (statSync(file).isDirectory()) file = join(file, 'index.html');
-      statSync(file);
-    } catch (_) {
-      res.writeHead(404);
-      res.end('not found');
-      return;
-    }
-    res.writeHead(200, { 'Content-Type': TYPES[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
-    createReadStream(file).pipe(res);
-  });
-  return new Promise((ok) => server.listen(port, '127.0.0.1', () => ok(server)));
-}
-
 rmSync(WORK, { recursive: true, force: true });
 mkdirSync(SHOTS, { recursive: true });
-const server = await serve(PORT);
+const server = serve(PORT);
+await server.ready;
+server.setRoot(BUILD);
 const browser = await puppeteer.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   headless: true,
@@ -140,6 +114,7 @@ async function ui(page, sels) {
 
 const textOf = (page, sel) => page.$eval(sel, (el) => el.textContent.replace(/\s+/g, ' ').trim());
 const norm = (s) => String(s).replace(/\s+/g, ' ').trim();
+const showsText = async (page, sel, text) => (await shown(page, sel)) && (await textOf(page, sel)) === text;
 
 function clearDir(dir) {
   for (const n of readdirSync(dir)) rmSync(join(dir, n), { recursive: true, force: true });
@@ -185,6 +160,16 @@ const dialogOpen = (page) => page.evaluate(() => {
   return !!d && (d.matches(':popover-open') || d.hasAttribute('data-open'));
 });
 
+async function lockDuringRestore(page, lab, clickSel, fieldSel) {
+  await page.click(clickSel);
+  assert(await until(() => dialogOpen(page), 20000), 'the restore asks before changing anything');
+  await lab.evaluate((url) => import(url).then((m) => m.lock()), MODULE);
+  await sleep(1200);
+  await page.click('#m-dialog-cancel');
+  assert(await until(async () => !(await dialogOpen(page)), 5000), 'the dialog closes');
+  return until(() => shown(page, fieldSel), 5000);
+}
+
 async function settle(page, read, final, timeout = 60000) {
   const asked = [];
   const end = Date.now() + timeout;
@@ -215,6 +200,7 @@ async function aboutPage(dev, width) {
 }
 
 async function reveal(page, id) {
+  await page.bringToFront();
   if (!(await shown(page, '#' + id))) await page.click('[data-reveal="' + id + '"]');
   await page.waitForSelector('#' + id + ':not([hidden])');
 }
@@ -332,6 +318,7 @@ check('export while unlocked makes a v5 file', async () => {
   assert(await textOf(about, '#about-data-code') === norm(EN.unlock.backup_default), 'About code line text');
   assert(await textOf(about, '#about-data-other') === norm(EN.unlock.backup_other), 'About disclosure text');
   assert(await about.$eval('#about-data-other', (b) => b.getAttribute('aria-expanded')) === 'false', 'disclosure starts collapsed');
+  assert(await showsText(about, '#about-data-export-lede-code', norm(EN.about.data_export_lede_code)) && !(await shown(about, '#about-data-export-lede')), 'About export lede for a code-protected file');
   await shot(about, 'about-export-code-1280', '.about-data-card:has(#about-export-form)');
   const v5 = await aboutExport(about, A);
   const h = header(v5);
@@ -342,6 +329,7 @@ check('export while unlocked makes a v5 file', async () => {
   const u2 = await ui(about, { code: '#about-data-code', pass: '#about-data-pass', pass2: '#about-data-pass2' });
   assert(!u2.code && u2.pass && u2.pass2, 'disclosure shows both passphrase fields and drops the code line', u2);
   assert(await about.$eval('#about-data-other', (b) => b.getAttribute('aria-expanded')) === 'true', 'disclosure expanded');
+  assert(await shown(about, '#about-data-export-lede') && !(await shown(about, '#about-data-export-lede-code')), 'the disclosure brings back the passphrase lede');
   await shot(about, 'about-export-other-1280', '.about-data-card:has(#about-export-form)');
   await about.type('#about-data-pass', 'short');
   await about.click('#about-data-export-btn');
@@ -371,6 +359,7 @@ check('export while unlocked makes a v5 file', async () => {
   const f = await ui(files, { code: '#files-export-code', other: '#files-export-other', pass: '#files-export-pass' });
   assert(f.code && f.other && !f.pass, 'Files export: code line and disclosure, no passphrase field', f);
   assert(await textOf(files, '#files-export-code') === norm(EN.unlock.backup_default), 'Files code line text');
+  assert(await showsText(files, '#files-export-lede-code', norm(EN.tool.files.export_modal_lede_code)) && !(await shown(files, '#files-export-lede')), 'Files export lede for a code-protected file');
   await shot(files, 'files-export-code-1280', '#files-export-modal .m-modal__card');
   const fv5 = await filesExport(files, A);
   const fh = header(fv5);
@@ -381,6 +370,7 @@ check('export while unlocked makes a v5 file', async () => {
   await files.click('#files-export-other');
   const f2 = await ui(files, { code: '#files-export-code', pass: '#files-export-pass' });
   assert(!f2.code && f2.pass, 'Files disclosure shows the passphrase field', f2);
+  assert(await shown(files, '#files-export-lede') && !(await shown(files, '#files-export-lede-code')), 'Files disclosure brings back the passphrase lede');
   await files.type('#files-export-pass', PASS);
   const fv3 = await filesExport(files, A);
   const fh3 = header(fv3);
@@ -414,10 +404,11 @@ check('restore v5 on a fresh profile with the code', async () => {
   assert(!u.pass && u.code && u.prompt && !u.key, 'the code field replaces the passphrase field', u);
   assert(await textOf(about, '#about-data-import-code-note') === norm(EN.unlock.backup_code_prompt), 'About code prompt text');
   const attrs = await about.$eval('#about-data-import-code', (el) => ({
-    type: el.type, ac: el.getAttribute('autocomplete'), cap: el.getAttribute('autocapitalize'),
+    type: el.type, ac: el.getAttribute('autocomplete'), cap: el.getAttribute('autocapitalize'), cor: el.getAttribute('autocorrect'), spell: el.getAttribute('spellcheck'),
     label: el.closest('label') ? el.closest('label').querySelector('span').textContent.trim() : ''
   }));
-  assert(attrs.type === 'text' && attrs.ac === 'one-time-code' && attrs.cap === 'characters' && attrs.label === norm(EN.unlock.code_label), 'About code field attributes', attrs);
+  assert(attrs.type === 'text' && attrs.ac === 'one-time-code' && attrs.cap === 'characters' && attrs.cor === 'off' && attrs.spell === 'false' && attrs.label === norm(EN.unlock.code_label), 'About code field attributes', attrs);
+  assert(await showsText(about, '#about-data-import-lede-code', norm(EN.about.data_import_lede_code)) && !(await shown(about, '#about-data-import-lede')), 'About restore lede for a code file');
   await shot(about, 'about-restore-code-1280', '.about-data-card:has(#about-import-form)');
   await about.setViewport({ width: 390, height: 900 });
   assert(await about.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth) <= 0, 'About restore: no horizontal scroll at 390 px');
@@ -425,7 +416,7 @@ check('restore v5 on a fresh profile with the code', async () => {
   await about.setViewport({ width: 1280, height: 900 });
   await about.type('#about-data-import-code', WRONG);
   const bad = await aboutRestore(about);
-  assert(bad.tone === 'err' && bad.text === norm(EN.common.restore_err_pass), 'a wrong code shows the wrong-passphrase error', bad);
+  assert(bad.tone === 'err' && bad.text === norm(EN.common.restore_err_code), 'a wrong code shows the wrong-code error', bad);
   assert(await about.$eval('#about-data-import-code', (el) => el.value) === '', 'the code field is cleared after a try');
   assert(await readStore(about, 'tools.' + CHECK_KEY) === null, 'nothing restored after a wrong code');
   await about.type('#about-data-import-code', code.toLowerCase());
@@ -449,10 +440,11 @@ check('restore v5 on a fresh profile with the code', async () => {
   const f = await ui(files, { pass: '#files-restore-pass', code: '#files-restore-code', prompt: '#files-restore-code-note', key: '#files-restore-key' });
   assert(!f.pass && f.code && f.prompt && !f.key, 'Files code field replaces the passphrase field', f);
   const fattrs = await files.$eval('#files-restore-code', (el) => ({
-    type: el.type, ac: el.getAttribute('autocomplete'), cap: el.getAttribute('autocapitalize'),
+    type: el.type, ac: el.getAttribute('autocomplete'), cap: el.getAttribute('autocapitalize'), cor: el.getAttribute('autocorrect'), spell: el.getAttribute('spellcheck'),
     label: document.querySelector('label[for="files-restore-code"]').textContent.trim()
   }));
-  assert(fattrs.type === 'text' && fattrs.ac === 'one-time-code' && fattrs.cap === 'characters' && fattrs.label === norm(EN.unlock.code_label), 'Files code field attributes', fattrs);
+  assert(fattrs.type === 'text' && fattrs.ac === 'one-time-code' && fattrs.cap === 'characters' && fattrs.cor === 'off' && fattrs.spell === 'false' && fattrs.label === norm(EN.unlock.code_label), 'Files code field attributes', fattrs);
+  assert(await showsText(files, '#files-restore-lede-code', norm(EN.about.data_import_lede_code)) && !(await shown(files, '#files-restore-lede')), 'Files restore lede for a code file');
   assert(await textOf(files, '#files-restore-code-note') === norm(EN.unlock.backup_code_prompt), 'Files code prompt text');
   await shot(files, 'files-restore-code-1280', '#files-restore-modal .m-modal__card');
   await files.setViewport({ width: 390, height: 900 });
@@ -461,7 +453,7 @@ check('restore v5 on a fresh profile with the code', async () => {
   await files.setViewport({ width: 1280, height: 900 });
   await files.type('#files-restore-code', WRONG);
   const fbad = await filesRestore(files);
-  assert(fbad.text === norm(EN.common.restore_err_pass), 'Files wrong code shows the wrong-passphrase error', fbad);
+  assert(fbad.text === norm(EN.common.restore_err_code), 'Files wrong code shows the wrong-code error', fbad);
   await files.type('#files-restore-code', code);
   await files.$eval('#files-restore-status', (el) => { el.textContent = ''; });
   const fnav = reloaded(files);
@@ -543,6 +535,117 @@ check('restore v5 while unlocked opens without asking', async () => {
   clean();
 });
 
+check('flow on: v3 and v2 files use the passphrase, a v4 envelope follows the session', async () => {
+  assert(A && v3About && code, 'needs the first check');
+  const lab = await open(A, '/beta/unlock/');
+  await lab.evaluate((k) => window.MentriaStore.set('tools', k, { n: 1 }), CHECK_KEY);
+  const made = await lab.evaluate(async (url, pass) => {
+    const m = await import(url);
+    await m.ready();
+    const B = window.MentriaBackup;
+    const local = window.MentriaStore.exportAll();
+    const v2 = await B.encryptBackup(local, pass);
+    const v4 = await B.encryptBackup(local, { keyring: await m.backupKey() });
+    return { unlocked: m.state().unlocked, v2: JSON.stringify(v2), v4: JSON.stringify(v4) };
+  }, MODULE, PASS);
+  assert(made.unlocked, 'device A is unlocked for this check');
+  const v2 = join(WORK, 'v2-envelope.json');
+  const v4 = join(WORK, 'v4-envelope.json');
+  writeFileSync(v2, made.v2);
+  writeFileSync(v4, made.v4);
+  const e2 = JSON.parse(made.v2);
+  const e4 = JSON.parse(made.v4);
+  assert(e2.v === 2 && e2.kdf === 'PBKDF2', 'v2 envelope fixture', { v: e2.v, kdf: e2.kdf });
+  assert(e4.v === 4 && e4.kdf === 'keyring-code' && e4.salt === salt && e4.kcv === kcv, 'v4 envelope fixture', { v: e4.v, kdf: e4.kdf });
+
+  const aboutPass = async (file, label) => {
+    const about = await aboutPage(A);
+    await reveal(about, 'about-import-form');
+    await upload(about, '#about-data-import-file', file);
+    await sleep(800);
+    const u = await ui(about, { pass: '#about-data-import-pass', code: '#about-data-import-code', key: '#about-data-import-key', lede: '#about-data-import-lede', ledeCode: '#about-data-import-lede-code' });
+    assert(u.pass && !u.code && !u.key && u.lede && !u.ledeCode, 'About ' + label + ': the passphrase field while unlocked', u);
+    await about.evaluate((k) => window.MentriaStore.remove('tools', k), CHECK_KEY);
+    await about.type('#about-data-import-pass', PASS);
+    const nav = reloaded(about);
+    const ok = await aboutRestore(about);
+    assert(ok.tone === 'ok', 'About ' + label + ' restores with the passphrase', ok);
+    assert((await readStore(about, 'tools.' + CHECK_KEY) || {}).n === 1, 'About ' + label + ': data back');
+    await nav;
+    await about.close();
+  };
+  await aboutPass(v3About, 'v3 file');
+  await aboutPass(v2, 'v2 envelope');
+
+  const filesPass = async (file, label) => {
+    const files = await open(A, '/tools/files/');
+    await filesRestoreOpen(files);
+    await upload(files, '#files-restore-file', file);
+    await sleep(800);
+    const f = await ui(files, { pass: '#files-restore-pass', code: '#files-restore-code', key: '#files-restore-key', lede: '#files-restore-lede', ledeCode: '#files-restore-lede-code' });
+    assert(f.pass && !f.code && !f.key && f.lede && !f.ledeCode, 'Files ' + label + ': the passphrase field while unlocked', f);
+    await files.evaluate((k) => window.MentriaStore.remove('tools', k), CHECK_KEY);
+    await files.type('#files-restore-pass', PASS);
+    const nav = reloaded(files);
+    const ok = await filesRestore(files);
+    assert(ok.text === norm(EN.about.data_import_done), 'Files ' + label + ' restores with the passphrase', ok);
+    assert((await readStore(files, 'tools.' + CHECK_KEY) || {}).n === 1, 'Files ' + label + ': data back');
+    await nav;
+    await files.close();
+  };
+  await filesPass(v3About, 'v3 file');
+  await filesPass(v2, 'v2 envelope');
+
+  const about = await aboutPage(A);
+  await reveal(about, 'about-import-form');
+  await upload(about, '#about-data-import-file', v4);
+  assert(await until(() => shown(about, '#about-data-import-key'), 10000), 'About v4 envelope opens without asking while the session matches');
+  assert(!(await shown(about, '#about-data-import-pass')) && !(await shown(about, '#about-data-import-code')), 'About v4: no field while unlocked');
+  assert(await lockDuringRestore(about, lab, '#about-data-import-btn', '#about-data-import-code'), 'About: a Lock during a cancelled restore shows the code field afterwards');
+  assert(await textOf(about, '#about-data-import-status') === norm(EN.common.restore_cancelled), 'About: the restore was cancelled');
+  await lab.evaluate((url, c) => import(url).then((m) => m.unlockWithCode(c)), MODULE, code);
+  assert(await until(() => shown(about, '#about-data-import-key'), 10000), 'About v4: unlocking again opens it without asking');
+  await about.evaluate((k) => window.MentriaStore.remove('tools', k), CHECK_KEY);
+  const nav = reloaded(about);
+  const ok = await aboutRestore(about);
+  assert(ok.tone === 'ok', 'About v4 restores without asking', ok);
+  assert((await readStore(about, 'tools.' + CHECK_KEY) || {}).n === 1, 'About v4: data back');
+  await nav;
+  await about.waitForFunction(() => { const d = document.getElementById('about-advanced'); return !!d && d.open; });
+
+  const files = await open(A, '/tools/files/');
+  await filesRestoreOpen(files);
+  await upload(files, '#files-restore-file', v4);
+  assert(await until(() => shown(files, '#files-restore-key'), 10000), 'Files v4 envelope opens without asking while the session matches');
+  assert(await lockDuringRestore(files, lab, '#files-restore-confirm', '#files-restore-code'), 'Files: a Lock during a cancelled restore shows the code field afterwards');
+  assert(await textOf(files, '#files-restore-status') === norm(EN.common.restore_cancelled), 'Files: the restore was cancelled');
+  await lab.evaluate((url, c) => import(url).then((m) => m.unlockWithCode(c)), MODULE, code);
+  assert(await until(() => shown(files, '#files-restore-key'), 10000), 'Files v4: unlocking again opens it without asking');
+
+  await about.evaluate((url) => import(url).then((m) => m.lock()), MODULE);
+  assert(await until(() => shown(files, '#files-restore-code'), 10000), 'Files v4 envelope asks for the code after Lock');
+  await reveal(about, 'about-import-form');
+  await upload(about, '#about-data-import-file', v4);
+  assert(await until(() => shown(about, '#about-data-import-code'), 10000), 'About v4 envelope asks for the code when locked');
+  assert(!(await shown(about, '#about-data-import-pass')) && !(await shown(about, '#about-data-import-key')), 'About v4 locked: only the code field');
+  await about.type('#about-data-import-code', WRONG);
+  const bad = await aboutRestore(about);
+  assert(bad.tone === 'err' && bad.text === norm(EN.common.restore_err_code), 'About v4: a wrong code shows the wrong-code error', bad);
+  assert(await until(() => shown(about, '#about-data-import-code'), 5000), 'About v4: the code field stays after a wrong code');
+  await about.evaluate((k) => window.MentriaStore.remove('tools', k), CHECK_KEY);
+  await about.type('#about-data-import-code', code);
+  const nav2 = reloaded(about);
+  const ok2 = await aboutRestore(about);
+  assert(ok2.tone === 'ok', 'About v4 restores with the code when locked', ok2);
+  assert((await readStore(about, 'tools.' + CHECK_KEY) || {}).n === 1, 'About v4 locked: data back');
+  await nav2;
+  await lab.evaluate((url, c) => import(url).then((m) => m.unlockWithCode(c)), MODULE, code);
+  await files.close();
+  await about.close();
+  await lab.close();
+  clean();
+});
+
 check('switch off keeps the passphrase export', async () => {
   assert(A && v5About && v3About, 'needs the first check');
   const lab = await open(A, '/beta/unlock/');
@@ -555,6 +658,7 @@ check('switch off keeps the passphrase export', async () => {
   assert(!(await bootLoaded(about)), 'About does not load the runtime with the switch off');
   const u = await ui(about, { code: '#about-data-code', other: '#about-data-other', pass: '#about-data-pass', pass2: '#about-data-pass2' });
   assert(!u.code && !u.other && u.pass && u.pass2, 'About export shows the two passphrase fields as today', u);
+  assert(await shown(about, '#about-data-export-lede') && !(await shown(about, '#about-data-export-lede-code')), 'About export lede as today');
   await shot(about, 'about-export-off-1280', '.about-data-card:has(#about-export-form)');
   await about.click('#about-data-export-btn');
   const st = await aboutStatus(about, 'about-data-export-status');
@@ -574,6 +678,7 @@ check('switch off keeps the passphrase export', async () => {
   await sleep(800);
   const r = await ui(about, { pass: '#about-data-import-pass', code: '#about-data-import-code', key: '#about-data-import-key' });
   assert(r.pass && !r.code && !r.key, 'switch off: a v5 file shows the passphrase field as today', r);
+  assert(await shown(about, '#about-data-import-lede') && !(await shown(about, '#about-data-import-lede-code')), 'About restore lede as today');
   assert(!(await bootLoaded(about)), 'choosing a v5 file does not load the runtime with the switch off');
   await upload(about, '#about-data-import-file', v3);
   await about.click('#about-data-import-btn');
@@ -593,6 +698,7 @@ check('switch off keeps the passphrase export', async () => {
   await sleep(600);
   const f = await ui(files, { code: '#files-export-code', other: '#files-export-other', pass: '#files-export-pass' });
   assert(!f.code && !f.other && f.pass, 'Files export shows the passphrase field as today', f);
+  assert(await shown(files, '#files-export-lede') && !(await shown(files, '#files-export-lede-code')), 'Files export lede as today');
   assert(await files.evaluate(() => document.activeElement && document.activeElement.id) === 'files-export-pass', 'Files export focuses the passphrase as today');
   await shot(files, 'files-export-off-1280', '#files-export-modal .m-modal__card');
   await files.type('#files-export-pass', PASS);
@@ -610,7 +716,7 @@ check('switch off keeps the passphrase export', async () => {
 });
 
 check('production build never loads the runtime', async () => {
-  root = resolve(PROD);
+  server.setRoot(PROD);
   try {
     const D = await device('d');
     const first = await open(D, '/about/');
@@ -638,7 +744,7 @@ check('production build never loads the runtime', async () => {
     await D.context.close();
     clean();
   } finally {
-    root = resolve(BUILD);
+    server.setRoot(BUILD);
   }
 }, !!PROD);
 
@@ -660,7 +766,7 @@ for (const [name, fn, when] of checks.filter(([n]) => !ONLY || n.includes(ONLY))
 }
 console.log((ran - failed) + '/' + ran + ' passed');
 await browser.close();
-server.close();
+await server.close();
 rmSync(PROFILE, { recursive: true, force: true });
 for (const n of readdirSync(WORK)) if (n.startsWith('downloads-')) rmSync(join(WORK, n), { recursive: true, force: true });
 console.log('screenshots: ' + SHOTS);

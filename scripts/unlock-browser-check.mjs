@@ -827,6 +827,7 @@ function assertLegacyKept(G, name, snap, when) {
 
 async function refreshRemember(G) {
   const st = await keyringState(G.rig.page);
+  assert(deviceUnlocks(G).length || !st.hasDevice, 'a person who had no device unlock does not get a keyring device key', { hasDevice: st.hasDevice });
   G.rememberOn = !!st.hasDevice;
   return st;
 }

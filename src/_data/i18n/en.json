@@ -6151,6 +6151,7 @@
     "not_now": "Not now",
     "not_now_note": "Locked things stay locked. You can unlock when you open one.",
     "working": "Unlocking…",
+    "saving": "Saving…",
     "err_code": "That code doesn't match. Check it and try again.",
     "err_pass": "That passphrase doesn't match.",
     "err_prf": "Your device didn't unlock Mentria here. Use your recovery code, then add this device.",
@@ -6201,6 +6202,7 @@
     "passkey_step_title": "Unlock with your device next time",
     "skip_for_now": "Skip for now",
     "passkey_skipped": "No passkey was added.",
+    "passkey_unusable": "Your device saved a passkey Mentria can't use. You can delete it in your device's settings.",
     "code_save_first": "Save this code first. It replaced your old one.",
     "passphrase_too_short_keep": "Your old passphrase is shorter than 12 characters, so it won't carry over.",
     "services": {

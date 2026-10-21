@@ -6151,6 +6151,7 @@
     "not_now": "Ahora no",
     "not_now_note": "Lo bloqueado sigue bloqueado. Puedes desbloquearlo cuando lo abras.",
     "working": "Desbloqueando…",
+    "saving": "Guardando…",
     "err_code": "Ese código no coincide. Revísalo e inténtalo de nuevo.",
     "err_pass": "Esa frase de contraseña no coincide.",
     "err_prf": "Tu dispositivo no desbloqueó Mentria aquí. Usa tu código de recuperación y luego añade este dispositivo.",
@@ -6201,6 +6202,7 @@
     "passkey_step_title": "Desbloquea con tu dispositivo la próxima vez",
     "skip_for_now": "Omitir por ahora",
     "passkey_skipped": "No se añadió ninguna llave de acceso.",
+    "passkey_unusable": "Tu dispositivo guardó una llave de acceso que Mentria no puede usar. Puedes eliminarla en los ajustes de tu dispositivo.",
     "code_save_first": "Guarda este código primero. Ha reemplazado al anterior.",
     "passphrase_too_short_keep": "Tu frase de contraseña anterior tiene menos de 12 caracteres, así que no se conservará.",
     "services": {

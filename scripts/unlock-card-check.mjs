@@ -279,14 +279,37 @@ async function busyInfo(target) {
     const d = document.querySelector('.m-ulayer [role="dialog"]');
     if (!d) return null;
     const m = d.querySelector('.m-usheet__msg');
-    return { buttons: [...d.querySelectorAll('button')].map((b) => b.disabled), msg: m ? m.textContent : null, busy: d.hasAttribute('aria-busy') };
+    const fields = [...d.querySelectorAll('input')].filter((i) => i.getClientRects().length > 0).map((i) => ({
+      name: i.name,
+      locked: i.type === 'checkbox' || i.type === 'radio' ? i.disabled : i.readOnly || i.disabled
+    }));
+    return { buttons: [...d.querySelectorAll('button')].map((b) => b.disabled), fields, msg: m ? m.textContent : null, busy: d.hasAttribute('aria-busy') };
   });
 }
 
-async function busyNow(target) {
+async function busyNow(target, want) {
   const i = await busyInfo(target);
-  return !!i && i.buttons.length > 0 && i.buttons.every(Boolean) && i.msg === EN.working && i.busy;
+  return !!i && i.buttons.length > 0 && i.buttons.every(Boolean) && i.msg === (want || EN.saving) && i.busy;
 }
+
+async function focusInfo(target) {
+  return target.evaluate(() => {
+    const d = document.querySelector('.m-ulayer [role="dialog"]');
+    const a = document.activeElement;
+    const first = d ? [...d.querySelectorAll('button, a[href], input, select, textarea, [tabindex]')].find((n) => !n.disabled && n.tabIndex >= 0 && n.getClientRects().length > 0) : null;
+    const name = (n) => (n ? n.dataset.act || n.name || n.tagName : null);
+    return { active: name(a), first: name(first), isFirst: !!first && a === first, inside: !!d && d.contains(a) && a !== d && !a.disabled };
+  });
+}
+
+const SLOW_ENCRYPT = (ms) => {
+  const enc = crypto.subtle.encrypt.bind(crypto.subtle);
+  window.__slow = true;
+  crypto.subtle.encrypt = async (...a) => {
+    if (window.__slow) await new Promise((r) => setTimeout(r, ms));
+    return enc(...a);
+  };
+};
 
 async function axe(target, sel) {
   await target.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running'), { timeout: 5000 });
@@ -510,9 +533,11 @@ check('setup with new code requires last four', async () => {
     };
   });
   await page.keyboard.press('Enter');
-  const busy = await until(() => busyNow(page), 5000);
+  const busy = await until(() => busyNow(page, EN.saving), 5000);
+  const busyState = await busyInfo(page);
   await page.evaluate(() => { window.__slow = false; });
-  assert(busy, 'buttons off and the working line shown while the keyring is made', await busyInfo(page));
+  assert(busy, 'buttons off and the saving line shown while the keyring is made', busyState);
+  assert(EN.saving !== EN.working && busyState.fields.length > 0 && busyState.fields.every((f) => f.locked), 'the last-four field is read-only while the keyring is made', busyState);
   await until(async () => ['passkey', 'no-prf'].includes(await step(page)), 15000);
   const made = await page.evaluate(() => ({ st: window.__m.state(), rec: !!localStorage.getItem('mentria.store.keyring.vault') }));
   assert(made.rec && made.st.setUp && made.st.unlocked && made.st.codeConfirmed, 'Next on the code step makes the confirmed keyring', made);
@@ -657,7 +682,7 @@ check('setup with verifyCode checks the typed code', async () => {
   assert(attrs.ac === 'one-time-code' && attrs.cap === 'characters' && attrs.label === EN.code_label, 'saved code field', attrs);
   await page.type('.m-ulayer input[name="saved-code"]', 'AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA');
   await page.click('.m-ulayer [data-act="next"]');
-  assert(await until(() => busyNow(page), 3000), 'busy while the saved code is checked', await busyInfo(page));
+  assert(await until(() => busyNow(page, EN.working), 3000), 'busy with the unlocking line while the saved code is checked', await busyInfo(page));
   await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_code);
   assert(await step(page) === 'code' && await record(page) === null, 'a wrong saved code stays on the step, nothing written');
   await typeInto(page, '.m-ulayer input[name="saved-code"]', saved.toLowerCase());
@@ -792,7 +817,10 @@ check('setup falls back when the passkey has no PRF', async () => {
   await waitStep(page, 'no-prf');
   const mid = await page.evaluate(() => ({ s: window.__m.state(), notNow: !!document.querySelector('.m-ulayer [data-act="not-now"]') }));
   assert(mid.s.setUp && mid.s.passkeys === 0 && !mid.notNow, 'keyring made, no-PRF options offered, no Later once written', mid);
-  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.passkey_skipped);
+  assert(EN.passkey_unusable && EN.passkey_unusable !== EN.passkey_skipped, 'the unusable-passkey line has its own copy');
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.passkey_unusable);
+  const warn = await page.$eval('.m-ulayer .m-usheet__msg', (el) => ({ warn: el.classList.contains('is-warn'), error: el.classList.contains('is-error') }));
+  assert(warn.warn && !warn.error, 'the device saved a passkey Mentria cannot use, said as a warning', warn);
   const live = await page.evaluate(() => window.__live.filter((x) => x.text === document.querySelector('.m-ulayer .m-usheet__msg').textContent));
   assert(live.length > 0 && live.every((x) => x.frame > x.born), 'the new step fills its live region a frame after the region is in the DOM', live);
   await page.click('.m-ulayer input[name="remember"]');
@@ -801,6 +829,22 @@ check('setup falls back when the passkey has no PRF', async () => {
   const st = await page.evaluate(() => ({ res: window.__setupResult, s: window.__m.state() }));
   assert(st.res === true && st.s.hasDevice && st.s.codeConfirmed, 'remember turned on after the fallback', st);
   await cdp.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId: a });
+  await clean();
+  const p2 = await open('/beta/unlock/');
+  await enableOnLab(p2);
+  await modules(p2);
+  await p2.click('#unlock-demo-setup');
+  await waitStep(p2, 'intro');
+  await p2.click('.m-ulayer [data-act="next"]');
+  await waitStep(p2, 'code');
+  const c2 = await shownCode(p2);
+  await p2.type('.m-ulayer input[name="code-check"]', c2.slice(-4));
+  await p2.click('.m-ulayer [data-act="next"]');
+  await waitStep(p2, 'passkey');
+  await p2.evaluate(() => { delete window.PublicKeyCredential; });
+  await p2.click('.m-ulayer [data-act="add-passkey"]');
+  await waitStep(p2, 'no-prf');
+  await waitMsg(p2, '.m-ulayer .m-usheet__msg', EN.passkey_skipped);
 });
 
 check('confirm and a regenerated code', async () => {
@@ -1044,10 +1088,14 @@ check('setup resolves true only when the service is linked', async () => {
     await waitStep(page, 'code');
     const code = await shownCode(page);
     await page.type('.m-ulayer input[name="code-check"]', code.slice(-4));
-    await page.click('.m-ulayer [data-act="next"]');
+    if (retry) await page.keyboard.press('Enter');
+    else await page.click('.m-ulayer [data-act="next"]');
     await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_storage);
     const mid = await page.evaluate(() => ({ step: document.querySelector('.m-ulayer [data-step]').dataset.step, notNow: !!document.querySelector('.m-ulayer [data-act="not-now"]'), s: window.__m.state(), r: window.__r }));
     assert(mid.step === 'code' && !mid.notNow && mid.s.setUp && mid.s.linked.length === 0 && mid.r === null, 'the link error stays on the step with a retry, no Later', mid);
+    const f = await focusInfo(page);
+    if (retry) assert(f.isFirst, 'focus returns to the first control after a link failure from the last-four field', f);
+    else assert(f.inside && f.active === 'next', 'focus stays on Next after a link failure from Next', f);
     if (retry) {
       const before = await page.evaluate(() => JSON.parse(localStorage.getItem('mentria.store.keyring.vault')).kcv);
       await page.evaluate(() => { window.__failLink = false; });
@@ -1113,10 +1161,10 @@ check('back while busy keeps the handler', async () => {
   await waitStep(page, 'code');
   await page.type('.m-ulayer input[name="saved-code"]', 'WXYZ-2345-ABCD-EFGH-IJKL-MNOP-QRST-UV67');
   await page.click('.m-ulayer [data-act="next"]');
-  assert(await until(() => busyNow(page), 3000), 'busy while the code is checked', await busyInfo(page));
+  assert(await until(() => busyNow(page, EN.working), 3000), 'busy while the code is checked', await busyInfo(page));
   await page.evaluate(() => history.back());
   await sleep(600);
-  assert(await layerOpen(page) && await busyNow(page) && await page.evaluate(() => window.__r === null), 'Back while busy is ignored');
+  assert(await layerOpen(page) && await busyNow(page, EN.working) && await page.evaluate(() => window.__r === null), 'Back while busy is ignored');
   await page.evaluate(() => window.__release());
   await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_code);
   await page.evaluate(() => history.back());
@@ -1156,6 +1204,224 @@ check('a storage AbortError is not shown as cancelled', async () => {
   await page.type('#unlock-demo input[name="recovery-code"]', code);
   await page.keyboard.press('Enter');
   await waitMsg(page, '#unlock-demo .m-unlock__msg', EN.err_storage);
+});
+
+const KNOWN = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ23-4567';
+const KEPT = 'an old passphrase kept';
+const NO_PRF_NO_CW = () => {
+  if (window.PublicKeyCredential) PublicKeyCredential.getClientCapabilities = async () => ({ 'extension:prf': false });
+  try { delete window.CloseWatcher; } catch (_) {}
+};
+
+async function setupTo(page, args, want) {
+  await start(page, '(ui) => ui.showSetup(' + args + ')');
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, want);
+}
+
+check('closing the passkey or no-PRF step keeps the passphrase, never Remember', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await modules(page);
+  await setupTo(page, "{ knownCode: '" + KNOWN + "', knownPassphrase: '" + KEPT + "' }", 'passkey');
+  assert(await page.$eval('.m-ulayer input[name="keep-pass"]', (el) => el.checked), 'keep my passphrase is on by default');
+  await page.evaluate(SLOW_ENCRYPT, 700);
+  await page.keyboard.press('Escape');
+  const busy = await until(() => busyNow(page, EN.saving), 5000);
+  const during = await busyInfo(page);
+  await page.evaluate(() => { window.__slow = false; });
+  const res = await settled(page, 20000);
+  const r = await page.evaluate(async (p) => {
+    const m = window.__m;
+    const out = { st: m.state(), layer: !!document.querySelector('.m-ulayer') };
+    await m.lock();
+    try { await m.unlockWithPassphrase(p); } catch (e) { out.err = String(e && e.message); }
+    out.unlocked = m.state().unlocked;
+    return out;
+  }, KEPT);
+  assert(res.ok && res.v === true && !r.layer && r.st.hasPass && r.st.passkeys === 0 && r.unlocked, 'Escape on the passkey step keeps the passphrase', { res, r });
+  assert(busy, 'the sheet stays open with the saving line while the passphrase is kept', during);
+
+  await clean();
+  const p2 = await open('/beta/unlock/', NO_PRF_NO_CW);
+  await enableOnLab(p2);
+  await modules(p2);
+  await setupTo(p2, "{ knownCode: '" + KNOWN + "', knownPassphrase: '" + KEPT + "' }", 'no-prf');
+  const opts = await p2.evaluate(() => ({ keep: document.querySelector('.m-ulayer input[name="keep-pass"]').checked, cw: typeof window.CloseWatcher }));
+  assert(opts.keep && opts.cw === 'undefined', 'keep my passphrase is on by default on the no-PRF step', opts);
+  await p2.click('.m-ulayer input[name="remember"]');
+  await p2.evaluate(() => history.back());
+  const res2 = await settled(p2, 20000);
+  await sleep(400);
+  const r2 = await p2.evaluate(() => ({ st: window.__m.state(), layer: !!document.querySelector('.m-ulayer'), path: location.pathname }));
+  assert(res2.ok && res2.v === true && !r2.layer && r2.path === '/beta/unlock/', 'Back closes the no-PRF step and stays on the page', { res2, r2 });
+  assert(r2.st.hasPass && !r2.st.hasDevice, 'Back keeps the passphrase and never turns on Remember', r2);
+
+  await clean();
+  const p3 = await open('/beta/unlock/');
+  await enableOnLab(p3);
+  await modules(p3);
+  await setupTo(p3, "{ knownCode: '" + KNOWN + "', knownPassphrase: '" + KEPT + "' }", 'passkey');
+  await p3.click('.m-ulayer input[name="keep-pass"]');
+  await p3.keyboard.press('Escape');
+  const res3 = await settled(p3, 10000);
+  const s3 = await p3.evaluate(() => window.__m.state());
+  assert(res3.ok && res3.v === true && !s3.hasPass, 'with keep my passphrase off, closing sets no passphrase', { res3, s3 });
+});
+
+check('Add a passkey stays off once a passkey was added', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  const cdp = await page.createCDPSession();
+  await cdp.send('WebAuthn.enable');
+  const a = (await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: true }, AUTH) })).authenticatorId;
+  await enableOnLab(page);
+  await modules(page);
+  await page.evaluate(() => {
+    const S = window.MentriaStore;
+    const set = S.set.bind(S);
+    window.__failPass = true;
+    S.set = (ns, key, v, o) => (window.__failPass && ns === 'keyring' && v && v.wraps && v.wraps.pass && typeof v.wraps.pass.ct === 'string' ? false : set(ns, key, v, o));
+  });
+  await setupTo(page, "{ knownCode: '" + KNOWN + "', knownPassphrase: '" + KEPT + "' }", 'passkey');
+  await page.evaluate(() => {
+    const c = navigator.credentials;
+    const create = c.create.bind(c);
+    window.__creates = 0;
+    c.create = (o) => {
+      window.__creates += 1;
+      const p = create(o);
+      return new Promise((res, rej) => setTimeout(() => p.then(res, rej), 700));
+    };
+  });
+  await page.click('.m-ulayer [data-act="add-passkey"]');
+  const adding = await until(() => busyNow(page, EN.saving), 5000);
+  const addingInfo = await busyInfo(page);
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_storage);
+  const mid = await page.evaluate(() => {
+    const d = document.querySelector('.m-ulayer [role="dialog"]');
+    return { step: d.querySelector('[data-step]').dataset.step, add: d.querySelector('[data-act="add-passkey"]').disabled, skip: d.querySelector('[data-act="skip-passkey"]').disabled, passkeys: window.__m.state().passkeys, r: window.__r };
+  });
+  assert(mid.step === 'passkey' && mid.passkeys === 1 && mid.r === null, 'the passkey is added and the passphrase error stays on the step', mid);
+  assert(mid.add === true && mid.skip === false, 'Add a passkey is off once a passkey was added; Skip for now stays', mid);
+  const f = await focusInfo(page);
+  assert(f.inside, 'focus stays on a control in the sheet', f);
+  await page.evaluate(() => document.querySelector('.m-ulayer form[data-step="passkey"]').requestSubmit());
+  await sleep(1200);
+  const again = await page.evaluate(() => ({ creates: window.__creates, passkeys: window.__m.state().passkeys }));
+  assert(again.creates === 1 && again.passkeys === 1, 'submitting the step again adds no second passkey', again);
+  assert(adding, 'the saving line shows while the passkey is added', addingInfo);
+  await page.evaluate(() => { window.__failPass = false; });
+  await page.click('.m-ulayer [data-act="skip-passkey"]');
+  const res = await settled(page, 20000);
+  const st = await page.evaluate(() => window.__m.state());
+  assert(res.ok && res.v === true && st.passkeys === 1 && st.hasPass, 'Skip for now then keeps the passphrase with the one passkey', { res, st });
+  await cdp.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId: a });
+});
+
+check('setup says no passkey was added after a timeout or no credential', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await modules(page);
+  await setupTo(page, "{ knownCode: '" + KNOWN + "' }", 'passkey');
+  for (const kind of ['webauthn-timeout', 'no-credential']) {
+    await page.evaluate((k) => {
+      const el = document.querySelector('.m-ulayer .m-usheet__msg');
+      el.textContent = '';
+      navigator.credentials.create = () => (k === 'no-credential' ? Promise.resolve(null) : Promise.reject(new Error(k)));
+    }, kind);
+    await page.click('.m-ulayer [data-act="add-passkey"]');
+    await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.passkey_skipped);
+    const m = await page.evaluate(() => {
+      const d = document.querySelector('.m-ulayer [role="dialog"]');
+      const msg = d.querySelector('.m-usheet__msg');
+      return { step: d.querySelector('[data-step]').dataset.step, warn: msg.classList.contains('is-warn'), error: msg.classList.contains('is-error'), add: !d.querySelector('[data-act="add-passkey"]').disabled, skip: !d.querySelector('[data-act="skip-passkey"]').disabled };
+    });
+    assert(m.step === 'passkey' && m.warn && !m.error && m.add && m.skip, kind + ' says no passkey was added and offers Add and Skip', m);
+  }
+  await page.click('.m-ulayer [data-act="skip-passkey"]');
+  const res = await settled(page, 15000);
+  assert(res.ok && res.v === true && await page.evaluate(() => window.__m.state().passkeys) === 0, 'skip finishes without a passkey', res);
+});
+
+check('inputs are read-only while busy', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await modules(page);
+  const saved = 'WXYZ-2345-ABCD-EFGH-IJKL-MNOP-QRST-UV67';
+  await start(page, '(ui) => ui.showSetup({ verifyCode: () => new Promise((r) => { window.__release = r; }) })');
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  await page.type('.m-ulayer input[name="saved-code"]', saved);
+  await page.click('.m-ulayer [data-act="next"]');
+  assert(await until(() => busyNow(page, EN.working), 3000), 'busy while the saved code is checked', await busyInfo(page));
+  const during = await busyInfo(page);
+  assert(during.fields.length >= 3 && during.fields.every((f) => f.locked), 'the saved-code field is read-only and the choices are off while busy', during);
+  await page.focus('.m-ulayer input[name="saved-code"]');
+  await page.keyboard.type('ZZ');
+  await page.evaluate(() => document.querySelector('.m-ulayer input[name="code-choice"][value="new"]').click());
+  const kept = await page.evaluate(() => ({ v: document.querySelector('.m-ulayer input[name="saved-code"]').value, keep: document.querySelector('.m-ulayer input[name="code-choice"][value="keep"]').checked }));
+  assert(kept.v === saved && kept.keep, 'typing and choosing change nothing while busy', kept);
+  await page.evaluate(() => window.__release(false));
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_code);
+  const after = await busyInfo(page);
+  assert(after.fields.length >= 3 && after.fields.every((f) => !f.locked) && !after.busy, 'fields work again after the check', after);
+
+  await clean();
+  const p2 = await open('/beta/unlock/', NO_PRF);
+  await enableOnLab(p2);
+  await modules(p2);
+  await setupTo(p2, "{ knownCode: '" + KNOWN + "' }", 'no-prf');
+  await p2.click('.m-ulayer input[name="set-pass"]');
+  await p2.waitForFunction(() => { const el = document.querySelector('.m-ulayer input[name="new-pass"]'); return el && el.getBoundingClientRect().height > 0; });
+  await p2.type('.m-ulayer input[name="new-pass"]', 'correct horse battery');
+  await p2.click('.m-ulayer input[name="remember"]');
+  await p2.evaluate(SLOW_ENCRYPT, 1500);
+  await p2.click('.m-ulayer [data-act="done"]');
+  const busy2 = await until(() => busyNow(p2, EN.saving), 5000);
+  const d2 = await busyInfo(p2);
+  await p2.evaluate(() => document.querySelector('.m-ulayer input[name="remember"]').click());
+  const rememberOn = await p2.evaluate(() => document.querySelector('.m-ulayer input[name="remember"]').checked);
+  await p2.evaluate(() => { window.__slow = false; });
+  const res = await settled(p2, 20000);
+  const st = await p2.evaluate(() => window.__m.state());
+  assert(res.ok && res.v === true && st.hasPass, 'the no-PRF options are applied', { res, st });
+  assert(busy2, 'busy with the saving line while the options are applied', d2);
+  assert(d2.fields.length >= 3 && d2.fields.every((f) => f.locked), 'the passphrase field is read-only and the boxes are off while busy', d2);
+  assert(rememberOn && st.hasDevice, 'Remember stays as chosen while busy', { rememberOn, st });
+
+  const { page: p3, code } = await labWithKeyring();
+  await p3.evaluate(() => window.__m.lock());
+  await p3.click('#unlock-demo-card');
+  await p3.waitForSelector('#unlock-demo .m-unlock');
+  await openCode(p3, '#unlock-demo .m-unlock');
+  await typeInto(p3, '#unlock-demo input[name="recovery-code"]', code);
+  await p3.evaluate(() => {
+    const dec = crypto.subtle.decrypt.bind(crypto.subtle);
+    window.__slow = true;
+    crypto.subtle.decrypt = async (...a) => {
+      if (window.__slow) await new Promise((r) => setTimeout(r, 700));
+      return dec(...a);
+    };
+  });
+  await p3.keyboard.press('Enter');
+  await p3.waitForFunction(() => document.querySelector('#unlock-demo .m-unlock').hasAttribute('aria-busy'), { timeout: 5000 });
+  const card = await p3.evaluate(() => {
+    const c = document.querySelector('#unlock-demo .m-unlock');
+    return { msg: c.querySelector('.m-unlock__msg').textContent, code: c.querySelector('input[name="recovery-code"]').readOnly, pass: c.querySelector('input[name="passphrase"]').readOnly };
+  });
+  await p3.keyboard.type('ZZ');
+  const typed = await p3.$eval('#unlock-demo input[name="recovery-code"]', (el) => el.value);
+  await p3.evaluate(() => { window.__slow = false; });
+  await p3.waitForFunction(() => window.__m.state().unlocked === true, { timeout: 15000 });
+  assert(card.msg === EN.working && card.code && card.pass && typed === code, 'card fields are read-only while it unlocks', { card, typed });
 });
 let failed = 0;
 const ONLY = process.env.ONLY || '';

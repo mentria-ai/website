@@ -9,6 +9,7 @@ const SAVE_NAME = 'mentria-recovery-code.txt';
 const PRF_ERRORS = new Set(['no-prf', 'bad-prf', 'unknown-passkey', 'no-credential', 'webauthn-timeout', 'no-passkey']);
 const WEBAUTHN_PRF = new Set(['SecurityError', 'NotSupportedError']);
 const CANCEL_ERRORS = new Set(['NotAllowedError', 'AbortError']);
+const SKIPPED_ERRORS = new Set(['webauthn-timeout', 'no-credential']);
 const STORAGE_ERRORS = new Set(['storage', 'idb', 'QuotaExceededError', 'UnknownError', 'AbortError', 'SecurityError', 'InvalidStateError', 'DataError', 'VersionError']);
 const FOCUSABLE = 'button, a[href], input, select, textarea, [tabindex]';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -485,9 +486,13 @@ function buildCard(T0, { mode, onDone, titleId }) {
     passInput.removeAttribute('aria-invalid');
     let err = null;
     const p = (async () => fn())();
+    codeInput.readOnly = true;
+    passInput.readOnly = true;
     say(msg, T, 'working');
     try { await p; } catch (e) { err = e || new Error('err'); }
     busy = false;
+    codeInput.readOnly = false;
+    passInput.readOnly = false;
     root.removeAttribute('aria-busy');
     if (done) return;
     if (!err) {
@@ -733,29 +738,55 @@ function codeShown(code, getMsg, getT) {
   return { box, tools: h('div', { class: 'm-usheet__tools' }, copyBtn, saveBtn), check, watch };
 }
 
+function seal(el) {
+  if (!el) return;
+  el.disabled = true;
+  el.setAttribute('data-sealed', '');
+}
+
+function checkable(el) {
+  return el.type === 'checkbox' || el.type === 'radio';
+}
+
 function busyHolder(getLayer, getMsg, getT) {
   let held = null;
-  return function busyOn(on) {
+  return function busyOn(on, key) {
     const L = getLayer();
     if (!L) return;
     const msg = getMsg();
     if (on) {
       if (held) return;
       const active = document.activeElement;
-      held = { focus: L.panel.contains(active) ? active : null, buttons: [...L.panel.querySelectorAll('button')].filter((b) => !b.disabled) };
+      const inputs = [...L.panel.querySelectorAll('input')];
+      held = {
+        key: key || 'saving',
+        focus: L.panel.contains(active) ? active : null,
+        buttons: [...L.panel.querySelectorAll('button')].filter((b) => !b.disabled),
+        checks: inputs.filter((i) => checkable(i) && !i.disabled),
+        fields: inputs.filter((i) => !checkable(i) && !i.disabled && !i.readOnly)
+      };
       for (const b of held.buttons) b.disabled = true;
+      for (const i of held.checks) i.disabled = true;
+      for (const i of held.fields) i.readOnly = true;
       L.panel.setAttribute('aria-busy', 'true');
       if (held.focus && held.focus.disabled) focusEl(L.panel);
-      if (msg) say(msg, getT(), 'working');
+      if (msg) say(msg, getT(), held.key);
       return;
     }
     L.panel.removeAttribute('aria-busy');
     if (!held) return;
     const was = held;
     held = null;
-    for (const b of was.buttons) if (b.isConnected) b.disabled = false;
-    if (msg && msg.dataset.uk === 'working') say(msg, getT(), null);
-    if (was.focus && was.focus.isConnected && !was.focus.disabled && document.activeElement === L.panel) focusEl(was.focus);
+    const free = (el) => el.isConnected && !el.hasAttribute('data-sealed');
+    for (const b of was.buttons) if (free(b)) b.disabled = false;
+    for (const i of was.checks) if (free(i)) i.disabled = false;
+    for (const i of was.fields) if (free(i)) i.readOnly = false;
+    if (msg && msg.dataset.uk === was.key) say(msg, getT(), null);
+    const a = document.activeElement;
+    const lost = !a || a === document.body || a === L.panel || (L.panel.contains(a) && a.disabled);
+    if (!lost) return;
+    if (was.focus && was.focus.isConnected && !was.focus.disabled) focusEl(was.focus);
+    else focusEl(tabbables(L.panel)[0] || L.panel);
   };
 }
 
@@ -787,15 +818,17 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
   let noPrf = false;
   let busy = false;
   let closed = false;
+  let closeTried = false;
+  let stepName = null;
   let L = null;
   let msg = null;
   let resolveSetup = null;
   const result = new Promise((r) => { resolveSetup = r; });
   const view = { repaint(T2) { T = T2; if (L) paint(L.panel, T); } };
   const hold = busyHolder(() => L, getMsg, getT);
-  const busyOn = (on) => {
+  const busyOn = (on, key) => {
     busy = on;
-    hold(on);
+    hold(on, key);
   };
   const complete = () => prog.created && (!wantsLink || prog.linked);
 
@@ -808,6 +841,7 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
   };
 
   function show(form) {
+    stepName = form.dataset.step;
     L.panel.replaceChildren(form);
     paint(form, T);
     focusEl(form.querySelector('.m-usheet__title'));
@@ -900,7 +934,7 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
           const typed = n ? formatCode(n) : null;
           let ok = false;
           if (typed) {
-            busyOn(true);
+            busyOn(true, 'working');
             try { ok = (await verify(typed)) === true; } catch (_) { ok = false; }
             busyOn(false);
             if (closed) return;
@@ -930,7 +964,7 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
         prog.created = true;
         pendingCode = null;
         for (const b of form.querySelectorAll('[data-act="not-now"]')) b.remove();
-        for (const i of form.querySelectorAll('input')) i.disabled = true;
+        for (const i of form.querySelectorAll('input')) seal(i);
       } else {
         busyOn(true);
       }
@@ -964,17 +998,17 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     return o;
   }
 
-  async function wrapUp(alreadyBusy) {
+  async function wrapUp(alreadyBusy, closing) {
     if (!alreadyBusy) busyOn(true);
     try {
       if (!prog.pass) {
-        const pass = keepPass && draft.keepPass ? keepPass : (noPrf && draft.setPass ? draft.pass : null);
+        const pass = keepPass && draft.keepPass ? keepPass : (!closing && noPrf && draft.setPass ? draft.pass : null);
         if (pass) {
           await withConfirm(() => setPassphrase(pass));
           prog.pass = true;
         }
       }
-      if (noPrf && draft.remember && !prog.remember) {
+      if (!closing && noPrf && draft.remember && !prog.remember) {
         await withConfirm(() => setRemember(true));
         prog.remember = true;
       }
@@ -989,11 +1023,13 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     if (prog.passkey) toast(T.passkey_added);
   }
 
-  function addKey() {
+  function addKey(add) {
     const p = (async () => addPasskey(''))();
+    const reached = !!(window.PublicKeyCredential && navigator.credentials);
     busyOn(true);
     p.then(() => {
       prog.passkey = true;
+      seal(add);
       return wrapUp(true);
     }, async (err) => {
       busyOn(false);
@@ -1002,7 +1038,7 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
       if (n === 'no-prf') {
         noPrf = true;
         noPrfStep();
-        say(msg, T, 'passkey_skipped', 'warn');
+        say(msg, T, reached ? 'passkey_unusable' : 'passkey_skipped', 'warn');
         return;
       }
       if (n === 'confirm-needed') {
@@ -1011,7 +1047,7 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
         return;
       }
       const key = errKey(err, true);
-      if (key === 'err_cancelled') say(msg, T, 'passkey_skipped', 'warn');
+      if (key === 'err_cancelled' || SKIPPED_ERRORS.has(n)) say(msg, T, 'passkey_skipped', 'warn');
       else say(msg, T, key, 'error');
     });
   }
@@ -1019,13 +1055,15 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
   function passkeyStep() {
     const parts = sheetForm(ids, 'passkey', [3, 3]);
     msg = parts.msg;
+    const add = button('add-passkey', 'add_passkey', true, 'submit');
+    if (prog.passkey) seal(add);
     const skip = button('skip-passkey', 'skip_for_now', false);
     skip.addEventListener('click', () => { if (!busy && !closed) wrapUp(false); });
     const keep = keepPassOption();
-    const form = assemble(parts, 'passkey_step_title', 'passkey_gloss', [keep ? keep.wrap : null, shortNote()], [button('add-passkey', 'add_passkey', true, 'submit'), skip]);
+    const form = assemble(parts, 'passkey_step_title', 'passkey_gloss', [keep ? keep.wrap : null, shortNote()], [add, skip]);
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      if (!busy && !closed) addKey();
+      if (!busy && !closed && !prog.passkey) addKey(add);
     });
     show(form);
   }
@@ -1088,6 +1126,12 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     describedby: ids.lede,
     onDismiss: () => {
       if (busy) return false;
+      const lastStep = stepName === 'passkey' || stepName === 'no-prf';
+      if (lastStep && !closeTried && keepPass && draft.keepPass && !prog.pass) {
+        closeTried = true;
+        wrapUp(false, true);
+        return false;
+      }
       finish(complete());
       return true;
     }

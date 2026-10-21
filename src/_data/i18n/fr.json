@@ -6151,6 +6151,7 @@
     "not_now": "Pas maintenant",
     "not_now_note": "Ce qui est verrouillé le reste. Vous pourrez le déverrouiller en l'ouvrant.",
     "working": "Déverrouillage…",
+    "saving": "Enregistrement…",
     "err_code": "Ce code ne correspond pas. Vérifiez-le et réessayez.",
     "err_pass": "Cette phrase secrète ne correspond pas.",
     "err_prf": "Votre appareil n'a pas déverrouillé Mentria ici. Utilisez votre code de récupération, puis ajoutez cet appareil.",
@@ -6201,6 +6202,7 @@
     "passkey_step_title": "Déverrouillez avec votre appareil la prochaine fois",
     "skip_for_now": "Passer pour l'instant",
     "passkey_skipped": "Aucune clé d'accès n'a été ajoutée.",
+    "passkey_unusable": "Votre appareil a enregistré une clé d'accès que Mentria ne peut pas utiliser. Vous pouvez la supprimer dans les réglages de votre appareil.",
     "code_save_first": "Conservez d'abord ce code. Il remplace l'ancien.",
     "passphrase_too_short_keep": "Votre ancienne phrase secrète fait moins de 12 caractères, elle ne sera donc pas reprise.",
     "services": {

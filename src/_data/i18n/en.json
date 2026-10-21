@@ -794,7 +794,14 @@
       "empty_preview": "Empty",
       "to_mdpdf_btn": "→ PDF",
       "to_mdpdf_failed": "Couldn't open this note in Markdown → PDF: this browser can't save data for this site right now. Copy the text across instead.",
-      "to_mdpdf_title": "Open this note in Markdown → PDF"
+      "to_mdpdf_title": "Open this note in Markdown → PDF",
+      "lock_title_one": "Encrypt this note. Your one unlock opens it.",
+      "relock_title": "Lock everything your one unlock opens",
+      "confirm_lock_one": "Locking encrypts this note. Your one unlock opens it. The note's title stays visible and is NOT encrypted — keep secrets out of the title. Lock it?",
+      "lock_failed_one": "Couldn't lock the note. Try again.",
+      "key_missing": "This note was locked on another device, and its key isn't here yet. Sync with that device, then try again.",
+      "one_unlock_off": "This note opens with the one unlock, which is off on this device.",
+      "convert_skipped": "Locked notes the old lock couldn't open here: {n}. They stay as they are."
     },
     "color-picker": {
       "btn_link": "Link",

@@ -807,6 +807,7 @@
       "key_missing": "Esta nota foi bloqueada em outro dispositivo, e a chave dela ainda não está aqui. Sincronize com esse dispositivo e tente de novo.",
       "one_unlock_off": "Esta nota abre com o desbloqueio único, que está desativado neste dispositivo.",
       "convert_skipped": "Notas bloqueadas que este dispositivo não conseguiu abrir: {n}. Elas continuam como estão.",
+      "read_only_old": "Somente leitura. Desbloqueie a Mentria para editar esta nota.",
       "lock_key_missing": "A chave de outra nota bloqueada ainda não está neste dispositivo. Desbloqueie no dispositivo que a bloqueou e depois sincronize.",
       "relock_old_title": "Bloquear de novo suas notas bloqueadas"
     },

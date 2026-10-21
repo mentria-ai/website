@@ -61,6 +61,7 @@ unlockTool: true
       <span data-unsaved="full" hidden>{{ "tool.quick-notes.unsaved_full" | t }}</span>
     </p>
     <p class="qn-convert" id="qn-convert" role="status" aria-live="polite" hidden></p>
+    <p class="qn-readonly" id="qn-readonly" role="status" aria-live="polite" hidden>{{ "tool.quick-notes.read_only_old" | t }}</p>
     <textarea
       class="qn-editor__textarea"
       id="qn-textarea"
@@ -150,6 +151,7 @@ unlockTool: true
   const toolEl      = document.getElementById('qn-tool');
   const removeLockBtn = document.getElementById('qn-remove-lock-btn');
   const convertEl   = document.getElementById('qn-convert');
+  const readOnlyEl  = document.getElementById('qn-readonly');
   const lockedBody  = document.getElementById('qn-locked-body');
   const lockedNote  = document.getElementById('qn-locked-note');
   const linkBox     = document.getElementById('qn-locked-link');
@@ -462,6 +464,14 @@ unlockTool: true
 
   function curKey() { return notesKeys.length ? notesKeys[0] : null; }
 
+  function notesLinked() {
+    try { return !!U && U.state().linked.includes('notes'); } catch (_) { return true; }
+  }
+
+  function oldReadOnly(note) {
+    return one && isLegacyLocked(note) && !notesKeys.length && notesLinked();
+  }
+
   function ringFor(note, ring) {
     if (!note.kid) return ring;
     return ring.filter((k) => k.id === note.kid).concat(ring.filter((k) => k.id !== note.kid));
@@ -635,26 +645,15 @@ unlockTool: true
     if (!r || !r.ready) return;
     retiring = true;
     try {
-      const S = window.MentriaStore;
       const ids = [];
-      const stored = S.get('quick_notes', 'cred_id');
+      const stored = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null;
       if (typeof stored === 'string' && stored) ids.push(stored);
       let old = null;
       try { old = localStorage.getItem(CRED_KEY); } catch (_) {}
       if (old && !ids.includes(old)) ids.push(old);
-      const okSalt = S.remove('quick_notes', 'salt');
-      const okCred = S.remove('quick_notes', 'cred_id');
-      let okLocal = true;
-      try {
-        localStorage.removeItem(SALT_KEY);
-        localStorage.removeItem(CRED_KEY);
-      } catch (_) {
-        okLocal = false;
-      }
-      if (!okSalt || !okCred || !okLocal) return;
       sessionKey = null;
-      signalRetired(ids);
       await U.markRetired('notes');
+      signalRetired(ids);
     } catch (_) {
     } finally {
       retiring = false;
@@ -882,11 +881,15 @@ unlockTool: true
     exportBtn.hidden = locked;
     shareBtn.hidden = locked || !navigator.share;
     mdpdfBtn.hidden = locked;
+    const readOnly = mode === 'unlocked' && oldReadOnly(getNote(activeId));
+    textarea.readOnly = readOnly;
+    titleInput.readOnly = readOnly;
+    readOnlyEl.hidden = !readOnly;
     if (one) {
       lockBtn.hidden = locked || !oneOK;
       lockBtn.textContent = COPY.lockBtn;
       lockBtn.title = mode === 'unlocked' ? (U.state().unlocked ? COPY.relockTitle : COPY.relockOldTitle) : COPY.lockTitleOne;
-      removeLockBtn.hidden = mode !== 'unlocked';
+      removeLockBtn.hidden = mode !== 'unlocked' || readOnly;
     } else if (!cryptoOK) {
       lockBtn.hidden = true;
     } else {
@@ -941,7 +944,7 @@ unlockTool: true
       if (notesKeys.length) {
         sealed = await sealCur(id, text);
         kv = 2;
-      } else if (!note.kv && sessionKey) {
+      } else if (!note.kv && sessionKey && !notesLinked()) {
         sealed = await sealLegacy(sessionKey, text);
       }
     } catch (_) {
@@ -965,6 +968,7 @@ unlockTool: true
   async function saveActive() {
     const note = getNote(activeId);
     if (!note) return;
+    if (oldReadOnly(note)) return;
     note.title = titleInput.value;
     if (one && note.enc) return saveLocked(note);
     if (note.enc && (!sessionKey || editorMode !== 'unlocked')) {
@@ -1206,9 +1210,9 @@ unlockTool: true
   async function removeLock() {
     const note = getNote(activeId);
     if (!note || !note.enc) return;
-    if (one && editorMode !== 'unlocked') return;
+    if (one && (editorMode !== 'unlocked' || oldReadOnly(note))) return;
     if (!(await mentriaConfirm(COPY.confirmRemoveLock))) return;
-    if (one && (editorMode !== 'unlocked' || activeId !== note.id || getNote(note.id) !== note)) return;
+    if (one && (editorMode !== 'unlocked' || oldReadOnly(note) || activeId !== note.id || getNote(note.id) !== note)) return;
     note.enc = false;
     note.body = textarea.value;
     delete note.iv;
@@ -1412,9 +1416,11 @@ unlockTool: true
       U = m;
       one = true;
       let seenUnlocked = false;
+      let seenEpoch = U.state().epoch;
       U.onChange((s) => {
-        if ((seenUnlocked || wasUnlocked) && s && !s.unlocked) dropOld();
+        if (s && !s.unlocked && (seenUnlocked || wasUnlocked || s.epoch !== seenEpoch)) dropOld();
         seenUnlocked = !!(s && s.unlocked);
+        if (s) seenEpoch = s.epoch;
         openNotes();
       });
       try { await U.ready(); } catch (_) {}
@@ -1434,7 +1440,7 @@ unlockTool: true
 .qn-print { display: none; }
 
 @media print {
-  .hero, .qn-sidebar, .qn-editor__titlebar, .qn-unsaved, .qn-convert, .qn-editor__textarea, .qn-editor__statusbar, .qn-locked { display: none !important; }
+  .hero, .qn-sidebar, .qn-editor__titlebar, .qn-unsaved, .qn-convert, .qn-readonly, .qn-editor__textarea, .qn-editor__statusbar, .qn-locked { display: none !important; }
   .qn-tool { display: block !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; background: none !important; }
   .qn-editor { display: block !important; }
   .qn-print { display: block; color: #111; }
@@ -1649,7 +1655,8 @@ unlockTool: true
 }
 
 .qn-unsaved,
-.qn-convert {
+.qn-convert,
+.qn-readonly {
   flex-shrink: 0;
   margin: 0;
   padding: 0.55rem 1rem;
@@ -1662,7 +1669,8 @@ unlockTool: true
   color: var(--term-fg);
 }
 .qn-unsaved[hidden],
-.qn-convert[hidden] { display: none; }
+.qn-convert[hidden],
+.qn-readonly[hidden] { display: none; }
 
 .qn-action-btn {
   padding: 0.35rem 0.75rem;

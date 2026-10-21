@@ -37,8 +37,8 @@ const PROBE = () => {
   }
   if (window.PublicKeyCredential) PublicKeyCredential.signalUnknownCredential = (o) => { window.__signals.push(o); return Promise.resolve(); };
 };
-const FAIL_REMOVE = () => {
-  if (sessionStorage.getItem('t-fail-remove') !== '1') return;
+const WATCH_REMOVE = () => {
+  window.__removed = [];
   let held;
   Object.defineProperty(window, 'MentriaStore', {
     configurable: true,
@@ -46,7 +46,10 @@ const FAIL_REMOVE = () => {
     set(x) {
       if (x && typeof x.remove === 'function') {
         const r = x.remove;
-        x.remove = (ns, k, o) => (ns === 'quick_notes' ? false : r(ns, k, o));
+        x.remove = (ns, k, o) => {
+          if (ns === 'quick_notes') window.__removed.push(k);
+          return r.call(x, ns, k, o);
+        };
       }
       held = x;
     }
@@ -224,6 +227,9 @@ async function view(page) {
       lockTitle: document.getElementById('qn-lock-btn').title,
       removeBtn: shown(document.getElementById('qn-remove-lock-btn')) ? document.getElementById('qn-remove-lock-btn').textContent.trim() : null,
       convert: shown(conv) ? conv.textContent.trim() : null,
+      readOnly: document.getElementById('qn-textarea').readOnly,
+      titleReadOnly: document.getElementById('qn-title-input').readOnly,
+      readOnlyLine: shown(document.getElementById('qn-readonly')) ? document.getElementById('qn-readonly').textContent.trim() : null,
       layer: !!document.querySelector('.m-ulayer [role="dialog"]')
     };
   });
@@ -754,7 +760,7 @@ check('retirement checks what is stored', async () => {
   await nudge(page);
   rec = await until(async () => { const r = await readJson(page, RECORD); return r && r.retired && r.retired.notes ? r : null; }, 15000, 'retired once the stored copy is converted');
   const left = await page.evaluate(() => ({ cred: window.MentriaStore.get('quick_notes', 'cred_id'), salt: window.MentriaStore.get('quick_notes', 'salt'), signals: window.__signals.length }));
-  assert(left.cred == null && left.salt == null && left.signals === 1, 'old lock removed and signalled after a good write', left);
+  assert(typeof left.cred === 'string' && typeof left.salt === 'string' && left.signals === 1, 'old lock signalled after a good write, with its salt and credential id kept', left);
 });
 
 check('lock elsewhere drops the old key', async () => {
@@ -995,8 +1001,56 @@ check('Later on the card keeps the old note, with the old Lock title', async () 
   await page.click('#qn-card-later');
   const v = await waitView(page, (x) => x.text === 'alpha secret text', 'Not now opens the note the old way');
   assert(v.lockTitle === QN.relock_old_title && v.removeBtn === QN.remove_lock_btn, 'Lock only forgets the old key here, and its title says so', v);
+  assert(!v.readOnly && !v.titleReadOnly && v.readOnlyLine === null, 'with notes not linked yet the old note stays editable', v);
   await page.click('#qn-lock-btn');
   await waitView(page, (x) => x.text === null && x.raw === '' && x.unlockBtn, 'Lock hides the note again');
+});
+
+check('Not now with notes linked opens old notes read only, and a lock elsewhere closes them', async () => {
+  await clean();
+  const page = await open(NOTES);
+  await authOn(page);
+  await settle(page, 'old');
+  await oneLegacy(page);
+  await page.evaluate(SWITCH_ON);
+  await reload(page, 'one');
+  const code = await makeKeyring(page);
+  await page.evaluate(async (M) => {
+    const m = await import(M);
+    await m.link('notes', crypto.getRandomValues(new Uint8Array(32)));
+  }, MODULE);
+  assert((await readJson(page, RECORD)).services.notes, 'notes are linked in the one unlock');
+  await lockKeyring(page);
+  await pick(page, 'Alpha');
+  await resetWa(page);
+  await page.click('#qn-unlock-btn');
+  await waitView(page, (x) => x.card && x.later, 'card and Not now after the old tap', 30000);
+  await page.click('#qn-card-later');
+  let v = await waitView(page, (x) => x.text === 'alpha secret text', 'Not now opens the old note');
+  assert(v.readOnly && v.titleReadOnly && v.readOnlyLine === QN.read_only_old, 'the old note opens read only, with a line that says so', v);
+  assert(v.removeBtn === null, 'no Remove lock while read only', v);
+  const before = await blob(page);
+  await page.evaluate(() => {
+    const ta = document.getElementById('qn-textarea');
+    ta.value += ' changed';
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await sleep(1500);
+  assert(JSON.stringify(await blob(page)) === JSON.stringify(before), 'nothing is sealed again with the old key', { before, after: await blob(page) });
+  const other = await open('/about/');
+  await lockKeyring(other);
+  await page.bringToFront();
+  v = await waitView(page, (x) => x.text === null && x.raw === '' && x.unlockBtn, 'a lock in another tab closes the old note');
+  assert(v.readOnlyLine === null, 'the read only line goes with it', v);
+  await resetWa(page);
+  await page.click('#qn-unlock-btn');
+  await waitView(page, (x) => x.card && x.later, 'the old tap is needed again', 30000);
+  assert((await wa(page)).join() === 'get', 'the old key was forgotten', await wa(page));
+  await cardCode(page, '#qn-locked-card', code);
+  const after = await waitBlob(page, (x) => { const n = byTitle(x, 'Alpha'); return n && n.kv === 2; }, 'Alpha converted once the session opens', 30000);
+  assert((await openV2(page, byTitle(after, 'Alpha'))) === 'alpha secret text', 'the unsaved change was never kept');
+  v = await waitView(page, (x) => x.text === 'alpha secret text' && !x.readOnly && !x.titleReadOnly && x.readOnlyLine === null, 'editable once the session is open');
+  await other.close();
 });
 
 check('Export all right after a lock leaves old-style notes out', async () => {
@@ -1083,20 +1137,21 @@ check('a lock during conversion does not stop it', async () => {
 });
 
 check('old lock retires once every note converted', async () => {
-  const { page } = await notesKeyring([FAIL_REMOVE]);
+  const { page } = await notesKeyring([WATCH_REMOVE]);
   await writeNote(page, 'Hotel', 'hotel secret text', false);
   await lockActive(page, 'Hotel', 'hotel secret text');
   const credStd = btoa(String.fromCharCode(0xfb, 0xff, 0xfe, 0x01, 0x02, 0x03, 0xfb, 0xef, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80));
   const credUrl = credStd.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  await page.evaluate((c) => {
-    const salt = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
-    window.MentriaStore.set('quick_notes', 'salt', salt);
+  const salt = await page.evaluate((c) => {
+    const s = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+    window.MentriaStore.set('quick_notes', 'salt', s);
     window.MentriaStore.set('quick_notes', 'cred_id', c);
-    localStorage.setItem('mentria-qn-salt', salt);
+    localStorage.setItem('mentria-qn-salt', s);
     localStorage.setItem('mentria-qn-cred', c);
     const rec = window.MentriaStore.get('keyring', 'vault');
     rec.services.notes.linked = new Date(Date.now() - 31 * 86400000).toISOString();
     window.MentriaStore.set('keyring', 'vault', rec);
+    return s;
   }, credStd);
   await legacyNote(page, 'India', 'india text');
   await reload(page, 'one');
@@ -1111,36 +1166,35 @@ check('old lock retires once every note converted', async () => {
   await page.evaluate(() => {
     const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob')).filter((n) => n.title !== 'India');
     window.MentriaStore.set('quick_notes', 'blob', list);
-    sessionStorage.setItem('t-fail-remove', '1');
   });
   await reload(page, 'one');
-  await pick(page, 'Hotel');
-  await waitView(page, (x) => x.text === 'hotel secret text', 'Hotel open while removals fail');
-  await sleep(1500);
-  const kept = await page.evaluate(() => ({ cred: window.MentriaStore.get('quick_notes', 'cred_id'), signals: window.__signals.length }));
-  rec = await readJson(page, RECORD);
-  assert(kept.cred === credStd && kept.signals === 0 && !(rec.retired && rec.retired.notes), 'no signal and no retired mark when the removals fail', { kept, retired: rec.retired });
-  await page.evaluate(() => sessionStorage.removeItem('t-fail-remove'));
-  await reload(page, 'one');
   rec = await until(async () => { const r = await readJson(page, RECORD); return r && r.retired && r.retired.notes ? r : null; }, 15000, 'notes marked retired');
+  await sleep(800);
   const left = await page.evaluate(() => ({
     salt: window.MentriaStore.get('quick_notes', 'salt'),
     cred: window.MentriaStore.get('quick_notes', 'cred_id'),
     lsSalt: localStorage.getItem('mentria-qn-salt'),
     lsCred: localStorage.getItem('mentria-qn-cred'),
+    removed: window.__removed.filter((k) => k === 'salt' || k === 'cred_id'),
     signals: window.__signals
   }));
-  assert(left.salt == null && left.cred == null && left.lsSalt == null && left.lsCred == null, 'old salt and credential ids deleted', left);
+  assert(left.salt === salt && left.cred === credStd && left.lsSalt === salt && left.lsCred === credStd, 'retirement keeps the old salt and credential ids', left);
+  assert(!left.removed.length, 'retirement removes nothing from the store', left.removed);
   assert(left.signals.length === 1 && left.signals[0].credentialId === credUrl && left.signals[0].rpId === 'localhost', 'old passkey signalled unknown in base64url', left.signals);
   const blobNow = await blob(page);
   assert(blobNow.some((n) => n.title === 'Hotel' && n.kv === 2), 'notes kept');
   await pick(page, 'Hotel');
   await waitView(page, (x) => x.text === 'hotel secret text', 'Hotel still opens after retirement');
+  await reload(page, 'one');
+  await pick(page, 'Hotel');
+  await waitView(page, (x) => x.text === 'hotel secret text', 'Hotel opens after a reload');
+  await sleep(1200);
+  assert((await page.evaluate(() => window.__signals.length)) === 0, 'retirement signals once');
 });
 
 let failed = 0;
 const ONLY = process.env.ONLY || '';
-const run = checks.filter(([n]) => !ONLY || n.includes(ONLY));
+const run = checks.filter(([n]) => !ONLY || ONLY.split('|').some((o) => n.includes(o)));
 for (const [name, fn] of run) {
   try {
     await fn();

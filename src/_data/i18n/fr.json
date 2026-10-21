@@ -807,6 +807,7 @@
       "key_missing": "Cette note a été verrouillée sur un autre appareil, et sa clé n'est pas encore ici. Synchronisez avec cet appareil, puis réessayez.",
       "one_unlock_off": "Cette note s'ouvre avec le déverrouillage unique, qui est désactivé sur cet appareil.",
       "convert_skipped": "Notes verrouillées que cet appareil n'a pas pu ouvrir : {n}. Elles restent telles quelles.",
+      "read_only_old": "Lecture seule. Déverrouillez Mentria pour modifier cette note.",
       "lock_key_missing": "La clé d'une autre note verrouillée n'est pas encore sur cet appareil. Déverrouillez sur l'appareil qui l'a verrouillée, puis synchronisez.",
       "relock_old_title": "Reverrouiller vos notes verrouillées"
     },

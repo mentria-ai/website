@@ -31,6 +31,14 @@
     <p class="ulab__status" id="unlock-status" role="status" aria-live="polite"></p>
   </div>
   <div class="ulab__box">
+    <div class="ulab__actions">
+      <button type="button" class="m-btn m-btn--ghost" id="unlock-demo-card">Show card</button>
+      <button type="button" class="m-btn m-btn--ghost" id="unlock-demo-launch">Show launch</button>
+      <button type="button" class="m-btn m-btn--ghost" id="unlock-demo-setup">Show setup</button>
+    </div>
+    <div class="ulab__demo" id="unlock-demo"></div>
+  </div>
+  <div class="ulab__box">
     <table class="ulab__table">
       <caption>Diagnostics (refreshed every second)</caption>
       <tbody id="unlock-diag"></tbody>
@@ -50,6 +58,7 @@
   .ulab__code { margin: 1rem 0 0; overflow-wrap: anywhere; }
   .ulab__code code { font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.04em; }
   .ulab__status { min-height: 1.4em; margin: 0.75rem 0 0; color: var(--term-muted); }
+  .ulab__demo:not(:empty) { margin-top: 1rem; }
   .ulab__table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem; }
   .ulab__table caption { text-align: left; padding-bottom: 0.5rem; color: var(--term-muted); font-family: inherit; }
   .ulab__table th, .ulab__table td { text-align: left; padding: 0.35rem 0.5rem; border-top: 1px solid var(--term-border, rgba(255, 255, 255, 0.08)); vertical-align: top; overflow-wrap: anywhere; }
@@ -148,6 +157,40 @@
   lockBtn.addEventListener('click', async () => {
     await U.lock();
     say('Locked.');
+    paint();
+  });
+
+  let demo = null;
+  const ui = () => import('/assets/js/mentria-unlock-ui.js');
+
+  $('unlock-demo-card').addEventListener('click', async () => {
+    if (demo) demo.destroy();
+    demo = null;
+    window.__cardUnlocks = 0;
+    window.__cardState = null;
+    if (!U.state().setUp) { say('Create a test keyring first.'); return; }
+    demo = await (await ui()).mountCard($('unlock-demo'), {
+      onUnlocked: (s) => {
+        window.__cardUnlocks = (window.__cardUnlocks || 0) + 1;
+        window.__cardState = s;
+        say('Unlocked by the card.');
+        paint();
+      }
+    });
+  });
+
+  $('unlock-demo-launch').addEventListener('click', () => {
+    const s = U.state();
+    if (!s.setUp || s.unlocked) { say(s.setUp ? 'Lock first to see the launch screen.' : 'Create a test keyring first.'); return; }
+    ui().then((m) => m.showLaunch()).then(paint, paint);
+  });
+
+  $('unlock-demo-setup').addEventListener('click', async () => {
+    window.__setupResult = null;
+    if (U.state().setUp) { say('This device already has a keyring.'); return; }
+    const ok = await (await ui()).showSetup({});
+    window.__setupResult = ok;
+    say(ok ? 'Setup finished.' : 'Setup closed. Nothing was saved.');
     paint();
   });
 

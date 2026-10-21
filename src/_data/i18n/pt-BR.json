@@ -6190,6 +6190,10 @@
     "homescreen_note": "O app da sua Tela de Início e o seu navegador guardam cópias separadas. Adicione uma chave de acesso em cada um.",
     "tester_switch": "Testar o desbloqueio único (beta)",
     "tester_note": "Só para testes no beta. Se você desativar, seus bloqueios antigos continuam funcionando.",
+    "next": "Próximo",
+    "done": "Concluir",
+    "code_copied": "Código de recuperação copiado",
+    "err_other": "Algo deu errado. Tente de novo.",
     "services": {
       "identity": "conversas",
       "totp": "códigos",

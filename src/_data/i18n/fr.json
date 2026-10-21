@@ -6190,6 +6190,10 @@
     "homescreen_note": "L'app de votre écran d'accueil et votre navigateur gardent des copies séparées. Ajoutez une clé d'accès dans chacun.",
     "tester_switch": "Essayer le déverrouillage unique (bêta)",
     "tester_note": "Uniquement pour les tests en bêta. Si vous le désactivez, vos anciens verrous continuent de fonctionner.",
+    "next": "Suivant",
+    "done": "Terminé",
+    "code_copied": "Code de récupération copié",
+    "err_other": "Une erreur s'est produite. Réessayez.",
     "services": {
       "identity": "discussions",
       "totp": "codes",

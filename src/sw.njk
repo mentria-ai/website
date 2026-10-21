@@ -182,6 +182,10 @@ const ASSETS = [
   '/assets/js/mentria-identity.js',
   '/assets/js/mentria-unlock-core.js',
   '/assets/js/mentria-unlock.js',
+  '/assets/js/mentria-unlock-ui.js',
+{%- for l in locales %}
+  '/assets/js/unlock-copy.{{ l.code | lower }}.js',
+{%- endfor %}
   '/assets/js/mentria-comms-id.js',
   '/assets/js/mentria-gamepad.js',
   '/assets/js/mentria-push-db.js',

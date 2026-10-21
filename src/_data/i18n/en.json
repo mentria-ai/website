@@ -6190,6 +6190,10 @@
     "homescreen_note": "The app on your Home Screen and your browser keep separate copies. Add a passkey in each.",
     "tester_switch": "Try the one unlock (beta)",
     "tester_note": "For testing on beta only. Turning it off keeps your old locks working.",
+    "next": "Next",
+    "done": "Done",
+    "code_copied": "Recovery code copied",
+    "err_other": "Something went wrong. Try again.",
     "services": {
       "identity": "chats",
       "totp": "codes",

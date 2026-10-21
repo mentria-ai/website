@@ -6190,6 +6190,10 @@
     "homescreen_note": "La app de tu pantalla de inicio y tu navegador guardan copias separadas. Añade una llave de acceso en cada uno.",
     "tester_switch": "Probar el desbloqueo único (beta)",
     "tester_note": "Solo para pruebas en beta. Si lo desactivas, tus bloqueos anteriores siguen funcionando.",
+    "next": "Siguiente",
+    "done": "Listo",
+    "code_copied": "Código de recuperación copiado",
+    "err_other": "Algo salió mal. Inténtalo de nuevo.",
     "services": {
       "identity": "chats",
       "totp": "códigos",

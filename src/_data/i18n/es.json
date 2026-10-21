@@ -6203,7 +6203,7 @@
     "skip_for_now": "Omitir por ahora",
     "passkey_skipped": "No se añadió ninguna llave de acceso.",
     "passkey_unusable": "Tu dispositivo guardó una llave de acceso que Mentria no puede usar. Puedes eliminarla en los ajustes de tu dispositivo.",
-    "not_saved": "Tu frase de contraseña no se guardó. Puedes añadirla más tarde en los ajustes.",
+    "not_saved": "No se guardó tu frase de contraseña.",
     "code_save_first": "Guarda este código primero. Ha reemplazado al anterior.",
     "passphrase_too_short_keep": "Tu frase de contraseña anterior tiene menos de 12 caracteres, así que no se conservará.",
     "services": {

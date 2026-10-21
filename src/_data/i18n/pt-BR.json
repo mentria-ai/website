@@ -6203,7 +6203,7 @@
     "skip_for_now": "Pular por enquanto",
     "passkey_skipped": "Nenhuma chave de acesso foi adicionada.",
     "passkey_unusable": "Seu dispositivo salvou uma chave de acesso que a Mentria não pode usar. Você pode excluí-la nas configurações do seu dispositivo.",
-    "not_saved": "Sua frase secreta não foi salva. Você pode adicioná-la depois nas configurações.",
+    "not_saved": "Sua frase secreta não foi salva.",
     "code_save_first": "Guarde este código primeiro. Ele substituiu o antigo.",
     "passphrase_too_short_keep": "Sua frase secreta antiga tem menos de 12 caracteres, então ela não será mantida.",
     "services": {

@@ -279,9 +279,16 @@ check('service seal/open per name', async () => {
   await assert.rejects(S.exportKey('raw', rootKey));
   const secret = rand(32);
   const entry = await U.sealService(rootKey, 'identity', secret, NOW);
-  assert.deepEqual(Object.keys(entry).sort(), ['ct', 'iv', 'linked']);
+  assert.deepEqual(Object.keys(entry).sort(), ['ct', 'id', 'iv', 'linked']);
   assert.equal(entry.linked, iso(NOW));
+  assert.equal(U.unb64u(entry.id).length, 8);
+  assert.equal(U.b64u(U.unb64u(entry.id)), entry.id);
+  assert.notEqual((await U.sealService(rootKey, 'identity', secret, NOW)).id, entry.id);
   assert.deepEqual(await U.openService(rootKey, 'identity', entry), secret);
+  const legacy = clone(entry);
+  delete legacy.id;
+  assert.deepEqual(await U.openService(rootKey, 'identity', legacy), secret);
+  assert.deepEqual(await U.openService(rootKey, 'identity', Object.assign(clone(entry), { id: 'other' })), secret);
   await assert.rejects(U.openService(rootKey, 'totp', entry), { message: 'bad-service' });
   await assert.rejects(U.openService(await U.rootKeyFrom(rand(32)), 'identity', entry), { message: 'bad-service' });
   await assert.rejects(U.openService(rootKey, 'identity', tamper(entry, 'iv')), { message: 'bad-service' });
@@ -585,7 +592,7 @@ check('merge keeps the newest wraps and services and the earliest dates', async 
     assert.deepEqual(await U.openWithCode(m.wraps.recovery, code2), rootBytes);
     assert.deepEqual(await U.backupKeyFromEntry(rootKey, m.backup), await U.backupKeyFromCode(code2, m.backup.salt));
     assert.deepEqual(m.wraps.pass, { removed: iso(NOW + 2000) });
-    assert.deepEqual(m.services.identity, a.services.identity);
+    assert.deepEqual(m.services.identity, Object.assign({}, a.services.identity, { prior: [b.services.identity] }));
     assert.deepEqual(m.services.totp, b.services.totp);
     assert.deepEqual(m.retired, { identity: iso(NOW + 8000), totp: iso(NOW + 7000) });
     assert.equal(m.codeConfirmed, null);
@@ -597,6 +604,128 @@ check('merge keeps the newest wraps and services and the earliest dates', async 
     assert.deepEqual(m.wraps.pass, c.wraps.pass);
   }
   assert.equal(U.mergeRecords(record, clone(record)).wraps.pass, undefined);
+});
+
+check('merge keeps the other device\'s service secret under prior', async () => {
+  const { record, rootKey } = await fresh();
+  const sa = rand(32);
+  const sb = rand(32);
+  const a = clone(record);
+  const b = clone(record);
+  a.services.notes = await U.sealService(rootKey, 'notes', sa, NOW + 1000);
+  b.services.notes = await U.sealService(rootKey, 'notes', sb, NOW + 2000);
+  const m = U.mergeRecords(a, b);
+  assert.ok(U.isRecord(m));
+  assert.equal(JSON.stringify(U.mergeRecords(b, a)), JSON.stringify(m));
+  assert.deepEqual(m.services.notes, Object.assign({}, b.services.notes, { prior: [a.services.notes] }));
+  assert.deepEqual(await U.openService(rootKey, 'notes', m.services.notes), sb);
+  assert.deepEqual(await U.openService(rootKey, 'notes', m.services.notes.prior[0]), sa);
+  const got = [];
+  for (const { id, entry } of U.listServiceEntries(m, 'notes')) got.push([id, await U.openService(rootKey, 'notes', entry)]);
+  assert.deepEqual(got, [[b.services.notes.id, sb], [a.services.notes.id, sa]]);
+  for (const x of [m, a, b, U.mergeRecords(m, a), U.mergeRecords(b, m)]) {
+    assert.equal(JSON.stringify(U.mergeRecords(m, x)), JSON.stringify(m));
+    assert.equal(JSON.stringify(U.mergeRecords(x, m)), JSON.stringify(m));
+  }
+  const flipped = clone(record);
+  flipped.services.notes = Object.assign(clone(a.services.notes), { prior: [clone(b.services.notes), clone(a.services.notes)] });
+  assert.deepEqual(U.mergeRecords(flipped, clone(record)).services.notes, Object.assign({}, a.services.notes, { prior: [b.services.notes] }));
+  for (const x of [U.mergeRecords(m, flipped), U.mergeRecords(flipped, m)]) assert.deepEqual(x.services.notes, m.services.notes);
+  const relinked = clone(b);
+  relinked.services.notes = Object.assign(clone(b.services.notes), { linked: iso(NOW + 3000) });
+  for (const x of [U.mergeRecords(b, relinked), U.mergeRecords(relinked, b)]) assert.deepEqual(x.services.notes, relinked.services.notes);
+  const oldA = clone(a);
+  const oldB = clone(b);
+  delete oldA.services.notes.id;
+  delete oldB.services.notes.id;
+  for (const x of [U.mergeRecords(oldA, oldB), U.mergeRecords(oldB, oldA)]) {
+    assert.ok(U.isRecord(x));
+    assert.deepEqual(x.services.notes, Object.assign({}, oldB.services.notes, { prior: [oldA.services.notes] }));
+  }
+  assert.equal(JSON.stringify(U.mergeRecords(oldA, oldB)), JSON.stringify(U.mergeRecords(oldB, oldA)));
+  assert.deepEqual(U.mergeRecords(oldA, clone(oldA)).services.notes, oldA.services.notes);
+  const twin = clone(oldA);
+  twin.services.notes = await U.sealService(rootKey, 'notes', sb, NOW + 1000);
+  delete twin.services.notes.id;
+  const [lo, hi] = [oldA.services.notes, twin.services.notes].sort((p, q) => (JSON.stringify(p) < JSON.stringify(q) ? -1 : 1));
+  for (const x of [U.mergeRecords(oldA, twin), U.mergeRecords(twin, oldA)]) assert.deepEqual(x.services.notes, Object.assign({}, hi, { prior: [lo] }));
+  for (const x of [U.mergeRecords(oldA, b), U.mergeRecords(b, oldA)]) {
+    assert.deepEqual(x.services.notes, Object.assign({}, b.services.notes, { prior: [oldA.services.notes] }));
+  }
+  const none = clone(record);
+  for (const x of [U.mergeRecords(none, a), U.mergeRecords(a, none)]) assert.deepEqual(x.services.notes, a.services.notes);
+});
+
+check('prior is unioned and capped', async () => {
+  const { record, rootKey } = await fresh();
+  const e = [];
+  for (let i = 0; i < 12; i++) e.push(await U.sealService(rootKey, 'totp', te.encode('secret ' + i), NOW + i * 1000));
+  const withPrior = (cur, list) => Object.assign(clone(cur), { prior: list.map(clone) });
+  const c = clone(record);
+  const d = clone(record);
+  c.services.totp = withPrior(e[5], [e[1], e[3]]);
+  d.services.totp = withPrior(e[4], [e[3], e[2]]);
+  for (const m of [U.mergeRecords(c, d), U.mergeRecords(d, c)]) assert.deepEqual(m.services.totp, withPrior(e[5], [e[1], e[2], e[3], e[4]]));
+  assert.equal(JSON.stringify(U.mergeRecords(c, d)), JSON.stringify(U.mergeRecords(d, c)));
+  const a = clone(record);
+  const b = clone(record);
+  a.services.totp = withPrior(e[10], [e[0], e[2], e[4], e[6], e[8]]);
+  b.services.totp = withPrior(e[11], [e[9], e[7], e[5], e[3], e[1], e[2]]);
+  const m = U.mergeRecords(a, b);
+  assert.equal(JSON.stringify(U.mergeRecords(b, a)), JSON.stringify(m));
+  assert.deepEqual(m.services.totp, withPrior(e[11], e.slice(3, 11)));
+  assert.equal(JSON.stringify(U.mergeRecords(m, m)), JSON.stringify(m));
+  const big = clone(record);
+  big.services.totp = withPrior(e[11], e.slice(0, 11).reverse());
+  assert.deepEqual(U.mergeRecords(big, clone(record)).services.totp, withPrior(e[11], e.slice(3, 11)));
+  const undated = clone(record);
+  undated.services.totp = withPrior(e[11], [Object.assign(clone(e[0]), { linked: 'not a date' })].concat(e.slice(1, 9)));
+  assert.deepEqual(U.mergeRecords(undated, clone(record)).services.totp.prior.map((x) => x.id), e.slice(1, 9).map((x) => x.id));
+  const messy = clone(record);
+  messy.services.totp = withPrior(e[6], [Object.assign(clone(e[2]), { prior: [clone(e[1])] }), e[6], e[2], { id: 'no-box' }, { iv: 'x' }]);
+  messy.services.totp.prior.push('junk', null, 7);
+  for (const x of [U.mergeRecords(messy, clone(record)), U.mergeRecords(clone(record), messy)]) {
+    assert.ok(U.isRecord(x));
+    assert.deepEqual(x.services.totp, withPrior(e[6], [e[1], e[2]]));
+  }
+  const broken = clone(record);
+  broken.services.totp = { linked: iso(NOW + 99000), prior: [clone(e[0])] };
+  for (const x of [U.mergeRecords(broken, c), U.mergeRecords(c, broken)]) assert.deepEqual(x.services.totp, withPrior(e[5], [e[0], e[1], e[3]]));
+});
+
+check('isRecord accepts service entries with and without id or prior', async () => {
+  const { record, rootKey } = await fresh();
+  const entry = await U.sealService(rootKey, 'identity', rand(32), NOW);
+  const old = clone(entry);
+  delete old.id;
+  const shapes = [entry, old, Object.assign(clone(entry), { prior: [] }), Object.assign(clone(entry), { prior: [old] }), Object.assign(clone(old), { prior: [clone(entry), clone(old)] })];
+  for (const svc of shapes) {
+    const r = Object.assign(clone(record), { services: { identity: svc } });
+    assert.ok(U.isRecord(r), JSON.stringify(svc));
+    assert.ok(U.isRecord(U.mergeRecords(r, clone(r))));
+  }
+});
+
+check('listServiceEntries lists current then prior', async () => {
+  const { record, rootKey } = await fresh();
+  const e = [];
+  for (let i = 0; i < 4; i++) e.push(await U.sealService(rootKey, 'identity', rand(32), NOW + i * 1000));
+  assert.deepEqual(U.listServiceEntries(record, 'identity'), []);
+  const r = clone(record);
+  r.services.identity = Object.assign(clone(e[3]), { prior: [clone(e[0]), clone(e[1]), clone(e[2])] });
+  const list = U.listServiceEntries(r, 'identity');
+  assert.deepEqual(list.map((x) => x.id), [e[3].id, e[2].id, e[1].id, e[0].id]);
+  assert.deepEqual(list.map((x) => x.entry), [e[3], e[2], e[1], e[0]]);
+  list[0].entry.ct = 'changed';
+  list[1].entry.ct = 'changed';
+  assert.equal(r.services.identity.ct, e[3].ct);
+  assert.equal(r.services.identity.prior[2].ct, e[2].ct);
+  const old = clone(e[0]);
+  delete old.id;
+  r.services.identity = Object.assign(clone(old), { prior: [clone(e[1]), clone(old), clone(e[1]), { id: 'x' }, null] });
+  assert.deepEqual(U.listServiceEntries(r, 'identity'), [{ id: null, entry: old }, { id: e[1].id, entry: e[1] }]);
+  for (const name of ['totp', 'backup', '__proto__', 'constructor', undefined]) assert.deepEqual(U.listServiceEntries(r, name), [], String(name));
+  for (const bad of [null, undefined, {}, 'x', { services: null }]) assert.deepEqual(U.listServiceEntries(bad, 'identity'), []);
 });
 
 check('retirement blockers in order', async () => {

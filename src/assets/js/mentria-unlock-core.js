@@ -4,6 +4,7 @@ const KCV_PREFIX = 'mentria-keyring-kcv-v1';
 const PBKDF2_ITER = 600000;
 const ITER_MIN = 1000;
 const ITER_MAX = 10000000;
+const PRIOR_MAX = 8;
 const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const B32_RE = /^[A-Za-z2-7]{32}$/;
 const C20_RE = /^[abcdefghjkmnpqrstuvwxyz23456789]{20}$/i;
@@ -242,7 +243,7 @@ export async function sealService(rootKey, name, secretBytes, now) {
   needKey(rootKey, 'HKDF');
   const secret = needBytes(secretBytes, 1, Infinity);
   const box = await seal(await serviceKey(rootKey, name), secret, 'mentria-keyring|svc|' + name);
-  return { iv: box.iv, ct: box.ct, linked: stamp(now) };
+  return { id: b64u(randomBytes(8)), iv: box.iv, ct: box.ct, linked: stamp(now) };
 }
 
 export async function openService(rootKey, name, entry) {
@@ -360,6 +361,54 @@ function mergePrf(a, b) {
     .sort((x, y) => (ms(x.created) - ms(y.created)) || (x.id < y.id ? -1 : x.id > y.id ? 1 : 0));
 }
 
+function svcKey(e) { return typeof e.id === 'string' && e.id ? 'id:' + e.id : 'ct:' + e.ct; }
+
+function svcBare(e) {
+  const out = Object.assign({}, e);
+  delete out.prior;
+  return out;
+}
+
+function svcPrior(e) {
+  if (!isObj(e) || !Array.isArray(e.prior)) return [];
+  return e.prior.filter(isBox).flatMap((p) => [svcBare(p)].concat(svcPrior(p)));
+}
+
+function svcWhen(e) { return ms(e.linked); }
+
+function mergeService(x, y) {
+  const tops = [x, y].filter(isBox).map(svcBare);
+  if (!tops.length) return later(x, y, svcWhen);
+  const cur = later(tops[0], tops[1], svcWhen);
+  const top = svcKey(cur);
+  const byKey = new Map();
+  for (const e of tops.concat(svcPrior(x), svcPrior(y))) {
+    const k = svcKey(e);
+    if (k !== top) byKey.set(k, byKey.has(k) ? later(byKey.get(k), e, svcWhen) : e);
+  }
+  const prior = [...byKey]
+    .sort((p, q) => (svcWhen(p[1]) - svcWhen(q[1])) || (p[0] < q[0] ? -1 : p[0] > q[0] ? 1 : 0))
+    .slice(-PRIOR_MAX)
+    .map((p) => p[1]);
+  return prior.length ? Object.assign(cur, { prior }) : cur;
+}
+
+export function listServiceEntries(record, name) {
+  if (!SERVICES.includes(name) || !isObj(record) || !isObj(record.services)) return [];
+  const cur = own(record.services, name);
+  if (!isObj(cur)) return [];
+  const prior = svcPrior(cur).reverse().sort((p, q) => (svcWhen(q) - svcWhen(p)) || 0);
+  const seen = new Set();
+  const out = [];
+  for (const e of (cur.ct ? [svcBare(cur)] : []).concat(prior)) {
+    const k = svcKey(e);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push({ id: typeof e.id === 'string' && e.id ? e.id : null, entry: e });
+  }
+  return out;
+}
+
 function mergeMap(a, b, pick) {
   const x = isObj(a) ? a : {};
   const y = isObj(b) ? b : {};
@@ -397,7 +446,7 @@ export function mergeRecords(local, incoming) {
       pass: pass && pass.removed ? { removed: pass.removed } : pass
     }),
     backup,
-    services: mergeMap(a.services, b.services, (x, y) => later(x, y, (e) => ms(e.linked))),
+    services: mergeMap(a.services, b.services, mergeService),
     retired: mergeMap(a.retired, b.retired, earlier),
     devices: mergeMap(a.devices, b.devices, (x, y) => later(x, y, (d) => ms(d.lastSeen)))
   }));

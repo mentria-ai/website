@@ -2,7 +2,7 @@ import {
   SERVICES, b64u, unb64u, newRecoveryCode, normalizeCode, formatCode, rootKeyFrom,
   wrapWithCode, openWithCode, wrapWithPassphrase, openWithPassphrase, wrapWithPrf, openWithPrf,
   wrapWithDeviceKey, openWithDeviceKey, sealService, openService, makeBackupEntry, backupKeyFromEntry,
-  createRecord, verifyRoot, isRecord, touchDevice, retirementStatus, decideLaunch
+  createRecord, verifyRoot, isRecord, mergeRecords, listServiceEntries, touchDevice, retirementStatus, decideLaunch
 } from './mentria-unlock-core.js';
 
 const NS = 'keyring';
@@ -110,7 +110,26 @@ function livePasskeys(rec) {
 
 function livePass(w) { return isObj(w) && !w.removed && typeof w.ct === 'string'; }
 
-function linkedOf(rec) { return SERVICES.filter((n) => isObj(own(rec.services, n)) && own(rec.services, n).ct); }
+function linkedEntry(rec, name) {
+  const e = own(rec.services, name);
+  return isObj(e) && e.ct ? e : null;
+}
+
+function linkedOf(rec) { return SERVICES.filter((n) => !!linkedEntry(rec, n)); }
+
+function bytesOf(v) {
+  if (v instanceof Uint8Array) return v;
+  if (ArrayBuffer.isView(v)) return new Uint8Array(v.buffer, v.byteOffset, v.byteLength);
+  if (Object.prototype.toString.call(v) === '[object ArrayBuffer]') return new Uint8Array(v);
+  return null;
+}
+
+function sameBytes(a, b) {
+  if (!a || !b || a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a[i] ^ b[i];
+  return d === 0;
+}
 
 function codeOk(rec) { return !retirementStatus(rec, SERVICES[0]).blockers.includes('code-unconfirmed'); }
 
@@ -653,16 +672,52 @@ export async function secret(name) {
   return openService(mem.root, name, entry);
 }
 
+export async function secrets(name) {
+  if (!enabled() || !SERVICES.includes(name)) return [];
+  const rec = readRecord();
+  if (!rec || !sessionLive()) return [];
+  const root = mem.root;
+  const cur = linkedEntry(rec, name);
+  const list = listServiceEntries(rec, name);
+  const out = [];
+  for (let i = 0; i < list.length; i++) {
+    try {
+      out.push({ id: list[i].id, bytes: await openService(root, name, list[i].entry) });
+    } catch (e) {
+      if (i === 0 && cur) throw e;
+    }
+  }
+  return out;
+}
+
+export function secretId(name) {
+  if (!enabled() || !SERVICES.includes(name)) return null;
+  const rec = readRecord();
+  const cur = rec ? linkedEntry(rec, name) : null;
+  return cur && typeof cur.id === 'string' && cur.id ? cur.id : null;
+}
+
 export async function link(name, bytes) {
   const rec = enabled() ? readRecord() : null;
   if (!rec || !sessionLive()) throw new Error('locked');
   if (!SERVICES.includes(name)) throw new Error('bad-service');
-  const entry = await sealService(mem.root, name, bytes);
+  const root = mem.root;
+  const was = linkedEntry(rec, name);
+  let at = Date.now();
+  if (was) {
+    let have = null;
+    try { have = await openService(root, name, was); } catch (_) {}
+    if (sameBytes(have, bytesOf(bytes))) return;
+    const t = Date.parse(was.linked);
+    if (Number.isFinite(t) && t >= at) at = t + 1;
+  }
+  const entry = await sealService(root, name, bytes, at);
+  const S = await storeReady();
   const fresh = readRecord();
   if (!fresh || fresh.kcv !== mem.kcv) throw new Error('locked');
-  fresh.services = Object.assign({}, fresh.services, { [name]: entry });
-  fresh.changed = entry.linked;
-  await writeRecord(fresh);
+  const next = mergeRecords(fresh, Object.assign({}, fresh, { services: Object.assign({}, fresh.services, { [name]: entry }), changed: entry.linked }));
+  if (!S || !next || S.set(NS, KEY, next) !== true) throw new Error('storage');
+  post('record');
   notify(true);
 }
 

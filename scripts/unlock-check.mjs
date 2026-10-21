@@ -656,11 +656,17 @@ check('merge keeps the other device\'s service secret under prior', async () => 
   for (const x of [U.mergeRecords(none, a), U.mergeRecords(a, none)]) assert.deepEqual(x.services.notes, a.services.notes);
 });
 
-check('prior is unioned and capped', async () => {
+check('prior keeps every distinct entry', async () => {
   const { record, rootKey } = await fresh();
   const e = [];
   for (let i = 0; i < 12; i++) e.push(await U.sealService(rootKey, 'totp', te.encode('secret ' + i), NOW + i * 1000));
   const withPrior = (cur, list) => Object.assign(clone(cur), { prior: list.map(clone) });
+  const opened = async (r) => {
+    const out = [];
+    for (const { entry } of U.listServiceEntries(r, 'totp')) out.push(new TextDecoder().decode(await U.openService(rootKey, 'totp', entry)));
+    return out;
+  };
+  const every = e.map((_, i) => 'secret ' + (11 - i));
   const c = clone(record);
   const d = clone(record);
   c.services.totp = withPrior(e[5], [e[1], e[3]]);
@@ -673,14 +679,46 @@ check('prior is unioned and capped', async () => {
   b.services.totp = withPrior(e[11], [e[9], e[7], e[5], e[3], e[1], e[2]]);
   const m = U.mergeRecords(a, b);
   assert.equal(JSON.stringify(U.mergeRecords(b, a)), JSON.stringify(m));
-  assert.deepEqual(m.services.totp, withPrior(e[11], e.slice(3, 11)));
+  assert.deepEqual(m.services.totp, withPrior(e[11], e.slice(0, 11)));
   assert.equal(JSON.stringify(U.mergeRecords(m, m)), JSON.stringify(m));
+  assert.deepEqual(await opened(m), every);
+  for (const x of [a, b, U.mergeRecords(m, a), U.mergeRecords(b, m)]) {
+    assert.equal(JSON.stringify(U.mergeRecords(m, x)), JSON.stringify(m));
+    assert.equal(JSON.stringify(U.mergeRecords(x, m)), JSON.stringify(m));
+  }
+  const parts = [[e[3], [e[0], e[7], e[11]]], [e[11], [e[1]]], [e[5], [e[9], e[2], e[10], e[3]]], [e[8], [e[4], e[6], e[8]]]].map(([cur, list]) => {
+    const r = clone(record);
+    r.services.totp = withPrior(cur, list);
+    return r;
+  });
+  const perms = (xs) => (xs.length < 2 ? [xs] : xs.flatMap((x, i) => perms(xs.slice(0, i).concat(xs.slice(i + 1))).map((p) => [x].concat(p))));
+  const want = JSON.stringify(m);
+  for (const p of perms([0, 1, 2, 3])) {
+    const [w, x, y, z] = p.map((i) => clone(parts[i]));
+    const folded = [x, y, z].reduce((acc, r, i) => (i % 2 ? U.mergeRecords(r, acc) : U.mergeRecords(acc, r)), w);
+    assert.equal(JSON.stringify(folded), want, p.join());
+    assert.equal(JSON.stringify(U.mergeRecords(U.mergeRecords(w, x), U.mergeRecords(y, z))), want, p.join());
+    assert.equal(JSON.stringify(U.mergeRecords(folded, folded)), want, p.join());
+  }
+  let chain = clone(record);
+  const linked = [];
+  for (let i = 0; i < 20; i++) {
+    const dev = clone(record);
+    dev.services.notes = await U.sealService(rootKey, 'notes', te.encode('link ' + i), NOW + i * 1000);
+    linked.push(dev.services.notes);
+    chain = i % 2 ? U.mergeRecords(dev, chain) : U.mergeRecords(chain, dev);
+  }
+  assert.deepEqual(chain.services.notes, withPrior(linked[19], linked.slice(0, 19)));
+  const notes = [];
+  for (const { id, entry } of U.listServiceEntries(chain, 'notes')) notes.push([id, new TextDecoder().decode(await U.openService(rootKey, 'notes', entry))]);
+  assert.deepEqual(notes, linked.map((x, i) => [x.id, 'link ' + i]).reverse());
   const big = clone(record);
   big.services.totp = withPrior(e[11], e.slice(0, 11).reverse());
-  assert.deepEqual(U.mergeRecords(big, clone(record)).services.totp, withPrior(e[11], e.slice(3, 11)));
+  assert.deepEqual(U.mergeRecords(big, clone(record)).services.totp, withPrior(e[11], e.slice(0, 11)));
   const undated = clone(record);
-  undated.services.totp = withPrior(e[11], [Object.assign(clone(e[0]), { linked: 'not a date' })].concat(e.slice(1, 9)));
-  assert.deepEqual(U.mergeRecords(undated, clone(record)).services.totp.prior.map((x) => x.id), e.slice(1, 9).map((x) => x.id));
+  const noDate = Object.assign(clone(e[0]), { linked: 'not a date' });
+  undated.services.totp = withPrior(e[11], [noDate].concat(e.slice(1, 9)));
+  for (const x of [U.mergeRecords(undated, clone(record)), U.mergeRecords(clone(record), undated)]) assert.deepEqual(x.services.totp, withPrior(e[11], [noDate].concat(e.slice(1, 9))));
   const messy = clone(record);
   messy.services.totp = withPrior(e[6], [Object.assign(clone(e[2]), { prior: [clone(e[1])] }), e[6], e[2], { id: 'no-box' }, { iv: 'x' }]);
   messy.services.totp.prior.push('junk', null, 7);

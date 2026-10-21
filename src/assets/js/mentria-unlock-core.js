@@ -4,7 +4,6 @@ const KCV_PREFIX = 'mentria-keyring-kcv-v1';
 const PBKDF2_ITER = 600000;
 const ITER_MIN = 1000;
 const ITER_MAX = 10000000;
-const PRIOR_MAX = 8;
 const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const B32_RE = /^[A-Za-z2-7]{32}$/;
 const C20_RE = /^[abcdefghjkmnpqrstuvwxyz23456789]{20}$/i;
@@ -388,7 +387,6 @@ function mergeService(x, y) {
   }
   const prior = [...byKey]
     .sort((p, q) => (svcWhen(p[1]) - svcWhen(q[1])) || (p[0] < q[0] ? -1 : p[0] > q[0] ? 1 : 0))
-    .slice(-PRIOR_MAX)
     .map((p) => p[1]);
   return prior.length ? Object.assign(cur, { prior }) : cur;
 }

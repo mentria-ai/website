@@ -1235,16 +1235,24 @@ check('link keeps the old secret under prior', async () => {
     const root = await C.rootKeyFrom(await C.openWithCode(rd().wraps.recovery, code));
     out.oldOpens = hex(await C.openService(root, 'notes', e2.prior[0])) === hex(s1);
     const other = rd();
-    other.services.notes = await C.sealService(root, 'notes', rnd(), Date.now() + 86400000);
+    const so = rnd();
+    other.services.notes = await C.sealService(root, 'notes', so, Date.now() + 86400000);
     const planted = C.mergeRecords(rd(), other);
     window.MentriaStore.set('keyring', 'vault', planted);
-    await m.link('notes', rnd());
+    const s4 = rnd();
+    await m.link('notes', s4);
     const e4 = rd().services.notes;
     out.after = Date.parse(e4.linked) > Date.parse(other.services.notes.linked);
     out.stays = C.mergeRecords(planted, rd()).services.notes.id === e4.id && C.mergeRecords(rd(), planted).services.notes.id === e4.id;
     out.prior4 = e4.prior.map((p) => p.id).join() === [e1.id, e2.id, other.services.notes.id].join();
-    for (let i = 0; i < 9; i++) await m.link('notes', rnd());
-    out.cap = [rd().services.notes.prior.length, (await m.secrets('notes')).length];
+    const more = [];
+    for (let i = 0; i < 9; i++) {
+      more.push(rnd());
+      await m.link('notes', more[i]);
+    }
+    const kept = await m.secrets('notes');
+    out.count = [rd().services.notes.prior.length, kept.length];
+    out.every = JSON.stringify(kept.map((x) => hex(x.bytes))) === JSON.stringify([s1, s2, so, s4].concat(more).reverse().map(hex));
     const ca = rnd();
     const cb = rnd();
     await Promise.all([m.link('totp', ca), m.link('totp', cb)]);
@@ -1256,7 +1264,7 @@ check('link keeps the old secret under prior', async () => {
   assert(r.first && r.sameKept, 'the first link has an id and no prior; linking the same secret again writes nothing', r);
   assert(r.moved && r.current && r.oldOpens, 'linking a different secret moves the old entry to prior', r);
   assert(r.after && r.stays && r.prior4, 'a new link is stamped after the entry it replaces and stays current through a merge', r);
-  assert(JSON.stringify(r.cap) === '[8,9]', 'prior is capped at 8 through links', r.cap);
+  assert(JSON.stringify(r.count) === '[12,13]' && r.every, 'prior keeps every secret through links', { count: r.count, every: r.every });
   assert(r.concurrent && r.valid, 'two links at once keep both secrets', r);
 });
 

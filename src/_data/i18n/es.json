@@ -1444,7 +1444,7 @@
       "empty_state": "Aún no hay cuentas. Pulsa «Añadir cuenta» para empezar.",
       "lock_button": "Bloquear",
       "backup_button": "Descargar copia",
-      "enroll_prf": "+ Añadir cara, huella o PIN",
+      "enroll_prf": "+ Desbloqueo con cara, huella o PIN",
       "prf_enroll_done": "Desbloqueo con cara, huella o PIN añadido en este dispositivo.",
       "prf_enroll_failed": "No se pudo añadir el desbloqueo con cara, huella o PIN",
       "backup_gate_title": "Haz copia antes de guardar",

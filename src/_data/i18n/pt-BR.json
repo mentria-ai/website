@@ -1444,7 +1444,7 @@
       "empty_state": "Ainda sem contas. Clique em \"Adicionar conta\" para começar.",
       "lock_button": "Bloquear",
       "backup_button": "Baixar backup",
-      "enroll_prf": "+ Adicionar rosto, digital ou PIN",
+      "enroll_prf": "+ Desbloqueio por rosto, digital ou PIN",
       "prf_enroll_done": "Desbloqueio por rosto, digital ou PIN adicionado neste dispositivo.",
       "prf_enroll_failed": "Não foi possível adicionar o desbloqueio por rosto, digital ou PIN",
       "backup_gate_title": "Faça backup antes de salvar",
@@ -1472,7 +1472,7 @@
       "create_lede": "Crie seu cofre. Seu desbloqueio único o abre.",
       "linked_missing": "Este cofre abre com um desbloqueio único que não está neste dispositivo. Restaure um backup que o inclua ou sincronize com um dispositivo que o tenha.",
       "backup_gate_lede_code": "Segredos TOTP não podem ser recuperados se você perder este dispositivo. Baixe um backup agora. Ele é protegido pelo seu código de recuperação.",
-      "backup_gate_lede_linked": "Segredos TOTP não podem ser recuperados se você perder este dispositivo. Agora seu código de recuperação não consegue proteger este backup, então escolha uma frase secreta para o arquivo. Você vai precisar dela para restaurar."
+      "backup_gate_lede_linked": "Segredos TOTP não podem ser recuperados se você perder este dispositivo. No momento, seu código de recuperação não consegue proteger este backup, então escolha uma frase secreta para o arquivo. Você vai precisar dela para restaurar."
     },
     "exif": {
       "aria_drop": "Área para soltar imagens",

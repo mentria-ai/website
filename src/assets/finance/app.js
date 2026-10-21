@@ -377,13 +377,10 @@ async function retireLegacy() {
   try { r = K.retirement('finance'); } catch (_) { return false; }
   const plan = V.retirePlan(r);
   if (plan === 'keep') return false;
-  if (plan === 'leftovers') {
-    if (!V.hasLegacyWraps(await db.getMeta('wraps'))) return false;
-  } else {
-    const ops = [];
-    for (const kind of ['pass', 'recovery']) if (app.ledger.exists('vaultwrap', kind)) ops.push(...app.engine.removeOps('vaultwrap', kind));
-    if (ops.length) await app.engine.commit(ops);
-  }
+  const ops = [];
+  for (const kind of ['pass', 'recovery']) if (app.ledger.exists('vaultwrap', kind)) ops.push(...app.engine.removeOps('vaultwrap', kind));
+  if (plan === 'leftovers' && !ops.length && !V.hasLegacyWraps(await db.getMeta('wraps'))) return false;
+  if (ops.length) await app.engine.commit(ops);
   const ids = await V.retireLegacy();
   await KR.forgetPasskeys(ids);
   if (plan === 'retire') await K.markRetired('finance');
@@ -402,9 +399,25 @@ function keyringLockedNow() {
 async function convertDevice() {
   const K = app.K;
   const wraps = await db.getMeta('wraps');
-  if (!K || !wraps || !wraps.device) return;
+  if (!K || !wraps || !wraps.device || K.rememberDecision() === 'off') return;
   try {
     if (!K.state().hasDevice) await K.setRemember(true);
+    K.setRememberPending(false);
+    await V.setDeviceUnlock(null, false);
+  } catch (e) {
+    if (KR.errCode(e) === 'confirm-needed') K.setRememberPending(true);
+  }
+}
+
+async function resumeRemember() {
+  const K = app.K;
+  if (!K || !K.rememberPending() || K.rememberDecision() === 'off') return;
+  const wraps = await db.getMeta('wraps');
+  if (!wraps || !wraps.device) return;
+  if (!K.state().hasDevice && !K.hasRootBytes()) return;
+  try {
+    if (!K.state().hasDevice) await K.setRemember(true);
+    K.setRememberPending(false);
     await V.setDeviceUnlock(null, false);
   } catch (_) {}
 }
@@ -454,7 +467,13 @@ async function linkWithCard(bytes) {
       title: T.link_title || t('lock.locked'),
       body: box,
       foot: [h('button', { type: 'button', class: 'fb', onclick: () => sh.close() }, t('common.later'))],
-      onClose: () => { if (!settled) app.linkDeclined = true; finish(false); }
+      onClose: () => {
+        if (!settled) {
+          app.linkDeclined = true;
+          KR.sayLater();
+        }
+        finish(false);
+      }
     });
     ui.mountCard(box, {
       onUnlocked: async () => {
@@ -469,7 +488,9 @@ async function linkWithCard(bytes) {
 
 async function linkLegacy(bytes, info) {
   const K = app.K;
+  const i = info || {};
   if (!K || app.linkDeclined || app.linked) return false;
+  if (i.auto && KR.saidLater()) return false;
   try {
     if (!K.enabled()) return false;
     const s = K.state();
@@ -478,7 +499,6 @@ async function linkLegacy(bytes, info) {
     const ui = await KR.ui();
     const secret = new Uint8Array(bytes);
     const opts = { service: 'finance', secret };
-    const i = info || {};
     if (i.code) opts.knownCode = i.code;
     opts.verifyCode = (code) => V.unlockRecovery(code).then((r) => { r.root.fill(0); return true; }, () => false);
     if (i.pass) opts.knownPassphrase = i.pass;
@@ -487,6 +507,7 @@ async function linkLegacy(bytes, info) {
     const after = K.state();
     if (!ok && !(after.unlocked && await inKeyring(bytes))) {
       app.linkDeclined = true;
+      KR.sayLater();
       return false;
     }
     await finishLink();
@@ -514,6 +535,8 @@ async function openLinked() {
     if (!(await db.getMeta('linked'))) {
       await V.markLinked();
       await convertDevice();
+    } else {
+      await resumeRemember();
     }
     await openSession(s);
     return true;
@@ -541,9 +564,25 @@ async function joinLinked(rootBytes) {
 let keyringOff = null;
 function watchKeyring(K) {
   if (!K || keyringOff) return;
-  keyringOff = K.onChange((s) => {
-    if (!s.unlocked && app.linked && app.engine) lock();
-  });
+  keyringOff = K.onChange(() => { followKeyring().catch((e) => console.error(e)); });
+}
+
+async function linkedHere() {
+  let linked = false;
+  try { linked = (await db.getMeta('linked')) === true; } catch (_) {}
+  if (!linked || !app.engine) return false;
+  if (!app.linked) {
+    app.linked = true;
+    scheduleRender();
+  }
+  return true;
+}
+
+async function followKeyring() {
+  const K = app.K;
+  if (!K || !app.engine) return;
+  if (!app.linked && !(await linkedHere())) return;
+  if (app.engine && app.linked && !K.state().unlocked) lock();
 }
 
 export async function lockNow() {

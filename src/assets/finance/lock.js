@@ -334,7 +334,7 @@ function unlockScreen(root, opts) {
     h('div', { class: 'flock__alt', style: { marginTop: '18px' } }, h('button', { type: 'button', style: { color: 'var(--f-muted)' }, onclick: () => eraseDevice(root, opts) }, t('lock.erase')))
   );
   if (st.hasDevice) {
-    V.unlockDevice().then((s) => opened(s)).catch(() => { setTimeout(() => pass.focus(), 50); });
+    V.unlockDevice().then((s) => opened(s, { auto: true })).catch(() => { setTimeout(() => pass.focus(), 50); });
   } else if (!st.prf.length) setTimeout(() => pass.focus(), 50);
 }
 

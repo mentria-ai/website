@@ -1334,6 +1334,19 @@ test('keyring helper: byte comparison and error codes', () => {
   assert.equal(KRM.errCode(null), '');
 });
 
+test('keyring helper: settings errors read as copy, never as codes', () => {
+  const T = { err_storage: 'storage copy', err_other: 'other copy' };
+  const named = (name) => { const e = new Error('x'); e.name = name; return e; };
+  assert.equal(KRM.failText(new Error('idb'), T), 'storage copy');
+  assert.equal(KRM.failText(new Error('storage'), T), 'storage copy');
+  assert.equal(KRM.failText(named('QuotaExceededError'), T), 'storage copy');
+  assert.equal(KRM.failText(new Error('locked'), T), 'other copy');
+  assert.equal(KRM.failText(named('TypeError'), T), 'other copy');
+  assert.equal(KRM.failText(new Error('idb'), {}), '');
+  const src = readFileSync(resolve(here, '../src/assets/finance/views/settings.js'), 'utf8');
+  assert.ok(!/toast\([^;]*errCode\(/.test(src), 'a settings toast shows a raw error code');
+});
+
 test('keyring helper: nothing loads outside a beta page', async () => {
   const had = Object.prototype.hasOwnProperty.call(globalThis, 'document');
   const prev = globalThis.document;

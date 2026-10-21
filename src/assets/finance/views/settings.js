@@ -263,7 +263,7 @@ function keyringSection(ctx) {
         try {
           await KR.withConfirm(() => K.removePasskey(p.id));
           U.toast(t('settings.passkey_removed'));
-        } catch (e) { if (KR.errCode(e) !== 'confirm-needed') U.toast(t('errors.write') + ' ' + KR.errCode(e)); }
+        } catch (e) { if (KR.errCode(e) !== 'confirm-needed') U.toast(KR.failText(e, T) || t('errors.write')); }
         ctx.rerender();
       }));
     }
@@ -290,9 +290,9 @@ function keyringSection(ctx) {
     if (prf === 'no' || st.hasDevice) {
       pkBox.append(U.checkbox(T.remember_label || t('setup.device_unlock'), st.hasDevice, async (v) => {
         try {
-          await KR.withConfirm(() => K.setRemember(v));
+          await KR.withConfirm(() => K.setRemember(v, { decided: true }));
           U.toast(v ? t('settings.device_on') : t('settings.device_off'));
-        } catch (e) { if (KR.errCode(e) !== 'confirm-needed') U.toast(t('errors.write') + ' ' + KR.errCode(e)); }
+        } catch (e) { if (KR.errCode(e) !== 'confirm-needed') U.toast(KR.failText(e, T) || t('errors.write')); }
         ctx.rerender();
       }), T.remember_note ? h('p', { class: 'ff__hint' }, T.remember_note) : null);
     }

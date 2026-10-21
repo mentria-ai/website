@@ -32,7 +32,7 @@ function historyShapeProblems(history, ids) {
   if (!history || typeof history !== 'object' || Array.isArray(history)) return [HISTORY_FILE + ': must be an object that maps an extension id to a list of hashes'];
   const out = [];
   for (const [id, list] of Object.entries(history)) {
-    if (!ids.has(id)) out.push(HISTORY_FILE + ': "' + id + '" is not a single-file extension in src/_data/extensionCatalog.json');
+    if (!ids.has(id)) out.push(HISTORY_FILE + ': "' + id + '" is not a single-file extension in src/_data/extensionCatalog.json; if it was removed, mark it retired in src/_data/extensionCatalog.json instead of deleting it, so copies people already installed stay verified');
     if (!Array.isArray(list) || !list.length || list.some((h) => typeof h !== 'string' || !HEX.test(h))) out.push(HISTORY_FILE + ': "' + id + '" must be a non-empty list of 64-character lowercase hex hashes');
     else if (new Set(list).size !== list.length) out.push(HISTORY_FILE + ': "' + id + '" lists the same hash twice');
   }
@@ -225,7 +225,9 @@ rule('history file shape is checked', () => {
   if (historyShapeProblems({ a: ['f'.repeat(64)] }, ids).length) throw new Error('a valid history was rejected');
   if (historyShapeProblems({ a: ['F'.repeat(64)] }, ids).length !== 1) throw new Error('an uppercase hash was accepted');
   if (historyShapeProblems({ a: ['f'.repeat(64), 'f'.repeat(64)] }, ids).length !== 1) throw new Error('a repeated hash was accepted');
-  if (historyShapeProblems({ z: ['f'.repeat(64)] }, ids).length !== 1) throw new Error('an unknown id was accepted');
+  const unknown = historyShapeProblems({ z: ['f'.repeat(64)] }, ids);
+  if (unknown.length !== 1) throw new Error('an unknown id was accepted');
+  if (!unknown[0].includes('mark it retired in src/_data/extensionCatalog.json instead of deleting it')) throw new Error('message for a removed id: ' + unknown[0]);
 });
 rule('app extension is verified', async () => {
   const entry = X.installApp({ id: 'app-one', name: 'App', version: '1.0.0', app: '/extensions/app-one/app/' });

@@ -2,6 +2,8 @@ const JS = '/assets/js/';
 const RUNTIME = JS + 'mentria-unlock.js';
 const CARD = JS + 'mentria-unlock-ui.js';
 const LOCAL = 'mentria.keyring.local';
+const LATER = 'mentria.finance.linkLater';
+const STORAGE_ERRORS = new Set(['storage', 'idb', 'QuotaExceededError', 'UnknownError', 'AbortError', 'SecurityError', 'InvalidStateError', 'DataError', 'VersionError']);
 let runtimeP = null;
 let uiP = null;
 let failed = false;
@@ -72,6 +74,20 @@ export function errCode(e) {
   if (!e) return '';
   const name = String(e.name || '');
   return name && name !== 'Error' && /Error$/.test(name) ? name : String(e.message || name);
+}
+
+export function failText(e, T) {
+  const copy = T || {};
+  const key = STORAGE_ERRORS.has(errCode(e)) ? 'err_storage' : 'err_other';
+  return typeof copy[key] === 'string' ? copy[key] : '';
+}
+
+export function saidLater() {
+  try { return sessionStorage.getItem(LATER) === '1'; } catch (_) { return false; }
+}
+
+export function sayLater() {
+  try { sessionStorage.setItem(LATER, '1'); } catch (_) {}
 }
 
 export async function withConfirm(fn) {

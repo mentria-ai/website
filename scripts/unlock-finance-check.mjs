@@ -932,6 +932,244 @@ check('retired elsewhere: leftover wraps go and stay gone', async () => {
   assert(signals.length === ids.length && signals.every((s, i) => s.credentialId === ids[i]), 'this device signals its own old passkeys', { signals, ids });
 });
 
+async function keyringOn(page, lockAfter) {
+  at('keyring on the lab page');
+  await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
+  return page.evaluate(async (l) => {
+    const M = await import('/assets/js/mentria-unlock.js');
+    const core = await import('/assets/js/mentria-unlock-core.js');
+    await M.ready();
+    const code = core.newRecoveryCode();
+    await M.create({ code, confirmed: true });
+    if (l) await M.lock();
+    return code;
+  }, !!lockAfter);
+}
+
+async function onLab(page, fn, arg) {
+  if (!page.url().startsWith(ORIGIN + '/beta/unlock/')) await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
+  return page.evaluate(fn, arg);
+}
+
+async function declinedTab(r) {
+  const page = r.page;
+  let frame = await store(page);
+  await legacySetup(frame, { passkey: false, device: false });
+  await setSwitch(page, true);
+  const code = await keyringOn(page, true);
+  frame = await store(page);
+  await shown(frame, '#fin-pass', 20000);
+  await (await typeIn(frame, '#fin-pass', PASS)).press('Enter');
+  await present(frame, '#fin-main', 60000);
+  await shown(frame, 'dialog.fsheet .m-unlock', 30000);
+  await pressText(frame, 'dialog.fsheet', FIN.common.later);
+  await frame.waitForFunction(() => !document.querySelector('dialog.fsheet'), { timeout: 15000 });
+  await opened(frame);
+  assert(!(await metaOf(frame)).linked, 'Later keeps today\'s ledger');
+  return { frame, code };
+}
+
+check('a tab that said Later locks once another tab linked the ledger', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    const { frame, code } = await declinedTab(r);
+    const other = await newPage(r, false);
+    await onLab(other, async (c) => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      await M.ready();
+      await M.unlockWithCode(c);
+    }, code);
+    await sleep(1000);
+    await page.bringToFront();
+    assert(await frame.$('#fin-main'), 'the ledger stays open while it is not linked');
+    await onLab(other, async () => {
+      const db = await new Promise((ok, no) => { const q = indexedDB.open('mentria-ext-finance'); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error); });
+      await new Promise((ok, no) => { const tx = db.transaction('meta', 'readwrite'); tx.objectStore('meta').put(true, 'linked'); tx.oncomplete = ok; tx.onerror = () => no(tx.error); });
+      db.close();
+    });
+    await onLab(other, async () => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      await M.lock();
+    });
+    await page.bringToFront();
+    await shown(frame, '.flock', 20000);
+    assert(!(await frame.$('#fin-main')), 'the ledger closed with the lock');
+  } finally {
+    await done(r);
+  }
+});
+
+check('a tab that said Later takes up a link made in another tab', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    const { frame, code } = await declinedTab(r);
+    const before = await settingsInfo(frame);
+    assert(before.autoLock && !before.keyringNote, 'today\'s settings while not linked', before);
+    const other = await newPage(r, false);
+    await onLab(other, async (a) => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      const V = await import('/assets/finance/vault.js');
+      await M.ready();
+      await M.unlockWithCode(a.code);
+      const s = await V.unlockPass(a.pass);
+      await V.markLinked();
+      await M.link('finance', s.root);
+      s.root.fill(0);
+    }, { code, pass: PASS });
+    await page.bringToFront();
+    const took = await until(async () => (await settingsInfo(frame)).keyringNote, 15000);
+    assert(took, 'the open ledger switches to the one unlock', await settingsInfo(frame));
+    await frame.evaluate(() => { document.getElementById('fin-main').dataset.kept = '1'; });
+    await fakeAway(frame, 10);
+    await sleep(1500);
+    const kept = await frame.evaluate(() => { const m = document.getElementById('fin-main'); return !!m && m.dataset.kept === '1'; });
+    assert(kept, 'its own auto-lock is off once it follows the one unlock');
+    await onLab(other, async () => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      await M.lock();
+    });
+    await page.bringToFront();
+    await cardShown(frame);
+    assert(!(await frame.$('#fin-main')), 'a lock elsewhere locks it');
+  } finally {
+    await done(r);
+  }
+});
+
+check('Later after a device unlock is not asked again in this tab', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: true });
+    await setSwitch(page, true);
+    frame = await store(page);
+    await present(frame, '#fin-main', 60000);
+    await waitStep(frame, 'intro');
+    await press(frame, '.m-ulayer [data-act="not-now"]');
+    await layerGone(frame);
+    await page.reload({ waitUntil: 'load' });
+    frame = await frameOf(page);
+    await opened(frame);
+    await sleep(3000);
+    assert(!(await frame.$('.m-ulayer')), 'the setup sheet stays away after a reload');
+    assert(!(await metaOf(frame)).linked && (await record(page)) === null, 'nothing was linked or made');
+    const fresh = await newPage(r, false);
+    const f2 = await store(fresh);
+    await present(f2, '#fin-main', 60000);
+    await waitStep(f2, 'intro');
+  } finally {
+    await done(r);
+  }
+});
+
+check('retired elsewhere: this ledger\'s synced wraps go too', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: false });
+    assert(await until(async () => (await ledgerOf(frame, PASS)).pass, 15000), 'the wraps are mirrored into the ledger');
+    await setSwitch(page, true);
+    await keyringOn(page, false);
+    await onLab(page, async (pw) => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      const V = await import('/assets/finance/vault.js');
+      const s = await V.unlockPass(pw);
+      await M.link('finance', s.root);
+      s.root.fill(0);
+    }, PASS);
+    await page.goto(ORIGIN + '/robots.txt', { waitUntil: 'load' });
+    await page.evaluate((k) => {
+      const rec = JSON.parse(localStorage.getItem(k));
+      rec.services.finance.linked = new Date(Date.now() - 31 * 86400000).toISOString();
+      rec.retired = { finance: new Date(Date.now() - 86400000).toISOString() };
+      rec.changed = new Date().toISOString();
+      localStorage.setItem(k, JSON.stringify(rec));
+    }, RECORD);
+    frame = await store(page);
+    await opened(frame);
+    const plan = await frame.evaluate(async () => (await import('/assets/js/mentria-unlock.js')).retirement('finance'));
+    assert(plan.blockers.join() === 'already-retired', 'only the retirement elsewhere is left', plan);
+    const gone = await until(async () => (await metaOf(frame)).wrapKinds.length === 0, 20000);
+    assert(gone, 'the old wraps on this device are deleted', await metaOf(frame));
+    const ok = await until(async () => { const l = await ledgerOf(frame); return !l.pass && !l.recovery && l.passRemoved && l.recoveryRemoved; }, 15000);
+    assert(ok, 'the synced copies in the ledger are deleted too', await ledgerOf(frame));
+    assert(!r.errors.length, 'no page errors', r.errors);
+  } finally {
+    await done(r);
+  }
+});
+
+async function rememberOf(scope) {
+  return scope.evaluate(async () => {
+    const M = await import('/assets/js/mentria-unlock.js');
+    await M.ready();
+    return { decision: M.rememberDecision(), pending: M.rememberPending(), hasDevice: M.state().hasDevice, unlocked: M.state().unlocked, linked: M.state().linked };
+  });
+}
+
+check('Remember turned off stays off when a device-unlock ledger links', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: true });
+    await setSwitch(page, true);
+    const code = await keyringOn(page, false);
+    await onLab(page, async () => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      await M.setRemember(false, { decided: true });
+      await M.lock();
+    });
+    frame = await store(page);
+    await present(frame, '#fin-main', 60000);
+    await shown(frame, 'dialog.fsheet .m-unlock', 30000);
+    await cardCode(frame, 'dialog.fsheet .m-unlock', code);
+    await frame.waitForFunction(() => !document.querySelector('dialog.fsheet'), { timeout: 30000 });
+    assert(await until(async () => (await metaOf(frame)).linked, 15000), 'the ledger is linked');
+    await sleep(800);
+    const rem = await rememberOf(frame);
+    const meta = await metaOf(frame);
+    assert(rem.decision === 'off' && !rem.hasDevice && rem.linked.includes('finance'), 'Remember stays off', rem);
+    assert(meta.wrapKinds.includes('device'), 'Finance\'s own device unlock waits for retirement', meta);
+  } finally {
+    await done(r);
+  }
+});
+
+check('a Remember that needed a confirm turns on at the next card unlock', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: true });
+    await setSwitch(page, true);
+    const code = await keyringOn(page, false);
+    frame = await store(page);
+    await opened(frame);
+    assert(await until(async () => (await metaOf(frame)).linked, 15000), 'the ledger links with the open session');
+    await sleep(800);
+    let rem = await rememberOf(frame);
+    let meta = await metaOf(frame);
+    assert(rem.pending && !rem.hasDevice && rem.decision === '', 'Remember waits for an unlock on this device', rem);
+    assert(meta.wrapKinds.includes('device'), 'Finance\'s own device unlock stays meanwhile', meta);
+    await lockTop(frame);
+    await cardShown(frame);
+    await cardCode(frame, '.flock .m-unlock', code);
+    await opened(frame);
+    const on = await until(async () => (await rememberOf(frame)).hasDevice, 15000);
+    rem = await rememberOf(frame);
+    meta = await metaOf(frame);
+    assert(on && !rem.pending && rem.decision === '', 'Remember turns on after the card unlock', rem);
+    assert(!meta.wrapKinds.includes('device') && meta.wrapKinds.includes('pass'), 'Finance\'s own device unlock is handed over', meta);
+  } finally {
+    await done(r);
+  }
+});
+
 let failed = 0;
 const ONLY = process.env.ONLY || '';
 const run = checks.filter(([n]) => !ONLY || ONLY.split('|').some((o) => n.includes(o)));

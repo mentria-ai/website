@@ -226,8 +226,17 @@ localeReload: true
       </div>
       <p class="about-data-card__p" id="about-identity-lede">{{ "about.identity_lede_none" | t }}</p>
 
+      <div class="about-identity-link" id="about-identity-link" hidden>
+        <p class="about-data-card__p"><strong class="about-identity-link__h">{{ "unlock.link_title" | t }}</strong> {{ "unlock.link_body" | t }}</p>
+        <button type="button" class="about-data-btn" id="about-identity-link-btn" hidden>{{ "about.identity_link_button" | t }}…</button>
+      </div>
+
+      <div class="about-identity-slot" id="about-identity-card-slot" hidden></div>
+      <button type="button" class="about-data-btn about-data-btn--ghost about-identity-later" id="about-identity-later" hidden>{{ "unlock.not_now" | t }}</button>
+
       <div class="about-identity-actions" id="about-identity-setup" hidden>
         <button type="button" class="about-data-btn about-reveal-btn" data-reveal="about-identity-setup-form">{{ "about.identity_setup_button" | t }}…</button>
+        <button type="button" class="about-data-btn about-identity-create" id="about-identity-create" hidden>{{ "about.identity_setup_button" | t }}…</button>
         <div class="about-fold" id="about-identity-setup-form" hidden>
           <label class="about-data-field">
             <span>{{ "about.identity_pass_label" | t }}</span>
@@ -255,8 +264,16 @@ localeReload: true
         <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-lock-btn">{{ "about.identity_lock_button" | t }}</button>
         <button type="button" class="about-data-btn" id="about-identity-passkey-add" hidden>{{ "about.identity_passkey_add" | t }}</button>
         <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-passkey-remove" hidden>{{ "about.identity_passkey_remove" | t }}</button>
-        <label class="about-identity-device"><input type="checkbox" id="about-identity-device"> {{ "about.identity_device_label" | t }}</label>
+        <label class="about-identity-device" id="about-identity-device-row"><input type="checkbox" id="about-identity-device"> {{ "about.identity_device_label" | t }}</label>
         <p class="about-data-card__p about-identity-note" id="about-identity-passkey-note">{{ "about.identity_device_note" | t }}</p>
+        <div class="about-identity-keyring" id="about-identity-keyring" hidden>
+          <h4 class="about-identity-sub" id="about-identity-passkeys-h">{{ "unlock.passkeys_title" | t }}</h4>
+          <ul class="about-identity-passkeys" id="about-identity-passkeys" aria-labelledby="about-identity-passkeys-h"></ul>
+          <button type="button" class="about-data-btn" id="about-identity-kr-add">{{ "about.identity_passkey_add" | t }}</button>
+          <label class="about-identity-device"><input type="checkbox" id="about-identity-launch" aria-describedby="about-identity-launch-note"> {{ "unlock.launch_setting" | t }}</label>
+          <p class="about-data-card__p about-identity-note" id="about-identity-launch-note">{{ "unlock.launch_setting_note" | t }}</p>
+          <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-regen">{{ "unlock.regenerate_code" | t }}</button>
+        </div>
       </div>
     </div>
 
@@ -466,6 +483,19 @@ localeReload: true
   .about-identity-status[data-tone="locked"] { color: var(--syn-amber, #f7b015); border-color: var(--syn-amber, #f7b015); }
   .about-identity-actions { display: flex; flex-direction: column; gap: 10px; }
   .about-identity-actions--unlocked { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .about-identity-actions.is-kr > .about-reveal-btn, .about-identity-actions.is-kr > .about-fold { display: none; }
+  .about-identity-link { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px dashed var(--term-border); border-radius: 6px; }
+  .about-identity-link__h { color: var(--syn-cyan); font-weight: 600; }
+  .about-identity-link .about-data-btn, .about-identity-later, .about-identity-create { align-self: flex-start; }
+  .about-identity-slot .m-unlock { max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+  .about-identity-keyring { flex: 1 1 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--term-border); }
+  .about-identity-keyring > .about-data-btn { align-self: flex-start; }
+  .about-identity-keyring .about-identity-device { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--term-fg); }
+  .about-identity-sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--term-muted); margin: 0; }
+  .about-identity-passkeys { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .about-identity-passkeys li { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; font-family: var(--font-mono); font-size: 12px; color: var(--term-fg); }
+  .about-identity-passkeys li span { min-width: 0; overflow-wrap: anywhere; }
+  .about-identity-passkeys li .about-data-btn { margin-top: 0; flex: 0 0 auto; }
   .about-sync-code { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
   .about-sync-qr { width: 100%; max-width: 220px; height: auto; image-rendering: pixelated; background: #fff; border-radius: 6px; padding: 8px; box-sizing: border-box; }
   .about-sync-code__label { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); letter-spacing: 0.1em; align-self: stretch; }
@@ -1406,7 +1436,17 @@ localeReload: true
       passkeyFailed:  {{ ('about.identity_passkey_failed' | t) | dump | safe }},
       passkeyUnsupported: {{ ('about.identity_passkey_unsupported' | t) | dump | safe }},
       passkeyMismatch:    {{ ('about.identity_passkey_mismatch'    | t) | dump | safe }},
-      passkeyRemoveConfirm: {{ ('about.identity_passkey_remove_confirm' | t) | dump | safe }}
+      passkeyRemoveConfirm: {{ ('about.identity_passkey_remove_confirm' | t) | dump | safe }},
+      rememberNote:   {{ ('unlock.remember_note'          | t) | dump | safe }},
+      krAdded:        {{ ('unlock.passkey_added'          | t) | dump | safe }},
+      krSkipped:      {{ ('unlock.passkey_skipped'        | t) | dump | safe }},
+      krNoPrf:        {{ ('unlock.no_prf_title'           | t) | dump | safe }},
+      krOther:        {{ ('unlock.err_other'              | t) | dump | safe }},
+      krStorage:      {{ ('unlock.err_storage'            | t) | dump | safe }},
+      krRemove:       {{ ('unlock.passkey_remove'         | t) | dump | safe }},
+      krRemoveConfirm: {{ ('about.identity_kr_remove_confirm' | t) | dump | safe }},
+      krAddedOn:      {{ ('about.identity_passkey_added_on' | t) | dump | safe }},
+      regenConfirm:   {{ ('about.identity_regenerate_confirm' | t) | dump | safe }}
     };
     var statusEl = document.getElementById('about-identity-status');
     var ledeEl   = document.getElementById('about-identity-lede');
@@ -1421,6 +1461,40 @@ localeReload: true
     var lockBtn = document.getElementById('about-identity-lock-btn');
     var syncBtn = document.getElementById('about-identity-sync-btn');
     if (!setupBtn) return;
+    var pkUnlockBtn = document.getElementById('about-identity-passkey-unlock');
+    var pkAddBtn = document.getElementById('about-identity-passkey-add');
+    var pkRemoveBtn = document.getElementById('about-identity-passkey-remove');
+    var deviceToggle = document.getElementById('about-identity-device');
+    var deviceRow = document.getElementById('about-identity-device-row');
+    var deviceNote = document.getElementById('about-identity-passkey-note');
+    var deviceNoteText = deviceNote.textContent;
+    var createBtn = document.getElementById('about-identity-create');
+    var linkBox = document.getElementById('about-identity-link');
+    var linkBtn = document.getElementById('about-identity-link-btn');
+    var slot = document.getElementById('about-identity-card-slot');
+    var laterBtn = document.getElementById('about-identity-later');
+    var krBox = document.getElementById('about-identity-keyring');
+    var pkHead = document.getElementById('about-identity-passkeys-h');
+    var pkList = document.getElementById('about-identity-passkeys');
+    var krAddBtn = document.getElementById('about-identity-kr-add');
+    var launchToggle = document.getElementById('about-identity-launch');
+    var regenBtn = document.getElementById('about-identity-regen');
+
+    var kr = null;
+    var krc = null;
+    var krUi = null;
+    var krPrf = 'unknown';
+    var fromKeyring = false;
+    var krBroken = false;
+    var setupBusy = false;
+    var pendingCreate = false;
+    var linkMode = null;
+    var cardFor = null;
+    var cardP = null;
+    var listKey = null;
+    var retiring = false;
+    var reconciling = null;
+    var again = false;
 
     function waitFor(name, cb) {
       if (window[name]) return cb();
@@ -1431,12 +1505,42 @@ localeReload: true
       }, 100);
     }
 
-    function refresh() {
-      var setUp = window.MentriaIdentity && window.MentriaIdentity.isSetUp();
-      var unlocked = window.MentriaIdentity && window.MentriaIdentity.isUnlocked();
-      setupBox.hidden = setUp;
-      unlockBox.hidden = !setUp || unlocked;
-      unlockedBox.hidden = !unlocked;
+    function krWanted() {
+      if (document.documentElement.dataset.release !== 'beta' || window.__mentriaRedirecting) return false;
+      try {
+        var l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
+        return !!l && l.enabled === true;
+      } catch (_) { return false; }
+    }
+    function krActive() {
+      try { return !!kr && kr.enabled(); } catch (_) { return false; }
+    }
+    function ui() {
+      if (!krUi) krUi = import('/assets/js/mentria-unlock-ui.js').catch(function (e) { krUi = null; throw e; });
+      return krUi;
+    }
+    function linkedHere() {
+      var I = window.MentriaIdentity;
+      return krActive() && !krBroken && !!I && I.isSetUp() && I.isLinked();
+    }
+    function errName(e) {
+      if (!e) return '';
+      if (e.name && e.name !== 'Error' && /Error$/.test(e.name)) return e.name;
+      return String(e.message || e);
+    }
+    function errText(e) {
+      var n = errName(e);
+      return n === 'storage' || n === 'storage-full' || n === 'storage unavailable' || n === 'QuotaExceededError' ? COPY.krStorage : COPY.krOther;
+    }
+    function toast(text) {
+      if (window.MentriaUI && typeof window.MentriaUI.toast === 'function') window.MentriaUI.toast(text);
+      else window.mentriaAlert(text);
+    }
+    function fmtDate(iso) {
+      try { return iso ? new Date(iso).toLocaleDateString(document.documentElement.lang || undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : ''; } catch (_) { return ''; }
+    }
+
+    function head(setUp, unlocked) {
       var adv = document.getElementById('about-advanced');
       var badge = document.getElementById('about-advanced-badge');
       if (adv && setUp && !adv.dataset.autoOpened) { adv.open = true; adv.dataset.autoOpened = '1'; }
@@ -1459,7 +1563,263 @@ localeReload: true
         ledeEl.textContent = COPY.ledeLocked;
       }
     }
-    waitFor('MentriaIdentity', refresh);
+
+    function legacyPasskeyUI(I) {
+      var hasPk = I.hasPasskey();
+      pkUnlockBtn.hidden = !hasPk;
+      pkAddBtn.hidden = hasPk || !I.isUnlocked();
+      pkRemoveBtn.hidden = !hasPk || !I.isUnlocked();
+      deviceRow.hidden = false;
+      deviceNote.hidden = false;
+      deviceNote.textContent = deviceNoteText;
+      deviceToggle.checked = I.hasDeviceUnlock();
+    }
+
+    function mountFor(want) {
+      if (cardFor === want) return;
+      if (cardP) {
+        var old = cardP;
+        cardP = null;
+        old.then(function (h) { if (h) h.destroy(); });
+      }
+      cardFor = want;
+      if (!want) return;
+      cardP = ui().then(function (m) {
+        return m.mountCard(slot, { onUnlocked: function () { reconcile(); } });
+      }).catch(function () { return null; });
+    }
+
+    function legacyRender() {
+      var I = window.MentriaIdentity;
+      var setUp = I && I.isSetUp();
+      var unlocked = I && I.isUnlocked();
+      mountFor(null);
+      setupBox.classList.remove('is-kr');
+      createBtn.hidden = true;
+      linkBox.hidden = true;
+      slot.hidden = true;
+      laterBtn.hidden = true;
+      krBox.hidden = true;
+      ledeEl.hidden = false;
+      setupBox.hidden = setUp;
+      unlockBox.hidden = !setUp || unlocked;
+      unlockedBox.hidden = !unlocked;
+      head(setUp, unlocked);
+      if (I) legacyPasskeyUI(I);
+    }
+
+    function renderKeyring(s) {
+      var list = kr.passkeys();
+      var key = JSON.stringify(list);
+      if (key !== listKey) {
+        listKey = key;
+        pkList.replaceChildren();
+        list.forEach(function (p) {
+          var li = document.createElement('li');
+          var name = document.createElement('span');
+          name.textContent = p.label || COPY.krAddedOn.replace('{date}', fmtDate(p.created));
+          var rm = document.createElement('button');
+          rm.type = 'button';
+          rm.className = 'about-data-btn about-data-btn--ghost';
+          rm.textContent = COPY.krRemove;
+          rm.setAttribute('aria-label', COPY.krRemove + ': ' + name.textContent);
+          rm.addEventListener('click', function () { removeKr(p.id, rm); });
+          li.append(name, rm);
+          pkList.append(li);
+        });
+      }
+      krAddBtn.hidden = krPrf === 'no';
+      pkList.hidden = !list.length;
+      pkHead.hidden = !list.length && krAddBtn.hidden;
+      launchToggle.checked = !!s.askAtLaunch;
+    }
+
+    function krRender() {
+      var I = window.MentriaIdentity;
+      if (!I) return;
+      var s = kr.state();
+      var setUp = I.isSetUp();
+      var unlocked = I.isUnlocked();
+      var linked = linkedHere();
+      var ringLocked = s.setUp && !s.unlocked;
+      var want = null;
+      if (linked && !unlocked) want = 'unlock';
+      else if (!setUp && pendingCreate && ringLocked) want = 'create';
+      else if (setUp && unlocked && !linked && !krBroken && linkMode === 'card' && ringLocked) want = 'link';
+      setupBox.classList.add('is-kr');
+      createBtn.hidden = false;
+      setupBox.hidden = setUp || !!want;
+      unlockBox.hidden = !setUp || unlocked || linked;
+      unlockedBox.hidden = !unlocked;
+      linkBox.hidden = !setUp || linked || krBroken || (unlocked && !linkMode);
+      linkBtn.hidden = linkMode !== 'offer' || s.setUp;
+      ledeEl.hidden = want === 'unlock';
+      slot.hidden = !want;
+      laterBtn.hidden = want !== 'create' && want !== 'link';
+      head(setUp, unlocked);
+      if (linked && unlocked) {
+        pkUnlockBtn.hidden = true;
+        pkAddBtn.hidden = true;
+        pkRemoveBtn.hidden = true;
+        var remember = krPrf === 'no' || !!s.hasDevice;
+        deviceRow.hidden = !remember;
+        deviceNote.hidden = !remember;
+        deviceNote.textContent = COPY.rememberNote;
+        deviceToggle.checked = !!s.hasDevice;
+        krBox.hidden = !s.unlocked;
+        if (s.unlocked) renderKeyring(s);
+      } else {
+        krBox.hidden = true;
+        legacyPasskeyUI(I);
+      }
+      mountFor(want);
+    }
+
+    function refresh() {
+      if (krActive()) krRender();
+      else legacyRender();
+    }
+
+    async function maybeRetire() {
+      var I = window.MentriaIdentity;
+      if (retiring || !krActive() || !fromKeyring || !I.isLinked()) return;
+      var r = kr.retirement('identity');
+      if (!r || !r.ready) return;
+      retiring = true;
+      try {
+        var id = I.legacyPasskeyId();
+        I.retireLegacy();
+        if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
+          try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: id }); } catch (_) {}
+        }
+        await kr.markRetired('identity');
+      } catch (_) {
+      } finally {
+        retiring = false;
+      }
+    }
+
+    async function openFromKeyring() {
+      var I = window.MentriaIdentity;
+      try {
+        var b = await kr.secret('identity');
+        if (!b) return;
+        await I.useSecret(b);
+      } catch (_) {
+        krBroken = true;
+        return;
+      }
+      fromKeyring = true;
+      pendingCreate = false;
+      linkMode = null;
+      maybeRetire();
+    }
+
+    async function createInKeyring() {
+      var I = window.MentriaIdentity;
+      var b = await I.createLinked();
+      try {
+        await kr.link('identity', b);
+      } catch (e) {
+        try { await I.discardLinked(b); } catch (_) {}
+        throw e;
+      }
+      fromKeyring = true;
+    }
+
+    async function linkNow() {
+      var I = window.MentriaIdentity;
+      if (I.isLinked() || !I.isUnlocked()) return;
+      await kr.link('identity', new Uint8Array(I.getSecret()));
+      fromKeyring = true;
+      linkMode = null;
+    }
+
+    async function reconcileOnce() {
+      var I = window.MentriaIdentity;
+      if (!I) return;
+      if (!krActive()) {
+        if (fromKeyring) { I.lock(); fromKeyring = false; }
+        return;
+      }
+      var s = kr.state();
+      if (!s.unlocked) {
+        if (fromKeyring) { I.lock(); fromKeyring = false; }
+        if (linkMode === 'offer' && s.setUp) linkMode = 'card';
+        return;
+      }
+      if (setupBusy) return;
+      if (linkedHere()) {
+        if (!I.isUnlocked()) await openFromKeyring();
+        else fromKeyring = true;
+        return;
+      }
+      if (!I.isSetUp()) {
+        if (pendingCreate) {
+          pendingCreate = false;
+          try { await createInKeyring(); } catch (e) { window.mentriaAlert(errText(e)); }
+        }
+        return;
+      }
+      if (I.isUnlocked() && !krBroken) {
+        try { await linkNow(); } catch (_) {}
+      }
+    }
+
+    function reconcile() {
+      if (reconciling) { again = true; return reconciling; }
+      reconciling = (async function () {
+        do {
+          again = false;
+          await reconcileOnce();
+        } while (again);
+      })().catch(function () {}).then(function () {
+        reconciling = null;
+        refresh();
+      });
+      return reconciling;
+    }
+
+    async function legacyUnlock(p) {
+      var I = window.MentriaIdentity;
+      try {
+        await I.unlock(p);
+      } catch (e) {
+        var n = krc ? krc.normalizeCode(p) : null;
+        var alt = n && n.kind === 'c20' ? krc.formatCode(n) : null;
+        if (!alt || alt === p) throw e;
+        await I.unlock(alt);
+      }
+    }
+
+    async function startSetup(typed) {
+      var I = window.MentriaIdentity;
+      if (!krActive() || !I.isUnlocked() || I.isLinked()) return;
+      var o = { service: 'identity', secret: new Uint8Array(I.getSecret()) };
+      var n = typed && krc ? krc.normalizeCode(typed) : null;
+      if (n && n.kind === 'c20') o.knownCode = krc.formatCode(n);
+      else if (typed) o.knownPassphrase = typed;
+      var ok = false;
+      setupBusy = true;
+      try { ok = await (await ui()).showSetup(o); } catch (_) { ok = false; }
+      setupBusy = false;
+      if (ok && I.isLinked()) { fromKeyring = true; linkMode = null; }
+      else if (linkMode !== 'offer') linkMode = null;
+      reconcile();
+    }
+
+    async function afterLegacyUnlock(opts) {
+      var I = window.MentriaIdentity;
+      try {
+        if (!krActive() || krBroken || !I.isUnlocked() || I.isLinked()) return;
+        var s = kr.state();
+        if (s.unlocked) await linkNow();
+        else if (s.setUp) linkMode = 'card';
+        else if (opts.auto) linkMode = 'offer';
+        else { await startSetup(opts.typed); return; }
+      } catch (_) {}
+      refresh();
+    }
 
     setupBtn.addEventListener('click', async function () {
       var p1 = setupPass.value, p2 = setupPass2.value;
@@ -1476,50 +1836,85 @@ localeReload: true
       } finally { setupBtn.disabled = false; }
     });
 
+    createBtn.addEventListener('click', async function () {
+      var I = window.MentriaIdentity;
+      if (!I || !krActive()) return;
+      createBtn.disabled = true;
+      try {
+        var s = kr.state();
+        if (!s.setUp) {
+          var m = await ui();
+          var b = await I.createLinked();
+          var ok = false;
+          setupBusy = true;
+          try { ok = await m.showSetup({ service: 'identity', secret: b }); } catch (_) { ok = false; }
+          setupBusy = false;
+          if (ok && I.isLinked()) fromKeyring = true;
+          else await I.discardLinked(b);
+        } else if (s.unlocked) {
+          await createInKeyring();
+        } else {
+          pendingCreate = true;
+        }
+      } catch (err) {
+        setupBusy = false;
+        window.mentriaAlert(errText(err));
+      } finally {
+        createBtn.disabled = false;
+        reconcile();
+      }
+    });
+
     unlockBtn.addEventListener('click', async function () {
       var p = unlockPass.value;
       if (!p) return;
+      var keyring = krActive();
+      var opened = false;
       unlockBtn.disabled = true;
       try {
-        await window.MentriaIdentity.unlock(p);
+        if (keyring) await legacyUnlock(p);
+        else await window.MentriaIdentity.unlock(p);
         unlockPass.value = '';
         refresh();
+        opened = true;
       } catch (err) {
         window.mentriaAlert(COPY.unlockFailed);
       } finally { unlockBtn.disabled = false; }
+      if (opened && keyring) afterLegacyUnlock({ typed: p });
     });
 
     lockBtn.addEventListener('click', function () {
+      if (krActive() && fromKeyring) {
+        ui().then(function (m) { return m.lockNow(); }, function () { return kr.lock(); }).catch(function () {}).then(function () { reconcile(); });
+        return;
+      }
       window.MentriaIdentity.lock();
       refresh();
     });
 
-    var pkUnlockBtn = document.getElementById('about-identity-passkey-unlock');
-    var pkAddBtn = document.getElementById('about-identity-passkey-add');
-    var pkRemoveBtn = document.getElementById('about-identity-passkey-remove');
-    var deviceToggle = document.getElementById('about-identity-device');
+    laterBtn.addEventListener('click', function () {
+      pendingCreate = false;
+      if (linkMode === 'card') linkMode = null;
+      refresh();
+    });
 
-    function refreshPasskeyUI() {
-      var I = window.MentriaIdentity;
-      if (!I) return;
-      var hasPk = I.hasPasskey();
-      pkUnlockBtn.hidden = !hasPk;
-      pkAddBtn.hidden = hasPk || !I.isUnlocked();
-      pkRemoveBtn.hidden = !hasPk || !I.isUnlocked();
-      deviceToggle.checked = I.hasDeviceUnlock();
-    }
-
-    var origRefresh = refresh;
-    refresh = function () { origRefresh(); refreshPasskeyUI(); };
+    linkBtn.addEventListener('click', function () {
+      linkBtn.disabled = true;
+      startSetup(null).then(function () { linkBtn.disabled = false; }, function () { linkBtn.disabled = false; });
+    });
 
     pkUnlockBtn.addEventListener('click', async function () {
+      var keyring = krActive();
+      var opened = false;
       pkUnlockBtn.disabled = true;
       try {
         await window.MentriaIdentity.unlockWithPasskey();
         refresh();
+        opened = true;
       } catch (err) {
         window.mentriaAlert(COPY.passkeyFailed);
       } finally { pkUnlockBtn.disabled = false; }
+      if (opened && keyring) afterLegacyUnlock({});
     });
 
     pkAddBtn.addEventListener('click', async function () {
@@ -1541,8 +1936,31 @@ localeReload: true
       refresh();
     });
 
+    async function withConfirm(fn) {
+      try {
+        return await fn();
+      } catch (e) {
+        if (errName(e) !== 'confirm-needed') throw e;
+        var m = await ui();
+        if (!(await m.showConfirm())) return false;
+        return fn();
+      }
+    }
+
     deviceToggle.addEventListener('change', async function () {
       deviceToggle.disabled = true;
+      if (krActive() && fromKeyring) {
+        var on = deviceToggle.checked;
+        try {
+          await withConfirm(function () { return kr.setRemember(on); });
+        } catch (err) {
+          window.mentriaAlert(errText(err));
+        } finally {
+          deviceToggle.disabled = false;
+        }
+        refresh();
+        return;
+      }
       try {
         await window.MentriaIdentity.setDeviceUnlock(deviceToggle.checked);
       } catch (err) {
@@ -1553,20 +1971,110 @@ localeReload: true
       refresh();
     });
 
-    waitFor('MentriaIdentity', function () {
-      window.MentriaIdentity.tryDeviceUnlock().then(function () { refresh(); });
+    launchToggle.addEventListener('change', function () {
+      if (krActive()) kr.setAskAtLaunch(launchToggle.checked);
+      refresh();
+    });
+
+    krAddBtn.addEventListener('click', function () {
+      if (!krActive()) return;
+      var p;
+      try { p = kr.addPasskey(''); } catch (e) { p = Promise.reject(e); }
+      krAddBtn.disabled = true;
+      var refocus = false;
+      p.then(function () {
+        toast(COPY.krAdded);
+      }, async function (e) {
+        var n = errName(e);
+        if (n === 'confirm-needed') {
+          var ok = false;
+          try { ok = await (await ui()).showConfirm(); } catch (_) { ok = false; }
+          refocus = ok;
+          return;
+        }
+        if (n === 'no-prf') krPrf = 'no';
+        window.mentriaAlert(n === 'no-prf' ? COPY.krNoPrf : n === 'NotAllowedError' || n === 'AbortError' || n === 'InvalidStateError' ? COPY.krSkipped : COPY.krOther);
+      }).then(function () {
+        krAddBtn.disabled = false;
+        refresh();
+        if (refocus && !krAddBtn.hidden) { try { krAddBtn.focus(); } catch (_) {} }
+      });
+    });
+
+    async function removeKr(id, btn) {
+      var ok = await window.mentriaConfirm(COPY.krRemoveConfirm, { danger: true });
+      if (!ok) return;
+      btn.disabled = true;
+      try {
+        await withConfirm(function () { return kr.removePasskey(id); });
+      } catch (err) {
+        window.mentriaAlert(errText(err));
+      } finally {
+        btn.disabled = false;
+        refresh();
+      }
+    }
+
+    regenBtn.addEventListener('click', async function () {
+      if (!krActive()) return;
+      var ok = await window.mentriaConfirm(COPY.regenConfirm, { danger: true });
+      if (!ok) return;
+      regenBtn.disabled = true;
+      try {
+        var m = await ui();
+        var code = await withConfirm(function () { return kr.regenerateCode(); });
+        if (code) await m.showCode(code);
+      } catch (err) {
+        window.mentriaAlert(errText(err));
+      } finally {
+        regenBtn.disabled = false;
+        refresh();
+      }
     });
 
     syncBtn.addEventListener('click', async function () {
       if (!window.MentriaSync) return;
       syncBtn.disabled = true;
       try {
-        var secret = window.MentriaIdentity.getSecret();
+        var secret = krActive() && fromKeyring ? await kr.secret('identity') : null;
+        if (!secret) secret = window.MentriaIdentity.getSecret();
         await window.MentriaSync.joinWithIdentity(secret);
       } catch (err) {
         window.mentriaAlert(String(err && err.message || err));
       } finally { syncBtn.disabled = false; }
     });
+
+    function legacyBoot() {
+      refresh();
+      window.MentriaIdentity.tryDeviceUnlock().then(function () { refresh(); });
+    }
+
+    function boot() {
+      if (!krWanted()) { legacyBoot(); return; }
+      Promise.all([import('/assets/js/mentria-unlock.js'), import('/assets/js/mentria-unlock-core.js')]).then(function (mods) {
+        var m = mods[0];
+        return Promise.resolve().then(function () { return m.ready(); }).catch(function () {}).then(function () {
+          if (!m.enabled()) { legacyBoot(); return; }
+          kr = m;
+          krc = mods[1];
+          m.onChange(function () { reconcile(); });
+          m.prfSupport().then(function (v) { if (krPrf !== 'no') krPrf = v; refresh(); }, function () {});
+          return reconcile().then(function () {
+            var I = window.MentriaIdentity;
+            if (!I.isSetUp() || I.isUnlocked() || linkedHere() || !I.hasDeviceUnlock()) return;
+            return I.tryDeviceUnlock().then(function (ok) {
+              refresh();
+              if (ok) return afterLegacyUnlock({ auto: true });
+            });
+          });
+        });
+      }).catch(function () {
+        kr = null;
+        legacyBoot();
+      });
+    }
+
+    waitFor('MentriaIdentity', boot);
   })();
 </script>
 <script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>

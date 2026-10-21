@@ -13,6 +13,8 @@
   const IDB_NAME = 'mentria-identity';
   const IDB_STORE = 'keys';
   const IDB_DEVICE_KEY = 'device-wrap';
+  const KEYRING_NS = 'keyring';
+  const KEYRING_KEY = 'vault';
 
   function b64uEnc(bytes) {
     const u8 = new Uint8Array(bytes);
@@ -299,6 +301,78 @@
   function idbDelete() {
     return idbOpen().then(function (db) { return idbDel(db, IDB_DEVICE_KEY).then(function () { db.close(); }); });
   }
+  function dropDeviceKey() {
+    const known = typeof indexedDB !== 'undefined' && typeof indexedDB.databases === 'function'
+      ? indexedDB.databases().then(function (list) { return list.some(function (d) { return d.name === IDB_NAME; }); })
+      : Promise.resolve(true);
+    return known.then(function (yes) { return yes ? idbDelete() : null; }).catch(function () {});
+  }
+
+  function isLinked() {
+    if (!global.MentriaStore) return false;
+    const rec = global.MentriaStore.get(KEYRING_NS, KEYRING_KEY);
+    const services = rec && typeof rec === 'object' ? rec.services : null;
+    if (!services || typeof services !== 'object' || !Object.prototype.hasOwnProperty.call(services, NS)) return false;
+    const entry = services[NS];
+    return !!(entry && typeof entry === 'object' && entry.ct);
+  }
+
+  function secretBytes(bytes) {
+    const u8 = bytes instanceof Uint8Array ? new Uint8Array(bytes) : ArrayBuffer.isView(bytes) ? new Uint8Array(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)) : null;
+    if (!u8 || u8.length !== SECRET_BYTES) throw new Error('bad-secret');
+    return u8;
+  }
+
+  async function useSecret(bytes) {
+    requireCrypto();
+    const secret = secretBytes(bytes);
+    const kcv = await kcvOf(secret);
+    const vault = loadVault();
+    if (!vault) throw new Error('no-vault');
+    if (!vault.kcv || !timingSafeEq(b64uDec(kcv), b64uDec(vault.kcv))) throw new Error('kcv-mismatch');
+    state.secret = secret;
+  }
+
+  async function createLinked() {
+    requireCrypto();
+    if (isSetUp()) throw new Error('already-set-up');
+    const secret = crypto.getRandomValues(new Uint8Array(SECRET_BYTES));
+    const kcv = await kcvOf(secret);
+    if (isSetUp()) throw new Error('already-set-up');
+    saveVault({ v: 3, kcv: kcv, linked: true });
+    state.secret = secret;
+    return new Uint8Array(secret);
+  }
+
+  async function discardLinked(bytes) {
+    const vault = loadVault();
+    if (!vault || vault.linked !== true || vault.pass || vault.prf || vault.device) return false;
+    if (!vault.kcv || await kcvOf(secretBytes(bytes)) !== vault.kcv) return false;
+    const fresh = loadVault();
+    if (!fresh || fresh.kcv !== vault.kcv || fresh.pass || fresh.prf || fresh.device) return false;
+    global.MentriaStore.remove(NS, KEY);
+    state.secret = null;
+    return true;
+  }
+
+  function legacyPasskeyId() {
+    const v = loadVault();
+    return v && v.prf && typeof v.prf.credId === 'string' && v.prf.credId ? v.prf.credId : null;
+  }
+
+  function retireLegacy() {
+    const vault = loadVault();
+    if (!vault) return;
+    if (vault.pass || vault.prf || vault.device || vault.v !== 3 || vault.linked !== true) {
+      delete vault.pass;
+      delete vault.prf;
+      delete vault.device;
+      vault.v = 3;
+      vault.linked = true;
+      saveVault(vault);
+    }
+    dropDeviceKey();
+  }
 
   function hasDeviceUnlock() {
     const v = loadVault();
@@ -350,6 +424,7 @@
     cryptoReady,
     setup, unlock, lock, isSetUp, isUnlocked, getSecret, clearVault,
     passkeySupport, hasPasskey, enrollPasskey, unlockWithPasskey, removePasskey,
-    hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock
+    hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock,
+    useSecret, isLinked, createLinked, discardLinked, retireLegacy, legacyPasskeyId
   };
 })(typeof window !== 'undefined' ? window : globalThis);

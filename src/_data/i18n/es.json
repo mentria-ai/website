@@ -3832,7 +3832,8 @@
         "device_unlock": "Desbloquear automáticamente en este dispositivo",
         "device_hint": "Aquí no se pedirá la frase de contraseña. Actívalo solo en un equipo que uses solo tú.",
         "finish": "Crear mi libro de cuentas",
-        "creating": "Cifrando…"
+        "creating": "Cifrando…",
+        "keyring_other": "Your one unlock already opens another Finance ledger. To use that ledger on this device, go back and choose “I use Finance on another device”."
       },
       "lock": {
         "locked": "Bloqueado",

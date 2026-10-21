@@ -213,7 +213,11 @@ export function render(ctx) {
       const ok = await U.confirmDialog({ title: t('lock.erase_title'), body: t('lock.erase_body'), ok: t('lock.erase_ok'), danger: true });
       if (!ok) return;
       ctx.lock(true);
-      await db.wipe();
+      try { await db.wipe(); } catch (e) {
+        U.toast(t('errors.write') + ' ' + String((e && e.message) || e), { ms: 7000 });
+        setTimeout(() => location.reload(), 2500);
+        return;
+      }
       try { if (window.MentriaStore) window.MentriaStore.remove('extdata.finance', 'widget'); } catch (_) {}
       location.reload();
     } }, icon('trash'), t('lock.erase'))));

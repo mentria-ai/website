@@ -55,8 +55,16 @@ export async function markLinked() {
   await db.setMeta({ linked: true });
 }
 
+export function retirePlan(r) {
+  if (!r || typeof r !== 'object') return 'keep';
+  if (r.ready === true) return 'retire';
+  const b = Array.isArray(r.blockers) ? r.blockers : [];
+  return b.length === 1 && b[0] === 'already-retired' ? 'leftovers' : 'keep';
+}
+
 export async function matchLinked(list, kcv) {
   const items = Array.isArray(list) ? list : [];
+  if (!kcv && items.length > 1) return null;
   for (let i = 0; i < items.length; i++) {
     const root = new Uint8Array(items[i].bytes);
     const keys = await C.deriveKeys(root);

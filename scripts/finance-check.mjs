@@ -1293,8 +1293,22 @@ test('vault: a linked ledger opens with whichever kept secret matches its key', 
   assert.notEqual(hit.root, mine);
   assert.equal(await VT.matchLinked([{ id: 'now', bytes: other }], kcv), null);
   assert.equal(await VT.matchLinked([], kcv), null);
-  assert.equal((await VT.matchLinked(list, null)).index, 0);
+  assert.equal(await VT.matchLinked(list, null), null);
+  assert.equal((await VT.matchLinked([{ id: 'only', bytes: other }], null)).index, 0);
   assert.deepEqual(Array.from(list[0].bytes), Array.from(other));
+});
+
+test('vault: old locks retire only when every rule holds', () => {
+  assert.equal(VT.retirePlan({ ready: true, blockers: [] }), 'retire');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['already-retired'] }), 'leftovers');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['already-retired', 'too-recent'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['too-recent', 'already-retired'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['already-retired', 'code-unconfirmed'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['already-retired', 'old-device'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['too-recent'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['disabled'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false }), 'keep');
+  assert.equal(VT.retirePlan(null), 'keep');
 });
 
 test('vault: pairing takes a ledger without wraps only into an open one unlock', () => {

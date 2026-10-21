@@ -214,6 +214,7 @@ function basicsStep(root, opts, draft) {
   frame(root,
     linked ? null : steps(3, 3),
     h('h2', null, t('setup.basics_title')),
+    linked && draft.other ? h('div', { class: 'fbanner' }, icon('info'), h('span', null, t('setup.keyring_other'))) : null,
     U.field(t('setup.base'), ccy, t('setup.base_hint')),
     linked ? null : h('div', { class: 'fstack' }, pk, pk ? h('p', { class: 'ff__hint' }, t('setup.passkey_hint')) : null, dev, h('p', { class: 'ff__hint' }, t('setup.device_hint'))),
     err, done,
@@ -233,7 +234,7 @@ async function keyringStart(root, opts) {
     if (!s.setUp) return;
   }
   if (s.unlocked) {
-    basicsStep(root, opts, { linked: true });
+    basicsStep(root, opts, { linked: true, other: s.linked.indexOf('finance') >= 0 });
     return;
   }
   const box = h('div');

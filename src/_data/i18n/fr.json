@@ -3832,7 +3832,8 @@
         "device_unlock": "Déverrouiller automatiquement sur cet appareil",
         "device_hint": "La phrase secrète n'est plus demandée ici. N'activez cette option que sur un ordinateur que personne d'autre n'utilise.",
         "finish": "Créer mon livre de comptes",
-        "creating": "Chiffrement…"
+        "creating": "Chiffrement…",
+        "keyring_other": "Your one unlock already opens another Finance ledger. To use that ledger on this device, go back and choose “I use Finance on another device”."
       },
       "lock": {
         "locked": "Verrouillé",

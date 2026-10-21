@@ -72,6 +72,7 @@ const app = {
   linked: false,
   linkDeclined: false,
   current: false,
+  currentId: null,
   opening: false
 };
 
@@ -370,13 +371,13 @@ export async function publishWrap(kind) {
 
 async function retireLegacy() {
   const K = app.K;
-  if (!K || !app.linked || !app.current || !app.engine || app.engine.readOnly) return false;
+  if (!K || !app.linked || !app.engine || app.engine.readOnly) return false;
+  if (!app.current || !app.currentId || K.secretId('finance') !== app.currentId) return false;
   let r = null;
   try { r = K.retirement('finance'); } catch (_) { return false; }
-  if (!r) return false;
-  const already = Array.isArray(r.blockers) && r.blockers.indexOf('already-retired') >= 0;
-  if (!r.ready && !already) return false;
-  if (already) {
+  const plan = V.retirePlan(r);
+  if (plan === 'keep') return false;
+  if (plan === 'leftovers') {
     if (!V.hasLegacyWraps(await db.getMeta('wraps'))) return false;
   } else {
     const ops = [];
@@ -385,7 +386,7 @@ async function retireLegacy() {
   }
   const ids = await V.retireLegacy();
   await KR.forgetPasskeys(ids);
-  if (!already) await K.markRetired('finance');
+  if (plan === 'retire') await K.markRetired('finance');
   return true;
 }
 
@@ -411,7 +412,8 @@ async function convertDevice() {
 async function ensureLinked(bytes) {
   const K = app.K;
   if (!K || !K.state().unlocked) throw new Error('locked');
-  await K.link('finance', new Uint8Array(bytes));
+  const copy = new Uint8Array(bytes);
+  try { await K.link('finance', copy); } finally { copy.fill(0); }
 }
 
 async function finishLink() {
@@ -500,12 +502,15 @@ async function openLinked() {
   if (app.engine || app.opening) return true;
   if (!K) return false;
   app.opening = true;
+  app.current = false;
+  app.currentId = null;
   try {
     const list = await K.secrets('finance');
     if (!list.length) throw new Error('not-linked');
     let s;
     try { s = await V.openLinked(list); } finally { for (const x of list) x.bytes.fill(0); }
-    app.current = s.index === 0 && list[0].id === K.secretId('finance');
+    app.currentId = s.id;
+    app.current = s.index === 0 && !!s.id && s.id === K.secretId('finance');
     if (!(await db.getMeta('linked'))) {
       await V.markLinked();
       await convertDevice();
@@ -521,7 +526,8 @@ async function createLinked(pending) {
   const K = app.K;
   if (!K || !K.state().unlocked) throw new Error('locked');
   const v = await V.buildVault(null, { linked: true, pending });
-  await K.link('finance', new Uint8Array(v.root));
+  const copy = new Uint8Array(v.root);
+  try { await K.link('finance', copy); } finally { copy.fill(0); }
   const created = await V.saveVault(v);
   await openSession({ root: created.root, keys: created.keys, linked: true });
 }
@@ -699,6 +705,7 @@ export function lock(stay) {
   app.ledger = null;
   app.linked = false;
   app.current = false;
+  app.currentId = null;
   clearTimeout(widgetTimer);
   updateWidget();
   if (!stay) start();

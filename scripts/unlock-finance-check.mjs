@@ -269,14 +269,8 @@ async function ledgerOf(frame, pass) {
     if (pw) s = await V.unlockPass(pw);
     else {
       const M = await import('/assets/js/mentria-unlock.js');
-      const C = await import('/assets/finance/crypto.js');
-      const kcv = await D.getMeta('kcv');
-      for (const x of await M.secrets('finance')) {
-        const keys = await C.deriveKeys(x.bytes);
-        if (!s && keys.kcv === kcv) s = { root: new Uint8Array(x.bytes), keys };
-        x.bytes.fill(0);
-      }
-      if (!s) throw new Error('no kept secret opens this ledger');
+      const list = await M.secrets('finance');
+      try { s = await V.openLinked(list); } finally { for (const x of list) x.bytes.fill(0); }
     }
     const engine = new E.Engine({ root: s.root, keys: s.keys, deviceId: await D.getMeta('device_id') });
     await engine.load();
@@ -529,6 +523,7 @@ check('new ledger is linked', async () => {
   await layerGone(frame);
   await buttonByText(frame, '.flock', FIN.setup.finish);
   assert(!(await frame.$('.flock .fcheck input[type="checkbox"]')) && !(await frame.$('.flock input[type="password"]')), 'no Finance passphrase, passkey or device options');
+  assert(!(await frame.$('.flock .fbanner')), 'no note when the one unlock holds no other ledger');
   await pressText(frame, '.flock', FIN.setup.finish);
   await opened(frame);
   const meta = await metaOf(frame);
@@ -705,6 +700,7 @@ check('after Erase a new ledger links normally', async () => {
   at('basics after erase');
   await buttonByText(frame, '.flock', FIN.setup.finish);
   assert(!(await frame.$('.flock input[type="password"]')) && !(await frame.$('.m-ulayer')), 'setup goes straight to the basics with the session open');
+  assert(await frame.evaluate((note) => [...document.querySelectorAll('.flock .fbanner')].some((b) => b.textContent.trim() === note), FIN.setup.keyring_other), 'a note points to adding this device instead');
   await pressText(frame, '.flock', FIN.setup.finish);
   await opened(frame);
   const meta = await metaOf(frame);
@@ -824,6 +820,50 @@ check('recovery code unlock keeps the Finance code', async () => {
   } finally {
     await done(r);
   }
+});
+
+check('old locks stay while this ledger sits under prior', async () => {
+  const r = shared.legacy;
+  assert(shared.legacyLinked, 'needs the linked ledger');
+  const page = r.page;
+  let frame = await frameOf(page);
+  await opened(frame);
+  const before = await metaOf(frame);
+  assert(before.wrapKinds.join() === 'pass,prf,recovery', 'the old wraps are here', before);
+  await page.evaluate(async () => {
+    const M = await import('/assets/js/mentria-unlock.js');
+    await M.ready();
+    await M.link('finance', crypto.getRandomValues(new Uint8Array(32)));
+  });
+  const kept = await keptFinance(page);
+  assert(kept.list[0].kcv !== before.kcv && kept.list.slice(1).some((x) => x.kcv === before.kcv), 'this ledger now sits under prior', kept);
+  await page.goto(ORIGIN + '/robots.txt', { waitUntil: 'load' });
+  const dated = await page.evaluate((k) => {
+    const rec = JSON.parse(localStorage.getItem(k));
+    rec.services.finance.linked = new Date(Date.now() - 31 * 86400000).toISOString();
+    localStorage.setItem(k, JSON.stringify(rec));
+    return rec.services.finance.linked;
+  }, RECORD);
+  frame = await store(page);
+  await opened(frame);
+  await sleep(3000);
+  const meta = await metaOf(frame);
+  const rec = await record(page);
+  assert(meta.wrapKinds.join() === 'pass,prf,recovery', 'the old wraps stay while another ledger is current', meta);
+  assert(!(rec.retired && rec.retired.finance), 'Finance is not marked retired', rec.retired);
+  assert(rec.services.finance.linked === dated, 'the backdated link time held');
+  const plan = await frame.evaluate(async () => (await import('/assets/js/mentria-unlock.js')).retirement('finance'));
+  assert(plan.ready, 'the record alone would allow retirement', plan);
+  assert(!(await frame.evaluate(() => window.__signals.length)), 'no passkey is signalled');
+  await frame.evaluate(async (pw) => {
+    const M = await import('/assets/js/mentria-unlock.js');
+    const V = await import('/assets/finance/vault.js');
+    const s = await V.unlockPass(pw);
+    await M.link('finance', s.root);
+    s.root.fill(0);
+  }, PASS);
+  const back = await keptFinance(page);
+  assert(back.list[0].kcv === before.kcv, 'this ledger is current again', back);
 });
 
 check('retirement deletes the old locks', async () => {

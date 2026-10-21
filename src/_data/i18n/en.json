@@ -3832,7 +3832,8 @@
         "device_unlock": "Unlock automatically on this device",
         "device_hint": "Skips the passphrase here. Only turn this on for a computer you alone use.",
         "finish": "Create my ledger",
-        "creating": "Encrypting…"
+        "creating": "Encrypting…",
+        "keyring_other": "Your one unlock already opens another Finance ledger. To use that ledger on this device, go back and choose “I use Finance on another device”."
       },
       "lock": {
         "locked": "Locked",

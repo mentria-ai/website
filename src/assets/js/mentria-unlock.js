@@ -19,6 +19,7 @@ const RP_NAME = 'Mentria';
 const WEBAUTHN_MS = 90000;
 const SEEN_MS = 15000;
 const DAY_MS = 86400000;
+const PROBE_MS = 2000;
 
 const mem = { root: null, bytes: null, kcv: null, epoch: null, code: null, codeSalt: null, hasDevice: false, prf: 'unknown', launch: null };
 const diag = { liveOther: null, marker: null, seenAgeMs: null, wasDiscarded: null, mobile: null, navType: null, standalone: null, decision: null };
@@ -53,6 +54,19 @@ function saveLocal(patch) {
   const next = Object.assign(local(), patch);
   lsSet(LOCAL_KEY, JSON.stringify(next));
   return next;
+}
+
+function clearManualLock() {
+  const l = local();
+  if (!Object.prototype.hasOwnProperty.call(l, 'manualLock')) return;
+  delete l.manualLock;
+  lsSet(LOCAL_KEY, JSON.stringify(l));
+}
+
+function manuallyLocked() { return local().manualLock === readEpoch(); }
+
+function framed() {
+  try { return window.top !== window && !!window.parent.document; } catch (_) { return false; }
 }
 
 function readEpoch() {
@@ -325,9 +339,10 @@ async function launchScreen() {
 
 async function boot(markDecided) {
   attach();
-  const liveOther = await othersLive();
+  const inFrame = framed();
+  const liveOther = inFrame ? null : await othersLive();
   const got = inputs();
-  const decision = decideLaunch({ liveOther, marker: !!got.marker, seenAgeMs: got.seenAgeMs, wasDiscarded: got.wasDiscarded, mobile: got.mobile });
+  const decision = inFrame ? 'continue' : decideLaunch({ liveOther, marker: !!got.marker, seenAgeMs: got.seenAgeMs, wasDiscarded: got.wasDiscarded, mobile: got.mobile });
   Object.assign(diag, {
     liveOther,
     marker: got.marker,
@@ -351,7 +366,7 @@ async function boot(markDecided) {
   if (!sessionLive() && mem.hasDevice) await unlockWithDevice();
   await prfP;
   const s = state();
-  if (decision === 'reopen' && s.askAtLaunch && !s.unlocked && local().declinedEpoch !== s.epoch && !document.documentElement.hasAttribute('data-unlock-tool')) launchScreen();
+  if (!inFrame && decision === 'reopen' && s.askAtLaunch && !s.unlocked && !document.documentElement.hasAttribute('data-unlock-tool')) launchScreen();
   notify(false);
   return state();
 }
@@ -361,7 +376,7 @@ async function decidedFirst() {
   if (decided) await decided;
 }
 
-async function openSession(bytes, rec) {
+async function openSession(bytes, rec, silent) {
   await decidedFirst();
   await verifyRoot(rec, bytes);
   const root = await rootKeyFrom(bytes);
@@ -369,10 +384,16 @@ async function openSession(bytes, rec) {
     const epoch = readEpoch();
     await idbPut('session', 'current', { epoch, openedAt: Date.now(), kcv: rec.kcv, root });
     mem.root = root;
-    mem.bytes = new Uint8Array(bytes);
+    mem.bytes = silent ? null : new Uint8Array(bytes);
     mem.kcv = rec.kcv;
     mem.epoch = epoch;
   });
+  if (!sessionLive()) {
+    drop();
+    notify(false);
+    throw new Error('locked');
+  }
+  if (!silent) clearManualLock();
   if (started) mark();
   post('unlock');
   touch(rec);
@@ -403,14 +424,14 @@ function sameKeyring(rec) {
   return fresh;
 }
 
+function extOf(cred) {
+  try { return cred.getClientExtensionResults() || null; } catch (_) { return null; }
+}
+
 function prfOf(cred) {
-  try {
-    const r = cred.getClientExtensionResults();
-    const first = r && r.prf && r.prf.results && r.prf.results.first;
-    return first ? new Uint8Array(first) : null;
-  } catch (_) {
-    return null;
-  }
+  const r = extOf(cred);
+  const first = r && r.prf && r.prf.results && r.prf.results.first;
+  return first ? new Uint8Array(first) : null;
 }
 
 function ceremony(kind, publicKey) {
@@ -511,7 +532,7 @@ export function onChange(fn) {
 
 export async function create({ code, confirmed, deviceName } = {}) {
   if (!enabled()) throw new Error('disabled');
-  if (readRecord()) throw new Error('exists');
+  if (lsGet(RECORD_KEY) != null || readRecord()) throw new Error('exists');
   const given = code != null && code !== '';
   let text;
   if (given) {
@@ -533,6 +554,11 @@ export async function create({ code, confirmed, deviceName } = {}) {
   try {
     await openSession(rootBytes, record);
   } catch (e) {
+    if (e && e.message === 'locked') {
+      mem.code = text;
+      mem.codeSalt = record.wraps.recovery.salt;
+      return { code: text };
+    }
     try { S.remove(NS, KEY, { remote: true }); } catch (_) {}
     post('record');
     throw e;
@@ -563,7 +589,7 @@ export async function unlockWithPassphrase(pass) {
 }
 
 export async function unlockWithDevice() {
-  if (!enabled()) return false;
+  if (!enabled() || manuallyLocked()) return false;
   const rec = readRecord();
   if (!rec) return false;
   let entry = null;
@@ -571,7 +597,7 @@ export async function unlockWithDevice() {
   if (!isObj(entry) || entry.kcv !== rec.kcv || !entry.key || !isObj(entry.box)) return false;
   try {
     const bytes = await openWithDeviceKey(entry.box, entry.key);
-    await openSession(bytes, rec);
+    await openSession(bytes, rec, true);
     return true;
   } catch (_) {
     return false;
@@ -580,7 +606,7 @@ export async function unlockWithDevice() {
 
 export async function lock() {
   forget();
-  bumpEpoch();
+  saveLocal({ manualLock: bumpEpoch() });
   if (started) {
     mark();
     seen();
@@ -650,6 +676,8 @@ export async function addPasskey(label) {
     extensions: { prf: { eval: { first: salt } } }
   });
   if (!cred) throw new Error('no-credential');
+  const made = extOf(cred);
+  if (made && made.prf && made.prf.enabled === false) throw new Error('no-prf');
   const rawId = new Uint8Array(cred.rawId);
   let out = prfOf(cred);
   if (!out) {
@@ -788,7 +816,10 @@ export async function prfSupport() {
     if (!window.PublicKeyCredential || !navigator.credentials || !window.crypto || !crypto.subtle) {
       out = 'no';
     } else if (typeof PublicKeyCredential.getClientCapabilities === 'function') {
-      const caps = await PublicKeyCredential.getClientCapabilities();
+      const caps = await Promise.race([
+        PublicKeyCredential.getClientCapabilities(),
+        new Promise((resolve) => setTimeout(() => resolve(null), PROBE_MS))
+      ]);
       if (caps && caps['extension:prf'] === true) out = 'yes';
       else if (caps && caps['extension:prf'] === false) out = 'no';
     }

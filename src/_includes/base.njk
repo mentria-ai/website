@@ -63,9 +63,10 @@
             for (var i = 0; i < locales.length; i++) { if (locales[i].code === c) return locales[i]; }
             return null;
           }
-          function go(loc) { location.replace(loc.prefix + (path === '/' ? '/' : path) + rest); }
+          function go(loc) { window.__mentriaRedirecting = true; location.replace(loc.prefix + (path === '/' ? '/' : path) + rest); }
           var current = localeOfPath(path);
           if (current && window.MENTRIA_EN_ONLY && window.MENTRIA_EN_ONLY.indexOf(path.slice(current.prefix.length) || '/') >= 0) {
+            window.__mentriaRedirecting = true;
             location.replace((path.slice(current.prefix.length) || '/') + rest);
             return;
           }
@@ -102,6 +103,7 @@
     <script>
       (function () {
         try {
+          if (window.__mentriaRedirecting) return;
           var l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
           if (l && l.enabled === true && localStorage.getItem('mentria.store.keyring.vault')) import('/assets/js/mentria-unlock.js').then(function (m) { return m.ready(); }).catch(function () {});
         } catch (e) {}

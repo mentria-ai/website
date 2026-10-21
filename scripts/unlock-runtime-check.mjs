@@ -852,6 +852,7 @@ check('a rejected unlock leaves no session row', async () => {
   await a.evaluate(() => window.__m.lock());
   await installHold(a);
   const e0 = await readLocal(a, 'mentria.keyring.epoch');
+  assert(await sees(b, e0), 'harness: the second page sees the first Lock before its own', e0);
   await a.evaluate((x) => {
     window.__h = window.__hold('idbPut');
     window.__res = undefined;

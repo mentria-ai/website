@@ -37,6 +37,21 @@ const PROBE = () => {
   }
   if (window.PublicKeyCredential) PublicKeyCredential.signalUnknownCredential = (o) => { window.__signals.push(o); return Promise.resolve(); };
 };
+const FAIL_REMOVE = () => {
+  if (sessionStorage.getItem('t-fail-remove') !== '1') return;
+  let held;
+  Object.defineProperty(window, 'MentriaStore', {
+    configurable: true,
+    get() { return held; },
+    set(x) {
+      if (x && typeof x.remove === 'function') {
+        const r = x.remove;
+        x.remove = (ns, k, o) => (ns === 'quick_notes' ? false : r(ns, k, o));
+      }
+      held = x;
+    }
+  });
+};
 const SWITCH_ON = () => {
   try {
     const l = JSON.parse(localStorage.getItem('mentria.keyring.local') || '{}') || {};
@@ -241,11 +256,13 @@ async function runtime(page, op, arg) {
     if (o === 'lock') { await m.lock(); return m.state().unlocked; }
     if (o === 'unlock') { await m.unlockWithCode(a); return m.state().unlocked; }
     if (o === 'retirement') return m.retirement('notes', a);
+    if (o === 'nudge') { m.setAskAtLaunch(!m.state().askAtLaunch); return m.state().askAtLaunch; }
     throw new Error('unknown op ' + o);
   }, MODULE, op, arg);
 }
 
 async function lockKeyring(page) { await runtime(page, 'lock'); }
+async function nudge(page) { await runtime(page, 'nudge'); }
 async function unlockKeyring(page, code) { await runtime(page, 'unlock', code); }
 
 async function openV2(page, note) {
@@ -364,7 +381,7 @@ check('switch off keeps the old flow', async () => {
     assert((await wa(page)).length === 0, label + ': no passkey prompt for it', await wa(page));
     const log = logs.get(page);
     assert(!log.requests.some((u) => u.includes(UI)), label + ': the card module is never loaded', log.requests.filter((u) => u.includes('unlock')));
-    if (label === 'non-beta') assert(!log.requests.some((u) => u.includes(MODULE)), 'non-beta: the runtime is never loaded');
+    assert(!log.requests.some((u) => u.includes(MODULE)), label + ': the runtime is never loaded with the switch off');
     const dbs = await page.evaluate(async () => (await indexedDB.databases()).map((d) => d.name));
     assert(!dbs.includes('mentria-keyring') && (await readJson(page, RECORD)) === null, label + ': no keyring storage touched', dbs);
     assert(!log.errors.length, label + ': no page errors', log.errors);
@@ -594,7 +611,8 @@ check('legacy notes keep working on Later and survive a failed write', async () 
   await page.waitForSelector('.m-ulayer [data-step="intro"]', { timeout: 20000 });
   assert((await wa(page)).join() === 'get', 'one old tap before setup', await wa(page));
   await page.click('.m-ulayer [data-act="not-now"]');
-  await waitView(page, (x) => x.text === 'alpha secret text' && !x.layer, 'Later opens the note the old way');
+  const lv = await waitView(page, (x) => x.text === 'alpha secret text' && !x.layer, 'Later opens the note the old way');
+  assert(lv.lockTitle === QN.lock_title && lv.removeBtn === QN.remove_lock_btn, 'without a keyring the Lock title is the old one', lv);
   assert((await readJson(page, RECORD)) === null && JSON.stringify(await blob(page)) === JSON.stringify(before), 'Later writes nothing');
   await page.focus('#qn-textarea');
   await page.keyboard.press('End');
@@ -607,7 +625,7 @@ check('legacy notes keep working on Later and survive a failed write', async () 
     window.__set = S.set;
     S.set = (ns, k, val, o) => (ns === 'quick_notes' && k === 'blob' ? false : window.__set.call(S, ns, k, val, o));
   });
-  const code = await makeKeyring(page);
+  await makeKeyring(page);
   await until(async () => { const r = await readJson(page, RECORD); return r && r.services && r.services.notes; }, 15000, 'notes linked for the conversion');
   await sleep(1200);
   assert(JSON.stringify(await blob(page)) === JSON.stringify(mid), 'a failed write leaves the old notes untouched');
@@ -622,12 +640,163 @@ check('legacy notes keep working on Later and survive a failed write', async () 
   await pick(page, 'Alpha');
   await waitView(page, (x) => x.text === 'alpha secret text later', 'Alpha open again');
   await page.evaluate(() => { window.MentriaStore.set = window.__set; });
-  await lockKeyring(page);
-  await unlockKeyring(page, code);
+  await nudge(page);
   const after = await waitBlob(page, (x) => ['Alpha', 'Bravo'].every((t) => { const n = byTitle(x, t); return n && n.kv === 2; }), 'converted once writes work again', 20000);
   assert((await openV2(page, byTitle(after, 'Alpha'))) === 'alpha secret text later', 'Alpha converted with the edit');
   assert((await openV2(page, byTitle(after, 'Bravo'))) === 'bravo secret text', 'Bravo converted without a second tap');
   assert((await wa(page)).join() === 'get', 'one tap in all', await wa(page));
+});
+
+async function failBlobWrites(page, on) {
+  await page.evaluate((v) => {
+    const S = window.MentriaStore;
+    if (!window.__set) window.__set = S.set;
+    S.set = v ? (ns, k, val, o) => (ns === 'quick_notes' && k === 'blob' ? false : window.__set.call(S, ns, k, val, o)) : window.__set;
+  }, on);
+}
+
+async function oneLegacy(page) {
+  await writeNote(page, 'Alpha', 'alpha secret text', false);
+  await page.click('#qn-lock-btn');
+  await answerDialog(page);
+  await waitBlob(page, (v) => { const n = byTitle(v, 'Alpha'); return n && n.enc === true && n.iv && n.body !== 'alpha secret text'; }, 'Alpha locked the old way', 60000);
+}
+
+async function failedConversion() {
+  await clean();
+  const page = await open(NOTES);
+  await authOn(page);
+  await settle(page, 'old');
+  await oneLegacy(page);
+  const before = await blob(page);
+  await page.evaluate(SWITCH_ON);
+  await reload(page, 'one');
+  const code = await makeKeyring(page);
+  await failBlobWrites(page, true);
+  await pick(page, 'Alpha');
+  await resetWa(page);
+  await page.click('#qn-unlock-btn');
+  await until(async () => { const r = await readJson(page, RECORD); return r && r.services && r.services.notes; }, 15000, 'notes linked for the conversion');
+  await waitView(page, (x) => x.text === 'alpha secret text', 'Alpha open with the old key after the failed write', 20000);
+  assert((await wa(page)).join() === 'get', 'one old tap', await wa(page));
+  assert(JSON.stringify(await blob(page)) === JSON.stringify(before), 'stored notes unchanged');
+  return { page, code, before };
+}
+
+check('conversion keeps later edits and deletions', async () => {
+  await clean();
+  const page = await open(NOTES);
+  await authOn(page);
+  await settle(page, 'old');
+  await legacySeed(page);
+  const before = await blob(page);
+  await page.evaluate(SWITCH_ON);
+  await reload(page, 'one');
+  await makeKeyring(page);
+  await pick(page, 'Alpha');
+  const tClick = await page.evaluate(() => Date.now());
+  await page.click('#qn-unlock-btn');
+  const after = await waitBlob(page, (x) => ['Alpha', 'Bravo'].every((t) => { const n = byTitle(x, t); return n && n.kv === 2; }), 'converted', 30000);
+  const a0 = byTitle(before, 'Alpha');
+  const b0 = byTitle(before, 'Bravo');
+  const other = await open('/about/');
+  const sent = await other.evaluate((a, b, until) => {
+    const now = Date.now();
+    const tA = a.updatedAt + Math.floor((until - a.updatedAt) / 2);
+    const tB = b.updatedAt + Math.floor((until - b.updatedAt) / 2);
+    const edited = Object.assign({}, a, { updatedAt: tA, body: a.body.split('').reverse().join('') });
+    window.MentriaStore.importAll({ version: 1, exportedAt: new Date().toISOString(), store: { 'quick_notes.blob': JSON.stringify([edited]), 'quick_notes.deleted': JSON.stringify({ [b.id]: tB }) }, legacy: {} }, { mode: 'merge' });
+    return { tA, tB, now, edited };
+  }, a0, b0, tClick);
+  assert(sent.tA > a0.updatedAt + 1 && sent.tA < tClick && sent.tB > b0.updatedAt + 1 && sent.tB < tClick, 'edit and deletion fall after the old time and before the conversion', { sent, tClick });
+  const merged = await blob(other);
+  const ma = byTitle(merged, 'Alpha');
+  assert(ma && ma.updatedAt === sent.tA && ma.body === sent.edited.body && !('kv' in ma), 'a later edit made elsewhere wins over the re-encryption', ma);
+  assert(!byTitle(merged, 'Bravo'), 'a later deletion made elsewhere stays deleted', merged.map((n) => n.title));
+  assert(byTitle(merged, 'Charlie'), 'plain note kept');
+  assert(byTitle(after, 'Alpha').updatedAt === a0.updatedAt + 1 && byTitle(after, 'Bravo').updatedAt === b0.updatedAt + 1, 'conversion moves updatedAt by one', { a: [a0.updatedAt, byTitle(after, 'Alpha').updatedAt], b: [b0.updatedAt, byTitle(after, 'Bravo').updatedAt] });
+  await reload(page, 'one');
+  await until(async () => !(await page.evaluate(() => [...document.querySelectorAll('#qn-note-list .qn-note-tab__title')].some((t) => t.textContent === 'Bravo'))), 5000, 'Bravo gone from the list');
+  const fin = await blob(page);
+  assert(!byTitle(fin, 'Bravo') && byTitle(fin, 'Alpha').updatedAt === sent.tA, 'notes page keeps the merge', fin.map((n) => [n.title, n.updatedAt]));
+});
+
+check('retirement checks what is stored', async () => {
+  const { page } = await failedConversion();
+  await page.evaluate(() => {
+    const rec = window.MentriaStore.get('keyring', 'vault');
+    rec.services.notes.linked = new Date(Date.now() - 31 * 86400000).toISOString();
+    window.MentriaStore.set('keyring', 'vault', rec);
+  });
+  await page.focus('#qn-textarea');
+  await page.keyboard.press('End');
+  await page.type('#qn-textarea', ' edit');
+  await sleep(1500);
+  const mem = await page.evaluate(async () => {
+    const { MentriaBus } = await import('/assets/js/mentria-bus.js');
+    return MentriaBus.invoke('notes.readAll');
+  });
+  const stored = byTitle(await blob(page), 'Alpha');
+  assert(mem.find((x) => x.title === 'Alpha').body !== stored.body && !stored.kv, 'the save converted Alpha in memory only', { mem, stored });
+  const ready = await runtime(page, 'retirement', { notesConverted: true });
+  assert(ready.ready === true, 'only the notes block retirement here', ready);
+  await nudge(page);
+  await sleep(1500);
+  let rec = await readJson(page, RECORD);
+  assert(!(rec.retired && rec.retired.notes) && typeof (await store(page, 'quick_notes', 'cred_id')) === 'string' && typeof (await store(page, 'quick_notes', 'salt')) === 'string', 'nothing retired while the stored copy is old-style', rec.retired);
+  assert((await page.evaluate(() => window.__signals.length)) === 0, 'no signal while the stored copy is old-style');
+  await failBlobWrites(page, false);
+  await page.type('#qn-textarea', '!');
+  const saved = await waitBlob(page, (x) => { const n = byTitle(x, 'Alpha'); return n && n.kv === 2; }, 'Alpha saved under the notes key');
+  assert((await openV2(page, byTitle(saved, 'Alpha'))) === 'alpha secret text edit!', 'stored copy opens with the notes key');
+  await nudge(page);
+  rec = await until(async () => { const r = await readJson(page, RECORD); return r && r.retired && r.retired.notes ? r : null; }, 15000, 'retired once the stored copy is converted');
+  const left = await page.evaluate(() => ({ cred: window.MentriaStore.get('quick_notes', 'cred_id'), salt: window.MentriaStore.get('quick_notes', 'salt'), signals: window.__signals.length }));
+  assert(left.cred == null && left.salt == null && left.signals === 1, 'old lock removed and signalled after a good write', left);
+});
+
+check('lock elsewhere drops the old key', async () => {
+  const { page, code } = await failedConversion();
+  const other = await open('/about/');
+  await lockKeyring(other);
+  await waitView(page, (x) => x.text === null && x.raw === '' && x.unlockBtn && x.link, 'old-style note hides when another tab locks');
+  await failBlobWrites(page, false);
+  await unlockKeyring(other, code);
+  await sleep(1500);
+  let v = await view(page);
+  assert(v.text === null && v.unlockBtn && !byTitle(await blob(page), 'Alpha').kv, 'the old key is gone, so the note waits for a new tap', v);
+  await page.bringToFront();
+  await resetWa(page);
+  await page.click('#qn-unlock-btn');
+  const after = await waitBlob(page, (x) => { const n = byTitle(x, 'Alpha'); return n && n.kv === 2; }, 'converted after the new tap', 30000);
+  assert((await wa(page)).join() === 'get' && (await openV2(page, byTitle(after, 'Alpha'))) === 'alpha secret text', 'one new tap converts it', await wa(page));
+});
+
+check('export and print leak no locked text while locked', async () => {
+  const { page } = await notesKeyring();
+  await writeNote(page, 'Delta', 'delta plain text', false);
+  await writeNote(page, 'Foxtrot', 'foxtrot secret text', true);
+  await lockActive(page, 'Foxtrot', 'foxtrot secret text');
+  await waitView(page, (x) => x.text === 'foxtrot secret text', 'Foxtrot open');
+  await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+  assert((await page.$eval('#qn-print', (el) => el.textContent)).includes('foxtrot secret text'), 'print copy made while open');
+  await lockKeyring(page);
+  await waitView(page, (x) => x.card && x.raw === '', 'locked');
+  const after = await page.evaluate(() => ({ print: document.getElementById('qn-print').textContent, html: document.documentElement.outerHTML.includes('foxtrot secret') }));
+  assert(!after.print.includes('foxtrot secret') && !after.html, 'locking clears the print copy', after);
+  await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+  await page.emulateMediaType('print');
+  const printed = await page.evaluate(() => document.body.innerText);
+  await page.emulateMediaType(null);
+  assert(!printed.includes('foxtrot secret'), 'printing while locked shows no locked text');
+  await page.evaluate(() => {
+    window.__downloads = [];
+    window.MentriaUI.downloadFile = (name, b) => { b.text().then((t) => window.__downloads.push({ name, t })); };
+  });
+  await page.click('#qn-export-all-btn');
+  const got = await until(() => page.evaluate(() => window.__downloads[0] || null), 5000, 'export file');
+  assert(got.t.includes('delta plain text') && !got.t.includes('foxtrot secret'), 'Export all leaves the locked note out', got);
+  await until(async () => (await page.evaluate(() => [...document.querySelectorAll('.m-toast')].map((t) => t.textContent).join(' '))).includes(QN.export_all_skipped.replace('{n}', '1')), 5000, 'skipped toast');
 });
 
 check('missing keys are never replaced', async () => {
@@ -648,7 +817,7 @@ check('missing keys are never replaced', async () => {
   await page.click('#qn-lock-btn');
   await answerDialog(page);
   const alert = await answerDialog(page);
-  assert(alert === QN.key_missing, 'locking says the key is missing', alert);
+  assert(alert === QN.lock_key_missing, 'locking says another note\'s key is missing', alert);
   await sleep(500);
   const rec = await readJson(page, RECORD);
   assert(!rec.services.notes, 'no new notes key linked over notes that need the old one', rec.services);
@@ -665,7 +834,7 @@ check('missing keys are never replaced', async () => {
 });
 
 check('old lock retires once every note converted', async () => {
-  const { page } = await notesKeyring();
+  const { page } = await notesKeyring([FAIL_REMOVE]);
   await writeNote(page, 'Hotel', 'hotel secret text', false);
   await lockActive(page, 'Hotel', 'hotel secret text');
   const credStd = btoa(String.fromCharCode(0xfb, 0xff, 0xfe, 0x01, 0x02, 0x03, 0xfb, 0xef, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80));
@@ -693,7 +862,16 @@ check('old lock retires once every note converted', async () => {
   await page.evaluate(() => {
     const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob')).filter((n) => n.title !== 'India');
     window.MentriaStore.set('quick_notes', 'blob', list);
+    sessionStorage.setItem('t-fail-remove', '1');
   });
+  await reload(page, 'one');
+  await pick(page, 'Hotel');
+  await waitView(page, (x) => x.text === 'hotel secret text', 'Hotel open while removals fail');
+  await sleep(1500);
+  const kept = await page.evaluate(() => ({ cred: window.MentriaStore.get('quick_notes', 'cred_id'), signals: window.__signals.length }));
+  rec = await readJson(page, RECORD);
+  assert(kept.cred === credStd && kept.signals === 0 && !(rec.retired && rec.retired.notes), 'no signal and no retired mark when the removals fail', { kept, retired: rec.retired });
+  await page.evaluate(() => sessionStorage.removeItem('t-fail-remove'));
   await reload(page, 'one');
   rec = await until(async () => { const r = await readJson(page, RECORD); return r && r.retired && r.retired.notes ? r : null; }, 15000, 'notes marked retired');
   const left = await page.evaluate(() => ({

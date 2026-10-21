@@ -795,7 +795,7 @@ export function showSetup(opts) {
   return setupP;
 }
 
-async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }) {
+async function setup({ service, secret, knownCode, verifyCode, knownPassphrase, remember, onRemember }) {
   const supportP = prfSupport().catch(() => 'unknown');
   const T0 = await copy();
   await domReady();
@@ -813,7 +813,7 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
   if (!pendingCode) pendingCode = newRecoveryCode();
   const fresh = pendingCode;
   const ids = { title: uid('title'), lede: uid('lede'), msg: uid('msg') };
-  const draft = { choice: saved || verify ? 'keep' : 'new', checked: false, typed: null, keepPass: !!keepPass, setPass: false, pass: '', remember: false };
+  const draft = { choice: saved || verify ? 'keep' : 'new', checked: false, typed: null, keepPass: !!keepPass, setPass: false, pass: '', remember: remember === true };
   const prog = { created: false, linked: false, passkey: false, pass: false, remember: false };
   let noPrf = false;
   let busy = false;
@@ -1110,7 +1110,12 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     }
     if (!prog.remember) {
       const rem = option('checkbox', 'remember', '1', 'remember_label', draft.remember, 'remember_note');
-      rem.input.addEventListener('change', () => { draft.remember = rem.input.checked; });
+      rem.input.addEventListener('change', () => {
+        draft.remember = rem.input.checked;
+        if (typeof onRemember === 'function') {
+          try { onRemember(draft.remember); } catch (_) {}
+        }
+      });
       body.push(rem.wrap);
     }
     const form = assemble(parts, 'no_prf_title', 'no_prf_body', body, [button('done', 'done', true, 'submit')]);

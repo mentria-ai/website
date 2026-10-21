@@ -2745,7 +2745,8 @@ let krSetupBusy = false;
 let krSawLocked = false;
 let krOpening = null;
 let krRetiring = false;
-let krSettling = false;
+let krSettleP = null;
+let krNoDeviceHere = false;
 let krLinkMode = null;
 const krSlots = new Map();
 const krUi = () => {
@@ -3127,6 +3128,7 @@ const krOpen = () => {
     krOpened = true;
     await initIdentity();
     refreshPasskeyOffer(krSawLocked);
+    await krSettleRemember();
     krRetire();
     return true;
   })().finally(() => { krOpening = null; });
@@ -3145,7 +3147,7 @@ const krRetire = async () => {
     const kcv = cur ? await I.matchesVault(cur) : '';
     if (!kcv) return;
     const id = I.legacyPasskeyId();
-    if (!I.retireLegacy(kcv, { dropDevice: !!KR.state().hasDevice })) return;
+    if (!I.retireLegacy(kcv, { dropDevice: !!KR.state().hasDevice || I.rememberDecision() === 'off' })) return;
     if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
       try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: id }); } catch (_) {}
     }
@@ -3157,30 +3159,54 @@ const krRetire = async () => {
   }
 };
 
+const krDropRetiredDevice = async () => {
+  const I = window.MentriaIdentity;
+  if (!I.hasDeviceUnlock() || !KR.state().hasDevice) return;
+  const r = KR.retirement('identity');
+  if (!r || !r.blockers || !r.blockers.includes('already-retired')) return;
+  let cur = null;
+  try {
+    cur = await KR.secret('identity');
+    const kcv = cur ? await I.matchesVault(cur) : '';
+    if (kcv) I.retireLegacy(kcv, { dropDevice: true });
+  } catch (_) {
+  } finally {
+    if (cur) cur.fill(0);
+  }
+};
+
 const krKeepRemembered = async () => {
   const I = window.MentriaIdentity;
-  if (!I || !I.hasDeviceUnlock()) return;
+  if (!I || I.rememberDecision() === 'off' || !(await I.deviceUnlockHere())) return;
   try {
     if (!KR.state().hasDevice) await KR.setRemember(true);
     I.setRememberPending(false);
+    I.setRememberDecision('on');
   } catch (e) {
     if (e && e.message === 'confirm-needed') I.setRememberPending(true);
   }
 };
 
-const krSettleRemember = async () => {
+const krSettleOnce = async () => {
   const I = window.MentriaIdentity;
-  if (krSettling || !I || !I.rememberPending()) return;
-  if (!I.hasDeviceUnlock() || KR.state().hasDevice) { I.setRememberPending(false); return; }
-  if (!KR.hasRootBytes()) return;
-  krSettling = true;
-  try {
-    await KR.setRemember(true);
-    I.setRememberPending(false);
-  } catch (_) {
-  } finally {
-    krSettling = false;
+  if (!I) return;
+  if (I.rememberDecision() === 'off') { I.setRememberPending(false); return; }
+  if (!I.rememberPending()) {
+    if (krNoDeviceHere || I.rememberDecision() || !I.isLinked() || KR.state().hasDevice) return;
+    if (!(await I.deviceUnlockHere())) { krNoDeviceHere = true; return; }
+    I.setRememberPending(true);
   }
+  if (KR.state().hasDevice) { I.setRememberPending(false); return; }
+  if (!KR.hasRootBytes()) return;
+  await KR.setRemember(true);
+  I.setRememberPending(false);
+  I.setRememberDecision('on');
+  await krDropRetiredDevice();
+};
+
+const krSettleRemember = () => {
+  if (!krSettleP) krSettleP = krSettleOnce().catch(() => {}).then(() => { krSettleP = null; });
+  return krSettleP;
 };
 
 const krLinkNow = async () => {
@@ -3221,6 +3247,11 @@ const krSetupLegacy = async ({ typed, verify } = {}) => {
   if (n && n.kind === 'c20') opts.knownCode = KRC.formatCode(n);
   else if (typed) opts.knownPassphrase = typed;
   else if (verify) opts.verifyCode = krVerifyOld;
+  if (I.rememberDecision() !== 'off' && await I.deviceUnlockHere()) opts.remember = true;
+  opts.onRemember = (on) => {
+    I.setRememberDecision(on ? 'on' : 'off');
+    if (!on) I.setRememberPending(false);
+  };
   let ok = false;
   krSetupBusy = true;
   try { ok = await (await krUi()).showSetup(opts); } catch (_) { ok = false; }

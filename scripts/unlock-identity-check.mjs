@@ -376,12 +376,45 @@ function deviceWrapKept(page) {
 }
 
 function rememberUi(page) {
-  return page.evaluate((k) => ({
-    row: !!document.getElementById('about-identity-device-row').getClientRects().length,
-    checked: document.getElementById('about-identity-device').checked,
-    layer: !!document.querySelector('.m-ulayer'),
-    pending: (JSON.parse(localStorage.getItem(k) || 'null') || {}).rememberPending === true
-  }), LOCAL_IDENTITY);
+  return page.evaluate((k) => {
+    const l = JSON.parse(localStorage.getItem(k) || 'null') || {};
+    return {
+      row: !!document.getElementById('about-identity-device-row').getClientRects().length,
+      checked: document.getElementById('about-identity-device').checked,
+      note: document.getElementById('about-identity-passkey-note').textContent.trim(),
+      layer: !!document.querySelector('.m-ulayer'),
+      pending: l.rememberPending === true,
+      decision: l.remember || null
+    };
+  }, LOCAL_IDENTITY);
+}
+
+async function seedLegacyDevice(page) {
+  await openAdvanced(page);
+  await press(page, '[data-reveal="about-identity-setup-form"]');
+  await page.type('#about-identity-setup-pass', PASSPHRASE);
+  await page.type('#about-identity-setup-pass2', PASSPHRASE);
+  await page.click('#about-identity-setup-btn');
+  await answerDialog(page);
+  await waitVisible(page, '#about-identity-unlocked');
+  await page.click('#about-identity-device');
+  await until(() => readJson(page, IDENTITY).then((v) => !!(v && v.device)), 15000, 'seed: device unlock on');
+  await until(() => deviceWrapKept(page), 10000, 'seed: device key stored');
+  const vault0 = await readJson(page, IDENTITY);
+  assert(vault0.pass && vault0.device, 'seed: pass and device wraps', Object.keys(vault0));
+  return vault0;
+}
+
+async function dropKeyring(page) {
+  await page.goto(ORIGIN + '/robots.txt', { waitUntil: 'load' });
+  await page.evaluate(async (k) => {
+    localStorage.removeItem(k);
+    localStorage.removeItem(k.replace('mentria.store.', 'mentria.meta.'));
+    await new Promise((ok) => {
+      const req = indexedDB.deleteDatabase('mentria-keyring');
+      req.onsuccess = req.onerror = req.onblocked = () => ok();
+    });
+  }, KEYRING);
 }
 
 async function seedSilentLink(page) {
@@ -1590,6 +1623,139 @@ check('a silent link turns Remember this device on at the next unlock on About',
   clean_(rig);
   clean_(rigs.get(tools));
   clean_(rigs.get(again));
+});
+
+check('a device that receives a linked identity with its own device unlock gets Remember on at its next unlock', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  const vault0 = await seedLegacyDevice(page);
+  const secret = await identityBytes(page);
+  await setSwitch(page, true);
+  const tools = await open('/tools/');
+  const code = await tools.evaluate(async (u, b) => {
+    const m = await import(u);
+    await m.ready();
+    const made = await m.create({});
+    if (!m.confirmCode(made.code.replace(/-/g, '').slice(-4))) throw new Error('code not confirmed');
+    await m.link('identity', new Uint8Array(b));
+    return made.code;
+  }, RUNTIME, secret);
+  await page.bringToFront();
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the identity opens from the keyring');
+  await until(() => rememberUi(page).then((u) => u.pending), 10000, 'Remember this device is pending on this device');
+  const ui0 = await rememberUi(page);
+  assert(ui0.row && ui0.checked && ui0.note === EN.about.identity_remember_pending && !ui0.layer && !ui0.decision, 'the toggle shows on, with the next-unlock note and no sheet', ui0);
+  assert(!(await runtime(page)).hasDevice, 'seed: the keyring does not remember this device yet');
+  await tools.close();
+  await backdateIdentityLink(page);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(async () => {
+    const r = await readJson(page, KEYRING);
+    return !!(r && r.retired && r.retired.identity);
+  }, 20000, 'identity marked retired');
+  const retired = await readJson(page, IDENTITY);
+  assert(!retired.pass && JSON.stringify(retired.device) === JSON.stringify(vault0.device) && await deviceWrapKept(page), 'retirement keeps the device unlock while Remember is pending', Object.keys(retired));
+  await page.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
+  await waitVisible(page, '#about-identity-card-slot .m-unlock', 15000);
+  await cardCode(page, '#about-identity-card-slot', code);
+  await until(() => runtime(page).then((st) => st.hasDevice === true), 20000, 'Remember this device turns on after the card unlock');
+  await until(() => rememberUi(page).then((u) => !u.pending), 10000, 'the pending flag clears');
+  await until(() => readJson(page, IDENTITY).then((v) => !v.device), 10000, 'the leftover old device wrap is deleted');
+  await until(async () => !(await deviceWrapKept(page)), 10000, 'the leftover old device key is deleted');
+  const ui = await rememberUi(page);
+  assert(ui.row && ui.checked && ui.note === EN.unlock.remember_note, 'the toggle shows on with the usual note', ui);
+  await closeAll();
+  const again = await open('/about/');
+  await openAdvanced(again);
+  await until(() => again.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the next reopen opens the identity by itself');
+  const r = await again.evaluate(async (u) => {
+    const m = await import(u);
+    const s = m.state();
+    return { unlocked: s.unlocked, launch: s.launch, card: !!document.querySelector('#about-identity-card-slot .m-unlock'), wa: window.__wa.slice() };
+  }, RUNTIME);
+  assert(r.launch === 'reopen' && r.unlocked && !r.card && !r.wa.length, 'a reopen opens without asking', r);
+  clean_(rig);
+  clean_(rigs.get(tools));
+  clean_(rigs.get(again));
+});
+
+check('Remember turned off stays off and lets retirement delete the old device key', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  await seedLegacyDevice(page);
+  await setSwitch(page, true);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-link-btn', 20000);
+  await page.click('#about-identity-link-btn');
+  await setupNew(page, { passkey: false });
+  await until(() => runtime(page).then((st) => st.hasDevice === true), 15000, 'seed: Remember this device carried over');
+  await waitVisible(page, '#about-identity-device', 15000);
+  await page.click('#about-identity-device');
+  await until(() => runtime(page).then((st) => st.hasDevice === false), 15000, 'Remember this device turns off');
+  const off = await rememberUi(page);
+  assert(off.decision === 'off' && !off.checked && !off.pending, 'the off decision is recorded on this device', off);
+  await dropKeyring(page);
+  await page.goto(ORIGIN + '/about/', { waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-link-btn', 20000);
+  assert(await page.evaluate(() => MentriaIdentity.isUnlocked()), 'the old device key still opens the unlinked identity');
+  await page.click('#about-identity-link-btn');
+  await setupNew(page, { passkey: false });
+  await until(() => readJson(page, KEYRING).then((r) => !!(r && r.services.identity)), 15000, 'linked again');
+  await sleep(800);
+  const st = await runtime(page);
+  const again = await rememberUi(page);
+  assert(!st.hasDevice && !again.pending && again.decision === 'off' && !again.checked, 're-linking does not turn Remember back on', { hasDevice: st.hasDevice, again });
+  await backdateIdentityLink(page);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(async () => {
+    const r = await readJson(page, KEYRING);
+    return !!(r && r.retired && r.retired.identity);
+  }, 20000, 'identity marked retired');
+  const vault = await readJson(page, IDENTITY);
+  assert(JSON.stringify(Object.keys(vault).sort()) === JSON.stringify(['kcv', 'linked', 'v']), 'retirement deletes the old device wrap after an off', vault);
+  await until(async () => !(await deviceWrapKept(page)), 10000, 'the old device key is deleted');
+  clean_(rig);
+});
+
+check('the no-passkey setup sheet starts Remember checked for a device unlock and records an uncheck', async () => {
+  await fresh(false);
+  const noPrf = () => {
+    if (window.PublicKeyCredential) PublicKeyCredential.getClientCapabilities = async () => ({ 'extension:prf': false });
+  };
+  const page = await open('/about/', { init: noPrf });
+  const rig = rigs.get(page);
+  await seedLegacyDevice(page);
+  await setSwitch(page, true);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-link-btn', 20000);
+  await page.click('#about-identity-link-btn');
+  await waitStep(page, 'intro');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  const code = await page.$eval('.m-ulayer .m-ucode', (el) => el.textContent.replace(/\s+/g, ''));
+  await page.type('.m-ulayer input[name="code-check"]', code.replace(/[^A-Z2-7]/g, '').slice(-4));
+  await until(() => page.$eval('.m-ulayer [data-act="next"]', (b) => !b.disabled), 5000, 'Next enabled');
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'no-prf', 20000);
+  assert(await page.$eval('.m-ulayer input[name="remember"]', (el) => el.checked), 'Remember starts checked for a device that had it on');
+  await page.click('.m-ulayer input[name="remember"]');
+  await page.click('.m-ulayer [data-act="done"]');
+  await sheetClosed(page);
+  await until(() => readJson(page, KEYRING).then((r) => !!(r && r.services.identity)), 15000, 'identity linked');
+  await sleep(800);
+  const st = await runtime(page);
+  const ui = await rememberUi(page);
+  assert(!st.hasDevice && ui.decision === 'off' && !ui.pending && !ui.checked, 'the uncheck is recorded and Remember stays off', { hasDevice: st.hasDevice, ui });
+  clean_(rig);
 });
 
 check('production build never loads the runtime', async () => {

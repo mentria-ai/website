@@ -173,6 +173,7 @@
     "identity_passkey_added_on": "Ajoutée le {date}",
     "identity_kr_remove_confirm": "Retirer cette clé d'accès ? Elle ne déverrouillera plus Mentria. Votre code de récupération fonctionne toujours.",
     "identity_regenerate_confirm": "Créer un nouveau code de récupération ? Le code que vous avez conservé ne déverrouillera plus Mentria.",
+    "identity_remember_pending": "S'activera la prochaine fois que vous déverrouillerez sur cet appareil. Ensuite, tout ce qui est verrouillé ici s'ouvrira sans rien demander. Uniquement pour un appareil que personne d'autre n'utilise.",
     "whats_new": "Nouveautés de {tag}",
     "update_now": "Mettre à jour maintenant",
     "release_notes": "Notes de version sur GitHub",

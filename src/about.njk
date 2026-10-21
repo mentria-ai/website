@@ -1438,6 +1438,7 @@ localeReload: true
       passkeyMismatch:    {{ ('about.identity_passkey_mismatch'    | t) | dump | safe }},
       passkeyRemoveConfirm: {{ ('about.identity_passkey_remove_confirm' | t) | dump | safe }},
       rememberNote:   {{ ('unlock.remember_note'          | t) | dump | safe }},
+      rememberPending: {{ ('about.identity_remember_pending' | t) | dump | safe }},
       krAdded:        {{ ('unlock.passkey_added'          | t) | dump | safe }},
       krSkipped:      {{ ('unlock.passkey_skipped'        | t) | dump | safe }},
       krNoPrf:        {{ ('unlock.no_prf_title'           | t) | dump | safe }},
@@ -1493,7 +1494,8 @@ localeReload: true
     var cardP = null;
     var listKey = null;
     var retiring = false;
-    var settling = false;
+    var settleP = null;
+    var noDeviceHere = false;
     var reconciling = null;
     var again = false;
 
@@ -1671,11 +1673,11 @@ localeReload: true
         pkUnlockBtn.hidden = true;
         pkAddBtn.hidden = true;
         pkRemoveBtn.hidden = true;
-        var pending = I.rememberPending();
+        var pending = I.rememberPending() && !s.hasDevice;
         var remember = krPrf === 'no' || !!s.hasDevice || pending || I.hasDeviceUnlock();
         deviceRow.hidden = !remember;
         deviceNote.hidden = !remember;
-        deviceNote.textContent = COPY.rememberNote;
+        deviceNote.textContent = pending ? COPY.rememberPending : COPY.rememberNote;
         deviceToggle.checked = !!s.hasDevice || pending;
         krBox.hidden = !s.unlocked;
         if (s.unlocked) renderKeyring(s);
@@ -1703,7 +1705,7 @@ localeReload: true
         var kcv = cur ? await I.matchesVault(cur) : '';
         if (!kcv) return;
         var id = I.legacyPasskeyId();
-        if (!I.retireLegacy(kcv, { dropDevice: !!kr.state().hasDevice })) return;
+        if (!I.retireLegacy(kcv, { dropDevice: !!kr.state().hasDevice || I.rememberDecision() === 'off' })) return;
         if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
           try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: id }); } catch (_) {}
         }
@@ -1754,30 +1756,53 @@ localeReload: true
       fromKeyring = true;
     }
 
+    async function dropRetiredDevice() {
+      var I = window.MentriaIdentity;
+      if (!I.hasDeviceUnlock() || !kr.state().hasDevice) return;
+      var r = kr.retirement('identity');
+      if (!r || !r.blockers || r.blockers.indexOf('already-retired') < 0) return;
+      var cur = null;
+      try {
+        cur = await kr.secret('identity');
+        var kcv = cur ? await I.matchesVault(cur) : '';
+        if (kcv) I.retireLegacy(kcv, { dropDevice: true });
+      } catch (_) {
+      } finally {
+        if (cur) cur.fill(0);
+      }
+    }
+
     async function keepRemembered() {
       var I = window.MentriaIdentity;
-      if (!I.hasDeviceUnlock()) return;
+      if (I.rememberDecision() === 'off' || !(await I.deviceUnlockHere())) return;
       try {
         if (!kr.state().hasDevice) await kr.setRemember(true);
         I.setRememberPending(false);
+        I.setRememberDecision('on');
       } catch (e) {
         if (errName(e) === 'confirm-needed') I.setRememberPending(true);
       }
     }
 
-    async function settleRemember() {
+    async function settleOnce() {
       var I = window.MentriaIdentity;
-      if (settling || !I.rememberPending()) return;
-      if (!I.hasDeviceUnlock() || kr.state().hasDevice) { I.setRememberPending(false); return; }
-      if (!kr.hasRootBytes()) return;
-      settling = true;
-      try {
-        await kr.setRemember(true);
-        I.setRememberPending(false);
-      } catch (_) {
-      } finally {
-        settling = false;
+      if (I.rememberDecision() === 'off') { I.setRememberPending(false); return; }
+      if (!I.rememberPending()) {
+        if (noDeviceHere || I.rememberDecision() || !I.isLinked() || kr.state().hasDevice) return;
+        if (!(await I.deviceUnlockHere())) { noDeviceHere = true; return; }
+        I.setRememberPending(true);
       }
+      if (kr.state().hasDevice) { I.setRememberPending(false); return; }
+      if (!kr.hasRootBytes()) return;
+      await kr.setRemember(true);
+      I.setRememberPending(false);
+      I.setRememberDecision('on');
+      await dropRetiredDevice();
+    }
+
+    function settleRemember() {
+      if (!settleP) settleP = settleOnce().catch(function () {}).then(function () { settleP = null; });
+      return settleP;
     }
 
     async function linkNow() {
@@ -1853,6 +1878,11 @@ localeReload: true
       var n = typed && krc ? krc.normalizeCode(typed) : null;
       if (n && n.kind === 'c20') o.knownCode = krc.formatCode(n);
       else if (typed) o.knownPassphrase = typed;
+      if (I.rememberDecision() !== 'off' && await I.deviceUnlockHere()) o.remember = true;
+      o.onRemember = function (on) {
+        I.setRememberDecision(on ? 'on' : 'off');
+        if (!on) I.setRememberPending(false);
+      };
       var ok = false;
       setupBusy = true;
       try { ok = await (await ui()).showSetup(o); } catch (_) { ok = false; }
@@ -2011,8 +2041,10 @@ localeReload: true
       if (krActive() && fromKeyring) {
         var on = deviceToggle.checked;
         window.MentriaIdentity.setRememberPending(false);
+        window.MentriaIdentity.setRememberDecision(on ? 'on' : 'off');
         try {
-          await withConfirm(function () { return kr.setRemember(on); });
+          var done = await withConfirm(function () { return kr.setRemember(on); });
+          if (on && done !== false) await dropRetiredDevice();
         } catch (err) {
           window.mentriaAlert(errText(err));
         } finally {

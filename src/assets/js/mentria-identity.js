@@ -485,18 +485,51 @@
     }
   }
 
+  function writeLocal(name, value) {
+    try {
+      const v = readLocal();
+      if (value === undefined) delete v[name];
+      else v[name] = value;
+      if (Object.keys(v).length) global.localStorage.setItem(LOCAL_KEY, JSON.stringify(v));
+      else global.localStorage.removeItem(LOCAL_KEY);
+    } catch (_) {}
+  }
+
   function rememberPending() {
     return readLocal().rememberPending === true;
   }
 
   function setRememberPending(on) {
+    writeLocal('rememberPending', on ? true : undefined);
+  }
+
+  function rememberDecision() {
+    const d = readLocal().remember;
+    return d === 'on' || d === 'off' ? d : '';
+  }
+
+  function setRememberDecision(d) {
+    writeLocal('remember', d === 'on' || d === 'off' ? d : undefined);
+  }
+
+  async function deviceUnlockHere() {
+    const vault = loadVault();
+    if (!vault || !vault.device || !vault.kcv || !cryptoReady()) return false;
+    let secret = null;
     try {
-      const v = readLocal();
-      if (on) v.rememberPending = true;
-      else delete v.rememberPending;
-      if (Object.keys(v).length) global.localStorage.setItem(LOCAL_KEY, JSON.stringify(v));
-      else global.localStorage.removeItem(LOCAL_KEY);
-    } catch (_) {}
+      if (typeof indexedDB === 'undefined') return false;
+      if (typeof indexedDB.databases === 'function' && !(await indexedDB.databases()).some(function (d) { return d.name === IDB_NAME; })) return false;
+      const db = await idbOpen();
+      const key = await idbGet(db, IDB_DEVICE_KEY);
+      db.close();
+      if (!key) return false;
+      secret = await decryptWith(key, { iv: vault.device.iv, ct: vault.device.ct });
+      return timingSafeEq(b64uDec(await kcvOf(secret)), b64uDec(vault.kcv));
+    } catch (_) {
+      return false;
+    } finally {
+      if (secret) secret.fill(0);
+    }
   }
 
   async function setDeviceUnlock(on) {
@@ -544,7 +577,7 @@
     cryptoReady,
     setup, unlock, lock, isSetUp, isUnlocked, getSecret, clearVault,
     passkeySupport, hasPasskey, enrollPasskey, unlockWithPasskey, removePasskey,
-    hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock, rememberPending, setRememberPending,
+    hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock, deviceUnlockHere, rememberPending, setRememberPending, rememberDecision, setRememberDecision,
     useSecret, isLinked, createLinked, saveLinked, openLinked, rebuildLinked, matchesVault, retireLegacy, legacyPasskeyId
   };
 })(typeof window !== 'undefined' ? window : globalThis);

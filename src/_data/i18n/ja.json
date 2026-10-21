@@ -173,6 +173,7 @@
     "identity_passkey_added_on": "{date}に追加",
     "identity_kr_remove_confirm": "このパスキーを削除しますか？ このパスキーでは Mentria のロックを解除できなくなります。リカバリーコードは引き続き使えます。",
     "identity_regenerate_confirm": "新しいリカバリーコードを作成しますか？ 保存したコードでは Mentria のロックを解除できなくなります。",
+    "identity_remember_pending": "次にこのデバイスでロックを解除したときにオンになります。その後は、ここでロックしたものを確認なしで開きます。自分しか使わないデバイスでのみ使ってください。",
     "whats_new": "{tag} の新機能",
     "update_now": "今すぐ更新",
     "release_notes": "GitHub のリリースノート",

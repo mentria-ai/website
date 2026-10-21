@@ -173,6 +173,7 @@
     "identity_passkey_added_on": "Added {date}",
     "identity_kr_remove_confirm": "Remove this passkey? It will no longer unlock Mentria. Your recovery code still works.",
     "identity_regenerate_confirm": "Make a new recovery code? The code you saved will stop unlocking Mentria.",
+    "identity_remember_pending": "Turns on the next time you unlock on this device. Then everything locked here opens without asking. Only for a device you alone use.",
     "whats_new": "What’s new in {tag}",
     "update_now": "Update now",
     "release_notes": "Release notes on GitHub",

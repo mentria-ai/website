@@ -173,6 +173,7 @@
     "identity_passkey_added_on": "Adicionada em {date}",
     "identity_kr_remove_confirm": "Remover esta chave de acesso? Ela não vai mais desbloquear a Mentria. Seu código de recuperação continua funcionando.",
     "identity_regenerate_confirm": "Criar um novo código de recuperação? O código que você guardou vai deixar de desbloquear a Mentria.",
+    "identity_remember_pending": "Será ativado na próxima vez que você desbloquear neste dispositivo. Depois disso, tudo o que está bloqueado aqui abre sem pedir nada. Só para um dispositivo que apenas você usa.",
     "whats_new": "Novidades em {tag}",
     "update_now": "Atualizar agora",
     "release_notes": "Notas da versão no GitHub",

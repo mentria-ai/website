@@ -951,12 +951,21 @@ async function onLab(page, fn, arg) {
   return page.evaluate(fn, arg);
 }
 
-async function declinedTab(r) {
+const LATER = () => sessionStorage.getItem('mentria.finance.linkLater');
+
+const NUDGE = async () => {
+  const M = await import('/assets/js/mentria-unlock.js');
+  await M.ready();
+  M.setAskAtLaunch(!M.state().askAtLaunch);
+};
+
+async function declinedTab(r, prep) {
   const page = r.page;
   let frame = await store(page);
   await legacySetup(frame, { passkey: false, device: false });
   await setSwitch(page, true);
-  const code = await keyringOn(page, true);
+  const code = await keyringOn(page, !prep);
+  if (prep) await onLab(page, prep, PASS);
   frame = await store(page);
   await shown(frame, '#fin-pass', 20000);
   await (await typeIn(frame, '#fin-pass', PASS)).press('Enter');
@@ -966,6 +975,7 @@ async function declinedTab(r) {
   await frame.waitForFunction(() => !document.querySelector('dialog.fsheet'), { timeout: 15000 });
   await opened(frame);
   assert(!(await metaOf(frame)).linked, 'Later keeps today\'s ledger');
+  assert((await frame.evaluate(LATER)) === '1', 'Later is kept for this tab');
   return { frame, code };
 }
 
@@ -1098,6 +1108,103 @@ check('retired elsewhere: this ledger\'s synced wraps go too', async () => {
     const ok = await until(async () => { const l = await ledgerOf(frame); return !l.pass && !l.recovery && l.passRemoved && l.recoveryRemoved; }, 15000);
     assert(ok, 'the synced copies in the ledger are deleted too', await ledgerOf(frame));
     assert(!r.errors.length, 'no page errors', r.errors);
+  } finally {
+    await done(r);
+  }
+});
+
+check('a Lock closes a tab that said Later once the one unlock holds Finance from another device', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    const { frame, code } = await declinedTab(r, async (pw) => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      const V = await import('/assets/finance/vault.js');
+      const s = await V.unlockPass(pw);
+      await M.link('finance', s.root);
+      s.root.fill(0);
+      await M.lock();
+    });
+    const other = await newPage(r, false);
+    await onLab(other, NUDGE);
+    await sleep(1500);
+    await page.bringToFront();
+    assert(await frame.$('#fin-main'), 'a change that is not a lock leaves the ledger open');
+    await onLab(other, async (c) => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      await M.unlockWithCode(c);
+    }, code);
+    await sleep(1500);
+    await page.bringToFront();
+    assert(await frame.$('#fin-main'), 'an unlock leaves it open');
+    await onLab(other, async () => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      await M.lock();
+    });
+    await page.bringToFront();
+    await shown(frame, '.flock', 20000);
+    assert(!(await frame.$('#fin-main')), 'the Lock closed the ledger');
+  } finally {
+    await done(r);
+  }
+});
+
+check('a ledger the one unlock cannot open keeps its own lock', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: false });
+    await setSwitch(page, true);
+    await keyringOn(page, false);
+    await onLab(page, async () => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      await M.link('finance', crypto.getRandomValues(new Uint8Array(32)));
+      const db = await new Promise((ok, no) => { const q = indexedDB.open('mentria-ext-finance'); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error); });
+      await new Promise((ok, no) => { const tx = db.transaction('meta', 'readwrite'); tx.objectStore('meta').put(true, 'linked'); tx.oncomplete = ok; tx.onerror = () => no(tx.error); });
+      db.close();
+    });
+    frame = await store(page);
+    await shown(frame, '#fin-pass', 30000);
+    await (await typeIn(frame, '#fin-pass', PASS)).press('Enter');
+    await opened(frame);
+    const other = await newPage(r, false);
+    await onLab(other, NUDGE);
+    await sleep(1500);
+    await page.bringToFront();
+    const s = await settingsInfo(frame);
+    assert(s.autoLock && s.changePass && !s.keyringNote, 'the ledger keeps its own settings', s);
+    await fakeAway(frame, 10);
+    await shown(frame, '#fin-pass', 20000);
+    assert(!(await frame.$('#fin-main')), 'its own auto-lock still runs');
+  } finally {
+    await done(r);
+  }
+});
+
+check('a lock while the link sheet is open is not a Later', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: false });
+    await setSwitch(page, true);
+    await keyringOn(page, true);
+    frame = await store(page);
+    await shown(frame, '#fin-pass', 20000);
+    await (await typeIn(frame, '#fin-pass', PASS)).press('Enter');
+    await present(frame, '#fin-main', 60000);
+    await shown(frame, 'dialog.fsheet .m-unlock', 30000);
+    await fakeAway(frame, 10);
+    await shown(frame, '#fin-pass', 20000);
+    assert(!(await frame.$('dialog.fsheet')), 'the auto-lock closed the sheet');
+    assert((await frame.evaluate(LATER)) === null, 'a lock is not a Later');
+    await (await typeIn(frame, '#fin-pass', PASS)).press('Enter');
+    await present(frame, '#fin-main', 60000);
+    await shown(frame, 'dialog.fsheet .m-unlock', 30000);
+    await page.keyboard.press('Escape');
+    await frame.waitForFunction(() => !document.querySelector('dialog.fsheet'), { timeout: 15000 });
+    assert((await frame.evaluate(LATER)) === '1', 'Escape counts as Later');
   } finally {
     await done(r);
   }

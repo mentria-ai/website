@@ -51,6 +51,16 @@ const WATCH_REMOVE = () => {
           return r.call(x, ns, k, o);
         };
       }
+      if (x && typeof x.set === 'function') {
+        const w = x.set;
+        x.set = (ns, k, v, o) => {
+          if (ns === 'keyring' && k === 'vault' && sessionStorage.getItem('t-fail-record') === '1') {
+            window.__recordFails = (window.__recordFails || 0) + 1;
+            return false;
+          }
+          return w.call(x, ns, k, v, o);
+        };
+      }
       held = x;
     }
   });
@@ -1166,7 +1176,16 @@ check('old lock retires once every note converted', async () => {
   await page.evaluate(() => {
     const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob')).filter((n) => n.title !== 'India');
     window.MentriaStore.set('quick_notes', 'blob', list);
+    sessionStorage.setItem('t-fail-record', '1');
   });
+  await reload(page, 'one');
+  await pick(page, 'Hotel');
+  await waitView(page, (x) => x.text === 'hotel secret text', 'Hotel open while the record cannot be written');
+  await sleep(1500);
+  const failedMark = await page.evaluate(() => ({ tries: window.__recordFails || 0, signals: window.__signals.length, retired: (JSON.parse(localStorage.getItem('mentria.store.keyring.vault')).retired || {}).notes || null }));
+  assert(failedMark.tries > 0, 'retirement tried to write the retired mark', failedMark);
+  assert(failedMark.signals === 0 && failedMark.retired === null, 'no signal while the retired mark cannot be written', failedMark);
+  await page.evaluate(() => sessionStorage.removeItem('t-fail-record'));
   await reload(page, 'one');
   rec = await until(async () => { const r = await readJson(page, RECORD); return r && r.retired && r.retired.notes ? r : null; }, 15000, 'notes marked retired');
   await sleep(800);

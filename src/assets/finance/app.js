@@ -463,17 +463,26 @@ async function linkWithCard(bytes) {
       resolve(v);
     };
     const box = h('div');
+    let declined = false;
+    let escTimer = null;
     const sh = U.sheet({
       title: T.link_title || t('lock.locked'),
       body: box,
-      foot: [h('button', { type: 'button', class: 'fb', onclick: () => sh.close() }, t('common.later'))],
+      foot: [h('button', { type: 'button', class: 'fb', onclick: () => { declined = true; sh.close(); } }, t('common.later'))],
       onClose: () => {
-        if (!settled) {
+        clearTimeout(escTimer);
+        if (!settled && declined) {
           app.linkDeclined = true;
           KR.sayLater();
         }
         finish(false);
       }
+    });
+    sh.el.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || e.isComposing) return;
+      declined = true;
+      clearTimeout(escTimer);
+      escTimer = setTimeout(() => { declined = false; }, 400);
     });
     ui.mountCard(box, {
       onUnlocked: async () => {
@@ -562,27 +571,45 @@ async function joinLinked(rootBytes) {
 }
 
 let keyringOff = null;
+let keyEpoch = 0;
+let keyOpen = false;
 function watchKeyring(K) {
   if (!K || keyringOff) return;
-  keyringOff = K.onChange(() => { followKeyring().catch((e) => console.error(e)); });
+  const now = K.state();
+  keyEpoch = now.epoch;
+  keyOpen = now.unlocked;
+  keyringOff = K.onChange((s) => {
+    const locked = !s.unlocked && (keyOpen || s.epoch !== keyEpoch);
+    keyEpoch = s.epoch;
+    keyOpen = s.unlocked;
+    followKeyring(s, locked).catch((e) => console.error(e));
+  });
 }
 
-async function linkedHere() {
-  let linked = false;
-  try { linked = (await db.getMeta('linked')) === true; } catch (_) {}
-  if (!linked || !app.engine) return false;
-  if (!app.linked) {
-    app.linked = true;
-    scheduleRender();
-  }
-  return true;
+async function metaLinked() {
+  try { return (await db.getMeta('linked')) === true; } catch (_) { return false; }
 }
 
-async function followKeyring() {
+async function opensHere(engine) {
+  try { return !!engine.root && (await inKeyring(engine.root)); } catch (_) { return false; }
+}
+
+async function followKeyring(s, locked) {
   const K = app.K;
   if (!K || !app.engine) return;
-  if (!app.linked && !(await linkedHere())) return;
-  if (app.engine && app.linked && !K.state().unlocked) lock();
+  if (app.linked) {
+    if (!s.unlocked) lock();
+    return;
+  }
+  if (!s.unlocked) {
+    if (locked && (s.linked.indexOf('finance') >= 0 || (await metaLinked())) && app.engine && !app.linked && !K.state().unlocked) lock();
+    return;
+  }
+  const engine = app.engine;
+  if (!(await metaLinked()) || app.engine !== engine || app.linked || !K.state().unlocked) return;
+  if (!(await opensHere(engine)) || app.engine !== engine || app.linked) return;
+  app.linked = true;
+  scheduleRender();
 }
 
 export async function lockNow() {

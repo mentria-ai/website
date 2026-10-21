@@ -1325,9 +1325,18 @@
     return out;
   };
 
-  const keyringMerger = async () => {
-    let core;
-    try { core = await loadCore(); } catch (_) { return null; }
+  const keyringCheck = async (local, plan) => {
+    const store = local.store && typeof local.store === 'object' ? local.store : {};
+    if (store['keyring.vault'] == null || plan.same.indexOf('keyring.vault') >= 0) return { core: null, bad: false };
+    let core = null;
+    try { core = await loadCore(); } catch (_) { core = null; }
+    let value = null;
+    try { value = JSON.parse(String(store['keyring.vault'])); } catch (_) { value = null; }
+    return { core, bad: !core || !core.isRecord(value) };
+  };
+
+  const keyringMerger = (core) => {
+    if (!core) return null;
     return (suffix, localRaw, incomingRaw) => {
       if (suffix !== 'keyring.vault') return null;
       const merged = core.mergeRecords(JSON.parse(localRaw), JSON.parse(incomingRaw));
@@ -1352,9 +1361,10 @@
         .replace('{areas}', listJoin(contentAreas(S, local, dbPlans, copy.areas)));
       if (!(await ask(msg, false))) return { restored: 0, cancelled: true };
     }
-    const skip = [];
+    const keyring = await keyringCheck(local, plan);
+    const skip = keyring.bad ? ['keyring.vault'] : [];
     for (const suffix of plan.vaults) {
-      if (suffix === 'keyring.vault' && !copy.keyringVault) { skip.push(suffix); continue; }
+      if (suffix === 'keyring.vault' && (keyring.bad || !copy.keyringVault)) { if (skip.indexOf(suffix) < 0) skip.push(suffix); continue; }
       const text = suffix === 'totp.vault' ? copy.totpVault : suffix === 'keyring.vault' ? copy.keyringVault : copy.identityVault;
       if (!(await ask(text))) skip.push(suffix);
     }
@@ -1373,7 +1383,7 @@
       skip.push.apply(skip, plan.replace);
       merging.forEach((p) => { p.keepReplaced = true; });
     }
-    const mergeVault = plan.merge.indexOf('keyring.vault') >= 0 && skip.indexOf('keyring.vault') < 0 ? await keyringMerger() : null;
+    const mergeVault = plan.merge.indexOf('keyring.vault') >= 0 && skip.indexOf('keyring.vault') < 0 ? keyringMerger(keyring.core) : null;
     await checkSpace(dbPlans);
     const done = await commitDatabases(dbPlans);
     let result;

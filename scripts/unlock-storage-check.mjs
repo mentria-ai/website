@@ -164,7 +164,11 @@ async function joinRoom() {
   assert.ok(room && room.action, 'room joined');
   const key = await roomKey(SECRET);
   const messages = async () => Promise.all(room.sent.map((s) => openMsg(key, s.payload)));
-  const deliver = async (msg) => room.action.onMessage(await sealMsg(key, msg), { peerId: 'peer-1' });
+  const deliver = async (msg) => {
+    const n = Sync.status().handled;
+    room.action.onMessage(await sealMsg(key, msg), { peerId: 'peer-1' });
+    await until(() => Sync.status().handled > n);
+  };
   return { room, key, messages, deliver };
 }
 
@@ -396,7 +400,6 @@ check('snapshot carries app, keyring and device', async () => {
   assert.equal(plain.keyring, undefined);
   assert.equal(plain.device, undefined);
   await off.deliver(snapshotOf({ 'keyring.vault': JSON.stringify(k.record) }));
-  await sleep(150);
   assert.equal(raw('keyring.vault'), JSON.stringify(k.record), 'switch off records nobody');
   await Sync.disconnect();
 });
@@ -414,8 +417,9 @@ check('old peer keeps legacy wraps', async () => {
   const r = await joinRoom();
   r.room.onPeerJoin('peer-1');
   await r.deliver(snapshotOf({ 'identity.vault': idRaw, 'totp.vault': totpRaw, 'keyring.vault': raw('keyring.vault') }));
-  const rec = await until(() => { const v = Store.get('keyring', 'vault'); return v.devices.legacy ? v : null; });
-  assert.equal(rec.devices.legacy.name, 'older version');
+  const rec = Store.get('keyring', 'vault');
+  assert.ok(rec.devices.legacy, 'legacy entry written');
+  assert.equal(rec.devices.legacy.name, '');
   assert.equal(rec.devices.legacy.app, '');
   assert.equal(rec.devices.legacy.keyring, 0);
   assert.ok(Math.abs(Date.parse(rec.devices.legacy.lastSeen) - Date.now()) < 60000);
@@ -427,15 +431,16 @@ check('old peer keeps legacy wraps', async () => {
   assert.equal(sent.value.devices.legacy.keyring, 0);
   const again = raw('keyring.vault');
   await r.deliver(snapshotOf({ 'identity.vault': idRaw }));
-  await sleep(150);
   assert.equal(raw('keyring.vault'), again, 'seen today is not written again');
-  await r.deliver(snapshotOf({}, { app: 'beta', keyring: 1, device: { id: 'dev-b', name: 'Phone' } }));
-  const both = await until(() => { const v = Store.get('keyring', 'vault'); return v.devices['dev-b'] ? v : null; });
+  await r.deliver(snapshotOf({ 'identity.vault': idRaw }, { app: 'v2026.10.07' }));
+  assert.equal(raw('keyring.vault'), again, 'the legacy entry keeps a stable app');
+  await r.deliver(snapshotOf({ 'keyring.vault': raw('keyring.vault') }, { app: 'beta', keyring: 1, device: { id: 'dev-b', name: 'Phone' } }));
+  const both = Store.get('keyring', 'vault');
+  assert.ok(both.devices['dev-b'], 'modern peer recorded');
   assert.deepEqual({ name: both.devices['dev-b'].name, app: both.devices['dev-b'].app, keyring: both.devices['dev-b'].keyring }, { name: 'Phone', app: 'beta', keyring: 1 });
   assert.equal(both.devices.legacy.keyring, 0);
-  await r.deliver(snapshotOf({}, { keyring: 1, device: { id: 'legacy', name: 'x' } }));
-  await r.deliver(snapshotOf({}, { keyring: 1, device: { id: '__proto__', name: 'x' } }));
-  await sleep(150);
+  await r.deliver(snapshotOf({ 'keyring.vault': raw('keyring.vault') }, { keyring: 1, device: { id: 'legacy', name: 'x' } }));
+  await r.deliver(snapshotOf({ 'keyring.vault': raw('keyring.vault') }, { keyring: 1, device: { id: '__proto__', name: 'x' } }));
   const last = Store.get('keyring', 'vault');
   assert.equal(last.devices.legacy.keyring, 0);
   assert.deepEqual(Object.keys(last.devices).sort(), ['dev-a', 'dev-b', 'legacy']);
@@ -451,7 +456,8 @@ check('sync merges a same-kcv keyring', async () => {
   const incoming = U.touchDevice(await withPasskey(k, k.record), 'dev-b', { name: 'Phone', app: 'beta', keyring: 1 });
   const r = await joinRoom();
   await r.deliver(snapshotOf({ 'keyring.vault': JSON.stringify(incoming) }, { app: 'beta', keyring: 1, device: { id: 'dev-b', name: 'Phone' } }));
-  const merged = await until(() => { const v = Store.get('keyring', 'vault'); return v.wraps.prf.length === 2 ? v : null; });
+  const merged = Store.get('keyring', 'vault');
+  assert.equal(merged.wraps.prf.length, 2);
   assert.ok(merged.devices['dev-a'] && merged.devices['dev-b']);
   assert.deepEqual(asked, []);
   const back = await until(async () => (await r.messages()).find((m) => m.op === 'snapshot-back' && m.data.store['keyring.vault']));
@@ -459,20 +465,17 @@ check('sync merges a same-kcv keyring', async () => {
   assert.equal(back.keyring, 1);
   const third = await withPasskey(k, incoming);
   await r.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: third, mtime: Date.now() });
-  await until(() => Store.get('keyring', 'vault').wraps.prf.length === 3);
+  assert.equal(Store.get('keyring', 'vault').wraps.prf.length, 3);
   const kept = raw('keyring.vault');
   const other = await keyring('dev-z');
   await r.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: other.record, mtime: Date.now() });
-  await sleep(150);
   assert.equal(raw('keyring.vault'), kept, 'a different keyring never replaces it silently');
   const broken = clone(third);
   delete broken.wraps;
   await r.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: broken, mtime: Date.now() });
-  await sleep(150);
   assert.equal(raw('keyring.vault'), kept, 'an unreadable copy never overwrites it');
   await r.deliver({ op: 'remove', ns: 'keyring', key: 'vault', mtime: Date.now() });
-  await r.deliver(Object.assign(snapshotOf({}, { keyring: 1 }), { tombs: { 'keyring.vault': Date.now() + 60000 } }));
-  await sleep(150);
+  await r.deliver(Object.assign(snapshotOf({ 'keyring.vault': kept }, { app: 'beta', keyring: 1, device: { id: 'dev-b', name: 'Phone' } }), { tombs: { 'keyring.vault': Date.now() + 60000 } }));
   assert.equal(raw('keyring.vault'), kept, 'a peer never deletes it');
   await Sync.disconnect();
 });
@@ -491,9 +494,112 @@ check('sync asks before replacing a different keyring', async () => {
   assert.deepEqual(asked, ['SYNC KEYRING?']);
   const choice = await until(async () => (await r.messages()).find((m) => m.op === 'vault'));
   assert.deepEqual({ suffix: choice.suffix, keep: choice.keep }, { suffix: 'keyring.vault', keep: true });
-  await sleep(50);
+  const after = Store.get('keyring', 'vault');
+  assert.equal(after.kcv, k.record.kcv);
+  assert.deepEqual(after.wraps, JSON.parse(before).wraps);
+  assert.equal(after.devices.legacy.keyring, 0, 'a peer holding another keyring blocks retirement');
+  await Sync.disconnect();
+});
+
+check('keyring merge happens at apply time', async () => {
+  reset();
+  const k = await keyring();
+  const local = await withPasskey(k, k.record);
+  put('keyring.vault', local, Date.now() - 3600000);
+  put('tools.x', { a: 1 }, Date.now() - 3600000);
+  const incoming = await withPasskey(k, k.record);
+  let otherTab = null;
+  answer = async () => {
+    otherTab = await withPasskey(k, JSON.parse(raw('keyring.vault')));
+    ls.setItem('mentria.store.keyring.vault', JSON.stringify(otherTab));
+    return true;
+  };
+  const r = await joinRoom();
+  const snap = snapshotOf({ 'keyring.vault': JSON.stringify(incoming), 'tools.x': JSON.stringify({ a: 2 }) }, { keyring: 1 });
+  snap.meta['tools.x'] = Date.now();
+  await r.deliver(snap);
+  assert.ok(otherTab, 'the prompt ran');
+  assert.equal(Store.get('tools', 'x').a, 2);
+  const ids = Store.get('keyring', 'vault').wraps.prf.map((p) => p.id).sort();
+  const want = [local.wraps.prf[0].id, incoming.wraps.prf[0].id, otherTab.wraps.prf[1].id].sort();
+  assert.deepEqual(ids, want, 'a passkey added during the prompt survives');
+  await Sync.disconnect();
+});
+
+check('peer tombstones never block a keyring', async () => {
+  reset();
+  const k = await keyring();
+  const r = await joinRoom();
+  await r.deliver(Object.assign(snapshotOf({}, { keyring: 1 }), { tombs: { 'keyring.vault': Date.now() + 3600000 } }));
+  const tombs = JSON.parse(ls.getItem('mentria-sync-tombstones') || '{}');
+  assert.equal(tombs['keyring.vault'], undefined);
+  await r.deliver(snapshotOf({ 'keyring.vault': JSON.stringify(k.record) }, { keyring: 1 }));
   assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv);
-  assert.deepEqual(Object.keys(Store.get('keyring', 'vault').devices), Object.keys(JSON.parse(before).devices));
+  await Sync.disconnect();
+});
+
+check('an invalid keyring is never a first copy', async () => {
+  reset();
+  const k = await keyring();
+  const broken = clone(k.record);
+  delete broken.wraps;
+  const r = await joinRoom();
+  await r.deliver(snapshotOf({ 'keyring.vault': JSON.stringify(broken) }, { keyring: 1 }));
+  assert.equal(raw('keyring.vault'), null, 'snapshot add');
+  await r.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: broken, mtime: Date.now() });
+  assert.equal(raw('keyring.vault'), null, 'live set add');
+  await r.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: 'not a record', mtime: Date.now() });
+  assert.equal(raw('keyring.vault'), null, 'live set of a string');
+  await r.deliver({ op: 'snapshot', data: { version: 1, exportedAt: new Date().toISOString(), store: { 'keyring.vault': JSON.stringify(broken), 'tools.z': '1' }, legacy: {} } });
+  assert.equal(raw('tools.z'), '1');
+  assert.equal(raw('keyring.vault'), null, 'old protocol snapshot add');
+  await Sync.disconnect();
+  const payload = (rec) => ({ version: 1, exportedAt: new Date().toISOString(), store: { 'keyring.vault': JSON.stringify(rec), 'tools.y': '1' }, legacy: {} });
+  const result = await BK.applyRestore(payload(broken), COPY);
+  assert.equal(raw('keyring.vault'), null, 'restore add');
+  assert.equal(raw('tools.y'), '1');
+  assert.ok(result.restored >= 1);
+  assert.ok(!asked.includes('KEYRING?'));
+  put('keyring.vault', k.record);
+  const before = raw('keyring.vault');
+  const other = await keyring('dev-z');
+  const otherBroken = clone(other.record);
+  otherBroken.wraps.prf = 'x';
+  await BK.applyRestore(payload(otherBroken), COPY);
+  assert.ok(!asked.includes('KEYRING?'), 'no prompt for an invalid replacement');
+  assert.equal(raw('keyring.vault'), before);
+  ls.removeItem('mentria.store.keyring.vault');
+  await BK.applyRestore(payload(k.record), COPY);
+  assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv, 'a valid one is added');
+  const r2 = await joinRoom();
+  ls.removeItem('mentria.store.keyring.vault');
+  await r2.deliver({ op: 'set', ns: 'keyring', key: 'vault', value: k.record, mtime: Date.now() });
+  assert.equal(Store.get('keyring', 'vault').kcv, k.record.kcv, 'a valid live set is added');
+  await Sync.disconnect();
+});
+
+check('a peer that cannot open this keyring blocks retirement', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record);
+  const other = await keyring('dev-z');
+  answer = () => false;
+  const r = await joinRoom();
+  const dev = (id) => ({ app: 'beta', keyring: 1, device: { id, name: id } });
+  await r.deliver(Object.assign(snapshotOf({ 'keyring.vault': JSON.stringify(other.record) }, dev('dev-b')), { meta: {} }));
+  await r.deliver(snapshotOf({}, dev('dev-c')));
+  await r.deliver(Object.assign(snapshotOf({}, dev('dev-d')), { op: 'snapshot-back' }));
+  await r.deliver(snapshotOf({ 'keyring.vault': raw('keyring.vault') }, dev('dev-e')));
+  await r.deliver(snapshotOf({}, { app: 'beta', keyring: 1 }));
+  const d = Store.get('keyring', 'vault').devices;
+  assert.equal(d['dev-b'].keyring, 0, 'holds a different keyring');
+  assert.equal(d['dev-c'].keyring, 0, 'holds no keyring');
+  assert.equal(d['dev-d'].keyring, 1, 'a reply leaves out what both sides share');
+  assert.equal(d['dev-e'].keyring, 1, 'holds this keyring');
+  assert.deepEqual(d.legacy, Object.assign({}, d.legacy, { name: '', app: '', keyring: 0 }), 'no device id');
+  assert.ok(U.retirementStatus(Store.get('keyring', 'vault'), 'identity').blockers.includes('old-device'));
+  await r.deliver(snapshotOf({ 'keyring.vault': raw('keyring.vault') }, dev('dev-b')));
+  assert.equal(Store.get('keyring', 'vault').devices['dev-b'].keyring, 1, 'flips once it holds this keyring');
   await Sync.disconnect();
 });
 

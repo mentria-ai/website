@@ -13,8 +13,6 @@
   const IDB_NAME = 'mentria-identity';
   const IDB_STORE = 'keys';
   const IDB_DEVICE_KEY = 'device-wrap';
-  const KEYRING_NS = 'keyring';
-  const KEYRING_KEY = 'vault';
   const LOCAL_KEY = 'mentria.identity.local';
 
   function b64uEnc(bytes) {
@@ -177,6 +175,11 @@
     return !!(v && v.prf && v.prf.credId);
   }
 
+  function hasPassphrase() {
+    const v = loadVault();
+    return !!(v && v.pass && v.pass.ct);
+  }
+
   function prfFromCredential(cred) {
     try {
       const ext = cred.getClientExtensionResults();
@@ -310,29 +313,10 @@
     return known.then(function (yes) { return yes ? idbDelete() : null; }).catch(function () {});
   }
 
-  function isLinked() {
-    if (!global.MentriaStore) return false;
-    const rec = global.MentriaStore.get(KEYRING_NS, KEYRING_KEY);
-    const services = rec && typeof rec === 'object' ? rec.services : null;
-    if (!services || typeof services !== 'object' || !Object.prototype.hasOwnProperty.call(services, NS)) return false;
-    const entry = services[NS];
-    return !!(entry && typeof entry === 'object' && entry.ct);
-  }
-
   function secretBytes(bytes) {
     const u8 = bytes instanceof Uint8Array ? new Uint8Array(bytes) : ArrayBuffer.isView(bytes) ? new Uint8Array(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)) : null;
     if (!u8 || u8.length !== SECRET_BYTES) throw new Error('bad-secret');
     return u8;
-  }
-
-  async function useSecret(bytes) {
-    requireCrypto();
-    const secret = secretBytes(bytes);
-    const kcv = await kcvOf(secret);
-    const vault = loadVault();
-    if (!vault) throw new Error('no-vault');
-    if (!vault.kcv || !timingSafeEq(b64uDec(kcv), b64uDec(vault.kcv))) throw new Error('kcv-mismatch');
-    state.secret = secret;
   }
 
   async function createLinked() {
@@ -486,31 +470,10 @@
     }
   }
 
-  function writeLocal(name, value) {
-    try {
-      const v = readLocal();
-      if (value === undefined) delete v[name];
-      else v[name] = value;
-      if (Object.keys(v).length) global.localStorage.setItem(LOCAL_KEY, JSON.stringify(v));
-      else global.localStorage.removeItem(LOCAL_KEY);
-    } catch (_) {}
-  }
-
-  function rememberPending() {
-    return readLocal().rememberPending === true;
-  }
-
-  function setRememberPending(on) {
-    writeLocal('rememberPending', on ? true : undefined);
-  }
-
-  function rememberDecision() {
-    const d = readLocal().remember;
-    return d === 'on' || d === 'off' ? d : '';
-  }
-
-  function setRememberDecision(d) {
-    writeLocal('remember', d === 'on' || d === 'off' ? d : undefined);
+  function takeLocal() {
+    const v = readLocal();
+    try { global.localStorage.removeItem(LOCAL_KEY); } catch (_) {}
+    return { remember: v.remember === 'on' || v.remember === 'off' ? v.remember : '', rememberPending: v.rememberPending === true };
   }
 
   async function deviceUnlockHere() {
@@ -577,8 +540,8 @@
   global.MentriaIdentity = {
     cryptoReady,
     setup, unlock, lock, isSetUp, isUnlocked, getSecret, clearVault,
-    passkeySupport, hasPasskey, enrollPasskey, unlockWithPasskey, removePasskey,
-    hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock, deviceUnlockHere, rememberPending, setRememberPending, rememberDecision, setRememberDecision,
-    useSecret, isLinked, createLinked, saveLinked, openLinked, rebuildLinked, matchesVault, retireLegacy, legacyPasskeyId
+    passkeySupport, hasPasskey, hasPassphrase, enrollPasskey, unlockWithPasskey, removePasskey,
+    hasDeviceUnlock, setDeviceUnlock, tryDeviceUnlock, deviceUnlockHere, takeLocal,
+    createLinked, saveLinked, openLinked, rebuildLinked, matchesVault, retireLegacy, legacyPasskeyId
   };
 })(typeof window !== 'undefined' ? window : globalThis);

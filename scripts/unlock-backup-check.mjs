@@ -715,6 +715,138 @@ check('switch off keeps the passphrase export', async () => {
   clean();
 });
 
+async function sealOwnV5(lab) {
+  return lab.evaluate(async (url) => {
+    const m = await import(url);
+    await m.ready();
+    const B = window.MentriaBackup;
+    const out = await B.sealBackup(await B.prepareBackup(), { keyring: await m.backupKey() });
+    return out.blob.text();
+  }, MODULE);
+}
+
+async function labWithKeyring(name) {
+  const D = await device(name);
+  const lab = await open(D, '/beta/unlock/');
+  await setSwitch(lab, true);
+  await createOnLab(lab);
+  await lab.evaluate((k) => window.MentriaStore.set('tools', k, { n: 3 }), CHECK_KEY);
+  return { D, lab };
+}
+
+check('files: a damaged own file is not called a wrong passphrase', async () => {
+  const { D, lab } = await labWithKeyring('e');
+  const lines = (await sealOwnV5(lab)).split('\n');
+  const i = lines.findIndex((l, n) => n > 0 && l.length > 40);
+  assert(i > 0, 'seed: the file has a body line');
+  const pos = Math.floor(lines[i].length / 2);
+  lines[i] = lines[i].slice(0, pos) + (lines[i][pos] === 'A' ? 'B' : 'A') + lines[i].slice(pos + 1);
+  const bad = join(WORK, 'v5-damaged.json');
+  writeFileSync(bad, lines.join('\n'));
+  const files = await open(D, '/tools/files/');
+  await filesRestoreOpen(files);
+  await upload(files, '#files-restore-file', bad);
+  assert(await until(() => shown(files, '#files-restore-key'), 10000), 'the session opens the file without a field');
+  const st = await filesRestore(files);
+  assert(st.text === norm(EN.common.restore_err_damaged), 'a damaged file is not called a wrong passphrase', st);
+  await D.context.close();
+  clean();
+});
+
+check('files: export says when the code cannot protect a file', async () => {
+  const { D, lab } = await labWithKeyring('f');
+  await lab.evaluate(() => {
+    const rec = window.MentriaStore.get('keyring', 'vault');
+    delete rec.backup;
+    window.MentriaStore.set('keyring', 'vault', rec);
+  });
+  const files = await open(D, '/tools/files/');
+  await filesExportOpen(files);
+  assert(await until(() => shown(files, '#files-export-code'), 10000), 'code mode on export');
+  await files.click('#files-export-confirm');
+  await files.waitForFunction(() => document.getElementById('files-export-strength').dataset.level === 'weak', { timeout: 20000 });
+  assert(await textOf(files, '#files-export-strength') === norm(EN.common.backup_code_unavailable), 'the export says the code cannot protect it now', await textOf(files, '#files-export-strength'));
+  assert(await shown(files, '#files-export-pass'), 'the passphrase field comes back');
+  await D.context.close();
+  clean();
+});
+
+check('files asks before deleting the one unlock and names what stops opening', async () => {
+  const { D, lab } = await labWithKeyring('g');
+  await lab.evaluate(async (url) => {
+    const m = await import(url);
+    await m.link('identity', crypto.getRandomValues(new Uint8Array(32)));
+    await m.link('totp', crypto.getRandomValues(new Uint8Array(32)));
+  }, MODULE);
+  const raw0 = await lab.evaluate(() => localStorage.getItem('mentria.store.keyring.vault'));
+  const files = await open(D, '/tools/files/');
+  await files.waitForSelector('.files__ns[data-id="keyring"]');
+  await files.click('.files__ns[data-id="keyring"]');
+  await files.waitForSelector('[data-action="delete"][data-key="vault"]');
+  await files.click('[data-action="delete"][data-key="vault"]');
+  assert(await until(() => dialogOpen(files), 10000), 'deleting the one unlock asks first');
+  const msg = await textOf(files, '#m-dialog-msg');
+  assert(msg === norm(EN.tool.files.confirm_delete_keyring.replace('{services}', 'chats and codes')), 'the question names what stops opening', msg);
+  await sleep(300);
+  await files.click('#m-dialog-cancel');
+  assert(await until(async () => !(await dialogOpen(files)), 5000), 'the dialog closes');
+  assert(await files.evaluate(() => localStorage.getItem('mentria.store.keyring.vault')) === raw0, 'Cancel keeps the one unlock');
+  await files.click('[data-action="delete"][data-key="vault"]');
+  assert(await until(() => dialogOpen(files), 10000), 'it asks again');
+  await sleep(300);
+  await files.click('#m-dialog-ok');
+  assert(await until(() => files.evaluate(() => localStorage.getItem('mentria.store.keyring.vault') === null), 10000), 'OK deletes it');
+  await D.context.close();
+  const { D: D2 } = await labWithKeyring('h');
+  const f2 = await open(D2, '/tools/files/');
+  await f2.waitForSelector('.files__ns[data-id="keyring"]');
+  await f2.click('.files__ns[data-id="keyring"]');
+  await f2.waitForSelector('[data-action="delete"][data-key="vault"]');
+  await f2.click('[data-action="delete"][data-key="vault"]');
+  assert(await until(() => dialogOpen(f2), 10000), 'an empty one unlock asks too');
+  assert(await textOf(f2, '#m-dialog-msg') === norm(EN.tool.files.confirm_delete_keyring_none), 'the question for an empty one unlock', await textOf(f2, '#m-dialog-msg'));
+  await sleep(300);
+  await f2.click('#m-dialog-cancel');
+  await D2.context.close();
+  clean();
+});
+
+check('files restore still asks for the code when the one unlock stalls', async () => {
+  const G = await device('i');
+  const lab = await open(G, '/beta/unlock/');
+  await setSwitch(lab, true);
+  const gcode = await createOnLab(lab);
+  await lab.evaluate((k) => window.MentriaStore.set('tools', k, { n: 4 }), CHECK_KEY);
+  const file = join(WORK, 'v5-stall.json');
+  writeFileSync(file, await sealOwnV5(lab));
+  await lab.close();
+  const page = await G.context.newPage();
+  await page.setViewport({ width: 1280, height: 900 });
+  page.on('pageerror', (e) => pageErrors.push('g files: ' + String(e && e.message || e).slice(0, 300)));
+  page.on('dialog', async (d) => { nativeDialogs.push(d.type() + ': ' + d.message().slice(0, 200)); try { await d.dismiss(); } catch (_) {} });
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  const held = [];
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    if (q.url().includes('/assets/js/mentria-unlock.js')) { held.push(q.url()); return; }
+    q.continue();
+  });
+  await page.goto(ORIGIN + '/tools/files/', { waitUntil: 'load' });
+  await page.evaluate((k) => window.MentriaStore.remove('tools', k), CHECK_KEY);
+  await filesRestoreOpen(page);
+  await upload(page, '#files-restore-file', file);
+  assert(await until(() => shown(page, '#files-restore-code'), 9000), 'the code field shows after the wait');
+  assert(held.length > 0, 'the one unlock was held', held.length);
+  await page.type('#files-restore-code', gcode);
+  const nav = reloaded(page);
+  const ok = await filesRestore(page);
+  assert(ok.text === norm(EN.about.data_import_done), 'the code restores while the one unlock is stalled', ok);
+  await nav;
+  await G.context.close();
+  clean();
+});
+
 check('production build never loads the runtime', async () => {
   server.setRoot(PROD);
   try {

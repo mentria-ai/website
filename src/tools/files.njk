@@ -172,6 +172,10 @@ localeReload: true
     del:          {{ ("tool.files.delete"         | t) | dump | safe }},
     confirmDelete:{{ ("tool.files.confirm_delete" | t) | dump | safe }},
     confirmDeleteTotp: {{ ("tool.files.confirm_delete_totp" | t) | dump | safe }},
+    confirmDeleteKeyring: {{ ("tool.files.confirm_delete_keyring" | t) | dump | safe }},
+    confirmDeleteKeyringNone: {{ ("tool.files.confirm_delete_keyring_none" | t) | dump | safe }},
+    ringServices: {{ "unlock.services" | tsub | dump | safe }},
+    codeUnavailable: {{ ("common.backup_code_unavailable" | t) | dump | safe }},
     cachesGroup: {{ ("tool.files.caches_group" | t) | dump | safe }},
     cachesShare: {{ ("tool.files.caches_share" | t) | dump | safe }},
     redaction:    {{ ("tool.files.redaction_notice" | t) | dump | safe }},
@@ -240,6 +244,7 @@ localeReload: true
       file:  {{ ("common.restore_err_file"  | t) | dump | safe }},
       pass:  {{ ("common.restore_err_pass"  | t) | dump | safe }},
       code:  {{ ("common.restore_err_code"  | t) | dump | safe }},
+      damaged: {{ ("common.restore_err_damaged" | t) | dump | safe }},
       space: {{ ("common.restore_err_space" | t) | dump | safe }},
       newer: {{ ("common.restore_err_newer" | t) | dump | safe }},
       blocked: {{ ("common.restore_err_blocked" | t) | dump | safe }},
@@ -902,11 +907,31 @@ localeReload: true
     viewModal.open();
   }
 
+  function ringServicesText(key) {
+    let rec = null;
+    try { rec = key === 'vault' ? store.get('keyring', key) : null; } catch (_) { rec = null; }
+    const own = (o, k) => !!o && typeof o === 'object' && Object.prototype.hasOwnProperty.call(o, k);
+    const names = ['identity', 'totp', 'notes', 'finance'].filter((n) => {
+      const e = rec && own(rec.services, n) ? rec.services[n] : null;
+      return (!!e && typeof e === 'object' && !!e.ct) || (!!rec && own(rec.retired, n));
+    }).map((n) => COPY.ringServices[n] || n);
+    if (!names.length) return '';
+    try { return new Intl.ListFormat(document.documentElement.lang || undefined, { type: 'conjunction' }).format(names); } catch (_) { return names.join(', '); }
+  }
+
+  function deleteMessage(bucket, key) {
+    if (bucket.id === 'totp') return COPY.confirmDeleteTotp.replace('{name}', key);
+    if (bucket.id === 'keyring') {
+      const services = ringServicesText(key);
+      return services ? COPY.confirmDeleteKeyring.replace('{services}', services) : COPY.confirmDeleteKeyringNone;
+    }
+    return COPY.confirmDelete.replace('{name}', key);
+  }
+
   async function deleteItem(bucket, key) {
-    const guarded = bucket.id === 'totp' || bucket.id === 'identity';
+    const guarded = bucket.id === 'totp' || bucket.id === 'identity' || bucket.id === 'keyring';
     if (guarded) {
-      const msg = bucket.id === 'totp' ? COPY.confirmDeleteTotp.replace('{name}', key) : COPY.confirmDelete.replace('{name}', key);
-      if (!(await window.mentriaConfirm(msg, { danger: true }))) return;
+      if (!(await window.mentriaConfirm(deleteMessage(bucket, key), { danger: true }))) return;
     }
     let saved = null;
     if (bucket.kind === 'legacy') {
@@ -989,6 +1014,7 @@ localeReload: true
   let codeShown = false;
   let restoreSeq = 0;
   let restoring = false;
+  const UNLOCK_WAIT_MS = 5000;
 
   function unlockWanted(needRecord) {
     if (document.documentElement.dataset.release !== 'beta' || window.__mentriaRedirecting) return false;
@@ -999,18 +1025,22 @@ localeReload: true
   }
 
   function loadUnlock() {
-    if (!unlockLoad) {
-      unlockLoad = import('/assets/js/mentria-unlock.js').then((m) => Promise.resolve().then(() => m.ready()).catch(() => {}).then(() => {
+    if (unlockLoad) return unlockLoad;
+    let p = null;
+    const start = import('/assets/js/mentria-unlock.js').then((m) => Promise.resolve().then(() => m.ready()).catch(() => {}).then(() => {
+      if (!unlock) {
         m.onChange(syncUnlock);
         unlock = m;
         syncUnlock();
-        return m;
-      })).catch(() => {
-        unlockLoad = null;
-        return null;
-      });
-    }
-    return unlockLoad;
+      }
+      return m;
+    }), () => {
+      if (unlockLoad === p) unlockLoad = null;
+      return null;
+    });
+    p = Promise.race([start, new Promise((resolve) => setTimeout(() => resolve(null), UNLOCK_WAIT_MS))]);
+    unlockLoad = p;
+    return p;
   }
 
   const wipeKey = (k) => { try { if (k && k.key && k.key.fill) k.key.fill(0); } catch (_) {} };
@@ -1055,7 +1085,7 @@ localeReload: true
     if (!h || !h.code) return { kind: 'pass' };
     let k = null;
     if (unlockWanted(true)) {
-      const m = await loadUnlock();
+      const m = unlock || await loadUnlock();
       try { if (m && m.enabled() && m.state().unlocked) k = await m.backupKey(); } catch (_) { k = null; }
     }
     if (k && k.salt === h.salt && k.kcv === h.kcv) return { kind: 'key', key: k };
@@ -1163,7 +1193,7 @@ localeReload: true
           otherBtn.setAttribute('aria-expanded', 'true');
           renderExport();
           strengthEl.dataset.level = 'weak';
-          strengthEl.textContent = COPY.passShort;
+          strengthEl.textContent = COPY.codeUnavailable;
           passInput.focus();
           return;
         }
@@ -1240,7 +1270,7 @@ localeReload: true
       setTimeout(() => { location.reload(); }, 1200);
     } catch (err) {
       const raw = MentriaBackup.restoreErrorCode(err);
-      const code = raw === 'pass' && mode.kind === 'code' ? 'code' : raw;
+      const code = raw === 'pass' && mode.kind === 'code' ? 'code' : raw === 'pass' && mode.kind === 'key' ? 'damaged' : raw;
       out.textContent = code ? COPY.restoreErr[code] : COPY.restoreFail.replace('{err}', String(err && err.message || err));
       btn.disabled = false;
     } finally {

@@ -38,6 +38,7 @@ unlockTool: true
       <p class="totp-link__p">{{ "unlock.link_body" | t }}</p>
     </div>
     <div class="totp-ring-card" id="totp-ring-card" hidden></div>
+    <button type="button" class="totp-btn m-btn m-btn--ghost totp-old" id="totp-old-btn" aria-expanded="false" aria-controls="totp-unlock" hidden>{{ "tool.totp.old_unlock" | t }}</button>
     <div class="totp-create" id="totp-create" hidden>
       <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-create-btn">{{ "tool.totp.setup_button" | t }}</button>
     </div>
@@ -632,7 +633,12 @@ unlockTool: true
   const RING_URL = '/assets/js/mentria-unlock.js';
   const RING_UI_URL = '/assets/js/mentria-unlock-ui.js';
   const RING_WAIT_MS = 5000;
-  const ring = { on: false, mod: null, ui: null, chain: Promise.resolve(), cardP: null, linkP: null, raw: null, busy: 0, declined: false };
+  const ring = { on: false, mod: null, ui: null, chain: Promise.resolve(), cardP: null, linkP: null, raw: null, busy: 0, declined: false, old: false };
+
+  function dropRaw() {
+    if (ring.raw) ring.raw.fill(0);
+    ring.raw = null;
+  }
 
   const AUTOLOCK_KEY = 'autolock_min';
   function autolockMinutes() {
@@ -719,7 +725,7 @@ unlockTool: true
   }
 
   function keyringWanted() {
-    if (document.documentElement.dataset.release !== 'beta') return false;
+    if (document.documentElement.dataset.release !== 'beta' || window.__mentriaRedirecting) return false;
     try {
       const l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
       return !!l && l.enabled === true;
@@ -809,12 +815,17 @@ unlockTool: true
   function showRing(kind) {
     showLocked();
     const card = kind === 'card';
-    const old = kind === 'link' || kind === 'old' || kind === 'setup';
+    const v = state.vault;
+    const oldHere = card && !!v && !!(v.pass || v.prf);
+    if (!oldHere) ring.old = false;
+    const old = kind === 'link' || kind === 'old' || kind === 'setup' || (oldHere && ring.old);
     $('totp-locked-h').hidden = card;
     $('totp-locked-lede').hidden = card;
     $('totp-link-note').hidden = kind !== 'link';
     $('totp-create').hidden = kind !== 'create';
     $('totp-ring-card').hidden = !card;
+    $('totp-old-btn').hidden = !oldHere;
+    $('totp-old-btn').setAttribute('aria-expanded', oldHere && ring.old ? 'true' : 'false');
     if (!old) {
       $('totp-setup').hidden = true;
       $('totp-unlock').hidden = true;
@@ -885,11 +896,16 @@ unlockTool: true
       return;
     }
     let bytes = await ring.mod.secret('totp');
-    if (!bytes) {
-      bytes = crypto.getRandomValues(new Uint8Array(32));
-      await ring.mod.link('totp', bytes);
+    let key = null;
+    try {
+      if (!bytes) {
+        bytes = crypto.getRandomValues(new Uint8Array(32));
+        await ring.mod.link('totp', bytes);
+      }
+      key = await importRaw(bytes);
+    } finally {
+      if (bytes) bytes.fill(0);
     }
-    const key = await importRaw(bytes);
     const secrets = await encryptWith(key, new TextEncoder().encode('[]'));
     state.vault = { v: 2, linked: true, kid: kidOf(null), secrets };
     saveVault(state.vault);
@@ -907,7 +923,11 @@ unlockTool: true
     try {
       if (!ring.mod.state().setUp) {
         const bytes = crypto.getRandomValues(new Uint8Array(32));
-        await ring.ui.showSetup({ service: 'totp', secret: bytes });
+        try {
+          await ring.ui.showSetup({ service: 'totp', secret: bytes });
+        } finally {
+          bytes.fill(0);
+        }
         const now = ring.mod.state();
         if (!now.setUp) { ring.declined = true; return; }
         if (!now.unlocked) return;
@@ -925,10 +945,12 @@ unlockTool: true
   }
 
   async function afterLegacy(bytes, pass) {
-    if (state.mode === 'linked') return;
+    if (state.mode === 'linked') { if (bytes) bytes.fill(0); return; }
     state.mode = 'legacy';
     const s = ring.mod.state();
-    if (!bytes || isLinked(s)) return;
+    if (!bytes) return;
+    if (isLinked(s) && (s.unlocked || !s.setUp)) { bytes.fill(0); return; }
+    dropRaw();
     ring.raw = bytes;
     if (s.unlocked) { await linkLegacy(); return; }
     if (s.setUp) { showLinkPanel(); return; }
@@ -941,11 +963,11 @@ unlockTool: true
     } finally {
       ring.busy--;
     }
-    if (!state.masterKey) { ring.raw = null; route(); return; }
+    if (!state.masterKey) { dropRaw(); route(); return; }
     const now = ring.mod.state();
     if (isLinked(now)) { becameLinked(); return; }
     if (!ok && now.setUp && now.unlocked) { await linkLegacy(); return; }
-    ring.raw = null;
+    dropRaw();
   }
 
   function sameBytes(a, b) {
@@ -955,8 +977,8 @@ unlockTool: true
   }
 
   async function linkLegacy() {
-    const bytes = ring.raw;
-    if (!bytes || !state.masterKey) return;
+    if (!ring.raw || !state.masterKey) return;
+    const bytes = new Uint8Array(ring.raw);
     try {
       const have = await ring.mod.secrets('totp');
       const match = have.some((c) => sameBytes(c.bytes, bytes));
@@ -965,8 +987,10 @@ unlockTool: true
         becameLinked();
         return;
       }
-      if (await ring.mod.secret('totp')) {
-        ring.raw = null;
+      const current = await ring.mod.secret('totp');
+      if (current) {
+        current.fill(0);
+        dropRaw();
         hideLinkPanel();
         return;
       }
@@ -974,6 +998,8 @@ unlockTool: true
     } catch (_) {
       setStatus(COPY.link_failed, 'err');
       return;
+    } finally {
+      bytes.fill(0);
     }
     becameLinked();
   }
@@ -985,7 +1011,7 @@ unlockTool: true
   }
 
   function becameLinked() {
-    ring.raw = null;
+    dropRaw();
     hideLinkPanel();
     if (!state.masterKey) return;
     state.mode = 'linked';
@@ -1145,7 +1171,7 @@ unlockTool: true
       importModal.close();
       pendingAdd = null;
       pendingImport = null;
-      ring.raw = null;
+      dropRaw();
       hideLinkPanel();
       route();
     } else {
@@ -1509,6 +1535,7 @@ unlockTool: true
       setStatus('', null);
       showVault();
       if (ring.on) afterLegacy(raw, pass).catch(() => {});
+      else raw.fill(0);
     } catch (err) {
       setStatus(COPY.unlock_failed, 'err');
     } finally {
@@ -1523,6 +1550,7 @@ unlockTool: true
       setStatus('', null);
       showVault();
       if (ring.on) afterLegacy(raw, null).catch(() => {});
+      else raw.fill(0);
     } catch (err) {
       setStatus(COPY.prf_unsupported, 'err');
     } finally {
@@ -1552,7 +1580,13 @@ unlockTool: true
   });
 
   if ($('totp-create-btn')) $('totp-create-btn').addEventListener('click', () => { if (ring.on) createFlow(); });
-  if ($('totp-link-later')) $('totp-link-later').addEventListener('click', () => { ring.raw = null; hideLinkPanel(); });
+  if ($('totp-link-later')) $('totp-link-later').addEventListener('click', () => { dropRaw(); hideLinkPanel(); });
+  if ($('totp-old-btn')) $('totp-old-btn').addEventListener('click', () => {
+    if (state.masterKey) return;
+    ring.old = !ring.old;
+    showRing('card');
+    if (ring.old) $(state.vault && state.vault.prf && prfSupported ? 'totp-prf-btn' : 'totp-unlock-pass').focus();
+  });
 
   (function initAutolockSeg() {
     const seg = $('totp-autolock-seg');

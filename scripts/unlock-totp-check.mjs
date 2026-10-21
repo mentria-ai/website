@@ -230,6 +230,7 @@ async function screen(page) {
       prf: vis('totp-prf-btn'),
       linkNote: vis('totp-link-note') ? text('totp-link-note') : null,
       linkPanel: vis('totp-link-panel'),
+      oldBtn: vis('totp-old-btn'),
       create: vis('totp-create'),
       autolock: vis('totp-autolock'),
       enrol: vis('totp-prf-enroll-btn'),
@@ -640,7 +641,7 @@ check('locked shows card then codes', async () => {
   await until(async () => (await screen(page)).card, 10000, 'the card after Lock');
   const s1 = await screen(page);
   const st1 = await ringState(page);
-  assert(!s1.vault && !s1.heading && !s1.setup && !s1.unlock && !s1.create && s1.rows === 0, 'Lock shows only the card', s1);
+  assert(!s1.vault && !s1.heading && !s1.setup && !s1.unlock && !s1.create && !s1.oldBtn && s1.rows === 0, 'Lock shows only the card', s1);
   assert(!st1.unlocked, 'Lock locked the one unlock', st1);
   const toast = await page.evaluate(() => [...document.querySelectorAll('.m-toast')].map((t) => t.textContent.trim()).join('|'));
   assert(toast.includes(U.locked_toast), 'Lock says it locked everything', toast);
@@ -761,7 +762,7 @@ check('backup gate falls back to a passphrase without a backup key', async () =>
   await press(page, '#totp-backup-confirm-btn');
   await page.waitForFunction(() => document.getElementById('totp-backup-pass-field').getBoundingClientRect().height > 0, { timeout: 10000 });
   const m1 = await backupModal(page);
-  assert(m1.field && m1.lede === T.backup_gate_lede, 'without a backup key the passphrase field comes back', m1);
+  assert(m1.field && m1.lede === T.backup_gate_lede_linked, 'without a backup key the passphrase field comes back', m1);
   await typeInto(page, '#totp-backup-pass', BACKUP_PASS);
   await press(page, '#totp-backup-confirm-btn');
   await closedBackup(page);
@@ -1257,6 +1258,59 @@ check('a keyring lock closes the add and import windows', async () => {
   assert(await page.evaluate(() => document.getElementById('totp-import-modal').hidden), 'the import window closes on lock');
   await cardUnlock(page, '#totp-ring-card', { code });
   await waitRows(page, 1);
+  await done(r);
+});
+
+check('the old unlock stays under the card while the vault still has it', async () => {
+  const r = await rig('old under card');
+  const { page } = r;
+  const { vault, code } = await legacyLinked(r);
+  await ringLock(page);
+  await until(async () => (await screen(page)).card, 10000, 'the card after a lock');
+  const s0 = await screen(page);
+  const b0 = await page.evaluate(() => { const b = document.getElementById('totp-old-btn'); return b ? { text: b.textContent.trim(), expanded: b.getAttribute('aria-expanded') } : null; });
+  assert(s0.card && s0.oldBtn && !s0.unlock && b0 && b0.text === T.old_unlock && b0.expanded === 'false', 'the card shows with the old unlock folded under it', { s0, b0 });
+  await press(page, '#totp-old-btn');
+  await until(async () => (await screen(page)).unlock, 5000, 'the old unlock under the card');
+  const s1 = await screen(page);
+  assert(s1.card && s1.unlock && s1.prf, 'the old passphrase and passkey are both offered', s1);
+  if (process.env.SHOTS) {
+    mkdirSync(process.env.SHOTS, { recursive: true });
+    await page.screenshot({ path: join(process.env.SHOTS, 'totp-old-under-card-1280.png') });
+    await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2 });
+    await sleep(250);
+    await page.screenshot({ path: join(process.env.SHOTS, 'totp-old-under-card-390.png') });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    await page.setViewport({ width: 1280, height: 900 });
+    assert(overflow <= 0, 'no sideways scroll at 390 px', overflow);
+  }
+  assert(await page.$eval('#totp-old-btn', (b) => b.getAttribute('aria-expanded')) === 'true', 'the disclosure is expanded');
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await until(async () => (await screen(page)).linkPanel, 15000, 'the link panel');
+  const s2 = await screen(page);
+  assert(s2.vault && s2.autolock && !(await ringState(page)).unlocked, 'the vault opened the old way and the panel asks for the one unlock', s2);
+  await cardUnlock(page, '#totp-link-panel', { code });
+  await until(async () => !(await screen(page)).linkPanel, 10000, 'the panel to close');
+  await until(async () => !(await screen(page)).autolock, 10000, 'the vault to join the one unlock');
+  const kept = await readJson(page, VAULT);
+  assert(JSON.stringify(kept.pass) === JSON.stringify(vault.pass) && JSON.stringify(kept.prf) === JSON.stringify(vault.prf), 'the old wraps are kept', Object.keys(kept));
+  await press(page, '#totp-lock-btn');
+  await until(async () => (await screen(page)).card, 10000, 'Lock locks the one unlock again');
+  await done(r);
+});
+
+check('a redirecting page never loads the one unlock', async () => {
+  const r = await rig('redirecting', { authenticator: false });
+  const { page } = r;
+  await setSwitch(page, true);
+  await openTotp(page);
+  await makeKeyring(page);
+  r.requests.length = 0;
+  await openTotp(page, () => { window.__mentriaRedirecting = true; });
+  await sleep(800);
+  assert(!r.requests.some((u) => u.includes('/assets/js/mentria-unlock')), 'no one unlock request while redirecting', r.requests.filter((u) => u.includes('unlock')));
   await done(r);
 });
 

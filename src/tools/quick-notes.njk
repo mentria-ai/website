@@ -122,7 +122,7 @@ unlockTool: true
     lockFailedOne:     {{ ("tool.quick-notes.lock_failed_one"    | t) | dump | safe }},
     keyMissing:        {{ ("tool.quick-notes.key_missing"        | t) | dump | safe }},
     lockKeyMissing:    {{ ("tool.quick-notes.lock_key_missing"   | t) | dump | safe }},
-    lockTitle:         {{ ("tool.quick-notes.lock_title"         | t) | dump | safe }},
+    relockOldTitle:    {{ ("tool.quick-notes.relock_old_title"   | t) | dump | safe }},
     oneOff:            {{ ("tool.quick-notes.one_unlock_off"     | t) | dump | safe }},
     convertSkipped:    {{ ("tool.quick-notes.convert_skipped"    | t) | dump | safe }}
   };
@@ -183,7 +183,8 @@ unlockTool: true
   let one = false;
   let oneSettled = !TRY_ONE;
   let oneReady = Promise.resolve();
-  let notesKey = null;
+  let notesKeys = [];
+  let ringSig = '';
   let linkPending = false;
   let card = null;
   let cardP = null;
@@ -194,6 +195,8 @@ unlockTool: true
   let retiring = false;
   let wasUnlocked = false;
   const skipped = new Set();
+  const skippedKv = new Set();
+  const curOk = new Set();
 
   let autoBlank = null;
 
@@ -300,7 +303,7 @@ unlockTool: true
       });
     }
     renderList();
-    if (one && sessionKey && notesKey) openNotes();
+    if (one && notesKeys.length) openNotes();
   }
 
   function acceptExternalDelete() {
@@ -457,10 +460,40 @@ unlockTool: true
     return new TextDecoder().decode(pt);
   }
 
+  function curKey() { return notesKeys.length ? notesKeys[0] : null; }
+
+  function ringFor(note, ring) {
+    if (!note.kid) return ring;
+    return ring.filter((k) => k.id === note.kid).concat(ring.filter((k) => k.id !== note.kid));
+  }
+
+  async function openKv2(note) {
+    const ring = notesKeys;
+    for (const k of ringFor(note, ring)) {
+      try { return { text: await openV2(k.key, note), current: k === ring[0] }; } catch (_) {}
+    }
+    return null;
+  }
+
+  async function sealCur(id, text) {
+    const c = curKey();
+    if (!c) throw new Error('locked');
+    const sealed = await sealV2(c.key, id, text);
+    sealed.kid = c.id;
+    return sealed;
+  }
+
+  function setKid(n, kid) {
+    if (kid) n.kid = kid;
+    else delete n.kid;
+  }
+
   async function decryptOne(note) {
     if (note.kv === 2) {
-      if (!notesKey) throw new Error('locked');
-      return openV2(notesKey, note);
+      if (!U || !U.state().unlocked || !notesKeys.length) throw new Error('locked');
+      const got = await openKv2(note);
+      if (!got || !U.state().unlocked) throw new Error('locked');
+      return got.text;
     }
     if (note.kv || !sessionKey) throw new Error('locked');
     return openLegacy(sessionKey, note);
@@ -473,34 +506,40 @@ unlockTool: true
 
   function linkNotesKey() {
     const run = async () => {
-      const have = await U.secret('notes');
-      if (have) return have;
-      if (hasKv2()) return null;
+      const have = await U.secrets('notes');
+      if (have.length) return have;
       const fresh = crypto.getRandomValues(new Uint8Array(32));
       try { await U.link('notes', fresh); } finally { fresh.fill(0); }
-      return U.secret('notes');
+      return U.secrets('notes');
     };
     if (navigator.locks && typeof navigator.locks.request === 'function') return navigator.locks.request('mentria-notes-key', run);
     return run();
   }
 
   async function ensureNotesKey(allowLink) {
-    let bytes = null;
-    try { bytes = await U.secret('notes'); } catch (_) { notesKey = null; return false; }
-    if (!bytes && allowLink && !hasKv2()) bytes = await linkNotesKey();
-    if (!bytes) { notesKey = null; return false; }
+    let list = [];
+    try { list = await U.secrets('notes'); } catch (_) { notesKeys = []; return false; }
+    if (!list.length && allowLink) list = await linkNotesKey();
+    const ring = [];
     try {
-      notesKey = await crypto.subtle.importKey('raw', bytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+      for (const x of list) ring.push({ id: typeof x.id === 'string' && x.id ? x.id : null, key: await crypto.subtle.importKey('raw', x.bytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']) });
     } finally {
-      bytes.fill(0);
+      for (const x of list) x.bytes.fill(0);
     }
-    return true;
+    const sig = ring.map((k) => String(k.id)).join(',');
+    if (sig !== ringSig) {
+      ringSig = sig;
+      skippedKv.clear();
+      curOk.clear();
+    }
+    notesKeys = ring;
+    return ring.length > 0;
   }
 
   function lockView(note) {
     const s = U.state();
     if (note.kv === 2) {
-      if (notesKey) return 'open';
+      if (notesKeys.length) return 'open';
       return !s.unlocked && s.setUp ? 'card' : 'missing';
     }
     if (note.kv) return 'missing';
@@ -509,33 +548,59 @@ unlockTool: true
     return 'legacy';
   }
 
-  async function convertLegacy() {
+  function underCurrent(n, cur) {
+    return !!cur && ((!!cur.id && n.kid === cur.id) || curOk.has(noteSig(n)));
+  }
+
+  function forgetLegacy(legacyKey) {
+    if (legacyKey && sessionKey === legacyKey && notes.every((n) => !isLegacyLocked(n) || skipped.has(noteSig(n)))) sessionKey = null;
+  }
+
+  async function convertNotes() {
+    const ring = notesKeys;
+    const cur = ring[0];
+    if (!cur) return false;
     const legacyKey = sessionKey;
-    if (!legacyKey || !notesKey) return false;
-    try { await saver.flush(); } catch (_) {}
+    const wants = (n) => {
+      if (!n || !n.enc) return false;
+      const sig = noteSig(n);
+      if (!n.kv) return !!legacyKey && !skipped.has(sig);
+      return n.kv === 2 && !underCurrent(n, cur) && !skippedKv.has(sig);
+    };
+    if (notes.some(wants)) {
+      try { await saver.flush(); } catch (_) {}
+    }
     for (let pass = 0; pass < 3; pass++) {
-      const key = notesKey;
-      if (!key || sessionKey !== legacyKey) return false;
-      const todo = notes.filter((n) => isLegacyLocked(n) && !skipped.has(noteSig(n)));
+      if (notesKeys !== ring || sessionKey !== legacyKey) return false;
+      const todo = notes.filter(wants);
       if (!todo.length) break;
       const done = new Map();
       for (const n of todo) {
         const sig = noteSig(n);
         let text;
-        try { text = await openLegacy(legacyKey, n); } catch (_) { skipped.add(sig); continue; }
-        done.set(n.id, { sig: sig, sealed: await sealV2(key, n.id, text) });
+        if (isLegacyLocked(n)) {
+          try { text = await openLegacy(legacyKey, n); } catch (_) { skipped.add(sig); continue; }
+        } else {
+          const got = await openKv2(n);
+          if (!got) { skippedKv.add(sig); continue; }
+          if (got.current && !cur.id) { curOk.add(sig); continue; }
+          text = got.text;
+        }
+        done.set(n.id, { sig: sig, sealed: await sealV2(cur.key, n.id, text) });
       }
       if (!done.size) break;
-      if (!U.state().unlocked || notesKey !== key || sessionKey !== legacyKey) return false;
+      if (!U.state().unlocked || notesKeys !== ring || sessionKey !== legacyKey) return false;
       const prev = notes;
       notes = notes.map((n) => {
         const d = n && done.get(n.id);
-        if (!d || !isLegacyLocked(n) || noteSig(n) !== d.sig) return n;
-        return Object.assign({}, n, { body: d.sealed.body, iv: d.sealed.iv, kv: 2, updatedAt: (Number(n.updatedAt) || 0) + 1 });
+        if (!d || !n.enc || noteSig(n) !== d.sig) return n;
+        const out = Object.assign({}, n, { body: d.sealed.body, iv: d.sealed.iv, kv: 2, updatedAt: (Number(n.updatedAt) || 0) + 1 });
+        setKid(out, cur.id);
+        return out;
       });
       if (!persist()) { notes = prev; return false; }
     }
-    if (notes.every((n) => !isLegacyLocked(n) || skipped.has(noteSig(n)))) sessionKey = null;
+    forgetLegacy(legacyKey);
     return true;
   }
 
@@ -554,7 +619,9 @@ unlockTool: true
     if (!S || unsavedWhy) return false;
     const stored = S.get('quick_notes', 'blob');
     if (stored != null && !Array.isArray(stored)) return false;
-    return !(stored || []).some(isLegacyLocked) && !notes.some(isLegacyLocked);
+    const cur = curKey();
+    const ok = (n) => !isLegacyLocked(n) && !(!!n && !!n.enc && n.kv === 2 && !underCurrent(n, cur));
+    return (stored || []).every(ok) && notes.every(ok);
   }
 
   async function retireIfReady() {
@@ -605,16 +672,16 @@ unlockTool: true
     if (s.unlocked) {
       const legacy = !!sessionKey && notes.some((n) => isLegacyLocked(n) && !skipped.has(noteSig(n)));
       try { await ensureNotesKey(legacy); } catch (_) {}
-      if (notesKey) {
+      if (notesKeys.length) {
         linkPending = false;
-        if (sessionKey) { try { await convertLegacy(); } catch (_) {} }
+        try { await convertNotes(); } catch (_) {}
         await retireIfReady();
       }
     } else {
-      if (notesKey || (dropped && sessionKey)) {
+      if (notesKeys.length || (dropped && sessionKey)) {
         try { await saver.flush(); } catch (_) {}
       }
-      notesKey = null;
+      notesKeys = [];
       if (dropped) {
         sessionKey = null;
         linkPending = false;
@@ -682,7 +749,7 @@ unlockTool: true
   }
 
   function showSkipped() {
-    const n = one ? notes.filter((x) => isLegacyLocked(x) && skipped.has(noteSig(x))).length : 0;
+    const n = one ? notes.filter((x) => (isLegacyLocked(x) && skipped.has(noteSig(x))) || (!!x && !!x.enc && x.kv === 2 && skippedKv.has(noteSig(x)))).length : 0;
     const text = n ? COPY.convertSkipped.replace('{n}', n.toLocaleString(document.documentElement.lang || 'en')) : '';
     if (convertEl.textContent !== text) convertEl.textContent = text;
     convertEl.hidden = !text;
@@ -813,7 +880,7 @@ unlockTool: true
     if (one) {
       lockBtn.hidden = locked || !oneOK;
       lockBtn.textContent = COPY.lockBtn;
-      lockBtn.title = mode === 'unlocked' ? (U.state().setUp ? COPY.relockTitle : COPY.lockTitle) : COPY.lockTitleOne;
+      lockBtn.title = mode === 'unlocked' ? (U.state().setUp ? COPY.relockTitle : COPY.relockOldTitle) : COPY.lockTitleOne;
       removeLockBtn.hidden = mode !== 'unlocked';
     } else if (!cryptoOK) {
       lockBtn.hidden = true;
@@ -866,8 +933,8 @@ unlockTool: true
     let sealed = null;
     let kv = 0;
     try {
-      if (notesKey) {
-        sealed = await sealV2(notesKey, id, text);
+      if (notesKeys.length) {
+        sealed = await sealCur(id, text);
         kv = 2;
       } else if (!note.kv && sessionKey) {
         sealed = await sealLegacy(sessionKey, text);
@@ -883,6 +950,7 @@ unlockTool: true
     cur.iv = sealed.iv;
     if (kv) cur.kv = kv;
     else delete cur.kv;
+    setKid(cur, kv ? sealed.kid : null);
     cur.updatedAt = Date.now();
     const ok = persist();
     if (ok && cur.id === activeId) updateSavedLabel(cur.updatedAt);
@@ -1034,11 +1102,10 @@ unlockTool: true
     if (ready === 'missing') { mentriaAlert(COPY.lockKeyMissing); return; }
     if (ready !== true || activeId !== note.id) return;
     try { await saver.flush(); } catch (_) {}
-    const key = notesKey;
     const cur = getNote(note.id);
-    if (!key || !cur || cur.enc) return;
+    if (!curKey() || !cur || cur.enc) return;
     let sealed;
-    try { sealed = await sealV2(key, cur.id, textarea.value); } catch (_) { mentriaAlert(COPY.lockFailedOne); return; }
+    try { sealed = await sealCur(cur.id, textarea.value); } catch (_) { mentriaAlert(COPY.lockFailedOne); return; }
     const n = getNote(note.id);
     if (!n || n.enc || activeId !== n.id) return;
     n.title = titleInput.value;
@@ -1046,6 +1113,7 @@ unlockTool: true
     n.kv = 2;
     n.body = sealed.body;
     n.iv = sealed.iv;
+    setKid(n, sealed.kid);
     n.updatedAt = Date.now();
     persist();
     renderEditor();
@@ -1140,6 +1208,7 @@ unlockTool: true
     note.body = textarea.value;
     delete note.iv;
     delete note.kv;
+    delete note.kid;
     note.updatedAt = Date.now();
     persist();
     renderEditor();

@@ -805,8 +805,9 @@
       "lock_failed_one": "Couldn't lock the note. Try again.",
       "key_missing": "This note was locked on another device, and its key isn't here yet. Sync with that device, then try again.",
       "one_unlock_off": "This note opens with the one unlock, which is off on this device.",
-      "convert_skipped": "Locked notes the old lock couldn't open here: {n}. They stay as they are.",
-      "lock_key_missing": "Another locked note's key isn't on this device yet. Unlock on the device that locked it, then sync."
+      "convert_skipped": "Locked notes this device couldn't open: {n}. They stay as they are.",
+      "lock_key_missing": "Another locked note's key isn't on this device yet. Unlock on the device that locked it, then sync.",
+      "relock_old_title": "Lock your locked notes again"
     },
     "color-picker": {
       "btn_link": "Lien",

@@ -603,6 +603,40 @@ check('a peer that cannot open this keyring blocks retirement', async () => {
   await Sync.disconnect();
 });
 
+check('a linked totp vault keeps its sync id through retirement', async () => {
+  reset();
+  const legacy = legacyTotp();
+  const kid = legacy.pass.salt + '.' + legacy.pass.wrap;
+  put('totp.vault', Object.assign(clone(legacy), { kid }));
+  const retired = { v: 2, linked: true, kid, secrets: { iv: U.b64u(rand(12)), ct: U.b64u(rand(64)) } };
+  let r = await joinRoom();
+  await r.deliver({ op: 'set', ns: 'totp', key: 'vault', value: retired, mtime: Date.now() });
+  assert.deepEqual(Store.get('totp', 'vault'), retired, 'a retired copy has the same id as the linked legacy vault');
+  await Sync.disconnect();
+  const again = Object.assign(clone(legacy), { kid, iv: U.b64u(rand(12)) });
+  r = await joinRoom();
+  await r.deliver({ op: 'set', ns: 'totp', key: 'vault', value: again, mtime: Date.now() });
+  assert.deepEqual(Store.get('totp', 'vault'), again, 'a copy that still has its pass wrap matches a retired one');
+  await Sync.disconnect();
+});
+
+check('a new linked totp vault is identified by its kid', async () => {
+  reset();
+  const kid = U.b64u(rand(16));
+  const mine = { v: 2, linked: true, kid, secrets: { iv: U.b64u(rand(12)), ct: U.b64u(rand(64)) } };
+  put('totp.vault', mine);
+  const r = await joinRoom();
+  const kept = raw('totp.vault');
+  await r.deliver({ op: 'set', ns: 'totp', key: 'vault', value: { v: 2, linked: true, kid: U.b64u(rand(16)), secrets: { iv: 'x', ct: 'y' } }, mtime: Date.now() });
+  assert.equal(raw('totp.vault'), kept, 'a vault with another kid is not followed');
+  await r.deliver({ op: 'set', ns: 'totp', key: 'vault', value: { v: 2, linked: true, kid: '', secrets: { iv: 'x', ct: 'y' } }, mtime: Date.now() });
+  assert.equal(raw('totp.vault'), kept, 'an empty kid is no id');
+  const next = { v: 2, linked: true, kid, secrets: { iv: U.b64u(rand(12)), ct: U.b64u(rand(64)) } };
+  await r.deliver({ op: 'set', ns: 'totp', key: 'vault', value: next, mtime: Date.now() });
+  assert.deepEqual(Store.get('totp', 'vault'), next, 'the same kid is followed');
+  await Sync.disconnect();
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

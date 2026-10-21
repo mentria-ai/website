@@ -221,7 +221,10 @@ const vaultId = (suffix, value) => {
   const v = (typeof value === 'string') ? parseRaw(value) : value;
   if (!v || typeof v !== 'object') return null;
   if (suffix === 'identity.vault' || suffix === KEYRING) return typeof v.kcv === 'string' && v.kcv ? v.kcv : null;
-  if (suffix === 'totp.vault') return v.pass && typeof v.pass.salt === 'string' && typeof v.pass.wrap === 'string' ? v.pass.salt + '.' + v.pass.wrap : null;
+  if (suffix === 'totp.vault') {
+    if (v.pass) return typeof v.pass.salt === 'string' && typeof v.pass.wrap === 'string' ? v.pass.salt + '.' + v.pass.wrap : null;
+    return typeof v.kid === 'string' && v.kid ? v.kid : null;
+  }
   return null;
 };
 

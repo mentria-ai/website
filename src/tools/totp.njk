@@ -841,7 +841,7 @@ unlockTool: true
     }
     const key = await importRaw(bytes);
     const secrets = await encryptWith(key, new TextEncoder().encode('[]'));
-    state.vault = { v: 2, linked: true, secrets };
+    state.vault = { v: 2, linked: true, kid: kidOf(null), secrets };
     saveVault(state.vault);
     state.masterKey = key;
     state.accounts = [];
@@ -922,12 +922,23 @@ unlockTool: true
     becameLinked();
   }
 
+  function kidOf(v) {
+    if (v && typeof v.kid === 'string' && v.kid) return v.kid;
+    if (v && v.pass && typeof v.pass.salt === 'string' && typeof v.pass.wrap === 'string') return v.pass.salt + '.' + v.pass.wrap;
+    return b64uEnc(crypto.getRandomValues(new Uint8Array(16)));
+  }
+
   function becameLinked() {
     ring.raw = null;
     hideLinkPanel();
     if (!state.masterKey) return;
     state.mode = 'linked';
     applyMode();
+    const v = state.vault;
+    if (v && !(typeof v.kid === 'string' && v.kid)) {
+      const next = Object.assign({}, v, { kid: kidOf(v) });
+      if (saveVault(next)) state.vault = next;
+    }
   }
 
   function showLinkPanel() {
@@ -956,7 +967,7 @@ unlockTool: true
     const credId = v.prf && typeof v.prf.cred_id === 'string' ? v.prf.cred_id : null;
     if (v.pass || v.prf) {
       if (JSON.stringify(loadVault()) !== JSON.stringify(v)) return;
-      const next = Object.assign({}, v, { v: 2, linked: true });
+      const next = Object.assign({}, v, { v: 2, linked: true, kid: kidOf(v) });
       delete next.pass;
       delete next.prf;
       if (!saveVault(next)) return;

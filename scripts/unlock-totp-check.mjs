@@ -361,6 +361,18 @@ async function legacySetup(r, { passkey, accounts }) {
   return vault;
 }
 
+const KID = /^[A-Za-z0-9_-]{22}$/;
+
+async function keptWithKid(page, before) {
+  const now = await readRaw(page, VAULT);
+  const old = JSON.parse(before);
+  const got = JSON.parse(now);
+  const kid = got.kid;
+  delete got.kid;
+  assert(JSON.stringify(got) === before && kid === old.pass.salt + '.' + old.pass.wrap, 'linking only adds the sync id; the old wraps are untouched', { kid, keys: Object.keys(got) });
+  return now;
+}
+
 async function finishSetup(page) {
   await page.waitForSelector('.m-ulayer [data-step="intro"]', { timeout: 20000 });
   await press(page, '.m-ulayer [data-act="next"]');
@@ -474,7 +486,7 @@ check('new vault with no keyring runs setup first', async () => {
   const vault = await readJson(page, VAULT);
   const rec = await readJson(page, RECORD);
   const st = await ringState(page);
-  assert(vault && JSON.stringify(Object.keys(vault).sort()) === '["linked","secrets","v"]' && vault.v === 2 && vault.linked === true, 'the vault is { v: 2, linked: true, secrets }', vault);
+  assert(vault && JSON.stringify(Object.keys(vault).sort()) === '["kid","linked","secrets","v"]' && vault.v === 2 && vault.linked === true && KID.test(vault.kid), 'the vault is { v: 2, linked: true, kid, secrets }', vault);
   assert(rec && rec.services && rec.services.totp && st.linked.includes('totp') && st.unlocked && st.codeConfirmed, 'setup made the keyring and linked totp', st);
   const s1 = await screen(page);
   assert(s1.vault && !s1.autolock && !s1.enrol, 'linked vault hides auto-lock and the old passkey button', s1);
@@ -514,7 +526,7 @@ check('new vault is linked and opens without a screen after reload', async () =>
   await page.waitForFunction(() => !document.getElementById('totp-vault').hidden, { timeout: 20000 });
   const vault = await readJson(page, VAULT);
   const st = await ringState(page);
-  assert(vault && JSON.stringify(Object.keys(vault).sort()) === '["linked","secrets","v"]' && vault.v === 2 && vault.linked === true && !vault.pass && !vault.prf, 'the new vault has no legacy wraps', vault);
+  assert(vault && JSON.stringify(Object.keys(vault).sort()) === '["kid","linked","secrets","v"]' && vault.v === 2 && vault.linked === true && KID.test(vault.kid) && !vault.pass && !vault.prf, 'the new vault has a kid and no legacy wraps', vault);
   assert(st.linked.includes('totp'), 'totp is linked', st);
   const secretOk = await page.evaluate(async (u, v) => {
     const m = await import(u);
@@ -710,7 +722,7 @@ check('legacy vault from the old flow links after one old unlock', async () => {
   await until(async () => (await ringState(page)).linked.includes('totp'), 10000, 'totp linked');
   const st = await ringState(page);
   assert(st.unlocked && st.hasPass && st.codeConfirmed, 'the keyring keeps the passphrase', st);
-  assert(await readRaw(page, VAULT) === before, 'linking leaves the old vault and its wraps untouched');
+  const linkedRaw = await keptWithKid(page, before);
   const s1 = await screen(page);
   assert(s1.vault && !s1.autolock && !s1.enrol, 'the vault now behaves as linked', s1);
   await expectCodes(page, ACCOUNTS);
@@ -736,7 +748,7 @@ check('legacy vault from the old flow links after one old unlock', async () => {
   await typeInto(page, '#totp-unlock-pass', PASS);
   await press(page, '#totp-unlock-btn');
   await expectCodes(page, ACCOUNTS);
-  assert(await readRaw(page, VAULT) === before, 'the old vault is still byte for byte the same');
+  assert(await readRaw(page, VAULT) === linkedRaw, 'the linked vault is still byte for byte the same');
   await done(r);
 });
 
@@ -756,7 +768,7 @@ check('legacy unlock links into an open session', async () => {
   await until(async () => (await ringState(page)).linked.includes('totp'), 10000, 'totp linked');
   const s1 = await screen(page);
   assert(s1.vault && !s1.layer && !s1.linkPanel && !s1.autolock, 'it links without another screen', s1);
-  assert(await readRaw(page, VAULT) === before, 'the old vault is untouched');
+  await keptWithKid(page, before);
   await page.evaluateOnNewDocument(WATCH);
   await page.reload({ waitUntil: 'load' });
   await settle(page);
@@ -786,7 +798,7 @@ check('legacy passkey unlock with a locked keyring links after the card', async 
   await until(async () => !(await screen(page)).linkPanel, 10000, 'the panel to close');
   const s2 = await screen(page);
   assert(s2.vault && !s2.autolock, 'the vault switches to linked', s2);
-  assert(await readRaw(page, VAULT) === before, 'the old vault is untouched');
+  await keptWithKid(page, before);
   await page.reload({ waitUntil: 'load' });
   await settle(page);
   await expectCodes(page, ACCOUNTS.slice(0, 1));
@@ -838,6 +850,7 @@ check('retirement deletes the old wraps after the grace', async () => {
   const early = await readJson(page, VAULT);
   const block = await page.evaluate(async (u) => (await import(u)).retirement('totp'), RUNTIME);
   assert(early.pass && early.prf && JSON.stringify(block.blockers) === '["too-recent"]', 'a fresh link keeps the old wraps', { block, keys: Object.keys(early) });
+  assert(early.kid === legacy.pass.salt + '.' + legacy.pass.wrap, 'linking set the sync id from the pass wrap', { kid: early.kid });
   await page.evaluate((days) => {
     const rec = window.MentriaStore.get('keyring', 'vault');
     const at = new Date(Date.now() - days).toISOString();
@@ -850,7 +863,8 @@ check('retirement deletes the old wraps after the grace', async () => {
   await settle(page);
   await expectCodes(page, ACCOUNTS.slice(0, 1));
   const vault = await until(async () => { const v = await readJson(page, VAULT); return v && !v.pass && !v.prf ? v : null; }, 10000, 'the old wraps to go');
-  assert(JSON.stringify(Object.keys(vault).sort()) === '["linked","secrets","v"]' && vault.v === 2 && vault.linked === true, 'the vault becomes a linked vault', vault);
+  assert(JSON.stringify(Object.keys(vault).sort()) === '["kid","linked","secrets","v"]' && vault.v === 2 && vault.linked === true, 'the vault becomes a linked vault', vault);
+  assert(vault.kid === legacy.pass.salt + '.' + legacy.pass.wrap && vault.kid === early.kid, 'the sync id survives retirement', { kid: vault.kid });
   assert(JSON.stringify(vault.secrets) === JSON.stringify(legacy.secrets), 'retirement keeps the encrypted accounts as they were');
   const rec = await readJson(page, RECORD);
   const signals = await until(async () => { const s = await page.evaluate(() => window.__signals); return s && s.length ? s : null; }, 5000, 'the old passkey signal');
@@ -911,6 +925,7 @@ check('a link that does not open the vault is never replaced', async () => {
   const s1 = await screen(page);
   const after = (await readJson(page, RECORD)).services.totp;
   assert(JSON.stringify(after) === JSON.stringify(entry), 'the existing link is kept', { entry, after });
+  assert(!(await readJson(page, VAULT)).kid, 'an unlinked vault gets no sync id');
   assert(s1.autolock && !s1.layer && !s1.linkPanel, 'the vault works as today', s1);
   await done(r);
 });

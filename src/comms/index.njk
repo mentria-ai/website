@@ -3191,12 +3191,19 @@ const krSettleOnce = async () => {
   const I = window.MentriaIdentity;
   if (!I) return;
   if (I.rememberDecision() === 'off') { I.setRememberPending(false); return; }
-  if (!I.rememberPending()) {
-    if (krNoDeviceHere || I.rememberDecision() || !I.isLinked() || KR.state().hasDevice) return;
-    if (!(await I.deviceUnlockHere())) { krNoDeviceHere = true; return; }
-    I.setRememberPending(true);
+  const pending = I.rememberPending();
+  if (!pending && (krNoDeviceHere || I.rememberDecision() || !I.isLinked())) return;
+  if (!(await I.deviceUnlockHere())) {
+    if (pending) I.setRememberPending(false);
+    else krNoDeviceHere = true;
+    return;
   }
-  if (KR.state().hasDevice) { I.setRememberPending(false); return; }
+  if (KR.state().hasDevice) {
+    I.setRememberPending(false);
+    I.setRememberDecision('on');
+    return;
+  }
+  if (!pending) I.setRememberPending(true);
   if (!KR.hasRootBytes()) return;
   await KR.setRemember(true);
   I.setRememberPending(false);

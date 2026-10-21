@@ -1787,12 +1787,19 @@ localeReload: true
     async function settleOnce() {
       var I = window.MentriaIdentity;
       if (I.rememberDecision() === 'off') { I.setRememberPending(false); return; }
-      if (!I.rememberPending()) {
-        if (noDeviceHere || I.rememberDecision() || !I.isLinked() || kr.state().hasDevice) return;
-        if (!(await I.deviceUnlockHere())) { noDeviceHere = true; return; }
-        I.setRememberPending(true);
+      var pending = I.rememberPending();
+      if (!pending && (noDeviceHere || I.rememberDecision() || !I.isLinked())) return;
+      if (!(await I.deviceUnlockHere())) {
+        if (pending) I.setRememberPending(false);
+        else noDeviceHere = true;
+        return;
       }
-      if (kr.state().hasDevice) { I.setRememberPending(false); return; }
+      if (kr.state().hasDevice) {
+        I.setRememberPending(false);
+        I.setRememberDecision('on');
+        return;
+      }
+      if (!pending) I.setRememberPending(true);
       if (!kr.hasRootBytes()) return;
       await kr.setRemember(true);
       I.setRememberPending(false);
@@ -2044,7 +2051,8 @@ localeReload: true
         window.MentriaIdentity.setRememberDecision(on ? 'on' : 'off');
         try {
           var done = await withConfirm(function () { return kr.setRemember(on); });
-          if (on && done !== false) await dropRetiredDevice();
+          if (on && done === false) window.MentriaIdentity.setRememberDecision('off');
+          else if (on) await dropRetiredDevice();
         } catch (err) {
           window.mentriaAlert(errText(err));
         } finally {
@@ -2055,6 +2063,8 @@ localeReload: true
       }
       try {
         await window.MentriaIdentity.setDeviceUnlock(deviceToggle.checked);
+        var I = window.MentriaIdentity;
+        if (!deviceToggle.checked && (I.rememberPending() || I.rememberDecision())) I.setRememberDecision('off');
       } catch (err) {
         window.mentriaAlert(String(err && err.message || err));
       } finally {

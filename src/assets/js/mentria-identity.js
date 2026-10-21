@@ -152,6 +152,7 @@
 
   function clearVault() {
     if (global.MentriaStore) global.MentriaStore.remove(NS, KEY);
+    try { global.localStorage.removeItem(LOCAL_KEY); } catch (_) {}
     state.secret = null;
     idbDelete().catch(function () {});
   }

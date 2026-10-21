@@ -1700,6 +1700,21 @@ check('Remember turned off stays off and lets retirement delete the old device k
   await until(() => runtime(page).then((st) => st.hasDevice === false), 15000, 'Remember this device turns off');
   const off = await rememberUi(page);
   assert(off.decision === 'off' && !off.checked && !off.pending, 'the off decision is recorded on this device', off);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-device', 15000);
+  await page.evaluate((k) => {
+    const l = JSON.parse(localStorage.getItem(k) || 'null') || {};
+    l.remember = 'on';
+    localStorage.setItem(k, JSON.stringify(l));
+  }, LOCAL_IDENTITY);
+  await page.click('#about-identity-device');
+  await waitVisible(page, '.m-ulayer [data-act="not-now"]', 15000);
+  await page.click('.m-ulayer [data-act="not-now"]');
+  await sheetClosed(page, 15000);
+  await until(() => page.$eval('#about-identity-device', (el) => !el.disabled), 10000, 'the toggle settles');
+  const cancelled = await rememberUi(page);
+  assert(cancelled.decision === 'off' && !cancelled.checked && !(await runtime(page)).hasDevice, 'cancelling the confirm for Remember records off', cancelled);
   await dropKeyring(page);
   await page.goto(ORIGIN + '/about/', { waitUntil: 'load' });
   await openAdvanced(page);
@@ -1755,7 +1770,81 @@ check('the no-passkey setup sheet starts Remember checked for a device unlock an
   const st = await runtime(page);
   const ui = await rememberUi(page);
   assert(!st.hasDevice && ui.decision === 'off' && !ui.pending && !ui.checked, 'the uncheck is recorded and Remember stays off', { hasDevice: st.hasDevice, ui });
+  const cleared = await page.evaluate((k) => { MentriaIdentity.clearVault(); return localStorage.getItem(k); }, LOCAL_IDENTITY);
+  assert(cleared === null, 'clearing the identity clears its device-local settings', cleared);
   clean_(rig);
+});
+
+check('a legacy switch-off clears a pending Remember', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  const { tools, code } = await seedSilentLink(page);
+  assert((await rememberUi(page)).pending, 'seed: Remember is pending');
+  await tools.close();
+  await setSwitch(page, false);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'the old device key opens the identity with the switch off');
+  await waitVisible(page, '#about-identity-device', 15000);
+  assert(await page.$eval('#about-identity-device', (el) => el.checked), 'seed: the old Remember toggle shows on');
+  await page.click('#about-identity-device');
+  await until(() => readJson(page, IDENTITY).then((v) => !v.device), 15000, 'the old device unlock turns off');
+  await until(() => rememberUi(page).then((u) => u.decision === 'off'), 10000, 'the old toggle records off');
+  await setSwitch(page, true);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the identity opens from the keyring again');
+  await page.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
+  await waitVisible(page, '#about-identity-card-slot .m-unlock', 15000);
+  await cardCode(page, '#about-identity-card-slot', code);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the card opens the identity');
+  await sleep(1200);
+  const st = await runtime(page);
+  const ui = await rememberUi(page);
+  assert(!st.hasDevice && !ui.pending && !ui.checked, 'Remember stays off after the card unlock', { hasDevice: st.hasDevice, ui });
+  clean_(rig);
+  clean_(rigs.get(tools));
+});
+
+check('Comms turns a pending Remember on at its next card unlock', async () => {
+  await fresh(false);
+  const page = await open('/comms/', { auth: true });
+  const rig = rigs.get(page);
+  await commsOnboard(page, 'Pending Pia');
+  await waitVisible(page, '#comms-onboard-done', 40000);
+  await page.click('#comms-onboard-continue');
+  await waitVisible(page, '#comms-id-on');
+  const fp = await fingerprint(page);
+  await page.evaluate(() => MentriaIdentity.setDeviceUnlock(true));
+  await until(() => deviceWrapKept(page), 10000, 'seed: device key stored');
+  const secret = await identityBytes(page);
+  await setSwitch(page, true);
+  const tools = await open('/tools/');
+  const code = await tools.evaluate(async (u, b) => {
+    const m = await import(u);
+    await m.ready();
+    const made = await m.create({});
+    if (!m.confirmCode(made.code.replace(/-/g, '').slice(-4))) throw new Error('code not confirmed');
+    await m.link('identity', new Uint8Array(b));
+    return made.code;
+  }, RUNTIME, secret);
+  await page.bringToFront();
+  await page.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+  await waitVisible(page, '#comms-id-on', 30000);
+  await until(() => page.evaluate((k) => (JSON.parse(localStorage.getItem(k) || 'null') || {}).rememberPending === true, LOCAL_IDENTITY), 10000, 'Comms marks Remember pending');
+  assert(!(await runtime(page)).hasDevice, 'seed: the keyring does not remember this device yet');
+  await tools.close();
+  await lockAndWaitReload(page);
+  await waitVisible(page, '#comms-id-card-slot .m-unlock', 20000);
+  await cardCode(page, '#comms-id-card-slot', code);
+  await waitVisible(page, '#comms-id-on', 30000);
+  await until(() => runtime(page).then((st) => st.hasDevice === true), 20000, 'Remember this device turns on after the Comms card unlock');
+  const l = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null') || {}, LOCAL_IDENTITY);
+  assert(!l.rememberPending && l.remember === 'on', 'the pending flag clears and on is recorded', l);
+  assert(await fingerprint(page) === fp, 'the same Comms identity');
+  clean_(rig);
+  clean_(rigs.get(tools));
 });
 
 check('production build never loads the runtime', async () => {

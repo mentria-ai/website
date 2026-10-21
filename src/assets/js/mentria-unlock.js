@@ -56,9 +56,10 @@ function saveLocal(patch) {
   return next;
 }
 
-function clearManualLock() {
+function clearManualLock(epoch) {
   const l = local();
   if (!Object.prototype.hasOwnProperty.call(l, 'manualLock')) return;
+  if (typeof l.manualLock === 'number' && l.manualLock > epoch) return;
   delete l.manualLock;
   lsSet(LOCAL_KEY, JSON.stringify(l));
 }
@@ -141,6 +142,11 @@ async function idb(store, mode, fn) {
 const idbGet = (store, key) => idb(store, 'readonly', (s) => s.get(key));
 const idbPut = (store, key, value) => idb(store, 'readwrite', (s) => s.put(value, key));
 const idbDel = (store, key) => idb(store, 'readwrite', (s) => s.delete(key));
+const idbDelIf = (store, key, test) => idb(store, 'readwrite', (s) => {
+  const g = s.get(key);
+  g.onsuccess = () => { if (test(g.result)) s.delete(key); };
+  return null;
+});
 
 function serial(fn) {
   const run = queue.then(fn, fn);
@@ -380,20 +386,26 @@ async function openSession(bytes, rec, silent) {
   await decidedFirst();
   await verifyRoot(rec, bytes);
   const root = await rootKeyFrom(bytes);
-  await serial(async () => {
+  const live = await serial(async () => {
     const epoch = readEpoch();
-    await idbPut('session', 'current', { epoch, openedAt: Date.now(), kcv: rec.kcv, root });
+    const openedAt = Date.now();
+    await idbPut('session', 'current', { epoch, openedAt, kcv: rec.kcv, root });
     mem.root = root;
     mem.bytes = silent ? null : new Uint8Array(bytes);
     mem.kcv = rec.kcv;
     mem.epoch = epoch;
-  });
-  if (!sessionLive()) {
+    if (sessionLive() && !(silent && manuallyLocked())) {
+      if (!silent) clearManualLock(epoch);
+      return true;
+    }
     drop();
+    try { await idbDelIf('session', 'current', (row) => isObj(row) && row.epoch === epoch && row.openedAt === openedAt); } catch (_) {}
+    return false;
+  });
+  if (!live) {
     notify(false);
     throw new Error('locked');
   }
-  if (!silent) clearManualLock();
   if (started) mark();
   post('unlock');
   touch(rec);
@@ -495,7 +507,7 @@ export function setEnabled(on) {
 
 export function ready() {
   if (bootP) return bootP.then(() => state());
-  if (!enabled() || !readRecord()) return Promise.resolve(state());
+  if (window.__mentriaRedirecting || !enabled() || !readRecord()) return Promise.resolve(state());
   let markDecided;
   decided = new Promise((resolve) => { markDecided = resolve; });
   bootP = boot(markDecided).catch(() => {
@@ -554,7 +566,9 @@ export async function create({ code, confirmed, deviceName } = {}) {
   try {
     await openSession(rootBytes, record);
   } catch (e) {
-    if (e && e.message === 'locked') {
+    const now = readRecord();
+    if (now && now.kcv !== record.kcv) throw new Error('exists');
+    if (now && e && e.message === 'locked') {
       mem.code = text;
       mem.codeSalt = record.wraps.recovery.salt;
       return { code: text };
@@ -704,6 +718,7 @@ export async function addPasskey(label) {
 export async function removePasskey(id) {
   const rec = need();
   if (!sessionLive()) throw new Error('locked');
+  if (!hasRootBytes()) throw new Error('confirm-needed');
   const at = iso();
   let hit = false;
   rec.wraps.prf = rec.wraps.prf.map((e) => {
@@ -723,6 +738,7 @@ export async function setPassphrase(pass) {
   const rec = need();
   if (pass == null || pass === '') {
     if (!sessionLive()) throw new Error('locked');
+    if (!hasRootBytes()) throw new Error('confirm-needed');
     if (!livePass(rec.wraps.pass)) return;
     const at = iso();
     rec.wraps.pass = { removed: at };

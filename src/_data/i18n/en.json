@@ -1455,7 +1455,10 @@
       "next_label": "next:",
       "add_secret_bad_chars": "Secret has invalid characters: {chars}. Base32 uses only A–Z and 2–7 — check for 0/O, 1/I/L, 8/B look-alikes.",
       "autolock_label": "auto-lock",
-      "autolock_off": "off"
+      "autolock_off": "off",
+      "create_lede": "Create your vault. Your one unlock opens it.",
+      "linked_missing": "This vault opens with a one unlock that isn't on this device. Restore a backup that includes it, or sync with a device that has it.",
+      "backup_gate_lede_code": "TOTP secrets can't be recovered if you lose this device. Download a backup now. It's protected by your recovery code."
     },
     "exif": {
       "aria_drop": "Image dropzone",

@@ -10,6 +10,7 @@ eleventyComputed:
   title: "{{ 'tools.totp.title' | t }}"
   description: "{{ 'tools.totp.lede' | t }}"
 localeReload: true
+unlockTool: true
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">totp</span></p>
@@ -29,8 +30,18 @@ localeReload: true
   <span id="totp-copy-hint" class="sr-only">{{ "tool.totp.copy_code" | t }}</span>
 
   <div class="totp-locked" id="totp-locked" hidden>
-    <h2 class="totp-locked__h">{{ "tool.totp.locked_title" | t }}</h2>
+    <h2 class="totp-locked__h" id="totp-locked-h">{{ "tool.totp.locked_title" | t }}</h2>
     <p class="totp-locked__p" id="totp-locked-lede">{{ "tool.totp.locked_lede_setup" | t }}</p>
+    {%- if releaseTag == "beta" %}
+    <div class="totp-link" id="totp-link-note" hidden>
+      <p class="totp-link__h">{{ "unlock.link_title" | t }}</p>
+      <p class="totp-link__p">{{ "unlock.link_body" | t }}</p>
+    </div>
+    <div class="totp-ring-card" id="totp-ring-card" hidden></div>
+    <div class="totp-create" id="totp-create" hidden>
+      <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-create-btn">{{ "tool.totp.setup_button" | t }}</button>
+    </div>
+    {%- endif %}
 
     <div class="totp-setup" id="totp-setup" hidden>
       <label class="totp-field">
@@ -58,12 +69,19 @@ localeReload: true
   </div>
 
   <div class="totp-vault" id="totp-vault" hidden>
+    {%- if releaseTag == "beta" %}
+    <div class="totp-link totp-link--panel" id="totp-link-panel" hidden>
+      <p class="totp-link__h">{{ "unlock.link_title" | t }}</p>
+      <div class="totp-link__card" id="totp-link-card"></div>
+      <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-link-later">{{ "unlock.not_now" | t }}</button>
+    </div>
+    {%- endif %}
     <div class="totp-toolbar">
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-add-btn">+ {{ "tool.totp.add_button" | t }}</button>
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-prf-enroll-btn" hidden>{{ "tool.totp.enroll_prf" | t }}</button>
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-backup-btn">{{ "tool.totp.backup_button" | t }}</button>
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-lock-btn">{{ "tool.totp.lock_button" | t }}</button>
-      <span class="totp-autolock">
+      <span class="totp-autolock" id="totp-autolock">
         <span class="totp-autolock__label">{{ "tool.totp.autolock_label" | t }}</span>
         <div class="m-seg totp-autolock__seg" id="totp-autolock-seg">
           <button type="button" data-value="5">5m</button>
@@ -169,7 +187,7 @@ localeReload: true
     <div class="totp-modal__card m-modal__card">
       <h3 class="totp-modal__h" id="totp-backup-title">{{ "tool.totp.backup_gate_title" | t }}</h3>
       <p class="totp-modal__p" id="totp-backup-lede">{{ "tool.totp.backup_gate_lede" | t }}</p>
-      <label class="totp-field">
+      <label class="totp-field" id="totp-backup-pass-field">
         <span>{{ "tool.totp.backup_pass_label" | t }}</span>
         <input type="password" id="totp-backup-pass" autocomplete="new-password" minlength="8" aria-describedby="totp-backup-err">
       </label>
@@ -270,6 +288,14 @@ localeReload: true
   .totp-scanner { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
   .totp-scanner__video { width: 100%; aspect-ratio: 1; background: #000; border: 1px solid var(--syn-cyan, #67e8f9); border-radius: 6px; object-fit: cover; }
   .totp-scanner__note { font-family: var(--font-mono); font-size: 11px; color: var(--syn-amber, #f7b015); margin: 0; }
+
+  .totp-link { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--term-border); border-radius: var(--radius-md, 6px); }
+  .totp-link--panel { gap: 10px; width: 100%; max-width: 480px; box-sizing: border-box; margin: 0 auto 12px; }
+  .totp-link--panel > .totp-btn { align-self: flex-start; }
+  .totp-link__h { margin: 0; font-family: var(--font-mono); font-size: 12px; color: var(--accent, #6ef3c5); }
+  .totp-link__p { margin: 0; font-size: 12px; line-height: 1.5; color: var(--term-muted); }
+  .totp-create { display: flex; flex-direction: column; }
+  #totp-backup-pass-field[hidden] { display: none; }
 </style>
 
 <script>
@@ -331,7 +357,11 @@ localeReload: true
     import_done:              {{ ('tool.totp.import_done'              | t) | dump | safe }},
     import_invalid:           {{ ('tool.totp.import_invalid'           | t) | dump | safe }},
     export_label:             {{ ('tool.totp.export_label'             | t) | dump | safe }},
-    export_hides:             {{ ('tool.totp.export_hides'             | t) | dump | safe }}
+    export_hides:             {{ ('tool.totp.export_hides'             | t) | dump | safe }},
+    create_lede:              {{ ('tool.totp.create_lede'              | t) | dump | safe }},
+    linked_missing:           {{ ('tool.totp.linked_missing'           | t) | dump | safe }},
+    backup_gate_lede_code:    {{ ('tool.totp.backup_gate_lede_code'    | t) | dump | safe }},
+    link_failed:              {{ ('unlock.err_other'                   | t) | dump | safe }}
   };
 
   function b64uEnc(bytes) {
@@ -594,8 +624,13 @@ localeReload: true
     accounts: [],
     timer: null,
     hiddenAt: null,
-    lastActivity: Date.now()
+    lastActivity: Date.now(),
+    mode: null
   };
+
+  const RING_URL = '/assets/js/mentria-unlock.js';
+  const RING_UI_URL = '/assets/js/mentria-unlock-ui.js';
+  const ring = { on: false, mod: null, ui: null, chain: Promise.resolve(), cardP: null, linkP: null, raw: null, busy: 0, declined: false };
 
   const AUTOLOCK_KEY = 'autolock_min';
   function autolockMinutes() {
@@ -604,6 +639,7 @@ localeReload: true
     return (v === 5 || v === 15) ? v : 5;
   }
   function maybeAutoLock() {
+    if (state.mode === 'linked') return false;
     const mins = autolockMinutes();
     if (!mins || !state.masterKey) return false;
     const now = Date.now();
@@ -680,6 +716,264 @@ localeReload: true
     }
   }
 
+  function keyringWanted() {
+    if (document.documentElement.dataset.release !== 'beta') return false;
+    try {
+      const l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
+      return !!l && l.enabled === true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function keyringStart() {
+    try {
+      const mods = await Promise.all([import(RING_URL), import(RING_UI_URL)]);
+      if (!mods[0].enabled()) return false;
+      ring.mod = mods[0];
+      ring.ui = mods[1];
+      await ring.mod.ready();
+      ring.on = true;
+      ring.mod.onChange(onRingChange);
+      return true;
+    } catch (_) {
+      ring.on = false;
+      return false;
+    }
+  }
+
+  function onRingChange(s) {
+    if (!s.unlocked && state.mode === 'linked') { lock(); return; }
+    if (!state.masterKey && !ring.busy) route();
+  }
+
+  function isLinked(s) {
+    return (s || ring.mod.state()).linked.indexOf('totp') >= 0;
+  }
+
+  function route() {
+    ring.chain = ring.chain.then(routeNow).catch(() => {});
+    return ring.chain;
+  }
+
+  async function routeNow() {
+    if (state.masterKey) return;
+    const s = ring.mod.state();
+    const v = state.vault;
+    if (!v) {
+      if (s.setUp && !s.unlocked) showRing('card');
+      else if (!s.setUp && ring.declined) showRing('setup');
+      else showRing('create');
+      return;
+    }
+    const linked = isLinked(s);
+    if (linked && !s.unlocked) { showRing('card'); return; }
+    if (linked && await openLinked()) return;
+    if (state.masterKey) return;
+    if (v.pass || v.prf) showRing(linked ? 'old' : 'link');
+    else showRing('missing');
+  }
+
+  function showRing(kind) {
+    showLocked();
+    const card = kind === 'card';
+    const old = kind === 'link' || kind === 'old' || kind === 'setup';
+    $('totp-locked-h').hidden = card;
+    $('totp-locked-lede').hidden = card;
+    $('totp-link-note').hidden = kind !== 'link';
+    $('totp-create').hidden = kind !== 'create';
+    $('totp-ring-card').hidden = !card;
+    if (!old) {
+      $('totp-setup').hidden = true;
+      $('totp-unlock').hidden = true;
+    }
+    if (kind === 'create') $('totp-locked-lede').textContent = COPY.create_lede;
+    if (kind === 'missing') $('totp-locked-lede').textContent = COPY.linked_missing;
+    if (card) mountRingCard(); else dropRingCard();
+  }
+
+  function mountRingCard() {
+    if (ring.cardP) return;
+    ring.cardP = ring.ui.mountCard($('totp-ring-card'), { onUnlocked: () => { route(); } }).catch(() => {
+      ring.cardP = null;
+      const v = state.vault;
+      if (v && (v.pass || v.prf) && !state.masterKey) showRing('old');
+      return null;
+    });
+  }
+
+  function dropRingCard() {
+    const p = ring.cardP;
+    if (!p) return;
+    ring.cardP = null;
+    p.then((c) => { if (c) c.destroy(); });
+  }
+
+  async function openLinked() {
+    let bytes = null;
+    try { bytes = await ring.mod.secret('totp'); } catch (_) { bytes = null; }
+    if (!bytes || state.masterKey) return !!state.masterKey;
+    try {
+      state.masterKey = await importRaw(bytes);
+      await decryptSecrets();
+    } catch (_) {
+      state.masterKey = null;
+      state.accounts = [];
+      return false;
+    }
+    state.mode = 'linked';
+    setStatus('', null);
+    showVault();
+    retire().catch(() => {});
+    return true;
+  }
+
+  async function createLinked() {
+    const existing = loadVault();
+    if (existing) {
+      state.vault = existing;
+      return;
+    }
+    let bytes = await ring.mod.secret('totp');
+    if (!bytes) {
+      bytes = crypto.getRandomValues(new Uint8Array(32));
+      await ring.mod.link('totp', bytes);
+    }
+    const key = await importRaw(bytes);
+    const secrets = await encryptWith(key, new TextEncoder().encode('[]'));
+    state.vault = { v: 2, linked: true, secrets };
+    saveVault(state.vault);
+    state.masterKey = key;
+    state.accounts = [];
+    state.mode = 'linked';
+    setStatus('', null);
+    showVault();
+  }
+
+  async function createFlow() {
+    const btn = $('totp-create-btn');
+    btn.disabled = true;
+    ring.busy++;
+    try {
+      if (!ring.mod.state().setUp) {
+        const bytes = crypto.getRandomValues(new Uint8Array(32));
+        await ring.ui.showSetup({ service: 'totp', secret: bytes });
+        const now = ring.mod.state();
+        if (!now.setUp) { ring.declined = true; return; }
+        if (!now.unlocked) return;
+      } else if (!ring.mod.state().unlocked) {
+        return;
+      }
+      await createLinked();
+    } catch (_) {
+      setStatus(COPY.link_failed, 'err');
+    } finally {
+      ring.busy--;
+      btn.disabled = false;
+      if (!state.masterKey) route();
+    }
+  }
+
+  async function afterLegacy(bytes, pass) {
+    state.mode = 'legacy';
+    const s = ring.mod.state();
+    if (!bytes || isLinked(s)) return;
+    ring.raw = bytes;
+    if (s.unlocked) { await linkLegacy(); return; }
+    if (s.setUp) { showLinkPanel(); return; }
+    ring.busy++;
+    let ok = false;
+    try {
+      ok = await ring.ui.showSetup({ service: 'totp', secret: bytes, knownPassphrase: pass || undefined });
+    } catch (_) {
+      ok = false;
+    } finally {
+      ring.busy--;
+    }
+    if (!state.masterKey) { ring.raw = null; route(); return; }
+    const now = ring.mod.state();
+    if (isLinked(now)) { becameLinked(); return; }
+    if (!ok && now.setUp && now.unlocked) { await linkLegacy(); return; }
+    ring.raw = null;
+  }
+
+  function sameBytes(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
+  }
+
+  async function linkLegacy() {
+    const bytes = ring.raw;
+    if (!bytes || !state.masterKey) return;
+    try {
+      const have = await ring.mod.secret('totp');
+      if (have) {
+        ring.raw = null;
+        hideLinkPanel();
+        if (sameBytes(have, bytes)) becameLinked();
+        return;
+      }
+      await ring.mod.link('totp', bytes);
+    } catch (_) {
+      setStatus(COPY.link_failed, 'err');
+      return;
+    }
+    becameLinked();
+  }
+
+  function becameLinked() {
+    ring.raw = null;
+    hideLinkPanel();
+    if (!state.masterKey) return;
+    state.mode = 'linked';
+    applyMode();
+  }
+
+  function showLinkPanel() {
+    const panel = $('totp-link-panel');
+    if (!panel || ring.linkP) return;
+    panel.hidden = false;
+    ring.linkP = ring.ui.mountCard($('totp-link-card'), { onUnlocked: () => { linkLegacy(); } }).catch(() => {
+      hideLinkPanel();
+      return null;
+    });
+  }
+
+  function hideLinkPanel() {
+    const panel = $('totp-link-panel');
+    if (panel) panel.hidden = true;
+    const p = ring.linkP;
+    ring.linkP = null;
+    if (p) p.then((c) => { if (c) c.destroy(); });
+  }
+
+  async function retire() {
+    const v = state.vault;
+    if (!ring.on || state.mode !== 'linked' || !v) return;
+    const r = ring.mod.retirement('totp');
+    if (!r || !r.ready) return;
+    const credId = v.prf && typeof v.prf.cred_id === 'string' ? v.prf.cred_id : null;
+    if (v.pass || v.prf) {
+      if (JSON.stringify(loadVault()) !== JSON.stringify(v)) return;
+      const next = Object.assign({}, v, { v: 2, linked: true });
+      delete next.pass;
+      delete next.prf;
+      if (!saveVault(next)) return;
+      state.vault = next;
+    }
+    if (credId && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
+      try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: credId }); } catch (_) {}
+    }
+    await ring.mod.markRetired('totp');
+  }
+
+  function applyMode() {
+    const linked = state.mode === 'linked';
+    $('totp-prf-enroll-btn').hidden = linked || !!state.vault.prf || !prfSupported;
+    $('totp-autolock').hidden = linked;
+  }
+
   let clockOffset = 0;
   let clockChecked = false;
   function nowMs() { return Date.now() + clockOffset; }
@@ -713,7 +1007,8 @@ localeReload: true
   function showVault() {
     $('totp-locked').hidden = true;
     $('totp-vault').hidden = false;
-    $('totp-prf-enroll-btn').hidden = !!state.vault.prf || !prfSupported;
+    applyMode();
+    if (ring.on) dropRingCard();
     renderList();
     if (!state.timer) state.timer = setInterval(tick, 1000);
     tick();
@@ -762,9 +1057,16 @@ localeReload: true
     if (typeof exportModalReady !== 'undefined' && exportModalReady) closeExport();
     state.masterKey = null;
     state.accounts = [];
+    state.mode = null;
     lastCodes.clear();
     $('totp-list').replaceChildren();
-    showLocked();
+    if (ring.on) {
+      ring.raw = null;
+      hideLinkPanel();
+      route();
+    } else {
+      showLocked();
+    }
     setStatus('', null);
   }
 
@@ -880,6 +1182,7 @@ localeReload: true
     const masterBytes = await decryptWith(wrapKey, { iv: state.vault.pass.iv, ct: state.vault.pass.wrap });
     state.masterKey = await importRaw(masterBytes);
     await decryptSecrets();
+    return masterBytes;
   }
   async function unlockWithPrf() {
     if (!state.vault || !state.vault.prf) throw new Error('no prf');
@@ -890,6 +1193,7 @@ localeReload: true
     const masterBytes = await decryptWith(wrapKey, { iv: state.vault.prf.iv, ct: state.vault.prf.wrap });
     state.masterKey = await importRaw(masterBytes);
     await decryptSecrets();
+    return masterBytes;
   }
 
   async function setupVault(pass) {
@@ -1116,10 +1420,11 @@ localeReload: true
     if (!pass) return;
     $('totp-unlock-btn').disabled = true;
     try {
-      await unlockWithPassphrase(pass);
+      const raw = await unlockWithPassphrase(pass);
       $('totp-unlock-pass').value = '';
       setStatus('', null);
       showVault();
+      if (ring.on) afterLegacy(raw, pass).catch(() => {});
     } catch (err) {
       setStatus(COPY.unlock_failed, 'err');
     } finally {
@@ -1130,9 +1435,10 @@ localeReload: true
   $('totp-prf-btn').addEventListener('click', async () => {
     $('totp-prf-btn').disabled = true;
     try {
-      await unlockWithPrf();
+      const raw = await unlockWithPrf();
       setStatus('', null);
       showVault();
+      if (ring.on) afterLegacy(raw, null).catch(() => {});
     } catch (err) {
       setStatus(COPY.prf_unsupported, 'err');
     } finally {
@@ -1152,7 +1458,17 @@ localeReload: true
     }
   });
 
-  $('totp-lock-btn').addEventListener('click', () => { lock(); });
+  $('totp-lock-btn').addEventListener('click', () => {
+    if (state.mode === 'linked' && ring.ui) {
+      const done = () => { if (state.mode === 'linked') lock(); };
+      ring.ui.lockNow().then(done, done);
+      return;
+    }
+    lock();
+  });
+
+  if ($('totp-create-btn')) $('totp-create-btn').addEventListener('click', () => { if (ring.on) createFlow(); });
+  if ($('totp-link-later')) $('totp-link-later').addEventListener('click', () => { ring.raw = null; hideLinkPanel(); });
 
   (function initAutolockSeg() {
     const seg = $('totp-autolock-seg');
@@ -1350,6 +1666,13 @@ localeReload: true
   function openExport(acc) {
     exportAcc = acc;
     $('totp-export-title').textContent = COPY.export_label.replace(/{name}/g, ((acc.issuer ? acc.issuer + ' ' : '') + (acc.account || '')).trim());
+    if (state.mode === 'linked') {
+      $('totp-export-pass').value = '';
+      $('totp-export-err').textContent = '';
+      exportModal.open();
+      revealExport();
+      return;
+    }
     $('totp-export-gate').hidden = false;
     $('totp-export-reveal').hidden = true;
     $('totp-export-prf').hidden = !(state.vault && state.vault.prf && prfSupported);
@@ -1432,15 +1755,30 @@ localeReload: true
   new MutationObserver(() => { if ($('totp-export-modal').hidden && exportAcc) closeExport(); })
     .observe($('totp-export-modal'), { attributes: true, attributeFilter: ['hidden'] });
 
+  let backupUnsaved = false;
   function openBackupModal(mode) {
     const unsaved = mode === 'unsaved';
+    const code = state.mode === 'linked';
+    backupUnsaved = unsaved;
     $('totp-backup-title').textContent = unsaved ? COPY.backup_unsaved_title : COPY.backup_gate_title;
-    $('totp-backup-lede').textContent = unsaved ? COPY.backup_unsaved_lede : COPY.backup_gate_lede;
+    $('totp-backup-lede').textContent = unsaved ? COPY.backup_unsaved_lede : (code ? COPY.backup_gate_lede_code : COPY.backup_gate_lede);
     $('totp-backup-confirm-btn').textContent = unsaved ? COPY.backup_button : COPY.backup_gate_confirm;
+    $('totp-backup-pass-field').hidden = code;
     $('totp-backup-pass').value = '';
     $('totp-backup-err').textContent = '';
     backupModal.open();
+    (code ? $('totp-backup-confirm-btn') : $('totp-backup-pass')).focus();
+  }
+
+  async function backupSecret(pass) {
+    if (state.mode !== 'linked' || !$('totp-backup-pass-field').hidden) return pass;
+    let key = null;
+    try { key = await ring.mod.backupKey(); } catch (_) { key = null; }
+    if (key) return { keyring: key };
+    $('totp-backup-pass-field').hidden = false;
+    if (!backupUnsaved) $('totp-backup-lede').textContent = COPY.backup_gate_lede;
     $('totp-backup-pass').focus();
+    return null;
   }
 
   $('totp-backup-pass').addEventListener('input', () => { $('totp-backup-err').textContent = ''; });
@@ -1450,17 +1788,23 @@ localeReload: true
     backupErr.textContent = '';
     if (!window.MentriaBackup) { backupErr.textContent = 'backup library not loaded'; return; }
     const pass = $('totp-backup-pass').value;
-    if (!pass || pass.length < 8) { backupErr.textContent = COPY.setup_strength_too_short; $('totp-backup-pass').focus(); return; }
+    const byCode = state.mode === 'linked' && $('totp-backup-pass-field').hidden;
+    if (!byCode && (!pass || pass.length < 8)) { backupErr.textContent = COPY.setup_strength_too_short; $('totp-backup-pass').focus(); return; }
     $('totp-backup-confirm-btn').disabled = true;
     try {
+      const secret = await backupSecret(pass);
+      if (!secret) return;
       const next = pendingAdd ? state.accounts.concat(pendingAdd) : state.accounts;
       let vaultForBackup = state.vault;
       if (pendingAdd) {
         const tempEnv = await encryptWith(state.masterKey, new TextEncoder().encode(JSON.stringify(next)));
         vaultForBackup = Object.assign({}, state.vault, { secrets: tempEnv });
       }
-      const payload = { version: 1, exportedAt: new Date().toISOString(), store: { 'totp.vault': JSON.stringify(vaultForBackup) }, legacy: {} };
-      const env = await window.MentriaBackup.encryptBackup(payload, pass);
+      const store = { 'totp.vault': JSON.stringify(vaultForBackup) };
+      const record = state.mode === 'linked' ? window.MentriaStore.get('keyring', 'vault') : null;
+      if (record) store['keyring.vault'] = JSON.stringify(record);
+      const payload = { version: 1, exportedAt: new Date().toISOString(), store, legacy: {} };
+      const env = await window.MentriaBackup.encryptBackup(payload, secret);
       window.MentriaBackup.downloadBackupJson(env, 'mentria-totp-backup');
       if (pendingAdd) {
         state.accounts = next;
@@ -1515,6 +1859,10 @@ localeReload: true
     if (!window.MentriaStore) { setStatus('storage unavailable', 'err'); return; }
     state.vault = loadVault();
     if (storageTrouble() === 'blocked') showUnsaved('blocked');
+    if (keyringWanted()) {
+      keyringStart().then((on) => { if (on) route(); else showLocked(); });
+      return;
+    }
     showLocked();
   }
 
@@ -1530,7 +1878,10 @@ localeReload: true
     const next = loadVault();
     if (!next) { acceptExternalDelete(); return; }
     state.vault = next;
-    if (!state.masterKey) return;
+    if (!state.masterKey) {
+      if (ring.on && !ring.busy) route();
+      return;
+    }
     try {
       await decryptSecrets();
       renderList();

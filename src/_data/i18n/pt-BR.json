@@ -1455,7 +1455,10 @@
       "next_label": "próximo:",
       "add_secret_bad_chars": "O segredo tem caracteres inválidos: {chars}. Base32 usa apenas A–Z e 2–7 — verifique confusões como 0/O, 1/I/L, 8/B.",
       "autolock_label": "bloqueio auto",
-      "autolock_off": "não"
+      "autolock_off": "não",
+      "create_lede": "Crie seu cofre. Seu desbloqueio único o abre.",
+      "linked_missing": "Este cofre abre com um desbloqueio único que não está neste dispositivo. Restaure um backup que o inclua ou sincronize com um dispositivo que o tenha.",
+      "backup_gate_lede_code": "Segredos TOTP não podem ser recuperados se você perder este dispositivo. Baixe um backup agora. Ele é protegido pelo seu código de recuperação."
     },
     "exif": {
       "aria_drop": "Área para soltar imagens",

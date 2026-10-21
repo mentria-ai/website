@@ -1455,7 +1455,10 @@
       "next_label": "suivant :",
       "add_secret_bad_chars": "Le secret contient des caractères non valides : {chars}. Le Base32 n'utilise que A–Z et 2–7 — attention aux confusions 0/O, 1/I/L, 8/B.",
       "autolock_label": "verrou auto",
-      "autolock_off": "off"
+      "autolock_off": "off",
+      "create_lede": "Créez votre coffre. Votre déverrouillage unique l'ouvre.",
+      "linked_missing": "Ce coffre s'ouvre avec un déverrouillage unique qui n'est pas sur cet appareil. Restaurez une sauvegarde qui le contient, ou synchronisez avec un appareil qui l'a.",
+      "backup_gate_lede_code": "Les secrets TOTP ne peuvent pas être récupérés si vous perdez cet appareil. Téléchargez une sauvegarde maintenant. Elle est protégée par votre code de récupération."
     },
     "exif": {
       "aria_drop": "Zone de dépôt d’image",

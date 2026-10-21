@@ -6203,6 +6203,7 @@
     "skip_for_now": "Skip for now",
     "passkey_skipped": "No passkey was added.",
     "passkey_unusable": "Your device saved a passkey Mentria can't use. You can delete it in your device's settings.",
+    "not_saved": "Your passphrase wasn't saved. You can add it later in settings.",
     "code_save_first": "Save this code first. It replaced your old one.",
     "passphrase_too_short_keep": "Your old passphrase is shorter than 12 characters, so it won't carry over.",
     "services": {

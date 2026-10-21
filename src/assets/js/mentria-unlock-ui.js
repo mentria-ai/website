@@ -1023,13 +1023,21 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     if (prog.passkey) toast(T.passkey_added);
   }
 
-  function addKey(add) {
+  function relabel(btn, key) {
+    const span = btn.querySelector('[data-uk]');
+    if (!span) return;
+    span.dataset.uk = key;
+    paint(btn, T);
+  }
+
+  function addKey(add, skip) {
     const p = (async () => addPasskey(''))();
     const reached = !!(window.PublicKeyCredential && navigator.credentials);
     busyOn(true);
     p.then(() => {
       prog.passkey = true;
       seal(add);
+      relabel(skip, 'done');
       return wrapUp(true);
     }, async (err) => {
       busyOn(false);
@@ -1057,13 +1065,13 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     msg = parts.msg;
     const add = button('add-passkey', 'add_passkey', true, 'submit');
     if (prog.passkey) seal(add);
-    const skip = button('skip-passkey', 'skip_for_now', false);
+    const skip = button('skip-passkey', prog.passkey ? 'done' : 'skip_for_now', false);
     skip.addEventListener('click', () => { if (!busy && !closed) wrapUp(false); });
     const keep = keepPassOption();
     const form = assemble(parts, 'passkey_step_title', 'passkey_gloss', [keep ? keep.wrap : null, shortNote()], [add, skip]);
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      if (!busy && !closed && !prog.passkey) addKey(add);
+      if (!busy && !closed && !prog.passkey) addKey(add, skip);
     });
     show(form);
   }
@@ -1127,12 +1135,14 @@ async function setup({ service, secret, knownCode, verifyCode, knownPassphrase }
     onDismiss: () => {
       if (busy) return false;
       const lastStep = stepName === 'passkey' || stepName === 'no-prf';
-      if (lastStep && !closeTried && keepPass && draft.keepPass && !prog.pass) {
+      const keeping = lastStep && keepPass && draft.keepPass && !prog.pass;
+      if (keeping && !closeTried) {
         closeTried = true;
         wrapUp(false, true);
         return false;
       }
       finish(complete());
+      if (keeping) toast(T.not_saved);
       return true;
     }
   });

@@ -6203,6 +6203,7 @@
     "skip_for_now": "今はスキップ",
     "passkey_skipped": "パスキーは追加されませんでした。",
     "passkey_unusable": "デバイスに Mentria で使えないパスキーが保存されました。デバイスの設定から削除できます。",
+    "not_saved": "パスフレーズは保存されませんでした。あとで設定から追加できます。",
     "code_save_first": "先にこのコードを保存してください。以前のコードは置き換えられました。",
     "passphrase_too_short_keep": "以前のパスフレーズは 12 文字未満のため、引き継がれません。",
     "services": {

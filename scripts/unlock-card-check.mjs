@@ -1244,6 +1244,7 @@ check('closing the passkey or no-PRF step keeps the passphrase, never Remember',
     return out;
   }, KEPT);
   assert(res.ok && res.v === true && !r.layer && r.st.hasPass && r.st.passkeys === 0 && r.unlocked, 'Escape on the passkey step keeps the passphrase', { res, r });
+  assert(await page.evaluate((w) => (document.querySelector('.m-toast') || {}).textContent !== w, EN.not_saved), 'a close that saved the passphrase shows no not-saved toast');
   assert(busy, 'the sheet stays open with the saving line while the passphrase is kept', during);
 
   await clean();
@@ -1271,7 +1272,54 @@ check('closing the passkey or no-PRF step keeps the passphrase, never Remember',
   const res3 = await settled(p3, 10000);
   const s3 = await p3.evaluate(() => window.__m.state());
   assert(res3.ok && res3.v === true && !s3.hasPass, 'with keep my passphrase off, closing sets no passphrase', { res3, s3 });
+  await sleep(300);
+  assert(await p3.evaluate((w) => (document.querySelector('.m-toast') || {}).textContent !== w, EN.not_saved), 'closing with keep my passphrase off shows no not-saved toast');
 });
+
+check('a failed save on close: the next close closes and says so', async () => {
+  const errors = [];
+  for (const back of [false, true]) {
+    try {
+      await failedSaveClose(back);
+    } catch (e) {
+      errors.push(String(e && e.message || e).slice(0, 260));
+    }
+  }
+  assert(!errors.length, errors.join(' || '));
+});
+
+async function failedSaveClose(back) {
+  await clean();
+  const page = await open('/beta/unlock/', back ? NO_CLOSE_WATCHER : undefined);
+  await enableOnLab(page);
+  await modules(page);
+  await page.evaluate(() => {
+    const S = window.MentriaStore;
+    const set = S.set.bind(S);
+    S.set = (ns, key, v, o) => (ns === 'keyring' && v && v.wraps && v.wraps.pass && typeof v.wraps.pass.ct === 'string' ? false : set(ns, key, v, o));
+  });
+  await setupTo(page, "{ knownCode: '" + KNOWN + "', knownPassphrase: '" + KEPT + "' }", 'passkey');
+  const how = back ? 'Back' : 'Escape';
+  const pre = await page.evaluate(() => ({ keep: document.querySelector('.m-ulayer input[name="keep-pass"]').checked, cw: typeof window.CloseWatcher }));
+  assert(pre.keep && (!back || pre.cw === 'undefined'), 'keep my passphrase is on', pre);
+  const close = () => (back ? page.evaluate(() => history.back()) : page.keyboard.press('Escape'));
+  await close();
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_storage);
+  await sleep(400);
+  const mid = await page.evaluate(() => ({ layer: !!document.querySelector('.m-ulayer'), r: window.__r, hasPass: window.__m.state().hasPass, path: location.pathname, toast: (document.querySelector('.m-toast') || {}).textContent || '' }));
+  assert(mid.layer && mid.r === null && !mid.hasPass && mid.path === '/beta/unlock/', how + ': the first close shows the error and keeps the sheet', mid);
+  assert(mid.toast !== EN.not_saved, how + ': no not-saved toast while the sheet stays', mid);
+  await close();
+  const closed = await until(() => page.evaluate(() => !!window.__r && !document.querySelector('.m-ulayer')), 10000);
+  const after2 = await page.evaluate(() => ({ layer: !!document.querySelector('.m-ulayer'), r: window.__r, msg: (document.querySelector('.m-ulayer .m-usheet__msg') || {}).textContent || null }));
+  assert(closed, how + ': the second close closes the sheet instead of trying again', after2);
+  const res = await settled(page, 1000);
+  await sleep(400);
+  const end = await page.evaluate(() => ({ layer: !!document.querySelector('.m-ulayer'), hasPass: window.__m.state().hasPass, setUp: window.__m.state().setUp, path: location.pathname }));
+  assert(res.ok && res.v === true && !end.layer && !end.hasPass && end.setUp && end.path === '/beta/unlock/', how + ': the second close closes without the passphrase and the page stays', { res, end });
+  const told = await until(() => page.evaluate((w) => (document.querySelector('.m-toast') || {}).textContent === w, EN.not_saved), 3000);
+  assert(EN.not_saved && told, how + ': the second close says the passphrase was not saved', await page.evaluate(() => (document.querySelector('.m-toast') || {}).textContent));
+}
 
 check('Add a passkey stays off once a passkey was added', async () => {
   await clean();
@@ -1304,10 +1352,12 @@ check('Add a passkey stays off once a passkey was added', async () => {
   await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.err_storage);
   const mid = await page.evaluate(() => {
     const d = document.querySelector('.m-ulayer [role="dialog"]');
-    return { step: d.querySelector('[data-step]').dataset.step, add: d.querySelector('[data-act="add-passkey"]').disabled, skip: d.querySelector('[data-act="skip-passkey"]').disabled, passkeys: window.__m.state().passkeys, r: window.__r };
+    const ghost = d.querySelector('[data-act="skip-passkey"]');
+    return { step: d.querySelector('[data-step]').dataset.step, add: d.querySelector('[data-act="add-passkey"]').disabled, skip: ghost.disabled, label: ghost.textContent.trim(), ghost: ghost.classList.contains('m-unlock__btn--ghost'), passkeys: window.__m.state().passkeys, r: window.__r };
   });
   assert(mid.step === 'passkey' && mid.passkeys === 1 && mid.r === null, 'the passkey is added and the passphrase error stays on the step', mid);
-  assert(mid.add === true && mid.skip === false, 'Add a passkey is off once a passkey was added; Skip for now stays', mid);
+  assert(mid.add === true && mid.skip === false, 'Add a passkey is off once a passkey was added; the ghost button stays', mid);
+  assert(mid.label === EN.done && mid.ghost, 'the ghost button reads Done once a passkey was added', mid);
   const f = await focusInfo(page);
   assert(f.inside, 'focus stays on a control in the sheet', f);
   await page.evaluate(() => document.querySelector('.m-ulayer form[data-step="passkey"]').requestSubmit());

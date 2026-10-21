@@ -994,6 +994,23 @@ check('recording a peer keeps a keyring write that landed after its read', async
   assert.ok(rec.services.notes && rec.services.notes.id === extra.id, 'the write that landed after the read is kept');
 });
 
+check('the fold-in line names no other device and the unused code key is gone', async () => {
+  const OLD = {
+    en: 'You have another one unlock from a different device — bring it in',
+    es: 'Tienes otro desbloqueo único de otro dispositivo: inclúyelo aquí',
+    fr: 'Vous avez un autre déverrouillage unique venant d\'un autre appareil : intégrez-le',
+    ja: '別のデバイスのひとつのロック解除があります。こちらにまとめましょう',
+    'pt-BR': 'Você tem outro desbloqueio único de outro dispositivo: traga-o para cá'
+  };
+  const all = Object.fromEntries(Object.keys(OLD).map((l) => [l, JSON.parse(readFileSync(join(repo, 'src/_data/i18n/' + l + '.json'), 'utf8')).unlock]));
+  assert.equal(all.en.foldin_line, 'Some locked things use another one unlock kept on this device. Bring them in.');
+  for (const [l, u] of Object.entries(all)) {
+    assert.ok(typeof u.foldin_line === 'string' && u.foldin_line && u.foldin_line !== OLD[l], l + ' foldin_line reworded');
+    if (l !== 'en') assert.notEqual(u.foldin_line, all.en.foldin_line, l + ' foldin_line translated');
+    assert.ok(!('code_save_first' in u), l + ' has no code_save_first');
+  }
+});
+
 check('both keyring prompts say what stops opening until it is brought back in', async () => {
   const en = enNow();
   for (const text of [en.about.sync_vault_keyring, en.common.restore_keyring_vault]) {

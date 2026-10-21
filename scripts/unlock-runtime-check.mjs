@@ -704,7 +704,7 @@ check('create rolls back when the session write fails', async () => {
   assert(r.e && r.record === null && r.setUp === false, 'create rejects and removes the record', r);
   assert(!(r.tomb || '').includes('keyring.vault'), 'rollback writes no sync tombstone', r.tomb);
   assert(Array.isArray(r.kept) && r.kept.length === 1 && typeof r.kept[0] === 'string', 'the rolled-back record is kept on the side', r.kept);
-  assert(r.again && JSON.stringify(r.others) === JSON.stringify(r.kept), 'a later create works and lists the kept one', r);
+  assert(r.again && JSON.stringify(r.others) === '[]', 'a later create works and never offers the kept one, which holds nothing to bring in', r);
 });
 
 check('unlock rejects when another tab locks during the write', async () => {
@@ -1734,8 +1734,10 @@ check('fold in another keyring with its recovery code', async () => {
     out.lockedFold = await err(() => m.foldIn(F.kcvA, { code: codeA }));
     await m.unlockWithCode(F.codeB);
     out.list = m.others();
-    localStorage.setItem('mentria.keyring.others', JSON.stringify([rd(), JSON.parse(localStorage.getItem('mentria.keyring.others'))[0], { junk: 1 }]));
+    const empty = (await C.createRecord({ code: C.newRecoveryCode(), deviceId: 'dev-e' })).record;
+    localStorage.setItem('mentria.keyring.others', JSON.stringify([rd(), JSON.parse(localStorage.getItem('mentria.keyring.others'))[0], { junk: 1 }, empty]));
     out.listMixed = m.others().map((o) => o.kcv);
+    out.emptyKept = JSON.parse(localStorage.getItem('mentria.keyring.others')).some((x) => x && x.kcv === empty.kcv);
     out.wrong = await err(() => m.foldIn(F.kcvA, { code: F.codeB }));
     out.unknown = await err(() => m.foldIn('nope', { code: codeA }));
     out.noPass = await err(() => m.foldIn(F.kcvA, { passphrase: 'a long passphrase here' }));
@@ -1764,10 +1766,10 @@ check('fold in another keyring with its recovery code', async () => {
   }, codeA);
   assert(r.locked === false && r.lockedFold === 'locked', 'foldIn needs the current session', r);
   assert(r.list.length === 1 && r.list[0].kcv !== undefined && JSON.stringify(r.list[0].services) === '["identity","notes"]' && typeof r.list[0].created === 'string', 'others() lists the stashed keyring and what it holds', r.list);
-  assert(r.listMixed.length === 1, 'others() skips the current keyring and unreadable entries', r.listMixed);
-  assert(r.wrong === 'bad-code' && r.unknown === 'no-keyring' && r.noPass === 'no-pass' && r.noMethod === 'bad-input' && r.stashed === 3, 'failed fold-ins keep the stash', r);
+  assert(r.listMixed.length === 1 && r.emptyKept, 'others() skips the current keyring, unreadable entries and a keyring with nothing to bring in (which stays stored)', r);
+  assert(r.wrong === 'bad-code' && r.unknown === 'no-keyring' && r.noPass === 'no-pass' && r.noMethod === 'bad-input' && r.stashed === 4, 'failed fold-ins keep the stash', r);
   assert(r.fold === 'no error' && r.after.length === 0, 'the fold-in succeeds and others() is empty', r);
-  assert(Array.isArray(r.stash) && r.stash.length === 2 && r.stash[0].kcv === r.kcvB && r.stash[1].junk === 1, 'only the folded entry leaves the stash', r.stash);
+  assert(Array.isArray(r.stash) && r.stash.length === 3 && r.stash[0].kcv === r.kcvB && r.stash[1].junk === 1 && r.stash[2].kcv !== r.kcvB, 'only the folded entry leaves the stash', r.stash);
   assert(JSON.stringify(r.notes) === JSON.stringify(r.wantNotes) && r.notesCur && r.older, 'the other keyring\'s notes secrets join as prior entries with their ids, the current one stays', r);
   assert(r.identity && r.fresh && r.totp && JSON.stringify(r.linked) === '["identity","totp","notes"]', 'a service only the other keyring had becomes current here', r);
   assert(r.valid && r.again === 'no-keyring' && r.peer, 'the record stays valid and merges with another device on this keyring', r);
@@ -1975,18 +1977,58 @@ check('a stuck database times out and Lock still tells other pages', async () =>
   const r = await a.evaluate(() => new Promise((res) => {
     const t = Date.now();
     window.__m.lock().then(() => res({ ok: true, ms: Date.now() - t }), (e) => res({ ok: false, e: e.message, ms: Date.now() - t }));
-    setTimeout(() => res({ ok: false, e: 'hung', ms: Date.now() - t }), 12000);
+    setTimeout(() => res({ ok: false, e: 'hung', ms: Date.now() - t }), 25000);
   }));
   assert(await a.evaluate(() => window.__h.state) === 'held', 'harness: a database open is stuck');
-  assert(r.ok && r.ms < 10000, 'Lock settles after the database timeout', r);
+  assert(r.ok && r.ms < 22000, 'Lock settles after the database timeout', r);
   assert(await until(() => b.evaluate(() => window.__bc.includes('lock')), 3000), 'the other page hears the lock');
   await a.evaluate(() => { window.__h2 = window.__hold('mentria-unlock.js'); });
   const u = await a.evaluate((code) => new Promise((res) => {
     const t = Date.now();
     window.__m.unlockWithCode(code).then(() => res({ ok: true }), (e) => res({ ok: false, e: e.message, ms: Date.now() - t }));
-    setTimeout(() => res({ ok: false, e: 'hung' }), 12000);
+    setTimeout(() => res({ ok: false, e: 'hung' }), 25000);
   }), c);
-  assert(!u.ok && u.e === 'idb' && u.ms < 10000, 'an unlock with a stuck database rejects with idb', u);
+  assert(!u.ok && u.e === 'idb' && u.ms >= 9500 && u.ms < 22000, 'an unlock with a stuck database open rejects with idb after the 10 s open timeout', u);
+});
+
+check('a slow database open gets 10 s; a stuck transaction gives up after 4 s', async () => {
+  await clean();
+  const a = await open('/beta/unlock/');
+  await enableOnLab(a);
+  await createOnLab(a);
+  await runtime(a);
+  await installHold(a);
+  await a.evaluate(() => {
+    window.__h = window.__hold('mentria-unlock.js');
+    setTimeout(() => window.__h.release(), 6000);
+  });
+  const slow = await a.evaluate(() => new Promise((res) => {
+    const t = Date.now();
+    window.__m.lock().then(() => res({ ok: true, ms: Date.now() - t }), (e) => res({ ok: false, e: e.message, ms: Date.now() - t }));
+    setTimeout(() => res({ ok: false, e: 'hung' }), 20000);
+  }));
+  assert(slow.ok && slow.ms >= 5500, 'Lock waits for a slow open', slow);
+  assert(await sessionRow(a) === null, 'the slow open still deletes the session row', await sessionRow(a));
+  await a.evaluate(() => window.__m.unlockWithCode(document.getElementById('unlock-code').textContent.trim()));
+  assert(await sessionRow(a), 'setup: unlocked again with a session row');
+  await a.evaluate(() => new Promise((res, rej) => {
+    const q = indexedDB.open('mentria-keyring', 1);
+    q.onerror = () => rej(q.error);
+    q.onsuccess = () => {
+      const st = q.result.transaction('session', 'readwrite').objectStore('session');
+      window.__spin = true;
+      const spin = () => { if (window.__spin) st.get('nothing').onsuccess = spin; };
+      spin();
+      res();
+    };
+  }));
+  const stuck = await a.evaluate(() => new Promise((res) => {
+    const t = Date.now();
+    window.__m.lock().then(() => res({ ok: true, ms: Date.now() - t }), (e) => res({ ok: false, e: e.message, ms: Date.now() - t }));
+    setTimeout(() => res({ ok: false, e: 'hung' }), 20000);
+  }));
+  await a.evaluate(() => { window.__spin = false; });
+  assert(stuck.ok && stuck.ms >= 3500 && stuck.ms < 9000, 'a stuck transaction gives up after about 4 s and Lock settles', stuck);
 });
 
 check('create waits for the keyring write lock', async () => {

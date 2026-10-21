@@ -24,6 +24,7 @@ const SEEN_MS = 15000;
 const DAY_MS = 86400000;
 const PROBE_MS = 2000;
 const IDB_MS = 4000;
+const IDB_OPEN_MS = 10000;
 
 const mem = { root: null, bytes: null, kcv: null, epoch: null, code: null, codeSalt: null, pending: null, hasDevice: false, prf: 'unknown', launch: null };
 const diag = { liveOther: null, marker: null, seenAgeMs: null, wasDiscarded: null, mobile: null, navType: null, standalone: null, decision: null };
@@ -209,32 +210,31 @@ function openDb() {
   });
 }
 
-function idb(store, mode, fn) {
-  let dead = false;
-  let tx = null;
-  const run = (async () => {
-    const db = await openDb();
-    try {
-      if (dead) throw new Error('idb');
-      return await new Promise((resolve, reject) => {
-        tx = db.transaction(store, mode);
-        const req = fn(tx.objectStore(store));
-        tx.oncomplete = () => resolve(req ? req.result : undefined);
-        tx.onerror = () => reject(tx.error || new Error('idb'));
-        tx.onabort = () => reject(tx.error || new Error('idb'));
-      });
-    } finally {
-      db.close();
-    }
-  })();
+function timed(p, ms, onLate) {
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => {
-      dead = true;
-      try { if (tx) tx.abort(); } catch (_) {}
+      onLate();
       reject(new Error('idb'));
-    }, IDB_MS);
-    run.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+    }, ms);
+    p.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
   });
+}
+
+async function idb(store, mode, fn) {
+  const opening = openDb();
+  const db = await timed(opening, IDB_OPEN_MS, () => { opening.then((d) => d.close(), () => {}); });
+  let tx = null;
+  try {
+    return await timed(new Promise((resolve, reject) => {
+      tx = db.transaction(store, mode);
+      const req = fn(tx.objectStore(store));
+      tx.oncomplete = () => resolve(req ? req.result : undefined);
+      tx.onerror = () => reject(tx.error || new Error('idb'));
+      tx.onabort = () => reject(tx.error || new Error('idb'));
+    }), IDB_MS, () => { try { if (tx) tx.abort(); } catch (_) {} });
+  } finally {
+    db.close();
+  }
 }
 
 const idbGet = (store, key) => idb(store, 'readonly', (s) => s.get(key));
@@ -989,11 +989,13 @@ export function others() {
   const out = [];
   for (const o of readOthers()) {
     if (!isRecord(o) || (rec && o.kcv === rec.kcv) || seen.has(o.kcv)) continue;
+    const services = SERVICES.filter((n) => listServiceEntries(o, n).length > 0);
+    if (!services.length) continue;
     seen.add(o.kcv);
     out.push({
       kcv: o.kcv,
       created: typeof o.created === 'string' ? o.created : null,
-      services: SERVICES.filter((n) => listServiceEntries(o, n).length > 0),
+      services,
       passkeys: livePasskeys(o).length
     });
   }

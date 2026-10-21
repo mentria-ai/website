@@ -85,7 +85,7 @@ unlockTool: true
     <p class="comms__lock-h" id="comms-lock-title">{{ 'tool.comms.lock.title' | t }}</p>
     <p class="comms__lock-waiting" id="comms-lock-waiting" hidden></p>
     <div class="comms__card-slot" id="comms-id-card-slot" hidden></div>
-    <button class="comms__btn comms__btn--ghost" id="comms-lock-old" type="button" aria-expanded="false" hidden>{{ 'tool.comms.lock.old_unlock' | t }}</button>
+    <button class="comms__btn comms__btn--ghost" id="comms-lock-old" type="button" aria-expanded="false" aria-controls="comms-id-passkey comms-lock-alt" hidden>{{ 'tool.comms.lock.old_unlock' | t }}</button>
     <button class="comms__btn comms__btn--big" id="comms-id-passkey" type="button" hidden>{{ 'tool.comms.lock.unlock' | t }}</button>
     <details class="comms__lock-alt" id="comms-lock-alt">
       <summary>{{ 'tool.comms.lock.use_code' | t }}</summary>
@@ -2755,6 +2755,8 @@ let krNoDeviceHere = false;
 let krLinkMode = null;
 let krOldOpen = false;
 let krDeclined = false;
+let krEpoch = null;
+let krLateP = null;
 const KR_WAIT_MS = 5000;
 const krSlots = new Map();
 const krUi = () => {
@@ -2765,6 +2767,14 @@ const krOn = () => { try { return !!KR && KR.enabled(); } catch (_) { return fal
 const krHas = () => { try { return krOn() && KR.state().linked.includes('identity'); } catch (_) { return false; } };
 const krLinked = () => krOn() && !krBroken && !!window.MentriaIdentity && MentriaIdentity.isSetUp() && krHas();
 const krHasOld = () => !!window.MentriaIdentity && (MentriaIdentity.hasPassphrase() || MentriaIdentity.hasPasskey());
+const krRingHasIdentity = () => {
+  try {
+    const rec = window.MentriaStore ? MentriaStore.get('keyring', 'vault') : null;
+    const e = rec && rec.services && typeof rec.services === 'object' ? rec.services.identity : null;
+    return !!(e && typeof e === 'object' && e.ct);
+  } catch (_) { return false; }
+};
+const krTyping = () => !!els.idPass.value || els.lockAlt.contains(document.activeElement);
 const krErr = (e) => {
   const m = e && (e.name && e.name !== 'Error' && /Error$/.test(e.name) ? e.name : e.message);
   if (m === 'locked') return;
@@ -2832,7 +2842,7 @@ const refreshIdUI = () => {
   const oldHere = cardMode && krHasOld();
   if (!oldHere) krOldOpen = false;
   els.idPasskey.hidden = (cardMode && !krOldOpen) || state !== 'locked' || !(window.MentriaIdentity && MentriaIdentity.hasPasskey());
-  els.lockAlt.open = state === 'locked' && !(window.MentriaIdentity && MentriaIdentity.hasPasskey());
+  els.lockAlt.open = state === 'locked' && (!(window.MentriaIdentity && MentriaIdentity.hasPasskey()) || (!!KR && krTyping()));
   if (KR) krRefreshUI(state, cardMode, oldHere);
   els.contacts.hidden = state !== 'unlocked';
   if (state !== 'unlocked') els.idCard.hidden = true;
@@ -3307,6 +3317,10 @@ const krLinkNow = async () => {
 const krChanged = (s) => {
   if (!KR) return;
   if (krOpened && !s.unlocked) { location.reload(); return; }
+  if (s.epoch !== krEpoch) {
+    if (krEpoch !== null) krBroken = false;
+    krEpoch = s.epoch;
+  }
   if (!s.unlocked) krSawLocked = true;
   if (krLinkMode === 'offer' && s.setUp) krLinkMode = 'card';
   const I = window.MentriaIdentity;
@@ -4098,6 +4112,7 @@ els.obCreate.addEventListener('click', async () => {
   els.obCreate.textContent = T.onboard.setting_up;
   try {
     if (KR_WANTED && bootUnlock) await bootUnlock;
+    if (KR_WANTED && !krOn() && krLateP && krRingHasIdentity() && !window.MentriaIdentity.isSetUp()) await krLateP;
     if (krOn() && !krDeclined) {
       if (!cryptoOk()) throw new Error('insecure-context');
       const made = await krCreateIdentity();
@@ -4214,6 +4229,7 @@ const krAttach = (mods) => {
   KR = mods[0];
   KRC = mods[1];
   krMigrateRemember();
+  krEpoch = KR.state().epoch;
   KR.onChange(krChanged);
   if (!KR.state().unlocked) krSawLocked = true;
 };
@@ -4221,6 +4237,7 @@ const krLate = async (start, fallback) => {
   const mods = await start;
   try { await fallback; } catch (_) {}
   if (!mods || KR) return;
+  if (krTyping()) krOldOpen = true;
   krAttach(mods);
   const I = window.MentriaIdentity;
   if (I && I.isUnlocked()) await krAfterLegacy({ auto: true, verify: true });
@@ -4238,7 +4255,7 @@ const krBootSteps = async () => {
     krPending = false;
     refreshIdUI();
     const fallback = legacyBoot();
-    krLate(start, fallback).catch(() => {});
+    krLateP = krLate(start, fallback).catch(() => {});
     return fallback;
   }
   if (!mods) {

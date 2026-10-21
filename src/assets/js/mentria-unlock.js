@@ -800,6 +800,8 @@ export async function link(name, bytes) {
   const rec = enabled() ? readRecord() : null;
   if (!rec || !sessionLive()) throw new Error('locked');
   if (!SERVICES.includes(name)) throw new Error('bad-service');
+  const given = bytesOf(bytes);
+  if (given && given.every((x) => x === 0)) throw new Error('bad-input');
   const root = mem.root;
   const tag = sessionTag();
   const live = () => {

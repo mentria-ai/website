@@ -790,7 +790,7 @@ const LEGACY_OF = {
   }
 };
 
-const RETIRES = { identity: ['pass', 'prf', 'device', 'deviceWrap'], totp: ['pass', 'prf'], notes: ['salt', 'credId', 'oldSalt', 'oldCred'], finance: ['pass', 'recovery', 'prf', 'device'] };
+const RETIRES = { identity: ['pass', 'prf', 'device', 'deviceWrap'], totp: ['pass', 'prf'], notes: [], finance: ['pass', 'recovery', 'prf', 'device'] };
 const DEVICE_FIELDS = { identity: ['device', 'deviceWrap'], finance: ['device'] };
 
 const LINK_ALLOWED = {
@@ -1400,9 +1400,34 @@ async function stepLater(G) {
   return 'old unlock (' + where.how + ') then Later: service opened the old way; ' + (changes.length ? 'only ' + changes.join(', ') + ' changed' : 'storage byte-identical') + '; since the new build arrived: ' + (since.length ? since.join(', ') : 'nothing') + ' (old screens seen: ' + seen.screens.join(' ') + ')';
 }
 
+async function freshTab(G) {
+  const { rig } = G;
+  const old = rig.page;
+  const page = await rig.context.newPage();
+  await page.setViewport({ width: 1280, height: 900 });
+  const cdp = await page.createCDPSession();
+  await cdp.send('WebAuthn.enable', { enableUI: false });
+  const { authenticatorId } = await cdp.send('WebAuthn.addVirtualAuthenticator', { options: AUTHENTICATOR });
+  const { credentials: list } = await rig.cdp.send('WebAuthn.getCredentials', { authenticatorId: rig.authenticatorId });
+  for (const credential of list) await cdp.send('WebAuthn.addCredential', { authenticatorId, credential });
+  page.on('pageerror', (e) => rig.pageErrors.push(String((e && e.message) || e).slice(0, 300)));
+  page.on('dialog', async (d) => {
+    rig.nativeDialogs.push(d.type() + ': ' + d.message().slice(0, 200));
+    try { if (d.type() === 'beforeunload') await d.accept(); else await d.dismiss(); } catch (_) {}
+  });
+  await page.evaluateOnNewDocument(PROBE);
+  rigs.set(page, rig);
+  rig.page = page;
+  rig.cdp = cdp;
+  rig.authenticatorId = authenticatorId;
+  await old.close();
+  return list.length;
+}
+
 async function stepLink(G) {
   const { rig, plan } = G;
   const svc = SVC[plan.svc];
+  const moved = svc.name === 'finance' && plan.later === 'device' ? await freshTab(G) : null;
   await visit(rig, svc);
   if (plan.link !== 'device') await linkLineShown(rig, svc);
   await svc.oldUnlock(rig, plan.link, G);
@@ -1445,7 +1470,7 @@ async function stepLink(G) {
   G.linkNotes = linked;
   G.unlockSecret = plan.unlock === 'pass' ? G.secret(plan.unlockSecret) : G.code;
   const recNow = await recordOf(rig.page);
-  return 'old unlock (' + plan.link + ') then setup (' + s.code + ' code' + (s.passkey ? ', keyring passkey' : '') + (s.keepPass ? ', passphrase kept' : '') + '); ' + note + '; linked: ' + G.linkNotes.join(', ') + '; record services: ' + Object.keys(recNow.services).sort().join(', ');
+  return (moved !== null ? 'in a fresh tab (' + moved + ' passkey(s) moved), ' : '') + 'old unlock (' + plan.link + ') then setup (' + s.code + ' code' + (s.passkey ? ', keyring passkey' : '') + (s.keepPass ? ', passphrase kept' : '') + '); ' + note + '; linked: ' + G.linkNotes.join(', ') + '; record services: ' + Object.keys(recNow.services).sort().join(', ');
 }
 
 async function stepKept(G) {
@@ -1633,7 +1658,7 @@ async function stepOldDevice(G) {
 const RETIRE_ALLOWED = {
   identity: [/^ls:mentria\.(store|meta)\.identity\.vault /, /^idb:mentria-identity\/keys\/"device-wrap" removed/],
   totp: [/^ls:mentria\.(store|meta)\.totp\.vault /],
-  notes: [/^ls:mentria\.(store|meta)\.quick_notes\.(salt|cred_id) removed/, /^ls:mentria-qn-(salt|cred) removed/, /^ls:mentria-sync-tombstones /],
+  notes: [],
   finance: [/^idb:mentria-ext-finance\/meta\/"(wraps|seq)" changed/, /^idb:mentria-ext-finance\/pages\/"[^"]+" added/]
 };
 
@@ -1664,10 +1689,15 @@ async function stepRetire(G) {
     const gone = RETIRES[n].filter((k) => was[k] != null);
     const atLink = LEGACY_OF[n](G.legacySnap);
     const want = RETIRES[n].filter((k) => atLink[k] != null && !(handedOver(G, n) && DEVICE_FIELDS[n].includes(k) && was[k] == null));
-    assert(want.length > 0 && J(gone) === J(want), n + ': the wraps deleted are exactly the legacy wraps present at link time', { gone, want });
+    if (n === 'notes') {
+      assert(was.salt != null && was.credId != null && is.salt === was.salt && is.credId === was.credId, 'notes: retirement keeps quick_notes.salt and cred_id', { was, is });
+      assert(G.retiredAt && G.retiredAt.notes, 'notes are marked retired', G.retiredAt);
+    } else {
+      assert(want.length > 0 && J(gone) === J(want), n + ': the wraps deleted are exactly the legacy wraps present at link time', { gone, want });
+    }
     for (const k of RETIRES[n]) assert(is[k] == null, n + ' ' + k + ' is deleted', is);
     for (const k of Object.keys(was)) if (!RETIRES[n].includes(k)) assert(is[k] === was[k], n + ' ' + k + ' is kept', { was: was[k], is: is[k] });
-    notes.push(n + ' deleted ' + (gone.join(', ') || 'nothing (no legacy wraps)'));
+    notes.push(n === 'notes' ? 'notes kept salt and cred_id and are marked retired' : n + ' deleted ' + (gone.join(', ') || 'nothing (no legacy wraps)'));
   }
   if (G.linked.includes('identity')) {
     const v = parse(after.ls[VAULT_IDENTITY]);

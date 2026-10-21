@@ -1105,6 +1105,7 @@ check('retirement drops the old lock after 30 days', async () => {
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-card-slot .m-unlock', 15000);
   assert(!(await visible(page, '#about-identity-unlock')), 'no old unlock after retirement');
+  assert(!(await visible(page, '#about-identity-old')), 'no old-unlock disclosure after retirement');
   const n = await page.evaluate(() => window.__signals.length);
   assert(n === 0, 'retirement runs once', n);
   clean_(rig);
@@ -1633,6 +1634,10 @@ check('comms carries a remembered identity over to Remember this device', async 
   assert(JSON.stringify(Object.keys(after).sort()) === JSON.stringify(['kcv', 'linked', 'v']) && after.kcv === vault0.kcv && after.v === 3, 'retirement deletes the old device wrap with the others', after);
   await until(async () => !(await deviceWrapKept(page)), 10000, 'the old device key is deleted');
   assert((await runtime(page)).hasDevice === true, 'Remember this device stays on');
+  await lockAndWaitReload(page);
+  await waitVisible(page, '#comms-id-card-slot .m-unlock', 20000);
+  await sleep(400);
+  assert(!(await visible(page, '#comms-lock-old')) && !(await visible(page, '#comms-lock-alt')), 'no old-unlock disclosure once the old wraps are gone');
   clean_(rig);
 });
 
@@ -2062,6 +2067,7 @@ check('comms keeps the old unlock under the card and links through the card', as
   });
   assert(lockUi.old && lockUi.expanded === 'false' && !lockUi.pk && !lockUi.alt, 'the card shows with the old unlock folded under it', lockUi);
   assert(await text(page, '#comms-lock-old') === EN.tool.comms.lock.old_unlock, 'the disclosure says what it is');
+  assert(await page.$eval('#comms-lock-old', (b) => b.getAttribute('aria-controls')) === 'comms-id-passkey comms-lock-alt', 'the disclosure names what it opens');
   await shot(page, 'comms-old-folded', '.comms');
   await page.click('#comms-lock-old');
   await waitVisible(page, '#comms-id-passkey');
@@ -2450,6 +2456,211 @@ check('about offers to bring in another one unlock', async () => {
   clean_(rigs.get(tab2));
 });
 
+check('about shows the undo as done only after it finishes', async () => {
+  await fresh(false);
+  const seed = await open('/robots.txt');
+  await seed.evaluate(() => localStorage.setItem('mentria-sync-rescue', JSON.stringify({ v: 2, at: Date.now(), entries: { 'tools.fixb_undo': { raw: JSON.stringify({ u: 1 }), meta: null } } })));
+  await seed.close();
+  const page = await open('/about/');
+  const rig = rigs.get(page);
+  await waitVisible(page, '#about-rescue-btn', 20000);
+  await page.evaluate(() => {
+    const S = window.MentriaSync;
+    const real = S.restoreRescue;
+    window.__undo = { started: 0, finish: null };
+    S.restoreRescue = () => {
+      window.__undo.started++;
+      return new Promise((ok, no) => { window.__undo.finish = () => Promise.resolve(real()).then(ok, no); });
+    };
+  });
+  await page.click('#about-rescue-btn');
+  await answerDialog(page);
+  await until(() => page.evaluate(() => window.__undo.started === 1), 5000, 'the undo starts');
+  await sleep(500);
+  const mid = await page.evaluate(() => ({ status: document.getElementById('about-rescue-status').textContent.trim(), btn: !document.getElementById('about-rescue-btn').hidden }));
+  assert(!mid.status && mid.btn, 'the undo is not shown as done while it runs', mid);
+  await page.evaluate(() => window.__undo.finish());
+  await until(() => page.evaluate(() => !!document.getElementById('about-rescue-status').textContent.trim()), 5000, 'the done line after the undo finishes');
+  const done = await page.evaluate(() => ({ status: document.getElementById('about-rescue-status').textContent.trim(), btn: !document.getElementById('about-rescue-btn').hidden, value: localStorage.getItem('mentria.store.tools.fixb_undo') }));
+  assert(!done.btn && done.status.startsWith(EN.about.sync_rescue_done.split('{')[0].trim().slice(0, 12)) && JSON.parse(done.value).u === 1, 'the done line comes after the undo restored the data', done);
+  clean_(rig);
+});
+
+check('during the wait a keyring that names the identity is waited for, not set up again', async () => {
+  await fresh(true);
+  const page = await open('/about/', { auth: true });
+  const code = await aboutCreate(page, { passkey: false });
+  const ring0 = await keyringSecret(page);
+  await page.evaluate(() => window.MentriaStore.remove('identity', 'vault'));
+  await page.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
+  await closeAll();
+  const about = await open(null, { auth: true });
+  await holdRuntime(about, 7500, false);
+  await about.goto(ORIGIN + '/about/', { waitUntil: 'load' });
+  await about.evaluate(() => { document.getElementById('about-advanced').open = true; });
+  await sleep(6200);
+  const mid = await about.evaluate(() => ({ setup: document.getElementById('about-identity-setup').hidden, unlock: document.getElementById('about-identity-unlock').hidden, vault: localStorage.getItem('mentria.store.identity.vault') }));
+  assert(mid.setup && mid.unlock && mid.vault === null, 'About offers no setup of its own while the one unlock is loading', mid);
+  await waitVisible(about, '#about-identity-create', 15000);
+  await about.click('#about-identity-create');
+  await waitVisible(about, '#about-identity-card-slot .m-unlock', 15000);
+  await cardCode(about, '#about-identity-card-slot', code);
+  await until(() => about.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the identity comes back from the keyring');
+  assert(JSON.stringify(await identityBytes(about)) === JSON.stringify(ring0), 'the same identity');
+  clean_(rigs.get(about));
+  await fresh(true);
+  const comms = await open('/comms/', { auth: true });
+  await commsOnboard(comms, 'Wait Wes');
+  const ccode = await setupNew(comms, { passkey: false });
+  await waitVisible(comms, '#comms-id-on', 30000);
+  const fp = await fingerprint(comms);
+  await comms.evaluate(() => window.MentriaStore.remove('identity', 'vault'));
+  await lockAndWaitReload(comms);
+  await closeAll();
+  const c2 = await open(null, { auth: true });
+  await holdRuntime(c2, 7500, false);
+  await c2.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+  await commsOnboard(c2, 'Wait Wes');
+  await sleep(6500);
+  const cm = await c2.evaluate(() => ({ done: !!document.getElementById('comms-onboard-done').getClientRects().length, vault: localStorage.getItem('mentria.store.identity.vault'), code: document.getElementById('comms-onboard-code').textContent }));
+  assert(!cm.done && cm.vault === null && !cm.code, 'Comms makes no identity of its own while the one unlock is loading', cm);
+  await waitVisible(c2, '#comms-onboard-card .m-unlock', 15000);
+  await cardCode(c2, '#comms-onboard-card', ccode);
+  await waitVisible(c2, '#comms-id-on', 30000);
+  assert(await fingerprint(c2) === fp, 'Comms brings back the same identity from the keyring');
+  clean_(rigs.get(c2));
+});
+
+check('a broken keyring link is tried again after the next lock', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  await seedAboutPass(page);
+  await setSwitch(page, true);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-unlock');
+  await page.type('#about-identity-unlock-pass', PASSPHRASE);
+  await page.click('#about-identity-unlock-btn');
+  const code = await setupNew(page, { passkey: false });
+  await waitVisible(page, '#about-identity-keyring', 30000);
+  const mine = await identityBytes(page);
+  await page.evaluate(async (u, k) => {
+    const m = await import(u);
+    await m.link('identity', crypto.getRandomValues(new Uint8Array(32)));
+    const r = JSON.parse(localStorage.getItem(k));
+    delete r.services.identity.prior;
+    localStorage.setItem(k, JSON.stringify(r));
+  }, RUNTIME, KEYRING);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-unlock', 15000);
+  await sleep(500);
+  assert(!(await page.evaluate(() => MentriaIdentity.isUnlocked())), 'seed: the link does not open this vault, so the old unlock shows');
+  const tools = await open('/tools/');
+  await tools.evaluate(async (u, b) => {
+    const m = await import(u);
+    await m.ready();
+    await m.link('identity', new Uint8Array(b));
+    await m.lock();
+  }, RUNTIME, mine);
+  await waitVisible(page, '#about-identity-card-slot .m-unlock', 15000);
+  await tools.evaluate(async (u, c) => { const m = await import(u); await m.unlockWithCode(c); }, RUNTIME, code);
+  await waitVisible(page, '#about-identity-keyring', 20000);
+  assert(JSON.stringify(await identityBytes(page)) === JSON.stringify(mine), 'About opens the identity from the keyring again');
+  clean_(rig);
+  clean_(rigs.get(tools));
+  await fresh(false);
+  const comms = await open('/comms/', { auth: true });
+  const { code: ccode, fp } = await seedCommsLegacy(comms, 'Broken Bo');
+  await setSwitch(comms, true);
+  await comms.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+  await waitVisible(comms, '#comms-id-locked');
+  await comms.click('#comms-lock-alt summary');
+  await typeInto(comms, '#comms-id-pass', ccode);
+  await comms.click('#comms-id-unlock');
+  await setupKeep(comms, { passkey: false });
+  await waitVisible(comms, '#comms-id-on', 20000);
+  const cmine = await identityBytes(comms);
+  await comms.evaluate(async (u, k) => {
+    const m = await import(u);
+    await m.link('identity', crypto.getRandomValues(new Uint8Array(32)));
+    const r = JSON.parse(localStorage.getItem(k));
+    delete r.services.identity.prior;
+    localStorage.setItem(k, JSON.stringify(r));
+  }, RUNTIME, KEYRING);
+  await comms.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+  await waitVisible(comms, '#comms-id-locked', 15000);
+  await sleep(800);
+  const b0 = await comms.evaluate(() => ({ card: !!document.querySelector('#comms-id-card-slot .m-unlock'), alt: !!document.getElementById('comms-lock-alt').getClientRects().length }));
+  assert(!b0.card && b0.alt, 'seed: Comms shows the old unlock for a link that does not open it', b0);
+  const t2 = await open('/tools/');
+  await t2.evaluate(async (u, b) => {
+    const m = await import(u);
+    await m.ready();
+    await m.link('identity', new Uint8Array(b));
+    await m.lock();
+  }, RUNTIME, cmine);
+  await waitVisible(comms, '#comms-id-card-slot .m-unlock', 15000);
+  await t2.evaluate(async (u, c) => { const m = await import(u); await m.unlockWithCode(c); }, RUNTIME, ccode);
+  await waitVisible(comms, '#comms-id-on', 30000);
+  assert(await fingerprint(comms) === fp, 'Comms opens the same identity from the keyring');
+  await waitVisible(comms, '#comms-id-lock', 10000);
+  clean_(rigs.get(comms));
+  clean_(rigs.get(t2));
+});
+
+check('a late one unlock keeps a half-typed old passphrase on About and Comms', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  await seedAboutPass(page);
+  await setSwitch(page, true);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await waitVisible(page, '#about-identity-unlock');
+  await page.type('#about-identity-unlock-pass', PASSPHRASE);
+  await page.click('#about-identity-unlock-btn');
+  await setupNew(page, { passkey: false, keepPass: true });
+  await waitVisible(page, '#about-identity-keyring', 30000);
+  await page.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
+  await waitVisible(page, '#about-identity-card-slot .m-unlock', 15000);
+  await closeAll();
+  const about = await open(null, { auth: true });
+  await holdRuntime(about, 7500, false);
+  await about.goto(ORIGIN + '/about/', { waitUntil: 'load' });
+  await openAdvanced(about);
+  await waitVisible(about, '#about-identity-unlock-pass', 4000);
+  await about.type('#about-identity-unlock-pass', 'half');
+  await waitVisible(about, '#about-identity-card-slot .m-unlock', 15000);
+  const a = await about.evaluate(() => ({ shown: !!document.getElementById('about-identity-unlock').getClientRects().length, value: document.getElementById('about-identity-unlock-pass').value, expanded: document.getElementById('about-identity-old').getAttribute('aria-expanded') }));
+  assert(a.shown && a.value === 'half' && a.expanded === 'true', 'the old unlock stays open with what was typed', a);
+  clean_(rigs.get(about));
+  await fresh(false);
+  const comms = await open('/comms/', { auth: true });
+  const { code } = await seedCommsLegacy(comms, 'Late Lu');
+  await setSwitch(comms, true);
+  await comms.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+  await waitVisible(comms, '#comms-id-locked');
+  await comms.click('#comms-lock-alt summary');
+  await typeInto(comms, '#comms-id-pass', code);
+  await comms.click('#comms-id-unlock');
+  await setupKeep(comms, { passkey: false });
+  await waitVisible(comms, '#comms-id-on', 20000);
+  await lockAndWaitReload(comms);
+  await waitVisible(comms, '#comms-id-card-slot .m-unlock', 20000);
+  await closeAll();
+  const c2 = await open(null, { auth: true });
+  await holdRuntime(c2, 7500, false);
+  await c2.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+  await waitVisible(c2, '#comms-id-locked', 7000);
+  if (!(await visible(c2, '#comms-id-pass'))) await c2.click('#comms-lock-alt summary');
+  await c2.type('#comms-id-pass', 'half');
+  await waitVisible(c2, '#comms-id-card-slot .m-unlock', 15000);
+  const c = await c2.evaluate(() => ({ shown: !!document.getElementById('comms-id-pass').getClientRects().length, value: document.getElementById('comms-id-pass').value, expanded: document.getElementById('comms-lock-old').getAttribute('aria-expanded') }));
+  assert(c.shown && c.value === 'half' && c.expanded === 'true', 'Comms keeps the old unlock open with what was typed', c);
+  clean_(rigs.get(c2));
+});
+
 check('production build never loads the runtime', async () => {
   const prod = process.env.PROD;
   if (!prod) return 'skip';
@@ -2472,7 +2683,27 @@ check('production build never loads the runtime', async () => {
     }
     assert(!(await visible(about, '#about-identity-link')) && !(await visible(page, '#comms-id-lock')), 'no keyring controls');
     assert(!(await readJson(page, KEYRING)), 'no keyring record');
+    await about.evaluate(async () => {
+      const c = await import('/assets/js/mentria-unlock-core.js');
+      const { record } = await c.createRecord({ code: c.newRecoveryCode(), deviceId: 'dev-p', deviceName: 'Prod', app: '' });
+      window.MentriaStore.set('keyring', 'vault', record);
+    });
+    const lsAll = (p) => p.evaluate(() => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; });
+    const VOL = /^(mentria_seen|mentria_tool_usage|mentria_caps)/;
+    const before = await lsAll(about);
+    await page.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+    await waitVisible(page, '#comms-id-locked', 20000);
+    await about.goto(ORIGIN + '/about/', { waitUntil: 'load' });
+    await openAdvanced(about);
+    const totp = await open('/tools/totp/');
+    await sleep(1500);
+    const after = await lsAll(about);
+    const added = Object.keys(after).filter((k) => !(k in before) && !VOL.test(k));
+    const changed = Object.keys(before).filter((k) => /keyring|identity/.test(k) && before[k] !== after[k]);
+    assert(!added.length && !changed.length, 'About, Comms and TOTP write nothing new on a production build', { added, changed });
+    for (const p of [page, about, totp]) assert(!(await loaded(p, RUNTIME)) && !(await loaded(p, UI)), 'still no runtime or card request');
     clean_(rig);
+    clean_(rigs.get(totp));
   } finally {
     server.setRoot(BUILD);
   }

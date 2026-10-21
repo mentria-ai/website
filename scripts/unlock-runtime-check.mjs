@@ -1274,6 +1274,31 @@ check('link keeps the old secret under prior', async () => {
   assert(r.concurrent && r.valid, 'two links at once keep both secrets', r);
 });
 
+check('link refuses an all-zero secret', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await createOnLab(page);
+  await runtime(page);
+  const r = await page.evaluate(async () => {
+    const m = window.__m;
+    const raw0 = localStorage.getItem('mentria.store.keyring.vault');
+    const tries = [new Uint8Array(32), new ArrayBuffer(32), new Uint8Array(32).buffer];
+    const errs = [];
+    for (const t of tries) {
+      try { await m.link('totp', t); errs.push('linked'); } catch (e) { errs.push(e && e.message); }
+    }
+    const unchanged = localStorage.getItem('mentria.store.keyring.vault') === raw0;
+    const one = new Uint8Array(32);
+    one[31] = 1;
+    let ok = 'linked';
+    try { await m.link('totp', one); } catch (e) { ok = e && e.message; }
+    return { errs, unchanged, ok, linked: m.state().linked.includes('totp') };
+  });
+  assert(r.errs.every((e) => e === 'bad-input') && r.unchanged, 'an all-zero secret is refused with bad-input and nothing is written', r);
+  assert(r.ok === 'linked' && r.linked, 'a secret with any non-zero byte still links', r);
+});
+
 check('secrets() returns current then prior', async () => {
   await clean();
   const page = await open('/beta/unlock/');

@@ -524,6 +524,8 @@ async function switchOffFlow(prod) {
     await setSwitch(page, false);
   }
   r.requests.length = 0;
+  const lsAll = () => page.evaluate(() => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; });
+  const ls0 = await lsAll();
   await openTotp(page);
   const s3 = await screen(page);
   assert(s3.unlock && !s3.card && !s3.linkNote && !s3.layer, prod ? 'a production page keeps the old unlock even with the switch and a keyring' : 'with a keyring present but the switch off, the old unlock stays', s3);
@@ -531,6 +533,10 @@ async function switchOffFlow(prod) {
   assert(!r.requests.some((u) => u.includes('/assets/js/mentria-unlock')), 'the switch-off page never loads the one unlock', r.requests.filter((u) => u.includes('unlock')));
   const after = await readJson(page, VAULT);
   assert(JSON.stringify(after) === JSON.stringify(vault), 'the vault is unchanged');
+  const ls1 = await lsAll();
+  const added = Object.keys(ls1).filter((k) => !(k in ls0) && !/^(mentria_seen|mentria_tool_usage|mentria_caps)/.test(k));
+  const changed = Object.keys(ls0).filter((k) => /keyring|totp/.test(k) && ls0[k] !== ls1[k]);
+  assert(!added.length && !changed.length, 'opening TOTP writes nothing new', { added, changed });
   await done(r);
 }
 
@@ -975,8 +981,25 @@ check('a new vault reuses an existing totp link', async () => {
   await done(r);
 });
 
-check('a link that does not open the vault is never replaced', async () => {
-  const r = await rig('link not replaced');
+async function opensVault(page) {
+  return page.evaluate(async (u, k) => {
+    const m = await import(u);
+    const bytes = await m.secret('totp');
+    if (!bytes) return false;
+    const v = JSON.parse(localStorage.getItem(k));
+    const d = (s) => { const t = s.replace(/-/g, '+').replace(/_/g, '/'); const b = atob(t + '='.repeat((4 - (t.length % 4)) % 4)); return Uint8Array.from(b, (c) => c.charCodeAt(0)); };
+    try {
+      const key = await crypto.subtle.importKey('raw', bytes, { name: 'AES-GCM' }, false, ['decrypt']);
+      await crypto.subtle.decrypt({ name: 'AES-GCM', iv: d(v.secrets.iv) }, key, d(v.secrets.ct));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }, RUNTIME, VAULT);
+}
+
+check('an old unlock links over a key that does not open the vault', async () => {
+  const r = await rig('link over');
   const { page } = r;
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
   await setSwitch(page, true);
@@ -986,16 +1009,95 @@ check('a link that does not open the vault is never replaced', async () => {
   const entry = (await readJson(page, RECORD)).services.totp;
   await openTotp(page);
   const s0 = await screen(page);
-  assert(s0.unlock && !s0.linkNote && !s0.card, 'the old unlock stays when the link cannot open this vault', s0);
+  assert(s0.unlock && s0.linkNote && !s0.card, 'the old unlock offers to bring this vault in', s0);
   await typeInto(page, '#totp-unlock-pass', PASS);
   await press(page, '#totp-unlock-btn');
   await expectCodes(page, ACCOUNTS.slice(0, 1));
-  await sleep(800);
-  const s1 = await screen(page);
+  await until(async () => !(await screen(page)).autolock, 10000, 'the vault to join the one unlock');
   const after = (await readJson(page, RECORD)).services.totp;
-  assert(JSON.stringify(after) === JSON.stringify(entry), 'the existing link is kept', { entry, after });
-  assert(!(await readJson(page, VAULT)).kid, 'an unlinked vault gets no sync id');
-  assert(s1.autolock && !s1.layer && !s1.linkPanel, 'the vault works as today', s1);
+  assert(after.id !== entry.id && Array.isArray(after.prior) && after.prior.some((x) => x.id === entry.id), 'this vault\'s key is current and the other key stays under prior', { entry: entry.id, after: after.id });
+  assert(await opensVault(page), 'the current one unlock entry opens this vault');
+  const v = await readJson(page, VAULT);
+  assert(v.pass && v.kid, 'the old wrap stays and the vault gets its sync id', Object.keys(v));
+  await done(r);
+});
+
+check('a fold-in that made another device\'s TOTP key current still lets this vault link', async () => {
+  const r = await rig('link over fold-in', { authenticator: false });
+  const { page } = r;
+  await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
+  await setSwitch(page, true);
+  await openTotp(page);
+  const code = await makeKeyring(page);
+  const fold = await page.evaluate(async (u, k) => {
+    const m = await import(u);
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const codeB = C.newRecoveryCode();
+    const made = await C.createRecord({ code: codeB, deviceId: 'dev-b', deviceName: 'Other' });
+    const kb = await C.rootKeyFrom(made.rootBytes);
+    made.record.services.totp = await C.sealService(kb, 'totp', crypto.getRandomValues(new Uint8Array(32)), Date.now() - 5000);
+    localStorage.setItem('mentria.keyring.others', JSON.stringify([made.record]));
+    await m.foldIn(made.record.kcv, { code: codeB });
+    const rec = JSON.parse(localStorage.getItem(k));
+    return { other: made.record.services.totp.id, current: rec.services.totp ? rec.services.totp.id : null };
+  }, RUNTIME, RECORD);
+  assert(fold.current && fold.current === fold.other, 'seed: the fold-in made the other device\'s TOTP key current', fold);
+  assert(!(await opensVault(page)), 'seed: the current entry does not open this vault');
+  await openTotp(page);
+  const s0 = await screen(page);
+  assert(s0.unlock && s0.linkNote && !s0.card, 'the old unlock offers to bring this vault in', s0);
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await until(async () => !(await screen(page)).autolock, 10000, 'the vault to join the one unlock');
+  const rec = await readJson(page, RECORD);
+  assert(rec.services.totp.id !== fold.other && (rec.services.totp.prior || []).some((x) => x.id === fold.other), 'the other device\'s key stays under prior', rec.services.totp);
+  assert(await opensVault(page), 'the one unlock opens this vault');
+  await page.evaluateOnNewDocument(WATCH);
+  await page.reload({ waitUntil: 'load' });
+  await settle(page);
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  assert(!(await page.evaluate(() => window.__seen.locked)), 'a reload opens the vault with the one unlock and no screen');
+  await ringLock(page);
+  await until(async () => (await screen(page)).card, 10000, 'the card after a lock');
+  await cardUnlock(page, '#totp-ring-card', { code });
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await done(r);
+});
+
+check('a lock while the setup sheet is open still links the real key', async () => {
+  const r = await rig('lock during setup', { authenticator: false });
+  const { page } = r;
+  await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
+  await setSwitch(page, true);
+  await openTotp(page);
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await page.waitForSelector('.m-ulayer [data-step="intro"]', { timeout: 20000 });
+  await page.evaluate(() => { window.__realNow = Date.now; const real = Date.now; Date.now = () => real() + 3600000; });
+  await until(() => page.evaluate(() => document.getElementById('totp-vault').hidden), 8000, 'the vault to lock under the sheet');
+  await page.evaluate(() => { Date.now = window.__realNow; });
+  await finishSetup(page);
+  await until(async () => (await ringState(page)).linked.includes('totp'), 10000, 'totp linked');
+  assert(await opensVault(page), 'the linked key opens this vault, not zeros');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await done(r);
+});
+
+check('a late one unlock keeps a half-typed old passphrase', async () => {
+  const r = await rig('late keeps typing', { authenticator: false });
+  const { page } = r;
+  await legacyLinked(r);
+  await ringLock(page);
+  await until(async () => (await screen(page)).card, 10000, 'the card');
+  await delayRuntime(page, 7500);
+  await page.reload({ waitUntil: 'load' });
+  await until(async () => (await screen(page)).unlock, 9000, 'the old unlock after the wait');
+  await typeInto(page, '#totp-unlock-pass', 'half');
+  await until(async () => (await screen(page)).card, 12000, 'the card once the one unlock is ready');
+  const s = await screen(page);
+  const kept = await page.evaluate(() => ({ value: document.getElementById('totp-unlock-pass').value, expanded: document.getElementById('totp-old-btn').getAttribute('aria-expanded') }));
+  assert(s.unlock && s.oldBtn && kept.value === 'half' && kept.expanded === 'true', 'the old unlock stays open under the card with what was typed', { s, kept });
   await done(r);
 });
 

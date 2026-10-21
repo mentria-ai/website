@@ -751,6 +751,8 @@ unlockTool: true
     const late = await start;
     if (!late || ring.on) return;
     attachRing(late);
+    const typed = $('totp-unlock-pass');
+    if (typed && (document.activeElement === typed || typed.value)) ring.old = true;
     if (!state.masterKey) route();
     else if (state.mode !== 'linked') await adoptLinked();
   }
@@ -808,7 +810,7 @@ unlockTool: true
     if (linked && !s.unlocked) { showRing('card'); return; }
     if (linked && await openLinked()) return;
     if (state.masterKey) return;
-    if (v.pass || v.prf) showRing(linked ? 'old' : 'link');
+    if (v.pass || v.prf) showRing('link');
     else showRing('missing');
   }
 
@@ -949,19 +951,20 @@ unlockTool: true
     state.mode = 'legacy';
     const s = ring.mod.state();
     if (!bytes) return;
-    if (isLinked(s) && (s.unlocked || !s.setUp)) { bytes.fill(0); return; }
     dropRaw();
     ring.raw = bytes;
     if (s.unlocked) { await linkLegacy(); return; }
     if (s.setUp) { showLinkPanel(); return; }
     ring.busy++;
     let ok = false;
+    const secret = new Uint8Array(bytes);
     try {
-      ok = await ring.ui.showSetup({ service: 'totp', secret: bytes, knownPassphrase: pass || undefined });
+      ok = await ring.ui.showSetup({ service: 'totp', secret, knownPassphrase: pass || undefined });
     } catch (_) {
       ok = false;
     } finally {
       ring.busy--;
+      secret.fill(0);
     }
     if (!state.masterKey) { dropRaw(); route(); return; }
     const now = ring.mod.state();
@@ -985,13 +988,6 @@ unlockTool: true
       for (const c of have) c.bytes.fill(0);
       if (match) {
         becameLinked();
-        return;
-      }
-      const current = await ring.mod.secret('totp');
-      if (current) {
-        current.fill(0);
-        dropRaw();
-        hideLinkPanel();
         return;
       }
       await ring.mod.link('totp', bytes);

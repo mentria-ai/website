@@ -1187,8 +1187,9 @@ localeReload: true
             ? await window.mentriaConfirm(relabel('about.sync_rescue_confirm', COPY.rescueConfirm).replace('{areas}', areas), { ok: relabel('about.sync_rescue_button', COPY.rescueButton) })
             : false;
           if (!ok) return;
+          rescueBtn.disabled = true;
           try {
-            window.MentriaSync.restoreRescue();
+            await window.MentriaSync.restoreRescue();
             rescueBtn.hidden = true;
             rescueText.textContent = '';
             rescueStatus.textContent = relabel('about.sync_rescue_done', COPY.rescueDone).replace('{areas}', areas);
@@ -1196,6 +1197,8 @@ localeReload: true
             try { rescueStatus.focus({ preventScroll: true }); } catch (_) {}
           } catch (err) {
             rescueStatus.textContent = COPY.statusError + ': ' + (err && err.message || err);
+          } finally {
+            rescueBtn.disabled = false;
           }
         });
       });
@@ -1522,6 +1525,7 @@ localeReload: true
     var again = false;
     var oldOpen = false;
     var declined = false;
+    var ringEpoch = null;
 
     function waitFor(name, cb) {
       if (window[name]) return cb();
@@ -1562,6 +1566,21 @@ localeReload: true
     }
     function linkFailed(e) {
       if (errName(e) !== 'locked') toast(errText(e));
+    }
+    function ringHasIdentity() {
+      try {
+        var rec = window.MentriaStore ? window.MentriaStore.get('keyring', 'vault') : null;
+        var e = rec && rec.services && typeof rec.services === 'object' ? rec.services.identity : null;
+        return !!(e && typeof e === 'object' && e.ct);
+      } catch (_) { return false; }
+    }
+    function ringChanged() {
+      try {
+        var ep = kr.state().epoch;
+        if (ringEpoch !== null && ep !== ringEpoch) krBroken = false;
+        ringEpoch = ep;
+      } catch (_) {}
+      reconcile();
     }
     function migrateRemember() {
       var old = window.MentriaIdentity.takeLocal();
@@ -2283,20 +2302,28 @@ localeReload: true
     function boot() {
       if (!krWanted()) { legacyBoot(); return; }
       var fell = false;
-      var timer = setTimeout(function () { fell = true; legacyBoot(); }, KR_WAIT_MS);
+      var fellBack = false;
+      var timer = setTimeout(function () {
+        fell = true;
+        if (ringHasIdentity() && !window.MentriaIdentity.isSetUp()) return;
+        fellBack = true;
+        legacyBoot();
+      }, KR_WAIT_MS);
       Promise.all([import('/assets/js/mentria-unlock.js'), import('/assets/js/mentria-unlock-core.js')]).then(function (mods) {
         var m = mods[0];
         return Promise.resolve().then(function () { return m.ready(); }).catch(function () {}).then(function () {
           clearTimeout(timer);
-          if (!m.enabled()) { if (!fell) legacyBoot(); return; }
+          if (!m.enabled()) { if (!fellBack) legacyBoot(); return; }
           kr = m;
           krc = mods[1];
           migrateRemember();
-          m.onChange(function () { reconcile(); });
+          if (fellBack && (document.activeElement === unlockPass || unlockPass.value)) oldOpen = true;
+          try { ringEpoch = m.state().epoch; } catch (_) {}
+          m.onChange(ringChanged);
           m.prfSupport().then(function (v) { if (krPrf !== 'no') krPrf = v; refresh(); }, function () {});
           return reconcile().then(function () {
             var I = window.MentriaIdentity;
-            if (fell) return I.isUnlocked() && !fromKeyring ? afterLegacyUnlock({ auto: true }) : null;
+            if (fellBack) return I.isUnlocked() && !fromKeyring ? afterLegacyUnlock({ auto: true }) : null;
             if (!I.isSetUp() || I.isUnlocked() || linkedHere() || !I.hasDeviceUnlock()) return;
             return I.tryDeviceUnlock().then(function (ok) {
               refresh();
@@ -2307,7 +2334,7 @@ localeReload: true
       }).catch(function () {
         clearTimeout(timer);
         kr = null;
-        if (!fell) legacyBoot();
+        if (!fellBack) legacyBoot();
       });
     }
 

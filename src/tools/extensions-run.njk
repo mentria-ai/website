@@ -50,10 +50,10 @@ try { gallery = JSON.parse(document.getElementById('xr-gallery').textContent) ||
 const listed = Object.prototype.hasOwnProperty.call(gallery, id) ? gallery[id] : '';
 const own = (map, key) => (map && Object.prototype.hasOwnProperty.call(map, key) ? map[key] : null);
 let hashes = {};
-let history = {};
+let earlierHashes = {};
 try { hashes = JSON.parse(document.getElementById('xr-hashes').textContent) || {}; } catch (_) {}
-try { history = JSON.parse(document.getElementById('xr-history').textContent) || {}; } catch (_) {}
-const published = [own(hashes, id) ? own(hashes, id).sha256 : ''].concat(own(history, id) || []);
+try { earlierHashes = JSON.parse(document.getElementById('xr-history').textContent) || {}; } catch (_) {}
+const published = [own(hashes, id) ? own(hashes, id).sha256 : ''].concat(own(earlierHashes, id) || []);
 
 function tr(key, fallback) {
   const I = window.MentriaI18n;

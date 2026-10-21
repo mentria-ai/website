@@ -7,13 +7,13 @@
   var prefix = (typeof palette.prefix === 'string') ? palette.prefix : '';
   var hiddenStore = {};
   var hashes = {};
-  var history = {};
+  var earlierHashes = {};
   try { hashes = JSON.parse(document.getElementById('launcher-ext-hashes').textContent) || {}; } catch (_) { hashes = {}; }
-  try { history = JSON.parse(document.getElementById('launcher-ext-history').textContent) || {}; } catch (_) { history = {}; }
+  try { earlierHashes = JSON.parse(document.getElementById('launcher-ext-history').textContent) || {}; } catch (_) { earlierHashes = {}; }
 
   function published(id) {
     var h = Object.prototype.hasOwnProperty.call(hashes, id) ? hashes[id] : null;
-    var earlier = Object.prototype.hasOwnProperty.call(history, id) && Array.isArray(history[id]) ? history[id] : [];
+    var earlier = Object.prototype.hasOwnProperty.call(earlierHashes, id) && Array.isArray(earlierHashes[id]) ? earlierHashes[id] : [];
     return (h && typeof h.sha256 === 'string' ? [h.sha256] : []).concat(earlier);
   }
 

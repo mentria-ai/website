@@ -298,6 +298,16 @@ check('older catalog version shows no badge', async (page) => {
   if (b.shown) throw new Error('store page shows a badge after the catalog update');
 });
 
+check('run page clears command hash after mount', async (page) => {
+  const manifest = JSON.parse(/id="mentria-ext">([^<]*)</.exec(PASTED_HTML)[1]);
+  await seedInstall(page, { manifest, html: PASTED_HTML }, false);
+  await open(page, '/tools/extensions/run/?id=' + PASTED + '#cmd=starter&args=hello');
+  await mounted(page);
+  const got = await page.evaluate(() => ({ hash: location.hash, args: window.__mentriaExtHost && window.__mentriaExtHost.args }));
+  if (got.hash !== '') throw new Error('command hash is still in the address: ' + got.hash);
+  if (!got.args || got.args.cmd !== 'starter' || got.args.args !== 'hello') throw new Error('extension did not get the command: ' + JSON.stringify(got.args));
+});
+
 check('unverified update prompt explains full access', async (page) => {
   await open(page, '/tools/extensions/');
   await page.waitForSelector('#exg-grid .exg__actions button', { timeout: 20000 });

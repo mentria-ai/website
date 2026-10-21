@@ -6,9 +6,9 @@ import puppeteer from 'puppeteer-core';
 
 const BUILD = process.argv[2];
 if (!BUILD) { console.log('usage: node scripts/unlock-runtime-check.mjs <beta build dir>'); process.exit(2); }
-const PORT = 8096;
+const PORT = Number(process.env.UNLOCK_PORT) || 8096;
 const ORIGIN = 'http://localhost:' + PORT;
-const PROFILE = join(tmpdir(), 'unlock-runtime-check-profile');
+const PROFILE = join(tmpdir(), PORT === 8096 ? 'unlock-runtime-check-profile' : 'unlock-runtime-check-profile-' + PORT);
 const MODULE = '/assets/js/mentria-unlock.js';
 
 const TYPES = {
@@ -255,7 +255,7 @@ function installCryptoHold(page) {
         if (label !== aad) return SubtleCrypto.prototype[method].call(crypto.subtle, alg, ...rest);
         delete crypto.subtle[method];
         h.state = 'held';
-        return h.gate.then(() => crypto.subtle[method](alg, ...rest));
+        return h.gate.then(() => SubtleCrypto.prototype[method].call(crypto.subtle, alg, ...rest));
       };
       return h;
     };
@@ -1538,6 +1538,75 @@ check('link stamps and compares against the record it writes over', async () => 
     return { res: window.__res, raw: localStorage.getItem(k), id: window.__m.secretId('notes'), copies: list.filter((x) => Array.from(x.bytes).join() === want).length };
   }, [RECORD, sx.join()]);
   assert(r2.res === 'ok' && r2.raw === p2.raw && r2.id === p2.id && r2.copies === 1, 'a link whose bytes arrived mid-call writes nothing', { res: r2.res, same: r2.raw === p2.raw, id: [r2.id, p2.id], copies: r2.copies });
+});
+
+check('the healing page tells its own listeners', async () => {
+  await clean();
+  const a = await open('/beta/unlock/');
+  await enableOnLab(a);
+  await createOnLab(a);
+  await runtime(a);
+  const b = await open('/about/');
+  const sb = await runtime(b);
+  assert(sb.unlocked, 'setup: the second page is unlocked', sb);
+  const stale = await b.evaluate((k) => localStorage.getItem(k), RECORD);
+  await a.evaluate(() => window.__m.link('notes', crypto.getRandomValues(new Uint8Array(32))));
+  const linked = await a.evaluate((k) => localStorage.getItem(k), RECORD);
+  assert(await until(() => b.evaluate(([k, raw]) => localStorage.getItem(k) === raw, [RECORD, linked]), 5000), 'harness: the second page sees the link');
+  await a.evaluate(() => { window.__seen = []; window.__m.onChange((s) => window.__seen.push(s.linked.join())); });
+  await countRecordEvents(a);
+  await holdWriteLock(b);
+  await b.evaluate((raw) => { if (window.MentriaStore.set('keyring', 'vault', JSON.parse(raw)) !== true) throw new Error('write failed'); }, stale);
+  assert(await until(() => a.evaluate(() => window.__seen.length > 0 && window.__seen[window.__seen.length - 1] === ''), 5000), 'harness: the listener saw the stale record first');
+  assert(await writeLockPending(a), 'harness: the heal waits for the lock');
+  await b.evaluate(() => window.__wlRelease());
+  assert(await writeLockIdle(a), 'harness: the heal ran');
+  const r = await until(() => a.evaluate(() => window.__seen[window.__seen.length - 1] === 'notes'), 3000);
+  const info = await a.evaluate(() => ({ seen: window.__seen, events: window.__recEvents.length, linked: window.__m.state().linked }));
+  assert(info.linked.join() === 'notes' && info.events === 1, 'harness: the record is healed with no other write', info);
+  assert(r, 'a listener on the healing page sees the restored link', info);
+});
+
+check('link gives up with busy when the entry keeps changing', async () => {
+  await clean();
+  const a = await open('/beta/unlock/');
+  await enableOnLab(a);
+  const c = await createOnLab(a);
+  await runtime(a);
+  await a.evaluate(() => window.__m.link('notes', crypto.getRandomValues(new Uint8Array(32))));
+  const b = await open('/tools/');
+  await b.waitForFunction(() => document.readyState === 'complete' && !!window.MentriaStore);
+  await installCryptoHold(a);
+  const AAD = 'mentria-keyring|svc|notes';
+  await a.evaluate((aad) => {
+    window.__h = window.__holdCrypto('encrypt', aad);
+    window.__res = undefined;
+    window.__m.link('notes', crypto.getRandomValues(new Uint8Array(32))).then(() => { window.__res = 'ok'; }, (e) => { window.__res = e.message; });
+  }, AAD);
+  let planted = null;
+  for (let k = 1; k <= 4; k++) {
+    assert(await until(() => a.evaluate(() => window.__h.state === 'held'), 5000), 'harness: seal ' + k + ' is held');
+    planted = await b.evaluate(async (code) => {
+      const C = await import('/assets/js/mentria-unlock-core.js');
+      const rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+      const root = await C.rootKeyFrom(await C.openWithCode(rec.wraps.recovery, code));
+      const other = JSON.parse(JSON.stringify(rec));
+      other.services.notes = await C.sealService(root, 'notes', crypto.getRandomValues(new Uint8Array(32)), Date.parse(rec.services.notes.linked) + 1000);
+      if (window.MentriaStore.set('keyring', 'vault', C.mergeRecords(rec, other)) !== true) throw new Error('write failed');
+      return { raw: localStorage.getItem('mentria.store.keyring.vault'), id: other.services.notes.id };
+    }, c);
+    assert(await until(() => a.evaluate(([key, raw]) => localStorage.getItem(key) === raw, [RECORD, planted.raw]), 5000), 'harness: the first page sees planted entry ' + k);
+    await a.evaluate(([aad, more]) => {
+      const held = window.__h;
+      if (more) window.__h = window.__holdCrypto('encrypt', aad);
+      held.release();
+    }, [AAD, k < 4]);
+  }
+  assert(await until(() => a.evaluate(() => window.__res !== undefined), 10000), 'harness: the link settles');
+  assert(await writeLockIdle(a), 'harness: no write in flight');
+  const r = await a.evaluate((key) => ({ res: window.__res, raw: localStorage.getItem(key), id: window.__m.secretId('notes') }), RECORD);
+  assert(r.res === 'busy', 'link rejects with busy after the entry changed on every try', { res: r.res });
+  assert(r.raw === planted.raw && r.id === planted.id, 'nothing is written over the newest entry', { same: r.raw === planted.raw, id: [r.id, planted.id] });
 });
 
 let failed = 0;

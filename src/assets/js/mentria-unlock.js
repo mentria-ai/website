@@ -129,7 +129,9 @@ function heal(e) {
     const now = readRecord();
     if (!now) return;
     const next = mergeRecords(now, old);
-    if (next && canon(next) !== canon(now)) store(S, next);
+    if (!next || canon(next) === canon(now)) return;
+    store(S, next);
+    notify(true);
   }).catch(() => {});
 }
 
@@ -752,11 +754,11 @@ export async function link(name, bytes) {
     const S = await storeReady();
     let prev = linkedEntry(live(), name);
     for (let i = 1; ; i++) {
-      const last = i >= LINK_TRIES;
-      const entry = await sealOver(root, name, prev, bytes, last);
+      const entry = await sealOver(root, name, prev, bytes);
       const fresh = live();
       const now = linkedEntry(fresh, name);
-      if (!last && entrySig(now) !== entrySig(prev)) {
+      if (entrySig(now) !== entrySig(prev)) {
+        if (i >= LINK_TRIES) throw new Error('busy');
         prev = now;
         continue;
       }
@@ -772,14 +774,12 @@ export async function link(name, bytes) {
 
 function entrySig(e) { return e ? [e.id, e.ct, e.linked].join('|') : ''; }
 
-async function sealOver(root, name, prev, bytes, force) {
+async function sealOver(root, name, prev, bytes) {
   let at = Date.now();
   if (prev) {
-    if (!force) {
-      let have = null;
-      try { have = await openService(root, name, prev); } catch (_) {}
-      if (sameBytes(have, bytesOf(bytes))) return null;
-    }
+    let have = null;
+    try { have = await openService(root, name, prev); } catch (_) {}
+    if (sameBytes(have, bytesOf(bytes))) return null;
     const t = Date.parse(prev.linked);
     if (Number.isFinite(t) && t >= at) at = t + 1;
   }

@@ -1206,7 +1206,7 @@
       "share_ok": "shared to {n} peer(s)",
       "share_open_comms": "opening comms — use \"attach extension\" there to send",
       "confirm_remove": "Remove {name}? Its source and saved data are deleted from this device.",
-      "trust_prompt": "Install {name} v{version}? It will run with full access to your data on this device. Only install files from people you trust. Permissions: {perms}",
+      "trust_prompt": "Install {name} v{version}? It runs with full access to everything Mentria keeps on this device, including locked things while they are open. Only install files from people you trust. Permissions: {perms}",
       "update_prompt": "Update {name} {old} → {new}? Saved data is kept.",
       "reinstall_prompt": "Reinstall {name} {new}? Saved data is kept.",
       "downgrade_prompt": "Replace {name} {old} with older {new}? Saved data is kept.",
@@ -5476,7 +5476,7 @@
         "too_large": "extension too large to send"
       },
       "install": {
-        "trust": "Install \"{name}\" v{version}? It runs with full access to this site. Permissions: {perms}.",
+        "trust": "Install \"{name}\" v{version}? It runs with full access to everything Mentria keeps on this device, including locked things while they are open. Only install files from people you trust. Permissions: {perms}.",
         "update": "Update \"{name}\" from v{old} to v{new}?",
         "reinstall": "Reinstall \"{name}\" v{new}?",
         "downgrade": "Replace \"{name}\" v{old} with older v{new}?",
@@ -5899,6 +5899,7 @@
     "access_title": "What it can use",
     "access_none": "Only its own screen. It doesn't ask for any extra access.",
     "access_trust": "Extensions run with the same access as Mentria's own tools on this device, so add only ones you trust. The ones here are made by Mentria.",
+    "full_access_badge": "full access",
     "perm_storage": "Storage",
     "perm_storage_desc": "Keeps its settings and your saved items on this device.",
     "perm_network": "Network",

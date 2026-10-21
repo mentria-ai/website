@@ -1206,7 +1206,7 @@
       "share_ok": "envoyé à {n} pair(s)",
       "share_open_comms": "ouverture de comms — utilisez « joindre une extension » pour envoyer",
       "confirm_remove": "Supprimer {name} ? Sa source et ses données seront effacées de cet appareil.",
-      "trust_prompt": "Installer {name} v{version} ? Elle s'exécutera avec un accès complet à vos données sur cet appareil. N'installez que des fichiers de personnes de confiance. Permissions : {perms}",
+      "trust_prompt": "Installer {name} v{version} ? Elle s'exécute avec un accès complet à tout ce que Mentria conserve sur cet appareil, y compris ce qui est verrouillé tant que c'est ouvert. N'installez que des fichiers de personnes de confiance. Permissions : {perms}",
       "update_prompt": "Mettre à jour {name} {old} → {new} ? Les données sont conservées.",
       "reinstall_prompt": "Réinstaller {name} {new} ? Les données sont conservées.",
       "downgrade_prompt": "Remplacer {name} {old} par la version antérieure {new} ? Les données sont conservées.",
@@ -5476,7 +5476,7 @@
         "too_large": "extension trop volumineuse pour être envoyée"
       },
       "install": {
-        "trust": "Installer « {name} » v{version} ? Elle s’exécute avec un accès complet à ce site. Autorisations : {perms}.",
+        "trust": "Installer « {name} » v{version} ? Elle s’exécute avec un accès complet à tout ce que Mentria conserve sur cet appareil, y compris ce qui est verrouillé tant que c’est ouvert. N’installez que des fichiers de personnes de confiance. Autorisations : {perms}.",
         "update": "Mettre à jour « {name} » de v{old} à v{new} ?",
         "reinstall": "Réinstaller « {name} » v{new} ?",
         "downgrade": "Remplacer « {name} » v{old} par l’ancienne version v{new} ?",
@@ -5899,6 +5899,7 @@
     "access_title": "Ce qu’elle peut utiliser",
     "access_none": "Uniquement son propre écran. Elle ne demande aucun accès supplémentaire.",
     "access_trust": "Les extensions ont les mêmes accès que les outils de Mentria sur cet appareil : n’ajoutez que celles en qui vous avez confiance. Celles-ci sont créées par Mentria.",
+    "full_access_badge": "accès complet",
     "perm_storage": "Stockage",
     "perm_storage_desc": "Garde ses réglages et vos éléments enregistrés sur cet appareil.",
     "perm_network": "Réseau",

@@ -105,7 +105,8 @@ const COPY = {
   galOpen:       {{ ("tool.ext_gallery.btn_open"    | t) | dump | safe }},
   galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }},
   galInstalling: {{ ("store.installing" | t) | dump | safe }},
-  galFailed:     {{ ("store.install_failed" | t) | dump | safe }}
+  galFailed:     {{ ("store.install_failed" | t) | dump | safe }},
+  fullAccess:    {{ ("store.full_access_badge" | t) | dump | safe }}
 };
 const PERMS = {
   {%- for p in ["storage", "ai", "bluetooth", "usb", "serial", "network", "notifications", "share", "camera"] %}
@@ -142,6 +143,9 @@ function mismatchError() {
   const e = new Error('mismatch');
   e.code = 'mismatch';
   return e;
+}
+function publishedHash(id) {
+  return Object.prototype.hasOwnProperty.call(HASHES, id) && HASHES[id] ? HASHES[id].sha256 : '';
 }
 async function fetchSource(id) {
   const published = HASHES[id];
@@ -231,6 +235,12 @@ function row(entry) {
   const title = document.createElement('div');
   title.className = 'xt__name';
   title.textContent = m.name;
+  if (!X.isVerified(entry, publishedHash(m.id))) {
+    const access = document.createElement('span');
+    access.className = 'xt__access';
+    access.textContent = COPY.fullAccess;
+    title.append(' ', access);
+  }
   const sub = document.createElement('div');
   sub.className = 'xt__sub';
   sub.textContent = 'v' + m.version + (m.author ? ' · ' + m.author : '') + (entry.sha256 ? ' · SHA-256 ' + entry.sha256.slice(0, 12) : '');
@@ -575,6 +585,8 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('pageshow', (e) => { if (e.persisted) render(); });
 
 render();
+const hashChecks = X.getRegistry().filter((e) => publishedHash(e.manifest.id)).map((e) => X.checkSource(e.manifest.id, publishedHash(e.manifest.id)).then((now) => !!now && now.sha256 !== e.sha256, () => false));
+Promise.all(hashChecks).then((changed) => { if (changed.includes(true)) render(); });
 </script>
 
 <style>
@@ -606,6 +618,7 @@ render();
 .xt__icon img { width: 28px; height: 28px; }
 .xt__meta { flex: 1 1 12rem; min-width: 0; }
 .xt__name { font-size: 0.85rem; color: var(--term-fg); overflow-wrap: anywhere; }
+.xt__access { display: inline-block; padding: 1px 7px; font-size: 0.62rem; line-height: 1.3; color: var(--syn-amber, #fbbf24); border: 1px solid rgba(251, 191, 36, 0.5); border-radius: 999px; white-space: nowrap; vertical-align: 1px; }
 .xt__sub { font-size: 0.7rem; color: var(--term-muted); overflow-wrap: anywhere; }
 .xt__perms { font-size: 0.7rem; color: var(--term-muted); overflow-wrap: anywhere; }
 .xt__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; margin-left: auto; }

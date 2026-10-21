@@ -568,6 +568,25 @@ html.is-standalone .app-bar ~ .m-mini-dock { --mini-base: calc(var(--app-bar-h, 
   padding: 2px 6px;
   border-radius: 999px;
 }
+.launch-tile__access {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  z-index: 2;
+  max-width: calc(100% + 6px);
+  transform: translateX(-50%);
+  padding: 2px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  line-height: 1.2;
+  color: var(--syn-amber);
+  background: var(--term-bg-raised);
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  border-radius: 999px;
+}
 .launch-tile[hidden] { display: none; }
 @media (prefers-reduced-motion: no-preference) {
   .launch-tile {
@@ -945,6 +964,24 @@ html.app-chrome .hero-scrim {
 }
 .terminal-frame__install:hover,
 .terminal-frame__install:focus-visible { background: rgba(110, 243, 197, 0.16); }
+
+.terminal-frame__access {
+  flex: none;
+  margin-left: var(--space-2);
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--syn-amber);
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: 999px;
+}
+.terminal-frame__access[hidden] { display: none; }
+@media (max-width: 480px) {
+  .terminal-frame__access { margin-left: 6px; padding: 1px 6px; font-size: 0.62rem; }
+}
 
 .terminal-frame__expand {
   margin-left: var(--space-2);

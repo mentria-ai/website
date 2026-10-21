@@ -1206,7 +1206,7 @@
       "share_ok": "{n} 件のピアに送信しました",
       "share_open_comms": "Comms を開いています — そこで「拡張機能を添付」で送信してください",
       "confirm_remove": "{name}を削除しますか？ソースと保存データがこの端末から消えます。",
-      "trust_prompt": "{name} v{version}をインストールしますか？この端末のデータへ完全アクセスで動作します。信頼できる人のファイルだけを入れてください。権限: {perms}",
+      "trust_prompt": "{name} v{version}をインストールしますか？Mentria がこの端末に保存しているすべてのものへ完全アクセスで動作します。ロック中のものも、開いている間は含まれます。信頼できる人のファイルだけを入れてください。権限: {perms}",
       "update_prompt": "{name}を{old}→{new}に更新しますか？保存データは保持されます。",
       "reinstall_prompt": "{name} {new}を再インストールしますか？保存データは保持されます。",
       "downgrade_prompt": "{name}を{old}から古い{new}に置き換えますか？保存データは保持されます。",
@@ -5476,7 +5476,7 @@
         "too_large": "拡張機能が大きすぎて送信できません"
       },
       "install": {
-        "trust": "「{name}」v{version} をインストールしますか？このサイトへのフルアクセス権で動作します。権限：{perms}。",
+        "trust": "「{name}」v{version} をインストールしますか？Mentria がこの端末に保存しているすべてのものへ完全アクセスで動作します。ロック中のものも、開いている間は含まれます。信頼できる人のファイルだけを入れてください。権限：{perms}。",
         "update": "「{name}」を v{old} から v{new} に更新しますか？",
         "reinstall": "「{name}」v{new} を再インストールしますか？",
         "downgrade": "「{name}」v{old} を古い v{new} に置き換えますか？",
@@ -5899,6 +5899,7 @@
     "access_title": "使用するもの",
     "access_none": "自分の画面だけです。追加のアクセスは求めません。",
     "access_trust": "拡張機能はこの端末上で Mentria の標準ツールと同じアクセス権で動作します。信頼できるものだけを追加してください。ここにある拡張機能は Mentria が作成しています。",
+    "full_access_badge": "完全アクセス",
     "perm_storage": "ストレージ",
     "perm_storage_desc": "設定と保存した項目をこの端末に保存します。",
     "perm_network": "ネットワーク",

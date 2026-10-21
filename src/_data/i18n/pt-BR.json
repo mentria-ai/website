@@ -1206,7 +1206,7 @@
       "share_ok": "enviado para {n} par(es)",
       "share_open_comms": "abrindo comms — use \"anexar extensão\" lá para enviar",
       "confirm_remove": "Remover {name}? O código e os dados salvos serão apagados deste dispositivo.",
-      "trust_prompt": "Instalar {name} v{version}? Será executada com acesso total aos seus dados neste dispositivo. Instale apenas arquivos de quem você confia. Permissões: {perms}",
+      "trust_prompt": "Instalar {name} v{version}? Ela roda com acesso total a tudo o que o Mentria guarda neste dispositivo, inclusive o que está bloqueado enquanto estiver aberto. Instale apenas arquivos de quem você confia. Permissões: {perms}",
       "update_prompt": "Atualizar {name} {old} → {new}? Os dados salvos são mantidos.",
       "reinstall_prompt": "Reinstalar {name} {new}? Os dados salvos são mantidos.",
       "downgrade_prompt": "Substituir {name} {old} pela versão anterior {new}? Os dados salvos são mantidos.",
@@ -5476,7 +5476,7 @@
         "too_large": "a extensão é grande demais para enviar"
       },
       "install": {
-        "trust": "Instalar “{name}” v{version}? Ela roda com acesso total a este site. Permissões: {perms}.",
+        "trust": "Instalar “{name}” v{version}? Ela roda com acesso total a tudo o que o Mentria guarda neste aparelho, inclusive o que está bloqueado enquanto estiver aberto. Instale apenas arquivos de quem você confia. Permissões: {perms}.",
         "update": "Atualizar “{name}” da v{old} para a v{new}?",
         "reinstall": "Reinstalar “{name}” v{new}?",
         "downgrade": "Substituir “{name}” v{old} pela versão mais antiga v{new}?",
@@ -5899,6 +5899,7 @@
     "access_title": "O que pode usar",
     "access_none": "Só a própria tela. Não pede nenhum acesso extra.",
     "access_trust": "As extensões funcionam com o mesmo acesso das ferramentas do Mentria neste aparelho, então adicione só as que você confia. As daqui são feitas pelo Mentria.",
+    "full_access_badge": "acesso total",
     "perm_storage": "Armazenamento",
     "perm_storage_desc": "Guarda as configurações e seus itens salvos neste aparelho.",
     "perm_network": "Rede",

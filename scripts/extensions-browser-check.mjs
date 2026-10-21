@@ -1,0 +1,244 @@
+import { rmSync, mkdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import puppeteer from 'puppeteer-core';
+import { serve } from './scanner-serve.mjs';
+
+const BUILD = process.argv[2];
+const SHOTS = process.argv[3] || '';
+if (!BUILD) { console.log('usage: node scripts/extensions-browser-check.mjs <build dir> [<screenshot dir>]'); process.exit(2); }
+const PORT = 8097;
+const ORIGIN = 'http://localhost:' + PORT;
+const PROFILE = join(tmpdir(), 'mentria-ext-check-' + process.pid);
+const CATALOG = 'dice-roller';
+const PASTED = 'paste-check';
+const PASTED_HTML = '<!doctype html><script type="application/json" id="mentria-ext">' +
+  JSON.stringify({ id: PASTED, name: 'Paste Check', version: '1.0.0', icon: '🧪', permissions: ['storage'], mounts: { tool: {} } }) +
+  '</' + 'script><p style="font-family:monospace;color:#ccc;padding:1rem">pasted extension</p>';
+const DESKTOP = { width: 1280, height: 860 };
+const PHONE = { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
+
+rmSync(PROFILE, { recursive: true, force: true });
+if (SHOTS) mkdirSync(SHOTS, { recursive: true });
+const server = await serve(BUILD, PORT);
+const browser = await puppeteer.launch({
+  executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  headless: true,
+  userDataDir: PROFILE,
+  protocolTimeout: 120000
+});
+
+const checks = [];
+const check = (name, fn) => checks.push([name, fn]);
+
+async function open(page, path, viewport) {
+  await page.setViewport(viewport || DESKTOP);
+  await page.goto(ORIGIN + path, { waitUntil: 'load' });
+}
+
+async function shot(page, name, selector) {
+  if (!SHOTS) return;
+  const file = join(SHOTS, name + '.png');
+  if (selector) await page.$eval(selector, (el) => el.scrollIntoView({ block: 'center', behavior: 'instant' })).catch(() => {});
+  await new Promise((r) => setTimeout(r, 400));
+  const box = selector ? await page.$eval(selector, (el) => {
+    const r = el.getBoundingClientRect();
+    return { x: Math.max(0, r.left) + scrollX, y: Math.max(0, r.top) + scrollY, width: Math.min(r.width, innerWidth), height: Math.min(r.height, innerHeight) };
+  }).catch(() => null) : null;
+  if (box && box.width > 0 && box.height > 0) await page.screenshot({ path: file, clip: box, captureBeyondViewport: false });
+  else await page.screenshot({ path: file });
+}
+
+async function mounted(page) {
+  await page.waitForFunction(() => {
+    const f = document.getElementById('xr-frame');
+    return !!f && (f.hasAttribute('srcdoc') || f.hasAttribute('src'));
+  }, { timeout: 20000 });
+}
+
+function titleBadge(page) {
+  return page.evaluate(() => {
+    const el = document.querySelector('.terminal-frame__access');
+    const name = document.querySelector('.terminal-frame__filename');
+    const shown = !!el && !el.hidden && el.getClientRects().length > 0;
+    return {
+      shown,
+      text: shown ? el.textContent.trim() : '',
+      nextToName: shown && !!name && el.previousElementSibling === name,
+      inBar: shown && !!el.closest('.terminal-frame__titlebar'),
+      name: name ? name.textContent.trim() : '',
+      overflow: document.documentElement.scrollWidth > innerWidth
+    };
+  });
+}
+
+async function launcherTile(page, id, viewport) {
+  await open(page, '/about/#tools', viewport);
+  const sel = '.launcher__cat--extensions .launch-tile[data-slug="' + id + '"]';
+  await page.waitForSelector(sel, { timeout: 20000 });
+  await new Promise((r) => setTimeout(r, 400));
+  return page.$eval(sel, (a) => {
+    const b = a.querySelector('.launch-tile__access');
+    return { badge: b ? b.textContent.trim() : '', label: a.querySelector('.launch-tile__label').textContent.trim() };
+  });
+}
+
+async function managerRow(page, name, viewport) {
+  await open(page, '/tools/extensions/', viewport);
+  await page.waitForFunction((n) => Array.from(document.querySelectorAll('.xt__row .xt__name')).some((el) => el.firstChild && el.firstChild.textContent === n), { timeout: 20000 }, name);
+  await new Promise((r) => setTimeout(r, 300));
+  return page.evaluate((n) => {
+    const row = Array.from(document.querySelectorAll('.xt__row')).find((r) => r.querySelector('.xt__name').firstChild.textContent === n);
+    const b = row && row.querySelector('.xt__access');
+    return { badge: b ? b.textContent.trim() : '' };
+  }, name);
+}
+
+async function storeInstall(page, id) {
+  await open(page, '/extensions/' + id + '/');
+  await mounted(page);
+  await page.waitForFunction(() => !document.getElementById('xs-install').hidden, { timeout: 20000 });
+  await page.click('#xs-install');
+  await page.waitForFunction(() => !document.getElementById('xs-state').hidden || !document.getElementById('xs-state-plain').hidden, { timeout: 30000 });
+  return page.evaluate((x) => {
+    const reg = window.MentriaStore.get('ext', 'registry') || [];
+    const row = reg.find((e) => e.manifest.id === x);
+    return { sha256: row && row.sha256, published: JSON.parse(document.getElementById('xs-data').textContent).sha256 };
+  }, id);
+}
+
+function registrySha(page, id) {
+  return page.evaluate((x) => {
+    const row = (window.MentriaStore.get('ext', 'registry') || []).find((e) => e.manifest.id === x);
+    return row ? row.sha256 || null : undefined;
+  }, id);
+}
+
+check('pasted extension shows full access badge', async (page) => {
+  await open(page, '/tools/extensions/');
+  await page.waitForSelector('#exg-grid .exg__actions button', { timeout: 20000 });
+  await page.$eval('.xt__paste', (el) => { el.open = true; });
+  await page.$eval('#xt-paste', (el, v) => { el.value = v; }, PASTED_HTML);
+  await page.$eval('#xt-paste-install', (b) => b.click());
+  await page.waitForFunction(() => /Paste Check/.test(document.getElementById('m-dialog-msg').textContent), { timeout: 10000 });
+  const prompt = await page.$eval('#m-dialog-msg', (el) => el.textContent);
+  if (!prompt.includes('full access to everything Mentria keeps on this device, including locked things while they are open')) throw new Error('install prompt does not explain full access: ' + prompt);
+  await shot(page, 'install-prompt-1280', '#m-dialog');
+  await page.click('#m-dialog-ok');
+  const row = await managerRow(page, 'Paste Check');
+  if (row.badge !== 'full access') throw new Error('manager row badge is "' + row.badge + '"');
+  await shot(page, 'manager-row-1280', '.xt__list');
+  const phoneRow = await managerRow(page, 'Paste Check', PHONE);
+  if (phoneRow.badge !== 'full access') throw new Error('manager row badge at 390 is "' + phoneRow.badge + '"');
+  await shot(page, 'manager-row-390', '.xt__list');
+  for (const [label, viewport] of [['1280', DESKTOP], ['390', PHONE]]) {
+    await open(page, '/tools/extensions/run/?id=' + PASTED, viewport);
+    await mounted(page);
+    const b = await titleBadge(page);
+    if (!b.shown || b.text !== 'full access' || !b.nextToName || !b.inBar || b.overflow) throw new Error('run page badge at ' + label + ': ' + JSON.stringify(b));
+    await shot(page, 'run-pasted-' + label, '.terminal-frame__titlebar');
+    await shot(page, 'run-pasted-page-' + label);
+    const tile = await launcherTile(page, PASTED, viewport);
+    if (tile.badge !== 'full access') throw new Error('launcher tile badge at ' + label + ' is "' + tile.badge + '"');
+    await shot(page, 'launcher-pasted-' + label, '.launcher__cat--extensions');
+  }
+  const sha = await registrySha(page, PASTED);
+  if (sha) throw new Error('pasted extension gained a recorded hash: ' + sha);
+});
+
+check('catalog install shows no badge', async (page) => {
+  const got = await storeInstall(page, CATALOG);
+  if (!got.sha256 || got.sha256 !== got.published) throw new Error('store install recorded ' + got.sha256 + ', published ' + got.published);
+  await open(page, '/extensions/' + CATALOG + '/');
+  await mounted(page);
+  let b = await titleBadge(page);
+  if (b.shown) throw new Error('store page shows a badge for a catalog install');
+  await open(page, '/tools/extensions/run/?id=' + CATALOG);
+  await mounted(page);
+  b = await titleBadge(page);
+  if (b.shown) throw new Error('run page shows a badge for a catalog install');
+  await shot(page, 'run-catalog-1280', '.terminal-frame__titlebar');
+  const tile = await launcherTile(page, CATALOG);
+  if (tile.badge) throw new Error('launcher tile shows "' + tile.badge + '" for a catalog install');
+  const row = await managerRow(page, 'Dice Roller');
+  if (row.badge) throw new Error('manager row shows "' + row.badge + '" for a catalog install');
+});
+
+check('tampered catalog entry shows the badge', async (page) => {
+  await storeInstall(page, CATALOG);
+  await page.evaluate((x) => {
+    const S = window.MentriaStore;
+    S.set('ext', 'src.' + x, S.get('ext', 'src.' + x) + '<p>changed</p>');
+  }, CATALOG);
+  await open(page, '/tools/extensions/run/?id=' + CATALOG);
+  await mounted(page);
+  let b = await titleBadge(page);
+  if (!b.shown || b.text !== 'full access' || !b.nextToName) throw new Error('run page badge: ' + JSON.stringify(b));
+  if (await registrySha(page, CATALOG)) throw new Error('changed file kept its recorded hash');
+  const tile = await launcherTile(page, CATALOG);
+  if (tile.badge !== 'full access') throw new Error('launcher tile badge is "' + tile.badge + '"');
+  for (const [label, viewport] of [['1280', DESKTOP], ['390', PHONE]]) {
+    await open(page, '/extensions/' + CATALOG + '/', viewport);
+    await mounted(page);
+    b = await titleBadge(page);
+    if (!b.shown || b.text !== 'full access' || !b.nextToName || b.overflow) throw new Error('store page badge at ' + label + ': ' + JSON.stringify(b));
+    await shot(page, 'store-tampered-' + label, '.terminal-frame__titlebar');
+  }
+  await open(page, '/fr/extensions/' + CATALOG + '/', PHONE);
+  await mounted(page);
+  b = await titleBadge(page);
+  if (b.text !== 'accès complet' || b.overflow) throw new Error('French store page badge: ' + JSON.stringify(b));
+  await shot(page, 'store-tampered-fr-390', '.terminal-frame__titlebar');
+  await shot(page, 'store-tampered-fr-390-page');
+  await open(page, '/ja/tools/extensions/run/?id=' + CATALOG, PHONE);
+  await mounted(page);
+  b = await titleBadge(page);
+  if (b.text !== '完全アクセス') throw new Error('Japanese run page badge is "' + b.text + '"');
+  await shot(page, 'run-tampered-ja-390', '.terminal-frame__titlebar');
+});
+
+check('catalog install without a recorded hash shows no badge', async (page) => {
+  await storeInstall(page, CATALOG);
+  const published = await page.$eval('#xs-data', (el) => JSON.parse(el.textContent).sha256);
+  await page.evaluate((x) => {
+    const reg = window.MentriaStore.get('ext', 'registry');
+    delete reg.find((e) => e.manifest.id === x).sha256;
+    window.MentriaStore.set('ext', 'registry', reg);
+  }, CATALOG);
+  const tile = await launcherTile(page, CATALOG);
+  if (tile.badge) throw new Error('launcher tile shows "' + tile.badge + '" after its check');
+  if (await registrySha(page, CATALOG) !== published) throw new Error('launcher check did not record the hash');
+  await page.evaluate((x) => {
+    const reg = window.MentriaStore.get('ext', 'registry');
+    delete reg.find((e) => e.manifest.id === x).sha256;
+    window.MentriaStore.set('ext', 'registry', reg);
+  }, CATALOG);
+  await open(page, '/tools/extensions/run/?id=' + CATALOG);
+  await mounted(page);
+  const b = await titleBadge(page);
+  if (b.shown) throw new Error('run page shows a badge for a catalog file without a recorded hash');
+  if (await registrySha(page, CATALOG) !== published) throw new Error('run page did not record the hash');
+});
+
+let failed = 0;
+for (const [name, fn] of checks) {
+  const ctx = await browser.createBrowserContext();
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  try {
+    await page.setBypassServiceWorker(true);
+    await fn(page);
+    if (errors.length) throw new Error('page errors: ' + errors.join(' | '));
+    console.log('ok   ' + name);
+  } catch (e) {
+    failed++;
+    console.log('FAIL ' + name + '\n     ' + ((e && e.message) || e));
+  }
+  await ctx.close();
+}
+await browser.close();
+server.close();
+rmSync(PROFILE, { recursive: true, force: true });
+console.log(checks.length - failed + '/' + checks.length + ' passed');
+if (failed) process.exit(1);

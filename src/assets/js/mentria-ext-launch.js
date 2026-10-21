@@ -6,6 +6,18 @@
   var palette = window.MENTRIA_PALETTE_DATA || {};
   var prefix = (typeof palette.prefix === 'string') ? palette.prefix : '';
   var hiddenStore = {};
+  var hashes = {};
+  try { hashes = JSON.parse(document.getElementById('launcher-ext-hashes').textContent) || {}; } catch (_) { hashes = {}; }
+
+  function published(id) {
+    var h = Object.prototype.hasOwnProperty.call(hashes, id) ? hashes[id] : null;
+    return h && typeof h.sha256 === 'string' ? h.sha256 : '';
+  }
+
+  function accessLabel() {
+    var i18n = window.MentriaI18n;
+    return (i18n && i18n.t && i18n.t('store.full_access_badge')) || pages.getAttribute('data-label-access') || 'full access';
+  }
 
   function escapeSlug(id) {
     return (window.CSS && CSS.escape) ? CSS.escape(id) : id.replace(/[^a-z0-9-]/g, '');
@@ -75,6 +87,14 @@
       lab.className = 'launch-tile__label';
       lab.textContent = m.name;
       a.appendChild(icon); a.appendChild(lab);
+      var verified = false;
+      try { verified = X.isVerified(e, published(m.id)); } catch (_) {}
+      if (!verified) {
+        var access = document.createElement('span');
+        access.className = 'launch-tile__access';
+        access.textContent = accessLabel();
+        a.appendChild(access);
+      }
       grid.appendChild(a);
     });
     if (!grid.children.length) return;
@@ -92,11 +112,23 @@
 
   import('/assets/js/mentria-extensions.js').then(function (X) {
     var timer = 0;
+    var checked = {};
     function later() {
       clearTimeout(timer);
       timer = setTimeout(function () { render(X); }, 0);
     }
+    function verify() {
+      var list = [];
+      try { list = X.getRegistry(); } catch (_) { list = []; }
+      list.forEach(function (e) {
+        var id = e.manifest.id;
+        if (checked[id] || !e.enabled || !published(id)) return;
+        checked[id] = true;
+        try { X.checkSource(id, published(id)).catch(function () {}); } catch (_) {}
+      });
+    }
     render(X);
+    verify();
     window.addEventListener('mentria:write', function (e) {
       var d = (e && e.detail) || {};
       if (d.ns === 'ext' && d.key === 'registry') later();

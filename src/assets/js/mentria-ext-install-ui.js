@@ -1,7 +1,7 @@
 import * as X from '/assets/js/mentria-extensions.js';
 
 const DEFAULT_COPY = {
-  trust: 'Install "{name}" v{version}? It runs with full access to this site. Permissions: {perms}.',
+  trust: 'Install {name} v{version}? It runs with full access to everything Mentria keeps on this device, including locked things while they are open. Only install files from people you trust. Permissions: {perms}',
   update: 'Update "{name}" from v{old} to v{new}?',
   reinstall: 'Reinstall "{name}" v{new}?',
   downgrade: 'Replace "{name}" v{old} with older v{new}?',

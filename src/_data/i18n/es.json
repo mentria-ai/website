@@ -1206,7 +1206,7 @@
       "share_ok": "enviado a {n} contacto(s)",
       "share_open_comms": "abriendo comms — usa \"adjuntar extensión\" allí para enviar",
       "confirm_remove": "¿Eliminar {name}? Su código y datos guardados se borrarán de este dispositivo.",
-      "trust_prompt": "¿Instalar {name} v{version}? Se ejecutará con acceso completo a tus datos en este dispositivo. Instala solo archivos de personas de confianza. Permisos: {perms}",
+      "trust_prompt": "¿Instalar {name} v{version}? Se ejecuta con acceso total a todo lo que Mentria guarda en este dispositivo, incluido lo bloqueado mientras está abierto. Instala solo archivos de personas de confianza. Permisos: {perms}",
       "update_prompt": "¿Actualizar {name} {old} → {new}? Los datos guardados se conservan.",
       "reinstall_prompt": "¿Reinstalar {name} {new}? Los datos guardados se conservan.",
       "downgrade_prompt": "¿Reemplazar {name} {old} por la versión anterior {new}? Los datos guardados se conservan.",
@@ -5476,7 +5476,7 @@
         "too_large": "la extensión es demasiado grande para enviarla"
       },
       "install": {
-        "trust": "¿Instalar «{name}» v{version}? Se ejecuta con acceso total a este sitio. Permisos: {perms}.",
+        "trust": "¿Instalar «{name}» v{version}? Se ejecuta con acceso total a todo lo que Mentria guarda en este dispositivo, incluido lo bloqueado mientras está abierto. Instala solo archivos de personas de confianza. Permisos: {perms}.",
         "update": "¿Actualizar «{name}» de v{old} a v{new}?",
         "reinstall": "¿Reinstalar «{name}» v{new}?",
         "downgrade": "¿Reemplazar «{name}» v{old} por la versión anterior v{new}?",
@@ -5899,6 +5899,7 @@
     "access_title": "Qué puede usar",
     "access_none": "Solo su propia pantalla. No pide ningún acceso adicional.",
     "access_trust": "Las extensiones funcionan con el mismo acceso que las herramientas de Mentria en este dispositivo, así que añade solo las que te den confianza. Las de aquí las hace Mentria.",
+    "full_access_badge": "acceso total",
     "perm_storage": "Almacenamiento",
     "perm_storage_desc": "Guarda su configuración y tus elementos en este dispositivo.",
     "perm_network": "Red",

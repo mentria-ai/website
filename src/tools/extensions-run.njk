@@ -24,6 +24,7 @@ eleventyComputed:
 {% include "terminal-frame-close.njk" %}
 
 <script type="application/json" id="xr-hashes">{{ extensionHashes | dump | safe }}</script>
+<script type="application/json" id="xr-history">{{ extensionHashHistory | dump | safe }}</script>
 <script type="application/json" id="xr-gallery">{ {%- for e in extensions %}{{ e.id | dump | safe }}: {{ e.name | dump | safe }}{% if not loop.last %}, {% endif %}{%- endfor %} }</script>
 <script>
   window.XR_COPY = {
@@ -47,9 +48,12 @@ let prefix = root.dataset.prefix || '';
 let gallery = {};
 try { gallery = JSON.parse(document.getElementById('xr-gallery').textContent) || {}; } catch (_) {}
 const listed = Object.prototype.hasOwnProperty.call(gallery, id) ? gallery[id] : '';
+const own = (map, key) => (map && Object.prototype.hasOwnProperty.call(map, key) ? map[key] : null);
 let hashes = {};
+let history = {};
 try { hashes = JSON.parse(document.getElementById('xr-hashes').textContent) || {}; } catch (_) {}
-const published = Object.prototype.hasOwnProperty.call(hashes, id) && hashes[id] ? hashes[id].sha256 : '';
+try { history = JSON.parse(document.getElementById('xr-history').textContent) || {}; } catch (_) {}
+const published = [own(hashes, id) ? own(hashes, id).sha256 : ''].concat(own(history, id) || []);
 
 function tr(key, fallback) {
   const I = window.MentriaI18n;

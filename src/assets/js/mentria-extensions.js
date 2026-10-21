@@ -145,10 +145,14 @@ export function isApp(entry) {
   return !!(m && m.app);
 }
 
-export function isVerified(entry, publishedSha256) {
+function knownHashes(published) {
+  return (Array.isArray(published) ? published : [published]).filter((h) => typeof h === 'string' && SHA_RE.test(h));
+}
+
+export function isVerified(entry, published) {
   if (!entry || !entry.manifest) return false;
   if (isApp(entry)) return true;
-  return typeof publishedSha256 === 'string' && SHA_RE.test(publishedSha256) && entry.sha256 === publishedSha256;
+  return typeof entry.sha256 === 'string' && knownHashes(published).includes(entry.sha256);
 }
 
 export function installApp(manifest) {
@@ -196,7 +200,7 @@ export async function fetchVerified(id, sha256) {
   throw codedError('mismatch', 'mismatch');
 }
 
-export async function checkSource(id, publishedSha256) {
+export async function checkSource(id, published) {
   const entry = getEntry(id);
   if (!entry || isApp(entry)) return entry;
   const source = getSource(id);
@@ -206,7 +210,7 @@ export async function checkSource(id, publishedSha256) {
   const registry = getRegistry();
   const row = registry.find((x) => x.manifest.id === id);
   if (!row) return null;
-  const next = got === publishedSha256 || got === row.sha256 ? got : null;
+  const next = knownHashes(published).includes(got) || got === row.sha256 ? got : null;
   if (next === (row.sha256 || null)) return row;
   if (next) row.sha256 = next;
   else delete row.sha256;

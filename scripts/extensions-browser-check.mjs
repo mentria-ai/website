@@ -1,4 +1,6 @@
-import { rmSync, mkdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { rmSync, mkdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import puppeteer from 'puppeteer-core';
@@ -15,6 +17,7 @@ const PASTED = 'paste-check';
 const PASTED_HTML = '<!doctype html><script type="application/json" id="mentria-ext">' +
   JSON.stringify({ id: PASTED, name: 'Paste Check', version: '1.0.0', icon: '🧪', permissions: ['storage'], mounts: { tool: {} } }) +
   '</' + 'script><p style="font-family:monospace;color:#ccc;padding:1rem">pasted extension</p>';
+const ACCESS_NOTE = 'It runs with full access to everything Mentria keeps on this device, including locked things while they are open.';
 const DESKTOP = { width: 1280, height: 860 };
 const PHONE = { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 
@@ -30,6 +33,47 @@ const browser = await puppeteer.launch({
 
 const checks = [];
 const check = (name, fn) => checks.push([name, fn]);
+
+function olderCatalogFile(id) {
+  const file = 'src/assets/extensions/' + id + '.html';
+  const now = readFileSync(file);
+  const version = (html) => JSON.parse(/<script type="application[/]json" id="mentria-ext">([\s\S]*?)<[/]script>/.exec(html)[1]).version;
+  const newer = (a, b) => { const x = a.split('.').map(Number); const y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i]; return false; };
+  const current = version(now.toString('utf8'));
+  const commits = execFileSync('git', ['log', '--format=%H', '--', file], { encoding: 'utf8' }).split('\n').filter(Boolean);
+  for (const c of commits) {
+    let bytes;
+    try { bytes = execFileSync('git', ['show', c + ':' + file], { maxBuffer: 64 * 1024 * 1024 }); } catch (_) { continue; }
+    const html = bytes.toString('utf8');
+    if (!newer(current, version(html))) continue;
+    return { html, sha256: createHash('sha256').update(bytes).digest('hex'), manifest: JSON.parse(/<script type="application[/]json" id="mentria-ext">([\s\S]*?)<[/]script>/.exec(html)[1]) };
+  }
+  throw new Error('no earlier version of ' + file + ' with a lower version number in this checkout');
+}
+
+async function watchAccessBadges(page) {
+  await page.evaluateOnNewDocument(() => {
+    window.__accessSeen = [];
+    new MutationObserver((list) => {
+      for (const m of list) for (const n of m.addedNodes) {
+        if (n.nodeType !== 1) continue;
+        const hit = n.matches('.launch-tile__access, .xt__access') ? n : n.querySelector('.launch-tile__access, .xt__access');
+        if (hit) window.__accessSeen.push(hit.closest('.launch-tile, .xt__row').textContent.trim());
+      }
+    }).observe(document, { childList: true, subtree: true });
+  });
+}
+
+async function seedInstall(page, older, withHash) {
+  await open(page, '/tools/');
+  await page.evaluate((o, h) => {
+    const S = window.MentriaStore;
+    S.set('ext', 'src.' + o.manifest.id, o.html);
+    const row = { manifest: o.manifest, enabled: true, installedAt: new Date().toISOString(), updatedAt: new Date().toISOString(), size: o.html.length };
+    if (h) row.sha256 = o.sha256;
+    S.set('ext', 'registry', [row]);
+  }, older, withHash);
+}
 
 async function open(page, path, viewport) {
   await page.setViewport(viewport || DESKTOP);
@@ -218,6 +262,61 @@ check('catalog install without a recorded hash shows no badge', async (page) => 
   const b = await titleBadge(page);
   if (b.shown) throw new Error('run page shows a badge for a catalog file without a recorded hash');
   if (await registrySha(page, CATALOG) !== published) throw new Error('run page did not record the hash');
+});
+
+check('older catalog version shows no badge', async (page) => {
+  const older = olderCatalogFile(CATALOG);
+  await watchAccessBadges(page);
+  await seedInstall(page, older, true);
+  await open(page, '/tools/extensions/run/?id=' + CATALOG);
+  await mounted(page);
+  let b = await titleBadge(page);
+  if (b.shown) throw new Error('run page shows a badge for v' + older.manifest.version + ' installed from the catalog');
+  let tile = await launcherTile(page, CATALOG);
+  if (tile.badge) throw new Error('launcher tile shows "' + tile.badge + '" for an earlier catalog version');
+  await seedInstall(page, older, false);
+  tile = await launcherTile(page, CATALOG);
+  if (tile.badge) throw new Error('launcher tile shows "' + tile.badge + '" for an earlier catalog version with no recorded hash');
+  if (await registrySha(page, CATALOG) !== older.sha256) throw new Error('launcher did not record the earlier published hash');
+  let seen = await page.evaluate(() => window.__accessSeen);
+  if (seen.length) throw new Error('launcher showed the badge before its check: ' + JSON.stringify(seen));
+  await seedInstall(page, older, false);
+  const row = await managerRow(page, older.manifest.name);
+  if (row.badge) throw new Error('manager row shows "' + row.badge + '" for an earlier catalog version');
+  seen = await page.evaluate(() => window.__accessSeen);
+  if (seen.length) throw new Error('manager showed the badge before its check: ' + JSON.stringify(seen));
+  await page.waitForFunction((id) => !!document.querySelector('#exg-grid .exg__card[data-id="' + id + '"] .exg__actions button.m-btn--primary'), { timeout: 20000 }, CATALOG);
+  await page.$eval('#exg-grid .exg__card[data-id="' + CATALOG + '"] .exg__actions button.m-btn--primary', (btn) => btn.click());
+  await page.waitForFunction(() => /Dice Roller/.test(document.getElementById('m-dialog-msg').textContent), { timeout: 10000 });
+  const prompt = await page.$eval('#m-dialog-msg', (el) => el.textContent);
+  if (prompt.includes('full access')) throw new Error('update to the verified catalog file says full access: ' + prompt);
+  await page.click('#m-dialog-ok');
+  await page.waitForFunction((id, v) => { const r = (window.MentriaStore.get('ext', 'registry') || []).find((e) => e.manifest.id === id); return r && r.manifest.version !== v && !!r.sha256; }, { timeout: 20000 }, CATALOG, older.manifest.version);
+  await open(page, '/extensions/' + CATALOG + '/');
+  await mounted(page);
+  b = await titleBadge(page);
+  if (b.shown) throw new Error('store page shows a badge after the catalog update');
+});
+
+check('unverified update prompt explains full access', async (page) => {
+  await open(page, '/tools/extensions/');
+  await page.waitForSelector('#exg-grid .exg__actions button', { timeout: 20000 });
+  const paste = async (html, expect, name) => {
+    await page.$eval('.xt__paste', (el) => { el.open = true; });
+    await page.$eval('#xt-paste', (el, v) => { el.value = v; }, html);
+    await page.$eval('#xt-paste-install', (btn) => btn.click());
+    await page.waitForFunction((x) => document.getElementById('m-dialog-msg').textContent.includes(x), { timeout: 10000 }, expect);
+    const text = await page.$eval('#m-dialog-msg', (el) => el.textContent);
+    if (name) await shot(page, name, '#m-dialog');
+    await page.click('#m-dialog-ok');
+    await page.waitForFunction(() => !document.getElementById('m-dialog-msg').offsetParent, { timeout: 10000 });
+    return text;
+  };
+  await paste(PASTED_HTML, 'Install Paste Check');
+  const update = await paste(PASTED_HTML.replace('"version":"1.0.0"', '"version":"1.1.0"'), 'Update Paste Check', 'update-prompt-1280');
+  if (!update.includes(ACCESS_NOTE)) throw new Error('update prompt: ' + update);
+  const replace = await paste(PASTED_HTML.replace('"version":"1.0.0"', '"version":"1.2.0"').replace('"name":"Paste Check"', '"name":"Paste Renamed"'), 'Replace Paste Check', 'replace-prompt-1280');
+  if (!replace.includes(ACCESS_NOTE) || replace.includes('to your data on this device') || replace.includes('to this site')) throw new Error('replace prompt: ' + replace);
 });
 
 let failed = 0;

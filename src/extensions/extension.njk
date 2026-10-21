@@ -121,7 +121,7 @@ eleventyComputed:
 }
 </script>
 {% set published = extensionHashes[ext.id] %}
-<script type="application/json" id="xs-data">{{ { id: ext.id, kind: ext.kind, app: ext.app, prefix: prefix, manifest: ext.manifest, sha256: (published.sha256 if published else "") } | dump | safe }}</script>
+<script type="application/json" id="xs-data">{{ { id: ext.id, kind: ext.kind, app: ext.app, prefix: prefix, manifest: ext.manifest, sha256: (published.sha256 if published else ""), earlier: (extensionHashHistory[ext.id] or []) } | dump | safe }}</script>
 <script>
   window.XS_COPY = {
     installing: {{ ("store.installing" | t) | dump | safe }},
@@ -136,6 +136,7 @@ eleventyComputed:
 <script type="module">
 const D = JSON.parse(document.getElementById('xs-data').textContent);
 const C = window.XS_COPY;
+const KNOWN = [D.sha256].concat(D.earlier || []);
 const installBtn = document.getElementById('xs-install');
 const removeBtn = document.getElementById('xs-remove');
 const stateEl = document.getElementById('xs-state');
@@ -243,8 +244,8 @@ function showAccess(on) {
 
 async function verified(entry) {
   let now = entry;
-  try { now = (await X.checkSource(D.id, D.sha256)) || entry; } catch (_) {}
-  try { return X.isVerified(now, D.sha256); } catch (_) { return false; }
+  try { now = (await X.checkSource(D.id, KNOWN)) || entry; } catch (_) {}
+  try { return X.isVerified(now, KNOWN); } catch (_) { return false; }
 }
 
 function extraUrls() {

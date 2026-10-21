@@ -7,11 +7,14 @@
   var prefix = (typeof palette.prefix === 'string') ? palette.prefix : '';
   var hiddenStore = {};
   var hashes = {};
+  var history = {};
   try { hashes = JSON.parse(document.getElementById('launcher-ext-hashes').textContent) || {}; } catch (_) { hashes = {}; }
+  try { history = JSON.parse(document.getElementById('launcher-ext-history').textContent) || {}; } catch (_) { history = {}; }
 
   function published(id) {
     var h = Object.prototype.hasOwnProperty.call(hashes, id) ? hashes[id] : null;
-    return h && typeof h.sha256 === 'string' ? h.sha256 : '';
+    var earlier = Object.prototype.hasOwnProperty.call(history, id) && Array.isArray(history[id]) ? history[id] : [];
+    return (h && typeof h.sha256 === 'string' ? [h.sha256] : []).concat(earlier);
   }
 
   function accessLabel() {
@@ -113,22 +116,29 @@
   import('/assets/js/mentria-extensions.js').then(function (X) {
     var timer = 0;
     var checked = {};
+    var ready = false;
     function later() {
+      if (!ready) return;
       clearTimeout(timer);
       timer = setTimeout(function () { render(X); }, 0);
     }
     function verify() {
       var list = [];
+      var waits = [];
       try { list = X.getRegistry(); } catch (_) { list = []; }
       list.forEach(function (e) {
         var id = e.manifest.id;
-        if (checked[id] || !e.enabled || !published(id)) return;
+        if (checked[id] || !e.enabled || !published(id).length) return;
         checked[id] = true;
-        try { X.checkSource(id, published(id)).catch(function () {}); } catch (_) {}
+        var done;
+        try { done = X.checkSource(id, published(id)).catch(function () {}); } catch (_) { return; }
+        var ok = false;
+        try { ok = X.isVerified(e, published(id)); } catch (_) {}
+        if (!ok) waits.push(done);
       });
+      return Promise.all(waits);
     }
-    render(X);
-    verify();
+    verify().then(function () { ready = true; render(X); });
     window.addEventListener('mentria:write', function (e) {
       var d = (e && e.detail) || {};
       if (d.ns === 'ext' && d.key === 'registry') later();

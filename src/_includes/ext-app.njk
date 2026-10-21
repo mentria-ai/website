@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ lang or 'en' }}" class="ext-app">
+{% set siteLocale = (lang or "en") | findLocale %}{% set siteCode = (siteLocale.code | lower) if siteLocale else "en" %}<html lang="{{ lang or 'en' }}" class="ext-app" data-release="{{ releaseTag }}" data-site-code="{{ siteCode }}"{% if unlockTool %} data-unlock-tool{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -14,6 +14,16 @@
     <link rel="stylesheet" href="/assets/css/style.css?v={{ buildHash }}">
     <link rel="stylesheet" href="/assets/css/terminal.css?v={{ buildHash }}">
     <script src="/assets/js/mentria-store.js?v={{ buildHash }}"></script>
+    {%- if releaseTag == "beta" %}
+    <script>
+      (function () {
+        try {
+          var l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
+          if (l && l.enabled === true && localStorage.getItem('mentria.store.keyring.vault')) import('/assets/js/mentria-unlock.js').then(function (m) { return m.ready(); }).catch(function () {});
+        } catch (e) {}
+      })();
+    </script>
+    {%- endif %}
     {%- if not appPlain %}
     <script src="/assets/js/mentria-gamepad.js?v={{ buildHash }}" defer></script>
     <script src="/assets/js/mentria-input-help.js?v={{ buildHash }}" defer></script>

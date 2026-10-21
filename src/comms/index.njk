@@ -3144,7 +3144,7 @@ const krRetire = async () => {
     const kcv = cur ? await I.matchesVault(cur) : '';
     if (!kcv) return;
     const id = I.legacyPasskeyId();
-    if (!I.retireLegacy(kcv)) return;
+    if (!I.retireLegacy(kcv, { dropDevice: !!KR.state().hasDevice })) return;
     if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
       try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: id }); } catch (_) {}
     }
@@ -3156,12 +3156,21 @@ const krRetire = async () => {
   }
 };
 
+const krKeepRemembered = async () => {
+  const I = window.MentriaIdentity;
+  if (!I || !I.hasDeviceUnlock()) return;
+  try {
+    if (!KR.state().hasDevice) await KR.setRemember(true);
+  } catch (_) {}
+};
+
 const krLinkNow = async () => {
   const I = window.MentriaIdentity;
   if (!krOn() || krBroken || I.isLinked() || !I.isUnlocked()) return false;
   try { await KR.link('identity', new Uint8Array(I.getSecret())); } catch (_) { return false; }
   krOpened = true;
   krLinkMode = null;
+  await krKeepRemembered();
   refreshIdUI();
   refreshPasskeyOffer(false);
   return true;
@@ -3196,8 +3205,11 @@ const krSetupLegacy = async ({ typed, verify } = {}) => {
   krSetupBusy = true;
   try { ok = await (await krUi()).showSetup(opts); } catch (_) { ok = false; }
   krSetupBusy = false;
-  if (ok && I.isLinked()) { krOpened = true; krLinkMode = null; }
-  else if (KR.state().unlocked) await krLinkNow();
+  if (ok && I.isLinked()) {
+    krOpened = true;
+    krLinkMode = null;
+    await krKeepRemembered();
+  } else if (KR.state().unlocked) await krLinkNow();
   refreshIdUI();
   refreshPasskeyOffer(false);
 };

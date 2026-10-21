@@ -360,6 +360,30 @@ async function vaultKcvMatches(page, bytes) {
   }, IDENTITY, bytes);
 }
 
+function deviceWrapKept(page) {
+  return page.evaluate(async () => (await indexedDB.databases()).some((d) => d.name === 'mentria-identity') && new Promise((ok) => {
+    const req = indexedDB.open('mentria-identity');
+    req.onsuccess = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains('keys')) { db.close(); ok(false); return; }
+      const g = db.transaction('keys', 'readonly').objectStore('keys').get('device-wrap');
+      g.onsuccess = () => { ok(!!g.result); db.close(); };
+      g.onerror = () => { ok(false); db.close(); };
+    };
+    req.onerror = () => ok(false);
+  }));
+}
+
+async function backdateIdentityLink(page) {
+  await page.evaluate((k) => {
+    const r = JSON.parse(localStorage.getItem(k));
+    const old = new Date(Date.now() - 31 * 86400000).toISOString();
+    r.services.identity.linked = old;
+    for (const p of r.services.identity.prior || []) p.linked = old;
+    localStorage.setItem(k, JSON.stringify(r));
+  }, KEYRING);
+}
+
 async function legacyOnRoot(page) {
   await page.evaluate(async () => {
     for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
@@ -1412,6 +1436,114 @@ check('a link that does not open the vault keeps the old lock', async () => {
   assert(vault.pass && vault.kcv === vault0.kcv, 'the old wrap is kept', Object.keys(vault));
   assert(!(await page.$('.m-ulayer')), 'no setup sheet for an already linked identity');
   clean_(rig);
+});
+
+check('comms carries a remembered identity over to Remember this device', async () => {
+  await fresh(false);
+  const page = await open('/comms/', { auth: true });
+  const rig = rigs.get(page);
+  await commsOnboard(page, 'Device Dee');
+  await waitVisible(page, '#comms-onboard-done', 40000);
+  const code = await text(page, '#comms-onboard-code');
+  await page.click('#comms-onboard-continue');
+  await waitVisible(page, '#comms-id-on');
+  const fp = await fingerprint(page);
+  await page.evaluate(() => MentriaIdentity.setDeviceUnlock(true));
+  const vault0 = await readJson(page, IDENTITY);
+  assert(vault0.pass && vault0.prf && vault0.device, 'seed: pass, prf and device wraps', Object.keys(vault0));
+  assert(await deviceWrapKept(page), 'seed: the device key is stored');
+  await setSwitch(page, true);
+  await page.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+  await waitVisible(page, '#comms-link-go', 30000);
+  assert(await page.evaluate(() => MentriaIdentity.isUnlocked()), 'the old device key opens the identity');
+  await page.click('#comms-link-go');
+  await waitStep(page, 'intro', 30000);
+  await page.click('.m-ulayer [data-act="next"]');
+  await waitStep(page, 'code');
+  await page.type('.m-ulayer input[name="saved-code"]', code);
+  await page.click('.m-ulayer [data-act="next"]');
+  await finishMethod(page, { passkey: false });
+  await until(() => readJson(page, KEYRING).then((r) => !!(r && r.services.identity)), 15000, 'identity linked');
+  await until(() => runtime(page).then((st) => st.hasDevice === true), 15000, 'Remember this device on in the keyring');
+  const vault = await readJson(page, IDENTITY);
+  assert(JSON.stringify(vault.device) === JSON.stringify(vault0.device) && vault.pass && vault.prf, 'the old wraps are kept until retirement', Object.keys(vault));
+  assert(await deviceWrapKept(page), 'the old device key is kept until retirement');
+  assert(await fingerprint(page) === fp, 'the same Comms identity');
+  await backdateIdentityLink(page);
+  await page.evaluateOnNewDocument(SIGNAL_PROBE);
+  await page.reload({ waitUntil: 'load' });
+  await until(async () => {
+    const r = await readJson(page, KEYRING);
+    return !!(r && r.retired && r.retired.identity);
+  }, 20000, 'identity marked retired');
+  const after = await readJson(page, IDENTITY);
+  assert(JSON.stringify(Object.keys(after).sort()) === JSON.stringify(['kcv', 'linked', 'v']) && after.kcv === vault0.kcv && after.v === 3, 'retirement deletes the old device wrap with the others', after);
+  await until(async () => !(await deviceWrapKept(page)), 10000, 'the old device key is deleted');
+  assert((await runtime(page)).hasDevice === true, 'Remember this device stays on');
+  clean_(rig);
+});
+
+check('a legacy device key survives retirement while the keyring has none', async () => {
+  await fresh(false);
+  const page = await open('/about/', { auth: true });
+  const rig = rigs.get(page);
+  await openAdvanced(page);
+  await press(page, '[data-reveal="about-identity-setup-form"]');
+  await page.type('#about-identity-setup-pass', PASSPHRASE);
+  await page.type('#about-identity-setup-pass2', PASSPHRASE);
+  await page.click('#about-identity-setup-btn');
+  await answerDialog(page);
+  await waitVisible(page, '#about-identity-unlocked');
+  await page.click('#about-identity-device');
+  await until(() => readJson(page, IDENTITY).then((v) => !!(v && v.device)), 15000, 'seed: device unlock on');
+  const vault0 = await readJson(page, IDENTITY);
+  assert(vault0.pass && vault0.device, 'seed: pass and device wraps', Object.keys(vault0));
+  await setSwitch(page, true);
+  const tools = await open('/tools/');
+  await tools.evaluate(async (u) => {
+    const m = await import(u);
+    await m.ready();
+    const made = await m.create({});
+    if (!m.confirmCode(made.code.replace(/-/g, '').slice(-4))) throw new Error('code not confirmed');
+  }, RUNTIME);
+  await page.bringToFront();
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => readJson(page, KEYRING).then((r) => !!(r && r.services.identity)), 20000, 'the identity opened by the old device key links into the open keyring');
+  await waitVisible(page, '#about-identity-keyring', 15000);
+  const st = await page.evaluate(async (u) => {
+    const m = await import(u);
+    return { hasDevice: m.state().hasDevice, bytes: m.hasRootBytes() };
+  }, RUNTIME);
+  assert(!st.bytes && !st.hasDevice, 'seed: the keyring could not take Remember this device without a confirm', st);
+  const ui = await page.evaluate(() => ({
+    row: !!document.getElementById('about-identity-device-row').getClientRects().length,
+    checked: document.getElementById('about-identity-device').checked,
+    layer: !!document.querySelector('.m-ulayer')
+  }));
+  assert(ui.row && !ui.checked && !ui.layer, 'Remember this device is offered, off, with no sheet', ui);
+  const kept = await readJson(page, IDENTITY);
+  assert(JSON.stringify(kept.device) === JSON.stringify(vault0.device), 'the old device wrap is kept at link time');
+  await tools.close();
+  await backdateIdentityLink(page);
+  await page.evaluateOnNewDocument(SIGNAL_PROBE);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(async () => {
+    const r = await readJson(page, KEYRING);
+    return !!(r && r.retired && r.retired.identity);
+  }, 20000, 'identity marked retired');
+  const vault = await readJson(page, IDENTITY);
+  assert(!vault.pass && !vault.prf && vault.v === 3 && vault.linked === true && vault.kcv === vault0.kcv, 'the other old wraps retire', vault);
+  assert(JSON.stringify(vault.device) === JSON.stringify(vault0.device), 'the old device wrap survives retirement', Object.keys(vault));
+  await sleep(500);
+  assert(await deviceWrapKept(page), 'the old device key survives retirement');
+  await setSwitch(page, false);
+  await page.reload({ waitUntil: 'load' });
+  await openAdvanced(page);
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'with the switch off the old device key still opens the identity');
+  clean_(rig);
+  clean_(rigs.get(tools));
 });
 
 check('production build never loads the runtime', async () => {

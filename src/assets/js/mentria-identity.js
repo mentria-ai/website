@@ -454,18 +454,19 @@
     return v && v.prf && typeof v.prf.credId === 'string' && v.prf.credId ? v.prf.credId : null;
   }
 
-  function retireLegacy(expectedKcv) {
+  function retireLegacy(expectedKcv, opts) {
     const vault = loadVault();
     if (!vault || typeof expectedKcv !== 'string' || !expectedKcv || vault.kcv !== expectedKcv) return false;
-    if (vault.pass || vault.prf || vault.device || vault.v !== 3 || vault.linked !== true) {
+    const dropDevice = !!(opts && opts.dropDevice === true);
+    if (vault.pass || vault.prf || (dropDevice && vault.device) || vault.v !== 3 || vault.linked !== true) {
       delete vault.pass;
       delete vault.prf;
-      delete vault.device;
+      if (dropDevice) delete vault.device;
       vault.v = 3;
       vault.linked = true;
       saveVault(vault);
     }
-    dropDeviceKey();
+    if (dropDevice) dropDeviceKey();
     return true;
   }
 

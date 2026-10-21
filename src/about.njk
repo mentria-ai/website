@@ -1670,7 +1670,7 @@ localeReload: true
         pkUnlockBtn.hidden = true;
         pkAddBtn.hidden = true;
         pkRemoveBtn.hidden = true;
-        var remember = krPrf === 'no' || !!s.hasDevice;
+        var remember = krPrf === 'no' || !!s.hasDevice || I.hasDeviceUnlock();
         deviceRow.hidden = !remember;
         deviceNote.hidden = !remember;
         deviceNote.textContent = COPY.rememberNote;
@@ -1701,7 +1701,7 @@ localeReload: true
         var kcv = cur ? await I.matchesVault(cur) : '';
         if (!kcv) return;
         var id = I.legacyPasskeyId();
-        if (!I.retireLegacy(kcv)) return;
+        if (!I.retireLegacy(kcv, { dropDevice: !!kr.state().hasDevice })) return;
         if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
           try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: id }); } catch (_) {}
         }
@@ -1752,12 +1752,21 @@ localeReload: true
       fromKeyring = true;
     }
 
+    async function keepRemembered() {
+      var I = window.MentriaIdentity;
+      if (!I.hasDeviceUnlock()) return;
+      try {
+        if (!kr.state().hasDevice) await kr.setRemember(true);
+      } catch (_) {}
+    }
+
     async function linkNow() {
       var I = window.MentriaIdentity;
       if (I.isLinked() || !I.isUnlocked()) return;
       await kr.link('identity', new Uint8Array(I.getSecret()));
       fromKeyring = true;
       linkMode = null;
+      await keepRemembered();
     }
 
     async function reconcileOnce() {
@@ -1827,8 +1836,11 @@ localeReload: true
       setupBusy = true;
       try { ok = await (await ui()).showSetup(o); } catch (_) { ok = false; }
       setupBusy = false;
-      if (ok && I.isLinked()) { fromKeyring = true; linkMode = null; }
-      else if (linkMode !== 'offer') linkMode = null;
+      if (ok && I.isLinked()) {
+        fromKeyring = true;
+        linkMode = null;
+        await keepRemembered();
+      } else if (linkMode !== 'offer') linkMode = null;
       reconcile();
     }
 

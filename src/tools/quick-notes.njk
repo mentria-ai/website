@@ -531,6 +531,8 @@ unlockTool: true
       ringSig = sig;
       skippedKv.clear();
       curOk.clear();
+    } else if (notesKeys.length === ring.length && ring.length && ring.every((k) => k.id)) {
+      return true;
     }
     notesKeys = ring;
     return ring.length > 0;
@@ -539,7 +541,7 @@ unlockTool: true
   function lockView(note) {
     const s = U.state();
     if (note.kv === 2) {
-      if (notesKeys.length) return 'open';
+      if (notesKeys.length && s.unlocked) return 'open';
       return !s.unlocked && s.setUp ? 'card' : 'missing';
     }
     if (note.kv) return 'missing';
@@ -659,6 +661,13 @@ unlockTool: true
     }
   }
 
+  function dropOld() {
+    try { saver.flush(); } catch (_) {}
+    sessionKey = null;
+    linkPending = false;
+    printEl.textContent = '';
+  }
+
   function openNotes() {
     openChain = openChain.then(openNotesNow, openNotesNow);
     return openChain;
@@ -678,15 +687,11 @@ unlockTool: true
         await retireIfReady();
       }
     } else {
-      if (notesKeys.length || (dropped && sessionKey)) {
+      if (dropped) dropOld();
+      if (notesKeys.length) {
         try { await saver.flush(); } catch (_) {}
       }
       notesKeys = [];
-      if (dropped) {
-        sessionKey = null;
-        linkPending = false;
-        printEl.textContent = '';
-      }
     }
     refreshEditor();
     renderList();
@@ -880,7 +885,7 @@ unlockTool: true
     if (one) {
       lockBtn.hidden = locked || !oneOK;
       lockBtn.textContent = COPY.lockBtn;
-      lockBtn.title = mode === 'unlocked' ? (U.state().setUp ? COPY.relockTitle : COPY.relockOldTitle) : COPY.lockTitleOne;
+      lockBtn.title = mode === 'unlocked' ? (U.state().unlocked ? COPY.relockTitle : COPY.relockOldTitle) : COPY.lockTitleOne;
       removeLockBtn.hidden = mode !== 'unlocked';
     } else if (!cryptoOK) {
       lockBtn.hidden = true;
@@ -1406,7 +1411,12 @@ unlockTool: true
       if (!m.enabled()) return;
       U = m;
       one = true;
-      U.onChange(() => { openNotes(); });
+      let seenUnlocked = false;
+      U.onChange((s) => {
+        if ((seenUnlocked || wasUnlocked) && s && !s.unlocked) dropOld();
+        seenUnlocked = !!(s && s.unlocked);
+        openNotes();
+      });
       try { await U.ready(); } catch (_) {}
       await openNotes();
     }).catch(() => {}).then(() => {

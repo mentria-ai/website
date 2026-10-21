@@ -856,6 +856,18 @@ check('a key that arrives later still opens its notes', async () => {
   assert((await store(page, 'quick_notes', 'salt')) == null && (await store(page, 'quick_notes', 'cred_id')) == null, 'no old salt or cred_id created');
 });
 
+const SLOW = (kind, ms) => {
+  const s = crypto.subtle;
+  if (!window.__decrypt) window.__decrypt = s.decrypt.bind(s);
+  const d = window.__decrypt;
+  s.decrypt = async (alg, key, data) => {
+    const aad = alg && alg.additionalData ? new TextDecoder().decode(alg.additionalData) : '';
+    const hit = kind === 'old' ? !aad : aad.startsWith('mentria-notes|v2|');
+    if (hit) await new Promise((r) => setTimeout(r, ms));
+    return d(alg, key, data);
+  };
+};
+
 const LINK_NEW = async (M) => {
   const m = await import(M);
   await m.ready();
@@ -965,6 +977,109 @@ check('two devices\' keys all open and move to the current key', async () => {
   });
   await reload(page, 'one');
   rec = await until(async () => { const r = await readJson(page, RECORD); return r && r.retired && r.retired.notes ? r : null; }, 15000, 'retired once every note is under the current key');
+});
+
+check('Later on the card keeps the old note, with the old Lock title', async () => {
+  await clean();
+  const page = await open(NOTES);
+  await authOn(page);
+  await settle(page, 'old');
+  await oneLegacy(page);
+  await page.evaluate(SWITCH_ON);
+  await reload(page, 'one');
+  await makeKeyring(page);
+  await lockKeyring(page);
+  await pick(page, 'Alpha');
+  await page.click('#qn-unlock-btn');
+  await waitView(page, (x) => x.card && x.later, 'card and Not now after the old tap', 30000);
+  await page.click('#qn-card-later');
+  const v = await waitView(page, (x) => x.text === 'alpha secret text', 'Not now opens the note the old way');
+  assert(v.lockTitle === QN.relock_old_title && v.removeBtn === QN.remove_lock_btn, 'Lock only forgets the old key here, and its title says so', v);
+  await page.click('#qn-lock-btn');
+  await waitView(page, (x) => x.text === null && x.raw === '' && x.unlockBtn, 'Lock hides the note again');
+});
+
+check('Export all right after a lock leaves old-style notes out', async () => {
+  const { page } = await failedConversion();
+  await page.evaluate(() => {
+    window.__downloads = [];
+    window.MentriaUI.downloadFile = (name, b) => { b.text().then((t) => window.__downloads.push({ name, t })); };
+  });
+  await page.evaluate(SLOW, 'old', 2500);
+  await nudge(page);
+  await page.evaluate(async (M) => {
+    const m = await import(M);
+    await m.lock();
+    document.getElementById('qn-export-all-btn').click();
+  }, MODULE);
+  await sleep(6000);
+  const got = await page.evaluate(() => window.__downloads.slice());
+  assert(!JSON.stringify(got).includes('alpha secret'), 'no old-style locked text in the file', got);
+  await waitView(page, (x) => x.text === null && x.raw === '' && x.unlockBtn, 'note hidden after the lock');
+});
+
+check('a just-locked note shows the card', async () => {
+  const { page } = await notesKeyring();
+  await writeNote(page, 'Mike', 'mike secret text', false);
+  await lockActive(page, 'Mike', 'mike secret text');
+  await writeNote(page, 'November', 'november secret text', true);
+  await lockActive(page, 'November', 'november secret text');
+  await waitView(page, (x) => x.text === 'november secret text', 'November open');
+  await page.evaluate(SLOW, 'v2', 2500);
+  await addNotes(page, [await keyedNote(page, btoa(String.fromCharCode(...Array.from({ length: 32 }, (_, i) => 255 - i))), 'Stray', 'stray text', 'unknownkid', Date.now())]);
+  await sleep(300);
+  const seen = await page.evaluate(async (M) => {
+    const note = document.getElementById('qn-locked-note');
+    const texts = [];
+    new MutationObserver(() => { if (note.textContent) texts.push(note.textContent); }).observe(note, { childList: true, characterData: true, subtree: true });
+    window.__noteTexts = texts;
+    const ta = document.getElementById('qn-textarea');
+    ta.value += ' more';
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    const m = await import(M);
+    await m.lock();
+    const tab = [...document.querySelectorAll('#qn-note-list .qn-note-tab')].find((b) => b.querySelector('.qn-note-tab__title').textContent === 'Mike');
+    tab.click();
+    return true;
+  }, MODULE);
+  assert(seen, 'switched notes right after the lock');
+  await waitView(page, (x) => x.card && x.raw === '', 'card for Mike', 20000);
+  await sleep(500);
+  const texts = await page.evaluate(() => window.__noteTexts.slice());
+  assert(!texts.includes(QN.key_missing), 'never says the key is on another device', texts);
+});
+
+check('a lock during conversion does not stop it', async () => {
+  const { page } = await notesKeyring();
+  await writeNote(page, 'Oscar', 'oscar secret text', false);
+  await lockActive(page, 'Oscar', 'oscar secret text');
+  const other = await open('/about/');
+  const two = await other.evaluate(LINK_NEW, MODULE);
+  const [k2, k1] = two.ring;
+  await waitBlob(page, (x) => { const n = byTitle(x, 'Oscar'); return n && n.kid === k2.id; }, 'Oscar moved to the second key', 20000);
+  await page.bringToFront();
+  await writeNote(page, 'Papa', 'papa plain text', true);
+  await sleep(1500);
+  await page.evaluate(() => {
+    const s = crypto.subtle;
+    const d = s.decrypt.bind(s);
+    s.decrypt = async (alg, key, data) => {
+      if (window.__slow && alg && alg.additionalData && new TextDecoder().decode(alg.additionalData).startsWith('mentria-notes|v2|')) await new Promise((r) => setTimeout(r, 4000));
+      return d(alg, key, data);
+    };
+    window.__slow = true;
+  });
+  const quebec = await keyedNote(other, k1.key, 'Quebec', 'quebec secret text', k1.id, Date.now() - 5000);
+  await addNotes(other, [quebec]);
+  await until(() => page.evaluate(() => [...document.querySelectorAll('#qn-note-list .qn-note-tab__title')].some((t) => t.textContent === 'Quebec')), 5000, 'Quebec arrived');
+  await sleep(500);
+  await page.click('#qn-lock-btn');
+  await answerDialog(page);
+  const papa = byTitle(await waitBlob(page, (x) => { const n = byTitle(x, 'Papa'); return n && n.kv === 2; }, 'Papa locked during the conversion', 20000), 'Papa');
+  assert(papa.kid === k2.id, 'Papa uses the current key', papa);
+  const moved = await waitBlob(page, (x) => { const n = byTitle(x, 'Quebec'); return n && n.kid === k2.id; }, 'Quebec still moved to the current key', 20000);
+  assert(byTitle(moved, 'Quebec').updatedAt === quebec.updatedAt + 1 && (await openWith(page, k2.key, byTitle(moved, 'Quebec'))) === 'quebec secret text', 'Quebec opens with the current key');
+  await page.evaluate(() => { window.__slow = false; });
 });
 
 check('old lock retires once every note converted', async () => {

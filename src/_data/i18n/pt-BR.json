@@ -3858,7 +3858,9 @@
         "erase_title": "Apagar o app Finanças neste dispositivo?",
         "erase_body": "Isso exclui deste navegador seu livro-caixa criptografado, suas chaves e configurações. Dispositivos pareados e arquivos de backup mantêm as cópias deles. Não dá para desfazer.",
         "erase_ok": "Apagar",
-        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here."
+        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here.",
+        "linked_failed": "This ledger opens with your one unlock, which didn't load on this page. Reload to try again.",
+        "linked_missing": "This ledger's key isn't in the one unlock on this device. Restore your Mentria backup here, or open Finance on a device where it opens."
       },
       "pair": {
         "title": "Adicionar este dispositivo",

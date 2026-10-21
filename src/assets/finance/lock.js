@@ -67,11 +67,18 @@ function busy(btn, on, label) {
   else { btn.textContent = btn.dataset.label || btn.textContent; btn.disabled = false; }
 }
 
+export function lockRoute(st, keyringOn) {
+  if (!st.setup) return 'welcome';
+  if (!st.linked && !(st.keyringLinked && !st.hasPass)) return 'unlock';
+  if (keyringOn && st.keyringLinked) return 'card';
+  return st.hasPass ? 'unlock' : 'linked';
+}
+
 export function showLock(root, opts) {
-  const st = opts.status;
-  if (!st.setup) welcome(root, opts);
-  else if ((st.linked && (opts.keyring || !st.hasPass)) || (opts.keyring && st.keyringLinked && !st.hasPass)) linkedScreen(root, opts);
-  else unlockScreen(root, opts);
+  const route = lockRoute(opts.status, !!opts.keyring);
+  if (route === 'welcome') welcome(root, opts);
+  else if (route === 'unlock') unlockScreen(root, opts);
+  else linkedScreen(root, opts, route === 'card');
 }
 
 function iosNote() {
@@ -285,7 +292,10 @@ function unlockScreen(root, opts) {
   };
   const opened = async (s, info) => {
     const bytes = opts.keyring ? new Uint8Array(s.root) : null;
-    await opts.onOpen(s);
+    try { await opts.onOpen(s); } catch (e) {
+      if (bytes) bytes.fill(0);
+      throw e;
+    }
     if (bytes) {
       let linked = false;
       try { linked = await opts.linkLegacy(bytes, info || {}); } finally { bytes.fill(0); }
@@ -332,9 +342,13 @@ function unlockScreen(root, opts) {
   } else if (!st.prf.length) setTimeout(() => pass.focus(), 50);
 }
 
-function linkedScreen(root, opts) {
+function linkedNote(opts) {
+  if (opts.keyring) return t('lock.linked_missing');
+  return opts.keyringWhy === 'failed' ? t('lock.linked_failed') : t('lock.linked_off');
+}
+
+function linkedScreen(root, opts, withCard) {
   const st = opts.status;
-  const K = opts.keyring;
   const err = errLine();
   const box = h('div');
   const inboxCount = h('span', { class: 'fmuted fsmall' });
@@ -342,12 +356,12 @@ function linkedScreen(root, opts) {
   frame(root,
     mark(st.deviceName || t('lock.locked')),
     iosNote(),
-    K ? box : h('p', { class: 'flock__lede' }, t('lock.linked_off')),
+    withCard ? box : h('p', { class: 'flock__lede' }, linkedNote(opts)),
     err,
     quickAddLocked(opts, inboxCount),
     h('div', { class: 'flock__alt', style: { marginTop: '18px' } }, h('button', { type: 'button', style: { color: 'var(--f-muted)' }, onclick: () => eraseDevice(root, opts) }, t('lock.erase')))
   );
-  if (!K) return;
+  if (!withCard) return;
   let opening = false;
   const open = async () => {
     if (opening) return;

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const mod = (name) => import(pathToFileURL(resolve(here, '../src/assets/finance/' + name)).href);
@@ -1311,6 +1312,53 @@ test('keyring helper: nothing loads outside a beta page', async () => {
   } finally {
     if (had) globalThis.document = prev; else delete globalThis.document;
   }
+});
+
+test('keyring helper: tells a switched-off device from a runtime that failed to load', async () => {
+  const keep = {};
+  for (const k of ['document', 'localStorage']) keep[k] = Object.getOwnPropertyDescriptor(globalThis, k);
+  const store = new Map();
+  globalThis.localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)) };
+  try {
+    globalThis.document = { documentElement: { dataset: { release: '2026.10.21' } } };
+    store.set('mentria.keyring.local', JSON.stringify({ enabled: true }));
+    assert.deepEqual(await KRM.load(), { K: null, why: 'off' });
+    globalThis.document = { documentElement: { dataset: { release: 'beta' } } };
+    assert.deepEqual(await KRM.load(), { K: null, why: 'failed' });
+    store.set('mentria.keyring.local', JSON.stringify({ enabled: false }));
+    assert.deepEqual(await KRM.load(), { K: null, why: 'off' });
+    store.set('mentria.keyring.local', 'not json');
+    assert.deepEqual(await KRM.load(), { K: null, why: 'off' });
+  } finally {
+    for (const k of Object.keys(keep)) {
+      if (keep[k]) Object.defineProperty(globalThis, k, keep[k]); else delete globalThis[k];
+    }
+  }
+});
+
+const LK = await mod('lock.js');
+
+test('lock screen: a ledger the one unlock cannot open falls back to its passphrase', () => {
+  const st = (o) => Object.assign({ setup: true, linked: false, keyringLinked: false, hasPass: false }, o);
+  assert.equal(LK.lockRoute(st({ setup: false }), true), 'welcome');
+  assert.equal(LK.lockRoute(st({ hasPass: true }), true), 'unlock');
+  assert.equal(LK.lockRoute(st({ hasPass: true, keyringLinked: true }), true), 'unlock');
+  assert.equal(LK.lockRoute(st({ linked: true, keyringLinked: true, hasPass: true }), true), 'card');
+  assert.equal(LK.lockRoute(st({ linked: true, keyringLinked: true }), true), 'card');
+  assert.equal(LK.lockRoute(st({ keyringLinked: true }), true), 'card');
+  assert.equal(LK.lockRoute(st({ linked: true, hasPass: true }), true), 'unlock');
+  assert.equal(LK.lockRoute(st({ linked: true }), true), 'linked');
+  assert.equal(LK.lockRoute(st({ linked: true, keyringLinked: true, hasPass: true }), false), 'unlock');
+  assert.equal(LK.lockRoute(st({ linked: true, keyringLinked: true }), false), 'linked');
+});
+
+test('package: Finance leaves the one unlock runtime and card to the site', () => {
+  const exts = createRequire(import.meta.url)(resolve(here, '../src/_data/extensions.js'));
+  const fin = exts.find((e) => e.id === 'finance');
+  const urls = fin.files.map((f) => f.u);
+  assert.ok(urls.includes('/assets/finance/keyring.js'));
+  assert.ok(urls.includes('/assets/finance/app.js'));
+  assert.deepEqual(urls.filter((u) => /mentria-unlock|unlock-copy/.test(u)), []);
 });
 
 let failed = 0;

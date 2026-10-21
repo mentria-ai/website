@@ -3858,7 +3858,9 @@
         "erase_title": "Erase Finance on this device?",
         "erase_body": "This deletes your encrypted ledger, keys and settings from this browser. Paired devices and backup files keep their copies. This can't be undone.",
         "erase_ok": "Erase",
-        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here."
+        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here.",
+        "linked_failed": "This ledger opens with your one unlock, which didn't load on this page. Reload to try again.",
+        "linked_missing": "This ledger's key isn't in the one unlock on this device. Restore your Mentria backup here, or open Finance on a device where it opens."
       },
       "pair": {
         "title": "Add this device",

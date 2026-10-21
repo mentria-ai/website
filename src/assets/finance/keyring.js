@@ -1,14 +1,28 @@
+const JS = '/assets/js/';
+const RUNTIME = JS + 'mentria-unlock.js';
+const CARD = JS + 'mentria-unlock-ui.js';
+const LOCAL = 'mentria.keyring.local';
 let runtimeP = null;
 let uiP = null;
+let failed = false;
 const copies = new Map();
 
 function beta() {
   try { return document.documentElement.dataset.release === 'beta'; } catch (_) { return false; }
 }
 
+function switchOn() {
+  try {
+    const l = JSON.parse(localStorage.getItem(LOCAL) || 'null');
+    return !!l && l.enabled === true;
+  } catch (_) { return false; }
+}
+
 export function runtime() {
   if (!beta()) return Promise.resolve(null);
-  if (!runtimeP) runtimeP = import('/assets/js/mentria-unlock.js').catch(() => { runtimeP = null; return null; });
+  if (!runtimeP) {
+    runtimeP = import(RUNTIME).then((m) => { failed = false; return m; }, () => { runtimeP = null; failed = true; return null; });
+  }
   return runtimeP;
 }
 
@@ -20,9 +34,15 @@ export async function active() {
   return K;
 }
 
+export async function load() {
+  const K = await active();
+  if (K) return { K, why: null };
+  return { K: null, why: beta() && failed && switchOn() ? 'failed' : 'off' };
+}
+
 export function ui() {
   if (!uiP) {
-    uiP = import('/assets/js/mentria-unlock-ui.js');
+    uiP = import(CARD);
     uiP.catch(() => { uiP = null; });
   }
   return uiP;

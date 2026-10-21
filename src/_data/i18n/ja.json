@@ -3858,7 +3858,9 @@
         "erase_title": "このデバイスの家計簿を消去しますか？",
         "erase_body": "このブラウザーから、暗号化された家計簿のデータ、キー、設定を削除します。ペアリング済みのデバイスやバックアップファイルにあるコピーは残ります。この操作は元に戻せません。",
         "erase_ok": "消去",
-        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here."
+        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here.",
+        "linked_failed": "This ledger opens with your one unlock, which didn't load on this page. Reload to try again.",
+        "linked_missing": "This ledger's key isn't in the one unlock on this device. Restore your Mentria backup here, or open Finance on a device where it opens."
       },
       "pair": {
         "title": "このデバイスを追加",

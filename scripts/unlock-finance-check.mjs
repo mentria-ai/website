@@ -31,6 +31,23 @@ const PROBE = () => {
   try {
     if (window.PublicKeyCredential) window.PublicKeyCredential.signalUnknownCredential = async (o) => { window.__signals.push(o); };
   } catch (_) {}
+  let hold = false;
+  try { hold = /\/extensions\/finance\/app\//.test(location.pathname) && localStorage.getItem('test.holdPages') === '1'; } catch (_) {}
+  if (!hold) return;
+  window.__holding = 'waiting';
+  const req = indexedDB.open('mentria-ext-finance');
+  req.onsuccess = () => {
+    const db = req.result;
+    const tx = db.transaction('pages', 'readwrite');
+    const store = tx.objectStore('pages');
+    window.__holding = 'held';
+    const spin = () => {
+      if (localStorage.getItem('test.holdPages') !== '1') { window.__holding = 'released'; return; }
+      store.count().onsuccess = spin;
+    };
+    spin();
+    tx.oncomplete = () => db.close();
+  };
 };
 
 const server = serve(PORT);
@@ -232,6 +249,15 @@ async function metaOf(frame) {
   });
 }
 
+async function rawWraps(frame) {
+  return frame.evaluate(async () => {
+    const db = await new Promise((ok, no) => { const q = indexedDB.open('mentria-ext-finance'); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error); });
+    const w = await new Promise((ok, no) => { const q = db.transaction('meta', 'readonly').objectStore('meta').get('wraps'); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error); });
+    db.close();
+    return JSON.parse(JSON.stringify(w));
+  });
+}
+
 async function ledgerOf(frame, pass) {
   at('ledger');
   return frame.evaluate(async (pw) => {
@@ -348,6 +374,17 @@ async function fakeAway(frame, minutes) {
 }
 
 const shared = {};
+
+check('the Finance package leaves the runtime to the site', async () => {
+  const r = await rig({ authenticator: false });
+  try {
+    await r.page.goto(ORIGIN + '/robots.txt', { waitUntil: 'load' });
+    const urls = await r.page.evaluate(async () => (await (await fetch('/extensions/finance/files.json')).json()).files.map((f) => f.u));
+    assert(urls.includes('/assets/finance/keyring.js') && !urls.some((u) => /mentria-unlock|unlock-copy/.test(u)), 'files.json lists Finance files only', urls.filter((u) => !u.startsWith('/assets/finance/')));
+  } finally {
+    await done(r);
+  }
+});
 
 check('switch off keeps the old flow', async () => {
   const r = await rig();
@@ -508,6 +545,44 @@ check('lock in one tab locks the other', async () => {
   await b.close();
 });
 
+check('a lock while a linked ledger opens still locks it', async () => {
+  const r = shared.fresh;
+  assert(r, 'needs the new ledger');
+  const a = r.page;
+  const fa = await frameOf(a);
+  await opened(fa);
+  await a.evaluate(() => localStorage.setItem('test.holdPages', '1'));
+  const b = await newPage(r, false);
+  try {
+    at('hold');
+    await b.goto(ORIGIN + STORE, { waitUntil: 'load' });
+    await b.waitForFunction(() => {
+      const f = document.getElementById('xr-frame');
+      try { return !!(f && f.contentWindow && f.contentWindow.__holding === 'held' && f.contentWindow.FIN_COPY); } catch (_) { return false; }
+    }, { timeout: 60000, polling: 150 });
+    const fb = await (await b.$('#xr-frame')).contentFrame();
+    await sleep(2500);
+    const mid = await fb.evaluate(() => ({ main: !!document.getElementById('fin-main'), lock: !!document.querySelector('.flock') }));
+    assert(!mid.main && !mid.lock, 'the second tab is still opening its ledger', mid);
+    await a.bringToFront();
+    await lockTop(fa);
+    await cardShown(fa);
+    const locked = await until(async () => !(await runtimeState(fb)).unlocked, 15000);
+    assert(locked, 'the opening tab heard the lock');
+    await a.evaluate(() => localStorage.removeItem('test.holdPages'));
+    await b.bringToFront();
+    await cardShown(fb);
+    await sleep(800);
+    assert(!(await fb.$('#fin-main')), 'the ledger that was opening ends locked');
+  } finally {
+    await a.evaluate(() => localStorage.removeItem('test.holdPages')).catch(() => {});
+    await b.close().catch(() => {});
+  }
+  const fa2 = await frameOf(a);
+  await cardCode(fa2, '.flock .m-unlock', shared.freshCode);
+  await opened(fa2);
+});
+
 check('export with keys works while unlocked', async () => {
   const r = shared.fresh;
   assert(r, 'needs the new ledger');
@@ -598,6 +673,79 @@ check('legacy device unlock turns on remember', async () => {
   await done(r);
 });
 
+check('adopting a linked ledger hands its device unlock to Remember', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: true });
+    await setSwitch(page, true);
+    await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
+    const made = await page.evaluate(async () => {
+      const M = await import('/assets/js/mentria-unlock.js');
+      const V = await import('/assets/finance/vault.js');
+      await M.create({});
+      await M.setRemember(true);
+      const s = await V.unlockDevice();
+      await M.link('finance', s.root);
+      return M.state();
+    });
+    assert(made.unlocked && made.hasDevice && made.linked.includes('finance'), 'a remembered keyring already holds this ledger', made);
+    frame = await store(page);
+    await opened(frame);
+    const ok = await until(async () => !(await metaOf(frame)).wrapKinds.includes('device'), 15000);
+    const meta = await metaOf(frame);
+    const st = await runtimeState(frame);
+    const facts = await frame.evaluate(async () => ({ sheet: !!document.querySelector('.m-ulayer'), bytes: (await import('/assets/js/mentria-unlock.js')).hasRootBytes() }));
+    assert(!(await frame.evaluate(() => window.__sawLock)) && !facts.sheet, 'the ledger opens with no screen and no setup sheet', facts);
+    assert(ok && meta.linked && meta.wrapKinds.join() === 'pass,recovery', 'Finance\'s device unlock is gone and its passphrase stays', meta);
+    assert(st.hasDevice && !facts.bytes, 'Remember stays on without asking to confirm', { st, facts });
+  } finally {
+    await done(r);
+  }
+});
+
+check('recovery code unlock keeps the Finance code', async () => {
+  const r = await rig();
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    const code = await legacySetup(frame, { passkey: false, device: false });
+    await setSwitch(page, true);
+    frame = await store(page);
+    await shown(frame, '#fin-pass', 20000);
+    await pressText(frame, '.flock', FIN.lock.use_recovery);
+    await (await typeIn(frame, '#fin-pass', code.toLowerCase().replace(/-/g, ' '))).press('Enter');
+    await present(frame, '#fin-main', 60000);
+    await waitStep(frame, 'intro');
+    await press(frame, '.m-ulayer [data-act="next"]');
+    await waitStep(frame, 'code');
+    const info = await frame.evaluate(() => {
+      const keep = document.querySelector('.m-ulayer input[name="code-choice"][value="keep"]');
+      const next = document.querySelector('.m-ulayer [data-act="next"]');
+      return { keep: !!keep && keep.checked, saved: !!document.querySelector('.m-ulayer input[name="saved-code"]'), next: !!next && !next.disabled };
+    });
+    assert(info.keep && !info.saved && info.next, 'the Finance code is kept without typing it again', info);
+    await press(frame, '.m-ulayer [data-act="next"]');
+    await waitStep(frame, 'passkey');
+    assert(!(await frame.$('.m-ulayer input[name="keep-pass"]')), 'no passphrase to keep after a code unlock');
+    await press(frame, '.m-ulayer [data-act="skip-passkey"]');
+    await layerGone(frame);
+    const ok = await until(async () => (await metaOf(frame)).linked, 15000);
+    const st = await runtimeState(frame);
+    assert(ok && st.linked.includes('finance') && st.codeConfirmed && st.passkeys === 0 && !st.hasPass, 'linked with the Finance code as the Mentria code', st);
+    await sleep(1200);
+    const ask = await frame.evaluate((title) => [...document.querySelectorAll('dialog.fsheet')].some((d) => d.textContent.includes(title)), FIN.lock.new_pass_title);
+    assert(!ask, 'no new Finance passphrase is asked for');
+    await lockTop(frame);
+    await cardShown(frame);
+    await cardCode(frame, '.flock .m-unlock', code);
+    await opened(frame);
+  } finally {
+    await done(r);
+  }
+});
+
 check('retirement deletes the old locks', async () => {
   const r = shared.legacy;
   assert(shared.legacyLinked, 'needs the linked ledger');
@@ -606,6 +754,7 @@ check('retirement deletes the old locks', async () => {
   await opened(frame);
   const before = await metaOf(frame);
   assert(before.wrapKinds.join() === 'pass,prf,recovery', 'nothing retires inside 30 days', before);
+  shared.wrapsBefore = await rawWraps(frame);
   const legacyIds = before.prfIds.map((id) => id.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
   await page.evaluate((k) => {
     const rec = JSON.parse(localStorage.getItem(k));
@@ -630,6 +779,35 @@ check('retirement deletes the old locks', async () => {
   const again = await frame.evaluate(() => window.__signals.length);
   assert(again === 0, 'retirement runs once', again);
   assert(!r.errors.length, 'no page errors', r.errors);
+  shared.retired = rec.retired.finance;
+});
+
+check('retired elsewhere: leftover wraps go and stay gone', async () => {
+  const r = shared.legacy;
+  assert(shared.retired && shared.wrapsBefore, 'needs the retired ledger');
+  const page = r.page;
+  let frame = await frameOf(page);
+  await opened(frame);
+  await frame.evaluate(async (wraps) => {
+    const db = await new Promise((ok, no) => { const q = indexedDB.open('mentria-ext-finance'); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error); });
+    await new Promise((ok, no) => { const tx = db.transaction('meta', 'readwrite'); tx.objectStore('meta').put(wraps, 'wraps'); tx.oncomplete = ok; tx.onerror = () => no(tx.error); });
+    db.close();
+  }, shared.wrapsBefore);
+  const planted = await metaOf(frame);
+  assert(planted.wrapKinds.join() === 'pass,prf,recovery', 'this device still holds its old wraps', planted);
+  const ids = planted.prfIds.map((id) => id.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+  await page.reload({ waitUntil: 'load' });
+  frame = await frameOf(page);
+  await opened(frame);
+  const ok = await until(async () => (await metaOf(frame)).wrapKinds.length === 0, 20000);
+  await sleep(1500);
+  const l = await ledgerOf(frame);
+  const rec = await record(page);
+  const signals = await frame.evaluate(() => window.__signals);
+  assert(ok, 'the leftover wraps are deleted', await metaOf(frame));
+  assert(!l.pass && !l.recovery && l.passRemoved && l.recoveryRemoved, 'they are not published back into the ledger', l);
+  assert(rec.retired.finance === shared.retired, 'the retirement date is unchanged', rec.retired);
+  assert(signals.length === ids.length && signals.every((s, i) => s.credentialId === ids[i]), 'this device signals its own old passkeys', { signals, ids });
 });
 
 let failed = 0;

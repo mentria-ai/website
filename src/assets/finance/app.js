@@ -390,7 +390,21 @@ async function retireLegacy() {
 
 async function sameAsKeyring(bytes) {
   const cur = await app.K.secret('finance');
-  return !!cur && KR.sameBytes(cur, bytes);
+  try { return !!cur && KR.sameBytes(cur, bytes); } finally { if (cur) cur.fill(0); }
+}
+
+function keyringLockedNow() {
+  return !!(app.linked && app.K && !app.K.state().unlocked);
+}
+
+async function convertDevice() {
+  const K = app.K;
+  const wraps = await db.getMeta('wraps');
+  if (!K || !wraps || !wraps.device) return;
+  try {
+    if (!K.state().hasDevice) await K.setRemember(true);
+    await V.setDeviceUnlock(null, false);
+  } catch (_) {}
 }
 
 async function ensureLinked(bytes) {
@@ -405,15 +419,10 @@ async function ensureLinked(bytes) {
 
 async function finishLink() {
   await V.markLinked();
-  const wraps = await db.getMeta('wraps');
-  if (wraps && wraps.device) {
-    try {
-      await app.K.setRemember(true);
-      await V.setDeviceUnlock(null, false);
-    } catch (_) {}
-  }
+  await convertDevice();
   if (app.engine) {
     app.linked = true;
+    if (keyringLockedNow()) { lock(); return; }
     scheduleRender();
   } else {
     start();
@@ -497,8 +506,12 @@ async function openLinked() {
   try {
     const bytes = await K.secret('finance');
     if (!bytes) throw new Error('not-linked');
-    const s = await V.openLinked(bytes);
-    if (!(await db.getMeta('linked'))) await V.markLinked();
+    let s;
+    try { s = await V.openLinked(bytes); } finally { bytes.fill(0); }
+    if (!(await db.getMeta('linked'))) {
+      await V.markLinked();
+      await convertDevice();
+    }
     await openSession(s);
     return true;
   } finally {
@@ -561,6 +574,7 @@ export async function openSession(session) {
   if (!isWriter) engine.waitForWriter();
   app.engine = engine;
   app.ledger = new Ledger(engine);
+  if (keyringLockedNow()) { lock(); return; }
   U.setNumberLocale(app.ledger.settings().locale || null);
   engine.addEventListener('change', () => { scheduleRender(); updateWidgetSoon(); });
   engine.addEventListener('writer', () => { scheduleRender(); afterWriter().then(() => updateWidget()); });
@@ -717,7 +731,8 @@ async function start() {
   const root = app.root;
   await loadLocal();
   try { await V.refreshDeviceName(); } catch (_) {}
-  const K = await KR.active();
+  const kr = await KR.load();
+  const K = kr.K;
   app.K = K;
   watchKeyring(K);
   const ks = K ? K.state() : null;
@@ -734,6 +749,7 @@ async function start() {
     saveLocal,
     publishWrap,
     keyring: K,
+    keyringWhy: kr.why,
     openLinked,
     linkLegacy,
     createLinked,

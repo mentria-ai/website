@@ -24,7 +24,7 @@ const SEEN_MS = 15000;
 const DAY_MS = 86400000;
 const PROBE_MS = 2000;
 
-const mem = { root: null, bytes: null, kcv: null, epoch: null, code: null, codeSalt: null, hasDevice: false, prf: 'unknown', launch: null };
+const mem = { root: null, bytes: null, kcv: null, epoch: null, code: null, codeSalt: null, pending: null, hasDevice: false, prf: 'unknown', launch: null };
 const diag = { liveOther: null, marker: null, seenAgeMs: null, wasDiscarded: null, mobile: null, navType: null, standalone: null, decision: null };
 const listeners = new Set();
 let lastKey = null;
@@ -128,7 +128,15 @@ function store(S, rec) {
 }
 
 async function writeRecord(rec) {
-  store(await storeReady(), rec);
+  const S = await storeReady();
+  await exclusive(async () => {
+    const now = readRecord();
+    if (!now) throw new Error('no-keyring');
+    const next = now.kcv === rec.kcv ? mergeRecords(now, rec) : null;
+    if (!next) throw new Error('wrong-key');
+    if (canon(next) === canon(now)) return;
+    store(S, next);
+  });
 }
 
 function exclusive(fn) {
@@ -144,14 +152,15 @@ function canon(v) {
 
 function heal(e) {
   if (e.newValue == null || e.oldValue == null || !enabled()) return;
-  const old = parse(e.oldValue);
-  if (!isRecord(old)) return;
+  const sides = [parse(e.oldValue), parse(e.newValue)].filter(isRecord);
+  if (!sides.length) return;
   exclusive(async () => {
     const S = await storeReady();
     const now = readRecord();
     if (!now) return;
-    const next = mergeRecords(now, old);
-    if (!next || canon(next) === canon(now)) return;
+    let next = now;
+    for (const side of sides) next = mergeRecords(next, side) || next;
+    if (canon(next) === canon(now)) return;
     store(S, next);
     notify(true);
   }).catch(() => {});
@@ -248,6 +257,7 @@ function forget() {
   drop();
   mem.code = null;
   mem.codeSalt = null;
+  mem.pending = null;
 }
 
 function notify(force) {
@@ -1087,29 +1097,39 @@ export async function regenerateCode() {
   const wrap = await wrapWithCode(mem.bytes, text);
   const backup = await makeBackupEntry(mem.root, text);
   const fresh = sameKeyring(rec);
-  fresh.wraps.recovery = wrap;
-  fresh.backup = backup;
-  fresh.codeConfirmed = null;
-  fresh.changed = wrap.created;
-  await writeRecord(fresh);
-  mem.code = text;
-  mem.codeSalt = wrap.salt;
+  mem.pending = { text, wrap, backup, kcv: fresh.kcv, base: fresh.wraps.recovery.salt };
   notify(true);
   return text;
 }
 
 export function confirmCode(last4) {
-  if (!mem.code) return false;
-  const want = mem.code.replace(/-/g, '').slice(-4).toUpperCase();
+  const p = mem.pending;
+  const text = p ? p.text : mem.code;
+  if (!text) return false;
+  const want = text.replace(/-/g, '').slice(-4).toUpperCase();
   const got = String(last4 == null ? '' : last4).replace(/[\s-]/g, '').toUpperCase();
   if (got.length !== 4 || got !== want) return false;
   const S = window.MentriaStore;
   const rec = readRecord();
-  if (!S || !rec || rec.wraps.recovery.salt !== mem.codeSalt) return false;
+  if (!S || !rec) return false;
+  if (p ? rec.kcv !== p.kcv || rec.wraps.recovery.salt !== p.base : rec.wraps.recovery.salt !== mem.codeSalt) {
+    if (p) mem.pending = null;
+    return false;
+  }
   const at = iso();
-  rec.codeConfirmed = at;
-  rec.changed = at;
-  if (S.set(NS, KEY, rec) !== true) return false;
+  const cand = Object.assign({}, rec, { codeConfirmed: at, changed: at });
+  if (p) {
+    cand.wraps = Object.assign({}, rec.wraps, { recovery: p.wrap });
+    cand.backup = p.backup;
+  }
+  const now = readRecord();
+  const next = now && now.kcv === rec.kcv ? mergeRecords(now, cand) : null;
+  if (!next || S.set(NS, KEY, next) !== true) return false;
+  if (p) {
+    mem.pending = null;
+    mem.code = p.text;
+    mem.codeSalt = p.wrap.salt;
+  }
   post('record');
   notify(true);
   return true;

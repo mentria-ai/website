@@ -6237,6 +6237,7 @@
     "foldin_passkey": "Use its passkey",
     "foldin_submit": "Bring it in",
     "foldin_done": "Done. What it opened now opens with this unlock.",
+    "code_close_again": "Your new code isn't saved yet. Type its last four characters to switch to it, or close again to keep your old code.",
     "services": {
       "identity": "chats",
       "totp": "codes",

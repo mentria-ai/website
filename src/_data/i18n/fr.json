@@ -6237,6 +6237,7 @@
     "foldin_passkey": "Utiliser sa clé d'accès",
     "foldin_submit": "L'intégrer",
     "foldin_done": "C'est fait. Ce qu'il ouvrait s'ouvre maintenant avec ce déverrouillage.",
+    "code_close_again": "Votre nouveau code n'est pas encore enregistré. Saisissez ses quatre derniers caractères pour l'adopter, ou fermez à nouveau pour garder l'ancien code.",
     "services": {
       "identity": "discussions",
       "totp": "codes",

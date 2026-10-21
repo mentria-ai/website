@@ -1184,7 +1184,8 @@ export async function showCode(code) {
           finish(false);
           return true;
         }
-        say(parts.msg, T, 'code_save_first', 'warn');
+        free = true;
+        say(parts.msg, T, 'code_close_again', 'warn');
         return false;
       }
     });

@@ -312,7 +312,10 @@ const notePeer = async (msg) => {
     const keyring = opens ? 1 : 0;
     const prev = ownEntry(record.devices, id);
     if (prev && prev.name === name && prev.app === app && prev.keyring === keyring && Date.now() - Date.parse(prev.lastSeen) < TOUCH_MS) return;
-    window.MentriaStore.set('keyring', 'vault', core.touchDevice(record, id, { name, app, keyring, now: Date.now() }));
+    const touched = core.touchDevice(record, id, { name, app, keyring, now: Date.now() });
+    const now = localKeyring();
+    const next = now && now.kcv === record.kcv ? core.mergeRecords(now, touched) : null;
+    if (next) window.MentriaStore.set('keyring', 'vault', next);
   } catch (_) {}
 };
 

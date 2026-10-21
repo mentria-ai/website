@@ -1036,12 +1036,13 @@ check('passkey clicks reach WebAuthn first', async () => {
   assert(launchCalls[0] === 'get:true', 'launch: the passkey button reaches navigator.credentials.get inside the click', launchCalls);
 });
 
-check('showCode cannot be dismissed before the check', async () => {
+check('showCode warns once before a close keeps the old code', async () => {
   await clean();
   const page = await open('/beta/unlock/', NO_CLOSE_WATCHER);
   await enableOnLab(page);
-  await createOnLab(page);
+  const old = await createOnLab(page);
   await modules(page);
+  const raw0 = await page.evaluate(() => localStorage.getItem('mentria.store.keyring.vault'));
   const fresh = await page.evaluate(async () => { window.__fresh = await window.__m.regenerateCode(); return window.__fresh; });
   await start(page, '(ui) => ui.showCode(window.__fresh)');
   await page.waitForSelector('.m-ulayer .m-ucode');
@@ -1051,23 +1052,34 @@ check('showCode cannot be dismissed before the check', async () => {
   });
   assert(!ui.notNow && ui.copy && ui.save && ui.closeWatcher === 'undefined', 'no Not now; Copy and Save as file stay', ui);
   await page.keyboard.press('Escape');
-  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.code_save_first);
-  assert(await layerOpen(page) && await page.evaluate(() => window.__r === null), 'Escape keeps the code on screen');
-  for (let i = 0; i < 2; i++) {
-    await page.evaluate(() => {
-      const el = document.querySelector('.m-ulayer .m-usheet__msg');
-      el.textContent = '';
-      history.back();
-    });
-    await sleep(600);
-    assert(await layerOpen(page), 'Back keeps the code on screen', i);
-    await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.code_save_first);
-  }
-  assert(await page.evaluate(() => window.__r === null && location.pathname === '/beta/unlock/'), 'still on the page, not resolved');
-  await page.type('.m-ulayer input[name="code-check"]', fresh.slice(-4));
+  await waitMsg(page, '.m-ulayer .m-usheet__msg', EN.code_close_again);
+  assert(await layerOpen(page) && await page.evaluate(() => window.__r === null), 'the first Escape keeps the code on screen and says what a close does');
+  await page.evaluate(() => history.back());
+  const closed = await settled(page, 5000);
+  assert(closed.ok && closed.v === false && !(await layerOpen(page)), 'Back then closes it with false', closed);
+  const kept = await page.evaluate(async ([raw0, old, fresh]) => {
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+    return {
+      same: localStorage.getItem('mentria.store.keyring.vault') === raw0,
+      old: await C.openWithCode(rec.wraps.recovery, old).then(() => true, () => false),
+      fresh: await C.openWithCode(rec.wraps.recovery, fresh).then(() => true, () => false)
+    };
+  }, [raw0, old, fresh]);
+  assert(kept.same && kept.old && !kept.fresh, 'closing keeps the old code', kept);
+  const next = await page.evaluate(async () => { window.__fresh = await window.__m.regenerateCode(); return window.__fresh; });
+  await start(page, '(ui) => ui.showCode(window.__fresh)');
+  await page.waitForSelector('.m-ulayer .m-ucode');
+  await page.type('.m-ulayer input[name="code-check"]', next.slice(-4));
   await page.click('.m-ulayer [data-act="done"]');
   const r = await settled(page, 10000);
   assert(r.ok && r.v === true && !(await layerOpen(page)) && await page.evaluate(() => window.__m.state().codeConfirmed), 'the last four close it and confirm the code', r);
+  const now = await page.evaluate(async (next) => {
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+    return C.openWithCode(rec.wraps.recovery, next).then(() => true, () => false);
+  }, next);
+  assert(now, 'the confirmed code is the one that opens');
 });
 
 check('setup resolves true only when the service is linked', async () => {

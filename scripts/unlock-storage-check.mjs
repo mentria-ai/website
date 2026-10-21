@@ -965,6 +965,35 @@ check('restore replace and keep both keep the other keyring on the side', async 
   assert.equal(raw('keyring.vault'), now, 'no stash, no replace');
 });
 
+check('recording a peer keeps a keyring write that landed after its read', async () => {
+  reset();
+  const k = await keyring();
+  put('keyring.vault', k.record, Date.now() - 3600000);
+  const extra = await U.sealService(k.rootKey, 'notes', rand(32), Date.now());
+  const get = Store.get;
+  let seen = 0;
+  Store.get = function (ns, key) {
+    const v = get.call(this, ns, key);
+    if (ns === 'keyring' && key === 'vault' && String(new Error().stack).includes('notePeer') && ++seen === 2) {
+      const cur = JSON.parse(raw('keyring.vault'));
+      cur.services.notes = extra;
+      ls.setItem('mentria.store.keyring.vault', JSON.stringify(cur));
+    }
+    return v;
+  };
+  try {
+    const r = await joinRoom();
+    await r.deliver(snapshotOf({ 'keyring.vault': raw('keyring.vault') }, { app: 'beta', keyring: 1, device: { id: 'dev-b', name: 'Phone' } }));
+    await Sync.disconnect();
+  } finally {
+    Store.get = get;
+  }
+  const rec = Store.get('keyring', 'vault');
+  assert.ok(seen >= 2, 'harness: the peer write read the record');
+  assert.ok(rec.devices['dev-b'], 'the peer is recorded');
+  assert.ok(rec.services.notes && rec.services.notes.id === extra.id, 'the write that landed after the read is kept');
+});
+
 check('both keyring prompts say what stops opening until it is brought back in', async () => {
   const en = enNow();
   for (const text of [en.about.sync_vault_keyring, en.common.restore_keyring_vault]) {

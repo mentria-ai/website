@@ -6237,6 +6237,7 @@
     "foldin_passkey": "Usar su llave de acceso",
     "foldin_submit": "Incluirlo",
     "foldin_done": "Listo. Lo que abría ahora se abre con este desbloqueo.",
+    "code_close_again": "Tu código nuevo aún no se ha guardado. Escribe sus cuatro últimos caracteres para cambiar a él, o vuelve a cerrar para conservar el código anterior.",
     "services": {
       "identity": "chats",
       "totp": "códigos",

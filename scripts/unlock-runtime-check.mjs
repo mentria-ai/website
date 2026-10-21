@@ -1794,6 +1794,137 @@ check('fold in another keyring with its passkey', async () => {
   assert(r.others === 0 && r.notes.includes(r.want.na) && r.notes.includes(r.want.nb), 'the passkey fold-in brings the secrets', r);
 });
 
+check('a new recovery code takes effect only after its last four', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  const first = await createOnLab(page);
+  await runtime(page);
+  const r = await page.evaluate(async (oldCode) => {
+    const m = window.__m;
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const key = 'mentria.store.keyring.vault';
+    const rd = () => JSON.parse(localStorage.getItem(key));
+    const opens = (code) => C.openWithCode(rd().wraps.recovery, code).then(() => true, () => false);
+    const out = {};
+    out.firstConfirm = m.confirmCode(oldCode.replace(/-/g, '').slice(-4));
+    const raw0 = localStorage.getItem(key);
+    const fresh = await m.regenerateCode();
+    out.unchanged = localStorage.getItem(key) === raw0;
+    out.confirmedMeanwhile = m.state().codeConfirmed;
+    out.oldOpens = await opens(oldCode);
+    out.newOpens = await opens(fresh);
+    out.wrong = m.confirmCode('ZZZZ');
+    out.unchangedAfterWrong = localStorage.getItem(key) === raw0;
+    out.right = m.confirmCode(fresh.replace(/-/g, '').slice(-4));
+    out.newNow = await opens(fresh);
+    out.oldNow = await opens(oldCode);
+    out.confirmed = m.state().codeConfirmed;
+    const bk = await m.backupKey();
+    const fromCode = await C.backupKeyFromCode(fresh, bk.salt);
+    out.backup = bk.key.length === 32 && bk.key.every((b, i) => b === fromCode[i]);
+    window.__fresh = fresh;
+    window.__second = await m.regenerateCode();
+    return out;
+  }, first);
+  assert(r.firstConfirm && r.unchanged && r.confirmedMeanwhile, 'regenerateCode writes nothing before the last four', r);
+  assert(r.oldOpens && !r.newOpens, 'until then the old code still opens and the new one does not', r);
+  assert(r.wrong === false && r.unchangedAfterWrong, 'a wrong last four writes nothing', r);
+  assert(r.right && r.newNow && !r.oldNow && r.confirmed && r.backup, 'the right last four writes the new code and its backup entry', r);
+  const fresh = await page.evaluate(() => window.__fresh);
+  const second = await page.evaluate(() => window.__second);
+  const raw1 = await page.evaluate(() => localStorage.getItem('mentria.store.keyring.vault'));
+  await page.reload({ waitUntil: 'load' });
+  await runtime(page);
+  const after = await page.evaluate(async ([fresh, second]) => {
+    const m = window.__m;
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+    return {
+      late: m.confirmCode(second.replace(/-/g, '').slice(-4)),
+      raw: localStorage.getItem('mentria.store.keyring.vault'),
+      fresh: await C.openWithCode(rec.wraps.recovery, fresh).then(() => true, () => false),
+      second: await C.openWithCode(rec.wraps.recovery, second).then(() => true, () => false)
+    };
+  }, [fresh, second]);
+  assert(after.late === false && after.raw === raw1 && after.fresh && !after.second, 'a reload drops a code that was never confirmed', after);
+});
+
+check('every record write merges with what is stored now', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  const c = await createOnLab(page);
+  await runtime(page);
+  const r = await page.evaluate(async (code) => {
+    const m = window.__m;
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const S = window.MentriaStore;
+    const key = 'mentria.store.keyring.vault';
+    const rd = () => JSON.parse(localStorage.getItem(key));
+    const rnd = () => crypto.getRandomValues(new Uint8Array(32));
+    const bytes = await C.openWithCode(rd().wraps.recovery, code);
+    const root = await C.rootKeyFrom(bytes);
+    let n = 0;
+    const arm = async () => {
+      const name = ['identity', 'totp', 'notes', 'finance'][n++ % 4];
+      const entry = await C.sealService(root, name, rnd(), Date.now() + n);
+      const get = S.get;
+      S.get = function (...a) {
+        const v = get.apply(this, a);
+        if (a[0] === 'keyring' && a[1] === 'vault') {
+          S.get = get;
+          const cur = JSON.parse(localStorage.getItem(key));
+          cur.services[name] = entry;
+          localStorage.setItem(key, JSON.stringify(cur));
+        }
+        return v;
+      };
+      return () => !!rd().services[name] && rd().services[name].id === entry.id;
+    };
+    const out = {};
+    let kept = await arm();
+    out.confirm = m.confirmCode(code.replace(/-/g, '').slice(-4)) && !!rd().codeConfirmed;
+    out.confirmKept = kept();
+    const fake = await C.wrapWithPrf(bytes, rnd(), { id: C.b64u(rnd().slice(0, 16)), salt: C.b64u(rnd()), label: 'fake' });
+    const withKey = rd();
+    withKey.wraps.prf.push(fake);
+    S.set('keyring', 'vault', withKey);
+    kept = await arm();
+    await m.removePasskey(fake.id);
+    out.removed = !!rd().wraps.prf.find((e) => e.id === fake.id && e.removed);
+    out.removeKept = kept();
+    await m.setPassphrase('correct horse battery');
+    kept = await arm();
+    await m.setPassphrase(null);
+    out.passGone = !!rd().wraps.pass.removed;
+    out.passKept = kept();
+    kept = await arm();
+    await m.markRetired('totp');
+    out.retired = !!rd().retired.totp;
+    out.retireKept = kept();
+    const base = rd();
+    const lost = JSON.parse(JSON.stringify(base));
+    lost.services.notes = await C.sealService(root, 'notes', rnd(), Date.now() + 99999);
+    const newer = JSON.stringify(lost);
+    const stale = JSON.parse(JSON.stringify(base));
+    delete stale.services.notes;
+    stale.devices.other = { name: 'x', lastSeen: new Date().toISOString(), app: '', keyring: 1 };
+    localStorage.setItem(key, JSON.stringify(stale));
+    window.dispatchEvent(new StorageEvent('storage', { key, oldValue: JSON.stringify(base), newValue: newer, storageArea: localStorage }));
+    const end = Date.now() + 3000;
+    while (Date.now() < end && !(rd().services.notes && rd().services.notes.id === lost.services.notes.id)) await new Promise((res) => setTimeout(res, 50));
+    out.healNew = !!rd().services.notes && rd().services.notes.id === lost.services.notes.id && !!rd().devices.other;
+    out.valid = C.isRecord(rd());
+    return out;
+  }, c);
+  assert(r.confirm && r.confirmKept, 'confirmCode keeps a write that landed after its read', r);
+  assert(r.removed && r.removeKept, 'removePasskey keeps a write that landed after its read', r);
+  assert(r.passGone && r.passKept, 'removing the passphrase keeps a write that landed after its read', r);
+  assert(r.retired && r.retireKept, 'markRetired keeps a write that landed after its read', r);
+  assert(r.healNew && r.valid, 'healing merges the event\'s new value too', r);
+});
+
 const TRYSTERO_STUB = "export const selfId = 'self-peer';\nexport function joinRoom(config, roomId) { return window.__fakeRoom(config, roomId); }\n";
 
 async function device(name, services) {

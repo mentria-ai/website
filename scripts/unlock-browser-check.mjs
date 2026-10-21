@@ -822,7 +822,25 @@ function assertLegacyKept(G, name, snap, when) {
     }
     assert(is[k] === was[k], name + ' ' + k + ' is unchanged ' + when, { was: was[k].slice(0, 80), is: (is[k] || '').slice(0, 80) });
   }
-  return Object.keys(was).filter((k) => was[k] != null);
+  return Object.keys(is).filter((k) => is[k] != null);
+}
+
+async function refreshRemember(G) {
+  const st = await keyringState(G.rig.page);
+  G.rememberOn = !!st.hasDevice;
+  return st;
+}
+
+function liveKeys(o) {
+  return Object.keys(o || {}).filter((k) => o[k] != null && !(Array.isArray(o[k]) && !o[k].length)).sort();
+}
+
+function assertHandoverRecord(label, was, is) {
+  const before = liveKeys(was);
+  const after = liveKeys(is);
+  const ok = J(after) === J(before) || J(after) === J(before.filter((k) => k !== 'device'));
+  assert(ok, label + ' keeps exactly its keys, dropping at most the device wrap', { before, after });
+  for (const k of after) assert(J(is[k]) === J(was[k]), label + ' ' + k + ' is unchanged by the hand-over', k);
 }
 
 async function identityDeviceOpens(page) {
@@ -1431,13 +1449,14 @@ async function stepLink(G) {
 
 async function stepKept(G) {
   const { rig } = G;
-  const st0 = await keyringState(rig.page);
-  G.rememberOn = !!st0.hasDevice;
+  const st0 = await refreshRemember(G);
+  const had = deviceUnlocks(G);
+  assert(had.length || !st0.hasDevice, 'a person who had no device unlock does not get a keyring device key', { had, hasDevice: st0.hasDevice });
   const now = await snapshot(rig.page);
   const notes = [];
   for (const name of G.linked) {
     const kept = assertLegacyKept(G, name, now, 'after linking');
-    notes.push(name + ': ' + kept.join(', ') + (handedOver(G, name) ? ' (device unlock handed to Remember this device)' : ''));
+    notes.push(name + ' still stores ' + kept.join(', ') + (handedOver(G, name) ? ' (device unlock handed to Remember this device)' : ''));
   }
   const dev = await assertDeviceWrapWorks(G, 'after linking');
   if (dev) notes.push(dev);
@@ -1472,8 +1491,10 @@ async function stepKept(G) {
       assert(st.hasDevice, 'Remember this device is on in the keyring', st);
     }
   }
+  if (handedOver(G, 'identity')) assertHandoverRecord('the identity vault', parse(G.legacySnap.ls[VAULT_IDENTITY]), parse(now.ls[VAULT_IDENTITY]));
+  if (handedOver(G, 'finance')) assertHandoverRecord('the Finance wraps', parse(G.legacySnap.idb['mentria-ext-finance/meta/"wraps"']), parse(now.idb['mentria-ext-finance/meta/"wraps"']));
   const changes = diffSnap(G.legacySnap, now);
-  const allowed = LINK_ALLOWED.common.concat(G.rememberOn ? LINK_ALLOWED.remember : []);
+  const allowed = LINK_ALLOWED.common.concat(had.length ? LINK_ALLOWED.remember : []);
   for (const n of G.linked) {
     allowed.push(...LINK_ALLOWED[n]);
     if (handedOver(G, n) && LINK_ALLOWED[n + 'Handover']) allowed.push(...LINK_ALLOWED[n + 'Handover']);
@@ -1536,8 +1557,8 @@ async function stepRelock(G) {
   await visit(rig, svc);
   const st = await keyringState(rig.page);
   assert(st.diag.decision === 'reopen' && st.diag.marker && st.diag.seenAgeMs >= 60000, 'the page decides the app was reopened after the grace', st.diag);
-  G.remembered = st.hasDevice;
-  if (plan.unlock === 'device' || st.hasDevice) {
+  G.remembered = !!st.hasDevice && deviceUnlocks(G).length > 0;
+  if (plan.unlock === 'device' || G.remembered) {
     assert(st.unlocked && st.hasDevice, 'the remembered device reopens the session by itself', st);
     const note = await openedQuietly(rig, svc, G);
     return 'all pages closed ' + (away / 1000).toFixed(0) + ' s: decision reopen (epoch ' + st.epoch + '), Remember this device opened it again with no screen; ' + note;
@@ -1578,6 +1599,7 @@ async function openAll(G) {
 
 async function stepOldDevice(G) {
   const { rig } = G;
+  await refreshRemember(G);
   const at = new Date(Date.now() - 31 * DAY).toISOString();
   const seen = new Date(Date.now() - 5 * DAY).toISOString();
   const rec = await writeRecord(rig, { linked: Object.fromEntries(G.linked.map((n) => [n, at])), devices: { legacy: { name: '', lastSeen: seen, app: '', keyring: 0 } } });
@@ -1616,6 +1638,7 @@ const RETIRE_ALLOWED = {
 
 async function stepRetire(G) {
   const { rig } = G;
+  await refreshRemember(G);
   const old = new Date(Date.now() - 31 * DAY).toISOString();
   await writeRecord(rig, { devices: { legacy: { lastSeen: old } } });
   const before = await snapshot(rig.page);

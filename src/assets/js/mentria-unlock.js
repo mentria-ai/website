@@ -177,6 +177,16 @@ function livePasskeys(rec) {
 
 function livePass(w) { return isObj(w) && !w.removed && typeof w.ct === 'string'; }
 
+function stampMs(v) {
+  const n = Date.parse(v);
+  return Number.isFinite(n) ? n : -Infinity;
+}
+
+function passAfter(w, at) {
+  const t = isObj(w) ? Math.max(stampMs(w.created), stampMs(w.removed)) : -Infinity;
+  return t >= Date.parse(at) ? new Date(t + 1).toISOString() : at;
+}
+
 function linkedEntry(rec, name) {
   const e = own(rec.services, name);
   return isObj(e) && e.ct ? e : null;
@@ -933,7 +943,7 @@ export async function setPassphrase(pass) {
     if (!sessionLive()) throw new Error('locked');
     if (!hasRootBytes()) throw new Error('confirm-needed');
     if (!livePass(rec.wraps.pass)) return;
-    const at = iso();
+    const at = passAfter(rec.wraps.pass, iso());
     rec.wraps.pass = { removed: at };
     rec.changed = at;
     await writeRecord(rec);
@@ -943,6 +953,7 @@ export async function setPassphrase(pass) {
   if (!hasRootBytes()) throw new Error('confirm-needed');
   const wrap = await wrapWithPassphrase(mem.bytes, pass);
   const fresh = sameKeyring(rec);
+  wrap.created = passAfter(fresh.wraps.pass, wrap.created);
   fresh.wraps.pass = wrap;
   fresh.changed = wrap.created;
   await writeRecord(fresh);

@@ -1992,6 +1992,54 @@ check('every record write merges with what is stored now', async () => {
   assert(r.healNew && r.valid, 'healing merges the event\'s new value too', r);
 });
 
+check('a passphrase change or removal is stamped after the one it replaces', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await createOnLab(page);
+  await runtime(page);
+  const r = await page.evaluate(async () => {
+    const m = window.__m;
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const key = 'mentria.store.keyring.vault';
+    const rd = () => JSON.parse(localStorage.getItem(key));
+    const opens = (w, p) => C.openWithPassphrase(w, p).then(() => true, () => false);
+    const Real = Date;
+    const still = async (fn) => {
+      const t = Real.now();
+      window.Date = class extends Real {
+        constructor(...a) { if (a.length) super(...a); else super(t); }
+        static now() { return t; }
+      };
+      try { return await fn(); } finally { window.Date = Real; }
+    };
+    const ahead = () => {
+      const rec = rd();
+      rec.wraps.pass.created = new Real(Real.now() + 60000).toISOString();
+      localStorage.setItem(key, JSON.stringify(rec));
+      return rec.wraps.pass.created;
+    };
+    const out = {};
+    await still(async () => {
+      await m.setPassphrase('correct horse battery');
+      await m.setPassphrase(null);
+    });
+    out.sameMs = { pass: rd().wraps.pass, hasPass: m.state().hasPass };
+    await m.setPassphrase('correct horse battery');
+    const t1 = ahead();
+    await m.setPassphrase('a different passphrase');
+    const w = rd().wraps.pass;
+    out.change = { created: w.created, t1, newOpens: await opens(w, 'a different passphrase'), oldOpens: await opens(w, 'correct horse battery') };
+    const t2 = ahead();
+    await m.setPassphrase(null);
+    out.remove = { pass: rd().wraps.pass, t2, hasPass: m.state().hasPass };
+    return out;
+  });
+  assert(Object.keys(r.sameMs.pass).join() === 'removed' && !r.sameMs.hasPass, 'a removal in the same millisecond as the set still removes it', r.sameMs);
+  assert(r.change.newOpens && !r.change.oldOpens && Date.parse(r.change.created) > Date.parse(r.change.t1), 'a change replaces a passphrase stamped ahead of this clock', r.change);
+  assert(r.remove.pass.removed && Date.parse(r.remove.pass.removed) > Date.parse(r.remove.t2) && !r.remove.hasPass, 'a removal beats a passphrase stamped ahead of this clock', r.remove);
+});
+
 check('switch off deletes the session and the lab names retired locks', async () => {
   await clean();
   const page = await open('/beta/unlock/');

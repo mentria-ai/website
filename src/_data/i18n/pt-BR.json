@@ -6235,6 +6235,7 @@
     "done": "Concluir",
     "code_copied": "Código de recuperação copiado",
     "err_other": "Algo deu errado. Tente de novo.",
+    "load_failed": "O desbloqueio único não carregou. Recarregue a página para tentar de novo.",
     "passkey_step_title": "Desbloqueie com seu dispositivo da próxima vez",
     "skip_for_now": "Pular por enquanto",
     "passkey_skipped": "Nenhuma chave de acesso foi adicionada.",

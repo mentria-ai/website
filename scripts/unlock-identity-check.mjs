@@ -2531,6 +2531,58 @@ check('during the wait a keyring that names the identity is waited for, not set 
   clean_(rigs.get(c2));
 });
 
+check('the wait for a keyring that names the identity gives up after 10 s, then carries on', async () => {
+  await fresh(true);
+  const page = await open('/about/', { auth: true });
+  const code = await aboutCreate(page, { passkey: false });
+  const ring0 = await keyringSecret(page);
+  await page.evaluate(() => window.MentriaStore.remove('identity', 'vault'));
+  await page.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
+  await closeAll();
+  const about = await open(null, { auth: true });
+  await holdRuntime(about, 14000, false);
+  const t0 = Date.now();
+  await about.goto(ORIGIN + '/about/', { waitUntil: 'load' });
+  await about.evaluate(() => { document.getElementById('about-advanced').open = true; });
+  await until(() => about.evaluate((t) => document.getElementById('about-identity-lede').textContent.trim() === t && !!document.getElementById('about-identity-lede').getClientRects().length, EN.unlock.load_failed), 13000, 'About says the one unlock did not load');
+  const waited = Date.now() - t0;
+  const mid = await about.evaluate(() => ({ setup: document.getElementById('about-identity-setup').hidden, unlock: document.getElementById('about-identity-unlock').hidden, vault: localStorage.getItem('mentria.store.identity.vault') }));
+  assert(waited >= 9000 && mid.setup && mid.unlock && mid.vault === null, 'About gives up after the wait and offers no setup of its own', { waited, mid });
+  await waitVisible(about, '#about-identity-create', 15000);
+  assert(await about.evaluate((t) => document.getElementById('about-identity-lede').textContent.trim() !== t, EN.unlock.load_failed), 'the line goes once the one unlock arrives');
+  await about.click('#about-identity-create');
+  await waitVisible(about, '#about-identity-card-slot .m-unlock', 15000);
+  await cardCode(about, '#about-identity-card-slot', code);
+  await until(() => about.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the identity comes back from the keyring');
+  assert(JSON.stringify(await identityBytes(about)) === JSON.stringify(ring0), 'the same identity');
+  clean_(rigs.get(about));
+  await fresh(true);
+  const comms = await open('/comms/', { auth: true });
+  await commsOnboard(comms, 'Give Up Gus');
+  const ccode = await setupNew(comms, { passkey: false });
+  await waitVisible(comms, '#comms-id-on', 30000);
+  const fp = await fingerprint(comms);
+  await comms.evaluate(() => window.MentriaStore.remove('identity', 'vault'));
+  await lockAndWaitReload(comms);
+  await closeAll();
+  const c2 = await open(null, { auth: true });
+  await holdRuntime(c2, 14000, false);
+  const t1 = Date.now();
+  await c2.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+  await commsOnboard(c2, 'Give Up Gus');
+  await until(() => c2.evaluate((t) => { const e = document.getElementById('comms-onboard-err'); return !e.hidden && e.textContent.trim() === t; }, EN.unlock.load_failed), 13000, 'Comms says the one unlock did not load');
+  const cwait = Date.now() - t1;
+  const cm = await c2.evaluate(() => ({ done: !!document.getElementById('comms-onboard-done').getClientRects().length, vault: localStorage.getItem('mentria.store.identity.vault'), busy: document.getElementById('comms-onboard-create').disabled }));
+  assert(cwait >= 9000 && !cm.done && cm.vault === null && !cm.busy, 'Comms gives up after the wait and makes no identity of its own', { cwait, cm });
+  await until(() => c2.evaluate(() => document.getElementById('comms-onboard-err').hidden), 10000, 'the line goes once the one unlock arrives');
+  await c2.click('#comms-onboard-create');
+  await waitVisible(c2, '#comms-onboard-card .m-unlock', 15000);
+  await cardCode(c2, '#comms-onboard-card', ccode);
+  await waitVisible(c2, '#comms-id-on', 30000);
+  assert(await fingerprint(c2) === fp, 'Comms brings back the same identity from the keyring');
+  clean_(rigs.get(c2));
+});
+
 check('a broken keyring link is tried again after the next lock', async () => {
   await fresh(false);
   const page = await open('/about/', { auth: true });

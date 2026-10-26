@@ -6235,6 +6235,7 @@
     "done": "Done",
     "code_copied": "Recovery code copied",
     "err_other": "Something went wrong. Try again.",
+    "load_failed": "The one unlock didn't load. Reload the page to try again.",
     "passkey_step_title": "Unlock with your device next time",
     "skip_for_now": "Skip for now",
     "passkey_skipped": "No passkey was added.",

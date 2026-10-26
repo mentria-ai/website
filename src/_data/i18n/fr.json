@@ -6235,6 +6235,7 @@
     "done": "Terminé",
     "code_copied": "Code de récupération copié",
     "err_other": "Une erreur s'est produite. Réessayez.",
+    "load_failed": "Le déverrouillage unique ne s'est pas chargé. Rechargez la page pour réessayer.",
     "passkey_step_title": "Déverrouillez avec votre appareil la prochaine fois",
     "skip_for_now": "Passer pour l'instant",
     "passkey_skipped": "Aucune clé d'accès n'a été ajoutée.",

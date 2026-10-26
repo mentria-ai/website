@@ -556,7 +556,8 @@ const T = {{ "tool.comms" | tsub | dump | safe }};
 const TU = {
   passkeyAdded: {{ ('unlock.passkey_added' | t) | dump | safe }},
   other: {{ ('unlock.err_other' | t) | dump | safe }},
-  storage: {{ ('unlock.err_storage' | t) | dump | safe }}
+  storage: {{ ('unlock.err_storage' | t) | dump | safe }},
+  loadFailed: {{ ('unlock.load_failed' | t) | dump | safe }}
 };
 const LANG = {{ locale.code | dump | safe }};
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
@@ -2758,6 +2759,8 @@ let krDeclined = false;
 let krEpoch = null;
 let krLateP = null;
 const KR_WAIT_MS = 5000;
+const KR_GIVE_UP_MS = 10000;
+const krBootAt = Date.now();
 const krSlots = new Map();
 const krUi = () => {
   if (!krUiP) krUiP = import('/assets/js/mentria-unlock-ui.js').catch((e) => { krUiP = null; throw e; });
@@ -4112,7 +4115,15 @@ els.obCreate.addEventListener('click', async () => {
   els.obCreate.textContent = T.onboard.setting_up;
   try {
     if (KR_WANTED && bootUnlock) await bootUnlock;
-    if (KR_WANTED && !krOn() && krLateP && krRingHasIdentity() && !window.MentriaIdentity.isSetUp()) await krLateP;
+    if (KR_WANTED && !krOn() && krLateP && krRingHasIdentity() && !window.MentriaIdentity.isSetUp()) {
+      const left = Math.max(0, KR_GIVE_UP_MS - (Date.now() - krBootAt));
+      await Promise.race([krLateP, new Promise((resolve) => setTimeout(resolve, left))]);
+      if (!krOn()) {
+        els.obErr.hidden = false;
+        els.obErr.textContent = TU.loadFailed;
+        return;
+      }
+    }
     if (krOn() && !krDeclined) {
       if (!cryptoOk()) throw new Error('insecure-context');
       const made = await krCreateIdentity();
@@ -4239,6 +4250,10 @@ const krLate = async (start, fallback) => {
   if (!mods || KR) return;
   if (krTyping()) krOldOpen = true;
   krAttach(mods);
+  if (els.obErr.textContent === TU.loadFailed) {
+    els.obErr.hidden = true;
+    els.obErr.textContent = '';
+  }
   const I = window.MentriaIdentity;
   if (I && I.isUnlocked()) await krAfterLegacy({ auto: true, verify: true });
   else if (krLinked() && KR.state().unlocked) await krOpen();

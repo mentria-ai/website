@@ -1163,7 +1163,7 @@ check('old lock retires once every note converted', async () => {
     window.MentriaStore.set('keyring', 'vault', rec);
     return s;
   }, credStd);
-  await legacyNote(page, 'India', 'india text');
+  await legacyNote(page, 'Romeo', 'romeo text');
   await reload(page, 'one');
   await pick(page, 'Hotel');
   await waitView(page, (x) => x.text === 'hotel secret text', 'Hotel open');
@@ -1174,7 +1174,7 @@ check('old lock retires once every note converted', async () => {
   const blocked = await runtime(page, 'retirement', { notesConverted: true });
   assert(blocked.ready === true, 'nothing else blocks retirement in this setup', blocked);
   await page.evaluate(() => {
-    const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob')).filter((n) => n.title !== 'India');
+    const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob')).filter((n) => n.title !== 'Romeo');
     window.MentriaStore.set('quick_notes', 'blob', list);
     sessionStorage.setItem('t-fail-record', '1');
   });

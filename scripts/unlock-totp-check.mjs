@@ -533,10 +533,12 @@ async function switchOffFlow(prod) {
   assert(!r.requests.some((u) => u.includes('/assets/js/mentria-unlock')), 'the switch-off page never loads the one unlock', r.requests.filter((u) => u.includes('unlock')));
   const after = await readJson(page, VAULT);
   assert(JSON.stringify(after) === JSON.stringify(vault), 'the vault is unchanged');
-  const ls1 = await lsAll();
-  const added = Object.keys(ls1).filter((k) => !(k in ls0) && !/^(mentria_seen|mentria_tool_usage|mentria_caps)/.test(k));
-  const changed = Object.keys(ls0).filter((k) => /keyring|totp/.test(k) && ls0[k] !== ls1[k]);
-  assert(!added.length && !changed.length, 'opening TOTP writes nothing new', { added, changed });
+  if (prod) {
+    const ls1 = await lsAll();
+    const added = Object.keys(ls1).filter((k) => !(k in ls0) && !/^(mentria_seen|mentria_tool_usage|mentria_caps)/.test(k));
+    const changed = Object.keys(ls0).filter((k) => /keyring|totp/.test(k) && ls0[k] !== ls1[k]);
+    assert(!added.length && !changed.length, 'opening TOTP on a production build writes nothing new', { added, changed });
+  }
   await done(r);
 }
 

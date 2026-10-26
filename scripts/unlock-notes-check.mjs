@@ -323,6 +323,49 @@ async function legacyNote(page, title, text) {
 
 function store(page, ns, key) { return page.evaluate((n, k) => window.MentriaStore.get(n, k), ns, key); }
 
+const OTHER_DEVICE = async (title, text, pairOnly) => {
+  const b = (u) => btoa(String.fromCharCode(...new Uint8Array(u)));
+  const salt = crypto.getRandomValues(new Uint8Array(32));
+  const prf = { prf: { eval: { first: salt } } };
+  const cred = await navigator.credentials.create({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), rp: { name: 'Mentria Quick Notes' }, user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'quick-notes', displayName: 'Quick Notes' }, pubKeyCredParams: [{ type: 'public-key', alg: -7 }], authenticatorSelection: { residentKey: 'required', userVerification: 'required' }, extensions: prf } });
+  if (pairOnly) return { salt: b(salt), cred: b(cred.rawId) };
+  const r = cred.getClientExtensionResults().prf;
+  let first = r && r.results && r.results.first;
+  if (!first) {
+    const a = await navigator.credentials.get({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), allowCredentials: [{ type: 'public-key', id: cred.rawId }], userVerification: 'required', extensions: prf } });
+    first = a.getClientExtensionResults().prf.results.first;
+  }
+  const key = await crypto.subtle.importKey('raw', first, 'AES-GCM', false, ['encrypt']);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(text));
+  const now = Date.now();
+  const note = { id: 'other' + now.toString(36), title, body: b(ct), iv: b(iv), enc: true, salt: b(salt), credId: b(cred.rawId), createdAt: now, updatedAt: now };
+  const S = window.MentriaStore;
+  S.set('quick_notes', 'salt', note.salt, { remote: true });
+  S.set('quick_notes', 'cred_id', note.credId, { remote: true });
+  const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob') || '[]');
+  S.set('quick_notes', 'blob', list.concat([note]), { remote: true });
+  return { salt: note.salt, cred: note.credId, note };
+};
+
+async function oldLock(page, title, text) {
+  await page.click('#qn-lock-btn');
+  const msg = await answerDialog(page);
+  assert(msg === QN.confirm_lock, title + ': old confirm text', msg);
+  const list = await waitBlob(page, (v) => { const n = byTitle(v, title); return n && n.enc === true && n.iv && n.body !== text; }, title + ' locked the old way', 60000);
+  return byTitle(list, title);
+}
+
+async function unlockOld(page, title, text) {
+  await pick(page, title);
+  const v = await view(page);
+  if (v.text !== text) {
+    assert(v.panel && v.unlockBtn, title + ': old locked panel', v);
+    await page.click('#qn-unlock-btn');
+  }
+  return waitView(page, (x) => x.text === text, title + ' opens with its passkey', 30000);
+}
+
 async function legacySeed(page) {
   await writeNote(page, 'Alpha', 'alpha secret text', false);
   await page.click('#qn-lock-btn');
@@ -403,6 +446,105 @@ check('switch off keeps the old flow', async () => {
     assert(!log.errors.length, label + ': no page errors', log.errors);
   }
   srv.setRoot(BUILD);
+});
+
+check('old locks keep their own salt and passkey through a sync', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES);
+    const auth = await authOn(page);
+    await settle(page, 'old');
+    await writeNote(page, 'One', 'one secret text', false);
+    await oldLock(page, 'One', 'one secret text');
+    const mine = { salt: await store(page, 'quick_notes', 'salt'), cred: await store(page, 'quick_notes', 'cred_id') };
+    assert(typeof mine.salt === 'string' && typeof mine.cred === 'string', 'device A made its salt and passkey', mine);
+    const other = await page.evaluate(OTHER_DEVICE, 'Two', 'two secret text');
+    assert(other.salt !== mine.salt && other.cred !== mine.cred, 'the other device has its own salt and passkey');
+    await waitBlob(page, (v) => !!byTitle(v, 'Two'), 'Two arrived by sync');
+    assert((await store(page, 'quick_notes', 'salt')) === other.salt && (await store(page, 'quick_notes', 'cred_id')) === other.cred, 'the sync replaced the stored salt and cred_id');
+    await resetWa(page);
+    await writeNote(page, 'Three', 'three secret text', true);
+    await oldLock(page, 'Three', 'three secret text');
+    assert((await wa(page)).length === 0, 'locking in the same visit asks no passkey', await wa(page));
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'One', 'one secret text');
+    await unlockOld(page, 'Three', 'three secret text');
+    assert((await wa(page)).join() === 'get', 'One and Three open with one tap of the first passkey', await wa(page));
+    await unlockOld(page, 'Two', 'two secret text');
+    assert((await wa(page)).join() === 'get,get', 'Two opens with its own passkey', await wa(page));
+    assert((await auth.creds()).length === 2, 'two passkeys on the authenticator');
+    const list = await blob(page);
+    for (const [t, want] of [['One', mine], ['Three', mine], ['Two', other]]) {
+      const n = byTitle(list, t);
+      assert(n.salt === want.salt && n.credId === want.cred, t + ' records the salt and passkey it was locked with', n);
+    }
+    assert((await store(page, 'quick_notes', 'salt')) === other.salt && (await store(page, 'quick_notes', 'cred_id')) === other.cred, 'the synced salt and cred_id are not replaced');
+    const two = byTitle(list, 'Two');
+    await page.focus('#qn-textarea');
+    await page.keyboard.press('End');
+    await page.type('#qn-textarea', ' edit');
+    await waitBlob(page, (x) => { const n = byTitle(x, 'Two'); return n && n.iv !== two.iv; }, 'Two edit saved');
+    await sleep(800);
+    const edited = byTitle(await blob(page), 'Two');
+    assert(edited.enc && !('kv' in edited) && edited.salt === other.salt && edited.credId === other.cred, 'an edit keeps the salt and passkey of the note', edited);
+    await page.evaluate(() => {
+      const cur = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob'));
+      for (const n of cur) if (n.title === 'Two') { delete n.salt; delete n.credId; }
+      window.MentriaStore.set('quick_notes', 'blob', cur);
+    });
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Two', 'two secret text edit');
+    assert((await wa(page)).join() === 'get', 'a note without its own salt and passkey opens with the stored ones', await wa(page));
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('a note with stale salt and passkey opens with the stored ones', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES);
+    await authOn(page);
+    await settle(page, 'old');
+    await writeNote(page, 'Stale', 'stale secret text', false);
+    await oldLock(page, 'Stale', 'stale secret text');
+    const mine = { salt: await store(page, 'quick_notes', 'salt'), cred: await store(page, 'quick_notes', 'cred_id') };
+    const stale = await page.evaluate(OTHER_DEVICE, '', '', true);
+    assert(stale.salt !== mine.salt && stale.cred !== mine.cred, 'a second salt and passkey', stale);
+    await page.evaluate((p) => {
+      const cur = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob'));
+      for (const n of cur) if (n.title === 'Stale') { n.salt = p.salt; n.credId = p.cred; }
+      window.MentriaStore.set('quick_notes', 'blob', cur);
+    }, stale);
+    assert((await store(page, 'quick_notes', 'salt')) === mine.salt && (await store(page, 'quick_notes', 'cred_id')) === mine.cred, 'the stored salt and cred_id are the ones the note was locked with');
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Stale', 'stale secret text');
+    assert((await wa(page)).join() === 'get,get', 'the stale passkey is tried, then the stored one once', await wa(page));
+    const before = byTitle(await blob(page), 'Stale');
+    assert(before.salt === stale.salt && before.credId === stale.cred, 'opening alone writes nothing', before);
+    await page.focus('#qn-textarea');
+    await page.keyboard.press('End');
+    await page.type('#qn-textarea', ' edit');
+    await waitBlob(page, (x) => { const n = byTitle(x, 'Stale'); return n && n.iv !== before.iv; }, 'Stale edit saved');
+    await sleep(800);
+    const saved = byTitle(await blob(page), 'Stale');
+    assert(saved.salt === mine.salt && saved.credId === mine.cred, 'the next save records the salt and passkey that opened it', saved);
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Stale', 'stale secret text edit');
+    assert((await wa(page)).join() === 'get', 'after the save one tap of the stored passkey opens it', await wa(page));
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
 });
 
 check('lock a note in keyring mode', async () => {
@@ -610,6 +752,48 @@ check('legacy notes convert after one tap', async () => {
   await pick(page, 'Alpha');
   await waitView(page, (x) => x.text === 'alpha secret text', 'converted note opens after reload with no tap');
   assert((await wa(page)).length === 0, 'no tap after reload');
+  const log = logs.get(page);
+  assert(!log.errors.length, 'no page errors', log.errors);
+});
+
+check('old locks under two salts convert with their own passkeys', async () => {
+  await clean();
+  const page = await open(NOTES);
+  await authOn(page);
+  await settle(page, 'old');
+  await writeNote(page, 'One', 'one secret text', false);
+  await oldLock(page, 'One', 'one secret text');
+  const mine = { salt: await store(page, 'quick_notes', 'salt'), cred: await store(page, 'quick_notes', 'cred_id') };
+  const other = await page.evaluate(OTHER_DEVICE, 'Two', 'two secret text');
+  assert(typeof mine.salt === 'string' && mine.salt !== other.salt && mine.cred !== other.cred, 'the other device has its own salt and passkey', mine);
+  await waitBlob(page, (v) => !!byTitle(v, 'Two'), 'Two arrived by sync');
+  await legacyNote(page, 'Foreign', 'from a lost key');
+  const before = await blob(page);
+  await page.evaluate(SWITCH_ON);
+  await reload(page, 'one');
+  await makeKeyring(page);
+  await pick(page, 'One');
+  await resetWa(page);
+  await page.click('#qn-unlock-btn');
+  let after = await waitBlob(page, (x) => { const n = byTitle(x, 'One'); return n && n.kv === 2; }, 'One converted after a tap of its own passkey', 30000);
+  await waitView(page, (x) => x.text === 'one secret text' && x.convert === QN.convert_skipped.replace('{n}', '2'), 'One open, Two and Foreign counted as not opened');
+  assert((await wa(page)).join() === 'get', 'one tap', await wa(page));
+  const one = byTitle(before, 'One');
+  assert(one.salt === mine.salt && one.credId === mine.cred, 'One was locked with its salt and passkey on the note', one);
+  let n = byTitle(after, 'One');
+  assert(!('salt' in n) && !('credId' in n) && (await openV2(page, n)) === 'one secret text', 'converted One drops its salt and passkey and opens with the notes key', n);
+  assert(JSON.stringify(byTitle(after, 'Two')) === JSON.stringify(byTitle(before, 'Two')), 'Two untouched until its passkey is used');
+  await pick(page, 'Two');
+  const v = await view(page);
+  assert(v.panel && v.unlockBtn && v.link, 'Two keeps the old unlock', v);
+  await resetWa(page);
+  await page.click('#qn-unlock-btn');
+  after = await waitBlob(page, (x) => { const t = byTitle(x, 'Two'); return t && t.kv === 2; }, 'Two converted after a tap of its own passkey', 30000);
+  await waitView(page, (x) => x.text === 'two secret text' && x.convert === QN.convert_skipped.replace('{n}', '1'), 'Two open, Foreign still counted');
+  assert((await wa(page)).join() === 'get', 'one tap for Two', await wa(page));
+  n = byTitle(after, 'Two');
+  assert(!('salt' in n) && !('credId' in n) && (await openV2(page, n)) === 'two secret text', 'converted Two drops its salt and passkey and opens with the notes key', n);
+  assert(JSON.stringify(byTitle(after, 'Foreign')) === JSON.stringify(byTitle(before, 'Foreign')), 'a note no passkey here opens is left untouched');
   const log = logs.get(page);
   assert(!log.errors.length, 'no page errors', log.errors);
 });

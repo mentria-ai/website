@@ -165,7 +165,8 @@ unlockTool: true
 
   const CRED_KEY = 'mentria-qn-cred';
   const SALT_KEY = 'mentria-qn-salt';
-  let sessionKey = null;
+  let sessionKeys = null;
+  const fellBack = new Map();
   const cryptoOK = !!(window.PublicKeyCredential && window.isSecureContext && window.crypto && crypto.subtle);
 
   const BETA = document.documentElement.dataset.release === 'beta';
@@ -328,22 +329,21 @@ unlockTool: true
   }
 
   function prfSalt() {
-    let s = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'salt') : null;
-    if (!s) {
-      const legacy = localStorage.getItem(SALT_KEY);
-      if (legacy) {
-        s = legacy;
-        if (window.MentriaStore) { window.MentriaStore.set('quick_notes', 'salt', s); localStorage.removeItem(SALT_KEY); }
-      } else {
-        s = b64enc(crypto.getRandomValues(new Uint8Array(32)));
-        if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'salt', s);
-        else localStorage.setItem(SALT_KEY, s);
-      }
+    const S = window.MentriaStore;
+    const have = S ? S.get('quick_notes', 'salt') : null;
+    if (have) return String(have);
+    const legacy = localStorage.getItem(SALT_KEY);
+    if (legacy) {
+      if (S && S.set('quick_notes', 'salt', legacy)) localStorage.removeItem(SALT_KEY);
+      return legacy;
     }
-    return b64dec(s);
+    const s = b64enc(crypto.getRandomValues(new Uint8Array(32)));
+    if (S) S.set('quick_notes', 'salt', s);
+    else localStorage.setItem(SALT_KEY, s);
+    return s;
   }
 
-  function legacyLockHere() {
+  function storedPair() {
     const S = window.MentriaStore;
     let salt = S ? S.get('quick_notes', 'salt') : null;
     let cred = S ? S.get('quick_notes', 'cred_id') : null;
@@ -351,15 +351,57 @@ unlockTool: true
       if (!salt) salt = localStorage.getItem(SALT_KEY);
       if (!cred) cred = localStorage.getItem(CRED_KEY);
     } catch (_) {}
-    return !!salt && !!cred;
+    return { salt: salt ? String(salt) : null, cred: cred ? String(cred) : null };
   }
 
-  async function ensureKey(noCreate) {
-    if (sessionKey) return sessionKey;
+  function legacyLockHere() {
+    const p = storedPair();
+    return !!p.salt && !!p.cred;
+  }
+
+  function ownPair(note) {
+    if (!note || typeof note.salt !== 'string' || !note.salt || typeof note.credId !== 'string' || !note.credId) return null;
+    return { salt: note.salt, cred: note.credId };
+  }
+
+  function pairOf(note) {
+    const own = ownPair(note);
+    return (own && fellBack.get(noteSig(note))) || own || storedPair();
+  }
+
+  function keyIn(keys, pair) {
+    return keys && pair.salt && pair.cred ? keys.get(pair.salt + '|' + pair.cred) || null : null;
+  }
+
+  function mayOpen(note) {
+    return !!keyIn(sessionKeys, pairOf(note)) || (!!ownPair(note) && !!keyIn(sessionKeys, storedPair()));
+  }
+
+  function storedDiffers(note) {
+    const own = ownPair(note);
+    const st = storedPair();
+    return !!own && !!st.salt && !!st.cred && (st.salt !== own.salt || st.cred !== own.cred);
+  }
+
+  function setPair(n, k) {
+    if (k) {
+      n.salt = k.salt;
+      n.credId = k.cred;
+    } else {
+      delete n.salt;
+      delete n.credId;
+    }
+  }
+
+  async function ensureKey(noCreate, note) {
+    const own = ownPair(note);
+    const held = keyIn(sessionKeys, own || storedPair());
+    if (held) return held;
     if (!cryptoOK) throw new Error('prf-unsupported');
-    if (noCreate && !legacyLockHere()) throw new Error('no-legacy');
-    const salt = prfSalt();
-    let credId = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null;
+    if (noCreate && !own && !legacyLockHere()) throw new Error('no-legacy');
+    const saltB64 = own ? own.salt : prfSalt();
+    const salt = b64dec(saltB64);
+    let credId = own ? own.cred : (window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null);
     if (!credId) {
       const legacy = localStorage.getItem(CRED_KEY);
       if (legacy) {
@@ -405,28 +447,42 @@ unlockTool: true
       if (!prf || !prf.results || !prf.results.first) throw new Error('prf-unsupported');
       prfResult = prf.results.first;
     }
-    sessionKey = await crypto.subtle.importKey(
+    const key = await crypto.subtle.importKey(
       'raw', new Uint8Array(prfResult), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
     );
-    return sessionKey;
+    const got = { key: key, salt: saltB64, cred: credId };
+    sessionKeys = new Map(sessionKeys || []).set(saltB64 + '|' + credId, got);
+    return got;
   }
 
-  async function encryptText(text) {
-    const key = await ensureKey();
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ct = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv: iv }, key, new TextEncoder().encode(text)
-    );
-    return { body: b64enc(ct), iv: b64enc(iv) };
+  async function lockKey() {
+    const held = keyIn(sessionKeys, storedPair());
+    if (held) return held;
+    if (sessionKeys && sessionKeys.size) return [...sessionKeys.values()].pop();
+    return ensureKey();
   }
 
-  async function decryptNote(note) {
-    const key = await ensureKey();
-    const pt = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: b64dec(note.iv) }, key, b64dec(note.body)
-    );
-    return new TextDecoder().decode(pt);
+  async function sealOld(note, text) {
+    const k = keyIn(sessionKeys, pairOf(note));
+    if (!k) throw new Error('locked');
+    const sealed = await sealLegacy(k.key, text);
+    sealed.pair = k;
+    return sealed;
   }
+
+  async function openOld(keys, note) {
+    const k = keyIn(keys, pairOf(note));
+    if (k) {
+      try { return await openLegacy(k.key, note); } catch (_) {}
+    }
+    const st = ownPair(note) ? keyIn(keys, storedPair()) : null;
+    if (!st || st === k) throw new Error('locked');
+    const text = await openLegacy(st.key, note);
+    fellBack.set(noteSig(note), { salt: st.salt, cred: st.cred });
+    return text;
+  }
+
+  function decryptNote(note) { return openOld(sessionKeys, note); }
 
   function handleCryptoError(err, fallbackMsg) {
     if (err && err.name === 'NotAllowedError') return;
@@ -505,8 +561,8 @@ unlockTool: true
       if (!got || !U.state().unlocked) throw new Error('locked');
       return got.text;
     }
-    if (note.kv || !sessionKey) throw new Error('locked');
-    return openLegacy(sessionKey, note);
+    if (note.kv) throw new Error('locked');
+    return decryptNote(note);
   }
 
   function loadUI() {
@@ -556,7 +612,7 @@ unlockTool: true
     }
     if (note.kv) return 'missing';
     if (linkPending && s.setUp && !s.unlocked) return 'card';
-    if (sessionKey && !skipped.has(noteSig(note))) return 'open';
+    if (mayOpen(note) && !skipped.has(noteSig(note))) return 'open';
     return 'legacy';
   }
 
@@ -564,26 +620,26 @@ unlockTool: true
     return !!cur && ((!!cur.id && n.kid === cur.id) || curOk.has(noteSig(n)));
   }
 
-  function forgetLegacy(legacyKey) {
-    if (legacyKey && sessionKey === legacyKey && notes.every((n) => !isLegacyLocked(n) || skipped.has(noteSig(n)))) sessionKey = null;
+  function forgetLegacy(legacyKeys) {
+    if (legacyKeys && sessionKeys === legacyKeys && notes.every((n) => !isLegacyLocked(n) || skipped.has(noteSig(n)))) sessionKeys = null;
   }
 
   async function convertNotes() {
     const ring = notesKeys;
     const cur = ring[0];
     if (!cur) return false;
-    const legacyKey = sessionKey;
+    const legacyKeys = sessionKeys;
     const wants = (n) => {
       if (!n || !n.enc) return false;
       const sig = noteSig(n);
-      if (!n.kv) return !!legacyKey && !skipped.has(sig);
+      if (!n.kv) return !!legacyKeys && !skipped.has(sig);
       return n.kv === 2 && !underCurrent(n, cur) && !skippedKv.has(sig);
     };
     if (notes.some(wants)) {
       try { await saver.flush(); } catch (_) {}
     }
     for (let pass = 0; pass < 3; pass++) {
-      if (notesKeys !== ring || sessionKey !== legacyKey) return false;
+      if (notesKeys !== ring || sessionKeys !== legacyKeys) return false;
       const todo = notes.filter(wants);
       if (!todo.length) break;
       const done = new Map();
@@ -591,7 +647,7 @@ unlockTool: true
         const sig = noteSig(n);
         let text;
         if (isLegacyLocked(n)) {
-          try { text = await openLegacy(legacyKey, n); } catch (_) { skipped.add(sig); continue; }
+          try { text = await openOld(legacyKeys, n); } catch (_) { skipped.add(sig); continue; }
         } else {
           const got = await openKv2(n);
           if (!got) { skippedKv.add(sig); continue; }
@@ -601,18 +657,19 @@ unlockTool: true
         done.set(n.id, { sig: sig, sealed: await sealV2(cur.key, n.id, text) });
       }
       if (!done.size) break;
-      if (!U.state().unlocked || notesKeys !== ring || sessionKey !== legacyKey) return false;
+      if (!U.state().unlocked || notesKeys !== ring || sessionKeys !== legacyKeys) return false;
       const prev = notes;
       notes = notes.map((n) => {
         const d = n && done.get(n.id);
         if (!d || !n.enc || noteSig(n) !== d.sig) return n;
         const out = Object.assign({}, n, { body: d.sealed.body, iv: d.sealed.iv, kv: 2, updatedAt: (Number(n.updatedAt) || 0) + 1 });
         setKid(out, cur.id);
+        setPair(out, null);
         return out;
       });
       if (!persist()) { notes = prev; return false; }
     }
-    forgetLegacy(legacyKey);
+    forgetLegacy(legacyKeys);
     return true;
   }
 
@@ -651,7 +708,7 @@ unlockTool: true
       let old = null;
       try { old = localStorage.getItem(CRED_KEY); } catch (_) {}
       if (old && !ids.includes(old)) ids.push(old);
-      sessionKey = null;
+      sessionKeys = null;
       await U.markRetired('notes');
       signalRetired(ids);
     } catch (_) {
@@ -662,7 +719,7 @@ unlockTool: true
 
   function dropOld() {
     try { saver.flush(); } catch (_) {}
-    sessionKey = null;
+    sessionKeys = null;
     linkPending = false;
     printEl.textContent = '';
   }
@@ -678,7 +735,7 @@ unlockTool: true
     const dropped = wasUnlocked && !s.unlocked;
     wasUnlocked = s.unlocked;
     if (s.unlocked) {
-      const legacy = !!sessionKey && notes.some((n) => isLegacyLocked(n) && !skipped.has(noteSig(n)));
+      const legacy = !!sessionKeys && notes.some((n) => isLegacyLocked(n) && !skipped.has(noteSig(n)));
       try { await ensureNotesKey(legacy); } catch (_) {}
       if (notesKeys.length) {
         linkPending = false;
@@ -852,7 +909,7 @@ unlockTool: true
     } else if (note.kv) {
       mode = 'locked';
       view = 'off';
-    } else if (sessionKey) {
+    } else if (mayOpen(note)) {
       mode = 'unlocked';
       try {
         const text = await decryptNote(note);
@@ -944,8 +1001,8 @@ unlockTool: true
       if (notesKeys.length) {
         sealed = await sealCur(id, text);
         kv = 2;
-      } else if (!note.kv && sessionKey && !notesLinked()) {
-        sealed = await sealLegacy(sessionKey, text);
+      } else if (!note.kv && mayOpen(note) && !notesLinked()) {
+        sealed = await sealOld(note, text);
       }
     } catch (_) {
       sealed = null;
@@ -959,6 +1016,7 @@ unlockTool: true
     if (kv) cur.kv = kv;
     else delete cur.kv;
     setKid(cur, kv ? sealed.kid : null);
+    setPair(cur, kv ? null : sealed.pair);
     cur.updatedAt = Date.now();
     const ok = persist();
     if (ok && cur.id === activeId) updateSavedLabel(cur.updatedAt);
@@ -971,7 +1029,7 @@ unlockTool: true
     if (oldReadOnly(note)) return;
     note.title = titleInput.value;
     if (one && note.enc) return saveLocked(note);
-    if (note.enc && (!sessionKey || editorMode !== 'unlocked')) {
+    if (note.enc && (!mayOpen(note) || editorMode !== 'unlocked')) {
       note.updatedAt = Date.now();
       persist();
       renderList();
@@ -979,9 +1037,10 @@ unlockTool: true
     }
     if (note.enc) {
       try {
-        const enc = await encryptText(textarea.value);
+        const enc = await sealOld(note, textarea.value);
         note.body = enc.body;
         note.iv = enc.iv;
+        setPair(note, enc.pair);
       } catch (_) { return; }
     } else {
       note.body = textarea.value;
@@ -1051,7 +1110,7 @@ unlockTool: true
       if (!n.enc) body = n.id === activeId && !textarea.hidden ? textarea.value : String(n.body || '');
       else if (one) {
         try { body = await decryptOne(n); } catch (_) { body = null; }
-      } else if (sessionKey) {
+      } else if (sessionKeys) {
         try { body = await decryptNote(n); } catch (_) { body = null; }
       } else body = null;
       if (body == null) { skipped++; continue; }
@@ -1123,6 +1182,7 @@ unlockTool: true
     n.body = sealed.body;
     n.iv = sealed.iv;
     setKid(n, sealed.kid);
+    setPair(n, null);
     n.updatedAt = Date.now();
     persist();
     renderEditor();
@@ -1131,7 +1191,7 @@ unlockTool: true
 
   async function relock() {
     try { await saver.flush(); } catch (_) {}
-    sessionKey = null;
+    sessionKeys = null;
     linkPending = false;
     cardFocus = true;
     if (U.state().unlocked) {
@@ -1146,7 +1206,7 @@ unlockTool: true
   }
 
   async function bringIn() {
-    if (!sessionKey) return;
+    if (!sessionKeys) return;
     const s = U.state();
     if (s.unlocked) { await openNotes(); return; }
     if (s.setUp) {
@@ -1167,8 +1227,10 @@ unlockTool: true
     if (!cryptoOK) { mentriaAlert(COPY.prfUnsupported); return; }
     if (!(await mentriaConfirm(COPY.confirmLock))) return;
     let enc;
+    let k;
     try {
-      enc = await encryptText(textarea.value);
+      k = await lockKey();
+      enc = await sealLegacy(k.key, textarea.value);
     } catch (err) {
       handleCryptoError(err, COPY.lockFailed);
       return;
@@ -1177,6 +1239,7 @@ unlockTool: true
     note.enc = true;
     note.body = enc.body;
     note.iv = enc.iv;
+    setPair(note, k);
     note.updatedAt = Date.now();
     persist();
     renderEditor();
@@ -1187,11 +1250,16 @@ unlockTool: true
     const note = getNote(activeId);
     if (!note || !note.enc || note.kv) return;
     try {
-      await ensureKey(one || (TRY_ONE && !oneSettled));
+      await ensureKey(one || (TRY_ONE && !oneSettled), note);
+      if (storedDiffers(note)) {
+        let opened = true;
+        try { await decryptNote(note); } catch (_) { opened = false; }
+        if (!opened) await ensureKey(true, null);
+      }
     } catch (err) {
       if (err && err.message === 'no-legacy') {
         if (one) {
-          for (const n of notes) if (isLegacyLocked(n)) skipped.add(noteSig(n));
+          for (const n of notes) if (isLegacyLocked(n) && !ownPair(n)) skipped.add(noteSig(n));
           applyEditorMode(editorMode, panelView);
         }
         return;
@@ -1218,6 +1286,7 @@ unlockTool: true
     delete note.iv;
     delete note.kv;
     delete note.kid;
+    setPair(note, null);
     note.updatedAt = Date.now();
     persist();
     renderEditor();

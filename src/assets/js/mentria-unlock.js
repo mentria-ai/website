@@ -182,7 +182,7 @@ function stampMs(v) {
   return Number.isFinite(n) ? n : -Infinity;
 }
 
-function passAfter(w, at) {
+function stampAfter(w, at) {
   const t = isObj(w) ? Math.max(stampMs(w.created), stampMs(w.removed)) : -Infinity;
   return t >= Date.parse(at) ? new Date(t + 1).toISOString() : at;
 }
@@ -912,6 +912,7 @@ export async function addPasskey(label) {
   const id = b64u(rawId);
   const entry = await wrapWithPrf(bytes, out, { id, salt: b64u(salt), label: label == null ? '' : String(label) });
   const fresh = sameKeyring(rec);
+  entry.created = stampAfter(fresh.wraps.prf.find((e) => isObj(e) && e.id === id), entry.created);
   fresh.wraps.prf = fresh.wraps.prf.filter((e) => !(isObj(e) && e.id === id)).concat([entry]);
   fresh.changed = iso();
   await writeRecord(fresh);
@@ -922,16 +923,16 @@ export async function removePasskey(id) {
   const rec = need();
   if (!sessionLive()) throw new Error('locked');
   if (!hasRootBytes()) throw new Error('confirm-needed');
-  const at = iso();
-  let hit = false;
+  const now = iso();
+  let at = null;
   rec.wraps.prf = rec.wraps.prf.map((e) => {
     if (isObj(e) && e.id === id && !e.removed) {
-      hit = true;
+      at = stampAfter(e, now);
       return { id, removed: at };
     }
     return e;
   });
-  if (!hit) return;
+  if (!at) return;
   rec.changed = at;
   await writeRecord(rec);
   notify(true);
@@ -943,7 +944,7 @@ export async function setPassphrase(pass) {
     if (!sessionLive()) throw new Error('locked');
     if (!hasRootBytes()) throw new Error('confirm-needed');
     if (!livePass(rec.wraps.pass)) return;
-    const at = passAfter(rec.wraps.pass, iso());
+    const at = stampAfter(rec.wraps.pass, iso());
     rec.wraps.pass = { removed: at };
     rec.changed = at;
     await writeRecord(rec);
@@ -953,7 +954,7 @@ export async function setPassphrase(pass) {
   if (!hasRootBytes()) throw new Error('confirm-needed');
   const wrap = await wrapWithPassphrase(mem.bytes, pass);
   const fresh = sameKeyring(rec);
-  wrap.created = passAfter(fresh.wraps.pass, wrap.created);
+  wrap.created = stampAfter(fresh.wraps.pass, wrap.created);
   fresh.wraps.pass = wrap;
   fresh.changed = wrap.created;
   await writeRecord(fresh);
@@ -1172,10 +1173,11 @@ export function confirmCode(last4) {
     if (p) mem.pending = null;
     return false;
   }
-  const at = iso();
+  const wrap = p ? Object.assign({}, p.wrap, { created: stampAfter(rec.wraps.recovery, p.wrap.created) }) : rec.wraps.recovery;
+  const at = stampAfter(wrap, iso());
   const cand = Object.assign({}, rec, { codeConfirmed: at, changed: at });
   if (p) {
-    cand.wraps = Object.assign({}, rec.wraps, { recovery: p.wrap });
+    cand.wraps = Object.assign({}, rec.wraps, { recovery: wrap });
     cand.backup = p.backup;
   }
   const now = readRecord();

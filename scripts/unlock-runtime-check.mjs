@@ -2040,6 +2040,58 @@ check('a passphrase change or removal is stamped after the one it replaces', asy
   assert(r.remove.pass.removed && Date.parse(r.remove.pass.removed) > Date.parse(r.remove.t2) && !r.remove.hasPass, 'a removal beats a passphrase stamped ahead of this clock', r.remove);
 });
 
+check('passkey and recovery code writes are stamped after what they replace', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  const c = await createOnLab(page);
+  await runtime(page);
+  const r = await page.evaluate(async (code) => {
+    const m = window.__m;
+    const C = await import('/assets/js/mentria-unlock-core.js');
+    const key = 'mentria.store.keyring.vault';
+    const rd = () => JSON.parse(localStorage.getItem(key));
+    const rnd = (n) => crypto.getRandomValues(new Uint8Array(n));
+    const ahead = () => new Date(Date.now() + 60000).toISOString();
+    const plant = (fn) => { const rec = rd(); fn(rec); localStorage.setItem(key, JSON.stringify(rec)); };
+    const bytes = await C.openWithCode(rd().wraps.recovery, code);
+    const out = {};
+    const id1 = C.b64u(rnd(16));
+    const fake = await C.wrapWithPrf(bytes, rnd(32), { id: id1, salt: C.b64u(rnd(32)), label: 'ahead' });
+    fake.created = ahead();
+    plant((rec) => rec.wraps.prf.push(fake));
+    await m.removePasskey(id1);
+    out.remove = { entry: rd().wraps.prf.find((e) => e.id === id1), created: fake.created, listed: m.passkeys().some((p) => p.id === id1) };
+    const raw = rnd(16);
+    const id2 = C.b64u(raw);
+    const prf = rnd(32);
+    const tomb = ahead();
+    plant((rec) => rec.wraps.prf.push({ id: id2, removed: tomb }));
+    navigator.credentials.create = async () => ({ rawId: raw.buffer, getClientExtensionResults: () => ({ prf: { enabled: true, results: { first: prf.buffer } } }) });
+    await m.addPasskey('again');
+    delete navigator.credentials.create;
+    const e2 = rd().wraps.prf.find((e) => e.id === id2);
+    out.add = { entry: e2, tomb, listed: m.passkeys().some((p) => p.id === id2), opens: !!e2 && !e2.removed && await C.openWithPrf(e2, prf).then(() => true, () => false) };
+    const fresh = await m.regenerateCode();
+    const was = ahead();
+    plant((rec) => { rec.wraps.recovery.created = was; });
+    out.code = { ok: m.confirmCode(fresh.replace(/-/g, '').slice(-4)), was };
+    const rec = rd();
+    Object.assign(out.code, {
+      created: rec.wraps.recovery.created,
+      newOpens: await C.openWithCode(rec.wraps.recovery, fresh).then(() => true, () => false),
+      oldOpens: await C.openWithCode(rec.wraps.recovery, code).then(() => true, () => false),
+      confirmed: m.state().codeConfirmed
+    });
+    return out;
+  }, c);
+  const e1 = r.remove.entry;
+  assert(e1 && e1.removed && Date.parse(e1.removed) > Date.parse(r.remove.created) && !r.remove.listed, 'a passkey removal beats a passkey stamped ahead of this clock', r.remove);
+  const e2 = r.add.entry;
+  assert(e2 && !e2.removed && Date.parse(e2.created) > Date.parse(r.add.tomb) && r.add.listed && r.add.opens, 'a passkey added over a removal stamped ahead of this clock stays', r.add);
+  assert(r.code.ok && r.code.newOpens && !r.code.oldOpens && Date.parse(r.code.created) > Date.parse(r.code.was) && r.code.confirmed, 'a new code replaces a recovery wrap stamped ahead of this clock and stays confirmed', r.code);
+});
+
 check('switch off deletes the session and the lab names retired locks', async () => {
   await clean();
   const page = await open('/beta/unlock/');

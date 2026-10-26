@@ -317,6 +317,7 @@ unlockTool: true
     prf_unsupported:          {{ ('tool.totp.prf_unsupported'          | t) | dump | safe }},
     prf_enroll_done:          {{ ('tool.totp.prf_enroll_done'          | t) | dump | safe }},
     prf_enroll_failed:        {{ ('tool.totp.prf_enroll_failed'        | t) | dump | safe }},
+    prf_enroll_relock:        {{ ('tool.totp.prf_enroll_relock'        | t) | dump | safe }},
     locked_lede_setup:        {{ ('tool.totp.locked_lede_setup'        | t) | dump | safe }},
     locked_lede_unlock:       {{ ('tool.totp.locked_lede_unlock'       | t) | dump | safe }},
     handoff_unlock:           {{ ('tool.totp.handoff_unlock'           | t) | dump | safe }},
@@ -623,6 +624,7 @@ unlockTool: true
   const state = {
     vault: null,
     masterKey: null,
+    masterRaw: null,
     accounts: [],
     timer: null,
     hiddenAt: null,
@@ -638,6 +640,15 @@ unlockTool: true
   function dropRaw() {
     if (ring.raw) ring.raw.fill(0);
     ring.raw = null;
+  }
+
+  function holdMaster(bytes) {
+    dropMaster();
+    state.masterRaw = new Uint8Array(bytes);
+  }
+  function dropMaster() {
+    if (state.masterRaw) state.masterRaw.fill(0);
+    state.masterRaw = null;
   }
 
   const AUTOLOCK_KEY = 'autolock_min';
@@ -1008,6 +1019,7 @@ unlockTool: true
 
   function becameLinked() {
     dropRaw();
+    dropMaster();
     hideLinkPanel();
     if (!state.masterKey) return;
     state.mode = 'linked';
@@ -1157,6 +1169,7 @@ unlockTool: true
     if (state.timer) { clearInterval(state.timer); state.timer = null; }
     if (typeof exportModalReady !== 'undefined' && exportModalReady) closeExport();
     state.masterKey = null;
+    dropMaster();
     state.accounts = [];
     state.mode = null;
     lastCodes.clear();
@@ -1288,6 +1301,7 @@ unlockTool: true
     const masterBytes = await decryptWith(wrapKey, { iv: state.vault.pass.iv, ct: state.vault.pass.wrap });
     state.masterKey = await importRaw(masterBytes);
     await decryptSecrets();
+    holdMaster(masterBytes);
     return masterBytes;
   }
   async function unlockWithPrf() {
@@ -1299,6 +1313,7 @@ unlockTool: true
     const masterBytes = await decryptWith(wrapKey, { iv: state.vault.prf.iv, ct: state.vault.prf.wrap });
     state.masterKey = await importRaw(masterBytes);
     await decryptSecrets();
+    holdMaster(masterBytes);
     return masterBytes;
   }
 
@@ -1317,25 +1332,31 @@ unlockTool: true
     };
     saveVault(state.vault);
     state.masterKey = masterKey;
+    holdMaster(rawMaster);
+    rawMaster.fill(0);
     state.accounts = [];
   }
 
   async function enrollPrf() {
     if (!prfSupported) throw new Error('prf-unsupported');
     if (!state.masterKey) throw new Error('locked');
-    const salt = crypto.getRandomValues(new Uint8Array(32));
-    const { credId, prfResult } = await prfCreate(salt);
-    if (!prfResult) {
-      const r = await prfGet(credId, salt);
-      const wrapKey = await prfDeriveKey(r);
-      const rawMaster = await exportRaw(state.masterKey);
-      const wrap = await encryptWith(wrapKey, rawMaster);
-      state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
-    } else {
-      const wrapKey = await prfDeriveKey(new Uint8Array(prfResult));
-      const rawMaster = await exportRaw(state.masterKey);
-      const wrap = await encryptWith(wrapKey, rawMaster);
-      state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
+    if (!state.masterRaw) throw new Error(COPY.prf_enroll_relock);
+    const rawMaster = new Uint8Array(state.masterRaw);
+    try {
+      const salt = crypto.getRandomValues(new Uint8Array(32));
+      const { credId, prfResult } = await prfCreate(salt);
+      if (!prfResult) {
+        const r = await prfGet(credId, salt);
+        const wrapKey = await prfDeriveKey(r);
+        const wrap = await encryptWith(wrapKey, rawMaster);
+        state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
+      } else {
+        const wrapKey = await prfDeriveKey(new Uint8Array(prfResult));
+        const wrap = await encryptWith(wrapKey, rawMaster);
+        state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
+      }
+    } finally {
+      rawMaster.fill(0);
     }
     return saveVault(state.vault);
   }

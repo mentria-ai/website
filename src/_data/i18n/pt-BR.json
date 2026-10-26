@@ -1454,6 +1454,7 @@
       "enroll_prf": "+ Desbloqueio por rosto, digital ou PIN",
       "prf_enroll_done": "Desbloqueio por rosto, digital ou PIN adicionado neste dispositivo.",
       "prf_enroll_failed": "Não foi possível adicionar o desbloqueio por rosto, digital ou PIN",
+      "prf_enroll_relock": "Bloqueie, desbloqueie com sua senha e tente novamente.",
       "backup_gate_title": "Faça backup antes de salvar",
       "backup_gate_lede": "Segredos TOTP não podem ser recuperados se você perder este dispositivo ou esquecer a senha. Baixe um backup criptografado agora — usa uma senha de sua escolha (pode ser a mesma do cofre).",
       "backup_gate_confirm": "Baixar backup e salvar",

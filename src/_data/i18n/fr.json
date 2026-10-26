@@ -1454,6 +1454,7 @@
       "enroll_prf": "+ Déverrouillage visage, empreinte ou PIN",
       "prf_enroll_done": "Déverrouillage par visage, empreinte ou code PIN ajouté sur cet appareil.",
       "prf_enroll_failed": "Impossible d'ajouter le déverrouillage par visage, empreinte ou code PIN",
+      "prf_enroll_relock": "Verrouillez, déverrouillez avec votre phrase secrète, puis réessayez.",
       "backup_gate_title": "Sauvegardez avant d'enregistrer",
       "backup_gate_lede": "Les secrets TOTP ne peuvent pas être récupérés si vous perdez cet appareil ou oubliez votre phrase secrète. Téléchargez maintenant une sauvegarde chiffrée — elle utilise une phrase secrète de votre choix (peut être la même que celle du coffre).",
       "backup_gate_confirm": "Télécharger et enregistrer",

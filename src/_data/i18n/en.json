@@ -1454,6 +1454,7 @@
       "enroll_prf": "+ Add face, fingerprint or PIN unlock",
       "prf_enroll_done": "Face, fingerprint or PIN unlock added on this device.",
       "prf_enroll_failed": "Couldn't add face, fingerprint or PIN unlock",
+      "prf_enroll_relock": "Lock, unlock with your passphrase, then try again.",
       "backup_gate_title": "Back up before you save",
       "backup_gate_lede": "TOTP secrets cannot be recovered if you lose this device or forget your passphrase. Download an encrypted backup now — it uses a passphrase you choose (can be the same as your vault).",
       "backup_gate_confirm": "Download backup and save",

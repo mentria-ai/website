@@ -550,6 +550,72 @@ check('switch off keeps the old flow on the production build', async () => {
   try { await switchOffFlow(true); } finally { server.setRoot(BUILD); }
 });
 
+async function passkeys(page) {
+  const { cdp, authenticatorId } = page.__auth;
+  const { credentials } = await cdp.send('WebAuthn.getCredentials', { authenticatorId });
+  return credentials.map((c) => Buffer.from(c.credentialId, 'base64').toString('base64url'));
+}
+
+async function statusLine(page) {
+  return page.evaluate(() => {
+    const el = document.getElementById('totp-status');
+    return { text: el.textContent.trim(), tone: el.dataset.tone || '' };
+  });
+}
+
+async function enrolAfterPassphrase(prod) {
+  const r = await rig(prod ? 'enrol after reload prod' : 'enrol after reload');
+  const { page } = r;
+  await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
+  assert((await passkeys(page)).length === 0, 'the old setup makes no passkey');
+  await openTotp(page);
+  assert(await page.evaluate(() => document.documentElement.dataset.release) === (prod ? '' : 'beta'), prod ? 'this is a production build' : 'this is a beta build');
+  const s0 = await screen(page);
+  assert(s0.unlock && !s0.prf && !s0.card && !s0.layer, 'a reload shows the old passphrase unlock', s0);
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  assert((await screen(page)).enrol, 'Add quick unlock shows after a passphrase unlock');
+  await press(page, '#totp-prf-enroll-btn');
+  const st = await until(async () => { const s = await statusLine(page); return s.tone ? s : null; }, 30000, 'the enrolment to finish');
+  const vault = await readJson(page, VAULT);
+  const keys = await passkeys(page);
+  assert(st.tone === 'ok' && st.text === T.prf_enroll_done, 'Add quick unlock succeeds after a reload and a passphrase unlock', { st, keys: keys.length });
+  assert(vault && vault.prf && vault.prf.cred_id, 'the vault holds the quick unlock', vault && vault.prf);
+  assert(keys.length === 1 && keys[0] === vault.prf.cred_id, 'the authenticator holds exactly one passkey, the vault\'s', { keys, cred: vault.prf.cred_id });
+  await openTotp(page);
+  const s1 = await screen(page);
+  assert(s1.unlock && s1.prf, 'a reload offers the passkey unlock', s1);
+  await press(page, '#totp-prf-btn');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  assert((await passkeys(page)).length === 1, 'the passkey unlock makes no new passkey');
+  await done(r);
+}
+
+check('quick unlock can be added after a reload and a passphrase unlock with the switch off', () => enrolAfterPassphrase(false));
+
+check('quick unlock can be added after a reload and a passphrase unlock on the production build', async () => {
+  if (!PROD) throw new Error('SKIP no production build given');
+  server.setRoot(PROD);
+  try { await enrolAfterPassphrase(true); } finally { server.setRoot(BUILD); }
+});
+
+check('quick unlock without the key bytes stops before making a passkey', async () => {
+  const r = await rig('enrol without bytes');
+  const { page } = r;
+  await newLinkedVault(r);
+  assert(!(await screen(page)).enrol, 'a linked vault hides Add quick unlock');
+  const before = await passkeys(page);
+  await page.$eval('#totp-prf-enroll-btn', (b) => b.click());
+  const st = await until(async () => { const s = await statusLine(page); return s.tone ? s : null; }, 30000, 'the enrolment to stop');
+  const after = await passkeys(page);
+  assert(after.length === before.length, 'no passkey is left behind', { before: before.length, after: after.length, st });
+  assert(st.tone === 'err' && st.text.includes(T.prf_enroll_relock), 'enrolment says why it stopped', st);
+  const vault = await readJson(page, VAULT);
+  assert(vault && !vault.prf, 'the vault gets no quick unlock', vault);
+  await done(r);
+});
+
 check('new vault with no keyring runs setup first', async () => {
   const r = await rig('setup first');
   const { page } = r;

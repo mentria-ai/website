@@ -1,4 +1,5 @@
 import { rmSync, readFileSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -64,6 +65,22 @@ const WATCH_REMOVE = () => {
       held = x;
     }
   });
+};
+const NOPRF = () => {
+  const c = navigator.credentials;
+  if (!c) return;
+  const get = c.get.bind(c);
+  c.get = (o) => {
+    const pk = o && o.publicKey;
+    const id = pk && pk.allowCredentials && pk.allowCredentials[0] && pk.allowCredentials[0].id;
+    const skip = sessionStorage.getItem('t-noprf');
+    if (skip && id && btoa(String.fromCharCode(...new Uint8Array(id))) === skip) {
+      const plain = Object.assign({}, pk);
+      delete plain.extensions;
+      return get({ publicKey: plain });
+    }
+    return get(o);
+  };
 };
 const SWITCH_ON = () => {
   try {
@@ -394,6 +411,29 @@ async function typeEnd(page, text) {
 
 const b64u = (s) => s.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
+const gonePair = () => ({ salt: randomBytes(32).toString('base64'), cred: randomBytes(16).toString('base64') });
+
+const pairShape = (p) => JSON.stringify({ salt: p.salt, credId: p.cred });
+
+async function preFixNote(page, title, text) {
+  await writeNote(page, title, text, false);
+  await oldLock(page, title, text);
+  const mine = await storedPair(page);
+  await stripPairs(page, [title]);
+  await page.evaluate((k) => localStorage.removeItem(k), PAIR);
+  return mine;
+}
+
+async function leaveNotes(page) {
+  await page.goto(ORIGIN + '/privacy/', { waitUntil: 'load' });
+  await page.waitForFunction(() => !!window.MentriaStore, { timeout: 10000 });
+}
+
+async function backToNotes(page) {
+  await page.goto(ORIGIN + NOTES, { waitUntil: 'load' });
+  await settle(page, 'old');
+}
+
 async function legacySeed(page) {
   await writeNote(page, 'Alpha', 'alpha secret text', false);
   await page.click('#qn-lock-btn');
@@ -663,6 +703,210 @@ check('old notes without a pair find this device\'s pair after a sync', async ()
     assert(c.salt === mine.salt && c.credId === mine.cred, 'a new lock uses this device\'s pair while the stored one came from elsewhere', c);
     assert((await wa(page)).join() === 'get', 'one tap of this device\'s passkey, none made', await wa(page));
     assert((await store(page, 'quick_notes', 'salt')) === other.salt && (await store(page, 'quick_notes', 'cred_id')) === other.cred, 'the synced salt and cred_id stay', await storedPair(page));
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('a pair replaced while Quick Notes is closed keeps old notes opening', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    for (const how of ['sync', 'import']) {
+      await clean();
+      const page = await open(NOTES);
+      await authOn(page);
+      await settle(page, 'old');
+      const mine = await preFixNote(page, 'Alpha', 'alpha secret text');
+      await leaveNotes(page);
+      const other = await page.evaluate(OTHER_DEVICE, '', '', true);
+      if (how === 'sync') await page.evaluate(SYNC_PAIR, other);
+      else {
+        await page.evaluate((p) => window.MentriaStore.importAll({
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          store: { 'quick_notes.salt': JSON.stringify(p.salt), 'quick_notes.cred_id': JSON.stringify(p.cred) },
+          legacy: {}
+        }, { mode: 'merge' }), other);
+      }
+      assert(JSON.stringify(await storedPair(page)) === JSON.stringify(other), how + ': the other device\'s salt and cred_id are stored', await storedPair(page));
+      await backToNotes(page);
+      assert(JSON.stringify(await readJson(page, PAIR)) === pairShape(mine), how + ': this device\'s pair was kept when it was replaced', await readJson(page, PAIR));
+      await resetWa(page);
+      await unlockOld(page, 'Alpha', 'alpha secret text');
+      assert((await wa(page)).join() === 'get,get', how + ': the synced passkey is tried, then this device\'s', await wa(page));
+      const log = logs.get(page);
+      assert(!log.errors.length, how + ': no page errors', log.errors);
+    }
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('a pair a sync replaced before this release is found in the sync rescue', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES);
+    await authOn(page);
+    await settle(page, 'old');
+    const mine = await preFixNote(page, 'Alpha', 'alpha secret text');
+    await leaveNotes(page);
+    const other = await page.evaluate(OTHER_DEVICE, '', '', true);
+    await page.evaluate((m, o) => {
+      const raw = (v) => JSON.stringify(v);
+      localStorage.setItem('mentria-sync-rescue', JSON.stringify({ v: 2, at: Date.now(), entries: { 'quick_notes.salt': { raw: raw(m.salt), meta: null }, 'quick_notes.cred_id': { raw: raw(m.cred), meta: null } } }));
+      localStorage.setItem('mentria.store.quick_notes.salt', raw(o.salt));
+      localStorage.setItem('mentria.store.quick_notes.cred_id', raw(o.cred));
+    }, mine, other);
+    assert((await readJson(page, PAIR)) === null, 'harness: no device pair stored yet');
+    await backToNotes(page);
+    assert(JSON.stringify(await readJson(page, PAIR)) === pairShape(mine), 'the device pair comes from the sync rescue', await readJson(page, PAIR));
+    await resetWa(page);
+    await unlockOld(page, 'Alpha', 'alpha secret text');
+    assert((await wa(page)).join() === 'get,get', 'the synced passkey is tried, then the one the rescue kept', await wa(page));
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('a new lock uses the stored passkey when this device\'s passkey does not answer', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES, NOPRF);
+    await authOn(page);
+    await settle(page, 'old');
+    await writeNote(page, 'Alpha', 'alpha secret text', false);
+    await oldLock(page, 'Alpha', 'alpha secret text');
+    const mine = await storedPair(page);
+    const cases = [['gone', 'Bravo', gonePair()], ['no extension', 'Charlie', await page.evaluate(OTHER_DEVICE, '', '', true)]];
+    for (const [how, title, dev] of cases) {
+      await page.evaluate((k, p, noprf) => {
+        localStorage.setItem(k, JSON.stringify({ salt: p.salt, credId: p.cred }));
+        if (noprf) sessionStorage.setItem('t-noprf', p.cred);
+        else sessionStorage.removeItem('t-noprf');
+      }, PAIR, dev, how === 'no extension');
+      await reload(page, 'old');
+      await writeNote(page, title, title.toLowerCase() + ' secret text', true);
+      await resetWa(page);
+      await page.click('#qn-lock-btn');
+      assert((await answerDialog(page)) === QN.confirm_lock, how + ': old confirm text');
+      const list = await waitBlob(page, (v) => { const n = byTitle(v, title); return n && n.enc === true && n.iv; }, how + ': ' + title + ' locked with the stored passkey', 20000);
+      const n = byTitle(list, title);
+      assert(n.salt === mine.salt && n.credId === mine.cred, how + ': the note records the stored pair', n);
+      assert((await wa(page)).join() === 'get,get', how + ': this device\'s passkey is tried, then the stored one', await wa(page));
+      await sleep(300);
+      assert(!(await dialogOpen(page)), how + ': no message');
+    }
+    await page.evaluate(() => sessionStorage.removeItem('t-noprf'));
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Bravo', 'bravo secret text');
+    await unlockOld(page, 'Charlie', 'charlie secret text');
+    assert((await wa(page)).join() === 'get', 'both open with one tap of the stored passkey', await wa(page));
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('old notes open when the stored or their own passkey is not on this device', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES);
+    await authOn(page);
+    await settle(page, 'old');
+    await writeNote(page, 'Alpha', 'alpha secret text', false);
+    await oldLock(page, 'Alpha', 'alpha secret text');
+    await writeNote(page, 'Bravo', 'bravo secret text', true);
+    await oldLock(page, 'Bravo', 'bravo secret text');
+    const mine = await storedPair(page);
+    await stripPairs(page, ['Alpha']);
+    const gone = gonePair();
+    await page.evaluate((p) => {
+      const cur = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob'));
+      for (const n of cur) if (n.title === 'Bravo') { n.salt = p.salt; n.credId = p.cred; }
+      window.MentriaStore.set('quick_notes', 'blob', cur);
+    }, gone);
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Bravo', 'bravo secret text');
+    assert((await wa(page)).join() === 'get,get', 'its own passkey is not here, so the stored one opens it', await wa(page));
+    const b = byTitle(await waitBlob(page, (x) => { const n = byTitle(x, 'Bravo'); return n && n.credId === mine.cred; }, 'Bravo records the pair that opened it'), 'Bravo');
+    assert(b.salt === mine.salt, 'Bravo records the stored salt', b);
+    await page.evaluate(SYNC_PAIR, gone);
+    assert(JSON.stringify(await readJson(page, PAIR)) === pairShape(mine), 'this device\'s pair stays', await readJson(page, PAIR));
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Alpha', 'alpha secret text');
+    assert((await wa(page)).join() === 'get,get', 'the stored passkey is not here, so this device\'s opens it', await wa(page));
+    await sleep(300);
+    assert(!(await dialogOpen(page)), 'no message');
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('an old unlock moves on when a passkey answers without the extension', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES, NOPRF);
+    await authOn(page);
+    await settle(page, 'old');
+    await writeNote(page, 'Alpha', 'alpha secret text', false);
+    await oldLock(page, 'Alpha', 'alpha secret text');
+    const mine = await storedPair(page);
+    await stripPairs(page, ['Alpha']);
+    const other = await page.evaluate(OTHER_DEVICE, '', '', true);
+    await page.evaluate(SYNC_PAIR, other);
+    await page.evaluate((c) => sessionStorage.setItem('t-noprf', c), other.cred);
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Alpha', 'alpha secret text');
+    assert((await wa(page)).join() === 'get,get', 'the stored passkey answers without the extension, then this device\'s opens it', await wa(page));
+    await sleep(300);
+    assert(!(await dialogOpen(page)), 'no message');
+    const a = byTitle(await waitBlob(page, (x) => { const n = byTitle(x, 'Alpha'); return n && n.credId === mine.cred; }, 'Alpha records the pair that opened it'), 'Alpha');
+    assert(a.salt === mine.salt, 'Alpha records this device\'s salt', a);
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('an old unlock that opens nothing says so', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES);
+    await authOn(page);
+    await settle(page, 'old');
+    await writeNote(page, 'Alpha', 'alpha secret text', false);
+    await oldLock(page, 'Alpha', 'alpha secret text');
+    await legacyNote(page, 'Lambda', 'lambda text');
+    await reload(page, 'old');
+    await pick(page, 'Lambda');
+    await resetWa(page);
+    await page.click('#qn-unlock-btn');
+    assert((await answerDialog(page)) === QN.unlock_failed, 'unlock says it failed');
+    assert((await wa(page)).join() === 'get', 'one passkey tap', await wa(page));
+    const v = await view(page);
+    assert(v.panel && v.unlockBtn && v.text === null, 'the note stays locked', v);
+    await page.click('#qn-unlock-btn');
+    assert((await answerDialog(page)) === QN.unlock_failed, 'a second tap says so again');
+    assert((await wa(page)).join() === 'get', 'without another prompt', await wa(page));
+    await pick(page, 'Alpha');
+    await waitView(page, (x) => x.text === 'alpha secret text', 'the passkey that answered still opens its own note');
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
@@ -1046,6 +1290,38 @@ check('a tap with no old lock here counts every old note', async () => {
   await waitView(page, (x) => x.convert === QN.convert_skipped.replace('{n}', '2'), 'both old notes counted as not opened');
   assert((await wa(page)).length === 0, 'no passkey made or asked', await wa(page));
   assert(JSON.stringify(await blob(page)) === JSON.stringify(before), 'nothing written');
+});
+
+check('an old unlock that opens nothing keeps the count and shows no card', async () => {
+  await clean();
+  const page = await open(NOTES);
+  await authOn(page);
+  await settle(page, 'old');
+  await writeNote(page, 'Alpha', 'alpha secret text', false);
+  await oldLock(page, 'Alpha', 'alpha secret text');
+  await legacyNote(page, 'Lambda', 'lambda text');
+  await page.evaluate(SWITCH_ON);
+  await reload(page, 'one');
+  await makeKeyring(page);
+  await pick(page, 'Alpha');
+  await page.click('#qn-unlock-btn');
+  await waitBlob(page, (x) => { const n = byTitle(x, 'Alpha'); return n && n.kv === 2; }, 'Alpha converted', 30000);
+  const one = QN.convert_skipped.replace('{n}', '1');
+  await waitView(page, (x) => x.text === 'alpha secret text' && x.convert === one, 'Alpha open and Lambda counted');
+  await lockKeyring(page);
+  await pick(page, 'Lambda');
+  await waitView(page, (x) => x.unlockBtn && !x.card && x.convert === one, 'Lambda offers the old unlock and stays counted');
+  const before = await blob(page);
+  await resetWa(page);
+  await page.click('#qn-unlock-btn');
+  assert((await answerDialog(page)) === QN.unlock_failed, 'unlock says it failed');
+  assert((await wa(page)).join() === 'get', 'one passkey tap', await wa(page));
+  await sleep(800);
+  const v = await view(page);
+  assert(v.unlockBtn && !v.card && !v.later && v.convert === one, 'no card, and the count stays', v);
+  assert(JSON.stringify(await blob(page)) === JSON.stringify(before), 'nothing written');
+  const log = logs.get(page);
+  assert(!log.errors.length, 'no page errors', log.errors);
 });
 
 check('legacy notes keep working on Later and survive a failed write', async () => {

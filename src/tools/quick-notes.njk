@@ -487,13 +487,23 @@ unlockTool: true
     return keyFor(pair);
   }
 
+  function nextPair(err) {
+    return !!err && (err.name === 'NotAllowedError' || err.message === 'prf-unsupported');
+  }
+
   async function lockKey() {
     const st = storedPair();
     const dev = devicePair();
     const held = keyIn(sessionKeys, st) || keyIn(sessionKeys, dev);
     if (held) return held;
     if (sessionKeys && sessionKeys.size) return [...sessionKeys.values()].pop();
-    if (dev && !samePair(dev, st)) return keyFor(dev);
+    if (dev && !samePair(dev, st)) {
+      try {
+        return await keyFor(dev);
+      } catch (err) {
+        if (!nextPair(err)) throw err;
+      }
+    }
     return ensureKey();
   }
 
@@ -546,7 +556,7 @@ unlockTool: true
       try {
         k = await keyFor(list[i]);
       } catch (err) {
-        if (i < list.length - 1 && err && err.name === 'NotAllowedError') continue;
+        if (i < list.length - 1 && nextPair(err)) continue;
         throw err;
       }
       try {
@@ -555,6 +565,7 @@ unlockTool: true
         return;
       } catch (_) {}
     }
+    throw new Error('locked');
   }
 
   function handleCryptoError(err, fallbackMsg) {

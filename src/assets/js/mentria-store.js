@@ -105,6 +105,59 @@
     } catch (_) {}
   };
 
+  const QN_PAIR_KEY = 'mentria.qn.pair';
+  const QN_PAIR = ['quick_notes.salt', 'quick_notes.cred_id'];
+  const QN_RAW = ['mentria-qn-salt', 'mentria-qn-cred'];
+  const RESCUE_KEY = 'mentria-sync-rescue';
+
+  const textOf = (raw) => {
+    if (raw == null) return null;
+    let v = raw;
+    try { v = JSON.parse(raw); } catch (_) {}
+    return typeof v === 'string' && v ? v : null;
+  };
+
+  const qnPairHeld = () => {
+    try {
+      const p = JSON.parse(global.localStorage.getItem(QN_PAIR_KEY) || 'null');
+      return !!p && typeof p.salt === 'string' && !!p.salt && typeof p.credId === 'string' && !!p.credId;
+    } catch (_) { return false; }
+  };
+
+  const qnRescued = () => {
+    try {
+      const raw = global.localStorage.getItem(RESCUE_KEY);
+      if (!raw || !QN_PAIR.some((s) => raw.indexOf('"' + s + '"') >= 0)) return {};
+      const rec = JSON.parse(raw);
+      return rec && rec.v === 2 && rec.entries && typeof rec.entries === 'object' ? rec.entries : {};
+    } catch (_) { return {}; }
+  };
+
+  const keepQnPair = (rescueOnly) => {
+    if (!lsAvailable) return;
+    try {
+      if (qnPairHeld()) return;
+      const rescued = qnRescued();
+      let fromRescue = false;
+      const half = (i) => {
+        const e = rescued[QN_PAIR[i]];
+        const r = e && typeof e.raw === 'string' ? textOf(e.raw) : null;
+        if (r) { fromRescue = true; return r; }
+        return textOf(global.localStorage.getItem(PREFIX + QN_PAIR[i])) || global.localStorage.getItem(QN_RAW[i]) || null;
+      };
+      const salt = half(0);
+      const credId = half(1);
+      if (!salt || !credId || (rescueOnly && !fromRescue)) return;
+      global.localStorage.setItem(QN_PAIR_KEY, JSON.stringify({ salt, credId }));
+    } catch (_) {}
+  };
+
+  const keepQnPairBefore = (next) => {
+    try {
+      if (QN_PAIR.some((s) => s in next && next[s] !== global.localStorage.getItem(PREFIX + s))) keepQnPair(false);
+    } catch (_) {}
+  };
+
   const set = (ns, key, value, opts) => {
     opts = opts || {};
     if (!lsAvailable) {
@@ -114,6 +167,7 @@
     try {
       const raw = JSON.stringify(value);
       const mtime = (opts && typeof opts.mtime === 'number') ? opts.mtime : Date.now();
+      if (ns === 'quick_notes' && (key === 'salt' || key === 'cred_id')) keepQnPairBefore({ [ns + '.' + key]: raw });
       global.localStorage.setItem(fullKey(ns, key), raw);
       noteWrite('ok');
       writeMeta(ns, key, raw, mtime);
@@ -417,6 +471,14 @@
       writes.push({ key: k, meta: null, raw: String(legacy[k]), mtime: restoredMtime });
     });
 
+    const qnNext = {};
+    QN_PAIR.forEach((s) => {
+      const w = writes.find((x) => x.key === PREFIX + s);
+      if (w) qnNext[s] = w.raw;
+      else if (mode === 'replace') qnNext[s] = null;
+    });
+    keepQnPairBefore(qnNext);
+
     const undo = [];
     const remember = (k) => { if (k) undo.push({ k, v: global.localStorage.getItem(k) }); };
     const rollback = () => {
@@ -496,6 +558,8 @@
     if (!global.navigator || !global.navigator.storage || !global.navigator.storage.persisted) return false;
     try { return !!(await global.navigator.storage.persisted()); } catch (_) { return false; }
   };
+
+  keepQnPair(true);
 
   global.MentriaStore = {
     get, set, remove, list, clear: clearNs, status,

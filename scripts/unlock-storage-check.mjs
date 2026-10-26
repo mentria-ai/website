@@ -1092,6 +1092,169 @@ check('undo sync merges a rescued copy of the same keyring', async () => {
   assert.equal(cur.wraps.prf.length, 1, 'what the rescued copy had comes back');
 });
 
+const QN_PAIR = 'mentria.qn.pair';
+const qnHeld = () => { try { return JSON.parse(ls.getItem(QN_PAIR)); } catch (_) { return 'unreadable'; } };
+const qnNew = () => ({ salt: b64(rand(32)), cred: b64(rand(16)) });
+const qnShape = (p) => ({ salt: p.salt, credId: p.cred });
+const qnSeed = (p, mtime) => {
+  put('quick_notes.salt', p.salt, mtime);
+  put('quick_notes.cred_id', p.cred, mtime);
+  assert.equal(ls.getItem(QN_PAIR), null, 'harness: no device pair yet');
+};
+const qnRescue = (p, halves) => ls.setItem('mentria-sync-rescue', JSON.stringify({
+  v: 2,
+  at: Date.now(),
+  entries: Object.fromEntries((halves || ['salt', 'cred_id']).map((h) => ['quick_notes.' + h, { raw: JSON.stringify(h === 'salt' ? p.salt : p.cred), meta: null }]))
+}));
+const qnPayload = (p, extra) => ({
+  version: 1,
+  exportedAt: new Date().toISOString(),
+  store: Object.assign({ 'quick_notes.salt': JSON.stringify(p.salt), 'quick_notes.cred_id': JSON.stringify(p.cred) }, extra || {}),
+  legacy: {}
+});
+const freshStore = async () => {
+  const keep = globalThis.MentriaStore;
+  const copy = join(tmp, 'store-' + Math.random().toString(36).slice(2) + '.cjs');
+  writeFileSync(copy, readFileSync(join(repo, 'src/assets/js/mentria-store.js'), 'utf8'));
+  await import(pathToFileURL(copy).href);
+  const mod = globalThis.MentriaStore;
+  globalThis.MentriaStore = keep;
+  assert.notEqual(mod, keep, 'harness: a fresh store module');
+  return mod;
+};
+
+check('a sync that replaces the notes salt and passkey keeps this device\'s pair', async () => {
+  reset();
+  const mine = qnNew();
+  const other = qnNew();
+  qnSeed(mine, Date.now() - 3600000);
+  let r = await joinRoom();
+  await r.deliver(snapshotOf({ 'quick_notes.salt': JSON.stringify(other.salt), 'quick_notes.cred_id': JSON.stringify(other.cred) }));
+  assert.equal(Store.get('quick_notes', 'salt'), other.salt, 'the sync replaced the salt');
+  assert.equal(Store.get('quick_notes', 'cred_id'), other.cred, 'the sync replaced the passkey id');
+  assert.deepEqual(qnHeld(), qnShape(mine), 'this device\'s pair is kept on the device');
+  const third = qnNew();
+  await r.deliver({ op: 'set', ns: 'quick_notes', key: 'salt', value: third.salt, mtime: Date.now() });
+  assert.equal(Store.get('quick_notes', 'salt'), third.salt);
+  assert.deepEqual(qnHeld(), qnShape(mine), 'a later sync never moves it');
+  await Sync.disconnect();
+  reset();
+  qnSeed(mine, Date.now() - 3600000);
+  r = await joinRoom();
+  await r.deliver({ op: 'set', ns: 'quick_notes', key: 'cred_id', value: other.cred, mtime: Date.now() });
+  assert.equal(Store.get('quick_notes', 'cred_id'), other.cred);
+  assert.deepEqual(qnHeld(), qnShape(mine), 'a live write keeps the pair it replaces');
+  await Sync.disconnect();
+  reset();
+  qnSeed(mine, Date.now() - 3600000);
+  r = await joinRoom();
+  await r.deliver({ op: 'snapshot', data: qnPayload(other) });
+  assert.equal(Store.get('quick_notes', 'salt'), other.salt, 'an older peer\'s snapshot replaced the salt');
+  assert.deepEqual(qnHeld(), qnShape(mine), 'an older peer\'s snapshot keeps the pair it replaces');
+  await Sync.disconnect();
+});
+
+check('an import that replaces or drops the notes pair keeps this device\'s pair', async () => {
+  for (const mode of ['merge', 'replace']) {
+    reset();
+    const mine = qnNew();
+    qnSeed(mine);
+    put('quick_notes.blob', [{ id: 'n1', body: 'hello', updatedAt: 5 }]);
+    const other = qnNew();
+    Store.importAll(qnPayload(other, { 'quick_notes.blob': raw('quick_notes.blob') }), { mode });
+    assert.equal(Store.get('quick_notes', 'salt'), other.salt, mode + ': the import replaced the salt');
+    assert.deepEqual(qnHeld(), qnShape(mine), mode + ': this device\'s pair is kept');
+  }
+  reset();
+  const mine = qnNew();
+  qnSeed(mine);
+  Store.importAll({ version: 1, exportedAt: new Date().toISOString(), store: { 'tools.x': JSON.stringify({ a: 1 }) }, legacy: {} }, { mode: 'replace' });
+  assert.equal(Store.get('quick_notes', 'salt'), null, 'harness: the replace dropped the pair');
+  assert.deepEqual(qnHeld(), qnShape(mine), 'a replace that drops the pair keeps it on the device');
+  for (const mode of ['merge', 'replace']) {
+    reset();
+    const same = qnNew();
+    qnSeed(same);
+    Store.importAll(qnPayload(same, { 'tools.x': JSON.stringify({ a: 1 }) }), { mode });
+    assert.equal(Store.get('tools', 'x').a, 1, 'harness: the import ran');
+    assert.equal(ls.getItem(QN_PAIR), null, mode + ': an import that leaves the pair as it is writes no device pair');
+  }
+});
+
+check('undoing a sync keeps the pair it brings back as this device\'s', async () => {
+  reset();
+  const mine = qnNew();
+  const other = qnNew();
+  qnSeed(other);
+  qnRescue(mine);
+  const S2 = await freshSync('fresh=1');
+  const back = await S2.restoreRescue();
+  assert.ok(back && back.restored === 2, 'the undo ran');
+  assert.equal(Store.get('quick_notes', 'salt'), mine.salt, 'the undo brought the salt back');
+  assert.deepEqual(qnHeld(), qnShape(mine), 'the device pair is the one the rescue kept');
+});
+
+check('a page load finds the pair a sync replaced before this release', async () => {
+  reset();
+  const mine = qnNew();
+  const other = qnNew();
+  ls.setItem('mentria.store.quick_notes.salt', JSON.stringify(other.salt));
+  ls.setItem('mentria.store.quick_notes.cred_id', JSON.stringify(other.cred));
+  qnRescue(mine);
+  await freshStore();
+  assert.deepEqual(qnHeld(), qnShape(mine), 'the device pair comes from the rescue');
+  reset();
+  const shared = qnNew();
+  ls.setItem('mentria.store.quick_notes.salt', JSON.stringify(shared.salt));
+  ls.setItem('mentria.store.quick_notes.cred_id', JSON.stringify(other.cred));
+  qnRescue(mine, ['cred_id']);
+  await freshStore();
+  assert.deepEqual(qnHeld(), { salt: shared.salt, credId: mine.cred }, 'a rescue of the passkey id alone pairs it with the salt it kept');
+  reset();
+  ls.setItem('mentria.store.quick_notes.salt', JSON.stringify(other.salt));
+  ls.setItem('mentria.store.quick_notes.cred_id', JSON.stringify(other.cred));
+  ls.setItem('mentria-sync-rescue', JSON.stringify({ v: 2, at: Date.now(), entries: { 'tools.undo': { raw: JSON.stringify({ u: 1 }), meta: null } } }));
+  await freshStore();
+  assert.equal(ls.getItem(QN_PAIR), null, 'a rescue without the pair writes no device pair');
+  reset();
+  ls.setItem('mentria.store.quick_notes.salt', JSON.stringify(other.salt));
+  ls.setItem('mentria.store.quick_notes.cred_id', JSON.stringify(other.cred));
+  await freshStore();
+  assert.equal(ls.getItem(QN_PAIR), null, 'a page load alone writes no device pair');
+  reset();
+  const kept = JSON.stringify(qnShape(other));
+  ls.setItem(QN_PAIR, kept);
+  qnRescue(mine);
+  await freshStore();
+  assert.equal(ls.getItem(QN_PAIR), kept, 'a stored device pair is never replaced');
+});
+
+check('keeping the notes pair leaves every other write alone', async () => {
+  reset();
+  const before = new Map(ls.map);
+  put('tools.x', { a: 1 });
+  put('quick_notes.blob', [{ id: 'n1', body: 'hello', updatedAt: 5 }]);
+  put('quick_notes.deleted', { n0: 1 });
+  Store.importAll({ version: 1, exportedAt: new Date().toISOString(), store: { 'tools.y': JSON.stringify({ b: 2 }) }, legacy: {} }, { mode: 'merge' });
+  const added = [...ls.map.keys()].filter((k) => !before.has(k)).sort();
+  assert.deepEqual(added, ['mentria.meta.quick_notes.blob', 'mentria.meta.quick_notes.deleted', 'mentria.meta.tools.x', 'mentria.meta.tools.y', 'mentria.store.quick_notes.blob', 'mentria.store.quick_notes.deleted', 'mentria.store.tools.x', 'mentria.store.tools.y'], 'other writes add only their own keys');
+  reset();
+  const mine = qnNew();
+  qnSeed(mine);
+  put('quick_notes.salt', mine.salt);
+  assert.equal(ls.getItem(QN_PAIR), null, 'writing the same salt keeps no pair');
+  reset();
+  put('quick_notes.salt', mine.salt);
+  put('quick_notes.salt', qnNew().salt);
+  assert.equal(ls.getItem(QN_PAIR), null, 'a salt with no passkey id is not a pair');
+  reset();
+  const legacy = qnNew();
+  ls.setItem('mentria-qn-salt', legacy.salt);
+  ls.setItem('mentria-qn-cred', legacy.cred);
+  put('quick_notes.salt', mine.salt);
+  assert.deepEqual(qnHeld(), qnShape(legacy), 'the older raw keys count as this device\'s pair');
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

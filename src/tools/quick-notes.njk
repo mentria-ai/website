@@ -165,8 +165,10 @@ unlockTool: true
 
   const CRED_KEY = 'mentria-qn-cred';
   const SALT_KEY = 'mentria-qn-salt';
+  const PAIR_KEY = 'mentria.qn.pair';
+  const USED_KEY = 'mentria.qn.used';
   let sessionKeys = null;
-  const fellBack = new Map();
+  const opened = new Map();
   const cryptoOK = !!(window.PublicKeyCredential && window.isSecureContext && window.crypto && crypto.subtle);
 
   const BETA = document.documentElement.dataset.release === 'beta';
@@ -354,9 +356,12 @@ unlockTool: true
     return { salt: salt ? String(salt) : null, cred: cred ? String(cred) : null };
   }
 
-  function legacyLockHere() {
-    const p = storedPair();
-    return !!p.salt && !!p.cred;
+  function fullPair(p) {
+    return !!p && typeof p.salt === 'string' && !!p.salt && typeof p.cred === 'string' && !!p.cred;
+  }
+
+  function samePair(a, b) {
+    return fullPair(a) && fullPair(b) && a.salt === b.salt && a.cred === b.cred;
   }
 
   function ownPair(note) {
@@ -364,23 +369,45 @@ unlockTool: true
     return { salt: note.salt, cred: note.credId };
   }
 
+  function devicePair() {
+    try {
+      const p = JSON.parse(localStorage.getItem(PAIR_KEY) || 'null');
+      if (p && typeof p.salt === 'string' && p.salt && typeof p.credId === 'string' && p.credId) return { salt: p.salt, cred: p.credId };
+    } catch (_) {}
+    return null;
+  }
+
+  function keepDevicePair(p) {
+    if (!fullPair(p) || devicePair()) return;
+    try { localStorage.setItem(PAIR_KEY, JSON.stringify({ salt: p.salt, credId: p.cred })); } catch (_) {}
+  }
+
+  function usedIds() {
+    try {
+      const v = JSON.parse(localStorage.getItem(USED_KEY) || '[]');
+      return Array.isArray(v) ? v.filter((x) => typeof x === 'string' && x) : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function noteUsed(ids) {
+    const have = usedIds();
+    const add = ids.filter((id, i) => typeof id === 'string' && id && !have.includes(id) && ids.indexOf(id) === i);
+    if (!add.length) return;
+    try { localStorage.setItem(USED_KEY, JSON.stringify(have.concat(add))); } catch (_) {}
+  }
+
   function pairOf(note) {
-    const own = ownPair(note);
-    return (own && fellBack.get(noteSig(note))) || own || storedPair();
+    return opened.get(noteSig(note)) || ownPair(note) || storedPair();
   }
 
   function keyIn(keys, pair) {
-    return keys && pair.salt && pair.cred ? keys.get(pair.salt + '|' + pair.cred) || null : null;
+    return keys && fullPair(pair) ? keys.get(pair.salt + '|' + pair.cred) || null : null;
   }
 
-  function mayOpen(note) {
-    return !!keyIn(sessionKeys, pairOf(note)) || (!!ownPair(note) && !!keyIn(sessionKeys, storedPair()));
-  }
-
-  function storedDiffers(note) {
-    const own = ownPair(note);
-    const st = storedPair();
-    return !!own && !!st.salt && !!st.cred && (st.salt !== own.salt || st.cred !== own.cred);
+  function oldKeysHeld() {
+    return !!sessionKeys && sessionKeys.size > 0;
   }
 
   function setPair(n, k) {
@@ -393,15 +420,40 @@ unlockTool: true
     }
   }
 
-  async function ensureKey(noCreate, note) {
-    const own = ownPair(note);
-    const held = keyIn(sessionKeys, own || storedPair());
+  async function holdKey(raw, pair) {
+    const key = await crypto.subtle.importKey(
+      'raw', new Uint8Array(raw), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
+    );
+    const got = { key: key, salt: pair.salt, cred: pair.cred };
+    sessionKeys = new Map(sessionKeys || []).set(pair.salt + '|' + pair.cred, got);
+    keepDevicePair(got);
+    return got;
+  }
+
+  async function keyFor(pair) {
+    const held = keyIn(sessionKeys, pair);
     if (held) return held;
     if (!cryptoOK) throw new Error('prf-unsupported');
-    if (noCreate && !own && !legacyLockHere()) throw new Error('no-legacy');
-    const saltB64 = own ? own.salt : prfSalt();
-    const salt = b64dec(saltB64);
-    let credId = own ? own.cred : (window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null);
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials: [{ type: 'public-key', id: b64dec(pair.cred) }],
+        userVerification: 'required',
+        extensions: { prf: { eval: { first: b64dec(pair.salt) } } }
+      }
+    });
+    if (!assertion) throw new Error('cancelled');
+    const prf = assertion.getClientExtensionResults().prf;
+    if (!prf || !prf.results || !prf.results.first) throw new Error('prf-unsupported');
+    return holdKey(prf.results.first, pair);
+  }
+
+  async function ensureKey() {
+    const held = keyIn(sessionKeys, storedPair());
+    if (held) return held;
+    if (!cryptoOK) throw new Error('prf-unsupported');
+    const saltB64 = prfSalt();
+    let credId = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null;
     if (!credId) {
       const legacy = localStorage.getItem(CRED_KEY);
       if (legacy) {
@@ -409,56 +461,39 @@ unlockTool: true
         if (window.MentriaStore) { window.MentriaStore.set('quick_notes', 'cred_id', credId); localStorage.removeItem(CRED_KEY); }
       }
     }
-    let prfResult = null;
-    if (!credId) {
-      const cred = await navigator.credentials.create({
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(32)),
-          rp: { name: 'Mentria Quick Notes' },
-          user: {
-            id: crypto.getRandomValues(new Uint8Array(16)),
-            name: 'quick-notes',
-            displayName: 'Quick Notes'
-          },
-          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
-          authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
-          extensions: { prf: { eval: { first: salt } } }
-        }
-      });
-      if (!cred) throw new Error('cancelled');
-      const prf = cred.getClientExtensionResults().prf;
-      if (!prf || prf.enabled === false) throw new Error('prf-unsupported');
-      credId = b64enc(cred.rawId);
-      if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'cred_id', credId);
-      else localStorage.setItem(CRED_KEY, credId);
-      if (prf.results && prf.results.first) prfResult = prf.results.first;
-    }
-    if (!prfResult) {
-      const assertion = await navigator.credentials.get({
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(32)),
-          allowCredentials: [{ type: 'public-key', id: b64dec(credId) }],
-          userVerification: 'required',
-          extensions: { prf: { eval: { first: salt } } }
-        }
-      });
-      if (!assertion) throw new Error('cancelled');
-      const prf = assertion.getClientExtensionResults().prf;
-      if (!prf || !prf.results || !prf.results.first) throw new Error('prf-unsupported');
-      prfResult = prf.results.first;
-    }
-    const key = await crypto.subtle.importKey(
-      'raw', new Uint8Array(prfResult), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
-    );
-    const got = { key: key, salt: saltB64, cred: credId };
-    sessionKeys = new Map(sessionKeys || []).set(saltB64 + '|' + credId, got);
-    return got;
+    if (credId) return keyFor({ salt: saltB64, cred: String(credId) });
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: 'Mentria Quick Notes' },
+        user: {
+          id: crypto.getRandomValues(new Uint8Array(16)),
+          name: 'quick-notes',
+          displayName: 'Quick Notes'
+        },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
+        extensions: { prf: { eval: { first: b64dec(saltB64) } } }
+      }
+    });
+    if (!cred) throw new Error('cancelled');
+    const prf = cred.getClientExtensionResults().prf;
+    if (!prf || prf.enabled === false) throw new Error('prf-unsupported');
+    credId = b64enc(cred.rawId);
+    if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'cred_id', credId);
+    else localStorage.setItem(CRED_KEY, credId);
+    const pair = { salt: saltB64, cred: credId };
+    if (prf.results && prf.results.first) return holdKey(prf.results.first, pair);
+    return keyFor(pair);
   }
 
   async function lockKey() {
-    const held = keyIn(sessionKeys, storedPair());
+    const st = storedPair();
+    const dev = devicePair();
+    const held = keyIn(sessionKeys, st) || keyIn(sessionKeys, dev);
     if (held) return held;
     if (sessionKeys && sessionKeys.size) return [...sessionKeys.values()].pop();
+    if (dev && !samePair(dev, st)) return keyFor(dev);
     return ensureKey();
   }
 
@@ -471,18 +506,56 @@ unlockTool: true
   }
 
   async function openOld(keys, note) {
-    const k = keyIn(keys, pairOf(note));
-    if (k) {
-      try { return await openLegacy(k.key, note); } catch (_) {}
+    if (!keys) throw new Error('locked');
+    const tried = new Set();
+    const order = [opened.get(noteSig(note)), ownPair(note), storedPair(), devicePair()].map((p) => keyIn(keys, p)).concat([...keys.values()]);
+    for (const k of order) {
+      if (!k || tried.has(k)) continue;
+      tried.add(k);
+      let text;
+      try { text = await openLegacy(k.key, note); } catch (_) { continue; }
+      opened.set(noteSig(note), { salt: k.salt, cred: k.cred });
+      return { text: text, k: k };
     }
-    const st = ownPair(note) ? keyIn(keys, storedPair()) : null;
-    if (!st || st === k) throw new Error('locked');
-    const text = await openLegacy(st.key, note);
-    fellBack.set(noteSig(note), { salt: st.salt, cred: st.cred });
-    return text;
+    throw new Error('locked');
   }
 
-  function decryptNote(note) { return openOld(sessionKeys, note); }
+  function notePair(note, k) {
+    const cur = getNote(note.id);
+    if (!cur || !isLegacyLocked(cur) || noteSig(cur) !== noteSig(note) || samePair(ownPair(cur), k)) return;
+    setPair(cur, k);
+    cur.updatedAt = (Number(cur.updatedAt) || 0) + 1;
+    persist();
+  }
+
+  async function decryptNote(note) {
+    const got = await openOld(sessionKeys, note);
+    if (oneSettled && !one) notePair(note, got.k);
+    return got.text;
+  }
+
+  async function promptOpen(note) {
+    const own = ownPair(note);
+    const list = [];
+    for (const p of own ? [own, storedPair()] : [storedPair(), devicePair()]) {
+      if (fullPair(p) && !list.some((q) => samePair(q, p))) list.push(p);
+    }
+    if (!list.length) throw new Error('no-legacy');
+    for (let i = 0; i < list.length; i++) {
+      let k;
+      try {
+        k = await keyFor(list[i]);
+      } catch (err) {
+        if (i < list.length - 1 && err && err.name === 'NotAllowedError') continue;
+        throw err;
+      }
+      try {
+        await openLegacy(k.key, note);
+        opened.set(noteSig(note), { salt: k.salt, cred: k.cred });
+        return;
+      } catch (_) {}
+    }
+  }
 
   function handleCryptoError(err, fallbackMsg) {
     if (err && err.name === 'NotAllowedError') return;
@@ -612,7 +685,7 @@ unlockTool: true
     }
     if (note.kv) return 'missing';
     if (linkPending && s.setUp && !s.unlocked) return 'card';
-    if (mayOpen(note) && !skipped.has(noteSig(note))) return 'open';
+    if (oldKeysHeld() && !skipped.has(noteSig(note))) return 'open';
     return 'legacy';
   }
 
@@ -646,28 +719,35 @@ unlockTool: true
       for (const n of todo) {
         const sig = noteSig(n);
         let text;
+        let cred = null;
         if (isLegacyLocked(n)) {
-          try { text = await openOld(legacyKeys, n); } catch (_) { skipped.add(sig); continue; }
+          let got;
+          try { got = await openOld(legacyKeys, n); } catch (_) { skipped.add(sig); continue; }
+          text = got.text;
+          cred = got.k.cred;
         } else {
           const got = await openKv2(n);
           if (!got) { skippedKv.add(sig); continue; }
           if (got.current && !cur.id) { curOk.add(sig); continue; }
           text = got.text;
         }
-        done.set(n.id, { sig: sig, sealed: await sealV2(cur.key, n.id, text) });
+        done.set(n.id, { sig: sig, cred: cred, sealed: await sealV2(cur.key, n.id, text) });
       }
       if (!done.size) break;
       if (!U.state().unlocked || notesKeys !== ring || sessionKeys !== legacyKeys) return false;
       const prev = notes;
+      const used = [];
       notes = notes.map((n) => {
         const d = n && done.get(n.id);
         if (!d || !n.enc || noteSig(n) !== d.sig) return n;
+        if (d.cred) used.push(d.cred);
         const out = Object.assign({}, n, { body: d.sealed.body, iv: d.sealed.iv, kv: 2, updatedAt: (Number(n.updatedAt) || 0) + 1 });
         setKid(out, cur.id);
         setPair(out, null);
         return out;
       });
       if (!persist()) { notes = prev; return false; }
+      noteUsed(used);
     }
     forgetLegacy(legacyKeys);
     return true;
@@ -703,11 +783,10 @@ unlockTool: true
     retiring = true;
     try {
       const ids = [];
-      const stored = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null;
-      if (typeof stored === 'string' && stored) ids.push(stored);
-      let old = null;
-      try { old = localStorage.getItem(CRED_KEY); } catch (_) {}
-      if (old && !ids.includes(old)) ids.push(old);
+      const add = (id) => { if (typeof id === 'string' && id && !ids.includes(id)) ids.push(id); };
+      add(window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null);
+      try { add(localStorage.getItem(CRED_KEY)); } catch (_) {}
+      usedIds().forEach(add);
       sessionKeys = null;
       await U.markRetired('notes');
       signalRetired(ids);
@@ -909,7 +988,7 @@ unlockTool: true
     } else if (note.kv) {
       mode = 'locked';
       view = 'off';
-    } else if (mayOpen(note)) {
+    } else if (oldKeysHeld()) {
       mode = 'unlocked';
       try {
         const text = await decryptNote(note);
@@ -1001,7 +1080,7 @@ unlockTool: true
       if (notesKeys.length) {
         sealed = await sealCur(id, text);
         kv = 2;
-      } else if (!note.kv && mayOpen(note) && !notesLinked()) {
+      } else if (!note.kv && oldKeysHeld() && !notesLinked()) {
         sealed = await sealOld(note, text);
       }
     } catch (_) {
@@ -1029,7 +1108,7 @@ unlockTool: true
     if (oldReadOnly(note)) return;
     note.title = titleInput.value;
     if (one && note.enc) return saveLocked(note);
-    if (note.enc && (!mayOpen(note) || editorMode !== 'unlocked')) {
+    if (note.enc && (!oldKeysHeld() || editorMode !== 'unlocked')) {
       note.updatedAt = Date.now();
       persist();
       renderList();
@@ -1250,17 +1329,19 @@ unlockTool: true
     const note = getNote(activeId);
     if (!note || !note.enc || note.kv) return;
     try {
-      await ensureKey(one || (TRY_ONE && !oneSettled), note);
-      if (storedDiffers(note)) {
-        let opened = true;
-        try { await decryptNote(note); } catch (_) { opened = false; }
-        if (!opened) await ensureKey(true, null);
+      let open = false;
+      if (oldKeysHeld()) {
+        try { await openOld(sessionKeys, note); open = true; } catch (_) {}
       }
+      if (!open) await promptOpen(note);
     } catch (err) {
       if (err && err.message === 'no-legacy') {
+        if (TRY_ONE) await oneReady;
         if (one) {
-          for (const n of notes) if (isLegacyLocked(n) && !ownPair(n)) skipped.add(noteSig(n));
+          for (const n of notes) if (isLegacyLocked(n)) skipped.add(noteSig(n));
           applyEditorMode(editorMode, panelView);
+        } else {
+          mentriaAlert(COPY.unlockFailed);
         }
         return;
       }
@@ -1469,6 +1550,7 @@ unlockTool: true
   }
 
   load();
+  keepDevicePair(storedPair());
   if (!unsavedWhy && storageTrouble() === 'blocked') showUnsaved('blocked');
   drainInbox();
   if (ingestSharedContent()) {

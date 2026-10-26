@@ -366,6 +366,34 @@ async function unlockOld(page, title, text) {
   return waitView(page, (x) => x.text === text, title + ' opens with its passkey', 30000);
 }
 
+const PAIR = 'mentria.qn.pair';
+
+const SYNC_PAIR = (p) => {
+  const S = window.MentriaStore;
+  S.set('quick_notes', 'salt', p.salt, { remote: true });
+  S.set('quick_notes', 'cred_id', p.cred, { remote: true });
+};
+
+async function stripPairs(page, titles) {
+  await page.evaluate((ts) => {
+    const cur = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob'));
+    for (const n of cur) if (ts.includes(n.title)) { delete n.salt; delete n.credId; }
+    window.MentriaStore.set('quick_notes', 'blob', cur);
+  }, titles);
+}
+
+async function storedPair(page) {
+  return { salt: await store(page, 'quick_notes', 'salt'), cred: await store(page, 'quick_notes', 'cred_id') };
+}
+
+async function typeEnd(page, text) {
+  await page.focus('#qn-textarea');
+  await page.keyboard.press('End');
+  await page.type('#qn-textarea', text);
+}
+
+const b64u = (s) => s.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
 async function legacySeed(page) {
   await writeNote(page, 'Alpha', 'alpha secret text', false);
   await page.click('#qn-lock-btn');
@@ -523,12 +551,13 @@ check('a note with stale salt and passkey opens with the stored ones', async () 
       window.MentriaStore.set('quick_notes', 'blob', cur);
     }, stale);
     assert((await store(page, 'quick_notes', 'salt')) === mine.salt && (await store(page, 'quick_notes', 'cred_id')) === mine.cred, 'the stored salt and cred_id are the ones the note was locked with');
+    const locked = byTitle(await blob(page), 'Stale');
     await reload(page, 'old');
     await resetWa(page);
     await unlockOld(page, 'Stale', 'stale secret text');
     assert((await wa(page)).join() === 'get,get', 'the stale passkey is tried, then the stored one once', await wa(page));
-    const before = byTitle(await blob(page), 'Stale');
-    assert(before.salt === stale.salt && before.credId === stale.cred, 'opening alone writes nothing', before);
+    const before = await waitBlob(page, (x) => { const n = byTitle(x, 'Stale'); return n && n.salt === mine.salt; }, 'opening records the salt and passkey that opened it').then((x) => byTitle(x, 'Stale'));
+    assert(before.credId === mine.cred && before.updatedAt === locked.updatedAt + 1 && before.iv === locked.iv, 'opening records the pair with updatedAt + 1 and keeps the sealed text', { before, locked });
     await page.focus('#qn-textarea');
     await page.keyboard.press('End');
     await page.type('#qn-textarea', ' edit');
@@ -540,6 +569,128 @@ check('a note with stale salt and passkey opens with the stored ones', async () 
     await resetWa(page);
     await unlockOld(page, 'Stale', 'stale secret text edit');
     assert((await wa(page)).join() === 'get', 'after the save one tap of the stored passkey opens it', await wa(page));
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('a sync during a visit keeps old notes opening and their edits saved', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES);
+    await authOn(page);
+    await settle(page, 'old');
+    await writeNote(page, 'Alpha', 'alpha secret text', false);
+    await oldLock(page, 'Alpha', 'alpha secret text');
+    await writeNote(page, 'Bravo', 'bravo secret text', true);
+    await oldLock(page, 'Bravo', 'bravo secret text');
+    const mine = await storedPair(page);
+    await stripPairs(page, ['Alpha', 'Bravo']);
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Alpha', 'alpha secret text');
+    assert((await wa(page)).join() === 'get', 'one tap opens Alpha', await wa(page));
+    const other = await page.evaluate(OTHER_DEVICE, '', '', true);
+    await page.evaluate(SYNC_PAIR, other);
+    await page.evaluate((k) => localStorage.removeItem(k), PAIR);
+    assert((await store(page, 'quick_notes', 'salt')) === other.salt, 'a sync replaced the stored salt and cred_id');
+    const a0 = byTitle(await blob(page), 'Alpha');
+    await resetWa(page);
+    await typeEnd(page, ' edit');
+    await waitBlob(page, (x) => { const n = byTitle(x, 'Alpha'); return n && n.iv !== a0.iv; }, 'the edit to Alpha is saved after the sync');
+    await sleep(800);
+    const a1 = byTitle(await blob(page), 'Alpha');
+    assert(a1.enc && !('kv' in a1) && a1.salt === mine.salt && a1.credId === mine.cred, 'Alpha is sealed again with the passkey that opened it', a1);
+    await pick(page, 'Bravo');
+    await waitView(page, (x) => x.text === 'bravo secret text', 'Bravo opens with the passkey already held this visit');
+    const b0 = byTitle(await blob(page), 'Bravo');
+    await typeEnd(page, ' edit');
+    await waitBlob(page, (x) => { const n = byTitle(x, 'Bravo'); return n && n.iv !== b0.iv; }, 'the edit to Bravo is saved');
+    await sleep(800);
+    const b1 = byTitle(await blob(page), 'Bravo');
+    assert(b1.salt === mine.salt && b1.credId === mine.cred, 'Bravo is sealed with the passkey that opened it', b1);
+    assert((await wa(page)).length === 0, 'no passkey asked after the sync', await wa(page));
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Alpha', 'alpha secret text edit');
+    await unlockOld(page, 'Bravo', 'bravo secret text edit');
+    assert((await wa(page)).join() === 'get', 'both open again with one tap of their own passkey', await wa(page));
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('old notes without a pair find this device\'s pair after a sync', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES);
+    await authOn(page);
+    await settle(page, 'old');
+    await writeNote(page, 'Alpha', 'alpha secret text', false);
+    await oldLock(page, 'Alpha', 'alpha secret text');
+    const mine = await storedPair(page);
+    await stripPairs(page, ['Alpha']);
+    await page.evaluate((k) => localStorage.removeItem(k), PAIR);
+    await reload(page, 'old');
+    assert(JSON.stringify(await readJson(page, PAIR)) === JSON.stringify({ salt: mine.salt, credId: mine.cred }), 'loading keeps this device\'s pair on the device', await readJson(page, PAIR));
+    const keys = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.includes('quick_notes')).sort());
+    assert(!keys.some((k) => k.includes('pair')), 'the pair is not a synced key', keys);
+    const other = await page.evaluate(OTHER_DEVICE, '', '', true);
+    await page.evaluate(SYNC_PAIR, other);
+    const a0 = byTitle(await blob(page), 'Alpha');
+    await reload(page, 'old');
+    assert(JSON.stringify(await readJson(page, PAIR)) === JSON.stringify({ salt: mine.salt, credId: mine.cred }), 'a synced pair does not replace this device\'s pair', await readJson(page, PAIR));
+    await resetWa(page);
+    await unlockOld(page, 'Alpha', 'alpha secret text');
+    assert((await wa(page)).join() === 'get,get', 'the synced passkey is tried, then this device\'s', await wa(page));
+    const a1 = byTitle(await waitBlob(page, (x) => { const n = byTitle(x, 'Alpha'); return n && n.salt === mine.salt; }, 'the first open records the pair'), 'Alpha');
+    assert(a1.credId === mine.cred && a1.updatedAt === a0.updatedAt + 1 && a1.iv === a0.iv && a1.body === a0.body, 'the first open records the pair with updatedAt + 1 and nothing else', { a0, a1 });
+    await reload(page, 'old');
+    await resetWa(page);
+    await unlockOld(page, 'Alpha', 'alpha secret text');
+    assert((await wa(page)).join() === 'get', 'after that one tap of its own passkey opens it', await wa(page));
+    await reload(page, 'old');
+    await resetWa(page);
+    await writeNote(page, 'Charlie', 'charlie secret text', true);
+    await oldLock(page, 'Charlie', 'charlie secret text');
+    const c = byTitle(await blob(page), 'Charlie');
+    assert(c.salt === mine.salt && c.credId === mine.cred, 'a new lock uses this device\'s pair while the stored one came from elsewhere', c);
+    assert((await wa(page)).join() === 'get', 'one tap of this device\'s passkey, none made', await wa(page));
+    assert((await store(page, 'quick_notes', 'salt')) === other.salt && (await store(page, 'quick_notes', 'cred_id')) === other.cred, 'the synced salt and cred_id stay', await storedPair(page));
+    const log = logs.get(page);
+    assert(!log.errors.length, 'no page errors', log.errors);
+  } finally {
+    srv.setRoot(BUILD);
+  }
+});
+
+check('unlock never makes a passkey or a new salt', async () => {
+  srv.setRoot(PLAIN || BUILD);
+  try {
+    await clean();
+    const page = await open(NOTES);
+    const auth = await authOn(page);
+    await settle(page, 'old');
+    await legacyNote(page, 'Lambda', 'lambda text');
+    await reload(page, 'old');
+    await pick(page, 'Lambda');
+    let v = await view(page);
+    assert(v.panel && v.unlockBtn, 'old locked panel', v);
+    await resetWa(page);
+    await page.click('#qn-unlock-btn');
+    const msg = await answerDialog(page);
+    assert(msg === QN.unlock_failed, 'unlock says it failed', msg);
+    assert((await wa(page)).length === 0 && (await auth.creds()).length === 0, 'no passkey made or asked', await wa(page));
+    const left = await page.evaluate((k) => ({ salt: window.MentriaStore.get('quick_notes', 'salt'), cred: window.MentriaStore.get('quick_notes', 'cred_id'), lsSalt: localStorage.getItem('mentria-qn-salt'), lsCred: localStorage.getItem('mentria-qn-cred'), pair: localStorage.getItem(k) }), PAIR);
+    assert(left.salt == null && left.cred == null && left.lsSalt == null && left.lsCred == null && left.pair == null, 'no salt, cred_id or pair written', left);
+    v = await view(page);
+    assert(v.panel && v.unlockBtn && v.text === null, 'the note stays locked', v);
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
@@ -796,6 +947,105 @@ check('old locks under two salts convert with their own passkeys', async () => {
   assert(JSON.stringify(byTitle(after, 'Foreign')) === JSON.stringify(byTitle(before, 'Foreign')), 'a note no passkey here opens is left untouched');
   const log = logs.get(page);
   assert(!log.errors.length, 'no page errors', log.errors);
+  await page.evaluate(() => {
+    const S = window.MentriaStore;
+    S.set('quick_notes', 'blob', JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob')).filter((x) => x.title !== 'Foreign'));
+    const rec = S.get('keyring', 'vault');
+    rec.services.notes.linked = new Date(Date.now() - 31 * 86400000).toISOString();
+    S.set('keyring', 'vault', rec);
+  });
+  await reload(page, 'one');
+  await until(async () => { const r = await readJson(page, RECORD); return r && r.retired && r.retired.notes; }, 15000, 'notes retired once every note converted');
+  await sleep(800);
+  const got = (await page.evaluate(() => window.__signals.map((s) => s.credentialId))).sort();
+  const want = [b64u(mine.cred), b64u(other.cred)].sort();
+  assert(JSON.stringify(got) === JSON.stringify(want), 'retirement signals every old passkey that answered during the conversion', { got, want });
+});
+
+check('old notes convert with the passkey that opened them after a sync', async () => {
+  await clean();
+  const page = await open(NOTES);
+  await authOn(page);
+  await settle(page, 'old');
+  await writeNote(page, 'Alpha', 'alpha secret text', false);
+  await oldLock(page, 'Alpha', 'alpha secret text');
+  await writeNote(page, 'Bravo', 'bravo secret text', true);
+  await oldLock(page, 'Bravo', 'bravo secret text');
+  await stripPairs(page, ['Alpha', 'Bravo']);
+  await page.evaluate(SWITCH_ON);
+  await reload(page, 'one');
+  const before = await blob(page);
+  const code = await makeKeyring(page);
+  await lockKeyring(page);
+  await pick(page, 'Alpha');
+  await resetWa(page);
+  await page.click('#qn-unlock-btn');
+  await waitView(page, (x) => x.card && x.later, 'card after the old tap', 30000);
+  assert((await wa(page)).join() === 'get', 'one tap', await wa(page));
+  const other = await page.evaluate(OTHER_DEVICE, '', '', true);
+  await page.evaluate(SYNC_PAIR, other);
+  await page.evaluate((k) => localStorage.removeItem(k), PAIR);
+  await resetWa(page);
+  await cardCode(page, '#qn-locked-card', code);
+  const after = await waitBlob(page, (x) => ['Alpha', 'Bravo'].every((t) => { const n = byTitle(x, t); return n && n.kv === 2; }), 'Alpha and Bravo converted with the passkey held before the sync', 30000);
+  for (const t of ['Alpha', 'Bravo']) {
+    const n = byTitle(after, t);
+    assert((await openV2(page, n)) === t.toLowerCase() + ' secret text' && n.updatedAt === byTitle(before, t).updatedAt + 1, t + ' opens with the notes key, updatedAt + 1', n);
+  }
+  await waitView(page, (x) => x.text === 'alpha secret text' && x.convert === null, 'Alpha open and nothing counted');
+  assert((await wa(page)).length === 0, 'no passkey asked after the sync', await wa(page));
+  const log = logs.get(page);
+  assert(!log.errors.length, 'no page errors', log.errors);
+});
+
+check('an old note opened on Later keeps saving with its passkey after a sync', async () => {
+  await clean();
+  const page = await open(NOTES);
+  await authOn(page);
+  await settle(page, 'old');
+  await writeNote(page, 'Alpha', 'alpha secret text', false);
+  await oldLock(page, 'Alpha', 'alpha secret text');
+  const mine = await storedPair(page);
+  await stripPairs(page, ['Alpha']);
+  await page.evaluate(SWITCH_ON);
+  await reload(page, 'one');
+  const before = await blob(page);
+  await pick(page, 'Alpha');
+  await page.click('#qn-unlock-btn');
+  await page.waitForSelector('.m-ulayer [data-step="intro"]', { timeout: 20000 });
+  await page.click('.m-ulayer [data-act="not-now"]');
+  await waitView(page, (x) => x.text === 'alpha secret text' && !x.layer, 'Later opens the note the old way');
+  await sleep(500);
+  assert(JSON.stringify(await blob(page)) === JSON.stringify(before), 'Later writes nothing');
+  const other = await page.evaluate(OTHER_DEVICE, '', '', true);
+  await page.evaluate(SYNC_PAIR, other);
+  await page.evaluate((k) => localStorage.removeItem(k), PAIR);
+  await typeEnd(page, ' later');
+  await waitBlob(page, (x) => { const n = byTitle(x, 'Alpha'); return n && n.iv !== byTitle(before, 'Alpha').iv; }, 'the edit is saved after the sync');
+  await sleep(800);
+  const a = byTitle(await blob(page), 'Alpha');
+  assert(a.enc && !('kv' in a) && a.salt === mine.salt && a.credId === mine.cred, 'sealed with the passkey that opened it, which the note now records', a);
+  const log = logs.get(page);
+  assert(!log.errors.length, 'no page errors', log.errors);
+});
+
+check('a tap with no old lock here counts every old note', async () => {
+  const { page } = await notesKeyring();
+  await authOn(page);
+  await page.evaluate(OTHER_DEVICE, 'Xray', 'xray secret text');
+  await waitBlob(page, (v) => !!byTitle(v, 'Xray'), 'Xray arrived by sync');
+  await page.evaluate(() => { window.MentriaStore.remove('quick_notes', 'salt'); window.MentriaStore.remove('quick_notes', 'cred_id'); });
+  await legacyNote(page, 'Lambda', 'lambda text');
+  await reload(page, 'one');
+  const before = await blob(page);
+  await pick(page, 'Lambda');
+  const v = await view(page);
+  assert(v.unlockBtn && v.link && v.convert === null, 'old note offers the old unlock', v);
+  await resetWa(page);
+  await page.click('#qn-unlock-btn');
+  await waitView(page, (x) => x.convert === QN.convert_skipped.replace('{n}', '2'), 'both old notes counted as not opened');
+  assert((await wa(page)).length === 0, 'no passkey made or asked', await wa(page));
+  assert(JSON.stringify(await blob(page)) === JSON.stringify(before), 'nothing written');
 });
 
 check('legacy notes keep working on Later and survive a failed write', async () => {

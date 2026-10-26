@@ -755,6 +755,7 @@ function diffSnap(a, b) {
 const VOLATILE = [
   /^ls:mentria_seen /, /^ls:mentria_tool_usage /, /^ls:mentria_caps /,
   /^ls:mentria\.keyring\.(local|seen|epoch) /,
+  /^ls:mentria\.qn\.(pair|used) /,
   /^ls:mentria\.(store|meta)\.extdata\.finance\.widget /,
   /^idb:mentria-push\//
 ];

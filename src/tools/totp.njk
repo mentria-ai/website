@@ -603,9 +603,11 @@ unlockTool: true
       }
     });
     if (!cred) throw new Error('cancelled');
-    const ext = cred.getClientExtensionResults().prf;
-    if (!ext || ext.enabled === false) throw new Error('prf-unsupported');
-    return { credId: new Uint8Array(cred.rawId), prfResult: ext.results ? ext.results.first : null };
+    return { credId: new Uint8Array(cred.rawId), prf: cred.getClientExtensionResults().prf };
+  }
+  async function forgetPasskey(credId) {
+    if (!credId || !window.PublicKeyCredential || typeof PublicKeyCredential.signalUnknownCredential !== 'function') return;
+    try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: credId }); } catch (_) {}
   }
   async function prfGet(credId, salt) {
     const assertion = await navigator.credentials.get({
@@ -644,7 +646,7 @@ unlockTool: true
 
   function holdMaster(bytes) {
     dropMaster();
-    state.masterRaw = new Uint8Array(bytes);
+    if (state.vault && !state.vault.prf) state.masterRaw = new Uint8Array(bytes);
   }
   function dropMaster() {
     if (state.masterRaw) state.masterRaw.fill(0);
@@ -1075,9 +1077,7 @@ unlockTool: true
       if (!saveVault(next)) return;
       state.vault = next;
     }
-    if (credId && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
-      try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: credId }); } catch (_) {}
-    }
+    await forgetPasskey(credId);
     await ring.mod.markRetired('totp');
   }
 
@@ -1313,7 +1313,6 @@ unlockTool: true
     const masterBytes = await decryptWith(wrapKey, { iv: state.vault.prf.iv, ct: state.vault.prf.wrap });
     state.masterKey = await importRaw(masterBytes);
     await decryptSecrets();
-    holdMaster(masterBytes);
     return masterBytes;
   }
 
@@ -1342,23 +1341,30 @@ unlockTool: true
     if (!state.masterKey) throw new Error('locked');
     if (!state.masterRaw) throw new Error(COPY.prf_enroll_relock);
     const rawMaster = new Uint8Array(state.masterRaw);
+    const salt = crypto.getRandomValues(new Uint8Array(32));
+    let credId = null;
+    let next = null;
     try {
-      const salt = crypto.getRandomValues(new Uint8Array(32));
-      const { credId, prfResult } = await prfCreate(salt);
-      if (!prfResult) {
-        const r = await prfGet(credId, salt);
-        const wrapKey = await prfDeriveKey(r);
-        const wrap = await encryptWith(wrapKey, rawMaster);
-        state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
-      } else {
-        const wrapKey = await prfDeriveKey(new Uint8Array(prfResult));
-        const wrap = await encryptWith(wrapKey, rawMaster);
-        state.vault.prf = { salt: b64uEnc(salt), cred_id: b64uEnc(credId), iv: wrap.iv, wrap: wrap.ct };
-      }
+      const made = await prfCreate(salt);
+      credId = b64uEnc(made.credId);
+      if (!made.prf || made.prf.enabled === false) throw new Error('prf-unsupported');
+      const first = made.prf.results && made.prf.results.first;
+      const wrapKey = await prfDeriveKey(first ? new Uint8Array(first) : await prfGet(made.credId, salt));
+      const wrap = await encryptWith(wrapKey, rawMaster);
+      next = Object.assign({}, state.vault, { prf: { salt: b64uEnc(salt), cred_id: credId, iv: wrap.iv, wrap: wrap.ct } });
+    } catch (e) {
+      await forgetPasskey(credId);
+      throw e;
     } finally {
       rawMaster.fill(0);
     }
-    return saveVault(state.vault);
+    if (!saveVault(next)) {
+      await forgetPasskey(credId);
+      return false;
+    }
+    state.vault = next;
+    dropMaster();
+    return true;
   }
 
   const scanner = { detector: null, useJsQR: false, stream: null, rafId: 0, scanning: false, lastDetect: 0, canvas: null, ctx: null, gen: 0 };
@@ -1578,8 +1584,12 @@ unlockTool: true
   $('totp-prf-enroll-btn').addEventListener('click', async () => {
     $('totp-prf-enroll-btn').disabled = true;
     try {
-      if (await enrollPrf()) setStatus(COPY.prf_enroll_done, 'ok');
-      $('totp-prf-enroll-btn').hidden = true;
+      if (await enrollPrf()) {
+        setStatus(COPY.prf_enroll_done, 'ok');
+        $('totp-prf-enroll-btn').hidden = true;
+      } else {
+        setStatus(COPY.prf_enroll_failed, 'err');
+      }
     } catch (err) {
       setStatus(COPY.prf_enroll_failed + ' — ' + (err && err.message || err), 'err');
     } finally {
@@ -2019,6 +2029,8 @@ unlockTool: true
     }
     try {
       await decryptSecrets();
+      if (state.vault.prf) dropMaster();
+      applyMode();
       renderList();
       tick();
     } catch (_) {

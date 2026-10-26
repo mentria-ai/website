@@ -1279,7 +1279,23 @@ check('a Remember that needed a confirm turns on at the next card unlock', async
 });
 
 async function lockedNow(frame) {
-  return frame.evaluate(() => ({ main: !!document.getElementById('fin-main'), lock: !!document.querySelector('.flock'), pass: !!document.getElementById('fin-pass') }));
+  return frame.evaluate(() => {
+    const a = document.activeElement;
+    return {
+      main: !!document.getElementById('fin-main'),
+      lock: !!document.querySelector('.flock'),
+      pass: !!document.getElementById('fin-pass'),
+      focus: a && a.tagName === 'BUTTON' ? a.textContent.replace(/\s+/g, ' ').trim() : (a ? a.tagName : '')
+    };
+  });
+}
+
+async function reopens(page) {
+  await page.reload({ waitUntil: 'load' });
+  const frame = await frameOf(page);
+  await opened(frame);
+  assert(!(await frame.$('.flock')), 'a reload opens Finance by device unlock');
+  return frame;
 }
 
 async function deviceLockStays() {
@@ -1293,18 +1309,18 @@ async function deviceLockStays() {
     await sleep(2000);
     let s = await lockedNow(frame);
     assert(!s.main && s.lock && s.pass, 'Lock leaves Finance locked with device unlock on', s);
+    assert(s.focus === FIN.lock.device, 'the held lock screen focuses the device button', s);
     await pressText(frame, '.flock', FIN.lock.device);
     await opened(frame);
+    frame = await reopens(page);
     await fakeAway(frame, 10);
     await sleep(2000);
     s = await lockedNow(frame);
-    assert(!s.main && s.lock && s.pass, 'auto-lock leaves Finance locked with device unlock on', s);
+    assert(!s.main && s.lock && s.pass, 'auto-lock on its own leaves Finance locked with device unlock on', s);
+    assert(s.focus === FIN.lock.device, 'the lock screen after auto-lock focuses the device button', s);
     await pressText(frame, '.flock', FIN.lock.device);
     await opened(frame);
-    await page.reload({ waitUntil: 'load' });
-    frame = await frameOf(page);
-    await opened(frame);
-    assert(!(await frame.$('.flock')), 'a reload opens Finance by device unlock');
+    await reopens(page);
     assert(!r.dialogs.length, 'no native dialogs', r.dialogs);
     assert(!r.errors.length, 'no page errors', r.errors);
   } finally {

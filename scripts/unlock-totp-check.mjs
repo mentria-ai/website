@@ -109,6 +109,49 @@ const SIGNALS = () => {
   };
 };
 
+const WIPES = () => {
+  window.__keys = new Set();
+  window.__wipes = 0;
+  const hex = (b) => Array.from(b).join(',');
+  const subtle = crypto.subtle;
+  const dec = subtle.decrypt.bind(subtle);
+  const exp = subtle.exportKey.bind(subtle);
+  subtle.decrypt = async (...a) => {
+    const out = await dec(...a);
+    if (out.byteLength === 32) window.__keys.add(hex(new Uint8Array(out)));
+    return out;
+  };
+  subtle.exportKey = async (f, k) => {
+    const out = await exp(f, k);
+    if (f === 'raw' && out.byteLength === 32) window.__keys.add(hex(new Uint8Array(out)));
+    return out;
+  };
+  const fill = Uint8Array.prototype.fill;
+  Uint8Array.prototype.fill = function (v) {
+    if (v === 0 && this.length === 32 && window.__keys.has(hex(this))) window.__wipes++;
+    return fill.apply(this, arguments);
+  };
+};
+
+const MADE = () => {
+  window.__made = [];
+  const creds = navigator.credentials;
+  if (!creds || !creds.create) return;
+  const create = creds.create.bind(creds);
+  creds.create = async (o) => {
+    const c = await create(o);
+    if (c && c.rawId) window.__made.push(btoa(String.fromCharCode(...new Uint8Array(c.rawId))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+    const ext = window.__extOut;
+    if (c && ext) Object.defineProperty(c, 'getClientExtensionResults', { configurable: true, value: () => JSON.parse(JSON.stringify(ext)) });
+    return c;
+  };
+  const get = creds.get.bind(creds);
+  creds.get = async (o) => {
+    if (window.__cancelGet) throw new DOMException('The operation either timed out or was not allowed.', 'NotAllowedError');
+    return get(o);
+  };
+};
+
 rmSync(WORK, { recursive: true, force: true });
 mkdirSync(WORK, { recursive: true });
 const server = serve(PORT);
@@ -563,9 +606,26 @@ async function statusLine(page) {
   });
 }
 
+async function clearStatus(page) {
+  await page.evaluate(() => { const el = document.getElementById('totp-status'); el.textContent = ''; delete el.dataset.tone; });
+}
+
+async function wipes(page) {
+  return page.evaluate(() => window.__wipes);
+}
+
+async function lockKeepsNothing(page, what) {
+  const w = await wipes(page);
+  await press(page, '#totp-lock-btn');
+  await until(async () => (await screen(page)).unlock, 10000, 'the lock');
+  const after = await wipes(page);
+  assert(after === w, what, { before: w, after });
+}
+
 async function enrolAfterPassphrase(prod) {
   const r = await rig(prod ? 'enrol after reload prod' : 'enrol after reload');
   const { page } = r;
+  await page.evaluateOnNewDocument(WIPES);
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
   assert((await passkeys(page)).length === 0, 'the old setup makes no passkey');
   await openTotp(page);
@@ -583,6 +643,8 @@ async function enrolAfterPassphrase(prod) {
   assert(st.tone === 'ok' && st.text === T.prf_enroll_done, 'Add quick unlock succeeds after a reload and a passphrase unlock', { st, keys: keys.length });
   assert(vault && vault.prf && vault.prf.cred_id, 'the vault holds the quick unlock', vault && vault.prf);
   assert(keys.length === 1 && keys[0] === vault.prf.cred_id, 'the authenticator holds exactly one passkey, the vault\'s', { keys, cred: vault.prf.cred_id });
+  assert(await wipes(page) >= 1, 'the key bytes are watched');
+  await lockKeepsNothing(page, 'enrolment drops the key bytes it held');
   await openTotp(page);
   const s1 = await screen(page);
   assert(s1.unlock && s1.prf, 'a reload offers the passkey unlock', s1);
@@ -615,6 +677,103 @@ check('quick unlock without the key bytes stops before making a passkey', async 
   assert(vault && !vault.prf, 'the vault gets no quick unlock', vault);
   await done(r);
 });
+
+check('a vault with quick unlock keeps no key bytes after a passphrase or passkey unlock', async () => {
+  const r = await rig('no bytes with quick unlock');
+  const { page } = r;
+  await page.evaluateOnNewDocument(WIPES);
+  await legacySetup(r, { passkey: true, accounts: ACCOUNTS.slice(0, 1) });
+  await openTotp(page);
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  assert(!(await screen(page)).enrol, 'Add quick unlock is hidden once quick unlock is set up');
+  assert(await wipes(page) >= 1, 'the key bytes are watched');
+  await lockKeepsNothing(page, 'a passphrase unlock holds no copy of the key bytes');
+  await press(page, '#totp-prf-btn');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  await lockKeepsNothing(page, 'a passkey unlock holds no copy of the key bytes');
+  await done(r);
+});
+
+check('a second tab hides Add quick unlock once the first tab adds it', async () => {
+  const r = await rig('second tab enrol');
+  const { page } = r;
+  await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
+  const other = await addPage(r, false);
+  await other.evaluateOnNewDocument(WIPES);
+  await openTotp(other);
+  await typeInto(other, '#totp-unlock-pass', PASS);
+  await press(other, '#totp-unlock-btn');
+  await expectCodes(other, ACCOUNTS.slice(0, 1));
+  assert((await screen(other)).enrol, 'the second tab offers Add quick unlock');
+  await page.bringToFront();
+  await clearStatus(page);
+  await press(page, '#totp-prf-enroll-btn');
+  const st = await until(async () => { const s = await statusLine(page); return s.tone ? s : null; }, 30000, 'the enrolment to finish');
+  assert(st.tone === 'ok', 'the first tab adds quick unlock', st);
+  await other.bringToFront();
+  await until(async () => !(await screen(other)).enrol, 5000, 'the second tab to hide Add quick unlock');
+  await expectCodes(other, ACCOUNTS.slice(0, 1));
+  await lockKeepsNothing(other, 'the second tab drops its key bytes');
+  await done(r);
+});
+
+async function enrolFails(kind) {
+  const r = await rig('enrol fails ' + kind);
+  const { page } = r;
+  await page.evaluateOnNewDocument(SIGNALS);
+  await page.evaluateOnNewDocument(MADE);
+  await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
+  if (kind === 'no prf') {
+    const { cdp, authenticatorId } = page.__auth;
+    await cdp.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId });
+    const added = await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({}, AUTH, { hasPrf: false }) });
+    page.__auth = { cdp, authenticatorId: added.authenticatorId };
+  }
+  await page.evaluate((k) => {
+    if (k === 'cancel') { window.__extOut = { prf: { enabled: true } }; window.__cancelGet = true; }
+    if (k === 'save') {
+      const S = window.MentriaStore;
+      window.__realSet = S.set;
+      S.set = (ns, key, ...rest) => (ns === 'totp' && key === 'vault' ? false : window.__realSet(ns, key, ...rest));
+    }
+  }, kind);
+  await clearStatus(page);
+  await press(page, '#totp-prf-enroll-btn');
+  const st = await until(async () => { const s = await statusLine(page); return s.tone ? s : null; }, 30000, 'the enrolment to stop');
+  const made = await page.evaluate(() => window.__made);
+  const signals = await until(async () => { const s = await page.evaluate(() => window.__signals); return s.length ? s : null; }, 5000, 'the new passkey to be signalled');
+  const keys = await passkeys(page);
+  assert(st.tone === 'err', 'enrolment says it failed', st);
+  assert(made.length === 1, 'one passkey was made', made);
+  assert(signals.length === 1 && signals[0].rpId === 'localhost' && signals[0].credentialId === made[0], 'the new passkey is signalled unknown', { signals, made });
+  assert(!keys.includes(made[0]), 'no passkey is left behind', { keys, made });
+  assert((await screen(page)).enrol, 'Add quick unlock stays for another try');
+  await page.evaluate(() => {
+    window.__extOut = null;
+    window.__cancelGet = false;
+    if (window.__realSet) window.MentriaStore.set = window.__realSet;
+  });
+  await addAccount(page, ACCOUNTS[1]);
+  await waitRows(page, 2);
+  const vault = await readJson(page, VAULT);
+  assert(vault && vault.secrets && !vault.prf, 'the vault never points at the signalled passkey', vault && vault.prf);
+  if (kind !== 'no prf') {
+    await clearStatus(page);
+    await press(page, '#totp-prf-enroll-btn');
+    const again = await until(async () => { const s = await statusLine(page); return s.tone ? s : null; }, 30000, 'the second try to finish');
+    const v2 = await readJson(page, VAULT);
+    const made2 = await page.evaluate(() => window.__made);
+    assert(again.tone === 'ok' && v2.prf && v2.prf.cred_id === made2[1], 'a second try adds quick unlock with the new passkey', { again, made2, prf: v2.prf });
+    assert((await passkeys(page)).length === 1, 'the authenticator holds only the vault\'s passkey');
+  }
+  await done(r);
+}
+
+check('a cancelled second prompt leaves no passkey behind', () => enrolFails('cancel'));
+check('a passkey without the extension leaves no passkey behind', () => enrolFails('no prf'));
+check('a vault that fails to save leaves no passkey behind', () => enrolFails('save'));
 
 check('new vault with no keyring runs setup first', async () => {
   const r = await rig('setup first');

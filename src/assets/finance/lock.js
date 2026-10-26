@@ -342,7 +342,8 @@ function unlockScreen(root, opts) {
   );
   if (st.hasDevice && !opts.held) {
     V.unlockDevice().then((s) => opened(s, { auto: true })).catch(() => { setTimeout(() => pass.focus(), 50); });
-  } else if (!st.prf.length && !st.hasDevice) setTimeout(() => pass.focus(), 50);
+  } else if (devBtn) setTimeout(() => devBtn.focus(), 50);
+  else if (!st.prf.length) setTimeout(() => pass.focus(), 50);
 }
 
 function linkedNote(opts) {

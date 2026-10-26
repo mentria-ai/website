@@ -6,7 +6,8 @@ import puppeteer from 'puppeteer-core';
 import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
-if (!BUILD) { console.log('usage: node scripts/unlock-finance-check.mjs <beta build dir>'); process.exit(2); }
+const PROD = process.argv[3] || '';
+if (!BUILD) { console.log('usage: node scripts/unlock-finance-check.mjs <beta build dir> [<production build dir>]'); process.exit(2); }
 const PORT = 8090;
 const ORIGIN = 'http://localhost:' + PORT;
 const PROFILE = join(tmpdir(), 'unlock-finance-check-profile');
@@ -1277,7 +1278,50 @@ check('a Remember that needed a confirm turns on at the next card unlock', async
   }
 });
 
+async function lockedNow(frame) {
+  return frame.evaluate(() => ({ main: !!document.getElementById('fin-main'), lock: !!document.querySelector('.flock'), pass: !!document.getElementById('fin-pass') }));
+}
+
+async function deviceLockStays() {
+  const r = await rig();
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: true });
+    assert((await metaOf(frame)).wrapKinds.includes('device'), 'today\'s device unlock is on');
+    await lockTop(frame);
+    await sleep(2000);
+    let s = await lockedNow(frame);
+    assert(!s.main && s.lock && s.pass, 'Lock leaves Finance locked with device unlock on', s);
+    await pressText(frame, '.flock', FIN.lock.device);
+    await opened(frame);
+    await fakeAway(frame, 10);
+    await sleep(2000);
+    s = await lockedNow(frame);
+    assert(!s.main && s.lock && s.pass, 'auto-lock leaves Finance locked with device unlock on', s);
+    await pressText(frame, '.flock', FIN.lock.device);
+    await opened(frame);
+    await page.reload({ waitUntil: 'load' });
+    frame = await frameOf(page);
+    await opened(frame);
+    assert(!(await frame.$('.flock')), 'a reload opens Finance by device unlock');
+    assert(!r.dialogs.length, 'no native dialogs', r.dialogs);
+    assert(!r.errors.length, 'no page errors', r.errors);
+  } finally {
+    await done(r);
+  }
+}
+
+check('device unlock: Lock stays locked with the switch off', deviceLockStays);
+
+check('device unlock: Lock stays locked on the production build', async () => {
+  if (!PROD) throw new Error('SKIP no production build given');
+  server.setRoot(PROD);
+  try { await deviceLockStays(); } finally { server.setRoot(BUILD); }
+});
+
 let failed = 0;
+let skipped = 0;
 const ONLY = process.env.ONLY || '';
 const run = checks.filter(([n]) => !ONLY || ONLY.split('|').some((o) => n.includes(o)));
 for (const [name, fn] of run) {
@@ -1286,11 +1330,12 @@ for (const [name, fn] of run) {
     await fn();
     console.log('PASS finance: ' + name);
   } catch (e) {
+    if (String(e && e.message).startsWith('SKIP')) { skipped++; console.log('SKIP finance: ' + name + ': ' + e.message.slice(5)); continue; }
     failed++;
     console.log('FAIL finance: ' + name + ': ' + String((e && e.message) || e).slice(0, 500) + (stage ? ' [at ' + stage + ']' : ''));
   }
 }
-console.log((run.length - failed) + '/' + run.length + ' passed');
+console.log((run.length - skipped - failed) + '/' + (run.length - skipped) + ' passed');
 for (const r of [shared.legacy, shared.fresh]) if (r) await done(r);
 await browser.close();
 await server.close();

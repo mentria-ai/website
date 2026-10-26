@@ -3863,6 +3863,7 @@
         "passkey": "Déverrouiller avec une clé d'accès",
         "passkey_cancelled": "Clé d'accès annulée.",
         "passkey_failed": "Cette clé d'accès n'a pas déverrouillé Finances. Utilisez votre phrase secrète.",
+        "device": "Déverrouiller sur cet appareil",
         "lock_now": "Verrouiller",
         "qa_title": "Ajout rapide sans déverrouiller",
         "qa_body": "Les saisies restent scellées jusqu'au déverrouillage, puis arrivent dans votre livre de comptes pour vérification.",

@@ -312,6 +312,12 @@ function unlockScreen(root, opts) {
     catch (e) { busy(pkBtn, false); err.textContent = e && e.name === 'NotAllowedError' ? t('lock.passkey_cancelled') : t('lock.passkey_failed'); return; }
     try { await opened(s); } catch (e) { openFailed(pkBtn, e); }
   } }, icon('passkey'), t('lock.passkey')) : null;
+  const devBtn = st.hasDevice && opts.held ? h('button', { type: 'button', class: 'fb fb--block', onclick: async () => {
+    busy(devBtn, true, t('lock.unlocking'));
+    let s;
+    try { s = await V.unlockDevice(); } catch (e) { openFailed(devBtn, e); return; }
+    try { await opened(s, { auto: true }); } catch (e) { openFailed(devBtn, e); }
+  } }, icon('devices'), t('lock.device')) : null;
   const inboxCount = h('span', { class: 'fmuted fsmall' });
   db.allInbox().then((list) => { if (list.length) inboxCount.textContent = U.tp('lock.inbox_waiting', list.length); }).catch(() => {});
   const linkLine = opts.keyring ? h('div', { class: 'fbanner fbanner--mint', hidden: true }) : null;
@@ -326,6 +332,7 @@ function unlockScreen(root, opts) {
     mark(st.deviceName || t('lock.locked')),
     linkLine,
     iosNote(),
+    devBtn,
     pkBtn,
     h('div', { class: 'ff' }, label, pass),
     err, go,
@@ -333,9 +340,9 @@ function unlockScreen(root, opts) {
     quickAddLocked(opts, inboxCount),
     h('div', { class: 'flock__alt', style: { marginTop: '18px' } }, h('button', { type: 'button', style: { color: 'var(--f-muted)' }, onclick: () => eraseDevice(root, opts) }, t('lock.erase')))
   );
-  if (st.hasDevice) {
+  if (st.hasDevice && !opts.held) {
     V.unlockDevice().then((s) => opened(s, { auto: true })).catch(() => { setTimeout(() => pass.focus(), 50); });
-  } else if (!st.prf.length) setTimeout(() => pass.focus(), 50);
+  } else if (!st.prf.length && !st.hasDevice) setTimeout(() => pass.focus(), 50);
 }
 
 function linkedNote(opts) {

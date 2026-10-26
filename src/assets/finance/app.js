@@ -71,6 +71,7 @@ const app = {
   K: null,
   linked: false,
   linkDeclined: false,
+  held: false,
   current: false,
   currentId: null,
   opening: false
@@ -764,6 +765,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 export function lock(stay) {
+  if (!app.linked) app.held = true;
   U.closeAllSheets();
   import('./agents.js').then((A) => A.disableAgents()).catch(() => {});
   if (app.sync) { app.sync.stop(); app.sync = null; }
@@ -816,6 +818,7 @@ async function start() {
   showLock(root, {
     status: st,
     local: app.local,
+    held: app.held,
     onOpen: (session) => openSession(session),
     saveLocal,
     publishWrap,

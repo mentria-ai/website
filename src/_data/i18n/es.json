@@ -3863,6 +3863,7 @@
         "passkey": "Desbloquear con llave de acceso",
         "passkey_cancelled": "Se canceló la llave de acceso.",
         "passkey_failed": "Esa llave de acceso no desbloqueó Finanzas. Usa tu frase de contraseña.",
+        "device": "Desbloquear en este dispositivo",
         "lock_now": "Bloquear",
         "qa_title": "Añadir rápido sin desbloquear",
         "qa_body": "Los movimientos quedan sellados hasta que desbloquees y luego llegan a tu libro de cuentas para que los revises.",

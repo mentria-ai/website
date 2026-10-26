@@ -3863,6 +3863,7 @@
         "passkey": "Desbloquear com chave de acesso",
         "passkey_cancelled": "Chave de acesso cancelada.",
         "passkey_failed": "Essa chave de acesso não desbloqueou o app Finanças. Use sua frase secreta.",
+        "device": "Desbloquear neste dispositivo",
         "lock_now": "Bloquear",
         "qa_title": "Lançamento rápido sem desbloquear",
         "qa_body": "Os lançamentos ficam lacrados até você desbloquear e depois entram no seu livro-caixa para revisão.",

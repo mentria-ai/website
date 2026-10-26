@@ -3863,6 +3863,7 @@
         "passkey": "Unlock with passkey",
         "passkey_cancelled": "Passkey cancelled.",
         "passkey_failed": "That passkey didn't unlock Finance. Use your passphrase.",
+        "device": "Unlock on this device",
         "lock_now": "Lock",
         "qa_title": "Quick add without unlocking",
         "qa_body": "Entries are sealed until you unlock, then land in your ledger to review.",

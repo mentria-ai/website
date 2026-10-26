@@ -1299,6 +1299,40 @@ check('link refuses an all-zero secret', async () => {
   assert(r.ok === 'linked' && r.linked, 'a secret with any non-zero byte still links', r);
 });
 
+check('link seals the bytes it was given even when the caller wipes them at once', async () => {
+  await clean();
+  const page = await open('/beta/unlock/');
+  await enableOnLab(page);
+  await createOnLab(page);
+  await runtime(page);
+  const r = await page.evaluate(async () => {
+    const m = window.__m;
+    const hex = (b) => (b ? Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('') : null);
+    const rnd = () => crypto.getRandomValues(new Uint8Array(32));
+    const out = {};
+    const s1 = rnd();
+    const k1 = hex(s1);
+    const p1 = m.link('notes', s1);
+    s1.fill(0);
+    try { await p1; out.first = 'linked'; } catch (e) { out.first = e && e.message; }
+    out.firstOpens = hex(await m.secret('notes')) === k1;
+    const s2 = rnd();
+    const k2 = hex(s2);
+    const p2 = m.link('notes', s2.buffer);
+    s2.fill(0);
+    try { await p2; out.second = 'linked'; } catch (e) { out.second = e && e.message; }
+    out.secondOpens = hex(await m.secret('notes')) === k2;
+    const s3 = rnd();
+    const k3 = hex(s3);
+    await m.link('notes', s3);
+    out.callerKept = hex(s3) === k3 && hex(await m.secret('notes')) === k3;
+    return out;
+  });
+  assert(r.first === 'linked' && r.firstOpens, 'a first link opens with the bytes passed in, not the wiped buffer', r);
+  assert(r.second === 'linked' && r.secondOpens, 'a link over an entry opens with the bytes passed in, not the wiped buffer', r);
+  assert(r.callerKept, 'link leaves the caller\'s own buffer as it was', r);
+});
+
 check('secrets() returns current then prior', async () => {
   await clean();
   const page = await open('/beta/unlock/');

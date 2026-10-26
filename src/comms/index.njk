@@ -4247,7 +4247,7 @@ const krAttach = (mods) => {
 const krLate = async (start, fallback) => {
   const mods = await start;
   try { await fallback; } catch (_) {}
-  if (!mods || KR) return;
+  if (!Array.isArray(mods) || KR) return;
   if (krTyping()) krOldOpen = true;
   krAttach(mods);
   if (els.obErr.textContent === TU.loadFailed) {
@@ -4264,7 +4264,7 @@ const krBootSteps = async () => {
     const mods = await Promise.all([import('/assets/js/mentria-unlock.js'), import('/assets/js/mentria-unlock-core.js')]);
     try { await mods[0].ready(); } catch (_) {}
     return mods[0].enabled() ? mods : null;
-  })().catch(() => null);
+  })().catch(() => 'failed');
   const mods = await Promise.race([start, new Promise((resolve) => setTimeout(() => resolve(false), KR_WAIT_MS))]);
   if (mods === false) {
     krPending = false;
@@ -4272,6 +4272,12 @@ const krBootSteps = async () => {
     const fallback = legacyBoot();
     krLateP = krLate(start, fallback).catch(() => {});
     return fallback;
+  }
+  if (mods === 'failed') {
+    krPending = false;
+    refreshIdUI();
+    krLateP = Promise.resolve();
+    return legacyBoot();
   }
   if (!mods) {
     krPending = false;

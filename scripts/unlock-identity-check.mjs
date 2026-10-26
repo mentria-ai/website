@@ -527,6 +527,22 @@ async function holdRuntime(page, ms, all) {
   return held;
 }
 
+async function failRuntime(page) {
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  const failed = [];
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    if (q.url().includes('/assets/js/mentria-unlock.js')) {
+      failed.push(q.url());
+      q.abort('failed').catch(() => {});
+      return;
+    }
+    q.continue();
+  });
+  return failed;
+}
+
 async function legacyOnRoot(page) {
   await page.evaluate(async () => {
     for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
@@ -2580,6 +2596,45 @@ check('the wait for a keyring that names the identity gives up after 10 s, then 
   await cardCode(c2, '#comms-onboard-card', ccode);
   await waitVisible(c2, '#comms-id-on', 30000);
   assert(await fingerprint(c2) === fp, 'Comms brings back the same identity from the keyring');
+  clean_(rigs.get(c2));
+});
+
+check('a one unlock that fails to load at once says so on About and Comms and makes no second identity', async () => {
+  await fresh(true);
+  const page = await open('/about/', { auth: true });
+  await aboutCreate(page, { passkey: false });
+  await page.evaluate(() => window.MentriaStore.remove('identity', 'vault'));
+  await page.evaluate(async (u) => { const m = await import(u); await m.lock(); }, RUNTIME);
+  await closeAll();
+  const about = await open(null, { auth: true });
+  const failed = await failRuntime(about);
+  const t0 = Date.now();
+  await about.goto(ORIGIN + '/about/', { waitUntil: 'load' });
+  await about.evaluate(() => { document.getElementById('about-advanced').open = true; });
+  await until(() => about.evaluate((t) => document.getElementById('about-identity-lede').textContent.trim() === t && !!document.getElementById('about-identity-lede').getClientRects().length, EN.unlock.load_failed), 4500, 'About says the one unlock did not load');
+  const waited = Date.now() - t0;
+  await sleep(Math.max(0, 6500 - (Date.now() - t0)));
+  const mid = await about.evaluate((t) => ({ lede: document.getElementById('about-identity-lede').textContent.trim() === t, setup: document.getElementById('about-identity-setup').hidden, unlock: document.getElementById('about-identity-unlock').hidden, vault: localStorage.getItem('mentria.store.identity.vault') }), EN.unlock.load_failed);
+  assert(failed.length > 0 && waited < 5000 && mid.lede && mid.setup && mid.unlock && mid.vault === null, 'About says the one unlock did not load and offers no setup of its own', { failed: failed.length, waited, mid });
+  clean_(rigs.get(about));
+  await fresh(true);
+  const comms = await open('/comms/', { auth: true });
+  await commsOnboard(comms, 'Fail Fay');
+  await setupNew(comms, { passkey: false });
+  await waitVisible(comms, '#comms-id-on', 30000);
+  await comms.evaluate(() => window.MentriaStore.remove('identity', 'vault'));
+  await lockAndWaitReload(comms);
+  await closeAll();
+  const c2 = await open(null, { auth: true });
+  const failed2 = await failRuntime(c2);
+  const t1 = Date.now();
+  await c2.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
+  await commsOnboard(c2, 'Fail Fay');
+  await until(() => c2.evaluate((t) => { const e = document.getElementById('comms-onboard-err'); return !e.hidden && e.textContent.trim() === t; }, EN.unlock.load_failed), 4500, 'Comms says the one unlock did not load');
+  const cwait = Date.now() - t1;
+  await sleep(1500);
+  const cm = await c2.evaluate(() => ({ done: !!document.getElementById('comms-onboard-done').getClientRects().length, vault: localStorage.getItem('mentria.store.identity.vault'), code: document.getElementById('comms-onboard-code').textContent, busy: document.getElementById('comms-onboard-create').disabled }));
+  assert(failed2.length > 0 && cwait < 5000 && !cm.done && cm.vault === null && !cm.code && !cm.busy, 'Comms says the one unlock did not load and makes no identity of its own', { failed: failed2.length, cwait, cm });
   clean_(rigs.get(c2));
 });
 

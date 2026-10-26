@@ -801,34 +801,39 @@ export async function link(name, bytes) {
   if (!rec || !sessionLive()) throw new Error('locked');
   if (!SERVICES.includes(name)) throw new Error('bad-service');
   const given = bytesOf(bytes);
-  if (given && given.every((x) => x === 0)) throw new Error('bad-input');
-  const root = mem.root;
-  const tag = sessionTag();
-  const live = () => {
-    const fresh = readRecord();
-    if (!fresh || !sessionLive() || sessionTag() !== tag) throw new Error('locked');
-    return fresh;
-  };
-  const wrote = await exclusive(async () => {
-    const S = await storeReady();
-    let prev = linkedEntry(live(), name);
-    for (let i = 1; ; i++) {
-      const entry = await sealOver(root, name, prev, bytes);
-      const fresh = live();
-      const now = linkedEntry(fresh, name);
-      if (entrySig(now) !== entrySig(prev)) {
-        if (i >= LINK_TRIES) throw new Error('busy');
-        prev = now;
-        continue;
+  const mine = new Uint8Array(given);
+  try {
+    if (mine.every((x) => x === 0)) throw new Error('bad-input');
+    const root = mem.root;
+    const tag = sessionTag();
+    const live = () => {
+      const fresh = readRecord();
+      if (!fresh || !sessionLive() || sessionTag() !== tag) throw new Error('locked');
+      return fresh;
+    };
+    const wrote = await exclusive(async () => {
+      const S = await storeReady();
+      let prev = linkedEntry(live(), name);
+      for (let i = 1; ; i++) {
+        const entry = await sealOver(root, name, prev, mine);
+        const fresh = live();
+        const now = linkedEntry(fresh, name);
+        if (entrySig(now) !== entrySig(prev)) {
+          if (i >= LINK_TRIES) throw new Error('busy');
+          prev = now;
+          continue;
+        }
+        if (!entry) return false;
+        const next = mergeRecords(fresh, Object.assign({}, fresh, { services: Object.assign({}, fresh.services, { [name]: entry }), changed: entry.linked }));
+        if (!next) throw new Error('locked');
+        store(S, next);
+        return true;
       }
-      if (!entry) return false;
-      const next = mergeRecords(fresh, Object.assign({}, fresh, { services: Object.assign({}, fresh.services, { [name]: entry }), changed: entry.linked }));
-      if (!next) throw new Error('locked');
-      store(S, next);
-      return true;
-    }
-  });
-  if (wrote) notify(true);
+    });
+    if (wrote) notify(true);
+  } finally {
+    mine.fill(0);
+  }
 }
 
 function entrySig(e) { return e ? [e.id, e.ct, e.linked].join('|') : ''; }

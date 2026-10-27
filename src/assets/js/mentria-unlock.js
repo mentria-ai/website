@@ -291,7 +291,7 @@ function forget() {
 
 function notify(force) {
   const s = state();
-  if (s.unlocked) ssDel(ASK_KEY);
+  if (s.unlocked || !s.askAtLaunch) ssDel(ASK_KEY);
   const k = JSON.stringify(s);
   if (!force && k === lastKey) return;
   lastKey = k;
@@ -481,7 +481,6 @@ async function boot(markDecided) {
     forget();
     bumpEpoch();
     if (local().askAtLaunch === true) ssSet(ASK_KEY, '1');
-    else ssDel(ASK_KEY);
     try { await idbDel('session', 'current'); } catch (_) {}
     post('lock');
   }
@@ -491,7 +490,8 @@ async function boot(markDecided) {
   await refresh(false);
   if (!sessionLive() && mem.hasDevice) await unlockWithDevice();
   await prfP;
-  if (!inFrame && state().ask && !document.documentElement.hasAttribute('data-unlock-tool')) askBar();
+  const html = document.documentElement;
+  if (!inFrame && state().ask && !html.hasAttribute('data-unlock-tool') && !html.classList.contains('is-fullscreen-tool')) askBar();
   notify(false);
   return state();
 }

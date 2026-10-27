@@ -15,6 +15,7 @@ const FOCUSABLE = 'button, a[href], input, select, textarea, [tabindex]';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const LOCK_ICON = '<rect x="5" y="10.5" width="14" height="9.5" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="15.2" r="1.3" fill="currentColor"/>';
 const CLOSE_ICON = '<line x1="18" y1="6" x2="6" y2="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>';
+const FULLSCREEN = 'is-fullscreen-tool';
 
 const copies = new Map();
 const regions = new WeakMap();
@@ -289,6 +290,13 @@ function focusEl(el) {
   try { el.focus({ preventScroll: false }); } catch (_) {}
 }
 
+function landing() {
+  const main = document.getElementById('main-content') || document.querySelector('main, [role="main"]');
+  if (!main) return;
+  if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+  try { main.focus({ preventScroll: true }); } catch (_) {}
+}
+
 function setPage(on) {
   const html = document.documentElement;
   if (on && !pageState) {
@@ -404,6 +412,7 @@ function closeLayer(L) {
   const o = L.opener;
   if (o && o !== document.body && document.contains(o)) focusEl(o);
   else if (top) focusEl(tabbables(top.panel)[0] || top.panel);
+  else if (o && o !== document.body) landing();
 }
 
 function buildCard(T0, { mode, onDone, titleId }) {
@@ -506,6 +515,10 @@ function buildCard(T0, { mode, onDone, titleId }) {
       finish();
       return;
     }
+    showError(kind, err);
+  }
+
+  function showError(kind, err) {
     const key = errKey(err, kind === 'passkey');
     say(msg, T, key, 'error');
     if (key === 'err_prf') {
@@ -567,6 +580,10 @@ function buildCard(T0, { mode, onDone, titleId }) {
       const s = state();
       if (!confirmMode && s.unlocked) finish(s);
     },
+    fail(err) {
+      if (done || busy || !err || errKey(err, true) === 'err_cancelled') return;
+      showError('passkey', err);
+    },
     destroy() {
       done = true;
       off();
@@ -599,7 +616,7 @@ export async function mountCard(container, { onUnlocked } = {}) {
   return { destroy: () => card.destroy() };
 }
 
-async function launch() {
+async function launch(err) {
   const T = await copy();
   await domReady();
   const s = state();
@@ -625,18 +642,20 @@ async function launch() {
     L = openLayer({ labelledby: titleId, describedby: card.ledeId, onDismiss: () => close() });
     L.panel.append(card.root);
     card.focus();
+    card.fail(err);
   });
 }
 
-export function showLaunch() {
-  if (!launchP) launchP = launch().catch(() => {}).finally(() => { launchP = null; });
+export function showLaunch(err) {
+  if (!launchP) launchP = launch(err).catch(() => {}).finally(() => { launchP = null; });
   return launchP;
 }
 
 export async function showBar() {
   const T0 = await copy();
   await domReady();
-  if (bar || !state().ask) return;
+  const html = document.documentElement;
+  if (bar || !state().ask || html.classList.contains(FULLSCREEN)) return;
   let T = T0;
   let busy = false;
   const text = h('span', { class: 'm-update__text' });
@@ -644,9 +663,16 @@ export async function showBar() {
   const x = h('button', { type: 'button', class: 'm-update__x', 'data-act': 'bar-close' }, glyph(CLOSE_ICON));
   const root = h('div', { class: 'm-update m-ubar', role: 'status', 'aria-live': 'polite' }, icon('m-ubar__icon'), text, go, x);
   const chip = document.getElementById('m-update');
-  const sizer = chip && typeof ResizeObserver === 'function' ? new ResizeObserver(() => {
-    const tall = chip.getBoundingClientRect().height;
-    if (tall > 0) root.style.setProperty('--m-update-h', Math.ceil(tall) + 'px');
+  const measure = (el, name) => {
+    const tall = el ? el.getBoundingClientRect().height : 0;
+    if (tall > 0) html.style.setProperty(name, Math.ceil(tall) + 'px');
+  };
+  const sizer = typeof ResizeObserver === 'function' ? new ResizeObserver(() => {
+    measure(chip, '--m-update-h');
+    measure(root, '--m-ubar-h');
+  }) : null;
+  const watch = typeof MutationObserver === 'function' ? new MutationObserver(() => {
+    if (html.classList.contains(FULLSCREEN)) close();
   }) : null;
   const view = {
     repaint(T2) {
@@ -662,7 +688,11 @@ export async function showBar() {
     bar = null;
     off();
     if (sizer) sizer.disconnect();
+    if (watch) watch.disconnect();
+    html.style.removeProperty('--m-update-h');
+    html.style.removeProperty('--m-ubar-h');
     live.delete(view);
+    if (root.contains(document.activeElement)) landing();
     root.remove();
   };
   const idle = () => {
@@ -681,9 +711,9 @@ export async function showBar() {
     unlockWithPasskey().then(() => {
       idle();
       close();
-    }, () => {
+    }, (err) => {
       idle();
-      if (bar === view && !state().unlocked) showLaunch();
+      if (bar === view && !state().unlocked) showLaunch(err);
     });
   });
   x.addEventListener('click', () => {
@@ -695,7 +725,11 @@ export async function showBar() {
   live.add(view);
   view.repaint(T);
   document.body.append(root);
-  if (sizer) sizer.observe(chip);
+  if (sizer) {
+    sizer.observe(root);
+    if (chip) sizer.observe(chip);
+  }
+  if (watch) watch.observe(html, { attributes: true, attributeFilter: ['class'] });
   nextFrame(() => {
     if (bar !== view) return;
     text.dataset.uk = 'bar_text';

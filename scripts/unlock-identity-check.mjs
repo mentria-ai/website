@@ -913,6 +913,52 @@ check('comms offers a keyring passkey after a code unlock', async () => {
   clean_(rig);
 });
 
+check('a page that cannot load the one unlock keeps the old comms flow', async () => {
+  await fresh(false);
+  const page = await open('/comms/', { auth: true });
+  const rig = rigs.get(page);
+  await commsOnboard(page, 'Legacy Lee');
+  await waitVisible(page, '#comms-onboard-done', 40000);
+  const code = await text(page, '#comms-onboard-code');
+  assert(CODE_SHAPE.test(code), 'the 20-symbol code is shown', code);
+  assert(!(await page.$('.m-ulayer')), 'no setup sheet');
+  await page.click('#comms-onboard-continue');
+  await waitVisible(page, '#comms-id-on');
+  const vault = await readJson(page, IDENTITY);
+  assert(vault && vault.v === 2 && vault.pass && vault.prf && !vault.linked, 'legacy vault with pass and prf', vault && Object.keys(vault));
+  assert(!(await readJson(page, KEYRING)), 'no keyring record');
+  assert((await loaded(page, RUNTIME)) && !(await loaded(page, UI)), 'the runtime is requested, fails, and the card never loads');
+  assert(!(await visible(page, '#comms-id-lock')), 'no Lock button');
+  await page.reload({ waitUntil: 'load' });
+  await waitVisible(page, '#comms-id-locked');
+  const lockUi = {
+    title: await visible(page, '#comms-id-locked .comms__lock-h'),
+    pk: await visible(page, '#comms-id-passkey'),
+    link: await visible(page, '#comms-lock-link'),
+    slot: await visible(page, '#comms-id-card-slot')
+  };
+  assert(lockUi.title && lockUi.pk && !lockUi.link && !lockUi.slot, 'old welcome back card', lockUi);
+  await page.click('#comms-lock-alt summary');
+  await typeInto(page, '#comms-id-pass', code);
+  await page.click('#comms-id-unlock');
+  await waitVisible(page, '#comms-id-on', 20000);
+  assert(!(await page.$('.m-ulayer')), 'no setup sheet after the old unlock');
+  assert(await loaded(page, RUNTIME), 'the runtime is tried again after the reload and the old unlock still opens');
+  const about = await open('/about/');
+  await openAdvanced(about);
+  await waitVisible(about, '#about-identity-unlock');
+  const a = {
+    pass: await visible(about, '#about-identity-unlock-pass'),
+    link: await visible(about, '#about-identity-link'),
+    create: await visible(about, '#about-identity-create')
+  };
+  assert(a.pass && !a.link && !a.create, 'About keeps the old unlock', a);
+  assert(await loaded(about, RUNTIME), 'About tries the runtime and falls back to the old unlock');
+  assert(!(await databases(about)).includes('mentria-keyring'), 'no keyring database');
+  clean_(rig);
+  clean_(rigs.get(about));
+});
+
 check('with no switch a fresh device gets the one unlock on Comms and About', async () => {
   await fresh(true);
   const page = await open('/comms/', { auth: true });

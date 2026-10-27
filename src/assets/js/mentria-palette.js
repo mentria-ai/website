@@ -158,7 +158,7 @@
       normNav.push({
         title: navTitle,
         hint: '',
-        href: prefix + n.href,
+        href: (n.raw ? '' : prefix) + n.href,
         titleN: norm(navTitle),
         usage: 0
       });
@@ -481,9 +481,19 @@
     return null;
   }
 
+  function pathOf(q) {
+    var d = data();
+    var t = String(q || '').trim();
+    if (!d || !d.beta || t.charAt(0) !== '/' || t.charAt(1) === '/' || t.charAt(1) === '\\') return '';
+    try {
+      var u = new URL(t, location.origin);
+      return u.origin === location.origin ? u.pathname + u.search + u.hash : '';
+    } catch (_) { return ''; }
+  }
+
   function parseCommand(rawQuery) {
     var q = String(rawQuery || '').trimStart();
-    var cmd = { note: '', timer: '', flip: norm(q).trim() === 'flip', staged: '' };
+    var cmd = { note: '', timer: '', flip: norm(q).trim() === 'flip', staged: '', path: pathOf(q) };
     var rest = afterWord(q, model.kwNote);
     if (rest !== null) {
       cmd.note = trimSep(rest).trim();
@@ -524,6 +534,9 @@
     }
     if (cmd.flip) {
       out.push({ id: 'flip', title: labels.actFlip || 'Flip a coin', hint: '', action: flipCoin });
+    }
+    if (cmd.path) {
+      out.push({ id: 'path', title: fmtLabel(labels.openPath || 'Open {path}', { path: clip(cmd.path, 48, '\u2026') }), hint: '', href: cmd.path });
     }
     return out;
   }

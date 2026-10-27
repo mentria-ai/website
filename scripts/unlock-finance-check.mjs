@@ -9,7 +9,7 @@ const BUILD = process.argv[2];
 if (!BUILD) { console.log('usage: node scripts/unlock-finance-check.mjs <production build dir>'); process.exit(2); }
 const HOST = '/tools/';
 const RUNTIME = '/assets/js/mentria-unlock.js';
-const PORT = 8090;
+const PORT = Number(process.env.UNLOCK_PORT) || 8090;
 const ORIGIN = 'http://localhost:' + PORT;
 const PROFILE = join(tmpdir(), 'unlock-finance-check-profile');
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';

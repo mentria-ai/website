@@ -8,7 +8,7 @@ import { serve } from './unlock-serve.mjs';
 const BUILD = process.argv[2];
 if (!BUILD) { console.log('usage: node scripts/unlock-identity-check.mjs <production build> [<legacy build>]'); process.exit(2); }
 const LEGACY = process.argv[3] || join(tmpdir(), 'unlock-legacy-build');
-const PORT = 8093;
+const PORT = Number(process.env.UNLOCK_PORT) || 8093;
 const ORIGIN = 'http://localhost:' + PORT;
 const PROFILE = join(tmpdir(), 'unlock-identity-check-profile');
 const FILES = join(tmpdir(), 'unlock-identity-check-files');

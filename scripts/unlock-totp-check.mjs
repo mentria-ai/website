@@ -8,7 +8,7 @@ import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
 if (!BUILD) { console.log('usage: node scripts/unlock-totp-check.mjs <production build dir>'); process.exit(2); }
-const PORT = 8092;
+const PORT = Number(process.env.UNLOCK_PORT) || 8092;
 const ORIGIN = 'http://localhost:' + PORT;
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const WORK = join(tmpdir(), 'unlock-totp-check');

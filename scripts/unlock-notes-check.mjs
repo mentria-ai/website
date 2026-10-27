@@ -9,9 +9,9 @@ import { serve } from './unlock-serve.mjs';
 const BUILD = process.argv[2];
 if (!BUILD) { console.log('usage: node scripts/unlock-notes-check.mjs <production build> [<legacy build>]'); process.exit(2); }
 const LEGACY = process.argv[3] || join(tmpdir(), 'unlock-legacy-build');
-const OLD_PORT = 8086;
+const OLD_PORT = Number(process.env.UNLOCK_OLD_PORT) || 8086;
 const OLD_ORIGIN = 'http://localhost:' + OLD_PORT;
-const PORT = 8091;
+const PORT = Number(process.env.UNLOCK_PORT) || 8091;
 const ORIGIN = 'http://localhost:' + PORT;
 const PROFILE = join(tmpdir(), 'unlock-notes-check-profile');
 const MODULE = '/assets/js/mentria-unlock.js';

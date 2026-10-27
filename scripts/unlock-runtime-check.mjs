@@ -1,11 +1,12 @@
 import http from 'node:http';
-import { createReadStream, statSync, rmSync, readFileSync } from 'node:fs';
+import { createReadStream, statSync, rmSync, readFileSync, readdirSync } from 'node:fs';
 import { join, extname, normalize, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import puppeteer from 'puppeteer-core';
 
 const BUILD = process.argv[2];
-if (!BUILD) { console.log('usage: node scripts/unlock-runtime-check.mjs <beta build dir>'); process.exit(2); }
+const PROD = process.argv[3] || '';
+if (!BUILD) { console.log('usage: node scripts/unlock-runtime-check.mjs <beta build dir> [<production build dir>]'); process.exit(2); }
 const PORT = Number(process.env.UNLOCK_PORT) || 8096;
 const ORIGIN = 'http://localhost:' + PORT;
 const PROFILE = join(tmpdir(), PORT === 8096 ? 'unlock-runtime-check-profile' : 'unlock-runtime-check-profile-' + PORT);
@@ -20,8 +21,9 @@ const TYPES = {
 
 const delays = new Map();
 
-function serve(dir, port) {
-  const root = resolve(dir);
+let root = resolve(BUILD);
+
+function serve(port) {
   const server = http.createServer(async (req, res) => {
     const path = decodeURIComponent(new URL(req.url, 'http://local').pathname);
     if (delays.has(path)) await new Promise((r) => setTimeout(r, delays.get(path)));
@@ -42,7 +44,7 @@ function serve(dir, port) {
 }
 
 rmSync(PROFILE, { recursive: true, force: true });
-const server = await serve(BUILD, PORT);
+const server = await serve(PORT);
 const browser = await puppeteer.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   headless: true,
@@ -52,7 +54,7 @@ const browser = await puppeteer.launch({
 });
 
 const checks = [];
-const check = (name, fn) => checks.push([name, fn]);
+const check = (name, fn, when = true) => checks.push([name, fn, when]);
 const pageLog = new WeakMap();
 
 function assert(cond, msg, extra) {
@@ -124,15 +126,6 @@ async function bootLoaded(page) {
 
 async function databases(page) {
   return page.evaluate(async () => (await indexedDB.databases()).map((d) => d.name));
-}
-
-async function enableOnLab(page) {
-  await page.waitForSelector('#unlock-switch');
-  const on = await page.$eval('#unlock-switch', (el) => el.checked);
-  if (!on) await page.click('#unlock-switch');
-  await page.waitForFunction(() => {
-    try { return JSON.parse(localStorage.getItem('mentria.keyring.local')).enabled === true; } catch (_) { return false; }
-  });
 }
 
 async function createOnLab(page) {
@@ -266,47 +259,106 @@ function installCryptoHold(page) {
 let code = null;
 let pageA = null;
 
-check('gate off without the tester switch', async () => {
-  await clean();
-  const lab = await open('/beta/unlock/');
-  assert(await lab.evaluate(() => document.documentElement.dataset.release) === 'beta', 'lab page is not a beta build');
-  await lab.evaluate(async () => {
+const WITHOUT = () => {
+  window.__without = (name, fn) => {
+    const owner = name === 'subtle' ? Crypto.prototype : window;
+    const key = name === 'subtle' ? 'subtle' : 'indexedDB';
+    const d = Object.getOwnPropertyDescriptor(owner, key);
+    Object.defineProperty(owner, key, { configurable: true, get: () => undefined });
+    try { return fn(); } finally { if (d) Object.defineProperty(owner, key, d); else delete owner[key]; }
+  };
+};
+
+async function plantRecord(page) {
+  return page.evaluate(async () => {
     const C = await import('/assets/js/mentria-unlock-core.js');
     const { record } = await C.createRecord({ code: C.newRecoveryCode(), deviceId: 'gate-check' });
     if (!C.isRecord(record)) throw new Error('planted record is not valid');
     localStorage.setItem('mentria.store.keyring.vault', JSON.stringify(record));
-    window.__planted = localStorage.getItem('mentria.store.keyring.vault');
   });
-  const planted = await lab.evaluate(() => window.__planted);
-  const about = await open('/about/');
-  await about.waitForFunction(() => document.readyState === 'complete');
-  await new Promise((r) => setTimeout(r, 300));
-  assert(!(await bootLoaded(about)), 'bootstrap loaded the runtime without the tester switch');
-  const s = await runtime(about);
-  const r = await about.evaluate(() => ({ enabled: window.__m.enabled(), unlocked: window.__m.state().unlocked }));
-  assert(r.enabled === false && s.enabled === false && r.unlocked === false, 'enabled() should be false', r);
-  const dbs = await databases(about);
-  assert(!dbs.includes('mentria-keyring'), 'ready() created the keyring database', dbs);
-  await about.evaluate(() => {
-    localStorage.removeItem('mentria.store.keyring.vault');
-    localStorage.setItem('mentria.keyring.local', JSON.stringify({ enabled: true }));
-  });
+}
+
+async function runsWithNoSwitch(label) {
+  await clean();
   const tools = await open('/tools/');
   await tools.waitForFunction(() => document.readyState === 'complete');
   await new Promise((r) => setTimeout(r, 300));
-  assert(!(await bootLoaded(tools)), 'bootstrap loaded the runtime with no keyring record');
-  assert(!(await databases(tools)).includes('mentria-keyring'), 'keyring database exists with no record');
-  await tools.evaluate((raw) => localStorage.setItem('mentria.store.keyring.vault', raw), planted);
-  const control = await open('/tools/');
-  await control.waitForFunction((url) => performance.getEntriesByType('resource').some((e) => new URL(e.name).pathname === url), { timeout: 10000 }, MODULE);
-  const sc = await runtime(control);
-  assert(sc.enabled && sc.setUp && (sc.launch === 'reopen' || sc.launch === 'continue'), 'control: the same record with the switch on boots the runtime', sc);
+  assert(!(await bootLoaded(tools)), label + ': the bootstrap loaded the runtime with no keyring record');
+  assert(!(await databases(tools)).includes('mentria-keyring'), label + ': a keyring database exists with no record');
+  await plantRecord(tools);
+  assert(await readLocal(tools, 'mentria.keyring.local') === null, label + ': no switch is seeded');
+  const about = await open('/about/');
+  await bootFrom(about);
+  const s = await runtime(about);
+  const r = await about.evaluate(() => ({ enabled: window.__m.enabled(), local: localStorage.getItem('mentria.keyring.local') }));
+  assert(r.enabled === true && s.enabled && s.setUp && (s.launch === 'reopen' || s.launch === 'continue'), label + ': a keyring record boots the one unlock with no switch', { r, s });
+  assert(!/"enabled"/.test(r.local || ''), label + ': the runtime writes no switch', r.local);
+  await about.evaluate(() => localStorage.setItem('mentria.keyring.local', JSON.stringify({ enabled: false })));
+  await closeAll();
+  const again = await open('/tools/');
+  await bootFrom(again);
+  const sa = await runtime(again);
+  assert(sa.enabled && sa.setUp && (sa.launch === 'reopen' || sa.launch === 'continue'), label + ': a tester switch left off no longer turns it off', sa);
+}
+
+check('the one unlock runs with no switch', async () => {
+  await clean();
+  const lab = await open('/beta/unlock/');
+  assert(await lab.evaluate(() => document.documentElement.dataset.release) === 'beta', 'lab page is not a beta build');
+  assert(!(await lab.$('#unlock-switch')), 'the lab has no tester switch');
+  await runsWithNoSwitch('beta');
+});
+
+check('a production build runs the one unlock and has no lab', async () => {
+  const dir = join('assets', 'js');
+  const same = readdirSync(join(BUILD, dir)).filter((f) => /^(mentria-unlock|unlock-copy\.)/.test(f)).map((n) => [n, readFileSync(join(BUILD, dir, n)).equals(readFileSync(join(PROD, dir, n)))]);
+  assert(same.length >= 8 && same.every(([, eq]) => eq), 'the runtime, card and copy files are the same in both builds', same.filter(([, eq]) => !eq));
+  root = resolve(PROD);
+  try {
+    await clean();
+    const home = await open('/tools/');
+    const tag = await home.evaluate(() => document.documentElement.getAttribute('data-release'));
+    assert(tag !== null && tag !== 'beta', 'the second build is a production build', tag);
+    const lab = await home.evaluate(async () => (await fetch('/beta/unlock/')).status);
+    assert(lab === 404, 'a production build has no lab page', lab);
+    const palette = await home.evaluate(async () => (await fetch('/assets/js/site-palette.en.js')).text());
+    assert(!palette.includes('/beta/unlock/') && !palette.includes('openPath') && palette.includes('beta: false'), 'the production palette has no beta entries');
+    await runsWithNoSwitch('production');
+  } finally {
+    root = resolve(BUILD);
+  }
+}, !!PROD);
+
+check('the runtime needs IndexedDB and crypto.subtle, and the lab names retired old locks', async () => {
+  await clean();
+  const page = await open('/beta/unlock/', WITHOUT);
+  await createOnLab(page);
+  await runtime(page);
+  const caps = await page.evaluate(() => ({
+    both: window.__m.enabled(),
+    noIdb: window.__without('indexedDB', () => [typeof indexedDB, window.__m.enabled(), window.__m.state().enabled]),
+    noSubtle: window.__without('subtle', () => [typeof crypto.subtle, window.__m.enabled(), window.__m.state().enabled]),
+    after: window.__m.enabled() && typeof indexedDB === 'object' && typeof crypto.subtle === 'object'
+  }));
+  assert(caps.both && caps.after && JSON.stringify(caps.noIdb) === '["undefined",false,false]' && JSON.stringify(caps.noSubtle) === '["undefined",false,false]', 'enabled() and state().enabled follow IndexedDB and crypto.subtle', caps);
+  const row = (label) => page.evaluate((l) => {
+    const th = [...document.querySelectorAll('#unlock-diag th')].find((x) => x.textContent === l);
+    return th ? th.nextElementSibling.textContent : null;
+  }, label);
+  assert(await until(async () => (await row('one unlock')) === 'runs in this browser', 3000), 'the lab says the one unlock runs here', await row('one unlock'));
+  assert(await row('old locks retired') === 'none', 'no retired old locks yet', await row('old locks retired'));
+  await page.evaluate(() => {
+    const rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
+    rec.retired = { notes: new Date().toISOString(), totp: new Date().toISOString() };
+    localStorage.setItem('mentria.store.keyring.vault', JSON.stringify(rec));
+  });
+  await page.reload({ waitUntil: 'load' });
+  assert(await until(async () => (await row('old locks retired')) === 'totp, notes', 5000), 'the lab names the retired old locks', await row('old locks retired'));
 });
 
 check('create then unlock with code', async () => {
   await clean();
   pageA = await open('/beta/unlock/');
-  await enableOnLab(pageA);
   code = await createOnLab(pageA);
   assert(/^([A-Z2-7]{4}-){7}[A-Z2-7]{4}$/.test(code), 'code format', code);
   await runtime(pageA);
@@ -458,7 +510,6 @@ check('passkey enrol and unlock', async () => {
   const { authenticatorId } = await cdp.send('WebAuthn.addVirtualAuthenticator', {
     options: { protocol: 'ctap2', ctap2Version: 'ctap2_1', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, hasPrf: true, automaticPresenceSimulation: true }
   });
-  await enableOnLab(page);
   const c = await createOnLab(page);
   await runtime(page);
   const support = await page.evaluate(() => window.__m.prfSupport());
@@ -498,7 +549,6 @@ check('passkey enrol and unlock', async () => {
 check('passphrase, new code, backup key and remember this device', async () => {
   await clean();
   let page = await open('/beta/unlock/');
-  await enableOnLab(page);
   const first = await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async (oldCode) => {
@@ -571,7 +621,6 @@ check('passphrase, new code, backup key and remember this device', async () => {
 check('create fails cleanly when localStorage write fails', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async () => {
     const S = window.MentriaStore;
@@ -598,7 +647,6 @@ check('create fails cleanly when localStorage write fails', async () => {
 check('bfcache keeps working', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await createOnLab(page);
   await go(page, '/about/');
   await page.waitForFunction((url) => performance.getEntriesByType('resource').some((e) => new URL(e.name).pathname === url), {}, MODULE);
@@ -639,7 +687,6 @@ check('bfcache keeps working', async () => {
 check('remembered device stays locked after Lock until reopen', async () => {
   await clean();
   let page = await open('/beta/unlock/');
-  await enableOnLab(page);
   const c = await createOnLab(page);
   await runtime(page);
   await page.evaluate(async () => { await window.__m.setRemember(true); await window.__m.lock(); });
@@ -665,7 +712,6 @@ check('remembered device stays locked after Lock until reopen', async () => {
 check('create refuses any stored record value', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async () => {
     const out = [];
@@ -684,7 +730,6 @@ check('create refuses any stored record value', async () => {
 check('create rolls back when the session write fails', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async () => {
     const put = IDBObjectStore.prototype.put;
@@ -710,7 +755,6 @@ check('create rolls back when the session write fails', async () => {
 check('unlock rejects when another tab locks during the write', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   const c = await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async (x) => {
@@ -738,7 +782,6 @@ check('addPasskey fails fast without PRF', async () => {
   const { authenticatorId } = await cdp.send('WebAuthn.addVirtualAuthenticator', {
     options: { protocol: 'ctap2', ctap2Version: 'ctap2_1', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, hasPrf: false, automaticPresenceSimulation: true }
   });
-  await enableOnLab(page);
   await createOnLab(page);
   await runtime(page);
   await page.evaluate(() => {
@@ -763,7 +806,6 @@ check('addPasskey fails fast without PRF', async () => {
 check('capability probe cannot hang ready()', async () => {
   await clean();
   const lab = await open('/beta/unlock/');
-  await enableOnLab(lab);
   await createOnLab(lab);
   await closeAll();
   const page = await open('/about/', () => {
@@ -782,7 +824,6 @@ check('frame pages leave the launch decision to the parent', async () => {
   await clean();
   const FRAME = '/extensions/finance/app/';
   const lab = await open('/beta/unlock/');
-  await enableOnLab(lab);
   await createOnLab(lab);
   await runtime(lab);
   await lab.evaluate(() => window.__m.setAskAtLaunch(true));
@@ -826,7 +867,6 @@ check('frame pages leave the launch decision to the parent', async () => {
 check('locale redirect makes one launch decision', async () => {
   await clean();
   const lab = await open('/beta/unlock/');
-  await enableOnLab(lab);
   await createOnLab(lab);
   const flagged = await open('/about/', () => { window.__mentriaRedirecting = true; });
   await new Promise((r) => setTimeout(r, 800));
@@ -861,7 +901,6 @@ check('locale redirect makes one launch decision', async () => {
 check('silent unlock loses to a Lock in another page', async () => {
   await clean();
   const lab = await open('/beta/unlock/');
-  await enableOnLab(lab);
   await createOnLab(lab);
   await runtime(lab);
   await lab.evaluate(() => window.__m.setRemember(true));
@@ -900,7 +939,6 @@ check('silent unlock loses to a Lock in another page', async () => {
 check('a rejected unlock leaves no session row', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   const c = await createOnLab(a);
   await runtime(a);
   const b = await open('/about/');
@@ -932,7 +970,6 @@ check('a rejected unlock leaves no session row', async () => {
 check('a Lock caught between its two writes still wins', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   const c = await createOnLab(a);
   await runtime(a);
   await a.evaluate(() => window.__m.setRemember(true));
@@ -977,7 +1014,6 @@ check('a Lock caught between its two writes still wins', async () => {
 check('another page never sees the new epoch without the manual lock', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   await createOnLab(a);
   await runtime(a);
   const b = await open('/about/');
@@ -1005,7 +1041,6 @@ check('another page never sees the new epoch without the manual lock', async () 
 check('ready() makes no decision on a redirecting page', async () => {
   await clean();
   const lab = await open('/beta/unlock/');
-  await enableOnLab(lab);
   await createOnLab(lab);
   const e0 = await readLocal(lab, 'mentria.keyring.epoch');
   await closeAll();
@@ -1029,7 +1064,6 @@ check('ready() makes no decision on a redirecting page', async () => {
 check('create re-checks for a record right before its write', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   await runtime(a);
   const b = await open('/about/');
   await b.waitForFunction(() => document.readyState === 'complete' && !!window.MentriaStore);
@@ -1066,7 +1100,6 @@ check('create re-checks for a record right before its write', async () => {
 check('create reports exists when another tab\'s create wins', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   await runtime(a);
   const b = await open('/about/');
   await b.waitForFunction(() => document.readyState === 'complete' && !!window.MentriaStore);
@@ -1129,7 +1162,6 @@ check('create reports exists when another tab\'s create wins', async () => {
 check('a rejected unlock keeps another page\'s newer row', async () => {
   await clean();
   const lab = await open('/beta/unlock/');
-  await enableOnLab(lab);
   const c = await createOnLab(lab);
   await runtime(lab);
   await lab.evaluate(() => window.__m.setRemember(true));
@@ -1180,7 +1212,6 @@ check('removing a passkey or the passphrase after a silent unlock asks for a con
   await cdp.send('WebAuthn.addVirtualAuthenticator', {
     options: { protocol: 'ctap2', ctap2Version: 'ctap2_1', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, hasPrf: true, automaticPresenceSimulation: true }
   });
-  await enableOnLab(page);
   const c = await createOnLab(page);
   await runtime(page);
   const add = await clickCall(page, "(m) => m.addPasskey('Keep me')");
@@ -1216,7 +1247,6 @@ check('removing a passkey or the passphrase after a silent unlock asks for a con
 check('link keeps the old secret under prior', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   const c = await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async (code) => {
@@ -1277,7 +1307,6 @@ check('link keeps the old secret under prior', async () => {
 check('link refuses an all-zero secret', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async () => {
@@ -1302,7 +1331,6 @@ check('link refuses an all-zero secret', async () => {
 check('link seals the bytes it was given even when the caller wipes them at once', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async () => {
@@ -1335,8 +1363,7 @@ check('link seals the bytes it was given even when the caller wipes them at once
 
 check('secrets() returns current then prior', async () => {
   await clean();
-  const page = await open('/beta/unlock/');
-  await enableOnLab(page);
+  const page = await open('/beta/unlock/', WITHOUT);
   const c = await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async (code) => {
@@ -1381,9 +1408,8 @@ check('secrets() returns current then prior', async () => {
     out.locked = { list: await m.secrets('identity'), id: m.secretId('identity') };
     await m.unlockWithCode(code);
     out.again = JSON.stringify(await pairs()) === JSON.stringify(out.merged.want);
-    m.setEnabled(false);
-    out.off = { list: await m.secrets('identity'), id: m.secretId('identity') };
-    m.setEnabled(true);
+    const off = window.__without('indexedDB', () => ({ list: m.secrets('identity'), id: m.secretId('identity') }));
+    out.off = { list: await off.list, id: off.id };
     return out;
   }, c);
   assert(JSON.stringify(r.none) === '{"list":[],"id":null}', 'nothing linked gives an empty list and no id', r.none);
@@ -1395,13 +1421,12 @@ check('secrets() returns current then prior', async () => {
   assert(JSON.stringify(r.unknown) === '{"list":[],"id":null,"unlinked":[]}', 'unknown or unlinked services give nothing', r.unknown);
   assert(JSON.stringify(r.locked.list) === '[]' && r.locked.id === r.merged.ib, 'locked: secrets() is empty, secretId() still names the current entry', r.locked);
   assert(r.again, 'after unlocking again secrets() lists both', r);
-  assert(JSON.stringify(r.off) === '{"list":[],"id":null}', 'switch off gives nothing', r.off);
+  assert(JSON.stringify(r.off) === '{"list":[],"id":null}', 'a browser without IndexedDB gives nothing', r.off);
 });
 
 check('a stale write from another page is healed', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   await createOnLab(a);
   await runtime(a);
   const b = await open('/about/');
@@ -1446,7 +1471,6 @@ check('a stale write from another page is healed', async () => {
 check('healing never brings back a removed or different keyring', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   await createOnLab(a);
   await runtime(a);
   await a.evaluate(() => window.__m.link('identity', crypto.getRandomValues(new Uint8Array(32))));
@@ -1476,7 +1500,6 @@ check('healing never brings back a removed or different keyring', async () => {
 check('link waits for the keyring write lock', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   await createOnLab(a);
   await runtime(a);
   const b = await open('/tools/');
@@ -1497,7 +1520,6 @@ check('link waits for the keyring write lock', async () => {
 check('secret() and secrets() give nothing when a Lock lands mid-call', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   const c = await createOnLab(a);
   await runtime(a);
   await a.evaluate(() => window.__m.link('notes', crypto.getRandomValues(new Uint8Array(32))));
@@ -1560,7 +1582,6 @@ check('secret() and secrets() give nothing when a Lock lands mid-call', async ()
 check('link stamps and compares against the record it writes over', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   const c = await createOnLab(a);
   await runtime(a);
   await a.evaluate(() => window.__m.link('notes', crypto.getRandomValues(new Uint8Array(32))));
@@ -1616,7 +1637,6 @@ check('link stamps and compares against the record it writes over', async () => 
 check('the healing page tells its own listeners', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   await createOnLab(a);
   await runtime(a);
   const b = await open('/about/');
@@ -1643,7 +1663,6 @@ check('the healing page tells its own listeners', async () => {
 check('link gives up with busy when the entry keeps changing', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   const c = await createOnLab(a);
   await runtime(a);
   await a.evaluate(() => window.__m.link('notes', crypto.getRandomValues(new Uint8Array(32))));
@@ -1685,7 +1704,6 @@ check('link gives up with busy when the entry keeps changing', async () => {
 check('remember decision and pending flags', async () => {
   await clean();
   let page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async () => {
@@ -1695,6 +1713,7 @@ check('remember decision and pending flags', async () => {
     out.api = ['rememberDecision', 'setRememberDecision', 'rememberPending', 'setRememberPending'].every((k) => typeof m[k] === 'function');
     if (!out.api) return out;
     out.start = [m.rememberDecision(), m.rememberPending()];
+    m.setAskAtLaunch(true);
     m.setRememberDecision('on');
     out.on = [m.rememberDecision(), loc().remember];
     m.setRememberDecision('off');
@@ -1715,7 +1734,8 @@ check('remember decision and pending flags', async () => {
     out.decidedOn = [m.rememberDecision(), m.rememberPending(), m.state().hasDevice];
     await m.setRemember(false);
     out.plainOff = [m.rememberDecision(), m.state().hasDevice];
-    out.kept = loc().enabled === true && typeof loc().deviceId === 'string';
+    out.kept = loc().askAtLaunch === true && typeof loc().deviceId === 'string';
+    m.setAskAtLaunch(false);
     m.setRememberDecision('');
     return out;
   });
@@ -1772,8 +1792,7 @@ async function foldSetup(page, codeA, opts) {
 
 check('fold in another keyring with its recovery code', async () => {
   await clean();
-  const page = await open('/beta/unlock/');
-  await enableOnLab(page);
+  const page = await open('/beta/unlock/', WITHOUT);
   const codeA = await createOnLab(page);
   await runtime(page);
   const api = await page.evaluate(() => typeof window.__m.others === 'function' && typeof window.__m.foldIn === 'function');
@@ -1818,9 +1837,7 @@ check('fold in another keyring with its recovery code', async () => {
     out.valid = C.isRecord(rec) && rec.kcv === F.kcvB;
     out.again = await err(() => m.foldIn(F.kcvA, { code: codeA }));
     out.peer = C.mergeRecords(F.b0, rec).services.notes.prior.length === 2 && C.mergeRecords(rec, F.b0).services.identity.id === F.ids.ia;
-    m.setEnabled(false);
-    out.off = m.others();
-    m.setEnabled(true);
+    out.off = window.__without('indexedDB', () => m.others());
     return out;
   }, codeA);
   assert(r.locked === false && r.lockedFold === 'locked', 'foldIn needs the current session', r);
@@ -1832,7 +1849,7 @@ check('fold in another keyring with its recovery code', async () => {
   assert(JSON.stringify(r.notes) === JSON.stringify(r.wantNotes) && r.notesCur && r.older, 'the other keyring\'s notes secrets join as prior entries with their ids, the current one stays', r);
   assert(r.identity && r.fresh && r.totp && JSON.stringify(r.linked) === '["identity","totp","notes"]', 'a service only the other keyring had becomes current here', r);
   assert(r.valid && r.again === 'no-keyring' && r.peer, 'the record stays valid and merges with another device on this keyring', r);
-  assert(JSON.stringify(r.off) === '[]', 'switch off lists nothing', r.off);
+  assert(JSON.stringify(r.off) === '[]', 'a browser without IndexedDB lists nothing', r.off);
 });
 
 check('fold in another keyring with its passkey', async () => {
@@ -1843,7 +1860,6 @@ check('fold in another keyring with its passkey', async () => {
   await cdp.send('WebAuthn.addVirtualAuthenticator', {
     options: { protocol: 'ctap2', ctap2Version: 'ctap2_1', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, hasPrf: true, automaticPresenceSimulation: true }
   });
-  await enableOnLab(page);
   const codeA = await createOnLab(page);
   await runtime(page);
   const add = await clickCall(page, "(m) => m.addPasskey('Old')");
@@ -1864,7 +1880,6 @@ check('fold in another keyring with its passkey', async () => {
 check('a new recovery code takes effect only after its last four', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   const first = await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async (oldCode) => {
@@ -1920,7 +1935,6 @@ check('a new recovery code takes effect only after its last four', async () => {
 check('every record write merges with what is stored now', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   const c = await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async (code) => {
@@ -1995,7 +2009,6 @@ check('every record write merges with what is stored now', async () => {
 check('a passphrase change or removal is stamped after the one it replaces', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async () => {
@@ -2043,7 +2056,6 @@ check('a passphrase change or removal is stamped after the one it replaces', asy
 check('passkey and recovery code writes are stamped after what they replace', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   const c = await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async (code) => {
@@ -2092,36 +2104,9 @@ check('passkey and recovery code writes are stamped after what they replace', as
   assert(r.code.ok && r.code.newOpens && !r.code.oldOpens && Date.parse(r.code.created) > Date.parse(r.code.was) && r.code.confirmed, 'a new code replaces a recovery wrap stamped ahead of this clock and stays confirmed', r.code);
 });
 
-check('switch off deletes the session and the lab names retired locks', async () => {
-  await clean();
-  const page = await open('/beta/unlock/');
-  await enableOnLab(page);
-  await createOnLab(page);
-  await runtime(page);
-  assert(await sessionRow(page), 'setup: a session row');
-  await page.evaluate(() => window.__m.setEnabled(false));
-  assert(await until(async () => (await sessionRow(page)) === null, 6000), 'turning the switch off deletes the session row');
-  const s = await page.evaluate(() => { window.__m.setEnabled(true); return window.__m.state(); });
-  assert(s.enabled && s.setUp && !s.unlocked, 'turning it on again finds the keyring locked', s);
-  const warn0 = await page.evaluate(() => { const el = document.getElementById('unlock-retired'); return el ? { hidden: el.hidden, text: el.textContent.trim() } : null; });
-  assert(warn0 && warn0.hidden, 'no retired line while nothing is retired', warn0);
-  await page.evaluate(() => {
-    const rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault'));
-    rec.retired = { notes: new Date().toISOString(), totp: new Date().toISOString() };
-    localStorage.setItem('mentria.store.keyring.vault', JSON.stringify(rec));
-  });
-  await page.reload({ waitUntil: 'load' });
-  await page.waitForFunction(() => { const el = document.getElementById('unlock-retired'); return el && !el.hidden; }, { timeout: 5000 }).catch(() => {});
-  const warn = await page.evaluate(() => { const el = document.getElementById('unlock-retired'); return el ? { hidden: el.hidden, text: el.textContent.trim() } : null; });
-  const lang = await page.evaluate(() => document.documentElement.lang || 'en');
-  const want = EN.tester_retired.replace('{services}', new Intl.ListFormat(lang, { type: 'conjunction' }).format([EN.services.totp, EN.services.notes]));
-  assert(warn && !warn.hidden && warn.text === want, 'the lab says which old locks are gone', { warn, want });
-});
-
 check('a stuck database times out and Lock still tells other pages', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   const c = await createOnLab(a);
   await runtime(a);
   const b = await open('/about/');
@@ -2154,7 +2139,6 @@ check('a stuck database times out and Lock still tells other pages', async () =>
 check('a slow database open gets 10 s; a stuck transaction gives up after 4 s', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   await createOnLab(a);
   await runtime(a);
   await installHold(a);
@@ -2194,7 +2178,6 @@ check('a slow database open gets 10 s; a stuck transaction gives up after 4 s', 
 check('create waits for the keyring write lock', async () => {
   await clean();
   const a = await open('/beta/unlock/');
-  await enableOnLab(a);
   await runtime(a);
   const b = await open('/about/');
   await b.waitForFunction(() => document.readyState === 'complete' && !!window.MentriaStore);
@@ -2222,7 +2205,6 @@ check('frames never hold the open lock', async () => {
   await clean();
   const FRAME = '/extensions/finance/app/';
   const lab = await open('/beta/unlock/');
-  await enableOnLab(lab);
   await createOnLab(lab);
   await closeAll();
   const host = await open('/robots.txt');
@@ -2247,7 +2229,6 @@ check('frames never hold the open lock', async () => {
 check('a fold-in keeps the stash when one of its entries does not open', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   const codeA = await createOnLab(page);
   await runtime(page);
   await foldSetup(page, codeA);
@@ -2272,7 +2253,6 @@ check('a fold-in keeps the stash when one of its entries does not open', async (
 check('create drops a pending new code', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await createOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async () => {
@@ -2289,7 +2269,6 @@ check('create drops a pending new code', async () => {
 check('an unreadable stash is never overwritten', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await runtime(page);
   const r = await page.evaluate(async () => {
     localStorage.setItem('mentria.keyring.others', '{broken');
@@ -2317,7 +2296,6 @@ async function device(name, services) {
     r.continue().catch(() => {});
   });
   await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
-  await enableOnLab(page);
   const c = await createOnLab(page);
   await runtime(page);
   const secrets = await page.evaluate(async (list) => {
@@ -2422,8 +2400,11 @@ check('two keyrings meeting through sync or restore: everything opens after a fo
 });
 
 let failed = 0;
+let ran = 0;
 const ONLY = process.env.ONLY || '';
-for (const [name, fn] of checks.filter(([n]) => !ONLY || n.includes(ONLY))) {
+for (const [name, fn, when] of checks.filter(([n]) => !ONLY || n.includes(ONLY))) {
+  if (!when) { console.log('SKIP ' + name + ' (pass a production build as the second argument)'); continue; }
+  ran++;
   try {
     await fn();
     console.log('PASS ' + name);
@@ -2432,7 +2413,6 @@ for (const [name, fn] of checks.filter(([n]) => !ONLY || n.includes(ONLY))) {
     console.log('FAIL ' + name + ': ' + (e && e.message || e));
   }
 }
-const ran = checks.filter(([n]) => !ONLY || n.includes(ONLY)).length;
 console.log((ran - failed) + '/' + ran + ' passed');
 await browser.close();
 server.close();

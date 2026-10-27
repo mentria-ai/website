@@ -3884,7 +3884,7 @@
         "erase_title": "¿Borrar Finanzas en este dispositivo?",
         "erase_body": "Esto elimina de este navegador tu libro de cuentas cifrado, tus claves y tus ajustes. Los dispositivos emparejados y los archivos de copia de seguridad conservan sus copias. No se puede deshacer.",
         "erase_ok": "Borrar",
-        "linked_off": "Este libro de cuentas se abre con tu desbloqueo único, que está desactivado en este dispositivo. Vuelve a activarlo para abrir Finanzas aquí.",
+        "linked_off": "Este libro de cuentas se abre con tu desbloqueo único, que este navegador no puede ejecutar. Actualiza el navegador para abrir Finanzas aquí.",
         "linked_failed": "Este libro de cuentas se abre con tu desbloqueo único, que no se cargó en esta página. Recarga para intentarlo de nuevo.",
         "linked_missing": "La clave de este libro de cuentas no está en el desbloqueo único de este dispositivo. Restaura aquí tu copia de seguridad de Mentria o abre Finanzas en un dispositivo donde sí se abra."
       },
@@ -6231,8 +6231,6 @@
     "backup_code_prompt": "Escribe tu código de recuperación para abrir esta copia de seguridad.",
     "new_device_body": "Desbloquea con tu dispositivo si tiene tu llave de acceso, o escribe tu código de recuperación. Después, añade este dispositivo.",
     "homescreen_note": "La app de tu pantalla de inicio y tu navegador guardan copias separadas. Añade una llave de acceso en cada uno.",
-    "tester_switch": "Probar el desbloqueo único (beta)",
-    "tester_note": "Solo para pruebas en beta. Si lo desactivas, tus bloqueos anteriores siguen funcionando.",
     "next": "Siguiente",
     "done": "Listo",
     "code_copied": "Código de recuperación copiado",
@@ -6252,7 +6250,6 @@
     "foldin_done": "Listo. Lo que abría ahora se abre con este desbloqueo.",
     "code_close_again": "Tu código nuevo aún no se ha guardado. Escribe sus cuatro últimos caracteres para cambiar a él, o vuelve a cerrar para conservar el código anterior.",
     "err_passkey_exists": "Este dispositivo ya tiene una llave de acceso para Mentria.",
-    "tester_retired": "Los bloqueos anteriores ya no existen para {services}. Con esto desactivado, siguen bloqueados hasta que vuelvas a activarlo.",
     "services": {
       "identity": "chats",
       "totp": "códigos",

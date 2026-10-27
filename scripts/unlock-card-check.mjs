@@ -150,14 +150,6 @@ async function modules(target) {
   }, MODULE, UI);
 }
 
-async function enableOnLab(page) {
-  await page.waitForSelector('#unlock-switch');
-  if (!(await page.$eval('#unlock-switch', (el) => el.checked))) await page.click('#unlock-switch');
-  await page.waitForFunction(() => {
-    try { return JSON.parse(localStorage.getItem('mentria.keyring.local')).enabled === true; } catch (_) { return false; }
-  });
-}
-
 async function createOnLab(page) {
   await page.click('#unlock-create');
   await page.waitForFunction(() => (document.getElementById('unlock-code').textContent || '').replace(/[^A-Z2-7]/g, '').length === 32, { timeout: 15000 });
@@ -167,7 +159,6 @@ async function createOnLab(page) {
 async function labWithKeyring(init) {
   await clean();
   const page = await open('/beta/unlock/', init);
-  await enableOnLab(page);
   const code = await createOnLab(page);
   await modules(page);
   return { page, code };
@@ -381,7 +372,6 @@ check('prf failure offers code', async () => {
   const cdp = await page.createCDPSession();
   await cdp.send('WebAuthn.enable');
   const a1 = (await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: true }, AUTH) })).authenticatorId;
-  await enableOnLab(page);
   const code = await createOnLab(page);
   await modules(page);
   await start(page, "(ui, m) => m.addPasskey('')");
@@ -479,7 +469,6 @@ check('launch overlay Not now stays away until reopen', async () => {
 check('setup with new code requires last four', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await modules(page);
   await page.click('#unlock-demo-setup');
   assert(await step(page) === 'intro', 'setup opens on the intro');
@@ -573,7 +562,6 @@ check('setup with new code requires last four', async () => {
 check('setup Later writes nothing', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await modules(page);
   await page.click('#unlock-demo-setup');
   await waitStep(page, 'intro');
@@ -626,7 +614,6 @@ check('setup Later writes nothing', async () => {
 check('setup with knownCode skips the check', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await modules(page);
   const known = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ23-4567';
   await start(page, "(ui) => ui.showSetup({ knownCode: '" + known + "', service: 'identity', secret: new Uint8Array(32).fill(7) })");
@@ -670,7 +657,6 @@ check('setup with knownCode skips the check', async () => {
 check('setup with verifyCode checks the typed code', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await modules(page);
   const saved = 'WXYZ-2345-ABCD-EFGH-IJKL-MNOP-QRST-UV67';
   await start(page, "(ui) => ui.showSetup({ verifyCode: async (c) => { window.__verified = (window.__verified || []).concat([c]); await new Promise((r) => setTimeout(r, 700)); return c.replace(/-/g, '').toUpperCase() === '" + saved.replace(/-/g, '') + "'; } })");
@@ -703,7 +689,6 @@ check('setup with verifyCode checks the typed code', async () => {
 check('setup on a no-PRF device offers passphrase and remember', async () => {
   await clean();
   const page = await open('/beta/unlock/', NO_PRF);
-  await enableOnLab(page);
   await modules(page);
   await page.click('#unlock-demo-setup');
   await waitStep(page, 'intro');
@@ -767,7 +752,6 @@ check('setup adds a passkey and the card unlocks with it', async () => {
   const cdp = await page.createCDPSession();
   await cdp.send('WebAuthn.enable');
   const a = (await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: true }, AUTH) })).authenticatorId;
-  await enableOnLab(page);
   await modules(page);
   await start(page, "(ui) => ui.showSetup({ knownCode: 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ23-4567', knownPassphrase: 'an old passphrase kept' })");
   await waitStep(page, 'intro');
@@ -801,7 +785,6 @@ check('setup falls back when the passkey has no PRF', async () => {
   const cdp = await page.createCDPSession();
   await cdp.send('WebAuthn.enable');
   const a = (await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: false }, AUTH) })).authenticatorId;
-  await enableOnLab(page);
   await modules(page);
   const support = await page.evaluate(() => window.__m.prfSupport());
   if (support === 'no') throw new Error('this browser reports no PRF support, so the fallback cannot be reached from the passkey step');
@@ -831,7 +814,6 @@ check('setup falls back when the passkey has no PRF', async () => {
   await cdp.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId: a });
   await clean();
   const p2 = await open('/beta/unlock/');
-  await enableOnLab(p2);
   await modules(p2);
   await p2.click('#unlock-demo-setup');
   await waitStep(p2, 'intro');
@@ -966,7 +948,6 @@ check('card and sheets pass axe', async () => {
   await page.waitForFunction(() => !document.querySelector('.m-ulayer'));
   await clean();
   const p2 = await open('/beta/unlock/');
-  await enableOnLab(p2);
   await modules(p2);
   await p2.click('#unlock-demo-setup');
   await waitStep(p2, 'intro');
@@ -984,7 +965,6 @@ check('passkey clicks reach WebAuthn first', async () => {
   const cdp = await page.createCDPSession();
   await cdp.send('WebAuthn.enable');
   const a = (await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: true }, AUTH) })).authenticatorId;
-  await enableOnLab(page);
   await modules(page);
   await page.click('#unlock-demo-setup');
   await waitStep(page, 'intro');
@@ -1039,7 +1019,6 @@ check('passkey clicks reach WebAuthn first', async () => {
 check('showCode warns once before a close keeps the old code', async () => {
   await clean();
   const page = await open('/beta/unlock/', NO_CLOSE_WATCHER);
-  await enableOnLab(page);
   const old = await createOnLab(page);
   await modules(page);
   const raw0 = await page.evaluate(() => localStorage.getItem('mentria.store.keyring.vault'));
@@ -1088,7 +1067,6 @@ check('setup resolves true only when the service is linked', async () => {
   for (const retry of [true, false]) {
     await clean();
     const page = await open('/beta/unlock/');
-    await enableOnLab(page);
     await modules(page);
     await page.evaluate(() => {
       const S = window.MentriaStore;
@@ -1135,7 +1113,6 @@ check('setup resolves true only when the service is linked', async () => {
 check('setup passkey cancel and the short passphrase line', async () => {
   await clean();
   const page = await open('/beta/unlock/', LIVE_PROBE);
-  await enableOnLab(page);
   await modules(page);
   await page.evaluate(() => {
     navigator.credentials.create = () => Promise.reject(new DOMException('The operation either timed out or was not allowed.', 'NotAllowedError'));
@@ -1167,7 +1144,6 @@ check('setup passkey cancel and the short passphrase line', async () => {
 check('back while busy keeps the handler', async () => {
   await clean();
   const page = await open('/beta/unlock/', NO_CLOSE_WATCHER);
-  await enableOnLab(page);
   await modules(page);
   await start(page, '(ui) => ui.showSetup({ verifyCode: () => new Promise((r) => { window.__release = () => r(false); }) })');
   await waitStep(page, 'intro');
@@ -1192,7 +1168,6 @@ check('a storage AbortError is not shown as cancelled', async () => {
   const cdp = await page.createCDPSession();
   await cdp.send('WebAuthn.enable');
   await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: true }, AUTH) });
-  await enableOnLab(page);
   const code = await createOnLab(page);
   await modules(page);
   await start(page, "(ui, m) => m.addPasskey('')");
@@ -1239,7 +1214,6 @@ async function setupTo(page, args, want) {
 check('closing the passkey or no-PRF step keeps the passphrase, never Remember', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await modules(page);
   await setupTo(page, "{ knownCode: '" + KNOWN + "', knownPassphrase: '" + KEPT + "' }", 'passkey');
   assert(await page.$eval('.m-ulayer input[name="keep-pass"]', (el) => el.checked), 'keep my passphrase is on by default');
@@ -1263,7 +1237,6 @@ check('closing the passkey or no-PRF step keeps the passphrase, never Remember',
 
   await clean();
   const p2 = await open('/beta/unlock/', NO_PRF_NO_CW);
-  await enableOnLab(p2);
   await modules(p2);
   await setupTo(p2, "{ knownCode: '" + KNOWN + "', knownPassphrase: '" + KEPT + "' }", 'no-prf');
   const opts = await p2.evaluate(() => ({ keep: document.querySelector('.m-ulayer input[name="keep-pass"]').checked, cw: typeof window.CloseWatcher }));
@@ -1278,7 +1251,6 @@ check('closing the passkey or no-PRF step keeps the passphrase, never Remember',
 
   await clean();
   const p3 = await open('/beta/unlock/');
-  await enableOnLab(p3);
   await modules(p3);
   await setupTo(p3, "{ knownCode: '" + KNOWN + "', knownPassphrase: '" + KEPT + "' }", 'passkey');
   await p3.click('.m-ulayer input[name="keep-pass"]');
@@ -1305,7 +1277,6 @@ check('a failed save on close: the next close closes and says so', async () => {
 async function failedSaveClose(back) {
   await clean();
   const page = await open('/beta/unlock/', back ? NO_CLOSE_WATCHER : undefined);
-  await enableOnLab(page);
   await modules(page);
   await page.evaluate(() => {
     const S = window.MentriaStore;
@@ -1341,7 +1312,6 @@ check('Add a passkey stays off once a passkey was added', async () => {
   const cdp = await page.createCDPSession();
   await cdp.send('WebAuthn.enable');
   const a = (await cdp.send('WebAuthn.addVirtualAuthenticator', { options: Object.assign({ hasPrf: true }, AUTH) })).authenticatorId;
-  await enableOnLab(page);
   await modules(page);
   await page.evaluate(() => {
     const S = window.MentriaStore;
@@ -1390,7 +1360,6 @@ check('Add a passkey stays off once a passkey was added', async () => {
 check('setup says no passkey was added after a timeout or no credential', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await modules(page);
   await setupTo(page, "{ knownCode: '" + KNOWN + "' }", 'passkey');
   for (const kind of ['webauthn-timeout', 'no-credential']) {
@@ -1416,7 +1385,6 @@ check('setup says no passkey was added after a timeout or no credential', async 
 check('inputs are read-only while busy', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await modules(page);
   const saved = 'WXYZ-2345-ABCD-EFGH-IJKL-MNOP-QRST-UV67';
   await start(page, '(ui) => ui.showSetup({ verifyCode: () => new Promise((r) => { window.__release = r; }) })');
@@ -1440,7 +1408,6 @@ check('inputs are read-only while busy', async () => {
 
   await clean();
   const p2 = await open('/beta/unlock/', NO_PRF);
-  await enableOnLab(p2);
   await modules(p2);
   await setupTo(p2, "{ knownCode: '" + KNOWN + "' }", 'no-prf');
   await p2.click('.m-ulayer input[name="set-pass"]');
@@ -1496,7 +1463,6 @@ const PASSKEY_EXISTS = () => {
 check('a passkey this device already holds gets its own message', async () => {
   await clean();
   const page = await open('/beta/unlock/', PASSKEY_EXISTS);
-  await enableOnLab(page);
   await modules(page);
   await start(page, "(ui) => ui.showSetup({ knownCode: 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ23-4567' })");
   await waitStep(page, 'intro');
@@ -1544,7 +1510,6 @@ check('only adding a passkey calls InvalidStateError a passkey this device has',
 check('setup offers the card when another page locked before the link', async () => {
   await clean();
   const page = await open('/beta/unlock/');
-  await enableOnLab(page);
   await modules(page);
   await page.evaluate(() => {
     const put = IDBObjectStore.prototype.put;
@@ -1553,7 +1518,7 @@ check('setup offers the card when another page locked before the link', async ()
       if (window.__lockOnce && this.name === 'session') {
         window.__lockOnce = false;
         const n = Number(localStorage.getItem('mentria.keyring.epoch') || 0) + 1;
-        const l = JSON.parse(localStorage.getItem('mentria.keyring.local'));
+        const l = JSON.parse(localStorage.getItem('mentria.keyring.local') || '{}');
         l.manualLock = n;
         localStorage.setItem('mentria.keyring.local', JSON.stringify(l));
         localStorage.setItem('mentria.keyring.epoch', String(n));

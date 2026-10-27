@@ -1350,27 +1350,35 @@ async function toNewBuild(G) {
   const svc = SVC[G.plan.svc];
   G.baseSnap = await snapshot(page);
   await page.goto(ORIGIN + svc.path, { waitUntil: 'load' });
-  const before = await page.evaluate(async () => ({ release: document.documentElement.dataset.release || '', controlled: !!navigator.serviceWorker.controller, caches: await caches.keys() }));
+  const before = await page.evaluate(async () => ({ release: document.documentElement.getAttribute('data-release'), controlled: !!navigator.serviceWorker.controller, caches: await caches.keys() }));
   assert(before.controlled && legacyCaches.length && legacyCaches.every((n) => before.caches.includes(n)), 'the legacy worker still controls the page', before);
   await pollUntil(() => page.evaluate(() => { const c = document.getElementById('m-update'); return !!c && !c.hidden && c.getClientRects().length > 0; }), (v) => v, 120000, 'the Update chip');
   const nav = page.waitForNavigation({ waitUntil: 'load', timeout: 60000 });
   await press(page, '#m-update-go');
   await nav;
   const after = await pollUntil(() => page.evaluate(async () => ({
-    release: document.documentElement.dataset.release || '',
+    release: document.documentElement.getAttribute('data-release'),
     controlled: !!navigator.serviceWorker.controller,
     caches: await caches.keys()
-  })), (v) => v && v.release === 'beta' && v.controlled && !v.caches.some((n) => legacyCaches.includes(n)), 60000, 'the new worker to take over');
-  return 'legacy worker served ' + svc.path + (before.release === 'beta' ? ' from the network (not precached)' : ' from its cache') + '; Update chip pressed: the page reloaded under the new worker (' + after.caches.filter((n) => n.startsWith('mentria-cache-')).join(', ') + '), legacy caches ' + legacyCaches.join(', ') + ' gone';
+  })), (v) => v && v.release !== null && v.release !== 'beta' && v.controlled && !v.caches.some((n) => legacyCaches.includes(n)), 60000, 'the new worker to take over');
+  return 'legacy worker served ' + svc.path + (before.release !== null ? ' from the network (not precached)' : ' from its cache') + '; Update chip pressed: the page reloaded under the new worker (' + after.caches.filter((n) => n.startsWith('mentria-cache-')).join(', ') + '), legacy caches ' + legacyCaches.join(', ') + ' gone';
 }
 
-async function switchOn(G) {
+const HOST = '/tools/';
+
+async function noSwitch(G) {
   const { page } = G.rig;
-  await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
-  await shown(page, '#unlock-switch');
-  if (!(await page.$eval('#unlock-switch', (e) => e.checked))) await press(page, '#unlock-switch');
-  await pollUntil(() => readJson(page, 'mentria.keyring.local'), (v) => v && v.enabled === true, 10000, 'the tester switch');
+  await page.goto(ORIGIN + HOST, { waitUntil: 'load' });
+  const tag = await page.evaluate(() => document.documentElement.getAttribute('data-release'));
+  assert(tag !== null && tag !== 'beta', 'the new build is a production build', tag);
+  const lab = await page.evaluate(async () => (await fetch('/beta/unlock/', { cache: 'no-store' })).status);
+  assert(lab === 404, 'a production build has no lab page', lab);
+  const local = await readJson(page, 'mentria.keyring.local');
+  assert(!local || !('enabled' in local), 'no switch is seeded', local);
+  const st = await keyringState(page);
+  assert(st.enabled && !st.setUp && !st.unlocked, 'the one unlock runs with no switch and there is no keyring yet', st);
   assert(!(await readJson(page, RECORD)), 'no keyring before the first setup');
+  return 'production build ' + JSON.stringify(tag) + ', no lab page, no switch, the runtime runs';
 }
 
 async function stepLater(G) {
@@ -1394,9 +1402,9 @@ async function stepLater(G) {
   assert(!bad.length, 'Later leaves the stored data exactly as it was', bad);
   const since = diffSnap(G.baseSnap, after);
   const badSince = unexpected(since, []);
-  assert(!badSince.length, 'nothing but the tester switch changed since the new build arrived', badSince);
+  assert(!badSince.length, 'nothing changed since the new build arrived', badSince);
   const st = await keyringState(rig.page);
-  assert(st.enabled && !st.setUp, 'the switch is on and there is still no keyring', st);
+  assert(st.enabled && !st.setUp, 'the one unlock runs and there is still no keyring', st);
   const seen = await probe(scopeOf(rig, svc));
   return 'old unlock (' + where.how + ') then Later: service opened the old way; ' + (changes.length ? 'only ' + changes.join(', ') + ' changed' : 'storage byte-identical') + '; since the new build arrived: ' + (since.length ? since.join(', ') : 'nothing') + ' (old screens seen: ' + seen.screens.join(' ') + ')';
 }
@@ -1770,12 +1778,12 @@ async function freshDevice(browser, name) {
 
 async function makeKeyring(G) {
   const { page } = G.rig;
-  await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
-  await press(page, '#unlock-switch');
-  await pollUntil(() => readJson(page, 'mentria.keyring.local'), (v) => v && v.enabled === true, 10000, 'the tester switch');
-  await press(page, '#unlock-create');
-  await shown(page, '#unlock-code', 30000);
-  const code = await page.$eval('#unlock-code', (e) => e.textContent.trim());
+  await page.goto(ORIGIN + HOST, { waitUntil: 'load' });
+  const code = await page.evaluate(async (u) => {
+    const m = await import(u);
+    await m.ready();
+    return (await m.create({ deviceName: 'Test device' })).code;
+  }, RUNTIME);
   assert(KEYRING_CODE_SHAPE.test(code), 'the test keyring shows a recovery code', code.length);
   const rec = await recordOf(page);
   assert(rec && rec.kcv && !Object.keys(rec.services).length, 'a keyring with nothing linked', rec && Object.keys(rec.services));
@@ -1880,7 +1888,7 @@ export async function migrate(browser, seeded) {
   }
   for (const G of groups) {
     await step(G, G.plan.chip ? 'the new build arrives through the Update chip' : 'the new build replaces the legacy worker', () => toNewBuild(G));
-    await step(G, 'the tester switch turns on', () => switchOn(G));
+    await step(G, 'the one unlock is on with no switch', () => noSwitch(G));
     await step(G, 'Later leaves everything exactly as before', () => stepLater(G));
     await step(G, 'one old unlock and setup link the service, and it opens', () => stepLink(G));
     await step(G, 'every legacy wrap is still present', () => stepKept(G));
@@ -1924,8 +1932,8 @@ async function main(argv) {
   const unknown = groups.filter((g) => !GROUPS.includes(g));
   if (unknown.length) { console.log('unknown group: ' + unknown.join(', ') + ' (known: ' + GROUPS.join(', ') + ')'); process.exit(2); }
   const migrating = newBuild && newBuild !== '-';
-  if (migrating && !existsSync(join(resolve(newBuild), 'beta', 'unlock', 'index.html'))) {
-    console.log('the new build must be a beta build (RELEASE_TAG=beta): ' + resolve(newBuild));
+  if (migrating && existsSync(join(resolve(newBuild), 'beta', 'unlock', 'index.html'))) {
+    console.log('the new build must be a production build (no RELEASE_TAG=beta): ' + resolve(newBuild));
     process.exit(2);
   }
   const server = serve(PORT);

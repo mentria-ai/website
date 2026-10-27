@@ -3884,7 +3884,7 @@
         "erase_title": "Apagar o app Finanças neste dispositivo?",
         "erase_body": "Isso exclui deste navegador seu livro-caixa criptografado, suas chaves e configurações. Dispositivos pareados e arquivos de backup mantêm as cópias deles. Não dá para desfazer.",
         "erase_ok": "Apagar",
-        "linked_off": "Este livro-caixa abre com seu desbloqueio único, que está desativado neste dispositivo. Ative-o de novo para abrir o app Finanças aqui.",
+        "linked_off": "Este livro-caixa abre com seu desbloqueio único, que este navegador não consegue executar. Atualize o navegador para abrir o app Finanças aqui.",
         "linked_failed": "Este livro-caixa abre com seu desbloqueio único, que não carregou nesta página. Recarregue para tentar de novo.",
         "linked_missing": "A chave deste livro-caixa não está no desbloqueio único deste dispositivo. Restaure aqui seu backup da Mentria ou abra o app Finanças em um dispositivo onde ele abre."
       },
@@ -6231,8 +6231,6 @@
     "backup_code_prompt": "Digite seu código de recuperação para abrir este backup.",
     "new_device_body": "Desbloqueie com seu dispositivo se ele tiver sua chave de acesso, ou digite seu código de recuperação. Depois, adicione este dispositivo.",
     "homescreen_note": "O app da sua Tela de Início e o seu navegador guardam cópias separadas. Adicione uma chave de acesso em cada um.",
-    "tester_switch": "Testar o desbloqueio único (beta)",
-    "tester_note": "Só para testes no beta. Se você desativar, seus bloqueios antigos continuam funcionando.",
     "next": "Próximo",
     "done": "Concluir",
     "code_copied": "Código de recuperação copiado",
@@ -6252,7 +6250,6 @@
     "foldin_done": "Pronto. O que ele abria agora abre com este desbloqueio.",
     "code_close_again": "Seu código novo ainda não foi salvo. Digite os quatro últimos caracteres para passar a usá-lo, ou feche de novo para manter o código antigo.",
     "err_passkey_exists": "Este dispositivo já tem uma chave de acesso para a Mentria.",
-    "tester_retired": "Os bloqueios antigos já não existem para {services}. Com isto desativado, eles continuam bloqueados até você ativar de novo.",
     "services": {
       "identity": "conversas",
       "totp": "códigos",

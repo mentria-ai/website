@@ -3884,7 +3884,7 @@
         "erase_title": "Erase Finance on this device?",
         "erase_body": "This deletes your encrypted ledger, keys and settings from this browser. Paired devices and backup files keep their copies. This can't be undone.",
         "erase_ok": "Erase",
-        "linked_off": "This ledger opens with your one unlock, which is turned off on this device. Turn it back on to open Finance here.",
+        "linked_off": "This ledger opens with your one unlock, which this browser can't run. Update the browser to open Finance here.",
         "linked_failed": "This ledger opens with your one unlock, which didn't load on this page. Reload to try again.",
         "linked_missing": "This ledger's key isn't in the one unlock on this device. Restore your Mentria backup here, or open Finance on a device where it opens."
       },
@@ -6231,8 +6231,6 @@
     "backup_code_prompt": "Type your recovery code to open this backup.",
     "new_device_body": "Unlock with your device if it has your passkey, or type your recovery code. Then add this device.",
     "homescreen_note": "The app on your Home Screen and your browser keep separate copies. Add a passkey in each.",
-    "tester_switch": "Try the one unlock (beta)",
-    "tester_note": "For testing on beta only. Turning it off keeps your old locks working.",
     "next": "Next",
     "done": "Done",
     "code_copied": "Recovery code copied",
@@ -6252,7 +6250,6 @@
     "foldin_done": "Done. What it opened now opens with this unlock.",
     "code_close_again": "Your new code isn't saved yet. Type its last four characters to switch to it, or close again to keep your old code.",
     "err_passkey_exists": "This device already has a passkey for Mentria.",
-    "tester_retired": "Old locks are already gone for {services}. With this off, those stay locked until you turn it back on.",
     "services": {
       "identity": "chats",
       "totp": "codes",

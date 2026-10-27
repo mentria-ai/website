@@ -3884,7 +3884,7 @@
         "erase_title": "Effacer Finances sur cet appareil ?",
         "erase_body": "Cela supprime de ce navigateur votre livre de comptes chiffré, vos clés et vos réglages. Les appareils appairés et les fichiers de sauvegarde gardent leurs copies. Cette action est irréversible.",
         "erase_ok": "Effacer",
-        "linked_off": "Ce livre de comptes s'ouvre avec votre déverrouillage unique, qui est désactivé sur cet appareil. Réactivez-le pour ouvrir Finances ici.",
+        "linked_off": "Ce livre de comptes s'ouvre avec votre déverrouillage unique, que ce navigateur ne peut pas exécuter. Mettez le navigateur à jour pour ouvrir Finances ici.",
         "linked_failed": "Ce livre de comptes s'ouvre avec votre déverrouillage unique, qui ne s'est pas chargé sur cette page. Rechargez pour réessayer.",
         "linked_missing": "La clé de ce livre de comptes n'est pas dans le déverrouillage unique de cet appareil. Restaurez ici votre sauvegarde Mentria, ou ouvrez Finances sur un appareil où il s'ouvre."
       },
@@ -6231,8 +6231,6 @@
     "backup_code_prompt": "Saisissez votre code de récupération pour ouvrir cette sauvegarde.",
     "new_device_body": "Déverrouillez avec votre appareil s'il a votre clé d'accès, ou saisissez votre code de récupération. Ensuite, ajoutez cet appareil.",
     "homescreen_note": "L'app de votre écran d'accueil et votre navigateur gardent des copies séparées. Ajoutez une clé d'accès dans chacun.",
-    "tester_switch": "Essayer le déverrouillage unique (bêta)",
-    "tester_note": "Uniquement pour les tests en bêta. Si vous le désactivez, vos anciens verrous continuent de fonctionner.",
     "next": "Suivant",
     "done": "Terminé",
     "code_copied": "Code de récupération copié",
@@ -6252,7 +6250,6 @@
     "foldin_done": "C'est fait. Ce qu'il ouvrait s'ouvre maintenant avec ce déverrouillage.",
     "code_close_again": "Votre nouveau code n'est pas encore enregistré. Saisissez ses quatre derniers caractères pour l'adopter, ou fermez à nouveau pour garder l'ancien code.",
     "err_passkey_exists": "Cet appareil a déjà une clé d'accès pour Mentria.",
-    "tester_retired": "Les anciens verrous n'existent plus pour {services}. Si ceci est désactivé, ces éléments restent verrouillés jusqu'à ce que vous le réactiviez.",
     "services": {
       "identity": "discussions",
       "totp": "codes",

@@ -5,8 +5,8 @@ import puppeteer from 'puppeteer-core';
 import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
-const PROD = process.argv[3] || '';
-if (!BUILD) { console.log('usage: node scripts/unlock-backup-check.mjs <beta build dir> [<production build dir>]'); process.exit(2); }
+if (!BUILD) { console.log('usage: node scripts/unlock-backup-check.mjs <production build dir>'); process.exit(2); }
+const HOST = '/tools/';
 const PORT = 8094;
 const ORIGIN = 'http://localhost:' + PORT;
 const WORK = join(tmpdir(), 'unlock-backup-check-' + process.pid);
@@ -76,19 +76,15 @@ function bootLoaded(page) {
   return page.evaluate((url) => performance.getEntriesByType('resource').some((e) => new URL(e.name).pathname === url), MODULE);
 }
 
-async function setSwitch(page, on) {
-  await page.waitForSelector('#unlock-switch');
-  const cur = await page.$eval('#unlock-switch', (el) => el.checked);
-  if (cur !== on) await page.click('#unlock-switch');
-  await page.waitForFunction((want) => {
-    try { return (JSON.parse(localStorage.getItem('mentria.keyring.local')) || {}).enabled === want; } catch (_) { return false; }
-  }, {}, on);
-}
-
-async function createOnLab(page) {
-  await page.click('#unlock-create');
-  await page.waitForFunction(() => (document.getElementById('unlock-code').textContent || '').replace(/[^A-Z2-7]/g, '').length === 32, { timeout: 15000 });
-  return page.$eval('#unlock-code', (el) => el.textContent.trim());
+async function createKeyring(page) {
+  const made = await page.evaluate(async (url) => {
+    const m = await import(url);
+    await m.ready();
+    const { code } = await m.create({ deviceName: 'Test device' });
+    return { code, state: m.state() };
+  }, MODULE);
+  assert(made.state.enabled && made.state.setUp && made.state.unlocked, 'a keyring made with no switch opens its session', made.state);
+  return made.code;
 }
 
 function runtimeState(page) {
@@ -288,9 +284,9 @@ let recordRaw = null;
 
 check('export while unlocked makes a v5 file', async () => {
   A = await device('a');
-  const lab = await open(A, '/beta/unlock/');
-  await setSwitch(lab, true);
-  code = await createOnLab(lab);
+  const lab = await open(A, HOST);
+  assert(await lab.evaluate(() => localStorage.getItem('mentria.keyring.local')) === null, 'no switch is seeded');
+  code = await createKeyring(lab);
   await lab.evaluate((k) => window.MentriaStore.set('tools', k, { n: 1 }), CHECK_KEY);
   recordRaw = await lab.evaluate(() => localStorage.getItem('mentria.store.keyring.vault'));
   const rec = JSON.parse(recordRaw);
@@ -393,8 +389,7 @@ check('export while unlocked makes a v5 file', async () => {
 check('restore v5 on a fresh profile with the code', async () => {
   assert(v5About && v5Files && code, 'needs the files from the first check');
   const B = await device('b');
-  const lab = await open(B, '/beta/unlock/');
-  await setSwitch(lab, true);
+  const lab = await open(B, HOST);
   assert(await lab.evaluate(() => localStorage.getItem('mentria.store.keyring.vault')) === null, 'fresh profile has no keyring');
   const about = await aboutPage(B);
   await reveal(about, 'about-import-form');
@@ -431,8 +426,7 @@ check('restore v5 on a fresh profile with the code', async () => {
   await about.close();
 
   const C = await device('c');
-  const lab2 = await open(C, '/beta/unlock/');
-  await setSwitch(lab2, true);
+  const lab2 = await open(C, HOST);
   const files = await open(C, '/tools/files/');
   await filesRestoreOpen(files);
   await upload(files, '#files-restore-file', v5Files);
@@ -537,7 +531,7 @@ check('restore v5 while unlocked opens without asking', async () => {
 
 check('flow on: v3 and v2 files use the passphrase, a v4 envelope follows the session', async () => {
   assert(A && v3About && code, 'needs the first check');
-  const lab = await open(A, '/beta/unlock/');
+  const lab = await open(A, HOST);
   await lab.evaluate((k) => window.MentriaStore.set('tools', k, { n: 1 }), CHECK_KEY);
   const made = await lab.evaluate(async (url, pass) => {
     const m = await import(url);
@@ -646,16 +640,17 @@ check('flow on: v3 and v2 files use the passphrase, a v4 envelope follows the se
   clean();
 });
 
-check('switch off keeps the passphrase export', async () => {
+check('a device with no keyring keeps the passphrase export, and a v5 file asks for its code', async () => {
   assert(A && v5About && v3About, 'needs the first check');
-  const lab = await open(A, '/beta/unlock/');
-  await setSwitch(lab, false);
+  const N = await device('n');
+  const lab = await open(N, HOST);
+  assert(await lab.evaluate(() => localStorage.getItem('mentria.store.keyring.vault')) === null, 'this device has no keyring');
   await lab.evaluate((k) => window.MentriaStore.set('tools', k, { n: 1 }), CHECK_KEY);
-  const about = await aboutPage(A);
+  const about = await aboutPage(N);
   await reveal(about, 'about-export-form');
   assert(await about.evaluate(() => document.activeElement && document.activeElement.id) === 'about-data-pass', 'opening the export focuses the passphrase as today');
   await sleep(800);
-  assert(!(await bootLoaded(about)), 'About does not load the runtime with the switch off');
+  assert(await until(() => bootLoaded(about), 10000), 'About loads the one unlock for its identity section, with no switch');
   const u = await ui(about, { code: '#about-data-code', other: '#about-data-other', pass: '#about-data-pass', pass2: '#about-data-pass2' });
   assert(!u.code && !u.other && u.pass && u.pass2, 'About export shows the two passphrase fields as today', u);
   assert(await shown(about, '#about-data-export-lede') && !(await shown(about, '#about-data-export-lede-code')), 'About export lede as today');
@@ -670,30 +665,31 @@ check('switch off keeps the passphrase export', async () => {
   assert(st2.tone === 'err' && st2.text === norm(EN.about.data_pass_mismatch), 'mismatched passphrases are refused as today', st2);
   await fillIn(about, '#about-data-pass', PASS);
   await fillIn(about, '#about-data-pass2', PASS);
-  const v3 = await aboutExport(about, A);
+  const v3 = await aboutExport(about, N);
   const h = header(v3);
-  assert(h.v === 3 && h.kdf === 'PBKDF2' && h.iter === 600000, 'switch off makes a v3 file', h);
+  assert(h.v === 3 && h.kdf === 'PBKDF2' && h.iter === 600000, 'a device with no keyring makes a v3 file', h);
   await reveal(about, 'about-import-form');
   await upload(about, '#about-data-import-file', v5About);
-  await sleep(800);
+  assert(await until(() => shown(about, '#about-data-import-code'), 10000), 'a v5 file asks for its recovery code');
   const r = await ui(about, { pass: '#about-data-import-pass', code: '#about-data-import-code', key: '#about-data-import-key' });
-  assert(r.pass && !r.code && !r.key, 'switch off: a v5 file shows the passphrase field as today', r);
-  assert(await shown(about, '#about-data-import-lede') && !(await shown(about, '#about-data-import-lede-code')), 'About restore lede as today');
-  assert(!(await bootLoaded(about)), 'choosing a v5 file does not load the runtime with the switch off');
+  assert(!r.pass && r.code && !r.key, 'a v5 file shows the code field, not the passphrase', r);
+  assert(!(await shown(about, '#about-data-import-lede')) && await shown(about, '#about-data-import-lede-code'), 'About restore lede for a code file');
   await upload(about, '#about-data-import-file', v3);
+  assert(await until(() => shown(about, '#about-data-import-pass'), 10000), 'a v3 file goes back to the passphrase field');
   await about.click('#about-data-import-btn');
+  await until(async () => (await aboutStatus(about, 'about-data-import-status')).tone === 'err', 5000);
   const empty = await aboutStatus(about, 'about-data-import-status');
   assert(empty.tone === 'err' && empty.text === norm(EN.about.data_pass_too_short), 'restore without a passphrase is refused as today', empty);
   await about.evaluate((k) => window.MentriaStore.remove('tools', k), CHECK_KEY);
   await about.type('#about-data-import-pass', PASS);
   const nav = reloaded(about);
   const ok = await aboutRestore(about);
-  assert(ok.tone === 'ok', 'switch off: the v3 file restores with its passphrase', ok);
-  assert((await readStore(about, 'tools.' + CHECK_KEY) || {}).n === 1, 'switch off: data back');
+  assert(ok.tone === 'ok', 'no keyring: the v3 file restores with its passphrase', ok);
+  assert((await readStore(about, 'tools.' + CHECK_KEY) || {}).n === 1, 'no keyring: data back');
   await nav;
   await about.close();
 
-  const files = await open(A, '/tools/files/');
+  const files = await open(N, '/tools/files/');
   await filesExportOpen(files);
   await sleep(600);
   const f = await ui(files, { code: '#files-export-code', other: '#files-export-other', pass: '#files-export-pass' });
@@ -702,16 +698,17 @@ check('switch off keeps the passphrase export', async () => {
   assert(await files.evaluate(() => document.activeElement && document.activeElement.id) === 'files-export-pass', 'Files export focuses the passphrase as today');
   await shot(files, 'files-export-off-1280', '#files-export-modal .m-modal__card');
   await files.type('#files-export-pass', PASS);
-  const fv3 = await filesExport(files, A);
-  assert(header(fv3).v === 3, 'Files switch off makes a v3 file');
+  const fv3 = await filesExport(files, N);
+  assert(header(fv3).v === 3, 'Files with no keyring makes a v3 file');
+  assert(!(await bootLoaded(files)), 'Files does not load the runtime on a device with no keyring');
   await filesRestoreOpen(files);
   await upload(files, '#files-restore-file', v5Files);
-  await sleep(800);
+  assert(await until(() => shown(files, '#files-restore-code'), 10000), 'Files asks for the recovery code of a v5 file');
   const fr = await ui(files, { pass: '#files-restore-pass', code: '#files-restore-code', key: '#files-restore-key' });
-  assert(fr.pass && !fr.code && !fr.key, 'Files switch off: a v5 file shows the passphrase field as today', fr);
-  assert(!(await bootLoaded(files)), 'Files does not load the runtime with the switch off');
+  assert(!fr.pass && fr.code && !fr.key, 'Files: a v5 file shows the code field, not the passphrase', fr);
   await files.close();
   await lab.close();
+  await N.context.close();
   clean();
 });
 
@@ -727,9 +724,8 @@ async function sealOwnV5(lab) {
 
 async function labWithKeyring(name) {
   const D = await device(name);
-  const lab = await open(D, '/beta/unlock/');
-  await setSwitch(lab, true);
-  await createOnLab(lab);
+  const lab = await open(D, HOST);
+  await createKeyring(lab);
   await lab.evaluate((k) => window.MentriaStore.set('tools', k, { n: 3 }), CHECK_KEY);
   return { D, lab };
 }
@@ -813,9 +809,8 @@ check('files asks before deleting the one unlock and names what stops opening', 
 
 check('files restore still asks for the code when the one unlock stalls', async () => {
   const G = await device('i');
-  const lab = await open(G, '/beta/unlock/');
-  await setSwitch(lab, true);
-  const gcode = await createOnLab(lab);
+  const lab = await open(G, HOST);
+  const gcode = await createKeyring(lab);
   await lab.evaluate((k) => window.MentriaStore.set('tools', k, { n: 4 }), CHECK_KEY);
   const file = join(WORK, 'v5-stall.json');
   writeFileSync(file, await sealOwnV5(lab));
@@ -847,38 +842,36 @@ check('files restore still asks for the code when the one unlock stalls', async 
   clean();
 });
 
-check('production build never loads the runtime', async () => {
-  server.setRoot(PROD);
-  try {
-    const D = await device('d');
-    const first = await open(D, '/about/');
-    assert(await first.evaluate(() => document.documentElement.dataset.release) !== 'beta', 'second build is not a beta build');
-    await first.evaluate((r) => {
-      localStorage.setItem('mentria.keyring.local', JSON.stringify({ enabled: true }));
-      localStorage.setItem('mentria.store.keyring.vault', r);
-    }, recordRaw);
-    await first.close();
-    const about = await aboutPage(D);
-    await reveal(about, 'about-export-form');
-    await reveal(about, 'about-import-form');
-    await upload(about, '#about-data-import-file', v5About);
-    await sleep(1000);
-    const u = await ui(about, { code: '#about-data-code', other: '#about-data-other', pass: '#about-data-pass', ipass: '#about-data-import-pass', icode: '#about-data-import-code' });
-    assert(!u.code && !u.other && u.pass && u.ipass && !u.icode, 'production About is as today', u);
-    assert(!(await bootLoaded(about)), 'production About never loads the runtime');
-    const files = await open(D, '/tools/files/');
-    await filesRestoreOpen(files);
-    await upload(files, '#files-restore-file', v5Files);
-    await sleep(800);
-    const f = await ui(files, { pass: '#files-restore-pass', code: '#files-restore-code' });
-    assert(f.pass && !f.code, 'production Files is as today', f);
-    assert(!(await bootLoaded(files)), 'production Files never loads the runtime');
-    await D.context.close();
-    clean();
-  } finally {
-    server.setRoot(BUILD);
-  }
-}, !!PROD);
+check('a production build runs the one unlock and has no lab', async () => {
+  const D = await device('d');
+  const first = await open(D, HOST);
+  const tag = await first.evaluate(() => document.documentElement.getAttribute('data-release'));
+  if (tag === 'beta') { await D.context.close(); return 'skip'; }
+  assert(tag !== null, 'the page comes from the new build', tag);
+  assert(await first.evaluate(async () => (await fetch('/beta/unlock/')).status) === 404, 'a production build has no lab page');
+  const palette = await first.evaluate(async () => (await fetch('/assets/js/site-palette.en.js')).text());
+  assert(!palette.includes('/beta/unlock/') && !palette.includes('openPath') && palette.includes('beta: false'), 'the production palette has no beta entries');
+  await first.evaluate((r) => localStorage.setItem('mentria.store.keyring.vault', r), recordRaw);
+  assert(await first.evaluate(() => localStorage.getItem('mentria.keyring.local')) === null, 'no switch is seeded');
+  await first.close();
+  const about = await aboutPage(D);
+  await reveal(about, 'about-export-form');
+  await reveal(about, 'about-import-form');
+  await upload(about, '#about-data-import-file', v5About);
+  assert(await until(() => shown(about, '#about-data-import-code'), 10000), 'production About asks a locked keyring\'s v5 file for its code');
+  const u = await ui(about, { code: '#about-data-code', pass: '#about-data-pass', ipass: '#about-data-import-pass', icode: '#about-data-import-code' });
+  assert(!u.code && u.pass && !u.ipass && u.icode, 'production About: a locked keyring keeps the passphrase export and asks the v5 file for its code', u);
+  assert(await bootLoaded(about), 'production About loads the runtime for a device with a keyring');
+  const files = await open(D, '/tools/files/');
+  await filesRestoreOpen(files);
+  await upload(files, '#files-restore-file', v5Files);
+  assert(await until(() => shown(files, '#files-restore-code'), 10000), 'production Files asks the v5 file for its code');
+  const f = await ui(files, { pass: '#files-restore-pass', code: '#files-restore-code' });
+  assert(!f.pass && f.code, 'production Files shows the code field', f);
+  assert(await bootLoaded(files), 'production Files loads the runtime for a device with a keyring');
+  await D.context.close();
+  clean();
+});
 
 let failed = 0;
 let ran = 0;
@@ -887,7 +880,7 @@ for (const [name, fn, when] of checks.filter(([n]) => !ONLY || n.includes(ONLY))
   if (!when) { console.log('SKIP ' + name); continue; }
   ran++;
   try {
-    await fn();
+    if (await fn() === 'skip') { ran--; console.log('SKIP ' + name + ' (pass a production build)'); continue; }
     console.log('PASS ' + name);
   } catch (e) {
     failed++;

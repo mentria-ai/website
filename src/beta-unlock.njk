@@ -2,7 +2,7 @@
 {
   layout: "base.njk",
   title: "One unlock lab",
-  description: "Beta test page for the one unlock: the tester switch and how each page decided whether the app was reopened.",
+  description: "Beta diagnostics page for the one unlock: a test keyring and how each page decided whether the app was reopened.",
   robots: "noindex, nofollow",
   englishOnly: true,
   eleventyExcludeFromCollections: true,
@@ -14,14 +14,11 @@
 ---
 <section class="hero ulab-hero">
   <h1>One unlock lab</h1>
-  <p>Turn the one unlock on for this device, make a test keyring, then open, close and reopen the app and read how this page decided.</p>
+  <p>Make a test keyring, then open, close and reopen the app and read how this page decided.</p>
 </section>
 
 <section class="ulab" id="ulab">
   <div class="ulab__box">
-    <label class="ulab__row"><input type="checkbox" id="unlock-switch"> <span>{{ "unlock.tester_switch" | t }}</span></label>
-    <p class="ulab__note">{{ "unlock.tester_note" | t }}</p>
-    <p class="ulab__note ulab__warn" id="unlock-retired" hidden data-text="{{ 'unlock.tester_retired' | traw }}" data-identity="{{ 'unlock.services.identity' | traw }}" data-totp="{{ 'unlock.services.totp' | traw }}" data-notes="{{ 'unlock.services.notes' | traw }}" data-finance="{{ 'unlock.services.finance' | traw }}"></p>
     <label class="ulab__row"><input type="checkbox" id="unlock-ask"> <span>{{ "unlock.launch_setting" | t }}</span></label>
     <p class="ulab__note">{{ "unlock.launch_setting_note" | t }}</p>
     <div class="ulab__actions">
@@ -59,7 +56,6 @@
   .ulab__code { margin: 1rem 0 0; overflow-wrap: anywhere; }
   .ulab__code code { font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.04em; }
   .ulab__status { min-height: 1.4em; margin: 0.75rem 0 0; color: var(--term-muted); }
-  .ulab__warn { color: var(--term-text, inherit); border-left: 3px solid var(--accent, #6ef3c5); padding-left: 0.6rem; }
   .ulab__demo:not(:empty) { margin-top: 1rem; }
   .ulab__table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem; }
   .ulab__table caption { text-align: left; padding-bottom: 0.5rem; color: var(--term-muted); font-family: inherit; }
@@ -71,7 +67,6 @@
   import * as U from '/assets/js/mentria-unlock.js';
 
   const $ = (id) => document.getElementById(id);
-  const toggle = $('unlock-switch');
   const ask = $('unlock-ask');
   const createBtn = $('unlock-create');
   const lockBtn = $('unlock-lock');
@@ -79,7 +74,7 @@
   const body = $('unlock-diag');
   const cells = new Map();
   const ROWS = [
-    ['tester switch', (s) => (s.enabled ? 'on' : 'off')],
+    ['one unlock', (s) => (s.enabled ? 'runs in this browser' : "can't run in this browser")],
     ['keyring', (s) => (s.setUp ? 'yes' : 'none')],
     ['session', (s) => (s.unlocked ? 'unlocked' : 'locked')],
     ['launch', (s) => s.launch || '-'],
@@ -98,7 +93,8 @@
     ['passphrase', (s) => (s.hasPass ? 'yes' : 'no')],
     ['remember this device', (s) => (s.hasDevice ? 'on' : 'off')],
     ['code confirmed', (s) => (s.codeConfirmed ? 'yes' : 'no')],
-    ['ask at launch', (s) => (s.askAtLaunch ? 'on' : 'off')]
+    ['ask at launch', (s) => (s.askAtLaunch ? 'on' : 'off')],
+    ['old locks retired', () => retired()]
   ];
 
   for (const [label] of ROWS) {
@@ -113,25 +109,18 @@
   }
 
   const say = (text) => { status.textContent = text; };
-  const retiredEl = $('unlock-retired');
 
-  function paintRetired() {
+  function retired() {
     let rec = null;
     try { rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault')); } catch (_) {}
-    const retired = rec && rec.retired && typeof rec.retired === 'object' ? rec.retired : {};
-    const names = ['identity', 'totp', 'notes', 'finance'].filter((n) => Object.prototype.hasOwnProperty.call(retired, n) && retired[n]).map((n) => retiredEl.dataset[n]);
-    let joined = names.join(', ');
-    try { if (names.length && typeof Intl.ListFormat === 'function') joined = new Intl.ListFormat(document.documentElement.lang || 'en', { type: 'conjunction' }).format(names); } catch (_) {}
-    const text = names.length ? retiredEl.dataset.text.replace('{services}', joined) : '';
-    if (retiredEl.textContent !== text) retiredEl.textContent = text;
-    retiredEl.hidden = !names.length;
+    const done = rec && rec.retired && typeof rec.retired === 'object' ? rec.retired : {};
+    const names = ['identity', 'totp', 'notes', 'finance'].filter((n) => Object.prototype.hasOwnProperty.call(done, n) && done[n]);
+    return names.length ? names.join(', ') : 'none';
   }
 
   function paint() {
-    paintRetired();
     const s = U.state();
     const d = U.diagnostics();
-    toggle.checked = s.enabled;
     ask.checked = s.askAtLaunch;
     ask.disabled = !s.enabled;
     createBtn.disabled = !s.enabled || s.setUp;
@@ -142,13 +131,6 @@
       if (td.textContent !== text) td.textContent = text;
     }
   }
-
-  toggle.addEventListener('change', () => {
-    U.setEnabled(toggle.checked);
-    say(toggle.checked ? 'The one unlock is on for this device.' : 'The one unlock is off. Your old locks work as before.');
-    U.ready().then(paint, paint);
-    paint();
-  });
 
   ask.addEventListener('change', () => {
     U.setAskAtLaunch(ask.checked);

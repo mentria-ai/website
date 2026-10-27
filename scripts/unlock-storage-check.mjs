@@ -48,7 +48,10 @@ globalThis.window = globalThis;
 globalThis.addEventListener = bus.addEventListener.bind(bus);
 globalThis.removeEventListener = bus.removeEventListener.bind(bus);
 globalThis.dispatchEvent = bus.dispatchEvent.bind(bus);
-globalThis.document = { documentElement: { dataset: { release: 'beta' }, lang: 'en' } };
+const RELEASE = 'v2026.10.28';
+const IDB = { databases: async () => [] };
+globalThis.indexedDB = IDB;
+globalThis.document = { documentElement: { dataset: { release: RELEASE }, lang: 'en' } };
 globalThis.fetch = async () => { throw new Error('offline'); };
 const asked = [];
 let answer = () => true;
@@ -115,8 +118,13 @@ const reset = (opts = {}) => {
   asked.length = 0;
   answer = () => true;
   delete globalThis.MentriaSyncCopy;
-  globalThis.document.documentElement.dataset.release = 'beta';
-  if (opts.enabled !== false) ls.setItem('mentria.keyring.local', JSON.stringify({ enabled: true, deviceId: 'dev-a' }));
+  globalThis.document.documentElement.dataset.release = RELEASE;
+  if (opts.capable === false) {
+    delete globalThis.indexedDB;
+  } else {
+    globalThis.indexedDB = IDB;
+    ls.setItem('mentria.keyring.local', JSON.stringify(Object.assign({ deviceId: 'dev-a' }, opts.local)));
+  }
 };
 const errCode = async (p, mod = BK) => {
   try { await p; } catch (e) { return mod.restoreErrorCode(e); }
@@ -386,12 +394,20 @@ check('snapshot carries app, keyring and device', async () => {
   const r = await joinRoom();
   r.room.onPeerJoin('peer-1');
   const snap = await until(async () => (await r.messages()).find((m) => m.op === 'snapshot'));
-  assert.equal(snap.app, 'beta');
-  assert.equal(snap.keyring, 1);
+  assert.equal(snap.app, RELEASE);
+  assert.equal(snap.keyring, 1, 'a production release says keyring with no switch');
   assert.deepEqual(snap.device, { id: 'dev-a', name: 'Laptop' });
   assert.equal(snap.v, 2);
   await Sync.disconnect();
-  reset({ enabled: false });
+  reset({ local: { enabled: false } });
+  put('keyring.vault', k.record);
+  const was = await joinRoom();
+  was.room.onPeerJoin('peer-1');
+  const still = await until(async () => (await was.messages()).find((m) => m.op === 'snapshot'));
+  assert.equal(still.keyring, 1, 'a tester switch left off on beta no longer turns it off');
+  assert.deepEqual(still.device, { id: 'dev-a', name: 'Laptop' });
+  await Sync.disconnect();
+  reset({ capable: false });
   globalThis.document.documentElement.dataset.release = 'v2026.10.21';
   put('keyring.vault', k.record);
   const off = await joinRoom();
@@ -401,7 +417,7 @@ check('snapshot carries app, keyring and device', async () => {
   assert.equal(plain.keyring, undefined);
   assert.equal(plain.device, undefined);
   await off.deliver(snapshotOf({ 'keyring.vault': JSON.stringify(k.record) }));
-  assert.equal(raw('keyring.vault'), JSON.stringify(k.record), 'switch off records nobody');
+  assert.equal(raw('keyring.vault'), JSON.stringify(k.record), 'a browser that cannot run the one unlock records nobody');
   await Sync.disconnect();
 });
 
@@ -748,11 +764,11 @@ check('code pairing: the joiner says keyring in its hello', async () => {
   assert.equal(hello.keyring, 1, 'a keyring device says so');
   assert.equal(hello.initiator, false);
   await Sync.disconnect();
-  reset({ enabled: false });
+  reset({ capable: false });
   p = await pairRoom(false);
   p.room.onPeerJoin('peer-1');
   const plain = await until(async () => (await p.messages()).find((m) => m.op === 'hello'));
-  assert.equal(plain.keyring, undefined, 'with the switch off the hello is unchanged');
+  assert.equal(plain.keyring, undefined, 'a browser that cannot run the one unlock sends the hello as before');
   await Sync.disconnect();
 });
 

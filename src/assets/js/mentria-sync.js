@@ -258,7 +258,9 @@ const keyringLocal = () => {
   } catch (_) { return {}; }
 };
 
-const keyringOn = () => releaseTag() === 'beta' && keyringLocal().enabled === true;
+const keyringOn = () => {
+  try { return typeof indexedDB !== 'undefined' && !!indexedDB && !!(window.crypto && crypto.subtle); } catch (_) { return false; }
+};
 
 const ownDeviceId = () => {
   const id = keyringLocal().deviceId;

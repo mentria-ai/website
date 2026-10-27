@@ -20,6 +20,7 @@ let scriptErrors = 0;
 let linkErrors = 0;
 let dataErrors = 0;
 let precacheErrors = 0;
+let releaseErrors = 0;
 let jsonBlocks = 0;
 let packCount = 0;
 const tmp = mkdtempSync(join(tmpdir(), 'mentria-check-'));
@@ -66,10 +67,17 @@ const checkCdn = (text, from) => {
   }
 };
 
+const HTML_RELEASE = /<html\b[^>]*\sdata-release="([^"]*)"/;
+const UNLOCK_BOOT = "import('/assets/js/mentria-unlock.js')";
+const homePage = join(root, 'index.html');
+const betaBuild = existsSync(homePage) && (HTML_RELEASE.exec(readFileSync(homePage, 'utf8')) || [])[1] === 'beta';
+
 const seenScripts = new Set();
 try {
+  if (!betaBuild && existsSync(join(root, 'beta', 'unlock', 'index.html'))) { releaseErrors++; console.error('RELEASE /beta/unlock/ is in a build that is not beta; the one unlock lab is for beta only'); }
   for (const page of pages) {
     const html = readFileSync(page, 'utf8');
+    if (HTML_RELEASE.test(html) && !html.includes(UNLOCK_BOOT)) { releaseErrors++; console.error(`RELEASE ${rel(page)} never starts the one unlock on a device that has one`); }
     if (!page.includes('/feed/')) {
       const scripts = [...html.matchAll(/<script(\s+type="module")?\s*>([\s\S]*?)<\/script>/g)].filter((m) => m[2].trim());
       scripts.forEach(([, module, src], i) => {
@@ -96,6 +104,10 @@ try {
 
   for (const f of files) {
     const r = rel(f);
+    if (!betaBuild && /^\/assets\/js\/site-palette\.[a-z-]+\.js$/.test(r)) {
+      const src = readFileSync(f, 'utf8');
+      if (src.includes('/beta/unlock/') || src.includes('openPath') || !src.includes('beta: false')) { releaseErrors++; console.error(`RELEASE ${r} carries the beta-only Search entries into a build that is not beta`); }
+    }
     if (r.endsWith('.css') && !r.startsWith('/assets/vendor/')) {
       for (const m of readFileSync(f, 'utf8').matchAll(CSS_URL)) checkPath(m[1], r);
     } else if (r.endsWith('.json')) {
@@ -213,5 +225,5 @@ try {
   rmSync(tmp, { recursive: true, force: true });
 }
 
-console.log(`${pages.length} pages, ${seenLinks.size} internal paths, ${seenCdn.size} CDN images, ${jsonBlocks} JSON blocks, ${packCount} packs, ${scriptErrors} script errors, ${linkErrors} broken links, ${dataErrors} data errors, ${precacheErrors} precache errors`);
-process.exit(scriptErrors || linkErrors || dataErrors || precacheErrors ? 1 : 0);
+console.log(`${pages.length} pages, ${seenLinks.size} internal paths, ${seenCdn.size} CDN images, ${jsonBlocks} JSON blocks, ${packCount} packs, ${scriptErrors} script errors, ${linkErrors} broken links, ${dataErrors} data errors, ${precacheErrors} precache errors, ${releaseErrors} release errors`);
+process.exit(scriptErrors || linkErrors || dataErrors || precacheErrors || releaseErrors ? 1 : 0);

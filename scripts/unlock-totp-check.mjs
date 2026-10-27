@@ -7,8 +7,7 @@ import puppeteer from 'puppeteer-core';
 import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
-const PROD = process.argv[3] || '';
-if (!BUILD) { console.log('usage: node scripts/unlock-totp-check.mjs <beta build dir> [<production build dir>]'); process.exit(2); }
+if (!BUILD) { console.log('usage: node scripts/unlock-totp-check.mjs <production build dir>'); process.exit(2); }
 const PORT = 8092;
 const ORIGIN = 'http://localhost:' + PORT;
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -189,6 +188,7 @@ async function addPage(r, authenticator) {
     try { await d.dismiss(); } catch (_) {}
   });
   page.on('request', (q) => r.requests.push(q.url()));
+  await applyRuntime(page);
   if (authenticator) {
     const cdp = await page.createCDPSession();
     await cdp.send('WebAuthn.enable', { enableUI: false });
@@ -205,14 +205,29 @@ async function done(r) {
   rigs = rigs.filter((x) => x !== r);
 }
 
-async function setSwitch(page, on) {
+const runtimeOff = new WeakMap();
+
+async function applyRuntime(page) {
+  const st = runtimeOff.get(page.browserContext());
+  if (!st) return;
+  let s = st.sessions.get(page);
+  if (!s && !st.off) return;
+  if (!s) {
+    s = await page.createCDPSession();
+    await s.send('Network.enable');
+    st.sessions.set(page, s);
+    await page.setBypassServiceWorker(true);
+  }
+  await s.send('Network.setBlockedURLs', { urls: st.off ? ['*' + RUNTIME + '*'] : [] });
+}
+
+async function setRuntime(page, loads) {
+  const ctx = page.browserContext();
+  const st = runtimeOff.get(ctx) || { off: false, sessions: new Map() };
+  runtimeOff.set(ctx, st);
+  st.off = !loads;
+  for (const p of new Set([page, ...st.sessions.keys()])) if (!p.isClosed()) await applyRuntime(p);
   if (!page.url().startsWith(ORIGIN)) await page.goto(ORIGIN + '/robots.txt', { waitUntil: 'load' });
-  await page.evaluate((k, v) => {
-    let l = {};
-    try { l = JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch (_) { l = {}; }
-    l.enabled = v;
-    localStorage.setItem(k, JSON.stringify(l));
-  }, LOCAL, on);
 }
 
 async function openTotp(page, init) {
@@ -391,7 +406,7 @@ function clearDownloads(dir) {
 
 async function legacySetup(r, { passkey, accounts }) {
   const { page } = r;
-  await setSwitch(page, false);
+  await setRuntime(page, false);
   await openTotp(page);
   const s0 = await screen(page);
   assert(s0.setup && !s0.unlock && s0.lede === T.locked_lede_setup, 'the old setup asks for a passphrase', s0);
@@ -452,7 +467,7 @@ function migrationUri(secret, name, issuer) {
 async function legacyLinked(r) {
   const { page } = r;
   const vault = await legacySetup(r, { passkey: !!r.page.__auth, accounts: ACCOUNTS.slice(0, 1) });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   const code = await makeKeyring(page);
   await typeInto(page, '#totp-unlock-pass', PASS);
@@ -510,7 +525,7 @@ async function ringLock(page) {
 
 async function newLinkedVault(r) {
   const { page } = r;
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   const code = await makeKeyring(page);
   await until(async () => (await screen(page)).create, 10000, 'the create button with an open session');
@@ -519,8 +534,8 @@ async function newLinkedVault(r) {
   return code;
 }
 
-async function switchOffFlow(prod) {
-  const r = await rig(prod ? 'switch off prod' : 'switch off');
+async function oldVaultFlow() {
+  const r = await rig('old vault');
   const { page } = r;
   const vault = await legacySetup(r, { passkey: true, accounts: ACCOUNTS.slice(0, 1) });
   const file = await waitFile(r.downloads, 'mentria-totp-backup-');
@@ -552,45 +567,44 @@ async function switchOffFlow(prod) {
   await page.waitForFunction(() => document.getElementById('totp-backup-modal').hidden, { timeout: 5000 });
   await press(page, '#totp-prf-btn');
   await expectCodes(page, ACCOUNTS.slice(0, 1));
-  if (prod) {
-    assert(await page.evaluate(() => document.documentElement.dataset.release) === '', 'this is a production build');
-    await page.evaluate(async () => {
-      const c = await import('/assets/js/mentria-unlock-core.js');
-      const { record } = await c.createRecord({ code: c.newRecoveryCode(), deviceId: 'dev-p', deviceName: 'Prod', app: '' });
-      window.MentriaStore.set('keyring', 'vault', record);
-    });
-    await setSwitch(page, true);
-  } else {
-    await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
-    await setSwitch(page, true);
-    await page.evaluate(async (u) => { const m = await import(u); await m.create(); }, RUNTIME);
-    await setSwitch(page, false);
-  }
+  await page.evaluate(async () => {
+    const c = await import('/assets/js/mentria-unlock-core.js');
+    const { record } = await c.createRecord({ code: c.newRecoveryCode(), deviceId: 'dev-p', deviceName: 'Other', app: '' });
+    window.MentriaStore.set('keyring', 'vault', record);
+  });
+  assert(await readJson(page, LOCAL) === null, 'no switch is seeded');
+  await setRuntime(page, true);
   r.requests.length = 0;
-  const lsAll = () => page.evaluate(() => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; });
-  const ls0 = await lsAll();
   await openTotp(page);
   const s3 = await screen(page);
-  assert(s3.unlock && !s3.card && !s3.linkNote && !s3.layer, prod ? 'a production page keeps the old unlock even with the switch and a keyring' : 'with a keyring present but the switch off, the old unlock stays', s3);
+  assert(s3.unlock && s3.prf && s3.linkNote && s3.linkNote.includes(U.link_title) && !s3.card && !s3.layer, 'with a keyring present and no switch, the old unlock shows the line that brings it into the one unlock', s3);
   await sleep(500);
-  assert(!r.requests.some((u) => u.includes('/assets/js/mentria-unlock')), 'the switch-off page never loads the one unlock', r.requests.filter((u) => u.includes('unlock')));
+  assert(r.requests.some((u) => new URL(u).pathname === RUNTIME), 'the page loads the one unlock with no switch', r.requests.filter((u) => u.includes('unlock')));
   const after = await readJson(page, VAULT);
-  assert(JSON.stringify(after) === JSON.stringify(vault), 'the vault is unchanged');
-  if (prod) {
-    const ls1 = await lsAll();
-    const added = Object.keys(ls1).filter((k) => !(k in ls0) && !/^(mentria_seen|mentria_tool_usage|mentria_caps)/.test(k));
-    const changed = Object.keys(ls0).filter((k) => /keyring|totp/.test(k) && ls0[k] !== ls1[k]);
-    assert(!added.length && !changed.length, 'opening TOTP on a production build writes nothing new', { added, changed });
-  }
+  assert(JSON.stringify(after) === JSON.stringify(vault), 'the vault is unchanged until an old unlock links it');
   await done(r);
 }
 
-check('switch off keeps the old flow', () => switchOffFlow(false));
+check('an old vault keeps the old flow while the one unlock cannot load, then offers the link with no switch', () => oldVaultFlow());
 
-check('switch off keeps the old flow on the production build', async () => {
-  if (!PROD) throw new Error('SKIP no production build given');
-  server.setRoot(PROD);
-  try { await switchOffFlow(true); } finally { server.setRoot(BUILD); }
+check('a production build has no lab and runs the one unlock with no switch', async () => {
+  const r = await rig('production');
+  const { page } = r;
+  await openTotp(page);
+  const tag = await page.evaluate(() => document.documentElement.getAttribute('data-release'));
+  if (tag === 'beta') throw new Error('SKIP the build is a beta build');
+  assert(tag !== null, 'the page comes from the new build', tag);
+  assert(await page.evaluate(async () => (await fetch('/beta/unlock/')).status) === 404, 'a production build has no lab page');
+  const palette = await page.evaluate(async () => (await fetch('/assets/js/site-palette.en.js')).text());
+  assert(!palette.includes('/beta/unlock/') && !palette.includes('openPath') && palette.includes('beta: false'), 'the production palette has no beta entries');
+  assert(await readJson(page, LOCAL) === null, 'no switch is seeded');
+  const s0 = await screen(page);
+  assert(s0.create && !s0.setup, 'a fresh device is offered the one unlock setup, not the old passphrase', s0);
+  await newLinkedVault(r);
+  const st = await ringState(page);
+  assert(st.enabled && st.linked.includes('totp'), 'the new vault is linked into the one unlock', st);
+  assert(!/"enabled"/.test(JSON.stringify(await readJson(page, LOCAL) || {})), 'nothing writes a switch');
+  await done(r);
 });
 
 async function passkeys(page) {
@@ -622,14 +636,13 @@ async function lockKeepsNothing(page, what) {
   assert(after === w, what, { before: w, after });
 }
 
-async function enrolAfterPassphrase(prod) {
-  const r = await rig(prod ? 'enrol after reload prod' : 'enrol after reload');
+async function enrolAfterPassphrase() {
+  const r = await rig('enrol after reload');
   const { page } = r;
   await page.evaluateOnNewDocument(WIPES);
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
   assert((await passkeys(page)).length === 0, 'the old setup makes no passkey');
   await openTotp(page);
-  assert(await page.evaluate(() => document.documentElement.dataset.release) === (prod ? '' : 'beta'), prod ? 'this is a production build' : 'this is a beta build');
   const s0 = await screen(page);
   assert(s0.unlock && !s0.prf && !s0.card && !s0.layer, 'a reload shows the old passphrase unlock', s0);
   await typeInto(page, '#totp-unlock-pass', PASS);
@@ -654,12 +667,27 @@ async function enrolAfterPassphrase(prod) {
   await done(r);
 }
 
-check('quick unlock can be added after a reload and a passphrase unlock with the switch off', () => enrolAfterPassphrase(false));
+check('quick unlock can be added after a reload and a passphrase unlock while the one unlock cannot load', () => enrolAfterPassphrase());
 
-check('quick unlock can be added after a reload and a passphrase unlock on the production build', async () => {
-  if (!PROD) throw new Error('SKIP no production build given');
-  server.setRoot(PROD);
-  try { await enrolAfterPassphrase(true); } finally { server.setRoot(BUILD); }
+check('with no switch a passphrase unlock of an old vault offers the one unlock instead of quick unlock', async () => {
+  const r = await rig('old vault offers link');
+  const { page } = r;
+  await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
+  await setRuntime(page, true);
+  await openTotp(page);
+  const s0 = await screen(page);
+  assert(s0.unlock && !s0.prf && s0.linkNote, 'the old unlock shows the line that brings it into the one unlock', s0);
+  await typeInto(page, '#totp-unlock-pass', PASS);
+  await press(page, '#totp-unlock-btn');
+  await page.waitForSelector('.m-ulayer [data-step="intro"]', { timeout: 20000 });
+  assert((await passkeys(page)).length === 0, 'no passkey is made before setup');
+  const { code } = await finishSetup(page);
+  await until(async () => (await ringState(page)).linked.includes('totp'), 10000, 'totp linked');
+  await expectCodes(page, ACCOUNTS.slice(0, 1));
+  const s1 = await screen(page);
+  assert(s1.vault && !s1.enrol && !s1.autolock, 'the linked vault offers no old quick unlock', s1);
+  assert(typeof code === 'string' && code.length > 20, 'setup showed a recovery code');
+  await done(r);
 });
 
 check('quick unlock without the key bytes stops before making a passkey', async () => {
@@ -778,7 +806,7 @@ check('a vault that fails to save leaves no passkey behind', () => enrolFails('s
 check('new vault with no keyring runs setup first', async () => {
   const r = await rig('setup first');
   const { page } = r;
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   const s0 = await screen(page);
   assert(s0.create && !s0.setup && !s0.unlock && !s0.card && s0.lede === T.create_lede, 'a new vault shows Create vault and no passphrase fields', s0);
@@ -802,7 +830,7 @@ check('new vault with no keyring runs setup first', async () => {
 check('setup Later falls back to the old passphrase setup', async () => {
   const r = await rig('setup later');
   const { page } = r;
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await press(page, '#totp-create-btn');
   await page.waitForSelector('.m-ulayer [data-step="intro"]', { timeout: 20000 });
@@ -818,7 +846,7 @@ check('setup Later falls back to the old passphrase setup', async () => {
 check('new vault is linked and opens without a screen after reload', async () => {
   const r = await rig('new linked');
   const { page } = r;
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await makeKeyring(page);
   await until(async () => (await screen(page)).create, 10000, 'the create button with an open session');
@@ -953,7 +981,7 @@ check('backup gate downloads a v4 file that restores with the code', async () =>
 
   const dev = await rig('backup v4 restore', { authenticator: false });
   const p2 = dev.page;
-  await setSwitch(p2, false);
+  await setRuntime(p2, false);
   await openTotp(p2);
   const res = await p2.evaluate(async (text, name, good) => {
     window.mentriaConfirm = async () => { window.__asked = (window.__asked || 0) + 1; return true; };
@@ -968,7 +996,7 @@ check('backup gate downloads a v4 file that restores with the code', async () =>
   }, file.text, file.name, code);
   assert(res.wrong === 'pass', 'a wrong code fails as a wrong passphrase', res);
   assert(JSON.stringify(res.keys) === '["keyring.vault","totp.vault"]' && res.out.restored >= 2 && !res.asked, 'the file restores the vault and its keyring', res);
-  await setSwitch(p2, true);
+  await setRuntime(p2, true);
   await openTotp(p2);
   const s = await screen(p2);
   assert(s.card && !s.unlock && !s.setup, 'the restored vault asks with the card', s);
@@ -1013,7 +1041,7 @@ check('legacy vault from the old flow links after one old unlock', async () => {
   const { page } = r;
   await legacySetup(r, { passkey: true, accounts: ACCOUNTS });
   const before = await readRaw(page, VAULT);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   const s0 = await screen(page);
   assert(s0.unlock && s0.prf && s0.linkNote && s0.linkNote.includes(U.link_title) && s0.linkNote.includes(U.link_body) && !s0.card, 'the old unlock stays with the link line', s0);
@@ -1043,10 +1071,10 @@ check('legacy vault from the old flow links after one old unlock', async () => {
   await press(page, '#totp-lock-btn');
   await cardUnlock(page, '#totp-ring-card', { code });
   await expectCodes(page, ACCOUNTS);
-  await setSwitch(page, false);
+  await setRuntime(page, false);
   await openTotp(page);
   const s2 = await screen(page);
-  assert(s2.unlock && !s2.card, 'with the switch off the old unlock is back', s2);
+  assert(s2.unlock && !s2.card, 'when the one unlock cannot load the old unlock is back', s2);
   await typeInto(page, '#totp-unlock-pass', PASS);
   await press(page, '#totp-unlock-btn');
   await expectCodes(page, ACCOUNTS);
@@ -1059,7 +1087,7 @@ check('legacy unlock links into an open session', async () => {
   const { page } = r;
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
   const before = await readRaw(page, VAULT);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await makeKeyring(page);
   await sleep(300);
@@ -1084,7 +1112,7 @@ check('legacy passkey unlock with a locked keyring links after the card', async 
   const { page } = r;
   await legacySetup(r, { passkey: true, accounts: ACCOUNTS.slice(0, 1) });
   const before = await readRaw(page, VAULT);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   const code = await makeKeyring(page);
   await ringLock(page);
@@ -1112,7 +1140,7 @@ check('Later keeps the legacy vault working', async () => {
   const { page } = r;
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
   const before = await readRaw(page, VAULT);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await typeInto(page, '#totp-unlock-pass', PASS);
   await press(page, '#totp-unlock-btn');
@@ -1138,7 +1166,7 @@ check('retirement deletes the old wraps after the grace', async () => {
   const r = await rig('retire');
   const { page } = r;
   const legacy = await legacySetup(r, { passkey: true, accounts: ACCOUNTS.slice(0, 1) });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await makeKeyring(page);
   await typeInto(page, '#totp-unlock-pass', PASS);
@@ -1182,7 +1210,7 @@ check('retirement deletes the old wraps after the grace', async () => {
 check('a new vault reuses an existing totp link', async () => {
   const r = await rig('link reused', { authenticator: false });
   const { page } = r;
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await makeKeyring(page);
   const known = await page.evaluate(async (u) => {
@@ -1229,7 +1257,7 @@ check('an old unlock links over a key that does not open the vault', async () =>
   const r = await rig('link over');
   const { page } = r;
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await makeKeyring(page);
   await page.evaluate(async (u) => { await (await import(u)).link('totp', crypto.getRandomValues(new Uint8Array(32))); }, RUNTIME);
@@ -1253,7 +1281,7 @@ check('a fold-in that made another device\'s TOTP key current still lets this va
   const r = await rig('link over fold-in', { authenticator: false });
   const { page } = r;
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   const code = await makeKeyring(page);
   const fold = await page.evaluate(async (u, k) => {
@@ -1296,7 +1324,7 @@ check('a lock while the setup sheet is open still links the real key', async () 
   const r = await rig('lock during setup', { authenticator: false });
   const { page } = r;
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await typeInto(page, '#totp-unlock-pass', PASS);
   await press(page, '#totp-unlock-btn');
@@ -1331,7 +1359,7 @@ check('a late one unlock keeps a half-typed old passphrase', async () => {
 check('a linked vault without its keyring says so', async () => {
   const r = await rig('missing keyring', { authenticator: false });
   const { page } = r;
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.evaluate((k) => {
     localStorage.setItem(k, JSON.stringify({ v: 2, linked: true, secrets: { iv: 'AAAAAAAAAAAAAAAA', ct: 'AAAAAAAAAAAAAAAAAAAAAAAA' } }));
   }, VAULT);
@@ -1368,7 +1396,7 @@ check('retirement keeps the old wraps when it cannot prove the key', async () =>
   const r = await rig('retire unproven');
   const { page } = r;
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await makeKeyring(page);
   await page.evaluate(async (u, k, days) => {
@@ -1395,7 +1423,7 @@ check('the sync id is never written over a newer vault', async () => {
   const r = await rig('kid fresh', { authenticator: false });
   const { page } = r;
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   const code = await makeKeyring(page);
   await ringLock(page);
@@ -1421,7 +1449,7 @@ check('a stalled one unlock falls back to the old unlock', async () => {
   const r = await rig('stalled runtime', { authenticator: false });
   const { page } = r;
   await legacySetup(r, { passkey: false, accounts: ACCOUNTS.slice(0, 1) });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await makeKeyring(page);
   await page.setBypassServiceWorker(true);
@@ -1633,7 +1661,7 @@ check('the old unlock stays under the card while the vault still has it', async 
 check('a redirecting page never loads the one unlock', async () => {
   const r = await rig('redirecting', { authenticator: false });
   const { page } = r;
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await openTotp(page);
   await makeKeyring(page);
   r.requests.length = 0;

@@ -611,17 +611,7 @@ async function adopt(bytes, rec) {
 }
 
 export function enabled() {
-  return document.documentElement.dataset.release === 'beta' && local().enabled === true;
-}
-
-export function setEnabled(on) {
-  saveLocal({ enabled: !!on });
-  if (!on) {
-    forget();
-    if (readRecord()) serial(async () => { try { await idbDel('session', 'current'); } catch (_) {} });
-  }
-  if (on && readRecord()) ready().catch(() => {});
-  refresh(false);
+  try { return typeof indexedDB !== 'undefined' && !!indexedDB && !!(window.crypto && crypto.subtle); } catch (_) { return false; }
 }
 
 export function ready() {

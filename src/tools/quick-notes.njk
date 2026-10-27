@@ -171,22 +171,13 @@ unlockTool: true
   const opened = new Map();
   const cryptoOK = !!(window.PublicKeyCredential && window.isSecureContext && window.crypto && crypto.subtle);
 
-  const BETA = document.documentElement.dataset.release === 'beta';
-  const TRY_ONE = BETA && (() => {
-    try {
-      const l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
-      return !!l && l.enabled === true;
-    } catch (_) {
-      return false;
-    }
-  })();
   const UNLOCK_JS = '/assets/js/mentria-unlock.js';
   const UNLOCK_UI_JS = '/assets/js/mentria-unlock-ui.js';
   const oneOK = !!(window.isSecureContext && window.crypto && crypto.subtle);
   let U = null;
   let uiP = null;
   let one = false;
-  let oneSettled = !TRY_ONE;
+  let oneSettled = false;
   let oneReady = Promise.resolve();
   let notesKeys = [];
   let ringSig = '';
@@ -1222,7 +1213,7 @@ unlockTool: true
   }
 
   async function handleLockClick() {
-    if (TRY_ONE) await oneReady;
+    await oneReady;
     const note = getNote(activeId);
     if (!note) return;
     if (one) {
@@ -1347,7 +1338,7 @@ unlockTool: true
       if (!open) await promptOpen(note);
     } catch (err) {
       if (err && err.message === 'no-legacy') {
-        if (TRY_ONE) await oneReady;
+        await oneReady;
         if (one) {
           for (const n of notes) if (isLegacyLocked(n)) skipped.add(noteSig(n));
           applyEditorMode(editorMode, panelView);
@@ -1359,7 +1350,7 @@ unlockTool: true
       handleCryptoError(err, COPY.unlockFailed);
       return;
     }
-    if (TRY_ONE) await oneReady;
+    await oneReady;
     if (one) {
       skipped.clear();
       await bringIn();
@@ -1572,29 +1563,25 @@ unlockTool: true
   renderList();
   if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(null, addSharedText);
 
-  if (TRY_ONE) {
-    oneReady = import(UNLOCK_JS).then(async (m) => {
-      if (!m.enabled()) return;
-      U = m;
-      one = true;
-      let seenUnlocked = false;
-      let seenEpoch = U.state().epoch;
-      U.onChange((s) => {
-        if (s && !s.unlocked && (seenUnlocked || wasUnlocked || s.epoch !== seenEpoch)) dropOld();
-        seenUnlocked = !!(s && s.unlocked);
-        if (s) seenEpoch = s.epoch;
-        openNotes();
-      });
-      try { await U.ready(); } catch (_) {}
-      await openNotes();
-    }).catch(() => {}).then(() => {
-      oneSettled = true;
-      toolEl.dataset.lock = one ? 'one' : 'old';
-      if (!one && panelView === 'off' && !lockedPanel.hidden) showPanel('off');
+  oneReady = import(UNLOCK_JS).then(async (m) => {
+    if (!m.enabled()) return;
+    U = m;
+    one = true;
+    let seenUnlocked = false;
+    let seenEpoch = U.state().epoch;
+    U.onChange((s) => {
+      if (s && !s.unlocked && (seenUnlocked || wasUnlocked || s.epoch !== seenEpoch)) dropOld();
+      seenUnlocked = !!(s && s.unlocked);
+      if (s) seenEpoch = s.epoch;
+      openNotes();
     });
-  } else {
-    toolEl.dataset.lock = 'old';
-  }
+    try { await U.ready(); } catch (_) {}
+    await openNotes();
+  }).catch(() => {}).then(() => {
+    oneSettled = true;
+    toolEl.dataset.lock = one ? 'one' : 'old';
+    if (!one && panelView === 'off' && !lockedPanel.hidden) showPanel('off');
+  });
 })();
 </script>
 

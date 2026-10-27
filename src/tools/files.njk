@@ -1017,11 +1017,9 @@ localeReload: true
   const UNLOCK_WAIT_MS = 5000;
 
   function unlockWanted(needRecord) {
-    if (document.documentElement.dataset.release !== 'beta' || window.__mentriaRedirecting) return false;
-    try {
-      const l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
-      return !!l && l.enabled === true && (!needRecord || localStorage.getItem('mentria.store.keyring.vault') != null);
-    } catch (_) { return false; }
+    if (window.__mentriaRedirecting) return false;
+    if (!needRecord) return true;
+    try { return localStorage.getItem('mentria.store.keyring.vault') != null; } catch (_) { return false; }
   }
 
   function loadUnlock() {
@@ -1119,7 +1117,7 @@ localeReload: true
     if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('files-restore-confirm').click(); }
   });
   window.addEventListener('storage', (e) => {
-    if (unlock || (e.key !== null && e.key !== 'mentria.keyring.local' && e.key !== 'mentria.store.keyring.vault')) return;
+    if (unlock || (e.key !== null && e.key !== 'mentria.store.keyring.vault')) return;
     if (unlockWanted(true)) loadUnlock();
     else refreshRestore();
   });

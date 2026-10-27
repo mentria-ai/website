@@ -152,7 +152,7 @@ const state = {
   refused: false,
   snapshotSent: false,
   oldPeer: false,
-  peerNew: false,
+  newPeers: new Set(),
   vaultChoice: {},
   vaultLinked: new Set(),
   vaultKept: new Set(),
@@ -246,7 +246,13 @@ const wraplessLinked = (suffix, value) => {
   return !!v && typeof v === 'object' && v.linked === true && !v.pass && !v.prf;
 };
 
-const holding = () => state.oldPeer || !state.peerNew;
+const livePeers = () => (state.code ? (state.partner ? [state.partner] : []) : Array.from(state.peers));
+
+const holding = () => {
+  if (state.oldPeer) return true;
+  const live = livePeers();
+  return !live.length || live.some((p) => !state.newPeers.has(p));
+};
 
 const heldFromPeer = (suffix, value) => holding() && wraplessLinked(suffix, value);
 
@@ -264,9 +270,14 @@ const withoutSealed = (suffix, value) => {
 
 const forPeer = (suffix, value) => (holding() ? withoutSealed(suffix, value) : value);
 
-const markPeer = (msg) => {
-  if (msg && msg.keyring === 1) state.peerNew = true;
+const markPeer = (msg, from) => {
+  if (msg && msg.keyring === 1) { if (from) state.newPeers.add(from); }
   else state.oldPeer = true;
+};
+
+const dropPeer = (peerId) => {
+  state.peers.delete(peerId);
+  state.newPeers.delete(peerId);
 };
 
 const releaseTag = () => {
@@ -884,6 +895,7 @@ const handleMessage = async (payload, from) => {
     return;
   }
   if (!msg || typeof msg !== 'object') return;
+  if (!state.code && from) state.peers.add(from);
 
   if (state.code && from) {
     if (msg.op === 'hello' || msg.op === 'welcome' || msg.op === 'busy') { await handshake(msg, from); return; }
@@ -901,7 +913,7 @@ const handleMessage = async (payload, from) => {
   }
 
   if ((msg.op === 'snapshot' || msg.op === 'snapshot-back') && msg.v === 2 && msg.data) {
-    markPeer(msg);
+    markPeer(msg, from);
     try {
       await mergeV2(msg, msg.op === 'snapshot-back');
       state.exchanged = true;
@@ -1058,7 +1070,7 @@ const resetSession = () => {
   state.refused = false;
   state.snapshotSent = false;
   state.oldPeer = false;
-  state.peerNew = false;
+  state.newPeers.clear();
   state.vaultChoice = {};
   state.vaultLinked.clear();
   state.vaultKept.clear();
@@ -1104,7 +1116,7 @@ const handshake = async (msg, from) => {
   if (msg.op === 'hello') {
     if (!state.isInitiator || msg.initiator) return;
     if (state.partner && state.partner !== from) { sendControl('busy', from); return; }
-    markPeer(msg);
+    markPeer(msg, from);
     acceptPartner(from);
     sendControl('welcome', from);
     startSync();
@@ -1113,7 +1125,7 @@ const handshake = async (msg, from) => {
   if (state.isInitiator || !msg.initiator) return;
   if (msg.op === 'welcome') {
     if (state.partner && state.partner !== from) return;
-    markPeer(msg);
+    markPeer(msg, from);
     acceptPartner(from);
     return;
   }
@@ -1173,7 +1185,7 @@ const joinRoomWithCode = async (codeRaw, opts) => {
   };
   state.room.onPeerLeave = (peerId) => {
     if (peerId !== state.partner) return;
-    state.peers.delete(peerId);
+    dropPeer(peerId);
     if (state.exchanged) { disconnect(); return; }
     state.partner = null;
     state.snapshotSent = false;
@@ -1249,14 +1261,15 @@ const joinWithIdentity = async (secretBytes) => {
     throw err;
   }
   state.action = state.room.makeAction('sync');
-  state.action.onMessage = (data) => handleIncoming(data);
+  state.action.onMessage = (data, ctx) => handleIncoming(data, (ctx && ctx.peerId) || null);
   state.room.onPeerJoin = (peerId) => {
     state.peers.add(peerId);
+    state.newPeers.delete(peerId);
     setStatus('connected');
     sendSnapshot();
   };
   state.room.onPeerLeave = (peerId) => {
-    state.peers.delete(peerId);
+    dropPeer(peerId);
     if (state.peers.size === 0) setStatus('pairing');
   };
   window.addEventListener('mentria:write', onLocalWrite);
@@ -1284,6 +1297,7 @@ const disconnect = async () => {
   state.exchanged = false;
   state.snapshotSent = false;
   state.oldPeer = false;
+  state.newPeers.clear();
   setStatus('idle');
 };
 

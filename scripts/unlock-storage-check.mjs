@@ -189,9 +189,9 @@ async function joinRoom() {
   assert.ok(room && room.action, 'room joined');
   const key = await roomKey(SECRET);
   const messages = async () => Promise.all(room.sent.map((s) => openMsg(key, s.payload)));
-  const deliver = async (msg) => {
+  const deliver = async (msg, peerId) => {
     const n = Sync.status().handled;
-    room.action.onMessage(await sealMsg(key, msg), { peerId: 'peer-1' });
+    room.action.onMessage(await sealMsg(key, msg), { peerId: peerId || 'peer-1' });
     await until(() => Sync.status().handled > n);
   };
   return { room, key, messages, deliver };
@@ -943,7 +943,7 @@ check('a device that runs the one unlock still gets one-unlock notes', async () 
   reset();
   seedNotes();
   let r = await joinRoom();
-  r.room.onPeerJoin('peer-0');
+  r.room.onPeerJoin('peer-1');
   await until(async () => lastSnapshot(r, 0));
   let n = (await r.messages()).length;
   await r.deliver(snapshotOf({ 'quick_notes.blob': JSON.stringify([NOTE('theirs')]) }, { app: RELEASE, keyring: 1, device: { id: 'dev-b', name: 'Phone' } }));
@@ -961,6 +961,90 @@ check('a device that runs the one unlock still gets one-unlock notes', async () 
   await p.deliver({ op: 'hello', initiator: false, keyring: 1 });
   const snap = await until(async () => (await p.messages()).find((m) => m.op === 'snapshot'));
   assert.deepEqual(sealedIds(snap.data.store['quick_notes.blob']), ['one'], 'a keyring joiner gets the one-unlock note in the first snapshot');
+  await Sync.disconnect();
+});
+
+const seedNotesLinked = async () => {
+  await seedLinked();
+  seedNotes();
+};
+const noneHeld = (msg, what) => {
+  noSealedIn(msg, what);
+  const st = (msg && msg.data && msg.data.store) || {};
+  assert.equal(st['identity.vault'], undefined, what + ': no wrap-less identity vault');
+  assert.equal(st['totp.vault'], undefined, what + ': no wrap-less totp vault');
+};
+const sentTo = (r, i) => r.room.sent[i] ? r.room.sent[i].to : undefined;
+
+check('a peer that joins after a keyring peer is held until it says keyring', async () => {
+  reset();
+  await seedNotesLinked();
+  const r = await joinRoom();
+  r.room.onPeerJoin('peer-1');
+  await until(async () => lastSnapshot(r, 0));
+  let n = (await r.messages()).length;
+  await r.deliver(snapshotOf({ 'tools.a': '{"a":1}' }, { app: RELEASE, keyring: 1, device: { id: 'dev-b', name: 'Phone' } }), 'peer-1');
+  const full = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'snapshot-back'));
+  assert.deepEqual(sealedIds(full.data.store['quick_notes.blob']), ['one'], 'setup: the keyring peer gets the one-unlock note');
+  assert.equal(full.data.store['identity.vault'], raw('identity.vault'), 'setup: and the wrap-less identity vault');
+  n = (await r.messages()).length;
+  r.room.onPeerJoin('peer-2');
+  const later = await until(async () => lastSnapshot(r, n));
+  noneHeld(later, 'the snapshot to a later peer that has not spoken');
+  assert.equal(sentTo(r, n), undefined, 'that snapshot is a broadcast, so it is held for everyone');
+  n = (await r.messages()).length;
+  assert.ok(Store.set('quick_notes', 'blob', listOf(raw('quick_notes.blob')).concat([SEALED('two')])));
+  assert.ok(Store.set('identity', 'vault', { v: 3, kcv: 'kcv-linked', linked: true, n: 2 }));
+  assert.ok(Store.set('tools', 'later', { c: 3 }));
+  const live = await until(async () => {
+    const all = await newMessages(r, n);
+    return all.find((m) => m.op === 'set' && m.ns === 'tools' && m.key === 'later') ? all : null;
+  });
+  assert.ok(!live.some((m) => m.op === 'set' && (m.ns === 'identity' || (m.ns === 'quick_notes' && m.key === 'blob'))), 'no live wrap-less vault or replacing note-list write while the later peer is silent');
+  for (const m of live.filter((x) => x.op === 'snapshot-back')) noneHeld(m, 'a live note-list merge while the later peer is silent');
+  assert.ok(live.some((m) => m.op === 'snapshot-back' && m.data.store['quick_notes.blob']), 'the note-list write still goes out, as a merge');
+  n = (await r.messages()).length;
+  await r.deliver(snapshotOf({ 'tools.b': '{"b":1}' }, { app: RELEASE, keyring: 1, device: { id: 'dev-b', name: 'Phone' } }), 'peer-1');
+  const reply = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'snapshot-back'));
+  noneHeld(reply, 'the reply to the keyring peer while the later peer is silent');
+  n = (await r.messages()).length;
+  await r.deliver(snapshotOf({ 'tools.c': '{"c":1}' }), 'peer-2');
+  const toOld = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'snapshot-back'));
+  noneHeld(toOld, 'the reply to the later peer, an older release');
+  n = (await r.messages()).length;
+  r.room.onPeerLeave('peer-2');
+  assert.ok(Store.set('quick_notes', 'blob', listOf(raw('quick_notes.blob')).concat([SEALED('three')])));
+  const after = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'snapshot-back' || (m.op === 'set' && m.ns === 'quick_notes')));
+  assert.equal(after.op, 'snapshot-back', 'once an older release was seen the session stays held');
+  noneHeld(after, 'after the older release left');
+  await Sync.disconnect();
+});
+
+check('a new peer that joins later still gets everything, one message later', async () => {
+  reset();
+  await seedNotesLinked();
+  const r = await joinRoom();
+  r.room.onPeerJoin('peer-1');
+  await until(async () => lastSnapshot(r, 0));
+  await r.deliver(snapshotOf({ 'tools.a': '{"a":1}' }, { app: RELEASE, keyring: 1, device: { id: 'dev-b', name: 'Phone' } }), 'peer-1');
+  let n = (await r.messages()).length;
+  r.room.onPeerJoin('peer-2');
+  noneHeld(await until(async () => lastSnapshot(r, n)), 'the first snapshot to the new joiner');
+  n = (await r.messages()).length;
+  await r.deliver(snapshotOf({ 'tools.d': '{"d":1}' }, { app: RELEASE, keyring: 1, device: { id: 'dev-c', name: 'Tablet' } }), 'peer-2');
+  const back = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'snapshot-back'));
+  assert.deepEqual(sealedIds(back.data.store['quick_notes.blob']), ['one'], 'the reply to the new joiner carries the one-unlock note');
+  assert.deepEqual(sealedIds(back.data.store['quick_notes.inbox']), ['in-one'], 'and the inbox note');
+  assert.equal(back.data.store['identity.vault'], raw('identity.vault'), 'and the wrap-less identity vault');
+  assert.equal(back.data.store['totp.vault'], raw('totp.vault'), 'and the wrap-less totp vault');
+  n = (await r.messages()).length;
+  assert.ok(Store.set('quick_notes', 'blob', listOf(raw('quick_notes.blob')).concat([SEALED('two')])));
+  const set = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'set' && m.ns === 'quick_notes' && m.key === 'blob'));
+  assert.deepEqual(sealedIds(set.value), ['one', 'two'], 'with every peer known, live writes go out whole again');
+  n = (await r.messages()).length;
+  r.room.onPeerLeave('peer-2');
+  r.room.onPeerJoin('peer-3');
+  noneHeld(await until(async () => lastSnapshot(r, n)), 'a peer that joins after one left is held again');
   await Sync.disconnect();
 });
 

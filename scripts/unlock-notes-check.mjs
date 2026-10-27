@@ -1,4 +1,4 @@
-import { rmSync, readFileSync } from 'node:fs';
+import { rmSync, readFileSync, existsSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -7,7 +7,10 @@ import puppeteer from 'puppeteer-core';
 import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
-if (!BUILD) { console.log('usage: node scripts/unlock-notes-check.mjs <production build>'); process.exit(2); }
+if (!BUILD) { console.log('usage: node scripts/unlock-notes-check.mjs <production build> [<legacy build>]'); process.exit(2); }
+const LEGACY = process.argv[3] || join(tmpdir(), 'unlock-legacy-build');
+const OLD_PORT = 8086;
+const OLD_ORIGIN = 'http://localhost:' + OLD_PORT;
 const PORT = 8091;
 const ORIGIN = 'http://localhost:' + PORT;
 const PROFILE = join(tmpdir(), 'unlock-notes-check-profile');
@@ -1953,6 +1956,132 @@ check('old lock retires once every note converted', async () => {
   await waitView(page, (x) => x.text === 'hotel secret text', 'Hotel opens after a reload');
   await sleep(1200);
   assert((await page.evaluate(() => window.__signals.length)) === 0, 'retirement signals once');
+});
+
+const BRIDGE_STUB = "export const selfId = 'self';\nexport function joinRoom() {\n  const room = { onPeerJoin: null, onPeerLeave: null, leave: async () => {} };\n  room.makeAction = (name) => { const a = { name, onMessage: null, send: (payload) => { window.__bridgeOut(JSON.stringify(payload)); } }; room.action = a; return a; };\n  window.__room = room;\n  return room;\n}\n";
+
+async function bridgedDevice(origin, path) {
+  const ctx = await browser.createBrowserContext();
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e && e.message || e).slice(0, 300)));
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    const u = new URL(q.url());
+    if (u.origin !== origin) { q.abort().catch(() => {}); return; }
+    if (u.pathname === '/assets/vendor/trystero-nostr.js') { q.respond({ status: 200, contentType: 'text/javascript', body: BRIDGE_STUB }).catch(() => {}); return; }
+    q.continue().catch(() => {});
+  });
+  await page.evaluateOnNewDocument(() => { window.mentriaConfirm = async () => true; });
+  const dev = { ctx, page, errors, sent: 0, peer: null, chain: Promise.resolve() };
+  await page.exposeFunction('__bridgeOut', (payload) => {
+    dev.sent++;
+    const to = dev.peer;
+    if (!to) return;
+    to.chain = to.chain.then(() => to.page.evaluate((p, id) => { if (window.__room && window.__room.action && window.__room.action.onMessage) window.__room.action.onMessage(JSON.parse(p), { peerId: id }); }, payload, dev.name).catch(() => {}));
+  });
+  await page.goto(origin + path, { waitUntil: 'load' });
+  await page.waitForFunction(() => !!window.MentriaStore, { timeout: 20000 });
+  await page.evaluate(async () => { await import('/assets/js/mentria-sync.js'); });
+  return dev;
+}
+
+async function quiet(a, b) {
+  let last = -1;
+  for (let i = 0; i < 100; i++) {
+    await sleep(500);
+    await a.chain;
+    await b.chain;
+    const now = a.sent + b.sent;
+    if (now === last) return;
+    last = now;
+  }
+  throw new Error('the two devices never went quiet');
+}
+
+const blobOf = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob') || '[]'));
+const note = (list, id) => list.find((n) => n.id === id);
+const sealedIn = (list) => list.filter((n) => n && n.enc && n.kv === 2).map((n) => n.id).sort();
+
+check('an older-release device syncing with this release never gets notes it cannot open', async () => {
+  if (!existsSync(LEGACY)) throw new Error('legacy build missing at ' + LEGACY);
+  const old = serve(OLD_PORT);
+  await old.ready;
+  old.setRoot(LEGACY);
+  try {
+    for (const mode of ['code', 'identity']) {
+      await clean();
+      const N = await bridgedDevice(ORIGIN, '/tools/');
+      const O = await bridgedDevice(OLD_ORIGIN, '/tools/');
+      N.name = 'peer-new';
+      O.name = 'peer-old';
+      N.peer = O;
+      O.peer = N;
+      try {
+        assert(!(await O.page.evaluate(() => !!document.documentElement.getAttribute('data-release'))), mode + ': the second device runs the older release');
+        await O.page.evaluate(() => {
+          window.MentriaStore.set('quick_notes', 'blob', [
+            { id: 'a', title: 'A', body: 'old-a', iv: 'old-iv-a', enc: true, salt: 's', credId: 'c', createdAt: 1, updatedAt: 1000 },
+            { id: 'p', title: 'P', body: 'plain p', createdAt: 1, updatedAt: 1000 }
+          ]);
+        });
+        await N.page.evaluate(() => {
+          window.MentriaStore.set('quick_notes', 'blob', [
+            { id: 'a', title: 'A', body: 'one-a', iv: 'one-iv-a', enc: true, kv: 2, createdAt: 1, updatedAt: 1001 },
+            { id: 'p', title: 'P', body: 'plain p', createdAt: 1, updatedAt: 1000 },
+            { id: 'n2', title: 'N2', body: 'one-n2', iv: 'one-iv-n2', enc: true, kv: 2, createdAt: 1, updatedAt: 1500 }
+          ]);
+        });
+        if (mode === 'code') {
+          const code = await N.page.evaluate(() => window.MentriaSync.start());
+          await O.page.evaluate((c) => window.MentriaSync.joinWithCode(c), code);
+        } else {
+          for (const d of [N, O]) await d.page.evaluate(() => window.MentriaSync.joinWithIdentity(new Uint8Array(32).fill(7)));
+        }
+        await N.page.evaluate(() => window.__room.onPeerJoin('peer-old'));
+        await O.page.evaluate(() => window.__room.onPeerJoin('peer-new'));
+        await quiet(N, O);
+        let o = await blobOf(O.page);
+        let n = await blobOf(N.page);
+        assert(N.sent > 0 && O.sent > 0, mode + ': the two devices exchanged messages', { n: N.sent, o: O.sent });
+        assert(sealedIn(o).length === 0, mode + ': the older device holds no note sealed by the one unlock', o);
+        assert(note(o, 'a') && note(o, 'a').iv === 'old-iv-a', mode + ': the older device keeps its own copy of the converted note', note(o, 'a'));
+        assert(note(o, 'p'), mode + ': plain notes still sync');
+        assert(note(n, 'a').kv === 2 && note(n, 'n2') && note(n, 'n2').kv === 2, mode + ': the old copy coming back never undoes the conversion here', n);
+        await N.page.evaluate(() => {
+          const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob'));
+          list.find((x) => x.id === 'p').body = 'plain p edited';
+          list.find((x) => x.id === 'p').updatedAt = 2000;
+          window.MentriaStore.set('quick_notes', 'blob', list);
+        });
+        await quiet(N, O);
+        o = await blobOf(O.page);
+        assert(note(o, 'p') && note(o, 'p').body === 'plain p edited', mode + ': a live edit here reaches the older device', note(o, 'p'));
+        assert(sealedIn(o).length === 0 && note(o, 'a') && note(o, 'a').iv === 'old-iv-a', mode + ': the live edit keeps the older device\'s own copy and sends nothing it cannot open', o);
+        await O.page.evaluate(() => {
+          const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob'));
+          const a = list.find((x) => x.id === 'a');
+          a.iv = 'old-iv-a-edited';
+          a.updatedAt = 3000;
+          window.MentriaStore.set('quick_notes', 'blob', list);
+        });
+        await quiet(N, O);
+        n = await blobOf(N.page);
+        assert(note(n, 'a') && note(n, 'a').iv === 'old-iv-a-edited' && !('kv' in note(n, 'a')), mode + ': a genuinely newer edit on the older device wins', note(n, 'a'));
+        assert(note(n, 'n2') && note(n, 'n2').kv === 2, mode + ': the older device\'s write never drops a note locked here', n);
+        assert(!N.errors.length && !O.errors.length, mode + ': no page errors', { n: N.errors, o: O.errors });
+      } finally {
+        for (const d of [N, O]) {
+          try { await d.page.evaluate(() => window.MentriaSync && window.MentriaSync.disconnect()); } catch (_) {}
+          await d.ctx.close().catch(() => {});
+        }
+      }
+    }
+  } finally {
+    await old.close();
+  }
 });
 
 let failed = 0;

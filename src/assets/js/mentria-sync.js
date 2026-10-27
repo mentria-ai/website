@@ -153,6 +153,8 @@ const state = {
   snapshotSent: false,
   oldPeer: false,
   newPeers: new Set(),
+  left: new Set(),
+  heldSome: false,
   vaultChoice: {},
   vaultLinked: new Set(),
   vaultKept: new Set(),
@@ -278,6 +280,14 @@ const markPeer = (msg, from) => {
 const dropPeer = (peerId) => {
   state.peers.delete(peerId);
   state.newPeers.delete(peerId);
+};
+
+const noteHeld = () => { if (holding()) state.heldSome = true; };
+
+const holdEnded = (was, replying) => {
+  if (!was || holding() || state.code || !state.heldSome || !state.peers.size || replying) return;
+  state.heldSome = false;
+  sendSnapshot();
 };
 
 const releaseTag = () => {
@@ -864,6 +874,7 @@ const mergeV2 = async (msg, isBack) => {
 
     const replyStore = {};
     const replyMeta = {};
+    noteHeld();
     replySuffixes.forEach((suffix) => {
       if (!(suffix in afterStore) || heldFromPeer(suffix, afterStore[suffix])) return;
       const { ns, key } = splitSuffix(suffix);
@@ -895,7 +906,7 @@ const handleMessage = async (payload, from) => {
     return;
   }
   if (!msg || typeof msg !== 'object') return;
-  if (!state.code && from) state.peers.add(from);
+  if (!state.code && from && !state.left.has(from)) state.peers.add(from);
 
   if (state.code && from) {
     if (msg.op === 'hello' || msg.op === 'welcome' || msg.op === 'busy') { await handshake(msg, from); return; }
@@ -913,7 +924,9 @@ const handleMessage = async (payload, from) => {
   }
 
   if ((msg.op === 'snapshot' || msg.op === 'snapshot-back') && msg.v === 2 && msg.data) {
+    const was = holding();
     markPeer(msg, from);
+    holdEnded(was, msg.op === 'snapshot');
     try {
       await mergeV2(msg, msg.op === 'snapshot-back');
       state.exchanged = true;
@@ -970,7 +983,7 @@ const handleMessage = async (payload, from) => {
     if (msg.ns === 'identity' && msg.key === 'vault') {
       try { value = JSON.parse(window.MentriaStore.adopt('identity.vault', JSON.stringify(value))); } catch (_) {}
     }
-    if (holding() && NOTE_LISTS.indexOf(suffix) >= 0) {
+    if (NOTE_LISTS.indexOf(suffix) >= 0) {
       const del = window.MentriaStore.get('quick_notes', 'deleted');
       value = window.MentriaStore.mergeNotes(window.MentriaStore.get(msg.ns, msg.key), value, del && typeof del === 'object' ? del : {});
       window.MentriaStore.set(msg.ns, msg.key, value, { remote: true, mtime: Date.now() });
@@ -1023,8 +1036,9 @@ const onLocalWrite = async (event) => {
   if (d.op !== 'set' && d.op !== 'remove') return;
   if (window.MentriaStore.isLocalOnly(d.ns + '.' + d.key)) return;
   if (state.vaultKept.has(d.ns + '.' + d.key)) return;
-  if (d.op === 'set' && heldFromPeer(d.ns + '.' + d.key, d.value)) return;
+  if (d.op === 'set' && heldFromPeer(d.ns + '.' + d.key, d.value)) { state.heldSome = true; return; }
   if (d.op === 'set' && holding() && NOTE_LISTS.indexOf(d.ns + '.' + d.key) >= 0) {
+    state.heldSome = true;
     try { await sendNotesMerge(d.ns + '.' + d.key, d.value); } catch (err) { emit('error', err); }
     return;
   }
@@ -1046,6 +1060,7 @@ const sendSnapshot = async () => {
   if (!state.action || !state.key) return;
   try {
     const snap = window.MentriaStore.exportAll();
+    noteHeld();
     if (holding() && snap.store) {
       Object.keys(snap.store).forEach((suffix) => {
         if (wraplessLinked(suffix, snap.store[suffix])) delete snap.store[suffix];
@@ -1071,6 +1086,8 @@ const resetSession = () => {
   state.snapshotSent = false;
   state.oldPeer = false;
   state.newPeers.clear();
+  state.left.clear();
+  state.heldSome = false;
   state.vaultChoice = {};
   state.vaultLinked.clear();
   state.vaultKept.clear();
@@ -1263,14 +1280,18 @@ const joinWithIdentity = async (secretBytes) => {
   state.action = state.room.makeAction('sync');
   state.action.onMessage = (data, ctx) => handleIncoming(data, (ctx && ctx.peerId) || null);
   state.room.onPeerJoin = (peerId) => {
+    state.left.delete(peerId);
     state.peers.add(peerId);
     state.newPeers.delete(peerId);
     setStatus('connected');
     sendSnapshot();
   };
   state.room.onPeerLeave = (peerId) => {
+    const was = holding();
+    state.left.add(peerId);
     dropPeer(peerId);
     if (state.peers.size === 0) setStatus('pairing');
+    holdEnded(was, false);
   };
   window.addEventListener('mentria:write', onLocalWrite);
   return 'identity';
@@ -1298,6 +1319,8 @@ const disconnect = async () => {
   state.snapshotSent = false;
   state.oldPeer = false;
   state.newPeers.clear();
+  state.left.clear();
+  state.heldSome = false;
   setStatus('idle');
 };
 

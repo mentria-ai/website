@@ -1048,6 +1048,74 @@ check('a new peer that joins later still gets everything, one message later', as
   await Sync.disconnect();
 });
 
+check('a hold that ends when the silent peer leaves sends what was held, and no live write drops it', async () => {
+  reset();
+  put('quick_notes.blob', [NOTE('plain'), SEALED('one')]);
+  put('quick_notes.deleted', {});
+  const keyringSnap = (n) => snapshotOf({ ['tools.k' + n]: '{"k":1}' }, { app: RELEASE, keyring: 1, device: { id: 'dev-b', name: 'Phone' } });
+  let r = await joinRoom();
+  r.room.onPeerJoin('peer-1');
+  await until(async () => lastSnapshot(r, 0));
+  await r.deliver(keyringSnap(1), 'peer-1');
+  r.room.onPeerJoin('peer-2');
+  let n = (await r.messages()).length;
+  assert.ok(Store.set('quick_notes', 'blob', listOf(raw('quick_notes.blob')).concat([SEALED('two', { updatedAt: 2500 })])));
+  const held = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'snapshot-back' && m.data.store['quick_notes.blob']));
+  assert.deepEqual(sealedIds(held.data.store['quick_notes.blob']), [], 'setup: the write during the hold went out without the one-unlock note');
+  n = (await r.messages()).length;
+  r.room.onPeerLeave('peer-2');
+  const catchUp = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'snapshot'));
+  assert.deepEqual(sealedIds(catchUp.data.store['quick_notes.blob']), ['one', 'two'], 'when the silent peer leaves, one catch-up snapshot carries what was held');
+  await sleep(200);
+  assert.equal((await newMessages(r, n)).filter((m) => m.op === 'snapshot').length, 1, 'exactly one catch-up snapshot');
+  await r.deliver({ op: 'set', ns: 'quick_notes', key: 'blob', value: [NOTE('plain', { updatedAt: 3000, body: 'edited there' }), SEALED('one')], mtime: Date.now() }, 'peer-1');
+  const mine = listOf(raw('quick_notes.blob'));
+  assert.deepEqual(sealedIds(mine), ['one', 'two'], 'a stale list from a keyring peer never drops the note held here');
+  assert.equal(mine.find((x) => x.id === 'plain').body, 'edited there', 'the newer edit from the other device still arrives');
+  await Sync.disconnect();
+
+  reset();
+  put('quick_notes.blob', [NOTE('plain'), SEALED('one')]);
+  r = await joinRoom();
+  r.room.onPeerJoin('peer-1');
+  await until(async () => lastSnapshot(r, 0));
+  await r.deliver(keyringSnap(1), 'peer-1');
+  r.room.onPeerJoin('peer-2');
+  n = (await r.messages()).length;
+  assert.ok(Store.set('quick_notes', 'blob', listOf(raw('quick_notes.blob')).concat([SEALED('two', { updatedAt: 2500 })])));
+  await until(async () => (await newMessages(r, n)).find((m) => m.op === 'snapshot-back' && m.data.store['quick_notes.blob']));
+  n = (await r.messages()).length;
+  await r.deliver(keyringSnap(2), 'peer-2');
+  const reply = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'snapshot-back'));
+  assert.deepEqual(sealedIds(reply.data.store['quick_notes.blob']), ['one', 'two'], 'when the held peer says keyring, the reply carries what was held');
+  await sleep(200);
+  assert.equal((await newMessages(r, n)).filter((m) => m.op === 'snapshot').length, 0, 'no catch-up snapshot duplicates that reply');
+  await Sync.disconnect();
+});
+
+check('a message handled after its sender left does not bring that peer back', async () => {
+  reset();
+  put('quick_notes.blob', [NOTE('plain'), SEALED('one')]);
+  const r = await joinRoom();
+  r.room.onPeerJoin('peer-1');
+  await until(async () => lastSnapshot(r, 0));
+  await r.deliver(snapshotOf({ 'tools.a': '{"a":1}' }, { app: RELEASE, keyring: 1 }), 'peer-1');
+  r.room.onPeerJoin('peer-2');
+  r.room.onPeerLeave('peer-2');
+  await r.deliver({ op: 'set', ns: 'tools', key: 'late', value: { x: 1 }, mtime: Date.now() }, 'peer-2');
+  assert.deepEqual(Store.get('tools', 'late'), { x: 1 }, 'the late message is still applied');
+  assert.equal(Sync.status().peers, 1, 'the peer that left is not counted again');
+  let n = (await r.messages()).length;
+  assert.ok(Store.set('quick_notes', 'blob', listOf(raw('quick_notes.blob')).concat([SEALED('three')])));
+  const set = await until(async () => (await newMessages(r, n)).find((m) => m.op === 'set' && m.ns === 'quick_notes' && m.key === 'blob'));
+  assert.deepEqual(sealedIds(set.value), ['one', 'three'], 'writes to the remaining keyring peer go out whole');
+  n = (await r.messages()).length;
+  r.room.onPeerJoin('peer-2');
+  assert.equal(Sync.status().peers, 2, 'a real rejoin counts it again');
+  noneHeld(await until(async () => lastSnapshot(r, n)), 'the rejoined peer is held until it says keyring');
+  await Sync.disconnect();
+});
+
 check('an old peer\'s legacy copy merges back without undoing a conversion', async () => {
   reset();
   put('quick_notes.blob', [SEALED('a', { updatedAt: 2000 }), NOTE('p', { updatedAt: 1000 }), SEALED('new', { updatedAt: 2100 })]);

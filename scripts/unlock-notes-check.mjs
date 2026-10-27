@@ -517,7 +517,7 @@ check('Quick Notes keeps the old flow while the one unlock cannot load, and runs
     await reload(page, 'old');
     await pick(page, 'New kind');
     v = await view(page);
-    assert(v.panel && !v.unlockBtn && v.note === QN.one_unlock_off, label + ': a note locked with the one unlock is not offered the old unlock', v);
+    assert(v.panel && !v.unlockBtn && v.note === QN.one_unlock_failed, label + ': a note locked with the one unlock is not offered the old unlock, and the panel says the one unlock did not load', v);
     await resetWa(page);
     await page.evaluate(() => document.getElementById('qn-unlock-btn').click());
     await sleep(500);
@@ -535,12 +535,68 @@ check('Quick Notes keeps the old flow while the one unlock cannot load, and runs
     assert(log.requests.some((u) => new URL(u).pathname === MODULE), 'with no switch the page loads the one unlock');
     await pick(page, 'New kind');
     v = await view(page);
-    assert(v.panel && v.note !== QN.one_unlock_off, 'a note locked with the one unlock is no longer called off', v);
+    assert(v.panel && v.note !== QN.one_unlock_off && v.note !== QN.one_unlock_failed, 'a note locked with the one unlock no longer says the one unlock is missing', v);
     await pick(page, 'Old');
     v = await view(page);
     assert(v.panel && v.unlockBtn && v.link && v.link.includes(UN.link_title), 'an old lock shows the line that brings it into the one unlock', v);
     assert(!/"enabled"/.test(JSON.stringify((await readJson(page, LOCAL)) || {})), 'nothing writes a switch');
   }
+});
+
+const NO_IDB = () => { Object.defineProperty(window, 'indexedDB', { configurable: true, get: () => undefined }); };
+const KV2_NOTE = () => {
+  const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob') || '[]');
+  list.push({ id: 'kvtwo', title: 'New kind', body: 'AAAA', iv: 'AAAAAAAAAAAAAAAA', enc: true, kv: 2, createdAt: 1, updatedAt: 3 });
+  window.MentriaStore.set('quick_notes', 'blob', list);
+};
+
+check('a browser that cannot run the one unlock says so, apart from a load failure', async () => {
+  await clean();
+  const seed = await open(NOTES);
+  await settle(seed, 'one');
+  await seed.evaluate(KV2_NOTE);
+  await seed.close();
+  const page = await open(NOTES, NO_IDB);
+  await settle(page, 'old');
+  await pick(page, 'New kind');
+  const v = await view(page);
+  assert(v.panel && !v.unlockBtn && v.note === QN.one_unlock_off, 'without IndexedDB the panel says this browser cannot run the one unlock', v);
+  assert(QN.one_unlock_off !== QN.one_unlock_failed, 'the two messages differ');
+});
+
+check('a stalled one unlock falls back after 5 s and takes over when it arrives', async () => {
+  await clean();
+  const seed = await open(NOTES);
+  await settle(seed, 'one');
+  await seed.evaluate(KV2_NOTE);
+  await seed.close();
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 900 });
+  const log = { requests: [], errors: [] };
+  logs.set(page, log);
+  page.on('pageerror', (e) => log.errors.push(String(e && e.message || e)));
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  let release = null;
+  const held = new Promise((r) => { release = r; });
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    if (new URL(q.url()).pathname === MODULE) { held.then(() => q.continue().catch(() => {})); return; }
+    q.continue().catch(() => {});
+  });
+  await page.evaluateOnNewDocument(PROBE);
+  const t0 = Date.now();
+  await page.goto(ORIGIN + NOTES, { waitUntil: 'load' });
+  await settle(page, 'old');
+  const waited = Date.now() - t0;
+  assert(waited >= 4000 && waited < 9000, 'the page falls back to the old way after the 5 s wait', waited);
+  await pick(page, 'New kind');
+  let v = await view(page);
+  assert(v.panel && v.note === QN.one_unlock_failed, 'while the one unlock is stalled the panel says it did not load', v);
+  release();
+  await settle(page, 'one');
+  v = await waitView(page, (x) => x.note !== QN.one_unlock_failed, 'the note panel updates once the one unlock arrives');
+  assert(!log.errors.length, 'no page errors', log.errors);
 });
 
 check('old locks keep their own salt and passkey through a sync', async () => {

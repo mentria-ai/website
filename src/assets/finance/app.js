@@ -800,11 +800,38 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+const KR_WAIT_MS = 5000;
+let krLate = null;
+
+function typing() {
+  return !!app.root && Array.from(app.root.querySelectorAll('input, textarea')).some((el) => !!el.value);
+}
+
+function lateKeyring(K) {
+  if (!K || app.K) return;
+  if (!app.engine && !typing()) { start(); return; }
+  app.K = K;
+  watchKeyring(K);
+}
+
+async function loadKeyring() {
+  const p = KR.load();
+  const kr = await Promise.race([p, new Promise((resolve) => setTimeout(() => resolve(null), KR_WAIT_MS))]);
+  if (kr) return kr;
+  if (!krLate) {
+    krLate = p.then((late) => {
+      krLate = null;
+      if (late && late.K) lateKeyring(late.K);
+    }, () => { krLate = null; });
+  }
+  return { K: null, why: 'failed' };
+}
+
 async function start() {
   const root = app.root;
   await loadLocal();
   try { await V.refreshDeviceName(); } catch (_) {}
-  const kr = await KR.load();
+  const kr = await loadKeyring();
   const K = kr.K;
   app.K = K;
   watchKeyring(K);

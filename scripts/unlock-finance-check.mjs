@@ -1356,6 +1356,36 @@ async function deviceLockStays(one) {
   }
 }
 
+check('a stalled one unlock shows the old unlock after 5 s and offers the link when it arrives', async () => {
+  const r = await rig({ oldWay: true });
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: false });
+    await setRuntime(page, true);
+    await page.setRequestInterception(true);
+    let release = null;
+    const held = new Promise((ok) => { release = ok; });
+    page.on('request', (q) => {
+      if (q.isInterceptResolutionHandled()) return;
+      if (new URL(q.url()).pathname === RUNTIME) { held.then(() => q.continue().catch(() => {})); return; }
+      q.continue().catch(() => {});
+    });
+    const t0 = Date.now();
+    frame = await store(page);
+    await shown(frame, '#fin-pass', 20000);
+    const waited = Date.now() - t0;
+    assert(waited >= 4000 && waited < 9000, 'the old unlock shows after the 5 s wait, not after the stalled load', waited);
+    assert(!(await frame.$('.flock .m-unlock')), 'no card while the one unlock is stalled');
+    release();
+    await frame.waitForFunction((t) => { const b = document.querySelector('.flock .fbanner--mint'); return b && !b.hidden && b.textContent.includes(t); }, { timeout: 20000 }, UK.link_title);
+    assert(await frame.$('#fin-pass'), 'the old unlock stays, now with the link line');
+    assert(!r.errors.length, 'no page errors', r.errors);
+  } finally {
+    await done(r);
+  }
+});
+
 check('device unlock: Lock stays locked while the one unlock cannot load', () => deviceLockStays(false));
 
 check('device unlock: Lock stays locked on a production build with the one unlock on', async () => {

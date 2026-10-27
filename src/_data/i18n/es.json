@@ -810,7 +810,8 @@
       "confirm_lock_one": "Bloquear cifra esta nota. Tu desbloqueo único la abre. El título de la nota permanece visible y NO se cifra: no pongas información secreta en el título. ¿Bloquearla?",
       "lock_failed_one": "No se pudo bloquear la nota. Inténtalo de nuevo.",
       "key_missing": "Esta nota se bloqueó en otro dispositivo y su clave todavía no está aquí. Sincroniza con ese dispositivo y vuelve a intentarlo.",
-      "one_unlock_off": "Esta nota se abre con el desbloqueo único, que está desactivado en este dispositivo.",
+      "one_unlock_off": "Esta nota se abre con el desbloqueo único, que este navegador no puede ejecutar. Actualiza el navegador a la versión más reciente para abrirla aquí.",
+      "one_unlock_failed": "Esta nota se abre con el desbloqueo único, que no se cargó en esta página. Recarga para intentarlo de nuevo.",
       "convert_skipped": "Notas bloqueadas que este dispositivo no pudo abrir: {n}. Se quedan como están.",
       "read_only_old": "Solo lectura. Desbloquea Mentria para editar esta nota.",
       "lock_key_missing": "La clave de otra nota bloqueada todavía no está en este dispositivo. Desbloquea en el dispositivo que la bloqueó y luego sincroniza.",
@@ -3884,7 +3885,7 @@
         "erase_title": "¿Borrar Finanzas en este dispositivo?",
         "erase_body": "Esto elimina de este navegador tu libro de cuentas cifrado, tus claves y tus ajustes. Los dispositivos emparejados y los archivos de copia de seguridad conservan sus copias. No se puede deshacer.",
         "erase_ok": "Borrar",
-        "linked_off": "Este libro de cuentas se abre con tu desbloqueo único, que este navegador no puede ejecutar. Actualiza el navegador para abrir Finanzas aquí.",
+        "linked_off": "Este libro de cuentas se abre con tu desbloqueo único, que este navegador no puede ejecutar. Actualiza el navegador a la versión más reciente para abrir Finanzas aquí.",
         "linked_failed": "Este libro de cuentas se abre con tu desbloqueo único, que no se cargó en esta página. Recarga para intentarlo de nuevo.",
         "linked_missing": "La clave de este libro de cuentas no está en el desbloqueo único de este dispositivo. Restaura aquí tu copia de seguridad de Mentria o abre Finanzas en un dispositivo donde sí se abra."
       },

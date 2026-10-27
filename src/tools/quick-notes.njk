@@ -125,6 +125,7 @@ unlockTool: true
     lockKeyMissing:    {{ ("tool.quick-notes.lock_key_missing"   | t) | dump | safe }},
     relockOldTitle:    {{ ("tool.quick-notes.relock_old_title"   | t) | dump | safe }},
     oneOff:            {{ ("tool.quick-notes.one_unlock_off"     | t) | dump | safe }},
+    oneFailed:         {{ ("tool.quick-notes.one_unlock_failed"  | t) | dump | safe }},
     convertSkipped:    {{ ("tool.quick-notes.convert_skipped"    | t) | dump | safe }}
   };
 
@@ -173,11 +174,13 @@ unlockTool: true
 
   const UNLOCK_JS = '/assets/js/mentria-unlock.js';
   const UNLOCK_UI_JS = '/assets/js/mentria-unlock-ui.js';
+  const ONE_WAIT_MS = 5000;
   const oneOK = !!(window.isSecureContext && window.crypto && crypto.subtle);
   let U = null;
   let uiP = null;
   let one = false;
   let oneSettled = false;
+  let oneWhy = '';
   let oneReady = Promise.resolve();
   let notesKeys = [];
   let ringSig = '';
@@ -882,7 +885,7 @@ unlockTool: true
     lockedBody.hidden = !oldPanel;
     unlockBtn.hidden = !oldPanel;
     linkBox.hidden = view !== 'legacy';
-    lockedNote.textContent = view === 'missing' ? COPY.keyMissing : (view === 'off' && oneSettled ? COPY.oneOff : '');
+    lockedNote.textContent = view === 'missing' ? COPY.keyMissing : (view === 'off' && oneSettled ? (oneWhy === 'failed' ? COPY.oneFailed : COPY.oneOff) : '');
     lockedNote.hidden = !lockedNote.textContent;
     cardBox.hidden = !cardView;
     cardLater.hidden = !(cardView && linkPending);
@@ -1563,10 +1566,15 @@ unlockTool: true
   renderList();
   if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(null, addSharedText);
 
-  oneReady = import(UNLOCK_JS).then(async (m) => {
-    if (!m.enabled()) return;
+  const settleOne = () => {
+    toolEl.dataset.lock = one ? 'one' : 'old';
+    if (!one && panelView === 'off' && !lockedPanel.hidden) showPanel('off');
+  };
+  const oneLoad = import(UNLOCK_JS).then(async (m) => {
+    if (!m.enabled()) { oneWhy = 'off'; return; }
     U = m;
     one = true;
+    oneWhy = '';
     let seenUnlocked = false;
     let seenEpoch = U.state().epoch;
     U.onChange((s) => {
@@ -1577,11 +1585,13 @@ unlockTool: true
     });
     try { await U.ready(); } catch (_) {}
     await openNotes();
-  }).catch(() => {}).then(() => {
+  }).catch(() => { if (!one) oneWhy = 'failed'; });
+  oneReady = Promise.race([oneLoad, new Promise((resolve) => setTimeout(resolve, ONE_WAIT_MS))]).then(() => {
+    if (!one && !oneWhy) oneWhy = 'failed';
     oneSettled = true;
-    toolEl.dataset.lock = one ? 'one' : 'old';
-    if (!one && panelView === 'off' && !lockedPanel.hidden) showPanel('off');
+    settleOne();
   });
+  oneLoad.then(() => { if (oneSettled) settleOne(); });
 })();
 </script>
 

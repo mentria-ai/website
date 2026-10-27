@@ -810,7 +810,8 @@
       "confirm_lock_one": "Bloquear criptografa esta nota. Seu desbloqueio único a abre. O título da nota permanece visível e NÃO é criptografado — não coloque segredos no título. Bloquear?",
       "lock_failed_one": "Não foi possível bloquear a nota. Tente de novo.",
       "key_missing": "Esta nota foi bloqueada em outro dispositivo, e a chave dela ainda não está aqui. Sincronize com esse dispositivo e tente de novo.",
-      "one_unlock_off": "Esta nota abre com o desbloqueio único, que está desativado neste dispositivo.",
+      "one_unlock_off": "Esta nota abre com o desbloqueio único, que este navegador não consegue executar. Atualize o navegador para a versão mais recente para abri-la aqui.",
+      "one_unlock_failed": "Esta nota abre com o desbloqueio único, que não carregou nesta página. Recarregue para tentar de novo.",
       "convert_skipped": "Notas bloqueadas que este dispositivo não conseguiu abrir: {n}. Elas continuam como estão.",
       "read_only_old": "Somente leitura. Desbloqueie a Mentria para editar esta nota.",
       "lock_key_missing": "A chave de outra nota bloqueada ainda não está neste dispositivo. Desbloqueie no dispositivo que a bloqueou e depois sincronize.",
@@ -3884,7 +3885,7 @@
         "erase_title": "Apagar o app Finanças neste dispositivo?",
         "erase_body": "Isso exclui deste navegador seu livro-caixa criptografado, suas chaves e configurações. Dispositivos pareados e arquivos de backup mantêm as cópias deles. Não dá para desfazer.",
         "erase_ok": "Apagar",
-        "linked_off": "Este livro-caixa abre com seu desbloqueio único, que este navegador não consegue executar. Atualize o navegador para abrir o app Finanças aqui.",
+        "linked_off": "Este livro-caixa abre com seu desbloqueio único, que este navegador não consegue executar. Atualize o navegador para a versão mais recente para abrir o app Finanças aqui.",
         "linked_failed": "Este livro-caixa abre com seu desbloqueio único, que não carregou nesta página. Recarregue para tentar de novo.",
         "linked_missing": "A chave deste livro-caixa não está no desbloqueio único deste dispositivo. Restaure aqui seu backup da Mentria ou abra o app Finanças em um dispositivo onde ele abre."
       },

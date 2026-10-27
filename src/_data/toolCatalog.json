@@ -96,7 +96,7 @@
   {
     "slug": "totp",
     "title": "TOTP",
-    "summary": "Two-factor codes that live in your browser, not on a server. Encrypted at rest, unlocked with a passphrase or Touch ID. Mandatory encrypted backup before your first secret saves.",
+    "summary": "Two-factor codes that live in your browser, not on a server. Encrypted at rest, unlocked with a passphrase or your device's face, fingerprint or PIN. Mandatory encrypted backup before your first secret saves.",
     "category": "Security",
     "group": "Everyday"
   },

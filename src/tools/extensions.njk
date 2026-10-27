@@ -70,6 +70,7 @@ const COPY = {
   reinstallPrompt: {{ ("tool.extensions.reinstall_prompt" | t) | dump | safe }},
   downgradePrompt: {{ ("tool.extensions.downgrade_prompt" | t) | dump | safe }},
   replacePrompt: {{ ("tool.extensions.replace_prompt" | t) | dump | safe }},
+  fullAccessNote: {{ ("tool.extensions.full_access_note" | t) | dump | safe }},
   permsAdded:    {{ ("tool.extensions.update_perms_added" | t) | dump | safe }},
   permsRemoved:  {{ ("tool.extensions.update_perms_removed" | t) | dump | safe }},
   largeNote:     {{ ("tool.extensions.large_note"     | t) | dump | safe }},
@@ -105,7 +106,8 @@ const COPY = {
   galOpen:       {{ ("tool.ext_gallery.btn_open"    | t) | dump | safe }},
   galErrLoad:    {{ ("tool.ext_gallery.err_load"    | t) | dump | safe }},
   galInstalling: {{ ("store.installing" | t) | dump | safe }},
-  galFailed:     {{ ("store.install_failed" | t) | dump | safe }}
+  galFailed:     {{ ("store.install_failed" | t) | dump | safe }},
+  fullAccess:    {{ ("store.full_access_badge" | t) | dump | safe }}
 };
 const PERMS = {
   {%- for p in ["storage", "ai", "bluetooth", "usb", "serial", "network", "notifications", "share", "camera"] %}
@@ -113,7 +115,7 @@ const PERMS = {
   {%- endfor %}
 };
 const INSTALL_OPTS = {
-  copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, reinstall: COPY.reinstallPrompt, downgrade: COPY.downgradePrompt, replace: COPY.replacePrompt, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved, large: COPY.largeNote },
+  copy: { trust: COPY.trustPrompt, update: COPY.updatePrompt, reinstall: COPY.reinstallPrompt, downgrade: COPY.downgradePrompt, replace: COPY.replacePrompt, fullAccess: COPY.fullAccessNote, permsAdded: COPY.permsAdded, permsRemoved: COPY.permsRemoved, large: COPY.largeNote },
   perms: PERMS
 };
 const ERROR_CODES = new Map([
@@ -136,12 +138,17 @@ const CATALOG = [
   {%- endfor %}
 ];
 const HASHES = {{ extensionHashes | dump | safe }};
+const HASH_HISTORY = {{ extensionHashHistory | dump | safe }};
 const HIDDEN = [{% for e in extensionCatalog %}{% if e.held or e.retired %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
 const HELD = [{% for e in extensionCatalog %}{% if e.held %}{{ e.id | dump | safe }}, {% endif %}{% endfor %}];
 function mismatchError() {
   const e = new Error('mismatch');
   e.code = 'mismatch';
   return e;
+}
+function knownFor(id) {
+  const own = (map) => (Object.prototype.hasOwnProperty.call(map, id) ? map[id] : null);
+  return (own(HASHES) ? [own(HASHES).sha256] : []).concat(own(HASH_HISTORY) || []);
 }
 async function fetchSource(id) {
   const published = HASHES[id];
@@ -231,6 +238,12 @@ function row(entry) {
   const title = document.createElement('div');
   title.className = 'xt__name';
   title.textContent = m.name;
+  if (!X.isVerified(entry, knownFor(m.id))) {
+    const access = document.createElement('span');
+    access.className = 'xt__access';
+    access.textContent = COPY.fullAccess;
+    title.append(' ', access);
+  }
   const sub = document.createElement('div');
   sub.className = 'xt__sub';
   sub.textContent = 'v' + m.version + (m.author ? ' · ' + m.author : '') + (entry.sha256 ? ' · SHA-256 ' + entry.sha256.slice(0, 12) : '');
@@ -482,7 +495,7 @@ async function galInstall(entry, card, b) {
     }
   }
   try {
-    const result = await confirmInstall(html, entry.sha256 ? Object.assign({}, INSTALL_OPTS, { meta: { sha256: entry.sha256 } }) : INSTALL_OPTS);
+    const result = await confirmInstall(html, entry.sha256 ? Object.assign({}, INSTALL_OPTS, { meta: { sha256: entry.sha256 }, published: knownFor(entry.id) }) : INSTALL_OPTS);
     if (!result) { b.disabled = false; return; }
     render();
     announceInstall(result, before);
@@ -547,6 +560,7 @@ refreshGallery = () => {
   galCards.forEach(({ entry, card }) => { if (entry.ready) galActions(entry, card); });
 };
 
+await Promise.all(X.getRegistry().filter((e) => knownFor(e.manifest.id).length).map((e) => X.checkSource(e.manifest.id, knownFor(e.manifest.id)).catch(() => null)));
 render();
 const wanted = new URLSearchParams(location.search).get('add');
 if (wanted && HELD.indexOf(wanted) !== -1 && !CATALOG.some((k) => k.id === wanted)) CATALOG.push({ id: wanted, desc: '' });
@@ -606,6 +620,7 @@ render();
 .xt__icon img { width: 28px; height: 28px; }
 .xt__meta { flex: 1 1 12rem; min-width: 0; }
 .xt__name { font-size: 0.85rem; color: var(--term-fg); overflow-wrap: anywhere; }
+.xt__access { display: inline-block; padding: 1px 7px; font-size: 0.62rem; line-height: 1.3; color: var(--syn-amber, #fbbf24); border: 1px solid rgba(251, 191, 36, 0.5); border-radius: 999px; white-space: nowrap; vertical-align: 1px; }
 .xt__sub { font-size: 0.7rem; color: var(--term-muted); overflow-wrap: anywhere; }
 .xt__perms { font-size: 0.7rem; color: var(--term-muted); overflow-wrap: anywhere; }
 .xt__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; margin-left: auto; }

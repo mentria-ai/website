@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const mod = (name) => import(pathToFileURL(resolve(here, '../src/assets/finance/' + name)).href);
@@ -1205,6 +1206,204 @@ test('backup: file names use the local date', () => {
   const d = new Date();
   const day = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   assert.equal(BK.backupName('mentria-backup'), 'mentria-backup-' + day + '.json');
+});
+
+const VT = await mod('vault.js');
+
+test('vault: a ledger linked to the one unlock counts as set up', () => {
+  const base = { kcv: 'k1', device_id: 'aaaaaaaaaaaaaaaa', device_name: 'Mac · Chrome' };
+  const legacy = VT.statusOf(Object.assign({ wraps: { pass: { ct: 'p' }, recovery: { ct: 'r' }, prf: [] } }, base), false);
+  assert.equal(legacy.setup, true);
+  assert.equal(legacy.linked, false);
+  assert.equal(legacy.hasPass, true);
+  const linked = VT.statusOf(Object.assign({ wraps: { prf: [] }, linked: true }, base), false);
+  assert.equal(linked.setup, true);
+  assert.equal(linked.linked, true);
+  assert.equal(linked.hasPass, false);
+  const viaKeyring = VT.statusOf(Object.assign({ wraps: { prf: [] } }, base), true);
+  assert.equal(viaKeyring.setup, true);
+  assert.equal(viaKeyring.keyringLinked, true);
+  assert.equal(VT.statusOf(Object.assign({ wraps: { prf: [] } }, base), false).setup, false);
+  assert.equal(VT.statusOf({ wraps: { prf: [] }, linked: true, device_id: 'aaaaaaaaaaaaaaaa' }, true).setup, false);
+  assert.equal(VT.statusOf({ kcv: 'k1', wraps: { pass: { ct: 'p' } } }, true).setup, false);
+  assert.equal(VT.statusOf(null, false).setup, false);
+  assert.equal(VT.statusOf({ wraps: { pass: { ct: 'p' }, device: { key: 1 }, prf: [{ id: 'x', label: 'L', created: 'c', ct: 'y' }] }, kcv: 'k', device_id: 'd' }).hasDevice, true);
+});
+
+test('vault: a linked ledger is created with no passphrase or recovery wrap', async () => {
+  const v = await VT.buildVault(null, { linked: true, pending: { base: 'EUR' } });
+  assert.equal(v.meta.linked, true);
+  assert.deepEqual(v.meta.wraps, { prf: [] });
+  assert.equal(v.recoveryCode, null);
+  assert.equal(v.root.length, 32);
+  assert.equal(v.meta.kcv, (await C.deriveKeys(v.root)).kcv);
+  assert.equal(v.meta.kcv, v.keys.kcv);
+  assert.match(v.meta.device_id, /^[0-9a-f]{16}$/);
+  assert.equal(v.meta.device_id, v.deviceId);
+  assert.deepEqual(v.meta.pending_setup, { base: 'EUR' });
+  const priv = await C.decryptJson(v.keys.inboxWrap, v.meta.inbox_priv, 'mentria-finance|inbox-key');
+  assert.equal(priv.kty, 'EC');
+  assert.equal(VT.statusOf(v.meta, false).setup, true);
+  const given = C.randomBytes(32);
+  const joined = await VT.buildVault(null, { root: given, linked: true });
+  assert.notEqual(joined.root, given);
+  assert.deepEqual(Array.from(joined.root), Array.from(given));
+  given.fill(0);
+  assert.notEqual(joined.root.reduce((a, b) => a + b, 0), 0);
+  assert.deepEqual(joined.meta.wraps, { prf: [] });
+});
+
+test('vault: a passphrase ledger keeps its wraps and is not marked linked', async () => {
+  const v = await VT.buildVault('correct horse battery staple', { recoveryCode: C.newRecoveryCode() });
+  assert.equal(v.meta.linked, undefined);
+  assert.ok(Object.prototype.hasOwnProperty.call(v.meta, 'linked'));
+  assert.deepEqual(Object.keys(v.meta.wraps), ['pass', 'recovery', 'prf']);
+  assert.deepEqual(Array.from(await C.openPassWrap(v.meta.wraps.pass, 'correct horse battery staple')), Array.from(v.root));
+  assert.deepEqual(Array.from(await C.openRecoveryWrap(v.meta.wraps.recovery, v.recoveryCode)), Array.from(v.root));
+  assert.equal(VT.statusOf(v.meta, false).setup, true);
+  assert.equal(VT.statusOf(v.meta, false).linked, false);
+});
+
+test('vault: retirement drops every legacy wrap and lists passkey ids for the signal', () => {
+  const wraps = { pass: { ct: 'p' }, recovery: { ct: 'r' }, device: { key: {} }, prf: [{ id: 'q+/9Zg==', salt: 's' }, { id: 'AAEC', salt: 't' }, { salt: 'u' }], extra: { keep: 1 } };
+  const r = VT.retiredWraps(wraps);
+  assert.deepEqual(r.wraps, { extra: { keep: 1 } });
+  assert.deepEqual(r.ids, ['q-_9Zg', 'AAEC']);
+  assert.ok(wraps.pass && wraps.prf.length === 3);
+  assert.equal(VT.hasLegacyWraps(wraps), true);
+  assert.equal(VT.hasLegacyWraps(r.wraps), false);
+  assert.equal(VT.hasLegacyWraps({ prf: [] }), false);
+  assert.equal(VT.hasLegacyWraps({ prf: [{ id: 'x' }] }), true);
+  assert.equal(VT.hasLegacyWraps(null), false);
+  assert.deepEqual(VT.retiredWraps(null), { wraps: {}, ids: [] });
+  assert.equal(VT.urlSafeId(C.b64(new Uint8Array([251, 255, 191]))), '-_-_');
+});
+
+test('vault: a linked ledger opens with whichever kept secret matches its key', async () => {
+  const mine = C.randomBytes(32);
+  const other = C.randomBytes(32);
+  const kcv = (await C.deriveKeys(mine)).kcv;
+  const list = [{ id: 'now', bytes: other }, { id: 'before', bytes: mine }];
+  const hit = await VT.matchLinked(list, kcv);
+  assert.equal(hit.index, 1);
+  assert.equal(hit.id, 'before');
+  assert.equal(hit.linked, true);
+  assert.equal(hit.keys.kcv, kcv);
+  assert.deepEqual(Array.from(hit.root), Array.from(mine));
+  assert.notEqual(hit.root, mine);
+  assert.equal(await VT.matchLinked([{ id: 'now', bytes: other }], kcv), null);
+  assert.equal(await VT.matchLinked([], kcv), null);
+  assert.equal(await VT.matchLinked(list, null), null);
+  assert.equal((await VT.matchLinked([{ id: 'only', bytes: other }], null)).index, 0);
+  assert.deepEqual(Array.from(list[0].bytes), Array.from(other));
+});
+
+test('vault: old locks retire only when every rule holds', () => {
+  assert.equal(VT.retirePlan({ ready: true, blockers: [] }), 'retire');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['already-retired'] }), 'leftovers');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['already-retired', 'too-recent'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['too-recent', 'already-retired'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['already-retired', 'code-unconfirmed'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['already-retired', 'old-device'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['too-recent'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false, blockers: ['disabled'] }), 'keep');
+  assert.equal(VT.retirePlan({ ready: false }), 'keep');
+  assert.equal(VT.retirePlan(null), 'keep');
+});
+
+test('vault: pairing takes a ledger without wraps only into an open one unlock', () => {
+  assert.equal(VT.pairPlan({ pass: { ct: 'p' } }, false), 'legacy');
+  assert.equal(VT.pairPlan({ pass: { ct: 'p' } }, true), 'legacy');
+  assert.equal(VT.pairPlan({}, true), 'linked');
+  assert.equal(VT.pairPlan({ recovery: { ct: 'r' } }, true), 'linked');
+  assert.equal(VT.pairPlan({}, false), 'no-wraps');
+  assert.equal(VT.pairPlan(null, false), 'no-wraps');
+});
+
+const KRM = await mod('keyring.js');
+
+test('keyring helper: byte comparison and error codes', () => {
+  assert.equal(KRM.sameBytes(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])), true);
+  assert.equal(KRM.sameBytes(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 4])), false);
+  assert.equal(KRM.sameBytes(new Uint8Array([1, 2]), new Uint8Array([1, 2, 3])), false);
+  assert.equal(KRM.sameBytes(null, new Uint8Array(0)), false);
+  assert.equal(KRM.errCode(new Error('confirm-needed')), 'confirm-needed');
+  const dom = new Error('x');
+  dom.name = 'NotAllowedError';
+  assert.equal(KRM.errCode(dom), 'NotAllowedError');
+  assert.equal(KRM.errCode(null), '');
+});
+
+test('keyring helper: settings errors read as copy, never as codes', () => {
+  const T = { err_storage: 'storage copy', err_other: 'other copy' };
+  const named = (name) => { const e = new Error('x'); e.name = name; return e; };
+  assert.equal(KRM.failText(new Error('idb'), T), 'storage copy');
+  assert.equal(KRM.failText(new Error('storage'), T), 'storage copy');
+  assert.equal(KRM.failText(named('QuotaExceededError'), T), 'storage copy');
+  assert.equal(KRM.failText(new Error('locked'), T), 'other copy');
+  assert.equal(KRM.failText(named('TypeError'), T), 'other copy');
+  assert.equal(KRM.failText(new Error('idb'), {}), '');
+  const src = readFileSync(resolve(here, '../src/assets/finance/views/settings.js'), 'utf8');
+  assert.ok(!/toast\([^;]*errCode\(/.test(src), 'a settings toast shows a raw error code');
+});
+
+test('keyring helper: nothing loads outside a beta page', async () => {
+  const had = Object.prototype.hasOwnProperty.call(globalThis, 'document');
+  const prev = globalThis.document;
+  globalThis.document = { documentElement: { dataset: { release: '2026.10.21' } } };
+  try {
+    assert.equal(await KRM.runtime(), null);
+    assert.equal(await KRM.active(), null);
+  } finally {
+    if (had) globalThis.document = prev; else delete globalThis.document;
+  }
+});
+
+test('keyring helper: tells a switched-off device from a runtime that failed to load', async () => {
+  const keep = {};
+  for (const k of ['document', 'localStorage']) keep[k] = Object.getOwnPropertyDescriptor(globalThis, k);
+  const store = new Map();
+  globalThis.localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)) };
+  try {
+    globalThis.document = { documentElement: { dataset: { release: '2026.10.21' } } };
+    store.set('mentria.keyring.local', JSON.stringify({ enabled: true }));
+    assert.deepEqual(await KRM.load(), { K: null, why: 'off' });
+    globalThis.document = { documentElement: { dataset: { release: 'beta' } } };
+    assert.deepEqual(await KRM.load(), { K: null, why: 'failed' });
+    store.set('mentria.keyring.local', JSON.stringify({ enabled: false }));
+    assert.deepEqual(await KRM.load(), { K: null, why: 'off' });
+    store.set('mentria.keyring.local', 'not json');
+    assert.deepEqual(await KRM.load(), { K: null, why: 'off' });
+  } finally {
+    for (const k of Object.keys(keep)) {
+      if (keep[k]) Object.defineProperty(globalThis, k, keep[k]); else delete globalThis[k];
+    }
+  }
+});
+
+const LK = await mod('lock.js');
+
+test('lock screen: a ledger the one unlock cannot open falls back to its passphrase', () => {
+  const st = (o) => Object.assign({ setup: true, linked: false, keyringLinked: false, hasPass: false }, o);
+  assert.equal(LK.lockRoute(st({ setup: false }), true), 'welcome');
+  assert.equal(LK.lockRoute(st({ hasPass: true }), true), 'unlock');
+  assert.equal(LK.lockRoute(st({ hasPass: true, keyringLinked: true }), true), 'unlock');
+  assert.equal(LK.lockRoute(st({ linked: true, keyringLinked: true, hasPass: true }), true), 'card');
+  assert.equal(LK.lockRoute(st({ linked: true, keyringLinked: true }), true), 'card');
+  assert.equal(LK.lockRoute(st({ keyringLinked: true }), true), 'card');
+  assert.equal(LK.lockRoute(st({ linked: true, hasPass: true }), true), 'unlock');
+  assert.equal(LK.lockRoute(st({ linked: true }), true), 'linked');
+  assert.equal(LK.lockRoute(st({ linked: true, keyringLinked: true, hasPass: true }), false), 'unlock');
+  assert.equal(LK.lockRoute(st({ linked: true, keyringLinked: true }), false), 'linked');
+});
+
+test('package: Finance leaves the one unlock runtime and card to the site', () => {
+  const exts = createRequire(import.meta.url)(resolve(here, '../src/_data/extensions.js'));
+  const fin = exts.find((e) => e.id === 'finance');
+  const urls = fin.files.map((f) => f.u);
+  assert.ok(urls.includes('/assets/finance/keyring.js'));
+  assert.ok(urls.includes('/assets/finance/app.js'));
+  assert.deepEqual(urls.filter((u) => /mentria-unlock|unlock-copy/.test(u)), []);
 });
 
 let failed = 0;

@@ -1,11 +1,12 @@
 import * as X from '/assets/js/mentria-extensions.js';
 
 const DEFAULT_COPY = {
-  trust: 'Install "{name}" v{version}? It runs with full access to this site. Permissions: {perms}.',
+  trust: 'Install {name} v{version}? It runs with full access to everything Mentria keeps on this device, including locked things while they are open. Only install files from people you trust. Permissions: {perms}',
   update: 'Update "{name}" from v{old} to v{new}?',
   reinstall: 'Reinstall "{name}" v{new}?',
   downgrade: 'Replace "{name}" v{old} with older v{new}?',
-  replace: 'Replace "{oldName}" v{old} with "{name}" v{new}? It uses the same ID, so it takes over the saved data and runs with full access to this site.',
+  replace: 'Replace "{oldName}" v{old} with "{name}" v{new}? It uses the same ID, so it takes over the saved data.',
+  fullAccess: 'It runs with full access to everything Mentria keeps on this device, including locked things while they are open. Only install files from people you trust.',
   permsAdded: 'New permissions: {perms}.',
   permsRemoved: 'No longer uses: {perms}.',
   from: 'From {from} — ',
@@ -31,6 +32,7 @@ export async function confirmInstall(html, opts) {
     const order = X.compareVersions(m.version, prev.version);
     const tpl = renamed ? copy.replace : (order < 0 ? copy.downgrade : (order === 0 ? copy.reinstall : copy.update));
     msg = fmt(tpl, { name: m.name, oldName: prev.name, old: prev.version, new: m.version });
+    if (!X.isVerified({ manifest: m, sha256: opts.meta && opts.meta.sha256 }, opts.published)) msg += ' ' + copy.fullAccess;
     danger = renamed || order < 0;
     const prevPerms = prev.permissions || [];
     const nextPerms = m.permissions || [];

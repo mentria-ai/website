@@ -491,7 +491,7 @@ async function boot(markDecided) {
   if (!sessionLive() && mem.hasDevice) await unlockWithDevice();
   await prfP;
   const html = document.documentElement;
-  if (!inFrame && state().ask && !html.hasAttribute('data-unlock-tool') && !html.classList.contains('is-fullscreen-tool')) askBar();
+  if (!inFrame && state().ask && !html.hasAttribute('data-unlock-tool') && !html.classList.contains('is-fullscreen-tool') && !html.classList.contains('ext-app')) askBar();
   notify(false);
   return state();
 }

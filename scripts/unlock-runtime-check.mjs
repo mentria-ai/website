@@ -824,7 +824,7 @@ check('capability probe cannot hang ready()', async () => {
 
 check('frame pages leave the launch decision to the parent', async () => {
   await clean();
-  const FRAME = '/extensions/finance/app/';
+  const FRAME = '/tools/';
   const lab = await open('/beta/unlock/');
   await createOnLab(lab);
   await runtime(lab);
@@ -865,8 +865,36 @@ check('frame pages leave the launch decision to the parent', async () => {
   assert(topAsked, 'the parent shows the unlock bar although an old declinedEpoch matches');
   assert(!pageLog.get(top).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'the frame never asks for the unlock bar');
   const frame = top.frames().find((f) => f.url().includes(FRAME));
+  const plain = await frame.evaluate(() => ({ tool: document.documentElement.hasAttribute('data-unlock-tool'), ext: document.documentElement.classList.contains('ext-app'), full: document.documentElement.classList.contains('is-fullscreen-tool') }));
+  assert(!plain.tool && !plain.ext && !plain.full, 'the frame is a plain page, so only the frame rule keeps the bar out', plain);
+  const ask = await frame.evaluate(async (url) => (await import(url)).state().ask, MODULE);
+  assert(ask === true, 'the frame sees the ask the parent set', ask);
   const bars = await until(async () => (await top.evaluate(() => document.querySelectorAll('.m-ubar').length)) === 1, 5000);
+  await new Promise((r) => setTimeout(r, 1000));
   assert(bars && await frame.evaluate(() => !document.querySelector('.m-ubar')), 'one bar on the parent, none in the frame');
+  assert(!pageLog.get(top).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'the frame still never asks for the unlock bar');
+});
+
+check('an extension app page shows no unlock bar and keeps the ask', async () => {
+  await clean();
+  const APP = '/extensions/scanner/app/';
+  const lab = await open('/beta/unlock/');
+  await createOnLab(lab);
+  await runtime(lab);
+  await lab.evaluate(() => window.__m.setAskAtLaunch(true));
+  await closeAll();
+  const page = await open(APP);
+  const html = await page.evaluate(() => ({ ext: document.documentElement.classList.contains('ext-app'), tool: document.documentElement.hasAttribute('data-unlock-tool') }));
+  assert(html.ext && !html.tool, 'the page is an extension app that shows no card of its own', html);
+  await bootFrom(page);
+  const s = await runtime(page);
+  assert(s.launch === 'reopen' && s.ask === true && !s.unlocked, 'the extension app makes the reopen decision and the ask stands', s);
+  await new Promise((r) => setTimeout(r, 1500));
+  assert(!(await page.evaluate(() => !!document.querySelector('.m-ubar'))), 'no unlock bar on an extension app page');
+  assert(!pageLog.get(page).requests.some((u) => u.includes('mentria-unlock-ui.js')), 'the extension app never asks for the unlock bar');
+  await go(page, '/tools/');
+  const bar = await until(() => page.evaluate(() => !!document.querySelector('.m-ubar')), 8000);
+  assert(bar, 'the ask is kept: the next plain page in the tab shows the bar');
 });
 
 check('locale redirect makes one launch decision', async () => {

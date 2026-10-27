@@ -11,7 +11,7 @@ if (!BUILD) { console.log('usage: node scripts/unlock-totp-check.mjs <production
 const PORT = Number(process.env.UNLOCK_PORT) || 8092;
 const ORIGIN = 'http://localhost:' + PORT;
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const WORK = join(tmpdir(), 'unlock-totp-check');
+const WORK = join(tmpdir(), PORT === 8092 ? 'unlock-totp-check' : 'unlock-totp-check-' + PORT);
 const PROFILE = join(WORK, 'profile');
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const I18N = JSON.parse(readFileSync(join(REPO, 'src/_data/i18n/en.json'), 'utf8'));

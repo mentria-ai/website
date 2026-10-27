@@ -11,7 +11,7 @@ const HOST = '/tools/';
 const RUNTIME = '/assets/js/mentria-unlock.js';
 const PORT = Number(process.env.UNLOCK_PORT) || 8090;
 const ORIGIN = 'http://localhost:' + PORT;
-const PROFILE = join(tmpdir(), 'unlock-finance-check-profile');
+const PROFILE = join(tmpdir(), PORT === 8090 ? 'unlock-finance-check-profile' : 'unlock-finance-check-profile-' + PORT);
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const EN = JSON.parse(readFileSync(join(REPO, 'src/_data/i18n/en.json'), 'utf8'));

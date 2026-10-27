@@ -9,7 +9,7 @@ const BUILD = process.argv[2];
 if (!BUILD) { console.log('usage: node scripts/unlock-card-check.mjs <beta build dir>'); process.exit(2); }
 const PORT = Number(process.env.UNLOCK_PORT) || 8095;
 const ORIGIN = 'http://localhost:' + PORT;
-const PROFILE = join(tmpdir(), 'unlock-card-check-profile');
+const PROFILE = join(tmpdir(), PORT === 8095 ? 'unlock-card-check-profile' : 'unlock-card-check-profile-' + PORT);
 const MODULE = '/assets/js/mentria-unlock.js';
 const UI = '/assets/js/mentria-unlock-ui.js';
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -617,8 +617,8 @@ check('launch bar follows the tab until its close or an unlock', async () => {
   await about.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 5000 });
   const keptAfter = await keyringKeys(about);
   assert(JSON.stringify(keptAfter) === JSON.stringify(kept), 'Not now stores nothing', { kept, keptAfter });
-  const back = await about.evaluate(() => ({ inert: document.querySelector('main').inert, bar: !!document.querySelector('.m-ubar'), focus: document.activeElement && document.activeElement.dataset.act }));
-  assert(!back.inert && back.bar && back.focus === 'bar-unlock', 'Not now closes the card; the bar stays and gets focus back', back);
+  const back = await about.evaluate(() => ({ inert: document.querySelector('main').inert, filter: getComputedStyle(document.querySelector('main')).filter, bar: !!document.querySelector('.m-ubar'), focus: document.activeElement && document.activeElement.dataset.act }));
+  assert(!back.inert && back.filter === 'none' && back.bar && back.focus === 'bar-unlock', 'Not now closes the card and clears the blur; the bar stays and gets focus back', back);
   await about.click('.m-ubar [data-act="bar-unlock"]');
   assert(await until(() => layerOpen(about), 8000), 'the card opens again');
   await openCode(about, '.m-ulayer');

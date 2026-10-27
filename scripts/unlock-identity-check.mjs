@@ -10,8 +10,8 @@ if (!BUILD) { console.log('usage: node scripts/unlock-identity-check.mjs <produc
 const LEGACY = process.argv[3] || join(tmpdir(), 'unlock-legacy-build');
 const PORT = Number(process.env.UNLOCK_PORT) || 8093;
 const ORIGIN = 'http://localhost:' + PORT;
-const PROFILE = join(tmpdir(), 'unlock-identity-check-profile');
-const FILES = join(tmpdir(), 'unlock-identity-check-files');
+const PROFILE = join(tmpdir(), PORT === 8093 ? 'unlock-identity-check-profile' : 'unlock-identity-check-profile-' + PORT);
+const FILES = join(tmpdir(), PORT === 8093 ? 'unlock-identity-check-files' : 'unlock-identity-check-files-' + PORT);
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const RUNTIME = '/assets/js/mentria-unlock.js';
 const UI = '/assets/js/mentria-unlock-ui.js';

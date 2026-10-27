@@ -13,7 +13,7 @@ const OLD_PORT = Number(process.env.UNLOCK_OLD_PORT) || 8086;
 const OLD_ORIGIN = 'http://localhost:' + OLD_PORT;
 const PORT = Number(process.env.UNLOCK_PORT) || 8091;
 const ORIGIN = 'http://localhost:' + PORT;
-const PROFILE = join(tmpdir(), 'unlock-notes-check-profile');
+const PROFILE = join(tmpdir(), PORT === 8091 ? 'unlock-notes-check-profile' : 'unlock-notes-check-profile-' + PORT);
 const MODULE = '/assets/js/mentria-unlock.js';
 const UI = '/assets/js/mentria-unlock-ui.js';
 const CORE = '/assets/js/mentria-unlock-core.js';
@@ -2076,7 +2076,7 @@ check('an older-release device syncing with this release never gets notes it can
       N.peer = O;
       O.peer = N;
       try {
-        assert(!(await O.page.evaluate(() => !!document.documentElement.getAttribute('data-release'))), mode + ': the second device runs the older release');
+        assert(!(await O.page.evaluate(() => document.documentElement.hasAttribute('data-release'))) && (await N.page.evaluate(() => document.documentElement.hasAttribute('data-release'))), mode + ': the second device runs the older release, the first this one');
         await O.page.evaluate(() => {
           window.MentriaStore.set('quick_notes', 'blob', [
             { id: 'a', title: 'A', body: 'old-a', iv: 'old-iv-a', enc: true, salt: 's', credId: 'c', createdAt: 1, updatedAt: 1000 },

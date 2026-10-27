@@ -1,7 +1,7 @@
 import {
   ready, state, onChange, prfSupport, create, link, lock, hasRootBytes,
   unlockWithCode, unlockWithPassphrase, unlockWithPasskey, confirmWithCode, confirmWithPasskey,
-  addPasskey, setPassphrase, setRemember, confirmCode, dropPendingCode, others, foldIn
+  addPasskey, setPassphrase, setRemember, confirmCode, dropPendingCode, others, foldIn, dismissAsk
 } from './mentria-unlock.js';
 import { newRecoveryCode, normalizeCode, formatCode } from './mentria-unlock-core.js';
 
@@ -14,6 +14,7 @@ const STORAGE_ERRORS = new Set(['storage', 'idb', 'QuotaExceededError', 'Unknown
 const FOCUSABLE = 'button, a[href], input, select, textarea, [tabindex]';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const LOCK_ICON = '<rect x="5" y="10.5" width="14" height="9.5" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="15.2" r="1.3" fill="currentColor"/>';
+const CLOSE_ICON = '<line x1="18" y1="6" x2="6" y2="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>';
 
 const copies = new Map();
 const regions = new WeakMap();
@@ -23,6 +24,7 @@ let localeOverride = null;
 let seq = 0;
 let pageState = null;
 let launchP = null;
+let bar = null;
 let setupP = null;
 let pendingCode = null;
 let noteEl = null;
@@ -82,13 +84,17 @@ function h(tag, attrs, ...kids) {
   return el;
 }
 
-function icon() {
+function glyph(markup) {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
-  svg.innerHTML = LOCK_ICON;
-  return h('span', { class: 'm-unlock__icon' }, svg);
+  svg.innerHTML = markup;
+  return svg;
+}
+
+function icon(cls) {
+  return h('span', { class: cls || 'm-unlock__icon' }, glyph(LOCK_ICON));
 }
 
 function paint(root, T) {
@@ -625,6 +631,76 @@ async function launch() {
 export function showLaunch() {
   if (!launchP) launchP = launch().catch(() => {}).finally(() => { launchP = null; });
   return launchP;
+}
+
+export async function showBar() {
+  const T0 = await copy();
+  await domReady();
+  if (bar || !state().ask) return;
+  let T = T0;
+  let busy = false;
+  const text = h('span', { class: 'm-update__text' });
+  const go = h('button', { type: 'button', class: 'm-update__btn', 'data-act': 'bar-unlock' }, h('span', { uk: 'bar_unlock' }));
+  const x = h('button', { type: 'button', class: 'm-update__x', 'data-act': 'bar-close' }, glyph(CLOSE_ICON));
+  const root = h('div', { class: 'm-update m-ubar', role: 'status', 'aria-live': 'polite' }, icon('m-ubar__icon'), text, go, x);
+  const chip = document.getElementById('m-update');
+  const sizer = chip && typeof ResizeObserver === 'function' ? new ResizeObserver(() => {
+    const tall = chip.getBoundingClientRect().height;
+    if (tall > 0) root.style.setProperty('--m-update-h', Math.ceil(tall) + 'px');
+  }) : null;
+  const view = {
+    repaint(T2) {
+      T = T2;
+      paint(root, T);
+      const label = typeof T.not_now === 'string' ? T.not_now : '';
+      x.setAttribute('aria-label', label);
+      x.title = label;
+    }
+  };
+  const close = () => {
+    if (bar !== view) return;
+    bar = null;
+    off();
+    if (sizer) sizer.disconnect();
+    live.delete(view);
+    root.remove();
+  };
+  const idle = () => {
+    busy = false;
+    root.removeAttribute('aria-busy');
+  };
+  go.addEventListener('click', () => {
+    if (busy || bar !== view) return;
+    const s = state();
+    if (!(s.passkeys > 0 && s.prf !== 'no')) {
+      showLaunch();
+      return;
+    }
+    busy = true;
+    root.setAttribute('aria-busy', 'true');
+    unlockWithPasskey().then(() => {
+      idle();
+      close();
+    }, () => {
+      idle();
+      if (bar === view && !state().unlocked) showLaunch();
+    });
+  });
+  x.addEventListener('click', () => {
+    close();
+    dismissAsk();
+  });
+  const off = onChange((s) => { if (!s.ask) close(); });
+  bar = view;
+  live.add(view);
+  view.repaint(T);
+  document.body.append(root);
+  if (sizer) sizer.observe(chip);
+  nextFrame(() => {
+    if (bar !== view) return;
+    text.dataset.uk = 'bar_text';
+    paint(text, T);
+  });
 }
 
 export async function showConfirm() {

@@ -6198,6 +6198,8 @@
     "err_storage": "このブラウザは Mentria のデータを保存していないため、ロック解除の状態を保てません。サイトデータが許可されているか確認してください。",
     "launch_setting": "アプリを開いたときにロック解除を求める",
     "launch_setting_note": "オフの場合は、ロックしたものを初めて開いたときに Mentria がロック解除を求めます。",
+    "bar_text": "Mentria はロック中",
+    "bar_unlock": "ロック解除",
     "lock_now": "ロック",
     "locked_toast": "ロックしました。次にロックしたものを開くときに、Mentria がもう一度ロック解除を求めます。",
     "setup_title": "ロックしたものを守る",

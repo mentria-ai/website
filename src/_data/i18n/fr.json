@@ -6198,6 +6198,8 @@
     "err_storage": "Ce navigateur n'enregistre pas les données de Mentria, il ne peut donc pas garder votre déverrouillage. Vérifiez que les données de site sont autorisées.",
     "launch_setting": "Demander le déverrouillage à l'ouverture de l'app",
     "launch_setting_note": "Désactivé : Mentria le demande la première fois que vous ouvrez quelque chose de verrouillé.",
+    "bar_text": "Verrouillé",
+    "bar_unlock": "Déverrouiller",
     "lock_now": "Verrouiller",
     "locked_toast": "Verrouillé. Mentria le redemandera la prochaine fois que vous ouvrirez quelque chose de verrouillé.",
     "setup_title": "Protégez ce que vous verrouillez",

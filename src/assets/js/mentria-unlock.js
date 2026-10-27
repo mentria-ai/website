@@ -12,6 +12,7 @@ const LOCAL_KEY = 'mentria.keyring.local';
 const EPOCH_KEY = 'mentria.keyring.epoch';
 const SEEN_KEY = 'mentria.keyring.seen';
 const TAB_KEY = 'mentria.keyring.tab';
+const ASK_KEY = 'mentria.keyring.ask';
 const OTHERS_KEY = 'mentria.keyring.others';
 const DB_NAME = 'mentria-keyring';
 const CHANNEL = 'mentria-unlock';
@@ -46,6 +47,7 @@ function lsGet(k) { try { return localStorage.getItem(k); } catch (_) { return n
 function lsSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (_) { return false; } }
 function ssGet(k) { try { return sessionStorage.getItem(k); } catch (_) { return null; } }
 function ssSet(k, v) { try { sessionStorage.setItem(k, v); return true; } catch (_) { return false; } }
+function ssDel(k) { try { sessionStorage.removeItem(k); } catch (_) {} }
 function random(n) { return crypto.getRandomValues(new Uint8Array(n)); }
 function iso() { return new Date().toISOString(); }
 function release() { return document.documentElement.dataset.release || ''; }
@@ -289,6 +291,7 @@ function forget() {
 
 function notify(force) {
   const s = state();
+  if (s.unlocked) ssDel(ASK_KEY);
   const k = JSON.stringify(s);
   if (!force && k === lastKey) return;
   lastKey = k;
@@ -451,10 +454,10 @@ function inputs() {
   };
 }
 
-async function launchScreen() {
+async function askBar() {
   try {
     const ui = await import('./mentria-unlock-ui.js');
-    await ui.showLaunch();
+    await ui.showBar();
   } catch (_) {}
 }
 
@@ -477,6 +480,8 @@ async function boot(markDecided) {
   if (decision === 'reopen') {
     forget();
     bumpEpoch();
+    if (local().askAtLaunch === true) ssSet(ASK_KEY, '1');
+    else ssDel(ASK_KEY);
     try { await idbDel('session', 'current'); } catch (_) {}
     post('lock');
   }
@@ -486,8 +491,7 @@ async function boot(markDecided) {
   await refresh(false);
   if (!sessionLive() && mem.hasDevice) await unlockWithDevice();
   await prfP;
-  const s = state();
-  if (!inFrame && decision === 'reopen' && s.askAtLaunch && !s.unlocked && !document.documentElement.hasAttribute('data-unlock-tool')) launchScreen();
+  if (!inFrame && state().ask && !document.documentElement.hasAttribute('data-unlock-tool')) askBar();
   notify(false);
   return state();
 }
@@ -629,10 +633,12 @@ export function ready() {
 export function state() {
   const on = enabled();
   const rec = readRecord();
+  const unlocked = !!rec && sessionLive();
+  const asking = local().askAtLaunch === true;
   return {
     enabled: on,
     setUp: !!rec,
-    unlocked: !!rec && sessionLive(),
+    unlocked,
     epoch: readEpoch(),
     linked: rec ? linkedOf(rec) : [],
     prf: mem.prf,
@@ -640,7 +646,8 @@ export function state() {
     hasPass: !!rec && livePass(rec.wraps.pass),
     hasDevice: !!rec && on && mem.hasDevice,
     codeConfirmed: !!rec && codeOk(rec),
-    askAtLaunch: local().askAtLaunch === true,
+    askAtLaunch: asking,
+    ask: on && !!rec && !unlocked && asking && ssGet(ASK_KEY) === '1',
     launch: mem.launch
   };
 }
@@ -1222,6 +1229,11 @@ export async function prfSupport() {
 
 export function setAskAtLaunch(on) {
   saveLocal({ askAtLaunch: !!on });
+  notify(false);
+}
+
+export function dismissAsk() {
+  ssDel(ASK_KEY);
   notify(false);
 }
 

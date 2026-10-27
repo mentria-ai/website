@@ -6198,6 +6198,8 @@
     "err_storage": "Este navegador no está guardando datos de Mentria, así que no puede mantener tu desbloqueo. Comprueba que los datos del sitio estén permitidos.",
     "launch_setting": "Pedir el desbloqueo al abrir la app",
     "launch_setting_note": "Desactivado: Mentria lo pide la primera vez que abres algo bloqueado.",
+    "bar_text": "Bloqueado",
+    "bar_unlock": "Desbloquear",
     "lock_now": "Bloquear",
     "locked_toast": "Bloqueado. Mentria lo volverá a pedir la próxima vez que abras algo bloqueado.",
     "setup_title": "Protege lo que tienes bloqueado",

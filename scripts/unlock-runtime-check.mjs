@@ -475,7 +475,7 @@ check('closing every page then opening one relocks', async () => {
   assert(d1.liveOther === false && !!d1.marker && d1.seenAgeMs > 60000 && d1.decision === 'reopen', 'decided by an old seen', d1);
   assert(epoch1 === epoch0 + 1, 'epoch bumped', { epoch0, epoch1 });
   const uiAsked = pageLog.get(pageA).requests.some((u) => u.includes('mentria-unlock-ui.js'));
-  assert(!uiAsked, 'launch screen requested although askAtLaunch is off');
+  assert(!uiAsked, 'unlock bar module requested although askAtLaunch is off');
   await pageA.evaluate(async (c) => { window.__m.setAskAtLaunch(true); await window.__m.unlockWithCode(c); }, code);
   await closeAll();
   pageA = await open('/tools/');
@@ -490,9 +490,11 @@ check('closing every page then opening one relocks', async () => {
     uiAsked2 = pageLog.get(pageA).requests.some((u) => u.includes('mentria-unlock-ui.js'));
     if (!uiAsked2) await new Promise((r) => setTimeout(r, 100));
   }
-  assert(uiAsked2, 'launch screen module requested with askAtLaunch on');
+  assert(uiAsked2, 'unlock bar module requested with askAtLaunch on');
+  const bar = await until(() => pageA.evaluate(() => !!document.querySelector('.m-ubar') && !document.querySelector('.m-ulayer')), 5000);
+  assert(bar, 'the unlock bar shows and no layer opens');
   const errs = pageLog.get(pageA).errors.filter((e) => /unlock/i.test(e));
-  assert(!errs.length, 'missing launch module raised an error', errs);
+  assert(!errs.length, 'the unlock bar raised an error', errs);
   const db = await pageA.evaluate(async () => {
     const d = await new Promise((res, rej) => { const q = indexedDB.open('mentria-keyring', 1); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
     const sess = await new Promise((res) => { const g = d.transaction('session').objectStore('session').get('current'); g.onsuccess = () => res(g.result); });
@@ -845,7 +847,7 @@ check('frame pages leave the launch decision to the parent', async () => {
   const e1 = await readLocal(host, 'mentria.keyring.epoch');
   assert(fb.s.launch === 'continue' && fb.d.decision === 'continue' && e1 === e0, 'a frame never bumps the epoch', { fb, e0, e1 });
   await new Promise((r) => setTimeout(r, 500));
-  assert(!pageLog.get(host).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'a frame never asks for the launch screen');
+  assert(!pageLog.get(host).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'a frame never asks for the unlock bar');
   await host.evaluate((n) => {
     const l = JSON.parse(localStorage.getItem('mentria.keyring.local'));
     l.declinedEpoch = n;
@@ -860,8 +862,11 @@ check('frame pages leave the launch decision to the parent', async () => {
   const e3 = await readLocal(top, 'mentria.keyring.epoch');
   assert(fa.s.launch === 'continue' && e3 === e2, 'one epoch bump per reopen with a frame', { fa, e2, e3 });
   const topAsked = await until(() => pageLog.get(top).requests.some((u) => u.includes('mentria-unlock-ui.js')), 3000);
-  assert(topAsked, 'the parent shows the launch screen although an old declinedEpoch matches');
-  assert(!pageLog.get(top).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'the frame never asks for the launch screen');
+  assert(topAsked, 'the parent shows the unlock bar although an old declinedEpoch matches');
+  assert(!pageLog.get(top).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'the frame never asks for the unlock bar');
+  const frame = top.frames().find((f) => f.url().includes(FRAME));
+  const bars = await until(async () => (await top.evaluate(() => document.querySelectorAll('.m-ubar').length)) === 1, 5000);
+  assert(bars && await frame.evaluate(() => !document.querySelector('.m-ubar')), 'one bar on the parent, none in the frame');
 });
 
 check('locale redirect makes one launch decision', async () => {

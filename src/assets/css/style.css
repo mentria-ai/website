@@ -243,6 +243,12 @@ html.is-standalone .app-bar ~ .m-mini-dock { --mini-base: calc(var(--app-bar-h, 
   html:has(.m-update:not([hidden])) .m-mini-dock { --mini-base: calc(88px + env(safe-area-inset-bottom, 0px)); }
   html.is-standalone:has(.m-update:not([hidden])) .m-mini-dock { --mini-base: calc(var(--app-bar-h, 52px) + 76px); }
   html:not(.is-fullscreen-tool):has(.pwa-install-banner--visible):has(.m-update:not([hidden])) .m-mini-dock { --mini-base: calc(150px + env(safe-area-inset-bottom, 0px)); }
+  html:has(.m-ubar:not([hidden])) .m-mini-dock { --mini-base: calc(34px + var(--m-ubar-h, 54px) + env(safe-area-inset-bottom, 0px)); }
+  html.is-standalone:has(.m-ubar:not([hidden])) .m-mini-dock { --mini-base: calc(var(--app-bar-h, 52px) + 22px + var(--m-ubar-h, 54px)); }
+  html:not(.is-fullscreen-tool):has(.pwa-install-banner--visible):has(.m-ubar:not([hidden])) .m-mini-dock { --mini-base: calc(96px + var(--m-ubar-h, 54px) + env(safe-area-inset-bottom, 0px)); }
+  html:has(.m-ubar):has(#m-update:not([hidden])) .m-mini-dock { --mini-base: calc(44px + var(--m-update-h, 54px) + var(--m-ubar-h, 54px) + env(safe-area-inset-bottom, 0px)); }
+  html.is-standalone:has(.m-ubar):has(#m-update:not([hidden])) .m-mini-dock { --mini-base: calc(var(--app-bar-h, 52px) + 32px + var(--m-update-h, 54px) + var(--m-ubar-h, 54px)); }
+  html:not(.is-fullscreen-tool):has(.pwa-install-banner--visible):has(.m-ubar):has(#m-update:not([hidden])) .m-mini-dock { --mini-base: calc(106px + var(--m-update-h, 54px) + var(--m-ubar-h, 54px) + env(safe-area-inset-bottom, 0px)); }
 }
 .m-mini { display: flex; align-items: stretch; max-width: 100%; border: 1px solid var(--syn-cyan, #22d3ee); border-radius: 999px; background: var(--term-bg-raised); box-shadow: var(--elev-3), var(--glow-cyan-soft, none); font-family: var(--font-mono); color: var(--term-fg); overflow: hidden; }
 .m-mini.is-done { border-color: var(--syn-pink, #f25fa8); animation: m-mini-pulse 1.2s ease-in-out infinite; }
@@ -1584,6 +1590,12 @@ html:not(.is-fullscreen-tool):has(.pwa-install-banner--visible) .m-update { bott
   justify-content: center;
 }
 .m-update__x:hover { color: var(--term-fg); }
+.m-ubar__icon { display: inline-flex; flex: 0 0 auto; color: var(--accent); }
+.m-ubar__icon svg, .m-ubar .m-update__x svg { display: block; width: 16px; height: 16px; }
+.m-ubar[aria-busy="true"] .m-update__btn { opacity: 0.6; cursor: progress; }
+html:has(#m-update:not([hidden])) .m-ubar { bottom: calc(22px + var(--m-update-h, 54px) + env(safe-area-inset-bottom, 0px)); }
+html.is-standalone:has(#m-update:not([hidden])) .m-ubar { bottom: calc(var(--app-bar-h) + 22px + var(--m-update-h, 54px)); }
+html:not(.is-fullscreen-tool):has(.pwa-install-banner--visible):has(#m-update:not([hidden])) .m-ubar { bottom: calc(98px + var(--m-update-h, 54px) + env(safe-area-inset-bottom, 0px)); }
 
 .nav-link--about { position: relative; }
 .nav-dot {

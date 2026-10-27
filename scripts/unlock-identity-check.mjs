@@ -6,12 +6,12 @@ import puppeteer from 'puppeteer-core';
 import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
-if (!BUILD) { console.log('usage: node scripts/unlock-identity-check.mjs <beta build> [<legacy build>]'); process.exit(2); }
+if (!BUILD) { console.log('usage: node scripts/unlock-identity-check.mjs <production build> [<legacy build>]'); process.exit(2); }
 const LEGACY = process.argv[3] || join(tmpdir(), 'unlock-legacy-build');
-const PORT = 8093;
+const PORT = Number(process.env.UNLOCK_PORT) || 8093;
 const ORIGIN = 'http://localhost:' + PORT;
-const PROFILE = join(tmpdir(), 'unlock-identity-check-profile');
-const FILES = join(tmpdir(), 'unlock-identity-check-files');
+const PROFILE = join(tmpdir(), PORT === 8093 ? 'unlock-identity-check-profile' : 'unlock-identity-check-profile-' + PORT);
+const FILES = join(tmpdir(), PORT === 8093 ? 'unlock-identity-check-files' : 'unlock-identity-check-files-' + PORT);
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const RUNTIME = '/assets/js/mentria-unlock.js';
 const UI = '/assets/js/mentria-unlock-ui.js';
@@ -75,9 +75,24 @@ const SIGNAL_PROBE = () => {
   }
 };
 
+let runtimeOff = false;
+const blocked = new Map();
+
+async function blockRuntime(page) {
+  let s = blocked.get(page);
+  if (!s) {
+    s = await page.createCDPSession();
+    await s.send('Network.enable');
+    blocked.set(page, s);
+  }
+  await page.setBypassServiceWorker(true);
+  await s.send('Network.setBlockedURLs', { urls: ['*' + RUNTIME + '*'] });
+}
+
 async function open(path, { auth = false, init } = {}) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 900 });
+  if (runtimeOff) await blockRuntime(page);
   const rig = { page, cdp: null, auth: null, errors: [], dialogs: [] };
   rigs.set(page, rig);
   page.on('pageerror', (e) => rig.errors.push(String((e && e.message) || e).slice(0, 300)));
@@ -110,21 +125,18 @@ async function clean() {
   await blank.close();
 }
 
-async function fresh(on) {
+async function fresh(runtimeLoads) {
+  runtimeOff = false;
+  blocked.clear();
   await clean();
-  const p = await browser.newPage();
-  await p.goto(ORIGIN + '/robots.txt');
-  await p.evaluate((k, v) => { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); }, LOCAL, on ? JSON.stringify({ enabled: true }) : null);
-  await p.close();
+  runtimeOff = !runtimeLoads;
 }
 
-async function setSwitch(page, on) {
-  await page.evaluate((k, v) => {
-    let l = {};
-    try { l = JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch (_) { l = {}; }
-    l.enabled = v;
-    localStorage.setItem(k, JSON.stringify(l));
-  }, LOCAL, on);
+async function setRuntime(page, loads) {
+  runtimeOff = !loads;
+  if (!loads) { await blockRuntime(page); return; }
+  for (const [p, s] of blocked) if (!p.isClosed()) await s.send('Network.setBlockedURLs', { urls: [] }).catch(() => {});
+  blocked.clear();
 }
 
 function readJson(page, key) {
@@ -437,7 +449,7 @@ async function seedSilentLink(page) {
   await until(() => readJson(page, IDENTITY).then((v) => !!(v && v.device)), 15000, 'seed: device unlock on');
   const vault0 = await readJson(page, IDENTITY);
   assert(vault0.pass && vault0.device, 'seed: pass and device wraps', Object.keys(vault0));
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   const tools = await open('/tools/');
   const code = await tools.evaluate(async (u) => {
     const m = await import(u);
@@ -901,7 +913,7 @@ check('comms offers a keyring passkey after a code unlock', async () => {
   clean_(rig);
 });
 
-check('switch off keeps the old comms flow', async () => {
+check('a page that cannot load the one unlock keeps the old comms flow', async () => {
   await fresh(false);
   const page = await open('/comms/', { auth: true });
   const rig = rigs.get(page);
@@ -915,7 +927,7 @@ check('switch off keeps the old comms flow', async () => {
   const vault = await readJson(page, IDENTITY);
   assert(vault && vault.v === 2 && vault.pass && vault.prf && !vault.linked, 'legacy vault with pass and prf', vault && Object.keys(vault));
   assert(!(await readJson(page, KEYRING)), 'no keyring record');
-  assert(!(await loaded(page, RUNTIME)) && !(await loaded(page, UI)), 'runtime and card never load');
+  assert((await loaded(page, RUNTIME)) && !(await loaded(page, UI)), 'the runtime is requested, fails, and the card never loads');
   assert(!(await visible(page, '#comms-id-lock')), 'no Lock button');
   await page.reload({ waitUntil: 'load' });
   await waitVisible(page, '#comms-id-locked');
@@ -931,7 +943,7 @@ check('switch off keeps the old comms flow', async () => {
   await page.click('#comms-id-unlock');
   await waitVisible(page, '#comms-id-on', 20000);
   assert(!(await page.$('.m-ulayer')), 'no setup sheet after the old unlock');
-  assert(!(await loaded(page, RUNTIME)), 'runtime still not loaded');
+  assert(await loaded(page, RUNTIME), 'the runtime is tried again after the reload and the old unlock still opens');
   const about = await open('/about/');
   await openAdvanced(about);
   await waitVisible(about, '#about-identity-unlock');
@@ -941,8 +953,36 @@ check('switch off keeps the old comms flow', async () => {
     create: await visible(about, '#about-identity-create')
   };
   assert(a.pass && !a.link && !a.create, 'About keeps the old unlock', a);
-  assert(!(await loaded(about, RUNTIME)), 'About does not load the runtime');
+  assert(await loaded(about, RUNTIME), 'About tries the runtime and falls back to the old unlock');
   assert(!(await databases(about)).includes('mentria-keyring'), 'no keyring database');
+  clean_(rig);
+  clean_(rigs.get(about));
+});
+
+check('with no switch a fresh device gets the one unlock on Comms and About', async () => {
+  await fresh(true);
+  const page = await open('/comms/', { auth: true });
+  const rig = rigs.get(page);
+  assert(await readJson(page, LOCAL) === null, 'no switch is seeded');
+  await commsOnboard(page, 'Fresh Fay');
+  await waitStep(page, 'intro', 40000);
+  const c = await page.evaluate(() => ({
+    done: !!document.getElementById('comms-onboard-done').getClientRects().length,
+    oldCode: document.getElementById('comms-onboard-code').textContent
+  }));
+  assert(!c.done && c.oldCode === '', 'Comms onboarding opens the one unlock setup, not the 20-symbol code step', c);
+  assert(await loaded(page, RUNTIME) && await loaded(page, UI), 'Comms loads the runtime and the card');
+  const about = await open('/about/');
+  await openAdvanced(about);
+  await waitVisible(about, '#about-identity-create');
+  const a = await about.evaluate(() => ({
+    reveal: !!document.querySelector('[data-reveal="about-identity-setup-form"]').getClientRects().length,
+    pass: !!document.getElementById('about-identity-setup-pass').getClientRects().length,
+    unlock: !!document.getElementById('about-identity-unlock-pass').getClientRects().length
+  }));
+  assert(!a.reveal && !a.pass && !a.unlock, 'About offers the one unlock, not the old passphrase setup', a);
+  assert(await loaded(about, RUNTIME), 'About loads the runtime');
+  assert(!/"enabled"/.test(JSON.stringify(await readJson(about, LOCAL) || {})), 'nothing writes a switch');
   clean_(rig);
   clean_(rigs.get(about));
 });
@@ -971,7 +1011,7 @@ check('legacy comms code links on first unlock', async () => {
   const rig = rigs.get(page);
   const vault0 = await readJson(page, IDENTITY);
   assert(vault0.pass && vault0.prf, 'legacy vault seeded with pass and prf', Object.keys(vault0));
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
   await waitVisible(page, '#comms-id-locked');
   const lockUi = await page.evaluate(() => ({
@@ -1020,7 +1060,7 @@ check('legacy comms passkey unlock checks the saved code', async () => {
     server.setRoot(BUILD);
   }
   const rig = rigs.get(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
   await waitVisible(page, '#comms-id-passkey');
   await page.click('#comms-id-passkey');
@@ -1063,7 +1103,7 @@ check('legacy about passphrase carries over', async () => {
   await answerDialog(page);
   const vault0 = await readJson(page, IDENTITY);
   assert(vault0.pass && vault0.prf && vault0.prf.credId, 'legacy About vault with a passkey', Object.keys(vault0));
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-unlock');
@@ -1290,7 +1330,7 @@ check('a mismatched link never takes over an old-way session', async () => {
   await page.click('#about-identity-setup-btn');
   await answerDialog(page);
   await waitVisible(page, '#about-identity-unlocked');
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   const tools = await open('/tools/');
   const code = await tools.evaluate(async (u) => {
     const m = await import(u);
@@ -1332,7 +1372,7 @@ check('comms shows its lock screen even when the keyring boot fails', async () =
   await waitVisible(page, '#comms-onboard-done', 40000);
   await page.click('#comms-onboard-continue');
   await waitVisible(page, '#comms-id-on');
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.evaluateOnNewDocument(() => {
     let held;
     let armed = true;
@@ -1419,7 +1459,7 @@ check('about opens from a prior entry and never retires through it', async () =>
   await until(() => readJson(page, IDENTITY).then((v) => !!(v && v.device)), 15000, 'seed: device unlock on');
   const vault0 = await readJson(page, IDENTITY);
   assert(vault0.pass && vault0.prf && vault0.device, 'seed: pass, prf and device wraps', Object.keys(vault0));
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-link-btn', 20000);
@@ -1565,7 +1605,7 @@ check('a link that does not open the vault keeps the old lock', async () => {
   await page.click('#about-identity-setup-btn');
   await answerDialog(page);
   await waitVisible(page, '#about-identity-unlocked');
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-unlock');
@@ -1622,7 +1662,7 @@ check('comms carries a remembered identity over to Remember this device', async 
   const vault0 = await readJson(page, IDENTITY);
   assert(vault0.pass && vault0.prf && vault0.device, 'seed: pass, prf and device wraps', Object.keys(vault0));
   assert(await deviceWrapKept(page), 'seed: the device key is stored');
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
   await waitVisible(page, '#comms-link-go', 30000);
   assert(await page.evaluate(() => MentriaIdentity.isUnlocked()), 'the old device key opens the identity');
@@ -1685,10 +1725,10 @@ check('a legacy device key survives retirement while the keyring has none', asyn
   assert(JSON.stringify(vault.device) === JSON.stringify(vault0.device), 'the old device wrap survives retirement', Object.keys(vault));
   await sleep(500);
   assert(await deviceWrapKept(page), 'the old device key survives retirement');
-  await setSwitch(page, false);
+  await setRuntime(page, false);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
-  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'with the switch off the old device key still opens the identity');
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'when the one unlock cannot load, the old device key still opens the identity');
   clean_(rig);
   clean_(rigs.get(tools));
 });
@@ -1733,7 +1773,7 @@ check('a device that receives a linked identity with its own device unlock gets 
   const rig = rigs.get(page);
   const vault0 = await seedLegacyDevice(page);
   const secret = await identityBytes(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   const tools = await open('/tools/');
   const code = await tools.evaluate(async (u, b) => {
     const m = await import(u);
@@ -1790,7 +1830,7 @@ check('Remember turned off stays off and lets retirement delete the old device k
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
   await seedLegacyDevice(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-link-btn', 20000);
@@ -1850,7 +1890,7 @@ check('the no-passkey setup sheet starts Remember checked for a device unlock an
   const page = await open('/about/', { init: noPrf });
   const rig = rigs.get(page);
   await seedLegacyDevice(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-link-btn', 20000);
@@ -1877,23 +1917,23 @@ check('the no-passkey setup sheet starts Remember checked for a device unlock an
   clean_(rig);
 });
 
-check('a legacy switch-off clears a pending Remember', async () => {
+check('the old Remember toggle used while the one unlock cannot load clears a pending Remember', async () => {
   await fresh(false);
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
   const { tools, code } = await seedSilentLink(page);
   assert((await rememberUi(page)).pending, 'seed: Remember is pending');
   await tools.close();
-  await setSwitch(page, false);
+  await setRuntime(page, false);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
-  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'the old device key opens the identity with the switch off');
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'the old device key opens the identity while the one unlock cannot load');
   await waitVisible(page, '#about-identity-device', 15000);
   assert(await page.$eval('#about-identity-device', (el) => el.checked), 'seed: the old Remember toggle shows on');
   await page.click('#about-identity-device');
   await until(() => readJson(page, IDENTITY).then((v) => !v.device), 15000, 'the old device unlock turns off');
   await until(() => rememberUi(page).then((u) => u.decision === 'off'), 10000, 'the old toggle records off');
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the identity opens from the keyring again');
@@ -1916,10 +1956,10 @@ check('turning the old Remember back on clears an off and keeps the pending Reme
   const { tools, code } = await seedSilentLink(page);
   assert((await rememberUi(page)).pending, 'seed: Remember is pending');
   await tools.close();
-  await setSwitch(page, false);
+  await setRuntime(page, false);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
-  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'the old device key opens the identity with the switch off');
+  await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 15000, 'the old device key opens the identity while the one unlock cannot load');
   await waitVisible(page, '#about-identity-device', 15000);
   await page.click('#about-identity-device');
   await until(() => readJson(page, IDENTITY).then((v) => !v.device), 15000, 'the old device unlock turns off');
@@ -1930,7 +1970,7 @@ check('turning the old Remember back on clears an off and keeps the pending Reme
   await until(() => rememberUi(page).then((u) => u.decision === null), 10000, 'turning it back on clears the off');
   await until(() => deviceWrapKept(page), 10000, 'the new old-style device key is stored');
   const vault1 = await readJson(page, IDENTITY);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await until(() => page.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'the identity opens from the keyring again');
@@ -1958,7 +1998,7 @@ check('Comms turns a pending Remember on at its next card unlock', async () => {
   await page.evaluate(() => MentriaIdentity.setDeviceUnlock(true));
   await until(() => deviceWrapKept(page), 10000, 'seed: device key stored');
   const secret = await identityBytes(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   const tools = await open('/tools/');
   const code = await tools.evaluate(async (u, b) => {
     const m = await import(u);
@@ -1991,7 +2031,7 @@ check('about keeps the old unlock under the card and links through the card', as
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
   await seedAboutPass(page, { passkey: true });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-unlock');
@@ -2035,7 +2075,7 @@ check('an old unlock under the card never takes over another identity\'s link', 
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
   const vault0 = await seedAboutPass(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   const { tools, code } = await otherTabKeyring('random');
   const entry0 = (await readJson(page, KEYRING)).services.identity;
   await page.bringToFront();
@@ -2066,7 +2106,7 @@ check('comms keeps the old unlock under the card and links through the card', as
   const page = await open('/comms/', { auth: true });
   const rig = rigs.get(page);
   const { code, fp } = await seedCommsLegacy(page, 'Old Ola');
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
   await waitVisible(page, '#comms-id-locked');
   await page.click('#comms-lock-alt summary');
@@ -2107,7 +2147,7 @@ check('a keyring record the one unlock cannot read never hides the old unlock', 
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
   await seedAboutPass(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ v: 1, services: { identity: { id: 'x', ct: 'y', linked: new Date().toISOString() } } })), KEYRING);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
@@ -2129,7 +2169,7 @@ check('a stalled one unlock falls back to the old unlock on About and Comms', as
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
   await seedAboutPass(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   const held = await holdRuntime(page, null, true);
   const t0 = Date.now();
   await page.reload({ waitUntil: 'load' });
@@ -2317,7 +2357,7 @@ check('about offers keep the saved code only for a code', async () => {
   const rig = rigs.get(page);
   const looksLikeCode = 'ABCDE FGHJK MNPQR STUVW';
   await seedAboutPass(page, { pass: looksLikeCode });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-unlock');
@@ -2336,7 +2376,7 @@ check('about\'s passkey unlock asks for the saved code', async () => {
   await fresh(false);
   const comms = await open('/comms/', { auth: true });
   const { code } = await seedCommsLegacy(comms, 'Code Cleo');
-  await setSwitch(comms, true);
+  await setRuntime(comms, true);
   const about = comms;
   await about.goto(ORIGIN + '/about/', { waitUntil: 'load' });
   await openAdvanced(about);
@@ -2365,7 +2405,7 @@ check('a link that fails says so on About and Comms', async () => {
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
   await seedAboutPass(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   const { tools } = await otherTabKeyring('open');
   await page.bringToFront();
   await page.reload({ waitUntil: 'load' });
@@ -2384,7 +2424,7 @@ check('a link that fails says so on About and Comms', async () => {
   await fresh(false);
   const comms = await open('/comms/', { auth: true });
   const { code } = await seedCommsLegacy(comms, 'Fail Fay');
-  await setSwitch(comms, true);
+  await setRuntime(comms, true);
   const t2 = await otherTabKeyring('open');
   await comms.bringToFront();
   await comms.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
@@ -2643,7 +2683,7 @@ check('a broken keyring link is tried again after the next lock', async () => {
   const page = await open('/about/', { auth: true });
   const rig = rigs.get(page);
   await seedAboutPass(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-unlock');
@@ -2680,7 +2720,7 @@ check('a broken keyring link is tried again after the next lock', async () => {
   await fresh(false);
   const comms = await open('/comms/', { auth: true });
   const { code: ccode, fp } = await seedCommsLegacy(comms, 'Broken Bo');
-  await setSwitch(comms, true);
+  await setRuntime(comms, true);
   await comms.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
   await waitVisible(comms, '#comms-id-locked');
   await comms.click('#comms-lock-alt summary');
@@ -2721,7 +2761,7 @@ check('a late one unlock keeps a half-typed old passphrase on About and Comms', 
   await fresh(false);
   const page = await open('/about/', { auth: true });
   await seedAboutPass(page);
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   await page.reload({ waitUntil: 'load' });
   await openAdvanced(page);
   await waitVisible(page, '#about-identity-unlock');
@@ -2745,7 +2785,7 @@ check('a late one unlock keeps a half-typed old passphrase on About and Comms', 
   await fresh(false);
   const comms = await open('/comms/', { auth: true });
   const { code } = await seedCommsLegacy(comms, 'Late Lu');
-  await setSwitch(comms, true);
+  await setRuntime(comms, true);
   await comms.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
   await waitVisible(comms, '#comms-id-locked');
   await comms.click('#comms-lock-alt summary');
@@ -2768,52 +2808,36 @@ check('a late one unlock keeps a half-typed old passphrase on About and Comms', 
   clean_(rigs.get(c2));
 });
 
-check('production build never loads the runtime', async () => {
-  const prod = process.env.PROD;
-  if (!prod) return 'skip';
+check('a production build runs the one unlock and has no lab', async () => {
   await fresh(true);
-  server.setRoot(prod);
-  try {
-    const page = await open('/comms/', { auth: true });
-    const rig = rigs.get(page);
-    assert(await page.evaluate(() => document.documentElement.dataset.release !== 'beta'), 'PROD is not a beta build');
-    await commsOnboard(page, 'Prod Pat');
-    await waitVisible(page, '#comms-onboard-done', 40000);
-    assert(CODE_SHAPE.test(await text(page, '#comms-onboard-code')), 'the old onboarding code step');
-    await page.click('#comms-onboard-continue');
-    await waitVisible(page, '#comms-id-on');
-    const about = await open('/about/');
-    await openAdvanced(about);
-    await waitVisible(about, '#about-identity-unlock');
-    for (const p of [page, about]) {
-      assert(!(await loaded(p, RUNTIME)) && !(await loaded(p, UI)), 'no runtime or card request');
-    }
-    assert(!(await visible(about, '#about-identity-link')) && !(await visible(page, '#comms-id-lock')), 'no keyring controls');
-    assert(!(await readJson(page, KEYRING)), 'no keyring record');
-    await about.evaluate(async () => {
-      const c = await import('/assets/js/mentria-unlock-core.js');
-      const { record } = await c.createRecord({ code: c.newRecoveryCode(), deviceId: 'dev-p', deviceName: 'Prod', app: '' });
-      window.MentriaStore.set('keyring', 'vault', record);
-    });
-    const lsAll = (p) => p.evaluate(() => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; });
-    const VOL = /^(mentria_seen|mentria_tool_usage|mentria_caps)/;
-    const before = await lsAll(about);
-    await page.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
-    await waitVisible(page, '#comms-id-locked', 20000);
-    await about.goto(ORIGIN + '/about/', { waitUntil: 'load' });
-    await openAdvanced(about);
-    const totp = await open('/tools/totp/');
-    await sleep(1500);
-    const after = await lsAll(about);
-    const added = Object.keys(after).filter((k) => !(k in before) && !VOL.test(k));
-    const changed = Object.keys(before).filter((k) => /keyring|identity/.test(k) && before[k] !== after[k]);
-    assert(!added.length && !changed.length, 'About, Comms and TOTP write nothing new on a production build', { added, changed });
-    for (const p of [page, about, totp]) assert(!(await loaded(p, RUNTIME)) && !(await loaded(p, UI)), 'still no runtime or card request');
-    clean_(rig);
-    clean_(rigs.get(totp));
-  } finally {
-    server.setRoot(BUILD);
-  }
+  const page = await open('/comms/', { auth: true });
+  const rig = rigs.get(page);
+  const tag = await page.evaluate(() => document.documentElement.getAttribute('data-release'));
+  if (tag === 'beta') return 'skip';
+  assert(tag !== null, 'the page comes from the new build', tag);
+  const lab = await page.evaluate(async () => (await fetch('/beta/unlock/')).status);
+  assert(lab === 404, 'a production build has no lab page', lab);
+  const palette = await page.evaluate(async () => (await fetch('/assets/js/site-palette.en.js')).text());
+  assert(!palette.includes('/beta/unlock/') && !palette.includes('openPath') && palette.includes('beta: false'), 'the production palette has no beta entries');
+  assert(await readJson(page, LOCAL) === null, 'no switch is seeded');
+  await commsOnboard(page, 'Prod Pat');
+  await setupNew(page, { passkey: true });
+  await waitVisible(page, '#comms-id-on', 30000);
+  const vault = await readJson(page, IDENTITY);
+  const rec = await readJson(page, KEYRING);
+  assert(vault && vault.v === 3 && vault.linked === true && !vault.pass && !vault.prf, 'Comms makes a linked identity', vault && Object.keys(vault));
+  assert(rec && rec.services.identity && rec.services.identity.ct, 'the keyring links the identity');
+  const about = await open('/about/');
+  await openAdvanced(about);
+  await until(() => about.evaluate(() => MentriaIdentity.isUnlocked()), 20000, 'About opens the identity from the one unlock session');
+  assert(await visible(about, '#about-identity-keyring') && !(await visible(about, '#about-identity-unlock-pass')), 'About shows the one unlock settings, no old unlock');
+  const totp = await open('/tools/totp/');
+  await sleep(1500);
+  for (const p of [page, about, totp]) assert(await loaded(p, RUNTIME), 'the runtime loads on ' + (await p.evaluate(() => location.pathname)));
+  assert(!/"enabled"/.test(JSON.stringify(await readJson(about, LOCAL) || {})), 'nothing writes a switch');
+  clean_(rig);
+  clean_(rigs.get(about));
+  clean_(rigs.get(totp));
 });
 
 let failed = 0;
@@ -2824,7 +2848,7 @@ try {
     const t0 = Date.now();
     try {
       if (await fn() === 'skip') {
-        console.log('SKIP ' + name + ' (set PROD=<non-beta build>)');
+        console.log('SKIP ' + name + ' (pass a production build)');
         continue;
       }
       passed++;

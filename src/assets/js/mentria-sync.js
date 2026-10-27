@@ -152,6 +152,9 @@ const state = {
   refused: false,
   snapshotSent: false,
   oldPeer: false,
+  newPeers: new Set(),
+  left: new Set(),
+  heldSome: false,
   vaultChoice: {},
   vaultLinked: new Set(),
   vaultKept: new Set(),
@@ -245,7 +248,47 @@ const wraplessLinked = (suffix, value) => {
   return !!v && typeof v === 'object' && v.linked === true && !v.pass && !v.prf;
 };
 
-const heldFromPeer = (suffix, value) => state.oldPeer && wraplessLinked(suffix, value);
+const livePeers = () => (state.code ? (state.partner ? [state.partner] : []) : Array.from(state.peers));
+
+const holding = () => {
+  if (state.oldPeer) return true;
+  const live = livePeers();
+  return !live.length || live.some((p) => !state.newPeers.has(p));
+};
+
+const heldFromPeer = (suffix, value) => holding() && wraplessLinked(suffix, value);
+
+const NOTE_LISTS = ['quick_notes.blob', 'quick_notes.inbox'];
+
+const sealedNote = (n) => !!n && typeof n === 'object' && !!n.enc && n.kv === 2;
+
+const withoutSealed = (suffix, value) => {
+  if (NOTE_LISTS.indexOf(suffix) < 0) return value;
+  const list = parseRaw(value);
+  if (!Array.isArray(list) || !list.some(sealedNote)) return value;
+  const kept = list.filter((n) => !sealedNote(n));
+  return typeof value === 'string' ? JSON.stringify(kept) : kept;
+};
+
+const forPeer = (suffix, value) => (holding() ? withoutSealed(suffix, value) : value);
+
+const markPeer = (msg, from) => {
+  if (msg && msg.keyring === 1) { if (from) state.newPeers.add(from); }
+  else state.oldPeer = true;
+};
+
+const dropPeer = (peerId) => {
+  state.peers.delete(peerId);
+  state.newPeers.delete(peerId);
+};
+
+const noteHeld = () => { if (holding()) state.heldSome = true; };
+
+const holdEnded = (was, replying) => {
+  if (!was || holding() || state.code || !state.heldSome || !state.peers.size || replying) return;
+  state.heldSome = false;
+  sendSnapshot();
+};
 
 const releaseTag = () => {
   try { return String(document.documentElement.dataset.release || ''); } catch (_) { return ''; }
@@ -258,7 +301,49 @@ const keyringLocal = () => {
   } catch (_) { return {}; }
 };
 
-const keyringOn = () => releaseTag() === 'beta' && keyringLocal().enabled === true;
+const PROBE_DB = 'mentria-sync-probe';
+const PROBE_MS = 10000;
+let idbProbe = null;
+
+const idbFactory = () => {
+  try { return typeof indexedDB !== 'undefined' && indexedDB ? indexedDB : null; } catch (_) { return null; }
+};
+
+const probeIdb = () => {
+  const f = idbFactory();
+  if (idbProbe && idbProbe.f === f) return idbProbe.p;
+  const entry = { f, ok: false, p: null };
+  idbProbe = entry;
+  entry.p = !f ? Promise.resolve(false) : new Promise((resolve) => {
+    let done = false;
+    let timer = 0;
+    const finish = (ok) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      entry.ok = ok;
+      resolve(ok);
+    };
+    timer = setTimeout(() => finish(false), PROBE_MS);
+    let req = null;
+    try { req = f.open(PROBE_DB); } catch (_) { finish(false); return; }
+    req.onsuccess = () => {
+      try { req.result.close(); } catch (_) {}
+      try { f.deleteDatabase(PROBE_DB); } catch (_) {}
+      finish(true);
+    };
+    req.onerror = (e) => {
+      try { if (e && e.preventDefault) e.preventDefault(); } catch (_) {}
+      finish(false);
+    };
+    req.onblocked = () => finish(false);
+  });
+  return entry.p;
+};
+
+const keyringOn = () => {
+  try { return !!(window.crypto && crypto.subtle) && !!idbProbe && idbProbe.f === idbFactory() && idbProbe.ok === true; } catch (_) { return false; }
+};
 
 const ownDeviceId = () => {
   const id = keyringLocal().deviceId;
@@ -789,10 +874,11 @@ const mergeV2 = async (msg, isBack) => {
 
     const replyStore = {};
     const replyMeta = {};
+    noteHeld();
     replySuffixes.forEach((suffix) => {
       if (!(suffix in afterStore) || heldFromPeer(suffix, afterStore[suffix])) return;
       const { ns, key } = splitSuffix(suffix);
-      replyStore[suffix] = afterStore[suffix];
+      replyStore[suffix] = forPeer(suffix, afterStore[suffix]);
       replyMeta[suffix] = localMtimeOf(ns, key);
     });
 
@@ -820,6 +906,7 @@ const handleMessage = async (payload, from) => {
     return;
   }
   if (!msg || typeof msg !== 'object') return;
+  if (!state.code && from && !state.left.has(from)) state.peers.add(from);
 
   if (state.code && from) {
     if (msg.op === 'hello' || msg.op === 'welcome' || msg.op === 'busy') { await handshake(msg, from); return; }
@@ -837,7 +924,9 @@ const handleMessage = async (payload, from) => {
   }
 
   if ((msg.op === 'snapshot' || msg.op === 'snapshot-back') && msg.v === 2 && msg.data) {
-    if (msg.keyring !== 1) state.oldPeer = true;
+    const was = holding();
+    markPeer(msg, from);
+    holdEnded(was, msg.op === 'snapshot');
     try {
       await mergeV2(msg, msg.op === 'snapshot-back');
       state.exchanged = true;
@@ -894,6 +983,14 @@ const handleMessage = async (payload, from) => {
     if (msg.ns === 'identity' && msg.key === 'vault') {
       try { value = JSON.parse(window.MentriaStore.adopt('identity.vault', JSON.stringify(value))); } catch (_) {}
     }
+    if (NOTE_LISTS.indexOf(suffix) >= 0) {
+      const del = window.MentriaStore.get('quick_notes', 'deleted');
+      value = window.MentriaStore.mergeNotes(window.MentriaStore.get(msg.ns, msg.key), value, del && typeof del === 'object' ? del : {});
+      window.MentriaStore.set(msg.ns, msg.key, value, { remote: true, mtime: Date.now() });
+      state.syncedSinceConnect++;
+      emit('synced', { restored: 1 });
+      return;
+    }
     window.MentriaStore.set(msg.ns, msg.key, value, { remote: true, mtime: msg.mtime });
     state.syncedSinceConnect++;
     emit('synced', { restored: 1 });
@@ -914,6 +1011,23 @@ const handleIncoming = async (payload, from) => {
   try { await handleMessage(payload, from); } finally { state.handled++; }
 };
 
+const sendNotesMerge = async (suffix, value) => {
+  const store = { [suffix]: JSON.stringify(withoutSealed(suffix, value)) };
+  const meta = { [suffix]: Date.now() };
+  const del = window.MentriaStore.get('quick_notes', 'deleted');
+  if (del && typeof del === 'object') {
+    store['quick_notes.deleted'] = JSON.stringify(del);
+    meta['quick_notes.deleted'] = localMtimeOf('quick_notes', 'deleted');
+  }
+  const payload = await encryptPayload(state.key, Object.assign({
+    op: 'snapshot-back', v: 2,
+    data: { version: 1, exportedAt: new Date().toISOString(), store, legacy: {} },
+    meta,
+    tombs: {}
+  }, peerInfo()));
+  sendToPartner(payload);
+};
+
 const onLocalWrite = async (event) => {
   if (!state.action || !state.key) return;
   const d = event.detail || {};
@@ -922,7 +1036,12 @@ const onLocalWrite = async (event) => {
   if (d.op !== 'set' && d.op !== 'remove') return;
   if (window.MentriaStore.isLocalOnly(d.ns + '.' + d.key)) return;
   if (state.vaultKept.has(d.ns + '.' + d.key)) return;
-  if (d.op === 'set' && heldFromPeer(d.ns + '.' + d.key, d.value)) return;
+  if (d.op === 'set' && heldFromPeer(d.ns + '.' + d.key, d.value)) { state.heldSome = true; return; }
+  if (d.op === 'set' && holding() && NOTE_LISTS.indexOf(d.ns + '.' + d.key) >= 0) {
+    state.heldSome = true;
+    try { await sendNotesMerge(d.ns + '.' + d.key, d.value); } catch (err) { emit('error', err); }
+    return;
+  }
   try {
     const mtime = (typeof d.mtime === 'number') ? d.mtime : Date.now();
     let value = d.value;
@@ -941,7 +1060,13 @@ const sendSnapshot = async () => {
   if (!state.action || !state.key) return;
   try {
     const snap = window.MentriaStore.exportAll();
-    if (state.oldPeer && snap.store) Object.keys(snap.store).forEach((suffix) => { if (wraplessLinked(suffix, snap.store[suffix])) delete snap.store[suffix]; });
+    noteHeld();
+    if (holding() && snap.store) {
+      Object.keys(snap.store).forEach((suffix) => {
+        if (wraplessLinked(suffix, snap.store[suffix])) delete snap.store[suffix];
+        else snap.store[suffix] = withoutSealed(suffix, snap.store[suffix]);
+      });
+    }
     const payload = await encryptPayload(state.key, Object.assign({ op: 'snapshot', v: 2, data: snap, meta: buildMeta(snap.store || {}), tombs: loadTombs() }, peerInfo()));
     sendToPartner(payload);
   } catch (err) {
@@ -960,6 +1085,9 @@ const resetSession = () => {
   state.refused = false;
   state.snapshotSent = false;
   state.oldPeer = false;
+  state.newPeers.clear();
+  state.left.clear();
+  state.heldSome = false;
   state.vaultChoice = {};
   state.vaultLinked.clear();
   state.vaultKept.clear();
@@ -1005,7 +1133,7 @@ const handshake = async (msg, from) => {
   if (msg.op === 'hello') {
     if (!state.isInitiator || msg.initiator) return;
     if (state.partner && state.partner !== from) { sendControl('busy', from); return; }
-    if (msg.keyring !== 1) state.oldPeer = true;
+    markPeer(msg, from);
     acceptPartner(from);
     sendControl('welcome', from);
     startSync();
@@ -1014,6 +1142,7 @@ const handshake = async (msg, from) => {
   if (state.isInitiator || !msg.initiator) return;
   if (msg.op === 'welcome') {
     if (state.partner && state.partner !== from) return;
+    markPeer(msg, from);
     acceptPartner(from);
     return;
   }
@@ -1029,6 +1158,7 @@ const handshake = async (msg, from) => {
 const joinRoomWithCode = async (codeRaw, opts) => {
   opts = opts || {};
   const derived = await deriveFromCode(codeRaw);
+  await probeIdb();
   state.code = formatCode(normalizeCode(codeRaw));
   state.roomId = derived.roomId;
   state.key = derived.key;
@@ -1072,7 +1202,7 @@ const joinRoomWithCode = async (codeRaw, opts) => {
   };
   state.room.onPeerLeave = (peerId) => {
     if (peerId !== state.partner) return;
-    state.peers.delete(peerId);
+    dropPeer(peerId);
     if (state.exchanged) { disconnect(); return; }
     state.partner = null;
     state.snapshotSent = false;
@@ -1129,6 +1259,7 @@ const deriveFromIdentity = async (secretBytes) => {
 const joinWithIdentity = async (secretBytes) => {
   if (state.status !== 'idle') await disconnect();
   const derived = await deriveFromIdentity(secretBytes);
+  await probeIdb();
   state.code = null;
   state.roomId = derived.roomId;
   state.key = derived.key;
@@ -1147,15 +1278,20 @@ const joinWithIdentity = async (secretBytes) => {
     throw err;
   }
   state.action = state.room.makeAction('sync');
-  state.action.onMessage = (data) => handleIncoming(data);
+  state.action.onMessage = (data, ctx) => handleIncoming(data, (ctx && ctx.peerId) || null);
   state.room.onPeerJoin = (peerId) => {
+    state.left.delete(peerId);
     state.peers.add(peerId);
+    state.newPeers.delete(peerId);
     setStatus('connected');
     sendSnapshot();
   };
   state.room.onPeerLeave = (peerId) => {
-    state.peers.delete(peerId);
+    const was = holding();
+    state.left.add(peerId);
+    dropPeer(peerId);
     if (state.peers.size === 0) setStatus('pairing');
+    holdEnded(was, false);
   };
   window.addEventListener('mentria:write', onLocalWrite);
   return 'identity';
@@ -1182,6 +1318,9 @@ const disconnect = async () => {
   state.exchanged = false;
   state.snapshotSent = false;
   state.oldPeer = false;
+  state.newPeers.clear();
+  state.left.clear();
+  state.heldSome = false;
   setStatus('idle');
 };
 

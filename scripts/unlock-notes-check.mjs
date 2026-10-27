@@ -1,4 +1,4 @@
-import { rmSync, readFileSync } from 'node:fs';
+import { rmSync, readFileSync, existsSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -7,11 +7,13 @@ import puppeteer from 'puppeteer-core';
 import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
-const PLAIN = process.argv[3] || '';
-if (!BUILD) { console.log('usage: node scripts/unlock-notes-check.mjs <beta build> [<non-beta build>]'); process.exit(2); }
-const PORT = 8091;
+if (!BUILD) { console.log('usage: node scripts/unlock-notes-check.mjs <production build> [<legacy build>]'); process.exit(2); }
+const LEGACY = process.argv[3] || join(tmpdir(), 'unlock-legacy-build');
+const OLD_PORT = Number(process.env.UNLOCK_OLD_PORT) || 8086;
+const OLD_ORIGIN = 'http://localhost:' + OLD_PORT;
+const PORT = Number(process.env.UNLOCK_PORT) || 8091;
 const ORIGIN = 'http://localhost:' + PORT;
-const PROFILE = join(tmpdir(), 'unlock-notes-check-profile');
+const PROFILE = join(tmpdir(), PORT === 8091 ? 'unlock-notes-check-profile' : 'unlock-notes-check-profile-' + PORT);
 const MODULE = '/assets/js/mentria-unlock.js';
 const UI = '/assets/js/mentria-unlock-ui.js';
 const CORE = '/assets/js/mentria-unlock-core.js';
@@ -82,13 +84,6 @@ const NOPRF = () => {
     return get(o);
   };
 };
-const SWITCH_ON = () => {
-  try {
-    const l = JSON.parse(localStorage.getItem('mentria.keyring.local') || '{}') || {};
-    l.enabled = true;
-    localStorage.setItem('mentria.keyring.local', JSON.stringify(l));
-  } catch (_) {}
-};
 
 const srv = serve(PORT);
 await srv.ready;
@@ -128,7 +123,26 @@ async function closeAll() {
   for (const p of await browser.pages()) await p.close();
 }
 
+let runtimeOff = false;
+const blocked = new Map();
+
+async function blockRuntime(page) {
+  const s = await page.createCDPSession();
+  await s.send('Network.enable');
+  await page.setBypassServiceWorker(true);
+  await s.send('Network.setBlockedURLs', { urls: ['*' + MODULE + '*'] });
+  blocked.set(page, s);
+}
+
+async function runtimeOn() {
+  runtimeOff = false;
+  for (const [p, s] of blocked) if (!p.isClosed()) await s.send('Network.setBlockedURLs', { urls: [] }).catch(() => {});
+  blocked.clear();
+}
+
 async function clean() {
+  runtimeOff = false;
+  blocked.clear();
   await closeAll();
   const blank = await browser.newPage();
   await blank.goto(ORIGIN + '/robots.txt');
@@ -151,6 +165,7 @@ async function open(path, ...inits) {
   logs.set(page, log);
   page.on('request', (r) => log.requests.push(r.url()));
   page.on('pageerror', (e) => log.errors.push(String(e && e.message || e)));
+  if (runtimeOff) await blockRuntime(page);
   await page.evaluateOnNewDocument(PROBE);
   for (const init of inits) await page.evaluateOnNewDocument(init);
   await page.goto(ORIGIN + path, { waitUntil: 'load' });
@@ -450,7 +465,7 @@ async function legacySeed(page) {
 
 async function notesKeyring(extra) {
   await clean();
-  const page = await open(NOTES, SWITCH_ON, ...(extra || []));
+  const page = await open(NOTES, ...(extra || []));
   await settle(page, 'one');
   const code = await makeKeyring(page);
   await until(() => runtime(page, 'unlocked'), 10000, 'keyring open');
@@ -464,10 +479,11 @@ async function lockActive(page, title, text) {
   return { msg, note: byTitle(list, title) };
 }
 
-check('switch off keeps the old flow', async () => {
-  for (const [label, dir] of [['beta', BUILD]].concat(PLAIN ? [['non-beta', PLAIN]] : [])) {
-    srv.setRoot(dir);
+check('Quick Notes keeps the old flow while the one unlock cannot load, and runs the one unlock with no switch', async () => {
+  {
+    const label = 'no one unlock';
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES);
     const auth = await authOn(page);
     await settle(page, 'old');
@@ -501,25 +517,92 @@ check('switch off keeps the old flow', async () => {
     await reload(page, 'old');
     await pick(page, 'New kind');
     v = await view(page);
-    assert(v.panel && !v.unlockBtn && v.note === QN.one_unlock_off, label + ': a note locked with the one unlock is not offered the old unlock', v);
+    assert(v.panel && !v.unlockBtn && v.note === QN.one_unlock_failed, label + ': a note locked with the one unlock is not offered the old unlock, and the panel says the one unlock did not load', v);
     await resetWa(page);
     await page.evaluate(() => document.getElementById('qn-unlock-btn').click());
     await sleep(500);
     assert((await wa(page)).length === 0, label + ': no passkey prompt for it', await wa(page));
     const log = logs.get(page);
     assert(!log.requests.some((u) => u.includes(UI)), label + ': the card module is never loaded', log.requests.filter((u) => u.includes('unlock')));
-    assert(!log.requests.some((u) => u.includes(MODULE)), label + ': the runtime is never loaded with the switch off');
+    assert(log.requests.some((u) => new URL(u).pathname === MODULE) && (await page.evaluate(() => document.getElementById('qn-tool').dataset.lock)) === 'old', label + ': the page tries the one unlock and, when it cannot load, keeps the old way');
     const dbs = await page.evaluate(async () => (await indexedDB.databases()).map((d) => d.name));
     assert(!dbs.includes('mentria-keyring') && (await readJson(page, RECORD)) === null, label + ': no keyring storage touched', dbs);
     assert(!log.errors.length, label + ': no page errors', log.errors);
+    assert((await readJson(page, LOCAL)) === null, 'no switch is seeded');
+    await runtimeOn();
+    log.requests.length = 0;
+    await reload(page, 'one');
+    assert(log.requests.some((u) => new URL(u).pathname === MODULE), 'with no switch the page loads the one unlock');
+    await pick(page, 'New kind');
+    v = await view(page);
+    assert(v.panel && v.note !== QN.one_unlock_off && v.note !== QN.one_unlock_failed, 'a note locked with the one unlock no longer says the one unlock is missing', v);
+    await pick(page, 'Old');
+    v = await view(page);
+    assert(v.panel && v.unlockBtn && v.link && v.link.includes(UN.link_title), 'an old lock shows the line that brings it into the one unlock', v);
+    assert(!/"enabled"/.test(JSON.stringify((await readJson(page, LOCAL)) || {})), 'nothing writes a switch');
   }
-  srv.setRoot(BUILD);
+});
+
+const NO_IDB = () => { Object.defineProperty(window, 'indexedDB', { configurable: true, get: () => undefined }); };
+const KV2_NOTE = () => {
+  const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob') || '[]');
+  list.push({ id: 'kvtwo', title: 'New kind', body: 'AAAA', iv: 'AAAAAAAAAAAAAAAA', enc: true, kv: 2, createdAt: 1, updatedAt: 3 });
+  window.MentriaStore.set('quick_notes', 'blob', list);
+};
+
+check('a browser that cannot run the one unlock says so, apart from a load failure', async () => {
+  await clean();
+  const seed = await open(NOTES);
+  await settle(seed, 'one');
+  await seed.evaluate(KV2_NOTE);
+  await seed.close();
+  const page = await open(NOTES, NO_IDB);
+  await settle(page, 'old');
+  await pick(page, 'New kind');
+  const v = await view(page);
+  assert(v.panel && !v.unlockBtn && v.note === QN.one_unlock_off, 'without IndexedDB the panel says this browser cannot run the one unlock', v);
+  assert(QN.one_unlock_off !== QN.one_unlock_failed, 'the two messages differ');
+});
+
+check('a stalled one unlock falls back after 5 s and takes over when it arrives', async () => {
+  await clean();
+  const seed = await open(NOTES);
+  await settle(seed, 'one');
+  await seed.evaluate(KV2_NOTE);
+  await seed.close();
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 900 });
+  const log = { requests: [], errors: [] };
+  logs.set(page, log);
+  page.on('pageerror', (e) => log.errors.push(String(e && e.message || e)));
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  let release = null;
+  const held = new Promise((r) => { release = r; });
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    if (new URL(q.url()).pathname === MODULE) { held.then(() => q.continue().catch(() => {})); return; }
+    q.continue().catch(() => {});
+  });
+  await page.evaluateOnNewDocument(PROBE);
+  const t0 = Date.now();
+  await page.goto(ORIGIN + NOTES, { waitUntil: 'load' });
+  await settle(page, 'old');
+  const waited = Date.now() - t0;
+  assert(waited >= 4000 && waited < 9000, 'the page falls back to the old way after the 5 s wait', waited);
+  await pick(page, 'New kind');
+  let v = await view(page);
+  assert(v.panel && v.note === QN.one_unlock_failed, 'while the one unlock is stalled the panel says it did not load', v);
+  release();
+  await settle(page, 'one');
+  v = await waitView(page, (x) => x.note !== QN.one_unlock_failed, 'the note panel updates once the one unlock arrives');
+  assert(!log.errors.length, 'no page errors', log.errors);
 });
 
 check('old locks keep their own salt and passkey through a sync', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES);
     const auth = await authOn(page);
     await settle(page, 'old');
@@ -569,14 +652,14 @@ check('old locks keep their own salt and passkey through a sync', async () => {
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('a note with stale salt and passkey opens with the stored ones', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES);
     await authOn(page);
     await settle(page, 'old');
@@ -612,14 +695,14 @@ check('a note with stale salt and passkey opens with the stored ones', async () 
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('a sync during a visit keeps old notes opening and their edits saved', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES);
     await authOn(page);
     await settle(page, 'old');
@@ -661,14 +744,14 @@ check('a sync during a visit keeps old notes opening and their edits saved', asy
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('old notes without a pair find this device\'s pair after a sync', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES);
     await authOn(page);
     await settle(page, 'old');
@@ -706,15 +789,15 @@ check('old notes without a pair find this device\'s pair after a sync', async ()
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('a pair replaced while Quick Notes is closed keeps old notes opening', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     for (const how of ['sync', 'import']) {
       await clean();
+      runtimeOff = true;
       const page = await open(NOTES);
       await authOn(page);
       await settle(page, 'old');
@@ -740,14 +823,14 @@ check('a pair replaced while Quick Notes is closed keeps old notes opening', asy
       assert(!log.errors.length, how + ': no page errors', log.errors);
     }
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('a pair a sync replaced before this release is found in the sync rescue', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES);
     await authOn(page);
     await settle(page, 'old');
@@ -769,14 +852,14 @@ check('a pair a sync replaced before this release is found in the sync rescue', 
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('a new lock uses the stored passkey when this device\'s passkey does not answer', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES, NOPRF);
     await authOn(page);
     await settle(page, 'old');
@@ -811,14 +894,14 @@ check('a new lock uses the stored passkey when this device\'s passkey does not a
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('old notes open when the stored or their own passkey is not on this device', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES);
     await authOn(page);
     await settle(page, 'old');
@@ -851,14 +934,14 @@ check('old notes open when the stored or their own passkey is not on this device
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('an old unlock moves on when a passkey answers without the extension', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES, NOPRF);
     await authOn(page);
     await settle(page, 'old');
@@ -880,14 +963,14 @@ check('an old unlock moves on when a passkey answers without the extension', asy
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('an old unlock that opens nothing says so', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES);
     await authOn(page);
     await settle(page, 'old');
@@ -910,14 +993,14 @@ check('an old unlock that opens nothing says so', async () => {
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
 check('unlock never makes a passkey or a new salt', async () => {
-  srv.setRoot(PLAIN || BUILD);
   try {
     await clean();
+    runtimeOff = true;
     const page = await open(NOTES);
     const auth = await authOn(page);
     await settle(page, 'old');
@@ -938,7 +1021,7 @@ check('unlock never makes a passkey or a new salt', async () => {
     const log = logs.get(page);
     assert(!log.errors.length, 'no page errors', log.errors);
   } finally {
-    srv.setRoot(BUILD);
+    runtimeOff = false;
   }
 });
 
@@ -996,7 +1079,7 @@ check('lock a note in keyring mode', async () => {
 
 check('lock with no keyring runs setup first', async () => {
   await clean();
-  const page = await open(NOTES, SWITCH_ON);
+  const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'one');
   await writeNote(page, 'Mike', 'mike secret text', false);
@@ -1095,6 +1178,7 @@ check('readAll returns ciphertext for locked notes', async () => {
 
 check('legacy notes convert after one tap', async () => {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   const auth = await authOn(page);
   await settle(page, 'old');
@@ -1103,7 +1187,7 @@ check('legacy notes convert after one tap', async () => {
   const before = await blob(page);
   const cred = await store(page, 'quick_notes', 'cred_id');
   assert(typeof cred === 'string' && (await auth.creds()).length === 1, 'one old passkey');
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   const code = await makeKeyring(page);
   await lockKeyring(page);
@@ -1153,6 +1237,7 @@ check('legacy notes convert after one tap', async () => {
 
 check('old locks under two salts convert with their own passkeys', async () => {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'old');
@@ -1164,7 +1249,7 @@ check('old locks under two salts convert with their own passkeys', async () => {
   await waitBlob(page, (v) => !!byTitle(v, 'Two'), 'Two arrived by sync');
   await legacyNote(page, 'Foreign', 'from a lost key');
   const before = await blob(page);
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   await makeKeyring(page);
   await pick(page, 'One');
@@ -1208,6 +1293,7 @@ check('old locks under two salts convert with their own passkeys', async () => {
 
 check('old notes convert with the passkey that opened them after a sync', async () => {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'old');
@@ -1216,7 +1302,7 @@ check('old notes convert with the passkey that opened them after a sync', async 
   await writeNote(page, 'Bravo', 'bravo secret text', true);
   await oldLock(page, 'Bravo', 'bravo secret text');
   await stripPairs(page, ['Alpha', 'Bravo']);
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   const before = await blob(page);
   const code = await makeKeyring(page);
@@ -1244,6 +1330,7 @@ check('old notes convert with the passkey that opened them after a sync', async 
 
 check('an old note opened on Later keeps saving with its passkey after a sync', async () => {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'old');
@@ -1251,7 +1338,7 @@ check('an old note opened on Later keeps saving with its passkey after a sync', 
   await oldLock(page, 'Alpha', 'alpha secret text');
   const mine = await storedPair(page);
   await stripPairs(page, ['Alpha']);
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   const before = await blob(page);
   await pick(page, 'Alpha');
@@ -1294,13 +1381,14 @@ check('a tap with no old lock here counts every old note', async () => {
 
 check('an old unlock that opens nothing keeps the count and shows no card', async () => {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'old');
   await writeNote(page, 'Alpha', 'alpha secret text', false);
   await oldLock(page, 'Alpha', 'alpha secret text');
   await legacyNote(page, 'Lambda', 'lambda text');
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   await makeKeyring(page);
   await pick(page, 'Alpha');
@@ -1326,12 +1414,13 @@ check('an old unlock that opens nothing keeps the count and shows no card', asyn
 
 check('legacy notes keep working on Later and survive a failed write', async () => {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'old');
   await legacySeed(page);
   const before = await blob(page);
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   await pick(page, 'Alpha');
   await resetWa(page);
@@ -1392,12 +1481,13 @@ async function oneLegacy(page) {
 
 async function failedConversion() {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'old');
   await oneLegacy(page);
   const before = await blob(page);
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   const code = await makeKeyring(page);
   await failBlobWrites(page, true);
@@ -1413,12 +1503,13 @@ async function failedConversion() {
 
 check('conversion keeps later edits and deletions', async () => {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'old');
   await legacySeed(page);
   const before = await blob(page);
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   await makeKeyring(page);
   await pick(page, 'Alpha');
@@ -1707,11 +1798,12 @@ check('two devices\' keys all open and move to the current key', async () => {
 
 check('Later on the card keeps the old note, with the old Lock title', async () => {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'old');
   await oneLegacy(page);
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   await makeKeyring(page);
   await lockKeyring(page);
@@ -1728,11 +1820,12 @@ check('Later on the card keeps the old note, with the old Lock title', async () 
 
 check('Not now with notes linked opens old notes read only, and a lock elsewhere closes them', async () => {
   await clean();
+  runtimeOff = true;
   const page = await open(NOTES);
   await authOn(page);
   await settle(page, 'old');
   await oneLegacy(page);
-  await page.evaluate(SWITCH_ON);
+  await runtimeOn();
   await reload(page, 'one');
   const code = await makeKeyring(page);
   await page.evaluate(async (M) => {
@@ -1919,6 +2012,132 @@ check('old lock retires once every note converted', async () => {
   await waitView(page, (x) => x.text === 'hotel secret text', 'Hotel opens after a reload');
   await sleep(1200);
   assert((await page.evaluate(() => window.__signals.length)) === 0, 'retirement signals once');
+});
+
+const BRIDGE_STUB = "export const selfId = 'self';\nexport function joinRoom() {\n  const room = { onPeerJoin: null, onPeerLeave: null, leave: async () => {} };\n  room.makeAction = (name) => { const a = { name, onMessage: null, send: (payload) => { window.__bridgeOut(JSON.stringify(payload)); } }; room.action = a; return a; };\n  window.__room = room;\n  return room;\n}\n";
+
+async function bridgedDevice(origin, path) {
+  const ctx = await browser.createBrowserContext();
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e && e.message || e).slice(0, 300)));
+  await page.setBypassServiceWorker(true);
+  await page.setRequestInterception(true);
+  page.on('request', (q) => {
+    if (q.isInterceptResolutionHandled()) return;
+    const u = new URL(q.url());
+    if (u.origin !== origin) { q.abort().catch(() => {}); return; }
+    if (u.pathname === '/assets/vendor/trystero-nostr.js') { q.respond({ status: 200, contentType: 'text/javascript', body: BRIDGE_STUB }).catch(() => {}); return; }
+    q.continue().catch(() => {});
+  });
+  await page.evaluateOnNewDocument(() => { window.mentriaConfirm = async () => true; });
+  const dev = { ctx, page, errors, sent: 0, peer: null, chain: Promise.resolve() };
+  await page.exposeFunction('__bridgeOut', (payload) => {
+    dev.sent++;
+    const to = dev.peer;
+    if (!to) return;
+    to.chain = to.chain.then(() => to.page.evaluate((p, id) => { if (window.__room && window.__room.action && window.__room.action.onMessage) window.__room.action.onMessage(JSON.parse(p), { peerId: id }); }, payload, dev.name).catch(() => {}));
+  });
+  await page.goto(origin + path, { waitUntil: 'load' });
+  await page.waitForFunction(() => !!window.MentriaStore, { timeout: 20000 });
+  await page.evaluate(async () => { await import('/assets/js/mentria-sync.js'); });
+  return dev;
+}
+
+async function quiet(a, b) {
+  let last = -1;
+  for (let i = 0; i < 100; i++) {
+    await sleep(500);
+    await a.chain;
+    await b.chain;
+    const now = a.sent + b.sent;
+    if (now === last) return;
+    last = now;
+  }
+  throw new Error('the two devices never went quiet');
+}
+
+const blobOf = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob') || '[]'));
+const note = (list, id) => list.find((n) => n.id === id);
+const sealedIn = (list) => list.filter((n) => n && n.enc && n.kv === 2).map((n) => n.id).sort();
+
+check('an older-release device syncing with this release never gets notes it cannot open', async () => {
+  if (!existsSync(LEGACY)) throw new Error('legacy build missing at ' + LEGACY);
+  const old = serve(OLD_PORT);
+  await old.ready;
+  old.setRoot(LEGACY);
+  try {
+    for (const mode of ['code', 'identity']) {
+      await clean();
+      const N = await bridgedDevice(ORIGIN, '/tools/');
+      const O = await bridgedDevice(OLD_ORIGIN, '/tools/');
+      N.name = 'peer-new';
+      O.name = 'peer-old';
+      N.peer = O;
+      O.peer = N;
+      try {
+        assert(!(await O.page.evaluate(() => document.documentElement.hasAttribute('data-release'))) && (await N.page.evaluate(() => document.documentElement.hasAttribute('data-release'))), mode + ': the second device runs the older release, the first this one');
+        await O.page.evaluate(() => {
+          window.MentriaStore.set('quick_notes', 'blob', [
+            { id: 'a', title: 'A', body: 'old-a', iv: 'old-iv-a', enc: true, salt: 's', credId: 'c', createdAt: 1, updatedAt: 1000 },
+            { id: 'p', title: 'P', body: 'plain p', createdAt: 1, updatedAt: 1000 }
+          ]);
+        });
+        await N.page.evaluate(() => {
+          window.MentriaStore.set('quick_notes', 'blob', [
+            { id: 'a', title: 'A', body: 'one-a', iv: 'one-iv-a', enc: true, kv: 2, createdAt: 1, updatedAt: 1001 },
+            { id: 'p', title: 'P', body: 'plain p', createdAt: 1, updatedAt: 1000 },
+            { id: 'n2', title: 'N2', body: 'one-n2', iv: 'one-iv-n2', enc: true, kv: 2, createdAt: 1, updatedAt: 1500 }
+          ]);
+        });
+        if (mode === 'code') {
+          const code = await N.page.evaluate(() => window.MentriaSync.start());
+          await O.page.evaluate((c) => window.MentriaSync.joinWithCode(c), code);
+        } else {
+          for (const d of [N, O]) await d.page.evaluate(() => window.MentriaSync.joinWithIdentity(new Uint8Array(32).fill(7)));
+        }
+        await N.page.evaluate(() => window.__room.onPeerJoin('peer-old'));
+        await O.page.evaluate(() => window.__room.onPeerJoin('peer-new'));
+        await quiet(N, O);
+        let o = await blobOf(O.page);
+        let n = await blobOf(N.page);
+        assert(N.sent > 0 && O.sent > 0, mode + ': the two devices exchanged messages', { n: N.sent, o: O.sent });
+        assert(sealedIn(o).length === 0, mode + ': the older device holds no note sealed by the one unlock', o);
+        assert(note(o, 'a') && note(o, 'a').iv === 'old-iv-a', mode + ': the older device keeps its own copy of the converted note', note(o, 'a'));
+        assert(note(o, 'p'), mode + ': plain notes still sync');
+        assert(note(n, 'a').kv === 2 && note(n, 'n2') && note(n, 'n2').kv === 2, mode + ': the old copy coming back never undoes the conversion here', n);
+        await N.page.evaluate(() => {
+          const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob'));
+          list.find((x) => x.id === 'p').body = 'plain p edited';
+          list.find((x) => x.id === 'p').updatedAt = 2000;
+          window.MentriaStore.set('quick_notes', 'blob', list);
+        });
+        await quiet(N, O);
+        o = await blobOf(O.page);
+        assert(note(o, 'p') && note(o, 'p').body === 'plain p edited', mode + ': a live edit here reaches the older device', note(o, 'p'));
+        assert(sealedIn(o).length === 0 && note(o, 'a') && note(o, 'a').iv === 'old-iv-a', mode + ': the live edit keeps the older device\'s own copy and sends nothing it cannot open', o);
+        await O.page.evaluate(() => {
+          const list = JSON.parse(localStorage.getItem('mentria.store.quick_notes.blob'));
+          const a = list.find((x) => x.id === 'a');
+          a.iv = 'old-iv-a-edited';
+          a.updatedAt = 3000;
+          window.MentriaStore.set('quick_notes', 'blob', list);
+        });
+        await quiet(N, O);
+        n = await blobOf(N.page);
+        assert(note(n, 'a') && note(n, 'a').iv === 'old-iv-a-edited' && !('kv' in note(n, 'a')), mode + ': a genuinely newer edit on the older device wins', note(n, 'a'));
+        assert(note(n, 'n2') && note(n, 'n2').kv === 2, mode + ': the older device\'s write never drops a note locked here', n);
+        assert(!N.errors.length && !O.errors.length, mode + ': no page errors', { n: N.errors, o: O.errors });
+      } finally {
+        for (const d of [N, O]) {
+          try { await d.page.evaluate(() => window.MentriaSync && window.MentriaSync.disconnect()); } catch (_) {}
+          await d.ctx.close().catch(() => {});
+        }
+      }
+    }
+  } finally {
+    await old.close();
+  }
 });
 
 let failed = 0;

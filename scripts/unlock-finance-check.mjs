@@ -6,11 +6,12 @@ import puppeteer from 'puppeteer-core';
 import { serve } from './unlock-serve.mjs';
 
 const BUILD = process.argv[2];
-const PROD = process.argv[3] || '';
-if (!BUILD) { console.log('usage: node scripts/unlock-finance-check.mjs <beta build dir> [<production build dir>]'); process.exit(2); }
-const PORT = 8090;
+if (!BUILD) { console.log('usage: node scripts/unlock-finance-check.mjs <production build dir>'); process.exit(2); }
+const HOST = '/tools/';
+const RUNTIME = '/assets/js/mentria-unlock.js';
+const PORT = Number(process.env.UNLOCK_PORT) || 8090;
 const ORIGIN = 'http://localhost:' + PORT;
-const PROFILE = join(tmpdir(), 'unlock-finance-check-profile');
+const PROFILE = join(tmpdir(), PORT === 8090 ? 'unlock-finance-check-profile' : 'unlock-finance-check-profile-' + PORT);
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const EN = JSON.parse(readFileSync(join(REPO, 'src/_data/i18n/en.json'), 'utf8'));
@@ -105,7 +106,7 @@ async function rig(opts) {
   const context = await browser.createBrowserContext();
   const r = { context, pages: [], errors: [], dialogs: [] };
   r.page = await newPage(r, o.authenticator !== false);
-  if (o.switchOn) await setSwitch(r.page, true);
+  if (o.oldWay) await setRuntime(r.page, false);
   return r;
 }
 
@@ -114,6 +115,7 @@ async function newPage(r, withAuth) {
   await page.setViewport({ width: 1280, height: 900 });
   page.on('pageerror', (e) => r.errors.push(String((e && e.message) || e).slice(0, 300)));
   page.on('dialog', async (d) => { r.dialogs.push(d.type() + ': ' + d.message()); try { await d.dismiss(); } catch (_) {} });
+  await applyRuntime(page);
   await page.evaluateOnNewDocument(PROBE);
   if (withAuth !== false) {
     const cdp = await page.createCDPSession();
@@ -130,14 +132,29 @@ async function done(r) {
   try { await r.context.close(); } catch (_) {}
 }
 
-async function setSwitch(page, on) {
+const runtimeOff = new WeakMap();
+
+async function applyRuntime(page) {
+  const st = runtimeOff.get(page.browserContext());
+  if (!st) return;
+  let s = st.sessions.get(page);
+  if (!s && !st.off) return;
+  if (!s) {
+    s = await page.createCDPSession();
+    await s.send('Network.enable');
+    st.sessions.set(page, s);
+    await page.setBypassServiceWorker(true);
+  }
+  await s.send('Network.setBlockedURLs', { urls: st.off ? ['*' + RUNTIME + '*'] : [] });
+}
+
+async function setRuntime(page, loads) {
+  const ctx = page.browserContext();
+  const st = runtimeOff.get(ctx) || { off: false, sessions: new Map() };
+  runtimeOff.set(ctx, st);
+  st.off = !loads;
+  for (const p of new Set([page, ...st.sessions.keys()])) if (!p.isClosed()) await applyRuntime(p);
   if (!page.url().startsWith(ORIGIN)) await page.goto(ORIGIN + '/robots.txt', { waitUntil: 'load' });
-  await page.evaluate((v) => {
-    let l = {};
-    try { l = JSON.parse(localStorage.getItem('mentria.keyring.local') || '{}') || {}; } catch (_) {}
-    l.enabled = v;
-    localStorage.setItem('mentria.keyring.local', JSON.stringify(l));
-  }, on);
 }
 
 async function store(page) {
@@ -403,8 +420,8 @@ check('the Finance package leaves the runtime to the site', async () => {
   }
 });
 
-check('switch off keeps the old flow', async () => {
-  const r = await rig();
+check('while the one unlock cannot load a new ledger keeps the old flow', async () => {
+  const r = await rig({ oldWay: true });
   shared.legacy = r;
   const page = r.page;
   let frame = await store(page);
@@ -432,9 +449,10 @@ check('switch off keeps the old flow', async () => {
 
 check('legacy ledger links after one old unlock', async () => {
   const r = shared.legacy;
-  assert(r && shared.code, 'needs the ledger from the switch-off check');
+  assert(r && shared.code, 'needs the ledger from the old-flow check');
   const page = r.page;
-  await setSwitch(page, true);
+  assert(await page.evaluate(() => localStorage.getItem('mentria.keyring.local')) === null, 'no switch is seeded');
+  await setRuntime(page, true);
   const frame = await store(page);
   await shown(frame, '#fin-pass', 20000);
   await frame.waitForFunction((t) => { const b = document.querySelector('.flock .fbanner--mint'); return b && !b.hidden && b.textContent.includes(t); }, { timeout: 15000 }, UK.link_title);
@@ -506,7 +524,7 @@ check('locked shows card and quick add', async () => {
 });
 
 check('new ledger is linked', async () => {
-  const r = await rig({ switchOn: true });
+  const r = await rig();
   shared.fresh = r;
   const page = r.page;
   let frame = await store(page);
@@ -717,12 +735,12 @@ check('after Erase a new ledger links normally', async () => {
 });
 
 check('legacy device unlock turns on remember', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   const page = r.page;
   let frame = await store(page);
   const code = await legacySetup(frame, { passkey: false, device: true });
   assert((await metaOf(frame)).wrapKinds.includes('device'), 'today\'s device unlock is on');
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   frame = await store(page);
   await present(frame, '#fin-main', 60000);
   await waitStep(frame, 'intro');
@@ -751,13 +769,13 @@ check('legacy device unlock turns on remember', async () => {
 });
 
 check('adopting a linked ledger hands its device unlock to Remember', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     let frame = await store(page);
     await legacySetup(frame, { passkey: false, device: true });
-    await setSwitch(page, true);
-    await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
+    await setRuntime(page, true);
+    await page.goto(ORIGIN + HOST, { waitUntil: 'load' });
     const made = await page.evaluate(async () => {
       const M = await import('/assets/js/mentria-unlock.js');
       const V = await import('/assets/finance/vault.js');
@@ -783,12 +801,12 @@ check('adopting a linked ledger hands its device unlock to Remember', async () =
 });
 
 check('recovery code unlock keeps the Finance code', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     let frame = await store(page);
     const code = await legacySetup(frame, { passkey: false, device: false });
-    await setSwitch(page, true);
+    await setRuntime(page, true);
     frame = await store(page);
     await shown(frame, '#fin-pass', 20000);
     await pressText(frame, '.flock', FIN.lock.use_recovery);
@@ -934,8 +952,8 @@ check('retired elsewhere: leftover wraps go and stay gone', async () => {
 });
 
 async function keyringOn(page, lockAfter) {
-  at('keyring on the lab page');
-  await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
+  at('keyring on a site page');
+  await page.goto(ORIGIN + HOST, { waitUntil: 'load' });
   return page.evaluate(async (l) => {
     const M = await import('/assets/js/mentria-unlock.js');
     const core = await import('/assets/js/mentria-unlock-core.js');
@@ -948,7 +966,7 @@ async function keyringOn(page, lockAfter) {
 }
 
 async function onLab(page, fn, arg) {
-  if (!page.url().startsWith(ORIGIN + '/beta/unlock/')) await page.goto(ORIGIN + '/beta/unlock/', { waitUntil: 'load' });
+  if (!page.url().startsWith(ORIGIN + HOST)) await page.goto(ORIGIN + HOST, { waitUntil: 'load' });
   return page.evaluate(fn, arg);
 }
 
@@ -964,7 +982,7 @@ async function declinedTab(r, prep) {
   const page = r.page;
   let frame = await store(page);
   await legacySetup(frame, { passkey: false, device: false });
-  await setSwitch(page, true);
+  await setRuntime(page, true);
   const code = await keyringOn(page, !prep);
   if (prep) await onLab(page, prep, PASS);
   frame = await store(page);
@@ -981,7 +999,7 @@ async function declinedTab(r, prep) {
 }
 
 check('a tab that said Later locks once another tab linked the ledger', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     const { frame, code } = await declinedTab(r);
@@ -1012,7 +1030,7 @@ check('a tab that said Later locks once another tab linked the ledger', async ()
 });
 
 check('a tab that said Later takes up a link made in another tab', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     const { frame, code } = await declinedTab(r);
@@ -1050,12 +1068,12 @@ check('a tab that said Later takes up a link made in another tab', async () => {
 });
 
 check('Later after a device unlock is not asked again in this tab', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     let frame = await store(page);
     await legacySetup(frame, { passkey: false, device: true });
-    await setSwitch(page, true);
+    await setRuntime(page, true);
     frame = await store(page);
     await present(frame, '#fin-main', 60000);
     await waitStep(frame, 'intro');
@@ -1077,13 +1095,13 @@ check('Later after a device unlock is not asked again in this tab', async () => 
 });
 
 check('retired elsewhere: this ledger\'s synced wraps go too', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     let frame = await store(page);
     await legacySetup(frame, { passkey: false, device: false });
     assert(await until(async () => (await ledgerOf(frame, PASS)).pass, 15000), 'the wraps are mirrored into the ledger');
-    await setSwitch(page, true);
+    await setRuntime(page, true);
     await keyringOn(page, false);
     await onLab(page, async (pw) => {
       const M = await import('/assets/js/mentria-unlock.js');
@@ -1115,7 +1133,7 @@ check('retired elsewhere: this ledger\'s synced wraps go too', async () => {
 });
 
 check('a Lock closes a tab that said Later once the one unlock holds Finance from another device', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     const { frame, code } = await declinedTab(r, async (pw) => {
@@ -1151,12 +1169,12 @@ check('a Lock closes a tab that said Later once the one unlock holds Finance fro
 });
 
 check('a ledger the one unlock cannot open keeps its own lock', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     let frame = await store(page);
     await legacySetup(frame, { passkey: false, device: false });
-    await setSwitch(page, true);
+    await setRuntime(page, true);
     await keyringOn(page, false);
     await onLab(page, async () => {
       const M = await import('/assets/js/mentria-unlock.js');
@@ -1184,12 +1202,12 @@ check('a ledger the one unlock cannot open keeps its own lock', async () => {
 });
 
 check('a lock while the link sheet is open is not a Later', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     let frame = await store(page);
     await legacySetup(frame, { passkey: false, device: false });
-    await setSwitch(page, true);
+    await setRuntime(page, true);
     await keyringOn(page, true);
     frame = await store(page);
     await shown(frame, '#fin-pass', 20000);
@@ -1220,12 +1238,12 @@ async function rememberOf(scope) {
 }
 
 check('Remember turned off stays off when a device-unlock ledger links', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     let frame = await store(page);
     await legacySetup(frame, { passkey: false, device: true });
-    await setSwitch(page, true);
+    await setRuntime(page, true);
     const code = await keyringOn(page, false);
     await onLab(page, async () => {
       const M = await import('/assets/js/mentria-unlock.js');
@@ -1249,12 +1267,12 @@ check('Remember turned off stays off when a device-unlock ledger links', async (
 });
 
 check('a Remember that needed a confirm turns on at the next card unlock', async () => {
-  const r = await rig();
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     let frame = await store(page);
     await legacySetup(frame, { passkey: false, device: true });
-    await setSwitch(page, true);
+    await setRuntime(page, true);
     const code = await keyringOn(page, false);
     frame = await store(page);
     await opened(frame);
@@ -1298,13 +1316,23 @@ async function reopens(page) {
   return frame;
 }
 
-async function deviceLockStays() {
-  const r = await rig();
+async function deviceLockStays(one) {
+  const r = await rig({ oldWay: true });
   try {
     const page = r.page;
     let frame = await store(page);
     await legacySetup(frame, { passkey: false, device: true });
     assert((await metaOf(frame)).wrapKinds.includes('device'), 'today\'s device unlock is on');
+    if (one) {
+      await setRuntime(page, true);
+      frame = await store(page);
+      await present(frame, '#fin-main', 60000);
+      await waitStep(frame, 'intro');
+      await press(frame, '.m-ulayer [data-act="not-now"]');
+      await layerGone(frame);
+      await opened(frame);
+      assert(!(await metaOf(frame)).linked && (await record(page)) === null, 'Not now keeps today\'s ledger');
+    }
     await lockTop(frame);
     await sleep(2000);
     let s = await lockedNow(frame);
@@ -1328,12 +1356,52 @@ async function deviceLockStays() {
   }
 }
 
-check('device unlock: Lock stays locked with the switch off', deviceLockStays);
+check('a stalled one unlock shows the old unlock after 5 s and offers the link when it arrives', async () => {
+  const r = await rig({ oldWay: true });
+  try {
+    const page = r.page;
+    let frame = await store(page);
+    await legacySetup(frame, { passkey: false, device: false });
+    await setRuntime(page, true);
+    await page.setRequestInterception(true);
+    let release = null;
+    const held = new Promise((ok) => { release = ok; });
+    page.on('request', (q) => {
+      if (q.isInterceptResolutionHandled()) return;
+      if (new URL(q.url()).pathname === RUNTIME) { held.then(() => q.continue().catch(() => {})); return; }
+      q.continue().catch(() => {});
+    });
+    const t0 = Date.now();
+    frame = await store(page);
+    await shown(frame, '#fin-pass', 20000);
+    const waited = Date.now() - t0;
+    assert(waited >= 4000 && waited < 9000, 'the old unlock shows after the 5 s wait, not after the stalled load', waited);
+    assert(!(await frame.$('.flock .m-unlock')), 'no card while the one unlock is stalled');
+    release();
+    await frame.waitForFunction((t) => { const b = document.querySelector('.flock .fbanner--mint'); return b && !b.hidden && b.textContent.includes(t); }, { timeout: 20000 }, UK.link_title);
+    assert(await frame.$('#fin-pass'), 'the old unlock stays, now with the link line');
+    assert(!r.errors.length, 'no page errors', r.errors);
+  } finally {
+    await done(r);
+  }
+});
 
-check('device unlock: Lock stays locked on the production build', async () => {
-  if (!PROD) throw new Error('SKIP no production build given');
-  server.setRoot(PROD);
-  try { await deviceLockStays(); } finally { server.setRoot(BUILD); }
+check('device unlock: Lock stays locked while the one unlock cannot load', () => deviceLockStays(false));
+
+check('device unlock: Lock stays locked on a production build with the one unlock on', async () => {
+  const r = await rig({ authenticator: false });
+  try {
+    await r.page.goto(ORIGIN + HOST, { waitUntil: 'load' });
+    const tag = await r.page.evaluate(() => document.documentElement.getAttribute('data-release'));
+    if (tag === 'beta') throw new Error('SKIP the build is a beta build');
+    assert(tag !== null, 'the page comes from the new build', tag);
+    assert(await r.page.evaluate(async () => (await fetch('/beta/unlock/')).status) === 404, 'a production build has no lab page');
+    const palette = await r.page.evaluate(async () => (await fetch('/assets/js/site-palette.en.js')).text());
+    assert(!palette.includes('/beta/unlock/') && !palette.includes('openPath') && palette.includes('beta: false'), 'the production palette has no beta entries');
+  } finally {
+    await done(r);
+  }
+  await deviceLockStays(true);
 });
 
 let failed = 0;

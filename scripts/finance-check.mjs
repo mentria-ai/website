@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createRequire } from 'node:module';
+import { createRequire, register } from 'node:module';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const mod = (name) => import(pathToFileURL(resolve(here, '../src/assets/finance/' + name)).href);
@@ -1347,33 +1347,43 @@ test('keyring helper: settings errors read as copy, never as codes', () => {
   assert.ok(!/toast\([^;]*errCode\(/.test(src), 'a settings toast shows a raw error code');
 });
 
-test('keyring helper: nothing loads outside a beta page', async () => {
-  const had = Object.prototype.hasOwnProperty.call(globalThis, 'document');
-  const prev = globalThis.document;
-  globalThis.document = { documentElement: { dataset: { release: '2026.10.21' } } };
-  try {
-    assert.equal(await KRM.runtime(), null);
-    assert.equal(await KRM.active(), null);
-  } finally {
-    if (had) globalThis.document = prev; else delete globalThis.document;
-  }
-});
-
-test('keyring helper: tells a switched-off device from a runtime that failed to load', async () => {
+test('keyring helper: every release tries the runtime, with no switch or one left off', async () => {
   const keep = {};
   for (const k of ['document', 'localStorage']) keep[k] = Object.getOwnPropertyDescriptor(globalThis, k);
   const store = new Map();
   globalThis.localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)) };
   try {
-    globalThis.document = { documentElement: { dataset: { release: '2026.10.21' } } };
-    store.set('mentria.keyring.local', JSON.stringify({ enabled: true }));
-    assert.deepEqual(await KRM.load(), { K: null, why: 'off' });
-    globalThis.document = { documentElement: { dataset: { release: 'beta' } } };
-    assert.deepEqual(await KRM.load(), { K: null, why: 'failed' });
-    store.set('mentria.keyring.local', JSON.stringify({ enabled: false }));
-    assert.deepEqual(await KRM.load(), { K: null, why: 'off' });
-    store.set('mentria.keyring.local', 'not json');
-    assert.deepEqual(await KRM.load(), { K: null, why: 'off' });
+    for (const release of ['', 'v2026.10.28', 'beta']) {
+      globalThis.document = { documentElement: { dataset: { release } } };
+      store.clear();
+      assert.deepEqual(await KRM.load(), { K: null, why: 'failed' }, 'release "' + release + '" with no switch tries the runtime');
+      store.set('mentria.keyring.local', JSON.stringify({ enabled: false }));
+      assert.deepEqual(await KRM.load(), { K: null, why: 'failed' }, 'release "' + release + '" with a switch left off tries the runtime');
+    }
+  } finally {
+    for (const k of Object.keys(keep)) {
+      if (keep[k]) Object.defineProperty(globalThis, k, keep[k]); else delete globalThis[k];
+    }
+  }
+});
+
+test('keyring helper: tells a browser that cannot run the one unlock from a runtime that failed to load', async () => {
+  const keep = {};
+  for (const k of ['document', 'localStorage', 'window', 'indexedDB']) keep[k] = Object.getOwnPropertyDescriptor(globalThis, k);
+  const store = new Map();
+  globalThis.localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)) };
+  globalThis.document = { documentElement: { dataset: { release: 'v2026.10.28' } } };
+  try {
+    delete globalThis.window;
+    delete globalThis.indexedDB;
+    assert.deepEqual(await KRM.load(), { K: null, why: 'failed' }, 'a runtime that does not load reads as failed');
+    const runtimeUrl = pathToFileURL(resolve(here, '../src/assets/js/mentria-unlock.js')).href;
+    register('data:text/javascript,' + encodeURIComponent('export async function resolve(s, c, n) { return s === "/assets/js/mentria-unlock.js" ? { url: ' + JSON.stringify(runtimeUrl) + ', shortCircuit: true } : n(s, c); }'));
+    assert.deepEqual(await KRM.load(), { K: null, why: 'off' }, 'a loaded runtime in a browser without IndexedDB reads as off');
+    globalThis.window = globalThis;
+    globalThis.indexedDB = {};
+    const got = await KRM.load();
+    assert.ok(got.K && got.why === null && got.K.enabled() === true && got.K.state().enabled === true, 'a browser that can run it gets the runtime with no switch');
   } finally {
     for (const k of Object.keys(keep)) {
       if (keep[k]) Object.defineProperty(globalThis, k, keep[k]); else delete globalThis[k];

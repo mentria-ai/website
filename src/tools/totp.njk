@@ -32,7 +32,6 @@ unlockTool: true
   <div class="totp-locked" id="totp-locked" hidden>
     <h2 class="totp-locked__h" id="totp-locked-h">{{ "tool.totp.locked_title" | t }}</h2>
     <p class="totp-locked__p" id="totp-locked-lede">{{ "tool.totp.locked_lede_setup" | t }}</p>
-    {%- if releaseTag == "beta" %}
     <div class="totp-link" id="totp-link-note" hidden>
       <p class="totp-link__h">{{ "unlock.link_title" | t }}</p>
       <p class="totp-link__p">{{ "unlock.link_body" | t }}</p>
@@ -42,7 +41,6 @@ unlockTool: true
     <div class="totp-create" id="totp-create" hidden>
       <button type="button" class="totp-btn m-btn m-btn--primary" id="totp-create-btn">{{ "tool.totp.setup_button" | t }}</button>
     </div>
-    {%- endif %}
 
     <div class="totp-setup" id="totp-setup" hidden>
       <label class="totp-field">
@@ -70,13 +68,11 @@ unlockTool: true
   </div>
 
   <div class="totp-vault" id="totp-vault" hidden>
-    {%- if releaseTag == "beta" %}
     <div class="totp-link totp-link--panel" id="totp-link-panel" hidden>
       <p class="totp-link__h">{{ "unlock.link_title" | t }}</p>
       <div class="totp-link__card" id="totp-link-card"></div>
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-link-later">{{ "unlock.not_now" | t }}</button>
     </div>
-    {%- endif %}
     <div class="totp-toolbar">
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-add-btn">+ {{ "tool.totp.add_button" | t }}</button>
       <button type="button" class="totp-btn m-btn m-btn--ghost" id="totp-prf-enroll-btn" hidden>{{ "tool.totp.enroll_prf" | t }}</button>
@@ -738,13 +734,7 @@ unlockTool: true
   }
 
   function keyringWanted() {
-    if (document.documentElement.dataset.release !== 'beta' || window.__mentriaRedirecting) return false;
-    try {
-      const l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
-      return !!l && l.enabled === true;
-    } catch (_) {
-      return false;
-    }
+    return !window.__mentriaRedirecting;
   }
 
   async function keyringStart() {

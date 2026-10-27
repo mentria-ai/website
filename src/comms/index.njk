@@ -2732,13 +2732,7 @@ const hasRoomHash = () => {
   return !!(h && h !== '#' && h.length > 2);
 };
 
-const KR_WANTED = (() => {
-  if (document.documentElement.dataset.release !== 'beta' || window.__mentriaRedirecting) return false;
-  try {
-    const l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
-    return !!l && l.enabled === true;
-  } catch (_) { return false; }
-})();
+const KR_WANTED = !window.__mentriaRedirecting;
 let KR = null;
 let KRC = null;
 let krUiP = null;

@@ -789,11 +789,9 @@ localeReload: true
     var UNLOCK_WAIT_MS = 5000;
 
     function unlockWanted(needRecord) {
-      if (document.documentElement.dataset.release !== 'beta' || window.__mentriaRedirecting) return false;
-      try {
-        var l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
-        return !!l && l.enabled === true && (!needRecord || localStorage.getItem('mentria.store.keyring.vault') != null);
-      } catch (_) { return false; }
+      if (window.__mentriaRedirecting) return false;
+      if (!needRecord) return true;
+      try { return localStorage.getItem('mentria.store.keyring.vault') != null; } catch (_) { return false; }
     }
 
     function loadUnlock() {
@@ -893,7 +891,7 @@ localeReload: true
     });
     fileEl.addEventListener('change', refreshRestore);
     window.addEventListener('storage', function (e) {
-      if (unlock || (e.key !== null && e.key !== 'mentria.keyring.local' && e.key !== 'mentria.store.keyring.vault')) return;
+      if (unlock || (e.key !== null && e.key !== 'mentria.store.keyring.vault')) return;
       if (unlockWanted(true)) loadUnlock();
       else refreshRestore();
     });
@@ -1539,11 +1537,7 @@ localeReload: true
     }
 
     function krWanted() {
-      if (document.documentElement.dataset.release !== 'beta' || window.__mentriaRedirecting) return false;
-      try {
-        var l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
-        return !!l && l.enabled === true;
-      } catch (_) { return false; }
+      return !window.__mentriaRedirecting;
     }
     function krActive() {
       try { return !!kr && kr.enabled(); } catch (_) { return false; }

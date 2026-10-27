@@ -99,17 +99,14 @@
         } catch (_) { /* ignore */ }
       })();
     </script>
-    {%- if releaseTag == "beta" %}
     <script>
       (function () {
         try {
           if (window.__mentriaRedirecting) return;
-          var l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
-          if (l && l.enabled === true && localStorage.getItem('mentria.store.keyring.vault')) import('/assets/js/mentria-unlock.js').then(function (m) { return m.ready(); }).catch(function () {});
+          if (localStorage.getItem('mentria.store.keyring.vault')) import('/assets/js/mentria-unlock.js').then(function (m) { return m.ready(); }).catch(function () {});
         } catch (e) {}
       })();
     </script>
-    {%- endif %}
     {% set baseUrl = site.siteUrl | default('/') %}
     {% set pageUrl = baseUrl ~ page.url %}
     {% set metaTitle = (fullTitle or (seoTitle and (seoTitle ~ " | " ~ site.title)) or (title and (title ~ " | " ~ site.title)) or ("site.metaTitle" | t)) | htmlDecode %}

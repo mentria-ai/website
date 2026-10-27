@@ -1,7 +1,6 @@
 const JS = '/assets/js/';
 const RUNTIME = JS + 'mentria-unlock.js';
 const CARD = JS + 'mentria-unlock-ui.js';
-const LOCAL = 'mentria.keyring.local';
 const LATER = 'mentria.finance.linkLater';
 const STORAGE_ERRORS = new Set(['storage', 'idb', 'QuotaExceededError', 'UnknownError', 'AbortError', 'SecurityError', 'InvalidStateError', 'DataError', 'VersionError']);
 let runtimeP = null;
@@ -9,19 +8,7 @@ let uiP = null;
 let failed = false;
 const copies = new Map();
 
-function beta() {
-  try { return document.documentElement.dataset.release === 'beta'; } catch (_) { return false; }
-}
-
-function switchOn() {
-  try {
-    const l = JSON.parse(localStorage.getItem(LOCAL) || 'null');
-    return !!l && l.enabled === true;
-  } catch (_) { return false; }
-}
-
 export function runtime() {
-  if (!beta()) return Promise.resolve(null);
   if (!runtimeP) {
     runtimeP = import(RUNTIME).then((m) => { failed = false; return m; }, () => { runtimeP = null; failed = true; return null; });
   }
@@ -39,7 +26,7 @@ export async function active() {
 export async function load() {
   const K = await active();
   if (K) return { K, why: null };
-  return { K: null, why: beta() && failed && switchOn() ? 'failed' : 'off' };
+  return { K: null, why: failed ? 'failed' : 'off' };
 }
 
 export function ui() {

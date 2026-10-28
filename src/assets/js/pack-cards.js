@@ -840,7 +840,8 @@
     try { return !!(navigator.gpu && localStorage.getItem('mentria-tier-validated')); } catch (_) { return false; }
   }
   function gradeWithModel(card, answer, ctx) {
-    return loadEngine().then(function (engine) {
+    return Promise.all([loadEngine(), import('/assets/js/mentria-model.js')]).then(function (mods) {
+      var engine = mods[0], stripThink = mods[1].stripThink;
       var ref = ctx.tx(card.model_answer || ''), rubric = ctx.tx(card.rubric || '');
       var system = 'You grade a learner\'s short answer. Reply with exactly two lines. Line 1: VERDICT: RIGHT, VERDICT: PARTIAL or VERDICT: WRONG. Line 2: one short sentence of feedback addressed to the learner. No other text.';
       var user = 'Question: ' + ctx.tx(card.prompt) + (ref ? '\nReference answer: ' + ref : '') + (rubric ? '\nA good answer covers: ' + rubric : '') + '\nLearner\'s answer: ' + answer;
@@ -848,6 +849,7 @@
       return engine.generate({ messages: [{ role: 'system', content: system }, { role: 'user', content: user }], maxTokens: 96, temperature: 0, enableThinking: false }, function (ev) {
         if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) out += ev.token;
       }).then(function () {
+        out = stripThink(out);
         var m = out.match(/VERDICT:\s*(RIGHT|PARTIAL|WRONG)/i);
         if (!m) throw new Error('no-verdict');
         var line = out.replace(/[\s\S]*?VERDICT:\s*(RIGHT|PARTIAL|WRONG)\s*/i, '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean)[0] || '';

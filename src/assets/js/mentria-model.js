@@ -26,7 +26,9 @@ const DEFAULT_COPY = {
   tryTier: 'Try {name}',
   failedTitle: '{name} didn’t run on this device',
   failedHint: 'You can try a smaller model or skip for now.',
-  failedHintLater: 'You can skip for now and try again later.'
+  failedHintLater: 'You can skip for now and try again later.',
+  upgradeText: 'A better {name} model is ready · {size}',
+  upgradeGo: 'Download'
 };
 
 function i18nReady(ms) {
@@ -78,6 +80,8 @@ function relabel() {
 }
 
 if (typeof document !== 'undefined') document.addEventListener('mentria:localechange', relabel);
+
+export const stripThink = Tiers.stripThink;
 
 export class NoWebGpuError extends Error {
   constructor() { super('no-webgpu'); this.name = 'NoWebGpuError'; }
@@ -253,6 +257,49 @@ function offerChoice(choices, titleText, detailNodes, labelFor, focusId) {
 
 function span(cls, text) { const s = document.createElement('span'); s.className = cls; s.textContent = text; return s; }
 
+const UPGRADE_NOW = 'mm-upgrade-now';
+const UPGRADE_LATER = 'mm-upgrade-later';
+let upgradeAsked = null;
+
+function upgradeRequested() {
+  if (upgradeAsked === null) {
+    try { upgradeAsked = sessionStorage.getItem(UPGRADE_NOW) === '1'; sessionStorage.removeItem(UPGRADE_NOW); } catch (_) { upgradeAsked = false; }
+  }
+  return upgradeAsked;
+}
+
+function offerUpgradeBar(id) {
+  try { if (sessionStorage.getItem(UPGRADE_LATER)) return; } catch (_) {}
+  if (document.getElementById('mm-upgrade') || document.querySelector('.m-ubar')) return;
+  const text = span('m-update__text', '');
+  const go = button('', '', () => {
+    try { sessionStorage.setItem(UPGRADE_NOW, '1'); } catch (_) {}
+    location.reload();
+  });
+  go.className = 'm-update__btn';
+  const x = button('×', '', () => {
+    try { sessionStorage.setItem(UPGRADE_LATER, '1'); } catch (_) {}
+    document.removeEventListener('mentria:localechange', paint);
+    root.remove();
+  });
+  x.className = 'm-update__x';
+  const root = document.createElement('div');
+  root.id = 'mm-upgrade';
+  root.className = 'm-update m-ubar';
+  root.setAttribute('role', 'status');
+  root.setAttribute('aria-live', 'polite');
+  root.append(text, go, x);
+  function paint() {
+    text.textContent = say('upgradeText', { name: tierName(id), size: tierSize(id) }).replace(/ ·/g, ' ·');
+    go.textContent = say('upgradeGo');
+    x.setAttribute('aria-label', say('chooseNotNow'));
+    x.title = say('chooseNotNow');
+  }
+  paint();
+  document.addEventListener('mentria:localechange', paint);
+  document.body.appendChild(root);
+}
+
 function offerTiers(choices) {
   const pref = Tiers.getUserTier();
   return offerChoice(choices, t('chooseTitle'), [
@@ -265,7 +312,7 @@ function offerTiers(choices) {
 async function tierChoices() {
   const d = await Tiers.decideTier();
   const set = new Set([d.tier].concat(d.eligible || []));
-  set.add('0.8b');
+  set.add(Tiers.SMALL_TIER);
   return Tiers.TIER_CHAIN.filter((id) => set.has(id));
 }
 
@@ -367,7 +414,7 @@ export async function ensureModel(engineFactory, opts) {
     engine.onDeviceLost = (info) => {
       try {
         const idx = Tiers.TIER_CHAIN.indexOf(tier);
-        const lower = Tiers.TIER_CHAIN[idx + 1];
+        const lower = idx >= 0 ? Tiers.TIER_CHAIN[idx + 1] : null;
         if (lower) Tiers.setTierCap(lower);
         Tiers.clearValidatedTier();
       } catch (_) {}
@@ -377,12 +424,28 @@ export async function ensureModel(engineFactory, opts) {
     return engine;
   };
 
-  if (cachedOnly) {
-    const c = await Tiers.effectiveTier({ cachedOnly: true });
-    if (!c) throw new Error('model-not-cached');
+  const loadCached = async (c) => {
     tellTier(c, true);
     const res = await Tiers.loadWithFallback(makeEngine, c, { vision, onlyCached: true, onFallback: (from, to) => tellTier(to, true) });
     return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq, decodeRoute: res.decodeRoute || null };
+  };
+
+  if (cachedOnly) {
+    const c = await Tiers.effectiveTier({ cachedOnly: true });
+    if (!c) throw new Error('model-not-cached');
+    return loadCached(c);
+  }
+
+  if (!choose && !upgradeRequested()) {
+    const want = await Tiers.effectiveTier();
+    if (want && !(await Tiers.isTierCached(want))) {
+      const old = await Tiers.effectiveTier({ cachedOnly: true });
+      if (old && Tiers.isLegacyTier(old)) {
+        const res = await loadCached(old);
+        offerUpgradeBar(want);
+        return res;
+      }
+    }
   }
 
   if (offerUpgrade && (choose || !Tiers.getUserTier())) {

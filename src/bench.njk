@@ -130,8 +130,8 @@ async function readDevice() {
 }
 
 const Tiers = await import('/assets/js/mentria-tiers.js');
-const chain = Tiers.TIER_CHAIN || ['0.8b', '2b', '4b', '27b'];
-const decision = await Tiers.decideTier().catch(() => ({ tier: '0.8b', eligible: [] }));
+const chain = Tiers.TIER_CHAIN;
+const decision = await Tiers.decideTier().catch(() => ({ tier: Tiers.SMALL_TIER, eligible: [] }));
 const eligible = new Set([decision.tier, chain[chain.length - 1]].concat(decision.eligible || []));
 const tiersEl = $('#bench-tiers');
 for (const id of chain) {
@@ -214,7 +214,7 @@ async function runTier(id, vision, runs, force, profile, quick, label) {
         messages: p.image
           ? [{ role: 'system', content: p.system }, { role: 'user', content: [{ type: 'image' }, { type: 'text', text: userText }] }]
           : [{ role: 'system', content: p.system }, { role: 'user', content: userText }],
-        maxTokens: maxTokOverride() || p.maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: p.image ? 1.15 : 1.0, enableThinking: false
+        maxTokens: maxTokOverride() || p.maxTokens, temperature: 0, topK: 1, topP: 1, repetitionPenalty: 1.0, enableThinking: false
       });
       const profiles = [];
       if (profile && r === 0 && (device.features || []).includes('timestamp-query')) { params.tsAll2 = 2; params.onProfile = (pr) => { profiles.push(compact(pr, 0)); }; }
@@ -331,15 +331,14 @@ $('#bench-run').addEventListener('click', async () => {
   }
 });
 const ADAPTER_SETS = {
-  '27b': [{ name: 'toolcall', path: 'loras/toolcall-console/' }, { name: 'qa-routing', path: 'loras/qa-routing/v1/' }],
-  '4b': [{ name: 'forge', path: 'loras/forge/v1/' }]
+  '27b': [{ name: 'toolcall', path: 'loras/toolcall-console/' }, { name: 'qa-routing', path: 'loras/qa-routing/v1/' }]
 };
 const RESIDENCY_STEPS = [1, 2, 4, 6, 8];
 async function runAdapterResidency(id, maxResident, reps, arms) {
   reps = Math.max(1, Math.min(5, reps | 0 || 1));
   arms = Array.isArray(arms) && arms.length ? arms : [null];
   const sets = ADAPTER_SETS[id];
-  if (!sets) { log(id + ': no adapter set for this tier (27b or 4b)'); return; }
+  if (!sets) { log(id + ': no adapter set for this tier (27b only)'); return; }
   log('--- adapter residency on ' + id + ', up to ' + maxResident + ' resident ---');
   const { MentriaEngine } = await import('/assets/mentria/dist/mentria.mjs');
   const engine = new MentriaEngine('/assets/mentria/dist/worker.mjs');
@@ -451,7 +450,7 @@ async function runAdapterResidency(id, maxResident, reps, arms) {
 }
 $('#bench-adapters').addEventListener('click', async () => {
   const checked = [...tiersEl.querySelectorAll('input:checked')].map((i) => i.value);
-  const id = checked.includes('27b') ? '27b' : checked.includes('4b') ? '4b' : (chain.includes('27b') ? '27b' : '4b');
+  const id = checked.includes('27b') || chain.includes('27b') ? '27b' : chain[2];
   const n = Math.max(1, Math.min(8, +$('#bench-adapters-n').value || 6));
   const reps = Math.max(1, Math.min(5, +$('#bench-adapters-reps').value || 1));
   const arms = genConfigs();
@@ -468,7 +467,7 @@ const REST_S = 20;
 const rest = async (secs, why) => { for (let i = secs; i > 0; i--) { setStatus(why + ' · next run in ' + i + ' s'); await new Promise((r) => setTimeout(r, 1000)); } };
 $('#bench-protocol').addEventListener('click', async () => {
   const checked = [...tiersEl.querySelectorAll('input:checked')].map((i) => i.value);
-  const id = checked.length ? checked[checked.length - 1] : (chain.includes('4b') ? '4b' : chain[chain.length - 1]);
+  const id = checked.length ? checked[checked.length - 1] : chain[2];
   const saved = { init: $('#bench-init').value, gen: $('#bench-gen').value, maxtok: $('#bench-maxtok').value, profile: $('#bench-profile').checked, quick: $('#bench-quick').checked };
   $('#bench-run').disabled = true; $('#bench-protocol').disabled = true;
   try {

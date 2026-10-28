@@ -341,6 +341,7 @@ async function ensureEngine(onProgress) {
 async function aiSuggestFilename(onLoadProgress) {
   const engine = await ensureEngine(onLoadProgress);
   if (!engine) return null;
+  const { stripThink } = await import('/assets/js/mentria-model.js');
   const text = (inputEl.value || '').trim().slice(0, 1500);
   if (text.length < 8) return null;
   const messages = [
@@ -358,7 +359,7 @@ async function aiSuggestFilename(onLoadProgress) {
   await engine.generate({
     messages, maxTokens: 24,
     temperature: 0.3, topP: 0.9, topK: 30,
-    repetitionPenalty: 1.1, enableThinking: false
+    repetitionPenalty: 1.0, enableThinking: false
   }, (event) => {
     if (typeof event.token === 'string' && event.token.length > 0) {
       if (/^<\|[^|]*\|>$/.test(event.token)) return;
@@ -367,8 +368,8 @@ async function aiSuggestFilename(onLoadProgress) {
     }
   });
   if (mpStrip) mpStrip.done({ tokens: nTok });
-  const slug0 = buf
-    .replace(/<think>[\s\S]*?<\/think>/g, '')
+  const slug0 = stripThink(buf
+    .replace(/<think>[\s\S]*?<\/think>/g, ''))
     .replace(/<\|[^|]*\|>/g, '')
     .trim()
     .toLowerCase()

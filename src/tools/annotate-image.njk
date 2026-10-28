@@ -114,6 +114,22 @@ eleventyComputed:
   const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const IMG_MAX = IS_IOS ? 256 : 448;
   const MAX_TOKENS = IS_IOS ? 256 : 512;
+  const TAG_TOKENS = 64;
+  const MAX_TAGS = 12;
+  function tidyTags(text){
+    const prompt = String(COPY.prompts.tags || '').toLowerCase();
+    const seen = new Set();
+    const out = [];
+    for (const raw of text.split(/[,\n]+/)){
+      const tag = raw.replace(/^[\s\-*•]+|[\s.]+$/g, '');
+      const key = tag.toLowerCase();
+      if (!tag || seen.has(key) || (key.indexOf(' ') > 0 && prompt.indexOf(key) >= 0)) continue;
+      seen.add(key);
+      out.push(tag);
+      if (out.length >= MAX_TAGS) break;
+    }
+    return out.join(', ');
+  }
 
   const COPY = {
     statusIdle:       {{ ("tool.annotate-image.status_idle"       | t) | dump | safe }},
@@ -307,7 +323,8 @@ eleventyComputed:
     const paint = () => {
       frame = 0;
       if (!open || stale()) return;
-      const display = stripThink(full.replace(/<think>[\s\S]*?<\/think>/g, '')).trim();
+      const text = stripThink(full.replace(/<think>[\s\S]*?<\/think>/g, '')).trim();
+      const display = mode === 'tags' ? tidyTags(text) : text;
       if (window.renderMarkdown) resultEl.innerHTML = (renderMarkdown(display) || '') + '<span class="an-cursor"></span>';
       else resultEl.textContent = display;
     };
@@ -324,7 +341,7 @@ eleventyComputed:
           { role: 'user', content: [ { type: 'image' }, { type: 'text', text: COPY.prompts[mode] } ] }
         ],
         images: [ { rgbHwc: img.rgbHwc, h: img.h, w: img.w } ],
-        maxTokens: MAX_TOKENS, temperature: 0, topK: 1, topP: 1.0, repetitionPenalty: 1.0, enableThinking: false
+        maxTokens: mode === 'tags' ? TAG_TOKENS : MAX_TOKENS, temperature: 0, topK: 1, topP: 1.0, repetitionPenalty: 1.0, enableThinking: false
       };
       await eng.generate(params, (event) => {
         if (!open || stale()) return;
@@ -338,7 +355,8 @@ eleventyComputed:
       close();
       if (stale()) return;
       if (strip) strip.done({ tokens: nTok });
-      const display = stripThink(full.replace(/<think>[\s\S]*?<\/think>/g, '')).replace(/<\|[^|]*\|>/g, '').trim();
+      const text = stripThink(full.replace(/<think>[\s\S]*?<\/think>/g, '')).replace(/<\|[^|]*\|>/g, '').trim();
+      const display = mode === 'tags' ? tidyTags(text) : text;
       lastText = display;
       if (window.renderMarkdown) resultEl.innerHTML = renderMarkdown(display) || ('<p>' + esc(COPY.emptyResponse) + '</p>');
       else resultEl.textContent = display || COPY.emptyResponse;

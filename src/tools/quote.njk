@@ -92,6 +92,16 @@ const SYSTEM_PROMPT =
   '(1-2 sentences). Do not attribute it to anyone. No preamble, no ' +
   'quotation marks \u2014 just the quote itself.';
 const MAX_TOKENS = 128;
+const THEMES = ['patience', 'courage', 'starting over', 'small steps', 'failure', 'curiosity', 'rest', 'discipline',
+  'kindness', 'change', 'focus', 'learning', 'hope', 'gratitude', 'friendship', 'fear', 'growth', 'time',
+  'creativity', 'resilience', 'honesty', 'balance', 'ambition', 'letting go'];
+let lastTheme = -1;
+function nextTheme() {
+  let i = Math.floor(Math.random() * THEMES.length);
+  if (i === lastTheme) i = (i + 1) % THEMES.length;
+  lastTheme = i;
+  return THEMES[i];
+}
 
 /* \u2500\u2500 Status helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 const statusDot  = document.getElementById('mq-status-dot');
@@ -257,7 +267,7 @@ function runApp(MentriaEngine) {
 
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user',   content: 'Give me a motivational quote.' },
+      { role: 'user',   content: 'Give me a motivational quote about ' + nextTheme() + '.' },
     ];
 
     let fullText = '';

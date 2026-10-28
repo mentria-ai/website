@@ -405,6 +405,11 @@ localeReload: true
   .about-whatsnew[hidden] { display: none; }
   .about-whatsnew .about-section-h { font-size: 1.1rem; margin-bottom: 12px; }
   .about-whatsnew__list { margin: 0 0 14px; padding-left: 1.1em; font-family: var(--font-mono); font-size: 13px; line-height: 1.6; color: var(--term-fg); }
+  .about-whatsnew__rel { list-style: none; margin-left: -1.1em; }
+  .about-whatsnew__rel + .about-whatsnew__rel { margin-top: 10px; }
+  .about-whatsnew__rel ul { margin: 2px 0 0; padding-left: 1.1em; list-style: disc; }
+  .about-whatsnew__tag { font-size: 11px; letter-spacing: 0.06em; color: var(--term-muted); text-decoration: none; }
+  a.about-whatsnew__tag:hover { color: var(--term-fg); }
   .about-whatsnew__row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
   .about-whatsnew__link { font-family: var(--font-mono); font-size: 12px; color: var(--term-muted); }
   .about-refresh--go { color: var(--accent); border-color: var(--accent); }
@@ -612,19 +617,56 @@ localeReload: true
     var box = document.getElementById('about-whatsnew');
     if (!box) return;
     var CUR = '{{ buildHash }}';
+    var TAG = {{ (releaseTag or "") | dump | safe }};
     var COPY = {
       h:        {{ ("about.whats_new"       | t) | dump | safe }},
+      since:    {{ ("about.whats_new_since" | t) | dump | safe }},
       updating: {{ ("about.update_updating" | t) | dump | safe }}
     };
     var data = null;
+    var link = document.getElementById('about-whatsnew-link');
+    var ALL = link.getAttribute('href');
+    function missed() {
+      var list = data && Array.isArray(data.releases) ? data.releases : [];
+      var out = [];
+      for (var i = 0; i < list.length; i++) {
+        var r = list[i];
+        if (!r || r.tag === TAG) break;
+        if (Array.isArray(r.items) && r.items.length) out.push(r);
+      }
+      return TAG ? out : [];
+    }
+    function fill(ul, items) {
+      items.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    }
     function render() {
       if (!data && !(window.MentriaUpdate && window.MentriaUpdate.pending)) return;
       box.hidden = false;
-      document.getElementById('about-whatsnew-h').textContent = COPY.h.replace('{tag}', data && data.tag ? data.tag : '…');
+      var h = document.getElementById('about-whatsnew-h');
       var ul = document.getElementById('about-whatsnew-list');
       ul.innerHTML = '';
-      ((data && data.items) || []).forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
-      if (data && data.url) document.getElementById('about-whatsnew-link').href = data.url;
+      var rels = missed();
+      if (rels.length > 1) {
+        h.textContent = COPY.since.replace('{tag}', TAG);
+        rels.forEach(function (r) {
+          var li = document.createElement('li');
+          li.className = 'about-whatsnew__rel';
+          var tag = document.createElement(r.url ? 'a' : 'span');
+          tag.className = 'about-whatsnew__tag';
+          tag.textContent = r.tag;
+          if (r.url) { tag.href = r.url; tag.target = '_blank'; tag.rel = 'noopener'; }
+          var sub = document.createElement('ul');
+          fill(sub, r.items);
+          li.appendChild(tag);
+          li.appendChild(sub);
+          ul.appendChild(li);
+        });
+        link.href = ALL;
+        return;
+      }
+      h.textContent = COPY.h.replace('{tag}', data && data.tag ? data.tag : '…');
+      fill(ul, (data && data.items) || []);
+      link.href = data && data.url ? data.url : ALL;
     }
     fetch('/assets/release.json?_=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })

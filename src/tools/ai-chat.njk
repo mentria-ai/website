@@ -146,6 +146,7 @@ eleventyComputed:
   tierBetter:             "tool.ai-chat.tier_better",
   tierBest:               "tool.ai-chat.tier_best",
   tierMax:                "tool.ai-chat.tier_max",
+  tierOld:                "tool.ai-chat.tier_old",
   emptySub:               "tool.ai-chat.empty_sub",
   tierConfirm:            "tool.ai-chat.tier_confirm",
   tierFallback:           "tool.ai-chat.tier_fallback",
@@ -406,12 +407,22 @@ function runApp(MentriaEngine, Tiers) {
   const assistantModels = new WeakMap();
   const repeatCutReplies = new WeakSet();
   function modelFamilyFor(tier) {
-    return tier === '27b' ? 'Bonsai 27B' : 'Qwen3.5';
+    if (tier === '27b') return 'Bonsai 27B';
+    return Tiers && Tiers.TIERS[tier] && Tiers.TIERS[tier].family === 'b2' ? 'Bonsai 2' : 'Qwen3.5';
+  }
+
+  function isSmallTier(tier) {
+    return tier === '0.8b' || (!!Tiers && tier === Tiers.SMALL_TIER);
+  }
+
+  function labelPrefix(tier) {
+    if (tier === '27b') return 'bonsai-';
+    return Tiers && Tiers.TIERS[tier] && Tiers.TIERS[tier].family === 'b2' ? 'bonsai2-' : 'qwen-';
   }
 
   function systemPromptFor(tier, turn) {
     const family = modelFamilyFor(tier);
-    const small = tier === '0.8b';
+    const small = isSmallTier(tier);
     const prompt = "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were prepared for the browser and shipped by mentria.ai.\n\n" +
       "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running " + family + " in their browser. When asked about Mentria itself: it is a small privacy-first studio at mentria.ai, building tools, games, and AI experiences that run in the browser, with no account needed. Notable parts of the site: an AI chat, a QR scanner, a document scanner, quick notes, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, private peer-to-peer chat and calls at /comms/, and card decks for learning about AI.\n\n" +
       "Be helpful, accurate, and brief. Don't over-apologize." +
@@ -538,14 +549,15 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   function modelLabel() {
-    return (currentTier === '27b' ? 'bonsai-' : 'qwen-') + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B') + (pinned ? ' · ' + pinned.name : '');
+    const id = (currentTier && Tiers.TIERS[currentTier]) ? currentTier : Tiers.SMALL_TIER;
+    return labelPrefix(id) + Tiers.TIERS[id].name + (pinned ? ' · ' + pinned.name : '');
   }
 
   function savedTierLabel() {
     let id = null;
     try { id = localStorage.getItem('mentria-tier'); } catch (_) {}
-    if (!id || !/^(0\.8|2|4|27)b$/.test(id)) return null;
-    return (id === '27b' ? 'bonsai-' : 'qwen-') + id.toUpperCase();
+    if (!id || !Tiers || !Tiers.TIERS[id]) return null;
+    return labelPrefix(id) + Tiers.TIERS[id].name;
   }
 
   function pushAssistant(content, bodyEl) {
@@ -1421,21 +1433,23 @@ function runApp(MentriaEngine, Tiers) {
   const sizeText = (label) => (window.MentriaUI && window.MentriaUI.sizeLabel ? window.MentriaUI.sizeLabel(label) : label);
   function updateEmptySub(id) {
     if (!emptySubEl) return;
-    const tier = Tiers.TIERS[id || currentTier || (tierDecision && tierDecision.tier) || '0.8b'];
+    const tier = Tiers.TIERS[id || currentTier || (tierDecision && tierDecision.tier) || Tiers.SMALL_TIER];
     if (!tier) return;
     emptySubEl.textContent = COPY.emptySub.replace('{size}', sizeText(tier.sizeLabel));
   }
-  updateEmptySub(Tiers.getUserTier() || '0.8b');
+  updateEmptySub(Tiers.getUserTier() || Tiers.SMALL_TIER);
 
   function tierOptionLabel(id) {
     const t = Tiers.TIERS[id];
-    const quality = id === '0.8b' ? COPY.tierFast : id === '2b' ? COPY.tierBetter : id === '4b' ? COPY.tierBest : COPY.tierMax;
-    return id === '0.8b' ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + sizeText(t.sizeLabel));
+    if (t.legacy) return t.name + ' · ' + COPY.tierOld;
+    const slot = Tiers.TIER_CHAIN.length - 1 - Tiers.TIER_CHAIN.indexOf(id);
+    const quality = [COPY.tierFast, COPY.tierBetter, COPY.tierBest][slot] || COPY.tierMax;
+    return id === Tiers.SMALL_TIER ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + sizeText(t.sizeLabel));
   }
 
   function syncTierSelector() {
     if (!tierDecision || !tierDecision.tier) return;
-    const ids = ['0.8b'].concat(tierDecision.eligible);
+    const ids = (currentTier && Tiers.isLegacyTier(currentTier) ? [currentTier] : []).concat([Tiers.SMALL_TIER], tierDecision.eligible);
     if (ids.length < 2) { tierSel.hidden = true; return; }
     tierSel.innerHTML = '';
     for (const id of ids) {
@@ -1451,7 +1465,7 @@ function runApp(MentriaEngine, Tiers) {
   tierSel.addEventListener('change', async () => {
     const id = tierSel.value;
     if (id === currentTier || generating || recovering) { tierSel.value = currentTier; return; }
-    if (id !== '0.8b' && !(await Tiers.isTierCached(id))) {
+    if (id !== Tiers.SMALL_TIER && !(await Tiers.isTierCached(id))) {
       const ok = await window.mentriaConfirm(COPY.tierConfirm.replace('{size}', sizeText(Tiers.TIERS[id].sizeLabel)));
       if (!ok) { tierSel.value = currentTier; return; }
     }
@@ -1794,7 +1808,7 @@ function runApp(MentriaEngine, Tiers) {
         paintThink(parts);
         display = parts.answer.trim();
       } else {
-        display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        display = Tiers.stripThink(fullText.replace(/<think>[\s\S]*?<\/think>/g, '')).trim();
       }
       // window.renderMarkdown escapes html before applying markdown patterns,
       // so model-emitted <script> tags are inert. Falls back to textContent if
@@ -1818,8 +1832,8 @@ function runApp(MentriaEngine, Tiers) {
         display = parts.answer.replace(/<\|[^|]*\|>/g, '').replace(/<tool_call>[\s\S]*?(<\/tool_call>|$)/g, '').trim();
         thinkTruncated = mode === 'done' && !parts.closed;
       } else {
-        display = fullText
-          .replace(/<think>[\s\S]*?<\/think>/g, '')
+        display = Tiers.stripThink(fullText
+          .replace(/<think>[\s\S]*?<\/think>/g, ''))
           .replace(/<tool_call>[\s\S]*?(<\/tool_call>|$)/g, '')
           .replace(/<\|[^|]*\|>/g, '')   // belt-and-suspenders strip if a multi-piece special leaks through
           .trim();
@@ -1934,7 +1948,7 @@ function runApp(MentriaEngine, Tiers) {
     markRoute(bodyEl, route);
     await setSearchAdapter(useTool);
     const asked = rest.length ? turnText(rest[rest.length - 1]) : '';
-    const baseSystem = currentTier === '0.8b' && !pinned
+    const baseSystem = isSmallTier(currentTier) && !pinned
       ? systemPromptFor(currentTier, { image: !!imagesForRequest, lang: replyLanguage(asked) })
       : systemMessage.content;
     const systemContent = useTool ? baseSystem + SEARCH_TOOL_PROMPT : baseSystem;

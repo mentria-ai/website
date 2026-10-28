@@ -31,8 +31,12 @@ function progress(p) {
 }
 
 async function chooseTier(Tiers, offer) {
-  const current = (await Tiers.effectiveTier()) || '0.8b';
+  let current = (await Tiers.effectiveTier()) || Tiers.SMALL_TIER;
   if (current === '27b') return current;
+  if (!(await Tiers.isTierCached(current))) {
+    const kept = await Tiers.effectiveTier({ cachedOnly: true });
+    if (kept) current = kept;
+  }
   const decision = await Tiers.decideTier();
   const eligible = new Set([decision.tier].concat(decision.eligible || []));
   const cap = Tiers.getTierCap ? Tiers.getTierCap() : null;
@@ -56,7 +60,7 @@ async function tiers() {
 
 export async function modelInfo() {
   const Tiers = await tiers();
-  const id = (await Tiers.isTierCached('27b')) ? '27b' : ((await Tiers.effectiveTier()) || '0.8b');
+  const id = (await Tiers.isTierCached('27b')) ? '27b' : ((await Tiers.effectiveTier({ cachedOnly: true })) || (await Tiers.effectiveTier()) || Tiers.SMALL_TIER);
   const t = Tiers.TIERS[id];
   return { tier: id, sizeLabel: t ? t.sizeLabel : '', cached: await Tiers.isTierCached(id) };
 }
@@ -101,7 +105,7 @@ export function hostWith(generate, isBusy, tier, vision) {
   post({ t: 'host', tab: TAB, tier: hostTier, vision: hostVision });
 }
 
-const TIER_RANK = { '0.8b': 0, '2b': 1, '4b': 2, '27b': 3 };
+const TIER_RANK = { '0.8b': 0, 'b2-2b': 1, '2b': 1, 'b2-4b': 2, '4b': 2, 'b2-9b': 3, '27b': 4 };
 
 function findHost(timeoutMs, needVision) {
   if (!channels.length) return Promise.resolve(null);
@@ -266,6 +270,7 @@ async function applyAdapter(engine, tier, adapter) {
   const name = String(adapter.name || 'adapter');
   if (activeAdapter === name) return activeAdapter;
   const Tiers = await tiers();
+  if (Tiers.TIERS[tier] && Tiers.TIERS[tier].family === 'b2') return activeAdapter;
   const base = adapter.base || (Tiers.TIERS[tier] && Tiers.TIERS[tier].base) || '';
   const path = adapter.path ? String(adapter.path).replace(/\/?$/, '/') : '';
   const spec = { name: name, configUrl: adapter.configUrl || (base + path + 'adapter_config.json'), weightsUrl: adapter.weightsUrl || (base + path + 'adapter_model.safetensors') };
@@ -300,11 +305,12 @@ async function localGenerate(system, user, maxTokens, onToken, image, adapter, s
       ? [{ role: 'system', content: system }, { role: 'user', content: [{ type: 'image' }, { type: 'text', text: user }] }]
       : [{ role: 'system', content: system }, { role: 'user', content: user }],
     maxTokens: maxTokens || 220,
-    temperature: t, topK: t > 0 ? (sampling.topK || 40) : 1, topP: t > 0 ? (sampling.topP || 0.95) : 1, repetitionPenalty: image ? 1.15 : 1.0, enableThinking: false
+    temperature: t, topK: t > 0 ? (sampling.topK || 40) : 1, topP: t > 0 ? (sampling.topP || 0.95) : 1, repetitionPenalty: 1.0, enableThinking: false
   };
   if (image) params.images = [image];
   const prefix = !image && sampling && typeof sampling.prefix === 'string' ? sampling.prefix : '';
   if (prefix) params.assistantPrefix = prefix;
+  const T = await tiers();
   await engine.generate(params, (ev) => {
     if (typeof ev.token === 'string') {
       if (validatedEngine !== engine) {
@@ -313,10 +319,10 @@ async function localGenerate(system, user, maxTokens, onToken, image, adapter, s
       }
       if (/^<\|[^|]*\|>$/.test(ev.token)) return;
       out += ev.token;
-      if (onToken) { try { onToken(ev.token, out); } catch (_) {} }
+      if (onToken) { try { onToken(ev.token, T.stripThink(out)); } catch (_) {} }
     }
   });
-  return out.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<\|[a-z_]+\|>/gi, '').trim();
+  return T.stripThink(out.replace(/<think>[\s\S]*?<\/think>/g, '')).replace(/<\|[a-z_]+\|>/gi, '').trim();
 }
 
 async function viaHost(system, user, maxTokens, onToken, image, adapter, sampling) {

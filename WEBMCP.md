@@ -2,7 +2,7 @@
 
 mentria.ai is a privacy-first toolbox: 34 tools, 8 games and an AI-concept feed
 that run entirely in the browser, including a ladder of on-device language
-models (0.8B–27B) on WebGPU. This document describes its WebMCP integration.
+models (2B–27B, Bonsai by PrismML) on WebGPU. This document describes its WebMCP integration.
 
 ## What agents can do here
 
@@ -69,9 +69,8 @@ button toggles it live). Same task, same session, adapter hot-swapped:
 
 On the 150-row held-out suite: composite 0.709 → 0.998, exact tool-name
 0.303 → 1.000, argument accuracy 0.242 → 0.990, IFEval unchanged, and it
-generalizes to unseen tool schemas (0.353 → 0.971). Adapters:
-huggingface.co/mentriaai — `loras/toolcall-console` (27B) and
-`loras/toolcall-web` (0.8B).
+generalizes to unseen tool schemas (0.353 → 0.971). Adapter:
+`loras/toolcall-console` in huggingface.co/mentriaai/Bonsai-27B-mentria.
 
 ## Multi-source model delivery
 

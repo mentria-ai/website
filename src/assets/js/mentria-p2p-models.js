@@ -171,7 +171,8 @@ export async function findCachedUrl(name) {
   const man = await loadManifest();
   const entry = man[name];
   if (!entry) return null;
-  const candidates = [CDN_BASE + entry.repo + '/' + name, HF_BASE + entry.repo + '/resolve/main/' + name];
+  const candidates = [];
+  for (const repo of [entry.repo].concat(entry.also || [])) candidates.push(CDN_BASE + repo + '/' + name, HF_BASE + repo + '/resolve/main/' + name);
   try {
     const c = await caches.open(CACHE);
     for (const u of candidates) {

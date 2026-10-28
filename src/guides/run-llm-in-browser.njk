@@ -12,15 +12,18 @@ eleventyComputed:
   description: "{{ 'guide_llm.description' | tlang(locale.code) }}"
 localeReload: true
 models:
-  - { id: "0.8b", name: "Qwen3.5 0.8B", size: "490", unit: "mb", where: "where_08b" }
-  - { id: "2b", name: "Qwen3.5 2B", size: "1.4", unit: "gb", where: "where_2b" }
-  - { id: "4b", name: "Qwen3.5 4B", size: "2.8", unit: "gb", where: "where_4b" }
+  - { id: "b2-2b", name: "Ternary Bonsai 2 2B", size: "520", unit: "mb", where: "where_08b" }
+  - { id: "b2-4b", name: "Ternary Bonsai 2 4B", size: "1.1", unit: "gb", where: "where_2b" }
+  - { id: "b2-9b", name: "Ternary Bonsai 2 9B", size: "2.4", unit: "gb", where: "where_4b" }
   - { id: "27b", name: "Bonsai 27B", size: "3.8", unit: "gb", where: "where_27b" }
 speeds:
-  - { name: "Qwen3.5 0.8B", load: "2.5", ttft: "0.1", speed: "157" }
-  - { name: "Qwen3.5 2B", load: "4.1", ttft: "0.2", speed: "62" }
-  - { name: "Qwen3.5 4B", load: "7.4", ttft: "0.4", speed: "25" }
-  - { name: "Bonsai 27B", load: "9.0", ttft: "1.2", speed: "39" }
+  - { name: "Ternary Bonsai 2 2B", device: "Mac · Chrome", ttft: "0.64", speed: "149" }
+  - { name: "Ternary Bonsai 2 2B", device: "Mac · Safari", ttft: "0.76", speed: "80–85" }
+  - { name: "Ternary Bonsai 2 2B", device: "iPhone · Safari", ttft: "5.3", speed: "23.9" }
+  - { name: "Ternary Bonsai 2 2B", device: "Android (Mali-G57) · Chrome", ttft: "54.0", speed: "2.9" }
+  - { name: "Ternary Bonsai 2 4B", device: "Mac · Chrome", ttft: "1.62", speed: "88.3" }
+  - { name: "Ternary Bonsai 2 9B", device: "Mac · Chrome", ttft: "3.1", speed: "57.4–58.4" }
+  - { name: "Bonsai 27B", device: "Mac · Chrome", ttft: "1.2", speed: "39" }
 ---
 {%- set G = "guide_llm" | tsub -%}
 {%- set P = locale.pathPrefix -%}
@@ -107,12 +110,12 @@ speeds:
     <h2 id="speed">{{ G.speed_h }}</h2>
     <div class="guide__table">
       <table>
-        <thead><tr><th scope="col">{{ G.th_model }}</th><th scope="col">{{ G.th_starts }}</th><th scope="col">{{ G.th_first }}</th><th scope="col">{{ G.th_speed }}</th></tr></thead>
+        <thead><tr><th scope="col">{{ G.th_model }}</th><th scope="col">{{ G.th_device }}</th><th scope="col">{{ G.th_first }}</th><th scope="col">{{ G.th_speed }}</th></tr></thead>
         <tbody>
           {%- for s in speeds %}
-          {%- set load = s.load | replace(".", G.dec) %}
-          {%- set ttft = s.ttft | replace(".", G.dec) %}
-          <tr><th scope="row">{{ s.name }}</th><td class="guide__num">{{ G.fmt_s | replace("{n}", load) }}</td><td class="guide__num">{{ G.fmt_s | replace("{n}", ttft) }}</td><td class="guide__num">{{ G.fmt_tps | replace("{n}", s.speed) }}</td></tr>
+          {%- set ttft = s.ttft | replace(".", G.dec) if s.ttft else "" %}
+          {%- set speed = s.speed | replace(".", G.dec) if s.speed else "" %}
+          <tr><th scope="row">{{ s.name }}</th><td>{{ s.device }}</td><td class="guide__num">{% if ttft %}{{ G.fmt_s | replace("{n}", ttft) }}{% endif %}</td><td class="guide__num">{% if speed %}{{ G.fmt_tps | replace("{n}", speed) }}{% endif %}</td></tr>
           {%- endfor %}
         </tbody>
       </table>
@@ -154,7 +157,7 @@ speeds:
   "description": {{ G.description | dump | safe }},
   "inLanguage": "{{ locale.code }}",
   "datePublished": "2026-10-09",
-  "dateModified": "2026-10-09",
+  "dateModified": "2026-10-28",
   "mainEntityOfPage": "{{ site.siteUrl }}{{ P }}/guides/run-llm-in-browser/",
   "author": { "@type": "Organization", "name": "Mentria", "url": "{{ site.siteUrl }}/" },
   "publisher": { "@type": "Organization", "name": "Mentria", "url": "{{ site.siteUrl }}/" }
@@ -207,7 +210,7 @@ const out = $('llm-demo-out');
 const stats = $('llm-demo-stats');
 const L = JSON.parse($('llm-demo-copy').textContent);
 const T = L.text;
-const NAMES = { '0.8b': 'Qwen3.5 0.8B', '2b': 'Qwen3.5 2B', '4b': 'Qwen3.5 4B', '27b': 'Bonsai 27B' };
+const NAMES = { 'b2-2b': 'Ternary Bonsai 2 2B', 'b2-4b': 'Ternary Bonsai 2 4B', 'b2-9b': 'Ternary Bonsai 2 9B', '27b': 'Bonsai 27B', '0.8b': 'Qwen3.5 0.8B', '2b': 'Qwen3.5 2B', '4b': 'Qwen3.5 4B' };
 const SYSTEM = 'You are a helpful assistant. Reply briefly in plain text, without markdown, headings or lists.' + (T.reply_lang ? ' ' + T.reply_lang : '');
 const shareEl = $('llm-demo-share');
 const STAGES = { download: T.p_download, upload: T.p_upload, prefill: T.p_prefill };

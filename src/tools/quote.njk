@@ -92,6 +92,16 @@ const SYSTEM_PROMPT =
   '(1-2 sentences). Do not attribute it to anyone. No preamble, no ' +
   'quotation marks \u2014 just the quote itself.';
 const MAX_TOKENS = 128;
+const THEMES = ['patience', 'courage', 'starting over', 'small steps', 'failure', 'curiosity', 'rest', 'discipline',
+  'kindness', 'change', 'focus', 'learning', 'hope', 'gratitude', 'friendship', 'fear', 'growth', 'time',
+  'creativity', 'resilience', 'honesty', 'balance', 'ambition', 'letting go'];
+let lastTheme = -1;
+function nextTheme() {
+  let i = Math.floor(Math.random() * THEMES.length);
+  if (i === lastTheme) i = (i + 1) % THEMES.length;
+  lastTheme = i;
+  return THEMES[i];
+}
 
 /* \u2500\u2500 Status helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 const statusDot  = document.getElementById('mq-status-dot');
@@ -164,6 +174,7 @@ function runApp(MentriaEngine) {
   const shareBtn       = document.getElementById('mq-share');
 
   let engine = null;
+  let stripThink = (s) => s;
   let generating = false;
   let loading = null;
   let blocked = false;
@@ -202,14 +213,14 @@ function runApp(MentriaEngine) {
     setStatus('loading', 'statusLoadingModel');
     await ensureStrip();
     try {
-      const { ensureModel } = await import('/assets/js/mentria-model.js');
-      const Tiers = await import('/assets/js/mentria-tiers.js');
+      const Model = await import('/assets/js/mentria-model.js');
+      stripThink = Model.stripThink;
       const createEngine = () => {
         const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
         window.mentriaWrapEngine && window.mentriaWrapEngine(e);
         return e;
       };
-      const res = await ensureModel(createEngine, {
+      const res = await Model.ensureModel(createEngine, {
         vision: false,
         offerUpgrade: true,
         onProgress: onEngineProgress,
@@ -217,21 +228,6 @@ function runApp(MentriaEngine) {
         onDeviceLost
       });
       engine = res.engine;
-      const base = Tiers.TIERS[res.tier].base;
-      try {
-        await engine.swapAdapter({
-          name: 'quotes-v1',
-          configUrl: base + 'loras/quotes/adapter_config.json',
-          weightsUrl: base + 'loras/quotes/adapter_model.safetensors',
-        });
-      } catch (err) {
-        console.warn('Quotes LoRA load failed, using base model:', err);
-      }
-      if (engine !== res.engine) {
-        if (strip) strip.hide();
-        newBtn.disabled = generating;
-        return;
-      }
       strip.done({ prime: COPY.statusReady, linger: 1200 });
       setStatus('ready', 'statusReady');
       newBtn.disabled = false;
@@ -271,7 +267,7 @@ function runApp(MentriaEngine) {
 
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user',   content: 'Give me a motivational quote.' },
+      { role: 'user',   content: 'Give me a motivational quote about ' + nextTheme() + '.' },
     ];
 
     let fullText = '';
@@ -283,7 +279,7 @@ function runApp(MentriaEngine) {
     function paintToken() {
       frame = 0;
       if (!open) return;
-      const display = stripWrapQuotes(fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim());
+      const display = stripWrapQuotes(stripThink(fullText.replace(/<think>[\s\S]*?<\/think>/g, '')).trim());
       // Markdown-rendered output (escapes html first → safe). Falls back to text.
       if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || '<p>…</p>';
       else quoteEl.textContent = display || '…';
@@ -299,7 +295,7 @@ function runApp(MentriaEngine) {
         temperature: 0.9,
         topP: 0.95,
         topK: 50,
-        repetitionPenalty: 1.1,
+        repetitionPenalty: 1.0,
         enableThinking: false,
       }, (event) => {
         if (!open) return;
@@ -314,8 +310,8 @@ function runApp(MentriaEngine) {
 
       close();
       if (strip) strip.done({ tokens: nTok });
-      const display = stripWrapQuotes(fullText
-        .replace(/<think>[\s\S]*?<\/think>/g, '')
+      const display = stripWrapQuotes(stripThink(fullText
+        .replace(/<think>[\s\S]*?<\/think>/g, ''))
         .replace(/<\|[^|]*\|>/g, '')
         .trim());
       const html = display && window.renderMarkdown ? renderMarkdown(display) : '';

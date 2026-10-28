@@ -58,7 +58,9 @@ jobs:
           fields=(-f "tag_name=$TAG" -f "target_commitish=$GITHUB_SHA")
           if [ -n "$PREV" ]; then fields+=(-f "previous_tag_name=$PREV"); fi
           gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" "${fields[@]}" > "$RUNNER_TEMP/release-notes.json"
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=12" > "$RUNNER_TEMP/releases-prev.json" || echo '[]' > "$RUNNER_TEMP/releases-prev.json"
           jq --arg tag "$TAG" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG" --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --slurpfile past "$RUNNER_TEMP/releases-prev.json" \
             -f .github/scripts/release-items.jq "$RUNNER_TEMP/release-notes.json" > src/_data/release.json
           delim="NOTES_$(openssl rand -hex 16)"
           { echo "notes<<$delim"; jq -r .body "$RUNNER_TEMP/release-notes.json"; echo "$delim"; } >> "$GITHUB_OUTPUT"

@@ -178,6 +178,7 @@
     "identity_passkey_again": "Confirmado. Escolha \"Adicionar uma chave de acesso\" de novo para concluir.",
     "identity_foldin_later": "Agora não",
     "whats_new": "Novidades em {tag}",
+    "whats_new_since": "Novidades desde {tag}",
     "update_now": "Atualizar agora",
     "release_notes": "Notas da versão no GitHub",
     "privacy": "Privacidade"

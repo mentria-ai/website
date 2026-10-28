@@ -411,6 +411,7 @@ export async function ensureModel(engineFactory, opts) {
   };
 
   const attachDeviceLost = (engine, tier) => {
+    engine.mentriaTier = tier;
     engine.onDeviceLost = (info) => {
       try {
         const idx = Tiers.TIER_CHAIN.indexOf(tier);

@@ -400,7 +400,7 @@ localeReload: true
           'You are a concise search assistant for a personal site. ' +
           'Given a user query and the top 5 ranked results, write ONE sentence ' +
           '(max 25 words) that helps the user pick a result. No preamble. ' +
-          'Reference results by number when useful.' },
+          'Reference results by number when useful. Write the sentence in the same language as the query.' },
         { role: 'user', content: 'Query: ' + $input.value.trim() + '\n\nTop results:\n' + top }
       ];
 

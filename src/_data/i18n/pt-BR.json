@@ -52,6 +52,7 @@
     "stack_4": "5 idiomas, i18n feito à mão",
     "stack_5": "pwa, funciona offline, hospedado no github pages",
     "stack_6": "jogos 3d com three.js; objetos do car kit da kenney (cc0)",
+    "stack_7": "modelos locais: ternary bonsai 2 e bonsai 27b da prismml, baseados no qwen (apache-2.0)",
     "principles_label": "princípios",
     "principles_h": "Três regras",
     "principle_1": "sem servidores no circuito",
@@ -197,7 +198,7 @@
       "confirm": "Confirmar"
     },
     "share": "Compartilhar",
-    "heavy_download": "Isso baixa um modelo de IA grande (490 MB ou mais, dependendo do modelo) e você parece estar em uma conexão lenta ou com economia de dados. Continuar?",
+    "heavy_download": "Isso baixa um modelo de IA grande (520 MB ou mais, dependendo do modelo) e você parece estar em uma conexão lenta ou com economia de dados. Continuar?",
     "download_postponed": "Download pausado — recarregue a página para começar.",
     "ai_engine_offline": "Você está offline e o motor de IA ainda não está salvo neste aparelho. Conecte-se uma vez para configurá-lo; depois ele funciona offline.",
     "ai_engine_failed": "Não foi possível carregar o motor de IA. Verifique sua conexão ou o bloqueador de anúncios e recarregue a página.",
@@ -393,8 +394,8 @@
   "tools": {
     "ai-chat": {
       "title": "Chat IA",
-      "lede": "Qwen3.5 rodando localmente no seu navegador. Sem servidor, sem chaves de API. Suporta visão.",
-      "tldr": "AI Chat executa Qwen3.5 localmente no seu navegador via WebGPU. Suas mensagens e qualquer imagem enviada nunca saem do seu dispositivo — sem servidor, sem chave de API, sem conta. Suporta entrada de imagem. O modelo carrega no primeiro clique; visitas seguintes iniciam instantaneamente do cache local.",
+      "lede": "Ternary Bonsai 2 e Bonsai 27B da PrismML, rodando localmente no seu navegador. Sem servidor, sem chaves de API. Suporta visão.",
+      "tldr": "AI Chat executa Ternary Bonsai 2 da PrismML, baseado no Qwen3.5, localmente no seu navegador via WebGPU, e Bonsai 27B em computadores com memória suficiente. Suas mensagens e imagens são processadas no seu dispositivo, e seus dados continuam privados — sem servidor, sem chave de API, sem conta. Suporta entrada de imagem. O modelo carrega no primeiro clique; visitas seguintes iniciam instantaneamente do cache local.",
       "seo_title": "Chat de IA privado que roda no seu navegador"
     },
     "base64-codec": {
@@ -523,12 +524,14 @@
       "failedTitle": "{name} não rodou neste dispositivo",
       "failedHint": "Você pode tentar um modelo menor ou pular por enquanto.",
       "failedHintLater": "Você pode pular por enquanto e tentar de novo mais tarde.",
-      "still": "Ainda em andamento: a primeira execução compila os shaders e pode levar um ou dois minutos no celular."
+      "still": "Ainda em andamento: a primeira execução compila os shaders e pode levar um ou dois minutos no celular.",
+      "upgradeText": "Há um modelo {name} melhor disponível · {size}",
+      "upgradeGo": "Baixar"
     },
     "quote": {
       "title": "Frase motivacional",
       "lede": "Frases originais geradas por IA, rodando localmente no seu navegador.",
-      "tldr": "Frase motivacional gera aforismos originais com um modelo Qwen3.5 ajustado em dados de frases curados, rodando inteiramente no seu navegador via WebGPU. Sem servidor, sem chave de API, sem conta. O modelo é baixado na primeira visita e fica em cache localmente para reutilização instantânea."
+      "tldr": "Frase motivacional gera aforismos originais com o mesmo modelo local do AI Chat, rodando inteiramente no seu navegador via WebGPU. Sem servidor, sem chave de API, sem conta. O modelo é baixado na primeira visita e fica em cache localmente para reutilização instantânea."
     },
     "radio": {
       "title": "Rádio infinita",
@@ -543,7 +546,7 @@
     "search": {
       "title": "Busca",
       "lede": "Encontre ferramentas e posts do feed. Digite qualquer consulta — palavra-chave ou linguagem natural.",
-      "tldr": "Busca em todo o site apoiada por um índice gerado em tempo de build, cobrindo cada ferramenta e post do feed em 5 idiomas. O modo padrão é correspondência fuzzy instantânea por palavras-chave em títulos, descrições e TL;DRs — sem download de modelo, sem ida ao servidor. Quando o modelo Qwen3.5 já está em cache local (após usar AI Chat ou Frase motivacional), um resumo IA opcional aparece acima dos resultados."
+      "tldr": "Busca em todo o site apoiada por um índice gerado em tempo de build, cobrindo cada ferramenta e post do feed em 5 idiomas. O modo padrão é correspondência fuzzy instantânea por palavras-chave em títulos, descrições e TL;DRs — sem download de modelo, sem ida ao servidor. Quando um modelo de IA local já está em cache (após usar AI Chat ou Frase motivacional), um resumo IA opcional aparece acima dos resultados."
     },
     "step-counter": {
       "title": "Contador de passos",
@@ -589,7 +592,7 @@
     "annotate-image": {
       "title": "Anotar imagem",
       "lede": "Envie uma imagem e obtenha na hora uma descrição de IA, texto alternativo, transcrição ou tags — com prompts testados de um toque. Roda localmente no seu navegador, nada é enviado.",
-      "tldr": "Um complemento focado e com visão para o AI Chat: solte uma imagem e um prompt testado roda automaticamente — sem precisar escrever um. Alterne entre Descrever, Ler texto (OCR), Texto alternativo e Objetos/tags com um toque. Ele roda o mesmo modelo de visão Qwen3.5 no dispositivo que o AI Chat (cache compartilhado — se você já usou o AI Chat, não há download extra), inteiramente no seu navegador via WebGPU. Nada é enviado; a imagem nunca sai do seu dispositivo. Arraste e solte, cole, escolha um arquivo ou use «abrir com» no seu gerenciador de arquivos depois de instalado. Copie ou baixe o resultado. Requer WebGPU (Chrome/Edge recente ou Safari 26+).",
+      "tldr": "Um complemento focado e com visão para o AI Chat: solte uma imagem e um prompt testado roda automaticamente — sem precisar escrever um. Alterne entre Descrever, Ler texto (OCR), Texto alternativo e Objetos/tags com um toque. Ele roda o mesmo modelo local do AI Chat, com sua parte de visão (cache compartilhado — se você já mostrou uma imagem ao AI Chat, não há download extra), inteiramente no seu navegador via WebGPU. A imagem é processada no seu dispositivo, e seus dados continuam privados. Arraste e solte, cole, escolha um arquivo ou use «abrir com» no seu gerenciador de arquivos depois de instalado. Copie ou baixe o resultado. Requer WebGPU (Chrome/Edge recente ou Safari 26+).",
       "seo_title": "Anotação de imagens com IA: texto alternativo e OCR"
     },
     "files": {
@@ -641,7 +644,7 @@
     "model-mirror": {
       "title": "Espelho de modelos",
       "lede": "Ajude a distribuir os modelos locais da Mentria em P2P. Mantenha esta aba aberta e seu navegador vira um espelho.",
-      "tldr": "Seu navegador compartilha o modelo 0.8B com outros visitantes por P2P, com o download oficial como reserva automática. Sem conta e sem instalação."
+      "tldr": "Seu navegador compartilha os modelos locais da Mentria com outros visitantes por P2P, com o download oficial como reserva automática. Sem conta e sem instalação."
     },
     "console": {
       "title": "Console",
@@ -1055,7 +1058,7 @@
       "btn_ai_generate": "Gerar nome",
       "btn_ai_generating": "Gerando…",
       "ai_unavailable_hint": "Abra AI Chat ou Frase motivacional uma vez para habilitar a nomeação IA",
-      "ai_confirm_download": "A nomeação por IA precisa de um download único do modelo (490 MB ou mais, dependendo do nível). Continuar?",
+      "ai_confirm_download": "A nomeação por IA precisa de um download único do modelo (520 MB ou mais, dependendo do nível). Continuar?",
       "btn_ai_loading": "Carregando {pct}%",
       "preview_region_aria": "Pré-visualização renderizada",
       "tab_hint": "Tab insere espaços. Pressione Escape e depois Tab para sair do editor.",
@@ -1130,6 +1133,7 @@
       "tier_better": "melhor",
       "tier_best": "máxima",
       "tier_max": "máximo",
+      "tier_old": "modelo anterior",
       "think_toggle": "Pensamento profundo — respostas mais lentas e cuidadosas",
       "think_needs_ctx": "O pensamento profundo requer uma GPU com mais memória",
       "think_toggle_slow": "Pensamento profundo — leva alguns minutos nesta GPU",
@@ -6099,7 +6103,7 @@
     "privacy_note": "Seu prompt é processado neste aparelho, não em um servidor. Veja <a href=\"{p}/privacy/\">Privacidade</a>.",
     "how_h": "Como funciona",
     "how1": "<strong>O WebGPU dá a uma página da web acesso ao seu chip gráfico.</strong> Os navegadores agora deixam as páginas rodarem seus próprios programas na GPU, o mesmo chip que os jogos usam. O motor da Mentria, escrito do zero para WebGPU, executa cada etapa do modelo como pequenos programas de GPU.",
-    "how2": "<strong>O modelo é comprimido para caber.</strong> Cada um dos seus números é guardado em 4 bits, ou cerca de 1 bit no caso do 27B, em vez dos 16 de costume. É assim que um modelo com 800 milhões de números vira um download de 490 MB.",
+    "how2": "<strong>O modelo é comprimido para caber.</strong> Cada um dos seus números é guardado como −1, 0 ou +1, com uma escala compartilhada para cada grupo de 128, então ocupa cerca de 2 bits em vez dos 16 de costume, ou cerca de 1 bit no caso do 27B. É assim que um modelo com 2 bilhões de números vira um download de 520 MB.",
     "how3": "<strong>Ele escreve um token de cada vez.</strong> Seu prompt é dividido em tokens, pedaços de palavras, e o modelo prevê o próximo token várias vezes seguidas na sua GPU, nas velocidades medidas abaixo.",
     "need_h": "Do que você precisa",
     "need1": "<strong>Um navegador com WebGPU.</strong> A maioria dos navegadores atuais tem; a tabela abaixo mostra onde.",
@@ -6118,19 +6122,19 @@
     "th_model": "Modelo",
     "th_download": "Download",
     "th_used": "Onde a Mentria usa",
-    "where_08b": "Qualquer aparelho com WebGPU, incluindo celulares.",
+    "where_08b": "Qualquer aparelho com WebGPU, incluindo celulares. É o modelo padrão e o único no iPhone e no iPad.",
     "where_2b": "Aparelhos com pelo menos 8 GB de memória.",
-    "where_4b": "Computadores com memória suficiente e alguns celulares Android topo de linha.",
+    "where_4b": "Computadores com memória suficiente. Nunca é oferecido em celulares.",
     "where_27b": "Computadores com placa de vídeo dedicada e Macs com Apple Silicon.",
-    "models_p": "A Mentria começa com o menor modelo e oferece um maior quando seu aparelho aguenta. Você pode trocar no <a href=\"{p}/tools/ai-chat/\">Chat IA</a>. Os quatro também conseguem ver imagens.",
+    "models_p": "A Mentria começa com o menor modelo e oferece um maior quando seu aparelho aguenta. Você pode trocar no <a href=\"{p}/tools/ai-chat/\">Chat IA</a>. O 2B, o 4B e o 9B são Ternary Bonsai 2 da PrismML, baseados no Qwen3.5 (Apache-2.0); o 27B é o Bonsai 27B, também da PrismML. Os quatro também conseguem ver imagens, o que exige um download extra único de 208 MB a 477 MB nos três menores.",
     "speed_h": "Qual a velocidade",
-    "th_starts": "Inicia em",
+    "th_device": "Aparelho",
     "th_first": "Primeira palavra",
     "th_speed": "Velocidade",
-    "speed_p": "Um token equivale a cerca de três quartos de uma palavra em inglês, então 25 tokens por segundo é mais rápido do que a maioria das pessoas lê. Aqui o 27B supera o 4B porque o motor o executa com configurações ajustadas para GPUs da Apple, que os modelos menores ainda não usam.",
-    "speeds_note": "Medido com o benchmark da Mentria em um Apple M4 Pro com 24 GB de memória, no Chrome 154, em outubro de 2026. Inicia em: tempo para carregar um modelo já salvo. Primeira palavra e velocidade: medianas de três execuções de uma resposta de 120 tokens. No seu aparelho os números serão outros, e a demonstração acima mostra os dele.",
+    "speed_p": "Um token equivale a cerca de três quartos de uma palavra em inglês, então 25 tokens por segundo é mais rápido do que a maioria das pessoas lê. Depois de um prompt longo, a primeira palavra demora mais, porque o modelo lê tudo antes de responder. Celulares são bem mais lentos que computadores.",
+    "speeds_note": "Medido com o motor da Mentria, em outubro de 2026. Mac: Apple M4 Pro. Nos modelos Ternary Bonsai 2, a primeira palavra é o tempo depois de um prompt de 512 tokens, e as velocidades nos celulares são com um prompt curto. A linha do Bonsai 27B vem de um benchmark anterior no Chrome 154 (medianas de três execuções de uma resposta de 120 tokens), então a primeira palavra dele não é diretamente comparável. No seu aparelho os números serão outros, e a demonstração acima mostra os dele.",
     "limits_h": "Os limites",
-    "lim1": "<strong>O primeiro download é grande.</strong> De 490 MB a 3,8 GB. Nos dados móveis isso pesa, por isso a Mentria pergunta antes em conexões lentas ou limitadas.",
+    "lim1": "<strong>O primeiro download é grande.</strong> De 520 MB a 3,8 GB. Nos dados móveis isso pesa, por isso a Mentria pergunta antes em conexões lentas ou limitadas.",
     "lim2": "<strong>Celulares têm menos espaço.</strong> Os navegadores de celular fecham uma aba que usa memória demais, por isso os celulares ficam com os modelos menores.",
     "lim3": "<strong>Modelos pequenos erram mais.</strong> São bons para explicar, reescrever e resumir, e bem mais fracos que os grandes modelos na nuvem em fatos e raciocínio. Confira tudo o que for importante.",
     "lim4": "<strong>Eles leem poucas páginas por vez.</strong> Um modelo no navegador trabalha com um contexto limitado, então documentos muito longos precisam ser divididos.",
@@ -6139,9 +6143,9 @@
     "more_h": "Use na Mentria",
     "more1": "<a href=\"{p}/tools/ai-chat/\">Chat IA</a>: converse com o modelo, mostre imagens e escolha um modelo maior.",
     "more2": "<a href=\"{p}/tools/annotate-image/\">Anotar imagem</a>: receba uma descrição, o texto ou tags de uma imagem.",
-    "more3": "<a href=\"{p}/tools/quote/\">Frase motivacional</a>: um modelo pequeno ajustado para escrever frases originais.",
+    "more3": "<a href=\"{p}/tools/quote/\">Frase motivacional</a>: o mesmo modelo escreve frases originais.",
     "more4": "<a href=\"{p}/privacy/\">Privacidade</a>: o que fica no seu aparelho e o que usa a rede.",
-    "updated": "Atualizado em 9 de outubro de 2026.",
+    "updated": "Atualizado em 28 de outubro de 2026.",
     "dec": ",",
     "fmt_mb": "{n} MB",
     "fmt_gb": "{n} GB",

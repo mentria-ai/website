@@ -6,10 +6,11 @@ import { Ledger, accountGroup } from './ledger.js';
 import { monthKey, isISODate, formatMonthKey, formatDate } from './dates.js';
 import { format, isCurrency } from './money.js';
 import { randomId } from './crypto.js';
-import { showLock } from './lock.js';
+import { showLock, dropCard } from './lock.js';
 import { openEntry } from './entry.js';
 import { syncController } from './sync.js';
 import { defaultOps, guessCurrency } from './defaults.js';
+import * as KR from './keyring.js';
 
 const { h, t, icon } = U;
 
@@ -66,7 +67,14 @@ const app = {
   renderSeq: 0,
   sync: null,
   writer: true,
-  viewState: {}
+  viewState: {},
+  K: null,
+  linked: false,
+  linkDeclined: false,
+  held: false,
+  current: false,
+  currentId: null,
+  opening: false
 };
 
 let queuedCmd = null;
@@ -126,9 +134,11 @@ function ctx() {
     openEntry: (opts) => openEntry(ctx(), opts),
     saveLocal,
     lock,
+    lockNow,
     publishWrap,
     getCtx: ctx,
     sync: app.sync,
+    keyring: app.linked ? app.K : null,
     host
   };
 }
@@ -164,11 +174,12 @@ function remove(entity, id) {
 
 function shell() {
   const root = app.root;
+  dropCard();
   root.replaceChildren();
   const title = h('h1', { class: 'fin-top__title', id: 'fin-title' });
   const syncBtn = h('button', { type: 'button', class: 'fsync', id: 'fin-sync', onclick: () => go('devices') }, h('i'), h('span', { id: 'fin-sync-text' }, t('sync.local')));
   const searchBtn = h('button', { type: 'button', class: 'fb fb--ghost fb--icon', 'aria-label': t('nav.search'), onclick: () => go('ledger', { q: '1' }) }, icon('search'));
-  const lockBtn = h('button', { type: 'button', class: 'fb fb--ghost fb--icon', 'aria-label': t('lock.lock_now'), onclick: () => lock() }, icon('lock'));
+  const lockBtn = h('button', { type: 'button', class: 'fb fb--ghost fb--icon', 'aria-label': t('lock.lock_now'), onclick: () => lockNow() }, icon('lock'));
   const top = h('header', { class: 'fin-top' }, title, h('span', { id: 'fin-top-extra' }), syncBtn, searchBtn, lockBtn);
   const nav = h('nav', { class: 'fin-nav', 'aria-label': t('nav.label') });
   nav.append(h('div', { class: 'fin-nav__brand' }, icon('coins'), h('span', null, t('app.name'))));
@@ -359,9 +370,267 @@ export async function publishWrap(kind) {
   await commit(app.ledger.exists('vaultwrap', kind) ? app.engine.updateOps('vaultwrap', kind, fields) : app.engine.createOps('vaultwrap', kind, fields));
 }
 
+async function retireLegacy() {
+  const K = app.K;
+  if (!K || !app.linked || !app.engine || app.engine.readOnly) return false;
+  if (!app.current || !app.currentId || K.secretId('finance') !== app.currentId) return false;
+  let r = null;
+  try { r = K.retirement('finance'); } catch (_) { return false; }
+  const plan = V.retirePlan(r);
+  if (plan === 'keep') return false;
+  const ops = [];
+  for (const kind of ['pass', 'recovery']) if (app.ledger.exists('vaultwrap', kind)) ops.push(...app.engine.removeOps('vaultwrap', kind));
+  if (plan === 'leftovers' && !ops.length && !V.hasLegacyWraps(await db.getMeta('wraps'))) return false;
+  if (ops.length) await app.engine.commit(ops);
+  const ids = await V.retireLegacy();
+  await KR.forgetPasskeys(ids);
+  if (plan === 'retire') await K.markRetired('finance');
+  return true;
+}
+
+async function inKeyring(bytes) {
+  const list = await app.K.secrets('finance');
+  try { return list.some((x) => KR.sameBytes(x.bytes, bytes)); } finally { for (const x of list) x.bytes.fill(0); }
+}
+
+function keyringLockedNow() {
+  return !!(app.linked && app.K && !app.K.state().unlocked);
+}
+
+async function convertDevice() {
+  const K = app.K;
+  const wraps = await db.getMeta('wraps');
+  if (!K || !wraps || !wraps.device || K.rememberDecision() === 'off') return;
+  try {
+    if (!K.state().hasDevice) await K.setRemember(true);
+    K.setRememberPending(false);
+    await V.setDeviceUnlock(null, false);
+  } catch (e) {
+    if (KR.errCode(e) === 'confirm-needed') K.setRememberPending(true);
+  }
+}
+
+async function resumeRemember() {
+  const K = app.K;
+  if (!K || !K.rememberPending() || K.rememberDecision() === 'off') return;
+  const wraps = await db.getMeta('wraps');
+  if (!wraps || !wraps.device) return;
+  if (!K.state().hasDevice && !K.hasRootBytes()) return;
+  try {
+    if (!K.state().hasDevice) await K.setRemember(true);
+    K.setRememberPending(false);
+    await V.setDeviceUnlock(null, false);
+  } catch (_) {}
+}
+
+async function ensureLinked(bytes) {
+  const K = app.K;
+  if (!K || !K.state().unlocked) throw new Error('locked');
+  const copy = new Uint8Array(bytes);
+  try { await K.link('finance', copy); } finally { copy.fill(0); }
+}
+
+async function finishLink() {
+  await V.markLinked();
+  await convertDevice();
+  if (app.engine) {
+    app.linked = true;
+    if (keyringLockedNow()) { lock(); return; }
+    scheduleRender();
+  } else {
+    start();
+  }
+}
+
+async function adoptLink(bytes) {
+  try { await ensureLinked(bytes); } catch (e) {
+    app.linkDeclined = true;
+    return false;
+  }
+  await finishLink();
+  return true;
+}
+
+async function linkWithCard(bytes) {
+  const T = await KR.copy();
+  const ui = await KR.ui();
+  return new Promise((resolve) => {
+    let card = null;
+    let settled = false;
+    const finish = (v) => {
+      if (settled) return;
+      settled = true;
+      if (card) card.destroy();
+      resolve(v);
+    };
+    const box = h('div');
+    let declined = false;
+    let escTimer = null;
+    const sh = U.sheet({
+      title: T.link_title || t('lock.locked'),
+      body: box,
+      foot: [h('button', { type: 'button', class: 'fb', onclick: () => { declined = true; sh.close(); } }, t('common.later'))],
+      onClose: () => {
+        clearTimeout(escTimer);
+        if (!settled && declined) {
+          app.linkDeclined = true;
+          KR.sayLater();
+        }
+        finish(false);
+      }
+    });
+    sh.el.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || e.isComposing) return;
+      declined = true;
+      clearTimeout(escTimer);
+      escTimer = setTimeout(() => { declined = false; }, 400);
+    });
+    ui.mountCard(box, {
+      onUnlocked: async () => {
+        if (settled) return;
+        const ok = await adoptLink(bytes);
+        finish(ok);
+        sh.close();
+      }
+    }).then((c) => { if (settled) c.destroy(); else card = c; }, () => sh.close());
+  });
+}
+
+async function linkLegacy(bytes, info) {
+  const K = app.K;
+  const i = info || {};
+  if (!K || app.linkDeclined || app.linked) return false;
+  if (i.auto && KR.saidLater()) return false;
+  try {
+    if (!K.enabled()) return false;
+    const s = K.state();
+    if (s.unlocked) return await adoptLink(bytes);
+    if (s.setUp) return await linkWithCard(bytes);
+    const ui = await KR.ui();
+    const secret = new Uint8Array(bytes);
+    const opts = { service: 'finance', secret };
+    if (i.code) opts.knownCode = i.code;
+    opts.verifyCode = (code) => V.unlockRecovery(code).then((r) => { r.root.fill(0); return true; }, () => false);
+    if (i.pass) opts.knownPassphrase = i.pass;
+    let ok = false;
+    try { ok = await ui.showSetup(opts); } finally { secret.fill(0); }
+    const after = K.state();
+    if (!ok && !(after.unlocked && await inKeyring(bytes))) {
+      app.linkDeclined = true;
+      KR.sayLater();
+      return false;
+    }
+    await finishLink();
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
+
+async function openLinked() {
+  const K = app.K;
+  if (app.engine || app.opening) return true;
+  if (!K) return false;
+  app.opening = true;
+  app.current = false;
+  app.currentId = null;
+  try {
+    const list = await K.secrets('finance');
+    if (!list.length) throw new Error('not-linked');
+    let s;
+    try { s = await V.openLinked(list); } finally { for (const x of list) x.bytes.fill(0); }
+    app.currentId = s.id;
+    app.current = s.index === 0 && !!s.id && s.id === K.secretId('finance');
+    if (!(await db.getMeta('linked'))) {
+      await V.markLinked();
+      await convertDevice();
+    } else {
+      await resumeRemember();
+    }
+    await openSession(s);
+    return true;
+  } finally {
+    app.opening = false;
+  }
+}
+
+async function createLinked(pending) {
+  const K = app.K;
+  if (!K || !K.state().unlocked) throw new Error('locked');
+  const v = await V.buildVault(null, { linked: true, pending });
+  const copy = new Uint8Array(v.root);
+  try { await K.link('finance', copy); } finally { copy.fill(0); }
+  const created = await V.saveVault(v);
+  await openSession({ root: created.root, keys: created.keys, linked: true });
+}
+
+async function joinLinked(rootBytes) {
+  const v = await V.buildVault(null, { root: rootBytes, linked: true });
+  await ensureLinked(v.root);
+  return V.saveVault(v);
+}
+
+let keyringOff = null;
+let keyEpoch = 0;
+let keyOpen = false;
+function watchKeyring(K) {
+  if (!K || keyringOff) return;
+  const now = K.state();
+  keyEpoch = now.epoch;
+  keyOpen = now.unlocked;
+  keyringOff = K.onChange((s) => {
+    const locked = !s.unlocked && (keyOpen || s.epoch !== keyEpoch);
+    keyEpoch = s.epoch;
+    keyOpen = s.unlocked;
+    followKeyring(s, locked).catch((e) => console.error(e));
+  });
+}
+
+async function metaLinked() {
+  try { return (await db.getMeta('linked')) === true; } catch (_) { return false; }
+}
+
+async function opensHere(engine) {
+  try { return !!engine.root && (await inKeyring(engine.root)); } catch (_) { return false; }
+}
+
+async function followKeyring(s, locked) {
+  const K = app.K;
+  if (!K || !app.engine) return;
+  if (app.linked) {
+    if (!s.unlocked) lock();
+    return;
+  }
+  if (!s.unlocked) {
+    if (locked && (s.linked.indexOf('finance') >= 0 || (await metaLinked())) && app.engine && !app.linked && !K.state().unlocked) lock();
+    return;
+  }
+  const engine = app.engine;
+  if (!(await metaLinked()) || app.engine !== engine || app.linked || !K.state().unlocked) return;
+  if (!(await opensHere(engine)) || app.engine !== engine || app.linked) return;
+  app.linked = true;
+  scheduleRender();
+}
+
+export async function lockNow() {
+  if (app.linked && app.K) {
+    try {
+      const ui = await KR.ui();
+      await ui.lockNow();
+    } catch (_) {
+      try { await app.K.lock(); } catch (_) {}
+    }
+    if (app.engine) lock();
+    return;
+  }
+  lock();
+}
+
 export async function openSession(session) {
   const deviceId = await db.getMeta('device_id');
   const deviceName = await db.getMeta('device_name');
+  app.linked = !!session.linked;
   const engine = new Engine({ root: session.root, keys: session.keys, deviceId, deviceName });
   engine.attachTabs();
   const isWriter = await engine.acquireWriter();
@@ -369,11 +638,13 @@ export async function openSession(session) {
     await engine.load();
   } catch (e) {
     engine.close();
+    app.linked = false;
     throw e;
   }
   if (!isWriter) engine.waitForWriter();
   app.engine = engine;
   app.ledger = new Ledger(engine);
+  if (keyringLockedNow()) { lock(); return; }
   U.setNumberLocale(app.ledger.settings().locale || null);
   engine.addEventListener('change', () => { scheduleRender(); updateWidgetSoon(); });
   engine.addEventListener('writer', () => { scheduleRender(); afterWriter().then(() => updateWidget()); });
@@ -411,6 +682,7 @@ async function afterWriter(session) {
     if (merged) U.toast(U.tp('lock.inbox_merged', merged), { ms: 5000 });
     await autoPost();
     await touchDevice();
+    if (app.linked) { try { await retireLegacy(); } catch (e) { console.error(e); } }
     await syncWraps();
     armRemindersSoon(0);
   } catch (e) { console.error(e); }
@@ -474,7 +746,7 @@ function armTimers() {
   for (const ev of ['pointerdown', 'keydown', 'wheel', 'touchstart']) window.addEventListener(ev, bumpActivity, { passive: true });
   clearInterval(lockTimer);
   lockTimer = setInterval(() => {
-    const mins = app.local.auto_lock_min;
+    const mins = app.linked ? 0 : app.local.auto_lock_min;
     if (!mins || !app.engine) return;
     const idle = Date.now() - app.lastActive;
     if (document.hidden && app.hiddenAt && Date.now() - app.hiddenAt > mins * 60000) lock();
@@ -485,28 +757,32 @@ function armTimers() {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) app.hiddenAt = Date.now();
   else {
-    const mins = app.local.auto_lock_min;
+    const mins = app.linked ? 0 : app.local.auto_lock_min;
     if (app.engine && mins && app.hiddenAt && Date.now() - app.hiddenAt > mins * 60000) lock();
     app.hiddenAt = 0;
     if (app.sync && app.engine) app.sync.poke();
   }
 });
 
-export function lock() {
+export function lock(stay) {
+  if (!app.linked) app.held = true;
   U.closeAllSheets();
   import('./agents.js').then((A) => A.disableAgents()).catch(() => {});
   if (app.sync) { app.sync.stop(); app.sync = null; }
   if (app.engine) { app.engine.close(); app.engine = null; }
   app.ledger = null;
+  app.linked = false;
+  app.current = false;
+  app.currentId = null;
   clearTimeout(widgetTimer);
   updateWidget();
-  start();
+  if (!stay) start();
 }
 
 window.addEventListener('hashchange', () => { if (app.engine) render(); });
 
 window.addEventListener('keydown', (e) => {
-  if (!app.engine || U.sheetOpen()) return;
+  if (!app.engine || U.sheetOpen() || document.documentElement.classList.contains('m-unlock-open')) return;
   const tag = (e.target && e.target.tagName) || '';
   if (/INPUT|TEXTAREA|SELECT/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -524,17 +800,61 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+const KR_WAIT_MS = 5000;
+let krLate = null;
+
+function typing() {
+  return !!app.root && Array.from(app.root.querySelectorAll('input, textarea')).some((el) => !!el.value);
+}
+
+function lateKeyring(K) {
+  if (!K || app.K) return;
+  if (!app.engine && !typing()) { start(); return; }
+  app.K = K;
+  watchKeyring(K);
+}
+
+async function loadKeyring() {
+  const p = KR.load();
+  const kr = await Promise.race([p, new Promise((resolve) => setTimeout(() => resolve(null), KR_WAIT_MS))]);
+  if (kr) return kr;
+  if (!krLate) {
+    krLate = p.then((late) => {
+      krLate = null;
+      if (late && late.K) lateKeyring(late.K);
+    }, () => { krLate = null; });
+  }
+  return { K: null, why: 'failed' };
+}
+
 async function start() {
   const root = app.root;
   await loadLocal();
   try { await V.refreshDeviceName(); } catch (_) {}
-  const st = await V.status();
+  const kr = await loadKeyring();
+  const K = kr.K;
+  app.K = K;
+  watchKeyring(K);
+  const ks = K ? K.state() : null;
+  const keyringLinked = !!ks && ks.linked.indexOf('finance') >= 0;
+  const st = await V.status({ keyringLinked });
+  if (K && st.setup && ks.unlocked && keyringLinked && !app.engine) {
+    try { if (await openLinked()) return; } catch (_) {}
+  }
+  if (app.engine) return;
   showLock(root, {
     status: st,
     local: app.local,
+    held: app.held,
     onOpen: (session) => openSession(session),
     saveLocal,
-    publishWrap
+    publishWrap,
+    keyring: K,
+    keyringWhy: kr.why,
+    openLinked,
+    linkLegacy,
+    createLinked,
+    joinLinked
   });
 }
 

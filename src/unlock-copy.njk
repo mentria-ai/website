@@ -1,0 +1,12 @@
+---
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "/assets/js/unlock-copy.{{ locale.code | lower }}.js"
+eleventyExcludeFromCollections: true
+eleventyExcludeFromSitemap: true
+eleventyComputed:
+  lang: "{{ locale.code }}"
+---
+export default {{ "unlock" | tsub | dump | safe }};

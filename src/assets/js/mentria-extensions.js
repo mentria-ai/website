@@ -7,6 +7,7 @@ const REJECT_BYTES = 1536 * 1024;
 const ID_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const VERSION_RE = /^\d+\.\d+\.\d+$/;
 const CMD_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const SHA_RE = /^[0-9a-f]{64}$/;
 const DB_NAME = 'mentria-ext-db';
 const DB_STORE = 'kv';
 const FILES_CACHE = 'mentria-ext-files';
@@ -128,7 +129,7 @@ export function install(html, manifest, meta) {
     updatedAt: new Date().toISOString(),
     size
   };
-  if (meta && typeof meta.sha256 === 'string' && /^[0-9a-f]{64}$/.test(meta.sha256)) entry.sha256 = meta.sha256;
+  if (meta && typeof meta.sha256 === 'string' && SHA_RE.test(meta.sha256)) entry.sha256 = meta.sha256;
   registry.push(entry);
   if (!store().set(NS, 'registry', registry)) {
     const err = storageError();
@@ -142,6 +143,16 @@ export function install(html, manifest, meta) {
 export function isApp(entry) {
   const m = entry && (entry.manifest || entry);
   return !!(m && m.app);
+}
+
+function knownHashes(published) {
+  return (Array.isArray(published) ? published : [published]).filter((h) => typeof h === 'string' && SHA_RE.test(h));
+}
+
+export function isVerified(entry, published) {
+  if (!entry || !entry.manifest) return false;
+  if (isApp(entry)) return true;
+  return typeof entry.sha256 === 'string' && knownHashes(published).includes(entry.sha256);
 }
 
 export function installApp(manifest) {
@@ -176,7 +187,7 @@ async function sha256Hex(buf) {
 }
 
 export async function fetchVerified(id, sha256) {
-  if (typeof sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(sha256)) throw codedError('mismatch', 'mismatch');
+  if (typeof sha256 !== 'string' || !SHA_RE.test(sha256)) throw codedError('mismatch', 'mismatch');
   const url = '/assets/extensions/' + encodeURIComponent(id) + '.html';
   for (const src of [url, url + '?v=' + sha256.slice(0, 12)]) {
     const r = await fetch(src, { cache: 'no-store' });
@@ -187,6 +198,23 @@ export async function fetchVerified(id, sha256) {
     return { html: new TextDecoder().decode(buf), sha256: got };
   }
   throw codedError('mismatch', 'mismatch');
+}
+
+export async function checkSource(id, published) {
+  const entry = getEntry(id);
+  if (!entry || isApp(entry)) return entry;
+  const source = getSource(id);
+  if (typeof source !== 'string') return entry;
+  const got = await sha256Hex(new TextEncoder().encode(source));
+  if (got === null || getSource(id) !== source) return getEntry(id);
+  const registry = getRegistry();
+  const row = registry.find((x) => x.manifest.id === id);
+  if (!row) return null;
+  const next = knownHashes(published).includes(got) || got === row.sha256 ? got : null;
+  if (next === (row.sha256 || null)) return row;
+  if (next) row.sha256 = next;
+  else delete row.sha256;
+  return store().set(NS, 'registry', registry) ? row : getEntry(id);
 }
 
 function ownedFiles(id) {

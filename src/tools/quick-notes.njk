@@ -10,6 +10,7 @@ eleventyComputed:
   title: "{{ 'tools.quick-notes.title' | t }}"
   description: "{{ 'tools.quick-notes.lede' | t }}"
 localeReload: true
+unlockTool: true
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">quick-notes</span></p>
@@ -51,6 +52,7 @@ localeReload: true
         <button class="qn-action-btn m-btn m-btn--ghost" id="qn-share-btn" title="{{ 'common.share' | t }}">{{ "common.share" | t }}</button>
         <button class="qn-action-btn m-btn m-btn--ghost" id="qn-mdpdf-btn" title="{{ 'tool.quick-notes.to_mdpdf_title' | t }}">{{ "tool.quick-notes.to_mdpdf_btn" | t }}</button>
         <button class="qn-action-btn m-btn m-btn--ghost" id="qn-lock-btn" title="{{ 'tool.quick-notes.lock_title' | t }}">{{ "tool.quick-notes.lock_btn" | t }}</button>
+        <button class="qn-action-btn m-btn m-btn--ghost" id="qn-remove-lock-btn" title="{{ 'tool.quick-notes.remove_lock_btn' | t }}" hidden>{{ "tool.quick-notes.remove_lock_btn" | t }}</button>
         <button class="qn-action-btn m-btn m-btn--danger" id="qn-delete-btn" title="{{ 'tool.quick-notes.delete_title' | t }}">{{ "tool.quick-notes.delete_btn" | t }}</button>
       </div>
     </div>
@@ -58,6 +60,8 @@ localeReload: true
       <span data-unsaved="blocked" hidden>{{ "tool.quick-notes.unsaved_blocked" | t }}</span>
       <span data-unsaved="full" hidden>{{ "tool.quick-notes.unsaved_full" | t }}</span>
     </p>
+    <p class="qn-convert" id="qn-convert" role="status" aria-live="polite" hidden></p>
+    <p class="qn-readonly" id="qn-readonly" role="status" aria-live="polite" hidden>{{ "tool.quick-notes.read_only_old" | t }}</p>
     <textarea
       class="qn-editor__textarea"
       id="qn-textarea"
@@ -70,8 +74,17 @@ localeReload: true
         <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
       </svg>
       <h2 class="qn-locked__heading">{{ "tool.quick-notes.locked_heading" | t }}</h2>
-      <p class="qn-locked__body">{{ "tool.quick-notes.locked_body" | t }}</p>
+      <p class="qn-locked__body" id="qn-locked-body">{{ "tool.quick-notes.locked_body" | t }}</p>
+      <p class="qn-locked__body qn-locked__note" id="qn-locked-note" hidden></p>
+      <div class="qn-locked__link" id="qn-locked-link" hidden>
+        <p class="qn-locked__link-title">{{ "unlock.link_title" | t }}</p>
+        <p class="qn-locked__link-body">{{ "unlock.link_body" | t }}</p>
+      </div>
       <button class="qn-unlock-btn m-btn m-btn--primary m-btn--pill" id="qn-unlock-btn">{{ "tool.quick-notes.unlock_btn" | t }}</button>
+      <div class="qn-locked__card" id="qn-locked-card" hidden>
+        <div id="qn-locked-card-slot"></div>
+        <button type="button" class="qn-card-later m-btn m-btn--ghost" id="qn-card-later" hidden>{{ "unlock.not_now" | t }}</button>
+      </div>
     </div>
     <div class="qn-print" id="qn-print" aria-hidden="true"></div>
     <div class="qn-editor__statusbar">
@@ -103,7 +116,17 @@ localeReload: true
     unlockFailed:      {{ ("tool.quick-notes.unlock_failed"      | t) | dump | safe }},
     prfUnsupported:    {{ ("tool.quick-notes.prf_unsupported"    | t) | dump | safe }},
     countSummary:      {{ ("tool.quick-notes.count_summary"      | t) | dump | safe }},
-    toMdpdfFailed:     {{ ("tool.quick-notes.to_mdpdf_failed"    | t) | dump | safe }}
+    toMdpdfFailed:     {{ ("tool.quick-notes.to_mdpdf_failed"    | t) | dump | safe }},
+    lockTitleOne:      {{ ("tool.quick-notes.lock_title_one"     | t) | dump | safe }},
+    relockTitle:       {{ ("tool.quick-notes.relock_title"       | t) | dump | safe }},
+    confirmLockOne:    {{ ("tool.quick-notes.confirm_lock_one"   | t) | dump | safe }},
+    lockFailedOne:     {{ ("tool.quick-notes.lock_failed_one"    | t) | dump | safe }},
+    keyMissing:        {{ ("tool.quick-notes.key_missing"        | t) | dump | safe }},
+    lockKeyMissing:    {{ ("tool.quick-notes.lock_key_missing"   | t) | dump | safe }},
+    relockOldTitle:    {{ ("tool.quick-notes.relock_old_title"   | t) | dump | safe }},
+    oneOff:            {{ ("tool.quick-notes.one_unlock_off"     | t) | dump | safe }},
+    oneFailed:         {{ ("tool.quick-notes.one_unlock_failed"  | t) | dump | safe }},
+    convertSkipped:    {{ ("tool.quick-notes.convert_skipped"    | t) | dump | safe }}
   };
 
   const STORAGE_KEY = 'mentria-quick-notes';
@@ -126,14 +149,53 @@ localeReload: true
   const unlockBtn   = document.getElementById('qn-unlock-btn');
   const sidebar     = document.getElementById('qn-sidebar');
   const sidebarToggle = document.getElementById('qn-sidebar-toggle');
+  const toolEl      = document.getElementById('qn-tool');
+  const removeLockBtn = document.getElementById('qn-remove-lock-btn');
+  const convertEl   = document.getElementById('qn-convert');
+  const readOnlyEl  = document.getElementById('qn-readonly');
+  const lockedBody  = document.getElementById('qn-locked-body');
+  const lockedNote  = document.getElementById('qn-locked-note');
+  const linkBox     = document.getElementById('qn-locked-link');
+  const cardBox     = document.getElementById('qn-locked-card');
+  const cardSlot    = document.getElementById('qn-locked-card-slot');
+  const cardLater   = document.getElementById('qn-card-later');
+  const printEl     = document.getElementById('qn-print');
 
   let notes = [];
   let activeId = null;
 
   const CRED_KEY = 'mentria-qn-cred';
   const SALT_KEY = 'mentria-qn-salt';
-  let sessionKey = null;
+  const PAIR_KEY = 'mentria.qn.pair';
+  const USED_KEY = 'mentria.qn.used';
+  let sessionKeys = null;
+  const opened = new Map();
   const cryptoOK = !!(window.PublicKeyCredential && window.isSecureContext && window.crypto && crypto.subtle);
+
+  const UNLOCK_JS = '/assets/js/mentria-unlock.js';
+  const UNLOCK_UI_JS = '/assets/js/mentria-unlock-ui.js';
+  const ONE_WAIT_MS = 5000;
+  const oneOK = !!(window.isSecureContext && window.crypto && crypto.subtle);
+  let U = null;
+  let uiP = null;
+  let one = false;
+  let oneSettled = false;
+  let oneWhy = '';
+  let oneReady = Promise.resolve();
+  let notesKeys = [];
+  let ringSig = '';
+  let linkPending = false;
+  let card = null;
+  let cardP = null;
+  let cardFocus = false;
+  let panelView = 'old';
+  let renderSeq = 0;
+  let openChain = Promise.resolve();
+  let retiring = false;
+  let wasUnlocked = false;
+  const skipped = new Set();
+  const skippedKv = new Set();
+  const curOk = new Set();
 
   let autoBlank = null;
 
@@ -240,6 +302,7 @@ localeReload: true
       });
     }
     renderList();
+    if (one && notesKeys.length) openNotes();
   }
 
   function acceptExternalDelete() {
@@ -262,25 +325,128 @@ localeReload: true
   }
 
   function prfSalt() {
-    let s = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'salt') : null;
-    if (!s) {
-      const legacy = localStorage.getItem(SALT_KEY);
-      if (legacy) {
-        s = legacy;
-        if (window.MentriaStore) { window.MentriaStore.set('quick_notes', 'salt', s); localStorage.removeItem(SALT_KEY); }
-      } else {
-        s = b64enc(crypto.getRandomValues(new Uint8Array(32)));
-        if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'salt', s);
-        else localStorage.setItem(SALT_KEY, s);
-      }
+    const S = window.MentriaStore;
+    const have = S ? S.get('quick_notes', 'salt') : null;
+    if (have) return String(have);
+    const legacy = localStorage.getItem(SALT_KEY);
+    if (legacy) {
+      if (S && S.set('quick_notes', 'salt', legacy)) localStorage.removeItem(SALT_KEY);
+      return legacy;
     }
-    return b64dec(s);
+    const s = b64enc(crypto.getRandomValues(new Uint8Array(32)));
+    if (S) S.set('quick_notes', 'salt', s);
+    else localStorage.setItem(SALT_KEY, s);
+    return s;
+  }
+
+  function storedPair() {
+    const S = window.MentriaStore;
+    let salt = S ? S.get('quick_notes', 'salt') : null;
+    let cred = S ? S.get('quick_notes', 'cred_id') : null;
+    try {
+      if (!salt) salt = localStorage.getItem(SALT_KEY);
+      if (!cred) cred = localStorage.getItem(CRED_KEY);
+    } catch (_) {}
+    return { salt: salt ? String(salt) : null, cred: cred ? String(cred) : null };
+  }
+
+  function fullPair(p) {
+    return !!p && typeof p.salt === 'string' && !!p.salt && typeof p.cred === 'string' && !!p.cred;
+  }
+
+  function samePair(a, b) {
+    return fullPair(a) && fullPair(b) && a.salt === b.salt && a.cred === b.cred;
+  }
+
+  function ownPair(note) {
+    if (!note || typeof note.salt !== 'string' || !note.salt || typeof note.credId !== 'string' || !note.credId) return null;
+    return { salt: note.salt, cred: note.credId };
+  }
+
+  function devicePair() {
+    try {
+      const p = JSON.parse(localStorage.getItem(PAIR_KEY) || 'null');
+      if (p && typeof p.salt === 'string' && p.salt && typeof p.credId === 'string' && p.credId) return { salt: p.salt, cred: p.credId };
+    } catch (_) {}
+    return null;
+  }
+
+  function keepDevicePair(p) {
+    if (!fullPair(p) || devicePair()) return;
+    try { localStorage.setItem(PAIR_KEY, JSON.stringify({ salt: p.salt, credId: p.cred })); } catch (_) {}
+  }
+
+  function usedIds() {
+    try {
+      const v = JSON.parse(localStorage.getItem(USED_KEY) || '[]');
+      return Array.isArray(v) ? v.filter((x) => typeof x === 'string' && x) : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function noteUsed(ids) {
+    const have = usedIds();
+    const add = ids.filter((id, i) => typeof id === 'string' && id && !have.includes(id) && ids.indexOf(id) === i);
+    if (!add.length) return;
+    try { localStorage.setItem(USED_KEY, JSON.stringify(have.concat(add))); } catch (_) {}
+  }
+
+  function pairOf(note) {
+    return opened.get(noteSig(note)) || ownPair(note) || storedPair();
+  }
+
+  function keyIn(keys, pair) {
+    return keys && fullPair(pair) ? keys.get(pair.salt + '|' + pair.cred) || null : null;
+  }
+
+  function oldKeysHeld() {
+    return !!sessionKeys && sessionKeys.size > 0;
+  }
+
+  function setPair(n, k) {
+    if (k) {
+      n.salt = k.salt;
+      n.credId = k.cred;
+    } else {
+      delete n.salt;
+      delete n.credId;
+    }
+  }
+
+  async function holdKey(raw, pair) {
+    const key = await crypto.subtle.importKey(
+      'raw', new Uint8Array(raw), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
+    );
+    const got = { key: key, salt: pair.salt, cred: pair.cred };
+    sessionKeys = new Map(sessionKeys || []).set(pair.salt + '|' + pair.cred, got);
+    keepDevicePair(got);
+    return got;
+  }
+
+  async function keyFor(pair) {
+    const held = keyIn(sessionKeys, pair);
+    if (held) return held;
+    if (!cryptoOK) throw new Error('prf-unsupported');
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials: [{ type: 'public-key', id: b64dec(pair.cred) }],
+        userVerification: 'required',
+        extensions: { prf: { eval: { first: b64dec(pair.salt) } } }
+      }
+    });
+    if (!assertion) throw new Error('cancelled');
+    const prf = assertion.getClientExtensionResults().prf;
+    if (!prf || !prf.results || !prf.results.first) throw new Error('prf-unsupported');
+    return holdKey(prf.results.first, pair);
   }
 
   async function ensureKey() {
-    if (sessionKey) return sessionKey;
+    const held = keyIn(sessionKeys, storedPair());
+    if (held) return held;
     if (!cryptoOK) throw new Error('prf-unsupported');
-    const salt = prfSalt();
+    const saltB64 = prfSalt();
     let credId = window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null;
     if (!credId) {
       const legacy = localStorage.getItem(CRED_KEY);
@@ -289,65 +455,111 @@ localeReload: true
         if (window.MentriaStore) { window.MentriaStore.set('quick_notes', 'cred_id', credId); localStorage.removeItem(CRED_KEY); }
       }
     }
-    let prfResult = null;
-    if (!credId) {
-      const cred = await navigator.credentials.create({
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(32)),
-          rp: { name: 'Mentria Quick Notes' },
-          user: {
-            id: crypto.getRandomValues(new Uint8Array(16)),
-            name: 'quick-notes',
-            displayName: 'Quick Notes'
-          },
-          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
-          authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
-          extensions: { prf: { eval: { first: salt } } }
-        }
-      });
-      if (!cred) throw new Error('cancelled');
-      const prf = cred.getClientExtensionResults().prf;
-      if (!prf || prf.enabled === false) throw new Error('prf-unsupported');
-      credId = b64enc(cred.rawId);
-      if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'cred_id', credId);
-      else localStorage.setItem(CRED_KEY, credId);
-      if (prf.results && prf.results.first) prfResult = prf.results.first;
-    }
-    if (!prfResult) {
-      const assertion = await navigator.credentials.get({
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(32)),
-          allowCredentials: [{ type: 'public-key', id: b64dec(credId) }],
-          userVerification: 'required',
-          extensions: { prf: { eval: { first: salt } } }
-        }
-      });
-      if (!assertion) throw new Error('cancelled');
-      const prf = assertion.getClientExtensionResults().prf;
-      if (!prf || !prf.results || !prf.results.first) throw new Error('prf-unsupported');
-      prfResult = prf.results.first;
-    }
-    sessionKey = await crypto.subtle.importKey(
-      'raw', new Uint8Array(prfResult), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']
-    );
-    return sessionKey;
+    if (credId) return keyFor({ salt: saltB64, cred: String(credId) });
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: 'Mentria Quick Notes' },
+        user: {
+          id: crypto.getRandomValues(new Uint8Array(16)),
+          name: 'quick-notes',
+          displayName: 'Quick Notes'
+        },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
+        extensions: { prf: { eval: { first: b64dec(saltB64) } } }
+      }
+    });
+    if (!cred) throw new Error('cancelled');
+    const prf = cred.getClientExtensionResults().prf;
+    if (!prf || prf.enabled === false) throw new Error('prf-unsupported');
+    credId = b64enc(cred.rawId);
+    if (window.MentriaStore) window.MentriaStore.set('quick_notes', 'cred_id', credId);
+    else localStorage.setItem(CRED_KEY, credId);
+    const pair = { salt: saltB64, cred: credId };
+    if (prf.results && prf.results.first) return holdKey(prf.results.first, pair);
+    return keyFor(pair);
   }
 
-  async function encryptText(text) {
-    const key = await ensureKey();
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ct = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv: iv }, key, new TextEncoder().encode(text)
-    );
-    return { body: b64enc(ct), iv: b64enc(iv) };
+  function nextPair(err) {
+    return !!err && (err.name === 'NotAllowedError' || err.message === 'prf-unsupported');
+  }
+
+  async function lockKey() {
+    const st = storedPair();
+    const dev = devicePair();
+    const held = keyIn(sessionKeys, st) || keyIn(sessionKeys, dev);
+    if (held) return held;
+    if (sessionKeys && sessionKeys.size) return [...sessionKeys.values()].pop();
+    if (dev && !samePair(dev, st)) {
+      try {
+        return await keyFor(dev);
+      } catch (err) {
+        if (!nextPair(err)) throw err;
+      }
+    }
+    return ensureKey();
+  }
+
+  async function sealOld(note, text) {
+    const k = keyIn(sessionKeys, pairOf(note));
+    if (!k) throw new Error('locked');
+    const sealed = await sealLegacy(k.key, text);
+    sealed.pair = k;
+    return sealed;
+  }
+
+  async function openOld(keys, note) {
+    if (!keys) throw new Error('locked');
+    const tried = new Set();
+    const order = [opened.get(noteSig(note)), ownPair(note), storedPair(), devicePair()].map((p) => keyIn(keys, p)).concat([...keys.values()]);
+    for (const k of order) {
+      if (!k || tried.has(k)) continue;
+      tried.add(k);
+      let text;
+      try { text = await openLegacy(k.key, note); } catch (_) { continue; }
+      opened.set(noteSig(note), { salt: k.salt, cred: k.cred });
+      return { text: text, k: k };
+    }
+    throw new Error('locked');
+  }
+
+  function notePair(note, k) {
+    const cur = getNote(note.id);
+    if (!cur || !isLegacyLocked(cur) || noteSig(cur) !== noteSig(note) || samePair(ownPair(cur), k)) return;
+    setPair(cur, k);
+    cur.updatedAt = (Number(cur.updatedAt) || 0) + 1;
+    persist();
   }
 
   async function decryptNote(note) {
-    const key = await ensureKey();
-    const pt = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: b64dec(note.iv) }, key, b64dec(note.body)
-    );
-    return new TextDecoder().decode(pt);
+    const got = await openOld(sessionKeys, note);
+    if (oneSettled && !one) notePair(note, got.k);
+    return got.text;
+  }
+
+  async function promptOpen(note) {
+    const own = ownPair(note);
+    const list = [];
+    for (const p of own ? [own, storedPair()] : [storedPair(), devicePair()]) {
+      if (fullPair(p) && !list.some((q) => samePair(q, p))) list.push(p);
+    }
+    if (!list.length) throw new Error('no-legacy');
+    for (let i = 0; i < list.length; i++) {
+      let k;
+      try {
+        k = await keyFor(list[i]);
+      } catch (err) {
+        if (i < list.length - 1 && nextPair(err)) continue;
+        throw err;
+      }
+      try {
+        await openLegacy(k.key, note);
+        opened.set(noteSig(note), { salt: k.salt, cred: k.cred });
+        return;
+      } catch (_) {}
+    }
+    throw new Error('locked');
   }
 
   function handleCryptoError(err, fallbackMsg) {
@@ -355,6 +567,337 @@ localeReload: true
     if (err && err.message === 'prf-unsupported') { mentriaAlert(COPY.prfUnsupported); return; }
     if (err && err.message === 'cancelled') return;
     mentriaAlert(fallbackMsg);
+  }
+
+  function noteSig(n) { return n.id + '|' + (n.iv || ''); }
+  function isLegacyLocked(n) { return !!n && !!n.enc && !n.kv; }
+  function hasKv2() { return notes.some((n) => !!n && !!n.enc && n.kv === 2); }
+  function noteAad(id) { return new TextEncoder().encode('mentria-notes|v2|' + id); }
+
+  async function sealV2(key, id, text) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv, additionalData: noteAad(id) }, key, new TextEncoder().encode(text));
+    return { body: b64enc(ct), iv: b64enc(iv) };
+  }
+
+  async function openV2(key, note) {
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64dec(note.iv), additionalData: noteAad(note.id) }, key, b64dec(note.body));
+    return new TextDecoder().decode(pt);
+  }
+
+  async function sealLegacy(key, text) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, new TextEncoder().encode(text));
+    return { body: b64enc(ct), iv: b64enc(iv) };
+  }
+
+  async function openLegacy(key, note) {
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64dec(note.iv) }, key, b64dec(note.body));
+    return new TextDecoder().decode(pt);
+  }
+
+  function curKey() { return notesKeys.length ? notesKeys[0] : null; }
+
+  function notesLinked() {
+    try { return !!U && U.state().linked.includes('notes'); } catch (_) { return true; }
+  }
+
+  function oldReadOnly(note) {
+    return one && isLegacyLocked(note) && !notesKeys.length && notesLinked();
+  }
+
+  function ringFor(note, ring) {
+    if (!note.kid) return ring;
+    return ring.filter((k) => k.id === note.kid).concat(ring.filter((k) => k.id !== note.kid));
+  }
+
+  async function openKv2(note) {
+    const ring = notesKeys;
+    for (const k of ringFor(note, ring)) {
+      try { return { text: await openV2(k.key, note), current: k === ring[0] }; } catch (_) {}
+    }
+    return null;
+  }
+
+  async function sealCur(id, text) {
+    const c = curKey();
+    if (!c) throw new Error('locked');
+    const sealed = await sealV2(c.key, id, text);
+    sealed.kid = c.id;
+    return sealed;
+  }
+
+  function setKid(n, kid) {
+    if (kid) n.kid = kid;
+    else delete n.kid;
+  }
+
+  async function decryptOne(note) {
+    if (note.kv === 2) {
+      if (!U || !U.state().unlocked || !notesKeys.length) throw new Error('locked');
+      const got = await openKv2(note);
+      if (!got || !U.state().unlocked) throw new Error('locked');
+      return got.text;
+    }
+    if (note.kv) throw new Error('locked');
+    return decryptNote(note);
+  }
+
+  function loadUI() {
+    if (!uiP) uiP = import(UNLOCK_UI_JS).catch((e) => { uiP = null; throw e; });
+    return uiP;
+  }
+
+  function linkNotesKey() {
+    const run = async () => {
+      const have = await U.secrets('notes');
+      if (have.length) return have;
+      const fresh = crypto.getRandomValues(new Uint8Array(32));
+      try { await U.link('notes', fresh); } finally { fresh.fill(0); }
+      return U.secrets('notes');
+    };
+    if (navigator.locks && typeof navigator.locks.request === 'function') return navigator.locks.request('mentria-notes-key', run);
+    return run();
+  }
+
+  async function ensureNotesKey(allowLink) {
+    let list = [];
+    try { list = await U.secrets('notes'); } catch (_) { notesKeys = []; return false; }
+    if (!list.length && allowLink) list = await linkNotesKey();
+    const ring = [];
+    try {
+      for (const x of list) ring.push({ id: typeof x.id === 'string' && x.id ? x.id : null, key: await crypto.subtle.importKey('raw', x.bytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']) });
+    } finally {
+      for (const x of list) x.bytes.fill(0);
+    }
+    const sig = ring.map((k) => String(k.id)).join(',');
+    if (sig !== ringSig) {
+      ringSig = sig;
+      skippedKv.clear();
+      curOk.clear();
+    } else if (notesKeys.length === ring.length && ring.length && ring.every((k) => k.id)) {
+      return true;
+    }
+    notesKeys = ring;
+    return ring.length > 0;
+  }
+
+  function lockView(note) {
+    const s = U.state();
+    if (note.kv === 2) {
+      if (notesKeys.length && s.unlocked) return 'open';
+      return !s.unlocked && s.setUp ? 'card' : 'missing';
+    }
+    if (note.kv) return 'missing';
+    if (linkPending && s.setUp && !s.unlocked) return 'card';
+    if (oldKeysHeld() && !skipped.has(noteSig(note))) return 'open';
+    return 'legacy';
+  }
+
+  function underCurrent(n, cur) {
+    return !!cur && ((!!cur.id && n.kid === cur.id) || curOk.has(noteSig(n)));
+  }
+
+  function forgetLegacy(legacyKeys) {
+    if (legacyKeys && sessionKeys === legacyKeys && notes.every((n) => !isLegacyLocked(n) || skipped.has(noteSig(n)))) sessionKeys = null;
+  }
+
+  async function convertNotes() {
+    const ring = notesKeys;
+    const cur = ring[0];
+    if (!cur) return false;
+    const legacyKeys = sessionKeys;
+    const wants = (n) => {
+      if (!n || !n.enc) return false;
+      const sig = noteSig(n);
+      if (!n.kv) return !!legacyKeys && !skipped.has(sig);
+      return n.kv === 2 && !underCurrent(n, cur) && !skippedKv.has(sig);
+    };
+    if (notes.some(wants)) {
+      try { await saver.flush(); } catch (_) {}
+    }
+    for (let pass = 0; pass < 3; pass++) {
+      if (notesKeys !== ring || sessionKeys !== legacyKeys) return false;
+      const todo = notes.filter(wants);
+      if (!todo.length) break;
+      const done = new Map();
+      for (const n of todo) {
+        const sig = noteSig(n);
+        let text;
+        let cred = null;
+        if (isLegacyLocked(n)) {
+          let got;
+          try { got = await openOld(legacyKeys, n); } catch (_) { skipped.add(sig); continue; }
+          text = got.text;
+          cred = got.k.cred;
+        } else {
+          const got = await openKv2(n);
+          if (!got) { skippedKv.add(sig); continue; }
+          if (got.current && !cur.id) { curOk.add(sig); continue; }
+          text = got.text;
+        }
+        done.set(n.id, { sig: sig, cred: cred, sealed: await sealV2(cur.key, n.id, text) });
+      }
+      if (!done.size) break;
+      if (!U.state().unlocked || notesKeys !== ring || sessionKeys !== legacyKeys) return false;
+      const prev = notes;
+      const used = [];
+      notes = notes.map((n) => {
+        const d = n && done.get(n.id);
+        if (!d || !n.enc || noteSig(n) !== d.sig) return n;
+        if (d.cred) used.push(d.cred);
+        const out = Object.assign({}, n, { body: d.sealed.body, iv: d.sealed.iv, kv: 2, updatedAt: (Number(n.updatedAt) || 0) + 1 });
+        setKid(out, cur.id);
+        setPair(out, null);
+        return out;
+      });
+      if (!persist()) { notes = prev; return false; }
+      noteUsed(used);
+    }
+    forgetLegacy(legacyKeys);
+    return true;
+  }
+
+  function signalRetired(ids) {
+    const P = window.PublicKeyCredential;
+    if (!P || typeof P.signalUnknownCredential !== 'function') return;
+    for (const id of ids) {
+      try {
+        Promise.resolve(P.signalUnknownCredential({ rpId: location.hostname, credentialId: id.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') })).catch(() => {});
+      } catch (_) {}
+    }
+  }
+
+  function storedConverted() {
+    const S = window.MentriaStore;
+    if (!S || unsavedWhy) return false;
+    const stored = S.get('quick_notes', 'blob');
+    if (stored != null && !Array.isArray(stored)) return false;
+    const cur = curKey();
+    const ok = (n) => !isLegacyLocked(n) && !(!!n && !!n.enc && n.kv === 2 && !underCurrent(n, cur));
+    return (stored || []).every(ok) && notes.every(ok);
+  }
+
+  async function retireIfReady() {
+    if (retiring) return;
+    const s = U.state();
+    if (!s.unlocked || !s.linked.includes('notes')) return;
+    let r = null;
+    try { r = U.retirement('notes', { notesConverted: storedConverted() }); } catch (_) { return; }
+    if (!r || !r.ready) return;
+    retiring = true;
+    try {
+      const ids = [];
+      const add = (id) => { if (typeof id === 'string' && id && !ids.includes(id)) ids.push(id); };
+      add(window.MentriaStore ? window.MentriaStore.get('quick_notes', 'cred_id') : null);
+      try { add(localStorage.getItem(CRED_KEY)); } catch (_) {}
+      usedIds().forEach(add);
+      sessionKeys = null;
+      await U.markRetired('notes');
+      signalRetired(ids);
+    } catch (_) {
+    } finally {
+      retiring = false;
+    }
+  }
+
+  function dropOld() {
+    try { saver.flush(); } catch (_) {}
+    sessionKeys = null;
+    linkPending = false;
+    printEl.textContent = '';
+  }
+
+  function openNotes() {
+    openChain = openChain.then(openNotesNow, openNotesNow);
+    return openChain;
+  }
+
+  async function openNotesNow() {
+    if (!one) return;
+    const s = U.state();
+    const dropped = wasUnlocked && !s.unlocked;
+    wasUnlocked = s.unlocked;
+    if (s.unlocked) {
+      const legacy = !!sessionKeys && notes.some((n) => isLegacyLocked(n) && !skipped.has(noteSig(n)));
+      try { await ensureNotesKey(legacy); } catch (_) {}
+      if (notesKeys.length) {
+        linkPending = false;
+        try { await convertNotes(); } catch (_) {}
+        await retireIfReady();
+      }
+    } else {
+      if (dropped) dropOld();
+      if (notesKeys.length) {
+        try { await saver.flush(); } catch (_) {}
+      }
+      notesKeys = [];
+    }
+    refreshEditor();
+    renderList();
+  }
+
+  function refreshEditor() {
+    const note = getNote(activeId);
+    if (!note) return;
+    const keep = (!note.enc && editorMode === 'plain') || (one && note.enc && editorMode === 'unlocked' && lockView(note) === 'open');
+    if (keep) applyEditorMode(editorMode, panelView);
+    else renderEditor();
+  }
+
+  function focusLost() {
+    const a = document.activeElement;
+    return !a || a === document.body || a === unlockBtn || a === lockBtn || a.hidden;
+  }
+
+  function mountLockCard() {
+    if (card || cardP || !one) return;
+    cardP = loadUI().then((ui) => ui.mountCard(cardSlot, {
+      onUnlocked: () => {
+        openNotes().then(() => {
+          if (focusLost() && !textarea.hidden) textarea.focus({ preventScroll: true });
+        });
+      }
+    })).then((h) => {
+      cardP = null;
+      card = h;
+      if (panelView !== 'card' || lockedPanel.hidden) { dropLockCard(); return; }
+      if (cardFocus && focusLost()) {
+        const t = cardBox.querySelector('.m-unlock__title');
+        if (t) t.focus({ preventScroll: true });
+      }
+      cardFocus = false;
+    }, () => { cardP = null; });
+  }
+
+  function dropLockCard() {
+    if (!card) return;
+    const c = card;
+    card = null;
+    try { c.destroy(); } catch (_) {}
+  }
+
+  function showPanel(view) {
+    panelView = view;
+    const cardView = view === 'card';
+    const oldPanel = view === 'old' || view === 'legacy';
+    lockedPanel.classList.toggle('qn-locked--card', cardView);
+    lockedBody.hidden = !oldPanel;
+    unlockBtn.hidden = !oldPanel;
+    linkBox.hidden = view !== 'legacy';
+    lockedNote.textContent = view === 'missing' ? COPY.keyMissing : (view === 'off' && oneSettled ? (oneWhy === 'failed' ? COPY.oneFailed : COPY.oneOff) : '');
+    lockedNote.hidden = !lockedNote.textContent;
+    cardBox.hidden = !cardView;
+    cardLater.hidden = !(cardView && linkPending);
+    if (cardView && !lockedPanel.hidden) mountLockCard();
+    else dropLockCard();
+  }
+
+  function showSkipped() {
+    const n = one ? notes.filter((x) => (isLegacyLocked(x) && skipped.has(noteSig(x))) || (!!x && !!x.enc && x.kv === 2 && skippedKv.has(noteSig(x)))).length : 0;
+    const text = n ? COPY.convertSkipped.replace('{n}', n.toLocaleString(document.documentElement.lang || 'en')) : '';
+    if (convertEl.textContent !== text) convertEl.textContent = text;
+    convertEl.hidden = !text;
   }
 
   function genId() {
@@ -424,14 +967,33 @@ localeReload: true
   }
 
   async function renderEditor() {
+    const seq = ++renderSeq;
     const note = getNote(activeId);
     if (!note) return;
     titleInput.value = note.title || '';
     let mode;
+    let view = 'old';
     if (!note.enc) {
       mode = 'plain';
       textarea.value = note.body || '';
-    } else if (sessionKey) {
+    } else if (one) {
+      view = lockView(note);
+      mode = view === 'open' ? 'unlocked' : 'locked';
+      if (mode === 'unlocked') {
+        let text = null;
+        try { text = await decryptOne(note); } catch (_) {}
+        if (seq !== renderSeq || activeId !== note.id) return;
+        if (text === null) {
+          mode = 'locked';
+          view = note.kv === 2 ? 'missing' : 'legacy';
+        } else {
+          textarea.value = text;
+        }
+      }
+    } else if (note.kv) {
+      mode = 'locked';
+      view = 'off';
+    } else if (oldKeysHeld()) {
       mode = 'unlocked';
       try {
         const text = await decryptNote(note);
@@ -443,14 +1005,15 @@ localeReload: true
     } else {
       mode = 'locked';
     }
+    if (seq !== renderSeq) return;
     if (mode === 'locked') textarea.value = '';
-    applyEditorMode(mode);
+    applyEditorMode(mode, view);
     updateCounts();
     updateSavedLabel(note.updatedAt);
   }
 
   let editorMode = 'plain';
-  function applyEditorMode(mode) {
+  function applyEditorMode(mode, view) {
     editorMode = mode;
     const locked = mode === 'locked';
     if (!locked) drainInbox();
@@ -459,12 +1022,24 @@ localeReload: true
     exportBtn.hidden = locked;
     shareBtn.hidden = locked || !navigator.share;
     mdpdfBtn.hidden = locked;
-    if (!cryptoOK) {
+    const readOnly = mode === 'unlocked' && oldReadOnly(getNote(activeId));
+    textarea.readOnly = readOnly;
+    titleInput.readOnly = readOnly;
+    readOnlyEl.hidden = !readOnly;
+    if (one) {
+      lockBtn.hidden = locked || !oneOK;
+      lockBtn.textContent = COPY.lockBtn;
+      lockBtn.title = mode === 'unlocked' ? (U.state().unlocked ? COPY.relockTitle : COPY.relockOldTitle) : COPY.lockTitleOne;
+      removeLockBtn.hidden = mode !== 'unlocked' || readOnly;
+    } else if (!cryptoOK) {
       lockBtn.hidden = true;
     } else {
       lockBtn.hidden = locked;
       lockBtn.textContent = mode === 'unlocked' ? COPY.removeLockBtn : COPY.lockBtn;
     }
+    if (locked && one) printEl.textContent = '';
+    showPanel(locked ? (view || 'old') : 'old');
+    showSkipped();
   }
 
   function renderList() {
@@ -483,6 +1058,7 @@ localeReload: true
       btn.addEventListener('click', () => selectNote(note.id));
       noteList.appendChild(btn);
     });
+    showSkipped();
   }
 
   function escHtml(s) {
@@ -493,11 +1069,51 @@ localeReload: true
 
   const saver = MentriaUI.debouncedSaver(saveActive, DEBOUNCE_MS);
 
+  async function saveLocked(note) {
+    if (editorMode !== 'unlocked') {
+      note.updatedAt = Date.now();
+      persist();
+      renderList();
+      return;
+    }
+    const id = note.id;
+    const title = note.title;
+    const text = textarea.value;
+    let sealed = null;
+    let kv = 0;
+    try {
+      if (notesKeys.length) {
+        sealed = await sealCur(id, text);
+        kv = 2;
+      } else if (!note.kv && oldKeysHeld() && !notesLinked()) {
+        sealed = await sealOld(note, text);
+      }
+    } catch (_) {
+      sealed = null;
+    }
+    if (!sealed) return;
+    const cur = getNote(id);
+    if (!cur || !cur.enc) return;
+    cur.title = title;
+    cur.body = sealed.body;
+    cur.iv = sealed.iv;
+    if (kv) cur.kv = kv;
+    else delete cur.kv;
+    setKid(cur, kv ? sealed.kid : null);
+    setPair(cur, kv ? null : sealed.pair);
+    cur.updatedAt = Date.now();
+    const ok = persist();
+    if (ok && cur.id === activeId) updateSavedLabel(cur.updatedAt);
+    renderList();
+  }
+
   async function saveActive() {
     const note = getNote(activeId);
     if (!note) return;
+    if (oldReadOnly(note)) return;
     note.title = titleInput.value;
-    if (note.enc && (!sessionKey || editorMode !== 'unlocked')) {
+    if (one && note.enc) return saveLocked(note);
+    if (note.enc && (!oldKeysHeld() || editorMode !== 'unlocked')) {
       note.updatedAt = Date.now();
       persist();
       renderList();
@@ -505,9 +1121,10 @@ localeReload: true
     }
     if (note.enc) {
       try {
-        const enc = await encryptText(textarea.value);
+        const enc = await sealOld(note, textarea.value);
         note.body = enc.body;
         note.iv = enc.iv;
+        setPair(note, enc.pair);
       } catch (_) { return; }
     } else {
       note.body = textarea.value;
@@ -575,7 +1192,9 @@ localeReload: true
     for (const n of sorted) {
       let body;
       if (!n.enc) body = n.id === activeId && !textarea.hidden ? textarea.value : String(n.body || '');
-      else if (sessionKey) {
+      else if (one) {
+        try { body = await decryptOne(n); } catch (_) { body = null; }
+      } else if (sessionKeys) {
         try { body = await decryptNote(n); } catch (_) { body = null; }
       } else body = null;
       if (body == null) { skipped++; continue; }
@@ -596,11 +1215,94 @@ localeReload: true
     } catch (_) {}
   }
 
-  function handleLockClick() {
+  async function handleLockClick() {
+    await oneReady;
     const note = getNote(activeId);
     if (!note) return;
+    if (one) {
+      if (note.enc) relock();
+      else lockNoteOne();
+      return;
+    }
     if (note.enc) removeLock();
     else lockNote();
+  }
+
+  async function openForLock() {
+    let s = U.state();
+    if (!s.setUp) {
+      if (hasKv2()) return 'missing';
+      const ui = await loadUI();
+      const fresh = crypto.getRandomValues(new Uint8Array(32));
+      try { await ui.showSetup({ service: 'notes', secret: fresh }); } finally { fresh.fill(0); }
+    } else if (!s.unlocked) {
+      const ui = await loadUI();
+      await ui.showLaunch();
+    }
+    s = U.state();
+    if (!s.unlocked) return false;
+    return (await ensureNotesKey(true)) ? true : 'missing';
+  }
+
+  async function lockNoteOne() {
+    const note = getNote(activeId);
+    if (!note || note.enc) return;
+    if (!oneOK) { mentriaAlert(COPY.lockFailedOne); return; }
+    if (!(await mentriaConfirm(COPY.confirmLockOne))) return;
+    let ready = false;
+    try { ready = await openForLock(); } catch (_) { mentriaAlert(COPY.lockFailedOne); return; }
+    if (ready === 'missing') { mentriaAlert(COPY.lockKeyMissing); return; }
+    if (ready !== true || activeId !== note.id) return;
+    try { await saver.flush(); } catch (_) {}
+    const cur = getNote(note.id);
+    if (!curKey() || !cur || cur.enc) return;
+    let sealed;
+    try { sealed = await sealCur(cur.id, textarea.value); } catch (_) { mentriaAlert(COPY.lockFailedOne); return; }
+    const n = getNote(note.id);
+    if (!n || n.enc || activeId !== n.id) return;
+    n.title = titleInput.value;
+    n.enc = true;
+    n.kv = 2;
+    n.body = sealed.body;
+    n.iv = sealed.iv;
+    setKid(n, sealed.kid);
+    setPair(n, null);
+    n.updatedAt = Date.now();
+    persist();
+    renderEditor();
+    renderList();
+  }
+
+  async function relock() {
+    try { await saver.flush(); } catch (_) {}
+    sessionKeys = null;
+    linkPending = false;
+    cardFocus = true;
+    if (U.state().unlocked) {
+      try {
+        const ui = await loadUI();
+        await ui.lockNow();
+      } catch (_) {
+        try { await U.lock(); } catch (_) {}
+      }
+    }
+    await openNotes();
+  }
+
+  async function bringIn() {
+    if (!sessionKeys) return;
+    const s = U.state();
+    if (s.unlocked) { await openNotes(); return; }
+    if (s.setUp) {
+      linkPending = true;
+      cardFocus = true;
+      return;
+    }
+    if (hasKv2()) return;
+    const ui = await loadUI();
+    const fresh = crypto.getRandomValues(new Uint8Array(32));
+    try { await ui.showSetup({ service: 'notes', secret: fresh }); } finally { fresh.fill(0); }
+    await openNotes();
   }
 
   async function lockNote() {
@@ -609,8 +1311,10 @@ localeReload: true
     if (!cryptoOK) { mentriaAlert(COPY.prfUnsupported); return; }
     if (!(await mentriaConfirm(COPY.confirmLock))) return;
     let enc;
+    let k;
     try {
-      enc = await encryptText(textarea.value);
+      k = await lockKey();
+      enc = await sealLegacy(k.key, textarea.value);
     } catch (err) {
       handleCryptoError(err, COPY.lockFailed);
       return;
@@ -619,6 +1323,7 @@ localeReload: true
     note.enc = true;
     note.body = enc.body;
     note.iv = enc.iv;
+    setPair(note, k);
     note.updatedAt = Date.now();
     persist();
     renderEditor();
@@ -627,12 +1332,31 @@ localeReload: true
 
   async function unlockNote() {
     const note = getNote(activeId);
-    if (!note || !note.enc) return;
+    if (!note || !note.enc || note.kv) return;
     try {
-      await ensureKey();
+      let open = false;
+      if (oldKeysHeld()) {
+        try { await openOld(sessionKeys, note); open = true; } catch (_) {}
+      }
+      if (!open) await promptOpen(note);
     } catch (err) {
+      if (err && err.message === 'no-legacy') {
+        await oneReady;
+        if (one) {
+          for (const n of notes) if (isLegacyLocked(n)) skipped.add(noteSig(n));
+          applyEditorMode(editorMode, panelView);
+        } else {
+          mentriaAlert(COPY.unlockFailed);
+        }
+        return;
+      }
       handleCryptoError(err, COPY.unlockFailed);
       return;
+    }
+    await oneReady;
+    if (one) {
+      skipped.clear();
+      await bringIn();
     }
     renderEditor();
   }
@@ -640,10 +1364,15 @@ localeReload: true
   async function removeLock() {
     const note = getNote(activeId);
     if (!note || !note.enc) return;
+    if (one && (editorMode !== 'unlocked' || oldReadOnly(note))) return;
     if (!(await mentriaConfirm(COPY.confirmRemoveLock))) return;
+    if (one && (editorMode !== 'unlocked' || oldReadOnly(note) || activeId !== note.id || getNote(note.id) !== note)) return;
     note.enc = false;
     note.body = textarea.value;
     delete note.iv;
+    delete note.kv;
+    delete note.kid;
+    setPair(note, null);
     note.updatedAt = Date.now();
     persist();
     renderEditor();
@@ -722,6 +1451,9 @@ localeReload: true
     body.textContent = textarea.value;
     out.append(h, body);
   });
+  window.addEventListener('afterprint', () => {
+    if (one) printEl.textContent = '';
+  });
   document.getElementById('qn-export-all-btn').addEventListener('click', exportAll);
   if (navigator.share) shareBtn.addEventListener('click', shareNote);
   else shareBtn.hidden = true;
@@ -737,7 +1469,14 @@ localeReload: true
     location.href = MDPDF_URL;
   });
   lockBtn.addEventListener('click', handleLockClick);
+  removeLockBtn.addEventListener('click', removeLock);
   unlockBtn.addEventListener('click', unlockNote);
+  cardLater.addEventListener('click', () => {
+    linkPending = false;
+    renderEditor().then(() => {
+      if (focusLost() && !textarea.hidden) textarea.focus({ preventScroll: true });
+    });
+  });
   deleteBtn.addEventListener('click', confirmDelete);
   sidebarToggle.addEventListener('click', toggleSidebar);
 
@@ -816,6 +1555,7 @@ localeReload: true
   }
 
   load();
+  keepDevicePair(storedPair());
   if (!unsavedWhy && storageTrouble() === 'blocked') showUnsaved('blocked');
   drainInbox();
   if (ingestSharedContent()) {
@@ -825,6 +1565,33 @@ localeReload: true
   }
   renderList();
   if (window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(null, addSharedText);
+
+  const settleOne = () => {
+    toolEl.dataset.lock = one ? 'one' : 'old';
+    if (!one && panelView === 'off' && !lockedPanel.hidden) showPanel('off');
+  };
+  const oneLoad = import(UNLOCK_JS).then(async (m) => {
+    if (!m.enabled()) { oneWhy = 'off'; return; }
+    U = m;
+    one = true;
+    oneWhy = '';
+    let seenUnlocked = false;
+    let seenEpoch = U.state().epoch;
+    U.onChange((s) => {
+      if (s && !s.unlocked && (seenUnlocked || wasUnlocked || s.epoch !== seenEpoch)) dropOld();
+      seenUnlocked = !!(s && s.unlocked);
+      if (s) seenEpoch = s.epoch;
+      openNotes();
+    });
+    try { await U.ready(); } catch (_) {}
+    await openNotes();
+  }).catch(() => { if (!one) oneWhy = 'failed'; });
+  oneReady = Promise.race([oneLoad, new Promise((resolve) => setTimeout(resolve, ONE_WAIT_MS))]).then(() => {
+    if (!one && !oneWhy) oneWhy = 'failed';
+    oneSettled = true;
+    settleOne();
+  });
+  oneLoad.then(() => { if (oneSettled) settleOne(); });
 })();
 </script>
 
@@ -832,7 +1599,7 @@ localeReload: true
 .qn-print { display: none; }
 
 @media print {
-  .hero, .qn-sidebar, .qn-editor__titlebar, .qn-unsaved, .qn-editor__textarea, .qn-editor__statusbar, .qn-locked { display: none !important; }
+  .hero, .qn-sidebar, .qn-editor__titlebar, .qn-unsaved, .qn-convert, .qn-readonly, .qn-editor__textarea, .qn-editor__statusbar, .qn-locked { display: none !important; }
   .qn-tool { display: block !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; background: none !important; }
   .qn-editor { display: block !important; }
   .qn-print { display: block; color: #111; }
@@ -1046,7 +1813,9 @@ localeReload: true
   flex-shrink: 0;
 }
 
-.qn-unsaved {
+.qn-unsaved,
+.qn-convert,
+.qn-readonly {
   flex-shrink: 0;
   margin: 0;
   padding: 0.55rem 1rem;
@@ -1058,7 +1827,9 @@ localeReload: true
   line-height: 1.5;
   color: var(--term-fg);
 }
-.qn-unsaved[hidden] { display: none; }
+.qn-unsaved[hidden],
+.qn-convert[hidden],
+.qn-readonly[hidden] { display: none; }
 
 .qn-action-btn {
   padding: 0.35rem 0.75rem;
@@ -1125,6 +1896,52 @@ localeReload: true
 }
 .qn-unlock-btn {
   margin-top: 0.3rem;
+  padding: 0.55rem 1.6rem;
+}
+.qn-locked__body[hidden],
+.qn-locked__link[hidden],
+.qn-locked__card[hidden],
+.qn-unlock-btn[hidden],
+.qn-card-later[hidden] { display: none; }
+.qn-locked__link {
+  max-width: 36ch;
+  padding: 0.6rem 0.85rem;
+  border-left: 3px solid var(--syn-cyan);
+  border-radius: var(--radius-sm);
+  background: rgba(34, 211, 238, 0.06);
+  text-align: left;
+}
+.qn-locked__link-title {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--term-fg);
+}
+.qn-locked__link-body {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--term-muted);
+}
+.qn-locked--card {
+  justify-content: flex-start;
+  min-height: 0;
+  overflow-y: auto;
+}
+.qn-locked--card .qn-locked__icon,
+.qn-locked--card .qn-locked__heading { display: none; }
+.qn-locked__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  margin: auto 0;
+}
+.qn-locked__card > div { width: 100%; }
+.qn-card-later {
+  min-height: 44px;
   padding: 0.55rem 1.6rem;
 }
 

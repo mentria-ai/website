@@ -11,6 +11,7 @@ eleventyComputed:
   seoTitle: "{{ 'tools.comms.seo_title' | t }}"
   description: "{{ 'tool.comms.meta_description' | t }}"
 localeReload: true
+unlockTool: true
 ---
 {%- set commsHttps = "https://mentria.ai" + locale.pathPrefix + "/comms/" -%}
 <section class="hero" style="padding-top:1rem;">
@@ -62,6 +63,7 @@ localeReload: true
       <h2 class="comms__onboard-h">{{ 'tool.comms.onboard.name_title' | t }}</h2>
       <input class="comms__input comms__input--big" id="comms-onboard-name" type="text" maxlength="32" placeholder="{{ 'tool.comms.onboard.name_placeholder' | t }}" autocomplete="nickname" enterkeyhint="done">
       <button class="comms__btn comms__btn--big" id="comms-onboard-create" type="button">{{ 'tool.comms.onboard.create' | t }}</button>
+      <div class="comms__card-slot" id="comms-onboard-card" hidden></div>
       <p class="comms__onboard-fine" id="comms-onboard-hint">{{ 'tool.comms.onboard.hint' | t }}</p>
       <p class="comms__onboard-err" id="comms-onboard-err" hidden></p>
     </div>
@@ -79,8 +81,11 @@ localeReload: true
   </div>
 
   <div class="comms__lock" id="comms-id-locked" hidden>
-    <p class="comms__lock-h">{{ 'tool.comms.lock.title' | t }}</p>
+    <p class="comms__lock-link" id="comms-lock-link" hidden><strong>{{ 'unlock.link_title' | t }}</strong> {{ 'unlock.link_body' | t }}</p>
+    <p class="comms__lock-h" id="comms-lock-title">{{ 'tool.comms.lock.title' | t }}</p>
     <p class="comms__lock-waiting" id="comms-lock-waiting" hidden></p>
+    <div class="comms__card-slot" id="comms-id-card-slot" hidden></div>
+    <button class="comms__btn comms__btn--ghost" id="comms-lock-old" type="button" aria-expanded="false" aria-controls="comms-id-passkey comms-lock-alt" hidden>{{ 'tool.comms.lock.old_unlock' | t }}</button>
     <button class="comms__btn comms__btn--big" id="comms-id-passkey" type="button" hidden>{{ 'tool.comms.lock.unlock' | t }}</button>
     <details class="comms__lock-alt" id="comms-lock-alt">
       <summary>{{ 'tool.comms.lock.use_code' | t }}</summary>
@@ -100,6 +105,7 @@ localeReload: true
         <span class="comms__badge comms__badge--fp" id="comms-id-fp" title="{{ 'tool.comms.profile.fp_title' | t }}"></span>
       </div>
       <span class="comms__profile-spacer"></span>
+      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-lock" type="button" hidden title="{{ 'unlock.lock_now' | t }}" aria-label="{{ 'unlock.lock_now' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></button>
       <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-adv-toggle" type="button" aria-expanded="false" title="{{ 'tool.comms.profile.settings' | t }}" aria-label="{{ 'tool.comms.profile.settings' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-gear"></use></svg></button>
     </div>
 
@@ -110,6 +116,15 @@ localeReload: true
         <button class="comms__btn comms__btn--ghost" id="comms-pk-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
       </div>
       <span class="comms__id-note" id="comms-pk-err" hidden></span>
+    </div>
+
+    <div class="comms__upgrade comms__link" id="comms-link" hidden>
+      <span class="comms__upgrade-text"><strong>{{ 'unlock.link_title' | t }}</strong> {{ 'unlock.link_body' | t }}</span>
+      <div class="comms__card-slot" id="comms-link-card" hidden></div>
+      <div class="comms__upgrade-actions">
+        <button class="comms__btn" id="comms-link-go" type="button" hidden>{{ 'tool.comms.guest.setup' | t }}</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-link-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
+      </div>
     </div>
 
     <div class="comms__chathead" id="comms-chathead">
@@ -278,6 +293,12 @@ localeReload: true
 .comms__lock-alt summary::-webkit-details-marker{display:none}
 
 .comms__lock-row{display:none;gap:.5rem;margin-top:.6rem}
+.comms__lock-link{margin:0;max-width:26rem;color:#9ba6b1;font-size:.8rem;line-height:1.5}
+.comms__lock-link strong{color:var(--accent,#6ef3c5);font-weight:600}
+.comms__lock--card{padding:0;background:none;border:0}
+.comms__card-slot{width:100%}
+.comms__link .comms__upgrade-text strong{color:var(--accent,#6ef3c5);font-weight:600}
+.comms__link .comms__card-slot{flex:1 1 100%}
 .comms__lock-alt[open] .comms__lock-row{display:flex}
 .comms__app{display:flex;flex-direction:column;gap:.75rem}
 .comms__id-row--you{flex:1;min-width:13rem}
@@ -532,6 +553,12 @@ import * as CID from '/assets/js/mentria-comms-id.js';
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
 const T = {{ "tool.comms" | tsub | dump | safe }};
+const TU = {
+  passkeyAdded: {{ ('unlock.passkey_added' | t) | dump | safe }},
+  other: {{ ('unlock.err_other' | t) | dump | safe }},
+  storage: {{ ('unlock.err_storage' | t) | dump | safe }},
+  loadFailed: {{ ('unlock.load_failed' | t) | dump | safe }}
+};
 const LANG = {{ locale.code | dump | safe }};
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
 const COMMS_PATH = PREFIX + '/comms/';
@@ -558,7 +585,7 @@ const why = (err) => {
   return msg;
 };
 const INSTALL_OPTS = {
-  copy: { trust: T.install.trust, update: T.install.update, reinstall: T.install.reinstall, downgrade: T.install.downgrade, replace: T.install.replace, permsAdded: T.install.perms_added, permsRemoved: T.install.perms_removed, from: T.install.from, large: T.install.large },
+  copy: { trust: T.install.trust, update: T.install.update, reinstall: T.install.reinstall, downgrade: T.install.downgrade, replace: T.install.replace, fullAccess: T.install.full_access, permsAdded: T.install.perms_added, permsRemoved: T.install.perms_removed, from: T.install.from, large: T.install.large },
   perms: T.perms
 };
 
@@ -609,7 +636,7 @@ const els = {
   obStart: $('comms-onboard-start'), obName: $('comms-onboard-name'), obCreate: $('comms-onboard-create'),
   obErr: $('comms-onboard-err'), obHint: $('comms-onboard-hint'), obMethod: $('comms-onboard-method'),
   obCode: $('comms-onboard-code'), obCopy: $('comms-onboard-copy'), obContinue: $('comms-onboard-continue'),
-  setupHere: $('comms-id-setup-here'), lockAlt: $('comms-lock-alt'),
+  setupHere: $('comms-id-setup-here'), lockAlt: $('comms-lock-alt'), lockOld: $('comms-lock-old'),
   leave: $('comms-leave'), peersN: $('comms-peers-n'), shareT: $('comms-id-share-t'),
   addToggle: $('comms-add-toggle'), addToggleT: $('comms-add-toggle-t'), addBox: $('comms-add'),
   scan: $('comms-scan'), scanWrap: $('comms-scan-wrap'), scanVideo: $('comms-scan-video'),
@@ -619,7 +646,10 @@ const els = {
   notif: $('comms-notif'), notifEnable: $('comms-notif-enable'), notifDismiss: $('comms-notif-dismiss'),
   lockWaiting: $('comms-lock-waiting'), pushStatus: $('comms-push-status'),
   pushTest: $('comms-push-test'), pushTestLog: $('comms-push-test-log'),
-  pkOffer: document.querySelector('#comms-pk-upgrade .comms__upgrade-text')
+  pkOffer: document.querySelector('#comms-pk-upgrade .comms__upgrade-text'),
+  lockTitle: $('comms-lock-title'), lockLink: $('comms-lock-link'), idCardSlot: $('comms-id-card-slot'), idLock: $('comms-id-lock'),
+  link: $('comms-link'), linkCard: $('comms-link-card'), linkGo: $('comms-link-go'), linkLater: $('comms-link-later'),
+  obCard: $('comms-onboard-card')
 };
 
 const APPLE_DEVICE = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
@@ -2702,19 +2732,115 @@ const hasRoomHash = () => {
   return !!(h && h !== '#' && h.length > 2);
 };
 
+const KR_WANTED = !window.__mentriaRedirecting;
+let KR = null;
+let KRC = null;
+let krUiP = null;
+let krPrfP = null;
+let krPending = KR_WANTED;
+let krOpened = false;
+let krBroken = false;
+let krNoPrf = false;
+let krSetupBusy = false;
+let krSawLocked = false;
+let krOpening = null;
+let krRetiring = false;
+let krSettleP = null;
+let krNoDeviceHere = false;
+let krLinkMode = null;
+let krOldOpen = false;
+let krDeclined = false;
+let krEpoch = null;
+let krLateP = null;
+const KR_WAIT_MS = 5000;
+const KR_GIVE_UP_MS = 10000;
+const krBootAt = Date.now();
+const krSlots = new Map();
+const krUi = () => {
+  if (!krUiP) krUiP = import('/assets/js/mentria-unlock-ui.js').catch((e) => { krUiP = null; throw e; });
+  return krUiP;
+};
+const krOn = () => { try { return !!KR && KR.enabled(); } catch (_) { return false; } };
+const krHas = () => { try { return krOn() && KR.state().linked.includes('identity'); } catch (_) { return false; } };
+const krLinked = () => krOn() && !krBroken && !!window.MentriaIdentity && MentriaIdentity.isSetUp() && krHas();
+const krHasOld = () => !!window.MentriaIdentity && (MentriaIdentity.hasPassphrase() || MentriaIdentity.hasPasskey());
+const krRingHasIdentity = () => {
+  try {
+    const rec = window.MentriaStore ? MentriaStore.get('keyring', 'vault') : null;
+    const e = rec && rec.services && typeof rec.services === 'object' ? rec.services.identity : null;
+    return !!(e && typeof e === 'object' && e.ct);
+  } catch (_) { return false; }
+};
+const krTyping = () => !!els.idPass.value || els.lockAlt.contains(document.activeElement);
+const krErr = (e) => {
+  const m = e && (e.name && e.name !== 'Error' && /Error$/.test(e.name) ? e.name : e.message);
+  if (m === 'locked') return;
+  notice(m === 'storage' || m === 'storage-full' || m === 'QuotaExceededError' ? TU.storage : TU.other);
+};
+const krSavedCode = (opened) => {
+  const n = opened && KRC ? KRC.normalizeCode(opened) : null;
+  return n && n.kind === 'c20' && KRC.formatCode(n) === opened ? opened : null;
+};
+const krMigrateRemember = () => {
+  const old = window.MentriaIdentity ? MentriaIdentity.takeLocal() : null;
+  if (!old || !KR) return;
+  if (old.remember && !KR.rememberDecision()) KR.setRememberDecision(old.remember);
+  if (old.rememberPending && !KR.rememberPending() && KR.rememberDecision() !== 'off') KR.setRememberPending(true);
+};
+const krPrf = () => {
+  if (!krPrfP) krPrfP = KR.prfSupport().catch(() => 'unknown');
+  return krPrfP;
+};
+const krSlot = (el, want, onUnlocked) => {
+  const cur = krSlots.get(el);
+  if (!want) {
+    if (cur) { krSlots.delete(el); cur.then((h) => { if (h) h.destroy(); }); }
+    el.hidden = true;
+    return;
+  }
+  el.hidden = false;
+  if (cur) return;
+  krSlots.set(el, krUi().then((ui) => ui.mountCard(el, { onUnlocked })).catch(() => null));
+};
+const krRefreshUI = (state, cardMode, oldHere) => {
+  const on = krOn();
+  const I = window.MentriaIdentity;
+  const oldShown = oldHere && krOldOpen;
+  els.idLocked.classList.toggle('comms__lock--card', cardMode);
+  els.lockTitle.hidden = cardMode;
+  els.lockAlt.hidden = cardMode && !oldShown;
+  els.idErr.hidden = cardMode && !oldShown;
+  els.lockOld.hidden = !oldHere;
+  els.lockOld.setAttribute('aria-expanded', oldShown ? 'true' : 'false');
+  els.lockLink.hidden = !(on && state === 'locked' && !cardMode && !krBroken && I && !krHas());
+  krSlot(els.idCardSlot, cardMode && !els.idLocked.hidden, () => { krOpen(); });
+  els.idLock.hidden = !(on && state === 'unlocked' && krOpened);
+  const mode = on && state === 'unlocked' && I && !krOpened && !krBroken ? krLinkMode : null;
+  const s = mode ? KR.state() : null;
+  const showCard = mode === 'card' && s.setUp && !s.unlocked;
+  const showOffer = mode === 'offer' && !s.setUp;
+  els.link.hidden = !(showCard || showOffer);
+  els.linkGo.hidden = !showOffer;
+  krSlot(els.linkCard, showCard, () => { krChanged(KR.state()); });
+};
+
 const refreshIdUI = () => {
   const state = CID.idState();
   const guest = hasRoomHash();
   if ((state === 'none' || state === 'unavailable') && !guest && !onboardDone) onboardActive = true;
   els.onboard.hidden = !onboardActive;
   if (onboardActive && !cryptoOk()) showOnboardStep('insecure');
-  els.idLocked.hidden = state !== 'locked' || onboardActive;
+  els.idLocked.hidden = state !== 'locked' || onboardActive || krPending;
   if (state === 'locked' && !onboardActive) updateLockWaiting();
   els.app.hidden = onboardActive || (state === 'locked' && !guest);
   els.idOn.hidden = state !== 'unlocked';
   els.idNone.hidden = state === 'unlocked' || !guest;
-  els.idPasskey.hidden = state !== 'locked' || !(window.MentriaIdentity && MentriaIdentity.hasPasskey());
-  els.lockAlt.open = state === 'locked' && !(window.MentriaIdentity && MentriaIdentity.hasPasskey());
+  const cardMode = state === 'locked' && krLinked();
+  const oldHere = cardMode && krHasOld();
+  if (!oldHere) krOldOpen = false;
+  els.idPasskey.hidden = (cardMode && !krOldOpen) || state !== 'locked' || !(window.MentriaIdentity && MentriaIdentity.hasPasskey());
+  els.lockAlt.open = state === 'locked' && (!(window.MentriaIdentity && MentriaIdentity.hasPasskey()) || (!!KR && krTyping()));
+  if (KR) krRefreshUI(state, cardMode, oldHere);
   els.contacts.hidden = state !== 'unlocked';
   if (state !== 'unlocked') els.idCard.hidden = true;
   if (state === 'unlocked' && els.contactList && !els.contactList.children.length && savedRooms().length) renderContacts();
@@ -2918,7 +3044,17 @@ const passkeyPossible = async () => {
   } catch { pkSupportCache = false; }
   return pkSupportCache;
 };
+const krOwnsPasskeys = () => krOpened && krLinked();
 const refreshPasskeyOffer = async (justUnlockedByCode) => {
+  if (krOwnsPasskeys()) {
+    const s = KR.state();
+    const possible = s.unlocked && s.passkeys === 0 && !krNoPrf && !!window.isSecureContext && (await krPrf()) !== 'no';
+    els.pkSettings.hidden = !possible;
+    const dismissed = !!(window.MentriaStore && MentriaStore.get('comms', PK_LATER_KEY));
+    els.pkUpgrade.hidden = !(possible && justUnlockedByCode && !dismissed);
+    if (!els.pkUpgrade.hidden) { els.pkErr.hidden = true; els.pkErr.textContent = ''; }
+    return;
+  }
   const I = window.MentriaIdentity;
   const unlocked = I && I.isUnlocked && I.isUnlocked();
   const has = !!(I && I.hasPasskey && I.hasPasskey());
@@ -2928,7 +3064,35 @@ const refreshPasskeyOffer = async (justUnlockedByCode) => {
   els.pkUpgrade.hidden = !(possible && justUnlockedByCode && !dismissed);
   if (!els.pkUpgrade.hidden) { els.pkErr.hidden = true; els.pkErr.textContent = ''; }
 };
+const krEnroll = async (btn) => {
+  let p;
+  try { p = KR.addPasskey(''); } catch (e) { p = Promise.reject(e); }
+  btn.disabled = true;
+  els.pkErr.hidden = true;
+  let refocus = false;
+  try {
+    await p;
+    els.pkUpgrade.hidden = true;
+    els.pkSettings.hidden = true;
+    notice(TU.passkeyAdded);
+  } catch (err) {
+    const msg = err && err.message;
+    if (msg === 'confirm-needed') {
+      let ok = false;
+      try { ok = await (await krUi()).showConfirm(); } catch (_) { ok = false; }
+      if (ok) { els.pkUpgrade.hidden = false; refocus = true; notice(T.passkey.again); }
+    } else {
+      els.pkErr.textContent = msg === 'no-prf' ? T.passkey.err_prf : T.passkey.err_failed;
+      els.pkErr.hidden = false;
+      if (msg === 'no-prf') { krNoPrf = true; els.pkSettings.hidden = true; }
+    }
+  } finally {
+    btn.disabled = false;
+  }
+  if (refocus) { try { els.pkEnroll.focus(); } catch (_) {} }
+};
 const enrollPasskeyFromComms = async (btn) => {
+  if (krOwnsPasskeys()) return krEnroll(btn);
   btn.disabled = true;
   els.pkErr.hidden = true;
   try {
@@ -2981,27 +3145,337 @@ const initIdentity = async () => {
   }
 };
 
+const krOpen = () => {
+  if (krOpening) return krOpening;
+  krOpening = (async () => {
+    const I = window.MentriaIdentity;
+    if (!krLinked() || (krOpened && I.isUnlocked())) return false;
+    let list = [];
+    try {
+      list = await KR.secrets('identity');
+      if (!list.length) {
+        if (KR.state().unlocked) { krBroken = true; refreshIdUI(); }
+        return false;
+      }
+      await I.openLinked(list.map((x) => x.bytes));
+    } catch (_) {
+      krBroken = true;
+      refreshIdUI();
+      return false;
+    } finally {
+      list.forEach((x) => { try { x.bytes.fill(0); } catch (_) {} });
+    }
+    krOpened = true;
+    await initIdentity();
+    refreshPasskeyOffer(krSawLocked);
+    await krSettleRemember();
+    krRetire();
+    return true;
+  })().finally(() => { krOpening = null; });
+  return krOpening;
+};
+
+let krAdopting = null;
+const krAdopt = () => {
+  if (!krAdopting) krAdopting = krAdoptOnce().finally(() => { krAdopting = null; });
+  return krAdopting;
+};
+const krAdoptOnce = async () => {
+  const I = window.MentriaIdentity;
+  if (!krLinked() || krOpened || !I.isUnlocked()) return false;
+  let list = [];
+  let hit = false;
+  try {
+    list = await KR.secrets('identity');
+    for (const x of list) {
+      if (await I.matchesVault(x.bytes)) { hit = true; break; }
+    }
+  } catch (_) {
+    hit = false;
+  } finally {
+    list.forEach((x) => { try { x.bytes.fill(0); } catch (_) {} });
+  }
+  krLinkMode = null;
+  if (!hit || !I.isUnlocked()) {
+    if (KR.state().unlocked) krBroken = true;
+    refreshIdUI();
+    return false;
+  }
+  krOpened = true;
+  refreshIdUI();
+  refreshPasskeyOffer(false);
+  await krSettleRemember();
+  krRetire();
+  return true;
+};
+
+const krRetire = async () => {
+  const I = window.MentriaIdentity;
+  if (krRetiring || !krOn() || !krOpened || !krHas()) return;
+  const r = KR.retirement('identity');
+  if (!r || !r.ready) return;
+  krRetiring = true;
+  let cur = null;
+  try {
+    cur = await KR.secret('identity');
+    const kcv = cur ? await I.matchesVault(cur) : '';
+    if (!kcv) return;
+    const id = I.legacyPasskeyId();
+    if (!I.retireLegacy(kcv, { dropDevice: !!KR.state().hasDevice || KR.rememberDecision() === 'off' })) return;
+    if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
+      try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: id }); } catch (_) {}
+    }
+    await KR.markRetired('identity');
+  } catch (_) {
+  } finally {
+    if (cur) cur.fill(0);
+    krRetiring = false;
+  }
+};
+
+const krDropRetiredDevice = async () => {
+  const I = window.MentriaIdentity;
+  if (!I.hasDeviceUnlock() || !KR.state().hasDevice) return;
+  const r = KR.retirement('identity');
+  if (!r || !r.blockers || !r.blockers.includes('already-retired')) return;
+  let cur = null;
+  try {
+    cur = await KR.secret('identity');
+    const kcv = cur ? await I.matchesVault(cur) : '';
+    if (kcv) I.retireLegacy(kcv, { dropDevice: true });
+  } catch (_) {
+  } finally {
+    if (cur) cur.fill(0);
+  }
+};
+
+const krKeepRemembered = async () => {
+  const I = window.MentriaIdentity;
+  if (!I || KR.rememberDecision() === 'off' || !(await I.deviceUnlockHere())) return;
+  try {
+    if (!KR.state().hasDevice) {
+      await KR.setRemember(true, { decided: true });
+    } else {
+      KR.setRememberPending(false);
+      KR.setRememberDecision('on');
+    }
+  } catch (e) {
+    if (e && e.message === 'confirm-needed') KR.setRememberPending(true);
+  }
+};
+
+const krSettleOnce = async () => {
+  const I = window.MentriaIdentity;
+  if (!I) return;
+  if (KR.rememberDecision() === 'off') { KR.setRememberPending(false); return; }
+  const pending = KR.rememberPending();
+  if (!pending && (krNoDeviceHere || KR.rememberDecision() || !krHas())) return;
+  if (!(await I.deviceUnlockHere())) {
+    if (pending) KR.setRememberPending(false);
+    else krNoDeviceHere = true;
+    return;
+  }
+  if (KR.state().hasDevice) {
+    KR.setRememberPending(false);
+    KR.setRememberDecision('on');
+    return;
+  }
+  if (!pending) KR.setRememberPending(true);
+  if (!KR.hasRootBytes()) return;
+  await KR.setRemember(true, { decided: true });
+  await krDropRetiredDevice();
+};
+
+const krSettleRemember = () => {
+  if (!krSettleP) krSettleP = krSettleOnce().catch(() => {}).then(() => { krSettleP = null; });
+  return krSettleP;
+};
+
+const krLinkNow = async () => {
+  const I = window.MentriaIdentity;
+  if (!krOn() || krBroken || krHas() || !I.isUnlocked()) return false;
+  const copy = new Uint8Array(I.getSecret());
+  try {
+    await KR.link('identity', copy);
+  } catch (e) {
+    krErr(e);
+    return false;
+  } finally {
+    copy.fill(0);
+  }
+  krOpened = true;
+  krLinkMode = null;
+  await krKeepRemembered();
+  refreshIdUI();
+  refreshPasskeyOffer(false);
+  return true;
+};
+
+const krChanged = (s) => {
+  if (!KR) return;
+  if (krOpened && !s.unlocked) { location.reload(); return; }
+  if (s.epoch !== krEpoch) {
+    if (krEpoch !== null) krBroken = false;
+    krEpoch = s.epoch;
+  }
+  if (!s.unlocked) krSawLocked = true;
+  if (krLinkMode === 'offer' && s.setUp) krLinkMode = 'card';
+  const I = window.MentriaIdentity;
+  if (s.unlocked && I && !krSetupBusy) {
+    krSettleRemember();
+    if (krLinked() && !I.isUnlocked()) krOpen();
+    else if (krLinked() && !krOpened) krAdopt();
+    else if (I.isSetUp() && I.isUnlocked() && !krHas() && !krBroken) krLinkNow();
+  }
+  refreshIdUI();
+};
+
+const krVerifyOld = async (code) => {
+  try { await window.MentriaIdentity.unlock(code); return true; } catch (_) { return false; }
+};
+
+const krSetupLegacy = async ({ typed, verify } = {}) => {
+  const I = window.MentriaIdentity;
+  if (!krOn() || krBroken || !I.isUnlocked() || krHas()) return;
+  const opts = { service: 'identity', secret: new Uint8Array(I.getSecret()) };
+  let ok = false;
+  try {
+    const code = krSavedCode(typed);
+    if (code) opts.knownCode = code;
+    else if (typed) opts.knownPassphrase = typed;
+    else if (verify) opts.verifyCode = krVerifyOld;
+    if (KR.rememberDecision() !== 'off' && await I.deviceUnlockHere()) opts.remember = true;
+    opts.onRemember = (on) => {
+      KR.setRememberDecision(on ? 'on' : 'off');
+      if (!on) KR.setRememberPending(false);
+    };
+    krSetupBusy = true;
+    try { ok = await (await krUi()).showSetup(opts); } catch (_) { ok = false; }
+  } finally {
+    krSetupBusy = false;
+    opts.secret.fill(0);
+  }
+  if (ok && krHas()) {
+    krOpened = true;
+    krLinkMode = null;
+    await krKeepRemembered();
+  } else if (KR.state().unlocked) await krLinkNow();
+  refreshIdUI();
+  refreshPasskeyOffer(false);
+};
+
+const krAfterLegacy = async (opts) => {
+  const I = window.MentriaIdentity;
+  if (!krOn() || krBroken || !I.isUnlocked() || krOpened) return;
+  const s = KR.state();
+  if (krHas()) {
+    if (s.unlocked) { await krAdopt(); return; }
+    krLinkMode = 'card';
+    refreshIdUI();
+    return;
+  }
+  if (s.unlocked) { await krLinkNow(); return; }
+  if (s.setUp) { krLinkMode = 'card'; refreshIdUI(); return; }
+  if (opts.auto) { krLinkMode = 'offer'; refreshIdUI(); return; }
+  await krSetupLegacy(opts);
+};
+
+const krLegacyUnlock = async (typed) => {
+  const I = window.MentriaIdentity;
+  try {
+    await I.unlock(typed);
+    return typed;
+  } catch (e) {
+    const n = KRC ? KRC.normalizeCode(typed) : null;
+    const alt = n && n.kind === 'c20' ? KRC.formatCode(n) : null;
+    if (!alt || alt === typed) throw e;
+    await I.unlock(alt);
+    return alt;
+  }
+};
+
+const krCreateIdentity = async () => {
+  const I = window.MentriaIdentity;
+  const s = KR.state();
+  if (!s.setUp) {
+    if (I.isSetUp()) throw new Error('already-set-up');
+    const ui = await krUi();
+    const bytes = await I.createLinked();
+    let ok = false;
+    try {
+      krSetupBusy = true;
+      try { ok = await ui.showSetup({ service: 'identity', secret: bytes }); } catch (_) { ok = false; }
+      krSetupBusy = false;
+      if (!ok || !krHas()) {
+        if (!ok && !KR.state().setUp) krDeclined = true;
+        return false;
+      }
+      await I.saveLinked(bytes);
+    } finally {
+      krSetupBusy = false;
+      bytes.fill(0);
+    }
+    krOpened = true;
+    return true;
+  }
+  if (!s.unlocked) {
+    krSlot(els.obCard, true, () => { krSlot(els.obCard, false); els.obCreate.click(); });
+    return false;
+  }
+  krSlot(els.obCard, false);
+  if (krHas()) {
+    const have = await KR.secrets('identity');
+    try {
+      if (!have.length) throw new Error('locked');
+      await I.rebuildLinked(have.map((x) => x.bytes));
+    } finally {
+      have.forEach((x) => { try { x.bytes.fill(0); } catch (_) {} });
+    }
+    krOpened = true;
+    return 'rebuilt';
+  }
+  const bytes = await I.createLinked();
+  try {
+    if (krHas()) return krCreateIdentity();
+    await KR.link('identity', bytes);
+    await I.saveLinked(bytes);
+  } finally {
+    bytes.fill(0);
+  }
+  krOpened = true;
+  return true;
+};
+
 els.idUnlock.addEventListener('click', async () => {
   els.idErr.textContent = '';
   els.idUnlock.disabled = true;
+  const typed = els.idPass.value;
+  const keyring = krOn();
+  let opened = false;
   try {
-    await window.MentriaIdentity.unlock(els.idPass.value);
+    if (keyring) opened = await krLegacyUnlock(typed);
+    else await window.MentriaIdentity.unlock(els.idPass.value);
     els.idPass.value = '';
     await initIdentity();
     refreshPasskeyOffer(true);
+    if (!keyring) opened = true;
   } catch {
     els.idErr.textContent = T.lock.wrong;
   } finally {
     els.idUnlock.disabled = false;
   }
+  if (opened && keyring) krAfterLegacy({ typed: opened });
 });
 els.idPass.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.idUnlock.click(); } });
 els.idPasskey.addEventListener('click', async () => {
   els.idErr.textContent = '';
   els.idPasskey.disabled = true;
+  const keyring = krOn();
+  let opened = false;
   try {
     await window.MentriaIdentity.unlockWithPasskey();
     await initIdentity();
+    opened = true;
   } catch (err) {
     const code = err && err.message;
     const name = err && err.name;
@@ -3018,6 +3492,27 @@ els.idPasskey.addEventListener('click', async () => {
   } finally {
     els.idPasskey.disabled = false;
   }
+  if (opened && keyring) krAfterLegacy({ verify: true });
+});
+
+els.idLock.addEventListener('click', () => {
+  if (!KR) return;
+  krUi().then((ui) => ui.lockNow(), () => KR.lock()).catch(() => {});
+});
+els.linkGo.addEventListener('click', () => {
+  els.linkGo.disabled = true;
+  krSetupLegacy({ verify: true }).finally(() => { els.linkGo.disabled = false; });
+});
+els.linkLater.addEventListener('click', () => {
+  krLinkMode = null;
+  refreshIdUI();
+});
+els.lockOld.addEventListener('click', () => {
+  krOldOpen = !krOldOpen;
+  refreshIdUI();
+  if (!krOldOpen) return;
+  const first = !els.idPasskey.hidden ? els.idPasskey : els.lockAlt.querySelector('summary');
+  if (first) { try { first.focus(); } catch (_) {} }
 });
 
 els.idName.addEventListener('change', () => {
@@ -3613,6 +4108,30 @@ els.obCreate.addEventListener('click', async () => {
   const prevLabel = els.obCreate.textContent;
   els.obCreate.textContent = T.onboard.setting_up;
   try {
+    if (KR_WANTED && bootUnlock) await bootUnlock;
+    if (KR_WANTED && !krOn() && krLateP && krRingHasIdentity() && !window.MentriaIdentity.isSetUp()) {
+      const left = Math.max(0, KR_GIVE_UP_MS - (Date.now() - krBootAt));
+      await Promise.race([krLateP, new Promise((resolve) => setTimeout(resolve, left))]);
+      if (!krOn()) {
+        els.obErr.hidden = false;
+        els.obErr.textContent = TU.loadFailed;
+        return;
+      }
+    }
+    if (krOn() && !krDeclined) {
+      if (!cryptoOk()) throw new Error('insecure-context');
+      const made = await krCreateIdentity();
+      if (made) {
+        if (made !== 'rebuilt' || !CID.getProfile().name) CID.setProfile({ name });
+        onboardDone = true;
+        onboardActive = false;
+        await initIdentity();
+        refreshIdUI();
+        if (!hasRoomHash()) els.contactIn.focus();
+        return;
+      }
+      if (!krDeclined) return;
+    }
     const code = makeRecoveryCode();
     await window.MentriaIdentity.setup(code);
     CID.setProfile({ name });
@@ -3704,10 +4223,92 @@ els.newSaved.addEventListener('click', async () => {
 
 refreshIdUI();
 let bootUnlock = null;
-if (CID.idState() === 'unlocked') initIdentity();
-else if (CID.idState() === 'locked' && window.MentriaIdentity && MentriaIdentity.tryDeviceUnlock) {
-  bootUnlock = MentriaIdentity.tryDeviceUnlock().then((ok) => { if (ok) initIdentity(); else refreshIdUI(); }, () => { refreshIdUI(); });
-}
+const legacyBoot = () => {
+  if (CID.idState() === 'unlocked') initIdentity();
+  else if (CID.idState() === 'locked' && window.MentriaIdentity && MentriaIdentity.tryDeviceUnlock) {
+    return MentriaIdentity.tryDeviceUnlock().then((ok) => { if (ok) initIdentity(); else refreshIdUI(); }, () => { refreshIdUI(); });
+  }
+  return null;
+};
+const krAttach = (mods) => {
+  KR = mods[0];
+  KRC = mods[1];
+  krMigrateRemember();
+  krEpoch = KR.state().epoch;
+  KR.onChange(krChanged);
+  if (!KR.state().unlocked) krSawLocked = true;
+};
+const krLate = async (start, fallback) => {
+  const mods = await start;
+  try { await fallback; } catch (_) {}
+  if (!Array.isArray(mods) || KR) return;
+  if (krTyping()) krOldOpen = true;
+  krAttach(mods);
+  if (els.obErr.textContent === TU.loadFailed) {
+    els.obErr.hidden = true;
+    els.obErr.textContent = '';
+  }
+  const I = window.MentriaIdentity;
+  if (I && I.isUnlocked()) await krAfterLegacy({ auto: true, verify: true });
+  else if (krLinked() && KR.state().unlocked) await krOpen();
+  refreshIdUI();
+};
+const krBootSteps = async () => {
+  const start = (async () => {
+    const mods = await Promise.all([import('/assets/js/mentria-unlock.js'), import('/assets/js/mentria-unlock-core.js')]);
+    try { await mods[0].ready(); } catch (_) {}
+    return mods[0].enabled() ? mods : null;
+  })().catch(() => 'failed');
+  const mods = await Promise.race([start, new Promise((resolve) => setTimeout(() => resolve(false), KR_WAIT_MS))]);
+  if (mods === false) {
+    krPending = false;
+    refreshIdUI();
+    const fallback = legacyBoot();
+    krLateP = krLate(start, fallback).catch(() => {});
+    return fallback;
+  }
+  if (mods === 'failed') {
+    krPending = false;
+    refreshIdUI();
+    krLateP = Promise.resolve();
+    return legacyBoot();
+  }
+  if (!mods) {
+    krPending = false;
+    refreshIdUI();
+    return legacyBoot();
+  }
+  krAttach(mods);
+  if (krLinked() && KR.state().unlocked) await krOpen();
+  krPending = false;
+  refreshIdUI();
+  const I = window.MentriaIdentity;
+  if (krLinked() || !I) return null;
+  if (CID.idState() === 'unlocked') { initIdentity(); return null; }
+  if (CID.idState() === 'locked' && I.tryDeviceUnlock) {
+    const ok = await I.tryDeviceUnlock().catch(() => false);
+    if (ok) {
+      await initIdentity();
+      krAfterLegacy({ auto: true, verify: true });
+    } else {
+      refreshIdUI();
+    }
+  }
+  return null;
+};
+const krBoot = async () => {
+  try {
+    return await krBootSteps();
+  } catch (_) {
+    return null;
+  } finally {
+    if (krPending) {
+      krPending = false;
+      try { refreshIdUI(); } catch (_) {}
+    }
+  }
+};
+bootUnlock = KR_WANTED ? krBoot() : legacyBoot();
 
 function randomRoomSlug() {
   const bytes = crypto.getRandomValues(new Uint8Array(5));

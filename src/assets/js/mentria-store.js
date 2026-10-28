@@ -105,6 +105,59 @@
     } catch (_) {}
   };
 
+  const QN_PAIR_KEY = 'mentria.qn.pair';
+  const QN_PAIR = ['quick_notes.salt', 'quick_notes.cred_id'];
+  const QN_RAW = ['mentria-qn-salt', 'mentria-qn-cred'];
+  const RESCUE_KEY = 'mentria-sync-rescue';
+
+  const textOf = (raw) => {
+    if (raw == null) return null;
+    let v = raw;
+    try { v = JSON.parse(raw); } catch (_) {}
+    return typeof v === 'string' && v ? v : null;
+  };
+
+  const qnPairHeld = () => {
+    try {
+      const p = JSON.parse(global.localStorage.getItem(QN_PAIR_KEY) || 'null');
+      return !!p && typeof p.salt === 'string' && !!p.salt && typeof p.credId === 'string' && !!p.credId;
+    } catch (_) { return false; }
+  };
+
+  const qnRescued = () => {
+    try {
+      const raw = global.localStorage.getItem(RESCUE_KEY);
+      if (!raw || !QN_PAIR.some((s) => raw.indexOf('"' + s + '"') >= 0)) return {};
+      const rec = JSON.parse(raw);
+      return rec && rec.v === 2 && rec.entries && typeof rec.entries === 'object' ? rec.entries : {};
+    } catch (_) { return {}; }
+  };
+
+  const keepQnPair = (rescueOnly) => {
+    if (!lsAvailable) return;
+    try {
+      if (qnPairHeld()) return;
+      const rescued = qnRescued();
+      let fromRescue = false;
+      const half = (i) => {
+        const e = rescued[QN_PAIR[i]];
+        const r = e && typeof e.raw === 'string' ? textOf(e.raw) : null;
+        if (r) { fromRescue = true; return r; }
+        return textOf(global.localStorage.getItem(PREFIX + QN_PAIR[i])) || global.localStorage.getItem(QN_RAW[i]) || null;
+      };
+      const salt = half(0);
+      const credId = half(1);
+      if (!salt || !credId || (rescueOnly && !fromRescue)) return;
+      global.localStorage.setItem(QN_PAIR_KEY, JSON.stringify({ salt, credId }));
+    } catch (_) {}
+  };
+
+  const keepQnPairBefore = (next) => {
+    try {
+      if (QN_PAIR.some((s) => s in next && next[s] !== global.localStorage.getItem(PREFIX + s))) keepQnPair(false);
+    } catch (_) {}
+  };
+
   const set = (ns, key, value, opts) => {
     opts = opts || {};
     if (!lsAvailable) {
@@ -114,6 +167,7 @@
     try {
       const raw = JSON.stringify(value);
       const mtime = (opts && typeof opts.mtime === 'number') ? opts.mtime : Date.now();
+      if (ns === 'quick_notes' && (key === 'salt' || key === 'cred_id')) keepQnPairBefore({ [ns + '.' + key]: raw });
       global.localStorage.setItem(fullKey(ns, key), raw);
       noteWrite('ok');
       writeMeta(ns, key, raw, mtime);
@@ -221,7 +275,8 @@
   const LOCAL_KEYS = ['tools.ruler_calibration', 'tools.decibel_settings', 'tools.countdown_active', 'ui.mini', 'ui.mini_tool', 'ui.mini_pos', 'handoff.md', 'comms.ring_token', 'comms.selftest_token', 'comms.ring_announced', 'comms.topic_v2_since'];
   const LOCAL_KEY_PREFIXES = ['ui.fullscreen.'];
   const LOCAL_LEGACY = ['mentria_lang', 'mentria_lang_redirected_at', 'mentria_seen', 'mentria_caps', 'mentria_pwa_installed_at', 'mentria_pwa_install_dismissed_at', 'mentria_pwa_install_seen'];
-  const VAULTS = ['totp.vault', 'identity.vault'];
+  const VAULTS = ['totp.vault', 'identity.vault', 'keyring.vault'];
+  const MERGE_VAULTS = ['keyring.vault'];
   const NOTE_LISTS = ['quick_notes.blob', 'quick_notes.inbox'];
   const DELETE_MAPS = ['quick_notes.deleted', 'tools.color_picker_deleted'];
 
@@ -232,6 +287,14 @@
     if (raw == null) return null;
     try { return JSON.parse(raw); } catch (_) { return null; }
   };
+
+  const sameKcv = (a, b) => {
+    const x = parseJson(a);
+    const y = parseJson(b);
+    return !!x && !!y && typeof x === 'object' && typeof y === 'object' && typeof x.kcv === 'string' && x.kcv !== '' && x.kcv === y.kcv;
+  };
+
+  const mergesVault = (suffix, local, incoming) => MERGE_VAULTS.indexOf(suffix) >= 0 && sameKcv(local, incoming);
 
   const portable = (suffix, raw) => {
     if (suffix !== 'identity.vault') return raw;
@@ -319,7 +382,7 @@
       const local = global.localStorage.getItem(PREFIX + suffix);
       if (local == null) { plan.add.push(suffix); return; }
       if (local === incoming) { plan.same.push(suffix); return; }
-      if (NOTE_LISTS.indexOf(suffix) >= 0 || DELETE_MAPS.indexOf(suffix) >= 0) { plan.merge.push(suffix); return; }
+      if (NOTE_LISTS.indexOf(suffix) >= 0 || DELETE_MAPS.indexOf(suffix) >= 0 || mergesVault(suffix, local, incoming)) { plan.merge.push(suffix); return; }
       if (VAULTS.indexOf(suffix) >= 0) { plan.vaults.push(suffix); return; }
       plan.replace.push(suffix);
     });
@@ -337,7 +400,8 @@
   const AREA_NAMES = {
     invoice: 'invoices', totp: 'TOTP accounts', identity: 'Comms identity', comms: 'Comms rooms and contacts',
     quick_notes: 'notes', packs: 'learning progress', games: 'game saves and scores', tools: 'tool settings',
-    ui: 'layout settings', ai_chat: 'AI chat', ext: 'extensions', extdata: 'extension data', feed: 'feed progress'
+    ui: 'layout settings', ai_chat: 'AI chat', ext: 'extensions', extdata: 'extension data', feed: 'feed progress',
+    keyring: 'one unlock'
   };
 
   const areaOf = (suffix) => {
@@ -391,6 +455,13 @@
       if (local != null && local !== raw) {
         if (NOTE_LISTS.indexOf(suffix) >= 0) { raw = JSON.stringify(mergeNotes(parseJson(local), parseJson(raw), deletedNotes)); mtime = Date.now(); }
         else if (DELETE_MAPS.indexOf(suffix) >= 0) { raw = JSON.stringify(maxMergeMap(parseJson(local), parseJson(raw), 200)); mtime = Date.now(); }
+        else if (mergesVault(suffix, local, raw)) {
+          let merged = null;
+          try { merged = typeof opts.mergeVault === 'function' ? opts.mergeVault(suffix, local, raw) : null; } catch (_) { merged = null; }
+          if (typeof merged !== 'string' || !merged) return;
+          raw = merged;
+          mtime = Date.now();
+        }
       }
       if (local != null && local === raw) return;
       writes.push({ key: PREFIX + suffix, meta: META_PREFIX + suffix, raw, mtime });
@@ -399,6 +470,14 @@
       if (typeof k !== 'string' || k.indexOf(LEGACY_PREFIX) !== 0 || isLocalLegacy(k) || skip.indexOf(k) >= 0) return;
       writes.push({ key: k, meta: null, raw: String(legacy[k]), mtime: restoredMtime });
     });
+
+    const qnNext = {};
+    QN_PAIR.forEach((s) => {
+      const w = writes.find((x) => x.key === PREFIX + s);
+      if (w) qnNext[s] = w.raw;
+      else if (mode === 'replace') qnNext[s] = null;
+    });
+    keepQnPairBefore(qnNext);
 
     const undo = [];
     const remember = (k) => { if (k) undo.push({ k, v: global.localStorage.getItem(k) }); };
@@ -479,6 +558,8 @@
     if (!global.navigator || !global.navigator.storage || !global.navigator.storage.persisted) return false;
     try { return !!(await global.navigator.storage.persisted()); } catch (_) { return false; }
   };
+
+  keepQnPair(true);
 
   global.MentriaStore = {
     get, set, remove, list, clear: clearNs, status,

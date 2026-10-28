@@ -1,0 +1,200 @@
+---js
+{
+  layout: "base.njk",
+  title: "One unlock lab",
+  description: "Beta diagnostics page for the one unlock: a test keyring and how each page decided whether the app was reopened.",
+  robots: "noindex, nofollow",
+  englishOnly: true,
+  eleventyExcludeFromCollections: true,
+  eleventyExcludeFromSitemap: true,
+  eleventyComputed: {
+    permalink: (data) => (data.releaseTag === "beta" ? "/beta/unlock/" : false)
+  }
+}
+---
+<section class="hero ulab-hero">
+  <h1>One unlock lab</h1>
+  <p>Make a test keyring, then open, close and reopen the app and read how this page decided.</p>
+</section>
+
+<section class="ulab" id="ulab">
+  <div class="ulab__box">
+    <label class="ulab__row"><input type="checkbox" id="unlock-ask"> <span>{{ "unlock.launch_setting" | t }}</span></label>
+    <p class="ulab__note">{{ "unlock.launch_setting_note" | t }}</p>
+    <div class="ulab__actions">
+      <button type="button" class="m-btn m-btn--primary" id="unlock-create">Create a test keyring</button>
+      <button type="button" class="m-btn m-btn--ghost" id="unlock-lock">{{ "unlock.lock_now" | t }}</button>
+    </div>
+    <p class="ulab__code" id="unlock-code-wrap" hidden>Recovery code: <code id="unlock-code"></code></p>
+    <p class="ulab__status" id="unlock-status" role="status" aria-live="polite"></p>
+  </div>
+  <div class="ulab__box">
+    <div class="ulab__actions">
+      <button type="button" class="m-btn m-btn--ghost" id="unlock-demo-card">Show card</button>
+      <button type="button" class="m-btn m-btn--ghost" id="unlock-demo-launch">Show launch</button>
+      <button type="button" class="m-btn m-btn--ghost" id="unlock-demo-setup">Show setup</button>
+    </div>
+    <div class="ulab__demo" id="unlock-demo"></div>
+  </div>
+  <div class="ulab__box">
+    <table class="ulab__table">
+      <caption>Diagnostics (refreshed every second)</caption>
+      <tbody id="unlock-diag"></tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .ulab-hero { padding-top: 1.5rem; }
+  .ulab { display: grid; gap: 1rem; max-width: 720px; margin: 0 auto 3rem; }
+  .ulab__box { border: 1px solid var(--term-border, rgba(255, 255, 255, 0.12)); border-radius: 12px; padding: 1rem; }
+  .ulab__row { display: flex; align-items: center; gap: 0.6rem; min-height: 44px; cursor: pointer; }
+  .ulab__row input { width: 20px; height: 20px; accent-color: var(--accent, #6ef3c5); }
+  .ulab__note { margin: 0 0 0.75rem 2.1rem; color: var(--term-muted); font-size: 0.9rem; }
+  .ulab__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
+  .ulab__actions .m-btn { min-height: 44px; }
+  .ulab__code { margin: 1rem 0 0; overflow-wrap: anywhere; }
+  .ulab__code code { font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.04em; }
+  .ulab__status { min-height: 1.4em; margin: 0.75rem 0 0; color: var(--term-muted); }
+  .ulab__demo:not(:empty) { margin-top: 1rem; }
+  .ulab__table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem; }
+  .ulab__table caption { text-align: left; padding-bottom: 0.5rem; color: var(--term-muted); font-family: inherit; }
+  .ulab__table th, .ulab__table td { text-align: left; padding: 0.35rem 0.5rem; border-top: 1px solid var(--term-border, rgba(255, 255, 255, 0.08)); vertical-align: top; overflow-wrap: anywhere; }
+  .ulab__table th { font-weight: 500; color: var(--term-muted); width: 42%; }
+</style>
+
+<script type="module">
+  import * as U from '/assets/js/mentria-unlock.js';
+
+  const $ = (id) => document.getElementById(id);
+  const ask = $('unlock-ask');
+  const createBtn = $('unlock-create');
+  const lockBtn = $('unlock-lock');
+  const status = $('unlock-status');
+  const body = $('unlock-diag');
+  const cells = new Map();
+  const ROWS = [
+    ['one unlock', (s) => (s.enabled ? 'runs in this browser' : "can't run in this browser")],
+    ['keyring', (s) => (s.setUp ? 'yes' : 'none')],
+    ['session', (s) => (s.unlocked ? 'unlocked' : 'locked')],
+    ['launch', (s) => s.launch || '-'],
+    ['epoch', (s, d) => String(d.epoch)],
+    ['decision', (s, d) => d.decision || 'not run on this page'],
+    ['another page live', (s, d) => (d.liveOther == null ? '-' : String(d.liveOther))],
+    ['tab marker', (s, d) => (d.marker ? JSON.stringify(d.marker) : 'none')],
+    ['last seen', (s, d) => (d.seenAgeMs == null ? 'never' : (d.seenAgeMs / 1000).toFixed(1) + ' s ago')],
+    ['was discarded', (s, d) => String(d.wasDiscarded)],
+    ['mobile', (s, d) => String(d.mobile)],
+    ['navigation type', (s, d) => d.navType || '-'],
+    ['standalone', (s, d) => String(d.standalone)],
+    ['linked', (s) => (s.linked.length ? s.linked.join(', ') : 'none')],
+    ['passkeys', (s) => String(s.passkeys)],
+    ['passkey support', (s) => s.prf],
+    ['passphrase', (s) => (s.hasPass ? 'yes' : 'no')],
+    ['remember this device', (s) => (s.hasDevice ? 'on' : 'off')],
+    ['code confirmed', (s) => (s.codeConfirmed ? 'yes' : 'no')],
+    ['ask at launch', (s) => (s.askAtLaunch ? 'on' : 'off')],
+    ['unlock bar in this tab', (s) => (s.ask ? 'asking' : 'no')],
+    ['old locks retired', () => retired()]
+  ];
+
+  for (const [label] of ROWS) {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th');
+    const td = document.createElement('td');
+    th.scope = 'row';
+    th.textContent = label;
+    tr.append(th, td);
+    body.append(tr);
+    cells.set(label, td);
+  }
+
+  const say = (text) => { status.textContent = text; };
+
+  function retired() {
+    let rec = null;
+    try { rec = JSON.parse(localStorage.getItem('mentria.store.keyring.vault')); } catch (_) {}
+    const done = rec && rec.retired && typeof rec.retired === 'object' ? rec.retired : {};
+    const names = ['identity', 'totp', 'notes', 'finance'].filter((n) => Object.prototype.hasOwnProperty.call(done, n) && done[n]);
+    return names.length ? names.join(', ') : 'none';
+  }
+
+  function paint() {
+    const s = U.state();
+    const d = U.diagnostics();
+    ask.checked = s.askAtLaunch;
+    ask.disabled = !s.enabled;
+    createBtn.disabled = !s.enabled || s.setUp;
+    lockBtn.disabled = !s.enabled || !s.unlocked;
+    for (const [label, read] of ROWS) {
+      const text = read(s, d);
+      const td = cells.get(label);
+      if (td.textContent !== text) td.textContent = text;
+    }
+  }
+
+  ask.addEventListener('change', () => {
+    U.setAskAtLaunch(ask.checked);
+    paint();
+  });
+
+  createBtn.addEventListener('click', async () => {
+    createBtn.disabled = true;
+    say('Creating…');
+    try {
+      const { code } = await U.create({ deviceName: 'Test device' });
+      $('unlock-code').textContent = code;
+      $('unlock-code-wrap').hidden = false;
+      say('Test keyring created and unlocked. Keep the code to test unlocking.');
+    } catch (e) {
+      const why = e && e.message;
+      say(why === 'exists' ? 'This device already has a keyring.' : why === 'storage' ? 'This browser is not saving data for this site.' : 'Could not create the keyring (' + why + ').');
+    }
+    paint();
+  });
+
+  lockBtn.addEventListener('click', async () => {
+    await U.lock();
+    say('Locked.');
+    paint();
+  });
+
+  let demo = null;
+  const ui = () => import('/assets/js/mentria-unlock-ui.js');
+
+  $('unlock-demo-card').addEventListener('click', async () => {
+    if (demo) demo.destroy();
+    demo = null;
+    window.__cardUnlocks = 0;
+    window.__cardState = null;
+    if (!U.state().setUp) { say('Create a test keyring first.'); return; }
+    demo = await (await ui()).mountCard($('unlock-demo'), {
+      onUnlocked: (s) => {
+        window.__cardUnlocks = (window.__cardUnlocks || 0) + 1;
+        window.__cardState = s;
+        say('Unlocked by the card.');
+        paint();
+      }
+    });
+  });
+
+  $('unlock-demo-launch').addEventListener('click', () => {
+    const s = U.state();
+    if (!s.setUp || s.unlocked) { say(s.setUp ? 'Lock first to see the launch screen.' : 'Create a test keyring first.'); return; }
+    ui().then((m) => m.showLaunch()).then(paint, paint);
+  });
+
+  $('unlock-demo-setup').addEventListener('click', async () => {
+    window.__setupResult = null;
+    if (U.state().setUp) { say('This device already has a keyring.'); return; }
+    const ok = await (await ui()).showSetup({});
+    window.__setupResult = ok;
+    say(ok ? 'Setup finished.' : 'Setup closed. Nothing was saved.');
+    paint();
+  });
+
+  U.onChange(paint);
+  U.ready().then(paint, paint);
+  setInterval(paint, 1000);
+  paint();
+</script>

@@ -80,10 +80,13 @@ localeReload: true
   <div class="files-modal__backdrop" data-close></div>
   <div class="files-modal__card m-modal__card">
     <h3 class="files-modal__h">{{ "tool.files.export_modal_title" | t }}</h3>
-    <p class="files-modal__p">{{ "tool.files.export_modal_lede" | t }}</p>
+    <p class="files-modal__p" id="files-export-lede">{{ "tool.files.export_modal_lede" | t }}</p>
+    <p class="files-modal__p" id="files-export-lede-code" hidden>{{ "tool.files.export_modal_lede_code" | t }}</p>
     <p class="files-modal__p" id="files-export-size" aria-live="polite"></p>
     <p class="files-modal__note" id="files-export-warn" hidden>{{ "common.backup_size_large" | t }}</p>
-    <div class="m-field">
+    <p class="files-modal__code" id="files-export-code" hidden>{{ "unlock.backup_default" | t }}</p>
+    <button type="button" class="m-btn m-btn--ghost files-modal__other" id="files-export-other" aria-expanded="false" aria-controls="files-export-pass-box" hidden>{{ "unlock.backup_other" | t }}</button>
+    <div class="m-field" id="files-export-pass-box">
       <label for="files-export-pass">{{ "tool.files.passphrase_label" | t }}</label>
       <input class="m-input" type="password" id="files-export-pass" autocomplete="new-password" minlength="8" spellcheck="false">
     </div>
@@ -99,15 +102,22 @@ localeReload: true
   <div class="files-modal__backdrop" data-close></div>
   <div class="files-modal__card m-modal__card">
     <h3 class="files-modal__h">{{ "about.data_import_title" | t }}</h3>
-    <p class="files-modal__p">{{ "about.data_import_lede" | t }}</p>
+    <p class="files-modal__p" id="files-restore-lede">{{ "about.data_import_lede" | t }}</p>
+    <p class="files-modal__p" id="files-restore-lede-code" hidden>{{ "about.data_import_lede_code" | t }}</p>
     <div class="m-field">
       <label for="files-restore-file">{{ "about.data_import_choose" | t }}</label>
       <input class="m-input" type="file" id="files-restore-file" accept="application/json,.json">
     </div>
-    <div class="m-field">
+    <div class="m-field" id="files-restore-pass-box">
       <label for="files-restore-pass">{{ "tool.files.passphrase_label" | t }}</label>
       <input class="m-input" type="password" id="files-restore-pass" autocomplete="current-password" spellcheck="false">
     </div>
+    <div class="m-field" id="files-restore-code-box" hidden>
+      <p class="files-modal__p" id="files-restore-code-note">{{ "unlock.backup_code_prompt" | t }}</p>
+      <label for="files-restore-code">{{ "unlock.code_label" | t }}</label>
+      <input class="m-input" type="text" id="files-restore-code" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-describedby="files-restore-code-note">
+    </div>
+    <p class="files-modal__code" id="files-restore-key" hidden>{{ "unlock.backup_default" | t }}</p>
     <p class="files-modal__strength" id="files-restore-status" aria-live="polite"></p>
     <div class="files-modal__actions">
       <button type="button" class="m-btn m-btn--ghost" data-close>{{ "tool.files.cancel" | t }}</button>
@@ -162,6 +172,10 @@ localeReload: true
     del:          {{ ("tool.files.delete"         | t) | dump | safe }},
     confirmDelete:{{ ("tool.files.confirm_delete" | t) | dump | safe }},
     confirmDeleteTotp: {{ ("tool.files.confirm_delete_totp" | t) | dump | safe }},
+    confirmDeleteKeyring: {{ ("tool.files.confirm_delete_keyring" | t) | dump | safe }},
+    confirmDeleteKeyringNone: {{ ("tool.files.confirm_delete_keyring_none" | t) | dump | safe }},
+    ringServices: {{ "unlock.services" | tsub | dump | safe }},
+    codeUnavailable: {{ ("common.backup_code_unavailable" | t) | dump | safe }},
     cachesGroup: {{ ("tool.files.caches_group" | t) | dump | safe }},
     cachesShare: {{ ("tool.files.caches_share" | t) | dump | safe }},
     redaction:    {{ ("tool.files.redaction_notice" | t) | dump | safe }},
@@ -222,12 +236,15 @@ localeReload: true
       replace:       {{ ("common.restore_replace"        | t) | dump | safe }},
       totpVault:     {{ ("common.restore_totp_vault"     | t) | dump | safe }},
       identityVault: {{ ("common.restore_identity_vault" | t) | dump | safe }},
+      keyringVault:  {{ ("common.restore_keyring_vault"  | t) | dump | safe }},
       finance:       {{ ("common.restore_finance"        | t) | dump | safe }},
       summary:       {{ ("common.restore_summary"        | t) | dump | safe }}
     },
     restoreErr: {
       file:  {{ ("common.restore_err_file"  | t) | dump | safe }},
       pass:  {{ ("common.restore_err_pass"  | t) | dump | safe }},
+      code:  {{ ("common.restore_err_code"  | t) | dump | safe }},
+      damaged: {{ ("common.restore_err_damaged" | t) | dump | safe }},
       space: {{ ("common.restore_err_space" | t) | dump | safe }},
       newer: {{ ("common.restore_err_newer" | t) | dump | safe }},
       blocked: {{ ("common.restore_err_blocked" | t) | dump | safe }},
@@ -890,11 +907,31 @@ localeReload: true
     viewModal.open();
   }
 
+  function ringServicesText(key) {
+    let rec = null;
+    try { rec = key === 'vault' ? store.get('keyring', key) : null; } catch (_) { rec = null; }
+    const own = (o, k) => !!o && typeof o === 'object' && Object.prototype.hasOwnProperty.call(o, k);
+    const names = ['identity', 'totp', 'notes', 'finance'].filter((n) => {
+      const e = rec && own(rec.services, n) ? rec.services[n] : null;
+      return (!!e && typeof e === 'object' && !!e.ct) || (!!rec && own(rec.retired, n));
+    }).map((n) => COPY.ringServices[n] || n);
+    if (!names.length) return '';
+    try { return new Intl.ListFormat(document.documentElement.lang || undefined, { type: 'conjunction' }).format(names); } catch (_) { return names.join(', '); }
+  }
+
+  function deleteMessage(bucket, key) {
+    if (bucket.id === 'totp') return COPY.confirmDeleteTotp.replace('{name}', key);
+    if (bucket.id === 'keyring') {
+      const services = ringServicesText(key);
+      return services ? COPY.confirmDeleteKeyring.replace('{services}', services) : COPY.confirmDeleteKeyringNone;
+    }
+    return COPY.confirmDelete.replace('{name}', key);
+  }
+
   async function deleteItem(bucket, key) {
-    const guarded = bucket.id === 'totp' || bucket.id === 'identity';
+    const guarded = bucket.id === 'totp' || bucket.id === 'identity' || bucket.id === 'keyring';
     if (guarded) {
-      const msg = bucket.id === 'totp' ? COPY.confirmDeleteTotp.replace('{name}', key) : COPY.confirmDelete.replace('{name}', key);
-      if (!(await window.mentriaConfirm(msg, { danger: true }))) return;
+      if (!(await window.mentriaConfirm(deleteMessage(bucket, key), { danger: true }))) return;
     }
     let saved = null;
     if (bucket.kind === 'legacy') {
@@ -961,6 +998,135 @@ localeReload: true
   const sizeWarn = $('files-export-warn');
   COPY.restore.areas = COPY.areas;
 
+  const exportCode = $('files-export-code');
+  const otherBtn = $('files-export-other');
+  const exportPassBox = $('files-export-pass-box');
+  const restorePassBox = $('files-restore-pass-box');
+  const restoreCodeBox = $('files-restore-code-box');
+  const restoreCode = $('files-restore-code');
+  const restoreKey = $('files-restore-key');
+  const exportLede = $('files-export-lede');
+  const exportLedeCode = $('files-export-lede-code');
+  const restoreLede = $('files-restore-lede');
+  const restoreLedeCode = $('files-restore-lede-code');
+  let unlock = null;
+  let unlockLoad = null;
+  let codeShown = false;
+  let restoreSeq = 0;
+  let restoring = false;
+  const UNLOCK_WAIT_MS = 5000;
+
+  function unlockWanted(needRecord) {
+    if (window.__mentriaRedirecting) return false;
+    if (!needRecord) return true;
+    try { return localStorage.getItem('mentria.store.keyring.vault') != null; } catch (_) { return false; }
+  }
+
+  function loadUnlock() {
+    if (unlockLoad) return unlockLoad;
+    let p = null;
+    const start = import('/assets/js/mentria-unlock.js').then((m) => Promise.resolve().then(() => m.ready()).catch(() => {}).then(() => {
+      if (!unlock) {
+        m.onChange(syncUnlock);
+        unlock = m;
+        syncUnlock();
+      }
+      return m;
+    }), () => {
+      if (unlockLoad === p) unlockLoad = null;
+      return null;
+    });
+    p = Promise.race([start, new Promise((resolve) => setTimeout(() => resolve(null), UNLOCK_WAIT_MS))]);
+    unlockLoad = p;
+    return p;
+  }
+
+  const wipeKey = (k) => { try { if (k && k.key && k.key.fill) k.key.fill(0); } catch (_) {} };
+
+  function codeExport() {
+    try { return !!unlock && unlock.enabled() && unlock.state().unlocked; } catch (_) { return false; }
+  }
+
+  const otherOpen = () => otherBtn.getAttribute('aria-expanded') === 'true';
+
+  function renderExport() {
+    const on = codeExport();
+    if (!on) otherBtn.setAttribute('aria-expanded', 'false');
+    else if (!codeShown && passInput.value) otherBtn.setAttribute('aria-expanded', 'true');
+    codeShown = on;
+    exportCode.hidden = !on || otherOpen();
+    otherBtn.hidden = !on;
+    exportPassBox.hidden = on && !otherOpen();
+    exportLede.hidden = exportPassBox.hidden;
+    exportLedeCode.hidden = !exportPassBox.hidden;
+    if (exportPassBox.hidden && exportPassBox.contains(document.activeElement)) $('files-export-confirm').focus();
+  }
+
+  function showRestore(kind) {
+    const lost = restorePassBox.contains(document.activeElement) || restoreCodeBox.contains(document.activeElement);
+    restorePassBox.hidden = kind !== 'pass';
+    restoreCodeBox.hidden = kind !== 'code';
+    restoreKey.hidden = kind !== 'key';
+    restoreLede.hidden = kind !== 'pass';
+    restoreLedeCode.hidden = kind === 'pass';
+    if (kind !== 'pass') $('files-restore-pass').value = '';
+    if (kind !== 'code') restoreCode.value = '';
+    if (lost && !document.activeElement.getClientRects().length) {
+      (kind === 'code' ? restoreCode : kind === 'pass' ? $('files-restore-pass') : $('files-restore-confirm')).focus();
+    }
+  }
+
+  async function restoreMode(f) {
+    if (!f || !window.MentriaBackup || !unlockWanted(false)) return { kind: 'pass' };
+    let h = null;
+    try { h = await MentriaBackup.backupHeader(f); } catch (_) { return { kind: 'pass' }; }
+    if (!h || !h.code) return { kind: 'pass' };
+    let k = null;
+    if (unlockWanted(true)) {
+      const m = unlock || await loadUnlock();
+      try { if (m && m.enabled() && m.state().unlocked) k = await m.backupKey(); } catch (_) { k = null; }
+    }
+    if (k && k.salt === h.salt && k.kcv === h.kcv) return { kind: 'key', key: k };
+    wipeKey(k);
+    return { kind: 'code' };
+  }
+
+  async function refreshRestore() {
+    if (restoring) return;
+    const seq = ++restoreSeq;
+    const fileEl = $('files-restore-file');
+    const mode = await restoreMode(fileEl.files && fileEl.files[0]);
+    wipeKey(mode.key);
+    if (seq === restoreSeq && !restoring) showRestore(mode.kind);
+  }
+
+  function syncUnlock() {
+    renderExport();
+    refreshRestore();
+  }
+
+  otherBtn.addEventListener('click', () => {
+    const open = !otherOpen();
+    otherBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!open) { passInput.value = ''; strengthEl.textContent = ''; strengthEl.dataset.level = ''; }
+    renderExport();
+    if (open) passInput.focus();
+  });
+  $('files-restore-file').addEventListener('change', refreshRestore);
+  restoreCode.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('files-restore-confirm').click(); }
+  });
+  window.addEventListener('storage', (e) => {
+    if (unlock || (e.key !== null && e.key !== 'mentria.store.keyring.vault')) return;
+    if (unlockWanted(true)) loadUnlock();
+    else refreshRestore();
+  });
+  window.addEventListener('mentria:write', (e) => {
+    const d = e.detail || {};
+    if (!unlock && d.ns === 'keyring' && d.key === 'vault' && unlockWanted(true)) loadUnlock();
+  });
+  if (unlockWanted(true)) loadUnlock();
+
   function pct(f) {
     try { return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'percent' }).format(f); }
     catch (_) { return Math.round(f * 100) + '%'; }
@@ -1000,27 +1166,43 @@ localeReload: true
     passInput.value = '';
     strengthEl.textContent = '';
     strengthEl.dataset.level = '';
+    otherBtn.setAttribute('aria-expanded', 'false');
+    renderExport();
     exportModal.open();
-    passInput.focus();
+    if (exportPassBox.hidden) $('files-export-confirm').focus();
+    else passInput.focus();
     measure();
   });
 
   $('files-export-confirm').addEventListener('click', async () => {
     if (!window.MentriaBackup) { status.set(COPY.backupFailed.replace('{msg}', 'MentriaBackup'), 'err'); return; }
+    const useCode = codeExport() && !otherOpen();
     const pass = passInput.value;
-    if (!pass || pass.length < 8) { strengthEl.dataset.level = 'weak'; strengthEl.textContent = COPY.passShort; passInput.focus(); return; }
+    if (!useCode && (!pass || pass.length < 8)) { strengthEl.dataset.level = 'weak'; strengthEl.textContent = COPY.passShort; passInput.focus(); return; }
     const btn = $('files-export-confirm');
     btn.disabled = true;
     strengthEl.dataset.level = '';
     strengthEl.textContent = COPY.exportBusy;
+    let key = null;
     try {
+      if (useCode) {
+        key = await unlock.backupKey();
+        if (!key) {
+          otherBtn.setAttribute('aria-expanded', 'true');
+          renderExport();
+          strengthEl.dataset.level = 'weak';
+          strengthEl.textContent = COPY.codeUnavailable;
+          passInput.focus();
+          return;
+        }
+      }
       const prepared = await MentriaBackup.prepareBackup();
       showSize(prepared);
       if (prepared.total > MentriaBackup.LARGE_BYTES && !(await window.mentriaConfirm(COPY.largeConfirm.replace('{size}', fmtBytes(prepared.total))))) {
         strengthEl.textContent = '';
         return;
       }
-      const out = await MentriaBackup.sealBackup(prepared, pass, { onProgress: progressTo(strengthEl, COPY.exportBusy) });
+      const out = await MentriaBackup.sealBackup(prepared, key ? { keyring: key } : pass, { onProgress: progressTo(strengthEl, COPY.exportBusy) });
       MentriaBackup.downloadBlob(out.blob, 'mentria-files-backup');
       passInput.value = '';
       strengthEl.textContent = '';
@@ -1031,6 +1213,7 @@ localeReload: true
       strengthEl.dataset.level = 'weak';
       strengthEl.textContent = ecode ? COPY.exportErr[ecode] : COPY.backupFailed.replace('{msg}', String(err && err.message || err));
     } finally {
+      wipeKey(key);
       btn.disabled = false;
     }
   });
@@ -1039,6 +1222,8 @@ localeReload: true
     $('files-restore-file').value = '';
     $('files-restore-pass').value = '';
     $('files-restore-status').textContent = '';
+    restoreSeq++;
+    showRestore('pass');
     restoreModal.open();
     $('files-restore-file').focus();
   });
@@ -1049,14 +1234,28 @@ localeReload: true
     const out = $('files-restore-status');
     const f = fileEl.files && fileEl.files[0];
     if (!f) { fileEl.focus(); return; }
-    if (!passEl.value) { passEl.focus(); return; }
-    if (!window.MentriaBackup) { out.textContent = COPY.restoreFail.replace('{err}', 'MentriaBackup'); return; }
     const btn = $('files-restore-confirm');
     btn.disabled = true;
+    restoring = true;
+    restoreSeq++;
+    const mode = await restoreMode(f).catch(() => ({ kind: 'pass' }));
+    showRestore(mode.kind);
+    const secret = mode.kind === 'key' ? { keyring: mode.key } : mode.kind === 'code' ? restoreCode.value.trim() : passEl.value;
+    if (!secret || !window.MentriaBackup) {
+      restoring = false;
+      btn.disabled = false;
+      if (!secret) (mode.kind === 'code' ? restoreCode : passEl).focus();
+      else out.textContent = COPY.restoreFail.replace('{err}', 'MentriaBackup');
+      refreshRestore();
+      return;
+    }
     out.textContent = COPY.restoreBusy;
+    let reloading = false;
     try {
-      const data = await MentriaBackup.readBackupFile(f, passEl.value, { onProgress: progressTo(out, COPY.restoreBusy) });
+      const data = await MentriaBackup.readBackupFile(f, secret, { onProgress: progressTo(out, COPY.restoreBusy) });
       passEl.value = '';
+      restoreCode.value = '';
+      wipeKey(mode.key);
       out.textContent = COPY.restoreApplying;
       const result = await MentriaBackup.applyRestore(data, COPY.restore);
       if (result.cancelled) {
@@ -1065,13 +1264,19 @@ localeReload: true
         return;
       }
       out.textContent = COPY.restoreDone.replace('{n}', result.restored);
+      reloading = true;
       setTimeout(() => { location.reload(); }, 1200);
     } catch (err) {
-      const code = MentriaBackup.restoreErrorCode(err);
+      const raw = MentriaBackup.restoreErrorCode(err);
+      const code = raw === 'pass' && mode.kind === 'code' ? 'code' : raw === 'pass' && mode.kind === 'key' ? 'damaged' : raw;
       out.textContent = code ? COPY.restoreErr[code] : COPY.restoreFail.replace('{err}', String(err && err.message || err));
       btn.disabled = false;
     } finally {
       passEl.value = '';
+      restoreCode.value = '';
+      wipeKey(mode.key);
+      restoring = false;
+      if (!reloading) refreshRestore();
     }
   });
 
@@ -1390,6 +1595,21 @@ localeReload: true
   display: flex;
   gap: var(--space-2);
   justify-content: flex-end;
+}
+.files-modal [hidden] { display: none; }
+.files-modal__code {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--syn-green);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.files-modal__code::before { content: "✓ " / ""; }
+.files-modal__other {
+  align-self: flex-start;
+  max-width: 100%;
+  text-align: left;
+  white-space: normal;
 }
 
 @media (max-width: 640px) {

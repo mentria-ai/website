@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ lang | default('en') }}"{% if feedLayout %} class="feed-layout"{% endif %}{% if localeReload %} data-locale-reload{% endif %}>
+{% set siteLocale = (lang or "en") | findLocale %}{% set siteCode = (siteLocale.code | lower) if siteLocale else "en" %}<html lang="{{ lang | default('en') }}"{% if feedLayout %} class="feed-layout"{% endif %}{% if localeReload %} data-locale-reload{% endif %} data-release="{{ releaseTag }}" data-site-code="{{ siteCode }}"{% if unlockTool %} data-unlock-tool{% endif %}>
 <head>
     <meta charset="UTF-8">
     <style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
@@ -63,9 +63,10 @@
             for (var i = 0; i < locales.length; i++) { if (locales[i].code === c) return locales[i]; }
             return null;
           }
-          function go(loc) { location.replace(loc.prefix + (path === '/' ? '/' : path) + rest); }
+          function go(loc) { window.__mentriaRedirecting = true; location.replace(loc.prefix + (path === '/' ? '/' : path) + rest); }
           var current = localeOfPath(path);
           if (current && window.MENTRIA_EN_ONLY && window.MENTRIA_EN_ONLY.indexOf(path.slice(current.prefix.length) || '/') >= 0) {
+            window.__mentriaRedirecting = true;
             location.replace((path.slice(current.prefix.length) || '/') + rest);
             return;
           }
@@ -96,6 +97,14 @@
             }
           }
         } catch (_) { /* ignore */ }
+      })();
+    </script>
+    <script>
+      (function () {
+        try {
+          if (window.__mentriaRedirecting) return;
+          if (localStorage.getItem('mentria.store.keyring.vault')) import('/assets/js/mentria-unlock.js').then(function (m) { return m.ready(); }).catch(function () {});
+        } catch (e) {}
       })();
     </script>
     {% set baseUrl = site.siteUrl | default('/') %}
@@ -209,8 +218,6 @@
     </script>
 
     {%- set localePrefix = ((locale or pair.locale).pathPrefix | default("")) -%}
-    {%- set siteLocale = (lang or "en") | findLocale -%}
-    {%- set siteCode = (siteLocale.code | lower) if siteLocale else "en" -%}
     {%- set isHomePage = (page.url == "/" or page.url == localePrefix + "/") -%}
     {%- set inTools = page.url | startsWith(localePrefix + "/tools/") -%}
     {%- set isToolIndex = (page.url == localePrefix + "/tools/") -%}

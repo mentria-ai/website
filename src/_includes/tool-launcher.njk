@@ -36,7 +36,7 @@
     <div class="launcher__head"><h2 class="launcher__label">{{ "home.launcher.recents" | t }}</h2></div>
     <div class="launcher__grid" id="launcher-recents-row"></div>
   </div>
-  <div class="launcher__pages">
+  <div class="launcher__pages" data-label-access="{{ 'store.full_access_badge' | t }}">
     {%- for g in groups %}
     {%- set catTools = (tools | groupby("group"))[g[0]] %}
     <section class="launcher__cat launcher__cat--{{ g[0] | lower }}" data-group="{{ g[0] }}">
@@ -78,6 +78,8 @@
        data-label-storage="{{ 'widgets.storage_label' | t }}"
        data-label-storage-used="{{ 'widgets.storage_used' | t }}"></div>
 </section>
+<script type="application/json" id="launcher-ext-hashes">{{ extensionHashes | dump | safe }}</script>
+<script type="application/json" id="launcher-ext-history">{{ extensionHashHistory | dump | safe }}</script>
 
 <script>
 (function () {

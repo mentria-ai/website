@@ -16,12 +16,15 @@ eleventyComputed:
 <h1 class="sr-only" id="xr-h1">{{ "tools.extensions.title" | t }}</h1>
 <section class="xr" data-prefix="{{ locale.pathPrefix }}" data-blocked="{{ 'tool.extensions.run_blocked' | t }}" data-install-quiet>
   <p class="xr__error" id="xr-error" hidden></p>
+  <span class="terminal-frame__access" id="xr-access" hidden>{{ "store.full_access_badge" | t }}</span>
   <p class="xr__missing" id="xr-gone" role="status" hidden><span id="xr-gone-text"></span> <a id="xr-gone-link" href="{{ locale.pathPrefix }}/tools/extensions/"></a></p>
   <p class="xr__missing" id="xr-disabled" hidden>{{ "tool.extensions.run_disabled" | t }} <a href="{{ locale.pathPrefix }}/tools/extensions/">{{ "tool.extensions.run_manager_link" | t }}</a></p>
   <iframe class="xr__frame" id="xr-frame" title="{{ 'tools.extensions.title' | t }}" allow="bluetooth; usb; serial; camera; microphone; fullscreen; gamepad; accelerometer; gyroscope; autoplay"></iframe>
 </section>
 {% include "terminal-frame-close.njk" %}
 
+<script type="application/json" id="xr-hashes">{{ extensionHashes | dump | safe }}</script>
+<script type="application/json" id="xr-history">{{ extensionHashHistory | dump | safe }}</script>
 <script type="application/json" id="xr-gallery">{ {%- for e in extensions %}{{ e.id | dump | safe }}: {{ e.name | dump | safe }}{% if not loop.last %}, {% endif %}{%- endfor %} }</script>
 <script>
   window.XR_COPY = {
@@ -40,10 +43,17 @@ const id = params.get('id') || '';
 const entry = X.getEntry(id);
 const frame = document.getElementById('xr-frame');
 const errEl = document.getElementById('xr-error');
+const accessEl = document.getElementById('xr-access');
 let prefix = root.dataset.prefix || '';
 let gallery = {};
 try { gallery = JSON.parse(document.getElementById('xr-gallery').textContent) || {}; } catch (_) {}
 const listed = Object.prototype.hasOwnProperty.call(gallery, id) ? gallery[id] : '';
+const own = (map, key) => (map && Object.prototype.hasOwnProperty.call(map, key) ? map[key] : null);
+let hashes = {};
+let earlierHashes = {};
+try { hashes = JSON.parse(document.getElementById('xr-hashes').textContent) || {}; } catch (_) {}
+try { earlierHashes = JSON.parse(document.getElementById('xr-history').textContent) || {}; } catch (_) {}
+const published = [own(hashes, id) ? own(hashes, id).sha256 : ''].concat(own(earlierHashes, id) || []);
 
 function tr(key, fallback) {
   const I = window.MentriaI18n;
@@ -54,6 +64,19 @@ function tr(key, fallback) {
 function setFilename(label) {
   const filename = document.querySelector('.terminal-frame__filename');
   if (filename) filename.textContent = label || 'extensions';
+}
+
+function showAccess(on) {
+  const filename = document.querySelector('.terminal-frame__filename');
+  if (on && filename && accessEl.previousElementSibling !== filename) filename.after(accessEl);
+  accessEl.hidden = !on;
+}
+
+async function verified(app) {
+  if (app) return true;
+  let now = entry;
+  try { now = (await X.checkSource(id, published)) || entry; } catch (_) {}
+  try { return X.isVerified(now, published); } catch (_) { return false; }
 }
 
 let goneState = null;
@@ -122,6 +145,7 @@ if (!entry || !entry.enabled || (!app && !source)) {
   frame.title = m.name;
   if (app) root.classList.add('xr--app');
   document.addEventListener('mentria:localechange', () => { document.title = title; });
+  showAccess(!(await verified(app)));
   const mount = (args) => H.mountExtension(frame, {
     manifest: m,
     source,
@@ -138,6 +162,7 @@ if (!entry || !entry.enabled || (!app && !source)) {
     running = false;
     frame.remove();
     errEl.hidden = true;
+    showAccess(false);
     if (removed) {
       showGone(m.name, true);
       setTimeout(() => { try { if (!X.getEntry(id)) X.clearData(id); } catch (_) {} }, 0);

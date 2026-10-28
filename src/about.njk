@@ -155,20 +155,25 @@ localeReload: true
     <div class="about-data-grid">
       <div class="about-data-card">
         <h3 class="about-data-card__h">{{ "about.data_export_title" | t }}</h3>
-        <p class="about-data-card__p">{{ "about.data_export_lede" | t }}</p>
+        <p class="about-data-card__p" id="about-data-export-lede">{{ "about.data_export_lede" | t }}</p>
+        <p class="about-data-card__p" id="about-data-export-lede-code" hidden>{{ "about.data_export_lede_code" | t }}</p>
         <button type="button" class="about-data-btn about-data-btn--ghost about-reveal-btn" data-reveal="about-export-form">{{ "about.data_export_button" | t }}…</button>
         <div class="about-fold" id="about-export-form" hidden>
           <p class="about-data-size" id="about-data-size" aria-live="polite"></p>
           <p class="about-data-size about-data-size--warn" id="about-data-size-warn" hidden>{{ "common.backup_size_large" | t }}</p>
-          <label class="about-data-field">
-            <span>{{ "about.data_pass_label" | t }}</span>
-            <input type="password" id="about-data-pass" autocomplete="new-password" spellcheck="false">
-          </label>
-          <div class="about-data-strength" id="about-data-strength" aria-live="polite"></div>
-          <label class="about-data-field">
-            <span>{{ "about.data_pass_confirm" | t }}</span>
-            <input type="password" id="about-data-pass2" autocomplete="new-password" spellcheck="false">
-          </label>
+          <p class="about-data-code" id="about-data-code" hidden>{{ "unlock.backup_default" | t }}</p>
+          <button type="button" class="about-data-btn about-data-btn--ghost about-data-other" id="about-data-other" aria-expanded="false" aria-controls="about-data-pass-box" hidden>{{ "unlock.backup_other" | t }}</button>
+          <div class="about-fold" id="about-data-pass-box">
+            <label class="about-data-field">
+              <span>{{ "about.data_pass_label" | t }}</span>
+              <input type="password" id="about-data-pass" autocomplete="new-password" spellcheck="false">
+            </label>
+            <div class="about-data-strength" id="about-data-strength" aria-live="polite"></div>
+            <label class="about-data-field">
+              <span>{{ "about.data_pass_confirm" | t }}</span>
+              <input type="password" id="about-data-pass2" autocomplete="new-password" spellcheck="false">
+            </label>
+          </div>
           <button type="button" class="about-data-btn" id="about-data-export-btn">{{ "about.data_export_button" | t }}</button>
           <div class="about-data-status" id="about-data-export-status" aria-live="polite"></div>
         </div>
@@ -176,17 +181,26 @@ localeReload: true
 
       <div class="about-data-card">
         <h3 class="about-data-card__h">{{ "about.data_import_title" | t }}</h3>
-        <p class="about-data-card__p">{{ "about.data_import_lede" | t }}</p>
+        <p class="about-data-card__p" id="about-data-import-lede">{{ "about.data_import_lede" | t }}</p>
+        <p class="about-data-card__p" id="about-data-import-lede-code" hidden>{{ "about.data_import_lede_code" | t }}</p>
         <button type="button" class="about-data-btn about-data-btn--ghost about-reveal-btn" data-reveal="about-import-form">{{ "about.data_import_button" | t }}…</button>
         <div class="about-fold" id="about-import-form" hidden>
           <label class="about-data-field">
             <span>{{ "about.data_import_choose" | t }}</span>
             <input type="file" id="about-data-import-file" accept="application/json,.json">
           </label>
-          <label class="about-data-field">
+          <label class="about-data-field" id="about-data-import-pass-field">
             <span>{{ "about.data_pass_label" | t }}</span>
             <input type="password" id="about-data-import-pass" autocomplete="current-password" spellcheck="false">
           </label>
+          <div class="about-fold" id="about-data-import-code-box" hidden>
+            <p class="about-data-card__p" id="about-data-import-code-note">{{ "unlock.backup_code_prompt" | t }}</p>
+            <label class="about-data-field">
+              <span>{{ "unlock.code_label" | t }}</span>
+              <input type="text" id="about-data-import-code" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-describedby="about-data-import-code-note">
+            </label>
+          </div>
+          <p class="about-data-code" id="about-data-import-key" hidden>{{ "unlock.backup_default" | t }}</p>
           <button type="button" class="about-data-btn about-data-btn--ghost" id="about-data-import-btn">{{ "about.data_import_button" | t }}</button>
           <div class="about-data-status" id="about-data-import-status" aria-live="polite"></div>
         </div>
@@ -212,8 +226,22 @@ localeReload: true
       </div>
       <p class="about-data-card__p" id="about-identity-lede">{{ "about.identity_lede_none" | t }}</p>
 
+      <div class="about-identity-link" id="about-identity-link" hidden>
+        <p class="about-data-card__p"><strong class="about-identity-link__h">{{ "unlock.link_title" | t }}</strong> {{ "unlock.link_body" | t }}</p>
+        <button type="button" class="about-data-btn" id="about-identity-link-btn" hidden>{{ "about.identity_link_button" | t }}…</button>
+      </div>
+
+      <div class="about-identity-foldin" id="about-identity-foldin-row" hidden>
+        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-foldin">{{ "unlock.foldin_line" | t }}</button>
+        <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-foldin-later">{{ "about.identity_foldin_later" | t }}</button>
+      </div>
+      <div class="about-identity-slot" id="about-identity-card-slot" hidden></div>
+      <button type="button" class="about-data-btn about-data-btn--ghost about-identity-later" id="about-identity-later" hidden>{{ "unlock.not_now" | t }}</button>
+      <button type="button" class="about-data-btn about-data-btn--ghost about-identity-later" id="about-identity-old" aria-expanded="false" aria-controls="about-identity-unlock" hidden>{{ "about.identity_old_unlock" | t }}</button>
+
       <div class="about-identity-actions" id="about-identity-setup" hidden>
         <button type="button" class="about-data-btn about-reveal-btn" data-reveal="about-identity-setup-form">{{ "about.identity_setup_button" | t }}…</button>
+        <button type="button" class="about-data-btn about-identity-create" id="about-identity-create" hidden>{{ "about.identity_setup_button" | t }}…</button>
         <div class="about-fold" id="about-identity-setup-form" hidden>
           <label class="about-data-field">
             <span>{{ "about.identity_pass_label" | t }}</span>
@@ -241,8 +269,16 @@ localeReload: true
         <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-lock-btn">{{ "about.identity_lock_button" | t }}</button>
         <button type="button" class="about-data-btn" id="about-identity-passkey-add" hidden>{{ "about.identity_passkey_add" | t }}</button>
         <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-passkey-remove" hidden>{{ "about.identity_passkey_remove" | t }}</button>
-        <label class="about-identity-device"><input type="checkbox" id="about-identity-device"> {{ "about.identity_device_label" | t }}</label>
+        <label class="about-identity-device" id="about-identity-device-row"><input type="checkbox" id="about-identity-device"> {{ "about.identity_device_label" | t }}</label>
         <p class="about-data-card__p about-identity-note" id="about-identity-passkey-note">{{ "about.identity_device_note" | t }}</p>
+        <div class="about-identity-keyring" id="about-identity-keyring" hidden>
+          <h4 class="about-identity-sub" id="about-identity-passkeys-h">{{ "unlock.passkeys_title" | t }}</h4>
+          <ul class="about-identity-passkeys" id="about-identity-passkeys" aria-labelledby="about-identity-passkeys-h"></ul>
+          <button type="button" class="about-data-btn" id="about-identity-kr-add">{{ "about.identity_passkey_add" | t }}</button>
+          <label class="about-identity-device"><input type="checkbox" id="about-identity-launch" aria-describedby="about-identity-launch-note"> {{ "unlock.launch_setting" | t }}</label>
+          <p class="about-data-card__p about-identity-note" id="about-identity-launch-note">{{ "unlock.launch_setting_note" | t }}</p>
+          <button type="button" class="about-data-btn about-data-btn--ghost" id="about-identity-regen">{{ "unlock.regenerate_code" | t }}</button>
+        </div>
       </div>
     </div>
 
@@ -410,6 +446,9 @@ localeReload: true
   .about-reveal-btn { align-self: flex-start; }
   .about-rescue .about-data-btn { align-self: flex-start; }
   .about-rescue .about-data-status:empty { display: none; }
+  .about-data-code { font-family: var(--font-mono); font-size: 12px; line-height: 1.5; color: var(--syn-green, #34c46a); margin: 0; overflow-wrap: anywhere; }
+  .about-data-code::before { content: "✓ " / ""; }
+  .about-data-other { align-self: flex-start; max-width: 100%; text-align: left; white-space: normal; }
   .about-data-scope { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
   .about-data-scope__col { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 2px 0 2px 14px; border-left: 2px solid var(--cyan-30); }
   .about-data-scope__col--out { border-left-color: var(--term-border); }
@@ -449,6 +488,21 @@ localeReload: true
   .about-identity-status[data-tone="locked"] { color: var(--syn-amber, #f7b015); border-color: var(--syn-amber, #f7b015); }
   .about-identity-actions { display: flex; flex-direction: column; gap: 10px; }
   .about-identity-actions--unlocked { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .about-identity-actions.is-kr > .about-reveal-btn, .about-identity-actions.is-kr > .about-fold { display: none; }
+  .about-identity-link { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px dashed var(--term-border); border-radius: 6px; }
+  .about-identity-link__h { color: var(--syn-cyan); font-weight: 600; }
+  .about-identity-link .about-data-btn, .about-identity-later, .about-identity-create { align-self: flex-start; }
+  .about-identity-foldin { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .about-identity-foldin .about-data-btn { margin-top: 0; }
+  .about-identity-slot .m-unlock { max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+  .about-identity-keyring { flex: 1 1 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--term-border); }
+  .about-identity-keyring > .about-data-btn { align-self: flex-start; }
+  .about-identity-keyring .about-identity-device { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--term-fg); }
+  .about-identity-sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--term-muted); margin: 0; }
+  .about-identity-passkeys { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .about-identity-passkeys li { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; font-family: var(--font-mono); font-size: 12px; color: var(--term-fg); }
+  .about-identity-passkeys li span { min-width: 0; overflow-wrap: anywhere; }
+  .about-identity-passkeys li .about-data-btn { margin-top: 0; flex: 0 0 auto; }
   .about-sync-code { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
   .about-sync-qr { width: 100%; max-width: 220px; height: auto; image-rendering: pixelated; background: #fff; border-radius: 6px; padding: 8px; box-sizing: border-box; }
   .about-sync-code__label { font-family: var(--font-mono); font-size: 10px; color: var(--term-subtle); letter-spacing: 0.1em; align-self: stretch; }
@@ -670,6 +724,8 @@ localeReload: true
       importFail:        {{ ('about.data_import_fail'            | t) | dump | safe }},
       importApplying:    {{ ('common.restore_applying'           | t) | dump | safe }},
       importCancelled:   {{ ('common.restore_cancelled'          | t) | dump | safe }},
+      codePrompt:        {{ ('unlock.backup_code_prompt'         | t) | dump | safe }},
+      codeUnavailable:   {{ ('common.backup_code_unavailable'    | t) | dump | safe }},
       size:              {{ ('common.backup_size'                | t) | dump | safe }},
       sizeBusy:          {{ ('common.backup_size_busy'           | t) | dump | safe }},
       largeConfirm:      {{ ('common.backup_large_confirm'       | t) | dump | safe }},
@@ -678,12 +734,15 @@ localeReload: true
         replace:       {{ ('common.restore_replace'        | t) | dump | safe }},
         totpVault:     {{ ('common.restore_totp_vault'     | t) | dump | safe }},
         identityVault: {{ ('common.restore_identity_vault' | t) | dump | safe }},
+        keyringVault:  {{ ('common.restore_keyring_vault'  | t) | dump | safe }},
         finance:       {{ ('common.restore_finance'        | t) | dump | safe }},
         summary:       {{ ('common.restore_summary'        | t) | dump | safe }}
       },
       restoreErr: {
         file:  {{ ('common.restore_err_file'  | t) | dump | safe }},
         pass:  {{ ('common.restore_err_pass'  | t) | dump | safe }},
+        code:  {{ ('common.restore_err_code'  | t) | dump | safe }},
+        damaged: {{ ('common.restore_err_damaged' | t) | dump | safe }},
         space: {{ ('common.restore_err_space' | t) | dump | safe }},
         newer: {{ ('common.restore_err_newer' | t) | dump | safe }},
         blocked: {{ ('common.restore_err_blocked' | t) | dump | safe }},
@@ -709,7 +768,139 @@ localeReload: true
     var importStat= document.getElementById('about-data-import-status');
     var sizeEl    = document.getElementById('about-data-size');
     var sizeWarn  = document.getElementById('about-data-size-warn');
+    var codeNote  = document.getElementById('about-data-code');
+    var otherBtn  = document.getElementById('about-data-other');
+    var passBox   = document.getElementById('about-data-pass-box');
+    var importPassField = document.getElementById('about-data-import-pass-field');
+    var importCodeBox   = document.getElementById('about-data-import-code-box');
+    var importCode= document.getElementById('about-data-import-code');
+    var importKey = document.getElementById('about-data-import-key');
+    var exportLede = document.getElementById('about-data-export-lede');
+    var exportLedeCode = document.getElementById('about-data-export-lede-code');
+    var importLede = document.getElementById('about-data-import-lede');
+    var importLedeCode = document.getElementById('about-data-import-lede-code');
     COPY.restore.areas = COPY.areas;
+
+    var unlock = null;
+    var unlockLoad = null;
+    var codeShown = false;
+    var restoreSeq = 0;
+    var restoring = false;
+    var UNLOCK_WAIT_MS = 5000;
+
+    function unlockWanted(needRecord) {
+      if (window.__mentriaRedirecting) return false;
+      if (!needRecord) return true;
+      try { return localStorage.getItem('mentria.store.keyring.vault') != null; } catch (_) { return false; }
+    }
+
+    function loadUnlock() {
+      if (unlockLoad) return unlockLoad;
+      var p = null;
+      var start = import('/assets/js/mentria-unlock.js').then(function (m) {
+        return Promise.resolve().then(function () { return m.ready(); }).catch(function () {}).then(function () {
+          if (!unlock) {
+            m.onChange(syncUnlock);
+            unlock = m;
+            syncUnlock();
+          }
+          return m;
+        });
+      }, function () {
+        if (unlockLoad === p) unlockLoad = null;
+        return null;
+      });
+      p = Promise.race([start, new Promise(function (resolve) { setTimeout(function () { resolve(null); }, UNLOCK_WAIT_MS); })]);
+      unlockLoad = p;
+      return p;
+    }
+
+    function wipeKey(k) {
+      try { if (k && k.key && k.key.fill) k.key.fill(0); } catch (_) {}
+    }
+
+    function codeExport() {
+      try { return !!unlock && unlock.enabled() && unlock.state().unlocked; } catch (_) { return false; }
+    }
+
+    function otherOpen() { return otherBtn.getAttribute('aria-expanded') === 'true'; }
+
+    function renderExport() {
+      var on = codeExport();
+      if (!on) otherBtn.setAttribute('aria-expanded', 'false');
+      else if (!codeShown && (passEl.value || pass2El.value)) otherBtn.setAttribute('aria-expanded', 'true');
+      codeShown = on;
+      if (!on) { codeNote.remove(); otherBtn.remove(); }
+      else if (!otherBtn.isConnected) passBox.before(codeNote, otherBtn);
+      codeNote.hidden = !on || otherOpen();
+      otherBtn.hidden = !on;
+      passBox.hidden = on && !otherOpen();
+      exportLede.hidden = passBox.hidden;
+      exportLedeCode.hidden = !passBox.hidden;
+      if (passBox.hidden && passBox.contains(document.activeElement)) { try { otherBtn.focus({ preventScroll: true }); } catch (_) {} }
+    }
+
+    function showRestore(kind) {
+      var lost = importPassField.contains(document.activeElement) || importCodeBox.contains(document.activeElement);
+      importPassField.hidden = kind !== 'pass';
+      importCodeBox.hidden = kind !== 'code';
+      importKey.hidden = kind !== 'key';
+      importLede.hidden = kind !== 'pass';
+      importLedeCode.hidden = kind === 'pass';
+      if (kind !== 'pass') importPass.value = '';
+      if (kind !== 'code') importCode.value = '';
+      if (lost && !document.activeElement.getClientRects().length) {
+        try { (kind === 'code' ? importCode : kind === 'pass' ? importPass : importBtn).focus({ preventScroll: true }); } catch (_) {}
+      }
+    }
+
+    async function restoreMode(f) {
+      if (!f || !unlockWanted(false)) return { kind: 'pass' };
+      var h = null;
+      try { h = await window.MentriaBackup.backupHeader(f); } catch (_) { return { kind: 'pass' }; }
+      if (!h || !h.code) return { kind: 'pass' };
+      var k = null;
+      if (unlockWanted(true)) {
+        var m = unlock || await loadUnlock();
+        try { if (m && m.enabled() && m.state().unlocked) k = await m.backupKey(); } catch (_) { k = null; }
+      }
+      if (k && k.salt === h.salt && k.kcv === h.kcv) return { kind: 'key', key: k };
+      wipeKey(k);
+      return { kind: 'code' };
+    }
+
+    async function refreshRestore() {
+      if (restoring) return;
+      var seq = ++restoreSeq;
+      var mode = await restoreMode(fileEl.files && fileEl.files[0]);
+      wipeKey(mode.key);
+      if (seq === restoreSeq && !restoring) showRestore(mode.kind);
+    }
+
+    function syncUnlock() {
+      renderExport();
+      refreshRestore();
+    }
+
+    otherBtn.addEventListener('click', function () {
+      var open = !otherOpen();
+      otherBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open) { passEl.value = ''; pass2El.value = ''; strengthEl.textContent = ''; delete strengthEl.dataset.level; }
+      renderExport();
+      if (open) { try { passEl.focus({ preventScroll: true }); } catch (_) {} }
+    });
+    fileEl.addEventListener('change', refreshRestore);
+    window.addEventListener('storage', function (e) {
+      if (unlock || (e.key !== null && e.key !== 'mentria.store.keyring.vault')) return;
+      if (unlockWanted(true)) loadUnlock();
+      else refreshRestore();
+    });
+    window.addEventListener('mentria:write', function (e) {
+      var d = e.detail || {};
+      if (!unlock && d.ns === 'keyring' && d.key === 'vault' && unlockWanted(true)) loadUnlock();
+    });
+    renderExport();
+    if (unlockWanted(true)) loadUnlock();
 
     function fmtBytes(n) {
       if (n == null || isNaN(n)) return '—';
@@ -798,26 +989,40 @@ localeReload: true
 
     exportBtn.addEventListener('click', async function () {
       setStatus(exportStat, '', null);
+      var useCode = codeExport() && !otherOpen();
       var pw = passEl.value;
       var pw2 = pass2El.value;
-      if (!pw || pw.length < 8) { setStatus(exportStat, COPY.passTooShort, 'err'); return; }
-      if (pw !== pw2) { setStatus(exportStat, COPY.passMismatch, 'err'); return; }
+      if (!useCode) {
+        if (!pw || pw.length < 8) { setStatus(exportStat, COPY.passTooShort, 'err'); return; }
+        if (pw !== pw2) { setStatus(exportStat, COPY.passMismatch, 'err'); return; }
+      }
       exportBtn.disabled = true;
       setStatus(exportStat, COPY.exportBusy, null);
+      var key = null;
       try {
+        if (useCode) {
+          key = await unlock.backupKey();
+          if (!key) {
+            otherBtn.setAttribute('aria-expanded', 'true');
+            renderExport();
+            setStatus(exportStat, COPY.codeUnavailable, 'err');
+            return;
+          }
+        }
         var prepared = await window.MentriaBackup.prepareBackup();
         showSize(prepared);
         if (prepared.total > window.MentriaBackup.LARGE_BYTES) {
           var go = window.mentriaConfirm ? await window.mentriaConfirm(COPY.largeConfirm.replace('{size}', fmtBytes(prepared.total))) : false;
           if (!go) { setStatus(exportStat, '', null); return; }
         }
-        var out = await window.MentriaBackup.sealBackup(prepared, pw, { onProgress: progressTo(exportStat, COPY.exportBusy) });
+        var out = await window.MentriaBackup.sealBackup(prepared, key ? { keyring: key } : pw, { onProgress: progressTo(exportStat, COPY.exportBusy) });
         window.MentriaBackup.downloadBlob(out.blob, 'mentria-backup');
         setStatus(exportStat, COPY.exportDone, 'ok');
       } catch (err) {
         var ecode = window.MentriaBackup.exportErrorCode(err);
         setStatus(exportStat, ecode ? COPY.exportErr[ecode] : String(err && err.message || err), 'err');
       } finally {
+        wipeKey(key);
         pw = pw2 = ''; passEl.value = ''; pass2El.value = ''; strengthEl.textContent = ''; delete strengthEl.dataset.level;
         exportBtn.disabled = false;
       }
@@ -826,25 +1031,46 @@ localeReload: true
     importBtn.addEventListener('click', async function () {
       setStatus(importStat, '', null);
       var f = fileEl.files && fileEl.files[0];
-      var pw = importPass.value;
       if (!f) { setStatus(importStat, COPY.importFail.replace('{err}', 'no file'), 'err'); return; }
-      if (!pw) { setStatus(importStat, COPY.passTooShort, 'err'); return; }
       importBtn.disabled = true;
+      restoring = true;
+      restoreSeq++;
+      var mode = await restoreMode(f).catch(function () { return { kind: 'pass' }; });
+      showRestore(mode.kind);
+      var pw = mode.kind === 'key' ? { keyring: mode.key } : mode.kind === 'code' ? importCode.value.trim() : importPass.value;
+      if (!pw) {
+        restoring = false;
+        importBtn.disabled = false;
+        if (mode.kind === 'code') {
+          setStatus(importStat, COPY.codePrompt, 'err');
+          try { importCode.focus({ preventScroll: true }); } catch (_) {}
+        } else {
+          setStatus(importStat, COPY.passTooShort, 'err');
+        }
+        refreshRestore();
+        return;
+      }
       setStatus(importStat, COPY.importBusy, null);
+      var reloading = false;
       try {
         var data = await window.MentriaBackup.readBackupFile(f, pw, { onProgress: progressTo(importStat, COPY.importBusy) });
-        pw = ''; importPass.value = '';
+        pw = ''; importPass.value = ''; importCode.value = ''; wipeKey(mode.key);
         setStatus(importStat, COPY.importApplying, null);
         var result = await window.MentriaBackup.applyRestore(data, COPY.restore);
         if (result.cancelled) { setStatus(importStat, COPY.importCancelled, null); return; }
         setStatus(importStat, COPY.importDone.replace('{n}', result.restored), 'ok');
+        reloading = true;
         setTimeout(function () { location.reload(); }, 1200);
       } catch (err) {
         var code = window.MentriaBackup.restoreErrorCode(err);
+        if (code === 'pass' && mode.kind === 'code') code = 'code';
+        else if (code === 'pass' && mode.kind === 'key') code = 'damaged';
         setStatus(importStat, code ? COPY.restoreErr[code] : COPY.importFail.replace('{err}', String(err && err.message || err)), 'err');
       } finally {
-        pw = ''; importPass.value = '';
+        pw = ''; importPass.value = ''; importCode.value = ''; wipeKey(mode.key);
+        restoring = false;
         importBtn.disabled = false;
+        if (!reloading) refreshRestore();
       }
     });
   }
@@ -877,6 +1103,7 @@ localeReload: true
     window.MentriaSyncCopy = {
       'about.sync_vault_totp':     {{ ('about.sync_vault_totp'     | t) | dump | safe }},
       'about.sync_vault_identity': {{ ('about.sync_vault_identity' | t) | dump | safe }},
+      'about.sync_vault_keyring':  {{ ('about.sync_vault_keyring'  | t) | dump | safe }},
       'about.sync_vault_keep':     {{ ('about.sync_vault_keep'     | t) | dump | safe }},
       'about.sync_vault_replace':  {{ ('about.sync_vault_replace'  | t) | dump | safe }},
       'about.sync_confirm_replace': {{ ('about.sync_confirm_replace' | t) | dump | safe }}
@@ -958,8 +1185,9 @@ localeReload: true
             ? await window.mentriaConfirm(relabel('about.sync_rescue_confirm', COPY.rescueConfirm).replace('{areas}', areas), { ok: relabel('about.sync_rescue_button', COPY.rescueButton) })
             : false;
           if (!ok) return;
+          rescueBtn.disabled = true;
           try {
-            window.MentriaSync.restoreRescue();
+            await window.MentriaSync.restoreRescue();
             rescueBtn.hidden = true;
             rescueText.textContent = '';
             rescueStatus.textContent = relabel('about.sync_rescue_done', COPY.rescueDone).replace('{areas}', areas);
@@ -967,6 +1195,8 @@ localeReload: true
             try { rescueStatus.focus({ preventScroll: true }); } catch (_) {}
           } catch (err) {
             rescueStatus.textContent = COPY.statusError + ': ' + (err && err.message || err);
+          } finally {
+            rescueBtn.disabled = false;
           }
         });
       });
@@ -1222,7 +1452,20 @@ localeReload: true
       passkeyFailed:  {{ ('about.identity_passkey_failed' | t) | dump | safe }},
       passkeyUnsupported: {{ ('about.identity_passkey_unsupported' | t) | dump | safe }},
       passkeyMismatch:    {{ ('about.identity_passkey_mismatch'    | t) | dump | safe }},
-      passkeyRemoveConfirm: {{ ('about.identity_passkey_remove_confirm' | t) | dump | safe }}
+      passkeyRemoveConfirm: {{ ('about.identity_passkey_remove_confirm' | t) | dump | safe }},
+      rememberNote:   {{ ('unlock.remember_note'          | t) | dump | safe }},
+      rememberPending: {{ ('about.identity_remember_pending' | t) | dump | safe }},
+      krAdded:        {{ ('unlock.passkey_added'          | t) | dump | safe }},
+      krSkipped:      {{ ('unlock.passkey_skipped'        | t) | dump | safe }},
+      krNoPrf:        {{ ('unlock.no_prf_title'           | t) | dump | safe }},
+      krOther:        {{ ('unlock.err_other'              | t) | dump | safe }},
+      krStorage:      {{ ('unlock.err_storage'            | t) | dump | safe }},
+      krRemove:       {{ ('unlock.passkey_remove'         | t) | dump | safe }},
+      krRemoveConfirm: {{ ('about.identity_kr_remove_confirm' | t) | dump | safe }},
+      krAddedOn:      {{ ('about.identity_passkey_added_on' | t) | dump | safe }},
+      krAgain:        {{ ('about.identity_passkey_again' | t) | dump | safe }},
+      regenConfirm:   {{ ('about.identity_regenerate_confirm' | t) | dump | safe }},
+      loadFailed:     {{ ('unlock.load_failed' | t) | dump | safe }}
     };
     var statusEl = document.getElementById('about-identity-status');
     var ledeEl   = document.getElementById('about-identity-lede');
@@ -1237,6 +1480,52 @@ localeReload: true
     var lockBtn = document.getElementById('about-identity-lock-btn');
     var syncBtn = document.getElementById('about-identity-sync-btn');
     if (!setupBtn) return;
+    var pkUnlockBtn = document.getElementById('about-identity-passkey-unlock');
+    var pkAddBtn = document.getElementById('about-identity-passkey-add');
+    var pkRemoveBtn = document.getElementById('about-identity-passkey-remove');
+    var deviceToggle = document.getElementById('about-identity-device');
+    var deviceRow = document.getElementById('about-identity-device-row');
+    var deviceNote = document.getElementById('about-identity-passkey-note');
+    var deviceNoteText = deviceNote.textContent;
+    var createBtn = document.getElementById('about-identity-create');
+    var linkBox = document.getElementById('about-identity-link');
+    var linkBtn = document.getElementById('about-identity-link-btn');
+    var slot = document.getElementById('about-identity-card-slot');
+    var laterBtn = document.getElementById('about-identity-later');
+    var krBox = document.getElementById('about-identity-keyring');
+    var pkHead = document.getElementById('about-identity-passkeys-h');
+    var pkList = document.getElementById('about-identity-passkeys');
+    var krAddBtn = document.getElementById('about-identity-kr-add');
+    var launchToggle = document.getElementById('about-identity-launch');
+    var regenBtn = document.getElementById('about-identity-regen');
+    var oldBtn = document.getElementById('about-identity-old');
+    var foldBtn = document.getElementById('about-identity-foldin');
+    var foldRow = document.getElementById('about-identity-foldin-row');
+    var foldLater = document.getElementById('about-identity-foldin-later');
+    var FOLD_LATER_KEY = 'mentria.keyring.foldin_later';
+    var KR_WAIT_MS = 5000;
+    var KR_GIVE_UP_MS = 10000;
+
+    var kr = null;
+    var krc = null;
+    var krUi = null;
+    var krPrf = 'unknown';
+    var fromKeyring = false;
+    var krBroken = false;
+    var setupBusy = false;
+    var pendingCreate = false;
+    var linkMode = null;
+    var cardFor = null;
+    var cardP = null;
+    var listKey = null;
+    var retiring = false;
+    var settleP = null;
+    var noDeviceHere = false;
+    var reconciling = null;
+    var again = false;
+    var oldOpen = false;
+    var declined = false;
+    var ringEpoch = null;
 
     function waitFor(name, cb) {
       if (window[name]) return cb();
@@ -1247,12 +1536,86 @@ localeReload: true
       }, 100);
     }
 
-    function refresh() {
-      var setUp = window.MentriaIdentity && window.MentriaIdentity.isSetUp();
-      var unlocked = window.MentriaIdentity && window.MentriaIdentity.isUnlocked();
-      setupBox.hidden = setUp;
-      unlockBox.hidden = !setUp || unlocked;
-      unlockedBox.hidden = !unlocked;
+    function krWanted() {
+      return !window.__mentriaRedirecting;
+    }
+    function krActive() {
+      try { return !!kr && kr.enabled(); } catch (_) { return false; }
+    }
+    function ui() {
+      if (!krUi) krUi = import('/assets/js/mentria-unlock-ui.js').catch(function (e) { krUi = null; throw e; });
+      return krUi;
+    }
+    function ringLinked() {
+      try { return krActive() && kr.state().linked.indexOf('identity') >= 0; } catch (_) { return false; }
+    }
+    function linkedHere() {
+      var I = window.MentriaIdentity;
+      return krActive() && !krBroken && !!I && I.isSetUp() && ringLinked();
+    }
+    function savedCode(opened) {
+      var n = opened && krc ? krc.normalizeCode(opened) : null;
+      return n && n.kind === 'c20' && krc.formatCode(n) === opened ? opened : null;
+    }
+    async function verifyOld(code) {
+      try { await window.MentriaIdentity.unlock(code); return true; } catch (_) { return false; }
+    }
+    function linkFailed(e) {
+      if (errName(e) !== 'locked') toast(errText(e));
+    }
+    function ringHasIdentity() {
+      try {
+        var rec = window.MentriaStore ? window.MentriaStore.get('keyring', 'vault') : null;
+        var e = rec && rec.services && typeof rec.services === 'object' ? rec.services.identity : null;
+        return !!(e && typeof e === 'object' && e.ct);
+      } catch (_) { return false; }
+    }
+    function ringChanged() {
+      try {
+        var ep = kr.state().epoch;
+        if (ringEpoch !== null && ep !== ringEpoch) krBroken = false;
+        ringEpoch = ep;
+      } catch (_) {}
+      reconcile();
+    }
+    function migrateRemember() {
+      var old = window.MentriaIdentity.takeLocal();
+      if (old.remember && !kr.rememberDecision()) kr.setRememberDecision(old.remember);
+      if (old.rememberPending && !kr.rememberPending() && kr.rememberDecision() !== 'off') kr.setRememberPending(true);
+    }
+    function legacyRemember(on) {
+      if (kr) {
+        if (!on && (kr.rememberPending() || kr.rememberDecision())) kr.setRememberDecision('off');
+        else if (on && kr.rememberDecision() === 'off') kr.setRememberDecision('');
+        return;
+      }
+      try {
+        var l = JSON.parse(localStorage.getItem('mentria.keyring.local') || 'null');
+        if (!l || typeof l !== 'object' || Array.isArray(l)) return;
+        if (!on && (l.rememberPending === true || l.remember === 'on' || l.remember === 'off')) l.remember = 'off';
+        else if (on && l.remember === 'off') delete l.remember;
+        else return;
+        localStorage.setItem('mentria.keyring.local', JSON.stringify(l));
+      } catch (_) {}
+    }
+    function errName(e) {
+      if (!e) return '';
+      if (e.name && e.name !== 'Error' && /Error$/.test(e.name)) return e.name;
+      return String(e.message || e);
+    }
+    function errText(e) {
+      var n = errName(e);
+      return n === 'storage' || n === 'storage-full' || n === 'storage unavailable' || n === 'QuotaExceededError' ? COPY.krStorage : COPY.krOther;
+    }
+    function toast(text) {
+      if (window.MentriaUI && typeof window.MentriaUI.toast === 'function') window.MentriaUI.toast(text);
+      else window.mentriaAlert(text);
+    }
+    function fmtDate(iso) {
+      try { return iso ? new Date(iso).toLocaleDateString(document.documentElement.lang || undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : ''; } catch (_) { return ''; }
+    }
+
+    function head(setUp, unlocked) {
       var adv = document.getElementById('about-advanced');
       var badge = document.getElementById('about-advanced-badge');
       if (adv && setUp && !adv.dataset.autoOpened) { adv.open = true; adv.dataset.autoOpened = '1'; }
@@ -1275,7 +1638,393 @@ localeReload: true
         ledeEl.textContent = COPY.ledeLocked;
       }
     }
-    waitFor('MentriaIdentity', refresh);
+
+    function legacyPasskeyUI(I) {
+      var hasPk = I.hasPasskey();
+      pkUnlockBtn.hidden = !hasPk;
+      pkAddBtn.hidden = hasPk || !I.isUnlocked();
+      pkRemoveBtn.hidden = !hasPk || !I.isUnlocked();
+      deviceRow.hidden = false;
+      deviceNote.hidden = false;
+      deviceNote.textContent = deviceNoteText;
+      deviceToggle.checked = I.hasDeviceUnlock();
+    }
+
+    function mountFor(want) {
+      if (cardFor === want) return;
+      if (cardP) {
+        var old = cardP;
+        cardP = null;
+        old.then(function (h) { if (h) h.destroy(); });
+      }
+      cardFor = want;
+      if (!want) return;
+      cardP = ui().then(function (m) {
+        return m.mountCard(slot, { onUnlocked: function () { reconcile(); } });
+      }).then(function (h) {
+        var t = slot.querySelector('h2.m-unlock__title');
+        if (t) {
+          var h4 = document.createElement('h4');
+          for (var i = 0; i < t.attributes.length; i++) h4.setAttribute(t.attributes[i].name, t.attributes[i].value);
+          while (t.firstChild) h4.appendChild(t.firstChild);
+          t.replaceWith(h4);
+        }
+        return h;
+      }).catch(function () { return null; });
+    }
+
+    function legacyRender() {
+      var I = window.MentriaIdentity;
+      var setUp = I && I.isSetUp();
+      var unlocked = I && I.isUnlocked();
+      mountFor(null);
+      setupBox.classList.remove('is-kr');
+      createBtn.hidden = true;
+      linkBox.hidden = true;
+      slot.hidden = true;
+      laterBtn.hidden = true;
+      oldBtn.hidden = true;
+      oldOpen = false;
+      foldRow.hidden = true;
+      krBox.hidden = true;
+      ledeEl.hidden = false;
+      setupBox.hidden = setUp;
+      unlockBox.hidden = !setUp || unlocked;
+      unlockedBox.hidden = !unlocked;
+      head(setUp, unlocked);
+      if (I) legacyPasskeyUI(I);
+    }
+
+    function renderKeyring(s) {
+      var list = kr.passkeys();
+      var key = JSON.stringify(list);
+      if (key !== listKey) {
+        listKey = key;
+        pkList.replaceChildren();
+        list.forEach(function (p) {
+          var li = document.createElement('li');
+          var name = document.createElement('span');
+          name.textContent = p.label || COPY.krAddedOn.replace('{date}', fmtDate(p.created));
+          var rm = document.createElement('button');
+          rm.type = 'button';
+          rm.className = 'about-data-btn about-data-btn--ghost';
+          rm.textContent = COPY.krRemove;
+          rm.setAttribute('aria-label', COPY.krRemove + ': ' + name.textContent);
+          rm.addEventListener('click', function () { removeKr(p.id, rm); });
+          li.append(name, rm);
+          pkList.append(li);
+        });
+      }
+      krAddBtn.hidden = krPrf === 'no';
+      pkList.hidden = !list.length;
+      pkHead.hidden = !list.length && krAddBtn.hidden;
+      launchToggle.checked = !!s.askAtLaunch;
+    }
+
+    function krRender() {
+      var I = window.MentriaIdentity;
+      if (!I) return;
+      var s = kr.state();
+      var setUp = I.isSetUp();
+      var unlocked = I.isUnlocked();
+      var linked = linkedHere();
+      var ringLocked = s.setUp && !s.unlocked;
+      var want = null;
+      if (linked && !unlocked) want = 'unlock';
+      else if (!setUp && pendingCreate && ringLocked) want = 'create';
+      else if (setUp && unlocked && !fromKeyring && !krBroken && linkMode === 'card' && ringLocked) want = 'link';
+      var oldWay = declined && !s.setUp;
+      var oldHere = want === 'unlock' && (I.hasPassphrase() || I.hasPasskey());
+      if (!oldHere) oldOpen = false;
+      setupBox.classList.toggle('is-kr', !oldWay);
+      createBtn.hidden = oldWay;
+      setupBox.hidden = setUp || !!want;
+      unlockBox.hidden = !setUp || unlocked || (linked && !oldOpen);
+      unlockedBox.hidden = !unlocked;
+      linkBox.hidden = !setUp || linked || krBroken || (unlocked && !linkMode);
+      linkBtn.hidden = linkMode !== 'offer' || s.setUp;
+      ledeEl.hidden = want === 'unlock';
+      slot.hidden = !want;
+      laterBtn.hidden = want !== 'create' && want !== 'link';
+      oldBtn.hidden = !oldHere;
+      oldBtn.setAttribute('aria-expanded', oldOpen ? 'true' : 'false');
+      var others = [];
+      try { others = s.unlocked ? kr.others() : []; } catch (_) { others = []; }
+      foldRow.hidden = !others.length || foldLaterSet();
+      head(setUp, unlocked);
+      if (linked && unlocked && fromKeyring) {
+        pkUnlockBtn.hidden = true;
+        pkAddBtn.hidden = true;
+        pkRemoveBtn.hidden = true;
+        var pending = kr.rememberPending() && !s.hasDevice;
+        var remember = krPrf === 'no' || !!s.hasDevice || pending || I.hasDeviceUnlock();
+        deviceRow.hidden = !remember;
+        deviceNote.hidden = !remember;
+        deviceNote.textContent = pending ? COPY.rememberPending : COPY.rememberNote;
+        deviceToggle.checked = !!s.hasDevice || pending;
+        krBox.hidden = !s.unlocked;
+        if (s.unlocked) renderKeyring(s);
+      } else {
+        krBox.hidden = true;
+        legacyPasskeyUI(I);
+      }
+      mountFor(want);
+    }
+
+    function refresh() {
+      if (krActive()) krRender();
+      else legacyRender();
+    }
+
+    async function maybeRetire() {
+      var I = window.MentriaIdentity;
+      if (retiring || !krActive() || !fromKeyring || !ringLinked()) return;
+      var r = kr.retirement('identity');
+      if (!r || !r.ready) return;
+      retiring = true;
+      var cur = null;
+      try {
+        cur = await kr.secret('identity');
+        var kcv = cur ? await I.matchesVault(cur) : '';
+        if (!kcv) return;
+        var id = I.legacyPasskeyId();
+        if (!I.retireLegacy(kcv, { dropDevice: !!kr.state().hasDevice || kr.rememberDecision() === 'off' })) return;
+        if (id && window.PublicKeyCredential && typeof PublicKeyCredential.signalUnknownCredential === 'function') {
+          try { await PublicKeyCredential.signalUnknownCredential({ rpId: location.hostname, credentialId: id }); } catch (_) {}
+        }
+        await kr.markRetired('identity');
+      } catch (_) {
+      } finally {
+        if (cur) cur.fill(0);
+        retiring = false;
+      }
+    }
+
+    async function openFromKeyring() {
+      var I = window.MentriaIdentity;
+      var list = [];
+      try {
+        list = await kr.secrets('identity');
+        if (!list.length) {
+          if (kr.state().unlocked) krBroken = true;
+          return;
+        }
+        await I.openLinked(list.map(function (x) { return x.bytes; }));
+      } catch (_) {
+        krBroken = true;
+        return;
+      } finally {
+        list.forEach(function (x) { try { x.bytes.fill(0); } catch (_) {} });
+      }
+      fromKeyring = true;
+      pendingCreate = false;
+      linkMode = null;
+      maybeRetire();
+    }
+
+    async function createInKeyring() {
+      var I = window.MentriaIdentity;
+      if (ringLinked()) {
+        var have = await kr.secrets('identity');
+        try {
+          if (!have.length) throw new Error('locked');
+          await I.rebuildLinked(have.map(function (x) { return x.bytes; }));
+        } finally {
+          have.forEach(function (x) { try { x.bytes.fill(0); } catch (_) {} });
+        }
+        fromKeyring = true;
+        return;
+      }
+      var b = await I.createLinked();
+      try {
+        if (ringLinked()) return createInKeyring();
+        await kr.link('identity', b);
+        await I.saveLinked(b);
+      } finally {
+        b.fill(0);
+      }
+      fromKeyring = true;
+    }
+
+    async function dropRetiredDevice() {
+      var I = window.MentriaIdentity;
+      if (!I.hasDeviceUnlock() || !kr.state().hasDevice) return;
+      var r = kr.retirement('identity');
+      if (!r || !r.blockers || r.blockers.indexOf('already-retired') < 0) return;
+      var cur = null;
+      try {
+        cur = await kr.secret('identity');
+        var kcv = cur ? await I.matchesVault(cur) : '';
+        if (kcv) I.retireLegacy(kcv, { dropDevice: true });
+      } catch (_) {
+      } finally {
+        if (cur) cur.fill(0);
+      }
+    }
+
+    async function keepRemembered() {
+      var I = window.MentriaIdentity;
+      if (kr.rememberDecision() === 'off' || !(await I.deviceUnlockHere())) return;
+      try {
+        if (!kr.state().hasDevice) {
+          await kr.setRemember(true, { decided: true });
+        } else {
+          kr.setRememberPending(false);
+          kr.setRememberDecision('on');
+        }
+      } catch (e) {
+        if (errName(e) === 'confirm-needed') kr.setRememberPending(true);
+      }
+    }
+
+    async function settleOnce() {
+      var I = window.MentriaIdentity;
+      if (kr.rememberDecision() === 'off') { kr.setRememberPending(false); return; }
+      var pending = kr.rememberPending();
+      if (!pending && (noDeviceHere || kr.rememberDecision() || !ringLinked())) return;
+      if (!(await I.deviceUnlockHere())) {
+        if (pending) kr.setRememberPending(false);
+        else noDeviceHere = true;
+        return;
+      }
+      if (kr.state().hasDevice) {
+        kr.setRememberPending(false);
+        kr.setRememberDecision('on');
+        return;
+      }
+      if (!pending) kr.setRememberPending(true);
+      if (!kr.hasRootBytes()) return;
+      await kr.setRemember(true, { decided: true });
+      await dropRetiredDevice();
+    }
+
+    function settleRemember() {
+      if (!settleP) settleP = settleOnce().catch(function () {}).then(function () { settleP = null; });
+      return settleP;
+    }
+
+    async function linkNow() {
+      var I = window.MentriaIdentity;
+      if (ringLinked() || !I.isUnlocked()) return;
+      var copy = new Uint8Array(I.getSecret());
+      try {
+        await kr.link('identity', copy);
+      } finally {
+        copy.fill(0);
+      }
+      fromKeyring = true;
+      linkMode = null;
+      await keepRemembered();
+    }
+
+    async function reconcileOnce() {
+      var I = window.MentriaIdentity;
+      if (!I) return;
+      if (!krActive()) {
+        if (fromKeyring) { I.lock(); fromKeyring = false; }
+        return;
+      }
+      var s = kr.state();
+      if (!s.unlocked) {
+        if (fromKeyring) { I.lock(); fromKeyring = false; }
+        if (linkMode === 'offer' && s.setUp) linkMode = 'card';
+        return;
+      }
+      if (setupBusy) return;
+      await settleRemember();
+      if (linkedHere()) {
+        if (!I.isUnlocked() || !fromKeyring) await openFromKeyring();
+        return;
+      }
+      if (!I.isSetUp()) {
+        if (pendingCreate) {
+          pendingCreate = false;
+          try { await createInKeyring(); } catch (e) { window.mentriaAlert(errText(e)); }
+        }
+        return;
+      }
+      if (I.isUnlocked() && !krBroken) {
+        try { await linkNow(); } catch (e) { linkFailed(e); }
+      }
+    }
+
+    function reconcile() {
+      if (reconciling) { again = true; return reconciling; }
+      reconciling = (async function () {
+        do {
+          again = false;
+          await reconcileOnce();
+        } while (again);
+      })().catch(function () {}).then(function () {
+        reconciling = null;
+        refresh();
+      });
+      return reconciling;
+    }
+
+    async function legacyUnlock(p) {
+      var I = window.MentriaIdentity;
+      try {
+        await I.unlock(p);
+        return p;
+      } catch (e) {
+        var n = krc ? krc.normalizeCode(p) : null;
+        var alt = n && n.kind === 'c20' ? krc.formatCode(n) : null;
+        if (!alt || alt === p) throw e;
+        await I.unlock(alt);
+        return alt;
+      }
+    }
+
+    async function startSetup(opts) {
+      var I = window.MentriaIdentity;
+      if (!krActive() || !I.isUnlocked() || ringLinked()) return;
+      var typed = opts && opts.typed;
+      var o = { service: 'identity', secret: new Uint8Array(I.getSecret()) };
+      var ok = false;
+      try {
+        var code = savedCode(typed);
+        if (code) o.knownCode = code;
+        else if (typed) o.knownPassphrase = typed;
+        else if (opts && opts.verify) o.verifyCode = verifyOld;
+        if (kr.rememberDecision() !== 'off' && await I.deviceUnlockHere()) o.remember = true;
+        o.onRemember = function (on) {
+          kr.setRememberDecision(on ? 'on' : 'off');
+          if (!on) kr.setRememberPending(false);
+        };
+        setupBusy = true;
+        try { ok = await (await ui()).showSetup(o); } catch (_) { ok = false; }
+      } finally {
+        setupBusy = false;
+        o.secret.fill(0);
+      }
+      if (ok && ringLinked()) {
+        fromKeyring = true;
+        linkMode = null;
+        await keepRemembered();
+      } else if (linkMode !== 'offer') linkMode = null;
+      reconcile();
+    }
+
+    async function afterLegacyUnlock(opts) {
+      var I = window.MentriaIdentity;
+      try {
+        if (!krActive() || krBroken || !I.isUnlocked() || fromKeyring) return;
+        var s = kr.state();
+        if (ringLinked()) {
+          linkMode = s.unlocked ? null : 'card';
+          reconcile();
+          return;
+        }
+        if (s.unlocked) await linkNow();
+        else if (s.setUp) linkMode = 'card';
+        else if (opts.auto) linkMode = 'offer';
+        else { await startSetup(opts); return; }
+      } catch (e) {
+        linkFailed(e);
+      }
+      refresh();
+    }
 
     setupBtn.addEventListener('click', async function () {
       var p1 = setupPass.value, p2 = setupPass2.value;
@@ -1292,50 +2041,122 @@ localeReload: true
       } finally { setupBtn.disabled = false; }
     });
 
+    createBtn.addEventListener('click', async function () {
+      var I = window.MentriaIdentity;
+      if (!I || !krActive()) return;
+      createBtn.disabled = true;
+      try {
+        var s = kr.state();
+        if (!s.setUp) {
+          var m = await ui();
+          var b = await I.createLinked();
+          var ok = false;
+          try {
+            setupBusy = true;
+            try { ok = await m.showSetup({ service: 'identity', secret: b }); } catch (_) { ok = false; }
+            setupBusy = false;
+            if (ok && ringLinked()) {
+              await I.saveLinked(b);
+              fromKeyring = true;
+            } else if (!ok && !kr.state().setUp) {
+              declined = true;
+            }
+          } finally {
+            b.fill(0);
+          }
+        } else if (s.unlocked) {
+          await createInKeyring();
+        } else {
+          pendingCreate = true;
+        }
+      } catch (err) {
+        setupBusy = false;
+        window.mentriaAlert(errText(err));
+      } finally {
+        createBtn.disabled = false;
+        reconcile().then(function () {
+          if (!declined || kr.state().setUp || window.MentriaIdentity.isSetUp()) return;
+          var reveal = setupBox.querySelector('.about-reveal-btn');
+          if (reveal && !reveal.hidden) reveal.click();
+        });
+      }
+    });
+
     unlockBtn.addEventListener('click', async function () {
       var p = unlockPass.value;
       if (!p) return;
+      var keyring = krActive();
+      var opened = false;
       unlockBtn.disabled = true;
       try {
-        await window.MentriaIdentity.unlock(p);
+        if (keyring) opened = await legacyUnlock(p);
+        else await window.MentriaIdentity.unlock(p);
         unlockPass.value = '';
         refresh();
+        if (!keyring) opened = true;
       } catch (err) {
         window.mentriaAlert(COPY.unlockFailed);
       } finally { unlockBtn.disabled = false; }
+      if (opened && keyring) afterLegacyUnlock({ typed: opened });
     });
 
     lockBtn.addEventListener('click', function () {
+      if (krActive() && fromKeyring) {
+        ui().then(function (m) { return m.lockNow(); }, function () { return kr.lock(); }).catch(function () {}).then(function () { reconcile(); });
+        return;
+      }
       window.MentriaIdentity.lock();
       refresh();
     });
 
-    var pkUnlockBtn = document.getElementById('about-identity-passkey-unlock');
-    var pkAddBtn = document.getElementById('about-identity-passkey-add');
-    var pkRemoveBtn = document.getElementById('about-identity-passkey-remove');
-    var deviceToggle = document.getElementById('about-identity-device');
+    laterBtn.addEventListener('click', function () {
+      pendingCreate = false;
+      if (linkMode === 'card') linkMode = null;
+      refresh();
+    });
 
-    function refreshPasskeyUI() {
-      var I = window.MentriaIdentity;
-      if (!I) return;
-      var hasPk = I.hasPasskey();
-      pkUnlockBtn.hidden = !hasPk;
-      pkAddBtn.hidden = hasPk || !I.isUnlocked();
-      pkRemoveBtn.hidden = !hasPk || !I.isUnlocked();
-      deviceToggle.checked = I.hasDeviceUnlock();
+    function foldLaterSet() {
+      try { return sessionStorage.getItem(FOLD_LATER_KEY) === '1'; } catch (_) { return false; }
     }
 
-    var origRefresh = refresh;
-    refresh = function () { origRefresh(); refreshPasskeyUI(); };
+    foldLater.addEventListener('click', function () {
+      try { sessionStorage.setItem(FOLD_LATER_KEY, '1'); } catch (_) {}
+      foldRow.hidden = true;
+      refresh();
+    });
+
+    foldBtn.addEventListener('click', function () {
+      if (!krActive()) return;
+      foldBtn.disabled = true;
+      ui().then(function (m) { return m.showFoldIn(); }).catch(function () { return false; }).then(function () {
+        foldBtn.disabled = false;
+        reconcile();
+      });
+    });
+
+    oldBtn.addEventListener('click', function () {
+      oldOpen = !oldOpen;
+      refresh();
+      if (oldOpen && !unlockBox.hidden) { try { unlockPass.focus({ preventScroll: true }); } catch (_) {} }
+    });
+
+    linkBtn.addEventListener('click', function () {
+      linkBtn.disabled = true;
+      startSetup({}).then(function () { linkBtn.disabled = false; }, function () { linkBtn.disabled = false; });
+    });
 
     pkUnlockBtn.addEventListener('click', async function () {
+      var keyring = krActive();
+      var opened = false;
       pkUnlockBtn.disabled = true;
       try {
         await window.MentriaIdentity.unlockWithPasskey();
         refresh();
+        opened = true;
       } catch (err) {
         window.mentriaAlert(COPY.passkeyFailed);
       } finally { pkUnlockBtn.disabled = false; }
+      if (opened && keyring) afterLegacyUnlock({ verify: true });
     });
 
     pkAddBtn.addEventListener('click', async function () {
@@ -1357,10 +2178,37 @@ localeReload: true
       refresh();
     });
 
+    async function withConfirm(fn) {
+      try {
+        return await fn();
+      } catch (e) {
+        if (errName(e) !== 'confirm-needed') throw e;
+        var m = await ui();
+        if (!(await m.showConfirm())) return false;
+        return fn();
+      }
+    }
+
     deviceToggle.addEventListener('change', async function () {
       deviceToggle.disabled = true;
+      if (krActive() && fromKeyring) {
+        var on = deviceToggle.checked;
+        kr.setRememberPending(false);
+        try {
+          var done = await withConfirm(function () { return kr.setRemember(on, { decided: true }); });
+          if (on && done === false) kr.setRememberDecision('off');
+          else if (on) await dropRetiredDevice();
+        } catch (err) {
+          window.mentriaAlert(errText(err));
+        } finally {
+          deviceToggle.disabled = false;
+        }
+        refresh();
+        return;
+      }
       try {
         await window.MentriaIdentity.setDeviceUnlock(deviceToggle.checked);
+        legacyRemember(deviceToggle.checked);
       } catch (err) {
         window.mentriaAlert(String(err && err.message || err));
       } finally {
@@ -1369,8 +2217,66 @@ localeReload: true
       refresh();
     });
 
-    waitFor('MentriaIdentity', function () {
-      window.MentriaIdentity.tryDeviceUnlock().then(function () { refresh(); });
+    launchToggle.addEventListener('change', function () {
+      if (krActive()) kr.setAskAtLaunch(launchToggle.checked);
+      refresh();
+    });
+
+    krAddBtn.addEventListener('click', function () {
+      if (!krActive()) return;
+      var p;
+      try { p = kr.addPasskey(''); } catch (e) { p = Promise.reject(e); }
+      krAddBtn.disabled = true;
+      var refocus = false;
+      p.then(function () {
+        toast(COPY.krAdded);
+      }, async function (e) {
+        var n = errName(e);
+        if (n === 'confirm-needed') {
+          var ok = false;
+          try { ok = await (await ui()).showConfirm(); } catch (_) { ok = false; }
+          refocus = ok;
+          if (ok) toast(COPY.krAgain);
+          return;
+        }
+        if (n === 'no-prf') krPrf = 'no';
+        window.mentriaAlert(n === 'no-prf' ? COPY.krNoPrf : n === 'NotAllowedError' || n === 'AbortError' || n === 'InvalidStateError' ? COPY.krSkipped : COPY.krOther);
+      }).then(function () {
+        krAddBtn.disabled = false;
+        refresh();
+        if (refocus && !krAddBtn.hidden) { try { krAddBtn.focus(); } catch (_) {} }
+      });
+    });
+
+    async function removeKr(id, btn) {
+      var ok = await window.mentriaConfirm(COPY.krRemoveConfirm, { danger: true });
+      if (!ok) return;
+      btn.disabled = true;
+      try {
+        await withConfirm(function () { return kr.removePasskey(id); });
+      } catch (err) {
+        window.mentriaAlert(errText(err));
+      } finally {
+        btn.disabled = false;
+        refresh();
+      }
+    }
+
+    regenBtn.addEventListener('click', async function () {
+      if (!krActive()) return;
+      var ok = await window.mentriaConfirm(COPY.regenConfirm, { danger: true });
+      if (!ok) return;
+      regenBtn.disabled = true;
+      try {
+        var m = await ui();
+        var code = await withConfirm(function () { return kr.regenerateCode(); });
+        if (code) await m.showCode(code);
+      } catch (err) {
+        window.mentriaAlert(errText(err));
+      } finally {
+        regenBtn.disabled = false;
+        refresh();
+      }
     });
 
     syncBtn.addEventListener('click', async function () {
@@ -1383,6 +2289,64 @@ localeReload: true
         window.mentriaAlert(String(err && err.message || err));
       } finally { syncBtn.disabled = false; }
     });
+
+    function legacyBoot() {
+      refresh();
+      window.MentriaIdentity.tryDeviceUnlock().then(function () { refresh(); });
+    }
+
+    function boot() {
+      if (!krWanted()) { legacyBoot(); return; }
+      var fellBack = false;
+      var waiting = false;
+      var giveUp = 0;
+      var gaveUp = function () {
+        if (kr) return;
+        ledeEl.textContent = COPY.loadFailed;
+        ledeEl.hidden = false;
+      };
+      var timer = setTimeout(function () {
+        if (ringHasIdentity() && !window.MentriaIdentity.isSetUp()) {
+          waiting = true;
+          giveUp = setTimeout(gaveUp, KR_GIVE_UP_MS - KR_WAIT_MS);
+          return;
+        }
+        fellBack = true;
+        legacyBoot();
+      }, KR_WAIT_MS);
+      Promise.all([import('/assets/js/mentria-unlock.js'), import('/assets/js/mentria-unlock-core.js')]).then(function (mods) {
+        var m = mods[0];
+        return Promise.resolve().then(function () { return m.ready(); }).catch(function () {}).then(function () {
+          clearTimeout(timer);
+          clearTimeout(giveUp);
+          if (!m.enabled()) { if (!fellBack) legacyBoot(); return; }
+          kr = m;
+          krc = mods[1];
+          migrateRemember();
+          if (fellBack && (document.activeElement === unlockPass || unlockPass.value)) oldOpen = true;
+          try { ringEpoch = m.state().epoch; } catch (_) {}
+          m.onChange(ringChanged);
+          m.prfSupport().then(function (v) { if (krPrf !== 'no') krPrf = v; refresh(); }, function () {});
+          return reconcile().then(function () {
+            var I = window.MentriaIdentity;
+            if (fellBack) return I.isUnlocked() && !fromKeyring ? afterLegacyUnlock({ auto: true }) : null;
+            if (!I.isSetUp() || I.isUnlocked() || linkedHere() || !I.hasDeviceUnlock()) return;
+            return I.tryDeviceUnlock().then(function (ok) {
+              refresh();
+              if (ok) return afterLegacyUnlock({ auto: true });
+            });
+          });
+        });
+      }).catch(function () {
+        clearTimeout(timer);
+        clearTimeout(giveUp);
+        kr = null;
+        if (waiting || (ringHasIdentity() && !window.MentriaIdentity.isSetUp())) gaveUp();
+        else if (!fellBack) legacyBoot();
+      });
+    }
+
+    waitFor('MentriaIdentity', boot);
   })();
 </script>
 <script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>

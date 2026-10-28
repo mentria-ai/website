@@ -7,8 +7,30 @@ import { todayISO } from './dates.js';
 import { decimalToInput } from './money.js';
 import { readFileJson, decryptExport, wrapRecords, foreignSafe } from './backup.js';
 import { pairJoin } from './sync.js';
+import * as KR from './keyring.js';
 
 const { h, t, icon } = U;
+
+let card = null;
+let screen = 0;
+
+export function dropCard() {
+  screen++;
+  if (card) {
+    const c = card;
+    card = null;
+    try { c.destroy(); } catch (_) {}
+  }
+}
+
+function mountCard(box, onUnlocked) {
+  const my = screen;
+  return KR.ui().then((ui) => ui.mountCard(box, { onUnlocked: (s) => { if (my === screen) onUnlocked(s); } })).then((c) => {
+    if (my !== screen) c.destroy();
+    else card = c;
+    return c;
+  });
+}
 
 function isIOS() { return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
 function standalone() {
@@ -17,6 +39,7 @@ function standalone() {
 }
 
 function frame(root, ...kids) {
+  dropCard();
   const inner = h('div', { class: 'flock__inner' }, ...kids);
   root.replaceChildren(h('main', { class: 'flock' }, inner));
   return inner;
@@ -44,10 +67,18 @@ function busy(btn, on, label) {
   else { btn.textContent = btn.dataset.label || btn.textContent; btn.disabled = false; }
 }
 
+export function lockRoute(st, keyringOn) {
+  if (!st.setup) return 'welcome';
+  if (!st.linked && !(st.keyringLinked && !st.hasPass)) return 'unlock';
+  if (keyringOn && st.keyringLinked) return 'card';
+  return st.hasPass ? 'unlock' : 'linked';
+}
+
 export function showLock(root, opts) {
-  const st = opts.status;
-  if (!st.setup) welcome(root, opts);
-  else unlockScreen(root, opts);
+  const route = lockRoute(opts.status, !!opts.keyring);
+  if (route === 'welcome') welcome(root, opts);
+  else if (route === 'unlock') unlockScreen(root, opts);
+  else linkedScreen(root, opts, route === 'card');
 }
 
 function iosNote() {
@@ -62,7 +93,7 @@ function welcome(root, opts) {
     h('ul', { class: 'fstack fsmall fmuted', style: { paddingLeft: '18px', margin: 0, gap: '6px' } },
       h('li', null, t('setup.point_local')), h('li', null, t('setup.point_sync')), h('li', null, t('setup.point_ai'))),
     iosNote(),
-    h('button', { type: 'button', class: 'fb fb--primary fb--block', onclick: () => passStep(root, opts, {}) }, t('setup.start')),
+    h('button', { type: 'button', class: 'fb fb--primary fb--block', onclick: () => (opts.keyring ? keyringStart(root, opts) : passStep(root, opts, {})) }, t('setup.start')),
     h('button', { type: 'button', class: 'fb fb--block', onclick: () => pairStep(root, opts) }, icon('devices'), t('setup.pair')),
     h('div', { class: 'flock__alt' }, h('button', { type: 'button', onclick: () => restoreStep(root, opts) }, t('setup.restore')))
   );
@@ -149,15 +180,23 @@ function currencyOptions(selected) {
 function basicsStep(root, opts, draft) {
   const guess = draft.base || guessCurrency();
   const ccy = U.select(currencyOptions(guess), guess);
+  const linked = !!draft.linked;
   let wantPasskey = V.prfSupported && !draft.noPasskey;
   let wantDevice = false;
-  const pk = V.prfSupported ? U.checkbox(t('setup.passkey'), wantPasskey, (v) => { wantPasskey = v; }) : null;
-  const dev = U.checkbox(t('setup.device_unlock'), false, (v) => { wantDevice = v; });
+  const pk = V.prfSupported && !linked ? U.checkbox(t('setup.passkey'), wantPasskey, (v) => { wantPasskey = v; }) : null;
+  const dev = linked ? null : U.checkbox(t('setup.device_unlock'), false, (v) => { wantDevice = v; });
   const err = errLine();
   const done = h('button', { type: 'button', class: 'fb fb--primary fb--block' }, t('setup.finish'));
   done.addEventListener('click', async () => {
     busy(done, true, t('setup.creating'));
     err.textContent = '';
+    if (linked) {
+      try { await opts.createLinked({ base: ccy.value }); } catch (e) {
+        busy(done, false);
+        err.textContent = t('errors.setup') + ' ' + String((e && e.message) || e);
+      }
+      return;
+    }
     try {
       const created = await V.create(draft.passphrase, { recoveryCode: draft.recoveryCode, pending: { base: ccy.value } });
       if (wantDevice) await V.setDeviceUnlock(created.root, true);
@@ -173,13 +212,38 @@ function basicsStep(root, opts, draft) {
     }
   });
   frame(root,
-    steps(3, 3),
+    linked ? null : steps(3, 3),
     h('h2', null, t('setup.basics_title')),
+    linked && draft.other ? h('div', { class: 'fbanner' }, icon('info'), h('span', null, t('setup.keyring_other'))) : null,
     U.field(t('setup.base'), ccy, t('setup.base_hint')),
-    h('div', { class: 'fstack' }, pk, pk ? h('p', { class: 'ff__hint' }, t('setup.passkey_hint')) : null, dev, h('p', { class: 'ff__hint' }, t('setup.device_hint'))),
+    linked ? null : h('div', { class: 'fstack' }, pk, pk ? h('p', { class: 'ff__hint' }, t('setup.passkey_hint')) : null, dev, h('p', { class: 'ff__hint' }, t('setup.device_hint'))),
     err, done,
-    h('div', { class: 'flock__alt' }, h('button', { type: 'button', onclick: () => recoveryStep(root, opts, draft) }, t('common.back')))
+    h('div', { class: 'flock__alt' }, h('button', { type: 'button', onclick: () => (linked ? welcome(root, opts) : recoveryStep(root, opts, draft)) }, t('common.back')))
   );
+}
+
+async function keyringStart(root, opts) {
+  const K = opts.keyring;
+  let s = K.state();
+  if (!s.setUp) {
+    try {
+      const ui = await KR.ui();
+      await ui.showSetup({});
+    } catch (_) {}
+    s = K.state();
+    if (!s.setUp) return;
+  }
+  if (s.unlocked) {
+    basicsStep(root, opts, { linked: true, other: s.linked.indexOf('finance') >= 0 });
+    return;
+  }
+  const box = h('div');
+  frame(root,
+    mark(),
+    box,
+    h('div', { class: 'flock__alt' }, h('button', { type: 'button', onclick: () => welcome(root, opts) }, t('common.back')))
+  );
+  mountCard(box, () => keyringStart(root, opts)).catch(() => {});
 }
 
 function unlockScreen(root, opts) {
@@ -207,8 +271,9 @@ function unlockScreen(root, opts) {
     busy(go, true, t('lock.unlocking'));
     err.textContent = '';
     let s;
+    const typed = pass.value;
     try {
-      s = mode === 'pass' ? await V.unlockPass(pass.value) : await V.unlockRecovery(pass.value);
+      s = mode === 'pass' ? await V.unlockPass(typed) : await V.unlockRecovery(typed);
     } catch (e) {
       busy(go, false);
       const m = String((e && e.message) || e);
@@ -218,10 +283,20 @@ function unlockScreen(root, opts) {
     }
     pass.value = '';
     if (mode === 'recovery') s.afterRecovery = true;
-    try { await opened(s); } catch (e) { openFailed(go, e); }
+    const info = mode === 'pass' ? { pass: typed } : { code: C.groupCode(C.normalizeRecovery(typed), 4) };
+    try { await opened(s, info); } catch (e) { openFailed(go, e); }
   };
-  const opened = async (s) => {
-    await opts.onOpen(s);
+  const opened = async (s, info) => {
+    const bytes = opts.keyring ? new Uint8Array(s.root) : null;
+    try { await opts.onOpen(s); } catch (e) {
+      if (bytes) bytes.fill(0);
+      throw e;
+    }
+    if (bytes) {
+      let linked = false;
+      try { linked = await opts.linkLegacy(bytes, info || {}); } finally { bytes.fill(0); }
+      if (linked) return;
+    }
     if (s.afterRecovery) setTimeout(() => askNewPass(s, opts), 400);
   };
   const openFailed = (btn, e) => {
@@ -237,11 +312,27 @@ function unlockScreen(root, opts) {
     catch (e) { busy(pkBtn, false); err.textContent = e && e.name === 'NotAllowedError' ? t('lock.passkey_cancelled') : t('lock.passkey_failed'); return; }
     try { await opened(s); } catch (e) { openFailed(pkBtn, e); }
   } }, icon('passkey'), t('lock.passkey')) : null;
+  const devBtn = st.hasDevice && opts.held ? h('button', { type: 'button', class: 'fb fb--block', onclick: async () => {
+    busy(devBtn, true, t('lock.unlocking'));
+    let s;
+    try { s = await V.unlockDevice(); } catch (e) { openFailed(devBtn, e); return; }
+    try { await opened(s, { auto: true }); } catch (e) { openFailed(devBtn, e); }
+  } }, icon('devices'), t('lock.device')) : null;
   const inboxCount = h('span', { class: 'fmuted fsmall' });
   db.allInbox().then((list) => { if (list.length) inboxCount.textContent = U.tp('lock.inbox_waiting', list.length); }).catch(() => {});
+  const linkLine = opts.keyring ? h('div', { class: 'fbanner fbanner--mint', hidden: true }) : null;
+  if (linkLine) {
+    KR.copy().then((T) => {
+      if (!T.link_title) return;
+      linkLine.replaceChildren(icon('info'), h('span', null, h('b', null, T.link_title), T.link_body ? h('br') : null, T.link_body || ''));
+      linkLine.hidden = false;
+    });
+  }
   frame(root,
     mark(st.deviceName || t('lock.locked')),
+    linkLine,
     iosNote(),
+    devBtn,
     pkBtn,
     h('div', { class: 'ff' }, label, pass),
     err, go,
@@ -249,9 +340,50 @@ function unlockScreen(root, opts) {
     quickAddLocked(opts, inboxCount),
     h('div', { class: 'flock__alt', style: { marginTop: '18px' } }, h('button', { type: 'button', style: { color: 'var(--f-muted)' }, onclick: () => eraseDevice(root, opts) }, t('lock.erase')))
   );
-  if (st.hasDevice) {
-    V.unlockDevice().then((s) => opened(s)).catch(() => { setTimeout(() => pass.focus(), 50); });
-  } else if (!st.prf.length) setTimeout(() => pass.focus(), 50);
+  if (st.hasDevice && !opts.held) {
+    V.unlockDevice().then((s) => opened(s, { auto: true })).catch(() => { setTimeout(() => pass.focus(), 50); });
+  } else if (devBtn) setTimeout(() => devBtn.focus(), 50);
+  else if (!st.prf.length) setTimeout(() => pass.focus(), 50);
+}
+
+function linkedNote(opts) {
+  if (opts.keyring) return t('lock.linked_missing');
+  return opts.keyringWhy === 'failed' ? t('lock.linked_failed') : t('lock.linked_off');
+}
+
+function linkedScreen(root, opts, withCard) {
+  const st = opts.status;
+  const err = errLine();
+  const box = h('div');
+  const inboxCount = h('span', { class: 'fmuted fsmall' });
+  db.allInbox().then((list) => { if (list.length) inboxCount.textContent = U.tp('lock.inbox_waiting', list.length); }).catch(() => {});
+  frame(root,
+    mark(st.deviceName || t('lock.locked')),
+    iosNote(),
+    withCard ? box : h('p', { class: 'flock__lede' }, linkedNote(opts)),
+    err,
+    quickAddLocked(opts, inboxCount),
+    h('div', { class: 'flock__alt', style: { marginTop: '18px' } }, h('button', { type: 'button', style: { color: 'var(--f-muted)' }, onclick: () => eraseDevice(root, opts) }, t('lock.erase')))
+  );
+  if (!withCard) return;
+  let opening = false;
+  const open = async () => {
+    if (opening) return;
+    opening = true;
+    let ok = false;
+    let m = '';
+    try { ok = await opts.openLinked(); } catch (e) { m = String((e && e.message) || e); }
+    if (ok) return;
+    opening = false;
+    if (st.hasPass) {
+      unlockScreen(root, Object.assign({}, opts, { keyring: null }));
+      return;
+    }
+    dropCard();
+    box.replaceChildren();
+    err.textContent = m === 'wrong-key' || m === 'not-linked' || m === 'bad-service' ? t('lock.wrong_key') : t('lock.failed') + ' ' + m;
+  };
+  mountCard(box, open).catch(() => { err.textContent = t('errors.load'); });
 }
 
 function askNewPass(session, opts) {
@@ -331,10 +463,13 @@ function pairStep(root, opts) {
           try {
             const rootKey = C.unb64(payload.root);
             const wraps = wrapRecords(payload.snapshot);
-            if (!wraps.pass) throw new Error(t('pair.no_wraps'));
-            const created = await V.create(null, { root: rootKey, passWrap: wraps.pass, recoveryWrap: wraps.recovery || null });
+            const plan = V.pairPlan(wraps, !!(opts.keyring && opts.keyring.enabled() && opts.keyring.state().unlocked));
+            if (plan === 'no-wraps') throw new Error(t('pair.no_wraps'));
+            const created = plan === 'linked'
+              ? await opts.joinLinked(rootKey)
+              : await V.create(null, { root: rootKey, passWrap: wraps.pass, recoveryWrap: wraps.recovery || null });
             await session.sendDone(created.deviceId, V.defaultDeviceName());
-            opts.onOpen({ root: created.root, keys: created.keys, firstRun: async (engine) => { await engine.importSnapshot(payload.snapshot, payload.summary); } });
+            opts.onOpen({ root: created.root, keys: created.keys, linked: plan === 'linked', firstRun: async (engine) => { await engine.importSnapshot(payload.snapshot, payload.summary); } });
           } catch (e) {
             busy(go, false);
             err.textContent = t('pair.failed') + ' ' + String((e && e.message) || e);

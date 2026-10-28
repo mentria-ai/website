@@ -21,7 +21,11 @@
           { id: "tools", title: {{ ("nav.tools" | t) | dump | safe }}, href: "/tools/" },
           { id: "learn", title: {{ ("learn.title" | t) | dump | safe }}, href: "/learn/" },
           { id: "about", title: {{ ("about.title" | t) | dump | safe }}, href: "/about/" }
+          {%- if releaseTag == "beta" %},
+          { id: "beta-unlock", title: "One unlock lab (beta)", href: "/beta/unlock/", raw: true }
+          {%- endif %}
         ],
+        beta: {{ (releaseTag == "beta") | dump | safe }},
         labels: {
           placeholder: {{ ("palette.placeholder" | t) | dump | safe }},
           listLabel: {{ ("palette.list_label" | t) | dump | safe }},
@@ -45,6 +49,7 @@
           kwFlip: {{ ("palette.kw_flip" | t) | dump | safe }},
           hintNote: {{ ("palette.hint_note" | t) | dump | safe }},
           hintTimer: {{ ("palette.hint_timer" | t) | dump | safe }},
-          searchSite: {{ ("palette.search_site" | t) | dump | safe }}
+          searchSite: {{ ("palette.search_site" | t) | dump | safe }}{% if releaseTag == "beta" %},
+          openPath: "Open {path}"{% endif %}
         }
       };

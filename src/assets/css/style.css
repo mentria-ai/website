@@ -689,13 +689,11 @@ html.is-standalone .app-bar ~ .m-mini-dock { --mini-base: calc(var(--app-bar-h, 
   color: var(--term-fg);
   width: min(380px, calc(100vw - 2rem));
   inset: 0;
-}
-.m-dialog:not(:popover-open) { display: none; }
-.m-dialog:popover-open {
-  display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
+.m-dialog:not(:popover-open) { display: none; }
+.m-dialog:popover-open { display: flex; }
 .m-dialog::backdrop {
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(3px);

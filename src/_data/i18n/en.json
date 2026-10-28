@@ -3983,7 +3983,7 @@
       },
       "nl": {
         "today": "today",
-        "yesterday": "yesterday",
+        "yesterday": "yesterday|last night",
         "daybefore": "day before yesterday",
         "tomorrow": "tomorrow",
         "last": "last",

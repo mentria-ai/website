@@ -178,6 +178,7 @@
     "identity_passkey_again": "Confirmed. Choose Add a passkey again to finish.",
     "identity_foldin_later": "Not now",
     "whats_new": "What’s new in {tag}",
+    "whats_new_since": "What’s new since {tag}",
     "update_now": "Update now",
     "release_notes": "Release notes on GitHub",
     "privacy": "Privacy"

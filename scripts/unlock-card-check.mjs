@@ -76,6 +76,14 @@ const CLICK_PROBE = () => {
   c.create = (o) => { window.__wa.push('create:' + window.__tick); return create(o); };
   c.get = (o) => { window.__wa.push('get:' + window.__tick); return get(o); };
 };
+const LAYER_COUNT = () => {
+  window.__layers = 0;
+  const watch = () => new MutationObserver((list) => {
+    for (const m of list) for (const n of m.addedNodes) if (n.nodeType === 1 && n.classList.contains('m-ulayer')) window.__layers += 1;
+  }).observe(document.body, { childList: true });
+  if (document.body) watch();
+  else document.addEventListener('DOMContentLoaded', watch, { once: true });
+};
 const LIVE_PROBE = () => {
   window.__frame = 0;
   window.__live = [];
@@ -313,17 +321,9 @@ async function axe(target, sel) {
 
 const ASK = 'mentria.keyring.ask';
 
-async function barShown(target) {
-  return target.evaluate(() => {
-    const b = document.querySelector('.m-ubar');
-    const t = b && b.querySelector('.m-update__text');
-    return !!b && b.getBoundingClientRect().height > 0 && !!t && t.textContent.length > 0;
-  });
-}
-
-async function noBar(target) {
+async function noLayer(target) {
   await sleep(2500);
-  return target.evaluate(() => !document.querySelector('.m-ubar'));
+  return target.evaluate(() => !document.querySelector('.m-ulayer'));
 }
 
 function askFlag(target) {
@@ -342,9 +342,9 @@ async function askingKeyring(before) {
   return code;
 }
 
-async function barPage(path, init) {
+async function launchPage(path, init) {
   const page = await open(path, init);
-  assert(await until(() => barShown(page), 12000), 'the bar shows after a reopen with ask at launch on', path);
+  assert(await until(() => layerOpen(page), 12000), 'the card opens by itself after a reopen with ask at launch on', path);
   return page;
 }
 
@@ -469,118 +469,12 @@ check('prf failure offers code', async () => {
   await cdp.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId: a2 });
 });
 
-check('launch bar after a reopen leaves the page usable', async () => {
-  await askingKeyring();
-  const lab = await barPage('/beta/unlock/');
-  const s = await modules(lab);
-  const flag = await askFlag(lab);
-  assert(s.launch === 'reopen' && !s.unlocked && s.ask === true && flag === '1', 'a reopen, still locked, and this tab asks', { s, flag });
-  const info = await lab.evaluate(() => {
-    const b = document.querySelector('.m-ubar');
-    const x = b.querySelector('[data-act="bar-close"]');
-    const main = document.querySelector('main');
-    return {
-      role: b.getAttribute('role'),
-      live: b.getAttribute('aria-live'),
-      text: b.querySelector('.m-update__text').textContent,
-      unlock: b.querySelector('[data-act="bar-unlock"]').textContent.trim(),
-      xLabel: x.getAttribute('aria-label'),
-      xTitle: x.getAttribute('title'),
-      glyph: !!b.querySelector('.m-ubar__icon svg'),
-      parent: b.parentElement === document.body,
-      dialog: !!b.closest('[role="dialog"], [aria-modal]'),
-      layer: !!document.querySelector('.m-ulayer'),
-      inert: document.querySelectorAll('[inert]').length,
-      open: document.documentElement.classList.contains('m-unlock-open'),
-      filter: getComputedStyle(main).filter,
-      overflow: getComputedStyle(document.body).overflow + '/' + getComputedStyle(document.documentElement).overflow,
-      focus: document.activeElement === document.body
-    };
-  });
-  assert(info.role === 'status' && info.live === 'polite' && info.parent && !info.dialog, 'a polite status bar, not a dialog', info);
-  assert(info.text === EN.bar_text && info.unlock === EN.bar_unlock && info.xLabel === EN.not_now && info.xTitle === EN.not_now && info.glyph, 'lock glyph, text, Unlock and a close named Not now', info);
-  assert(!info.layer && info.inert === 0 && !info.open && info.filter === 'none' && !info.overflow.includes('hidden'), 'no layer, no backdrop, nothing inert, no scroll lock', info);
-  assert(info.focus, 'the bar never moves focus', info);
-  const look = await lab.evaluate(() => {
-    const props = ['position', 'z-index', 'max-width', 'left', 'right', 'border-top-width', 'border-top-style', 'border-top-color', 'border-radius', 'background-color', 'color', 'font-family', 'font-size', 'box-shadow', 'padding-top', 'padding-left', 'padding-right', 'column-gap', 'align-items'];
-    const read = (el) => { const c = getComputedStyle(el); return props.map((p) => p + '=' + c.getPropertyValue(p)).join('; '); };
-    const size = (el) => { const r = el.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); };
-    const chip = document.getElementById('m-update');
-    chip.hidden = false;
-    const b = document.querySelector('.m-ubar');
-    const pairs = [[b, chip], [b.querySelector('[data-act="bar-unlock"]'), document.getElementById('m-update-go')], [b.querySelector('[data-act="bar-close"]'), document.getElementById('m-update-later')]];
-    const out = pairs.map(([a, z]) => ({ same: read(a) === read(z), a: read(a), z: read(z) }));
-    out.push({ same: size(pairs[2][0]) === size(pairs[2][1]), a: size(pairs[2][0]), z: size(pairs[2][1]) });
-    chip.hidden = true;
-    return out;
-  });
-  assert(look.every((x) => x.same), 'the bar, its Unlock and its close look like the update chip', look.filter((x) => !x.same));
-  const full = await lab.evaluate(() => {
-    const html = document.documentElement;
-    html.classList.add('ext-full');
-    const d = getComputedStyle(document.querySelector('.m-ubar')).display;
-    html.classList.remove('ext-full');
-    return d;
-  });
-  await lab.emulateMediaType('print');
-  const print = await lab.evaluate(() => getComputedStyle(document.querySelector('.m-ubar')).display);
-  await lab.emulateMediaType(null);
-  assert(full === 'none' && print === 'none', 'hidden in a full-screen extension and in print, like the update chip', { full, print });
-  await lab.click('#unlock-demo-card');
-  await lab.waitForSelector('#unlock-demo .m-unlock', { timeout: 5000 });
-  assert(await barShown(lab) && !(await layerOpen(lab)), 'a button elsewhere on the page still works while the bar shows');
-  await lab.keyboard.press('Tab');
-  const tab = await lab.evaluate(() => ({ moved: document.activeElement !== document.body, inBar: !!document.activeElement.closest('.m-ubar') }));
-  assert(tab.moved && !tab.inBar, 'Tab moves on through the page', tab);
-  const v = await axe(lab, '.m-ubar');
-  assert(!v.length, 'the bar passes axe', v);
-});
-
-check('no launch bar with ask at launch off', async () => {
-  await labWithKeyring();
-  await closeAll();
-  const about = await open('/about/');
-  const s = await modules(about);
-  assert(s.launch === 'reopen' && !s.askAtLaunch && !s.ask, 'a reopen with ask at launch off', s);
-  assert(await noBar(about) && !(await layerOpen(about)) && await askFlag(about) === null, 'no bar, no layer and no ask');
-});
-
-check('launch bar follows the tab until its close or an unlock', async () => {
+check('launch opens the card by itself after a reopen', async () => {
   const code = await askingKeyring();
-  let about = await barPage('/about/');
-  await about.goto(ORIGIN + '/tools/', { waitUntil: 'load' });
-  const s1 = await modules(about);
-  assert(s1.launch === 'continue' && !s1.unlocked, 'the next page in the tab continues, still locked', s1);
-  assert(await until(() => barShown(about), 8000), 'without its close the bar comes back on the next page');
-  await about.goto(ORIGIN + '/learn/deepcuts-deepcuts10/', { waitUntil: 'domcontentloaded' });
-  const deck = await until(() => about.evaluate(() => {
-    const b = document.querySelector('.m-ubar');
-    return !!b && !!document.querySelector('.deck--pack') && getComputedStyle(b).display === 'none';
-  }), 12000);
-  assert(deck, 'a pack deck hides the bar like the update chip');
-  await about.goto(ORIGIN + '/tools/', { waitUntil: 'load' });
-  assert(await until(() => barShown(about), 8000), 'the bar is back on the next page');
-  const other = await open('/about/');
-  const s2 = await modules(other);
-  assert(s2.launch === 'continue' && !s2.ask && await noBar(other), 'a second tab opened while the app is live does not ask', s2);
-  await other.close();
-  const before = await keyringKeys(about);
-  await about.focus('.m-ubar [data-act="bar-close"]');
-  await about.keyboard.press('Enter');
-  await about.waitForFunction(() => !document.querySelector('.m-ubar'), { timeout: 5000 });
+  const about = await launchPage('/about/');
+  const s = await modules(about);
   const flag = await askFlag(about);
-  const after = await keyringKeys(about);
-  assert(flag === null && JSON.stringify(after) === JSON.stringify(before), 'the close clears the ask and stores nothing else', { flag, before, after });
-  const landed = await about.evaluate(() => document.activeElement && document.activeElement.id);
-  assert(landed === 'main-content', 'the close moves focus to main, never to body', landed);
-  await about.goto(ORIGIN + '/about/', { waitUntil: 'load' });
-  const s3 = await modules(about);
-  assert(s3.launch === 'continue' && !s3.unlocked && !s3.ask && await noBar(about), 'after the close the next page in the tab does not ask', s3);
-  await closeAll();
-  about = await barPage('/about/');
-  await modules(about);
-  await about.click('.m-ubar [data-act="bar-unlock"]');
-  assert(await until(() => layerOpen(about), 8000), 'Unlock with no passkey opens the card at once');
+  assert(s.launch === 'reopen' && !s.unlocked && s.ask === true && flag === '1', 'a reopen, still locked, and this tab asks', { s, flag });
   const info = await about.evaluate(() => {
     const d = document.querySelector('.m-ulayer [role="dialog"]');
     const main = document.querySelector('main');
@@ -600,7 +494,7 @@ check('launch bar follows the tab until its close or an unlock', async () => {
   });
   assert(info.modal === 'true' && info.title === EN.card_title && info.card, 'the card in its layer, labelled by the card title', info);
   assert(info.notNow && info.notNow.trim() === EN.not_now && info.note === EN.not_now_note, 'Not now and its note', info);
-  assert(info.focusIn && info.inert && info.bar, 'focus inside the card, the page and the bar behind it inert', info);
+  assert(info.focusIn && info.inert && !info.bar, 'focus inside the card, the page behind it inert, and no bar', info);
   assert(info.filter !== 'none' && /blur/.test(info.filter) && info.backdrop === 'none', 'content is filtered, no backdrop-filter', info);
   for (let i = 0; i < 8; i++) {
     await about.keyboard.press('Tab');
@@ -617,136 +511,72 @@ check('launch bar follows the tab until its close or an unlock', async () => {
   await about.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 5000 });
   const keptAfter = await keyringKeys(about);
   assert(JSON.stringify(keptAfter) === JSON.stringify(kept), 'Not now stores nothing', { kept, keptAfter });
-  const back = await about.evaluate(() => ({ inert: document.querySelector('main').inert, filter: getComputedStyle(document.querySelector('main')).filter, bar: !!document.querySelector('.m-ubar'), focus: document.activeElement && document.activeElement.dataset.act }));
-  assert(!back.inert && back.filter === 'none' && back.bar && back.focus === 'bar-unlock', 'Not now closes the card and clears the blur; the bar stays and gets focus back', back);
-  await about.click('.m-ubar [data-act="bar-unlock"]');
-  assert(await until(() => layerOpen(about), 8000), 'the card opens again');
-  await openCode(about, '.m-ulayer');
-  await about.type('.m-ulayer input[name="recovery-code"]', code);
-  await about.keyboard.press('Enter');
-  await about.waitForFunction(() => !document.querySelector('.m-ulayer') && !document.querySelector('.m-ubar'), { timeout: 15000 });
-  const s4 = await modules(about);
-  assert(s4.unlocked && !s4.ask && await askFlag(about) === null, 'unlocking in the card closes it and the bar, and clears the ask', s4);
-  const focusAfter = await about.evaluate(() => document.activeElement && document.activeElement.id);
+  const back = await about.evaluate((k) => ({ inert: document.querySelector('main').inert, filter: getComputedStyle(document.querySelector('main')).filter, focus: document.activeElement && document.activeElement.id, flag: sessionStorage.getItem(k), bar: !!document.querySelector('.m-ubar') }), ASK);
+  assert(!back.inert && back.filter === 'none' && back.focus === 'main-content' && back.flag === null && !back.bar, 'Not now closes the card, clears the blur, lands on main and ends the ask', back);
+  await about.goto(ORIGIN + '/tools/', { waitUntil: 'load' });
+  const s2 = await modules(about);
+  assert(s2.launch === 'continue' && !s2.unlocked && !s2.ask && await noLayer(about), 'after Not now the next page in the tab does not ask', s2);
+  const other = await open('/about/');
+  const s3 = await modules(other);
+  assert(s3.launch === 'continue' && !s3.ask && await noLayer(other), 'a second tab opened while the app is live does not ask', s3);
+  await other.close();
+  await closeAll();
+  const again = await launchPage('/about/');
+  await modules(again);
+  await openCode(again, '.m-ulayer');
+  await again.type('.m-ulayer input[name="recovery-code"]', code);
+  await again.keyboard.press('Enter');
+  await again.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 15000 });
+  const s4 = await modules(again);
+  assert(s4.unlocked && !s4.ask && await askFlag(again) === null, 'unlocking in the card closes it and clears the ask', s4);
+  const focusAfter = await again.evaluate(() => document.activeElement && document.activeElement.id);
   assert(focusAfter === 'main-content', 'after the card unlocks, focus lands on main, never on body', focusAfter);
-  await about.evaluate(() => window.__m.lock());
-  await about.goto(ORIGIN + '/tools/', { waitUntil: 'load' });
-  const s5 = await modules(about);
-  assert(!s5.unlocked && s5.launch === 'continue' && await noBar(about), 'a Lock later does not bring the bar back', s5);
+  await again.evaluate(() => window.__m.lock());
+  await again.goto(ORIGIN + '/tools/', { waitUntil: 'load' });
+  const s5 = await modules(again);
+  assert(!s5.unlocked && s5.launch === 'continue' && await noLayer(again), 'a Lock later does not bring the card back', s5);
 });
 
-check('turning ask at launch off ends the ask in this tab', async () => {
-  await askingKeyring();
-  const about = await barPage('/about/');
-  await modules(about);
-  await about.evaluate(() => window.__m.setAskAtLaunch(false));
-  assert(await until(() => about.evaluate(() => !document.querySelector('.m-ubar')), 5000), 'the bar goes when the setting is turned off');
-  const off = await askFlag(about);
-  await about.evaluate(() => window.__m.setAskAtLaunch(true));
-  await about.goto(ORIGIN + '/tools/', { waitUntil: 'load' });
+check('no launch card with ask at launch off', async () => {
+  await labWithKeyring();
+  await closeAll();
+  const about = await open('/about/');
   const s = await modules(about);
-  const flag = await askFlag(about);
-  assert(off === null && flag === null && s.launch === 'continue' && !s.ask && await noBar(about), 'turning it back on does not bring the bar back without a reopen', { off, flag, s });
+  assert(s.launch === 'reopen' && !s.askAtLaunch && !s.ask, 'a reopen with ask at launch off', s);
+  assert(await noLayer(about) && await askFlag(about) === null, 'no card and no ask');
 });
 
-check('launch bar goes when another tab unlocks', async () => {
+check('the launch card goes when another tab unlocks', async () => {
   const code = await askingKeyring();
-  const about = await barPage('/about/');
+  const about = await launchPage('/about/');
   await modules(about);
   const other = await open('/tools/');
   await modules(other);
   await other.evaluate((c) => window.__m.unlockWithCode(c), code);
-  assert(await until(() => about.evaluate(() => !document.querySelector('.m-ubar')), 8000), 'the bar goes as soon as another tab unlocks');
+  assert(await until(() => about.evaluate(() => !document.querySelector('.m-ulayer')), 8000), 'the card goes as soon as another tab unlocks');
   const r = await about.evaluate((k) => ({ flag: sessionStorage.getItem(k), s: window.__m.state() }), ASK);
   assert(r.flag === null && r.s.unlocked && !r.s.ask, 'the ask is cleared and this tab is unlocked', r);
   await about.goto(ORIGIN + '/about/', { waitUntil: 'load' });
-  assert(await noBar(about), 'the next page does not ask');
+  assert(await noLayer(about), 'the next page does not ask');
 });
 
-check('a page that asks on its own shows no bar and keeps the ask', async () => {
+check('a page that asks on its own opens no launch card and keeps the ask', async () => {
   await askingKeyring((page) => page.evaluate(() => window.__m.link('totp', crypto.getRandomValues(new Uint8Array(32)))));
   const totp = await open('/tools/totp/');
   await totp.waitForSelector('#totp-ring-card .m-unlock', { timeout: 15000 });
   const s = await modules(totp);
   const tool = await totp.evaluate(() => document.documentElement.hasAttribute('data-unlock-tool'));
-  assert(tool && s.launch === 'reopen' && s.ask && await noBar(totp) && await askFlag(totp) === '1', 'its own card, no bar, the ask kept', s);
+  assert(tool && s.launch === 'reopen' && s.ask && await noLayer(totp) && await askFlag(totp) === '1', 'its own card, no launch card, the ask kept', s);
   await totp.goto(ORIGIN + '/tools/password-generator/', { waitUntil: 'load' });
   const full = await modules(totp);
   const fs = await totp.evaluate(() => document.documentElement.classList.contains('is-fullscreen-tool'));
-  assert(fs && full.ask && await noBar(totp) && await askFlag(totp) === '1', 'a full-screen tool shows no bar and keeps the ask', full);
+  assert(fs && full.ask && await noLayer(totp) && await askFlag(totp) === '1', 'a full-screen tool opens no launch card and keeps the ask', full);
   await totp.goto(ORIGIN + '/extensions/finance/app/', { waitUntil: 'load' });
   const fin = await modules(totp);
   const finTool = await totp.evaluate(() => document.documentElement.hasAttribute('data-unlock-tool') && document.documentElement.classList.contains('ext-app'));
-  assert(finTool && fin.ask && await noBar(totp) && await askFlag(totp) === '1', 'the Finance app page opened on its own is marked as asking itself and shows no bar', fin);
+  assert(finTool && fin.ask && await noLayer(totp) && await askFlag(totp) === '1', 'the Finance app page asks on its own and opens no launch card', fin);
   await totp.goto(ORIGIN + '/about/', { waitUntil: 'load' });
-  assert(await until(() => barShown(totp), 12000), 'the bar shows on the next page while still locked');
-  await totp.evaluate(() => localStorage.setItem('mentria.store.ui.fullscreen.password-generator', 'false'));
-  await totp.goto(ORIGIN + '/tools/password-generator/', { waitUntil: 'load' });
-  assert(await until(() => barShown(totp), 12000), 'a tool page out of full screen shows the bar');
-  await totp.click('[data-action="toggle-fullscreen"]');
-  const gone = await until(() => totp.evaluate(() => document.documentElement.classList.contains('is-fullscreen-tool') && !document.querySelector('.m-ubar')), 5000);
-  assert(gone && await askFlag(totp) === '1', 'entering full screen takes the bar away and keeps the ask');
-});
-
-check('launch bar fits a phone and stacks above the update chip and the dock', async () => {
-  await askingKeyring();
-  const page = await barPage('/about/');
-  for (const width of [360, 320]) {
-    await page.setViewport({ width, height: 740 });
-    for (const prefix of ['', '/es', '/fr', '/ja', '/pt-br']) {
-      for (const mode of ['plain', 'standalone', 'banner']) {
-        await page.goto(ORIGIN + prefix + '/about/', { waitUntil: 'load' });
-        assert(await until(() => barShown(page), 12000), 'the bar shows', prefix);
-        const r = await page.evaluate(async (mode) => {
-          await document.fonts.ready;
-          const html = document.documentElement;
-          const banner = document.getElementById('pwaInstallBanner');
-          const dock = document.createElement('div');
-          dock.className = 'm-mini-dock';
-          const mini = document.createElement('div');
-          mini.className = 'm-mini';
-          mini.style.cssText = 'width:200px;height:44px';
-          dock.append(mini);
-          document.body.append(dock);
-          if (mode === 'standalone') html.classList.add('is-standalone');
-          if (mode === 'banner') {
-            banner.hidden = false;
-            banner.classList.add('pwa-install-banner--visible');
-          }
-          const settle = () => new Promise((res) => setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(res)), mode === 'banner' ? 500 : 0));
-          await settle();
-          const box = (el) => { const q = el.getBoundingClientRect(); return { top: Math.round(q.top), bottom: Math.round(q.bottom), left: Math.round(q.left), right: Math.round(q.right) }; };
-          const b = document.querySelector('.m-ubar');
-          const t = b.querySelector('.m-update__text');
-          const range = document.createRange();
-          range.selectNodeContents(t);
-          const lines = new Set([...range.getClientRects()].map((q) => Math.round(q.top))).size;
-          const mid = (q) => (q.top + q.bottom) / 2;
-          const row = [...b.children].every((k) => Math.abs(mid(k.getBoundingClientRect()) - mid(b.getBoundingClientRect())) < 4);
-          const under = mode === 'standalone' ? document.querySelector('.app-bar') : mode === 'banner' ? banner : null;
-          const out = { text: t.textContent, lines, row, bar: box(b), dock: box(dock), vw: innerWidth, vh: innerHeight, scroll: html.scrollWidth, under: under ? box(under) : null };
-          const chip = document.getElementById('m-update');
-          chip.hidden = false;
-          await settle();
-          out.withChip = { bar: box(b), chip: box(chip), dock: box(dock), scroll: html.scrollWidth };
-          chip.hidden = true;
-          dock.remove();
-          html.classList.remove('is-standalone');
-          banner.classList.remove('pwa-install-banner--visible');
-          banner.hidden = true;
-          return out;
-        }, mode);
-        const where = { width, prefix, mode, r };
-        const apart = (a, z) => a.bottom <= z.top || z.bottom <= a.top || a.right <= z.left || z.right <= a.left;
-        assert(r.text && r.row && (width === 360 ? r.lines === 1 : r.lines <= 2), width === 360 ? 'text, Unlock and the close fit on one line at 360 px' : 'at 320 px the text takes at most two lines', where);
-        assert(r.bar.left >= 12 && r.bar.right <= r.vw - 12 && r.bar.bottom <= r.vh && r.scroll <= r.vw && r.withChip.scroll <= r.vw, 'inside the screen with no sideways scroll', where);
-        assert(!r.under || r.bar.bottom <= r.under.top, 'above the app bar when standalone and above the install banner', where);
-        assert(r.withChip.bar.bottom <= r.withChip.chip.top && r.withChip.bar.top >= 0, 'the unlock bar sits above the update chip with no overlap', where);
-        assert(!r.under || r.withChip.chip.bottom <= r.under.top, 'the update chip stays above what is under it', where);
-        assert(apart(r.dock, r.bar) && apart(r.withChip.dock, r.withChip.bar) && apart(r.withChip.dock, r.withChip.chip), 'the mini dock clears the bar and the update chip', where);
-      }
-    }
-  }
+  assert(await until(() => layerOpen(totp), 12000), 'the launch card opens on the next plain page while still locked');
 });
 
 check('setup with new code requires last four', async () => {
@@ -1283,70 +1113,70 @@ check('passkey clicks reach WebAuthn first', async () => {
   assert(confirmCalls[0] === 'get:true', 'confirm: the passkey button reaches navigator.credentials.get inside the click', confirmCalls);
   await settled(page, 30000);
   await page.evaluate(async () => { window.__m.setAskAtLaunch(true); await window.__m.lock(); });
+  await page.evaluateOnNewDocument(LAYER_COUNT);
   const about = await reopenHere(page, '/about/');
-  assert(await until(() => barShown(about), 12000), 'the launch bar shows');
-  await about.evaluate(() => {
-    window.__wa = [];
-    window.__layers = 0;
-    new MutationObserver((list) => {
-      for (const m of list) for (const n of m.addedNodes) if (n.nodeType === 1 && n.classList.contains('m-ulayer')) window.__layers += 1;
-    }).observe(document.body, { childList: true });
-  });
-  await about.click('.m-ubar [data-act="bar-unlock"]');
-  await about.waitForFunction(() => !document.querySelector('.m-ubar'), { timeout: 30000 });
-  const barCalls = await about.evaluate(() => ({ calls: window.__wa, layers: window.__layers, focus: document.activeElement && document.activeElement.id }));
-  const after = await modules(about);
-  assert(barCalls.calls.length === 1 && barCalls.calls[0] === 'get:true', 'launch bar: one tap makes exactly one navigator.credentials.get call inside the click', barCalls);
-  assert(after.unlocked && !after.ask && barCalls.layers === 0, 'the passkey unlocks, the bar goes and no card opened', { after, barCalls });
-  assert(barCalls.focus === 'main-content', 'focus moves from the bar to main, never to body', barCalls);
+  await modules(about);
+  await about.waitForFunction(() => window.__m.state().unlocked === true, { timeout: 30000 });
+  const launchCalls = await about.evaluate((k) => ({ calls: window.__wa, layers: window.__layers, flag: sessionStorage.getItem(k), ask: window.__m.state().ask }), ASK);
+  assert(launchCalls.calls.length === 1 && launchCalls.calls[0] === 'get:false', 'launch: exactly one navigator.credentials.get call, made without a tap', launchCalls);
+  assert(launchCalls.layers === 0 && launchCalls.flag === null && !launchCalls.ask, 'the passkey unlocks at launch, no card opened and the ask is cleared', launchCalls);
 });
 
-check('a cancelled passkey on the launch bar opens the card', async () => {
+check('a launch passkey that fails opens the card, a cancel stays locked', async () => {
   const page = await passkeyKeyring();
   await page.evaluateOnNewDocument(CLICK_PROBE);
-  const about = await reopenHere(page, '/about/');
-  assert(await until(() => barShown(about), 12000), 'the launch bar shows');
-  const s = await modules(about);
-  assert(s.passkeys === 1 && s.prf !== 'no' && s.ask, 'a passkey this device can use', s);
-  await about.evaluate(() => {
+  await page.evaluateOnNewDocument(LAYER_COUNT);
+  await page.evaluateOnNewDocument(() => {
     const c = navigator.credentials;
-    const probe = c.get;
-    window.__cancel = false;
-    window.__noPrf = true;
-    window.__wa = [];
+    if (!c) return;
+    const probe = c.get.bind(c);
     c.get = (o) => {
-      if (window.__noPrf) return probe(o).then((cred) => { cred.getClientExtensionResults = () => ({}); return cred; });
-      if (!window.__cancel) return probe(o);
-      window.__wa.push('get:' + window.__tick);
-      return Promise.reject(new DOMException('The operation either timed out or was not allowed.', 'NotAllowedError'));
+      const mode = localStorage.getItem('t.wa') || '';
+      if (mode === 'noprf') return probe(o).then((cred) => { cred.getClientExtensionResults = () => ({}); return cred; });
+      if (mode === 'cancel') {
+        window.__wa.push('get:' + window.__tick);
+        return Promise.reject(new DOMException('The operation either timed out or was not allowed.', 'NotAllowedError'));
+      }
+      return probe(o);
     };
   });
-  await about.click('.m-ubar [data-act="bar-unlock"]');
-  assert(await until(() => layerOpen(about), 30000), 'a passkey with no PRF opens the card');
+  await page.evaluate(() => localStorage.setItem('t.wa', 'noprf'));
+  let about = await reopenHere(page, '/about/');
+  assert(await until(() => layerOpen(about), 30000), 'a launch passkey with no PRF opens the card');
+  const s = await modules(about);
+  assert(s.passkeys === 1 && s.prf !== 'no', 'a passkey this device can use', s);
   await waitMsg(about, '.m-ulayer .m-unlock__msg', EN.err_prf);
   const prf = await about.evaluate(() => {
     const d = document.querySelector('.m-ulayer [role="dialog"]');
     const input = d.querySelector('input[name="recovery-code"]');
     return { calls: window.__wa, error: d.querySelector('.m-unlock__msg').classList.contains('is-error'), expanded: d.querySelector('[data-act="show-code"]').getAttribute('aria-expanded'), focus: document.activeElement === input, unlocked: window.__m.state().unlocked };
   });
-  assert(prf.calls.length === 1 && prf.calls[0] === 'get:true' && prf.error && prf.expanded === 'true' && prf.focus && !prf.unlocked, 'the card shows why the passkey failed and opens the code field', prf);
+  assert(prf.calls.length === 1 && prf.calls[0] === 'get:false' && prf.error && prf.expanded === 'true' && prf.focus && !prf.unlocked, 'the card shows why the launch passkey failed and opens the code field', prf);
   await about.click('.m-ulayer [data-act="not-now"]');
-  await about.waitForFunction(() => !document.querySelector('.m-ulayer') && !!document.querySelector('.m-ubar'), { timeout: 5000 });
-  await about.evaluate(() => { window.__noPrf = false; window.__cancel = true; window.__wa = []; });
-  await about.click('.m-ubar [data-act="bar-unlock"]');
-  assert(await until(() => layerOpen(about), 8000), 'a cancel opens the card');
-  await sleep(300);
-  const info = await about.evaluate(() => {
-    const d = document.querySelector('.m-ulayer [role="dialog"]');
-    return { calls: window.__wa, passkey: !!d.querySelector('[data-act="passkey"]'), notNow: !!d.querySelector('[data-act="not-now"]'), focusIn: d.contains(document.activeElement), focus: document.activeElement.dataset.act || document.activeElement.name, msg: d.querySelector('.m-unlock__msg').textContent, bar: !!document.querySelector('.m-ubar'), unlocked: window.__m.state().unlocked };
-  });
-  assert(info.calls.length === 1 && info.calls[0] === 'get:true', 'the cancelled tap made one navigator.credentials.get call inside the click', info);
-  assert(info.passkey && info.notNow && info.focusIn && info.bar && !info.unlocked && !info.msg && info.focus === 'passkey', 'the card with its passkey button focused, Not now, no error, still locked', info);
-  await about.evaluate(() => { window.__cancel = false; window.__wa = []; });
-  await about.click('.m-ulayer [data-act="passkey"]');
-  await until(() => about.evaluate(() => !document.querySelector('.m-ulayer') && !document.querySelector('.m-ubar')), 30000);
-  const done = await about.evaluate((k) => ({ s: window.__m.state(), flag: sessionStorage.getItem(k), calls: window.__wa, layer: !!document.querySelector('.m-ulayer'), bar: !!document.querySelector('.m-ubar'), msg: (document.querySelector('.m-ulayer .m-unlock__msg') || {}).textContent }), ASK);
-  assert(done.s.unlocked && !done.layer && !done.bar && done.flag === null && done.calls[0] === 'get:true', 'the card passkey unlocks and the bar goes', done);
+  await about.waitForFunction(() => !document.querySelector('.m-ulayer'), { timeout: 5000 });
+  assert(await askFlag(about) === null, 'Not now after a failed launch passkey ends the ask');
+  await about.goto(ORIGIN + '/tools/', { waitUntil: 'load' });
+  const s2 = await modules(about);
+  assert(!s2.ask && !s2.unlocked && await noLayer(about), 'the next page does not ask again', s2);
+  await about.evaluate(() => localStorage.setItem('t.wa', 'cancel'));
+  about = await reopenHere(about, '/about/');
+  await modules(about);
+  assert(await until(() => about.evaluate(() => window.__wa.length > 0), 15000), 'the launch passkey was asked for');
+  await sleep(1500);
+  const cancel = await about.evaluate((k) => ({ calls: window.__wa, layers: window.__layers, layer: !!document.querySelector('.m-ulayer'), bar: !!document.querySelector('.m-ubar'), flag: sessionStorage.getItem(k), s: window.__m.state() }), ASK);
+  assert(cancel.calls.length === 1 && cancel.calls[0] === 'get:false', 'one launch passkey call, made without a tap', cancel);
+  assert(!cancel.layer && cancel.layers === 0 && !cancel.bar && cancel.flag === null && !cancel.s.ask && !cancel.s.unlocked, 'a cancel stays locked with no card and no bar, and ends the ask', cancel);
+  await about.goto(ORIGIN + '/tools/', { waitUntil: 'load' });
+  const s3 = await modules(about);
+  const quiet = await about.evaluate(() => window.__wa.length);
+  assert(!s3.ask && !s3.unlocked && quiet === 0 && await noLayer(about), 'after a cancel the next page asks nothing', { s3, quiet });
+  await about.evaluate(() => localStorage.setItem('t.wa', ''));
+  about = await reopenHere(about, '/about/');
+  await modules(about);
+  await about.waitForFunction(() => window.__m.state().unlocked === true, { timeout: 30000 });
+  const ok = await about.evaluate(() => ({ calls: window.__wa, layers: window.__layers }));
+  assert(ok.calls.length === 1 && ok.calls[0] === 'get:false' && ok.layers === 0, 'a working passkey unlocks at launch with no card', ok);
+  await about.evaluate(() => localStorage.removeItem('t.wa'));
 });
 
 check('showCode warns once before a close keeps the old code', async () => {

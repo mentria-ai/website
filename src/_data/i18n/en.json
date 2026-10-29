@@ -6203,8 +6203,6 @@
     "err_storage": "This browser isn't saving data for Mentria, so it can't keep your unlock. Check that site data is allowed.",
     "launch_setting": "Ask to unlock when the app opens",
     "launch_setting_note": "Off: Mentria asks the first time you open something locked.",
-    "bar_text": "Mentria is locked",
-    "bar_unlock": "Unlock",
     "lock_now": "Lock",
     "locked_toast": "Locked. Mentria asks again the next time you open something locked.",
     "setup_title": "Protect your locked things",

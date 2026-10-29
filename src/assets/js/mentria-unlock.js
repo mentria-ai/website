@@ -454,10 +454,10 @@ function inputs() {
   };
 }
 
-async function askBar() {
+async function askNow() {
   try {
     const ui = await import('./mentria-unlock-ui.js');
-    await ui.showBar();
+    await ui.askAtLaunch();
   } catch (_) {}
 }
 
@@ -491,7 +491,7 @@ async function boot(markDecided) {
   if (!sessionLive() && mem.hasDevice) await unlockWithDevice();
   await prfP;
   const html = document.documentElement;
-  if (!inFrame && state().ask && !html.hasAttribute('data-unlock-tool') && !html.classList.contains('is-fullscreen-tool') && !html.classList.contains('ext-app')) askBar();
+  if (!inFrame && state().ask && !html.hasAttribute('data-unlock-tool') && !html.classList.contains('is-fullscreen-tool') && !html.classList.contains('ext-app')) askNow();
   notify(false);
   return state();
 }

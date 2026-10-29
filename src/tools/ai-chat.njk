@@ -207,6 +207,7 @@ const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platfo
 const IS_MOBILE = IS_IOS || /Android/i.test(navigator.userAgent);
 const IMG_MAX = IS_IOS ? 256 : 448;
 const PREVIEW_MAX = 1024;
+const IOS_IMAGES = 1;
 const MAX_TOKENS = 512;
 
 /* ── Status helpers ────────────────────────────────────────────────────── */
@@ -2007,7 +2008,17 @@ function runApp(MentriaEngine, Tiers) {
     }
     let droppedImages = 0;
     for (let i = 0; i < rest.length - kept.length; i++) droppedImages += turnImages(rest[i]);
-    const windowImages = conversationImages.slice(droppedImages);
+    let windowImages = conversationImages.slice(droppedImages);
+    let sendTurns = kept;
+    if (IS_IOS && windowImages.length > IOS_IMAGES) {
+      let skip = windowImages.length - IOS_IMAGES;
+      windowImages = windowImages.slice(skip);
+      sendTurns = kept.map((m) => {
+        if (!skip || !turnImages(m)) return m;
+        const content = m.content.filter((p) => !(p && p.type === 'image' && skip > 0 && skip--));
+        return { role: m.role, content };
+      });
+    }
     const imagesForRequest = windowImages.length ? windowImages : undefined;
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
@@ -2046,7 +2057,7 @@ function runApp(MentriaEngine, Tiers) {
         const smp = (pinned && pinned.sampling) || null;
         const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
         const params = {
-          messages: [{ role: 'system', content: systemContent }, ...kept, ...toolTurns],
+          messages: [{ role: 'system', content: systemContent }, ...sendTurns, ...toolTurns],
           maxTokens: (imagesForRequest && IS_IOS) ? 256
             : (pinned && num(pinned.maxTokens, 0) > 0) ? pinned.maxTokens
             : deepThink ? thinkBudget

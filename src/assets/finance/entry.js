@@ -58,6 +58,7 @@ export function openEntry(ctx, opts) {
     cleared: false,
     fxTyped: '',
     amountFromText: false,
+    modeFromText: false,
     touched: new Set()
   };
   if (existing) {
@@ -119,7 +120,7 @@ export function openEntry(ctx, opts) {
       { value: 'out', label: t('entry.expense') },
       { value: 'in', label: t('entry.income') },
       { value: 'xfer', label: t('entry.transfer') }
-    ], st.mode, (v) => { st.mode = v; st.category = null; refreshAll(); }, true));
+    ], st.mode, (v) => { st.mode = v; st.modeFromText = false; st.category = null; refreshAll(); }, true));
   }
 
   function amountMinor() { return minorFromTyped(st.typed, acctCcy(st.account)); }
@@ -309,12 +310,15 @@ export function openEntry(ctx, opts) {
     else if (!fromAi && !p.amount && st.amountFromText && !st.touched.has('amount')) { st.typed = ''; st.amountFromText = false; }
     if (p.transfer && L.accounts().length > 1) {
       st.mode = 'xfer';
+      st.modeFromText = true;
       if (p.account) st.account = p.account;
       if (p.toAccount) st.toAccount = p.toAccount;
     } else {
-      if (st.mode === 'xfer') st.mode = 'out';
-      if (p.income) st.mode = 'in';
-      else if (st.mode === 'in' && !p.income && !fromAi) st.mode = 'out';
+      const before = st.mode;
+      if (st.mode === 'xfer' && st.modeFromText) st.mode = 'out';
+      if (p.income) { st.mode = 'in'; st.modeFromText = true; }
+      else if (st.mode === 'in' && st.modeFromText && !fromAi) st.mode = 'out';
+      if (st.mode !== before && !st.touched.has('category')) st.category = null;
       if (p.account && !st.touched.has('account')) st.account = p.account;
       if (p.category && !st.touched.has('category')) st.category = p.category;
       if (p.payee && !st.touched.has('payee')) st.payee = p.payee;

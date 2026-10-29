@@ -1,9 +1,22 @@
 const holds = new Set();
+const GESTURES = ['pointerup', 'keydown', 'click'];
 let lock = null;
 let pending = false;
+let retryArmed = false;
 
 function wanted() {
   return holds.size > 0;
+}
+
+function retryOnGesture() {
+  if (retryArmed || typeof window === 'undefined') return;
+  retryArmed = true;
+  const again = () => {
+    for (const g of GESTURES) window.removeEventListener(g, again, true);
+    retryArmed = false;
+    grab();
+  };
+  for (const g of GESTURES) window.addEventListener(g, again, true);
 }
 
 function grab() {
@@ -17,7 +30,10 @@ function grab() {
     }
     lock = l;
     l.addEventListener('release', () => { if (lock === l) lock = null; });
-  }, () => { pending = false; });
+  }, () => {
+    pending = false;
+    if (wanted()) retryOnGesture();
+  });
 }
 
 function drop() {

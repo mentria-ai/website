@@ -32,7 +32,7 @@ function serve(dir, port) {
 }
 
 const STUB = () => {
-  window.__wl = { requests: 0, releases: 0, live: 0 };
+  window.__wl = { requests: 0, releases: 0, live: 0, denied: 0 };
   let hidden = false;
   Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => (hidden ? 'hidden' : 'visible') });
   const sentinels = new Set();
@@ -55,6 +55,10 @@ const STUB = () => {
     value: {
       request: async (type) => {
         if (type !== 'screen' || hidden) throw new DOMException('not visible', 'NotAllowedError');
+        if (window.__needTap && !navigator.userActivation.hasBeenActive) {
+          window.__wl.denied += 1;
+          throw new DOMException('Permission was denied', 'NotAllowedError');
+        }
         const t = make();
         sentinels.add(t);
         window.__wl.requests += 1;
@@ -78,11 +82,12 @@ const check = (name, fn) => checks.push([name, fn]);
 const assert = (cond, msg, extra) => { if (!cond) throw new Error(msg + (extra === undefined ? '' : ' ' + JSON.stringify(extra))); };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function open(path) {
+async function open(path, init) {
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e && e.message || e)));
   await page.evaluateOnNewDocument(STUB);
+  if (init) await page.evaluateOnNewDocument(init);
   await page.goto(ORIGIN + path, { waitUntil: 'load' });
   page.__errors = errors;
   return page;
@@ -139,6 +144,32 @@ check('a held lock comes back when the page is shown again', async () => {
   assert(r.hidden.live === 0 && r.hidden.requests === 1, 'hiding the page drops the lock', r.hidden);
   assert(r.shown.live === 1 && r.shown.requests === 2, 'showing it again takes the lock back', r.shown);
   assert(r.after.live === 0 && r.after.requests === 2, 'once released, showing the page asks for nothing', r.after);
+  await page.close();
+});
+
+check('a lock denied before the first tap is taken on the next tap', async () => {
+  const page = await open('/tools/', () => {
+    window.__needTap = true;
+    document.addEventListener('DOMContentLoaded', () => {
+      const pad = document.createElement('div');
+      pad.id = 't-pad';
+      pad.style.cssText = 'position:fixed;top:0;left:0;width:60px;height:60px;z-index:2147483647';
+      document.body.append(pad);
+      window.__tappedAtHold = navigator.userActivation.hasBeenActive;
+      import('/assets/js/mentria-wake.js').then((m) => { window.__rel = m.holdAwake(); });
+    });
+  });
+  await sleep(300);
+  const before = await page.evaluate(() => Object.assign({ tapped: window.__tappedAtHold }, window.__wl));
+  await page.click('#t-pad');
+  await sleep(150);
+  const after = await wl(page);
+  await page.evaluate(() => window.__rel());
+  await sleep(100);
+  const done = await wl(page);
+  assert(before.tapped === false && before.denied === 1 && before.live === 0 && before.requests === 0, 'denied before any tap, like Safari on iPhone', before);
+  assert(after.live === 1 && after.requests === 1, 'the next tap takes the lock', after);
+  assert(done.live === 0 && done.releases === 1, 'and it goes when the work ends', done);
   await page.close();
 });
 

@@ -1603,7 +1603,7 @@ function runApp(MentriaEngine, Tiers) {
 
   function isDeviceLostError(err) {
     const m = String((err && err.message) || err || '').toLowerCase();
-    return m.includes('device was lost') || m.includes('device lost') || m.includes('new mentriaengine');
+    return m.includes('device was lost') || m.includes('device lost') || m.includes('new mentriaengine') || m.includes('unable to make command encoder');
   }
 
   function showLostState(moveFocus) {

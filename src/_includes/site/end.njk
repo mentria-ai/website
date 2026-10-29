@@ -796,6 +796,11 @@ try {
         document.addEventListener('mentria:ai-start', function () { count++; update(); });
         document.addEventListener('mentria:ai-stop', function () { count = Math.max(0, count - 1); update(); });
       })();
+      var wakeP = null;
+      var wakeModule = function () {
+        if (!wakeP) wakeP = import('/assets/js/mentria-wake.js').catch(function () { return null; });
+        return wakeP;
+      };
       window.mentriaWrapEngine = function (engine) {
         if (!engine || engine.__mTracked || typeof engine.generate !== 'function') return engine;
         engine.__mTracked = true;
@@ -818,7 +823,14 @@ try {
         engine.generate = function (params, onToken) {
           document.dispatchEvent(new CustomEvent('mentria:ai-start'));
           var settled = false;
-          var stop = function () { if (settled) return; settled = true; document.dispatchEvent(new CustomEvent('mentria:ai-stop')); };
+          var releaseWake = null;
+          wakeModule().then(function (m) { if (m && !settled) releaseWake = m.holdAwake(); });
+          var stop = function () {
+            if (settled) return;
+            settled = true;
+            if (releaseWake) releaseWake();
+            document.dispatchEvent(new CustomEvent('mentria:ai-stop'));
+          };
           try {
             var r = orig(params, hideAfterThinkClose(params, onToken));
             if (r && typeof r.then === 'function') r.then(stop, stop); else stop();

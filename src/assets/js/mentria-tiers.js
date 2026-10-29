@@ -1,3 +1,5 @@
+import { holdAwake } from './mentria-wake.js';
+
 const MENTRIA_DIST = '/assets/mentria/dist/mentria.mjs';
 const LS_PREF = 'mentria-tier';
 const LS_CAP = 'mentria-tier-cap';
@@ -557,7 +559,16 @@ async function probeBase(base, file, signal) {
   return base;
 }
 
-export async function loadWithFallback(createEngine, startTier, { vision = true, onFallback = null, validate = null, aborted = null, onlyCached = false } = {}) {
+export async function loadWithFallback(createEngine, startTier, opts) {
+  const release = holdAwake();
+  try {
+    return await loadChain(createEngine, startTier, opts);
+  } finally {
+    release();
+  }
+}
+
+async function loadChain(createEngine, startTier, { vision = true, onFallback = null, validate = null, aborted = null, onlyCached = false } = {}) {
   const order = onlyCached ? TIER_CHAIN.concat(LEGACY_CHAIN) : TIER_CHAIN;
   let chain = order.slice(Math.max(0, order.indexOf(startTier)));
   if (onlyCached) {

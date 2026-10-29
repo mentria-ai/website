@@ -1,3 +1,5 @@
+import { holdAwake } from './mentria-wake.js';
+
 const CACHE = 'mentria-models';
 const TRACKER = 'wss://relay.mentria.ai/tracker';
 const PEERS_KEY = 'mentria-p2p-peers';
@@ -150,6 +152,15 @@ export function ensureShardViaP2P(url, onStatus) {
 }
 
 export async function prefetchTier(Tiers, tierId, opts) {
+  const release = holdAwake();
+  try {
+    return await fetchTier(Tiers, tierId, opts);
+  } finally {
+    release();
+  }
+}
+
+async function fetchTier(Tiers, tierId, opts) {
   const o = typeof opts === 'function' ? { onStatus: opts } : (opts || {});
   const t = Tiers.TIERS[tierId];
   if (!t) return { skipped: 'unknown-tier' };

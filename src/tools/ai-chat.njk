@@ -826,8 +826,26 @@ function runApp(MentriaEngine, Tiers) {
   // patch_size * spatial_merge_size = 32. We cap at 448² for predictable
   // prefill latency (~286 ms vision-tower pass on M-series; chat-friendly
   // per the engine's S463 bench).
+  function naturalSize(file) {
+    return new Promise((resolve, reject) => {
+      const u = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { const r = { w: img.naturalWidth, h: img.naturalHeight }; URL.revokeObjectURL(u); resolve(r); };
+      img.onerror = () => { URL.revokeObjectURL(u); reject(new Error('decode')); };
+      img.src = u;
+    });
+  }
+
+  async function decodeSmall(file, max) {
+    const d = await naturalSize(file).catch(() => null);
+    if (d && Math.max(d.w, d.h) > max) {
+      try { return await createImageBitmap(file, { resizeWidth: Math.max(1, Math.round(max * d.w / Math.max(d.w, d.h))), resizeQuality: 'high' }); } catch (_) {}
+    }
+    return createImageBitmap(file);
+  }
+
   async function fileToEngineImage(file, targetSize = 448, withPreview = false) {
-    const bitmap = await createImageBitmap(file);
+    const bitmap = await decodeSmall(file, PREVIEW_MAX);
     const preview = withPreview ? await previewOf(bitmap, file) : null;
     const maxDim = Math.max(bitmap.width, bitmap.height);
     const scale = maxDim > targetSize ? (targetSize / maxDim) : 1;

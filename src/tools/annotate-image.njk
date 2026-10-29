@@ -227,8 +227,26 @@ eleventyComputed:
     return new Promise((resolve) => c.toBlob((b) => { c.width = c.height = 0; resolve(b); }, type, 0.85));
   }
 
+  function naturalSize(file){
+    return new Promise((resolve, reject) => {
+      const u = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { const r = { w: img.naturalWidth, h: img.naturalHeight }; URL.revokeObjectURL(u); resolve(r); };
+      img.onerror = () => { URL.revokeObjectURL(u); reject(new Error('decode')); };
+      img.src = u;
+    });
+  }
+
+  async function decodeSmall(file, max){
+    const d = await naturalSize(file).catch(() => null);
+    if (d && Math.max(d.w, d.h) > max){
+      try { return await createImageBitmap(file, { resizeWidth: Math.max(1, Math.round(max * d.w / Math.max(d.w, d.h))), resizeQuality: 'high' }); } catch(_){}
+    }
+    return createImageBitmap(file);
+  }
+
   async function fileToEngineImage(file, targetSize = 448){
-    const bitmap = await createImageBitmap(file);
+    const bitmap = await decodeSmall(file, PREVIEW_MAX);
     const previewBlob = await previewOf(bitmap, file);
     let w = bitmap.width, h = bitmap.height;
     const scale = Math.min(1, targetSize / Math.max(w, h));

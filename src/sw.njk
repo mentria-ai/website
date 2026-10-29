@@ -11,6 +11,8 @@ const ENGINE_FILES = {{ engineFiles | dump | safe }};
 const DECKS_CACHE = 'mentria-decks-{{ buildHash }}';
 const ART_CACHE = 'mentria-deck-art';
 const SHARE_CACHE = 'mentria-share';
+const PDF_CACHE = 'mentria-pdf-6.4.299';
+const PDF_LIBS = /^\/assets\/vendor\/(pdfjs-|pdf-lib-)/;
 const EXT_DATA_CACHE = 'mentria-ext-data';
 const EXT_FILES_CACHE = 'mentria-ext-files';
 const DECKS_LIMIT = 60;
@@ -89,6 +91,7 @@ const ASSETS = [
   '/assets/radio/preferences.js',
   '/tools/invoice/',
   '/tools/markdown-pdf/',
+  '/tools/pdf/',
   '/tools/tetris/',
   '/tools/breakout/',
   '/tools/flappy/',
@@ -403,8 +406,8 @@ self.addEventListener('activate', event => {
     const hadOldModels = keys.some(k => k.startsWith('mentria-models-') && k !== MODELS_MARKER);
     await carryDecks(keys);
     await Promise.all(keys.map(key => {
-      if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER || key === DECKS_CACHE || key === ART_CACHE || key === SHARE_CACHE) return;
-      if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-') || key.startsWith('mentria-decks-')) return caches.delete(key);
+      if (key === CACHE_NAME || key === MODELS_CACHE || key === MODELS_MARKER || key === DECKS_CACHE || key === ART_CACHE || key === SHARE_CACHE || key === PDF_CACHE) return;
+      if (key.startsWith('mentria-cache-') || key.startsWith('mentria-models-') || key.startsWith('mentria-decks-') || key.startsWith('mentria-pdf-')) return caches.delete(key);
       if (key.startsWith('mentria-locale-') && updating) return markStale(key);
     }));
     if (!keys.includes(MODELS_MARKER)) {
@@ -583,6 +586,7 @@ async function handleShareTarget(request) {
   if (file && typeof file !== 'string' && file.size) {
     const cache = await caches.open(SHARE_CACHE);
     await cache.put('/share-target/file', new Response(file, { headers: { 'content-type': file.type || 'application/octet-stream', 'x-file-name': encodeURIComponent(file.name || 'shared-image') } }));
+    if (/pdf$/i.test(file.type || '') || /\.pdf$/i.test(file.name || '')) return Response.redirect('/tools/pdf/?shared=1', 303);
     return Response.redirect('/share/', 303);
   }
   const title = pick('title').trim();
@@ -677,6 +681,22 @@ self.addEventListener('fetch', event => {
       const body = await resp.arrayBuffer();
       event.waitUntil(cache.put(event.request.url, bufferedResponse(body, resp)).catch(() => {}));
       return bufferedResponse(body, resp);
+    })());
+    return;
+  }
+
+  if (url.origin === self.location.origin && PDF_LIBS.test(url.pathname)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(PDF_CACHE);
+      const key = integrityKey(url.pathname);
+      const hit = await cache.match(url.pathname);
+      if (hit) {
+        if (await trusted(hit, key, false)) return hit;
+        await cache.delete(url.pathname);
+      }
+      const resp = await fetch(event.request);
+      if (resp && resp.ok && resp.type === 'basic' && await trusted(resp.clone(), key, false)) event.waitUntil(cache.put(url.pathname, resp.clone()).catch(() => {}));
+      return resp;
     })());
     return;
   }

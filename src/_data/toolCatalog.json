@@ -202,6 +202,14 @@
     "group": "Create"
   },
   {
+    "slug": "pdf",
+    "title": "PDF Reader & Editor",
+    "summary": "Open, read and edit PDFs in your browser: search, highlight, add notes, draw, place images and signatures, fill in forms, and merge, split, reorder, rotate or delete pages. Works offline after your first visit, and your files aren't uploaded.",
+    "category": "Utility",
+    "group": "Create",
+    "added": "2026-10-29"
+  },
+  {
     "slug": "tetris",
     "title": "Tetris",
     "summary": "Browser-native Tetris in the Mentria synthwave palette. Touch, keyboard, and mouse supported. Plays offline.",

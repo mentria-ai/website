@@ -204,6 +204,7 @@ const MENTRIA_TIERS_PATH = '/assets/js/mentria-tiers.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const IS_MOBILE = IS_IOS || /Android/i.test(navigator.userAgent);
+const CHAT_VISION = !IS_IOS;
 const IMG_MAX = IS_IOS ? 256 : 448;
 const MAX_TOKENS = 512;
 
@@ -1533,7 +1534,7 @@ function runApp(MentriaEngine, Tiers) {
         return e;
       };
       const res = await ensureModel(createEngine, {
-        vision: true,
+        vision: CHAT_VISION,
         offerUpgrade: true,
         choose: choose === true,
         onProgress: onEngineProgress,
@@ -2192,7 +2193,7 @@ function runApp(MentriaEngine, Tiers) {
 
   /* ── Image handling ──────────────────────────────── */
   async function attachFile(file) {
-    if (!file || !file.type.startsWith('image/')) return;
+    if (!CHAT_VISION || !file || !file.type.startsWith('image/')) return;
     removeImage();
     const url = URL.createObjectURL(file);
     imgThumb.src = url;
@@ -2233,6 +2234,7 @@ function runApp(MentriaEngine, Tiers) {
 
   inputEl.addEventListener('input', () => { autoResize(); clearTooLong(); });
 
+  if (!CHAT_VISION) attachBtn.style.display = 'none';
   attachBtn.addEventListener('click', () => fileInput.click());
 
   fileInput.addEventListener('change', () => {

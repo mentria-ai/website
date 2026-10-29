@@ -203,6 +203,7 @@ const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
 const MENTRIA_TIERS_PATH = '/assets/js/mentria-tiers.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IS_MOBILE = IS_IOS || /Android/i.test(navigator.userAgent);
 const IMG_MAX = IS_IOS ? 256 : 448;
 const MAX_TOKENS = 512;
 
@@ -471,8 +472,16 @@ function runApp(MentriaEngine, Tiers) {
   ];
   const PAGE_REPLY_LANG = { es: 'Spanish', fr: 'French', ja: 'Japanese', 'pt-br': 'Brazilian Portuguese' };
 
-  function replyLanguage(text) {
+  function replyLanguage(texts) {
     const page = String(document.documentElement.lang || 'en').toLowerCase();
+    for (let i = texts.length - 1; i >= 0; i--) {
+      const lang = detectLanguage(texts[i], page);
+      if (lang) return lang;
+    }
+    return PAGE_REPLY_LANG[page] || null;
+  }
+
+  function detectLanguage(text, page) {
     if (/[\u3040-\u30ff]/.test(text) || (page === 'ja' && /[\u4e00-\u9fff]/.test(text))) return 'Japanese';
     const words = text.toLowerCase().replace(/\u2019/g, "'").split(/[^\p{L}']+/u);
     let best = null;
@@ -483,7 +492,7 @@ function runApp(MentriaEngine, Tiers) {
       if (n > top) { best = lang.name; top = n; tie = false; }
       else if (n > 0 && n === top) tie = true;
     });
-    return best && !tie ? best : (PAGE_REPLY_LANG[page] || null);
+    return best && !tie ? best : null;
   }
 
   let messages = [
@@ -856,7 +865,7 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   function warmSystemPrompt() {
-    if ((currentTier !== '27b' && !isB2Tier(currentTier)) || !engine || typeof engine.prefillOnly !== 'function' || deviceLost) return;
+    if ((currentTier !== '27b' && !isB2Tier(currentTier)) || IS_MOBILE || !engine || typeof engine.prefillOnly !== 'function' || deviceLost) return;
     if (webSearchOn && !pinned && !!(getSearchCfg() || {}).url) return;
     if (generating) { warmWanted = true; return; }
     const e = engine;
@@ -1977,9 +1986,9 @@ function runApp(MentriaEngine, Tiers) {
     const useTool = route ? route === 'tool' : searchActive;
     markRoute(bodyEl, route);
     await setSearchAdapter(useTool);
-    const asked = rest.length ? turnText(rest[rest.length - 1]) : '';
+    const asks = rest.filter((m) => m.role === 'user').map(turnText);
     const baseSystem = (isSmallTier(currentTier) || isB2Tier(currentTier)) && !pinned
-      ? systemPromptFor(currentTier, { image: !!imagesForRequest, lang: replyLanguage(asked), site: isB2Tier(currentTier) && asksAboutSite(rest.filter((m) => m.role === 'user').map(turnText)) })
+      ? systemPromptFor(currentTier, { image: !!imagesForRequest, lang: replyLanguage(asks), site: isB2Tier(currentTier) && asksAboutSite(asks) })
       : systemMessage.content;
     const systemContent = useTool ? baseSystem + SEARCH_TOOL_PROMPT : baseSystem;
     const toolTurns = [];

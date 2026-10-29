@@ -1296,6 +1296,7 @@
       "gpu_lost_notice": "A GPU foi reiniciada e o modelo parou. Seu chat foi mantido. Recarregue o modelo para continuar.",
       "btn_reload_model": "Recarregar modelo",
       "no_model_notice": "Escolha um modelo para começar a conversar. Ele é baixado uma vez e depois roda neste dispositivo.",
+      "load_cut_notice": "Da última vez a página reiniciou enquanto o modelo carregava. Para não repetir sem parar, desta vez ele não carrega sozinho.",
       "btn_choose_model": "Escolher modelo",
       "interrupted": "Interrompida: a GPU foi reiniciada antes de esta resposta terminar.",
       "err_context_full": "A conversa é longa demais para a memória do modelo. Inicie um novo chat para continuar.",

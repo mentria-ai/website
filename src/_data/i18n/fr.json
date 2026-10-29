@@ -1296,6 +1296,7 @@
       "gpu_lost_notice": "Le GPU a été réinitialisé et le modèle s'est arrêté. Votre discussion est conservée. Rechargez le modèle pour continuer.",
       "btn_reload_model": "Recharger le modèle",
       "no_model_notice": "Choisissez un modèle pour commencer à discuter. Il se télécharge une fois, puis fonctionne sur cet appareil.",
+      "load_cut_notice": "La dernière fois, la page a redémarré pendant le chargement du modèle. Pour éviter que cela recommence en boucle, il ne se charge pas tout seul cette fois.",
       "btn_choose_model": "Choisir un modèle",
       "interrupted": "Interrompue : le GPU a été réinitialisé avant la fin de cette réponse.",
       "err_context_full": "La conversation dépasse la mémoire du modèle. Démarrez une nouvelle discussion pour continuer.",

@@ -1296,6 +1296,7 @@
       "gpu_lost_notice": "The GPU was reset, so the model stopped. Your chat is kept. Reload the model to continue.",
       "btn_reload_model": "Reload model",
       "no_model_notice": "Choose a model to start chatting. It downloads once, then runs on this device.",
+      "load_cut_notice": "Last time the page restarted while the model was loading. So it doesn't start over and over, it won't load on its own this time.",
       "btn_choose_model": "Choose a model",
       "interrupted": "Interrupted: the GPU was reset before this answer finished.",
       "err_context_full": "Conversation is too long for the model's memory. Start a new chat to continue.",

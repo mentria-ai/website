@@ -223,11 +223,13 @@ function makeCacheStore(blobs, totalBytes) {
         cb(null, buf.subarray(((opts && opts.offset) || 0), ((opts && opts.offset) || 0) + wanted));
         return;
       }
-      const seg = Math.floor(start / SEGMENT_BYTES);
-      const off = start - seg * SEGMENT_BYTES;
-      const blob = blobs[seg];
-      if (!blob) { cb(new Error('segment out of range')); return; }
-      blob.slice(off, off + wanted).arrayBuffer().then(
+      const parts = [];
+      for (let k = 0, at = 0; k < blobs.length && at < start + wanted; at += blobs[k].size, k++) {
+        const a = Math.max(start, at), b = Math.min(start + wanted, at + blobs[k].size);
+        if (b > a) parts.push(blobs[k].slice(a - at, b - at));
+      }
+      if (!parts.length) { cb(new Error('segment out of range')); return; }
+      new Blob(parts).arrayBuffer().then(
         (ab) => cb(null, new Uint8Array(ab)),
         (err) => cb(err)
       );

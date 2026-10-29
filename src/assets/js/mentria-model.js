@@ -5,6 +5,42 @@ const IS_MOBILE = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/
 const PROBE_TIMEOUT = IS_MOBILE ? 120000 : 60000;
 const PROBE_STILL_MS = 20000;
 const READY_LINGER = 900;
+const RUN_KEY = 'mentria-model-loading';
+const PAGE_RUN = Math.random().toString(36).slice(2);
+let liveEngine = null;
+let parked = false;
+
+function markLoading(on) {
+  try {
+    if (on) sessionStorage.setItem(RUN_KEY, JSON.stringify({ run: PAGE_RUN, path: location.pathname, at: Date.now() }));
+    else sessionStorage.removeItem(RUN_KEY);
+  } catch (_) {}
+}
+
+function loadWasCut() {
+  try {
+    const v = JSON.parse(sessionStorage.getItem(RUN_KEY) || 'null');
+    if (!v || v.run === PAGE_RUN) return false;
+    sessionStorage.removeItem(RUN_KEY);
+    return v.path === location.pathname && Date.now() - v.at < 180000;
+  } catch (_) { return false; }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', (e) => {
+    markLoading(false);
+    if (!e.persisted) return;
+    const engines = new Set([window.__mentriaEngine, liveEngine].filter(Boolean));
+    if (!engines.size) return;
+    parked = true;
+    window.__mentriaEngine = null;
+    liveEngine = null;
+    for (const eng of engines) { try { eng.terminate(); } catch (_) {} }
+  });
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted && parked) location.reload();
+  });
+}
 
 const DEFAULT_COPY = {
   checking: 'Checking your device…',
@@ -382,6 +418,16 @@ function requestPersistentStorage() {
 
 export async function ensureModel(engineFactory, opts) {
   opts = opts || {};
+  if (opts.guardReload && loadWasCut()) throw new Error('load-cut-short');
+  markLoading(true);
+  try {
+    return await loadModelFor(engineFactory, opts);
+  } finally {
+    markLoading(false);
+  }
+}
+
+async function loadModelFor(engineFactory, opts) {
   const vision = !!opts.vision;
   const onProgress = opts.onProgress || null;
   const onDeviceLost = opts.onDeviceLost || null;
@@ -400,6 +446,7 @@ export async function ensureModel(engineFactory, opts) {
     if (stopped) throw new Error('stopped');
     const e = engineFactory();
     lastEngine = e;
+    liveEngine = e;
     const swapping = trackAdapters(e);
     e.onProgress = (p) => {
       const tag = p && (p.stage === 'download' || p.stage === 'upload') ? swapping() : null;

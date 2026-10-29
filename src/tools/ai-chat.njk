@@ -140,6 +140,7 @@ eleventyComputed:
   confirmDelete:          "tool.ai-chat.confirm_delete",
   statusNoModel:          "tool.ai-chat.status_no_model",
   noModelNotice:          "tool.ai-chat.no_model_notice",
+  loadCutNotice:          "tool.ai-chat.load_cut_notice",
   btnChooseModel:         "tool.ai-chat.btn_choose_model",
   tierLabel:              "tool.ai-chat.tier_label",
   tierFast:               "tool.ai-chat.tier_fast",
@@ -205,6 +206,7 @@ const MENTRIA_TIERS_PATH = '/assets/js/mentria-tiers.js';
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const IS_MOBILE = IS_IOS || /Android/i.test(navigator.userAgent);
 const IMG_MAX = IS_IOS ? 256 : 448;
+const PREVIEW_MAX = 1024;
 const MAX_TOKENS = 512;
 
 /* ── Status helpers ────────────────────────────────────────────────────── */
@@ -400,6 +402,7 @@ function runApp(MentriaEngine, Tiers) {
   let sending = false;
   let attachedImage = null;       // {rgbHwc, h, w} — pending attach for the NEXT send
   let attachedDataUrl = null;
+  let attachSeq = 0;
   // conversationImages keeps every image sent in this conversation, in order.
   // The chat template re-renders the full message history every turn, so each
   // {type:'image'} placeholder needs its corresponding rgbHwc on every call —
@@ -823,8 +826,9 @@ function runApp(MentriaEngine, Tiers) {
   // patch_size * spatial_merge_size = 32. We cap at 448² for predictable
   // prefill latency (~286 ms vision-tower pass on M-series; chat-friendly
   // per the engine's S463 bench).
-  async function fileToEngineImage(file, targetSize = 448) {
+  async function fileToEngineImage(file, targetSize = 448, withPreview = false) {
     const bitmap = await createImageBitmap(file);
+    const preview = withPreview ? await previewOf(bitmap, file) : null;
     const maxDim = Math.max(bitmap.width, bitmap.height);
     const scale = maxDim > targetSize ? (targetSize / maxDim) : 1;
     let w = Math.round(bitmap.width * scale);
@@ -843,7 +847,18 @@ function runApp(MentriaEngine, Tiers) {
       rgbHwc[j + 1] = data[i + 1];
       rgbHwc[j + 2] = data[i + 2];
     }
-    return { rgbHwc, h, w };
+    canvas.width = canvas.height = 0;
+    return preview ? { rgbHwc, h, w, preview } : { rgbHwc, h, w };
+  }
+
+  function previewOf(bitmap, file) {
+    const s = Math.min(1, PREVIEW_MAX / Math.max(bitmap.width, bitmap.height));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(bitmap.width * s));
+    c.height = Math.max(1, Math.round(bitmap.height * s));
+    c.getContext('2d').drawImage(bitmap, 0, 0, c.width, c.height);
+    const type = /png|gif|webp/.test(file.type) ? 'image/png' : 'image/jpeg';
+    return new Promise((resolve) => c.toBlob((b) => { c.width = c.height = 0; resolve(b); }, type, 0.85));
   }
 
   let strip = null;
@@ -1535,6 +1550,7 @@ function runApp(MentriaEngine, Tiers) {
       const res = await ensureModel(createEngine, {
         vision: true,
         offerUpgrade: true,
+        guardReload: true,
         choose: choose === true,
         onProgress: onEngineProgress,
         onTier: (info) => strip.setTier(info),
@@ -1576,6 +1592,12 @@ function runApp(MentriaEngine, Tiers) {
       warmSystemPrompt();
       return true;
     } catch (err) {
+      if (err && err.message === 'load-cut-short') {
+        if (strip) strip.hide();
+        setStatus('idle', 'statusNoModel');
+        showNotice('postponed', 'loadCutNotice', null, 'btnReloadModel', () => loadModel());
+        return false;
+      }
       if (err && err.message === 'download-postponed') {
         if (strip) strip.hide();
         setStatus('idle', 'statusNoModel');
@@ -2194,13 +2216,17 @@ function runApp(MentriaEngine, Tiers) {
   async function attachFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
     removeImage();
-    const url = URL.createObjectURL(file);
-    imgThumb.src = url;
-    imgPreview.style.display = '';
-    attachedDataUrl = url;
+    const seq = ++attachSeq;
     try {
-      attachedImage = await fileToEngineImage(file, IMG_MAX);
+      const img = await fileToEngineImage(file, IMG_MAX, true);
+      if (seq !== attachSeq) return;
+      const url = URL.createObjectURL(img.preview || file);
+      imgThumb.src = url;
+      imgPreview.style.display = '';
+      attachedDataUrl = url;
+      attachedImage = { rgbHwc: img.rgbHwc, h: img.h, w: img.w };
     } catch (err) {
+      if (seq !== attachSeq) return;
       console.error('Image attach error:', err);
       removeImage();
       setStatus('error', 'errBadImage');
@@ -2208,6 +2234,7 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   function removeImage() {
+    attachSeq++;
     if (attachedDataUrl) { try { URL.revokeObjectURL(attachedDataUrl); } catch (_) {} }
     attachedImage = null;
     attachedDataUrl = null;

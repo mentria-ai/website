@@ -13,7 +13,7 @@
 
 <p align="center">
   <b>A from-scratch WebGPU inference engine, and the tools built on it, running entirely in your browser.</b><br>
-  <sub>0.8B · 2B · 4B and a natively 1-bit 27B. No server, no API key, no account. Nothing leaves your device.</sub>
+  <sub>Ternary 2B · 4B · 9B and a natively 1-bit 27B, Bonsai models by PrismML. No server, no API key, no account. Your data stays private.</sub>
 </p>
 
 <p align="center">
@@ -62,11 +62,14 @@ flowchart LR
 |---|---|---|---|
 | RTX 3060 Laptop, 6 GB, Windows, Chrome | 27B, 1-bit | 25–30 tok/s | 3,072 |
 | M4 Pro, 24 GB, macOS, Chrome | 27B, 1-bit | ~30 tok/s | 16,384 |
-| Flagship Android, Adreno 8xx | 4B | 10–11 tok/s | 2,048 |
-| iPhone, Safari | 0.8B | ~3 tok/s | 2,048 |
+| M4 Pro, macOS, Chrome | 9B, ternary | 57–58 tok/s | 2,048 |
+| M4 Pro, macOS, Chrome | 4B, ternary | 88 tok/s | 2,048 |
+| M4 Pro, macOS, Chrome | 2B, ternary | 149 tok/s | 2,048 |
+| iPhone, Safari | 2B, ternary | ~24 tok/s | 2,048 |
+| Android, Mali-G57, Chrome | 2B, ternary | ~3 tok/s | 2,048 |
 
 > [!NOTE]
-> Chrome and Edge on Windows and macOS are the tested paths. Chrome on Android runs the small tiers. Safari on iPhone runs the 0.8B at about 3 tokens/s. Firefox works slowly on the small tiers only, because it charges about ten times more per submitted command buffer. The 27B is offered only where the GPU qualifies.
+> Chrome and Edge on Windows and macOS are the tested paths. Chrome on Android runs the 2B, and the 4B on phones with enough memory. Safari on iPhone and iPad runs the 2B only, at about 24 tokens/s. Firefox works slowly on the small tiers only, because it charges about ten times more per submitted command buffer. The 9B and 27B are offered only on computers whose GPU qualifies. The ternary rows come from the model cards: decode after a 512-token prompt on the Mac, and at a short context on the phones.
 
 ## Tools
 
@@ -105,7 +108,7 @@ npm run build   # production build → ./build
 <details>
 <summary><b>Model ladder</b></summary>
 
-The site shares one ladder: 0.8B · 2B · 4B · 27B. The three small tiers are Qwen3.5; the 27B is Bonsai-27B, natively 1-bit, repacked for this engine and published with its evaluation at [huggingface.co/mentriaai/Bonsai-27B-mentria](https://huggingface.co/mentriaai/Bonsai-27B-mentria). On the first visit a device check loads the best model the hardware qualifies for and runs a real generation to prove the route works, dropping a tier if it does not, then remembers the verdict. Bigger models are an explicit one-time choice, never a surprise download, and the check can be sent to the background or stopped at any point.
+The site shares one ladder: 2B · 4B · 9B · 27B. The three small tiers are Ternary Bonsai 2 by PrismML, built on Qwen3.5 (Apache-2.0): every weight is −1, 0 or +1, about 2 bits with one scale per group of 128, repacked for this engine and published with their evaluations at [Ternary-Bonsai-2-2B-mentria](https://huggingface.co/mentriaai/Ternary-Bonsai-2-2B-mentria), [4B](https://huggingface.co/mentriaai/Ternary-Bonsai-2-4B-mentria) and [9B](https://huggingface.co/mentriaai/Ternary-Bonsai-2-9B-mentria). The 27B is Bonsai-27B, also by PrismML, natively 1-bit, repacked for this engine and published with its evaluation at [huggingface.co/mentriaai/Bonsai-27B-mentria](https://huggingface.co/mentriaai/Bonsai-27B-mentria). On the first visit a device check loads the best model the hardware qualifies for and runs a real generation to prove the route works, dropping a tier if it does not, then remembers the verdict. Bigger models are an explicit one-time choice, never a surprise download, and the check can be sent to the background or stopped at any point.
 </details>
 
 ## License

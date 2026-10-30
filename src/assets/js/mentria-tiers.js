@@ -1,22 +1,37 @@
+import { holdAwake } from './mentria-wake.js';
+
 const MENTRIA_DIST = '/assets/mentria/dist/mentria.mjs';
 const LS_PREF = 'mentria-tier';
 const LS_CAP = 'mentria-tier-cap';
 const LS_VALID = 'mentria-tier-validated';
+const LS_FAMILY = 'mentria-model-family';
 const GiB = 1073741824;
+const DEFAULT_FAMILY = 'b2';
 
-export const TIER_CHAIN = ['27b', '4b', '2b', '0.8b'];
+export const FAMILY = (() => {
+  try { return localStorage.getItem(LS_FAMILY) === 'q4' ? 'q4' : DEFAULT_FAMILY; } catch (_) { return DEFAULT_FAMILY; }
+})();
+
+const CHAINS = {
+  b2: ['27b', 'b2-9b', 'b2-4b', 'b2-2b'],
+  q4: ['27b', '4b', '2b', '0.8b']
+};
+const LEGACY_FAMILY = FAMILY === 'b2' ? 'q4' : 'b2';
+
+export const TIER_CHAIN = CHAINS[FAMILY];
+export const LEGACY_CHAIN = CHAINS[LEGACY_FAMILY].filter((id) => id !== '27b');
+export const SMALL_TIER = TIER_CHAIN[TIER_CHAIN.length - 1];
 
 export const TIERS = {
   '0.8b': {
     id: '0.8b',
+    family: 'q4',
     name: '0.8B',
-    order: 0,
     sizeLabel: '490 MB',
     base: 'https://huggingface.co/mentriaai/Qwen3.5-0.8B-mentria/resolve/main/',
     shards: ['qwen3.5-0.8b-q4-tied.safetensors'],
     visionShards: ['qwen3.5-0.8b-vl-q4.safetensors'],
     configExport: 'QWEN35_08B_CONFIG',
-    loraQuotes: 'loras/quotes/adapter_model.safetensors',
     visionConfig: {
       hidden_size: 768,
       intermediate_size: 3072,
@@ -35,14 +50,13 @@ export const TIERS = {
   },
   '2b': {
     id: '2b',
+    family: 'q4',
     name: '2B',
-    order: 1,
     sizeLabel: '1.4 GB',
     base: 'https://huggingface.co/mentriaai/Qwen3.5-2B-mentria/resolve/main/',
     shards: ['qwen3.5-2b-q4-tied.safetensors'],
     visionShards: ['qwen3.5-2b-vl-q4.safetensors'],
     configExport: 'QWEN35_2B_CONFIG',
-    loraQuotes: 'loras/quotes/adapter_model.safetensors',
     visionConfig: {
       hidden_size: 1024,
       intermediate_size: 4096,
@@ -61,8 +75,8 @@ export const TIERS = {
   },
   '4b': {
     id: '4b',
+    family: 'q4',
     name: '4B',
-    order: 2,
     sizeLabel: '2.8 GB',
     base: 'https://huggingface.co/mentriaai/Qwen3.5-4B-mentria/resolve/main/',
     shards: [
@@ -71,7 +85,6 @@ export const TIERS = {
     ],
     visionShards: ['qwen3.5-4b-vl-q4.safetensors'],
     configExport: 'QWEN35_4B_CONFIG',
-    loraQuotes: 'loras/quotes/adapter_model.safetensors',
     visionConfig: {
       hidden_size: 1024,
       intermediate_size: 4096,
@@ -88,10 +101,51 @@ export const TIERS = {
       prefix: 'visual'
     }
   },
+  'b2-2b': {
+    id: 'b2-2b',
+    family: 'b2',
+    name: '2B',
+    sizeLabel: '520 MB',
+    base: 'https://huggingface.co/mentriaai/Ternary-Bonsai-2-2B-mentria/resolve/main/',
+    shards: ['bonsai2-2b-q2g128.safetensors'],
+    visionShards: ['qwen3.5-2b-vl-q4.safetensors'],
+    configExport: 'QWEN35_2B_CONFIG',
+    visionConfigExport: 'QWEN35_VL_2B_VISION_CONFIG',
+    streamingLoad: true
+  },
+  'b2-4b': {
+    id: 'b2-4b',
+    family: 'b2',
+    name: '4B',
+    sizeLabel: '1.1 GB',
+    base: 'https://huggingface.co/mentriaai/Ternary-Bonsai-2-4B-mentria/resolve/main/',
+    shards: ['bonsai2-4b-q2g128.safetensors'],
+    visionShards: ['qwen3.5-4b-vl-q4.safetensors'],
+    configExport: 'QWEN35_4B_CONFIG',
+    visionConfigExport: 'QWEN35_VL_4B_VISION_CONFIG',
+    streamingLoad: true,
+    desktopMaxSeq: 4096
+  },
+  'b2-9b': {
+    id: 'b2-9b',
+    family: 'b2',
+    name: '9B',
+    sizeLabel: '2.4 GB',
+    base: 'https://huggingface.co/mentriaai/Ternary-Bonsai-2-9B-mentria/resolve/main/',
+    shards: [
+      'bonsai2-9b-q2g128-00001-of-00002.safetensors',
+      'bonsai2-9b-q2g128-00002-of-00002.safetensors'
+    ],
+    visionShards: ['qwen3.5-9b-vl-q4.safetensors'],
+    configExport: 'QWEN35_9B_BONSAI2_CONFIG',
+    visionConfigExport: 'QWEN35_VL_9B_VISION_CONFIG',
+    streamingLoad: true,
+    desktopMaxSeq: 4096
+  },
   '27b': {
     id: '27b',
+    family: 'bonsai',
     name: '27B',
-    order: 3,
     sizeLabel: '3.8 GB',
     base: 'https://huggingface.co/mentriaai/Bonsai-27B-mentria/resolve/main/',
     shards: [
@@ -107,6 +161,26 @@ export const TIERS = {
     discreteMaxSeq: 1024
   }
 };
+
+for (const id of Object.keys(TIERS)) {
+  const i = TIER_CHAIN.indexOf(id);
+  TIERS[id].order = i >= 0 ? TIER_CHAIN.length - 1 - i : -1;
+  TIERS[id].legacy = i < 0;
+}
+
+export function isLegacyTier(id) { return !!(TIERS[id] && TIERS[id].legacy); }
+
+const SLOT_MAP = { '0.8b': 'b2-2b', '2b': 'b2-4b', '4b': 'b2-9b' };
+
+(function migrateStoredTiers() {
+  try {
+    const map = FAMILY === 'b2' ? SLOT_MAP : Object.fromEntries(Object.entries(SLOT_MAP).map(([a, b]) => [b, a]));
+    const pref = localStorage.getItem(LS_PREF);
+    if (map[pref]) localStorage.setItem(LS_PREF, map[pref]);
+    const cap = (localStorage.getItem(LS_CAP) || '').split('|')[0];
+    if (cap && TIERS[cap] && TIERS[cap].legacy) localStorage.removeItem(LS_CAP);
+  } catch (_) {}
+})();
 
 const IS_IOS = typeof navigator !== 'undefined' &&
   (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -184,7 +258,7 @@ function capAllows(id) {
 
 export function setTierCap(id) {
   try {
-    if (!id || !TIERS[id]) return;
+    if (!id || !TIERS[id] || TIERS[id].legacy) return;
     localStorage.setItem(LS_CAP, id + '|' + Date.now());
   } catch (_) {}
 }
@@ -201,10 +275,39 @@ export function setValidatedTier(id) {
     if (!id || !TIERS[id]) return;
     const cap = getTierCap();
     if (cap && TIERS[id].order > TIERS[cap].order) return;
+    if (!TIERS[id].legacy) purgeLegacyModels();
     const cur = getValidatedTier();
     if (cur && TIERS[cur].order >= TIERS[id].order) return;
     localStorage.setItem(LS_VALID, id);
   } catch (_) {}
+}
+
+let purging = null;
+export function purgeLegacyModels() {
+  if (FAMILY !== 'b2' || typeof caches === 'undefined') return Promise.resolve(0);
+  if (purging) return purging;
+  const repos = LEGACY_CHAIN.map((id) => repoOf(TIERS[id])).filter(Boolean);
+  purging = (async () => {
+    let n = 0;
+    try {
+      const c = await caches.open('mentria-models');
+      for (const req of await c.keys()) {
+        const path = new URL(req.url).pathname;
+        if (repos.some((r) => path.indexOf('/' + r + '/') >= 0) && await c.delete(req)) n++;
+      }
+      if (n) console.info('[mentria-tiers] removed ' + n + ' cached files of retired models');
+    } catch (_) {}
+    return n;
+  })();
+  return purging;
+}
+
+export function stripThink(text) {
+  const s = String(text || '');
+  const i = s.lastIndexOf('</think>');
+  if (i < 0) return s;
+  const after = s.slice(i + 8).replace(/^\s+/, '');
+  return after || s.slice(0, i).replace(/<think>/g, '').trim();
 }
 
 export function clearValidatedTier() {
@@ -214,11 +317,15 @@ export function clearValidatedTier() {
 export async function effectiveTier(opts) {
   const cachedOnly = !!(opts && opts.cachedOnly);
   if (typeof navigator === 'undefined' || !navigator.gpu) return null;
-  if (IS_IOS) return cachedOnly ? ((await isTierCached('0.8b')) ? '0.8b' : null) : '0.8b';
+  if (IS_IOS) {
+    if (!cachedOnly) return SMALL_TIER;
+    for (const id of [SMALL_TIER].concat(LEGACY_CHAIN.slice(-1))) if (await isTierCached(id)) return id;
+    return null;
+  }
   const caps = await detectCaps();
   if (!caps) return null;
   if (cachedOnly) {
-    for (const id of TIER_CHAIN) {
+    for (const id of TIER_CHAIN.concat(LEGACY_CHAIN)) {
       if (capAllows(id) && await isTierCached(id)) return id;
     }
     return null;
@@ -234,7 +341,7 @@ export async function effectiveTier(opts) {
     if (!(await isTierCached(id))) continue;
     if (eligible.has(id)) return id;
   }
-  return '0.8b';
+  return SMALL_TIER;
 }
 
 export async function isTierCached(id) {
@@ -247,8 +354,8 @@ export async function isTierCached(id) {
       let all = true;
       for (const shard of t.shards) {
         const u = b + shard;
-        const meta = u + (u.includes('?') ? '&' : '?') + 'mentria_seg=meta';
-        if (!((await caches.match(meta)) || (await caches.match(u)))) { all = false; break; }
+        const sep = u.includes('?') ? '&' : '?';
+        if (!((await caches.match(u + sep + 'mentria_seg=meta')) || (await caches.match(u + sep + 'mentria_seg=mig')) || (await caches.match(u)))) { all = false; break; }
       }
       if (all) return true;
     }
@@ -262,8 +369,8 @@ export async function decideTier() {
     return { tier: null, eligible: [], reasons: ['no-webgpu'], signals: {} };
   }
   if (IS_IOS) {
-    reasons.push('ios hard rule: 0.8b only');
-    const d = { tier: '0.8b', eligible: [], reasons, signals: { ios: true } };
+    reasons.push('ios hard rule: ' + SMALL_TIER + ' only');
+    const d = { tier: SMALL_TIER, eligible: [], reasons, signals: { ios: true } };
     logDecision(d);
     return d;
   }
@@ -287,28 +394,31 @@ export async function decideTier() {
   const big = canRunLargeModel(caps);
   const igpu = likelyIntegratedGpu(caps);
   const arch = String((caps.vendor && caps.vendor.architecture) || '');
-  const androidFlagship = IS_ANDROID && /^adreno-8/.test(arch) && caps.limits.maxBufferSize >= 2 * GiB && caps.limits.maxStorageBufferBindingSize >= GiB;
+  const androidFlagship = FAMILY === 'q4' && IS_ANDROID && /^adreno-8/.test(arch) && caps.limits.maxBufferSize >= 2 * GiB && caps.limits.maxStorageBufferBindingSize >= GiB;
   if (androidFlagship) reasons.push('android flagship gpu ' + arch + ': 4b allowed');
   const hard4 = (IS_DESKTOP && big.capable === true) || androidFlagship;
   const hard27 = IS_DESKTOP && hard4 && !igpu;
   const dmOk2 = dm !== undefined ? dm >= 8 : IS_DESKTOP;
   const hard2 = caps.limits.maxBufferSize >= GiB && dmOk2;
 
-  const [cached2, cached4, cached27] = await Promise.all([isTierCached('2b'), isTierCached('4b'), isTierCached('27b')]);
+  const [mid, top] = [TIER_CHAIN[2], TIER_CHAIN[1]];
+  const [cached2, cached4, cached27] = await Promise.all([isTierCached(mid), isTierCached(top), isTierCached('27b')]);
   const offer4 = hard4 && (quotaFree > 6e9 || cached4) && !saveData;
   const offer2 = hard2 && (quotaFree > 3e9 || cached2);
   const offer27 = hard27 && (quotaFree > 9e9 || cached27) && !saveData;
 
   const eligible = [];
-  if (offer2) eligible.push('2b');
-  if (offer4) eligible.push('4b');
+  if (offer2) eligible.push(mid);
+  if (offer4) eligible.push(top);
   if (offer27) eligible.push('27b');
 
-  let tier = '0.8b';
-  let why = 'default 0.8b';
+  let tier = SMALL_TIER;
+  let why = 'default ' + SMALL_TIER;
   const pref = getUserTier();
-  if (pref) {
-    const prefHard = pref === '0.8b' || (pref === '2b' && hard2) || (pref === '4b' && hard4) || (pref === '27b' && hard27);
+  if (pref && TIERS[pref].legacy) {
+    reasons.push('user-pref ' + pref + ' is a retired tier');
+  } else if (pref) {
+    const prefHard = pref === SMALL_TIER || (pref === mid && hard2) || (pref === top && hard4) || (pref === '27b' && hard27);
     if (prefHard && capAllows(pref)) {
       tier = pref;
       why = 'user-pref ' + pref;
@@ -324,6 +434,7 @@ export async function decideTier() {
     ' maxBind=' + (caps.limits.maxStorageBufferBindingSize / GiB).toFixed(1) + 'GiB' +
     ' deviceMemory=' + (dm === undefined ? 'n/a' : dm + 'GB') +
     ' platform=' + (IS_DESKTOP ? 'desktop' : IS_ANDROID ? 'android' : 'other') +
+    ' family=' + FAMILY +
     ' quotaFree=' + Math.round(quotaFree / 1e9) + 'GB' +
     ' saveData=' + saveData +
     ' igpu=' + igpu +
@@ -358,6 +469,9 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
       config = { ...config, attention: { ...config.attention, maxSeq: seq } };
     }
   }
+  if (t.desktopMaxSeq && IS_DESKTOP && t.desktopMaxSeq !== config.attention.maxSeq) {
+    config = { ...config, attention: { ...config.attention, maxSeq: t.desktopMaxSeq } };
+  }
   const shardBase = await resolveBase(t);
   const opts = {
     modelUrl: shardBase,
@@ -381,9 +495,14 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
 const CDN_MODELS = 'https://cdn.mentria.ai/models/';
 let basePicks = null;
 
+function repoOf(t) {
+  const m = ((t && t.base) || '').match(/huggingface\.co\/mentriaai\/([^/]+)\//);
+  return m ? m[1] : null;
+}
+
 function cdnBaseFor(t) {
-  const m = (t.base || '').match(/huggingface\.co\/mentriaai\/([^/]+)\//);
-  return m ? CDN_MODELS + m[1] + '/' : null;
+  const r = repoOf(t);
+  return r ? CDN_MODELS + r + '/' : null;
 }
 
 async function cachedBaseFor(t, cdn) {
@@ -393,7 +512,7 @@ async function cachedBaseFor(t, cdn) {
       if (!b) continue;
       const u = b + t.shards[0];
       const sep = u.includes('?') ? '&' : '?';
-      if (await c.match(u + sep + 'mentria_seg=meta') || await c.match(u)) return b;
+      if (await c.match(u + sep + 'mentria_seg=meta') || await c.match(u + sep + 'mentria_seg=mig') || await c.match(u)) return b;
     }
   } catch (_) {}
   return null;
@@ -408,22 +527,64 @@ export async function resolveBase(t) {
     try { basePicks = JSON.parse(sessionStorage.getItem('mentria-model-base') || '{}'); } catch (_) { basePicks = {}; }
   }
   const hit = basePicks[cdn];
-  if (hit && Date.now() - hit.t < 3600000) return hit.ok ? cdn : t.base;
-  let ok = false;
+  if (hit && hit.base && Date.now() - hit.t < 3600000) return hit.base;
+  const ctls = [new AbortController(), new AbortController()];
+  const timer = setTimeout(() => ctls.forEach((c) => c.abort()), PROBE_MS);
+  let pick = t.base;
   try {
-    const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), 2500);
-    const res = await fetch(cdn + t.shards[0], { method: 'HEAD', signal: ctl.signal });
-    clearTimeout(timer);
-    ok = res.ok;
+    pick = await Promise.any([probeBase(cdn, t.shards[0], ctls[0].signal), probeBase(t.base, t.shards[0], ctls[1].signal)]);
   } catch (_) {}
-  basePicks[cdn] = { ok, t: Date.now() };
+  clearTimeout(timer);
+  ctls.forEach((c) => c.abort());
+  basePicks[cdn] = { base: pick, t: Date.now() };
   try { sessionStorage.setItem('mentria-model-base', JSON.stringify(basePicks)); } catch (_) {}
-  return ok ? cdn : t.base;
+  return pick;
 }
 
-export async function loadWithFallback(createEngine, startTier, { vision = true, onFallback = null, validate = null, aborted = null, onlyCached = false } = {}) {
-  let chain = TIER_CHAIN.slice(TIER_CHAIN.indexOf(startTier));
+const PROBE_BYTES = 1048576;
+const PROBE_MS = 3000;
+
+async function probeBase(base, file, signal) {
+  const res = await fetch(base + file, { headers: { Range: 'bytes=0-' + (PROBE_BYTES - 1) }, cache: 'no-store', signal });
+  if (!res.ok || !res.body) throw new Error('probe ' + res.status);
+  const reader = res.body.getReader();
+  let got = 0;
+  while (got < PROBE_BYTES) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    got += value.byteLength;
+  }
+  reader.cancel().catch(() => {});
+  if (got < Math.min(PROBE_BYTES, 65536)) throw new Error('probe short');
+  return base;
+}
+
+async function compactTier(t, vision) {
+  const bases = [t.base];
+  const cdn = cdnBaseFor(t);
+  if (cdn) bases.unshift(cdn);
+  const files = t.shards.concat(vision && t.visionShards ? t.visionShards : []);
+  const urls = [];
+  for (const b of bases) for (const f of files) urls.push(b + f);
+  try {
+    const { compactShards } = await import('./mentria-model-cache.js');
+    const n = await compactShards(urls);
+    if (n) console.info('[mentria-tiers] re-split ' + n + ' cached file(s) of ' + t.id + ' into small pieces');
+  } catch (err) { console.warn('[mentria-tiers] cache re-split skipped', err); }
+}
+
+export async function loadWithFallback(createEngine, startTier, opts) {
+  const release = holdAwake();
+  try {
+    return await loadChain(createEngine, startTier, opts);
+  } finally {
+    release();
+  }
+}
+
+async function loadChain(createEngine, startTier, { vision = true, onFallback = null, validate = null, aborted = null, onlyCached = false } = {}) {
+  const order = onlyCached ? TIER_CHAIN.concat(LEGACY_CHAIN) : TIER_CHAIN;
+  let chain = order.slice(Math.max(0, order.indexOf(startTier)));
   if (onlyCached) {
     const kept = [];
     for (const id of chain) {
@@ -437,19 +598,22 @@ export async function loadWithFallback(createEngine, startTier, { vision = true,
     const engine = createEngine();
     try {
       await engine.init();
+      if (IS_IOS) await compactTier(TIERS[id], vision);
       const opts = await loadOptionsFor(id, { vision });
       const loadRes = await engine.loadModel(opts);
       try {
         if (loadRes && loadRes.decodeRoute) console.info('[mentria-tiers] ' + id + ' loaded', 'decodeRoute', loadRes.decodeRoute, 'adapter', loadRes.adapter);
       } catch (_) {}
       if (validate) await validate(engine, id);
+      const proven = getValidatedTier();
+      if (!TIERS[id].legacy && proven && !TIERS[proven].legacy) purgeLegacyModels();
       return { engine, tier: id, maxSeq: (opts.config.attention && opts.config.attention.maxSeq) || 2048, decodeRoute: (loadRes && loadRes.decodeRoute) || null };
     } catch (err) {
       lastErr = err;
       try { engine.terminate(); } catch (_) {}
       if (aborted && aborted()) throw err;
       const next = chain[i + 1];
-      const lower = TIER_CHAIN[TIER_CHAIN.indexOf(id) + 1];
+      const lower = TIERS[id].legacy ? null : TIER_CHAIN[TIER_CHAIN.indexOf(id) + 1];
       console.warn('[mentria-tiers] load failed for ' + id +
         (next ? ' — falling back to ' + next : ' — no tier left'), err);
       if (lower) setTierCap(lower);

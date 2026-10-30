@@ -796,16 +796,43 @@ try {
         document.addEventListener('mentria:ai-start', function () { count++; update(); });
         document.addEventListener('mentria:ai-stop', function () { count = Math.max(0, count - 1); update(); });
       })();
+      var wakeP = null;
+      var wakeModule = function () {
+        if (!wakeP) wakeP = import('/assets/js/mentria-wake.js').catch(function () { return null; });
+        return wakeP;
+      };
       window.mentriaWrapEngine = function (engine) {
         if (!engine || engine.__mTracked || typeof engine.generate !== 'function') return engine;
         engine.__mTracked = true;
         var orig = engine.generate.bind(engine);
-        engine.generate = function () {
+        var hideAfterThinkClose = function (params, onToken) {
+          if (!params || params.enableThinking !== false || typeof onToken !== 'function') return onToken;
+          var seen = '', opened = false, cut = false;
+          return function (ev) {
+            var t = ev && typeof ev.token === 'string' ? ev.token : '';
+            if (cut) {
+              if (ev && ev.finished) onToken(Object.assign({}, ev, { token: '', stopReason: 'think-close' }));
+              return;
+            }
+            if (t.indexOf('<think>') >= 0) opened = true;
+            if (!opened && !(ev && ev.finished) && t.indexOf('</think>') >= 0 && /\S/.test(seen.replace(/<\|[^|]*\|>/g, ''))) { cut = true; return; }
+            seen += t;
+            onToken(ev);
+          };
+        };
+        engine.generate = function (params, onToken) {
           document.dispatchEvent(new CustomEvent('mentria:ai-start'));
           var settled = false;
-          var stop = function () { if (settled) return; settled = true; document.dispatchEvent(new CustomEvent('mentria:ai-stop')); };
+          var releaseWake = null;
+          wakeModule().then(function (m) { if (m && !settled) releaseWake = m.holdAwake(); });
+          var stop = function () {
+            if (settled) return;
+            settled = true;
+            if (releaseWake) releaseWake();
+            document.dispatchEvent(new CustomEvent('mentria:ai-stop'));
+          };
           try {
-            var r = orig.apply(null, arguments);
+            var r = orig(params, hideAfterThinkClose(params, onToken));
             if (r && typeof r.then === 'function') r.then(stop, stop); else stop();
             return r;
           } catch (e) { stop(); throw e; }

@@ -549,6 +549,7 @@ import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/asset
 import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
+import { holdAwake } from '/assets/js/mentria-wake.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -833,6 +834,7 @@ let chunkAction = null;
 let profAction = null;
 let callAction = null;
 const call = { active: false, local: null, videoOn: false, micOff: false, cid: null, cids: new Set(), members: new Set(), invited: new Set(), sentTo: new Set(), connected: false, answerTimer: null };
+let callWake = null;
 const callTiles = new Map();
 const pendingStreams = new Map();
 const incomingRings = new Map();
@@ -1812,6 +1814,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     const key = ctx.peerId + ':' + m.id;
     const entry = incoming.get(key);
     if (!entry) return;
+    keepAwakeReceiving();
     const bytes = (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) ? data.byteLength : -1;
     const received = entry.received + bytes;
     if (bytes < 0 || received > entry.size || received > MAX_FILE) {
@@ -1980,6 +1983,15 @@ const undragEvents = ['dragleave', 'drop'];
 dragEvents.forEach(ev => els.drop.addEventListener(ev, (e) => { e.preventDefault(); els.drop.classList.add('comms__drop--hot'); }));
 undragEvents.forEach(ev => els.drop.addEventListener(ev, (e) => { e.preventDefault(); els.drop.classList.remove('comms__drop--hot'); }));
 const CHUNK = 32 * 1024;
+let recvWake = null;
+let recvTimer = 0;
+const keepAwakeReceiving = () => {
+  if (!recvWake) recvWake = holdAwake();
+  clearTimeout(recvTimer);
+  recvTimer = setTimeout(() => {
+    if (recvWake) { recvWake(); recvWake = null; }
+  }, 15000);
+};
 const sendOne = async (file, extra) => {
   const id = Math.random().toString(36).slice(2);
   const line = renderLine('you', '', { me: true, quiet: true, html: progressHTML(T.files.sending, file.name, file.size, 0) });
@@ -2030,8 +2042,13 @@ const sendFiles = async (fileList) => {
   const total = ok.reduce((s, f) => s + f.size, 0);
   if (ok.length > 1) sys(fmt(peers.size === 1 ? T.files.sending_to_one : T.files.sending_to_many, { n: ok.length, size: fmtSize(total), p: peers.size }));
   if (total > MAX_TOTAL_WARN) sys(fmt(T.files.heads_up, { size: fmtSize(total) }));
-  for (const file of ok) {
-    try { await sendOne(file); } catch (err) { sys(fmt(T.files.send_failed_for, { name: file.name, reason: why(err) })); }
+  const release = holdAwake();
+  try {
+    for (const file of ok) {
+      try { await sendOne(file); } catch (err) { sys(fmt(T.files.send_failed_for, { name: file.name, reason: why(err) })); }
+    }
+  } finally {
+    release();
   }
 };
 
@@ -2291,6 +2308,7 @@ const openCall = async () => {
   if (!room || room !== forRoom) { local.getTracks().forEach((t) => t.stop()); return false; }
   if (call.active) { local.getTracks().forEach((t) => t.stop()); return true; }
   call.active = true;
+  if (!callWake) callWake = holdAwake();
   call.local = local;
   call.videoOn = false;
   call.micOff = false;
@@ -2347,6 +2365,7 @@ const endCall = (silent, note) => {
   if (call.local) call.local.getTracks().forEach((t) => t.stop());
   call.local = null;
   call.active = false;
+  if (callWake) { callWake(); callWake = null; }
   call.connected = false;
   call.cid = null;
   call.cids.clear();

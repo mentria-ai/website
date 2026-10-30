@@ -1634,6 +1634,10 @@ body.is-tools-open { overflow: hidden; }
   .tools-popup__panel { --tp-bar-h: calc(44px + 1.5rem + 1px + env(safe-area-inset-top, 0px)); width: 100%; max-height: none; min-height: 100dvh; border: 0; border-radius: 0; padding: 0 1rem 6rem; }
   .tools-popup__bar { margin: 0 -1rem 0.25rem; padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1rem 0.75rem; }
 }
+@media (min-width: 641px) {
+  html.is-standalone .tools-popup { padding-bottom: calc(var(--app-bar-h) + 1rem); }
+  html.is-standalone .tools-popup__panel { max-height: calc(100dvh - 5.5rem - var(--app-bar-h)); }
+}
 
 .week-ring { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-right: 0.25rem; border-radius: 50%; color: var(--term-muted); text-decoration: none; }
 .week-ring svg { width: 22px; height: 22px; display: block; transform: rotate(-90deg); }

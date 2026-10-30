@@ -825,13 +825,15 @@
   }
 
   var enginePromise = null;
+  var engineTier = null;
+  var HINT_ONLY_TIERS = ['0.8b', 'b2-2b'];
   function loadEngine() {
-    if (window.__mentriaEngine) return Promise.resolve(window.__mentriaEngine);
+    if (window.__mentriaEngine) { engineTier = window.__mentriaEngine.mentriaTier || null; return Promise.resolve(window.__mentriaEngine); }
     if (enginePromise) return enginePromise;
     enginePromise = Promise.all([import('/assets/js/mentria-model.js'), import('/assets/mentria/dist/mentria.mjs')]).then(function (mods) {
       var ensureModel = mods[0].ensureModel, MentriaEngine = mods[1].MentriaEngine;
       var createEngine = function () { var e = new MentriaEngine('/assets/mentria/dist/worker.mjs'); if (window.mentriaWrapEngine) window.mentriaWrapEngine(e); return e; };
-      return ensureModel(createEngine, { cachedOnly: true }).then(function (res) { return res.engine; });
+      return ensureModel(createEngine, { cachedOnly: true }).then(function (res) { engineTier = res.tier; return res.engine; });
     });
     enginePromise.catch(function () { enginePromise = null; });
     return enginePromise;
@@ -839,18 +841,27 @@
   function canUseModel() {
     try { return !!(navigator.gpu && localStorage.getItem('mentria-tier-validated')); } catch (_) { return false; }
   }
+  var GRADE_SYSTEM = 'You grade a learner\'s short answer. Reply with exactly two lines. Line 1: VERDICT: RIGHT, VERDICT: PARTIAL or VERDICT: WRONG. Line 2: one short sentence of feedback addressed to the learner. No other text.';
+  var HINT_SYSTEM = 'You help a learner check a short answer against a reference answer. Reply with one short sentence addressed to the learner that says what their answer gets right and what it is missing. No other text.';
+  var ECHO = /^(one short sentence|line 2|verdict)/i;
+  function firstLine(text) {
+    return String(text || '').split('\n').map(function (x) { return x.trim(); }).filter(function (x) { return x && !ECHO.test(x); })[0] || '';
+  }
   function gradeWithModel(card, answer, ctx) {
-    return loadEngine().then(function (engine) {
+    return Promise.all([loadEngine(), import('/assets/js/mentria-model.js')]).then(function (mods) {
+      var engine = mods[0], stripThink = mods[1].stripThink;
       var ref = ctx.tx(card.model_answer || ''), rubric = ctx.tx(card.rubric || '');
-      var system = 'You grade a learner\'s short answer. Reply with exactly two lines. Line 1: VERDICT: RIGHT, VERDICT: PARTIAL or VERDICT: WRONG. Line 2: one short sentence of feedback addressed to the learner. No other text.';
+      var hint = !!engineTier && HINT_ONLY_TIERS.indexOf(engineTier) >= 0;
       var user = 'Question: ' + ctx.tx(card.prompt) + (ref ? '\nReference answer: ' + ref : '') + (rubric ? '\nA good answer covers: ' + rubric : '') + '\nLearner\'s answer: ' + answer;
       var out = '';
-      return engine.generate({ messages: [{ role: 'system', content: system }, { role: 'user', content: user }], maxTokens: 96, temperature: 0, enableThinking: false }, function (ev) {
+      return engine.generate({ messages: [{ role: 'system', content: hint ? HINT_SYSTEM : GRADE_SYSTEM }, { role: 'user', content: user }], maxTokens: hint ? 64 : 96, temperature: 0, enableThinking: false }, function (ev) {
         if (typeof ev.token === 'string' && !/^<\|[^|]*\|>$/.test(ev.token)) out += ev.token;
       }).then(function () {
+        out = stripThink(out);
+        if (hint) return { verdict: null, text: firstLine(out).slice(0, 240) };
         var m = out.match(/VERDICT:\s*(RIGHT|PARTIAL|WRONG)/i);
         if (!m) throw new Error('no-verdict');
-        var line = out.replace(/[\s\S]*?VERDICT:\s*(RIGHT|PARTIAL|WRONG)\s*/i, '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean)[0] || '';
+        var line = firstLine(out.replace(/[\s\S]*?VERDICT:\s*(RIGHT|PARTIAL|WRONG)\s*/i, ''));
         return { verdict: m[1].toLowerCase(), text: line.slice(0, 240) };
       });
     });
@@ -907,6 +918,7 @@
       p.classList.add('is-busy');
       gradeWithModel(card, answer, ctx).then(function (v) {
         p.classList.remove('is-busy');
+        if (!v.verdict) { selfGrade(v.text, had); return; }
         actions.remove();
         var msg = (v.verdict === 'partial' ? '<strong>' + esc(t('partial')) + '</strong> ' : '') + esc(v.text);
         finish(v.verdict === 'right', msg, had);
@@ -918,5 +930,5 @@
     return p;
   }
 
-  global.MentriaPackCards = { render: render, release: release, Ctx: Ctx, esc: esc, el: el };
+  global.MentriaPackCards = { render: render, release: release, Ctx: Ctx, esc: esc, el: el, grade: gradeWithModel };
 })(typeof window !== 'undefined' ? window : globalThis);

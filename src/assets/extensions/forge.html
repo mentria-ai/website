@@ -2,7 +2,7 @@
 {
   "id": "forge",
   "name": "Forge",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "icon": "⚒️",
   "author": "Mentria",
   "description": "Describe a small app; the model on this phone writes it, checks it, repairs it and installs it.",
@@ -126,7 +126,7 @@
   </div>
   <div class="chips hidden" id="chips"></div>
   <div class="hidden" id="more-panel">
-    <label><input type="checkbox" id="adapter"> <span>use the Forge adapter (the LoRA trained at the event: more first-try apps, slow on phones) <span id="adapter-state"></span></span></label>
+    <label id="adapter-row" class="hidden"><input type="checkbox" id="adapter"> <span>use the Forge adapter (the LoRA trained at the event: more first-try apps, slow on phones) <span id="adapter-state"></span></span></label>
     <label><span>Prompt style</span> <select id="prompt-style" aria-label="Prompt style"><option value="full">full, Saturday's prompt with an example</option><option value="lean">lean, tuned overnight for first-try success</option></select></label>
     <div class="row">
       <button id="save" type="button" disabled>Save file</button>
@@ -151,7 +151,7 @@
   </details>
   <details class="panel">
     <summary class="panel-summary"><span>Eval: held-out prompts, base vs adapter</span></summary>
-    <div class="row eval-row"><button id="eval-base" type="button">Run: base model</button><button id="eval-adapter" type="button">Run: with adapter</button></div>
+    <div class="row eval-row"><button id="eval-base" type="button">Run: base model</button><button id="eval-adapter" class="hidden" type="button">Run: with adapter</button></div>
     <pre id="eval-out"></pre>
   </details>
   <details class="panel">
@@ -358,7 +358,7 @@
   var evalRunning = false;
   async function runEval(withAdapter) {
     if ($('make').disabled || evalRunning) { setStatus('wait for the current run to finish'); return; }
-    if (withAdapter && !adapterAvailableFor(tierNow)) { setStatus('the adapter is for the 4B model'); return; }
+    if (withAdapter && !adapterAvailableFor(tierNow)) { setStatus('the adapter is not available on this model'); return; }
     var results = storage.get('eval') || [];
     var prevChecked = $('adapter').checked;
     evalRunning = true;
@@ -601,7 +601,8 @@
       var pref = storage.get('adapterOn');
       var wantAdapter = adapterAvailableFor(tierNow) && pref === true;
       $('adapter').checked = wantAdapter;
-      if (!adapterAvailableFor(tierNow)) { $('adapter').disabled = true; $('adapter-state').textContent = '· 4B only'; }
+      if (!adapterAvailableFor(tierNow)) $('adapter').disabled = true;
+      else { $('adapter-row').classList.remove('hidden'); $('eval-adapter').classList.remove('hidden'); }
       if (M.warmLocalModel) {
         setStatus(wantAdapter ? 'warming the model and the Forge adapter…' : 'warming the model…');
         try {

@@ -1,0 +1,1216 @@
+---
+layout: base.njk
+pagination:
+  data: locales
+  size: 1
+  alias: locale
+permalink: "{{ locale.pathPrefix }}/tools/pdf/index.html"
+eleventyComputed:
+  lang: "{{ locale.code }}"
+  title: "{{ 'tools.pdf.title' | t }}"
+  description: "{{ 'tools.pdf.lede' | t }}"
+---
+<section class="hero" style="padding-top:1rem;">
+  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">pdf</span></p>
+  <h1>{{ "tools.pdf.title" | t }}</h1>
+  <p>{{ "tools.pdf.lede" | t }}</p>
+  {% include "tldr.njk" %}
+</section>
+
+{% set terminalTitle = "pdf.js" %}
+{% include "terminal-frame-open.njk" %}
+<section class="pdf" id="pdf">
+  <div class="pdf__start" id="pdf-start">
+    <div class="pdf__drop" id="pdf-drop">
+      <svg class="pdf__drop-icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#tool-pdf"></use></svg>
+      <p class="pdf__drop-title">{{ "tool.pdf.drop" | t }}</p>
+      <div class="pdf__drop-acts">
+        <button type="button" class="m-btn m-btn--primary" id="pdf-open">{{ "tool.pdf.open" | t }}</button>
+        <button type="button" class="m-btn m-btn--ghost" id="pdf-combine">{{ "tool.pdf.combine" | t }}</button>
+      </div>
+      <p class="pdf__hint">{{ "tool.pdf.drop_hint" | t }}</p>
+    </div>
+    <div class="pdf__can">
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><p><b>{{ "tool.pdf.can_read_t" | t }}</b><span>{{ "tool.pdf.can_read" | t }}</span></p></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg><p><b>{{ "tool.pdf.can_edit_t" | t }}</b><span>{{ "tool.pdf.can_edit" | t }}</span></p></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2.5-3 4-6 6-6s-1 6 1 6 3-4 5-4 1 4 3 4 3-2 3-2"/><path d="M3 21h18"/></svg><p><b>{{ "tool.pdf.can_sign_t" | t }}</b><span>{{ "tool.pdf.can_sign" | t }}</span></p></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><p><b>{{ "tool.pdf.can_pages_t" | t }}</b><span>{{ "tool.pdf.can_pages" | t }}</span></p></div>
+    </div>
+  </div>
+
+  <div class="pdf__app" id="pdf-app" hidden>
+    <div class="pdf__top">
+      <div class="pdf__file"><span class="pdf__name" id="pdf-name"></span><span class="pdf__meta" id="pdf-meta"></span></div>
+      <div class="m-seg pdf__modes" id="pdf-modes" role="group" aria-label="{{ 'tool.pdf.modes_label' | t }}">
+        <button type="button" data-mode="read" class="is-active" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg>{{ "tool.pdf.mode_read" | t }}</button>
+        <button type="button" data-mode="edit" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>{{ "tool.pdf.mode_edit" | t }}</button>
+        <button type="button" data-mode="pages" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>{{ "tool.pdf.mode_pages" | t }}</button>
+      </div>
+      <div class="pdf__acts">
+        <button type="button" class="pdf__ib" id="pdf-another" title="{{ 'tool.pdf.open_other' | t }}" aria-label="{{ 'tool.pdf.open_other' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
+        <button type="button" class="pdf__ib" id="pdf-share" title="{{ 'tool.pdf.share' | t }}" aria-label="{{ 'tool.pdf.share' | t }}" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg></button>
+        <button type="button" class="m-btn m-btn--primary pdf__save" id="pdf-save" title="{{ 'tool.pdf.save' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg><span>{{ "tool.pdf.save" | t }}</span></button>
+      </div>
+    </div>
+
+    <div class="pdf__bar" id="pdf-readbar">
+      <button type="button" class="pdf__ib pdf__wide" id="pdf-prev" title="{{ 'tool.pdf.prev' | t }}" aria-label="{{ 'tool.pdf.prev' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="pdf__page pdf__wide" id="pdf-page" aria-live="polite"></span>
+      <button type="button" class="pdf__ib pdf__wide" id="pdf-next" title="{{ 'tool.pdf.next' | t }}" aria-label="{{ 'tool.pdf.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+      <span class="pdf__sep pdf__wide"></span>
+      <button type="button" class="pdf__ib" id="pdf-zoom-out" title="{{ 'tool.pdf.zoom_out' | t }}" aria-label="{{ 'tool.pdf.zoom_out' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+      <span class="pdf__zoom" id="pdf-zoom"></span>
+      <button type="button" class="pdf__ib" id="pdf-zoom-in" title="{{ 'tool.pdf.zoom_in' | t }}" aria-label="{{ 'tool.pdf.zoom_in' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button type="button" class="pdf__ib" id="pdf-fit" title="{{ 'tool.pdf.fit' | t }}" aria-label="{{ 'tool.pdf.fit' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+      <span class="pdf__sep"></span>
+      <button type="button" class="pdf__ib" id="pdf-dark" title="{{ 'tool.pdf.dark' | t }}" aria-label="{{ 'tool.pdf.dark' | t }}" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+      <button type="button" class="pdf__ib" id="pdf-side" title="{{ 'tool.pdf.side' | t }}" aria-label="{{ 'tool.pdf.side' | t }}" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+      <button type="button" class="pdf__ib pdf__end" id="pdf-search" title="{{ 'tool.pdf.search' | t }}" aria-label="{{ 'tool.pdf.search' | t }}" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+    </div>
+    <form class="pdf__findrow" id="pdf-findrow" role="search" hidden>
+      <label class="pdf__find"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input type="search" id="pdf-find" placeholder="{{ 'tool.pdf.find_ph' | t }}" aria-label="{{ 'tool.pdf.find_ph' | t }}" enterkeyhint="search" autocomplete="off"><em id="pdf-find-count"></em></label>
+      <button type="button" class="pdf__ib" id="pdf-find-prev" title="{{ 'tool.pdf.find_prev' | t }}" aria-label="{{ 'tool.pdf.find_prev' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg></button>
+      <button type="button" class="pdf__ib" id="pdf-find-next" title="{{ 'tool.pdf.find_next' | t }}" aria-label="{{ 'tool.pdf.find_next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    </form>
+
+    <div class="pdf__bar" id="pdf-editbar" hidden>
+      <div class="pdf__tools" role="group" aria-label="{{ 'tool.pdf.mode_edit' | t }}">
+        <button type="button" class="pdf__chip" data-tool="highlight" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg>{{ "tool.pdf.t_highlight" | t }}</button>
+        <button type="button" class="pdf__chip" data-tool="text" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>{{ "tool.pdf.t_text" | t }}</button>
+        <button type="button" class="pdf__chip" data-tool="draw" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c3-4 5 2 8-2s4-6 7-3 3 2 3 2"/></svg>{{ "tool.pdf.t_draw" | t }}</button>
+        <button type="button" class="pdf__chip" data-tool="image" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>{{ "tool.pdf.t_image" | t }}</button>
+        <button type="button" class="pdf__chip" data-tool="sign" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2.5-3 4-6 6-6s-1 6 1 6 3-4 5-4 1 4 3 4 3-2 3-2"/><path d="M3 21h18"/></svg>{{ "tool.pdf.t_sign" | t }}</button>
+      </div>
+      <div class="pdf__opts">
+        <span class="pdf__sep pdf__wide"></span>
+        <div class="pdf__swatches" id="pdf-swatches" role="radiogroup" aria-label="{{ 'tool.pdf.color' | t }}"></div>
+        <span class="pdf__sep"></span>
+        <button type="button" class="pdf__ib" id="pdf-undo" title="{{ 'tool.pdf.undo' | t }}" aria-label="{{ 'tool.pdf.undo' | t }}" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+        <button type="button" class="pdf__ib" id="pdf-redo" title="{{ 'tool.pdf.redo' | t }}" aria-label="{{ 'tool.pdf.redo' | t }}" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+        <button type="button" class="pdf__ib" id="pdf-del" title="{{ 'tool.pdf.delete_item' | t }}" aria-label="{{ 'tool.pdf.delete_item' | t }}" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+        <span class="pdf__hint pdf__wide pdf__end" id="pdf-edit-hint"></span>
+      </div>
+    </div>
+
+    <div class="pdf__view" id="pdf-view">
+      <aside class="pdf__rail" id="pdf-rail">
+        <div class="pdf__rail-tabs" role="tablist">
+          <button type="button" role="tab" data-rail="thumbs" aria-selected="true" class="is-on">{{ "tool.pdf.tab_pages" | t }}</button>
+          <button type="button" role="tab" data-rail="outline" aria-selected="false">{{ "tool.pdf.tab_outline" | t }}</button>
+        </div>
+        <div class="pdf__thumbs" id="pdf-thumbs"></div>
+        <div class="pdf__outline" id="pdf-outline" hidden></div>
+      </aside>
+      <div class="pdf__stage" id="pdf-stage">
+        <div class="pdf__scroll" id="pdf-scroll"><div class="pdfViewer" id="pdf-viewer"></div></div>
+        <div class="pdf__float pdf__narrow" id="pdf-float" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="pdf__pages" id="pdf-pages" hidden>
+      <div class="pdf__grid" id="pdf-grid" role="listbox" aria-multiselectable="true" aria-label="{{ 'tool.pdf.mode_pages' | t }}"></div>
+      <div class="pdf__tray">
+        <span class="pdf__hint" id="pdf-pages-hint"></span>
+        <button type="button" class="m-btn m-btn--ghost" data-act="add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 12v6M9 15h6"/></svg><span>{{ "tool.pdf.p_add" | t }}</span></button>
+        <button type="button" class="m-btn m-btn--ghost" data-act="rotate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><span>{{ "tool.pdf.p_rotate" | t }}</span></button>
+        <button type="button" class="m-btn m-btn--ghost" data-act="delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg><span>{{ "tool.pdf.p_delete" | t }}</span></button>
+        <button type="button" class="m-btn m-btn--ghost" data-act="extract"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M9 15h6"/></svg><span>{{ "tool.pdf.p_extract" | t }}</span></button>
+        <button type="button" class="m-btn m-btn--ghost" data-act="split"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span>{{ "tool.pdf.p_split" | t }}</span></button>
+        <button type="button" class="m-btn m-btn--ghost" data-act="images"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span>{{ "tool.pdf.p_images" | t }}</span></button>
+      </div>
+    </div>
+  </div>
+
+  <form class="pdf__pass" id="pdf-pass" hidden>
+    <p class="pdf__pass-title">{{ "tool.pdf.pass_title" | t }}</p>
+    <p class="pdf__hint" id="pdf-pass-msg"></p>
+    <input class="m-input pdf__pass-input" type="password" id="pdf-pass-input" placeholder="{{ 'tool.pdf.pass_ph' | t }}" aria-label="{{ 'tool.pdf.pass_ph' | t }}" autocomplete="off">
+    <div class="pdf__drop-acts">
+      <button type="submit" class="m-btn m-btn--primary">{{ "tool.pdf.pass_open" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" id="pdf-pass-cancel">{{ "tool.pdf.pass_cancel" | t }}</button>
+    </div>
+  </form>
+
+  <p class="pdf__status" id="pdf-status" role="status" aria-live="polite"></p>
+
+  <input type="file" id="pdf-file" accept="application/pdf,.pdf" hidden>
+  <input type="file" id="pdf-files" accept="application/pdf,.pdf" multiple hidden>
+  <input type="file" id="pdf-image" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden>
+</section>
+
+<div class="m-modal pdf-sig" id="pdf-sig" hidden>
+  <div class="m-modal__card pdf-sig__card" aria-labelledby="pdf-sig-title">
+    <p class="pdf-sig__title" id="pdf-sig-title">{{ "tool.pdf.sig_title" | t }}</p>
+    <div class="m-seg pdf-sig__tabs" role="group">
+      <button type="button" data-sig="draw" class="is-active" aria-pressed="true">{{ "tool.pdf.sig_draw" | t }}</button>
+      <button type="button" data-sig="type" aria-pressed="false">{{ "tool.pdf.sig_type" | t }}</button>
+    </div>
+    <canvas class="pdf-sig__pad" id="pdf-sig-pad" width="720" height="260" aria-label="{{ 'tool.pdf.sig_draw' | t }}"></canvas>
+    <input class="m-input pdf-sig__name" id="pdf-sig-name" placeholder="{{ 'tool.pdf.sig_name_ph' | t }}" aria-label="{{ 'tool.pdf.sig_name_ph' | t }}" hidden autocomplete="name">
+    <label class="pdf-sig__keep"><input type="checkbox" id="pdf-sig-keep"> {{ "tool.pdf.sig_keep" | t }}</label>
+    <div class="pdf-sig__acts">
+      <button type="button" class="m-btn m-btn--ghost" id="pdf-sig-saved" hidden>{{ "tool.pdf.sig_saved" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" id="pdf-sig-clear">{{ "tool.pdf.sig_clear" | t }}</button>
+      <button type="button" class="m-btn m-btn--ghost" id="pdf-sig-cancel">{{ "tool.pdf.sig_cancel" | t }}</button>
+      <button type="button" class="m-btn m-btn--primary" id="pdf-sig-use">{{ "tool.pdf.sig_use" | t }}</button>
+    </div>
+  </div>
+</div>
+{% include "terminal-frame-close.njk" %}
+
+{% set pdfKeys = ["pages_count", "pages_one", "selected", "edited", "saved", "find_count", "find_none", "no_outline", "hint_highlight", "hint_text", "hint_draw", "hint_image", "hint_sign", "hint_none", "p_hint", "p_hint_touch", "p_from", "p_need_sel", "p_split_need", "p_deleted", "p_deleted_one", "p_undo", "p_keep_one", "p_locked", "p_working", "p_extracted", "p_split_done", "p_images_done", "page_label", "pass_need", "pass_wrong", "loading", "opening", "not_pdf", "bad_pdf", "offline_first", "load_failed", "save_failed", "sig_empty", "part", "color", "pages_name", "extract_name"] %}
+<script>
+window.MENTRIA_PDF_COPY = {
+{%- for k in pdfKeys %}
+  {{ k }}: {{ ("tool.pdf." + k) | t | dump | safe }},
+{%- endfor %}
+};
+</script>
+<script type="module">
+const V = '/assets/vendor/pdfjs-6.4.299/';
+const PL = '/assets/vendor/pdf-lib-1.17.1/pdf-lib.esm.min.js';
+const C = window.MENTRIA_PDF_COPY;
+const $ = (id) => document.getElementById(id);
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const COARSE = matchMedia('(pointer: coarse)').matches;
+const fill = (s, o) => String(s).replace(/\{(\w+)\}/g, (_, k) => (o && o[k] != null ? o[k] : ''));
+const toast = (m) => { if (window.MentriaUI && window.MentriaUI.toast) window.MentriaUI.toast(m); };
+const say = (m) => { $('pdf-status').textContent = m || ''; };
+const HL_COLORS = ['#6ef3c5', '#fbbf24', '#f472b6', '#67e8f9'];
+const PEN_COLORS = ['#111827', '#1d4ed8', '#dc2626', '#15803d'];
+
+const st = {
+  core: null, view: null, doc: null, bytes: null, name: '', size: 0, locked: false,
+  viewer: null, bus: null, link: null, find: null,
+  mode: 'read', tool: null, dirty: false, hl: HL_COLORS[0], pen: PEN_COLORS[0],
+  sources: [], pages: [], sel: new Set(), pagesDirty: false, nextId: 1, pageCount: 0
+};
+
+let libP = null;
+function lib() {
+  if (!libP) {
+    libP = (async () => {
+      if (!document.getElementById('pdf-viewer-css')) {
+        const l = document.createElement('link');
+        l.id = 'pdf-viewer-css';
+        l.rel = 'stylesheet';
+        l.href = V + 'pdf_viewer.css';
+        document.head.appendChild(l);
+      }
+      const core = await import(V + 'pdf.min.mjs');
+      core.GlobalWorkerOptions.workerSrc = V + 'pdf.worker.min.mjs';
+      globalThis.pdfjsLib = core;
+      const view = await import(V + 'pdf_viewer.mjs');
+      st.core = core;
+      st.view = view;
+      return { core, view };
+    })().catch((e) => { libP = null; throw e; });
+  }
+  return libP;
+}
+let plP = null;
+function pdfLib() {
+  if (!plP) plP = import(PL).catch((e) => { plP = null; throw e; });
+  return plP;
+}
+
+function baseName() { return (st.name || 'document.pdf').replace(/\.pdf$/i, ''); }
+function isPdf(f) { return !!f && (/pdf$/i.test(f.type || '') || /\.pdf$/i.test(f.name || '')); }
+
+function docArgs(bytes) {
+  return { data: bytes.slice(), cMapUrl: V + 'cmaps/', cMapPacked: true, standardFontDataUrl: V + 'standard_fonts/', wasmUrl: V + 'wasm/', iccUrl: V + 'iccs/', isEvalSupported: false, enableXfa: false };
+}
+
+let passCb = null;
+function askPassword(update, reason) {
+  const P = st.core.PasswordResponses;
+  st.locked = true;
+  passCb = update;
+  $('pdf-pass-msg').textContent = reason === P.INCORRECT_PASSWORD ? C.pass_wrong : C.pass_need;
+  $('pdf-pass').hidden = false;
+  $('pdf-start').hidden = true;
+  $('pdf-pass-input').value = '';
+  $('pdf-pass-input').focus();
+}
+let passTask = null;
+$('pdf-pass').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (passCb) passCb($('pdf-pass-input').value);
+});
+$('pdf-pass-cancel').addEventListener('click', () => {
+  $('pdf-pass').hidden = true;
+  passCb = null;
+  if (passTask) { try { passTask.destroy(); } catch (_) {} }
+  if (!st.doc) $('pdf-start').hidden = false;
+});
+
+async function loadDoc(bytes) {
+  const L = await lib();
+  const task = L.core.getDocument(docArgs(bytes));
+  passTask = task;
+  st.locked = false;
+  task.onPassword = (update, reason) => askPassword(update, reason);
+  const doc = await task.promise;
+  $('pdf-pass').hidden = true;
+  passCb = null;
+  return doc;
+}
+
+async function openFiles(files, toPages) {
+  const list = Array.from(files || []).filter(isPdf);
+  if (!list.length) { if (files && files.length) toast(C.not_pdf); return; }
+  const first = list[0];
+  const ok = await openBytes(new Uint8Array(await first.arrayBuffer()), first.name || 'document.pdf', { fresh: true });
+  if (!ok) return;
+  if (list.length > 1 || toPages) {
+    await setMode('pages');
+    for (const f of list.slice(1)) await addSource(f);
+  }
+}
+
+async function openBytes(bytes, name, opts) {
+  const o = opts || {};
+  say(st.core ? C.opening : C.loading);
+  let doc;
+  try {
+    doc = await loadDoc(bytes);
+  } catch (e) {
+    $('pdf-pass').hidden = true;
+    if (!st.doc) { $('pdf-start').hidden = false; $('pdf-app').hidden = true; }
+    if (!st.core) say(navigator.onLine === false ? C.offline_first : C.load_failed);
+    else say(e && e.name === 'PasswordException' ? '' : C.bad_pdf);
+    return false;
+  }
+  if (st.doc && st.doc !== doc) { try { await st.doc.destroy(); } catch (_) {} }
+  st.doc = doc;
+  st.bytes = bytes;
+  st.pageCount = doc.numPages;
+  if (o.fresh) {
+    st.name = name;
+    st.size = bytes.byteLength;
+    st.sources = [];
+    st.pages = [];
+    st.sel.clear();
+    st.pagesDirty = false;
+  }
+  setDirty(false);
+  doc.annotationStorage.onSetModified = () => setDirty(true);
+  say('');
+  $('pdf-start').hidden = true;
+  $('pdf-app').hidden = false;
+  mountViewer(o.page || null);
+  loadRail();
+  return true;
+}
+
+function freshScroll() {
+  const old = $('pdf-scroll');
+  const box = old.cloneNode(false);
+  const inner = document.createElement('div');
+  inner.className = 'pdfViewer';
+  inner.id = 'pdf-viewer';
+  box.appendChild(inner);
+  old.replaceWith(box);
+  return { box, inner };
+}
+
+function remembered() {
+  const fp = st.doc && st.doc.fingerprints && st.doc.fingerprints[0];
+  if (!fp || !window.MentriaStore) return 0;
+  const map = window.MentriaStore.get('tools', 'pdf_pos') || {};
+  return (map[fp] && map[fp].p) || 0;
+}
+let posTimer = 0;
+function rememberPage(n) {
+  const fp = st.doc && st.doc.fingerprints && st.doc.fingerprints[0];
+  if (!fp || !window.MentriaStore) return;
+  clearTimeout(posTimer);
+  posTimer = setTimeout(() => {
+    const map = Object.assign({}, window.MentriaStore.get('tools', 'pdf_pos') || {});
+    map[fp] = { p: n, t: Date.now() };
+    const keys = Object.keys(map).sort((a, b) => map[b].t - map[a].t);
+    for (const k of keys.slice(40)) delete map[k];
+    window.MentriaStore.set('tools', 'pdf_pos', map);
+  }, 600);
+}
+
+function mountViewer(page) {
+  const { core, view } = st;
+  if (st.viewer) { try { st.viewer.setDocument(null); st.link.setDocument(null); } catch (_) {} }
+  const { box, inner } = freshScroll();
+  const bus = new view.EventBus();
+  const link = new view.PDFLinkService({ eventBus: bus });
+  const find = new view.PDFFindController({ eventBus: bus, linkService: link });
+  const viewer = new view.PDFViewer({
+    container: box,
+    viewer: inner,
+    eventBus: bus,
+    linkService: link,
+    findController: find,
+    textLayerMode: 1,
+    annotationMode: core.AnnotationMode.ENABLE_FORMS,
+    annotationEditorMode: core.AnnotationEditorType.NONE,
+    annotationEditorHighlightColors: HL_COLORS.map((c, i) => 'c' + i + '=' + c).join(','),
+    enableHighlightFloatingButton: false,
+    maxCanvasPixels: IS_IOS ? 4194304 : 16777216,
+    removePageBorders: false
+  });
+  link.setViewer(viewer);
+  st.viewer = viewer;
+  st.bus = bus;
+  st.link = link;
+  st.find = find;
+  bus.on('pagesinit', () => {
+    st.pending = page || remembered() || 1;
+    if (!$('pdf-view').hidden) settleView();
+    showPage(viewer.currentPageNumber);
+    applyMode();
+  });
+  bus.on('pagechanging', (e) => { showPage(e.pageNumber); rememberPage(e.pageNumber); });
+  bus.on('scalechanging', (e) => { $('pdf-zoom').textContent = Math.round(e.scale * 100) + '%'; });
+  const counted = (mc) => {
+    const q = $('pdf-find').value.trim();
+    $('pdf-find-count').textContent = !q ? '' : (mc && mc.total ? fill(C.find_count, { c: mc.current, t: mc.total }) : C.find_none);
+  };
+  bus.on('updatefindmatchescount', (e) => counted(e.matchesCount));
+  bus.on('updatefindcontrolstate', (e) => counted(e.matchesCount));
+  bus.on('annotationeditorstateschanged', (e) => {
+    const d = e.details || {};
+    $('pdf-undo').disabled = !d.hasSomethingToUndo;
+    $('pdf-redo').disabled = !d.hasSomethingToRedo;
+    $('pdf-del').disabled = !d.hasSelectedEditor;
+  });
+  viewer.setDocument(st.doc);
+  link.setDocument(st.doc, null);
+  updateMeta();
+}
+
+function settleView() {
+  if (!st.viewer || st.pending == null) return;
+  const want = st.pending;
+  st.pending = null;
+  st.viewer.currentScaleValue = 'auto';
+  if (want > 1 && want <= st.doc.numPages) st.viewer.currentPageNumber = want;
+}
+
+function showPage(n) {
+  const t = fill(C.page_label, { n, t: st.pageCount });
+  $('pdf-page').textContent = t;
+  $('pdf-float').textContent = t;
+}
+
+function updateMeta() {
+  $('pdf-name').textContent = st.name;
+  const n = st.mode === 'pages' && st.pages.length ? st.pages.length : st.pageCount;
+  const parts = [n === 1 ? C.pages_one : fill(C.pages_count, { n })];
+  if (st.mode === 'pages' && st.sel.size) parts.push(fill(C.selected, { n: st.sel.size }));
+  else if (st.dirty || st.pagesDirty) parts.push(C.edited);
+  $('pdf-meta').textContent = parts.join(' · ');
+  $('pdf-name').classList.toggle('is-dirty', !!(st.dirty || st.pagesDirty));
+}
+
+function setDirty(v) {
+  st.dirty = !!v;
+  updateMeta();
+}
+
+const thumbIO = 'IntersectionObserver' in window ? new IntersectionObserver((ents) => {
+  for (const en of ents) {
+    if (!en.isIntersecting) continue;
+    thumbIO.unobserve(en.target);
+    const fn = en.target.__draw;
+    if (fn) fn();
+  }
+}, { rootMargin: '300px' }) : null;
+
+async function drawThumb(canvas, doc, index, rotate, width) {
+  try {
+    const page = await doc.getPage(index + 1);
+    const base = page.getViewport({ scale: 1, rotation: (page.rotate + (rotate || 0)) % 360 });
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const scale = (width / base.width) * dpr;
+    const vp = page.getViewport({ scale, rotation: (page.rotate + (rotate || 0)) % 360 });
+    canvas.width = Math.ceil(vp.width);
+    canvas.height = Math.ceil(vp.height);
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    canvas.classList.add('is-drawn');
+  } catch (_) {}
+}
+function lazyThumb(canvas, draw) {
+  if (thumbIO) { canvas.__draw = draw; thumbIO.observe(canvas); } else draw();
+}
+
+function loadRail() {
+  const box = $('pdf-thumbs');
+  box.textContent = '';
+  const doc = st.doc;
+  for (let i = 0; i < doc.numPages; i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pdf__mini';
+    b.dataset.page = String(i + 1);
+    b.setAttribute('aria-label', fill(C.page_label, { n: i + 1, t: doc.numPages }));
+    const cv = document.createElement('canvas');
+    const num = document.createElement('i');
+    num.textContent = String(i + 1);
+    b.append(cv, num);
+    box.appendChild(b);
+    lazyThumb(cv, () => drawThumb(cv, doc, i, 0, 84));
+  }
+  const out = $('pdf-outline');
+  out.textContent = '';
+  doc.getOutline().then((items) => {
+    if (doc !== st.doc) return;
+    if (!items || !items.length) {
+      const p = document.createElement('p');
+      p.className = 'pdf__hint';
+      p.textContent = C.no_outline;
+      out.appendChild(p);
+      return;
+    }
+    const build = (list, depth) => {
+      const ul = document.createElement('ul');
+      for (const it of list) {
+        const li = document.createElement('li');
+        const a = document.createElement('button');
+        a.type = 'button';
+        a.textContent = it.title || '·';
+        a.style.paddingLeft = (0.4 + depth * 0.7) + 'rem';
+        a.addEventListener('click', () => { if (it.dest) st.link.goToDestination(it.dest); closeRailOnPhone(); });
+        li.appendChild(a);
+        if (it.items && it.items.length && depth < 4) li.appendChild(build(it.items, depth + 1));
+        ul.appendChild(li);
+      }
+      return ul;
+    };
+    out.appendChild(build(items, 0));
+  }).catch(() => {});
+}
+$('pdf-thumbs').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-page]');
+  if (!b || !st.viewer) return;
+  st.viewer.currentPageNumber = Number(b.dataset.page);
+  closeRailOnPhone();
+});
+document.querySelectorAll('[data-rail]').forEach((t) => t.addEventListener('click', () => {
+  const which = t.dataset.rail;
+  document.querySelectorAll('[data-rail]').forEach((x) => { const on = x === t; x.classList.toggle('is-on', on); x.setAttribute('aria-selected', String(on)); });
+  $('pdf-thumbs').hidden = which !== 'thumbs';
+  $('pdf-outline').hidden = which !== 'outline';
+}));
+function closeRailOnPhone() {
+  if (matchMedia('(max-width: 720px)').matches) setRail(false);
+}
+function setRail(on) {
+  $('pdf-view').classList.toggle('is-rail', on);
+  $('pdf-side').classList.toggle('is-on', on);
+  $('pdf-side').setAttribute('aria-pressed', String(on));
+}
+$('pdf-side').addEventListener('click', () => setRail(!$('pdf-view').classList.contains('is-rail')));
+
+$('pdf-prev').addEventListener('click', () => st.viewer && st.viewer.previousPage());
+$('pdf-next').addEventListener('click', () => st.viewer && st.viewer.nextPage());
+$('pdf-zoom-in').addEventListener('click', () => st.viewer && st.viewer.increaseScale());
+$('pdf-zoom-out').addEventListener('click', () => st.viewer && st.viewer.decreaseScale());
+$('pdf-fit').addEventListener('click', () => { if (st.viewer) st.viewer.currentScaleValue = 'page-width'; });
+$('pdf-dark').addEventListener('click', () => {
+  const on = !$('pdf-stage').classList.contains('is-dark');
+  $('pdf-stage').classList.toggle('is-dark', on);
+  $('pdf-dark').classList.toggle('is-on', on);
+  $('pdf-dark').setAttribute('aria-pressed', String(on));
+  if (window.MentriaStore) window.MentriaStore.set('tools', 'pdf_dark', on);
+});
+if (window.MentriaStore && window.MentriaStore.get('tools', 'pdf_dark') === true) {
+  $('pdf-stage').classList.add('is-dark');
+  $('pdf-dark').classList.add('is-on');
+  $('pdf-dark').setAttribute('aria-pressed', 'true');
+}
+
+function runFind(again, prev) {
+  if (!st.bus) return;
+  const q = $('pdf-find').value;
+  st.bus.dispatch('find', { source: null, type: again ? 'again' : '', query: q, caseSensitive: false, entireWord: false, highlightAll: true, findPrevious: !!prev, matchDiacritics: false });
+}
+let findTimer = 0;
+$('pdf-find').addEventListener('input', () => { clearTimeout(findTimer); findTimer = setTimeout(() => runFind(false, false), 200); });
+$('pdf-findrow').addEventListener('submit', (e) => { e.preventDefault(); runFind(true, false); });
+$('pdf-find-next').addEventListener('click', () => runFind(true, false));
+$('pdf-find-prev').addEventListener('click', () => runFind(true, true));
+$('pdf-find').addEventListener('keydown', (e) => { if (e.key === 'Escape') { setFind(false); } });
+function setFind(on) {
+  $('pdf-findrow').hidden = !on;
+  $('pdf-search').classList.toggle('is-on', on);
+  $('pdf-search').setAttribute('aria-pressed', String(on));
+  if (on) { $('pdf-find').focus(); $('pdf-find').select(); }
+  else if (st.bus) { $('pdf-find').value = ''; runFind(false, false); $('pdf-find-count').textContent = ''; }
+}
+$('pdf-search').addEventListener('click', () => setFind($('pdf-findrow').hidden));
+window.addEventListener('keydown', (e) => {
+  if (!st.doc || st.mode === 'pages') return;
+  if ((e.metaKey || e.ctrlKey) && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); if (st.mode !== 'read') setMode('read'); setFind(true); }
+});
+
+const EDIT_TYPES = () => {
+  const T = st.core.AnnotationEditorType;
+  return { highlight: T.HIGHLIGHT, text: T.FREETEXT, draw: T.INK, image: T.STAMP, sign: T.STAMP };
+};
+function editorMode(mode) {
+  if (!st.viewer) return;
+  try { st.viewer.annotationEditorMode = { mode }; } catch (_) {}
+}
+function param(type, value) {
+  if (st.bus) st.bus.dispatch('switchannotationeditorparams', { source: null, type, value });
+}
+function applyColor() {
+  const P = st.core.AnnotationEditorParamsType;
+  if (st.tool === 'highlight') param(P.HIGHLIGHT_COLOR, st.hl);
+  else if (st.tool === 'text') param(P.FREETEXT_COLOR, st.pen);
+  else if (st.tool === 'draw') param(P.INK_COLOR, st.pen);
+}
+function renderSwatches() {
+  const box = $('pdf-swatches');
+  box.textContent = '';
+  const pen = st.tool === 'text' || st.tool === 'draw';
+  const show = st.tool === 'highlight' || pen;
+  box.hidden = !show;
+  if (!show) return;
+  const list = pen ? PEN_COLORS : HL_COLORS;
+  const cur = pen ? st.pen : st.hl;
+  for (const c of list) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pdf__sw' + (c === cur ? ' is-on' : '');
+    b.style.background = c;
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-checked', String(c === cur));
+    b.setAttribute('aria-label', c);
+    b.addEventListener('click', () => {
+      if (pen) st.pen = c; else st.hl = c;
+      renderSwatches();
+      applyColor();
+    });
+    box.appendChild(b);
+  }
+}
+function setTool(name) {
+  st.tool = name;
+  document.querySelectorAll('[data-tool]').forEach((b) => {
+    const on = b.dataset.tool === name;
+    b.classList.toggle('is-on', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+  const hints = { highlight: C.hint_highlight, text: C.hint_text, draw: C.hint_draw, image: C.hint_image, sign: C.hint_sign };
+  $('pdf-edit-hint').textContent = name ? hints[name] : C.hint_none;
+  renderSwatches();
+  if (!st.core) return;
+  const T = st.core.AnnotationEditorType;
+  editorMode(name ? EDIT_TYPES()[name] : T.NONE);
+  setTimeout(applyColor, 0);
+}
+document.querySelectorAll('[data-tool]').forEach((b) => b.addEventListener('click', () => {
+  const name = b.dataset.tool;
+  if (name === 'image') { $('pdf-image').click(); return; }
+  if (name === 'sign') { openSig(); return; }
+  setTool(st.tool === name ? null : name);
+}));
+async function placeImage(file) {
+  if (!file || !st.core) return;
+  setTool(file.__sign ? 'sign' : 'image');
+  await new Promise((r) => setTimeout(r, 60));
+  param(st.core.AnnotationEditorParamsType.CREATE, { bitmapFile: file });
+}
+$('pdf-image').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) placeImage(f); });
+const editing = (name) => { if (st.bus) st.bus.dispatch('editingaction', { source: null, name }); };
+$('pdf-undo').addEventListener('click', () => editing('undo'));
+$('pdf-redo').addEventListener('click', () => editing('redo'));
+$('pdf-del').addEventListener('click', () => editing('delete'));
+
+const sigEl = $('pdf-sig');
+document.body.appendChild(sigEl);
+const sigModal = window.MentriaUI && window.MentriaUI.modal ? window.MentriaUI.modal(sigEl) : { open() { sigEl.hidden = false; }, close() { sigEl.hidden = true; } };
+const pad = $('pdf-sig-pad');
+const padCtx = pad.getContext('2d');
+let sigMode = 'draw';
+let inked = false;
+function clearPad() {
+  padCtx.clearRect(0, 0, pad.width, pad.height);
+  inked = false;
+}
+function savedSig() { return window.MentriaStore ? window.MentriaStore.get('tools', 'pdf_signature') : null; }
+function openSig() {
+  clearPad();
+  $('pdf-sig-name').value = '';
+  $('pdf-sig-saved').hidden = !savedSig();
+  $('pdf-sig-keep').checked = !!savedSig();
+  setSigMode('draw');
+  sigModal.open();
+}
+function setSigMode(m) {
+  sigMode = m;
+  document.querySelectorAll('[data-sig]').forEach((b) => { const on = b.dataset.sig === m; b.classList.toggle('is-active', on); b.setAttribute('aria-pressed', String(on)); });
+  pad.hidden = m !== 'draw';
+  $('pdf-sig-name').hidden = m !== 'type';
+  $('pdf-sig-clear').hidden = m !== 'draw';
+  if (m === 'type') $('pdf-sig-name').focus();
+}
+document.querySelectorAll('[data-sig]').forEach((b) => b.addEventListener('click', () => setSigMode(b.dataset.sig)));
+let drawing = null;
+function padPoint(e) {
+  const r = pad.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * (pad.width / r.width), y: (e.clientY - r.top) * (pad.height / r.height) };
+}
+pad.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  pad.setPointerCapture(e.pointerId);
+  drawing = padPoint(e);
+  padCtx.lineCap = 'round';
+  padCtx.lineJoin = 'round';
+  padCtx.strokeStyle = '#111';
+  padCtx.lineWidth = 5;
+});
+pad.addEventListener('pointermove', (e) => {
+  if (!drawing) return;
+  const p = padPoint(e);
+  padCtx.beginPath();
+  padCtx.moveTo(drawing.x, drawing.y);
+  padCtx.lineTo(p.x, p.y);
+  padCtx.stroke();
+  drawing = p;
+  inked = true;
+});
+const endDraw = () => { drawing = null; };
+pad.addEventListener('pointerup', endDraw);
+pad.addEventListener('pointercancel', endDraw);
+$('pdf-sig-clear').addEventListener('click', clearPad);
+$('pdf-sig-cancel').addEventListener('click', () => sigModal.close());
+function trimmed(src) {
+  const ctx = src.getContext('2d');
+  const { width: w, height: h } = src;
+  const data = ctx.getImageData(0, 0, w, h).data;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (data[(y * w + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return null;
+  const m = 8;
+  const out = document.createElement('canvas');
+  out.width = x1 - x0 + 1 + m * 2;
+  out.height = y1 - y0 + 1 + m * 2;
+  out.getContext('2d').drawImage(src, x0 - m, y0 - m, out.width, out.height, 0, 0, out.width, out.height);
+  return out;
+}
+function typedSig(name) {
+  const c = document.createElement('canvas');
+  c.width = 900;
+  c.height = 260;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#111';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'italic 120px "Snell Roundhand", "Segoe Script", "Bradley Hand", "Brush Script MT", cursive';
+  ctx.fillText(name, 20, 130, 860);
+  return trimmed(c);
+}
+const toBlob = (c) => new Promise((r) => c.toBlob(r, 'image/png'));
+async function useSig(dataUrl) {
+  let blob;
+  if (dataUrl) blob = await (await fetch(dataUrl)).blob();
+  else {
+    const c = sigMode === 'type' ? typedSig($('pdf-sig-name').value.trim()) : trimmed(pad);
+    if (!c || (sigMode === 'type' && !$('pdf-sig-name').value.trim()) || (sigMode === 'draw' && !inked)) { toast(C.sig_empty); return; }
+    blob = await toBlob(c);
+    if (window.MentriaStore) {
+      if ($('pdf-sig-keep').checked) window.MentriaStore.set('tools', 'pdf_signature', c.toDataURL('image/png'));
+      else window.MentriaStore.remove('tools', 'pdf_signature');
+    }
+  }
+  sigModal.close();
+  const file = new File([blob], 'signature.png', { type: 'image/png' });
+  file.__sign = true;
+  placeImage(file);
+}
+$('pdf-sig-use').addEventListener('click', () => useSig(null));
+$('pdf-sig-saved').addEventListener('click', () => { const s = savedSig(); if (s) useSig(s); });
+
+async function currentBytes() {
+  if (st.mode === 'pages' && st.pagesDirty) return compose(st.pages);
+  if (st.dirty) return st.doc.saveDocument();
+  return st.bytes;
+}
+function outName(suffix) { return baseName() + (suffix ? '-' + suffix : '') + '.pdf'; }
+async function savePdf(share) {
+  if (!st.doc) return;
+  say(C.p_working);
+  try {
+    const bytes = await currentBytes();
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const name = outName(st.dirty || st.pagesDirty ? C.pages_name : '');
+    if (share && window.MentriaUI) await window.MentriaUI.shareFile(name, blob);
+    else if (window.MentriaUI) window.MentriaUI.downloadFile(name, blob);
+    say('');
+    toast(C.saved);
+  } catch (e) {
+    say(fill(C.save_failed, { reason: (e && e.message) || e }));
+  }
+}
+$('pdf-save').addEventListener('click', () => savePdf(false));
+if (window.MentriaUI && window.MentriaUI.canShareFile && window.MentriaUI.canShareFile('a.pdf', 'application/pdf')) {
+  $('pdf-share').hidden = false;
+  $('pdf-share').addEventListener('click', () => savePdf(true));
+}
+
+async function bake() {
+  if (!st.dirty) return true;
+  const bytes = await st.doc.saveDocument();
+  const page = st.viewer ? st.viewer.currentPageNumber : 1;
+  const ok = await openBytes(bytes, st.name, { page });
+  if (ok) setDirty(false);
+  return ok;
+}
+async function setMode(mode) {
+  if (!st.doc || mode === st.mode) { if (mode === st.mode) applyMode(); return; }
+  if (mode === 'pages') {
+    if (st.locked) { toast(C.p_locked); return; }
+    if (st.tool) setTool(null);
+    await bake();
+    if (!st.pages.length || !st.sources.length) startPages();
+    st.mode = 'pages';
+    applyMode();
+    renderGrid();
+    return;
+  }
+  if (st.mode === 'pages' && st.pagesDirty) {
+    say(C.p_working);
+    try {
+      const bytes = await compose(st.pages);
+      st.mode = mode;
+      const ok = await openBytes(bytes, st.name, {});
+      if (ok) { st.pages = []; st.sources = []; st.sel.clear(); st.pagesDirty = false; st.pageCount = st.doc.numPages; }
+    } catch (e) { say(fill(C.save_failed, { reason: (e && e.message) || e })); return; }
+    say('');
+  }
+  st.mode = mode;
+  applyMode();
+}
+function applyMode() {
+  const m = st.mode;
+  document.querySelectorAll('#pdf-modes [data-mode]').forEach((b) => { const on = b.dataset.mode === m; b.classList.toggle('is-active', on); b.setAttribute('aria-pressed', String(on)); });
+  $('pdf-readbar').hidden = m !== 'read';
+  $('pdf-editbar').hidden = m !== 'edit';
+  if (m !== 'read') $('pdf-findrow').hidden = true;
+  $('pdf-view').hidden = m === 'pages';
+  $('pdf-pages').hidden = m !== 'pages';
+  $('pdf').dataset.mode = m;
+  if (m !== 'pages') settleView();
+  if (st.core && st.viewer) {
+    if (m === 'edit') { if (!st.tool) setTool(null); }
+    else if (st.tool) setTool(null);
+    else editorMode(st.core.AnnotationEditorType.NONE);
+  }
+  updateMeta();
+}
+document.querySelectorAll('#pdf-modes [data-mode]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+function startPages() {
+  st.sources = [{ bytes: st.bytes, name: st.name, doc: st.doc, tag: '' }];
+  st.pages = [];
+  for (let i = 0; i < st.doc.numPages; i++) st.pages.push({ id: st.nextId++, s: 0, i, rot: 0 });
+  st.sel.clear();
+  st.pagesDirty = false;
+}
+const TAGS = 'BCDEFGHIJKLMNOPQRSTUVWXYZ';
+async function addSource(file) {
+  if (!isPdf(file)) { toast(C.not_pdf); return; }
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let doc;
+  try { doc = await (await lib()).core.getDocument(docArgs(bytes)).promise; }
+  catch (_) { toast(C.bad_pdf); return; }
+  const s = st.sources.length;
+  st.sources.push({ bytes, name: file.name || 'document.pdf', doc, tag: TAGS[(s - 1) % TAGS.length] });
+  for (let i = 0; i < doc.numPages; i++) st.pages.push({ id: st.nextId++, s, i, rot: 0 });
+  st.pagesDirty = true;
+  renderGrid();
+}
+
+function renderGrid() {
+  const grid = $('pdf-grid');
+  grid.textContent = '';
+  st.pages.forEach((p, k) => {
+    const src = st.sources[p.s];
+    const card = document.createElement('div');
+    card.className = 'pdf__card' + (st.sel.has(p.id) ? ' is-sel' : '');
+    card.dataset.id = String(p.id);
+    card.setAttribute('role', 'option');
+    card.setAttribute('aria-selected', String(st.sel.has(p.id)));
+    card.tabIndex = 0;
+    const frame = document.createElement('div');
+    frame.className = 'pdf__thumb';
+    const cv = document.createElement('canvas');
+    frame.appendChild(cv);
+    const check = document.createElement('span');
+    check.className = 'pdf__check';
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = (src.tag ? src.tag + ' · ' : '') + (k + 1);
+    card.append(frame, check, num);
+    grid.appendChild(card);
+    lazyThumb(cv, () => drawThumb(cv, src.doc, p.i, p.rot, 150));
+  });
+  const extra = st.sources.slice(1).map((s) => fill(C.p_from, { tag: s.tag, name: s.name })).join(' · ');
+  $('pdf-pages-hint').textContent = [COARSE ? C.p_hint_touch : C.p_hint, extra].filter(Boolean).join(' · ');
+  updateMeta();
+}
+function toggleSel(id) {
+  if (st.sel.has(id)) st.sel.delete(id); else st.sel.add(id);
+  const card = $('pdf-grid').querySelector('[data-id="' + id + '"]');
+  if (card) { card.classList.toggle('is-sel', st.sel.has(id)); card.setAttribute('aria-selected', String(st.sel.has(id))); }
+  updateMeta();
+}
+function selected() { return st.pages.filter((p) => st.sel.has(p.id)); }
+function movePage(id, toIndex) {
+  const from = st.pages.findIndex((p) => p.id === id);
+  if (from < 0) return;
+  const [p] = st.pages.splice(from, 1);
+  st.pages.splice(Math.max(0, Math.min(st.pages.length, toIndex > from ? toIndex - 1 : toIndex)), 0, p);
+  st.pagesDirty = true;
+  renderGrid();
+}
+
+let drag = null;
+const grid = $('pdf-grid');
+grid.addEventListener('pointerdown', (e) => {
+  const card = e.target.closest('.pdf__card');
+  if (!card || e.button > 0) return;
+  const id = Number(card.dataset.id);
+  drag = { id, card, x: e.clientX, y: e.clientY, on: false, pointer: e.pointerId, touch: e.pointerType !== 'mouse', timer: 0, target: null };
+  if (drag.touch) drag.timer = setTimeout(() => { if (drag && !drag.moved) beginDrag(); }, 380);
+});
+function beginDrag() {
+  if (!drag || drag.on) return;
+  drag.on = true;
+  drag.card.classList.add('is-drag');
+  try { grid.setPointerCapture(drag.pointer); } catch (_) {}
+  if (navigator.vibrate) { try { navigator.vibrate(8); } catch (_) {} }
+}
+grid.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x;
+  const dy = e.clientY - drag.y;
+  if (!drag.on) {
+    if (Math.hypot(dx, dy) > 8) {
+      if (drag.touch) { clearTimeout(drag.timer); drag = null; return; }
+      beginDrag();
+    } else return;
+  }
+  e.preventDefault();
+  drag.card.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+  drag.card.style.pointerEvents = 'none';
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  const over = under && under.closest ? under.closest('.pdf__card') : null;
+  grid.querySelectorAll('.is-before,.is-after').forEach((c) => c.classList.remove('is-before', 'is-after'));
+  if (over && over !== drag.card) {
+    const r = over.getBoundingClientRect();
+    const after = e.clientX > r.left + r.width / 2;
+    over.classList.add(after ? 'is-after' : 'is-before');
+    drag.target = { id: Number(over.dataset.id), after };
+  } else drag.target = null;
+});
+grid.addEventListener('touchmove', (e) => { if (drag && drag.on) e.preventDefault(); }, { passive: false });
+function endDrag(cancel) {
+  if (!drag) return;
+  clearTimeout(drag.timer);
+  const d = drag;
+  drag = null;
+  if (!d.on) { if (!cancel) toggleSel(d.id); return; }
+  d.card.style.transform = '';
+  d.card.style.pointerEvents = '';
+  d.card.classList.remove('is-drag');
+  grid.querySelectorAll('.is-before,.is-after').forEach((c) => c.classList.remove('is-before', 'is-after'));
+  if (!cancel && d.target) {
+    const idx = st.pages.findIndex((p) => p.id === d.target.id);
+    movePage(d.id, d.target.after ? idx + 1 : idx);
+  }
+}
+grid.addEventListener('pointerup', () => endDrag(false));
+grid.addEventListener('pointercancel', () => endDrag(true));
+grid.addEventListener('contextmenu', (e) => { if (drag) e.preventDefault(); });
+grid.addEventListener('keydown', (e) => {
+  const card = e.target.closest('.pdf__card');
+  if (!card) return;
+  const id = Number(card.dataset.id);
+  const idx = st.pages.findIndex((p) => p.id === id);
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleSel(id); }
+  else if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+    e.preventDefault();
+    movePage(id, e.key === 'ArrowLeft' ? idx - 1 : idx + 2);
+    const again = grid.querySelector('[data-id="' + id + '"]');
+    if (again) again.focus();
+  }
+});
+
+async function compose(entries) {
+  const { PDFDocument, degrees } = await pdfLib();
+  const out = await PDFDocument.create();
+  const loaded = new Map();
+  const bySource = new Map();
+  for (const e of entries) { if (!bySource.has(e.s)) bySource.set(e.s, new Set()); bySource.get(e.s).add(e.i); }
+  const copied = new Map();
+  for (const [s, set] of bySource) {
+    let src = loaded.get(s);
+    if (!src) { src = await PDFDocument.load(st.sources[s].bytes, { ignoreEncryption: true, updateMetadata: false }); loaded.set(s, src); }
+    const idx = Array.from(set);
+    const pages = await out.copyPages(src, idx);
+    idx.forEach((i, k) => copied.set(s + ':' + i, pages[k]));
+  }
+  for (const e of entries) {
+    const p = copied.get(e.s + ':' + e.i);
+    if (e.rot) p.setRotation(degrees(((p.getRotation().angle || 0) + e.rot) % 360));
+    out.addPage(p);
+  }
+  return out.save();
+}
+async function deliver(files) {
+  const share = COARSE && navigator.canShare && navigator.canShare({ files });
+  if (share) {
+    try { await navigator.share({ files }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  for (const f of files) window.MentriaUI.downloadFile(f.name, f);
+}
+async function pageAction(act) {
+  const sel = selected();
+  if (act === 'add') { $('pdf-files').dataset.purpose = 'add'; $('pdf-files').click(); return; }
+  if (act === 'rotate') {
+    const list = sel.length ? sel : st.pages;
+    for (const p of list) p.rot = (p.rot + 90) % 360;
+    st.pagesDirty = true;
+    renderGrid();
+    return;
+  }
+  if (act === 'delete') {
+    if (!sel.length) { toast(C.p_need_sel); return; }
+    if (sel.length >= st.pages.length) { toast(C.p_keep_one); return; }
+    const before = st.pages.slice();
+    const wasDirty = st.pagesDirty;
+    st.pages = st.pages.filter((p) => !st.sel.has(p.id));
+    st.sel.clear();
+    st.pagesDirty = true;
+    renderGrid();
+    const msg = sel.length === 1 ? C.p_deleted_one : fill(C.p_deleted, { n: sel.length });
+    if (window.MentriaUI && window.MentriaUI.undoToast) window.MentriaUI.undoToast(msg, () => { st.pages = before; st.pagesDirty = wasDirty; renderGrid(); }, { label: C.p_undo });
+    else toast(msg);
+    return;
+  }
+  if (act === 'extract') {
+    if (!sel.length) { toast(C.p_need_sel); return; }
+    say(C.p_working);
+    try {
+      const bytes = await compose(sel);
+      await deliver([new File([bytes], outName(C.extract_name), { type: 'application/pdf' })]);
+      toast(fill(C.p_extracted, { n: sel.length }));
+    } catch (e) { toast(fill(C.save_failed, { reason: (e && e.message) || e })); }
+    say('');
+    return;
+  }
+  if (act === 'split') {
+    const at = st.pages.findIndex((p) => st.sel.has(p.id));
+    if (at <= 0) { toast(C.p_split_need); return; }
+    say(C.p_working);
+    try {
+      const a = await compose(st.pages.slice(0, at));
+      const b = await compose(st.pages.slice(at));
+      await deliver([new File([a], outName(C.part + '-1'), { type: 'application/pdf' }), new File([b], outName(C.part + '-2'), { type: 'application/pdf' })]);
+      toast(C.p_split_done);
+    } catch (e) { toast(fill(C.save_failed, { reason: (e && e.message) || e })); }
+    say('');
+    return;
+  }
+  if (act === 'images') {
+    const list = sel.length ? sel : st.pages;
+    say(C.p_working);
+    try {
+      const files = [];
+      for (const p of list) {
+        const cv = document.createElement('canvas');
+        await drawThumb(cv, st.sources[p.s].doc, p.i, p.rot, 1240);
+        const blob = await toBlob(cv);
+        files.push(new File([blob], baseName() + '-' + (st.pages.indexOf(p) + 1) + '.png', { type: 'image/png' }));
+      }
+      await deliver(files);
+      toast(fill(C.p_images_done, { n: files.length }));
+    } catch (e) { toast(fill(C.save_failed, { reason: (e && e.message) || e })); }
+    say('');
+  }
+}
+document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => pageAction(b.dataset.act)));
+
+$('pdf-open').addEventListener('click', () => $('pdf-file').click());
+$('pdf-another').addEventListener('click', () => $('pdf-file').click());
+$('pdf-combine').addEventListener('click', () => { $('pdf-files').dataset.purpose = 'combine'; $('pdf-files').click(); });
+$('pdf-file').addEventListener('change', (e) => { const f = Array.from(e.target.files || []); e.target.value = ''; if (f.length) { st.mode = 'read'; openFiles(f, false); } });
+$('pdf-files').addEventListener('change', async (e) => {
+  const f = Array.from(e.target.files || []);
+  e.target.value = '';
+  if (!f.length) return;
+  if (e.target.dataset.purpose === 'add' && st.doc) { for (const x of f) await addSource(x); return; }
+  st.mode = 'read';
+  openFiles(f, true);
+});
+
+const root = $('pdf');
+root.addEventListener('dragover', (e) => { if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) { e.preventDefault(); root.classList.add('is-drop'); } });
+root.addEventListener('dragleave', (e) => { if (e.target === root || !root.contains(e.relatedTarget)) root.classList.remove('is-drop'); });
+root.addEventListener('drop', async (e) => {
+  if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+  e.preventDefault();
+  root.classList.remove('is-drop');
+  const files = Array.from(e.dataTransfer.files);
+  if (st.doc && st.mode === 'pages') { for (const f of files) await addSource(f); return; }
+  st.mode = 'read';
+  openFiles(files, files.length > 1);
+});
+
+if ('launchQueue' in window && window.launchQueue && typeof window.launchQueue.setConsumer === 'function') {
+  window.launchQueue.setConsumer(async (params) => {
+    if (!params || !params.files || !params.files.length) return;
+    const files = await Promise.all(params.files.map((h) => h.getFile()));
+    st.mode = 'read';
+    openFiles(files, files.length > 1);
+  });
+}
+if (window.MentriaUI && window.MentriaUI.consumeShared) {
+  window.MentriaUI.consumeShared((file) => { st.mode = 'read'; openFiles([file], false); });
+}
+
+window.__mentriaPdf = { st, openBytes, setMode, compose, pageAction, setTool };
+</script>
+
+<style>
+.scanlines::after { display: none; }
+.pdf { position: relative; display: flex; flex-direction: column; gap: 0.75rem; }
+.pdf [hidden] { display: none !important; }
+.pdf svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pdf.is-drop::after { content: ''; position: absolute; inset: 0; border: 2px dashed var(--accent); border-radius: var(--radius-lg); background: rgba(110, 243, 197, 0.06); pointer-events: none; }
+.pdf__start { display: flex; flex-direction: column; gap: 1.25rem; }
+.pdf__drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.9rem; padding: 2.6rem 1.25rem; border: 1.5px dashed var(--term-border-strong); border-radius: var(--radius-lg); text-align: center; }
+.pdf__drop-icon { width: 64px; height: 64px; stroke: none !important; }
+.pdf__drop-title { margin: 0; color: var(--term-fg-strong); font-family: var(--font-mono); font-size: var(--text-md); }
+.pdf__drop-acts { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+.pdf__hint { color: var(--term-muted); font-family: var(--font-mono); font-size: var(--text-xs); }
+.pdf__drop .pdf__hint { max-width: 46ch; margin: 0; }
+.pdf__can { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; }
+.pdf__can div { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.75rem; border: 1px solid var(--term-border); border-radius: var(--radius-md); background: var(--term-bg-raised); }
+.pdf__can svg { width: 20px; height: 20px; color: var(--syn-cyan); flex: 0 0 auto; margin-top: 2px; }
+.pdf__can p { margin: 0; }
+.pdf__can b { display: block; color: var(--term-fg); font-family: var(--font-mono); font-size: var(--text-sm); font-weight: 500; }
+.pdf__can span { color: var(--term-muted); font-size: var(--text-xs); }
+.pdf__app { display: flex; flex-direction: column; gap: 0.6rem; }
+.pdf__top { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.pdf__file { display: flex; flex-direction: column; min-width: 0; margin-right: auto; font-family: var(--font-mono); }
+.pdf__name { color: var(--term-fg-strong); font-size: var(--text-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 36ch; }
+.pdf__name.is-dirty::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--syn-amber); vertical-align: middle; }
+.pdf__meta { color: var(--term-muted); font-size: var(--text-xs); }
+.pdf__modes { flex: 0 1 300px; min-width: 220px; }
+.pdf__modes > button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; }
+.pdf__modes svg { width: 15px; height: 15px; }
+.pdf__acts { display: flex; align-items: center; gap: 0.35rem; }
+.pdf__save { display: inline-flex; align-items: center; gap: 6px; }
+.pdf__save svg { width: 16px; height: 16px; }
+.pdf__ib { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--term-muted); cursor: pointer; flex: 0 0 auto; }
+.pdf__ib svg { width: 19px; height: 19px; }
+.pdf__ib:hover:not(:disabled) { background: rgba(255, 255, 255, 0.05); color: var(--term-fg); }
+.pdf__ib.is-on { color: var(--accent); background: rgba(110, 243, 197, 0.10); }
+.pdf__ib:disabled { opacity: 0.35; cursor: default; }
+.pdf__ib:focus-visible, .pdf__chip:focus-visible, .pdf__card:focus-visible, .pdf__mini:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pdf__bar { display: flex; align-items: center; gap: 0.25rem; padding: 0.3rem 0.4rem; border: 1px solid var(--term-border); border-radius: var(--radius-md); background: var(--term-bg-raised); overflow-x: auto; scrollbar-width: none; }
+.pdf__bar::-webkit-scrollbar { display: none; }
+.pdf__end { margin-left: auto; }
+.pdf__sep { width: 1px; align-self: stretch; margin: 6px 0.35rem; background: var(--term-border-strong); flex: 0 0 auto; }
+.pdf__page { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--term-fg); padding: 0 0.4rem; white-space: nowrap; }
+.pdf__zoom { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--term-muted); min-width: 4ch; text-align: center; }
+.pdf__findrow { display: flex; align-items: center; gap: 0.4rem; margin: 0; }
+.pdf__find { display: flex; align-items: center; gap: 0.45rem; flex: 1 1 auto; height: 40px; padding: 0 0.8rem; border: 1px solid var(--field-border); border-radius: var(--radius-pill); color: var(--term-muted); font-family: var(--font-mono); font-size: var(--text-sm); }
+.pdf__find svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.pdf__find input { flex: 1 1 auto; min-width: 0; border: 0; background: transparent; color: var(--term-fg); font: inherit; outline: none; }
+.pdf__find em { font-style: normal; color: var(--accent); white-space: nowrap; font-size: var(--text-xs); }
+.pdf__tools, .pdf__opts { display: flex; align-items: center; gap: 0.25rem; }
+.pdf__opts { flex: 1 1 auto; }
+.pdf__chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 0.75rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-pill); background: transparent; color: var(--term-fg); font-family: var(--font-mono); font-size: var(--text-xs); white-space: nowrap; cursor: pointer; flex: 0 0 auto; }
+.pdf__chip svg { width: 16px; height: 16px; }
+.pdf__chip.is-on { border-color: var(--accent); color: var(--accent); background: rgba(110, 243, 197, 0.08); }
+.pdf__swatches { display: flex; align-items: center; }
+.pdf__swatches[hidden] + .pdf__sep { display: none; }
+.pdf__sw { width: 24px; height: 24px; margin: 0 3px; padding: 0; border-radius: 50%; border: 2px solid transparent; cursor: pointer; flex: 0 0 auto; }
+.pdf__sw.is-on { border-color: var(--term-fg-strong); box-shadow: 0 0 0 2px var(--term-bg-raised) inset; }
+.pdf__view { position: relative; display: grid; grid-template-columns: 112px 1fr; gap: 0.75rem; }
+.pdf__rail { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--term-border); border-radius: var(--radius-md); background: var(--term-bg-raised); height: var(--pdf-h); overflow: hidden; }
+.pdf__rail-tabs { display: flex; gap: 4px; flex: 0 0 auto; }
+.pdf__rail-tabs button { flex: 1; border: 0; background: transparent; cursor: pointer; font-family: var(--font-mono); font-size: 10px; color: var(--term-muted); padding: 4px 0; border-radius: var(--radius-sm); }
+.pdf__rail-tabs button.is-on { color: var(--syn-cyan); background: var(--cyan-15); }
+.pdf__thumbs { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; overflow-y: auto; padding: 4px 2px 1.4rem; scrollbar-width: thin; }
+.pdf__mini { position: relative; width: 84px; padding: 0; border: 0; background: #f6f4ef; border-radius: 3px; cursor: pointer; line-height: 0; flex: 0 0 auto; }
+.pdf__mini canvas { width: 100%; height: auto; border-radius: 3px; }
+.pdf__mini canvas:not(.is-drawn) { aspect-ratio: 3 / 4; }
+.pdf__mini i { position: absolute; bottom: -1.25em; left: 0; right: 0; text-align: center; font-style: normal; font-family: var(--font-mono); font-size: 10px; line-height: 1; color: var(--term-muted); }
+.pdf__outline { overflow-y: auto; font-size: var(--text-xs); }
+.pdf__outline ul { list-style: none; margin: 0; padding: 0; }
+.pdf__outline button { display: block; width: 100%; padding: 0.35rem 0.4rem; border: 0; background: transparent; color: var(--term-fg); text-align: left; cursor: pointer; border-radius: var(--radius-sm); font: inherit; }
+.pdf__outline button:hover { background: rgba(255, 255, 255, 0.05); }
+.pdf__stage { position: relative; height: var(--pdf-h); border-radius: var(--radius-md); background: #15181d; overflow: hidden; }
+.pdf { --pdf-h: max(380px, calc(100dvh - 15.5rem - var(--app-bar-h, 0px))); }
+.pdf__scroll { position: absolute; inset: 0; overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.pdf__scroll .pdfViewer { padding: 0.75rem 0 2.5rem; }
+.pdf__scroll .textLayer .highlight { --highlight-bg-color: rgba(251, 191, 36, 0.38); --highlight-selected-bg-color: rgba(110, 243, 197, 0.65); }
+.pdf:has(#pdf-findrow:not([hidden])) { --pdf-h: max(340px, calc(100dvh - 18.5rem - var(--app-bar-h, 0px))); }
+.pdf__scroll .pdfViewer .page { box-shadow: 0 8px 26px rgba(0, 0, 0, 0.55); border: 0; margin: 0.75rem auto; }
+.pdf__stage.is-dark .pdfViewer .page .canvasWrapper { filter: invert(0.88) hue-rotate(180deg); }
+.pdf__stage.is-dark .pdfViewer .page { background: #1b1d22; }
+.pdf__float { position: absolute; left: 50%; bottom: 0.8rem; transform: translateX(-50%); padding: 0.3rem 0.8rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-pill); background: rgba(10, 10, 10, 0.88); font-family: var(--font-mono); font-size: var(--text-sm); color: var(--term-fg); pointer-events: none; }
+.pdf__narrow { display: none !important; }
+.pdf__pages { display: flex; flex-direction: column; gap: 0.6rem; }
+.pdf__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 1.2rem 0.9rem; padding: 0.4rem 0.3rem 0.6rem; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.pdf__card { position: relative; outline: none; cursor: pointer; -webkit-touch-callout: none; }
+.pdf__thumb { display: flex; align-items: center; justify-content: center; aspect-ratio: 3 / 4; border-radius: 4px; background: #1e2228; overflow: hidden; }
+.pdf__thumb canvas { max-width: 100%; max-height: 100%; background: #fff; border-radius: 2px; }
+.pdf__card.is-sel .pdf__thumb { outline: 2px solid var(--accent); outline-offset: 3px; }
+.pdf__check { position: absolute; top: 6px; left: 6px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #9aa3af; background: rgba(255, 255, 255, 0.75); }
+.pdf__card.is-sel .pdf__check { border-color: var(--accent); background: var(--accent); }
+.pdf__card.is-sel .pdf__check::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid #04140e; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.pdf__card.is-drag { z-index: 3; filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.65)); }
+.pdf__card.is-before::before, .pdf__card.is-after::after { content: ''; position: absolute; top: 0; bottom: 1.6rem; width: 3px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.pdf__card.is-before::before { left: -0.55rem; }
+.pdf__card.is-after::after { right: -0.55rem; }
+.pdf__card .num { display: block; margin-top: 0.45rem; text-align: center; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--term-muted); }
+.pdf__tray { position: sticky; bottom: calc(var(--app-bar-h, 0px) + 0.4rem); display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; padding: 0.6rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-md); background: var(--term-bg-raised); z-index: 2; }
+.pdf__tray .pdf__hint { margin-right: auto; }
+.pdf__tray .m-btn { display: inline-flex; align-items: center; gap: 6px; }
+.pdf__tray .m-btn svg { width: 16px; height: 16px; }
+.pdf__pass { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; padding: 2rem 1rem; border: 1px solid var(--term-border-strong); border-radius: var(--radius-lg); text-align: center; }
+.pdf__pass-title { margin: 0; color: var(--term-fg-strong); font-family: var(--font-mono); }
+.pdf__pass-input { max-width: 320px; width: 100%; }
+.pdf__status { margin: 0; min-height: 1.2em; color: var(--term-muted); font-family: var(--font-mono); font-size: var(--text-xs); }
+.pdf-sig__card { max-width: 30rem; }
+.pdf-sig__title { margin: 0; color: var(--term-fg-strong); font-family: var(--font-mono); }
+.pdf-sig__pad { width: 100%; height: auto; aspect-ratio: 720 / 260; background: #fbfaf7; border-radius: var(--radius-md); touch-action: none; cursor: crosshair; }
+.pdf-sig__keep { display: flex; align-items: center; gap: 0.5rem; color: var(--term-muted); font-size: var(--text-xs); font-family: var(--font-mono); }
+.pdf-sig__acts { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; }
+@media (max-width: 720px) {
+  .pdf { --pdf-h: max(340px, calc(100dvh - 17.5rem - var(--app-bar-h, 0px))); }
+  .pdf:has(#pdf-findrow:not([hidden])) { --pdf-h: max(300px, calc(100dvh - 20.5rem - var(--app-bar-h, 0px))); }
+  .pdf__top { gap: 0.5rem; }
+  .pdf__modes { flex: 1 1 100%; order: 2; min-width: 0; }
+  .pdf__file { order: 1; flex: 1 1 auto; }
+  .pdf__acts { order: 1; }
+  .pdf__save span { display: none; }
+  .pdf__wide { display: none !important; }
+  .pdf__narrow { display: block !important; }
+  .pdf__view { grid-template-columns: 1fr; }
+  .pdf__rail { display: none; position: absolute; z-index: 4; top: 0; left: 0; bottom: 0; width: min(70vw, 260px); height: auto; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6); }
+  .pdf__view.is-rail .pdf__rail { display: flex; }
+  .pdf__bar { flex-wrap: wrap; overflow: visible; row-gap: 0.35rem; }
+  .pdf__tools { flex: 1 1 100%; justify-content: space-between; }
+  .pdf__tools .pdf__chip { flex: 1 1 0; flex-direction: column; justify-content: center; gap: 3px; height: 54px; padding: 0 2px; border-radius: var(--radius-md); font-size: 10px; }
+  .pdf__tools .pdf__chip svg { width: 18px; height: 18px; }
+  .pdf__opts { flex: 1 1 100%; justify-content: center; }
+  .pdf__grid { grid-template-columns: repeat(3, 1fr); gap: 1rem 0.6rem; }
+  .pdf__tray { gap: 0.35rem; }
+  .pdf__tray .pdf__hint { flex: 1 1 100%; text-align: center; }
+  .pdf__tray .m-btn { flex: 1 1 30%; flex-direction: column; gap: 4px; padding: 0.45rem 0.2rem; font-size: 10px; }
+}
+</style>

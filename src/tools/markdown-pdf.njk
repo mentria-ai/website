@@ -341,15 +341,17 @@ async function ensureEngine(onProgress) {
 async function aiSuggestFilename(onLoadProgress) {
   const engine = await ensureEngine(onLoadProgress);
   if (!engine) return null;
+  const { stripThink } = await import('/assets/js/mentria-model.js');
   const text = (inputEl.value || '').trim().slice(0, 1500);
   if (text.length < 8) return null;
   const messages = [
     { role: 'system', content:
       'You name documents. Read the document the user gives you and reply with a ' +
       'short, descriptive title of 3 to 6 plain words that say what the document is ' +
-      'about. Reply with the title only: no quotes, no file extension, no explanation.' },
-    { role: 'user', content: 'Document:\n\n# Project Phoenix Kickoff\n\nAgenda for the Q3 launch covering timeline, budget owners, and the marketing plan for the new mobile app.' },
-    { role: 'assistant', content: 'Project Phoenix Q3 Kickoff' },
+      'about. Write the title in the same language as the document and keep names as they are. ' +
+      'Reply with the title only: no quotes, no file extension, no explanation.' },
+    { role: 'user', content: 'Document:\n\nActa de la reunión de vecinos: se acordó pintar la fachada en primavera y pedir dos presupuestos para arreglar el ascensor.' },
+    { role: 'assistant', content: 'Reunión de vecinos sobre fachada y ascensor' },
     { role: 'user', content: 'Document:\n\nA quick banana bread recipe: cream the butter and sugar, mix in three ripe bananas, fold in flour and baking soda, then bake at 350 degrees for one hour.' },
     { role: 'assistant', content: 'Banana Bread Recipe' },
     { role: 'user', content: 'Document:\n\n' + text }
@@ -358,7 +360,7 @@ async function aiSuggestFilename(onLoadProgress) {
   await engine.generate({
     messages, maxTokens: 24,
     temperature: 0.3, topP: 0.9, topK: 30,
-    repetitionPenalty: 1.1, enableThinking: false
+    repetitionPenalty: 1.0, enableThinking: false
   }, (event) => {
     if (typeof event.token === 'string' && event.token.length > 0) {
       if (/^<\|[^|]*\|>$/.test(event.token)) return;
@@ -367,17 +369,14 @@ async function aiSuggestFilename(onLoadProgress) {
     }
   });
   if (mpStrip) mpStrip.done({ tokens: nTok });
-  const slug0 = buf
-    .replace(/<think>[\s\S]*?<\/think>/g, '')
+  const title = stripThink(buf
+    .replace(/<think>[\s\S]*?<\/think>/g, ''))
     .replace(/<\|[^|]*\|>/g, '')
     .trim()
-    .toLowerCase()
     .split(/[\n\r]/)[0]
     .replace(/^[`'"\s]+|[`'"\s.]+$/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/\.(md|markdown|pdf|txt)$/i, '');
+  const slug0 = slugify(title);
   const GARBAGE_NAMES = new Set(['untitled', 'document', 'filename', 'title', 'slug', 'name']);
   const parts = slug0.split('-').filter(Boolean);
   const ALPHA = 'abcdefghijklmnopqrstuvwxyz';

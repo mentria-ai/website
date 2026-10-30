@@ -140,12 +140,14 @@ eleventyComputed:
   confirmDelete:          "tool.ai-chat.confirm_delete",
   statusNoModel:          "tool.ai-chat.status_no_model",
   noModelNotice:          "tool.ai-chat.no_model_notice",
+  loadCutNotice:          "tool.ai-chat.load_cut_notice",
   btnChooseModel:         "tool.ai-chat.btn_choose_model",
   tierLabel:              "tool.ai-chat.tier_label",
   tierFast:               "tool.ai-chat.tier_fast",
   tierBetter:             "tool.ai-chat.tier_better",
   tierBest:               "tool.ai-chat.tier_best",
   tierMax:                "tool.ai-chat.tier_max",
+  tierOld:                "tool.ai-chat.tier_old",
   emptySub:               "tool.ai-chat.empty_sub",
   tierConfirm:            "tool.ai-chat.tier_confirm",
   tierFallback:           "tool.ai-chat.tier_fallback",
@@ -202,7 +204,10 @@ const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
 const MENTRIA_TIERS_PATH = '/assets/js/mentria-tiers.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IS_MOBILE = IS_IOS || /Android/i.test(navigator.userAgent);
 const IMG_MAX = IS_IOS ? 256 : 448;
+const PREVIEW_MAX = 1024;
+const IOS_IMAGES = 1;
 const MAX_TOKENS = 512;
 
 /* ── Status helpers ────────────────────────────────────────────────────── */
@@ -398,6 +403,7 @@ function runApp(MentriaEngine, Tiers) {
   let sending = false;
   let attachedImage = null;       // {rgbHwc, h, w} — pending attach for the NEXT send
   let attachedDataUrl = null;
+  let attachSeq = 0;
   // conversationImages keeps every image sent in this conversation, in order.
   // The chat template re-renders the full message history every turn, so each
   // {type:'image'} placeholder needs its corresponding rgbHwc on every call —
@@ -406,12 +412,50 @@ function runApp(MentriaEngine, Tiers) {
   const assistantModels = new WeakMap();
   const repeatCutReplies = new WeakSet();
   function modelFamilyFor(tier) {
-    return tier === '27b' ? 'Bonsai 27B' : 'Qwen3.5';
+    if (tier === '27b') return 'Bonsai 27B';
+    return Tiers && Tiers.TIERS[tier] && Tiers.TIERS[tier].family === 'b2' ? 'Bonsai 2' : 'Qwen3.5';
+  }
+
+  function isSmallTier(tier) {
+    return tier === '0.8b' || (!!Tiers && tier === Tiers.SMALL_TIER);
+  }
+
+  function isB2Tier(tier) {
+    return !!Tiers && !!Tiers.TIERS[tier] && Tiers.TIERS[tier].family === 'b2';
+  }
+
+  function labelPrefix(tier) {
+    if (tier === '27b') return 'bonsai-';
+    return Tiers && Tiers.TIERS[tier] && Tiers.TIERS[tier].family === 'b2' ? 'bonsai2-' : 'qwen-';
+  }
+
+  const SITE_ASK = /mentria|this (site|website|app|page)\b|who are you\b|what are you\b|which model|what model|your name|qui[eé]n eres|qu[eé] modelo|qui es-tu|quel mod[eè]le|quem [eé] voc[eê]|qual modelo|あなたは誰|誰ですか|どのモデル|何のモデル/i;
+
+  function asksAboutSite(texts) {
+    return texts.some((t) => SITE_ASK.test(String(t || '')));
+  }
+
+  function b2SystemPrompt(tier, turn) {
+    const small = isSmallTier(tier);
+    const site = "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running Bonsai 2 in their browser. When asked about Mentria itself: it is a small privacy-first studio at mentria.ai, building tools, games, and AI experiences that run in the browser, with no account needed. Notable parts of the site: an AI chat, a QR scanner, a document scanner, quick notes, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, private peer-to-peer chat and calls at /comms/, and card decks for learning about AI.";
+    const base = "You are the Mentria AI assistant. You run Bonsai 2 locally in the user's browser via WebGPU." + (small ? " Your weights were prepared for the browser and shipped by mentria.ai.\n\n" + site : '') + "\n\n" +
+      "Be helpful, accurate, and brief. Don't over-apologize." +
+      (small ? '' : " You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.") + "\n\n" +
+      "Formatting: use markdown sparingly. For tables, output strict GitHub-flavored markdown: one header row, one divider row made only of pipes and dashes, then data rows. Never put prose, notes, parentheticals, or extra characters between the divider and the data rows. Each cell is one short phrase, never a sentence. Any explanation goes outside the table.";
+    if (!turn) return base;
+    const tail = [];
+    if (turn.site && !small) tail.push(site + ' Your weights were prepared for the browser and shipped by mentria.ai.');
+    if (turn.image) tail.push('When the user shares an image, describe what you see directly.');
+    if (turn.lang === 'English') tail.push('Reply in English.');
+    else if (turn.lang) tail.push('Reply in ' + turn.lang + '. Write every word in ' + turn.lang + '; do not mix in English words except proper nouns and code.');
+    else tail.push("Reply in the language of the user's message.");
+    return base + '\n\n' + tail.join('\n\n');
   }
 
   function systemPromptFor(tier, turn) {
+    if (isB2Tier(tier)) return b2SystemPrompt(tier, turn);
     const family = modelFamilyFor(tier);
-    const small = tier === '0.8b';
+    const small = isSmallTier(tier);
     const prompt = "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were prepared for the browser and shipped by mentria.ai.\n\n" +
       "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running " + family + " in their browser. When asked about Mentria itself: it is a small privacy-first studio at mentria.ai, building tools, games, and AI experiences that run in the browser, with no account needed. Notable parts of the site: an AI chat, a QR scanner, a document scanner, quick notes, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, private peer-to-peer chat and calls at /comms/, and card decks for learning about AI.\n\n" +
       "Be helpful, accurate, and brief. Don't over-apologize." +
@@ -432,8 +476,16 @@ function runApp(MentriaEngine, Tiers) {
   ];
   const PAGE_REPLY_LANG = { es: 'Spanish', fr: 'French', ja: 'Japanese', 'pt-br': 'Brazilian Portuguese' };
 
-  function replyLanguage(text) {
+  function replyLanguage(texts) {
     const page = String(document.documentElement.lang || 'en').toLowerCase();
+    for (let i = texts.length - 1; i >= 0; i--) {
+      const lang = detectLanguage(texts[i], page);
+      if (lang) return lang;
+    }
+    return PAGE_REPLY_LANG[page] || null;
+  }
+
+  function detectLanguage(text, page) {
     if (/[\u3040-\u30ff]/.test(text) || (page === 'ja' && /[\u4e00-\u9fff]/.test(text))) return 'Japanese';
     const words = text.toLowerCase().replace(/\u2019/g, "'").split(/[^\p{L}']+/u);
     let best = null;
@@ -444,7 +496,7 @@ function runApp(MentriaEngine, Tiers) {
       if (n > top) { best = lang.name; top = n; tie = false; }
       else if (n > 0 && n === top) tie = true;
     });
-    return best && !tie ? best : (PAGE_REPLY_LANG[page] || null);
+    return best && !tie ? best : null;
   }
 
   let messages = [
@@ -538,14 +590,15 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   function modelLabel() {
-    return (currentTier === '27b' ? 'bonsai-' : 'qwen-') + ((currentTier && Tiers.TIERS[currentTier]) ? Tiers.TIERS[currentTier].name : '0.8B') + (pinned ? ' · ' + pinned.name : '');
+    const id = (currentTier && Tiers.TIERS[currentTier]) ? currentTier : Tiers.SMALL_TIER;
+    return labelPrefix(id) + Tiers.TIERS[id].name + (pinned ? ' · ' + pinned.name : '');
   }
 
   function savedTierLabel() {
     let id = null;
     try { id = localStorage.getItem('mentria-tier'); } catch (_) {}
-    if (!id || !/^(0\.8|2|4|27)b$/.test(id)) return null;
-    return (id === '27b' ? 'bonsai-' : 'qwen-') + id.toUpperCase();
+    if (!id || !Tiers || !Tiers.TIERS[id]) return null;
+    return labelPrefix(id) + Tiers.TIERS[id].name;
   }
 
   function pushAssistant(content, bodyEl) {
@@ -774,8 +827,27 @@ function runApp(MentriaEngine, Tiers) {
   // patch_size * spatial_merge_size = 32. We cap at 448² for predictable
   // prefill latency (~286 ms vision-tower pass on M-series; chat-friendly
   // per the engine's S463 bench).
-  async function fileToEngineImage(file, targetSize = 448) {
-    const bitmap = await createImageBitmap(file);
+  function naturalSize(file) {
+    return new Promise((resolve, reject) => {
+      const u = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { const r = { w: img.naturalWidth, h: img.naturalHeight }; URL.revokeObjectURL(u); resolve(r); };
+      img.onerror = () => { URL.revokeObjectURL(u); reject(new Error('decode')); };
+      img.src = u;
+    });
+  }
+
+  async function decodeSmall(file, max) {
+    const d = await naturalSize(file).catch(() => null);
+    if (d && Math.max(d.w, d.h) > max) {
+      try { return await createImageBitmap(file, { resizeWidth: Math.max(1, Math.round(max * d.w / Math.max(d.w, d.h))), resizeQuality: 'high' }); } catch (_) {}
+    }
+    return createImageBitmap(file);
+  }
+
+  async function fileToEngineImage(file, targetSize = 448, withPreview = false) {
+    const bitmap = await decodeSmall(file, PREVIEW_MAX);
+    const preview = withPreview ? await previewOf(bitmap, file) : null;
     const maxDim = Math.max(bitmap.width, bitmap.height);
     const scale = maxDim > targetSize ? (targetSize / maxDim) : 1;
     let w = Math.round(bitmap.width * scale);
@@ -794,7 +866,18 @@ function runApp(MentriaEngine, Tiers) {
       rgbHwc[j + 1] = data[i + 1];
       rgbHwc[j + 2] = data[i + 2];
     }
-    return { rgbHwc, h, w };
+    canvas.width = canvas.height = 0;
+    return preview ? { rgbHwc, h, w, preview } : { rgbHwc, h, w };
+  }
+
+  function previewOf(bitmap, file) {
+    const s = Math.min(1, PREVIEW_MAX / Math.max(bitmap.width, bitmap.height));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(bitmap.width * s));
+    c.height = Math.max(1, Math.round(bitmap.height * s));
+    c.getContext('2d').drawImage(bitmap, 0, 0, c.width, c.height);
+    const type = /png|gif|webp/.test(file.type) ? 'image/png' : 'image/jpeg';
+    return new Promise((resolve) => c.toBlob((b) => { c.width = c.height = 0; resolve(b); }, type, 0.85));
   }
 
   let strip = null;
@@ -816,17 +899,19 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   function warmSystemPrompt() {
-    if (currentTier !== '27b' || !engine || typeof engine.prefillOnly !== 'function' || deviceLost) return;
+    if ((currentTier !== '27b' && !isB2Tier(currentTier)) || IS_MOBILE || !engine || typeof engine.prefillOnly !== 'function' || deviceLost) return;
     if (webSearchOn && !pinned && !!(getSearchCfg() || {}).url) return;
     if (generating) { warmWanted = true; return; }
     const e = engine;
     const prev = warmPromise;
-    const sys = { role: 'system', content: systemMessage.content };
+    const perTurn = isB2Tier(currentTier) && !pinned;
+    const sysA = { role: 'system', content: perTurn ? systemPromptFor(currentTier, { lang: 'English' }) : systemMessage.content };
+    const sysB = { role: 'system', content: perTurn ? systemPromptFor(currentTier, { site: true, image: true, lang: null }) : systemMessage.content };
     const run = (async () => {
       if (prev) { try { await prev; } catch (_) {} }
       if (e !== engine || generating) return;
-      const a = (await e.encodeChat([sys, { role: 'user', content: 'a' }], { enableThinking: false })).ids;
-      const b = (await e.encodeChat([sys, { role: 'user', content: 'b' }], { enableThinking: false })).ids;
+      const a = (await e.encodeChat([sysA, { role: 'user', content: 'a' }], { enableThinking: false })).ids;
+      const b = (await e.encodeChat([sysB, { role: 'user', content: 'b' }], { enableThinking: false })).ids;
       let n = 0;
       while (n < a.length && n < b.length && a[n] === b[n]) n++;
       if (e !== engine || n < 64) return;
@@ -1421,21 +1506,23 @@ function runApp(MentriaEngine, Tiers) {
   const sizeText = (label) => (window.MentriaUI && window.MentriaUI.sizeLabel ? window.MentriaUI.sizeLabel(label) : label);
   function updateEmptySub(id) {
     if (!emptySubEl) return;
-    const tier = Tiers.TIERS[id || currentTier || (tierDecision && tierDecision.tier) || '0.8b'];
+    const tier = Tiers.TIERS[id || currentTier || (tierDecision && tierDecision.tier) || Tiers.SMALL_TIER];
     if (!tier) return;
     emptySubEl.textContent = COPY.emptySub.replace('{size}', sizeText(tier.sizeLabel));
   }
-  updateEmptySub(Tiers.getUserTier() || '0.8b');
+  updateEmptySub(Tiers.getUserTier() || Tiers.SMALL_TIER);
 
   function tierOptionLabel(id) {
     const t = Tiers.TIERS[id];
-    const quality = id === '0.8b' ? COPY.tierFast : id === '2b' ? COPY.tierBetter : id === '4b' ? COPY.tierBest : COPY.tierMax;
-    return id === '0.8b' ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + sizeText(t.sizeLabel));
+    if (t.legacy) return t.name + ' · ' + COPY.tierOld;
+    const slot = Tiers.TIER_CHAIN.length - 1 - Tiers.TIER_CHAIN.indexOf(id);
+    const quality = [COPY.tierFast, COPY.tierBetter, COPY.tierBest][slot] || COPY.tierMax;
+    return id === Tiers.SMALL_TIER ? (t.name + ' · ' + quality) : (t.name + ' · ' + quality + ' · ' + sizeText(t.sizeLabel));
   }
 
   function syncTierSelector() {
     if (!tierDecision || !tierDecision.tier) return;
-    const ids = ['0.8b'].concat(tierDecision.eligible);
+    const ids = (currentTier && Tiers.isLegacyTier(currentTier) ? [currentTier] : []).concat([Tiers.SMALL_TIER], tierDecision.eligible);
     if (ids.length < 2) { tierSel.hidden = true; return; }
     tierSel.innerHTML = '';
     for (const id of ids) {
@@ -1451,7 +1538,7 @@ function runApp(MentriaEngine, Tiers) {
   tierSel.addEventListener('change', async () => {
     const id = tierSel.value;
     if (id === currentTier || generating || recovering) { tierSel.value = currentTier; return; }
-    if (id !== '0.8b' && !(await Tiers.isTierCached(id))) {
+    if (id !== Tiers.SMALL_TIER && !(await Tiers.isTierCached(id))) {
       const ok = await window.mentriaConfirm(COPY.tierConfirm.replace('{size}', sizeText(Tiers.TIERS[id].sizeLabel)));
       if (!ok) { tierSel.value = currentTier; return; }
     }
@@ -1482,6 +1569,7 @@ function runApp(MentriaEngine, Tiers) {
       const res = await ensureModel(createEngine, {
         vision: true,
         offerUpgrade: true,
+        guardReload: true,
         choose: choose === true,
         onProgress: onEngineProgress,
         onTier: (info) => strip.setTier(info),
@@ -1523,6 +1611,12 @@ function runApp(MentriaEngine, Tiers) {
       warmSystemPrompt();
       return true;
     } catch (err) {
+      if (err && err.message === 'load-cut-short') {
+        if (strip) strip.hide();
+        setStatus('idle', 'statusNoModel');
+        showNotice('postponed', 'loadCutNotice', null, 'btnReloadModel', () => loadModel());
+        return false;
+      }
       if (err && err.message === 'download-postponed') {
         if (strip) strip.hide();
         setStatus('idle', 'statusNoModel');
@@ -1549,7 +1643,7 @@ function runApp(MentriaEngine, Tiers) {
 
   function isDeviceLostError(err) {
     const m = String((err && err.message) || err || '').toLowerCase();
-    return m.includes('device was lost') || m.includes('device lost') || m.includes('new mentriaengine');
+    return m.includes('device was lost') || m.includes('device lost') || m.includes('new mentriaengine') || m.includes('unable to make command encoder');
   }
 
   function showLostState(moveFocus) {
@@ -1794,7 +1888,7 @@ function runApp(MentriaEngine, Tiers) {
         paintThink(parts);
         display = parts.answer.trim();
       } else {
-        display = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+        display = Tiers.stripThink(fullText.replace(/<think>[\s\S]*?<\/think>/g, '')).trim();
       }
       // window.renderMarkdown escapes html before applying markdown patterns,
       // so model-emitted <script> tags are inert. Falls back to textContent if
@@ -1818,8 +1912,8 @@ function runApp(MentriaEngine, Tiers) {
         display = parts.answer.replace(/<\|[^|]*\|>/g, '').replace(/<tool_call>[\s\S]*?(<\/tool_call>|$)/g, '').trim();
         thinkTruncated = mode === 'done' && !parts.closed;
       } else {
-        display = fullText
-          .replace(/<think>[\s\S]*?<\/think>/g, '')
+        display = Tiers.stripThink(fullText
+          .replace(/<think>[\s\S]*?<\/think>/g, ''))
           .replace(/<tool_call>[\s\S]*?(<\/tool_call>|$)/g, '')
           .replace(/<\|[^|]*\|>/g, '')   // belt-and-suspenders strip if a multi-piece special leaks through
           .trim();
@@ -1914,7 +2008,17 @@ function runApp(MentriaEngine, Tiers) {
     }
     let droppedImages = 0;
     for (let i = 0; i < rest.length - kept.length; i++) droppedImages += turnImages(rest[i]);
-    const windowImages = conversationImages.slice(droppedImages);
+    let windowImages = conversationImages.slice(droppedImages);
+    let sendTurns = kept;
+    if (IS_IOS && windowImages.length > IOS_IMAGES) {
+      let skip = windowImages.length - IOS_IMAGES;
+      windowImages = windowImages.slice(skip);
+      sendTurns = kept.map((m) => {
+        if (!skip || !turnImages(m)) return m;
+        const content = m.content.filter((p) => !(p && p.type === 'image' && skip > 0 && skip--));
+        return { role: m.role, content };
+      });
+    }
     const imagesForRequest = windowImages.length ? windowImages : undefined;
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
@@ -1933,9 +2037,9 @@ function runApp(MentriaEngine, Tiers) {
     const useTool = route ? route === 'tool' : searchActive;
     markRoute(bodyEl, route);
     await setSearchAdapter(useTool);
-    const asked = rest.length ? turnText(rest[rest.length - 1]) : '';
-    const baseSystem = currentTier === '0.8b' && !pinned
-      ? systemPromptFor(currentTier, { image: !!imagesForRequest, lang: replyLanguage(asked) })
+    const asks = rest.filter((m) => m.role === 'user').map(turnText);
+    const baseSystem = (isSmallTier(currentTier) || isB2Tier(currentTier)) && !pinned
+      ? systemPromptFor(currentTier, { image: !!imagesForRequest, lang: replyLanguage(asks), site: isB2Tier(currentTier) && asksAboutSite(asks) })
       : systemMessage.content;
     const systemContent = useTool ? baseSystem + SEARCH_TOOL_PROMPT : baseSystem;
     const toolTurns = [];
@@ -1953,7 +2057,7 @@ function runApp(MentriaEngine, Tiers) {
         const smp = (pinned && pinned.sampling) || null;
         const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
         const params = {
-          messages: [{ role: 'system', content: systemContent }, ...kept, ...toolTurns],
+          messages: [{ role: 'system', content: systemContent }, ...sendTurns, ...toolTurns],
           maxTokens: (imagesForRequest && IS_IOS) ? 256
             : (pinned && num(pinned.maxTokens, 0) > 0) ? pinned.maxTokens
             : deepThink ? thinkBudget
@@ -2141,13 +2245,17 @@ function runApp(MentriaEngine, Tiers) {
   async function attachFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
     removeImage();
-    const url = URL.createObjectURL(file);
-    imgThumb.src = url;
-    imgPreview.style.display = '';
-    attachedDataUrl = url;
+    const seq = ++attachSeq;
     try {
-      attachedImage = await fileToEngineImage(file, IMG_MAX);
+      const img = await fileToEngineImage(file, IMG_MAX, true);
+      if (seq !== attachSeq) return;
+      const url = URL.createObjectURL(img.preview || file);
+      imgThumb.src = url;
+      imgPreview.style.display = '';
+      attachedDataUrl = url;
+      attachedImage = { rgbHwc: img.rgbHwc, h: img.h, w: img.w };
     } catch (err) {
+      if (seq !== attachSeq) return;
       console.error('Image attach error:', err);
       removeImage();
       setStatus('error', 'errBadImage');
@@ -2155,6 +2263,7 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   function removeImage() {
+    attachSeq++;
     if (attachedDataUrl) { try { URL.revokeObjectURL(attachedDataUrl); } catch (_) {} }
     attachedImage = null;
     attachedDataUrl = null;

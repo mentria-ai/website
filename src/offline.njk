@@ -91,7 +91,7 @@ eleventyExcludeFromSitemap: true
   let hasModel = false;
   try {
     const tiers = await import('/assets/js/mentria-tiers.js');
-    for (const id of tiers.TIER_CHAIN) {
+    for (const id of tiers.TIER_CHAIN.concat(tiers.LEGACY_CHAIN)) {
       if (await tiers.isTierCached(id)) { hasModel = true; break; }
     }
   } catch (_) {}

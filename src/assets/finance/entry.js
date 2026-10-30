@@ -1,7 +1,7 @@
 import * as U from './ui.js';
 import { decimalsFor, convertMinor, localeSeparators, minorToDecimal, toMinor, trimDecimal, decimalToInput, formatDecimal } from './money.js';
 import { isISODate, weekday, weekdayNames } from './dates.js';
-import { parseEntry, aiPrompt, parseAiJson } from './nl.js';
+import { parseEntry, aiPrompt, parseAiJson, findDate } from './nl.js';
 import { payeeKey } from './ledger.js';
 import * as R from './rules.js';
 import { offerSimilar } from './categorize.js';
@@ -58,6 +58,7 @@ export function openEntry(ctx, opts) {
     cleared: false,
     fxTyped: '',
     amountFromText: false,
+    modeFromText: false,
     touched: new Set()
   };
   if (existing) {
@@ -119,7 +120,7 @@ export function openEntry(ctx, opts) {
       { value: 'out', label: t('entry.expense') },
       { value: 'in', label: t('entry.income') },
       { value: 'xfer', label: t('entry.transfer') }
-    ], st.mode, (v) => { st.mode = v; st.category = null; refreshAll(); }, true));
+    ], st.mode, (v) => { st.mode = v; st.modeFromText = false; st.category = null; refreshAll(); }, true));
   }
 
   function amountMinor() { return minorFromTyped(st.typed, acctCcy(st.account)); }
@@ -309,12 +310,15 @@ export function openEntry(ctx, opts) {
     else if (!fromAi && !p.amount && st.amountFromText && !st.touched.has('amount')) { st.typed = ''; st.amountFromText = false; }
     if (p.transfer && L.accounts().length > 1) {
       st.mode = 'xfer';
+      st.modeFromText = true;
       if (p.account) st.account = p.account;
       if (p.toAccount) st.toAccount = p.toAccount;
     } else {
-      if (st.mode === 'xfer') st.mode = 'out';
-      if (p.income) st.mode = 'in';
-      else if (st.mode === 'in' && !p.income && !fromAi) st.mode = 'out';
+      const before = st.mode;
+      if (st.mode === 'xfer' && st.modeFromText) st.mode = 'out';
+      if (p.income) { st.mode = 'in'; st.modeFromText = true; }
+      else if (st.mode === 'in' && st.modeFromText && !fromAi) st.mode = 'out';
+      if (st.mode !== before && !st.touched.has('category')) st.category = null;
       if (p.account && !st.touched.has('account')) st.account = p.account;
       if (p.category && !st.touched.has('category')) st.category = p.category;
       if (p.payee && !st.touched.has('payee')) st.payee = p.payee;
@@ -582,7 +586,9 @@ export async function aiParse(L, text) {
   if (typeof v.currency === 'string' && /^[A-Z]{3}$/.test(v.currency)) out.currency = v.currency;
   out.income = v.type === 'income';
   out.transfer = v.type === 'transfer';
-  if (isISODate(v.date)) out.date = v.date;
+  const ruleDate = findDate(text, nlContext(L));
+  if (ruleDate) out.date = ruleDate.date;
+  else if (isISODate(v.date)) out.date = v.date;
   const cat = L.leafCategories().find((c) => c.name.toLowerCase() === String(v.category || '').toLowerCase());
   if (cat) out.category = cat.id;
   const acct = L.accounts().find((a) => a.name.toLowerCase() === String(v.account || '').toLowerCase());

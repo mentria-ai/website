@@ -14,7 +14,6 @@ const STORAGE_ERRORS = new Set(['storage', 'idb', 'QuotaExceededError', 'Unknown
 const FOCUSABLE = 'button, a[href], input, select, textarea, [tabindex]';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const LOCK_ICON = '<rect x="5" y="10.5" width="14" height="9.5" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="15.2" r="1.3" fill="currentColor"/>';
-const CLOSE_ICON = '<line x1="18" y1="6" x2="6" y2="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>';
 const FULLSCREEN = 'is-fullscreen-tool';
 
 const copies = new Map();
@@ -25,7 +24,6 @@ let localeOverride = null;
 let seq = 0;
 let pageState = null;
 let launchP = null;
-let bar = null;
 let setupP = null;
 let pendingCode = null;
 let noteEl = null;
@@ -412,7 +410,7 @@ function closeLayer(L) {
   const o = L.opener;
   if (o && o !== document.body && document.contains(o)) focusEl(o);
   else if (top) focusEl(tabbables(top.panel)[0] || top.panel);
-  else if (o && o !== document.body) landing();
+  else landing();
 }
 
 function buildCard(T0, { mode, onDone, titleId }) {
@@ -651,90 +649,41 @@ export function showLaunch(err) {
   return launchP;
 }
 
-export async function showBar() {
-  const T0 = await copy();
-  await domReady();
-  const html = document.documentElement;
-  if (bar || !state().ask || html.classList.contains(FULLSCREEN)) return;
-  let T = T0;
-  let busy = false;
-  const text = h('span', { class: 'm-update__text' });
-  const go = h('button', { type: 'button', class: 'm-update__btn', 'data-act': 'bar-unlock' }, h('span', { uk: 'bar_unlock' }));
-  const x = h('button', { type: 'button', class: 'm-update__x', 'data-act': 'bar-close' }, glyph(CLOSE_ICON));
-  const root = h('div', { class: 'm-update m-ubar', role: 'status', 'aria-live': 'polite' }, icon('m-ubar__icon'), text, go, x);
-  const chip = document.getElementById('m-update');
-  const measure = (el, name) => {
-    const tall = el ? el.getBoundingClientRect().height : 0;
-    if (tall > 0) html.style.setProperty(name, Math.ceil(tall) + 'px');
-  };
-  const sizer = typeof ResizeObserver === 'function' ? new ResizeObserver(() => {
-    measure(chip, '--m-update-h');
-    measure(root, '--m-ubar-h');
-  }) : null;
-  const watch = typeof MutationObserver === 'function' ? new MutationObserver(() => {
-    if (html.classList.contains(FULLSCREEN)) close();
-  }) : null;
-  const view = {
-    repaint(T2) {
-      T = T2;
-      paint(root, T);
-      const label = typeof T.not_now === 'string' ? T.not_now : '';
-      x.setAttribute('aria-label', label);
-      x.title = label;
-    }
-  };
-  const close = () => {
-    if (bar !== view) return;
-    bar = null;
-    off();
-    if (sizer) sizer.disconnect();
-    if (watch) watch.disconnect();
-    html.style.removeProperty('--m-update-h');
-    html.style.removeProperty('--m-ubar-h');
-    live.delete(view);
-    if (root.contains(document.activeElement)) landing();
-    root.remove();
-  };
-  const idle = () => {
-    busy = false;
-    root.removeAttribute('aria-busy');
-  };
-  go.addEventListener('click', () => {
-    if (busy || bar !== view) return;
-    const s = state();
-    if (!(s.passkeys > 0 && s.prf !== 'no')) {
-      showLaunch();
+function settled() {
+  return new Promise((resolve) => {
+    const ok = () => document.visibilityState === 'visible' && document.hasFocus();
+    if (ok()) {
+      resolve();
       return;
     }
-    busy = true;
-    root.setAttribute('aria-busy', 'true');
-    unlockWithPasskey().then(() => {
-      idle();
-      close();
-    }, (err) => {
-      idle();
-      if (bar === view && !state().unlocked) showLaunch(err);
-    });
+    const check = () => {
+      if (!ok()) return;
+      document.removeEventListener('visibilitychange', check);
+      window.removeEventListener('focus', check);
+      resolve();
+    };
+    document.addEventListener('visibilitychange', check);
+    window.addEventListener('focus', check);
   });
-  x.addEventListener('click', () => {
-    close();
-    dismissAsk();
-  });
-  const off = onChange((s) => { if (!s.ask) close(); });
-  bar = view;
-  live.add(view);
-  view.repaint(T);
-  document.body.append(root);
-  if (sizer) {
-    sizer.observe(root);
-    if (chip) sizer.observe(chip);
+}
+
+export async function askAtLaunch() {
+  await domReady();
+  await settled();
+  const s = state();
+  if (!s.ask || s.unlocked || document.documentElement.classList.contains(FULLSCREEN)) return;
+  if (s.passkeys > 0 && s.prf !== 'no') {
+    try {
+      await unlockWithPasskey();
+      return;
+    } catch (err) {
+      if (state().unlocked) return;
+      if (errKey(err, true) !== 'err_cancelled') await showLaunch(err);
+    }
+  } else {
+    await showLaunch();
   }
-  if (watch) watch.observe(html, { attributes: true, attributeFilter: ['class'] });
-  nextFrame(() => {
-    if (bar !== view) return;
-    text.dataset.uk = 'bar_text';
-    paint(text, T);
-  });
+  if (!state().unlocked) dismissAsk();
 }
 
 export async function showConfirm() {

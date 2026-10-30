@@ -5,6 +5,42 @@ const IS_MOBILE = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/
 const PROBE_TIMEOUT = IS_MOBILE ? 120000 : 60000;
 const PROBE_STILL_MS = 20000;
 const READY_LINGER = 900;
+const RUN_KEY = 'mentria-model-loading';
+const PAGE_RUN = Math.random().toString(36).slice(2);
+let liveEngine = null;
+let parked = false;
+
+function markLoading(on) {
+  try {
+    if (on) sessionStorage.setItem(RUN_KEY, JSON.stringify({ run: PAGE_RUN, path: location.pathname, at: Date.now() }));
+    else sessionStorage.removeItem(RUN_KEY);
+  } catch (_) {}
+}
+
+function loadWasCut() {
+  try {
+    const v = JSON.parse(sessionStorage.getItem(RUN_KEY) || 'null');
+    if (!v || v.run === PAGE_RUN) return false;
+    sessionStorage.removeItem(RUN_KEY);
+    return v.path === location.pathname && Date.now() - v.at < 180000;
+  } catch (_) { return false; }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', (e) => {
+    markLoading(false);
+    if (!e.persisted) return;
+    const engines = new Set([window.__mentriaEngine, liveEngine].filter(Boolean));
+    if (!engines.size) return;
+    parked = true;
+    window.__mentriaEngine = null;
+    liveEngine = null;
+    for (const eng of engines) { try { eng.terminate(); } catch (_) {} }
+  });
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted && parked) location.reload();
+  });
+}
 
 const DEFAULT_COPY = {
   checking: 'Checking your device…',
@@ -26,7 +62,9 @@ const DEFAULT_COPY = {
   tryTier: 'Try {name}',
   failedTitle: '{name} didn’t run on this device',
   failedHint: 'You can try a smaller model or skip for now.',
-  failedHintLater: 'You can skip for now and try again later.'
+  failedHintLater: 'You can skip for now and try again later.',
+  upgradeText: 'A better {name} model is ready · {size}',
+  upgradeGo: 'Download'
 };
 
 function i18nReady(ms) {
@@ -78,6 +116,8 @@ function relabel() {
 }
 
 if (typeof document !== 'undefined') document.addEventListener('mentria:localechange', relabel);
+
+export const stripThink = Tiers.stripThink;
 
 export class NoWebGpuError extends Error {
   constructor() { super('no-webgpu'); this.name = 'NoWebGpuError'; }
@@ -253,6 +293,49 @@ function offerChoice(choices, titleText, detailNodes, labelFor, focusId) {
 
 function span(cls, text) { const s = document.createElement('span'); s.className = cls; s.textContent = text; return s; }
 
+const UPGRADE_NOW = 'mm-upgrade-now';
+const UPGRADE_LATER = 'mm-upgrade-later';
+let upgradeAsked = null;
+
+function upgradeRequested() {
+  if (upgradeAsked === null) {
+    try { upgradeAsked = sessionStorage.getItem(UPGRADE_NOW) === '1'; sessionStorage.removeItem(UPGRADE_NOW); } catch (_) { upgradeAsked = false; }
+  }
+  return upgradeAsked;
+}
+
+function offerUpgradeBar(id) {
+  try { if (sessionStorage.getItem(UPGRADE_LATER)) return; } catch (_) {}
+  if (document.getElementById('mm-upgrade') || document.querySelector('.m-ubar')) return;
+  const text = span('m-update__text', '');
+  const go = button('', '', () => {
+    try { sessionStorage.setItem(UPGRADE_NOW, '1'); } catch (_) {}
+    location.reload();
+  });
+  go.className = 'm-update__btn';
+  const x = button('×', '', () => {
+    try { sessionStorage.setItem(UPGRADE_LATER, '1'); } catch (_) {}
+    document.removeEventListener('mentria:localechange', paint);
+    root.remove();
+  });
+  x.className = 'm-update__x';
+  const root = document.createElement('div');
+  root.id = 'mm-upgrade';
+  root.className = 'm-update m-ubar';
+  root.setAttribute('role', 'status');
+  root.setAttribute('aria-live', 'polite');
+  root.append(text, go, x);
+  function paint() {
+    text.textContent = say('upgradeText', { name: tierName(id), size: tierSize(id) }).replace(/ ·/g, ' ·');
+    go.textContent = say('upgradeGo');
+    x.setAttribute('aria-label', say('chooseNotNow'));
+    x.title = say('chooseNotNow');
+  }
+  paint();
+  document.addEventListener('mentria:localechange', paint);
+  document.body.appendChild(root);
+}
+
 function offerTiers(choices) {
   const pref = Tiers.getUserTier();
   return offerChoice(choices, t('chooseTitle'), [
@@ -265,7 +348,7 @@ function offerTiers(choices) {
 async function tierChoices() {
   const d = await Tiers.decideTier();
   const set = new Set([d.tier].concat(d.eligible || []));
-  set.add('0.8b');
+  set.add(Tiers.SMALL_TIER);
   return Tiers.TIER_CHAIN.filter((id) => set.has(id));
 }
 
@@ -335,6 +418,16 @@ function requestPersistentStorage() {
 
 export async function ensureModel(engineFactory, opts) {
   opts = opts || {};
+  if (opts.guardReload && loadWasCut()) throw new Error('load-cut-short');
+  markLoading(true);
+  try {
+    return await loadModelFor(engineFactory, opts);
+  } finally {
+    markLoading(false);
+  }
+}
+
+async function loadModelFor(engineFactory, opts) {
   const vision = !!opts.vision;
   const onProgress = opts.onProgress || null;
   const onDeviceLost = opts.onDeviceLost || null;
@@ -353,6 +446,7 @@ export async function ensureModel(engineFactory, opts) {
     if (stopped) throw new Error('stopped');
     const e = engineFactory();
     lastEngine = e;
+    liveEngine = e;
     const swapping = trackAdapters(e);
     e.onProgress = (p) => {
       const tag = p && (p.stage === 'download' || p.stage === 'upload') ? swapping() : null;
@@ -364,10 +458,11 @@ export async function ensureModel(engineFactory, opts) {
   };
 
   const attachDeviceLost = (engine, tier) => {
+    engine.mentriaTier = tier;
     engine.onDeviceLost = (info) => {
       try {
         const idx = Tiers.TIER_CHAIN.indexOf(tier);
-        const lower = Tiers.TIER_CHAIN[idx + 1];
+        const lower = idx >= 0 ? Tiers.TIER_CHAIN[idx + 1] : null;
         if (lower) Tiers.setTierCap(lower);
         Tiers.clearValidatedTier();
       } catch (_) {}
@@ -377,12 +472,28 @@ export async function ensureModel(engineFactory, opts) {
     return engine;
   };
 
-  if (cachedOnly) {
-    const c = await Tiers.effectiveTier({ cachedOnly: true });
-    if (!c) throw new Error('model-not-cached');
+  const loadCached = async (c) => {
     tellTier(c, true);
     const res = await Tiers.loadWithFallback(makeEngine, c, { vision, onlyCached: true, onFallback: (from, to) => tellTier(to, true) });
     return { engine: attachDeviceLost(res.engine, res.tier), tier: res.tier, maxSeq: res.maxSeq, decodeRoute: res.decodeRoute || null };
+  };
+
+  if (cachedOnly) {
+    const c = await Tiers.effectiveTier({ cachedOnly: true });
+    if (!c) throw new Error('model-not-cached');
+    return loadCached(c);
+  }
+
+  if (!choose && !upgradeRequested()) {
+    const want = await Tiers.effectiveTier();
+    if (want && !(await Tiers.isTierCached(want))) {
+      const old = await Tiers.effectiveTier({ cachedOnly: true });
+      if (old && Tiers.isLegacyTier(old)) {
+        const res = await loadCached(old);
+        offerUpgradeBar(want);
+        return res;
+      }
+    }
   }
 
   if (offerUpgrade && (choose || !Tiers.getUserTier())) {

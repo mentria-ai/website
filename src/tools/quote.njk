@@ -92,6 +92,40 @@ const SYSTEM_PROMPT =
   '(1-2 sentences). Do not attribute it to anyone. No preamble, no ' +
   'quotation marks \u2014 just the quote itself.';
 const MAX_TOKENS = 128;
+const THEMES = ['patience', 'courage', 'starting over', 'small steps', 'failure', 'curiosity', 'rest', 'discipline',
+  'kindness', 'change', 'focus', 'learning', 'hope', 'gratitude', 'friendship', 'fear', 'growth', 'time',
+  'creativity', 'resilience', 'honesty', 'balance', 'ambition', 'letting go'];
+const ANCHORS = ['a kettle coming to the boil', 'a key that no longer fits its lock', 'frost on a window', 'a paper boat in a gutter',
+  'moss on the north side of a tree', "a lighthouse keeper's log", 'a borrowed ladder', 'a seed packet in a drawer',
+  'a bicycle with one flat tyre', 'a bridge half built', 'a candle in a power cut', 'bread rising under a cloth',
+  'a compass in a coat pocket', 'a garden after rain', 'a map with folds worn white', 'a violin left out of its case',
+  'a tide coming in', 'a kite caught in a tree', 'footprints in fresh snow', 'a jar of buttons', 'an unfinished letter',
+  'a train platform at dawn', 'a sourdough starter', 'a sprained ankle healing', 'a river stone worn smooth',
+  'a cracked teacup mended with gold', 'a night bus', 'a pencil worn to a stub', 'a beehive in winter',
+  'a sailboat waiting for wind', 'a chess pawn reaching the last row', 'a lantern on a hill path', 'a dog-eared library book',
+  'roots splitting a pavement', 'a clock with a missing hand', 'a fishing line in still water', 'a scarf being knitted',
+  'a staircase in the dark', 'a puddle reflecting the sky', 'a door left ajar', 'a mountain hut with one bed',
+  'a recipe card stained with flour', 'a bird testing a branch', 'a quiet street after a parade', 'a pair of muddy boots',
+  'an orchard in blossom', 'a rowing boat with one oar', 'a first draft full of crossings-out', 'a well with a long rope',
+  'a sunflower turning', 'a tent pitched in wind', 'a radio finding a station', 'a glass of water on a bedside table',
+  'a swing still moving', 'a mapmaker at a coastline', 'a snail crossing a path', 'a pottery wheel spinning',
+  'a ship in a bottle', 'a field after the harvest', 'a balcony full of herbs'];
+const REJECT = [/^\W*true\b/i, /\bis not\b[\s\S]*\b(but|it's)\b/i, /absence of fear|great work is to love|thousand miles/i];
+let lastTheme = -1;
+function quoteRequest() {
+  const theme = nextTheme();
+  const anchor = ANCHORS[Math.floor(Math.random() * ANCHORS.length)];
+  return 'Write one original motivational line of at most 22 words. Build it on this image: ' + anchor + '. ' +
+    'Let it quietly be about ' + theme + ' without using the word "' + theme + '" or its forms. ' +
+    'Do not use the shape "X is not Y, but Z". Do not begin with "True". ' +
+    'No famous sayings, no attribution, no quotation marks. Only the line.';
+}
+function nextTheme() {
+  let i = Math.floor(Math.random() * THEMES.length);
+  if (i === lastTheme) i = (i + 1) % THEMES.length;
+  lastTheme = i;
+  return THEMES[i];
+}
 
 /* \u2500\u2500 Status helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 const statusDot  = document.getElementById('mq-status-dot');
@@ -164,6 +198,7 @@ function runApp(MentriaEngine) {
   const shareBtn       = document.getElementById('mq-share');
 
   let engine = null;
+  let stripThink = (s) => s;
   let generating = false;
   let loading = null;
   let blocked = false;
@@ -202,14 +237,14 @@ function runApp(MentriaEngine) {
     setStatus('loading', 'statusLoadingModel');
     await ensureStrip();
     try {
-      const { ensureModel } = await import('/assets/js/mentria-model.js');
-      const Tiers = await import('/assets/js/mentria-tiers.js');
+      const Model = await import('/assets/js/mentria-model.js');
+      stripThink = Model.stripThink;
       const createEngine = () => {
         const e = new MentriaEngine(MENTRIA_DIST_BASE + 'worker.mjs');
         window.mentriaWrapEngine && window.mentriaWrapEngine(e);
         return e;
       };
-      const res = await ensureModel(createEngine, {
+      const res = await Model.ensureModel(createEngine, {
         vision: false,
         offerUpgrade: true,
         onProgress: onEngineProgress,
@@ -217,21 +252,6 @@ function runApp(MentriaEngine) {
         onDeviceLost
       });
       engine = res.engine;
-      const base = Tiers.TIERS[res.tier].base;
-      try {
-        await engine.swapAdapter({
-          name: 'quotes-v1',
-          configUrl: base + 'loras/quotes/adapter_config.json',
-          weightsUrl: base + 'loras/quotes/adapter_model.safetensors',
-        });
-      } catch (err) {
-        console.warn('Quotes LoRA load failed, using base model:', err);
-      }
-      if (engine !== res.engine) {
-        if (strip) strip.hide();
-        newBtn.disabled = generating;
-        return;
-      }
       strip.done({ prime: COPY.statusReady, linger: 1200 });
       setStatus('ready', 'statusReady');
       newBtn.disabled = false;
@@ -269,11 +289,6 @@ function runApp(MentriaEngine) {
     quoteEl.classList.add('mq__quote--typing');
     setStatus('generating', 'statusGenerating');
 
-    const messages = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user',   content: 'Give me a motivational quote.' },
-    ];
-
     let fullText = '';
 
     let nTok = 0;
@@ -283,7 +298,7 @@ function runApp(MentriaEngine) {
     function paintToken() {
       frame = 0;
       if (!open) return;
-      const display = stripWrapQuotes(fullText.replace(/<think>[\s\S]*?<\/think>/g, '').trim());
+      const display = stripWrapQuotes(stripThink(fullText.replace(/<think>[\s\S]*?<\/think>/g, '')).trim());
       // Markdown-rendered output (escapes html first → safe). Falls back to text.
       if (window.renderMarkdown) quoteEl.innerHTML = renderMarkdown(display) || '<p>…</p>';
       else quoteEl.textContent = display || '…';
@@ -291,33 +306,43 @@ function runApp(MentriaEngine) {
     const close = () => { open = false; if (frame) { cancelAnimationFrame(frame); frame = 0; } };
 
     try {
-      await eng.generate({
-        messages,
-        maxTokens: MAX_TOKENS,
-        // Match the original transformers.js sampling for similar
-        // creative variance: do_sample=true, temp=0.9, top_p=0.95.
-        temperature: 0.9,
-        topP: 0.95,
-        topK: 50,
-        repetitionPenalty: 1.1,
-        enableThinking: false,
-      }, (event) => {
-        if (!open) return;
-        if (typeof event.token === 'string' && event.token.length > 0) {
-          // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
-          if (/^<\|[^|]*\|>$/.test(event.token)) return;
-          fullText += event.token;
-          if (strip) strip.token(++nTok);
-          if (!frame) frame = requestAnimationFrame(paintToken);
-        }
-      });
+      let display = '';
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const messages = [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user',   content: quoteRequest() },
+        ];
+        fullText = '';
+        open = true;
+        await eng.generate({
+          messages,
+          maxTokens: MAX_TOKENS,
+          // Match the original transformers.js sampling for similar
+          // creative variance: do_sample=true, temp=0.9, top_p=0.95.
+          temperature: 0.9,
+          topP: 0.95,
+          topK: 50,
+          repetitionPenalty: 1.0,
+          enableThinking: false,
+        }, (event) => {
+          if (!open) return;
+          if (typeof event.token === 'string' && event.token.length > 0) {
+            // Skip Qwen special tokens (<|im_end|>, <|endoftext|>, etc) from the visible stream
+            if (/^<\|[^|]*\|>$/.test(event.token)) return;
+            fullText += event.token;
+            if (strip) strip.token(++nTok);
+            if (!frame) frame = requestAnimationFrame(paintToken);
+          }
+        });
 
-      close();
+        close();
+        display = stripWrapQuotes(stripThink(fullText
+          .replace(/<think>[\s\S]*?<\/think>/g, ''))
+          .replace(/<\|[^|]*\|>/g, '')
+          .trim());
+        if (!display || !REJECT.some((re) => re.test(display))) break;
+      }
       if (strip) strip.done({ tokens: nTok });
-      const display = stripWrapQuotes(fullText
-        .replace(/<think>[\s\S]*?<\/think>/g, '')
-        .replace(/<\|[^|]*\|>/g, '')
-        .trim());
       const html = display && window.renderMarkdown ? renderMarkdown(display) : '';
       if (!display || (window.renderMarkdown && !html)) showNote('errNoQuote');
       else if (window.renderMarkdown) quoteEl.innerHTML = html;

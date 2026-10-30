@@ -1,7 +1,7 @@
 import * as U from './ui.js';
 import { decimalsFor, convertMinor, localeSeparators, minorToDecimal, toMinor, trimDecimal, decimalToInput, formatDecimal } from './money.js';
 import { isISODate, weekday, weekdayNames } from './dates.js';
-import { parseEntry, aiPrompt, parseAiJson } from './nl.js';
+import { parseEntry, aiPrompt, parseAiJson, findDate } from './nl.js';
 import { payeeKey } from './ledger.js';
 import * as R from './rules.js';
 import { offerSimilar } from './categorize.js';
@@ -582,7 +582,9 @@ export async function aiParse(L, text) {
   if (typeof v.currency === 'string' && /^[A-Z]{3}$/.test(v.currency)) out.currency = v.currency;
   out.income = v.type === 'income';
   out.transfer = v.type === 'transfer';
-  if (isISODate(v.date)) out.date = v.date;
+  const ruleDate = findDate(text, nlContext(L));
+  if (ruleDate) out.date = ruleDate.date;
+  else if (isISODate(v.date)) out.date = v.date;
   const cat = L.leafCategories().find((c) => c.name.toLowerCase() === String(v.category || '').toLowerCase());
   if (cat) out.category = cat.id;
   const acct = L.accounts().find((a) => a.name.toLowerCase() === String(v.account || '').toLowerCase());

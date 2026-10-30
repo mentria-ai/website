@@ -16,6 +16,60 @@ const KANA_CHAR = /[\u3041-\u309f]/;
 
 function minLen(name) { return CJK.test(name) ? 2 : 3; }
 
+const AGO_NUM = { a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, un: 1, una: 1, une: 1, um: 1, uma: 1,
+  dos: 2, deux: 2, dois: 2, duas: 2, tres: 3, 'três': 3, trois: 3, cuatro: 4, quatre: 4, quatro: 4, cinco: 5, cinq: 5,
+  seis: 6, siete: 7, sept: 7, sete: 7, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7 };
+const AGO_RES = [
+  /\b(\d{1,2}|an?|one|two|three|four|five|six|seven)\s+(days?|weeks?)\s+ago\b/i,
+  /(?:^|[^\p{L}])(?:hace)\s+(\d{1,2}|una?|dos|tres|cuatro|cinco|seis|siete)\s+(d[ií]as?|semanas?)(?!\p{L})/iu,
+  /(?:^|[^\p{L}])il y a\s+(\d{1,2}|une?|deux|trois|quatre|cinq|six|sept)\s+(jours?|semaines?)(?!\p{L})/iu,
+  /(?:^|[^\p{L}])h[áa]\s+(\d{1,2}|uma?|dois|duas|tr[êe]s|quatro|cinco|seis|sete)\s+(dias?|semanas?)(?!\p{L})/iu,
+  /(\d{1,2}|[一二三四五六七])\s*(日|週間)前/
+];
+const DAY_RES = [
+  /\b(?:on\s+)?the\s+(\d{1,2})(?:st|nd|rd|th)\b/i,
+  /(?:^|[^\p{L}])el\s+d[ií]a\s+(\d{1,2})(?![\d.,])/iu,
+  /(?:^|[^\p{L}])no\s+dia\s+(\d{1,2})(?![\d.,])|(?:^|[^\p{L}])dia\s+(\d{1,2})(?![\d.,])/iu,
+  /(?:^|[^\p{L}])le\s+(\d{1,2})(?:er)?(?![\d.,:/])(?!\s*(?:€|eur|euros?|%|h(?!\p{L})))/iu,
+  /(\d{1,2})日(?!前|間)/
+];
+
+function matchedWord(m) { return m[0].replace(/^[^\p{L}\p{N}]+/u, '').trim(); }
+
+function recentDayOfMonth(today, d) {
+  const p = parts(today);
+  let y = p.y;
+  let m = p.m;
+  if (d > p.d) { m -= 1; if (m < 1) { m = 12; y -= 1; } }
+  const v = iso(y, m, d);
+  return isISODate(v) ? v : null;
+}
+
+function relativeDate(text, today) {
+  for (const re of AGO_RES) {
+    const m = text.match(re);
+    if (!m) continue;
+    const n = /^\d+$/.test(m[1]) ? +m[1] : AGO_NUM[m[1].toLowerCase()];
+    if (!n) continue;
+    const week = /^(week|semana|semaine|週)/i.test(m[2]);
+    return { date: addDays(today, -n * (week ? 7 : 1)), word: matchedWord(m) };
+  }
+  const jm = text.match(/(\d{1,2})月(\d{1,2})日/);
+  if (jm) {
+    let v = iso(parts(today).y, +jm[1], +jm[2]);
+    if (isISODate(v) && v > today) v = iso(parts(today).y - 1, +jm[1], +jm[2]);
+    if (isISODate(v)) return { date: v, word: jm[0] };
+  }
+  for (const re of DAY_RES) {
+    const m = text.match(re);
+    if (!m) continue;
+    const d = +(m[1] || m[2]);
+    const v = d >= 1 && d <= 31 ? recentDayOfMonth(today, d) : null;
+    if (v) return { date: v, word: matchedWord(m) };
+  }
+  return null;
+}
+
 function hasWord(text, word) {
   if (!word) return false;
   if (CJK.test(word)) return text.toLowerCase().includes(word.toLowerCase());
@@ -77,8 +131,9 @@ export function findDate(text, ctx) {
     const v = iso(y, mo, d);
     if (isISODate(v)) return { date: v > today && !dm[3] ? iso(y - 1, mo, d) : v, word: dm[0] };
   }
-  const named = text.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-zÀ-ÿ]{3,})\.?(?:\s+(\d{4}))?\b/) || text.match(/\b([A-Za-zÀ-ÿ]{3,})\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?\b/);
-  if (named) {
+  for (const re of [/\b(\d{1,2})(?:st|nd|rd|th)?\s+(?:de\s+)?([A-Za-zÀ-ÿ]{3,})\.?(?:\s+(?:de\s+)?(\d{4}))?\b/, /\b([A-Za-zÀ-ÿ]{3,})\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?\b/]) {
+    const named = text.match(re);
+    if (!named) continue;
     const a = named[1], b = named[2];
     const mo = monthFromText(/^\d/.test(a) ? b : a, ctx.locale);
     const d = +(/^\d/.test(a) ? a : b);
@@ -89,6 +144,8 @@ export function findDate(text, ctx) {
       if (isISODate(v)) return { date: v, word: named[0] };
     }
   }
+  const rel = relativeDate(text, today);
+  if (rel) return rel;
   const names = weekdayNames(ctx.locale).concat(weekdayNames('en'));
   const lastWords = wordsOf(W.last);
   for (let i = 0; i < names.length; i++) {
@@ -161,7 +218,7 @@ export function aiPrompt(ctx) {
   return [
     'You turn one sentence about money into JSON. Today is ' + ctx.today + ' (' + ctx.weekdayName + ').',
     'Fields: {"payee": string, "amount": number, "currency": string|null, "type": "expense"|"income"|"transfer", "date": "YYYY-MM-DD", "category": one of [' + cats + '] or null, "account": one of [' + accts + '] or null, "note": string}.',
-    'Use the amount exactly as written. Dates are relative to today. Reply with JSON only.',
+    'Use the amount exactly as written. Dates are relative to today. If the sentence names no time, "date" is today. Reply with JSON only.',
     'Example: "coffee 4.50 yesterday" -> {"payee":"Coffee","amount":4.5,"currency":null,"type":"expense","date":"' + addDays(ctx.today, -1) + '","category":null,"account":null,"note":""}',
     'Example: "got salary 52000" -> {"payee":"Salary","amount":52000,"currency":null,"type":"income","date":"' + ctx.today + '","category":null,"account":null,"note":""}'
   ].join('\n');

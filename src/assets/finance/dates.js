@@ -192,15 +192,22 @@ export function parseDateLoose(text, opts) {
 
 const EN_MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
+function monthLongNames(locale) {
+  const f = dateFmt(locale, { month: 'long' });
+  const out = [];
+  for (let m = 1; m <= 12; m++) out.push(f.format(new Date(Date.UTC(2024, m - 1, 1))).toLowerCase());
+  return out;
+}
+
 export function monthFromText(word, locale) {
   const w = String(word || '').toLowerCase().replace('.', '');
   if (w.length < 3 || /\d/.test(w)) return null;
-  const i = EN_MONTHS.indexOf(w.slice(0, 3));
+  const i = EN_MONTHS.indexOf(w);
   if (i >= 0) return i + 1;
-  if (locale) {
-    const names = monthNames(locale);
-    const j = names.findIndex((n) => n && (n.startsWith(w) || w.startsWith(n)));
-    if (j >= 0) return j + 1;
+  for (const loc of locale ? ['en', locale] : ['en']) {
+    const long = monthLongNames(loc);
+    const short = monthNames(loc);
+    for (let m = 0; m < 12; m++) if (long[m].startsWith(w) || w === short[m]) return m + 1;
   }
   return null;
 }

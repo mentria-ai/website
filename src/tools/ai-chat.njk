@@ -203,6 +203,8 @@ const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
 const MENTRIA_TIERS_PATH = '/assets/js/mentria-tiers.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IS_MOBILE = IS_IOS || /Android/i.test(navigator.userAgent);
+const CHAT_VISION = !IS_IOS;
 const IMG_MAX = IS_IOS ? 256 : 448;
 const MAX_TOKENS = 512;
 
@@ -415,12 +417,40 @@ function runApp(MentriaEngine, Tiers) {
     return tier === '0.8b' || (!!Tiers && tier === Tiers.SMALL_TIER);
   }
 
+  function isB2Tier(tier) {
+    return !!Tiers && !!Tiers.TIERS[tier] && Tiers.TIERS[tier].family === 'b2';
+  }
+
   function labelPrefix(tier) {
     if (tier === '27b') return 'bonsai-';
     return Tiers && Tiers.TIERS[tier] && Tiers.TIERS[tier].family === 'b2' ? 'bonsai2-' : 'qwen-';
   }
 
+  const SITE_ASK = /mentria|this (site|website|app|page)\b|who are you\b|what are you\b|which model|what model|your name|qui[eé]n eres|qu[eé] modelo|qui es-tu|quel mod[eè]le|quem [eé] voc[eê]|qual modelo|あなたは誰|誰ですか|どのモデル|何のモデル/i;
+
+  function asksAboutSite(texts) {
+    return texts.some((t) => SITE_ASK.test(String(t || '')));
+  }
+
+  function b2SystemPrompt(tier, turn) {
+    const small = isSmallTier(tier);
+    const site = "When the user asks who you are or what model you run: identify as the Mentria AI assistant, running Bonsai 2 in their browser. When asked about Mentria itself: it is a small privacy-first studio at mentria.ai, building tools, games, and AI experiences that run in the browser, with no account needed. Notable parts of the site: an AI chat, a QR scanner, a document scanner, quick notes, Tetris, Breakout, Minesweeper, an infinite AI-generated radio, private peer-to-peer chat and calls at /comms/, and card decks for learning about AI.";
+    const base = "You are the Mentria AI assistant. You run Bonsai 2 locally in the user's browser via WebGPU." + (small ? " Your weights were prepared for the browser and shipped by mentria.ai.\n\n" + site : '') + "\n\n" +
+      "Be helpful, accurate, and brief. Don't over-apologize." +
+      (small ? '' : " You cannot browse the web, run code, call APIs, or remember between sessions; if something is outside your training, say so plainly.") + "\n\n" +
+      "Formatting: use markdown sparingly. For tables, output strict GitHub-flavored markdown: one header row, one divider row made only of pipes and dashes, then data rows. Never put prose, notes, parentheticals, or extra characters between the divider and the data rows. Each cell is one short phrase, never a sentence. Any explanation goes outside the table.";
+    if (!turn) return base;
+    const tail = [];
+    if (turn.site && !small) tail.push(site + ' Your weights were prepared for the browser and shipped by mentria.ai.');
+    if (turn.image) tail.push('When the user shares an image, describe what you see directly.');
+    if (turn.lang === 'English') tail.push('Reply in English.');
+    else if (turn.lang) tail.push('Reply in ' + turn.lang + '. Write every word in ' + turn.lang + '; do not mix in English words except proper nouns and code.');
+    else tail.push("Reply in the language of the user's message.");
+    return base + '\n\n' + tail.join('\n\n');
+  }
+
   function systemPromptFor(tier, turn) {
+    if (isB2Tier(tier)) return b2SystemPrompt(tier, turn);
     const family = modelFamilyFor(tier);
     const small = isSmallTier(tier);
     const prompt = "You are the Mentria AI assistant. You run " + family + " locally in the user's browser via WebGPU. Your weights were prepared for the browser and shipped by mentria.ai.\n\n" +
@@ -443,8 +473,16 @@ function runApp(MentriaEngine, Tiers) {
   ];
   const PAGE_REPLY_LANG = { es: 'Spanish', fr: 'French', ja: 'Japanese', 'pt-br': 'Brazilian Portuguese' };
 
-  function replyLanguage(text) {
+  function replyLanguage(texts) {
     const page = String(document.documentElement.lang || 'en').toLowerCase();
+    for (let i = texts.length - 1; i >= 0; i--) {
+      const lang = detectLanguage(texts[i], page);
+      if (lang) return lang;
+    }
+    return PAGE_REPLY_LANG[page] || null;
+  }
+
+  function detectLanguage(text, page) {
     if (/[\u3040-\u30ff]/.test(text) || (page === 'ja' && /[\u4e00-\u9fff]/.test(text))) return 'Japanese';
     const words = text.toLowerCase().replace(/\u2019/g, "'").split(/[^\p{L}']+/u);
     let best = null;
@@ -455,7 +493,7 @@ function runApp(MentriaEngine, Tiers) {
       if (n > top) { best = lang.name; top = n; tie = false; }
       else if (n > 0 && n === top) tie = true;
     });
-    return best && !tie ? best : (PAGE_REPLY_LANG[page] || null);
+    return best && !tie ? best : null;
   }
 
   let messages = [
@@ -828,17 +866,19 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   function warmSystemPrompt() {
-    if (currentTier !== '27b' || !engine || typeof engine.prefillOnly !== 'function' || deviceLost) return;
+    if ((currentTier !== '27b' && !isB2Tier(currentTier)) || IS_MOBILE || !engine || typeof engine.prefillOnly !== 'function' || deviceLost) return;
     if (webSearchOn && !pinned && !!(getSearchCfg() || {}).url) return;
     if (generating) { warmWanted = true; return; }
     const e = engine;
     const prev = warmPromise;
-    const sys = { role: 'system', content: systemMessage.content };
+    const perTurn = isB2Tier(currentTier) && !pinned;
+    const sysA = { role: 'system', content: perTurn ? systemPromptFor(currentTier, { lang: 'English' }) : systemMessage.content };
+    const sysB = { role: 'system', content: perTurn ? systemPromptFor(currentTier, { site: true, image: true, lang: null }) : systemMessage.content };
     const run = (async () => {
       if (prev) { try { await prev; } catch (_) {} }
       if (e !== engine || generating) return;
-      const a = (await e.encodeChat([sys, { role: 'user', content: 'a' }], { enableThinking: false })).ids;
-      const b = (await e.encodeChat([sys, { role: 'user', content: 'b' }], { enableThinking: false })).ids;
+      const a = (await e.encodeChat([sysA, { role: 'user', content: 'a' }], { enableThinking: false })).ids;
+      const b = (await e.encodeChat([sysB, { role: 'user', content: 'b' }], { enableThinking: false })).ids;
       let n = 0;
       while (n < a.length && n < b.length && a[n] === b[n]) n++;
       if (e !== engine || n < 64) return;
@@ -1494,7 +1534,7 @@ function runApp(MentriaEngine, Tiers) {
         return e;
       };
       const res = await ensureModel(createEngine, {
-        vision: true,
+        vision: CHAT_VISION,
         offerUpgrade: true,
         choose: choose === true,
         onProgress: onEngineProgress,
@@ -1563,7 +1603,7 @@ function runApp(MentriaEngine, Tiers) {
 
   function isDeviceLostError(err) {
     const m = String((err && err.message) || err || '').toLowerCase();
-    return m.includes('device was lost') || m.includes('device lost') || m.includes('new mentriaengine');
+    return m.includes('device was lost') || m.includes('device lost') || m.includes('new mentriaengine') || m.includes('unable to make command encoder');
   }
 
   function showLostState(moveFocus) {
@@ -1947,9 +1987,9 @@ function runApp(MentriaEngine, Tiers) {
     const useTool = route ? route === 'tool' : searchActive;
     markRoute(bodyEl, route);
     await setSearchAdapter(useTool);
-    const asked = rest.length ? turnText(rest[rest.length - 1]) : '';
-    const baseSystem = isSmallTier(currentTier) && !pinned
-      ? systemPromptFor(currentTier, { image: !!imagesForRequest, lang: replyLanguage(asked) })
+    const asks = rest.filter((m) => m.role === 'user').map(turnText);
+    const baseSystem = (isSmallTier(currentTier) || isB2Tier(currentTier)) && !pinned
+      ? systemPromptFor(currentTier, { image: !!imagesForRequest, lang: replyLanguage(asks), site: isB2Tier(currentTier) && asksAboutSite(asks) })
       : systemMessage.content;
     const systemContent = useTool ? baseSystem + SEARCH_TOOL_PROMPT : baseSystem;
     const toolTurns = [];
@@ -2153,7 +2193,7 @@ function runApp(MentriaEngine, Tiers) {
 
   /* ── Image handling ──────────────────────────────── */
   async function attachFile(file) {
-    if (!file || !file.type.startsWith('image/')) return;
+    if (!CHAT_VISION || !file || !file.type.startsWith('image/')) return;
     removeImage();
     const url = URL.createObjectURL(file);
     imgThumb.src = url;
@@ -2194,6 +2234,7 @@ function runApp(MentriaEngine, Tiers) {
 
   inputEl.addEventListener('input', () => { autoResize(); clearTooLong(); });
 
+  if (!CHAT_VISION) attachBtn.style.display = 'none';
   attachBtn.addEventListener('click', () => fileInput.click());
 
   fileInput.addEventListener('change', () => {

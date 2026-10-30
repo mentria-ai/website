@@ -121,7 +121,8 @@ export const TIERS = {
     visionShards: ['qwen3.5-4b-vl-q4.safetensors'],
     configExport: 'QWEN35_4B_CONFIG',
     visionConfigExport: 'QWEN35_VL_4B_VISION_CONFIG',
-    streamingLoad: true
+    streamingLoad: true,
+    desktopMaxSeq: 4096
   },
   'b2-9b': {
     id: 'b2-9b',
@@ -136,7 +137,8 @@ export const TIERS = {
     visionShards: ['qwen3.5-9b-vl-q4.safetensors'],
     configExport: 'QWEN35_9B_BONSAI2_CONFIG',
     visionConfigExport: 'QWEN35_VL_9B_VISION_CONFIG',
-    streamingLoad: true
+    streamingLoad: true,
+    desktopMaxSeq: 4096
   },
   '27b': {
     id: '27b',
@@ -465,6 +467,9 @@ export async function loadOptionsFor(id, { vision = true } = {}) {
       config = { ...config, attention: { ...config.attention, maxSeq: seq } };
     }
   }
+  if (t.desktopMaxSeq && IS_DESKTOP && t.desktopMaxSeq !== config.attention.maxSeq) {
+    config = { ...config, attention: { ...config.attention, maxSeq: t.desktopMaxSeq } };
+  }
   const shardBase = await resolveBase(t);
   const opts = {
     modelUrl: shardBase,
@@ -520,18 +525,36 @@ export async function resolveBase(t) {
     try { basePicks = JSON.parse(sessionStorage.getItem('mentria-model-base') || '{}'); } catch (_) { basePicks = {}; }
   }
   const hit = basePicks[cdn];
-  if (hit && Date.now() - hit.t < 3600000) return hit.ok ? cdn : t.base;
-  let ok = false;
+  if (hit && hit.base && Date.now() - hit.t < 3600000) return hit.base;
+  const ctls = [new AbortController(), new AbortController()];
+  const timer = setTimeout(() => ctls.forEach((c) => c.abort()), PROBE_MS);
+  let pick = t.base;
   try {
-    const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), 2500);
-    const res = await fetch(cdn + t.shards[0], { method: 'HEAD', signal: ctl.signal });
-    clearTimeout(timer);
-    ok = res.ok;
+    pick = await Promise.any([probeBase(cdn, t.shards[0], ctls[0].signal), probeBase(t.base, t.shards[0], ctls[1].signal)]);
   } catch (_) {}
-  basePicks[cdn] = { ok, t: Date.now() };
+  clearTimeout(timer);
+  ctls.forEach((c) => c.abort());
+  basePicks[cdn] = { base: pick, t: Date.now() };
   try { sessionStorage.setItem('mentria-model-base', JSON.stringify(basePicks)); } catch (_) {}
-  return ok ? cdn : t.base;
+  return pick;
+}
+
+const PROBE_BYTES = 1048576;
+const PROBE_MS = 3000;
+
+async function probeBase(base, file, signal) {
+  const res = await fetch(base + file, { headers: { Range: 'bytes=0-' + (PROBE_BYTES - 1) }, cache: 'no-store', signal });
+  if (!res.ok || !res.body) throw new Error('probe ' + res.status);
+  const reader = res.body.getReader();
+  let got = 0;
+  while (got < PROBE_BYTES) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    got += value.byteLength;
+  }
+  reader.cancel().catch(() => {});
+  if (got < Math.min(PROBE_BYTES, 65536)) throw new Error('probe short');
+  return base;
 }
 
 export async function loadWithFallback(createEngine, startTier, { vision = true, onFallback = null, validate = null, aborted = null, onlyCached = false } = {}) {

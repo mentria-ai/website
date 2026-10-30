@@ -116,6 +116,9 @@ eleventyComputed:
   const MAX_TOKENS = IS_IOS ? 256 : 512;
   const TAG_TOKENS = 64;
   const MAX_TAGS = 12;
+  const TAG_STOP = new Set(['objects', 'object', 'colors', 'colours', 'color', 'colour', 'setting', 'subjects', 'main subjects', 'things',
+    'objetos', 'colores', 'entorno', 'sujetos', 'objets', 'couleurs', 'décor', 'sujets', 'cores', 'cenário', 'assuntos',
+    'オブジェクト', '色', '状況', '被写体']);
   function tidyTags(text){
     const prompt = String(COPY.prompts.tags || '').toLowerCase();
     const seen = new Set();
@@ -123,7 +126,7 @@ eleventyComputed:
     for (const raw of text.split(/[,\n]+/)){
       const tag = raw.replace(/^[\s\-*•]+|[\s.]+$/g, '');
       const key = tag.toLowerCase();
-      if (!tag || seen.has(key) || (key.indexOf(' ') > 0 && prompt.indexOf(key) >= 0)) continue;
+      if (!tag || seen.has(key) || TAG_STOP.has(key) || (key.indexOf(' ') > 0 && prompt.indexOf(key) >= 0)) continue;
       seen.add(key);
       out.push(tag);
       if (out.length >= MAX_TAGS) break;

@@ -1,3 +1,5 @@
+import { holdAwake } from './mentria-wake.js';
+
 const MENTRIA_DIST = '/assets/mentria/dist/mentria.mjs';
 const LS_PREF = 'mentria-tier';
 const LS_CAP = 'mentria-tier-cap';
@@ -352,8 +354,8 @@ export async function isTierCached(id) {
       let all = true;
       for (const shard of t.shards) {
         const u = b + shard;
-        const meta = u + (u.includes('?') ? '&' : '?') + 'mentria_seg=meta';
-        if (!((await caches.match(meta)) || (await caches.match(u)))) { all = false; break; }
+        const sep = u.includes('?') ? '&' : '?';
+        if (!((await caches.match(u + sep + 'mentria_seg=meta')) || (await caches.match(u + sep + 'mentria_seg=mig')) || (await caches.match(u)))) { all = false; break; }
       }
       if (all) return true;
     }
@@ -510,7 +512,7 @@ async function cachedBaseFor(t, cdn) {
       if (!b) continue;
       const u = b + t.shards[0];
       const sep = u.includes('?') ? '&' : '?';
-      if (await c.match(u + sep + 'mentria_seg=meta') || await c.match(u)) return b;
+      if (await c.match(u + sep + 'mentria_seg=meta') || await c.match(u + sep + 'mentria_seg=mig') || await c.match(u)) return b;
     }
   } catch (_) {}
   return null;
@@ -557,7 +559,30 @@ async function probeBase(base, file, signal) {
   return base;
 }
 
-export async function loadWithFallback(createEngine, startTier, { vision = true, onFallback = null, validate = null, aborted = null, onlyCached = false } = {}) {
+async function compactTier(t, vision) {
+  const bases = [t.base];
+  const cdn = cdnBaseFor(t);
+  if (cdn) bases.unshift(cdn);
+  const files = t.shards.concat(vision && t.visionShards ? t.visionShards : []);
+  const urls = [];
+  for (const b of bases) for (const f of files) urls.push(b + f);
+  try {
+    const { compactShards } = await import('./mentria-model-cache.js');
+    const n = await compactShards(urls);
+    if (n) console.info('[mentria-tiers] re-split ' + n + ' cached file(s) of ' + t.id + ' into small pieces');
+  } catch (err) { console.warn('[mentria-tiers] cache re-split skipped', err); }
+}
+
+export async function loadWithFallback(createEngine, startTier, opts) {
+  const release = holdAwake();
+  try {
+    return await loadChain(createEngine, startTier, opts);
+  } finally {
+    release();
+  }
+}
+
+async function loadChain(createEngine, startTier, { vision = true, onFallback = null, validate = null, aborted = null, onlyCached = false } = {}) {
   const order = onlyCached ? TIER_CHAIN.concat(LEGACY_CHAIN) : TIER_CHAIN;
   let chain = order.slice(Math.max(0, order.indexOf(startTier)));
   if (onlyCached) {
@@ -573,6 +598,7 @@ export async function loadWithFallback(createEngine, startTier, { vision = true,
     const engine = createEngine();
     try {
       await engine.init();
+      if (IS_IOS) await compactTier(TIERS[id], vision);
       const opts = await loadOptionsFor(id, { vision });
       const loadRes = await engine.loadModel(opts);
       try {

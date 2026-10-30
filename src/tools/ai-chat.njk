@@ -140,6 +140,7 @@ eleventyComputed:
   confirmDelete:          "tool.ai-chat.confirm_delete",
   statusNoModel:          "tool.ai-chat.status_no_model",
   noModelNotice:          "tool.ai-chat.no_model_notice",
+  loadCutNotice:          "tool.ai-chat.load_cut_notice",
   btnChooseModel:         "tool.ai-chat.btn_choose_model",
   tierLabel:              "tool.ai-chat.tier_label",
   tierFast:               "tool.ai-chat.tier_fast",
@@ -204,8 +205,9 @@ const MENTRIA_TIERS_PATH = '/assets/js/mentria-tiers.js';
 
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const IS_MOBILE = IS_IOS || /Android/i.test(navigator.userAgent);
-const CHAT_VISION = !IS_IOS;
 const IMG_MAX = IS_IOS ? 256 : 448;
+const PREVIEW_MAX = 1024;
+const IOS_IMAGES = 1;
 const MAX_TOKENS = 512;
 
 /* ── Status helpers ────────────────────────────────────────────────────── */
@@ -401,6 +403,7 @@ function runApp(MentriaEngine, Tiers) {
   let sending = false;
   let attachedImage = null;       // {rgbHwc, h, w} — pending attach for the NEXT send
   let attachedDataUrl = null;
+  let attachSeq = 0;
   // conversationImages keeps every image sent in this conversation, in order.
   // The chat template re-renders the full message history every turn, so each
   // {type:'image'} placeholder needs its corresponding rgbHwc on every call —
@@ -824,8 +827,27 @@ function runApp(MentriaEngine, Tiers) {
   // patch_size * spatial_merge_size = 32. We cap at 448² for predictable
   // prefill latency (~286 ms vision-tower pass on M-series; chat-friendly
   // per the engine's S463 bench).
-  async function fileToEngineImage(file, targetSize = 448) {
-    const bitmap = await createImageBitmap(file);
+  function naturalSize(file) {
+    return new Promise((resolve, reject) => {
+      const u = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { const r = { w: img.naturalWidth, h: img.naturalHeight }; URL.revokeObjectURL(u); resolve(r); };
+      img.onerror = () => { URL.revokeObjectURL(u); reject(new Error('decode')); };
+      img.src = u;
+    });
+  }
+
+  async function decodeSmall(file, max) {
+    const d = await naturalSize(file).catch(() => null);
+    if (d && Math.max(d.w, d.h) > max) {
+      try { return await createImageBitmap(file, { resizeWidth: Math.max(1, Math.round(max * d.w / Math.max(d.w, d.h))), resizeQuality: 'high' }); } catch (_) {}
+    }
+    return createImageBitmap(file);
+  }
+
+  async function fileToEngineImage(file, targetSize = 448, withPreview = false) {
+    const bitmap = await decodeSmall(file, PREVIEW_MAX);
+    const preview = withPreview ? await previewOf(bitmap, file) : null;
     const maxDim = Math.max(bitmap.width, bitmap.height);
     const scale = maxDim > targetSize ? (targetSize / maxDim) : 1;
     let w = Math.round(bitmap.width * scale);
@@ -844,7 +866,18 @@ function runApp(MentriaEngine, Tiers) {
       rgbHwc[j + 1] = data[i + 1];
       rgbHwc[j + 2] = data[i + 2];
     }
-    return { rgbHwc, h, w };
+    canvas.width = canvas.height = 0;
+    return preview ? { rgbHwc, h, w, preview } : { rgbHwc, h, w };
+  }
+
+  function previewOf(bitmap, file) {
+    const s = Math.min(1, PREVIEW_MAX / Math.max(bitmap.width, bitmap.height));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(bitmap.width * s));
+    c.height = Math.max(1, Math.round(bitmap.height * s));
+    c.getContext('2d').drawImage(bitmap, 0, 0, c.width, c.height);
+    const type = /png|gif|webp/.test(file.type) ? 'image/png' : 'image/jpeg';
+    return new Promise((resolve) => c.toBlob((b) => { c.width = c.height = 0; resolve(b); }, type, 0.85));
   }
 
   let strip = null;
@@ -1534,8 +1567,9 @@ function runApp(MentriaEngine, Tiers) {
         return e;
       };
       const res = await ensureModel(createEngine, {
-        vision: CHAT_VISION,
+        vision: true,
         offerUpgrade: true,
+        guardReload: true,
         choose: choose === true,
         onProgress: onEngineProgress,
         onTier: (info) => strip.setTier(info),
@@ -1577,6 +1611,12 @@ function runApp(MentriaEngine, Tiers) {
       warmSystemPrompt();
       return true;
     } catch (err) {
+      if (err && err.message === 'load-cut-short') {
+        if (strip) strip.hide();
+        setStatus('idle', 'statusNoModel');
+        showNotice('postponed', 'loadCutNotice', null, 'btnReloadModel', () => loadModel());
+        return false;
+      }
       if (err && err.message === 'download-postponed') {
         if (strip) strip.hide();
         setStatus('idle', 'statusNoModel');
@@ -1968,7 +2008,17 @@ function runApp(MentriaEngine, Tiers) {
     }
     let droppedImages = 0;
     for (let i = 0; i < rest.length - kept.length; i++) droppedImages += turnImages(rest[i]);
-    const windowImages = conversationImages.slice(droppedImages);
+    let windowImages = conversationImages.slice(droppedImages);
+    let sendTurns = kept;
+    if (IS_IOS && windowImages.length > IOS_IMAGES) {
+      let skip = windowImages.length - IOS_IMAGES;
+      windowImages = windowImages.slice(skip);
+      sendTurns = kept.map((m) => {
+        if (!skip || !turnImages(m)) return m;
+        const content = m.content.filter((p) => !(p && p.type === 'image' && skip > 0 && skip--));
+        return { role: m.role, content };
+      });
+    }
     const imagesForRequest = windowImages.length ? windowImages : undefined;
 
     const keptChars = kept.reduce((a, m) => a + turnText(m).length, 0);
@@ -2007,7 +2057,7 @@ function runApp(MentriaEngine, Tiers) {
         const smp = (pinned && pinned.sampling) || null;
         const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
         const params = {
-          messages: [{ role: 'system', content: systemContent }, ...kept, ...toolTurns],
+          messages: [{ role: 'system', content: systemContent }, ...sendTurns, ...toolTurns],
           maxTokens: (imagesForRequest && IS_IOS) ? 256
             : (pinned && num(pinned.maxTokens, 0) > 0) ? pinned.maxTokens
             : deepThink ? thinkBudget
@@ -2193,15 +2243,19 @@ function runApp(MentriaEngine, Tiers) {
 
   /* ── Image handling ──────────────────────────────── */
   async function attachFile(file) {
-    if (!CHAT_VISION || !file || !file.type.startsWith('image/')) return;
+    if (!file || !file.type.startsWith('image/')) return;
     removeImage();
-    const url = URL.createObjectURL(file);
-    imgThumb.src = url;
-    imgPreview.style.display = '';
-    attachedDataUrl = url;
+    const seq = ++attachSeq;
     try {
-      attachedImage = await fileToEngineImage(file, IMG_MAX);
+      const img = await fileToEngineImage(file, IMG_MAX, true);
+      if (seq !== attachSeq) return;
+      const url = URL.createObjectURL(img.preview || file);
+      imgThumb.src = url;
+      imgPreview.style.display = '';
+      attachedDataUrl = url;
+      attachedImage = { rgbHwc: img.rgbHwc, h: img.h, w: img.w };
     } catch (err) {
+      if (seq !== attachSeq) return;
       console.error('Image attach error:', err);
       removeImage();
       setStatus('error', 'errBadImage');
@@ -2209,6 +2263,7 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   function removeImage() {
+    attachSeq++;
     if (attachedDataUrl) { try { URL.revokeObjectURL(attachedDataUrl); } catch (_) {} }
     attachedImage = null;
     attachedDataUrl = null;
@@ -2234,7 +2289,6 @@ function runApp(MentriaEngine, Tiers) {
 
   inputEl.addEventListener('input', () => { autoResize(); clearTooLong(); });
 
-  if (!CHAT_VISION) attachBtn.style.display = 'none';
   attachBtn.addEventListener('click', () => fileInput.click());
 
   fileInput.addEventListener('change', () => {

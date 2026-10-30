@@ -113,6 +113,7 @@ eleventyComputed:
   const MENTRIA_DIST_BASE  = '/assets/mentria/dist/';
   const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const IMG_MAX = IS_IOS ? 256 : 448;
+  const PREVIEW_MAX = 1024;
   const MAX_TOKENS = IS_IOS ? 256 : 512;
   const TAG_TOKENS = 64;
   const MAX_TAGS = 12;
@@ -216,8 +217,37 @@ eleventyComputed:
   let curImage = null, curMode = 'describe', curName = 'image';
   let runSeq = 0, running = null, loadSeq = 0;
 
+  function previewOf(bitmap, file){
+    const s = Math.min(1, PREVIEW_MAX / Math.max(bitmap.width, bitmap.height));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(bitmap.width * s));
+    c.height = Math.max(1, Math.round(bitmap.height * s));
+    c.getContext('2d').drawImage(bitmap, 0, 0, c.width, c.height);
+    const type = /png|gif|webp/.test(file.type) ? 'image/png' : 'image/jpeg';
+    return new Promise((resolve) => c.toBlob((b) => { c.width = c.height = 0; resolve(b); }, type, 0.85));
+  }
+
+  function naturalSize(file){
+    return new Promise((resolve, reject) => {
+      const u = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { const r = { w: img.naturalWidth, h: img.naturalHeight }; URL.revokeObjectURL(u); resolve(r); };
+      img.onerror = () => { URL.revokeObjectURL(u); reject(new Error('decode')); };
+      img.src = u;
+    });
+  }
+
+  async function decodeSmall(file, max){
+    const d = await naturalSize(file).catch(() => null);
+    if (d && Math.max(d.w, d.h) > max){
+      try { return await createImageBitmap(file, { resizeWidth: Math.max(1, Math.round(max * d.w / Math.max(d.w, d.h))), resizeQuality: 'high' }); } catch(_){}
+    }
+    return createImageBitmap(file);
+  }
+
   async function fileToEngineImage(file, targetSize = 448){
-    const bitmap = await createImageBitmap(file);
+    const bitmap = await decodeSmall(file, PREVIEW_MAX);
+    const previewBlob = await previewOf(bitmap, file);
     let w = bitmap.width, h = bitmap.height;
     const scale = Math.min(1, targetSize / Math.max(w, h));
     w = Math.max(32, Math.round(w * scale / 32) * 32);
@@ -230,7 +260,8 @@ eleventyComputed:
     const rgbHwc = new Uint8Array(w * h * 3);
     for (let i = 0, j = 0; i < data.length; i += 4, j += 3){ rgbHwc[j] = data[i]; rgbHwc[j+1] = data[i+1]; rgbHwc[j+2] = data[i+2]; }
     bitmap.close && bitmap.close();
-    return { rgbHwc, h, w };
+    canvas.width = canvas.height = 0;
+    return { rgbHwc, h, w, previewBlob };
   }
 
   function onProgress(p){ if (strip) strip.onProgress(p); }
@@ -404,10 +435,10 @@ eleventyComputed:
       if (n !== loadSeq) return;
       curName = (file.name || 'image').replace(/\.[^.]+$/, '');
       if (curUrl){ try { URL.revokeObjectURL(curUrl); } catch(_){} }
-      curUrl = URL.createObjectURL(file);
+      curUrl = URL.createObjectURL(img.previewBlob || file);
       preview.src = curUrl; preview.hidden = false; dropInner.style.display = 'none';
       drop.classList.add('has-image');
-      curImage = img;
+      curImage = { rgbHwc: img.rgbHwc, h: img.h, w: img.w };
       modesEl.hidden = false;
       curMode = 'describe';
       run('describe');

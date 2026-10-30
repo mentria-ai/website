@@ -1,3 +1,5 @@
+import { holdAwake } from './mentria-wake.js';
+
 const CACHE = 'mentria-models';
 const TRACKER = 'wss://relay.mentria.ai/tracker';
 const PEERS_KEY = 'mentria-p2p-peers';
@@ -150,6 +152,15 @@ export function ensureShardViaP2P(url, onStatus) {
 }
 
 export async function prefetchTier(Tiers, tierId, opts) {
+  const release = holdAwake();
+  try {
+    return await fetchTier(Tiers, tierId, opts);
+  } finally {
+    release();
+  }
+}
+
+async function fetchTier(Tiers, tierId, opts) {
   const o = typeof opts === 'function' ? { onStatus: opts } : (opts || {});
   const t = Tiers.TIERS[tierId];
   if (!t) return { skipped: 'unknown-tier' };
@@ -212,11 +223,13 @@ function makeCacheStore(blobs, totalBytes) {
         cb(null, buf.subarray(((opts && opts.offset) || 0), ((opts && opts.offset) || 0) + wanted));
         return;
       }
-      const seg = Math.floor(start / SEGMENT_BYTES);
-      const off = start - seg * SEGMENT_BYTES;
-      const blob = blobs[seg];
-      if (!blob) { cb(new Error('segment out of range')); return; }
-      blob.slice(off, off + wanted).arrayBuffer().then(
+      const parts = [];
+      for (let k = 0, at = 0; k < blobs.length && at < start + wanted; at += blobs[k].size, k++) {
+        const a = Math.max(start, at), b = Math.min(start + wanted, at + blobs[k].size);
+        if (b > a) parts.push(blobs[k].slice(a - at, b - at));
+      }
+      if (!parts.length) { cb(new Error('segment out of range')); return; }
+      new Blob(parts).arrayBuffer().then(
         (ab) => cb(null, new Uint8Array(ab)),
         (err) => cb(err)
       );

@@ -115,7 +115,7 @@
       "files": [
         {
           "name": "image",
-          "accept": ["image/*", ".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif", ".heic", ".heif"]
+          "accept": ["image/*", ".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif", ".heic", ".heif", "application/pdf", ".pdf"]
         }
       ]
     }
@@ -194,6 +194,14 @@
         ],
         "audio/wav": [
           ".wav"
+        ]
+      }
+    },
+    {
+      "action": "/tools/pdf/",
+      "accept": {
+        "application/pdf": [
+          ".pdf"
         ]
       }
     }

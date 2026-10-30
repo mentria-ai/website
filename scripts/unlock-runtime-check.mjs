@@ -475,7 +475,7 @@ check('closing every page then opening one relocks', async () => {
   assert(d1.liveOther === false && !!d1.marker && d1.seenAgeMs > 60000 && d1.decision === 'reopen', 'decided by an old seen', d1);
   assert(epoch1 === epoch0 + 1, 'epoch bumped', { epoch0, epoch1 });
   const uiAsked = pageLog.get(pageA).requests.some((u) => u.includes('mentria-unlock-ui.js'));
-  assert(!uiAsked, 'unlock bar module requested although askAtLaunch is off');
+  assert(!uiAsked, 'unlock card module requested although askAtLaunch is off');
   await pageA.evaluate(async (c) => { window.__m.setAskAtLaunch(true); await window.__m.unlockWithCode(c); }, code);
   await closeAll();
   pageA = await open('/tools/');
@@ -490,11 +490,11 @@ check('closing every page then opening one relocks', async () => {
     uiAsked2 = pageLog.get(pageA).requests.some((u) => u.includes('mentria-unlock-ui.js'));
     if (!uiAsked2) await new Promise((r) => setTimeout(r, 100));
   }
-  assert(uiAsked2, 'unlock bar module requested with askAtLaunch on');
-  const bar = await until(() => pageA.evaluate(() => !!document.querySelector('.m-ubar') && !document.querySelector('.m-ulayer')), 5000);
-  assert(bar, 'the unlock bar shows and no layer opens');
+  assert(uiAsked2, 'unlock card module requested with askAtLaunch on');
+  const card = await until(() => pageA.evaluate(() => !!document.querySelector('.m-ulayer [role="dialog"]') && !document.querySelector('.m-ubar')), 5000);
+  assert(card, 'the unlock card opens by itself and no bar shows');
   const errs = pageLog.get(pageA).errors.filter((e) => /unlock/i.test(e));
-  assert(!errs.length, 'the unlock bar raised an error', errs);
+  assert(!errs.length, 'the launch ask raised an error', errs);
   const db = await pageA.evaluate(async () => {
     const d = await new Promise((res, rej) => { const q = indexedDB.open('mentria-keyring', 1); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
     const sess = await new Promise((res) => { const g = d.transaction('session').objectStore('session').get('current'); g.onsuccess = () => res(g.result); });
@@ -847,7 +847,7 @@ check('frame pages leave the launch decision to the parent', async () => {
   const e1 = await readLocal(host, 'mentria.keyring.epoch');
   assert(fb.s.launch === 'continue' && fb.d.decision === 'continue' && e1 === e0, 'a frame never bumps the epoch', { fb, e0, e1 });
   await new Promise((r) => setTimeout(r, 500));
-  assert(!pageLog.get(host).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'a frame never asks for the unlock bar');
+  assert(!pageLog.get(host).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'a frame never asks for the unlock card');
   await host.evaluate((n) => {
     const l = JSON.parse(localStorage.getItem('mentria.keyring.local'));
     l.declinedEpoch = n;
@@ -862,20 +862,20 @@ check('frame pages leave the launch decision to the parent', async () => {
   const e3 = await readLocal(top, 'mentria.keyring.epoch');
   assert(fa.s.launch === 'continue' && e3 === e2, 'one epoch bump per reopen with a frame', { fa, e2, e3 });
   const topAsked = await until(() => pageLog.get(top).requests.some((u) => u.includes('mentria-unlock-ui.js')), 3000);
-  assert(topAsked, 'the parent shows the unlock bar although an old declinedEpoch matches');
-  assert(!pageLog.get(top).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'the frame never asks for the unlock bar');
+  assert(topAsked, 'the parent asks although an old declinedEpoch matches');
+  assert(!pageLog.get(top).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'the frame never asks for the unlock card');
   const frame = top.frames().find((f) => f.url().includes(FRAME));
   const plain = await frame.evaluate(() => ({ tool: document.documentElement.hasAttribute('data-unlock-tool'), ext: document.documentElement.classList.contains('ext-app'), full: document.documentElement.classList.contains('is-fullscreen-tool') }));
-  assert(!plain.tool && !plain.ext && !plain.full, 'the frame is a plain page, so only the frame rule keeps the bar out', plain);
+  assert(!plain.tool && !plain.ext && !plain.full, 'the frame is a plain page, so only the frame rule keeps the card out', plain);
   const ask = await frame.evaluate(async (url) => (await import(url)).state().ask, MODULE);
   assert(ask === true, 'the frame sees the ask the parent set', ask);
-  const bars = await until(async () => (await top.evaluate(() => document.querySelectorAll('.m-ubar').length)) === 1, 5000);
+  const cards = await until(async () => (await top.evaluate(() => document.querySelectorAll('.m-ulayer').length)) === 1, 5000);
   await new Promise((r) => setTimeout(r, 1000));
-  assert(bars && await frame.evaluate(() => !document.querySelector('.m-ubar')), 'one bar on the parent, none in the frame');
-  assert(!pageLog.get(top).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'the frame still never asks for the unlock bar');
+  assert(cards && await frame.evaluate(() => !document.querySelector('.m-ulayer')), 'one card on the parent, none in the frame');
+  assert(!pageLog.get(top).frameRequests.some((u) => u.includes('mentria-unlock-ui.js')), 'the frame still never asks for the unlock card');
 });
 
-check('an extension app page shows no unlock bar and keeps the ask', async () => {
+check('an extension app page opens no unlock card and keeps the ask', async () => {
   await clean();
   const APP = '/extensions/scanner/app/';
   const lab = await open('/beta/unlock/');
@@ -890,11 +890,11 @@ check('an extension app page shows no unlock bar and keeps the ask', async () =>
   const s = await runtime(page);
   assert(s.launch === 'reopen' && s.ask === true && !s.unlocked, 'the extension app makes the reopen decision and the ask stands', s);
   await new Promise((r) => setTimeout(r, 1500));
-  assert(!(await page.evaluate(() => !!document.querySelector('.m-ubar'))), 'no unlock bar on an extension app page');
-  assert(!pageLog.get(page).requests.some((u) => u.includes('mentria-unlock-ui.js')), 'the extension app never asks for the unlock bar');
+  assert(!(await page.evaluate(() => !!document.querySelector('.m-ulayer'))), 'no unlock card on an extension app page');
+  assert(!pageLog.get(page).requests.some((u) => u.includes('mentria-unlock-ui.js')), 'the extension app never asks for the unlock card');
   await go(page, '/tools/');
-  const bar = await until(() => page.evaluate(() => !!document.querySelector('.m-ubar')), 8000);
-  assert(bar, 'the ask is kept: the next plain page in the tab shows the bar');
+  const card = await until(() => page.evaluate(() => !!document.querySelector('.m-ulayer [role="dialog"]')), 8000);
+  assert(card, 'the ask is kept: the next plain page in the tab opens the card');
 });
 
 check('locale redirect makes one launch decision', async () => {

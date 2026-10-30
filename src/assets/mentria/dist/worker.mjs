@@ -1,144 +1,158 @@
 var __mentria_chunks = {};
 
 (function() {
-function q(m, f, w, u = 0) {
-  const o = new Uint8Array(w.buffer, w.byteOffset, w.byteLength), c = 64 * 1024 * 1024;
-  if (o.byteLength <= c) {
-    m.queue.writeBuffer(f, u, o);
+function z(c, f, l, i = 0) {
+  const u = new Uint8Array(l.buffer, l.byteOffset, l.byteLength), h = 64 * 1024 * 1024;
+  if (u.byteLength <= h) {
+    c.queue.writeBuffer(f, i, u);
     return;
   }
-  for (let n = 0; n < o.byteLength; n += c) {
-    const a = Math.min(c, o.byteLength - n);
-    m.queue.writeBuffer(f, u + n, o, n, a);
+  for (let r = 0; r < u.byteLength; r += h) {
+    const a = Math.min(h, u.byteLength - r);
+    c.queue.writeBuffer(f, i + r, u, r, a);
   }
 }
-async function x(m, f, w, u = {}) {
-  let o;
-  if (u.stream) o = u.stream.getReader();
+function N(c) {
+  const f = String(c || "");
+  return /AppleWebKit\//.test(f) && !/(?:Chrome|Chromium|Edg|HeadlessChrome)\//.test(f);
+}
+async function H(c, f, l, i = {}) {
+  let u;
+  if (i.stream) u = i.stream.getReader();
   else {
-    const e = await fetch(m);
-    if (!e.ok) throw new Error(`streamSafetensors: ${e.status} for ${m}`);
-    o = e.body.getReader();
+    const e = await fetch(c);
+    if (!e.ok) throw new Error(`streamSafetensors: ${e.status} for ${c}`);
+    u = e.body.getReader();
   }
-  const c = new Uint8Array(0);
-  let n = c, a = 0;
-  async function E() {
-    n = c, a = 0;
-    const e = await o.read();
-    return e.done ? !1 : (n = e.value, a = 0, !0);
+  const h = new Uint8Array(0);
+  let r = h, a = 0;
+  const M = i.releaseChunks ?? N(typeof navigator < "u" ? navigator.userAgent : ""), O = (e) => {
+    if (e.byteLength > 0 && e.byteOffset === 0 && e.buffer && e.byteLength === e.buffer.byteLength && typeof e.buffer.transfer == "function" && !(typeof SharedArrayBuffer < "u" && e.buffer instanceof SharedArrayBuffer)) try {
+      e.buffer.transfer(0);
+    } catch {
+    }
+  };
+  async function S() {
+    M && O(r), r = h, a = 0;
+    const e = await u.read();
+    return e.done ? !1 : (r = e.value, a = 0, !0);
   }
-  async function g(e, r, i) {
-    let t = i;
+  async function g(e, t, o) {
+    let n = o;
+    for (; n > 0; ) {
+      if (a >= r.length) {
+        if (!await S()) return !1;
+        continue;
+      }
+      const s = Math.min(n, r.length - a);
+      e.set(r.subarray(a, a + s), t), a += s, t += s, n -= s;
+    }
+    return !0;
+  }
+  async function R(e) {
+    let t = e;
     for (; t > 0; ) {
-      if (a >= n.length) {
-        if (!await E()) return !1;
+      if (a >= r.length) {
+        if (!await S()) return !1;
         continue;
       }
-      const s = Math.min(t, n.length - a);
-      e.set(n.subarray(a, a + s), r), a += s, r += s, t -= s;
+      const o = Math.min(t, r.length - a);
+      a += o, t -= o;
     }
     return !0;
   }
-  async function G(e) {
-    let r = e;
-    for (; r > 0; ) {
-      if (a >= n.length) {
-        if (!await E()) return !1;
+  const m = new Uint8Array(4), L = i.fenceBytes ?? 32 * 1024 * 1024;
+  let B = 0;
+  const W = async (e) => {
+    B += e, L > 0 && B >= L && typeof f.queue.onSubmittedWorkDone == "function" && (B = 0, await f.queue.onSubmittedWorkDone());
+  };
+  async function Y(e, t) {
+    let o = t, n = 0, s = 0;
+    for (; o > 0; ) {
+      if (a >= r.length) {
+        if (!await S()) return !1;
         continue;
       }
-      const i = Math.min(r, n.length - a);
-      a += i, r -= i;
-    }
-    return !0;
-  }
-  const y = new Uint8Array(4);
-  async function R(e, r) {
-    let i = r, t = 0, s = 0;
-    for (; i > 0; ) {
-      if (a >= n.length) {
-        if (!await E()) return !1;
-        continue;
-      }
-      const S = Math.min(i, n.length - a), d = n.subarray(a, a + S);
-      a += S, i -= S;
-      let l = 0;
+      const E = Math.min(o, r.length - a), d = r.subarray(a, a + E);
+      a += E, o -= E;
+      let w = 0;
       if (s > 0) {
-        const O = Math.min(4 - s, d.length);
-        y.set(d.subarray(0, O), s), s += O, l = O, s === 4 && (f.queue.writeBuffer(e, t, y, 0, 4), t += 4, s = 0);
+        const C = Math.min(4 - s, d.length);
+        m.set(d.subarray(0, C), s), s += C, w = C, s === 4 && (f.queue.writeBuffer(e, n, m, 0, 4), n += 4, s = 0);
       }
-      const _ = d.length - l, h = _ - _ % 4;
-      h > 0 && (q(f, e, d.subarray(l, l + h), t), t += h);
-      const M = _ - h;
-      M > 0 && (y.set(d.subarray(l + h, l + h + M), 0), s = M);
+      const A = d.length - w, y = A - A % 4;
+      y > 0 && (z(f, e, d.subarray(w, w + y), n), n += y);
+      const k = A - y;
+      k > 0 && (m.set(d.subarray(w + y, w + y + k), 0), s = k), await W(E);
     }
-    return s > 0 && (y.fill(0, s), f.queue.writeBuffer(e, t, y, 0, 4)), !0;
+    return s > 0 && (m.fill(0, s), f.queue.writeBuffer(e, n, m, 0, 4)), !0;
   }
-  const A = new Uint8Array(8);
-  if (!await g(A, 0, 8)) throw new Error("streamSafetensors: EOF in length");
-  const U = Number(new DataView(A.buffer).getBigUint64(0, !0));
+  const F = new Uint8Array(8);
+  if (!await g(F, 0, 8)) throw new Error("streamSafetensors: EOF in length");
+  const U = Number(new DataView(F.buffer).getBigUint64(0, !0));
   if (U > 100 * 1024 * 1024) throw new Error("streamSafetensors: implausible header");
-  const k = new Uint8Array(U);
-  if (!await g(k, 0, U)) throw new Error("streamSafetensors: EOF in header");
-  const P = JSON.parse(new TextDecoder().decode(k)), T = P.__metadata__ || {}, B = /* @__PURE__ */ new Map(), b = [];
-  for (const [e, r] of Object.entries(P))
-    e !== "__metadata__" && (B.set(e, r), b.push({
+  const P = new Uint8Array(U);
+  if (!await g(P, 0, U)) throw new Error("streamSafetensors: EOF in header");
+  const q = JSON.parse(new TextDecoder().decode(P)), x = q.__metadata__ || {}, _ = /* @__PURE__ */ new Map(), b = [];
+  for (const [e, t] of Object.entries(q))
+    e !== "__metadata__" && (_.set(e, t), b.push({
       name: e,
-      start: r.data_offsets[0],
-      end: r.data_offsets[1]
+      start: t.data_offsets[0],
+      end: t.data_offsets[1]
     }));
-  b.sort((e, r) => e.start - r.start);
-  const F = /* @__PURE__ */ new Map(), L = /* @__PURE__ */ new Map(), $ = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST;
-  let p = 0, C = 0;
+  b.sort((e, t) => e.start - t.start);
+  const T = /* @__PURE__ */ new Map(), $ = /* @__PURE__ */ new Map(), D = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST;
+  let p = 0, G = 0;
   for (const e of b) {
     if (e.start > p) {
-      if (!await G(e.start - p)) throw new Error(`streamSafetensors: EOF before ${e.name}`);
+      if (!await R(e.start - p)) throw new Error(`streamSafetensors: EOF before ${e.name}`);
       p = e.start;
     }
-    const r = e.end - e.start, i = Math.ceil(r / 4) * 4;
-    if ((u.route ? u.route(e.name, B.get(e.name)) : "gpu") === "cpu") {
-      const t = new Uint8Array(r);
-      if (!await g(t, 0, r)) throw new Error(`streamSafetensors: EOF in ${e.name}`);
-      L.set(e.name, t);
+    const t = e.end - e.start, o = Math.ceil(t / 4) * 4;
+    if ((i.route ? i.route(e.name, _.get(e.name)) : "gpu") === "cpu") {
+      const n = new Uint8Array(t);
+      if (!await g(n, 0, t)) throw new Error(`streamSafetensors: EOF in ${e.name}`);
+      $.set(e.name, n);
     } else {
-      let t;
-      if (u.weightUpload === "writeBuffer") {
-        if (t = f.createBuffer({
-          size: i,
-          usage: $,
+      let n;
+      if (i.weightUpload === "writeBuffer") {
+        if (n = f.createBuffer({
+          size: o,
+          usage: D,
           label: e.name
-        }), !await R(t, r)) throw new Error(`streamSafetensors: EOF in ${e.name}`);
+        }), !await Y(n, t)) throw new Error(`streamSafetensors: EOF in ${e.name}`);
       } else {
-        if (t = f.createBuffer({
-          size: i,
-          usage: $,
+        if (n = f.createBuffer({
+          size: o,
+          usage: D,
           mappedAtCreation: !0,
           label: e.name
-        }), !await g(new Uint8Array(t.getMappedRange()), 0, r))
-          throw t.unmap(), t.destroy(), new Error(`streamSafetensors: EOF in ${e.name}`);
-        t.unmap();
+        }), !await g(new Uint8Array(n.getMappedRange()), 0, t))
+          throw n.unmap(), n.destroy(), new Error(`streamSafetensors: EOF in ${e.name}`);
+        n.unmap();
       }
-      F.set(e.name, t);
+      T.set(e.name, n);
     }
-    p = e.end, C++, w && w(C, b.length, e.name);
+    p = e.end, G++, l && l(G, b.length, e.name);
   }
-  n = c;
+  M && O(r), r = h;
   try {
-    o.cancel();
+    u.cancel();
   } catch {
   }
   return {
-    infos: B,
-    buffers: F,
-    cpu: L,
-    metadata: T
+    infos: _,
+    buffers: T,
+    cpu: $,
+    metadata: x
   };
 }
-__mentria_chunks["./streaming_safetensors-3wmeZuFH.mjs"] = { "n": q, "t": x };
+__mentria_chunks["./streaming_safetensors-CKMPSYQD.mjs"] = { "n": H, "r": z, "t": N };
 })();
 
 (function() {
-const { t: r } = __mentria_chunks["./streaming_safetensors-3wmeZuFH.mjs"];
-__mentria_chunks["./streaming_safetensors-BBzi0GtM.mjs"] = { "streamSafetensorsToGPU": r };
+const { n: t } = __mentria_chunks["./streaming_safetensors-CKMPSYQD.mjs"];
+__mentria_chunks["./streaming_safetensors-5bEZv0g3.mjs"] = { "streamSafetensorsToGPU": t };
 })();
 
 (function() {
@@ -3961,7 +3975,7 @@ function B(e) {
 }
 return { "C": H, "D": w, "E": C, "O": y, "S": I, "T": A, "_": $, "a": J, "b": L, "c": j, "d": X, "f": ee, "g": k, "h": R, "i": te, "k": V, "l": K, "m": P, "n": ne, "o": U, "p": W, "r": re, "s": q, "t": ae, "u": Y, "v": G, "w": F, "x": D, "y": M };
 })();
-const { C: mr, D: Ho, E: Nr, O: Qo, T: Ra, a: ti, b: Ln, d: jo, f: Yo, i: Zo, k: ni, n: Xo, o: Jo, r: eu, v: tu, w: Zn, x: nu } = __mentria_capabilities_BhXJGoqk_mjs;
+const { C: gr, D: Zo, E: Or, O: Xo, T: Ca, a: ni, b: Un, d: Jo, f: eu, i: tu, k: ri, n: nu, o: ru, r: au, v: su, w: Xn, x: iu } = __mentria_capabilities_BhXJGoqk_mjs;
 
 const __mentria_safetensors_BZPXuo_r_mjs = (function() {
 var c = class {
@@ -4057,142 +4071,156 @@ return { "n": f, "t": c };
 })();
 const { t: Ft } = __mentria_safetensors_BZPXuo_r_mjs;
 
-const __mentria_streaming_safetensors_3wmeZuFH_mjs = (function() {
-function q(m, f, w, u = 0) {
-  const o = new Uint8Array(w.buffer, w.byteOffset, w.byteLength), c = 64 * 1024 * 1024;
-  if (o.byteLength <= c) {
-    m.queue.writeBuffer(f, u, o);
+const __mentria_streaming_safetensors_CKMPSYQD_mjs = (function() {
+function z(c, f, l, i = 0) {
+  const u = new Uint8Array(l.buffer, l.byteOffset, l.byteLength), h = 64 * 1024 * 1024;
+  if (u.byteLength <= h) {
+    c.queue.writeBuffer(f, i, u);
     return;
   }
-  for (let n = 0; n < o.byteLength; n += c) {
-    const a = Math.min(c, o.byteLength - n);
-    m.queue.writeBuffer(f, u + n, o, n, a);
+  for (let r = 0; r < u.byteLength; r += h) {
+    const a = Math.min(h, u.byteLength - r);
+    c.queue.writeBuffer(f, i + r, u, r, a);
   }
 }
-async function x(m, f, w, u = {}) {
-  let o;
-  if (u.stream) o = u.stream.getReader();
+function N(c) {
+  const f = String(c || "");
+  return /AppleWebKit\//.test(f) && !/(?:Chrome|Chromium|Edg|HeadlessChrome)\//.test(f);
+}
+async function H(c, f, l, i = {}) {
+  let u;
+  if (i.stream) u = i.stream.getReader();
   else {
-    const e = await fetch(m);
-    if (!e.ok) throw new Error(`streamSafetensors: ${e.status} for ${m}`);
-    o = e.body.getReader();
+    const e = await fetch(c);
+    if (!e.ok) throw new Error(`streamSafetensors: ${e.status} for ${c}`);
+    u = e.body.getReader();
   }
-  const c = new Uint8Array(0);
-  let n = c, a = 0;
-  async function E() {
-    n = c, a = 0;
-    const e = await o.read();
-    return e.done ? !1 : (n = e.value, a = 0, !0);
+  const h = new Uint8Array(0);
+  let r = h, a = 0;
+  const M = i.releaseChunks ?? N(typeof navigator < "u" ? navigator.userAgent : ""), O = (e) => {
+    if (e.byteLength > 0 && e.byteOffset === 0 && e.buffer && e.byteLength === e.buffer.byteLength && typeof e.buffer.transfer == "function" && !(typeof SharedArrayBuffer < "u" && e.buffer instanceof SharedArrayBuffer)) try {
+      e.buffer.transfer(0);
+    } catch {
+    }
+  };
+  async function S() {
+    M && O(r), r = h, a = 0;
+    const e = await u.read();
+    return e.done ? !1 : (r = e.value, a = 0, !0);
   }
-  async function g(e, r, i) {
-    let t = i;
+  async function g(e, t, o) {
+    let n = o;
+    for (; n > 0; ) {
+      if (a >= r.length) {
+        if (!await S()) return !1;
+        continue;
+      }
+      const s = Math.min(n, r.length - a);
+      e.set(r.subarray(a, a + s), t), a += s, t += s, n -= s;
+    }
+    return !0;
+  }
+  async function R(e) {
+    let t = e;
     for (; t > 0; ) {
-      if (a >= n.length) {
-        if (!await E()) return !1;
+      if (a >= r.length) {
+        if (!await S()) return !1;
         continue;
       }
-      const s = Math.min(t, n.length - a);
-      e.set(n.subarray(a, a + s), r), a += s, r += s, t -= s;
+      const o = Math.min(t, r.length - a);
+      a += o, t -= o;
     }
     return !0;
   }
-  async function G(e) {
-    let r = e;
-    for (; r > 0; ) {
-      if (a >= n.length) {
-        if (!await E()) return !1;
+  const m = new Uint8Array(4), L = i.fenceBytes ?? 32 * 1024 * 1024;
+  let B = 0;
+  const W = async (e) => {
+    B += e, L > 0 && B >= L && typeof f.queue.onSubmittedWorkDone == "function" && (B = 0, await f.queue.onSubmittedWorkDone());
+  };
+  async function Y(e, t) {
+    let o = t, n = 0, s = 0;
+    for (; o > 0; ) {
+      if (a >= r.length) {
+        if (!await S()) return !1;
         continue;
       }
-      const i = Math.min(r, n.length - a);
-      a += i, r -= i;
-    }
-    return !0;
-  }
-  const y = new Uint8Array(4);
-  async function R(e, r) {
-    let i = r, t = 0, s = 0;
-    for (; i > 0; ) {
-      if (a >= n.length) {
-        if (!await E()) return !1;
-        continue;
-      }
-      const S = Math.min(i, n.length - a), d = n.subarray(a, a + S);
-      a += S, i -= S;
-      let l = 0;
+      const E = Math.min(o, r.length - a), d = r.subarray(a, a + E);
+      a += E, o -= E;
+      let w = 0;
       if (s > 0) {
-        const O = Math.min(4 - s, d.length);
-        y.set(d.subarray(0, O), s), s += O, l = O, s === 4 && (f.queue.writeBuffer(e, t, y, 0, 4), t += 4, s = 0);
+        const C = Math.min(4 - s, d.length);
+        m.set(d.subarray(0, C), s), s += C, w = C, s === 4 && (f.queue.writeBuffer(e, n, m, 0, 4), n += 4, s = 0);
       }
-      const _ = d.length - l, h = _ - _ % 4;
-      h > 0 && (q(f, e, d.subarray(l, l + h), t), t += h);
-      const M = _ - h;
-      M > 0 && (y.set(d.subarray(l + h, l + h + M), 0), s = M);
+      const A = d.length - w, y = A - A % 4;
+      y > 0 && (z(f, e, d.subarray(w, w + y), n), n += y);
+      const k = A - y;
+      k > 0 && (m.set(d.subarray(w + y, w + y + k), 0), s = k), await W(E);
     }
-    return s > 0 && (y.fill(0, s), f.queue.writeBuffer(e, t, y, 0, 4)), !0;
+    return s > 0 && (m.fill(0, s), f.queue.writeBuffer(e, n, m, 0, 4)), !0;
   }
-  const A = new Uint8Array(8);
-  if (!await g(A, 0, 8)) throw new Error("streamSafetensors: EOF in length");
-  const U = Number(new DataView(A.buffer).getBigUint64(0, !0));
+  const F = new Uint8Array(8);
+  if (!await g(F, 0, 8)) throw new Error("streamSafetensors: EOF in length");
+  const U = Number(new DataView(F.buffer).getBigUint64(0, !0));
   if (U > 100 * 1024 * 1024) throw new Error("streamSafetensors: implausible header");
-  const k = new Uint8Array(U);
-  if (!await g(k, 0, U)) throw new Error("streamSafetensors: EOF in header");
-  const P = JSON.parse(new TextDecoder().decode(k)), T = P.__metadata__ || {}, B = /* @__PURE__ */ new Map(), b = [];
-  for (const [e, r] of Object.entries(P))
-    e !== "__metadata__" && (B.set(e, r), b.push({
+  const P = new Uint8Array(U);
+  if (!await g(P, 0, U)) throw new Error("streamSafetensors: EOF in header");
+  const q = JSON.parse(new TextDecoder().decode(P)), x = q.__metadata__ || {}, _ = /* @__PURE__ */ new Map(), b = [];
+  for (const [e, t] of Object.entries(q))
+    e !== "__metadata__" && (_.set(e, t), b.push({
       name: e,
-      start: r.data_offsets[0],
-      end: r.data_offsets[1]
+      start: t.data_offsets[0],
+      end: t.data_offsets[1]
     }));
-  b.sort((e, r) => e.start - r.start);
-  const F = /* @__PURE__ */ new Map(), L = /* @__PURE__ */ new Map(), $ = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST;
-  let p = 0, C = 0;
+  b.sort((e, t) => e.start - t.start);
+  const T = /* @__PURE__ */ new Map(), $ = /* @__PURE__ */ new Map(), D = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST;
+  let p = 0, G = 0;
   for (const e of b) {
     if (e.start > p) {
-      if (!await G(e.start - p)) throw new Error(`streamSafetensors: EOF before ${e.name}`);
+      if (!await R(e.start - p)) throw new Error(`streamSafetensors: EOF before ${e.name}`);
       p = e.start;
     }
-    const r = e.end - e.start, i = Math.ceil(r / 4) * 4;
-    if ((u.route ? u.route(e.name, B.get(e.name)) : "gpu") === "cpu") {
-      const t = new Uint8Array(r);
-      if (!await g(t, 0, r)) throw new Error(`streamSafetensors: EOF in ${e.name}`);
-      L.set(e.name, t);
+    const t = e.end - e.start, o = Math.ceil(t / 4) * 4;
+    if ((i.route ? i.route(e.name, _.get(e.name)) : "gpu") === "cpu") {
+      const n = new Uint8Array(t);
+      if (!await g(n, 0, t)) throw new Error(`streamSafetensors: EOF in ${e.name}`);
+      $.set(e.name, n);
     } else {
-      let t;
-      if (u.weightUpload === "writeBuffer") {
-        if (t = f.createBuffer({
-          size: i,
-          usage: $,
+      let n;
+      if (i.weightUpload === "writeBuffer") {
+        if (n = f.createBuffer({
+          size: o,
+          usage: D,
           label: e.name
-        }), !await R(t, r)) throw new Error(`streamSafetensors: EOF in ${e.name}`);
+        }), !await Y(n, t)) throw new Error(`streamSafetensors: EOF in ${e.name}`);
       } else {
-        if (t = f.createBuffer({
-          size: i,
-          usage: $,
+        if (n = f.createBuffer({
+          size: o,
+          usage: D,
           mappedAtCreation: !0,
           label: e.name
-        }), !await g(new Uint8Array(t.getMappedRange()), 0, r))
-          throw t.unmap(), t.destroy(), new Error(`streamSafetensors: EOF in ${e.name}`);
-        t.unmap();
+        }), !await g(new Uint8Array(n.getMappedRange()), 0, t))
+          throw n.unmap(), n.destroy(), new Error(`streamSafetensors: EOF in ${e.name}`);
+        n.unmap();
       }
-      F.set(e.name, t);
+      T.set(e.name, n);
     }
-    p = e.end, C++, w && w(C, b.length, e.name);
+    p = e.end, G++, l && l(G, b.length, e.name);
   }
-  n = c;
+  M && O(r), r = h;
   try {
-    o.cancel();
+    u.cancel();
   } catch {
   }
   return {
-    infos: B,
-    buffers: F,
-    cpu: L,
-    metadata: T
+    infos: _,
+    buffers: T,
+    cpu: $,
+    metadata: x
   };
 }
-return { "n": q, "t": x };
+return { "n": H, "r": z, "t": N };
 })();
-const { n: gn } = __mentria_streaming_safetensors_3wmeZuFH_mjs;
+const { r: gn, t: ai } = __mentria_streaming_safetensors_CKMPSYQD_mjs;
 
 const __mentria_session_manifest_D9A7r9yZ_mjs = (function() {
 var y = "mentria-session";
@@ -4361,13 +4389,13 @@ function O(e, r, t, n = {}) {
 }
 return { "a": d, "c": L, "i": w, "n": k, "o": O, "r": m, "s": b, "t": p };
 })();
-const { a: vt, c: ri, i: ai, n: si, o: ii, r: ru, s: fa, t: au } = __mentria_session_manifest_D9A7r9yZ_mjs;
+const { a: kt, c: si, i: ii, n: oi, o: ui, r: ou, s: _a, t: uu } = __mentria_session_manifest_D9A7r9yZ_mjs;
 
 
 
 
 
-var su = Object.freeze({
+var lu = Object.freeze({
   "adain_1d.wgsl": `// AdaIN-1d — adaptive instance normalization with a per-channel affine.
 // BUILD-KOKORO-3b (docs/papers/kokoro_tts_webgpu_design.md §2).
 //
@@ -34710,12 +34738,12 @@ fn main(
 }
 `
 });
-function iu(e) {
-  const t = su[e];
+function du(e) {
+  const t = lu[e];
   if (t === void 0) throw new Error("Unknown shader: " + e);
   return t;
 }
-var ou = [
+var cu = [
   "prefill",
   "decode",
   "other"
@@ -34745,7 +34773,7 @@ function Yt() {
     hostMs: 0
   };
 }
-var uu = [
+var hu = [
   "encodeMs",
   "recordMs",
   "replayMs",
@@ -34783,38 +34811,38 @@ var uu = [
   createdBuffers: 0,
   destroyedBuffers: 0
 };
-function lu() {
+function pu() {
   return {
     ...nt,
     liveMiB: +(nt.live / 1048576).toFixed(2),
     peakMiB: +(nt.peak / 1048576).toFixed(2)
   };
 }
-var pr = () => typeof performance < "u" && performance.now ? performance.now() : Date.now(), oi = _e.buckets.other;
-function _a() {
-  oi = _e.buckets[_e.phase] || _e.buckets.other;
+var fr = () => typeof performance < "u" && performance.now ? performance.now() : Date.now(), li = _e.buckets.other;
+function ma() {
+  li = _e.buckets[_e.phase] || _e.buckets.other;
 }
 function _t(e, t) {
-  oi[e] += t, _e.lifetime[e] += t;
+  li[e] += t, _e.lifetime[e] += t;
 }
 function ze(e, t) {
   t >= 0 && _t(e, t);
 }
-function Ca(e, t) {
+function Na(e, t) {
   const n = _e.buckets[e], r = {};
   for (const a of t) r[a] = n && n[a] || 0;
   return r;
 }
-function du(e) {
+function fu(e) {
   _e.prefillChunks.length < 64 && _e.prefillChunks.push(e);
 }
-function cu() {
+function _u() {
   _t("bindGroupCacheHits", 1);
 }
-function Na() {
+function Oa() {
   _t("bindGroupCacheMisses", 1);
 }
-function hu(e = globalThis) {
+function mu(e = globalThis) {
   if (_e.installed) return !0;
   try {
     const t = e.GPUComputePassEncoder && e.GPUComputePassEncoder.prototype, n = e.GPUCommandEncoder && e.GPUCommandEncoder.prototype, r = e.GPUQueue && e.GPUQueue.prototype, a = e.GPUBuffer && e.GPUBuffer.prototype;
@@ -34901,21 +34929,21 @@ function hu(e = globalThis) {
     return _e.installError = String(t && t.message || t), !1;
   }
 }
-function pu() {
+function gu() {
   return _e.installed;
 }
-function fu() {
+function bu() {
   return _e.installError;
 }
-function Oa(e, t) {
+function Ia(e, t) {
   if (t !== void 0 && t !== _e.generation) return;
-  const n = pr();
-  _e.phaseStart && (_e.ms[_e.phase] += n - _e.phaseStart), _e.phase = ou.includes(e) ? e : "other", _a(), _e.phaseStart = n;
+  const n = fr();
+  _e.phaseStart && (_e.ms[_e.phase] += n - _e.phaseStart), _e.phase = cu.includes(e) ? e : "other", ma(), _e.phaseStart = n;
 }
-function ui() {
+function di() {
   return _e.phase;
 }
-function _u() {
+function wu() {
   return _e.phaseStart && _e.overlappedGenerations++, _e.generation++, _e.buckets = {
     prefill: Yt(),
     decode: Yt(),
@@ -34924,84 +34952,84 @@ function _u() {
     prefill: 0,
     decode: 0,
     other: 0
-  }, _e.phase = "other", _a(), _e.phaseStart = pr(), _e.generation;
+  }, _e.phase = "other", ma(), _e.phaseStart = fr(), _e.generation;
 }
-function mu(e) {
+function vu(e) {
   if (e !== void 0 && e !== _e.generation)
     return _e.staleEnds++, !1;
-  const t = pr();
-  return _e.phaseStart && (_e.ms[_e.phase] += t - _e.phaseStart), _e.phaseStart = 0, _e.phase = "other", _a(), !0;
+  const t = fr();
+  return _e.phaseStart && (_e.ms[_e.phase] += t - _e.phaseStart), _e.phaseStart = 0, _e.phase = "other", ma(), !0;
 }
-function gu({ prefillTokens: e, decodeTokens: t } = {}) {
+function ku({ prefillTokens: e, decodeTokens: t } = {}) {
   Number.isFinite(e) && (_e.prefillTokens = e), Number.isFinite(t) && (_e.decodeTokens = t);
 }
-function bu() {
+function yu() {
   _e.decodeTokens++;
 }
-function Ia(e, t) {
+function Da(e, t) {
   if (!t) return null;
   const n = {};
   for (const r of Object.keys(e)) n[r] = +(e[r] / t).toFixed(2);
   return n;
 }
-function Un(e) {
+function Rn(e) {
   const t = { ...e };
-  for (const n of uu) t[n] = +t[n].toFixed(2);
+  for (const n of hu) t[n] = +t[n].toFixed(2);
   return t;
 }
 function qt() {
   const e = { ..._e.ms };
-  _e.phaseStart && (e[_e.phase] += pr() - _e.phaseStart);
+  _e.phaseStart && (e[_e.phase] += fr() - _e.phaseStart);
   for (const t of Object.keys(e)) e[t] = +e[t].toFixed(1);
   return {
     installed: _e.installed,
     installError: _e.installError,
     promptTokens: _e.prefillTokens,
     decodeTokens: _e.decodeTokens,
-    prefill: Un(_e.buckets.prefill),
-    decode: Un(_e.buckets.decode),
-    other: Un(_e.buckets.other),
-    perPrefillToken: Ia(_e.buckets.prefill, _e.prefillTokens),
+    prefill: Rn(_e.buckets.prefill),
+    decode: Rn(_e.buckets.decode),
+    other: Rn(_e.buckets.other),
+    perPrefillToken: Da(_e.buckets.prefill, _e.prefillTokens),
     prefillChunks: _e.prefillChunks.map((t) => ({ ...t })),
-    perDecodeToken: Ia(_e.buckets.decode, _e.decodeTokens),
+    perDecodeToken: Da(_e.buckets.decode, _e.decodeTokens),
     ms: e,
     prefillTokensPerSecond: _e.prefillTokens && e.prefill > 0 ? +(_e.prefillTokens / (e.prefill / 1e3)).toFixed(2) : null,
     decodeTokensPerSecond: _e.decodeTokens && e.decode > 0 ? +(_e.decodeTokens / (e.decode / 1e3)).toFixed(2) : null,
     generation: _e.generation,
     overlappedGenerations: _e.overlappedGenerations,
     staleEnds: _e.staleEnds,
-    lifetime: Un(_e.lifetime),
-    gpuBytes: lu()
+    lifetime: Rn(_e.lifetime),
+    gpuBytes: pu()
   };
 }
-var Rn = "__mentriaScratchArena", wu = typeof GPUBufferUsage < "u" ? GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST : 140;
-function vu(e) {
+var Cn = "__mentriaScratchArena", Su = typeof GPUBufferUsage < "u" ? GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST : 140;
+function xu(e) {
   const t = Math.max(256, Math.ceil(e));
   if (t <= 65536) return Math.ceil(t / 256) * 256;
   const n = 2 ** Math.floor(Math.log2(t)) / 4;
   return Math.ceil(t / n) * n;
 }
-var St = class Or {
+var bt = class Ir {
   static for(t) {
-    let n = t[Rn];
+    let n = t[Cn];
     if (!n) {
-      n = new Or(t);
+      n = new Ir(t);
       try {
-        t[Rn] = n;
+        t[Cn] = n;
       } catch {
       }
     }
     return n;
   }
   static peek(t) {
-    return t && t[Rn] || null;
+    return t && t[Cn] || null;
   }
   static release(t, n) {
-    const r = Or.peek(t);
+    const r = Ir.peek(t);
     if (!r) return 0;
     const a = r.release(n);
     if (!n && r.slots.size === 0) try {
-      delete t[Rn];
+      delete t[Cn];
     } catch {
     }
     return a;
@@ -35017,7 +35045,7 @@ var St = class Or {
     }, this.poison = null, this._poisonBuf = null;
   }
   _slot(t, n, r) {
-    const a = wu | (r || 0);
+    const a = Su | (r || 0);
     let s = this.slots.get(t);
     if (s && s.buf.size >= n && (s.usage & a) === a) return {
       s,
@@ -35025,7 +35053,7 @@ var St = class Or {
     };
     s && (this.retired.push(s.buf), this.stats.grows++);
     const i = s ? s.usage | a : a, o = this.device.createBuffer({
-      size: vu(n),
+      size: xu(n),
       usage: i,
       label: "arena:" + t
     });
@@ -35089,6 +35117,33 @@ var St = class Or {
       }
     return n;
   }
+  trimTo(t) {
+    let n = 0;
+    for (const i of this.retired) n += i.size;
+    let r = this.collect(), a = 0;
+    for (const i of this.slots.values()) a += i.buf.size;
+    if (a <= t) return {
+      destroyed: r,
+      freedBytes: n
+    };
+    const s = [...this.slots.entries()].sort((i, o) => o[1].buf.size - i[1].buf.size);
+    for (const [i, o] of s) {
+      if (a <= t) break;
+      const u = o.buf.size;
+      try {
+        o.buf.destroy();
+      } catch {
+      }
+      this.slots.delete(i), a -= u, n += u, this.stats.destroyed++, r++;
+    }
+    return this.stats.trims = (this.stats.trims || 0) + 1, {
+      destroyed: r,
+      freedBytes: n
+    };
+  }
+  keys() {
+    return [...this.slots.entries()].map(([t, n]) => [t, n.buf.size]).sort((t, n) => n[1] - t[1]);
+  }
   footprint(t) {
     let n = 0, r = 0, a = 0;
     for (const [s, i] of this.slots)
@@ -35101,7 +35156,7 @@ var St = class Or {
       retiredBytes: a
     };
   }
-}, li = class {
+}, ci = class {
   device;
   layer;
   mlp;
@@ -35346,7 +35401,7 @@ var St = class Or {
     }
   }
   forwardPrefill(e, t, n, r, a) {
-    const s = this.device, i = this.hiddenSize, o = r * i * 4, u = [], l = [], d = St.for(s), c = d.get("blk.normed", o), h = d.get("blk.layerOut", o), p = d.get("blk.resid", o), f = d.get("blk.mlpOut", o), _ = this.prescaledEnabled && this.mlp.supportsPrescaledM_GT_1();
+    const s = this.device, i = this.hiddenSize, o = r * i * 4, u = [], l = [], d = bt.for(s), c = d.get("blk.normed", o), h = d.get("blk.layerOut", o), p = d.get("blk.resid", o), f = d.get("blk.mlpOut", o), _ = this.prescaledEnabled && this.mlp.supportsPrescaledM_GT_1();
     if (u.push(this.rmsnorm.dispatch(e, this.inputLnWeight, c, i, r, this.eps, this.ablateNorms)), this.layerType === "attention") {
       const b = this.layer.forwardPrefill(c, h, n, r, a);
       u.push(...b.cmds), l.push(...b.scratchBufs);
@@ -35378,7 +35433,7 @@ function Ie(e, t = {}) {
   if (i !== "f32" && i !== "f16") throw new Error(`instantiateTemplate: unknown weightType "${i}" (expected f16|f32)`);
   const o = i === "f16", u = t.stateType || "f32";
   if (u !== "f32" && u !== "f16" && u !== "int8" && u !== "int4") throw new Error(`instantiateTemplate: unknown stateType "${u}" (expected f32|f16|int8|int4)`);
-  const l = u === "f16", d = u === "int8", c = u === "int4", h = d || c ? "u32" : u, p = c ? 8 : d ? 4 : l ? 2 : 1, f = !!t.subgroups, _ = t.subgroupSize || 32, m = t.kiviBits ?? 4, b = bt(m), w = {
+  const l = u === "f16", d = u === "int8", c = u === "int4", h = d || c ? "u32" : u, p = c ? 8 : d ? 4 : l ? 2 : 1, f = !!t.subgroups, _ = t.subgroupSize || 32, m = t.kiviBits ?? 4, b = wt(m), w = {
     F16_ENABLE: r || s || l || o ? "enable f16;" : "",
     SUBGROUP_ENABLE: f ? "enable subgroups;" : "",
     USE_SUBGROUPS: f ? "1" : "0",
@@ -35439,7 +35494,7 @@ function It(e, t) {
   return r.join(`
 `);
 }
-var Da = Object.freeze(/* @__PURE__ */ new Set([
+var Ka = Object.freeze(/* @__PURE__ */ new Set([
   "USE_SUBGROUPS",
   "HAS_RESIDUAL",
   "HAS_F16",
@@ -35462,20 +35517,20 @@ var Da = Object.freeze(/* @__PURE__ */ new Set([
 ]));
 function kn(e, t = {}) {
   if (t.defines) {
-    for (const n of Object.keys(t.defines)) if (!Da.has(n)) throw new Error(`applyMatmulTemplate: unknown flag "${n}" (allowed: ${[...Da].join(", ")})`);
+    for (const n of Object.keys(t.defines)) if (!Ka.has(n)) throw new Error(`applyMatmulTemplate: unknown flag "${n}" (allowed: ${[...Ka].join(", ")})`);
   }
   return Ie(e, t);
 }
-var Ka = Object.freeze([2, 4]);
-function bt(e) {
-  if (!Ka.includes(e)) throw new RangeError(`kiviValuesPerWord: unsupported KIVI bit width ${e} (expected one of ${Ka.join("|")})`);
+var Wa = Object.freeze([2, 4]);
+function wt(e) {
+  if (!Wa.includes(e)) throw new RangeError(`kiviValuesPerWord: unsupported KIVI bit width ${e} (expected one of ${Wa.join("|")})`);
   return 32 / e;
 }
-function di(e, t) {
-  if (bt(e), !Number.isInteger(t) || t <= 0) throw new RangeError(`kiviBitsPerValue: groupSize must be a positive integer, got ${t}`);
+function hi(e, t) {
+  if (wt(e), !Number.isInteger(t) || t <= 0) throw new RangeError(`kiviBitsPerValue: groupSize must be a positive integer, got ${t}`);
   return e + 32 / t;
 }
-var ci = class {
+var pi = class {
   pipeline;
   pipelineResidual;
   bindGroupLayout;
@@ -35645,7 +35700,7 @@ var ci = class {
   }
   destroy() {
   }
-}, ku = class {
+}, Pu = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -35739,7 +35794,7 @@ var ci = class {
   }
   destroy() {
   }
-}, yu = class {
+}, Bu = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -35810,7 +35865,7 @@ var ci = class {
   }
   destroy() {
   }
-}, Su = class {
+}, Eu = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -35875,44 +35930,44 @@ var ci = class {
   }
   destroy() {
   }
-}, xu = 4, Pu = 8192, Wa = 2048, Ut = !1, Ot = /* @__PURE__ */ new Set(), $e = {
+}, qu = 4, Au = 8192, za = 2048, Ut = !1, Ot = /* @__PURE__ */ new Set(), $e = {
   hits: 0,
   misses: 0,
   oneShot: 0,
   clears: 0,
   invalidations: 0,
   created: 0
-}, Ir = !1, Dr = /* @__PURE__ */ new WeakMap(), Bu = 1;
-function gr(e) {
-  let t = Dr.get(e);
-  return t === void 0 && (t = Bu++, Dr.set(e, t)), t;
+}, Dr = !1, Kr = /* @__PURE__ */ new WeakMap(), Tu = 1;
+function br(e) {
+  let t = Kr.get(e);
+  return t === void 0 && (t = Tu++, Kr.set(e, t)), t;
 }
-function za(e, t = globalThis) {
+function Fa(e, t = globalThis) {
   const n = e === !0;
-  return n === Ut || (Ut = n, Ut ? Eu(t) : rn()), Ut;
+  return n === Ut || (Ut = n, Ut ? Mu(t) : rn()), Ut;
 }
-function hi() {
+function fi() {
   return Ut;
 }
-function Eu(e = globalThis) {
+function Mu(e = globalThis) {
   try {
     const t = e && e.GPUBuffer && e.GPUBuffer.prototype;
     if (!t) return !1;
     const n = t.destroy;
     if (typeof n != "function") return !1;
     if (n.__mentriaBgInvalidate)
-      return Ir = !0, !0;
+      return Dr = !0, !0;
     const r = function(...a) {
-      return Ot.size && qu(this), n.apply(this, a);
+      return Ot.size && Gu(this), n.apply(this, a);
     };
-    return r.__mentriaBgInvalidate = !0, t.destroy = r, Ir = !0, !0;
+    return r.__mentriaBgInvalidate = !0, t.destroy = r, Dr = !0, !0;
   } catch {
     return !1;
   }
 }
-function qu(e) {
+function Gu(e) {
   if (!Ot.size) return;
-  const t = Dr.get(e);
+  const t = Kr.get(e);
   if (t === void 0) return;
   let n = 0;
   for (const r of Ot) n += r._evictBuffer(e, t);
@@ -35925,7 +35980,7 @@ function rn() {
     Ot.clear();
   }
 }
-function ma() {
+function ga() {
   let e = 0;
   const t = {};
   for (const r of Ot)
@@ -35933,7 +35988,7 @@ function ma() {
   const n = $e.hits + $e.misses;
   return {
     enabled: Ut,
-    destroyPatch: Ir,
+    destroyPatch: Dr,
     hits: $e.hits,
     misses: $e.misses,
     oneShot: $e.oneShot,
@@ -35946,9 +36001,9 @@ function ma() {
     hitRate: n ? +($e.hits / n).toFixed(4) : null
   };
 }
-var Au = class {
-  constructor(e, t, n = Pu) {
-    this.device = e, this.label = t || "unknown", this.maxEntries = n, this.map = /* @__PURE__ */ new Map(), this.byBuf = /* @__PURE__ */ new Map(), this.pending = /* @__PURE__ */ new Set(), this.pendingQ = new Int32Array(Wa), this.pendingIdx = 0, this.size = 0, this.registered = !1;
+var Lu = class {
+  constructor(e, t, n = Au) {
+    this.device = e, this.label = t || "unknown", this.maxEntries = n, this.map = /* @__PURE__ */ new Map(), this.byBuf = /* @__PURE__ */ new Map(), this.pending = /* @__PURE__ */ new Set(), this.pendingQ = new Int32Array(za), this.pendingIdx = 0, this.size = 0, this.registered = !1;
   }
   _evictBuffer(e, t) {
     const n = this.byBuf.get(t);
@@ -35977,23 +36032,23 @@ var Au = class {
   }
   get(e, t) {
     this.registered || (Ot.add(this), this.registered = !0);
-    let n = gr(e);
+    let n = br(e);
     for (let o = 0; o < t.length; o++) {
       const u = t[o], l = u.resource, d = l && l.buffer;
       if (!d)
-        return $e.misses++, Na(), $e.created++, this.device.createBindGroup({
+        return $e.misses++, Oa(), $e.created++, this.device.createBindGroup({
           layout: e,
           entries: t
         });
-      n = Math.imul(n, 31) + (u.binding | 0) | 0, n = Math.imul(n, 31) + gr(d) | 0, n = Math.imul(n, 31) + (l.offset | 0) | 0, n = Math.imul(n, 31) + (l.size | 0) | 0;
+      n = Math.imul(n, 31) + (u.binding | 0) | 0, n = Math.imul(n, 31) + br(d) | 0, n = Math.imul(n, 31) + (l.offset | 0) | 0, n = Math.imul(n, 31) + (l.size | 0) | 0;
     }
     const r = this.map.get(n);
     if (r !== void 0) for (let o = 0; o < r.length; o++) {
       const u = r[o];
-      if (u.layout === e && Tu(u.keys, t))
-        return $e.hits++, cu(), u.bg;
+      if (u.layout === e && Uu(u.keys, t))
+        return $e.hits++, _u(), u.bg;
     }
-    $e.misses++, Na(), $e.created++;
+    $e.misses++, Oa(), $e.created++;
     const a = this.device.createBindGroup({
       layout: e,
       entries: t
@@ -36001,7 +36056,7 @@ var Au = class {
     if (!this.pending.delete(n)) {
       $e.oneShot++;
       const o = this.pendingQ[this.pendingIdx];
-      return o !== 0 && this.pending.delete(o), this.pendingQ[this.pendingIdx] = n, this.pendingIdx = (this.pendingIdx + 1) % Wa, this.pending.add(n), a;
+      return o !== 0 && this.pending.delete(o), this.pendingQ[this.pendingIdx] = n, this.pendingIdx = (this.pendingIdx + 1) % za, this.pending.add(n), a;
     }
     this.size >= this.maxEntries && (this.map.clear(), this.byBuf.clear(), this.size = 0, $e.clears++);
     const s = new Array(t.length * 4);
@@ -36010,20 +36065,20 @@ var Au = class {
       s[u++] = l.binding | 0, s[u++] = d.buffer, s[u++] = d.offset | 0, s[u++] = d.size | 0;
     }
     let i = this.map.get(n);
-    i === void 0 && (i = [], this.map.set(n, i)), i.length >= xu && (i.shift(), this.size--), i.push({
+    i === void 0 && (i = [], this.map.set(n, i)), i.length >= qu && (i.shift(), this.size--), i.push({
       layout: e,
       keys: s,
       bg: a
     }), this.size++;
     for (let o = 1; o < s.length; o += 4) {
-      const u = gr(s[o]);
+      const u = br(s[o]);
       let l = this.byBuf.get(u);
       l === void 0 && (l = /* @__PURE__ */ new Set(), this.byBuf.set(u, l)), l.add(n);
     }
     return a;
   }
 };
-function Tu(e, t) {
+function Uu(e, t) {
   if (e.length !== t.length * 4) return !1;
   for (let n = 0, r = 0; n < t.length; n++) {
     const a = t[n], s = a.resource;
@@ -36031,37 +36086,37 @@ function Tu(e, t) {
   }
   return !0;
 }
-var Fa = /* @__PURE__ */ new WeakMap();
+var $a = /* @__PURE__ */ new WeakMap();
 function Pt(e, t = 0) {
   if (!Ut) return e.getBindGroupLayout(t);
-  let n = Fa.get(e);
-  n === void 0 && (n = [], Fa.set(e, n));
+  let n = $a.get(e);
+  n === void 0 && (n = [], $a.set(e, n));
   let r = n[t];
   return r === void 0 && (r = e.getBindGroupLayout(t), n[t] = r), r;
 }
-var br = "__mentriaBgCache";
+var wr = "__mentriaBgCache";
 function Pe(e, t, n, r) {
-  if (!Ut || ui() !== "decode") return e.createBindGroup({
+  if (!Ut || di() !== "decode") return e.createBindGroup({
     layout: n,
     entries: r
   });
-  let a = t[br];
+  let a = t[wr];
   if (a === void 0 || a.device !== e) {
-    a = new Au(e, t && t.constructor && t.constructor.name || "unknown");
+    a = new Lu(e, t && t.constructor && t.constructor.name || "unknown");
     try {
-      Object.defineProperty(t, br, {
+      Object.defineProperty(t, wr, {
         value: a,
         writable: !0,
         enumerable: !1,
         configurable: !0
       });
     } catch {
-      t[br] = a;
+      t[wr] = a;
     }
   }
   return a.get(n, r);
 }
-var Mu = class {
+var Ru = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -36201,7 +36256,7 @@ var Mu = class {
   }
   destroy() {
   }
-}, pi = class {
+}, _i = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -36306,7 +36361,7 @@ var Mu = class {
   }
   destroy() {
   }
-}, Gu = class {
+}, Cu = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -36406,7 +36461,7 @@ var Mu = class {
   }
   destroy() {
   }
-}, $a = class {
+}, Va = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -36519,7 +36574,7 @@ var Mu = class {
   }
   destroy() {
   }
-}, fi = class {
+}, mi = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -36649,7 +36704,7 @@ var Mu = class {
   }
   destroy() {
   }
-}, _i = class {
+}, gi = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -36907,7 +36962,7 @@ var Mu = class {
   }
   destroy() {
   }
-}, mi = class {
+}, bi = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -37131,7 +37186,7 @@ var Mu = class {
   }
   destroy() {
   }
-}, ga = class {
+}, ba = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -37207,19 +37262,19 @@ var Mu = class {
   }
   destroy() {
   }
-}, Lu = Object.freeze({
+}, Nu = Object.freeze({
   residual: "dispatchWithResidual",
   lora: "dispatchWithLoRA",
   prescaled: "dispatchPrescaled",
   encoded: "dispatchEncoded"
-}), Uu = !0;
+}), Ou = !0;
 function it(e, t) {
   if (!e) return !1;
-  if (Uu) {
+  if (Ou) {
     const r = e.capabilities;
     return !!(r && r[t]);
   }
-  const n = Lu[t];
+  const n = Nu[t];
   return n ? typeof e[n] == "function" : !1;
 }
 function yn(e, t) {
@@ -37231,14 +37286,14 @@ function yn(e, t) {
   } else return !1;
   return !0;
 }
-function Ru(e) {
+function Iu(e) {
   const t = yn(e, "residual");
   return {
     m1VecmatRoute: t,
     reason: e ? globalThis.__mentriaM1VecmatRoute !== !0 ? "off (opt-in; set __mentriaM1VecmatRoute=true)" : t ? "on: no subgroup fused M=1 pipelines (width-gated adapter)" : "off: subgroup fused M=1 pipelines present" : "no vecmatQ4 operator"
   };
 }
-var Va = class {
+var Ha = class {
   device;
   matmul;
   conv1dUpdate;
@@ -38185,7 +38240,7 @@ var Va = class {
         start: y,
         end: m.length
       }), y = m.length);
-    }, P = St.for(r), x = n + ":" + p + ":" + a + ":" + s + ":" + u + ":" + l, R = (he, be) => P.get("dn." + he, be * 4), B = (he, be) => P.get("dn." + he, be * 4, {
+    }, P = bt.for(r), x = n + ":" + p + ":" + a + ":" + s + ":" + u + ":" + l, R = (he, be) => P.get("dn." + he, be * 4), B = (he, be) => P.get("dn." + he, be * 4, {
       zero: x,
       cmds: m
     }), G = n === p ? R : B, q = !!this.outputGateOp, U = R("qkvz", n * this.qkvzDim), W = R("ba", n * 2 * s), $ = q ? null : R("z", n * s * l), S = R("qkvSilu", n * this.convDim), M = G("v_hm", s * p * l), T = G("k_norm_key", a * p * u), A = G("q_scaled_key", a * p * u), L = o ? G("k_norm_hm", s * p * u) : T, O = o ? G("q_scaled_hm", s * p * u) : A, N = G("beta_hm", s * p), F = G("g_hm", s * p), Y = 1 / Math.sqrt(u), se = R("b_dense", s * n), J = R("a_dense", s * n), K = R("beta_dense", s * n), H = R("g_dense", s * n), D = R("w", s * p * u), j = R("u", s * p * l), ae = R("g_cumsum", s * p), ie = R("g_total", s * h), le = R("v_new", s * p * l), Z = R("chunkOut", s * p * l);
@@ -38342,7 +38397,7 @@ var Va = class {
     };
   }
   static releaseDevicePools(e) {
-    return St.release(e, "dn.");
+    return bt.release(e, "dn.");
   }
   setKStepOp(e, t = 8) {
     this.recurrenceKStep = e, this.kstepMaxM = t;
@@ -38511,7 +38566,7 @@ var Va = class {
       this.stateScales = null;
     }
   }
-}, Ha = {
+}, Qa = {
   qGate: "dn.qkvz",
   q: "dn.qkvSilu",
   gate: "dn.w",
@@ -38523,7 +38578,7 @@ var Va = class {
   v: "dn.statePong",
   kNormed: "dn.aIntra",
   kRoped: "dn.stateAll"
-}, Cu = 8, gi = class {
+}, Du = 8, wi = class {
   device;
   matmul;
   rmsnorm;
@@ -38720,7 +38775,7 @@ var Va = class {
   }
   setKivi(e) {
     if (this.useStreamingLLM) throw new Error("setKivi: mutually exclusive with StreamingLLM (S1027 v1) — KIVI dequant runs on a contiguous post-RoPE cache; the [sink|recent] ring requires v2 composition. Unset StreamingLLM first.");
-    this.useKivi = !0, this.useTurboQuant = !1, this.useF16Cache = !1, this.kiviGroupSize = e.groupSize || 32, this.kiviResidualLen = e.residualLength || 128, this.kiviSinkLen = e.sinkLength ?? Cu, this.kiviBits = e.kvQuantizeKey?.bits ?? 4, this.kiviValuesPerWord = bt(this.kiviBits);
+    this.useKivi = !0, this.useTurboQuant = !1, this.useF16Cache = !1, this.kiviGroupSize = e.groupSize || 32, this.kiviResidualLen = e.residualLength || 128, this.kiviSinkLen = e.sinkLength ?? Du, this.kiviBits = e.kvQuantizeKey?.bits ?? 4, this.kiviValuesPerWord = wt(this.kiviBits);
     for (const [t, n] of Object.entries({
       kvQuantizeKey: e.kvQuantizeKey,
       kvQuantizeValue: e.kvQuantizeValue,
@@ -39848,7 +39903,7 @@ var Va = class {
         usage: h
       });
       return b.push(D), D;
-    }, g = St.for(s), v = (H, D) => g.get(Ha[H] || "attn." + H, D * 4), y = v("qGate", i * this.qGateDim), k = v("q", i * this.qDim), P = v("gate", i * this.qDim), x = v("k", i * this.kDim), R = v("v", i * this.vDim), B = v("qNormed", i * this.qDim), G = v("kNormed", i * this.kDim), q = v("qRoped", i * this.qDim), U = v("kRoped", i * this.kDim), W = f ? null : v("qScaled", i * this.qDim), $ = f ? null : w(i * u * c), S = f ? null : w(i * u * c), M = v("attnOut", i * this.qDim), T = v("gatedOut", i * this.qDim), A = 1 / Math.sqrt(d);
+    }, g = bt.for(s), v = (H, D) => g.get(Qa[H] || "attn." + H, D * 4), y = v("qGate", i * this.qGateDim), k = v("q", i * this.qDim), P = v("gate", i * this.qDim), x = v("k", i * this.kDim), R = v("v", i * this.vDim), B = v("qNormed", i * this.qDim), G = v("kNormed", i * this.kDim), q = v("qRoped", i * this.qDim), U = v("kRoped", i * this.kDim), W = f ? null : v("qScaled", i * this.qDim), $ = f ? null : w(i * u * c), S = f ? null : w(i * u * c), M = v("attnOut", i * this.qDim), T = v("gatedOut", i * this.qDim), A = 1 / Math.sqrt(d);
     let L = null;
     f || (L = s.createBuffer({
       size: i * this.qDim * 4,
@@ -40030,7 +40085,7 @@ var Va = class {
         usage: b
       });
       return R.push(le), le;
-    }, G = St.for(s), q = (ie, le) => G.get(Ha[ie] || "attn." + ie, le * 4), U = this._fapKiviOp(), W = q("qGate", i * this.qGateDim), $ = q("q", i * this.qDim), S = q("gate", i * this.qDim), M = q("k", i * this.kDim), T = q("v", i * this.vDim), A = q("qNormed", i * this.qDim), L = q("kNormed", i * this.kDim), O = q("qRoped", i * this.qDim), N = q("kRoped", i * this.kDim), F = U ? null : q("qScaled", i * this.qDim), Y = U ? null : B(i * u * k), se = U ? null : B(i * u * k), J = q("attnOut", i * this.qDim), K = q("gatedOut", i * this.qDim), H = 1 / Math.sqrt(d);
+    }, G = bt.for(s), q = (ie, le) => G.get(Qa[ie] || "attn." + ie, le * 4), U = this._fapKiviOp(), W = q("qGate", i * this.qGateDim), $ = q("q", i * this.qDim), S = q("gate", i * this.qDim), M = q("k", i * this.kDim), T = q("v", i * this.vDim), A = q("qNormed", i * this.qDim), L = q("kNormed", i * this.kDim), O = q("qRoped", i * this.qDim), N = q("kRoped", i * this.kDim), F = U ? null : q("qScaled", i * this.qDim), Y = U ? null : B(i * u * k), se = U ? null : B(i * u * k), J = q("attnOut", i * this.qDim), K = q("gatedOut", i * this.qDim), H = 1 / Math.sqrt(d);
     let D = null;
     U || (D = s.createBuffer({
       size: i * this.qDim * 4,
@@ -40159,7 +40214,7 @@ var Va = class {
     }
     this.snapWeightsDims = null;
   }
-}, Xn = class {
+}, Jn = class {
   device;
   matmul;
   matmulQ4 = null;
@@ -40312,7 +40367,7 @@ var Va = class {
   ensureScratch(e) {
     const t = this.device, n = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST, r = this.hiddenSize, a = this.intermediateSize;
     if (e > 1) {
-      const i = St.for(t);
+      const i = bt.for(t);
       this.normedInBuf = this.sgmatQ4 ? i.get("mlp.normedIn", e * r * 4) : null, this.gateBuf = i.get("mlp.gate", e * a * 4), this.siluBuf = this.siluMul ? null : i.get("mlp.silu", e * a * 4), this.upBuf = i.get("mlp.up", e * a * 4), this.midBuf = i.get("mlp.mid", e * a * 4), this.allocatedM = e;
       return;
     }
@@ -40548,7 +40603,7 @@ var Va = class {
     }
   }
   static releaseDevicePools(e) {
-    return St.release(e, "mlp.");
+    return bt.release(e, "mlp.");
   }
   destroy() {
     if (this._ownScratch) {
@@ -40568,7 +40623,7 @@ var Va = class {
     this.paddedMidBuf && this.paddedMidBuf.destroy(), this.normedInBuf = this.gateBuf = this.siluBuf = this.upBuf = this.midBuf = this.paddedMidBuf = null, this.allocatedM = 0;
   }
 };
-function Kr(e, t, n, r, a = 1, s = 1, i = null, o = null) {
+function Wr(e, t, n, r, a = 1, s = 1, i = null, o = null) {
   const u = e.length;
   if (t.length !== u) throw new Error(`build3DPositions: inputIds (${u}) and mmTokenTypeIds (${t.length}) length mismatch`);
   if (!Number.isInteger(r) || r < 1) throw new Error(`build3DPositions: spatialMergeSize must be positive integer, got ${r}`);
@@ -40644,7 +40699,7 @@ function Kr(e, t, n, r, a = 1, s = 1, i = null, o = null) {
     ropeDelta: _ + 1 - u
   };
 }
-var Nu = class {
+var Ku = class {
   constructor(e, t = {}) {
     if (!e) throw new Error("SpecStateManager: device required");
     this.device = e, this.numSlots = t.numSlots ?? 2, this.poolBuf = null, this.bundleSize = 0, this.layout = [], this.slotInUse = [], this.initialized = !1, this._lazyModel = null;
@@ -40795,32 +40850,32 @@ var Nu = class {
     }
     this.layout = [], this.slotInUse = [], this.initialized = !1, this.bundleSize = 0, this._lazyModel = null;
   }
-}, Ou = "kivi-rollover", Iu = "chunked-decode-state";
-function Du(e) {
+}, Wu = "kivi-rollover", zu = "chunked-decode-state";
+function Fu(e) {
   if (!e || !e.useKivi) return 1 / 0;
-  Fu(e);
+  Qu(e);
   const t = Math.max(0, e.kiviSinkLen - e.kiviSinkCount);
   return Math.max(0, t + e.kiviResidualLen - 1 - e.kiviResidualPos);
 }
-function Ku(e) {
+function $u(e) {
   let t = 1 / 0;
   for (const n of e) {
-    const r = Du(n);
+    const r = Fu(n);
     r < t && (t = r);
   }
   return t;
 }
-function Wu(e) {
-  for (const t of e) if (t && t.layer && t.layer.useChunkedDecodeState) return Iu;
+function Vu(e) {
+  for (const t of e) if (t && t.layer && t.layer.useChunkedDecodeState) return zu;
   return null;
 }
-function zu({ layers: e, draftLen: t }) {
+function Hu({ layers: e, draftLen: t }) {
   if (!Number.isInteger(t) || t < 0) throw new Error(`planVerifyWindow: draftLen must be a non-negative integer (got ${t})`);
-  const n = Ku(e), r = Math.min(t, n);
+  const n = $u(e), r = Math.min(t, n);
   return r < 1 ? {
     draftLen: 0,
     refused: !0,
-    reason: Ou,
+    reason: Wu,
     safeWindow: n
   } : {
     draftLen: r,
@@ -40829,7 +40884,7 @@ function zu({ layers: e, draftLen: t }) {
     safeWindow: n
   };
 }
-function Fu(e) {
+function Qu(e) {
   if (!e) throw new Error("spec_rewind: cursor view is required");
   for (const t of [
     "kiviSinkLen",
@@ -40842,7 +40897,7 @@ function Fu(e) {
   if (e.kiviResidualPos >= e.kiviResidualLen) throw new Error(`spec_rewind: kiviResidualPos ${e.kiviResidualPos} must be < kiviResidualLen ${e.kiviResidualLen} (a full residual window rolls over immediately)`);
   if (e.kiviSinkCount > e.kiviSinkLen) throw new Error(`spec_rewind: kiviSinkCount ${e.kiviSinkCount} exceeds kiviSinkLen ${e.kiviSinkLen}`);
 }
-function Cn(e, t, n, r = {}) {
+function Nn(e, t, n, r = {}) {
   const a = e.length;
   if (a < 1) throw new Error("acceptGreedyPrefix: draft must contain >= 1 token");
   const s = !!r.probeInvert, i = r.argmaxRow || ((l, d) => {
@@ -40866,7 +40921,7 @@ function Cn(e, t, n, r = {}) {
     acceptLen: u
   };
 }
-function wr(e, t, n) {
+function vr(e, t, n) {
   let r = 0, a = !1;
   for (const s of e) {
     if (r >= t) break;
@@ -40880,31 +40935,31 @@ function wr(e, t, n) {
     eosStopped: a
   };
 }
-var vr = Object.freeze({
+var kr = Object.freeze({
   nMax: 5,
   nMin: 3,
   K: 8
 });
-function Qa() {
+function ja() {
   return {
     tokens: new Int32Array(0),
     srcPos: -1,
     n: 0
   };
 }
-var bi = class {
+var vi = class {
   constructor(e = {}) {
-    if (this.nMax = e.nMax ?? vr.nMax, this.nMin = e.nMin ?? vr.nMin, this.K = e.K ?? vr.K, !Number.isInteger(this.nMax) || !Number.isInteger(this.nMin) || !Number.isInteger(this.K)) throw new Error("PromptLookup: nMax / nMin / K must be integers");
+    if (this.nMax = e.nMax ?? kr.nMax, this.nMin = e.nMin ?? kr.nMin, this.K = e.K ?? kr.K, !Number.isInteger(this.nMax) || !Number.isInteger(this.nMin) || !Number.isInteger(this.K)) throw new Error("PromptLookup: nMax / nMin / K must be integers");
     if (this.nMin < 1 || this.nMax < this.nMin || this.K < 1) throw new Error(`PromptLookup: require 1 <= nMin <= nMax and K >= 1 (got nMin=${this.nMin}, nMax=${this.nMax}, K=${this.K})`);
-    if (this.eosTokenIds = $u(e.eosTokenIds), this.maxLength = e.maxLength === void 0 || e.maxLength === null ? 1 / 0 : e.maxLength, this.maxLength !== 1 / 0 && (!Number.isInteger(this.maxLength) || this.maxLength < 0)) throw new Error(`PromptLookup: maxLength must be a non-negative integer or null (got ${this.maxLength})`);
+    if (this.eosTokenIds = ju(e.eosTokenIds), this.maxLength = e.maxLength === void 0 || e.maxLength === null ? 1 / 0 : e.maxLength, this.maxLength !== 1 / 0 && (!Number.isInteger(this.maxLength) || this.maxLength < 0)) throw new Error(`PromptLookup: maxLength must be a non-negative integer or null (got ${this.maxLength})`);
     this.promptTokens = new Int32Array(0), this._buf = new Int32Array(0), this._len = 0;
   }
   setPrompt(e) {
-    const t = kr(e);
+    const t = yr(e);
     return this._buf = Int32Array.from(t), this._len = t.length, this.promptTokens = this._buf.subarray(0, this._len), this;
   }
   extend(e) {
-    const t = kr(e);
+    const t = yr(e);
     if (t.length === 0) return this;
     this._buf === void 0 && this.setPrompt(this.promptTokens);
     const n = this._len + t.length;
@@ -40915,7 +40970,7 @@ var bi = class {
     return this._buf.set(t, this._len), this._len = n, this.promptTokens = this._buf.subarray(0, this._len), this;
   }
   draft(e) {
-    const t = this.promptTokens, n = kr(e), r = t.length, a = n.length, s = Math.min(this.nMax, a, r);
+    const t = this.promptTokens, n = yr(e), r = t.length, a = n.length, s = Math.min(this.nMax, a, r);
     for (let i = s; i >= this.nMin; i--) {
       const o = a - i;
       for (let u = 0; u + i <= r; u++) {
@@ -40932,23 +40987,23 @@ var bi = class {
           h = p;
           break;
         }
-        return h === 0 ? Qa() : {
+        return h === 0 ? ja() : {
           tokens: t.slice(d, d + h),
           srcPos: u,
           n: i
         };
       }
     }
-    return Qa();
+    return ja();
   }
 };
-function kr(e) {
+function yr(e) {
   if (e instanceof Int32Array) return e;
   if (e == null) return new Int32Array(0);
   if (ArrayBuffer.isView(e) || Array.isArray(e)) return Int32Array.from(e);
   throw new Error("PromptLookup: token array must be Int32Array | TypedArray | Array | null");
 }
-function $u(e) {
+function ju(e) {
   if (e == null) return /* @__PURE__ */ new Set();
   if (e instanceof Set) return new Set(e);
   if (typeof e == "number") {
@@ -40958,22 +41013,22 @@ function $u(e) {
   if (Array.isArray(e) || ArrayBuffer.isView(e)) return new Set(Array.from(e));
   throw new Error("PromptLookup: eosTokenIds must be number | array | Set | null");
 }
-var Nn = Object.freeze({
+var On = Object.freeze({
   nMax: 4,
   nMin: 2,
   K: 7,
   maxEntriesPerTable: 12e3
-}), Vu = 96, Hu = 48;
-function Qu() {
+}), Yu = 96, Zu = 48;
+function Xu() {
   return {
     tokens: new Int32Array(0),
     srcPos: -1,
     n: 0
   };
 }
-var ju = class {
+var Ju = class {
   constructor(e = {}) {
-    if (this.nMax = e.nMax ?? Nn.nMax, this.nMin = e.nMin ?? Nn.nMin, this.K = e.K ?? Nn.K, this.maxEntriesPerTable = e.maxEntriesPerTable ?? Nn.maxEntriesPerTable, ![
+    if (this.nMax = e.nMax ?? On.nMax, this.nMin = e.nMin ?? On.nMin, this.K = e.K ?? On.K, this.maxEntriesPerTable = e.maxEntriesPerTable ?? On.maxEntriesPerTable, ![
       this.nMax,
       this.nMin,
       this.K,
@@ -41047,7 +41102,7 @@ var ju = class {
       if (s.token < 0) break;
       a === 0 && (r = s.n), n.push(s.token), t.push(s.token);
     }
-    return n.length === 0 ? Qu() : {
+    return n.length === 0 ? Xu() : {
       tokens: Int32Array.from(n),
       srcPos: -1,
       n: r
@@ -41060,7 +41115,7 @@ var ju = class {
   }
   estimateBytes() {
     let e = 0;
-    for (const t of this.tables.values()) for (const n of t.values()) e += Vu + n.size * Hu;
+    for (const t of this.tables.values()) for (const n of t.values()) e += Yu + n.size * Zu;
     return e;
   }
 }, $t = Object.freeze({
@@ -41071,8 +41126,8 @@ var ju = class {
   maxNodes: 262144,
   perRequestMaxNodes: 65536,
   maxCachedResponses: 64
-}), ja = 1e6;
-function Yu(e) {
+}), Ya = 1e6;
+function el(e) {
   const t = [], n = [e];
   for (; n.length > 0; ) {
     const l = n.shift();
@@ -41107,7 +41162,7 @@ function Yu(e) {
     })
   };
 }
-var Ya = class {
+var Za = class {
   constructor(e, t) {
     if (!Number.isInteger(e) || !Number.isInteger(t)) throw new Error("SuffixTree: maxNodes / maxTreeDepth must be integers");
     if (e < 2 || t < 1) throw new Error(`SuffixTree: require maxNodes >= 2, maxTreeDepth >= 1 (got maxNodes=${e}, maxTreeDepth=${t})`);
@@ -41214,7 +41269,7 @@ var Ya = class {
   get poolBytes() {
     return 16 * this.maxNodes;
   }
-}, Zu = class {
+}, tl = class {
   constructor(e = {}) {
     this.maxTreeDepth = e.maxTreeDepth ?? $t.maxTreeDepth, this.maxSpecFactor = e.maxSpecFactor ?? $t.maxSpecFactor, this.minTokenProb = e.minTokenProb ?? $t.minTokenProb, this.maxDraftNodes = e.maxDraftNodes ?? $t.maxDraftNodes, this.maxNodes = e.maxNodes ?? $t.maxNodes, this.perRequestMaxNodes = e.perRequestMaxNodes ?? $t.perRequestMaxNodes, this.maxCachedResponses = e.maxCachedResponses ?? $t.maxCachedResponses;
     for (const [t, n] of [
@@ -41226,7 +41281,7 @@ var Ya = class {
     ]) if (!Number.isInteger(n) || n < 1) throw new Error(`SuffixDecoder: ${t} must be a positive integer (got ${n})`);
     if (!Number.isFinite(this.maxSpecFactor) || this.maxSpecFactor <= 0) throw new Error(`SuffixDecoder: maxSpecFactor must be a positive number (got ${this.maxSpecFactor})`);
     if (!Number.isFinite(this.minTokenProb) || this.minTokenProb < 0 || this.minTokenProb >= 1) throw new Error(`SuffixDecoder: minTokenProb must be in [0, 1) (got ${this.minTokenProb})`);
-    this._mtpNum = BigInt(Math.round(this.minTokenProb * ja)), this._mtpDen = BigInt(ja), this.global = new Ya(this.maxNodes, this.maxTreeDepth), this.perRequest = new Ya(this.perRequestMaxNodes, this.maxTreeDepth), this.responses = [], this.history = [];
+    this._mtpNum = BigInt(Math.round(this.minTokenProb * Ya)), this._mtpDen = BigInt(Ya), this.global = new Za(this.maxNodes, this.maxTreeDepth), this.perRequest = new Za(this.perRequestMaxNodes, this.maxTreeDepth), this.responses = [], this.history = [];
   }
   seedPrompt(e) {
     return this.perRequest.insert(e), this.history = Array.from(e, (t) => t | 0), this;
@@ -41302,7 +41357,7 @@ var Ya = class {
     if (s.p > a.p ? (i = this.global, o = s, u = "global") : (i = this.perRequest, o = a, u = "request"), o.p === 0) return null;
     const l = Math.min(Math.floor(this.maxSpecFactor * o.p), this.maxDraftNodes, t);
     if (l < 1) return null;
-    const d = Yu(this._speculate(i, o.nodeIdx, l));
+    const d = el(this._speculate(i, o.nodeIdx, l));
     return d === null ? null : (d.p = o.p, d.source = u, d);
   }
   draftChain(e = this.history) {
@@ -41342,7 +41397,7 @@ var Ya = class {
     return e;
   }
 };
-function Xu(e, t, n) {
+function nl(e, t, n) {
   const r = new Int32Array(n);
   for (let a = 0; a < n; a++) {
     r[a] = -1;
@@ -41357,7 +41412,7 @@ function Xu(e, t, n) {
   }
   return r;
 }
-function Ju(e) {
+function rl(e) {
   if (e == null) return null;
   const { tokens: t, treeMask: n, positionIds: r, retrievePaths: a } = e;
   if (!t || t.length === 0) return null;
@@ -41365,7 +41420,7 @@ function Ju(e) {
   if (!n || n.length !== s * s) throw new Error(`flattenSuffixTree: treeMask length ${n ? n.length : "null"} != M*M (${s * s})`);
   if (!r || r.length !== s) throw new Error(`flattenSuffixTree: positionIds length ${r ? r.length : "null"} != M (${s})`);
   if (!Array.isArray(a)) throw new Error("flattenSuffixTree: retrievePaths must be an array");
-  const i = Xu(n, r, s);
+  const i = nl(n, r, s);
   for (let u = 0; u < s; u++) if (i[u] >= u) throw new Error(`flattenSuffixTree: BFS-order violation — node ${u} parent ${i[u]} is not strictly before it`);
   const o = {
     tokens: t,
@@ -41382,7 +41437,7 @@ var Sn = Object.freeze([64, 128]), an = Object.freeze([
   4,
   8
 ]);
-var Za = Object.freeze([
+var Xa = Object.freeze([
   32,
   64,
   512,
@@ -41394,48 +41449,48 @@ var Za = Object.freeze([
   8192,
   9216,
   12288
-]), Wr = "auto", ba = "launch";
-function wi(e) {
+]), zr = "auto", wa = "launch";
+function ki(e) {
   const t = Number(e);
   return an.includes(t) ? t : 1;
 }
-function zr(e) {
+function Fr(e) {
   return e == null || e === "" || e === "auto" ? {
-    mode: Wr,
+    mode: zr,
     S: 0
   } : e === "launch" ? {
-    mode: ba,
+    mode: wa,
     S: 0
   } : {
     mode: "explicit",
-    S: wi(e)
+    S: ki(e)
   };
 }
-function Fr(e) {
+function $r(e) {
   const t = Number(e);
   return 4 * (Number.isFinite(t) && t > 0 ? t : 32);
 }
-function Jn(e, t) {
+function er(e, t) {
   const n = Math.ceil(e / 64);
   for (const r of an) if (n * r >= t) return r;
   return an[an.length - 1];
 }
-function el(e, t) {
-  const n = Fr(e), r = Number(e) > 0 ? Number(e) : 32;
+function al(e, t) {
+  const n = $r(e), r = Number(e) > 0 ? Number(e) : 32;
   if (t) {
-    const a = Math.ceil(t / 64), s = Jn(t, n);
+    const a = Math.ceil(t / 64), s = er(t, n);
     return `auto: smallest S with ceil(N/64)*S >= 4*width workgroups (target ${n} at width ${r}); widest prefill projection N=${t} launches ${a} column-groups, so S=${s} (${a * s} workgroups)`;
   }
   return `launch: per GEMM, smallest S with ceil(N/64)*S >= 4*width workgroups (target ${n} at width ${r})`;
 }
-function tl(e, t) {
+function sl(e, t) {
   const n = Math.ceil(e / t);
   return {
     sEff: Math.ceil(e / n),
     kPerSplit: n
   };
 }
-function er(e, t, n) {
+function tr(e, t, n) {
   if (!Number.isInteger(e) || e < 1 || e > 64) return null;
   if (n) {
     if (![
@@ -41468,7 +41523,7 @@ function er(e, t, n) {
     mMax: s * a
   };
 }
-var yr = Object.freeze({
+var Sr = Object.freeze({
   plain: {
     residual: !1,
     prescaled: !1,
@@ -41489,12 +41544,12 @@ var yr = Object.freeze({
     prescaled: !0,
     bindings: 6
   }
-}), $r = class {
+}), Vr = class {
   device;
   shaderCode;
   pool = null;
   constructor(e, t, n = {}) {
-    if (this.device = e, this.shaderCode = t, this.workgroupSize = n.workgroupSize || 0, this.rowsPerThread = n.rowsPerThread || 0, this.subgroupWidth = n.subgroupWidth || 0, this.maxM = Math.min(n.maxM || 64, 64), this._pipelines = /* @__PURE__ */ new Map(), this._layouts = /* @__PURE__ */ new Map(), this.builtShapes = [], this.calls = 0, this.ksplitShaderCode = n.ksplitShaderCode || "", this.reduceShaderCode = n.reduceShaderCode || "", this.ksplitRaw = n.ksplit, this.ksplit = zr(n.ksplit).mode === "explicit" ? wi(n.ksplit) : 1, this.ksplitProvider = typeof n.ksplitProvider == "function" ? n.ksplitProvider : null, this.ksplitReferenceN = Number.isInteger(n.ksplitReferenceN) && n.ksplitReferenceN > 0 ? n.ksplitReferenceN : null, this.ksplitAvailable = !!(this.ksplitShaderCode && this.reduceShaderCode), this.ksplitReason = this.ksplitAvailable ? null : "ksplit/reduce shader source not supplied", this._partBuf = null, this._partFloats = 0, this._partSqBuf = null, this._partSqFloats = 0, this._retiredBufs = [], this.reduceCalls = 0, this.launched = /* @__PURE__ */ new Map(), this.workgroupSize && !Sn.includes(this.workgroupSize)) throw new Error(`MRowPrefillQ4Matmul: workgroupSize must be one of ${Sn.join("|")}`);
+    if (this.device = e, this.shaderCode = t, this.workgroupSize = n.workgroupSize || 0, this.rowsPerThread = n.rowsPerThread || 0, this.subgroupWidth = n.subgroupWidth || 0, this.maxM = Math.min(n.maxM || 64, 64), this._pipelines = /* @__PURE__ */ new Map(), this._layouts = /* @__PURE__ */ new Map(), this.builtShapes = [], this.calls = 0, this.ksplitShaderCode = n.ksplitShaderCode || "", this.reduceShaderCode = n.reduceShaderCode || "", this.ksplitRaw = n.ksplit, this.ksplit = Fr(n.ksplit).mode === "explicit" ? ki(n.ksplit) : 1, this.ksplitProvider = typeof n.ksplitProvider == "function" ? n.ksplitProvider : null, this.ksplitReferenceN = Number.isInteger(n.ksplitReferenceN) && n.ksplitReferenceN > 0 ? n.ksplitReferenceN : null, this.ksplitAvailable = !!(this.ksplitShaderCode && this.reduceShaderCode), this.ksplitReason = this.ksplitAvailable ? null : "ksplit/reduce shader source not supplied", this._partBuf = null, this._partFloats = 0, this._partSqBuf = null, this._partSqFloats = 0, this._retiredBufs = [], this.reduceCalls = 0, this.launched = /* @__PURE__ */ new Map(), this.workgroupSize && !Sn.includes(this.workgroupSize)) throw new Error(`MRowPrefillQ4Matmul: workgroupSize must be one of ${Sn.join("|")}`);
     if (this.rowsPerThread && ![
       1,
       2,
@@ -41503,20 +41558,20 @@ var yr = Object.freeze({
     ].includes(this.rowsPerThread)) throw new Error("MRowPrefillQ4Matmul: rowsPerThread must be one of 1|2|4|8");
   }
   ksplitKnob() {
-    return zr(this.ksplitProvider ? this.ksplitProvider() : this.ksplitRaw);
+    return Fr(this.ksplitProvider ? this.ksplitProvider() : this.ksplitRaw);
   }
   ksplitTarget() {
-    return Fr(this.subgroupWidth);
+    return $r(this.subgroupWidth);
   }
   resolveKsplit(e) {
     if (!this.ksplitAvailable) return 1;
     const t = this.ksplitKnob();
-    return t.mode === "explicit" ? t.S : Jn(t.mode === "auto" && this.ksplitReferenceN ? this.ksplitReferenceN : e, this.ksplitTarget());
+    return t.mode === "explicit" ? t.S : er(t.mode === "auto" && this.ksplitReferenceN ? this.ksplitReferenceN : e, this.ksplitTarget());
   }
   activeKsplit() {
     if (!this.ksplitAvailable) return 1;
     const e = this.ksplitKnob();
-    return e.mode === "explicit" ? e.S : e.mode === "auto" && this.ksplitReferenceN ? Jn(this.ksplitReferenceN, this.ksplitTarget()) : ba;
+    return e.mode === "explicit" ? e.S : e.mode === "auto" && this.ksplitReferenceN ? er(this.ksplitReferenceN, this.ksplitTarget()) : wa;
   }
   ksplitPlan(e, t, n) {
     let r = this.resolveKsplit(t);
@@ -41524,7 +41579,7 @@ var yr = Object.freeze({
     const a = this.device && this.device.limits && this.device.limits.maxStorageBufferBindingSize || 134217728;
     for (; r > 1 && r * e * t * 4 > a; ) r = r >> 1;
     if (r <= 1) return null;
-    const { sEff: s, kPerSplit: i } = tl(n, r);
+    const { sEff: s, kPerSplit: i } = sl(n, r);
     if (s <= 1) return null;
     const o = Math.ceil(t / 64);
     return {
@@ -41537,7 +41592,7 @@ var yr = Object.freeze({
     };
   }
   static launchGeometry() {
-    return Za.map((e) => {
+    return Xa.map((e) => {
       const t = Math.ceil(e / 64), n = {};
       for (const r of an) n[r] = t * r;
       return {
@@ -41548,9 +41603,9 @@ var yr = Object.freeze({
     });
   }
   static resolvedGeometry(e, t = null) {
-    const n = Fr(e);
-    return Za.map((r) => {
-      const a = Math.ceil(r / 64), s = Jn(t || r, n);
+    const n = $r(e);
+    return Xa.map((r) => {
+      const a = Math.ceil(r / 64), s = er(t || r, n);
       return {
         n: r,
         colGroups: a,
@@ -41569,13 +41624,13 @@ var yr = Object.freeze({
     return this.workgroupSize ? this.workgroupSize : this.subgroupWidth > 64 ? 128 : 0;
   }
   accepts(e, t, n) {
-    return !(e >= 2 && e <= this.maxM) || !(t > 0 && t % 32 === 0) || !(n > 0 && n % 4 === 0) ? !1 : er(e, this._wgPref(), this.rowsPerThread) !== null;
+    return !(e >= 2 && e <= this.maxM) || !(t > 0 && t % 32 === 0) || !(n > 0 && n % 4 === 0) ? !1 : tr(e, this._wgPref(), this.rowsPerThread) !== null;
   }
   _pipeline(e, t) {
     const n = `${e}|${t.wg}|${t.rowsPerThread}`;
     let r = this._pipelines.get(n);
     if (r) return r;
-    const a = yr[e];
+    const a = Sr[e];
     if (!a) throw new Error(`MRowPrefillQ4Matmul: unknown variant "${e}"`);
     const s = Ie(this.shaderCode, { defines: {
       HAS_RESIDUAL: a.residual ? "1" : "0",
@@ -41780,10 +41835,10 @@ var yr = Object.freeze({
     }), r;
   }
   _recordKsplit(e, t, n, r, a, s, i, o) {
-    const u = yr[e];
+    const u = Sr[e];
     if (!u) throw new Error(`MRowPrefillQ4Matmul: unknown variant "${e}"`);
     if (!o) return this._record(e, t, n, r, a, s, i);
-    const l = er(n, this._wgPref(), this.rowsPerThread);
+    const l = tr(n, this._wgPref(), this.rowsPerThread);
     if (!l) throw new Error(`MRowPrefillQ4Matmul: no shape for M=${n}`);
     const [d, c, h] = t, p = u.prescaled ? t[3] : null, f = u.residual ? t[u.prescaled ? 4 : 3] : null, _ = this._partBuffer(o.partFloats), m = u.prescaled ? this._partSqBuffer(o.S * n) : null, b = this._ksplitPipeline(u.prescaled, l), w = this._ksplitParams(n, r, a, s, o), g = [
       {
@@ -41856,7 +41911,7 @@ var yr = Object.freeze({
     _.setPipeline(h), _.setBindGroup(0, f), _.dispatchWorkgroups(Math.ceil(i / 64), s, 1), _.end(), this.reduceCalls++;
   }
   _record(e, t, n, r, a, s, i) {
-    const o = er(n, this._wgPref(), this.rowsPerThread);
+    const o = tr(n, this._wgPref(), this.rowsPerThread);
     if (!o) throw new Error(`MRowPrefillQ4Matmul: no shape for M=${n}`);
     const u = this._pipeline(e, o), l = this._params(n, r, a, s), d = [
       {
@@ -41881,7 +41936,7 @@ var yr = Object.freeze({
       resource: { buffer: t[f] }
     });
     const c = this.device.createBindGroup({
-      layout: this._layouts.get(String(yr[e].bindings)),
+      layout: this._layouts.get(String(Sr[e].bindings)),
       entries: d
     }), h = i || this.device.createCommandEncoder(), p = h.beginComputePass();
     return p.setPipeline(u), p.setBindGroup(0, c), p.dispatchWorkgroups(Math.ceil(r / 64), 1, 1), p.end(), this.calls++, i ? null : h.finish();
@@ -41981,16 +42036,16 @@ var yr = Object.freeze({
     }
     this._retiredBufs = [], this.launched.clear();
   }
-}, nl = "matmul_q4_mrow_prefill.wgsl", rl = "matmul_q4_mrow_ksplit.wgsl", al = "matmul_q4_mrow_reduce.wgsl", Vr = "q4-mrow-stream";
+}, il = "matmul_q4_mrow_prefill.wgsl", ol = "matmul_q4_mrow_ksplit.wgsl", ul = "matmul_q4_mrow_reduce.wgsl", Hr = "q4-mrow-stream";
 function xn() {
   const e = globalThis.__mentriaMobilePrefill;
   return e === "mrow" || e === !0;
 }
-function sl() {
+function ll() {
   const e = Number(globalThis.__mentriaMobilePrefillWG);
   return Sn.includes(e) ? e : 0;
 }
-function il() {
+function dl() {
   const e = Number(globalThis.__mentriaMobilePrefillRM);
   return [
     1,
@@ -41999,11 +42054,11 @@ function il() {
     8
   ].includes(e) ? e : 0;
 }
-function Hr() {
-  const e = zr(globalThis.__mentriaMobilePrefillKsplit);
+function Qr() {
+  const e = Fr(globalThis.__mentriaMobilePrefillKsplit);
   return e.mode === "explicit" ? e.S : e.mode;
 }
-function ol(e) {
+function cl(e) {
   let t = 0;
   const n = (r) => {
     Number.isInteger(r) && r > t && (t = r);
@@ -42015,14 +42070,14 @@ function ol(e) {
     }
   return t > 0 ? t : null;
 }
-function ul() {
+function hl() {
   const e = Number(globalThis.__mentriaMobilePrefillMaxM);
   return Number.isInteger(e) && e >= 1 && e <= 64 ? e : 64;
 }
-async function ll() {
-  return Qr(nl, "__mentriaMrowPrefillCode");
+async function pl() {
+  return jr(il, "__mentriaMrowPrefillCode");
 }
-async function Qr(e, t) {
+async function jr(e, t) {
   if (t) {
     const i = globalThis[t];
     if (typeof i == "string" && i.length) return i;
@@ -42043,11 +42098,11 @@ async function Qr(e, t) {
   if (!s.ok) throw new Error(`fetch ${e}: ${s.status}`);
   return s.text();
 }
-async function dl(e, t = {}) {
+async function fl(e, t = {}) {
   if (!xn() || !e || !e.operators) return null;
   const n = e.device || e.operators.matmulQ4 && e.operators.matmulQ4.device || e.operators.prescaledQ4 && e.operators.prescaledQ4.device;
   if (!n) throw new Error("mobilePrefill: no GPUDevice reachable from the model");
-  const r = await ll();
+  const r = await pl();
   let a = Number(globalThis.__mentriaMobilePrefillSubgroupWidth) || 0;
   if (!a) try {
     a = n.adapterInfo && n.adapterInfo.subgroupMinSize || 0;
@@ -42056,20 +42111,20 @@ async function dl(e, t = {}) {
   }
   let s = "", i = "", o = null;
   try {
-    [s, i] = await Promise.all([Qr(rl, "__mentriaMrowKsplitCode"), Qr(al, "__mentriaMrowReduceCode")]);
+    [s, i] = await Promise.all([jr(ol, "__mentriaMrowKsplitCode"), jr(ul, "__mentriaMrowReduceCode")]);
   } catch (c) {
     s = "", i = "", o = "shader fetch failed: " + (c && c.message ? c.message : String(c)), t.onFallback && t.onFallback("mobile-prefill", "ksplit-unavailable", o);
   }
-  const u = new $r(n, r, {
-    workgroupSize: sl(),
-    rowsPerThread: il(),
+  const u = new Vr(n, r, {
+    workgroupSize: ll(),
+    rowsPerThread: dl(),
     subgroupWidth: a,
-    maxM: ul(),
+    maxM: hl(),
     ksplitShaderCode: s,
     reduceShaderCode: i,
-    ksplit: Hr(),
-    ksplitProvider: Hr,
-    ksplitReferenceN: ol(e)
+    ksplit: Qr(),
+    ksplitProvider: Qr,
+    ksplitReferenceN: cl(e)
   });
   o && (u.ksplitReason = o), u.pool = e._pool || e.operators.matmulQ4 && e.operators.matmulQ4.pool || null;
   const l = [];
@@ -42080,11 +42135,11 @@ async function dl(e, t = {}) {
   if (!l.length) throw new Error("mobilePrefill: neither matmulQ4 nor prescaledQ4 is present on the model");
   e.operators.mrowPrefillQ4 = u;
   const d = {
-    routeName: Vr,
+    routeName: Hr,
     op: u,
     attached: l,
     live: !0,
-    describe: () => vi(u, l),
+    describe: () => yi(u, l),
     detach() {
       for (const c of l) {
         const h = e.operators[c];
@@ -42100,17 +42155,17 @@ async function dl(e, t = {}) {
       d.live = !0;
     }
   };
-  return t.onFallback && t.onFallback("mobile-prefill", "enabled", `${Vr} on ${l.join("+")} for M<=${u.maxM}; ksplit ${cl(u)}`), d;
+  return t.onFallback && t.onFallback("mobile-prefill", "enabled", `${Hr} on ${l.join("+")} for M<=${u.maxM}; ksplit ${_l(u)}`), d;
 }
-function vi(e, t) {
+function yi(e, t) {
   if (!e) return {
     route: "off",
     requested: xn(),
     reason: xn() ? "requested but not attached (see the load fallback events)" : "flag unset — default OFF on every platform",
     flag: "__mentriaMobilePrefill",
-    ksplit: Hr(),
+    ksplit: Qr(),
     ksplitFlag: "__mentriaMobilePrefillKsplit",
-    ksplitRule: `${Wr} = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)`
+    ksplitRule: `${zr} = smallest S with ceil(N/64)*S >= 4*subgroupWidth workgroups at the widest prefill projection (inert while the route is off)`
   };
   const n = [
     8,
@@ -42119,10 +42174,10 @@ function vi(e, t) {
     64
   ].map((a) => ({
     m: a,
-    ...er(a, e._wgPref(), e.rowsPerThread) || {}
+    ...tr(a, e._wgPref(), e.rowsPerThread) || {}
   })).filter((a) => a.wg), r = e.ksplitKnob();
   return {
-    route: Vr,
+    route: Hr,
     requested: !0,
     maxM: e.maxM,
     workgroupSizeOverride: e.workgroupSize || null,
@@ -42139,8 +42194,8 @@ function vi(e, t) {
     ksplitRequested: globalThis.__mentriaMobilePrefillKsplit === void 0 ? null : globalThis.__mentriaMobilePrefillKsplit,
     ksplitAllowed: [
       ...an,
-      Wr,
-      ba
+      zr,
+      wa
     ],
     ksplitAvailable: e.ksplitAvailable,
     ksplitReason: e.ksplitReason,
@@ -42148,27 +42203,27 @@ function vi(e, t) {
     ksplitTarget: e.ksplitTarget(),
     ksplitTargetPerLane: 4,
     ksplitReferenceN: e.ksplitReferenceN,
-    ksplitRule: r.mode === "explicit" ? `explicit: host passed mobilePrefillKsplit=${JSON.stringify(globalThis.__mentriaMobilePrefillKsplit)} — wins over the rule` : el(e.subgroupWidth, r.mode === "auto" ? e.ksplitReferenceN : null),
-    ksplitResolved: $r.resolvedGeometry(e.subgroupWidth, r.mode === "auto" ? e.ksplitReferenceN : null),
+    ksplitRule: r.mode === "explicit" ? `explicit: host passed mobilePrefillKsplit=${JSON.stringify(globalThis.__mentriaMobilePrefillKsplit)} — wins over the rule` : al(e.subgroupWidth, r.mode === "auto" ? e.ksplitReferenceN : null),
+    ksplitResolved: Vr.resolvedGeometry(e.subgroupWidth, r.mode === "auto" ? e.ksplitReferenceN : null),
     reduceWorkgroupSize: 64,
     reduceDispatches: e.reduceCalls,
-    parallelism: $r.launchGeometry(),
+    parallelism: Vr.launchGeometry(),
     launched: e.launchedRows()
   };
 }
-function cl(e) {
+function _l(e) {
   if (!e.ksplitAvailable) return "unavailable (S=1)";
   const t = e.ksplitKnob();
   return t.mode === "explicit" ? `S=${t.S} (explicit)` : t.mode === "auto" && e.ksplitReferenceN ? `S=${e.activeKsplit()} (auto: target ${e.ksplitTarget()} workgroups at width ${e.subgroupWidth || "unknown"}, widest N=${e.ksplitReferenceN})` : `per-launch (${t.mode}: target ${e.ksplitTarget()} workgroups)`;
 }
-var jr = "__mentriaPassLabel", Yr = "__mentriaPassLabelOverride", Zr = "__mentriaPassDetail";
-function hl(e, t) {
+var Yr = "__mentriaPassLabel", Zr = "__mentriaPassLabelOverride", Xr = "__mentriaPassDetail";
+function ml(e, t) {
   if (!e || typeof e.__mentriaPassLabel != "function") return null;
   const n = e.__mentriaPassDetail ?? null;
-  return e[Zr] = t, n;
+  return e[Xr] = t, n;
 }
-var Sr = "__mentriaCmdMerge", ft = 0, Kt = 1;
-function pl(e) {
+var xr = "__mentriaCmdMerge", ft = 0, Kt = 1;
+function gl(e) {
   let t = null;
   for (let n = 0; n < e.length; n++) {
     const r = e[n];
@@ -42176,11 +42231,11 @@ function pl(e) {
   }
   return t || e;
 }
-var ki = class {
+var Si = class {
   constructor(e, t, n) {
     this._log = e, this._seq = t, this._consumed = !1, this.label = n;
   }
-}, fl = class {
+}, bl = class {
   constructor(e, t) {
     this._log = e, this._enc = t, this.label = void 0;
   }
@@ -42195,7 +42250,7 @@ var ki = class {
     this._log.push([
       Kt,
       "setBindGroup",
-      pl(e)
+      gl(e)
     ]);
   }
   dispatchWorkgroups(...e) {
@@ -42240,18 +42295,18 @@ var ki = class {
       e
     ]);
   }
-}, _l = class {
+}, wl = class {
   constructor(e, t, n) {
     this._state = e, this._device = t, this._log = [], this._openPass = null, this._finished = !1, this.label = n && n.label;
   }
   beginComputePass(e) {
-    const t = this._device[jr], n = typeof t == "function" ? t() : null;
+    const t = this._device[Yr], n = typeof t == "function" ? t() : null;
     return this._log.push([
       ft,
       "beginComputePass",
       [e],
       n ?? null
-    ]), this._state.passes++, this._openPass = new fl(this._log, this);
+    ]), this._state.passes++, this._openPass = new bl(this._log, this);
   }
   beginRenderPass() {
     throw new Error("command merge: render passes are not supported inside a merged encode window");
@@ -42328,10 +42383,10 @@ var ki = class {
   }
   finish(e) {
     if (this._finished) throw new Error("command merge: finish() called twice on one encoder");
-    return this._finished = !0, this._state.created++, new ki(this._log, this._state.seq++, e && e.label || this.label);
+    return this._finished = !0, this._state.created++, new Si(this._log, this._state.seq++, e && e.label || this.label);
   }
 };
-function ml(e, t, n, r) {
+function vl(e, t, n, r) {
   if (t._consumed) throw new Error("command merge: a merged command buffer was submitted twice");
   t._consumed = !0;
   let a = null, s = 0;
@@ -42341,11 +42396,11 @@ function ml(e, t, n, r) {
     if (u[0] === ft) if (u[1] === "beginComputePass") {
       s++;
       const l = u[3];
-      l != null && (n[Yr] = l);
+      l != null && (n[Zr] = l);
       try {
         a = e.beginComputePass(...u[2]);
       } finally {
-        l != null && (n[Yr] = null);
+        l != null && (n[Zr] = null);
       }
     } else e[u[1]](...u[2]);
     else
@@ -42353,7 +42408,7 @@ function ml(e, t, n, r) {
   }
   r.replayed++, r.passHist[s] = (r.passHist[s] || 0) + 1;
 }
-function Xa(e, t, n, r, a = 0) {
+function Ja(e, t, n, r, a = 0) {
   const s = [];
   let i = null, o = 0;
   const u = () => {
@@ -42361,12 +42416,12 @@ function Xa(e, t, n, r, a = 0) {
   };
   for (let l = 0; l < n.length; l++) {
     const d = n[l];
-    d != null && (d instanceof ki ? (i && a > 0 && o >= a && u(), i || (i = e(), r.realEncoders++), ml(i, d, t, r), o++) : (u(), s.push(d), r.passthrough++));
+    d != null && (d instanceof Si ? (i && a > 0 && o >= a && u(), i || (i = e(), r.realEncoders++), vl(i, d, t, r), o++) : (u(), s.push(d), r.passthrough++));
   }
   return u(), s;
 }
-function gl(e, t, n) {
-  const r = e[Sr];
+function kl(e, t, n) {
+  const r = e[xr];
   if (r)
     return r.nested++, t();
   const a = {
@@ -42384,26 +42439,26 @@ function gl(e, t, n) {
     replayMs: 0,
     totalMs: 0
   }, s = typeof performance < "u" && performance.now ? () => performance.now() : () => Date.now(), i = s(), o = Object.prototype.hasOwnProperty, u = e.queue, l = o.call(e, "createCommandEncoder"), d = e.createCommandEncoder, c = o.call(u, "submit"), h = u.submit, p = (g) => d.call(e, g), f = (g) => h.call(u, g);
-  e[Sr] = a, e.createCommandEncoder = function(g) {
-    return new _l(a, e, g);
+  e[xr] = a, e.createCommandEncoder = function(g) {
+    return new wl(a, e, g);
   }, u.submit = function(g) {
-    return a.internalSubmits++, f(Xa(p, e, Array.from(g || []), a));
+    return a.internalSubmits++, f(Ja(p, e, Array.from(g || []), a));
   };
   let _;
   try {
     _ = t();
   } finally {
-    a.recordMs = s() - i, l ? e.createCommandEncoder = d : delete e.createCommandEncoder, c ? u.submit = h : delete u.submit, delete e[Sr];
+    a.recordMs = s() - i, l ? e.createCommandEncoder = d : delete e.createCommandEncoder, c ? u.submit = h : delete u.submit, delete e[xr];
   }
-  const m = s(), b = Xa(p, e, Array.isArray(_) ? _ : [], a, (n && n.maxPerBuffer) | 0), w = s();
+  const m = s(), b = Ja(p, e, Array.isArray(_) ? _ : [], a, (n && n.maxPerBuffer) | 0), w = s();
   return a.replayMs = w - m, a.totalMs = w - i, a.dropped = a.created - a.replayed, n && typeof n.onStats == "function" && n.onStats(a), b;
 }
-function xr(e, t) {
+function Pr(e, t) {
   const n = e.specRefusalReason();
   if (n)
     throw new Error(`${t}: speculation is unsound with ${n}. Chunked-decode DeltaNet state keeps pending updates in the operator's chunk accumulator and flushes recurrentState only on a chunk boundary, so a snapshot cannot capture it and verifyTree would start from a state that lags by chunkPos tokens. Disable enableChunkedDecodeState to speculate.`);
 }
-var bl = 248056, wl = 2, vl = new Float32Array([
+var yl = 248056, Sl = 2, xl = new Float32Array([
   -0.134497,
   -0.083994,
   -0.04725,
@@ -42412,7 +42467,7 @@ var bl = 248056, wl = 2, vl = new Float32Array([
   0.04725,
   0.083994,
   0.134497
-]), kl = new Float32Array([
+]), Pl = new Float32Array([
   -0.109245,
   -0.065622,
   -0.031284,
@@ -42420,17 +42475,17 @@ var bl = 248056, wl = 2, vl = new Float32Array([
   0.031284,
   0.065622,
   0.109245
-]), yl = new Float32Array([
+]), Bl = new Float32Array([
   -0.094401,
   -0.028299,
   0.028299,
   0.094401
-]), Sl = new Float32Array([
+]), El = new Float32Array([
   -0.06135,
   0,
   0.06135
 ]);
-function xl(e, t = 42) {
+function ql(e, t = 42) {
   const n = new Float32Array(e);
   let r = t;
   for (let a = 0; a < e; a++)
@@ -42519,7 +42574,7 @@ var sn = class _n {
     for (let i = 0; i < this.numLayers; i++) {
       const o = s.has(i), u = o ? "attention" : "deltanet";
       let l;
-      o ? (l = new gi(t, {
+      o ? (l = new wi(t, {
         matmul: n.matmul,
         rmsnorm: n.rmsnorm,
         rope: n.rope,
@@ -42535,7 +42590,7 @@ var sn = class _n {
         headDim: r.attention.headDim,
         maxSeq: r.attention.maxSeq,
         ungated: !!r.attention.ungated
-      }), n.fusedNormRoPE && (l.fusedNormRoPE = n.fusedNormRoPE), n.fusedNormMRoPE && n.mrope && (l.fusedNormMRoPE = n.fusedNormMRoPE, l.mrope = n.mrope, this.useMRoPE = !0), n.qgateDeinterleave && (l.qgateDeinterleave = n.qgateDeinterleave)) : l = new Va(t, {
+      }), n.fusedNormRoPE && (l.fusedNormRoPE = n.fusedNormRoPE), n.fusedNormMRoPE && n.mrope && (l.fusedNormMRoPE = n.fusedNormMRoPE, l.mrope = n.mrope, this.useMRoPE = !0), n.qgateDeinterleave && (l.qgateDeinterleave = n.qgateDeinterleave)) : l = new Ha(t, {
         matmul: n.matmul,
         conv1dUpdate: n.conv1dUpdate,
         silu: n.silu,
@@ -42553,7 +42608,7 @@ var sn = class _n {
         valueHeadDim: r.deltanet.valueHeadDim,
         convKernelSize: r.deltanet.convKernelSize
       });
-      const d = new Xn(t, {
+      const d = new Jn(t, {
         matmul: n.matmul,
         silu: n.silu,
         elementwise: n.elementwise,
@@ -42563,7 +42618,7 @@ var sn = class _n {
         rmsnorm: n.rmsnorm || null
       }, r.hiddenSize, r.intermediateSize);
       n.matmulQ4 && (l.setQuantized(n.matmulQ4), d.setQuantized(n.matmulQ4)), n.vecmatQ4 && (u === "deltanet" && l.setVecmatQ4(n.vecmatQ4), u === "attention" && l.setVecmatQ4(n.vecmatQ4), d.setVecmatQ4(n.vecmatQ4));
-      const c = new li(t, {
+      const c = new ci(t, {
         rmsnorm: n.rmsnorm,
         elementwise: n.elementwise
       }, l, d, u, {
@@ -42573,7 +42628,7 @@ var sn = class _n {
       });
       this.blocks.push(c);
     }
-    this._allocateScratch(), this.specStateManager = new Nu(t, { numSlots: 2 }), this.residentTrim = null;
+    this._allocateScratch(), this.specStateManager = new Ku(t, { numSlots: 2 }), this.residentTrim = null;
   }
   setResidentTrim(t) {
     if (t == null || t === "off" || t === !1)
@@ -42590,7 +42645,7 @@ var sn = class _n {
   }
   _trimPrefillPools() {
     if (!this.residentTrim || !this.residentTrim.prefill) return 0;
-    const t = Va.releaseDevicePools(this.device) + Xn.releaseDevicePools(this.device) + St.release(this.device);
+    const t = Ha.releaseDevicePools(this.device) + Jn.releaseDevicePools(this.device) + bt.release(this.device);
     return this._residentTrimReleases = (this._residentTrimReleases || 0) + t, t;
   }
   _ensureSpecState() {
@@ -42710,7 +42765,7 @@ var sn = class _n {
       i = b.layer.headDim, o = b.layer.numQHeads;
       break;
     }
-    const u = xl(i, r), l = a.createBuffer({
+    const u = ql(i, r), l = a.createBuffer({
       size: u.byteLength,
       usage: s,
       mappedAtCreation: !0
@@ -42724,7 +42779,7 @@ var sn = class _n {
       mappedAtCreation: !0
     });
     new Float32Array(h.getMappedRange()).set(c), h.unmap();
-    const p = n === 3 ? vl : yl, f = n === 3 ? kl : Sl, _ = a.createBuffer({
+    const p = n === 3 ? xl : Bl, f = n === 3 ? Pl : El, _ = a.createBuffer({
       size: p.byteLength,
       usage: s,
       mappedAtCreation: !0
@@ -43031,13 +43086,13 @@ var sn = class _n {
   specSafeDraftLen(t) {
     const n = [];
     for (const r of this.blocks) r.layerType === "attention" && n.push(r.layer);
-    return zu({
+    return Hu({
       layers: n,
       draftLen: t
     }).draftLen;
   }
   specRefusalReason() {
-    return Wu(this.blocks);
+    return Vu(this.blocks);
   }
   disposeState() {
     this.seqLen = 0;
@@ -43517,7 +43572,7 @@ var sn = class _n {
     return this.mergeDecodeCommands(() => this._forwardEncode(t, n));
   }
   mergeDecodeCommands(t) {
-    return this._decodeCmdMergeOn() ? gl(this.device, t, {
+    return this._decodeCmdMergeOn() ? kl(this.device, t, {
       maxPerBuffer: _n.DECODE_CMD_MERGE_MAX | 0,
       onStats: (n) => {
         this._lastDecodeMerge = n, _n.lastDecodeMerge = n;
@@ -43753,7 +43808,7 @@ var sn = class _n {
     }
     if (!this._mobilePrefillFailed)
       try {
-        this.mobilePrefillRoute = await dl(this, { onFallback: this._onFallback || void 0 }), this.mobilePrefillReason = this.mobilePrefillRoute ? "attached" : "not requested", this.mobilePrefillRoute && console.log("[mobile-prefill] route " + this.mobilePrefillRoute.routeName + " attached to " + this.mobilePrefillRoute.attached.join("+"));
+        this.mobilePrefillRoute = await fl(this, { onFallback: this._onFallback || void 0 }), this.mobilePrefillReason = this.mobilePrefillRoute ? "attached" : "not requested", this.mobilePrefillRoute && console.log("[mobile-prefill] route " + this.mobilePrefillRoute.routeName + " attached to " + this.mobilePrefillRoute.attached.join("+"));
       } catch (n) {
         this.mobilePrefillRoute = null, this._mobilePrefillFailed = !0, this.mobilePrefillReason = "attach failed: " + (n && n.message ? n.message : String(n)), console.warn("[mobile-prefill] " + this.mobilePrefillReason + " — staying on the tiled route");
       }
@@ -43802,7 +43857,7 @@ var sn = class _n {
       encodeMs: 0,
       submitMs: 0,
       syncMs: 0
-    }, _ = p(), m = this.seqLen, b = Ca("prefill", [
+    }, _ = p(), m = this.seqLen, b = Na("prefill", [
       "dispatches",
       "passes",
       "submits",
@@ -43820,7 +43875,7 @@ var sn = class _n {
       mappedAtCreation: !0
     });
     new Uint32Array(v.getMappedRange()).set(t), v.unmap();
-    const y = St.for(d), k = y.get("blk.mlpOut", r * c * 4);
+    const y = bt.for(d), k = y.get("blk.mlpOut", r * c * 4);
     let P = null, x = null, R = null, B = null, G = 0;
     try {
       w([this._dispatchEmbedding(v, k, r, c)]), await g(), s && s.throwIfAborted(), n && n.visionEmbedsBuf && n.visionSrcRowBuf && this.operators.visionSplice && (w([this.operators.visionSplice.dispatch(n.visionSrcRowBuf, n.visionEmbedsBuf, k, r, c)]), await g(), s && s.throwIfAborted()), P = y.get("model.ping", r * c * 4), x = y.get("model.pong", r * c * 4);
@@ -43829,7 +43884,7 @@ var sn = class _n {
         O.copyBufferToBuffer(k, 0, P, 0, r * c * 4), w([O.finish()]), await g(), s && s.throwIfAborted();
       }
       if (this.useMRoPE) {
-        const O = n && n.imageTokenId !== void 0 ? n.imageTokenId : bl, N = n && n.spatialMergeSize !== void 0 ? n.spatialMergeSize : wl, F = n && n.imageGrids ? n.imageGrids : [], Y = Kr(t, this._buildMmTokenTypeIds(t, O), F, N), se = Y.posIds;
+        const O = n && n.imageTokenId !== void 0 ? n.imageTokenId : yl, N = n && n.spatialMergeSize !== void 0 ? n.spatialMergeSize : Sl, F = n && n.imageGrids ? n.imageGrids : [], Y = Wr(t, this._buildMmTokenTypeIds(t, O), F, N), se = Y.posIds;
         if (this.seqLen > 0) for (let J = 0; J < se.length; J++) se[J] += this.seqLen;
         G = Y.ropeDelta | 0, R = d.createBuffer({
           size: se.byteLength,
@@ -43963,14 +44018,14 @@ var sn = class _n {
       {
         const q = p() - _;
         ze("encodeMs", f.encodeMs), ze("submitMs", f.submitMs), ze("syncMs", f.syncMs), ze("hostMs", q - f.encodeMs - f.submitMs - f.syncMs);
-        const U = Ca("prefill", [
+        const U = Na("prefill", [
           "dispatches",
           "passes",
           "submits",
           "cmdBufs",
           "workDone"
         ]);
-        du({
+        fu({
           m: r,
           seqLen0: m,
           wallMs: +q.toFixed(2),
@@ -44083,7 +44138,7 @@ var sn = class _n {
         v.topKBuf.destroy();
       } catch {
       }
-      const { accepted: k, bonus: P, acceptLen: x } = Cn(g, y, a, {
+      const { accepted: k, bonus: P, acceptLen: x } = Nn(g, y, a, {
         probeInvert: s,
         argmaxRow: u
       });
@@ -44174,7 +44229,7 @@ var sn = class _n {
     if (n.eosTokenIds != null) if (typeof n.eosTokenIds == "number") l.add(n.eosTokenIds);
     else for (const g of n.eosTokenIds) l.add(g);
     if (s && !this.prefillReady) throw new Error("generateWithPLD: promptLookup requires prefill operators (verifyTree / executeReplay route through executePrefill)");
-    s && xr(this, "generateWithPLD");
+    s && Pr(this, "generateWithPLD");
     const d = async (g, v) => {
       const y = v * u * 4, k = o.createBuffer({
         size: y,
@@ -44200,7 +44255,7 @@ var sn = class _n {
       await this.executePrefill(r, g);
     } else for (let g = 0; g < r.length; g++)
       o.queue.submit(this.forward(r[g])), g === r.length - 1 && await o.queue.onSubmittedWorkDone();
-    const h = s ? new bi({
+    const h = s ? new vi({
       K: n.K,
       nMax: n.nMax,
       nMin: n.nMin,
@@ -44244,12 +44299,12 @@ var sn = class _n {
         P.topKBuf.destroy();
       } catch {
       }
-      const { accepted: R, bonus: B, acceptLen: G } = Cn(v, x, u, {
+      const { accepted: R, bonus: B, acceptLen: G } = Nn(v, x, u, {
         probeInvert: i,
         argmaxRow: c
       });
       this.specRestore(k), await this.executeReplay([...R, B]), w.acceptedDraftTokens += G, w.bonusTokens++;
-      const q = [...R, B], U = wr(q, a - _.length, l);
+      const q = [...R, B], U = vr(q, a - _.length, l);
       for (let W = 0; W < U.count; W++)
         _.push(q[W]), m.push(q[W]), yield q[W];
       f && U.count > 0 && h.extend(q.slice(0, U.count)), b = U.eosStopped;
@@ -44262,7 +44317,7 @@ var sn = class _n {
     if (n.eosTokenIds != null) if (typeof n.eosTokenIds == "number") l.add(n.eosTokenIds);
     else for (const b of n.eosTokenIds) l.add(b);
     if (s && !this.prefillReady) throw new Error("generateWithANPD: anpd requires prefill operators (verifyTree / executeReplay route through executePrefill)");
-    s && xr(this, "generateWithANPD");
+    s && Pr(this, "generateWithANPD");
     const d = async (b, w) => {
       const g = w * u * 4, v = o.createBuffer({
         size: g,
@@ -44283,7 +44338,7 @@ var sn = class _n {
     if (this.initState(), r.length > 1 && this.prefillReady) await this.executePrefill(r);
     else for (let b = 0; b < r.length; b++)
       o.queue.submit(this.forward(r[b])), b === r.length - 1 && await o.queue.onSubmittedWorkDone();
-    const h = s ? new ju({
+    const h = s ? new Ju({
       K: n.K,
       nMax: n.nMax,
       nMin: n.nMin,
@@ -44329,12 +44384,12 @@ var sn = class _n {
         y.topKBuf.destroy();
       } catch {
       }
-      const { accepted: P, bonus: x, acceptLen: R } = Cn(w, k, u, {
+      const { accepted: P, bonus: x, acceptLen: R } = Nn(w, k, u, {
         probeInvert: i,
         argmaxRow: c
       });
       this.specRestore(v), await this.executeReplay([...P, x]), m.acceptedDraftTokens += R, m.bonusTokens++, h && h.updateMany([...P, x]);
-      const B = [...P, x], G = wr(B, a - p.length, l);
+      const B = [...P, x], G = vr(B, a - p.length, l);
       for (let q = 0; q < G.count; q++)
         p.push(B[q]), f.push(B[q]);
       _ = G.eosStopped;
@@ -44351,7 +44406,7 @@ var sn = class _n {
     if (n.eosTokenIds != null) if (typeof n.eosTokenIds == "number") d.add(n.eosTokenIds);
     else for (const w of n.eosTokenIds) d.add(w);
     if (s && !this.prefillReady) throw new Error("generateWithSuffix: suffix requires prefill operators (verifyTree / executeReplay route through executePrefill)");
-    s && xr(this, "generateWithSuffix");
+    s && Pr(this, "generateWithSuffix");
     const c = async (w, g) => {
       const v = g * l * 4, y = u.createBuffer({
         size: v,
@@ -44372,7 +44427,7 @@ var sn = class _n {
     if (this.initState(), r.length > 1 && this.prefillReady) await this.executePrefill(r);
     else for (let w = 0; w < r.length; w++)
       u.queue.submit(this.forward(r[w])), w === r.length - 1 && await u.queue.onSubmittedWorkDone();
-    const p = s ? new Zu({
+    const p = s ? new tl({
       maxTreeDepth: n.maxTreeDepth,
       maxSpecFactor: n.maxSpecFactor,
       minTokenProb: n.minTokenProb,
@@ -44399,7 +44454,7 @@ var sn = class _n {
       if (s && o) {
         const U = p.draft(_);
         let W = null;
-        if (U !== null && U.tokens.length > 0 && (b.draftsProduced++, W = Ju(U), W.retrievePaths.some((M) => M.length > 0 && W.tokens[M[0]] === w) || (W = null)), W === null) {
+        if (U !== null && U.tokens.length > 0 && (b.draftsProduced++, W = rl(U), W.retrievePaths.some((M) => M.length > 0 && W.tokens[M[0]] === w) || (W = null)), W === null) {
           if (b.fallbackSteps++, f.push(w), _.push(w), p && p.update(w), d.has(w)) {
             m = !0;
             break;
@@ -44447,12 +44502,12 @@ var sn = class _n {
         k.topKBuf.destroy();
       } catch {
       }
-      const { accepted: x, bonus: R, acceptLen: B } = Cn(g, P, l, {
+      const { accepted: x, bonus: R, acceptLen: B } = Nn(g, P, l, {
         probeInvert: i,
         argmaxRow: h
       });
       this.specRestore(y), await this.executeReplay([...x, R]), b.acceptedDraftTokens += B, b.bonusTokens++, p && p.updateMany([...x, R]);
-      const G = [...x, R], q = wr(G, a - f.length, d);
+      const G = [...x, R], q = vr(G, a - f.length, d);
       for (let U = 0; U < q.count; U++)
         f.push(G[U]), _.push(G[U]);
       m = q.eosStopped;
@@ -44468,7 +44523,7 @@ var sn = class _n {
       this._tqSharedBufs = null;
     }
     for (const t of this.blocks) t.destroy();
-    Xn.releaseDevicePools(this.device), St.release(this.device), this.specStateManager && this.specStateManager.destroy();
+    Jn.releaseDevicePools(this.device), bt.release(this.device), this.specStateManager && this.specStateManager.destroy();
   }
 };
 var Pn = Object.freeze([
@@ -44521,16 +44576,16 @@ var Pn = Object.freeze([
     maxSeq: 512,
     loadVision: !1
   })
-]), tr = Object.freeze({
+]), nr = Object.freeze({
   f32: "exact",
   f16: "R",
   kivi: "C"
-}), Pl = (() => {
-  const e = Pn.findIndex((t) => tr[t.kvMode] === "C");
+}), Al = (() => {
+  const e = Pn.findIndex((t) => nr[t.kvMode] === "C");
   return e === -1 ? 6 : e - 1;
 })();
-function Bl() {
-  const e = Pl, t = e + 1 <= 6 ? Pn[e + 1] : null, n = Pn.slice(0, e + 1).map((a) => `${a.kvMode} KV`).join(", "), r = t ? `rung ${t.rung} (${t.kvMode === "kivi" ? "4-bit KIVI" : t.kvMode} KV)` : "the next rung";
+function Tl() {
+  const e = Al, t = e + 1 <= 6 ? Pn[e + 1] : null, n = Pn.slice(0, e + 1).map((a) => `${a.kvMode} KV`).join(", "), r = t ? `rung ${t.rung} (${t.kvMode === "kivi" ? "4-bit KIVI" : t.kvMode} KV)` : "the next rung";
   return {
     rung: e,
     code: "compressed-kv-refused",
@@ -44538,7 +44593,7 @@ function Bl() {
     suggestion: `The model did not fit with an uncompressed KV cache (${n}), and allowCompressedKV: false refuses the next rung, ${r}. Free GPU memory (close other tabs or apps), load a smaller model, or allow compressed KV.`
   };
 }
-function rr(e) {
+function ar(e) {
   if (!Number.isInteger(e)) throw new RangeError(`buildPlan: rung must be an integer, got ${e} (${typeof e})`);
   if (e < 0 || e > 6) throw new RangeError(`buildPlan: rung=${e} out of range [0, 6]`);
   const t = Pn[e];
@@ -44550,24 +44605,24 @@ function rr(e) {
     loadVision: t.loadVision
   });
 }
-function yt(e) {
+function St(e) {
   if (!e || typeof e != "object") throw new TypeError(`rungLabel: plan must be an object, got ${typeof e}`);
   const t = e.weightQuant === "q4" ? "Q4" : e.weightQuant === "q3-mlp" ? "Q3-MLP" : e.weightQuant === "q3-all" ? "Q3-ALL" : `?(${e.weightQuant})`, n = e.kvMode === "f32" ? "f32 KV" : e.kvMode === "f16" ? "f16 KV" : e.kvMode === "kivi" ? "KIVI KV" : `?KV(${e.kvMode})`, r = e.loadVision ? "vision" : "no-vision";
   return `rung ${e.rung}: ${t} + ${n} + maxSeq=${e.maxSeq} + ${r}`;
 }
-function El(e, t) {
+function Ml(e, t) {
   if (!e || !t) throw new TypeError("degradeSummary: fromPlan and toPlan are required");
   const n = [];
   return e.weightQuant !== t.weightQuant && n.push(`Weight quant: ${e.weightQuant} → ${t.weightQuant}`), e.kvMode !== t.kvMode && n.push(`KV mode: ${e.kvMode} → ${t.kvMode}`), e.maxSeq !== t.maxSeq && n.push(`Reduced context from ${e.maxSeq} → ${t.maxSeq} tokens`), e.loadVision !== t.loadVision && n.push(t.loadVision ? "Vision tower re-enabled" : "Vision tower disabled"), n.length === 0 ? "No change" : n.join("; ");
 }
-function ql(e) {
+function Gl(e) {
   if (!e || typeof e != "object") throw new TypeError(`assertCanonicalPlan: plan must be an object, got ${typeof e}`);
   if (!Number.isInteger(e.rung) || e.rung < 0 || e.rung > 6) throw new RangeError(`assertCanonicalPlan: plan.rung=${e.rung} not in [0, 6]`);
   const t = Pn[e.rung];
   if (e.weightQuant !== t.weightQuant || e.kvMode !== t.kvMode || e.maxSeq !== t.maxSeq || e.loadVision !== t.loadVision) throw new RangeError(`assertCanonicalPlan: plan rung=${e.rung} drifted from canonical: got {weightQuant:'${e.weightQuant}', kvMode:'${e.kvMode}', maxSeq:${e.maxSeq}, loadVision:${e.loadVision}}, expected {weightQuant:'${t.weightQuant}', kvMode:'${t.kvMode}', maxSeq:${t.maxSeq}, loadVision:${t.loadVision}}`);
   return t;
 }
-function Xr(e, t, n, r = 32) {
+function Jr(e, t, n, r = 32) {
   if (!Number.isInteger(e) || e < 0) throw new Error(`planShards: totalRows must be a non-negative integer (got ${e})`);
   if (!Number.isInteger(t) || t <= 0) throw new Error(`planShards: rowBytes must be a positive integer (got ${t})`);
   if (!Number.isInteger(n) || n <= 0) throw new Error(`planShards: ceilingBytes must be a positive integer (got ${n})`);
@@ -44594,7 +44649,7 @@ function Xr(e, t, n, r = 32) {
     ranges: Object.freeze(o)
   });
 }
-function Al(e, t, n) {
+function Ll(e, t, n) {
   if (!Number.isInteger(e) || e <= 0) throw new Error(`computeNAxisShardCols: K must be a positive integer (got ${e})`);
   if (!Number.isInteger(t) || t <= 0) throw new Error(`computeNAxisShardCols: N must be a positive integer (got ${t})`);
   if (t % 32 !== 0) throw new Error(`computeNAxisShardCols: N=${t} must be a multiple of 32 (Q4 block size)`);
@@ -44606,12 +44661,12 @@ function Al(e, t, n) {
   for (let o = 0; o < s - 1; o++) i[o] = a;
   return i[s - 1] = t - a * (s - 1), i;
 }
-var ar = class extends Error {
+var sr = class extends Error {
   constructor(e, t) {
     super(e), this.name = "BindingLimitExceededError", this.code = "binding-limit-exceeded", Object.assign(this, t || {});
   }
 };
-function Tl(e, t = 256) {
+function Ul(e, t = 256) {
   if (!Number.isInteger(e) || e <= 0) throw new Error(`vAxisRowAlignment: rowBytes must be a positive integer (got ${e})`);
   const n = Number.isInteger(t) && t > 0 ? t : 256;
   let r = 32;
@@ -44619,7 +44674,7 @@ function Tl(e, t = 256) {
     if (r *= 2, r > 1 << 20) throw new Error(`vAxisRowAlignment: no row alignment ≤ 2^20 satisfies offsetAlign=${n} at rowBytes=${e}`);
   return r;
 }
-function Ml(e, t, n, r = {}) {
+function Rl(e, t, n, r = {}) {
   if (!Number.isInteger(e) || e <= 0) throw new Error(`planVAxisBindingShards: V must be a positive integer (got ${e})`);
   if (!Number.isInteger(t) || t <= 0 || t % 32 !== 0) throw new Error(`planVAxisBindingShards: H must be a positive multiple of 32 (got ${t})`);
   if (!Number.isFinite(n) || n <= 0) throw new Error(`planVAxisBindingShards: bindLimit must be positive (got ${n})`);
@@ -44641,8 +44696,8 @@ function Ml(e, t, n, r = {}) {
       byteSize: u
     })])
   });
-  const d = Tl(o, s), c = Math.floor(Math.floor(a / o) / d) * d;
-  if (c <= 0) throw new ar(`maxStorageBufferBindingSize=${a} B cannot hold even ${d} rows of a [V=${e}, H=${t}] Q4 table (${d * o} B needed). This device cannot host this tier's tied embed/lm_head table; use a smaller hidden size or a lower-bit format.`, {
+  const d = Ul(o, s), c = Math.floor(Math.floor(a / o) / d) * d;
+  if (c <= 0) throw new sr(`maxStorageBufferBindingSize=${a} B cannot hold even ${d} rows of a [V=${e}, H=${t}] Q4 table (${d * o} B needed). This device cannot host this tier's tied embed/lm_head table; use a smaller hidden size or a lower-bit format.`, {
     V: e,
     H: t,
     rowBytes: o,
@@ -44652,7 +44707,7 @@ function Ml(e, t, n, r = {}) {
     code: "binding-limit-exceeded"
   });
   const h = Math.ceil(e / c);
-  if (h > i) throw new ar(`[V=${e}, H=${t}] Q4 tied table is ${u} B and would need ${h} binding shards under maxStorageBufferBindingSize=${a} B (cap ${i}). Refusing: past the cap the per-token dispatch cost stops being free.`, {
+  if (h > i) throw new sr(`[V=${e}, H=${t}] Q4 tied table is ${u} B and would need ${h} binding shards under maxStorageBufferBindingSize=${a} B (cap ${i}). Refusing: past the cap the per-token dispatch cost stops being free.`, {
     V: e,
     H: t,
     rowBytes: o,
@@ -44680,9 +44735,9 @@ function Ml(e, t, n, r = {}) {
     ranges: Object.freeze(p)
   });
 }
-var Ja = class yi {
+var es = class xi {
   static plan(t, n, r, a = 32) {
-    return Xr(t, n, r, a);
+    return Jr(t, n, r, a);
   }
   static upload(t, n, r, a, s, i = {}) {
     if (!(n instanceof Uint32Array)) throw new Error("ShardedBuffer.upload: u32 must be a Uint32Array");
@@ -44693,7 +44748,7 @@ var Ja = class yi {
     if (!Number.isInteger(o) || o <= 0) throw new Error(`ShardedBuffer.upload: alignment must be positive integer (got ${o})`);
     const u = r * a;
     if (n.length !== u) throw new Error(`ShardedBuffer.upload: u32.length=${n.length} != totalRows × rowBytesU32 = ${r} × ${a} = ${u}`);
-    const l = i.label ?? "sharded_q4", d = Xr(r, a * 4, s, o);
+    const l = i.label ?? "sharded_q4", d = Jr(r, a * 4, s, o);
     if (d.numShards <= 1) {
       const h = t.createBuffer({
         size: n.byteLength,
@@ -44756,7 +44811,7 @@ var Ja = class yi {
     return u;
   }
   static uploadNAxis(t, n, r, a, s, i = {}) {
-    const o = yi.splitQ4ByNAxis(n, r, a, s), u = i.label ?? "nshard_q4", l = Object.freeze(s.slice()), d = [];
+    const o = xi.splitQ4ByNAxis(n, r, a, s), u = i.label ?? "nshard_q4", l = Object.freeze(s.slice()), d = [];
     for (let h = 0; h < o.length; h++) {
       const p = o[h];
       o[h] = null;
@@ -44797,31 +44852,31 @@ var Ja = class yi {
     }
   }
 };
-function Gl(e) {
+function Cl(e) {
   if (e == null) return {
     plan: null,
     accepted: !1
   };
-  const t = ql(e);
+  const t = Gl(e);
   if (t.weightQuant === "q4") return {
     plan: t,
     accepted: !0
   };
-  throw t.weightQuant === "q3-mlp" ? new Nr(Ra.Q3_MLP_NOT_PROVISIONED, `loadWeightsQ4: rung ${t.rung} requests weightQuant="q3-mlp" but the Q3-MLP routing is not shipped yet (blocked on BUILD-B3-LOADER-A2/A3 — see docs/papers/graceful_allocation_degrade_design.md §8). Worker rung-loop should advance to the next rung.`, {
+  throw t.weightQuant === "q3-mlp" ? new Or(Ca.Q3_MLP_NOT_PROVISIONED, `loadWeightsQ4: rung ${t.rung} requests weightQuant="q3-mlp" but the Q3-MLP routing is not shipped yet (blocked on BUILD-B3-LOADER-A2/A3 — see docs/papers/graceful_allocation_degrade_design.md §8). Worker rung-loop should advance to the next rung.`, {
     rung: t.rung,
     weightQuant: t.weightQuant
-  }) : new Nr(Ra.Q3_ALL_NOT_ALLOWED, `loadWeightsQ4: rung ${t.rung} requests weightQuant="${t.weightQuant}" which the loader does not recognize`, {
+  }) : new Or(Ca.Q3_ALL_NOT_ALLOWED, `loadWeightsQ4: rung ${t.rung} requests weightQuant="${t.weightQuant}" which the loader does not recognize`, {
     rung: t.rung,
     weightQuant: t.weightQuant
   });
 }
-var sr = Object.freeze({
+var ir = Object.freeze({
   enabled: !0,
   alpha: 0.25,
   srcLayer: 19,
   targetLayer: 23
-}), Si = Object.freeze({ enabled: !1 });
-function Ll(e, t, n, r) {
+}), Pi = Object.freeze({ enabled: !1 });
+function Nl(e, t, n, r) {
   if (!r || r.enabled === !1) return {
     applied: !1,
     reason: "disabled"
@@ -44830,7 +44885,7 @@ function Ll(e, t, n, r) {
   if (i && o) throw new Error("l23GammaFix: provide either targetLayer (scalar) or targetLayers (array), not both");
   if (!i && !o) throw new Error("l23GammaFix: must provide targetLayer (scalar) or targetLayers (array)");
   const u = o, l = u ? r.targetLayers : [r.targetLayer];
-  if (r === sr && !u && (s >= n.numLayers || r.targetLayer >= n.numLayers)) return {
+  if (r === ir && !u && (s >= n.numLayers || r.targetLayer >= n.numLayers)) return {
     applied: !1,
     reason: `model-too-small (numLayers=${n.numLayers}; default srcLayer=${s}, targetLayer=${r.targetLayer})`
   };
@@ -44880,30 +44935,30 @@ function Ll(e, t, n, r) {
     gammaDeltaL2: _
   };
 }
-function Ul(e) {
-  if (e === void 0) return Si;
-  if (e === !0) return sr;
+function Ol(e) {
+  if (e === void 0) return Pi;
+  if (e === !0) return ir;
   if (e === null || e === !1) return { enabled: !1 };
   const t = {
-    ...sr,
+    ...ir,
     ...e
   };
   return Array.isArray(e.targetLayers) && delete t.targetLayer, t;
 }
-var es = "mentria-kaxis-dp4a-v1", On = "Q4_KAXIS_DP4A", pn = 32, Rl = 160;
-function ts(e, t) {
+var ts = "mentria-kaxis-dp4a-v1", In = "Q4_KAXIS_DP4A", pn = 32, Il = 160;
+function ns(e, t) {
   if (!Number.isInteger(e) || !Number.isInteger(t) || e <= 0 || t <= 0) throw new Error(`kaxisDP4AExpectedU32: K=${e}, N=${t} must be positive integers`);
   if (e % pn !== 0 || t % pn !== 0) throw new Error(`kaxisDP4AExpectedU32: K=${e}, N=${t} must both be multiples of ${pn}`);
-  return e / pn * (t / pn) * Rl;
+  return e / pn * (t / pn) * Il;
 }
-function Cl(e, t, n, r = {}) {
+function Dl(e, t, n, r = {}) {
   if (t == null) return {
     loaded: !1,
     reason: "companion-not-supplied"
   };
   const a = r.onProgress || (() => {
   }), s = t.metadata;
-  if (!s || s.format !== es) throw new Error(`loadKaxisDP4ACompanion: expected metadata.format="${es}", got "${s?.format}"`);
+  if (!s || s.format !== ts) throw new Error(`loadKaxisDP4ACompanion: expected metadata.format="${ts}", got "${s?.format}"`);
   let i, o;
   try {
     i = JSON.parse(s.attn_layers);
@@ -44957,8 +45012,8 @@ function Cl(e, t, n, r = {}) {
       const P = `layers.${b}.attn.${k}`;
       if (!t.hasTensor(P)) throw new Error(`loadKaxisDP4ACompanion: missing tensor "${P}"`);
       const x = t.tensorInfo(P);
-      if (x.dtype !== On) throw new Error(`loadKaxisDP4ACompanion: tensor "${P}" has dtype "${x.dtype}", expected "${On}"`);
-      const { K: R, N: B } = v[k], G = ts(R, B), q = t.getTensor(P);
+      if (x.dtype !== In) throw new Error(`loadKaxisDP4ACompanion: tensor "${P}" has dtype "${x.dtype}", expected "${In}"`);
+      const { K: R, N: B } = v[k], G = ns(R, B), q = t.getTensor(P);
       if (q.length !== G) throw new Error(`loadKaxisDP4ACompanion: tensor "${P}" has ${q.length} u32 but expected ${G} for [K=${R}, N=${B}]`);
       const U = e.createBuffer({
         size: q.byteLength,
@@ -45003,8 +45058,8 @@ function Cl(e, t, n, r = {}) {
         const B = `layers.${v}.mlp.${R}`;
         if (!t.hasTensor(B)) throw new Error(`loadKaxisDP4ACompanion: missing tensor "${B}"`);
         const G = t.tensorInfo(B);
-        if (G.dtype !== On) throw new Error(`loadKaxisDP4ACompanion: tensor "${B}" has dtype "${G.dtype}", expected "${On}"`);
-        const { K: q, N: U } = P[R], W = ts(q, U), $ = t.getTensor(B);
+        if (G.dtype !== In) throw new Error(`loadKaxisDP4ACompanion: tensor "${B}" has dtype "${G.dtype}", expected "${In}"`);
+        const { K: q, N: U } = P[R], W = ns(q, U), $ = t.getTensor(B);
         if ($.length !== W) throw new Error(`loadKaxisDP4ACompanion: tensor "${B}" has ${$.length} u32 but expected ${W} for [K=${q}, N=${U}]`);
         const S = e.createBuffer({
           size: $.byteLength,
@@ -45031,11 +45086,11 @@ function Cl(e, t, n, r = {}) {
     mlpTotalBytes: m
   };
 }
-function Nl(e, t, n, r = {}) {
-  const a = Gl(r.plan), s = r.useShardedWeights === !0, i = r.shardingCeiling, o = Number.isFinite(i) && i > 0 ? Math.floor(i) : 0;
+function Kl(e, t, n, r = {}) {
+  const a = Cl(r.plan), s = r.useShardedWeights === !0, i = r.shardingCeiling, o = Number.isFinite(i) && i > 0 ? Math.floor(i) : 0;
   if (s && o <= 0) throw new Error(`loadWeightsQ4: useShardedWeights=true requires a positive shardingCeiling (got ${i})`);
   const u = Array.isArray(t) ? t : [t], l = r.onProgress || (() => {
-  }), d = Ul(r.l23GammaFix), c = Dl(u);
+  }), d = Ol(r.l23GammaFix), c = Fl(u);
   if (c.q4BlockLayout === "nk_t") {
     const K = n && n.operators && n.operators.vecmatQ4;
     if (K) {
@@ -45052,10 +45107,10 @@ function Nl(e, t, n, r = {}) {
       K.q4BlockLayout = "nk_t";
     }
   }
-  const h = Ol(u), p = Il(u), f = r.allowTiedEmbed === !0;
+  const h = Wl(u), p = zl(u), f = r.allowTiedEmbed === !0;
   if (p && !f) throw new Error("loadWeightsQ4: bundle declares tied_embed_lm_head=true (offline BUILD-TIED-EMBED-A produced via `tools/convert_q4.py --tied-embed-q4`) but the runtime tied-storage path is not yet wired. The next BUILD rung (BUILD-TIED-EMBED-C, see docs/papers/tied_embed_lm_head_q4_sharing_design.md §8) will add the loader branch that derives lm_head from embed_tokens. Until then, regenerate the bundle WITHOUT the --tied-embed-q4 flag, or pass options.allowTiedEmbed=true to opt into the tied path.");
   if (p && f && s) throw new Error("loadWeightsQ4: allowTiedEmbed=true is not yet supported alongside useShardedWeights=true. The tied path produces a single Q4 buffer; the sharding policy expects independent embed_tokens / lm_head shard records. Sharded-tied composition is a follow-up rung.");
-  const _ = Kl(u);
+  const _ = $l(u);
   let m = 0, b = 256;
   try {
     m = Number(e?.limits?.maxStorageBufferBindingSize) || 0, b = Number(e?.limits?.minStorageBufferOffsetAlignment) || 256;
@@ -45084,12 +45139,12 @@ function Nl(e, t, n, r = {}) {
     }
     if (p && f) {
       const H = n.vocabSize, D = n.hiddenSize, j = _.get("embed_tokens")?.file?.tensorInfo("embed_tokens")?.shape;
-      if (Array.isArray(j) && (j[1] !== D || j[0] < H)) throw new ar(`loadWeightsQ4: embed_tokens is [${j[0]}, ${j[1]}] but the model is [V=${H}, H=${D}]; refusing to plan binding windows against mismatched geometry (byte offsets would silently address the wrong rows).`, {
+      if (Array.isArray(j) && (j[1] !== D || j[0] < H)) throw new sr(`loadWeightsQ4: embed_tokens is [${j[0]}, ${j[1]}] but the model is [V=${H}, H=${D}]; refusing to plan binding windows against mismatched geometry (byte offsets would silently address the wrong rows).`, {
         shape: j,
         vocabSize: H,
         hiddenSize: D
       });
-      const ae = Ml(H, D, m, { offsetAlign: b });
+      const ae = Rl(H, D, m, { offsetAlign: b });
       w.tied = {
         name: "embed_tokens",
         V: H,
@@ -45102,7 +45157,7 @@ function Nl(e, t, n, r = {}) {
       }, ae.needed && (w.windows = ae.ranges, console.warn(`[weight_loader_q4] s1901: tied embed/lm_head table is ${ae.totalBytes} B (${(ae.totalBytes / 1048576).toFixed(1)} MiB) but this adapter's maxStorageBufferBindingSize is ${m} B (${(m / 1048576).toFixed(0)} MiB). Binding it whole would be a silent validation failure (all-zero logits ⇒ token id 0 forever). Splitting into ${ae.numShards} V-axis binding windows of ${ae.ranges.map((ie) => ie.rows).join("/")} rows.`));
     }
     const K = w.overLimit.filter((H) => !(p && f && (H.name === "embed_tokens" || H.name === "lm_head")));
-    if (K.length > 0) throw new ar(`loadWeightsQ4: ${K.length} tensor(s) exceed this adapter's maxStorageBufferBindingSize=${m} B and cannot be bound: ` + K.map((H) => `${H.name} (${H.bytes} B)`).join(", ") + ". Binding them anyway is a non-throwing WebGPU validation failure that produces all-zero output, so the load is refused instead.", {
+    if (K.length > 0) throw new sr(`loadWeightsQ4: ${K.length} tensor(s) exceed this adapter's maxStorageBufferBindingSize=${m} B and cannot be bound: ` + K.map((H) => `${H.name} (${H.bytes} B)`).join(", ") + ". Binding them anyway is a non-throwing WebGPU validation failure that produces all-zero output, so the load is refused instead.", {
       limit: m,
       tensors: K
     });
@@ -45121,14 +45176,14 @@ function Nl(e, t, n, r = {}) {
     const ae = j[0] | 0, ie = j[1] | 0;
     if (ae <= 0 || ie <= 0 || ie % 32 !== 0) throw new Error(`loadWeightsQ4: tensor "${K}" shape ${JSON.stringify(j)} not Q4-shardable (dim0>0, dim1>0, dim1%%32==0 required)`);
     if (K === "embed_tokens") {
-      const le = ae, Z = ie / 32 * 5, te = Z * 4, ne = Xr(le, te, o, 32);
+      const le = ae, Z = ie / 32 * 5, te = Z * 4, ne = Jr(le, te, o, 32);
       if (g.embedTokens = {
         tensor: "embed_tokens",
         kind: "row-axis",
         totalRows: le,
         rowBytesU32: Z,
         numShards: ne.numShards
-      }, ne.numShards >= 3) throw new Zn(mr.SHARDED_LOAD_NOT_YET_WIRED, `loadWeightsQ4: tensor "embed_tokens" would shard into ${ne.numShards} buffers (totalRows=${le}, rowBytes=${te}, ceiling=${o}). D-v.2 (embedding op consumer) supports exactly 2 shards; numShards=${ne.numShards} exceeds operator capacity.`, {
+      }, ne.numShards >= 3) throw new Xn(gr.SHARDED_LOAD_NOT_YET_WIRED, `loadWeightsQ4: tensor "embed_tokens" would shard into ${ne.numShards} buffers (totalRows=${le}, rowBytes=${te}, ceiling=${o}). D-v.2 (embedding op consumer) supports exactly 2 shards; numShards=${ne.numShards} exceeds operator capacity.`, {
         tensor: "embed_tokens",
         numShards: ne.numShards,
         totalRows: le,
@@ -45138,9 +45193,9 @@ function Nl(e, t, n, r = {}) {
       const le = ae, Z = ie;
       let te;
       try {
-        te = Al(le, Z, o);
+        te = Ll(le, Z, o);
       } catch (ue) {
-        throw new Zn(mr.LM_HEAD_TOO_FRAGMENTED, `loadWeightsQ4: tensor "lm_head" ceiling=${o} cannot hold one 64-col Q4 block at K=${le} (${ue.message}). Device too memory-constrained for Qwen3.5-0.8B production config; consider Q3 quantization downgrade or smaller model.`, {
+        throw new Xn(gr.LM_HEAD_TOO_FRAGMENTED, `loadWeightsQ4: tensor "lm_head" ceiling=${o} cannot hold one 64-col Q4 block at K=${le} (${ue.message}). Device too memory-constrained for Qwen3.5-0.8B production config; consider Q3 quantization downgrade or smaller model.`, {
           tensor: "lm_head",
           K: le,
           N: Z,
@@ -45158,7 +45213,7 @@ function Nl(e, t, n, r = {}) {
         numShards: ne,
         totalRows: le,
         rowBytesU32: Z / 32 * 5
-      }, ne > 8) throw new Zn(mr.LM_HEAD_TOO_FRAGMENTED, `loadWeightsQ4: tensor "lm_head" would shard into ${ne} N-axis buffers (K=${le}, N=${Z}, ceiling=${o}, max=8). Device too memory-constrained for Qwen3.5-0.8B production config; consider Q3 quantization downgrade or smaller model.`, {
+      }, ne > 8) throw new Xn(gr.LM_HEAD_TOO_FRAGMENTED, `loadWeightsQ4: tensor "lm_head" would shard into ${ne} N-axis buffers (K=${le}, N=${Z}, ceiling=${o}, max=8). Device too memory-constrained for Qwen3.5-0.8B production config; consider Q3 quantization downgrade or smaller model.`, {
         tensor: "lm_head",
         numShards: ne,
         K: le,
@@ -45170,7 +45225,7 @@ function Nl(e, t, n, r = {}) {
     }
   }
   let v = 0, y = 0, k = 0, P = 0, x = 0;
-  const R = Wl(n, { finalNormFused: h.fused }), B = [];
+  const R = Vl(n, { finalNormFused: h.fused }), B = [];
   function G(K) {
     const H = _.get(K);
     if (!H) throw new Error(`Missing Q4 tensor: "${K}"`);
@@ -45194,12 +45249,12 @@ function Nl(e, t, n, r = {}) {
   }
   function W(K, H, D) {
     if (!s || !D) return U(K, H);
-    const j = Ja.upload(e, K, D.totalRows, D.rowBytesU32, o, { label: H }), ae = K.length / 5 * 32;
+    const j = es.upload(e, K, D.totalRows, D.rowBytesU32, o, { label: H }), ae = K.length / 5 * 32;
     return v += ae, P += K.byteLength, x++, l(x, R), j;
   }
   function $(K, H, D) {
     if (!D || D.numShards === 1) return U(K, H);
-    const j = Ja.uploadNAxis(e, K, D.K, D.N, D.shardCols, { label: H }), ae = K.length / 5 * 32;
+    const j = es.uploadNAxis(e, K, D.K, D.N, D.shardCols, { label: H }), ae = K.length / 5 * 32;
     return v += ae, P += K.byteLength, x++, l(x, R), j;
   }
   function S(K, H) {
@@ -45293,13 +45348,13 @@ function Nl(e, t, n, r = {}) {
       });
     }
   }
-  const se = d === Si ? {
+  const se = d === Pi ? {
     applied: !1,
     reason: "default-off (pass l23GammaFix: true for the S681 patch)"
-  } : d === sr && (n.numLayers !== 24 || n.hiddenSize !== 1024) ? {
+  } : d === ir && (n.numLayers !== 24 || n.hiddenSize !== 1024) ? {
     applied: !1,
     reason: `skipped: 0.8B-specific fix, model is ${n.numLayers}L/h${n.hiddenSize}`
-  } : Ll(e, G, n, d), J = Cl(e, r.kaxisDP4ACompanion ?? null, n);
+  } : Nl(e, G, n, d), J = Dl(e, r.kaxisDP4ACompanion ?? null, n);
   return {
     totalQ4Elements: v,
     totalF32Elements: y,
@@ -45333,7 +45388,7 @@ function Nl(e, t, n, r = {}) {
     }
   };
 }
-function Ol(e) {
+function Wl(e) {
   for (const t of e) {
     const n = t.metadata;
     if (n && n.fused_final_norm === "true") {
@@ -45350,7 +45405,7 @@ function Ol(e) {
     eps: null
   };
 }
-function Il(e) {
+function zl(e) {
   for (const t of e) {
     const n = t.metadata;
     if (n && n.tied_embed_lm_head === "true")
@@ -45358,7 +45413,7 @@ function Il(e) {
   }
   return !1;
 }
-function Dl(e) {
+function Fl(e) {
   let t = "kn";
   for (const r of e) {
     const a = r.metadata && r.metadata.q4_block_layout;
@@ -45447,7 +45502,7 @@ function Dl(e) {
     gateUpBlockLayout: n
   };
 }
-function Kl(e) {
+function $l(e) {
   const t = /* @__PURE__ */ new Map();
   for (const n of e) for (const r of n.tensorNames()) t.set(r, {
     file: n,
@@ -45455,13 +45510,13 @@ function Kl(e) {
   });
   return t;
 }
-function Wl(e, t = {}) {
+function Vl(e, t = {}) {
   let n = t.finalNormFused ? 2 : 3;
   for (let r = 0; r < e.numLayers; r++)
     n += 5, e.blocks[r].layerType === "attention" ? n += 6 : n += 7;
   return n;
 }
-function zl(e, t, n, r = {}) {
+function Hl(e, t, n, r = {}) {
   const a = Array.isArray(t) ? t : [t], s = r.onProgress || (() => {
   }), i = r.streamed || null, o = r.weightUpload === "writeBuffer" ? "writeBuffer" : null, u = i ? i.metadata || {} : a[0] && a[0].metadata || {}, l = {
     "mentria-q2g128-v1": "Q2G128",
@@ -45661,31 +45716,31 @@ function zl(e, t, n, r = {}) {
     totalBytes: f
   };
 }
-var Fl = Object.freeze({
+var Ql = Object.freeze({
   split: "matmul_q1g128_vecmat_v14b_split.wgsl",
   reduce: "matvec_partial_reduce.wgsl"
-}), Jr = Object.freeze([
+}), ea = Object.freeze([
   1,
   2,
   4,
   8
-]), ns = Object.freeze([
+]), rs = Object.freeze([
   "off",
   "ksplit",
   "nsplit"
-]), $l = 8, In = 8, Vl = 32, Mt = (e, t) => Math.ceil(e / t);
-function Hl(e = {}) {
+]), jl = 8, Dn = 8, Yl = 32, Mt = (e, t) => Math.ceil(e / t);
+function Zl(e = {}) {
   const t = Number.isInteger(e.maxWorkgroupsPerDim) && e.maxWorkgroupsPerDim > 0 ? e.maxWorkgroupsPerDim : 65535;
   if (Number.isInteger(e.targetWgs) && e.targetWgs > 0) return Math.min(e.targetWgs, t);
   const n = Number.isInteger(e.subgroupWidth) && e.subgroupWidth > 0 ? e.subgroupWidth : 32, r = e.likelyIntegratedGpu ? 2 : 8;
   return Math.min(r * n, t);
 }
-function Ql(e = {}) {
+function Xl(e = {}) {
   const t = e.mode || "off";
-  if (!ns.includes(t)) throw new Error(`q1Matvec: unknown mode "${t}" (expected ${ns.join("|")})`);
+  if (!rs.includes(t)) throw new Error(`q1Matvec: unknown mode "${t}" (expected ${rs.join("|")})`);
   let n = null;
-  if (e.bands !== void 0 && e.bands !== null && e.bands !== "auto" && (n = Number(e.bands), !Jr.includes(n)))
-    throw new Error(`q1MatvecBands: must be one of ${Jr.join("|")}, got ${e.bands}`);
+  if (e.bands !== void 0 && e.bands !== null && e.bands !== "auto" && (n = Number(e.bands), !ea.includes(n)))
+    throw new Error(`q1MatvecBands: must be one of ${ea.join("|")}, got ${e.bands}`);
   let r = null;
   if (e.ksplit !== void 0 && e.ksplit !== null && e.ksplit !== "auto" && (r = Number(e.ksplit), !Number.isInteger(r) || r < 1))
     throw new Error(`q1MatvecKsplit: must be an integer >= 1, got ${e.ksplit}`);
@@ -45696,23 +45751,23 @@ function Ql(e = {}) {
     ksplit: r,
     subgroupWidth: a,
     maxWorkgroupsPerDim: Number.isInteger(e.maxWorkgroupsPerDim) && e.maxWorkgroupsPerDim > 0 ? e.maxWorkgroupsPerDim : 65535,
-    targetWgs: Hl(e),
+    targetWgs: Zl(e),
     targetSource: Number.isInteger(e.targetWgs) && e.targetWgs > 0 ? "override" : "auto"
   };
 }
-function jl(e, t, n) {
+function Jl(e, t, n) {
   if (!n || n.mode === "off") return null;
-  const r = Mt(e, $l), a = Mt(t >> 5, Vl), s = Mt(r, In);
+  const r = Mt(e, jl), a = Mt(t >> 5, Yl), s = Mt(r, Dn);
   let i;
   if (n.bands !== null) i = n.bands;
   else if (n.mode === "nsplit")
-    for (i = In; i > 1 && Mt(r, i) < n.targetWgs; ) i >>= 1;
-  else i = In;
+    for (i = Dn; i > 1 && Mt(r, i) < n.targetWgs; ) i >>= 1;
+  else i = Dn;
   const o = Mt(r, i);
   let u = 1;
   n.mode === "ksplit" && (u = n.ksplit !== null ? n.ksplit : Math.max(1, Mt(n.targetWgs, o)), u = Math.min(u, a));
   const l = u > 1 ? Mt(a, u) : 0;
-  if (u > 1 && (u = Mt(a, l)), u <= 1 && i === In) return null;
+  if (u > 1 && (u = Mt(a, l)), u <= 1 && i === Dn) return null;
   const d = n.maxWorkgroupsPerDim || 65535;
   return o > d || u > d || Mt(e, 256) > d ? null : {
     bands: i,
@@ -45724,7 +45779,7 @@ function jl(e, t, n) {
     exact: u <= 1
   };
 }
-var Jf = Object.freeze([
+var s_ = Object.freeze([
   {
     name: "attn q_proj (gated)",
     N: 12288,
@@ -45792,7 +45847,7 @@ var Jf = Object.freeze([
     per: 1
   }
 ]);
-async function Yl(e, t, n = {}) {
+async function ed(e, t, n = {}) {
   const r = typeof performance < "u" ? performance.now() : Date.now(), a = (u, l) => {
     try {
       n.onFallback && n.onFallback("q1-matvec-split", u, String(l));
@@ -45809,7 +45864,7 @@ async function Yl(e, t, n = {}) {
   if (!s.v14bPipeline) return a("no-v14b", "v14b decode route is not active — split route needs it");
   let i;
   try {
-    i = Ql(n);
+    i = Xl(n);
   } catch (u) {
     return a("bad-flag", u.message);
   }
@@ -45820,7 +45875,7 @@ async function Yl(e, t, n = {}) {
   };
   try {
     const u = {};
-    for (const [l, d] of Object.entries(Fl))
+    for (const [l, d] of Object.entries(Ql))
       if (u[l] = n.shaders && n.shaders[d] || (n.fetchShader ? await n.fetchShader(d) : null), !u[l]) throw new Error(`missing shader source: ${d}`);
     s.enableQ1Split(u.split, u.reduce, i);
   } catch (u) {
@@ -45831,9 +45886,9 @@ async function Yl(e, t, n = {}) {
     return a("build-failed", u.message);
   }
   const o = (typeof performance < "u" ? performance.now() : Date.now()) - r;
-  return Object.assign(xi(t), { buildMs: Number(o.toFixed(1)) });
+  return Object.assign(Bi(t), { buildMs: Number(o.toFixed(1)) });
 }
-function xi(e) {
+function Bi(e) {
   const t = e && e.vecmatQ2G128, n = t && t.q1Split;
   if (!n) return null;
   const r = {};
@@ -45856,31 +45911,31 @@ function xi(e) {
     shapes: r
   };
 }
-var Zl = Object.freeze({ band: "matmul_q1g128_vecmat_v14b_band.wgsl" }), rs = Object.freeze([
+var td = Object.freeze({ band: "matmul_q1g128_vecmat_v14b_band.wgsl" }), as = Object.freeze([
   8,
   16,
   32
-]), as = Object.freeze(["select", "xor"]), ss = Object.freeze(["off", "norm"]), Et = 8, ea = 8, Pr = (e, t) => Math.ceil(e / t);
-function Xl(e = {}) {
+]), ss = Object.freeze(["select", "xor"]), is = Object.freeze(["off", "norm"]), Et = 8, ta = 8, Br = (e, t) => Math.ceil(e / t);
+function nd(e = {}) {
   const t = e.rows === void 0 || e.rows === null || e.rows === "auto" ? Et : Number(e.rows);
-  if (!rs.includes(t)) throw new Error(`q1Band: must be one of ${rs.join("|")}, got ${e.rows}`);
+  if (!as.includes(t)) throw new Error(`q1Band: must be one of ${as.join("|")}, got ${e.rows}`);
   const n = e.sd === void 0 || e.sd === null ? "select" : String(e.sd);
-  if (!as.includes(n)) throw new Error(`q1BandSd: must be one of ${as.join("|")}, got ${e.sd}`);
+  if (!ss.includes(n)) throw new Error(`q1BandSd: must be one of ${ss.join("|")}, got ${e.sd}`);
   if (t !== Et && e.splitMode && e.splitMode !== "off") throw new Error(`q1Band=${t} and q1Matvec='${e.splitMode}' are mutually exclusive — both re-geometry the same v14b dispatch; run them as separate arms`);
   if (n !== "select" && t === Et) throw new Error("q1BandSd only applies to the wide-band route — set q1Band to 16 or 32");
   const r = e.fuse === void 0 || e.fuse === null ? "off" : String(e.fuse);
-  if (!ss.includes(r)) throw new Error(`q1Fuse: must be one of ${ss.join("|")}, got ${e.fuse}`);
+  if (!is.includes(r)) throw new Error(`q1Fuse: must be one of ${is.join("|")}, got ${e.fuse}`);
   if (r !== "off" && t === Et) throw new Error("q1Fuse only applies to the wide-band route — set q1Band to 16 or 32");
   return {
     rows: t,
     mul: t / Et,
     sd: n,
     fuse: r,
-    rowsPerWg: t * ea
+    rowsPerWg: t * ta
   };
 }
-function Br(e, t, n = Et) {
-  const r = Pr(e, Et), a = Pr(r, n / Et), s = e * t / 8, i = e * (t >> 7) * 2, o = a * t * 4;
+function Er(e, t, n = Et) {
+  const r = Br(e, Et), a = Br(r, n / Et), s = e * t / 8, i = e * (t >> 7) * 2, o = a * t * 4;
   return {
     codeBytes: s,
     scaleBytes: i,
@@ -45888,11 +45943,11 @@ function Br(e, t, n = Et) {
     actBytes: o,
     actPerCode: o / s,
     actPerWeight: o / (s + i),
-    workgroups: Pr(r, n / Et * ea),
-    rowsPerWg: n * ea
+    workgroups: Br(r, n / Et * ta),
+    rowsPerWg: n * ta
   };
 }
-var Er = Object.freeze({
+var qr = Object.freeze({
   select: Object.freeze({
     and: 4,
     cmp: 4,
@@ -45912,12 +45967,12 @@ var Er = Object.freeze({
   sdPerWeightByte: 2,
   dot32AddsPerWeightByte: 1.75
 });
-function Jl(e = "select") {
-  const t = Er[e];
+function rd(e = "select") {
+  const t = qr[e];
   if (!t) throw new Error(`unknown sd formulation "${e}"`);
-  return t.total * Er.sdPerWeightByte + Er.dot32AddsPerWeightByte;
+  return t.total * qr.sdPerWeightByte + qr.dot32AddsPerWeightByte;
 }
-async function ed(e, t, n = {}) {
+async function ad(e, t, n = {}) {
   const r = typeof performance < "u" ? performance.now() : Date.now(), a = (u, l) => {
     try {
       n.onFallback && n.onFallback("q1-matvec-band", u, String(l));
@@ -45934,7 +45989,7 @@ async function ed(e, t, n = {}) {
   if (!s.v14bPipeline) return a("no-v14b", "v14b decode route is not active — the band route needs it");
   let i;
   try {
-    i = Xl(n);
+    i = nd(n);
   } catch (u) {
     return a("bad-flag", u.message);
   }
@@ -45944,7 +45999,7 @@ async function ed(e, t, n = {}) {
     reason: "default-8"
   };
   try {
-    const u = Zl.band, l = n.shaders && n.shaders[u] || (n.fetchShader ? await n.fetchShader(u) : null);
+    const u = td.band, l = n.shaders && n.shaders[u] || (n.fetchShader ? await n.fetchShader(u) : null);
     if (!l) throw new Error(`missing shader source: ${u}`);
     s.enableQ1Band(l, i);
   } catch (u) {
@@ -45955,9 +46010,9 @@ async function ed(e, t, n = {}) {
     return a("build-failed", u.message);
   }
   const o = (typeof performance < "u" ? performance.now() : Date.now()) - r;
-  return Object.assign(Pi(t), { buildMs: Number(o.toFixed(1)) });
+  return Object.assign(Ei(t), { buildMs: Number(o.toFixed(1)) });
 }
-function Pi(e) {
+function Ei(e) {
   const t = e && e.vecmatQ2G128, n = t && t.q1Band;
   if (!n) return null;
   const r = {};
@@ -45975,12 +46030,12 @@ function Pi(e) {
     fuse: n.geom.fuse || "off",
     dispatches: { ...n.counts },
     rowsPerWg: n.geom.rowsPerWg,
-    sdOpsPerWeightByte: Jl(n.geom.sd),
+    sdOpsPerWeightByte: rd(n.geom.sd),
     pipelines: n.pipelineCount,
     shapes: r
   };
 }
-var e_ = Object.freeze([
+var i_ = Object.freeze([
   {
     name: "attn q_proj (gated)",
     N: 12288,
@@ -46047,30 +46102,30 @@ var e_ = Object.freeze([
     K: 5120,
     per: 1
   }
-]), td = Object.freeze({ lut: "matmul_q1g128_vecmat_lut_band.wgsl" }), is = Object.freeze(["off", "lut"]), os = Object.freeze([64, 128]), us = Object.freeze(["tile", "hoist"]);
-var ls = Object.freeze({
+]), sd = Object.freeze({ lut: "matmul_q1g128_vecmat_lut_band.wgsl" }), os = Object.freeze(["off", "lut"]), us = Object.freeze([64, 128]), ls = Object.freeze(["tile", "hoist"]);
+var ds = Object.freeze({
   plain: 2048,
   skew: 2200
 });
-var ds = 8, ta = 256;
-var nd = (e, t) => Math.ceil(e / t);
-function rd(e = {}) {
+var cs = 8, na = 256;
+var id = (e, t) => Math.ceil(e / t);
+function od(e = {}) {
   const t = e.mode === void 0 || e.mode === null ? "off" : String(e.mode);
-  if (!is.includes(t)) throw new Error(`q1Decode: must be one of ${is.join("|")}, got ${e.mode}`);
+  if (!os.includes(t)) throw new Error(`q1Decode: must be one of ${os.join("|")}, got ${e.mode}`);
   const n = e.rows === void 0 || e.rows === null || e.rows === "auto" ? 64 : Number(e.rows);
-  if (!os.includes(n)) throw new Error(`q1DecodeRows: must be one of ${os.join("|")}, got ${e.rows}`);
+  if (!us.includes(n)) throw new Error(`q1DecodeRows: must be one of ${us.join("|")}, got ${e.rows}`);
   if (t === "off" && n !== 64) throw new Error("q1DecodeRows only applies to the LUT decode route — set q1Decode to 'lut'");
   const r = e.skew === void 0 || e.skew === null ? !1 : !!e.skew, a = e.totals === void 0 || e.totals === null ? "tile" : String(e.totals);
-  if (!us.includes(a)) throw new Error(`q1LutTotals: must be one of ${us.join("|")}, got ${e.totals}`);
+  if (!ls.includes(a)) throw new Error(`q1LutTotals: must be one of ${ls.join("|")}, got ${e.totals}`);
   if (t === "off" && (r || a !== "tile")) throw new Error("q1LutSkew / q1LutTotals only apply to the LUT decode route — set q1Decode to 'lut'");
   if (t !== "off" && e.splitMode && e.splitMode !== "off") throw new Error(`q1Decode='${t}' and q1Matvec='${e.splitMode}' are mutually exclusive — both re-route the same v14b decode dispatch; run them as separate arms`);
-  if (t !== "off" && e.bandRows !== void 0 && e.bandRows !== null && Number(e.bandRows) !== ds) throw new Error(`q1Decode='${t}' and q1Band=${e.bandRows} are mutually exclusive — both re-route the same v14b decode dispatch; run them as separate arms`);
+  if (t !== "off" && e.bandRows !== void 0 && e.bandRows !== null && Number(e.bandRows) !== cs) throw new Error(`q1Decode='${t}' and q1Band=${e.bandRows} are mutually exclusive — both re-route the same v14b decode dispatch; run them as separate arms`);
   const s = (r ? "Skew" : "") + (a === "hoist" ? "Hoist" : "");
   return {
     mode: t,
     rows: n,
-    bands: n / ds,
-    lanes: ta / n,
+    bands: n / cs,
+    lanes: na / n,
     rowsPerWg: n,
     skew: r,
     totals: a,
@@ -46079,15 +46134,15 @@ function rd(e = {}) {
     suffix: s,
     methodPlain: "dispatchLut" + s,
     methodRes: "dispatchLut" + s + "Residual",
-    wgBytes: ad(n, r, a)
+    wgBytes: ud(n, r, a)
   };
 }
-function ad(e = 64, t = !1, n = "tile") {
-  const r = t ? ls.skew : ls.plain, a = n === "hoist" ? 256 : 4, s = e * 4;
+function ud(e = 64, t = !1, n = "tile") {
+  const r = t ? ds.skew : ds.plain, a = n === "hoist" ? 256 : 4, s = e * 4;
   return (r + a + s) * 4;
 }
-function sd(e = {}) {
-  const t = e.rows ?? 64, n = !!e.skew, r = e.totals ?? "tile", a = ta / t, s = ta / 32, i = a, o = 32 / i, u = n ? 8 : 0, l = new Array(32).fill(0);
+function ld(e = {}) {
+  const t = e.rows ?? 64, n = !!e.skew, r = e.totals ?? "tile", a = na / t, s = na / 32, i = a, o = 32 / i, u = n ? 8 : 0, l = new Array(32).fill(0);
   for (let v = 0; v < i; v++) for (let y = 0; y < 16; y++) l[(v * u + y) % 32]++;
   const d = Math.max(...l), c = 1 - Math.pow(15 / 16, o), h = (v, y) => {
     let k = 0;
@@ -46125,8 +46180,8 @@ function sd(e = {}) {
     barriersPerTile: r === "hoist" ? 2 : 3
   };
 }
-function id(e, t, n = 64, r = {}) {
-  const a = nd(e, n), s = r.totals === "hoist" ? 2 : 1, i = e * t / 8, o = e * (t >> 7) * 2, u = a * t * 4 * s, l = i * 8, d = a * (t / 4) * 16 * 4;
+function dd(e, t, n = 64, r = {}) {
+  const a = id(e, n), s = r.totals === "hoist" ? 2 : 1, i = e * t / 8, o = e * (t >> 7) * 2, u = a * t * 4 * s, l = i * 8, d = a * (t / 4) * 16 * 4;
   return {
     codeBytes: i,
     scaleBytes: o,
@@ -46140,7 +46195,7 @@ function id(e, t, n = 64, r = {}) {
     tiles: t / 512
   };
 }
-var na = Object.freeze({
+var ra = Object.freeze({
   perWord: Object.freeze({
     shl: 8,
     and: 8,
@@ -46157,10 +46212,10 @@ var na = Object.freeze({
   }),
   ldsReadsPerWeightByte: 2
 });
-function od() {
-  return na.perWord.total / 4 + na.perGroup.total / 16;
+function cd() {
+  return ra.perWord.total / 4 + ra.perGroup.total / 16;
 }
-async function ud(e, t, n = {}) {
+async function hd(e, t, n = {}) {
   const r = typeof performance < "u" ? performance.now() : Date.now(), a = (u, l) => {
     try {
       n.onFallback && n.onFallback("q1-lut-decode", u, String(l));
@@ -46176,7 +46231,7 @@ async function ud(e, t, n = {}) {
   if (!s) return a("no-operator", "operator bag has no vecmatQ2G128");
   let i;
   try {
-    i = rd(n);
+    i = od(n);
   } catch (u) {
     return a("bad-flag", u.message);
   }
@@ -46187,7 +46242,7 @@ async function ud(e, t, n = {}) {
   };
   if (!s.v14bPipeline) return a("no-v14b", "v14b decode route is not active — the LUT decode route reads its band repack");
   try {
-    const u = td.lut, l = n.shaders && n.shaders[u] || (n.fetchShader ? await n.fetchShader(u) : null);
+    const u = sd.lut, l = n.shaders && n.shaders[u] || (n.fetchShader ? await n.fetchShader(u) : null);
     if (!l) throw new Error(`missing shader source: ${u}`);
     s.enableQ1Lut(l, i);
   } catch (u) {
@@ -46198,9 +46253,9 @@ async function ud(e, t, n = {}) {
     return a("build-failed", u.message);
   }
   const o = (typeof performance < "u" ? performance.now() : Date.now()) - r;
-  return Object.assign(Bi(t), { buildMs: Number(o.toFixed(1)) });
+  return Object.assign(qi(t), { buildMs: Number(o.toFixed(1)) });
 }
-function Bi(e) {
+function qi(e) {
   const t = e && e.vecmatQ2G128, n = t && t.q1Lut;
   if (!n) return null;
   const r = {};
@@ -46212,7 +46267,7 @@ function Bi(e) {
     actPerCode: Number(i.actPerCode.toFixed(2)),
     wasActPerCode: Number(i.baseActPerCode.toFixed(2))
   };
-  const a = sd(n.geom);
+  const a = ld(n.geom);
   return {
     enabled: !0,
     mode: n.geom.mode,
@@ -46232,13 +46287,13 @@ function Bi(e) {
       cyclesPerTile: a.cyclesPerTile
     },
     dispatches: { ...n.counts },
-    opsPerWeightByte: Number(od().toFixed(2)),
-    ldsReadsPerWeightByte: na.ldsReadsPerWeightByte,
+    opsPerWeightByte: Number(cd().toFixed(2)),
+    ldsReadsPerWeightByte: ra.ldsReadsPerWeightByte,
     pipelines: n.pipelineCount,
     shapes: r
   };
 }
-var t_ = Object.freeze([
+var o_ = Object.freeze([
   {
     name: "attn q_proj (gated)",
     N: 12288,
@@ -46306,15 +46361,15 @@ var t_ = Object.freeze([
     per: 1
   }
 ]);
-var cs = Object.freeze([
+var hs = Object.freeze([
   "off",
   "gateup",
   "qkv",
   "all"
 ]);
-function ld(e = {}) {
+function pd(e = {}) {
   const t = e.mode === void 0 || e.mode === null ? "off" : String(e.mode);
-  if (!cs.includes(t)) throw new Error(`q1Concat: must be one of ${cs.join("|")}, got ${e.mode}`);
+  if (!hs.includes(t)) throw new Error(`q1Concat: must be one of ${hs.join("|")}, got ${e.mode}`);
   if (t === "off") return null;
   if (e.fuse && e.fuse !== "off") throw new Error(`q1Concat='${t}' and q1Fuse='${e.fuse}' are mutually exclusive — both rewrite the same v14b decode dispatch; run them as separate arms`);
   if (e.splitMode && e.splitMode !== "off") throw new Error(`q1Concat='${t}' and q1Matvec='${e.splitMode}' are mutually exclusive — both re-geometry the same v14b dispatch; run them as separate arms`);
@@ -46324,7 +46379,7 @@ function ld(e = {}) {
     qkv: t === "qkv" || t === "all"
   };
 }
-function dd(e, t, n = 256) {
+function fd(e, t, n = 256) {
   if (!Array.isArray(e) || e.length < 2) return {
     ok: !1,
     reason: "needs at least two parts"
@@ -46388,7 +46443,7 @@ function dd(e, t, n = 256) {
     outBytes: u * 4
   };
 }
-var n_ = Object.freeze([Object.freeze({
+var u_ = Object.freeze([Object.freeze({
   group: "gateup",
   per: 64,
   parts: Object.freeze([Object.freeze({
@@ -46421,7 +46476,7 @@ var n_ = Object.freeze([Object.freeze({
     })
   ])
 })]);
-function cd(e) {
+function _d(e) {
   const t = e && e.vecmatQ2G128, n = t && t.q1Concat;
   if (!n) return null;
   const r = [];
@@ -46448,7 +46503,7 @@ function cd(e) {
     declined: n.declined.slice(0, 8)
   };
 }
-var qr = 256, hd = class Xe {
+var Ar = 256, md = class Xe {
   device;
   pool = null;
   static GEMM_V2_SMALL_TILES = [
@@ -47157,7 +47212,7 @@ ${r.decl}
       if (!p.qbBuf) return s(`${p.name} has no weight buffer`);
       if (p.qbBuf.__v14) return s(`${p.name} was already repacked — prepare too late`);
     }
-    const i = dd(r.map((p) => ({
+    const i = fd(r.map((p) => ({
       name: p.name,
       N: p.N,
       K: p.K
@@ -47463,7 +47518,7 @@ ${r.decl}
         module: a.createShaderModule({ code: d }),
         entryPoint: "main"
       }
-    }), i = r.bands !== null ? [r.bands] : r.mode === "nsplit" ? Jr.slice() : [8], o = /* @__PURE__ */ new Map();
+    }), i = r.bands !== null ? [r.bands] : r.mode === "nsplit" ? ea.slice() : [8], o = /* @__PURE__ */ new Map();
     for (const d of i) {
       const c = {
         Q1_BANDS_PER_WG: d,
@@ -47493,11 +47548,11 @@ ${r.decl}
       } })));
       l = {
         plain: s(Ie(n, { defines: {
-          MOBILE_WG: qr,
+          MOBILE_WG: Ar,
           HAS_RESIDUAL: 0
         } })),
         res: s(Ie(n, { defines: {
-          MOBILE_WG: qr,
+          MOBILE_WG: Ar,
           HAS_RESIDUAL: 1
         } }))
       };
@@ -47533,7 +47588,7 @@ ${r.decl}
     if (a.has(r)) return a.get(r);
     let s = null;
     try {
-      s = jl(t, n, this.q1Split.geom);
+      s = Jl(t, n, this.q1Split.geom);
     } catch {
       s = null;
     }
@@ -47605,7 +47660,7 @@ ${r.decl}
       resource: a.buffer ? a : { buffer: a }
     });
     const d = t.beginComputePass();
-    d.setPipeline(u), d.setBindGroup(0, Pe(this.device, this, Pt(u), l)), d.dispatchWorkgroups(Math.ceil(s / qr)), d.end();
+    d.setPipeline(u), d.setBindGroup(0, Pe(this.device, this, Pt(u), l)), d.dispatchWorkgroups(Math.ceil(s / Ar)), d.end();
   }
   dispatchQ1Nsplit(t, n, r, a, s, i, o, u) {
     this.q1Split.counts.nsplit++;
@@ -47721,7 +47776,7 @@ ${r.decl}
     const u = this.q1Lut, l = s + "x" + i;
     if (u.geom.totals === "hoist" && i >> 7 > 256) throw new Error(`q1LutTotals:'hoist' supports K <= ${256 * 128}, got K=${i}`);
     if (!u.shapes.has(l)) {
-      const w = id(s, i, u.geom.rows, { totals: u.geom.totals }), g = Br(s, i, 8);
+      const w = dd(s, i, u.geom.rows, { totals: u.geom.totals }), g = Er(s, i, 8);
       u.shapes.set(l, Object.assign({}, w, {
         baseWorkgroups: g.workgroups,
         baseActBytes: g.actBytes,
@@ -47776,7 +47831,7 @@ ${r.decl}
     const r = t + "x" + n, a = this.q1Band.shapes;
     let s = a.get(r);
     if (!s) {
-      const i = Br(t, n, this.q1Band.geom.rows), o = Br(t, n, 8);
+      const i = Er(t, n, this.q1Band.geom.rows), o = Er(t, n, 8);
       s = {
         ...i,
         baseWorkgroups: o.workgroups,
@@ -48169,7 +48224,7 @@ ${r.decl}
   destroy() {
     this.disableQ1Split(), this.disableQ1Band(), this.disableLoRAFuse();
   }
-}, pd = class {
+}, gd = class {
   device;
   pool = null;
   constructor(e, t) {
@@ -48241,7 +48296,7 @@ ${r.decl}
   destroy() {
   }
 };
-function fd(e) {
+function bd(e) {
   for (const t of [
     1,
     2,
@@ -48302,9 +48357,9 @@ const ROW_FAST: bool = true;`,
     cfg: "const WG: u32 = 64u;",
     needsSubgroups: !0
   }
-}, Ei = `fn opq(x: f32) -> f32 { return bitcast<f32>(bitcast<u32>(x) ^ params._pad); }
+}, Ai = `fn opq(x: f32) -> f32 { return bitcast<f32>(bitcast<u32>(x) ^ params._pad); }
 
-`, hs = "acc = acc + s * unpack2x16float(qdata[sidx >> 1u])[sidx & 1u];", qi = [
+`, ps = "acc = acc + s * unpack2x16float(qdata[sidx >> 1u])[sidx & 1u];", Ti = [
   "lut[pb + (word & 15u)]",
   "lut[pb + 16u + ((word >> 4u) & 15u)]",
   "lut[pb + 32u + ((word >> 8u) & 15u)]",
@@ -48313,8 +48368,8 @@ const ROW_FAST: bool = true;`,
   "lut[pb + 80u + ((word >> 20u) & 15u)]",
   "lut[pb + 96u + ((word >> 24u) & 15u)]",
   "lut[pb + 112u + (word >> 28u)]"
-], _d = "s = s + " + qi.join(`
-                      + `) + ";", ps = "if ((g & 1u) == 0u) { acc0 = acc0 + s * sc; } else { acc1 = acc1 + s * sc; }", md = [
+], wd = "s = s + " + Ti.join(`
+                      + `) + ";", fs = "if ((g & 1u) == 0u) { acc0 = acc0 + s * sc; } else { acc1 = acc1 + s * sc; }", vd = [
   "pe(xa.x, xa.y, w, 0u)",
   "pe(xa.z, xa.w, w, 4u)",
   "pe(xb.x, xb.y, w, 8u)",
@@ -48323,21 +48378,21 @@ const ROW_FAST: bool = true;`,
   "pe(xc.z, xc.w, w, 20u)",
   "pe(xd.x, xd.y, w, 24u)",
   "pe(xd.z, xd.w, w, 28u)"
-], gd = `return s + pe(xa.x, xa.y, w, 0u) + pe(xa.z, xa.w, w, 4u)
+], kd = `return s + pe(xa.x, xa.y, w, 0u) + pe(xa.z, xa.w, w, 4u)
              + pe(xb.x, xb.y, w, 8u) + pe(xb.z, xb.w, w, 12u)
              + pe(xc.x, xc.y, w, 16u) + pe(xc.z, xc.w, w, 20u)
-             + pe(xd.x, xd.y, w, 24u) + pe(xd.z, xd.w, w, 28u);`, Ai = (e, t, n) => t.reduce((r, a) => `opq(${r} + ${n ? `opq(${a})` : a})`, e), Dn = {
-  fma: [[hs, "acc = fma(s, unpack2x16float(qdata[sidx >> 1u])[sidx & 1u], acc);"]],
-  rnd: [[hs, "acc = acc + opq(s * unpack2x16float(qdata[sidx >> 1u])[sidx & 1u]);"]],
-  pin: [[_d, "s = " + Ai("s", qi, !1) + ";"]],
-  opq: [["@compute @workgroup_size(256)", Ei + "@compute @workgroup_size(256)"]]
+             + pe(xd.x, xd.y, w, 24u) + pe(xd.z, xd.w, w, 28u);`, Mi = (e, t, n) => t.reduce((r, a) => `opq(${r} + ${n ? `opq(${a})` : a})`, e), Kn = {
+  fma: [[ps, "acc = fma(s, unpack2x16float(qdata[sidx >> 1u])[sidx & 1u], acc);"]],
+  rnd: [[ps, "acc = acc + opq(s * unpack2x16float(qdata[sidx >> 1u])[sidx & 1u]);"]],
+  pin: [[wd, "s = " + Mi("s", Ti, !1) + ";"]],
+  opq: [["@compute @workgroup_size(256)", Ai + "@compute @workgroup_size(256)"]]
 }, Rt = {
-  fma: [[ps, "if ((g & 1u) == 0u) { acc0 = fma(s, sc, acc0); } else { acc1 = fma(s, sc, acc1); }"]],
-  rnd: [[ps, `let pr = opq(s * sc);
+  fma: [[fs, "if ((g & 1u) == 0u) { acc0 = fma(s, sc, acc0); } else { acc1 = fma(s, sc, acc1); }"]],
+  rnd: [[fs, `let pr = opq(s * sc);
         if ((g & 1u) == 0u) { acc0 = acc0 + pr; } else { acc1 = acc1 + pr; }`]],
-  pin: [[gd, "return " + Ai("s", md, !0) + ";"], ["c[row] = acc0 + acc1;", "c[row] = opq(acc0) + opq(acc1);"]],
-  opq: [["@compute @workgroup_size(ROWS)", Ei + "@compute @workgroup_size(ROWS)"]]
-}, Kn = `const ROWS: u32 = 128u;
+  pin: [[kd, "return " + Mi("s", vd, !0) + ";"], ["c[row] = acc0 + acc1;", "c[row] = opq(acc0) + opq(acc1);"]],
+  opq: [["@compute @workgroup_size(ROWS)", Ai + "@compute @workgroup_size(ROWS)"]]
+}, Wn = `const ROWS: u32 = 128u;
 const ROW_FAST: bool = false;`, Wt = (e, t, n, r, a) => ({
   file: e,
   rows: n,
@@ -48347,14 +48402,14 @@ const ROW_FAST: bool = false;`, Wt = (e, t, n, r, a) => ({
   edits: [].concat(...a.map((s) => r[s]))
 });
 Object.assign(lt, {
-  lutfma: Wt("matmul_q2g128_vecmat_lut.wgsl", Kn, 128, Dn, ["fma"]),
-  lutrnd: Wt("matmul_q2g128_vecmat_lut.wgsl", Kn, 128, Dn, ["opq", "rnd"]),
-  lutpinfma: Wt("matmul_q2g128_vecmat_lut.wgsl", Kn, 128, Dn, [
+  lutfma: Wt("matmul_q2g128_vecmat_lut.wgsl", Wn, 128, Kn, ["fma"]),
+  lutrnd: Wt("matmul_q2g128_vecmat_lut.wgsl", Wn, 128, Kn, ["opq", "rnd"]),
+  lutpinfma: Wt("matmul_q2g128_vecmat_lut.wgsl", Wn, 128, Kn, [
     "opq",
     "pin",
     "fma"
   ]),
-  lutpinrnd: Wt("matmul_q2g128_vecmat_lut.wgsl", Kn, 128, Dn, [
+  lutpinrnd: Wt("matmul_q2g128_vecmat_lut.wgsl", Wn, 128, Kn, [
     "opq",
     "pin",
     "rnd"
@@ -48372,25 +48427,25 @@ Object.assign(lt, {
     "rnd"
   ])
 });
-var Wn = `let c0 = f32((w >> sh) & 3u) - 1.0;
+var zn = `let c0 = f32((w >> sh) & 3u) - 1.0;
     let c1 = f32((w >> (sh + 2u)) & 3u) - 1.0;
-    return fma(c0, x0, c1 * x1);`, bd = {
-  opqc: [[Wn, `let c0 = opq(f32((w >> sh) & 3u) - 1.0);
+    return fma(c0, x0, c1 * x1);`, yd = {
+  opqc: [[zn, `let c0 = opq(f32((w >> sh) & 3u) - 1.0);
     let c1 = opq(f32((w >> (sh + 2u)) & 3u) - 1.0);
     return fma(c0, x0, c1 * x1);`]],
-  icvt: [[Wn, `let c0 = f32(i32((w >> sh) & 3u) - 1);
+  icvt: [[zn, `let c0 = f32(i32((w >> sh) & 3u) - 1);
     let c1 = f32(i32((w >> (sh + 2u)) & 3u) - 1);
     return fma(c0, x0, c1 * x1);`]],
-  carr: [[Wn, `let cv = array<f32, 4>(-1.0, 0.0, 1.0, 2.0);
+  carr: [[zn, `let cv = array<f32, 4>(-1.0, 0.0, 1.0, 2.0);
     return fma(cv[(w >> sh) & 3u], x0, cv[(w >> (sh + 2u)) & 3u] * x1);`]],
-  sv: [[Wn, "return tv(x0, (w >> sh) & 3u) + tv(x1, (w >> (sh + 2u)) & 3u);"], ["fn pe(", `// (q - 1)·x for q in {0, 1, 2, 3}, exactly: -x, 0, x, x + x
+  sv: [[zn, "return tv(x0, (w >> sh) & 3u) + tv(x1, (w >> (sh + 2u)) & 3u);"], ["fn pe(", `// (q - 1)·x for q in {0, 1, 2, 3}, exactly: -x, 0, x, x + x
 fn tv(x: f32, q: u32) -> f32 {
     return select(select(-x, 0.0, q == 1u), select(x, x + x, q == 3u), q >= 2u);
 }
 
 fn pe(`]]
 };
-for (const [e, t] of Object.entries(bd)) {
+for (const [e, t] of Object.entries(yd)) {
   const n = e === "opqc";
   lt[`sel${e}`] = {
     file: "matmul_q2g128_vecmat_sel.wgsl",
@@ -48417,7 +48472,7 @@ for (const [e, t] of Object.entries(bd)) {
     ]
   };
 }
-var wd = [
+var Sd = [
   "selopqc",
   "selicvt",
   "selcarr",
@@ -48426,7 +48481,7 @@ var wd = [
   "selicvtpin",
   "selcarrpin",
   "selsvpin"
-], vd = "2026-10-28k", Ti = [
+], xd = "2026-10-28k", Gi = [
   "lut",
   "lutrf",
   "lutfma",
@@ -48440,7 +48495,7 @@ var wd = [
   "selpinrnd",
   "selsv",
   "selcarr"
-], fs = [
+], _s = [
   "lut",
   "rtile",
   "lutrf",
@@ -48455,15 +48510,15 @@ var wd = [
   "selrnd",
   "selpinfma",
   "selpinrnd",
-  ...wd
+  ...Sd
 ];
-function kd(e, t) {
+function Pd(e, t) {
   if (!t) return null;
   const n = e && e.b2NoSgDecode;
-  if (n != null && !fs.includes(n)) throw new Error(`b2NoSgDecode: ${JSON.stringify(n)} is not one of ${fs.join(", ")}`);
+  if (n != null && !_s.includes(n)) throw new Error(`b2NoSgDecode: ${JSON.stringify(n)} is not one of ${_s.join(", ")}`);
   return e && (e.b2NoSg === !1 || e.b2Kernels === !1) ? "ksplit" : n || "lut";
 }
-function nr(e, t) {
+function rr(e, t) {
   const n = lt[t], r = /\/\/__CFG_BEGIN__[\s\S]*?\/\/__CFG_END__/;
   if (!n || !r.test(e)) throw new Error(`no-subgroups decode kernel ${t}: configuration block missing`);
   let a = e.replace(r, `//__CFG_BEGIN__
@@ -48476,7 +48531,7 @@ ${n.cfg}
   }
   return a;
 }
-function Mi(e, t) {
+function Li(e, t) {
   if (t.BM / t.MR * (t.BN / t.NR) !== 256 || t.MR % 4 || t.NR % 4 || 128 % t.BK) return null;
   const n = /\/\/__TILE_BEGIN__[\s\S]*?\/\/__TILE_END__/;
   return n.test(e) ? e.replace(n, `//__TILE_BEGIN__
@@ -48487,8 +48542,8 @@ const MR: u32 = ${t.MR}u;
 const NR: u32 = ${t.NR}u;
 //__TILE_END__`) : null;
 }
-function _s(e, t, n = {}) {
-  let r = Mi(e, t);
+function ms(e, t, n = {}) {
+  let r = Li(e, t);
   if (!r) return null;
   const a = t.NR / 4, s = t.MR / 4, i = t.BM / 4, o = t.BN / 4, u = [
     "x",
@@ -48538,22 +48593,22 @@ ${h}//__${c}_END__`);
   }
   return r;
 }
-var Gi = [
+var Ui = [
   "unrolled",
   "loop",
   "named"
-], Li = [
+], Ri = [
   "auto",
   "small",
   "big",
   "m4n4"
-], ms = ["m4n4"];
-function Ui(e, t, n) {
-  return t === "loop" ? Mi(e, n) : t === "unrolled" ? _s(e, n) : t === "named" ? _s(e, n, { kloop: !0 }) : null;
+], gs = ["m4n4"];
+function Ci(e, t, n) {
+  return t === "loop" ? Li(e, n) : t === "unrolled" ? ms(e, n) : t === "named" ? ms(e, n, { kloop: !0 }) : null;
 }
-function gs(e, t) {
+function bs(e, t) {
   const n = e || {};
-  for (const [a, s] of [["b2GemmForm", Gi], ["b2GemmTile", Li]]) {
+  for (const [a, s] of [["b2GemmForm", Ui], ["b2GemmTile", Ri]]) {
     const i = n[a];
     if (i != null && !s.includes(i)) throw new Error(`${a}: ${JSON.stringify(i)} is not one of ${s.join(", ")}`);
   }
@@ -48565,20 +48620,20 @@ function gs(e, t) {
     file: r === "loop" ? "matmul_q2g128_gemm_t.wgsl" : "matmul_q2g128_gemm_t_unrolled.wgsl"
   };
 }
-var bs = [
+var ws = [
   "unrolled/big",
   "unrolled/small",
   "unrolled/m4n4",
   "named/m4n4",
   "named/small"
-], yd = [
+], Bd = [
   "lut",
   "lutrf",
   "sel",
   "rtile",
   "sg16"
 ];
-async function ws(e, t, n) {
+async function vs(e, t, n) {
   const u = new Uint32Array(8704);
   for (let m = 0; m < 256 * 4; m++) u[m >> 1] |= 15360 << (m & 1) * 16;
   let l = 12345;
@@ -48697,7 +48752,7 @@ async function ws(e, t, n) {
     }
   }
 }
-var Sd = class {
+var Ed = class {
   pool = null;
   constructor(e, t) {
     this.device = e, this.bindGroupLayout = e.createBindGroupLayout({ entries: [
@@ -48784,7 +48839,7 @@ var Sd = class {
     });
     return new Uint32Array(t.getMappedRange()).set(e), t.unmap(), t;
   }
-}, xd = class {
+}, qd = class {
   constructor(e) {
     const t = Number(e && e.block_size), n = (e && e.sign_widths || []).map(Number);
     if (!(t >= 2 && t <= 4096 && (t & t - 1) === 0)) throw new Error(`hadamard: block_size ${e && e.block_size} unsupported (power of two ≤ 4096)`);
@@ -48800,7 +48855,7 @@ var Sd = class {
     if (t === void 0) throw new Error(`hadamard: no sign vector for width ${e} (have ${this.widths.join(", ")}) — a folded projection with this K cannot be transformed`);
     return t;
   }
-}, ra = class {
+}, aa = class {
   constructor(e, t) {
     this.device = e, this.label = t, this.buf = null, this.retired = [];
   }
@@ -48811,10 +48866,10 @@ var Sd = class {
       label: this.label
     })), this.buf;
   }
-}, Ri = class {
+}, Ni = class {
   constructor(e, t, n, r, a) {
     if (!t || typeof t.dispatch != "function") throw new Error("HadamardQ2G128Matmul: inner op required");
-    this.device = e, this.inner = t, this.fwht = n, this.spec = r, this._extEncoder = null, this._scratch = new ra(e, "hadamard.fwht_scratch"), this._primal = /* @__PURE__ */ new Map(), this._pool = null, this.f32BindGroupLayout = e.createBindGroupLayout({ entries: [
+    this.device = e, this.inner = t, this.fwht = n, this.spec = r, this._extEncoder = null, this._scratch = new aa(e, "hadamard.fwht_scratch"), this._primal = /* @__PURE__ */ new Map(), this._pool = null, this.f32BindGroupLayout = e.createBindGroupLayout({ entries: [
       {
         binding: 0,
         visibility: GPUShaderStage.COMPUTE,
@@ -48846,7 +48901,7 @@ var Sd = class {
       foldedMany: 0,
       primalM1: 0,
       primalMany: 0
-    }, this._tband = null, this._smallN = null, this._gemm = null, this._share = null, this._shareScratch = new ra(e, "hadamard.fwht_shared"), this.census.fwhtShared = 0, this.census.fwhtReused = 0;
+    }, this._tband = null, this._smallN = null, this._gemm = null, this._share = null, this._shareScratch = new aa(e, "hadamard.fwht_shared"), this.census.fwhtShared = 0, this.census.fwhtReused = 0;
   }
   shareInputBegin(e, t, n) {
     this._share = {
@@ -48912,8 +48967,8 @@ var Sd = class {
     }
     if (n) {
       const s = r.form || "loop", i = r.tile || "auto";
-      if (!Gi.includes(s) || !Li.includes(i)) throw new Error(`ternary GEMM: form ${s} / tile ${i} not supported`);
-      const o = a.limits && a.limits.maxComputeWorkgroupStorageSize || 16384, u = (h) => this._mkGemm(n, s, h), l = Ct, d = (l.big.BM + l.big.BN) * l.big.BK * 4, c = ms.includes(i);
+      if (!Ui.includes(s) || !Ri.includes(i)) throw new Error(`ternary GEMM: form ${s} / tile ${i} not supported`);
+      const o = a.limits && a.limits.maxComputeWorkgroupStorageSize || 16384, u = (h) => this._mkGemm(n, s, h), l = Ct, d = (l.big.BM + l.big.BN) * l.big.BK * 4, c = gs.includes(i);
       this._gemm = {
         small: u(l.small),
         big: !c && i !== "small" && o >= d ? u(l.big) : null,
@@ -48924,7 +48979,7 @@ var Sd = class {
     }
   }
   _mkGemm(e, t, n) {
-    const r = this.device, a = Ui(e, t, n);
+    const r = this.device, a = Ci(e, t, n);
     if (!a) throw new Error(`ternary GEMM (${t}): tile block missing or tile invalid`);
     const s = r.createComputePipeline({
       layout: "auto",
@@ -48939,7 +48994,7 @@ var Sd = class {
       layout: s.getBindGroupLayout(0)
     };
   }
-  installArms(e, t, n = {}, { gemmArms: r = bs } = {}) {
+  installArms(e, t, n = {}, { gemmArms: r = ws } = {}) {
     const a = this.device, s = a.limits && a.limits.maxComputeWorkgroupStorageSize || 16384, i = {};
     for (const l of r) {
       const [d, c] = l.split("/"), h = Ct[c];
@@ -48983,12 +49038,12 @@ var Sd = class {
   get armsInfo() {
     const e = this._arms;
     return e ? {
-      gemms: Object.keys(e.gemms).filter((t) => bs.includes(t)),
+      gemms: Object.keys(e.gemms).filter((t) => ws.includes(t)),
       decodes: Object.keys(e.decodes),
       unavailable: e.unavailable,
       current: e.current,
-      rev: vd,
-      spellings: Ti.slice()
+      rev: xd,
+      spellings: Gi.slice()
     } : null;
   }
   setArm({ gemm: e = null, decode: t = null } = {}) {
@@ -49013,7 +49068,7 @@ var Sd = class {
         this._gemm = {
           small: n.gemms[`${r}/small`] || s,
           big: a === "big" ? s : null,
-          forced: ms.includes(a) ? s : null,
+          forced: gs.includes(a) ? s : null,
           form: r,
           tile: a
         };
@@ -49081,7 +49136,7 @@ var Sd = class {
     this._encodeTbandRes(e, { buffer: t }, n, { buffer: r }, a, s), this.census.tbandM1++;
   }
   _encodeTbandRes(e, t, n, r, a, s) {
-    const i = fd(a), o = this._tband.pipes.get(i), u = a * (s >> 7) + 1 >>> 1, l = this.device.createBindGroup({
+    const i = bd(a), o = this._tband.pipes.get(i), u = a * (s >> 7) + 1 >>> 1, l = this.device.createBindGroup({
       layout: o.layout,
       entries: [
         {
@@ -49286,7 +49341,7 @@ var Sd = class {
   }
   dispatch(e, t, n, r, a, s) {
     if (this._extPassGet) throw new Error("HadamardQ2G128Matmul: the encoder pass-mux (_extPassGet) is unsupported");
-    const i = this._extEncoder || this.device.createCommandEncoder(), o = typeof this.device.__mentriaPassLabel == "function" ? (u) => hl(this.device, u) : null;
+    const i = this._extEncoder || this.device.createCommandEncoder(), o = typeof this.device.__mentriaPassLabel == "function" ? (u) => ml(this.device, u) : null;
     try {
       this._dispatchInto(i, o, e, t, n, r, a, s);
     } finally {
@@ -49402,9 +49457,9 @@ var Sd = class {
   destroy() {
     this.inner && typeof this.inner.destroy == "function" && this.inner.destroy();
   }
-}, Pd = class {
+}, Ad = class {
   constructor(e, t, n, r) {
-    this.device = e, this.inner = t, this.fwht = n, this.spec = r, this._extEncoder = null, this._scratch = new ra(e, "hadamard.embed_scratch"), this._pool = null, this.census = {
+    this.device = e, this.inner = t, this.fwht = n, this.spec = r, this._extEncoder = null, this._scratch = new aa(e, "hadamard.embed_scratch"), this._pool = null, this.census = {
       lookupsM1: 0,
       lookupsMany: 0
     };
@@ -49430,18 +49485,18 @@ var Sd = class {
   }
   destroy() {
   }
-}, Ci = "b2pick-2026-10-28k6", Bd = [
+}, Oi = "b2pick-2026-10-28k6", Td = [
   "big",
   "small",
   "m4n4"
-], aa = [
+], sa = [
   "lut",
   "lutrf",
   "selsv",
   "selcarr"
-], vs = 0.1;
-var Ed = ["lutrf", "lut"], qd = 12, Ni = "mentria-b2-kernel-pick";
-function Ad(e, t, n, r, a) {
+], ks = 0.1;
+var Md = ["lutrf", "lut"], Gd = 12, Ii = "mentria-b2-kernel-pick";
+function Ld(e, t, n, r, a) {
   const s = t || {}, i = s.b2KernelPick === void 0 || s.b2KernelPick === null ? "auto" : String(s.b2KernelPick);
   if (![
     "auto",
@@ -49459,7 +49514,7 @@ function Ad(e, t, n, r, a) {
   }, u = a >= (Ct.big.BM + Ct.big.BN) * Ct.big.BK * 4;
   if (s.b2GemmForm !== void 0 || s.b2GemmTile !== void 0) o.pinned.push("gemm");
   else if (n && n.form !== "loop") {
-    const l = Bd.filter((d) => d !== "big" || u);
+    const l = Td.filter((d) => d !== "big" || u);
     o.slots.gemm = {
       form: n.form,
       tiles: l,
@@ -49467,18 +49522,18 @@ function Ad(e, t, n, r, a) {
       bigOk: u
     };
   }
-  return s.b2NoSgDecode !== void 0 ? o.pinned.push("decode") : r && aa.includes(r) && (o.slots.decode = {
-    kernels: aa.slice(),
+  return s.b2NoSgDecode !== void 0 ? o.pinned.push("decode") : r && sa.includes(r) && (o.slots.decode = {
+    kernels: sa.slice(),
     seed: r
   }), o.guard = o.slots.decode && r !== "lut" ? {
     decode: r,
-    fallback: Ed.filter((l) => l !== r)
+    fallback: Md.filter((l) => l !== r)
   } : null, o;
 }
-function Td(e, t, n, r) {
+function Ud(e, t, n, r) {
   const a = n || {};
   return JSON.stringify({
-    v: Ci,
+    v: Oi,
     ua: globalThis.navigator && navigator.userAgent || "",
     vendor: a.vendor || "",
     arch: a.architecture || "",
@@ -49492,17 +49547,17 @@ function Td(e, t, n, r) {
     slots: e.slots
   });
 }
-async function Md(e, t) {
+async function Rd(e, t) {
   if (t && t.storageThrows) throw new Error("storage disabled by test hook");
   if (typeof caches > "u") return null;
-  const n = await (await caches.open(Ni)).match(new Request("https://mentria.invalid/b2pick/" + encodeURIComponent(e)));
+  const n = await (await caches.open(Ii)).match(new Request("https://mentria.invalid/b2pick/" + encodeURIComponent(e)));
   return n ? n.json() : null;
 }
-async function Gd(e, t, n) {
+async function Cd(e, t, n) {
   if (n && n.storageThrows) throw new Error("storage disabled by test hook");
-  return typeof caches > "u" ? !1 : (await (await caches.open(Ni)).put(new Request("https://mentria.invalid/b2pick/" + encodeURIComponent(e)), new Response(JSON.stringify(t), { headers: { "content-type": "application/json" } })), !0);
+  return typeof caches > "u" ? !1 : (await (await caches.open(Ii)).put(new Request("https://mentria.invalid/b2pick/" + encodeURIComponent(e)), new Response(JSON.stringify(t), { headers: { "content-type": "application/json" } })), !0);
 }
-function zn(e, t, n) {
+function Fn(e, t, n) {
   let r = n >>> 0;
   const a = () => (r = Math.imul(r, 1664525) + 1013904223 >>> 0, r / 4294967296), s = t >> 7, i = t >> 4, o = e * s + 1 >>> 1, u = new Uint32Array(o + e * i), l = new Float32Array(1), d = new Uint32Array(l.buffer);
   for (let c = 0; c < e * s; c++) {
@@ -49525,7 +49580,7 @@ function zn(e, t, n) {
     sw: o
   };
 }
-function Fn(e, t) {
+function $n(e, t) {
   let n = t >>> 0;
   const r = () => (n = Math.imul(n, 1103515245) + 12345 >>> 0, n / 4294967296), a = new Float32Array(e);
   for (let s = 0; s < e; s++) {
@@ -49534,9 +49589,9 @@ function Fn(e, t) {
   }
   return a;
 }
-function Ld(e, t, n, r = {}) {
+function Nd(e, t, n, r = {}) {
   const a = t.mode === "off", s = {}, i = (l) => typeof e.createComputePipelineAsync == "function" ? e.createComputePipelineAsync(l) : Promise.resolve(e.createComputePipeline(l)), o = (l, d, c) => {
-    let h = Ui(n.unrolledCode, l, Ct[d]);
+    let h = Ci(n.unrolledCode, l, Ct[d]);
     if (!h) throw new Error(`b2 pick: no ${l}/${d} GEMM`);
     return c && (h = c(h)), i({
       layout: "auto",
@@ -49568,7 +49623,7 @@ function Ld(e, t, n, r = {}) {
     for (const h of d) {
       const p = h === "broken" ? "lutrf" : h;
       s[`dec/${h}`] = n.decodeCode(p).then((f) => {
-        let _ = nr(f, p);
+        let _ = rr(f, p);
         if (h === "broken" || c.includes(h)) {
           const m = _.replace("c[row0 + t] = v;", "c[row0 + t] = bitcast<f32>(bitcast<u32>(v) ^ 1u);").replace(/c\[row\] = ([^;]+);/, "c[row] = bitcast<f32>(bitcast<u32>($1) ^ 1u);");
           if (m === _) throw new Error(`b2 pick test hook: no output store to perturb in ${p}`);
@@ -49598,7 +49653,7 @@ function Ld(e, t, n, r = {}) {
     };
   });
 }
-async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
+async function Tr(e, t, n, r, a = {}, s = null, i = {}) {
   const o = i.mode || "full", u = i.state || {}, l = s && Array.isArray(s.weights) && s.weights.length ? s.weights : null, d = s && Array.isArray(s.down) && s.down.length ? s.down : null, c = s && s.lmHead ? s.lmHead : null, h = (Z) => Z && Z.buffer ? Z : { buffer: Z }, p = performance.now(), f = Number.isFinite(a.budgetMs) ? a.budgetMs : 700, _ = Math.min(Number.isFinite(i.deadline) ? i.deadline : 1 / 0, p + f), m = () => _ - performance.now(), b = (Z) => Z <= m(), w = {}, g = (Z, te) => {
     w[Z] = +((w[Z] || 0) + performance.now() - te).toFixed(1);
   }, v = (Z) => +Z.toFixed(3), y = (Z) => Object.fromEntries(Object.entries(Z).map(([te, ne]) => [te.startsWith("dec/") ? te.slice(4) : te, v(ne)])), k = o === "full" && e.features.has("timestamp-query") && !a.wallClock;
@@ -49823,7 +49878,7 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
       const xe = Ne.map((We) => We.ms[we]).filter((We) => We !== void 0);
       !xe.length && z.clock === qe && xe.push(ee[we]), xe.length && (he[we] = (qe === "ts" ? L(xe) : Math.min(...xe)) / C);
     }
-    const be = (he[ne] || ee[ne] / C) * C, ke = vs + (qe === "ts" ? 0 : (2 * P + 2 * Math.max(0, B.jitter - P)) / Math.max(be, P));
+    const be = (he[ne] || ee[ne] / C) * C, ke = ks + (qe === "ts" ? 0 : (2 * P + 2 * Math.max(0, B.jitter - P)) / Math.max(be, P));
     return {
       times: he,
       dropped: pe,
@@ -49832,7 +49887,7 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
       margin: ke,
       clock: qe
     };
-  }, le = (Z, te, ne = vs) => {
+  }, le = (Z, te, ne = ks) => {
     let ue = null;
     for (const [fe, V] of Object.entries(Z)) (ue === null || V < Z[ue]) && (ue = fe);
     return ue === null || !(te in Z) ? {
@@ -49907,7 +49962,7 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
     if (T.identity = {}, ne && M["dec/lut"]) {
       const ee = performance.now(), de = [];
       {
-        const ce = zn(320, 768, 13);
+        const ce = Fn(320, 768, 13);
         de.push({
           name: "synthetic 320x768",
           w: $(ce.q),
@@ -49929,7 +49984,7 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
         k: r.intermediateSize,
         sw: r.hiddenSize * (r.intermediateSize >> 7) + 1 >>> 1
       });
-      for (const ce of de) ce.a = $(Fn(ce.k, 17 + ce.k));
+      for (const ce of de) ce.a = $($n(ce.k, 17 + ce.k));
       re = de.length - 1, I = (o === "recheck" ? [i.kernel] : Object.keys(M).filter((ce) => ce.startsWith("dec/") && ce !== "dec/lut").map((ce) => ce.slice(4))).filter((ce) => ce !== "lut" && M["dec/" + ce]);
       const oe = [];
       for (const ce of de) for (const qe of ["lut", ...I]) {
@@ -49983,10 +50038,10 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
       if (l)
         ve = l, ce = oe * (pe >> 7) + 1 >>> 1;
       else {
-        const Se = zn(oe, pe, 21);
+        const Se = Fn(oe, pe, 21);
         ve = [$(Se.q)], ce = Se.sw;
       }
-      const qe = $(Fn(pe, 23)), Ne = S(Math.max(oe, ge) * 4), he = Ud(r), be = ge ? ge * (pe >> 7) + 1 >>> 1 : 0, ke = (Se) => {
+      const qe = $($n(pe, 23)), Ne = S(Math.max(oe, ge) * 4), he = Od(r), be = ge ? ge * (pe >> 7) + 1 >>> 1 : 0, ke = (Se) => {
         if (!c || !(he > 0)) return 0;
         const Oe = Math.round(Se * oe * he / (1 - he) / 128) * 128;
         return Math.max(128, Math.min(Oe, ge));
@@ -50060,7 +50115,7 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
         if (!Ze)
           T.budgetHit = !0, T.decodeSkipped = "its warm round did not fit in the budget";
         else {
-          const { times: Ue, dropped: pt, reps: Fe, k: At, margin: cn } = Ze, wt = Ze.clock === "ts" ? Fe >= 1 : Fe >= 2;
+          const { times: Ue, dropped: pt, reps: Fe, k: At, margin: cn } = Ze, vt = Ze.clock === "ts" ? Fe >= 1 : Fe >= 2;
           T.timingsMs.decode = Object.fromEntries(Object.entries(Ue).map(([Ge, ut]) => [Ge.slice(4), +ut.toFixed(4)]));
           for (const [Ge, ut] of Object.entries(pt)) T.dropped[Ge.slice(4)] = +ut.toFixed(4);
           if (T.shapes.decode = {
@@ -50072,7 +50127,7 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
             clock: Ze.clock,
             timesAre: "ms per unit",
             weights: l ? `model (${l.length} tensors${xe ? " + LM head prefix" : ""})` : "synthetic"
-          }, !(de in Ue) || !wt)
+          }, !(de in Ue) || !vt)
             T.budgetHit = !0, T.decodeSkipped = `${Fe} timed round(s) fit in the budget; the seed stands`;
           else {
             const Ge = le(Ue, de, cn);
@@ -50089,14 +50144,14 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
       if (!b(de) || te("gemm"))
         T.budgetHit = !0, T.gemmSkipped = `${Math.max(0, m()).toFixed(0)} ms left, its identity check needs ~${de.toFixed(0)} ms`;
       else {
-        const ge = zn(256, 512, 77), ve = $(ge.q), ce = $(Fn(260 * 512, 91)), qe = (Le, Se, Oe, tt, ht, xt, Ze, Ue, pt, Fe = 1, At = void 0) => {
+        const ge = Fn(256, 512, 77), ve = $(ge.q), ce = $($n(260 * 512, 91)), qe = (Le, Se, Oe, tt, ht, xt, Ze, Ue, pt, Fe = 1, At = void 0) => {
           const cn = $(new Uint32Array([
             xt,
             Ze,
             Ue,
             pt
-          ]), U.UNIFORM | U.COPY_DST), wt = Le.beginComputePass(At);
-          wt.setPipeline(Se.pipe), wt.setBindGroup(0, e.createBindGroup({
+          ]), U.UNIFORM | U.COPY_DST), vt = Le.beginComputePass(At);
+          vt.setPipeline(Se.pipe), vt.setBindGroup(0, e.createBindGroup({
             layout: Se.layout,
             entries: [
               {
@@ -50117,8 +50172,8 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
               }
             ]
           }));
-          for (let Ge = 0; Ge < Fe; Ge++) wt.dispatchWorkgroups(xt / Se.BN, Math.ceil(Ue / Se.BM));
-          wt.end();
+          for (let Ge = 0; Ge < Fe; Ge++) vt.dispatchWorkgroups(xt / Se.BN, Math.ceil(Ue / Se.BM));
+          vt.end();
         }, Ne = Object.keys(M).filter((Le) => Le.startsWith(X.form + "/")), he = [], be = (Le, Se) => {
           const Oe = S(Se * 256 * 4);
           he.push({
@@ -50154,14 +50209,14 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
           if (!b(1.25 * 3 * tt + q(3)))
             T.budgetHit = !0, T.gemmSkipped = `${Math.max(0, m()).toFixed(0)} ms left, its calibration needs ~${(3 * tt).toFixed(0)} ms`;
           else {
-            const ht = $(Fn(Ye * ct, 5)), xt = Dt * (ct >> 7) + 1 >>> 1, Ze = (Ge) => {
+            const ht = $($n(Ye * ct, 5)), xt = Dt * (ct >> 7) + 1 >>> 1, Ze = (Ge) => {
               if (l) return {
                 n: Ge,
                 wb: l[0],
                 sw: xt,
                 c: S(Ye * Ge * 4)
               };
-              const ut = zn(Ge, ct, 9);
+              const ut = Fn(Ge, ct, 9);
               return {
                 n: Ge,
                 wb: $(ut.q),
@@ -50189,30 +50244,30 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
               if (!b(1.25 * 3 * Fe * Ge / Ue.n + q(3))) break;
               Ue = Ze(Ge), Fe = await pt();
             }
-            const At = Math.min(64, Math.max(1, Math.ceil(G() / Math.max(Fe, 0.02)))), wt = await ie((Ge) => {
+            const At = Math.min(64, Math.max(1, Math.ceil(G() / Math.max(Fe, 0.02)))), vt = await ie((Ge) => {
               const ut = {};
-              for (const Tt of xe) ut[Tt] = (hn, Gn) => qe(hn, M[Tt], ht, Ue.wb, Ue.c, Ue.n, ct, Ye, Ue.sw, Ge, Gn);
+              for (const Tt of xe) ut[Tt] = (hn, Ln) => qe(hn, M[Tt], ht, Ue.wb, Ue.c, Ue.n, ct, Ye, Ue.sw, Ge, Ln);
               return ut;
             }, At, et, 64, "gemm", Math.max(Fe, 0.02));
-            if (!wt)
+            if (!vt)
               T.budgetHit = !0, T.gemmSkipped = "its warm round did not fit in the budget";
             else {
-              const { times: Ge, dropped: ut, reps: Tt, k: hn, margin: Gn } = wt, Vo = wt.clock === "ts" ? Tt >= 1 : Tt >= 2;
-              T.timingsMs.gemm = Object.fromEntries(Object.entries(Ge).map(([en, _r]) => [en, +_r.toFixed(3)]));
-              for (const [en, _r] of Object.entries(ut)) T.dropped[en] = +_r.toFixed(3);
+              const { times: Ge, dropped: ut, reps: Tt, k: hn, margin: Ln } = vt, Yo = vt.clock === "ts" ? Tt >= 1 : Tt >= 2;
+              T.timingsMs.gemm = Object.fromEntries(Object.entries(Ge).map(([en, mr]) => [en, +mr.toFixed(3)]));
+              for (const [en, mr] of Object.entries(ut)) T.dropped[en] = +mr.toFixed(3);
               if (T.shapes.gemm = {
                 N: Ue.n,
                 K: ct,
                 M: Ye,
                 dispatchesPerRun: hn,
                 reps: Tt,
-                margin: +Gn.toFixed(3),
-                clock: wt.clock,
+                margin: +Ln.toFixed(3),
+                clock: vt.clock,
                 weights: l ? "model (row prefix)" : "synthetic"
-              }, !(et in Ge) || !Vo)
+              }, !(et in Ge) || !Yo)
                 T.budgetHit = !0, T.gemmSkipped = `${Tt} timed round(s) fit in the budget; the seed stands`;
               else {
-                const en = le(Ge, et, Gn);
+                const en = le(Ge, et, Ln);
                 en.keep || (T.gemm = en.arm), T.decided.gemm = !0;
               }
             }
@@ -50234,7 +50289,7 @@ async function Ar(e, t, n, r, a = {}, s = null, i = {}) {
   }
   return T;
 }
-function Ud(e) {
+function Od(e) {
   const t = e.hiddenSize, n = e.intermediateSize, r = e.vocabSize, a = e.numLayers;
   if (!t || !n || !r || !a) return 0;
   const s = e.deltanet || {}, i = e.attention || {}, o = s.numKeyHeads ?? s.numHeads, u = s.numValueHeads ?? s.numHeads, l = (e.attnLayerIndices || []).length, d = 3 * n * t;
@@ -50249,9 +50304,9 @@ function Ud(e) {
   } else c += l * (4 * t * t + d);
   return r * t / (c + r * t);
 }
-async function Rd(e, t, n, r, a, s, i = {}, o = null) {
+async function Id(e, t, n, r, a, s, i = {}, o = null) {
   const u = performance.now(), l = Number.isFinite(i.budgetMs) ? i.budgetMs : 700, d = {
-    version: Ci,
+    version: Oi,
     mode: t.mode,
     seed: t.seed,
     pinned: t.pinned,
@@ -50277,7 +50332,7 @@ async function Rd(e, t, n, r, a, s, i = {}, o = null) {
       };
       const P = await s;
       c = P.pipes;
-      const x = await Ar(e, t, P, r, i, o, {
+      const x = await Tr(e, t, P, r, i, o, {
         mode: "guard",
         state: h
       });
@@ -50298,10 +50353,10 @@ async function Rd(e, t, n, r, a, s, i = {}, o = null) {
         report: d,
         pipes: c
       };
-    const p = Td(t, e, a, r);
+    const p = Ud(t, e, a, r);
     let f = null;
     if (t.mode !== "force") try {
-      f = await Md(p, i), d.cache = f && f.version === "b2pick-2026-10-28k6" ? "hit" : "miss";
+      f = await Rd(p, i), d.cache = f && f.version === "b2pick-2026-10-28k6" ? "hit" : "miss";
     } catch (P) {
       d.cache = "unavailable: " + String(P && P.message || P).slice(0, 120);
     }
@@ -50313,7 +50368,7 @@ async function Rd(e, t, n, r, a, s, i = {}, o = null) {
       const P = f.decided || {}, x = f.decode || t.seed.decode;
       let R = null;
       if (t.slots.decode && P.decode && x && x !== "lut") {
-        const G = await Ar(e, t, m, r, i, o, {
+        const G = await Tr(e, t, m, r, i, o, {
           mode: "recheck",
           kernel: x
         });
@@ -50346,9 +50401,9 @@ async function Rd(e, t, n, r, a, s, i = {}, o = null) {
         todo: B
       }, d.cache = "hit, partial: measuring " + B.join(" + "));
     }
-    const w = await Ar(e, t, m, r, i, o, {
+    const w = await Tr(e, t, m, r, i, o, {
       mode: "full",
-      deadline: u + d.compileWaitMs + l - qd,
+      deadline: u + d.compileWaitMs + l - Gd,
       state: h,
       ...b ? { slots: b.todo } : {}
     }), g = b ? b.hit : {}, v = (P, x, R) => b && !b.todo.includes(P) ? x : R, y = {
@@ -50403,7 +50458,7 @@ async function Rd(e, t, n, r, a, s, i = {}, o = null) {
     const k = Object.keys(t.slots).every((P) => y.decided[P]);
     d.source = (b ? "cache+" : "") + (k ? "measured" : "budget");
     try {
-      await Gd(p, {
+      await Cd(p, {
         version: "b2pick-2026-10-28k6",
         ...y
       }, i) && (d.cache = (d.cache === "miss" ? "" : (d.cache || "") + "; ") + "stored");
@@ -50452,7 +50507,7 @@ async function Rd(e, t, n, r, a, s, i = {}, o = null) {
     d.ms = +(performance.now() - u).toFixed(1);
   }
 }
-function wa(e) {
+function va(e) {
   const t = e.match(/layers\.(\d+)\.(.+)\.(lora_[AB])\.weight$/);
   return t ? {
     layerIdx: parseInt(t[1]),
@@ -50460,12 +50515,12 @@ function wa(e) {
     matrix: t[3] === "lora_A" ? "A" : "B"
   } : null;
 }
-function ir(e, t, n) {
+function or(e, t, n) {
   const r = new Float32Array(t * n);
   for (let a = 0; a < t; a++) for (let s = 0; s < n; s++) r[s * t + a] = e[a * n + s];
   return r;
 }
-function Cd(e) {
+function Dd(e) {
   if (e.peft_type === "DORA" || e.peft_type === "LORA" && e.use_dora === !0) throw new Error(`parseAdapterConfig: DoRA adapter detected (peft_type="${e.peft_type}", use_dora=${e.use_dora}). Use src/lora/dora_loader.js::loadDoraAdapter instead.`);
   if (e.peft_type && e.peft_type !== "LORA") throw new Error(`Unsupported peft_type: "${e.peft_type}" (expected "LORA")`);
   const t = e.r;
@@ -50481,7 +50536,7 @@ function Cd(e) {
     alphaPattern: e.alpha_pattern || {}
   };
 }
-function Nd(e, t, n = "") {
+function Kd(e, t, n = "") {
   const r = /* @__PURE__ */ new Map(), a = /* @__PURE__ */ new Map();
   for (const [s, i] of e) {
     const o = [];
@@ -50499,11 +50554,11 @@ function Nd(e, t, n = "") {
     modulesByLayer: a
   };
 }
-function Od(e, t, n) {
+function Wd(e, t, n) {
   if (!n) return;
   const r = [], a = /* @__PURE__ */ new Map(), s = [];
   for (const o of t.tensorNames()) {
-    const u = wa(o);
+    const u = va(o);
     if (!u) continue;
     const l = t.tensorInfo(o).shape || [];
     s.push({
@@ -50531,10 +50586,10 @@ function Od(e, t, n) {
   if (r.length !== 0)
     throw new Error(`Adapter "${e}" does not fit the loaded model (${n.label}): ${r[0]}` + (r.length > 1 ? `; ${r.length - 1} more of its ${i} LoRA tensors do not fit either` : "") + ". It was trained for a different model; load an adapter trained for this one.");
 }
-function Id(e, t, n, r) {
-  const a = Cd(n), s = r.tensorNames(), i = /* @__PURE__ */ new Map();
+function zd(e, t, n, r) {
+  const a = Dd(n), s = r.tensorNames(), i = /* @__PURE__ */ new Map();
   for (const u of s) {
-    const l = wa(u);
+    const l = va(u);
     if (!l) continue;
     const d = `${l.layerIdx}.${l.module}`;
     i.has(d) || i.set(d, {});
@@ -50549,7 +50604,7 @@ function Id(e, t, n, r) {
     if (!l.A || !l.B) throw new Error(`Incomplete LoRA pair for "${u}": missing ${l.A ? "B" : "A"} matrix`);
     const [d, c] = l.A.shape, [h, p] = l.B.shape;
     if (d !== p) throw new Error(`Rank mismatch for "${u}": A rank=${d}, B rank=${p}`);
-    const f = d, _ = a.rankPattern[u] ?? f, m = (a.alphaPattern[u] ?? a.alpha) / _, b = ir(l.A.data, d, c), w = ir(l.B.data, h, p), g = ks(e, b, `lora_A_${u}`), v = ks(e, w, `lora_B_${u}`);
+    const f = d, _ = a.rankPattern[u] ?? f, m = (a.alphaPattern[u] ?? a.alpha) / _, b = or(l.A.data, d, c), w = or(l.B.data, h, p), g = ys(e, b, `lora_A_${u}`), v = ys(e, w, `lora_B_${u}`);
     o.set(u, {
       A: g,
       B: v,
@@ -50566,15 +50621,15 @@ function Id(e, t, n, r) {
     layers: o
   };
 }
-function Dd(e) {
+function Fd(e) {
   for (const t of e.layers.values())
     t.A.destroy(), t.sharedB || t.B.destroy();
-  e.layers.clear(), e.fused && Oi(e.fused), e.fused = null;
+  e.layers.clear(), e.fused && Di(e.fused), e.fused = null;
 }
-function Kd(e, t, n, r) {
+function $d(e, t, n, r) {
   const a = /* @__PURE__ */ new Map();
   for (const c of n.tensorNames()) {
-    const h = wa(c);
+    const h = va(c);
     if (!h) continue;
     const p = `${h.layerIdx}.${h.module}`;
     a.has(p) || a.set(p, {}), a.get(p)[h.matrix] = c;
@@ -50781,11 +50836,11 @@ function Kd(e, t, n, r) {
     for (const [c, h] of r) for (const p of h) d(c, p);
     for (const c of t.layers.keys()) i.has(c) || s.uncovered.push(c);
   } catch (c) {
-    throw Oi(s), c;
+    throw Di(s), c;
   }
   return s;
 }
-function Oi(e) {
+function Di(e) {
   for (const t of e.groups.values())
     if (!t.reason) {
       t.ag.destroy(), t.u.destroy(), t.sp.destroy();
@@ -50793,7 +50848,7 @@ function Oi(e) {
     }
   e.groups.clear();
 }
-function ks(e, t, n) {
+function ys(e, t, n) {
   const r = e.createBuffer({
     size: t.byteLength,
     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
@@ -50802,7 +50857,7 @@ function ks(e, t, n) {
   });
   return new Float32Array(r.getMappedRange()).set(t), r.unmap(), r;
 }
-function Wd(e, t) {
+function Vd(e, t) {
   const n = /* @__PURE__ */ new Map(), r = e.tensorNames(), a = /* @__PURE__ */ new Map();
   for (const s of r) {
     const i = s.match(/^layers\.(\d+)\.(.+)\.lora_xs_([AB])$/);
@@ -50831,14 +50886,14 @@ function Wd(e, t) {
   }
   return { modules: n };
 }
-function zd(e, t) {
+function Hd(e, t) {
   for (const [n, r] of t.modules)
-    r.gpuB || (r.gpuB = sa(e, r.B, `lora_xs_B_shared_${n}`));
+    r.gpuB || (r.gpuB = ia(e, r.B, `lora_xs_B_shared_${n}`));
 }
-function Fd(e) {
+function Qd(e) {
   for (const t of e.modules.values()) t.gpuB && (t.gpuB.destroy(), t.gpuB = null);
 }
-function $d(e, t, n, r) {
+function jd(e, t, n, r) {
   const a = new Float32Array(n * r);
   for (let s = 0; s < n; s++) for (let i = 0; i < r; i++) {
     let o = 0;
@@ -50847,7 +50902,7 @@ function $d(e, t, n, r) {
   }
   return a;
 }
-function Vd(e) {
+function Yd(e) {
   if (e.peft_type !== "LORA_XS" && e.peft_type !== "LORA_XS_COMPACT") throw new Error(`Expected peft_type LORA_XS or LORA_XS_COMPACT, got "${e.peft_type}"`);
   const t = e.r;
   if (!Number.isInteger(t) || t < 1 || t > 128) throw new Error(`Invalid rank: ${t}`);
@@ -50859,8 +50914,8 @@ function Vd(e) {
     targetModules: e.target_modules || []
   };
 }
-function Hd(e, t, n, r, a) {
-  const s = Vd(n), i = /* @__PURE__ */ new Map();
+function Zd(e, t, n, r, a) {
+  const s = Yd(n), i = /* @__PURE__ */ new Map();
   for (const o of r.tensorNames()) {
     const u = o.match(/^layers\.(\d+)\.(.+)\.lora_R(?:\.weight)?$/);
     if (!u) continue;
@@ -50871,7 +50926,7 @@ function Hd(e, t, n, r, a) {
     }
     const c = r.tensorInfo(o), h = r.getTensor(o), [p, f] = c.shape;
     if (p !== s.rank || f !== s.rank) throw new Error(`R shape mismatch for "${l}": [${p},${f}], expected [${s.rank},${s.rank}]`);
-    const _ = sa(e, $d(d.A, h, d.K, s.rank), `lora_xs_Aeff_${l}`), m = !!d.gpuB, b = m ? d.gpuB : sa(e, d.B, `lora_xs_B_${l}`);
+    const _ = ia(e, jd(d.A, h, d.K, s.rank), `lora_xs_Aeff_${l}`), m = !!d.gpuB, b = m ? d.gpuB : ia(e, d.B, `lora_xs_B_${l}`);
     i.set(l, {
       A: _,
       B: b,
@@ -50888,7 +50943,7 @@ function Hd(e, t, n, r, a) {
     layers: i
   };
 }
-function sa(e, t, n) {
+function ia(e, t, n) {
   const r = e.createBuffer({
     size: t.byteLength,
     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
@@ -50897,7 +50952,7 @@ function sa(e, t, n) {
   });
   return new Float32Array(r.getMappedRange()).set(t), r.unmap(), r;
 }
-function Qd(e) {
+function Xd(e) {
   const t = e.match(/layers\.(\d+)\.(.+?)\.(lora_A\.weight|lora_B\.weight|lora_magnitude_vector\.weight|lora_magnitude_vector|lora_weight_norm\.weight|lora_weight_norm)$/);
   if (!t) return null;
   const n = t[3];
@@ -50908,7 +50963,7 @@ function Qd(e) {
     matrix: r
   };
 }
-function jd(e, t = {}) {
+function Jd(e, t = {}) {
   const n = e.peft_type || "LORA";
   if (!(n === "DORA" || n === "LORA" && e.use_dora === !0)) throw new Error(`parseDoraConfig: not a DoRA adapter — peft_type="${n}", use_dora=${e.use_dora}. Plain LoRA adapters must go through adapter_loader.js::parseAdapterConfig.`);
   const r = e.r;
@@ -50925,13 +50980,13 @@ function jd(e, t = {}) {
     requireWeightNorm: t.requireWeightNorm !== !1
   };
 }
-function Yd(e) {
+function ec(e) {
   return e ? e.peft_type === "DORA" || (e.peft_type ?? "LORA") === "LORA" && e.use_dora === !0 : !1;
 }
-function Zd(e, t, n, r, a = {}) {
-  const s = jd(n, a), i = r.tensorNames(), o = /* @__PURE__ */ new Map();
+function tc(e, t, n, r, a = {}) {
+  const s = Jd(n, a), i = r.tensorNames(), o = /* @__PURE__ */ new Map();
   for (const l of i) {
-    const d = Qd(l);
+    const d = Xd(l);
     if (!d) continue;
     const c = `${d.layerIdx}.${d.module}`;
     o.has(c) || o.set(c, {});
@@ -50954,7 +51009,7 @@ function Zd(e, t, n, r, a = {}) {
     if (d.mag.shape.length !== 1 || d.mag.shape[0] !== p) throw new Error(`loadDoraAdapter: magnitude shape mismatch for "${l}": got [${d.mag.shape.join(",")}], expected [${p}]`);
     if (d.wnorm && (d.wnorm.shape.length !== 1 || d.wnorm.shape[0] !== p))
       throw new Error(`loadDoraAdapter: weight_norm shape mismatch for "${l}": got [${d.wnorm.shape.join(",")}], expected [${p}]`);
-    const _ = s.rankPattern[l] ?? c, m = (s.alphaPattern[l] ?? s.alpha) / _, b = ir(d.A.data, c, h), w = ir(d.B.data, p, f), g = $n(e, b, `dora_A_${l}`), v = $n(e, w, `dora_B_${l}`), y = $n(e, d.mag.data, `dora_mag_${l}`), k = d.wnorm ? $n(e, d.wnorm.data, `dora_wnorm_${l}`) : null;
+    const _ = s.rankPattern[l] ?? c, m = (s.alphaPattern[l] ?? s.alpha) / _, b = or(d.A.data, c, h), w = or(d.B.data, p, f), g = Vn(e, b, `dora_A_${l}`), v = Vn(e, w, `dora_B_${l}`), y = Vn(e, d.mag.data, `dora_mag_${l}`), k = d.wnorm ? Vn(e, d.wnorm.data, `dora_wnorm_${l}`) : null;
     u.set(l, {
       A: g,
       B: v,
@@ -50975,12 +51030,12 @@ function Zd(e, t, n, r, a = {}) {
     layers: u
   };
 }
-function Xd(e) {
+function nc(e) {
   for (const t of e.layers.values())
     t.A.destroy(), t.B.destroy(), t.magnitude.destroy(), t.weightNorm && t.weightNorm.destroy();
   e.layers.clear();
 }
-function $n(e, t, n) {
+function Vn(e, t, n) {
   const r = e.createBuffer({
     size: t.byteLength,
     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
@@ -50989,7 +51044,7 @@ function $n(e, t, n) {
   });
   return new Float32Array(r.getMappedRange()).set(t), r.unmap(), r;
 }
-var Ii = class {
+var Ki = class {
   pipeline;
   bindGroupLayout;
   prescaledPipeline = null;
@@ -51632,10 +51687,10 @@ var Ii = class {
 function Je(e) {
   return e && e.kind || "lora";
 }
-function ys(e) {
-  e && (Je(e) === "dora" ? Xd(e) : Dd(e));
+function Ss(e) {
+  e && (Je(e) === "dora" ? nc(e) : Fd(e));
 }
-var Di = class Qe {
+var Wi = class Qe {
   device;
   loraApply;
   doraApply;
@@ -51666,10 +51721,10 @@ var Di = class Qe {
   }
   load(t, n, r) {
     if (this.adapters.has(t)) throw new Error(`Adapter "${t}" is already loaded. Unload first.`);
-    Od(t, r, this.modelShapes);
-    const a = Id(this.device, t, n, r);
+    Wd(t, r, this.modelShapes);
+    const a = zd(this.device, t, n, r);
     if (this.fuse) try {
-      a.fused = Kd(this.device, a, r, this.fuse.groups);
+      a.fused = $d(this.device, a, r, this.fuse.groups);
     } catch (s) {
       a.fused = null, a.fusedDecline = {
         reason: "layout-error",
@@ -51740,7 +51795,7 @@ var Di = class Qe {
     return d ? (i.counts.declined[d] = (i.counts.declined[d] || 0) + 1, null) : (i.counts.planned++, l);
   }
   _fuseTally(t, n) {
-    !this.fuse || n === 0 || (t > 1 || ui() === "prefill" ? this.fuse.counts.prefill += n : this.fuse.counts.unfused += n);
+    !this.fuse || n === 0 || (t > 1 || di() === "prefill" ? this.fuse.counts.prefill += n : this.fuse.counts.unfused += n);
   }
   loraFuseSkip(t, n, r, a) {
     const s = this.fuse;
@@ -51753,15 +51808,15 @@ var Di = class Qe {
     s.counts.declined[u] = (s.counts.declined[u] || 0) + 1;
   }
   loadBasis(t, n) {
-    this.sharedBasis = Wd(t, n), zd(this.device, this.sharedBasis);
+    this.sharedBasis = Vd(t, n), Hd(this.device, this.sharedBasis);
   }
   destroyBasis() {
-    this.sharedBasis && (Fd(this.sharedBasis), this.sharedBasis = null);
+    this.sharedBasis && (Qd(this.sharedBasis), this.sharedBasis = null);
   }
   loadLoRAXS(t, n, r) {
     if (!this.sharedBasis) throw new Error("Shared basis not loaded. Call loadBasis() first.");
     if (this.adapters.has(t)) throw new Error(`Adapter "${t}" is already loaded. Unload first.`);
-    const a = Hd(this.device, t, n, r, this.sharedBasis);
+    const a = Zd(this.device, t, n, r, this.sharedBasis);
     return this.adapters.set(t, a), a;
   }
   async loadFromURLs(t, n, r) {
@@ -51774,7 +51829,7 @@ var Di = class Qe {
   }
   loadDora(t, n, r, a) {
     if (this.adapters.has(t)) throw new Error(`Adapter "${t}" is already loaded. Unload first.`);
-    const s = Zd(this.device, t, n, r, a);
+    const s = tc(this.device, t, n, r, a);
     return this.adapters.set(t, s), s;
   }
   async loadDoraFromURLs(t, n, r, a) {
@@ -51786,7 +51841,7 @@ var Di = class Qe {
     return this.loadDora(t, o, u, a);
   }
   loadAuto(t, n, r, a) {
-    return Yd(n) ? this.loadDora(t, n, r, a) : this.load(t, n, r);
+    return ec(n) ? this.loadDora(t, n, r, a) : this.load(t, n, r);
   }
   activate(t) {
     if (!this.adapters.has(t)) throw new Error(`Adapter "${t}" is not loaded.`);
@@ -51951,11 +52006,11 @@ var Di = class Qe {
   }
   unload(t) {
     if (!this.adapters.has(t)) throw new Error(`Adapter "${t}" is not loaded.`);
-    this.activeAdapterName === t && (this._clearConcatCache(), this.activeAdapterName = null), ys(this.adapters.get(t)), this.adapters.delete(t);
+    this.activeAdapterName === t && (this._clearConcatCache(), this.activeAdapterName = null), Ss(this.adapters.get(t)), this.adapters.delete(t);
   }
   unloadAll() {
     this._clearConcatCache();
-    for (const [t, n] of this.adapters) ys(n);
+    for (const [t, n] of this.adapters) Ss(n);
     this.adapters.clear(), this.activeAdapterName = null;
   }
   list() {
@@ -52083,14 +52138,14 @@ var Di = class Qe {
   UNSUPPORTED_VARIANT: "unsupported-variant",
   DEVICE_LOST: "device-lost"
 });
-function Jd(e) {
+function rc(e) {
   return !e || typeof e != "object" ? {
     resolution: "rethrow",
     reason: null
-  } : e.threw ? e.threw instanceof Nr ? {
+  } : e.threw ? e.threw instanceof Or ? {
     resolution: "fallback",
     reason: tn.UNSUPPORTED_VARIANT
-  } : e.threw instanceof Zn ? {
+  } : e.threw instanceof Xn ? {
     resolution: "fallback",
     reason: tn.UNSUPPORTED_VARIANT
   } : {
@@ -52107,8 +52162,8 @@ function Jd(e) {
     reason: null
   };
 }
-var ia = /* @__PURE__ */ Symbol("rung-loop:device-lost");
-function ec(e) {
+var oa = /* @__PURE__ */ Symbol("rung-loop:device-lost");
+function ac(e) {
   if (!e || typeof e.then != "function") return {
     promise: new Promise(() => {
     }),
@@ -52120,9 +52175,9 @@ function ec(e) {
     n = a;
   });
   return e.then(() => {
-    t || n(ia);
+    t || n(oa);
   }, () => {
-    t || n(ia);
+    t || n(oa);
   }), {
     promise: r,
     abort: () => {
@@ -52130,10 +52185,10 @@ function ec(e) {
     }
   };
 }
-async function tc(e) {
+async function sc(e) {
   if (!e || typeof e != "object") throw new TypeError("runRungLoop: deps object is required");
   if (typeof e.runOneRung != "function") throw new TypeError("runRungLoop: deps.runOneRung must be a function");
-  const t = typeof e.buildPlan == "function" ? e.buildPlan : rr, n = Number.isInteger(e.maxFallbackRung) ? Math.max(0, Math.min(6, e.maxFallbackRung)) : 6, r = e.policyCap && typeof e.policyCap == "object" && Number.isInteger(e.policyCap.rung) ? e.policyCap : null, a = r ? Math.max(0, Math.min(6, r.rung)) : 6, s = Math.min(n, a), i = r !== null && a < n;
+  const t = typeof e.buildPlan == "function" ? e.buildPlan : ar, n = Number.isInteger(e.maxFallbackRung) ? Math.max(0, Math.min(6, e.maxFallbackRung)) : 6, r = e.policyCap && typeof e.policyCap == "object" && Number.isInteger(e.policyCap.rung) ? e.policyCap : null, a = r ? Math.max(0, Math.min(6, r.rung)) : 6, s = Math.min(n, a), i = r !== null && a < n;
   let o = Number.isInteger(e.startRung) ? Math.max(0, e.startRung) : 0;
   if (o > s) throw new RangeError(`runRungLoop: startRung=${o} > maxFallbackRung=${s}`);
   const u = e.strict === !0, l = Number.isInteger(e.maxDeviceReacquires) ? Math.max(0, e.maxDeviceReacquires) : 2, d = e.caps && typeof e.caps.deviceMaxBufferMiB == "number" ? e.caps.deviceMaxBufferMiB : null, c = [], h = [];
@@ -52144,16 +52199,16 @@ async function tc(e) {
       e.onRungAttempt(m, o);
     } catch {
     }
-    const b = ec(e.deviceLost);
+    const b = ac(e.deviceLost);
     let w;
     try {
       w = await Promise.race([Promise.resolve(e.runOneRung(m, o)), b.promise]);
     } finally {
       b.abort();
     }
-    if (w === ia) {
-      if (p >= l || typeof e.reacquireDevice != "function") throw new Ln("device-lost-escalation", {
-        rungsTried: c.map((R) => yt(t(R))),
+    if (w === oa) {
+      if (p >= l || typeof e.reacquireDevice != "function") throw new Un("device-lost-escalation", {
+        rungsTried: c.map((R) => St(t(R))),
         lastFailurePhase: f,
         deviceMaxBufferMiB: d,
         suggestion: "GPU device was lost while loading the model and could not be reacquired."
@@ -52174,7 +52229,7 @@ async function tc(e) {
       continue;
     }
     w && typeof w == "object" && typeof w.lastFailurePhase == "string" && (f = w.lastFailurePhase);
-    const g = Jd(w);
+    const g = rc(w);
     if (g.resolution === "success") return {
       result: w.result,
       plan: m,
@@ -52184,9 +52239,9 @@ async function tc(e) {
     };
     if (g.resolution === "rethrow") throw w.threw;
     _ = g.reason;
-    const v = o >= s, y = v ? null : t(o + 1), k = v && i, P = y ? El(m, y) : k ? String(r.summary) : "Ladder exhausted";
-    if (u) throw new Ln("strict-degrade", {
-      rungsTried: c.map((R) => yt(t(R))),
+    const v = o >= s, y = v ? null : t(o + 1), k = v && i, P = y ? Ml(m, y) : k ? String(r.summary) : "Ladder exhausted";
+    if (u) throw new Un("strict-degrade", {
+      rungsTried: c.map((R) => St(t(R))),
       lastFailurePhase: f,
       deviceMaxBufferMiB: d,
       suggestion: "Allocation budget is strict and the requested plan failed. Increase maxFallbackRung or relax strict mode to allow degraded plans."
@@ -52204,16 +52259,16 @@ async function tc(e) {
       e.onFallback(x);
     } catch {
     }
-    if (k) throw new Ln(r.code, {
-      rungsTried: c.map((R) => yt(t(R))),
+    if (k) throw new Un(r.code, {
+      rungsTried: c.map((R) => St(t(R))),
       lastFailurePhase: f,
       deviceMaxBufferMiB: d,
       suggestion: r.suggestion
     });
     if (v) {
       const R = _ === tn.VALIDATION ? "exceeds-limit" : "out-of-memory";
-      throw new Ln(R, {
-        rungsTried: c.map((B) => yt(t(B))),
+      throw new Un(R, {
+        rungsTried: c.map((B) => St(t(B))),
         lastFailurePhase: f,
         deviceMaxBufferMiB: d,
         suggestion: R === "exceeds-limit" ? "Even the smallest fallback plan asked for the largest buffer larger than this device permits." : "GPU is out of memory after every fallback rung. Try desktop Chrome or close other tabs."
@@ -52222,7 +52277,7 @@ async function tc(e) {
     o += 1;
   }
 }
-async function Ss(e, t) {
+async function xs(e, t) {
   if (!e) throw new TypeError("runAllocationPhase: device is required");
   if (typeof t != "function") throw new TypeError("runAllocationPhase: fn must be a function");
   if (typeof e.pushErrorScope != "function" || typeof e.popErrorScope != "function") throw new TypeError("runAllocationPhase: device does not expose pushErrorScope/popErrorScope");
@@ -52241,42 +52296,42 @@ async function Ss(e, t) {
     threw: r
   };
 }
-var xs = Object.freeze({
+var Ps = Object.freeze({
   exact: 0,
   R: 1,
   C: 2
 });
-function nc(e) {
+function ic(e) {
   return e.useKivi === !0 ? {
     precision: `kivi${e.kiviBits ?? 4}`,
-    precisionClass: tr.kivi
+    precisionClass: nr.kivi
   } : e.useTurboQuant === !0 ? {
     precision: `turboquant${e.tqBits ?? 3}`,
     precisionClass: "C"
   } : e.useF16Cache === !0 ? {
     precision: "f16",
-    precisionClass: tr.f16
+    precisionClass: nr.f16
   } : {
     precision: "f32",
-    precisionClass: tr.f32
+    precisionClass: nr.f32
   };
 }
-function rc(e) {
+function oc(e) {
   return e === "f32" ? "exact" : e === "f16" ? "R" : typeof e == "string" && /^(kivi|turboquant)\d+$/.test(e) ? "C" : null;
 }
-function Ki(e) {
+function zi(e) {
   if (e === void 0) return !0;
   if (e === !0 || e === !1) return e;
   throw new TypeError(`allowCompressedKV must be true or false (got ${e === null ? "null" : typeof e})`);
 }
-function ac(e) {
+function uc(e) {
   const t = (Array.isArray(e) ? e : []).filter((n) => n && n.fromRung !== n.toRung).map((n) => `${n.reason}${n.lastFailurePhase ? ` in phase ${n.lastFailurePhase}` : ""} at rung ${n.fromRung}`);
   return t.length ? t.join("; ") : null;
 }
-function Wi({ attnLayers: e, stateLayers: t = [], requested: n, requestedMaxSeq: r, rung: a, fallbackEvents: s = [], allowCompressedKV: i }) {
-  const o = (e || []).map(nc);
+function Fi({ attnLayers: e, stateLayers: t = [], requested: n, requestedMaxSeq: r, rung: a, fallbackEvents: s = [], allowCompressedKV: i }) {
+  const o = (e || []).map(ic);
   let u = null, l = null;
-  o.length && (u = o.every((_) => _.precision === o[0].precision) ? o[0].precision : "mixed", l = o.reduce((_, m) => xs[m.precisionClass] > xs[_] ? m.precisionClass : _, "exact"));
+  o.length && (u = o.every((_) => _.precision === o[0].precision) ? o[0].precision : "mixed", l = o.reduce((_, m) => Ps[m.precisionClass] > Ps[_] ? m.precisionClass : _, "exact"));
   const d = (e || []).map((_) => _.maxSeq).filter(Number.isInteger), c = d.length ? Math.min(...d) : null, h = (t || []).map((_) => _.statePrecision).filter((_) => typeof _ == "string"), p = h.length ? h.every((_) => _ === h[0]) ? h[0] : "mixed" : null, f = a > 0 && (u !== n || Number.isInteger(r) && c !== null && c < r);
   return {
     precision: u,
@@ -52285,13 +52340,13 @@ function Wi({ attnLayers: e, stateLayers: t = [], requested: n, requestedMaxSeq:
     maxSeq: c,
     requested: n,
     fallback: f,
-    reason: f ? ac(s) : null,
+    reason: f ? uc(s) : null,
     rung: a,
     allowCompressedKV: i
   };
 }
-function sc(e, t) {
-  return !e || !e.fallback || e.precisionClass !== "C" || rc(e.requested) === "C" ? null : `KV cache COMPRESSED to ${e.precision} (precision class C) by the cold-load fallback — ${t || `rung ${e.rung}`}; asked for ${e.requested}` + (e.reason ? `; after ${e.reason}` : "") + ". Reported as loadModel().kv; load with allowCompressedKV: false to refuse it.";
+function lc(e, t) {
+  return !e || !e.fallback || e.precisionClass !== "C" || oc(e.requested) === "C" ? null : `KV cache COMPRESSED to ${e.precision} (precision class C) by the cold-load fallback — ${t || `rung ${e.rung}`}; asked for ${e.requested}` + (e.reason ? `; after ${e.reason}` : "") + ". Reported as loadModel().kv; load with allowCompressedKV: false to refuse it.";
 }
 var ot = Object.freeze({
   patchSize: 16,
@@ -52309,7 +52364,7 @@ var ot = Object.freeze({
   ]),
   rescaleFactor: 1 / 255
 });
-function zi(e, t, n, r = {}) {
+function $i(e, t, n, r = {}) {
   const { patchSize: a = ot.patchSize, temporalPatchSize: s = ot.temporalPatchSize, mergeSize: i = ot.mergeSize, imageMean: o = ot.imageMean, imageStd: u = ot.imageStd, rescaleFactor: l = ot.rescaleFactor } = r, d = a * i;
   if (t <= 0 || n <= 0) throw new Error(`preprocessImage: invalid size ${t}x${n}`);
   if (t % d !== 0 || n % d !== 0) throw new Error(`preprocessImage: h,w must be multiples of ${d}; got ${t}x${n}. Use smartResize() + a bilinear resampler before calling preprocessImage.`);
@@ -52340,13 +52395,13 @@ function zi(e, t, n, r = {}) {
     tokenDim: v
   };
 }
-var Ps = [
+var Bs = [
   "exact",
   "max",
   "mae",
   "rmse"
 ];
-function ic(e, t) {
+function dc(e, t) {
   if (e === "exact" || e === "max") return (n, r, a, s) => {
     let i = 0;
     for (let o = 0; o < t; o++) {
@@ -52370,10 +52425,10 @@ function ic(e, t) {
   };
   throw new Error(`pixelprune: unknown method '${e}'`);
 }
-function Fi(e, t, n, r, a = {}) {
-  return oc(e, t, n, r, a);
+function Vi(e, t, n, r, a = {}) {
+  return cc(e, t, n, r, a);
 }
-function oc(e, t, n, r, a = {}) {
+function cc(e, t, n, r, a = {}) {
   if (!Number.isInteger(t) || t <= 0) throw new Error(`pixelprune: mH must be positive int, got ${t}`);
   if (!Number.isInteger(n) || n <= 0) throw new Error(`pixelprune: mW must be positive int, got ${n}`);
   if (!Number.isInteger(r) || r <= 0) throw new Error(`pixelprune: featDim must be positive int, got ${r}`);
@@ -52381,10 +52436,10 @@ function oc(e, t, n, r, a = {}) {
   const s = t * n;
   if (e.length !== s * r) throw new Error(`pixelprune: mergedFeat length ${e.length} != mH*mW*featDim = ${s * r}`);
   const i = a.method ?? "exact";
-  if (!Ps.includes(i)) throw new Error(`pixelprune: method must be one of ${Ps.join(",")}, got '${i}'`);
+  if (!Bs.includes(i)) throw new Error(`pixelprune: method must be one of ${Bs.join(",")}, got '${i}'`);
   const o = i === "exact" ? 0 : a.threshold ?? 0;
   if (!Number.isFinite(o) || o < 0) throw new Error(`pixelprune: threshold must be a finite non-negative number, got ${o}`);
-  const u = ic(i, r), l = (f, _) => u(e, e, f, _) <= o, d = new Uint8Array(s);
+  const u = dc(i, r), l = (f, _) => u(e, e, f, _) <= o, d = new Uint8Array(s);
   d[0] = 1;
   for (let f = 1; f < n; f++) {
     const _ = f, m = f - 1;
@@ -52405,13 +52460,13 @@ function oc(e, t, n, r, a = {}) {
   for (let f = 0; f < s; f++) d[f] && (h[p++] = f);
   return h;
 }
-function $i(e, t, n, r) {
+function Hi(e, t, n, r) {
   const a = r * r, s = t * a * n;
   if (e.length !== s) throw new Error(`groupPatchesIntoMergedTokens: flatPatches length ${e.length} != numMergedTokens*mergeSize²*tokenDim = ${s}`);
   const i = new Float32Array(t * a * n);
   return i.set(e), i;
 }
-function uc(e, t, n, r) {
+function hc(e, t, n, r) {
   if (!Number.isInteger(n) || n < 1) throw new Error(`applyPixelPruneSubset: mergeSize must be positive int, got ${n}`);
   if (!Number.isInteger(r) || r < 1) throw new Error(`applyPixelPruneSubset: tokenDim must be positive int, got ${r}`);
   if (!t || !(t.flatPatches instanceof Float32Array)) throw new Error("applyPixelPruneSubset: src.flatPatches must be Float32Array");
@@ -52442,7 +52497,7 @@ function uc(e, t, n, r) {
     numKeptMerged: u
   };
 }
-function lc(e, t) {
+function pc(e, t) {
   if (!Number.isInteger(t) || t < 0) throw new Error(`validateKeptIdx: fullCount must be non-negative int, got ${t}`);
   if (!(Array.isArray(e) || e instanceof Int32Array || e instanceof Uint32Array)) throw new Error(`validateKeptIdx: kept must be Array | Int32Array | Uint32Array, got ${typeof e}`);
   if (e.length > t) throw new Error(`validateKeptIdx: kept.length=${e.length} exceeds fullCount=${t} (prune never grows the token count)`);
@@ -52454,7 +52509,7 @@ function lc(e, t) {
     n = a;
   }
 }
-function dc(e, t, n) {
+function fc(e, t, n) {
   if (t == null) return null;
   if (!e || typeof e != "object") throw new Error("computeKeptMergedIdxForImage: pre must be an object");
   const { flatPatches: r, gridH: a, gridW: s, tokenDim: i } = e;
@@ -52462,14 +52517,14 @@ function dc(e, t, n) {
   if (!Number.isInteger(a) || !Number.isInteger(s) || !Number.isInteger(i)) throw new Error("computeKeptMergedIdxForImage: pre must have integer gridH, gridW, tokenDim");
   if (!Number.isInteger(n) || n < 1) throw new Error(`computeKeptMergedIdxForImage: mergeSize must be positive int, got ${n}`);
   if (a % n !== 0 || s % n !== 0) throw new Error(`computeKeptMergedIdxForImage: gridH=${a} gridW=${s} must be multiples of mergeSize=${n}`);
-  const o = n, u = a / o, l = s / o, d = u * l, c = o * o * i, h = Fi($i(r, d, i, o), u, l, c, {
+  const o = n, u = a / o, l = s / o, d = u * l, c = o * o * i, h = Vi(Hi(r, d, i, o), u, l, c, {
     method: t.method,
     threshold: t.threshold
   });
   if (h.length === 0) throw new Error("computeKeptMergedIdxForImage: PixelPrune kept zero merged tokens — this would emit an empty vision-token sequence. Lower the threshold or check the input image variance.");
   return h;
 }
-var Vi = class {
+var Qi = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -52549,8 +52604,8 @@ var Vi = class {
   }
   destroy() {
   }
-}, cc = 248056;
-function hc(e, t, n) {
+}, _c = 248056;
+function mc(e, t, n) {
   const r = new Int8Array(e);
   if (t) for (const { start: a, count: s } of t) {
     if (a < 0 || a + s > e) throw new Error(`buildMmTokenTypeIds: image range {start:${a}, count:${s}} out of bounds for L=${e}`);
@@ -52562,13 +52617,13 @@ function hc(e, t, n) {
   }
   return r;
 }
-function pc(e) {
-  const { tokenizer: t, messages: n, images: r = [], imagePadId: a = cc, spatialMergeSize: s = 2, tempMergeSize: i = 1, timeInterval: o = 1, enableThinking: u = !0 } = e;
+function gc(e) {
+  const { tokenizer: t, messages: n, images: r = [], imagePadId: a = _c, spatialMergeSize: s = 2, tempMergeSize: i = 1, timeInterval: o = 1, enableThinking: u = !0 } = e;
   if (!t || typeof t.encodeChatMultimodal != "function") throw new Error("prepareMultimodalPrefill: tokenizer must expose encodeChatMultimodal (upgrade to S500 MentriaTokenizer)");
   if (!Array.isArray(n)) throw new Error("prepareMultimodalPrefill: messages must be an array");
   if (!Array.isArray(r)) throw new Error("prepareMultimodalPrefill: images must be an array");
   if (r.length === 0) {
-    const k = t.encodeChat(n, { enableThinking: u }), P = k.length, x = new Int8Array(P), R = new Uint32Array(P).fill(4294967295), { posIds: B, ropeDelta: G } = Kr(k, x, null, s, i, o, null);
+    const k = t.encodeChat(n, { enableThinking: u }), P = k.length, x = new Int8Array(P), R = new Uint32Array(P).fill(4294967295), { posIds: B, ropeDelta: G } = Wr(k, x, null, s, i, o, null);
     return {
       tokenIds: k,
       mmTokenTypeIds: x,
@@ -52621,9 +52676,9 @@ function pc(e) {
     enableThinking: u
   }), _ = p.length;
   if (f.length !== r.length) throw new Error(`prepareMultimodalPrefill: internal — expansion produced ${f.length} ranges for ${r.length} images`);
-  const m = new Uint32Array(_), b = Vi.buildSrcRowCPU(p, a, m), w = l.reduce((k, P) => k + P, 0);
+  const m = new Uint32Array(_), b = Qi.buildSrcRowCPU(p, a, m), w = l.reduce((k, P) => k + P, 0);
   if (b !== w) throw new Error(`prepareMultimodalPrefill: visionSrcRow counted ${b} image_pad tokens but imageTokenCounts sum to ${w} — tokenizer expansion and splice are out of sync`);
-  const g = hc(_, f, []), { posIds: v, ropeDelta: y } = Kr(p, g, d, s, i, o, null, h ? c : null);
+  const g = mc(_, f, []), { posIds: v, ropeDelta: y } = Wr(p, g, d, s, i, o, null, h ? c : null);
   return {
     tokenIds: p,
     mmTokenTypeIds: g,
@@ -52635,7 +52690,7 @@ function pc(e) {
     imageGridThw: d
   };
 }
-function fc(e) {
+function bc(e) {
   const { tokenizer: t, messages: n, images: r, enableThinking: a = !0, preprocessOpts: s, spatialMergeSize: i, tempMergeSize: o = 1, pruneOpts: u = null } = e;
   if (!Array.isArray(r)) throw new Error("multimodalPreflight: images must be an array");
   if (r.length === 0) throw new Error("multimodalPreflight: images must be non-empty (use the text-only path instead)");
@@ -52647,7 +52702,7 @@ function fc(e) {
     if (!w || typeof g != "number" || typeof v != "number") throw new Error(`multimodalPreflight: images[${m}] must have {rgbHwc: Uint8Array, h: number, w: number}`);
     let y;
     try {
-      y = zi(w, g, v, l);
+      y = $i(w, g, v, l);
     } catch (q) {
       throw new Error(`multimodalPreflight: images[${m}] preprocessImage failed: ${q.message}`);
     }
@@ -52655,7 +52710,7 @@ function fc(e) {
     let B = null, G = R;
     if (u) {
       try {
-        B = dc(y, u, d);
+        B = fc(y, u, d);
       } catch (q) {
         throw new Error(`multimodalPreflight: images[${m}] PixelPrune compute failed: ${q.message}`);
       }
@@ -52676,7 +52731,7 @@ function fc(e) {
   }
   let _;
   try {
-    _ = pc({
+    _ = gc({
       tokenizer: t,
       messages: n,
       images: p,
@@ -52693,7 +52748,7 @@ function fc(e) {
     perImageKeptIdx: f
   };
 }
-var _c = class {
+var wc = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -52781,7 +52836,7 @@ var _c = class {
   destroy() {
   }
 };
-function Vn(e, t, n, r = n, a = 0) {
+function Hn(e, t, n, r = n, a = 0) {
   if (n % 32 !== 0 || r % 32 !== 0 || a % 32 !== 0) throw new Error(`packedQ4Weight: N=${n}, storedCols=${r}, colOffset=${a} must be multiples of 32`);
   if (a + n > r) throw new Error(`packedQ4Weight: columns ${a}..${a + n} exceed the stored ${r}`);
   const s = t * (r / 32) * 20;
@@ -52798,7 +52853,7 @@ function Vn(e, t, n, r = n, a = 0) {
 function Bn(e) {
   return !!e && e.format === "q4_0" && !!e.buffer;
 }
-var mc = class {
+var vc = class {
   device;
   pipeline;
   decodePipeline;
@@ -52913,7 +52968,7 @@ var mc = class {
   }
   destroy() {
   }
-}, gc = class {
+}, kc = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -52982,7 +53037,7 @@ var mc = class {
   }
   destroy() {
   }
-}, bc = class {
+}, yc = class {
   constructor(e, t, n = 64, r = 1e4) {
     if (n % 2 !== 0 || n % 4 !== 0) throw new Error(`RoPEVision: headDim must be divisible by 4, got ${n}`);
     this.device = e, this.headDim = n, this.base = r;
@@ -53262,7 +53317,7 @@ var mc = class {
   }
   destroy() {
   }
-}, Hi = class {
+}, ji = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -53329,7 +53384,7 @@ var mc = class {
   }
   destroy() {
   }
-}, wc = class {
+}, Sc = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -53397,7 +53452,7 @@ var mc = class {
   }
   destroy() {
   }
-}, vc = class {
+}, xc = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -53465,7 +53520,7 @@ var mc = class {
   }
   destroy() {
   }
-}, kc = class {
+}, Pc = class {
   device;
   pipeline;
   bindGroupLayout;
@@ -53551,7 +53606,7 @@ var mc = class {
   }
   destroy() {
   }
-}, yc = class {
+}, Bc = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -53632,7 +53687,7 @@ var mc = class {
   }
   destroy() {
   }
-}, Tr = Object.freeze({
+}, Mr = Object.freeze({
   layernorm: "layernorm.wgsl",
   matmul: "matmul_tiled.wgsl",
   matmulQ4: "matmul_tiled_q4.wgsl",
@@ -53648,20 +53703,20 @@ var mc = class {
   patchEmbed: "patch_embed.wgsl",
   posInterp: "pos_embed_interpolate.wgsl"
 });
-async function Sc(e) {
+async function Ec(e) {
   if (typeof e != "function") throw new Error("fetchVisionShaders: shaderFetcher must be a function (name => Promise<string>)");
-  const t = Object.keys(Tr), n = await Promise.all(t.map((a) => e(Tr[a]))), r = {};
+  const t = Object.keys(Mr), n = await Promise.all(t.map((a) => e(Mr[a]))), r = {};
   for (let a = 0; a < t.length; a++) {
     const s = n[a];
-    if (typeof s != "string" || s.length === 0) throw new Error(`fetchVisionShaders: fetcher returned empty/invalid code for "${Tr[t[a]]}"`);
+    if (typeof s != "string" || s.length === 0) throw new Error(`fetchVisionShaders: fetcher returned empty/invalid code for "${Mr[t[a]]}"`);
     r[t[a]] = s;
   }
   return r;
 }
-async function xc(e, t) {
+async function qc(e, t) {
   if (!e) throw new Error("createVisionOperators: device is required");
   if (!t || typeof t != "object") throw new Error("createVisionOperators: options object is required");
-  const { headDim: n, shaderFetcher: r } = t, a = t.ropeBase ?? 1e4, s = t.weightPlan ?? ti;
+  const { headDim: n, shaderFetcher: r } = t, a = t.ropeBase ?? 1e4, s = t.weightPlan ?? ni;
   for (const o of [
     "matmul",
     "patchEmbed",
@@ -53673,25 +53728,25 @@ async function xc(e, t) {
   if (!Number.isInteger(n) || n <= 0) throw new Error(`createVisionOperators: options.headDim must be a positive integer, got ${n}`);
   if (n % 4 !== 0) throw new Error(`createVisionOperators: headDim(${n}) must be divisible by 4 for RoPEVision`);
   if (typeof r != "function") throw new Error("createVisionOperators: options.shaderFetcher must be a function");
-  const i = await Sc(r);
+  const i = await Ec(r);
   return {
-    layernorm: new _c(e, i.layernorm),
-    matmul: new ci(e, i.matmul, { weightDtype: s.matmul }),
-    matmulQ4: new mc(e, i.matmulQ4, { roundToF16: s.matmul === "f16" }),
-    bias: new gc(e, i.bias),
-    rope: new bc(e, i.rope, n, a),
-    transpose: new ga(e, i.transpose),
-    elementwise: new pi(e, i.elementwise),
+    layernorm: new wc(e, i.layernorm),
+    matmul: new pi(e, i.matmul, { weightDtype: s.matmul }),
+    matmulQ4: new vc(e, i.matmulQ4, { roundToF16: s.matmul === "f16" }),
+    bias: new kc(e, i.bias),
+    rope: new yc(e, i.rope, n, a),
+    transpose: new ba(e, i.transpose),
+    elementwise: new _i(e, i.elementwise),
     scorePrefillNoncausal: new En(e, i.score, { causal: !1 }),
     valueAggPrefill: new qn(e, i.valueAgg),
-    softmax: new Hi(e, i.softmax),
-    geluTanh: new wc(e, i.geluTanh),
-    geluExact: new vc(e, i.geluExact),
-    patchEmbed: new kc(e, i.patchEmbed, { weightDtype: s.patchEmbed }),
-    posEmbedInterp: new yc(e, i.posInterp, { weightDtype: s.posEmbed })
+    softmax: new ji(e, i.softmax),
+    geluTanh: new Sc(e, i.geluTanh),
+    geluExact: new xc(e, i.geluExact),
+    patchEmbed: new Pc(e, i.patchEmbed, { weightDtype: s.patchEmbed }),
+    posEmbedInterp: new Bc(e, i.posInterp, { weightDtype: s.posEmbed })
   };
 }
-function Pc(e) {
+function Ac(e) {
   if (!Array.isArray(e)) throw new Error("buildVisionTensorMap: sfFiles must be an array of SafetensorsFile");
   if (e.length === 0) throw new Error("buildVisionTensorMap: sfFiles must not be empty");
   for (let a = 0; a < e.length; a++) {
@@ -53735,7 +53790,7 @@ function Pc(e) {
     }
   };
 }
-async function Bc(e) {
+async function Tc(e) {
   if (!e || typeof e != "object") throw new Error("fetchVisionShards: args object is required");
   const { cache: t, baseUrl: n, shards: r, onProgress: a, signal: s, retryOptions: i } = e;
   if (!t || typeof t.loadShard != "function") throw new Error("fetchVisionShards: args.cache must have a loadShard(url, onProgress?, options?) method");
@@ -53753,15 +53808,15 @@ async function Bc(e) {
     if (!(h instanceof ArrayBuffer)) throw new Error(`fetchVisionShards: cache.loadShard("${d}") did not return an ArrayBuffer (got ${h?.constructor?.name ?? typeof h})`);
     u.push(new Ft(h));
   }
-  return Pc(u);
+  return Ac(u);
 }
-async function Ec(e) {
+async function Mc(e) {
   const { device: t, cache: n, baseUrl: r, shards: a, isGpuTensor: s, weightUpload: i, onProgress: o } = e || {};
   if (!t || typeof t.createBuffer != "function") throw new Error("streamVisionShards: device required");
   if (typeof r != "string" || !r) throw new Error("streamVisionShards: baseUrl required");
   if (!Array.isArray(a) || a.length === 0) throw new Error("streamVisionShards: shards required");
   if (typeof s != "function") throw new Error("streamVisionShards: isGpuTensor required");
-  const { streamSafetensorsToGPU: u } = __mentria_chunks["./streaming_safetensors-BBzi0GtM.mjs"], l = /* @__PURE__ */ new Map();
+  const { streamSafetensorsToGPU: u } = __mentria_chunks["./streaming_safetensors-5bEZv0g3.mjs"], l = /* @__PURE__ */ new Map();
   let d = 0;
   for (let f = 0; f < a.length; f++) {
     const _ = `${r}${a[f]}`;
@@ -53859,7 +53914,7 @@ var on = [
   "fc2Buf",
   "scaleBuf"
 ];
-function Qi(e, t, n, r) {
+function Yi(e, t, n, r) {
   const { H: a, Inter: s, nH: i, headDim: o, useFlashAttn: u } = r, l = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST, d = (c) => t.createBuffer({
     size: c,
     usage: l
@@ -53873,7 +53928,7 @@ function Qi(e, t, n, r) {
   }
   e.scratchN = n;
 }
-var qc = class {
+var Gc = class {
   constructor(e) {
     this.device = e, this.scratchN = 0, this.dimsKey = null;
     for (const t of on) this[t] = null;
@@ -53882,7 +53937,7 @@ var qc = class {
     const n = `${t.H}/${t.Inter}/${t.nH}/${t.headDim}/${t.useFlashAttn}`;
     if (this.dimsKey === null) this.dimsKey = n;
     else if (this.dimsKey !== n) throw new Error(`VisionBlockScratch: shared by blocks of different shapes (${this.dimsKey} vs ${n})`);
-    e <= this.scratchN || (this.destroy(), this.dimsKey = n, Qi(this, this.device, e, t));
+    e <= this.scratchN || (this.destroy(), this.dimsKey = n, Yi(this, this.device, e, t));
   }
   get bytes() {
     let e = 0;
@@ -53899,7 +53954,7 @@ var qc = class {
     }
     this.scratchN = 0;
   }
-}, Ac = class {
+}, Lc = class {
   device;
   layernorm;
   matmul;
@@ -54004,7 +54059,7 @@ var qc = class {
       this.scratchN = this.sharedScratch.scratchN;
       return;
     }
-    e <= this.scratchN || (this._destroyScratch(), Qi(this, this.device, e, this._scratchDims()));
+    e <= this.scratchN || (this._destroyScratch(), Yi(this, this.device, e, this._scratchDims()));
   }
   _destroyScratch() {
     if (!this.sharedScratch) for (const e of on) {
@@ -54034,7 +54089,7 @@ var qc = class {
   destroy() {
     this._destroyScratch();
   }
-}, Tc = class {
+}, Uc = class {
   device;
   rope;
   blocks;
@@ -54088,7 +54143,7 @@ var qc = class {
   destroy() {
     this._destroyPing();
   }
-}, Mc = class {
+}, Rc = class {
   device;
   layernorm;
   matmul;
@@ -54153,7 +54208,7 @@ var qc = class {
     this._destroyScratch();
   }
 };
-function Gc(e, t = 2) {
+function Cc(e, t = 2) {
   if (!Array.isArray(e)) throw new Error(`computeVisionPosIds: gridThw must be an array, got ${typeof e}`);
   if (t < 1 || !Number.isInteger(t)) throw new Error(`computeVisionPosIds: mergeSize must be a positive integer, got ${t}`);
   let n = 0;
@@ -54176,7 +54231,7 @@ function Gc(e, t = 2) {
   }
   return r;
 }
-function Lc(e, t, n = 2) {
+function Nc(e, t, n = 2) {
   if (!(e instanceof Int32Array)) throw new Error(`subsetPosIds: posIds must be Int32Array, got ${e && e.constructor && e.constructor.name}`);
   if (n < 1 || !Number.isInteger(n)) throw new Error(`subsetPosIds: mergeSize must be a positive integer, got ${n}`);
   const r = 2 * (n * n);
@@ -54193,7 +54248,7 @@ function Lc(e, t, n = 2) {
   }
   return o;
 }
-function Uc(e, t, n, r, a) {
+function Oc(e, t, n, r, a) {
   if (e !== 1) throw new Error(`buildPosEmbedIndex: t=${e} != 1 not supported (v1, single-image only)`);
   if (!Number.isInteger(t) || !Number.isInteger(n) || t <= 0 || n <= 0) throw new Error(`buildPosEmbedIndex: h=${t} w=${n} must be positive integers`);
   if (!Number.isInteger(a) || a !== 2) throw new Error(`buildPosEmbedIndex: mergeSize=${a} != 2 not supported (v1)`);
@@ -54226,7 +54281,7 @@ function Uc(e, t, n, r, a) {
     numTokens: l
   };
 }
-var Rc = class {
+var Ic = class {
   device;
   patchEmbed;
   posEmbedInterp;
@@ -54294,14 +54349,14 @@ var Rc = class {
   }
   async forward(e, t, n, r) {
     if (!this.patchEmbedW) throw new Error("VisionModel.forward called before loadWeights");
-    const a = r && r.signal ? r.signal : null, s = r && r.pixelPrune ? r.pixelPrune : null, i = zi(e, t, n, this.preprocessOpts), { gridT: o, gridH: u, gridW: l, tokenDim: d } = i;
+    const a = r && r.signal ? r.signal : null, s = r && r.pixelPrune ? r.pixelPrune : null, i = $i(e, t, n, this.preprocessOpts), { gridT: o, gridH: u, gridW: l, tokenDim: d } = i;
     let { flatPatches: c, numTokens: h } = i;
     if (d !== this.tokenDim) throw new Error(`VisionModel.forward: preprocess tokenDim=${d} != expected ${this.tokenDim}`);
     if (o !== 1) throw new Error(`VisionModel.forward: gridT=${o} != 1 (video not supported in v1)`);
     if (u % this.mergeSize !== 0 || l % this.mergeSize !== 0) throw new Error(`VisionModel.forward: gridH=${u} gridW=${l} must be multiples of mergeSize=${this.mergeSize}`);
     const p = this.mergeSize, f = p * p, _ = u / p, m = l / p, b = h, w = _ * m;
     this._ensureScratch(h);
-    let { idx: g, weights: v } = Uc(o, u, l, this.numGridPerSide, this.mergeSize), y = Gc([[
+    let { idx: g, weights: v } = Oc(o, u, l, this.numGridPerSide, this.mergeSize), y = Cc([[
       1,
       u,
       l
@@ -54309,21 +54364,21 @@ var Rc = class {
     if (s) {
       if (s.keptMergedIdx != null) {
         const W = s.keptMergedIdx;
-        k = W instanceof Int32Array ? W : Int32Array.from(W), lc(k, w);
+        k = W instanceof Int32Array ? W : Int32Array.from(W), pc(k, w);
       } else {
         const W = f * d;
-        k = Fi($i(c, w, d, this.mergeSize), _, m, W, {
+        k = Vi(Hi(c, w, d, this.mergeSize), _, m, W, {
           method: s.method,
           threshold: s.threshold
         });
       }
       if (k.length === 0) throw new Error("VisionModel.forward: PixelPrune kept zero merged tokens — this would emit an empty vision-token sequence. Lower the threshold or check the input image variance.");
-      const U = uc(k, {
+      const U = hc(k, {
         flatPatches: c,
         posIdx: g,
         posWts: v
       }, this.mergeSize, this.tokenDim);
-      c = U.flatPatches, g = U.posIdx, v = U.posWts, h = U.numKept, y = Lc(y, k, this.mergeSize);
+      c = U.flatPatches, g = U.posIdx, v = U.posWts, h = U.numKept, y = Nc(y, k, this.mergeSize);
     }
     const P = this.device, x = P.queue;
     x.writeBuffer(this.flatPatchesBuf, 0, c), x.writeBuffer(this.posIdxBuf, 0, g), x.writeBuffer(this.posWtsBuf, 0, v), x.submit([this.patchEmbed.dispatch(this.flatPatchesBuf, this.patchEmbedW, this.patchEmbedBias, this.hiddenBuf, h, this.hiddenSize, this.tokenDim)]), await x.onSubmittedWorkDone(), a && a.throwIfAborted(), x.submit([this.posEmbedInterp.dispatch(this.posEmbedTable, this.posIdxBuf, this.posWtsBuf, this.hiddenBuf, h, this.hiddenSize)]), await x.onSubmittedWorkDone(), a && a.throwIfAborted();
@@ -54365,13 +54420,13 @@ var Rc = class {
   destroy() {
     this._destroyScratch();
   }
-}, Cc = /\.(?:blocks\.\d+\.(?:attn\.(?:qkv|proj)|mlp\.linear_fc[12])|merger\.linear_fc[12])\.weight$/;
+}, Dc = /\.(?:blocks\.\d+\.(?:attn\.(?:qkv|proj)|mlp\.linear_fc[12])|merger\.linear_fc[12])\.weight$/;
 function Ht(e, t, n) {
   const r = new Float32Array(t * n);
   for (let a = 0; a < t; a++) for (let s = 0; s < n; s++) r[s * t + a] = e[a * n + s];
   return r;
 }
-function Nc(e, t, n) {
+function Kc(e, t, n) {
   const r = new Float32Array(n * 3 * n);
   for (let o = 0; o < 3 * n; o++) for (let u = 0; u < n; u++) r[u * (3 * n) + o] = e[o * n + u];
   const a = new Float32Array(n * n), s = new Float32Array(n * n), i = new Float32Array(n * n);
@@ -54386,11 +54441,11 @@ function Nc(e, t, n) {
     b_v: new Float32Array(t.buffer, t.byteOffset + 2 * n * 4, n).slice()
   };
 }
-function Oc(e, t, n) {
+function Wc(e, t, n) {
   if (e.length !== t * n) throw new Error(`reshapePatchEmbed: expected ${t * n} elements, got ${e.length}`);
   return Ht(e, t, n);
 }
-function Hn(e, t, n) {
+function Qn(e, t, n) {
   if (n % 32 !== 0) throw new Error(`dequantVisionQ4_0: cols=${n} not divisible by 32`);
   const r = n / 32, a = t * r * 5;
   if (e.length !== a) throw new Error(`dequantVisionQ4_0: expected ${a} u32s for [${t}, ${n}], got ${e.length}`);
@@ -54404,7 +54459,7 @@ function Hn(e, t, n) {
   }
   return i;
 }
-function Ic(e, t) {
+function zc(e, t) {
   if (e.length !== t * 3 * t) throw new Error(`splitQKVTransposed: expected ${t * 3 * t} elements for H=${t}, got ${e.length}`);
   const n = new Float32Array(t * t), r = new Float32Array(t * t), a = new Float32Array(t * t);
   for (let s = 0; s < t; s++) for (let i = 0; i < t; i++)
@@ -54415,7 +54470,7 @@ function Ic(e, t) {
     W_v: a
   };
 }
-function Dc(e) {
+function Fc(e) {
   if (!e) throw new Error("vision_weight_loader: tensorMap is required");
   return typeof e.get == "function" && typeof e.getTensor != "function" ? (t) => {
     const n = e.get(t);
@@ -54427,8 +54482,8 @@ function Dc(e) {
     return n;
   };
 }
-function ji(e, t, n, r, a = {}) {
-  const s = Dc(r), i = n.prefix ?? "visual", o = n.eps ?? 1e-6, u = a.weightPlan ?? ti, l = a.packQ4 !== !1 && !!t.matmulQ4, d = a.weightUpload === "writeBuffer", c = typeof r?.getGpuBuffer == "function" ? (V) => r.getGpuBuffer(V) : () => null, h = n.hidden_size, p = n.intermediate_size, f = n.num_heads, _ = n.head_dim, m = n.out_hidden_size, b = n.depth, w = n.patch_size, g = n.temporal_patch_size, v = n.spatial_merge_size, y = n.num_position_embeddings, k = n.num_grid_per_side ?? Math.round(Math.sqrt(y)), P = 3 * g * w * w, x = h * v * v;
+function Zi(e, t, n, r, a = {}) {
+  const s = Fc(r), i = n.prefix ?? "visual", o = n.eps ?? 1e-6, u = a.weightPlan ?? ni, l = a.packQ4 !== !1 && !!t.matmulQ4, d = a.weightUpload === "writeBuffer", c = typeof r?.getGpuBuffer == "function" ? (V) => r.getGpuBuffer(V) : () => null, h = n.hidden_size, p = n.intermediate_size, f = n.num_heads, _ = n.head_dim, m = n.out_hidden_size, b = n.depth, w = n.patch_size, g = n.temporal_patch_size, v = n.spatial_merge_size, y = n.num_position_embeddings, k = n.num_grid_per_side ?? Math.round(Math.sqrt(y)), P = 3 * g * w * w, x = h * v * v;
   if (!Number.isInteger(h) || h <= 0) throw new Error(`loadVisionModel: invalid hidden_size ${h}`);
   if (!Number.isInteger(p) || p <= 0) throw new Error(`loadVisionModel: invalid intermediate_size ${p}`);
   if (f * _ !== h) throw new Error(`loadVisionModel: num_heads(${f})*head_dim(${_}) != hidden_size(${h})`);
@@ -54477,7 +54532,7 @@ function ji(e, t, n, r, a = {}) {
     return s(V);
   }, $ = (V, C, I, re) => {
     const z = W(V);
-    return z instanceof Uint32Array ? (q = !0, Hn(z, C, I)) : re(He(z, C * I));
+    return z instanceof Uint32Array ? (q = !0, Qn(z, C, I)) : re(He(z, C * I));
   }, S = (V, C, I) => {
     if (!l) return null;
     const re = c(V), z = C * (I / 32) * 20;
@@ -54506,16 +54561,16 @@ function ji(e, t, n, r, a = {}) {
     }), new Uint32Array(ee.getMappedRange()).set(X), ee.unmap()), R.push(ee), B.q4Tensors++, B.q4Bytes += X.byteLength, B.f32EquivalentBytes += C * I * 4, ee;
   }, M = (V, C, I, re, z) => {
     const X = S(V, C, I);
-    return X ? Vn(X, C, I) : G($(V, C, I, re), z, u.matmul);
-  }, T = a.sharedScratch === !1 ? null : new qc(e), A = s(`${i}.patch_embed.proj.weight`);
+    return X ? Hn(X, C, I) : G($(V, C, I, re), z, u.matmul);
+  }, T = a.sharedScratch === !1 ? null : new Gc(e), A = s(`${i}.patch_embed.proj.weight`);
   let L;
-  A instanceof Uint32Array ? (q = !0, L = Hn(A, P, h)) : L = Oc(He(A, h * P), h, P);
+  A instanceof Uint32Array ? (q = !0, L = Qn(A, P, h)) : L = Wc(He(A, h * P), h, P);
   const O = G(L, `${i}.patch_embed.W`, u.patchEmbed), N = G(He(s(`${i}.patch_embed.proj.bias`), h), `${i}.patch_embed.b`), F = s(`${i}.pos_embed.weight`);
   let Y;
-  F instanceof Uint32Array ? (q = !0, Y = Ht(Hn(F, h, y), h, y)) : Y = He(F, y * h);
+  F instanceof Uint32Array ? (q = !0, Y = Ht(Qn(F, h, y), h, y)) : Y = He(F, y * h);
   const se = G(Y, `${i}.pos_embed`, u.posEmbed), J = [];
   for (let V = 0; V < b; V++) {
-    const C = new Ac(e, t, {
+    const C = new Lc(e, t, {
       hiddenSize: h,
       numHeads: f,
       headDim: _,
@@ -54526,16 +54581,16 @@ function ji(e, t, n, r, a = {}) {
     let ee, de, oe;
     const pe = S(`${I}.attn.qkv.weight`, h, 3 * h);
     if (pe)
-      ee = Vn(pe, h, h, 3 * h, 0), de = Vn(pe, h, h, 3 * h, h), oe = Vn(pe, h, h, 3 * h, 2 * h);
+      ee = Hn(pe, h, h, 3 * h, 0), de = Hn(pe, h, h, 3 * h, h), oe = Hn(pe, h, h, 3 * h, 2 * h);
     else {
       const st = W(`${I}.attn.qkv.weight`);
       let et, Le, Se;
       if (st instanceof Uint32Array) {
         q = !0;
-        const Oe = Ic(Hn(st, h, 3 * h), h);
+        const Oe = zc(Qn(st, h, 3 * h), h);
         et = Oe.W_q, Le = Oe.W_k, Se = Oe.W_v;
       } else {
-        const Oe = Nc(He(st, 3 * h * h), X, h);
+        const Oe = Kc(He(st, 3 * h * h), X, h);
         et = Oe.W_q, Le = Oe.W_k, Se = Oe.W_v;
       }
       ee = G(et, `${I}.attn.W_q`, u.matmul), de = G(Le, `${I}.attn.W_k`, u.matmul), oe = G(Se, `${I}.attn.W_v`, u.matmul);
@@ -54560,7 +54615,7 @@ function ji(e, t, n, r, a = {}) {
       b_fc2: Dt
     }), J.push(C);
   }
-  const K = new Tc(e, t.rope, J), H = G(He(s(`${i}.merger.norm.weight`), h), `${i}.merger.norm.W`), D = G(He(s(`${i}.merger.norm.bias`), h), `${i}.merger.norm.b`), j = M(`${i}.merger.linear_fc1.weight`, x, x, (V) => Ht(V, x, x), `${i}.merger.W_fc1`), ae = G(He(s(`${i}.merger.linear_fc1.bias`), x), `${i}.merger.b_fc1`), ie = M(`${i}.merger.linear_fc2.weight`, x, m, (V) => Ht(V, m, x), `${i}.merger.W_fc2`), le = G(He(s(`${i}.merger.linear_fc2.bias`), m), `${i}.merger.b_fc2`), Z = new Mc(e, {
+  const K = new Uc(e, t.rope, J), H = G(He(s(`${i}.merger.norm.weight`), h), `${i}.merger.norm.W`), D = G(He(s(`${i}.merger.norm.bias`), h), `${i}.merger.norm.b`), j = M(`${i}.merger.linear_fc1.weight`, x, x, (V) => Ht(V, x, x), `${i}.merger.W_fc1`), ae = G(He(s(`${i}.merger.linear_fc1.bias`), x), `${i}.merger.b_fc1`), ie = M(`${i}.merger.linear_fc2.weight`, x, m, (V) => Ht(V, m, x), `${i}.merger.W_fc2`), le = G(He(s(`${i}.merger.linear_fc2.bias`), m), `${i}.merger.b_fc2`), Z = new Rc(e, {
     layernorm: t.layernorm,
     matmul: t.matmul,
     matmulQ4: t.matmulQ4 || null,
@@ -54581,7 +54636,7 @@ function ji(e, t, n, r, a = {}) {
     W_fc2: ie,
     b_fc2: le
   });
-  const te = new Rc(e, {
+  const te = new Ic(e, {
     patchEmbed: t.patchEmbed,
     posEmbedInterp: t.posEmbedInterp,
     blockStack: K,
@@ -54678,22 +54733,22 @@ function He(e, t) {
   if (e instanceof Float32Array || (e = new Float32Array(e)), e.length !== t) throw new Error(`vision_weight_loader: tensor size mismatch — got ${e.length}, expected ${t}`);
   return e;
 }
-async function Yi(e) {
+async function Xi(e) {
   if (!e || typeof e != "object") throw new Error("prepareVisionLoad: args object is required");
   const { device: t, cache: n, shaderFetcher: r, baseUrl: a, shards: s, config: i, onProgress: o, signal: u, retryOptions: l, f16Weights: d, stream: c, packQ4: h, weightUpload: p } = e;
-  if (!t || typeof t.createBuffer != "function") throw new Qo(Ho.NO_DEVICE, "prepareVisionLoad: device is missing or invalid (no createBuffer); device may have been lost — reconstruct MentriaEngine to recover");
+  if (!t || typeof t.createBuffer != "function") throw new Xo(Zo.NO_DEVICE, "prepareVisionLoad: device is missing or invalid (no createBuffer); device may have been lost — reconstruct MentriaEngine to recover");
   if (!n || typeof n.loadShard != "function") throw new Error("prepareVisionLoad: args.cache with loadShard(url, ...) required");
   if (typeof r != "function") throw new Error("prepareVisionLoad: args.shaderFetcher must be a function");
   if (typeof a != "string" || a.length === 0) throw new Error("prepareVisionLoad: args.baseUrl must be a non-empty string");
   if (!Array.isArray(s) || s.length === 0) throw new Error("prepareVisionLoad: args.shards must be a non-empty string array");
   if (o !== void 0 && typeof o != "function") throw new Error("prepareVisionLoad: args.onProgress must be a function if provided");
-  const f = i || Jo;
-  jo(f);
-  const _ = Yo(f, d === !0), m = (v, y, k, P) => {
+  const f = i || ru;
+  Jo(f);
+  const _ = eu(f, d === !0), m = (v, y, k, P) => {
     o && o(v, y, k, P);
   };
   m("init-vision", 0, 3, "Creating vision operators...");
-  const b = await xc(t, {
+  const b = await qc(t, {
     headDim: f.head_dim,
     shaderFetcher: r,
     weightPlan: _
@@ -54701,15 +54756,15 @@ async function Yi(e) {
   m("download-vision", 0, s.length, `Downloading ${s.length} vision shard(s)...`);
   const w = (v, y, k) => {
     m("download-vision", k + v / Math.max(y, 1), s.length, `Downloading vision shard ${k + 1}/${s.length}...`);
-  }, g = c === !0 && h !== !1 ? await Ec({
+  }, g = c === !0 && h !== !1 ? await Mc({
     device: t,
     cache: n,
     baseUrl: a,
     shards: s,
-    isGpuTensor: (v, y) => y.dtype === "Q4_0" && Cc.test(v),
+    isGpuTensor: (v, y) => y.dtype === "Q4_0" && Dc.test(v),
     weightUpload: p === "writeBuffer" ? "writeBuffer" : null,
     onProgress: w
-  }) : await Bc({
+  }) : await Tc({
     cache: n,
     baseUrl: a,
     shards: s,
@@ -54724,7 +54779,7 @@ async function Yi(e) {
     weightPlan: _
   };
 }
-var Zi = {
+var Ji = {
   allowedTokenIds: null,
   temperature: 1,
   topK: 50,
@@ -54734,7 +54789,7 @@ var Zi = {
   maxRepeatWindow: 64,
   logitsScale: 1
 };
-function Xi(e, t) {
+function eo(e, t) {
   if (e == null) return null;
   if (!(Array.isArray(e) || ArrayBuffer.isView(e))) throw new Error(`allowedTokenIds must be an array of token ids, got ${typeof e}`);
   if (e.length === 0) throw new Error("allowedTokenIds must not be empty (an empty set can never produce a token)");
@@ -54751,17 +54806,17 @@ function Xi(e, t) {
   for (const s of n) r[a++] = s;
   return r.sort(), r;
 }
-function Kc(e, t) {
+function $c(e, t) {
   if (!t || t.length === 0) return;
   const n = t.length, r = new Float32Array(n);
   for (let a = 0; a < n; a++) r[a] = e[t[a]];
   e.fill(-1 / 0);
   for (let a = 0; a < n; a++) e[t[a]] = r[a];
 }
-function Ji(e, t, n = null) {
-  return va(e, t, n, "suppressTokens");
+function to(e, t, n = null) {
+  return ka(e, t, n, "suppressTokens");
 }
-function va(e, t, n, r) {
+function ka(e, t, n, r) {
   if (e == null) return null;
   if (!(Array.isArray(e) || ArrayBuffer.isView(e))) throw new Error(`${r} must be an array of token ids or single-token strings, got ${typeof e}`);
   if (e.length === 0) return null;
@@ -54784,7 +54839,7 @@ function va(e, t, n, r) {
   const s = Uint32Array.from(a);
   return s.sort(), s;
 }
-function eo(e, t, n) {
+function no(e, t, n) {
   const r = new Set(n);
   let a;
   if (t && t.length > 0) a = t.filter((s) => !r.has(s));
@@ -54797,31 +54852,31 @@ function eo(e, t, n) {
   if (a.length === 0) throw new Error("suppressTokens removes every token this generation could sample" + (t ? " (every id of allowedTokenIds is suppressed)" : ""));
   return a;
 }
-function Wc(e, t) {
+function Vc(e, t) {
   if (!(!t || t.length === 0))
     for (let n = 0; n < t.length; n++) {
       const r = t[n];
       r < e.length && (e[r] = -1 / 0);
     }
 }
-function Bs(e, t, n) {
+function Es(e, t, n) {
   if (!(n === 1 || t.length === 0))
     for (let r = 0; r < t.length; r++) {
       const a = t[r];
       a < 0 || a >= e.length || (e[a] > 0 ? e[a] /= n : e[a] *= n);
     }
 }
-function zc(e, t) {
+function Hc(e, t) {
   if (t !== 1)
     for (let n = 0; n < e.length; n++) e[n] /= t;
 }
-function Fc(e, t) {
+function Qc(e, t) {
   if (t <= 0 || t >= e.length) return null;
   const n = e.length, r = new Float64Array(t);
   r.fill(-1 / 0);
   for (let u = 0; u < n; u++) {
     const l = e[u];
-    l > r[0] && (r[0] = l, $c(r, 0, t));
+    l > r[0] && (r[0] = l, jc(r, 0, t));
   }
   const a = r[0];
   let s = 0;
@@ -54831,7 +54886,7 @@ function Fc(e, t) {
   for (let u = 0; u < n; u++) e[u] > a ? o.push(u) : e[u] === a && i > 0 ? (i--, o.push(u)) : e[u] = -1 / 0;
   return o;
 }
-function $c(e, t, n) {
+function jc(e, t, n) {
   for (; ; ) {
     let r = t;
     const a = 2 * t + 1, s = 2 * t + 2;
@@ -54840,7 +54895,7 @@ function $c(e, t, n) {
     e[t] = e[r], e[r] = i, t = r;
   }
 }
-function Vc(e, t, n = null) {
+function Yc(e, t, n = null) {
   if (!(t > 0)) return;
   let r = -1 / 0;
   if (n !== null) for (let s = 0; s < n.length; s++) {
@@ -54868,7 +54923,7 @@ function Vc(e, t, n = null) {
   }
   else for (let s = 0; s < e.length; s++) e[s] < a && (e[s] = -1 / 0);
 }
-function Hc(e, t, n = null) {
+function Zc(e, t, n = null) {
   if (t >= 1) return;
   let r = -1 / 0;
   const a = [];
@@ -54911,7 +54966,7 @@ function Hc(e, t, n = null) {
   o === 0 && (o = 1);
   for (let u = o; u < a.length; u++) e[a[u].idx] = -1 / 0;
 }
-function Qc(e) {
+function Xc(e) {
   const t = e.length, n = new Float64Array(t);
   let r = -1 / 0;
   for (let s = 0; s < t; s++) e[s] > r && (r = e[s]);
@@ -54920,12 +54975,12 @@ function Qc(e) {
   if (a > 0) for (let s = 0; s < t; s++) n[s] /= a;
   return n;
 }
-function jc(e) {
+function Jc(e) {
   let t = 0, n = e[0];
   for (let r = 1; r < e.length; r++) e[r] > n && (n = e[r], t = r);
   return t;
 }
-function Yc(e, t) {
+function eh(e, t) {
   const n = t ? t() : Math.random();
   let r = 0;
   for (let a = 0; a < e.length; a++)
@@ -54933,14 +54988,14 @@ function Yc(e, t) {
   for (let a = e.length - 1; a >= 0; a--) if (e[a] > 0) return a;
   return 0;
 }
-function Zc(e, t = {}, n = [], r) {
+function th(e, t = {}, n = [], r) {
   const a = {
-    ...Zi,
+    ...Ji,
     ...t
   }, s = typeof a.logitsScale == "number" && Number.isFinite(a.logitsScale) && a.logitsScale > 0 && a.logitsScale !== 1 ? a.logitsScale : 1, i = new Float32Array(e);
-  if (Kc(i, a.allowedTokenIds), Wc(i, a.suppressTokenIds), a.temperature === 0 || a.topK === 1) {
-    Bs(i, n, a.repetitionPenalty);
-    const d = jc(i);
+  if ($c(i, a.allowedTokenIds), Vc(i, a.suppressTokenIds), a.temperature === 0 || a.topK === 1) {
+    Es(i, n, a.repetitionPenalty);
+    const d = Jc(i);
     return {
       tokenId: d,
       prob: 1,
@@ -54948,17 +55003,17 @@ function Zc(e, t = {}, n = [], r) {
     };
   }
   if (s !== 1) for (let d = 0; d < i.length; d++) i[d] *= s;
-  Bs(i, n, a.repetitionPenalty), zc(i, a.temperature);
-  const o = Fc(i, a.topK);
-  if (Vc(i, a.minP, o), Hc(i, a.topP, o), o !== null) return Xc(i, o, r);
-  const u = Qc(i), l = Yc(u, r);
+  Es(i, n, a.repetitionPenalty), Hc(i, a.temperature);
+  const o = Qc(i, a.topK);
+  if (Yc(i, a.minP, o), Zc(i, a.topP, o), o !== null) return nh(i, o, r);
+  const u = Xc(i), l = eh(u, r);
   return {
     tokenId: l,
     prob: u[l],
     logit: i[l]
   };
 }
-function Xc(e, t, n) {
+function nh(e, t, n) {
   const r = [], a = [];
   for (let c = 0; c < t.length; c++) {
     const h = t[c];
@@ -54991,7 +55046,7 @@ function Xc(e, t, n) {
     logit: a[d]
   };
 }
-var Jc = class {
+var rh = class {
   config;
   recentTokens = [];
   detector = null;
@@ -55001,7 +55056,7 @@ var Jc = class {
   constructor(e = {}) {
     const { detector: t = null, ...n } = e;
     this.config = {
-      ...Zi,
+      ...Ji,
       ...n
     }, this.detector = t;
   }
@@ -55022,7 +55077,7 @@ var Jc = class {
       } else
         this.cycleDetected = !1, this.cyclePeriod = null, this.stopReasonLast = null;
     }
-    const i = Zc(a, s, r, t);
+    const i = th(a, s, r, t);
     return this.recentTokens.push(i.tokenId), i;
   }
   addToHistory(e) {
@@ -55041,7 +55096,7 @@ var Jc = class {
     this.config.logitsScale = typeof e == "number" && Number.isFinite(e) && e > 0 ? e : 1;
   }
 };
-function to(e, { assistantPrefix: t = null, continueLast: n = !1 } = {}) {
+function ro(e, { assistantPrefix: t = null, continueLast: n = !1 } = {}) {
   const r = Array.isArray(e) ? e : [];
   if (t != null && typeof t != "string") throw new Error(`assistantPrefix must be a string, got ${typeof t}`);
   if (n !== !0) return {
@@ -55057,8 +55112,8 @@ function to(e, { assistantPrefix: t = null, continueLast: n = !1 } = {}) {
     assistantPrefix: a.content
   };
 }
-function no(e, { messages: t, assistantPrefix: n = null, continueLast: r = !1, enableThinking: a = !0 } = {}) {
-  const s = to(t, {
+function ao(e, { messages: t, assistantPrefix: n = null, continueLast: r = !1, enableThinking: a = !0 } = {}) {
+  const s = ro(t, {
     assistantPrefix: n,
     continueLast: r
   }), i = e.encodeChat(s.messages, {
@@ -55086,19 +55141,19 @@ function no(e, { messages: t, assistantPrefix: n = null, continueLast: r = !1, e
     info: o
   };
 }
-function ka(e, t) {
+function ya(e, t) {
   if (!e) throw new Error(`${t} requires a loaded tokenizer — call loadModel() first (and do not pass skipTokenizer)`);
   return e;
 }
-function ro(e, t) {
-  ka(e, "encodeChat");
+function so(e, t) {
+  ya(e, "encodeChat");
   const n = t && t.messages;
   if (!Array.isArray(n) || n.length === 0) throw new Error('encodeChat requires "messages": a non-empty array of {role, content}');
   for (const s of n)
     if (!(!s || !Array.isArray(s.content))) {
       for (const i of s.content) if (i && (i.type === "image" || i.type === "video")) throw new Error("encodeChat does not support image/video content items — the <|image_pad|> count depends on the pixels, so only the multimodal generate path can produce those ids");
     }
-  const { ids: r, info: a } = no(e, {
+  const { ids: r, info: a } = ao(e, {
     messages: n,
     assistantPrefix: t.assistantPrefix,
     continueLast: t.continueLast === !0,
@@ -55114,20 +55169,20 @@ function ro(e, t) {
     }
   };
 }
-function eh(e, t) {
-  ka(e, "encode");
+function ah(e, t) {
+  ya(e, "encode");
   const n = t && t.text;
   if (typeof n != "string") throw new Error(`encode requires "text" (a string), got ${typeof n}`);
   return { ids: Array.from(e.encode(n, { addSpecialTokens: !!(t && t.addSpecial) })) };
 }
-function th(e, t) {
-  ka(e, "decode");
+function sh(e, t) {
+  ya(e, "decode");
   const n = t && t.ids, r = ArrayBuffer.isView(n) ? Array.from(n) : n;
   if (!Array.isArray(r)) throw new Error('decode requires "ids": an array of token ids');
   for (let a = 0; a < r.length; a++) if (!Number.isInteger(r[a]) || r[a] < 0) throw new Error(`decode: ids[${a}] must be a non-negative integer, got ${r[a]}`);
   return { text: e.decode(r, { skipSpecialTokens: !!(t && t.skipSpecial) }) };
 }
-async function ya(e, t, n, r) {
+async function Sa(e, t, n, r) {
   if (!e) return;
   const a = e.block;
   if (a && !a.resolved && n >= a.resolveAtStep) {
@@ -55142,12 +55197,12 @@ async function ya(e, t, n, r) {
     i && r && r(i);
   }
 }
-function nh({ samplerConfig: e, hasArgmax: t, hasForwardFromBuffer: n, forceCpuDecode: r = !1, debugCaptureActive: a = !1, cycleDetectorActive: s = !1, detectorRewindable: i = !1, detectorBridgeAllowed: o = !0, allowedTokenIdsActive: u = !1, suppressTokenIdsActive: l = !1, hasArgmaxMask: d = !1 }) {
+function ih({ samplerConfig: e, hasArgmax: t, hasForwardFromBuffer: n, forceCpuDecode: r = !1, debugCaptureActive: a = !1, cycleDetectorActive: s = !1, detectorRewindable: i = !1, detectorBridgeAllowed: o = !0, allowedTokenIdsActive: u = !1, suppressTokenIdsActive: l = !1, hasArgmaxMask: d = !1 }) {
   if (r || a || (u || l) && !d || s && (!i || !o) || !e || e.temperature !== 0) return !1;
   const c = e.repetitionPenalty;
   return !(c !== void 0 && c !== 1 || !t || !n);
 }
-function rh({ samplerConfig: e, hasArgmax: t, hasForwardFromBuffer: n, forceCpuDecode: r = !1, debugCaptureActive: a = !1, cycleDetectorActive: s = !1, detectorRewindable: i = !1, detectorBridgeAllowed: o = !0, detectorMode: u = null, detectorNoRewindWhy: l = null, hasGpuSampler: d = !1, allowedTokenIdsActive: c = !1, suppressTokenIdsActive: h = !1, hasArgmaxMask: p = !1 }) {
+function oh({ samplerConfig: e, hasArgmax: t, hasForwardFromBuffer: n, forceCpuDecode: r = !1, debugCaptureActive: a = !1, cycleDetectorActive: s = !1, detectorRewindable: i = !1, detectorBridgeAllowed: o = !0, detectorMode: u = null, detectorNoRewindWhy: l = null, hasGpuSampler: d = !1, allowedTokenIdsActive: c = !1, suppressTokenIdsActive: h = !1, hasArgmaxMask: p = !1 }) {
   const f = [];
   if (r && f.push("forceCpuDecode"), a && f.push("debug-capture"), s && !i ? f.push(`cycle-detector:${u || "on"}:no-rewind` + (l ? `:${l}` : "")) : s && !o && f.push(`cycle-detector:${u || "on"}:bridge-off:narrow-adapter`), !e) f.push("no-sampler-config");
   else {
@@ -55157,7 +55212,7 @@ function rh({ samplerConfig: e, hasArgmax: t, hasForwardFromBuffer: n, forceCpuD
   }
   return t || f.push("no-argmax-operator"), n || f.push("no-forwardFromBuffer"), c && !p && f.push("allowedTokenIds:no-argmax-mask"), c && d && e && e.temperature > 0 && f.push("allowedTokenIds:no-gpu-sampler-mask"), h && !p && f.push("suppressTokens:no-argmax-mask"), h && d && e && e.temperature > 0 && f.push("suppressTokens:no-gpu-sampler-mask"), f;
 }
-function ao(e) {
+function io(e) {
   return e ? e.specStateManager ? typeof e.captureAttentionCursors != "function" || typeof e.canRestoreAttentionCursors != "function" || typeof e.restoreAttentionCursors != "function" ? {
     ok: !1,
     why: "no-attention-cursors"
@@ -55181,14 +55236,14 @@ function ao(e) {
     why: "no-model"
   };
 }
-function ah({ samplerConfig: e, hasGpuSampler: t, hasForwardFromBuffer: n, finalNormFused: r = !1, hasGpuInvRmsScale: a = !1, forceCpuDecode: s = !1, debugCaptureActive: i = !1, cycleDetectorActive: o = !1, allowedTokenIdsActive: u = !1, suppressTokenIdsActive: l = !1 }) {
+function uh({ samplerConfig: e, hasGpuSampler: t, hasForwardFromBuffer: n, finalNormFused: r = !1, hasGpuInvRmsScale: a = !1, forceCpuDecode: s = !1, debugCaptureActive: i = !1, cycleDetectorActive: o = !1, allowedTokenIdsActive: u = !1, suppressTokenIdsActive: l = !1 }) {
   return !(s || i || o || u || l || !t || !n || r && !a || !e || !(e.temperature > 0));
 }
-function fr(e, t, n, r) {
+function _r(e, t, n, r) {
   let a;
   return t ? a = t.decodeStep(e) : a = n ? n.decode([e]) : null, r && t && (a = (a || "") + t.flush()), a;
 }
-async function sh(e, t, n) {
+async function lh(e, t, n) {
   const r = n * 4, a = e.createBuffer({
     size: r,
     usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST
@@ -55197,20 +55252,20 @@ async function sh(e, t, n) {
   const i = new Float32Array(a.getMappedRange().slice(0));
   return a.unmap(), a.destroy(), i;
 }
-function Sa(e) {
+function xa(e) {
   return typeof e.mergeDecodeCommands == "function" && typeof e._decodeCmdMergeOn == "function" && e._decodeCmdMergeOn() === !0;
 }
-async function* ih(e, t, n, r = {}) {
+async function* dh(e, t, n, r = {}) {
   const { maxTokens: a = 256, eosTokenIds: s = null, tokenizer: i = null, prefillOpts: o = null, debugLayerNormsEvery: u = 0, onLayerNorms: l = null, debugL23ResidualsEvery: d = 0, onL23Residuals: c = null, debugL23MlpEvery: h = 0, onL23Mlp: p = null, debugL23AttnEvery: f = 0, onL23Attention: _ = null, debugDeltaStateEvery: m = 0, debugDeltaStateLayerIdx: b = 22, onDeltaState: w = null, forceCpuDecode: g = !1, gpuSampler: v = null, onProfile: y = null, profilers: k = null, allowedTokenIds: P = null, suppressTokenIds: x = null, stopTokenIds: R = null } = r;
   if (!n || n.length === 0) throw new Error("promptIds must contain at least one token");
-  const B = e.device, G = e.vocabSize, q = Xi(P, G), U = !!(q && q.length > 0), W = Ji(x, G, null), $ = !!(W && W.length > 0), S = $ ? eo(G, q, W) : q, M = va(R, G, null, "stopTokenIds"), T = M ? new Set(M) : null;
+  const B = e.device, G = e.vocabSize, q = eo(P, G), U = !!(q && q.length > 0), W = to(x, G, null), $ = !!(W && W.length > 0), S = $ ? no(G, q, W) : q, M = ka(R, G, null, "stopTokenIds"), T = M ? new Set(M) : null;
   if (t.addToHistory(n), r.promptLookup === !0 && !r.prefillIds && typeof e.generateWithPLDStream == "function" && e.prefillReady && !(typeof e.specRefusalReason == "function" && e.specRefusalReason()) && !(o && o.visionEmbedsBuf) && !g && !r.mtpProbe && !(u > 0) && !(d > 0) && !(h > 0) && !(f > 0) && !(m > 0) && !(t.detector && t.detector.mode && t.detector.mode !== "off") && t.config && t.config.temperature === 0 && (t.config.repetitionPenalty === void 0 || t.config.repetitionPenalty === 1) && !U && !$ && !T) {
-    globalThis.__mentriaDecodeLoop = "pld-spec", globalThis.__loopTelemetryDone || (globalThis.__loopTelemetryDone = !0, console.log("[generate] decode loop: pld-spec")), yield* oh(e, n, r, i ? i.createStreamDecoder() : null, o);
+    globalThis.__mentriaDecodeLoop = "pld-spec", globalThis.__loopTelemetryDone || (globalThis.__loopTelemetryDone = !0, console.log("[generate] decode loop: pld-spec")), yield* ch(e, n, r, i ? i.createStreamDecoder() : null, o);
     return;
   }
   let A = 0;
   const L = r.prefillIds || n;
-  if (Oa("prefill"), gu({ prefillTokens: L.length }), L.length > 1 && e.prefillReady) {
+  if (Ia("prefill"), ku({ prefillTokens: L.length }), L.length > 1 && e.prefillReady) {
     const I = await e.executePrefill(L, o || void 0);
     if (I && I.aborted === !0) {
       const re = /* @__PURE__ */ new Error("Prefill interrupted at a chunk boundary");
@@ -55221,8 +55276,8 @@ async function* ih(e, t, n, r = {}) {
     const re = e.forward(L[I]);
     B.queue.submit(re), I === L.length - 1 && await B.queue.onSubmittedWorkDone();
   }
-  Oa("decode"), k && k.pass && k.pass.endPrefill();
-  const O = u > 0 && typeof l == "function", N = d > 0 && typeof c == "function", F = h > 0 && typeof p == "function", Y = f > 0 && typeof _ == "function", se = m > 0 && typeof w == "function", J = O || N || F || Y || se, K = !!(t.detector && t.detector.mode && t.detector.mode !== "off"), H = K ? ao(e) : null, D = !!(H && H.ok && typeof t.detector.analyze == "function"), j = !globalThis.__narrowSg || globalThis.__mentriaResidentDetectorBridge === !0, ae = t.config ? t.config.allowedTokenIds : void 0;
+  Ia("decode"), k && k.pass && k.pass.endPrefill();
+  const O = u > 0 && typeof l == "function", N = d > 0 && typeof c == "function", F = h > 0 && typeof p == "function", Y = f > 0 && typeof _ == "function", se = m > 0 && typeof w == "function", J = O || N || F || Y || se, K = !!(t.detector && t.detector.mode && t.detector.mode !== "off"), H = K ? io(e) : null, D = !!(H && H.ok && typeof t.detector.analyze == "function"), j = !globalThis.__narrowSg || globalThis.__mentriaResidentDetectorBridge === !0, ae = t.config ? t.config.allowedTokenIds : void 0;
   t.config && (t.config.allowedTokenIds = q);
   const ie = t.config ? t.config.suppressTokenIds : void 0;
   t.config && $ && (t.config.suppressTokenIds = W);
@@ -55238,14 +55293,14 @@ async function* ih(e, t, n, r = {}) {
     allowedTokenIdsActive: U,
     suppressTokenIdsActive: $,
     hasArgmaxMask: le
-  }, te = nh(Z), ne = rh({
+  }, te = ih(Z), ne = oh({
     ...Z,
     detectorMode: K ? t.detector.mode : null,
     detectorNoRewindWhy: H && !H.ok ? H.why : null,
     hasGpuSampler: !!v
   }), ue = (te ? "gpu-argmax" : "pending-stochastic-check") + "|" + ne.join(",");
   (!globalThis.__loopTelemetryDone || globalThis.__loopTelemetryKey !== ue) && (globalThis.__loopTelemetryDone = !0, globalThis.__loopTelemetryKey = ue, console.log("[generate] decode loop: " + (te ? "gpu-argmax" : "pending-stochastic-check") + (ne.length ? " (not resident: " + ne.join(", ") + ")" : "") + (te && K ? ` (detector '${t.detector.mode}' bridged, rewind on fire)` : "")));
-  const fe = !te && ah({
+  const fe = !te && uh({
     samplerConfig: t.config,
     hasGpuSampler: !!v,
     hasForwardFromBuffer: typeof e.forwardFromBuffer == "function",
@@ -55294,18 +55349,18 @@ async function* ih(e, t, n, r = {}) {
       const I = K ? {
         sampler: t,
         detector: t.detector,
-        cpuLoopFrom: (re) => Es(e, t, B, G, a, s, i, A, V, {
+        cpuLoopFrom: (re) => qs(e, t, B, G, a, s, i, A, V, {
           ...C,
           startStep: re
         })
       } : null;
-      yield* uh(e, n, r, A, V, y, k, I, S, T);
-    } else fe ? yield* lh(e, t, v, r, A, V, y, k, T) : yield* Es(e, t, B, G, a, s, i, A, V, C);
+      yield* hh(e, n, r, A, V, y, k, I, S, T);
+    } else fe ? yield* ph(e, t, v, r, A, V, y, k, T) : yield* qs(e, t, B, G, a, s, i, A, V, C);
   } finally {
     t.config && (ae === void 0 ? delete t.config.allowedTokenIds : t.config.allowedTokenIds = ae, $ && (ie === void 0 ? delete t.config.suppressTokenIds : t.config.suppressTokenIds = ie));
   }
 }
-async function* oh(e, t, n, r, a) {
+async function* ch(e, t, n, r, a) {
   const { maxTokens: s = 256, eosTokenIds: i = null, tokenizer: o = null } = n, u = /* @__PURE__ */ new Set();
   if (i != null) if (typeof i == "number") u.add(i);
   else for (const c of i) u.add(c);
@@ -55322,13 +55377,13 @@ async function* oh(e, t, n, r, a) {
     const h = u.has(c);
     if (yield {
       id: c,
-      text: fr(c, r, o, h),
+      text: _r(c, r, o, h),
       isEos: h,
       pldStats: l
     }, h) return;
   }
 }
-async function* Es(e, t, n, r, a, s, i, o = 0, u = null, l = null) {
+async function* qs(e, t, n, r, a, s, i, o = 0, u = null, l = null) {
   const d = { mropeDelta: o }, c = l?.debugLayerNormsEvery | 0, h = l?.onLayerNorms || null, p = l?.debugL23ResidualsEvery | 0, f = l?.onL23Residuals || null, _ = l?.debugL23MlpEvery | 0, m = l?.onL23Mlp || null, b = l?.debugL23AttnEvery | 0, w = l?.onL23Attention || null, g = l?.debugDeltaStateEvery | 0, v = l?.onDeltaState || null;
   typeof l?.debugDeltaStateLayerIdx == "number" && l.debugDeltaStateLayerIdx;
   const y = Math.max(0, l?.startStep | 0), k = e.hiddenSize | 0, P = c > 0 || p > 0 || _ > 0 || b > 0 || g > 0 || !!(l && l.mtpProbe);
@@ -55342,7 +55397,7 @@ async function* Es(e, t, n, r, a, s, i, o = 0, u = null, l = null) {
         await x.mapAsync(GPUMapMode.READ);
         const D = x.getMappedRange();
         q = new Float32Array(D.slice(0, r * 4)), B && (U = new Float32Array(D.slice(r * 4, (r + k) * 4))), x.unmap(), R = !1;
-      } else q = await sh(n, e.logitsBuf, r);
+      } else q = await lh(n, e.logitsBuf, r);
       if (ze("syncMs", performance.now() - W), e.finalNormFused) {
         const D = U ? e.invRmsForSamplingFrom(U) : await e.computeInvRmsForSampling();
         t.setLogitsScale(D);
@@ -55361,7 +55416,7 @@ async function* Es(e, t, n, r, a, s, i, o = 0, u = null, l = null) {
         const ae = "step=" + G + " " + D.map((ie, le) => ie + ":" + j[le].toFixed(3)).join(" ");
         typeof l.onLogitsTopK == "function" ? l.onLogitsTopK(ae) : console.log("LOGITS_TOP5 " + ae);
       }
-      const { tokenId: $, prob: S, logit: M } = t.sample(q), T = s ? s.has($) : !1, A = !!(l?.stopSet && l.stopSet.has($)) && !T, L = A ? u ? u.flush() : "" : fr($, u, i, T), O = {
+      const { tokenId: $, prob: S, logit: M } = t.sample(q), T = s ? s.has($) : !1, A = !!(l?.stopSet && l.stopSet.has($)) && !T, L = A ? u ? u.flush() : "" : _r($, u, i, T), O = {
         id: $,
         step: G,
         prob: S,
@@ -55382,7 +55437,7 @@ async function* Es(e, t, n, r, a, s, i, o = 0, u = null, l = null) {
           });
         }
       }
-      const F = performance.now(), Y = Sa(e);
+      const F = performance.now(), Y = xa(e);
       let se;
       Y ? (x || (x = n.createBuffer({
         size: (r + k) * 4,
@@ -55396,7 +55451,7 @@ async function* Es(e, t, n, r, a, s, i, o = 0, u = null, l = null) {
       const K = performance.now();
       ze("encodeMs", J - F), ze("submitMs", K - J);
       const H = Y ? e._lastDecodeMerge : null;
-      if (H && (ze("recordMs", H.recordMs), ze("replayMs", H.replayMs)), (!Y || P) && (await n.queue.onSubmittedWorkDone(), ze("syncMs", performance.now() - K)), await ya(l?.profilers || null, e, G, l?.onProfile || null), c > 0 && h && G % c === 0) {
+      if (H && (ze("recordMs", H.recordMs), ze("replayMs", H.replayMs)), (!Y || P) && (await n.queue.onSubmittedWorkDone(), ze("syncMs", performance.now() - K)), await Sa(l?.profilers || null, e, G, l?.onProfile || null), c > 0 && h && G % c === 0) {
         const D = await e.readLayerNorms();
         h({
           step: G,
@@ -55463,8 +55518,8 @@ async function* Es(e, t, n, r, a, s, i, o = 0, u = null, l = null) {
     }
   }
 }
-async function* uh(e, t, n, r = 0, a = null, s = null, i = null, o = null, u = null, l = null) {
-  const { maxTokens: d = 256, eosTokenIds: c = null, tokenizer: h = null, gpuDecodeBatchSize: p = 4 } = n, f = { mropeDelta: r }, _ = e.device, m = e.vocabSize, b = e.operators.argmax, w = Math.max(1, p | 0), g = Sa(e), v = n.decodeProbe === "encodeOnly" || n.decodeProbe === "flushPerToken" ? n.decodeProbe : null, y = v === "encodeOnly" ? "encodeOnly" : null, k = v === "flushPerToken";
+async function* hh(e, t, n, r = 0, a = null, s = null, i = null, o = null, u = null, l = null) {
+  const { maxTokens: d = 256, eosTokenIds: c = null, tokenizer: h = null, gpuDecodeBatchSize: p = 4 } = n, f = { mropeDelta: r }, _ = e.device, m = e.vocabSize, b = e.operators.argmax, w = Math.max(1, p | 0), g = xa(e), v = n.decodeProbe === "encodeOnly" || n.decodeProbe === "flushPerToken" ? n.decodeProbe : null, y = v === "encodeOnly" ? "encodeOnly" : null, k = v === "flushPerToken";
   v && (globalThis.__mentriaDecodeProbe = {
     mode: v,
     steps: 0,
@@ -55547,7 +55602,7 @@ async function* uh(e, t, n, r = 0, a = null, s = null, i = null, o = null, u = n
           }
           fe = new Uint32Array(S.getMappedRange().slice(0, j * 4)), S.unmap();
         }
-        globalThis.__phCount || (globalThis.__phCount = 0), globalThis.__phCount++ < 6 && console.log("[gpuloop] batch phases: await=" + (ue - ne).toFixed(1) + "ms map=" + (performance.now() - ue).toFixed(1) + "ms"), await ya(i, e, K, s);
+        globalThis.__phCount || (globalThis.__phCount = 0), globalThis.__phCount++ < 6 && console.log("[gpuloop] batch phases: await=" + (ue - ne).toFixed(1) + "ms map=" + (performance.now() - ue).toFixed(1) + "ms"), await Sa(i, e, K, s);
         for (let V = 0; V < j; V++) {
           const C = fe[V], I = M + V;
           if (B) {
@@ -55566,7 +55621,7 @@ async function* uh(e, t, n, r = 0, a = null, s = null, i = null, o = null, u = n
             else
               G.cycleDetected = !1, G.cyclePeriod = null, G.stopReasonLast = null, G.recentTokens.push(C);
           }
-          const re = !y && c ? c.has(C) : !1, z = !y && !re && !!(l && l.has(C)), X = re || z, ee = z ? a ? a.flush() : "" : fr(C, a, h, re), de = X || I === d - 1, oe = {
+          const re = !y && c ? c.has(C) : !1, z = !y && !re && !!(l && l.has(C)), X = re || z, ee = z ? a ? a.flush() : "" : _r(C, a, h, re), de = X || I === d - 1, oe = {
             id: C,
             step: I,
             prob: 1,
@@ -55587,8 +55642,8 @@ async function* uh(e, t, n, r = 0, a = null, s = null, i = null, o = null, u = n
     W.destroy(), $.destroy(), S.destroy(), U && U.destroy(), x && x.destroy();
   }
 }
-async function* lh(e, t, n, r, a = 0, s = null, i = null, o = null, u = null) {
-  const { maxTokens: l = 256, eosTokenIds: d = null, tokenizer: c = null, gpuDecodeBatchSize: h = 4 } = r, p = { mropeDelta: a }, f = e.device, _ = Math.max(1, h), m = t.config.maxRepeatWindow, b = Sa(e), w = f.createBuffer({
+async function* ph(e, t, n, r, a = 0, s = null, i = null, o = null, u = null) {
+  const { maxTokens: l = 256, eosTokenIds: d = null, tokenizer: c = null, gpuDecodeBatchSize: h = 4 } = r, p = { mropeDelta: a }, f = e.device, _ = Math.max(1, h), m = t.config.maxRepeatWindow, b = xa(e), w = f.createBuffer({
     size: l * 4,
     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
   }), g = f.createBuffer({
@@ -55645,7 +55700,7 @@ async function* lh(e, t, n, r, a = 0, s = null, i = null, o = null, u = null) {
         }
         ze("syncMs", performance.now() - M);
         const T = new Uint32Array(g.getMappedRange().slice(0, G * 4));
-        g.unmap(), await ya(o, e, k, i);
+        g.unmap(), await Sa(o, e, k, i);
         for (let A = 0; A < G; A++) {
           const L = T[A], O = y + A, N = d ? d.has(L) : !1, F = !N && !!(u && u.has(L));
           t.recentTokens.push(L);
@@ -55654,7 +55709,7 @@ async function* lh(e, t, n, r, a = 0, s = null, i = null, o = null, u = null) {
             step: O,
             prob: 0,
             logit: 0,
-            text: F ? s ? s.flush() : "" : fr(L, s, c, N),
+            text: F ? s ? s.flush() : "" : _r(L, s, c, N),
             isEos: N
           };
           if (F && (Y.isStop = !0), yield Y, N || F) return;
@@ -55666,22 +55721,22 @@ async function* lh(e, t, n, r, a = 0, s = null, i = null, o = null, u = null) {
     w.destroy(), g.destroy();
   }
 }
-var dh = "mentria-models", qs = 3, As = 250, Ts = 1e4;
-function Ms(e) {
+var fh = "mentria-models", As = 3, Ts = 250, Ms = 1e4;
+function Gs(e) {
   return e?.name === "AbortError" ? !1 : typeof e?.httpStatus == "number" ? e.httpStatus >= 500 || e.httpStatus === 408 || e.httpStatus === 429 : !0;
 }
-function Gs(e) {
+function Ls(e) {
   if (!e) return null;
   const t = parseFloat(e);
   if (!Number.isNaN(t)) return t >= 0 ? t * 1e3 : null;
   const n = Date.parse(e);
   return Number.isNaN(n) ? null : Math.max(0, n - Date.now());
 }
-function Ls(e, t, n) {
+function Us(e, t, n) {
   const r = Math.min(e * Math.pow(2, t), n);
   return Math.random() * r;
 }
-function Us(e, t) {
+function Rs(e, t) {
   return new Promise((n, r) => {
     if (t?.aborted) return r(new DOMException("Aborted", "AbortError"));
     let a;
@@ -55693,10 +55748,13 @@ function Us(e, t) {
     }, t.addEventListener("abort", a, { once: !0 }));
   });
 }
-var ch = class so {
+function _h(e) {
+  return (ai(e) ? 16 : 256) * 1024 * 1024;
+}
+var mh = class oo {
   #e = null;
   #r;
-  constructor(t = dh) {
+  constructor(t = fh) {
     this.#r = t;
   }
   async init() {
@@ -55709,7 +55767,7 @@ var ch = class so {
   get isInitialized() {
     return this.#e !== null;
   }
-  static SEGMENT_BYTES = 256 * 1024 * 1024;
+  static SEGMENT_BYTES = _h(typeof navigator < "u" ? navigator.userAgent : "");
   #a(t, n) {
     return t + (t.includes("?") ? "&" : "?") + "mentria_seg=" + n;
   }
@@ -55790,7 +55848,7 @@ var ch = class so {
         fromCache: !0
       };
     }
-    const o = await this.#i(t, r), u = parseInt(o.headers.get("content-length") || "0", 10), l = so.SEGMENT_BYTES, d = this, c = o.body.getReader();
+    const o = await this.#i(t, r), u = parseInt(o.headers.get("content-length") || "0", 10), l = oo.SEGMENT_BYTES, d = this, c = o.body.getReader();
     let h = null, p = 0, f = 0, _ = 0, m = !1, b = Promise.resolve();
     const w = () => {
       if (m || p === 0) {
@@ -55844,7 +55902,7 @@ var ch = class so {
     };
   }
   async #i(t, n = {}) {
-    const r = n.maxRetries ?? qs, a = n.baseDelayMs ?? As, s = n.maxDelayMs ?? Ts, i = n.signal;
+    const r = n.maxRetries ?? As, a = n.baseDelayMs ?? Ts, s = n.maxDelayMs ?? Ms, i = n.signal;
     let o = 0;
     for (; ; ) {
       if (i?.aborted) throw new DOMException("Aborted", "AbortError");
@@ -55852,14 +55910,14 @@ var ch = class so {
         const u = await fetch(t, i ? { signal: i } : void 0);
         if (!u.ok) {
           const l = /* @__PURE__ */ new Error(`Failed to fetch shard: ${u.status} ${u.statusText} (${t})`);
-          throw l.httpStatus = u.status, l.retryAfterMs = Gs(u.headers.get("retry-after")), l;
+          throw l.httpStatus = u.status, l.retryAfterMs = Ls(u.headers.get("retry-after")), l;
         }
         if (!u.body) throw new Error(`No streaming body for ${t}`);
         return u;
       } catch (u) {
-        if (u?.name === "AbortError" || !Ms(u) || o >= r) throw u;
-        const l = u?.retryAfterMs != null ? Math.min(u.retryAfterMs, s) : Ls(a, o, s);
-        n.onRetry?.(o + 1, u, l), await Us(l, i), o++;
+        if (u?.name === "AbortError" || !Gs(u) || o >= r) throw u;
+        const l = u?.retryAfterMs != null ? Math.min(u.retryAfterMs, s) : Us(a, o, s);
+        n.onRetry?.(o + 1, u, l), await Rs(l, i), o++;
       }
     }
   }
@@ -55894,16 +55952,16 @@ var ch = class so {
     return l.buffer;
   }
   async #u(t, n, r) {
-    const a = r.maxRetries ?? qs, s = r.baseDelayMs ?? As, i = r.maxDelayMs ?? Ts, o = r.signal, u = r.onRetry;
+    const a = r.maxRetries ?? As, s = r.baseDelayMs ?? Ts, i = r.maxDelayMs ?? Ms, o = r.signal, u = r.onRetry;
     let l = 0;
     for (; ; ) {
       if (o?.aborted) throw new DOMException("Aborted", "AbortError");
       try {
         return await this.#o(t, n, o);
       } catch (d) {
-        if (d?.name === "AbortError" || !Ms(d) || l >= a) throw d;
-        const c = d.retryAfterMs != null ? Math.min(d.retryAfterMs, i) : Ls(s, l, i);
-        u?.(l + 1, d, c), await Us(c, o), l++;
+        if (d?.name === "AbortError" || !Gs(d) || l >= a) throw d;
+        const c = d.retryAfterMs != null ? Math.min(d.retryAfterMs, i) : Us(s, l, i);
+        u?.(l + 1, d, c), await Rs(c, o), l++;
       }
     }
   }
@@ -55911,7 +55969,7 @@ var ch = class so {
     const a = await fetch(t, r ? { signal: r } : void 0);
     if (!a.ok) {
       const o = /* @__PURE__ */ new Error(`Failed to fetch shard: ${a.status} ${a.statusText} (${t})`);
-      throw o.httpStatus = a.status, o.retryAfterMs = Gs(a.headers.get("retry-after")), o;
+      throw o.httpStatus = a.status, o.retryAfterMs = Ls(a.headers.get("retry-after")), o;
     }
     const s = parseInt(a.headers.get("content-length") || "0", 10);
     if (a.body && typeof a.clone == "function" && typeof a.body.getReader == "function") {
@@ -56014,7 +56072,7 @@ var ch = class so {
   #t() {
     if (!this.#e) throw new Error("ModelWeightCache not initialized — call init() first");
   }
-}, hh = {
+}, gh = {
   mode: "dry",
   multiplier: 1,
   base: 1.75,
@@ -56027,13 +56085,13 @@ var ch = class so {
   periodMinReps: 2,
   periodRepPenalty: 1.5
 };
-function ph(e, t) {
+function bh(e, t) {
   const n = Array.from(e);
   if (!t || t.size === 0) return n;
   for (let r = n.length - 2; r >= 0; r--) if (t.has(n[r])) return n.slice(r + 1);
   return n;
 }
-function fh(e) {
+function wh(e) {
   const t = e.length, n = new Int32Array(t);
   if (t < 2) return n;
   for (let r = 0; r < t - 1; r++) {
@@ -56044,7 +56102,7 @@ function fh(e) {
   }
   return n;
 }
-function _h(e, t, n, r = 0) {
+function vh(e, t, n, r = 0) {
   const a = /* @__PURE__ */ new Map(), s = e.length;
   for (let i = Math.max(1, r); i < s - 1; i++) {
     const o = t[i - 1];
@@ -56056,7 +56114,7 @@ function _h(e, t, n, r = 0) {
   }
   return a;
 }
-function mh(e, t, n) {
+function kh(e, t, n) {
   const r = e.length;
   if (r < 2) return null;
   const a = (s) => s * n;
@@ -56071,11 +56129,11 @@ function mh(e, t, n) {
   }
   return null;
 }
-var gh = class {
+var yh = class {
   config;
   constructor(e = {}) {
     this.config = {
-      ...hh,
+      ...gh,
       ...e
     }, this.config.sequenceBreakerIds || (this.config.sequenceBreakerIds = /* @__PURE__ */ new Set());
   }
@@ -56085,9 +56143,9 @@ var gh = class {
   analyze(e, t, n = 0) {
     const r = this.config;
     if (r.mode === "off") return { fired: !1 };
-    const a = Array.from(e), s = Math.max(0, a.length - r.penaltyLastN), i = a.slice(s), o = ph(i, r.sequenceBreakerIds), u = o.length;
+    const a = Array.from(e), s = Math.max(0, a.length - r.penaltyLastN), i = a.slice(s), o = bh(i, r.sequenceBreakerIds), u = o.length;
     if (u < 2) return { fired: !1 };
-    const l = r.penalizePromptRepeats ? 0 : Math.max(0, n - s - (i.length - u)), d = u - l >= 1 ? mh(o, r.periodPMax, r.periodMinReps) : null, c = r.allowedLength - 1, h = _h(o, fh(o), c, l);
+    const l = r.penalizePromptRepeats ? 0 : Math.max(0, n - s - (i.length - u)), d = u - l >= 1 ? kh(o, r.periodPMax, r.periodMinReps) : null, c = r.allowedLength - 1, h = vh(o, wh(o), c, l);
     let p = 0;
     for (const w of h.values()) w > p && (p = w);
     const f = h.size > 0, _ = d !== null;
@@ -56120,8 +56178,8 @@ var gh = class {
   }
   reset() {
   }
-}, bh = 248045, wh = 248046;
-function vh(e, t = null) {
+}, Sh = 248045, xh = 248046;
+function Ph(e, t = null) {
   const n = e.temperature ?? 0.7, r = e.topK ?? 50;
   let a = e.cycleDetector;
   a == null || a === "auto" ? a = "off" : typeof a == "object" && (a.mode === "auto" || a.mode === void 0) && (a = {
@@ -56142,8 +56200,8 @@ function vh(e, t = null) {
   };
   const o = /* @__PURE__ */ new Set();
   if (t?.eosTokenIds) for (const l of t.eosTokenIds) o.add(l);
-  o.add(bh), o.add(wh);
-  const u = new gh({
+  o.add(Sh), o.add(xh);
+  const u = new yh({
     ...typeof a == "string" ? { mode: a } : a,
     sequenceBreakerIds: o
   });
@@ -56152,11 +56210,11 @@ function vh(e, t = null) {
     samplerArgs: i
   };
 }
-var kh = 4096;
-function Rs(e) {
+var Bh = 4096;
+function Cs(e) {
   return e.length ? e[e.length >> 1] : 0;
 }
-async function io(e, t, n) {
+async function uo(e, t, n) {
   if (n <= 0) return null;
   const r = n * 16, a = e.createBuffer({
     size: r,
@@ -56180,11 +56238,11 @@ async function io(e, t, n) {
     a.destroy(), s.destroy();
   }
 }
-function Cs(e) {
+function Ns(e) {
   for (let t = 0; t < e.length; t++) if (e[t] !== 0) return !1;
   return !0;
 }
-var yh = class {
+var Eh = class {
   constructor(e, { numLayers: t, resolveAtStep: n = 1 }) {
     this.device = e, this.numMarkers = Math.min(t + 3, 128), this.resolveAtStep = n, this.resolved = !1, this.disposed = !1, this.querySet = e.createQuerySet({
       type: "timestamp",
@@ -56223,7 +56281,7 @@ var yh = class {
       perBlockUs: [],
       blocks: 0
     };
-    const e = Math.min(this.written, this.numMarkers), t = await io(this.device, this.querySet, e);
+    const e = Math.min(this.written, this.numMarkers), t = await uo(this.device, this.querySet, e);
     if (!t) return {
       mode: "tsProfile",
       supported: !0,
@@ -56255,7 +56313,7 @@ var yh = class {
       }
     }
   }
-}, Sh = [
+}, qh = [
   "wyOp",
   "chunkStateOp",
   "chunkOutputOp",
@@ -56263,9 +56321,9 @@ var yh = class {
   "megashaderAOp",
   "megashaderBOp",
   "recurrenceOp"
-], Ns = class {
+], Os = class {
   constructor(e, { cap: t = 2048, capturePrefill: n = !1 } = {}) {
-    this.device = e, this.cap = Math.max(1, Math.min(t, kh >> 1)), this.decode = {
+    this.device = e, this.cap = Math.max(1, Math.min(t, Bh >> 1)), this.decode = {
       querySet: e.createQuerySet({
         type: "timestamp",
         count: this.cap * 2
@@ -56314,14 +56372,14 @@ var yh = class {
     for (const i of e.blocks || []) {
       const o = i && i.layer;
       if (o)
-        for (const u of Sh) o[u] && n("dn." + u, o[u]);
+        for (const u of qh) o[u] && n("dn." + u, o[u]);
     }
     const r = this.device, a = () => {
-      const i = r[Zr];
+      const i = r[Xr];
       return i ? (t._curOp || "?") + "" + i : t._curOp;
     };
-    r[jr] = a, this._restore.push(() => {
-      delete r[jr], delete r[Zr];
+    r[Yr] = a, this._restore.push(() => {
+      delete r[Yr], delete r[Xr];
     });
     const s = r.createCommandEncoder.bind(r);
     return this._origCreateEncoder = r.createCommandEncoder, r.createCommandEncoder = function(i) {
@@ -56329,7 +56387,7 @@ var yh = class {
       return o.beginComputePass = function(l) {
         const d = t.armed && !(l && l.timestampWrites) ? t._target() : null;
         if (d) {
-          const c = d.idx++, h = r[Yr];
+          const c = d.idx++, h = r[Zr];
           return d.labels[c] = (h ?? a()) || "?", u(Object.assign({}, l || {}, { timestampWrites: {
             querySet: d.querySet,
             beginningOfPassWriteIndex: c * 2,
@@ -56367,7 +56425,7 @@ var yh = class {
     };
     const n = async (u) => {
       if (!u || u.idx === 0) return null;
-      const l = await io(this.device, u.querySet, u.idx);
+      const l = await uo(this.device, u.querySet, u.idx);
       if (!l) return null;
       const d = l.us, c = /* @__PURE__ */ new Map(), h = /* @__PURE__ */ new Map();
       let p = 0;
@@ -56385,7 +56443,7 @@ var yh = class {
         w.sort((g, v) => g - v), f.push({
           label: b,
           count: w.length,
-          medianUs: +Rs(w).toFixed(2),
+          medianUs: +Cs(w).toFixed(2),
           sumUs: +w.reduce((g, v) => g + v, 0).toFixed(1)
         });
       f.sort((b, w) => w.sumUs - b.sumUs || w.count - b.count);
@@ -56397,7 +56455,7 @@ var yh = class {
           label: b.slice(0, g),
           detail: b.slice(g + 1),
           count: w.length,
-          medianUs: +Rs(w).toFixed(2),
+          medianUs: +Cs(w).toFixed(2),
           minUs: +w[0].toFixed(2),
           maxUs: +w[w.length - 1].toFixed(2),
           sumUs: +w.reduce((v, y) => v + y, 0).toFixed(1)
@@ -56411,7 +56469,7 @@ var yh = class {
         _us: d
       };
       return _.length && (m.byShape = _), m;
-    }, r = await n(t), a = await n(this.decode), s = a ? a._us : null, i = (!a || Cs(a._us)) && (!r || Cs(r._us)), o = [];
+    }, r = await n(t), a = await n(this.decode), s = a ? a._us : null, i = (!a || Ns(a._us)) && (!r || Ns(r._us)), o = [];
     if (s) for (let u = 0; u < this.marks.length; u++) {
       const l = this.marks[u], d = u === this.marks.length - 1, c = d ? e : Math.min(this.marks[u + 1], e);
       if (l >= e || c <= l) break;
@@ -56457,13 +56515,13 @@ var yh = class {
       }
     }
   }
-}, oa = 1e-3, xh = 0.01, Ph = 2048, Bh = 1024;
-function oo(e) {
+}, ua = 1e-3, Ah = 0.01, Th = 2048, Mh = 1024;
+function lo(e) {
   let t = e >>> 0;
   return () => (t = Math.imul(t, 1664525) + 1013904223 >>> 0, t);
 }
-function Os(e, t, n) {
-  const r = t / 32, a = new Uint32Array(e * r * 5), s = new Float32Array(1), i = oo(n), o = new Float64Array(e * t);
+function Is(e, t, n) {
+  const r = t / 32, a = new Uint32Array(e * r * 5), s = new Float32Array(1), i = lo(n), o = new Float64Array(e * t);
   for (let u = 0; u < e; u++) for (let l = 0; l < r; l++) {
     const d = (u * r + l) * 5;
     s[0] = 78125e-7 * (1 + (i() >>> 28 & 3)), a[d] = new Uint32Array(s.buffer)[0];
@@ -56484,14 +56542,14 @@ function Os(e, t, n) {
   };
 }
 function Vt(e, t) {
-  const n = oo(t), r = new Float32Array(e);
+  const n = lo(t), r = new Float32Array(e);
   for (let a = 0; a < e; a++) r[a] = ((n() >>> 20 & 1023) - 512) / 512;
   return r;
 }
-function Eh(e, t) {
+function Gh(e, t) {
   let n = 0, r = -1;
   for (let a = 0; a < t.length; a++) {
-    const s = Math.abs(e[a] - t[a]) / (Math.abs(t[a]) + xh);
+    const s = Math.abs(e[a] - t[a]) / (Math.abs(t[a]) + Ah);
     s > n && (n = s, r = a);
   }
   return {
@@ -56499,7 +56557,7 @@ function Eh(e, t) {
     at: r
   };
 }
-var qh = class {
+var Lh = class {
   constructor(e) {
     this.device = e, this.bufs = [];
   }
@@ -56536,7 +56594,7 @@ var qh = class {
     this.bufs.length = 0;
   }
 };
-async function Ah(e, t, n = {}) {
+async function Uh(e, t, n = {}) {
   const r = n.N || 2048, a = n.K || 1024, s = t && t.vecmatQ4, i = t && t.prescaledFusedGateUp, o = s && s.subgroupWidth || i && i.subgroupWidth || 0, u = [], l = (b, w, g) => u.push({
     name: b,
     ok: w,
@@ -56551,10 +56609,10 @@ async function Ah(e, t, n = {}) {
   };
   const h = globalThis.__mentriaMobileMatvecSuspended;
   globalThis.__mentriaMobileMatvecSuspended = !0;
-  const p = new qh(e), f = typeof performance < "u" ? performance.now() : Date.now(), _ = () => +((typeof performance < "u" ? performance.now() : Date.now()) - f).toFixed(1);
+  const p = new Lh(e), f = typeof performance < "u" ? performance.now() : Date.now(), _ = () => +((typeof performance < "u" ? performance.now() : Date.now()) - f).toFixed(1);
   let m = !1;
   try {
-    const { words: b, deq: w } = Os(a, r, 388817), g = Vt(a, 12648430), v = p.upload(b), y = p.upload(g), k = p.storage(r * 4), P = {};
+    const { words: b, deq: w } = Is(a, r, 388817), g = Vt(a, 12648430), v = p.upload(b), y = p.upload(g), k = p.storage(r * 4), P = {};
     d && (e.queue.submit([s.dispatch(y, v, k, 1, r, a)]), P.plain = await p.read(k, r * 4));
     let x = null, R = null, B = null, G = null, q = null;
     if (d) {
@@ -56567,11 +56625,11 @@ async function Ah(e, t, n = {}) {
       for (let L = 0; L < r; L++) P.residual[L] = P.plain[L] + G[L];
     }
     let U = null, W = null;
-    c && (W = p.upload(Os(a, r, 659918).words), e.queue.submit([i.dispatch(y, v, W, k, R || p.upload(Vt(a, 48879)), r, a, 1e-6)]), U = await p.read(k, r * 4)), d && s.publishNarrow(), c && i.publishNarrow();
+    c && (W = p.upload(Is(a, r, 659918).words), e.queue.submit([i.dispatch(y, v, W, k, R || p.upload(Vt(a, 48879)), r, a, 1e-6)]), U = await p.read(k, r * 4)), d && s.publishNarrow(), c && i.publishNarrow();
     let $ = !0;
     const S = (M, T, A) => {
-      const { worst: L, at: O } = Eh(T, A), N = Number.isFinite(L) && L <= 1e-3;
-      return l(M, N, `maxRel ${L.toExponential(2)} at ${O} (tol ${oa})`), N || ($ = !1), N;
+      const { worst: L, at: O } = Gh(T, A), N = Number.isFinite(L) && L <= 1e-3;
+      return l(M, N, `maxRel ${L.toExponential(2)} at ${O} (tol ${ua})`), N || ($ = !1), N;
     };
     if (d) {
       if (e.queue.submit([s.dispatch(y, v, k, 1, r, a)]), S("vecmat.ksplitWide", await p.read(k, r * 4), P.plain), s.ksplitWidePrescaledPipeline && (e.queue.submit([s.dispatchPrescaled(y, v, k, R, 1, r, a, 1e-6)]), S("vecmat.ksplitWidePrescaled", await p.read(k, r * 4), P.prescaled)), s.ksplitWideResidualPipeline && (e.queue.submit([s.dispatchWithResidual(y, v, k, q, 1, r, a)]), S("vecmat.ksplitWideResidual", await p.read(k, r * 4), P.residual)), s.mrowPipelines && s.mrowPipelines[2]) {
@@ -56616,7 +56674,7 @@ async function Ah(e, t, n = {}) {
       width: o,
       kernels: u,
       ms: _(),
-      reason: `narrow subgroup probe PASSED at width ${o} (${u.length} kernels, tol ${oa}, ${_()} ms)`
+      reason: `narrow subgroup probe PASSED at width ${o} (${u.length} kernels, tol ${ua}, ${_()} ms)`
     };
   } catch (b) {
     d && s.revokeNarrow && s.revokeNarrow(), c && i.revokeNarrow && i.revokeNarrow();
@@ -56632,8 +56690,8 @@ async function Ah(e, t, n = {}) {
     globalThis.__mentriaMobileMatvecSuspended = h, m || (s && s.narrowPublished && s.revokeNarrow(), i && i.narrowPublished && i.revokeNarrow()), p.dispose();
   }
 }
-var uo = 720 * 60 * 60 * 1e3, Th = "mentria-engine", Mh = 1, Qn = "narrow-subgroup-probe";
-function ua(e) {
+var co = 720 * 60 * 60 * 1e3, Rh = "mentria-engine", Ch = 1, jn = "narrow-subgroup-probe";
+function la(e) {
   const t = String(e);
   let n = 2166136261, r = 16777619;
   for (let a = 0; a < t.length; a++) {
@@ -56642,17 +56700,17 @@ function ua(e) {
   }
   return (n >>> 0).toString(16).padStart(8, "0") + (r >>> 0).toString(16).padStart(8, "0");
 }
-function Gh(e) {
-  return ua((Array.isArray(e) ? e : []).map((t) => typeof t == "string" ? `${t.length}:${ua(t)}` : "<absent>").join("\0"));
+function Nh(e) {
+  return la((Array.isArray(e) ? e : []).map((t) => typeof t == "string" ? `${t.length}:${la(t)}` : "<absent>").join("\0"));
 }
-function Lh(e = {}) {
+function Oh(e = {}) {
   const t = (n) => n == null ? "" : String(n);
   return [
     "s1",
     `v=${t(e.vendor)}`,
     `a=${t(e.architecture)}`,
     `d=${t(e.device)}`,
-    `desc=${ua(t(e.description))}`,
+    `desc=${la(t(e.description))}`,
     `b=${t(e.engineBuild)}`,
     `w=${t(e.subgroupWidth)}`,
     `sh=${t(e.shaderHash)}`,
@@ -56662,49 +56720,49 @@ function Lh(e = {}) {
     `f=${e.forced === !0 ? 1 : 0}`
   ].join("|");
 }
-function Mr(e) {
+function Gr(e) {
   return new Promise((t, n) => {
     e.onsuccess = () => t(e.result), e.onerror = () => n(e.error || /* @__PURE__ */ new Error("IndexedDB request failed"));
   });
 }
-function lo(e) {
+function ho(e) {
   const t = (e || (typeof globalThis < "u" ? globalThis : {})).indexedDB;
   if (!t || typeof t.open != "function") return null;
   let n = null;
   const r = () => (n || (n = new Promise((s, i) => {
     let o;
     try {
-      o = t.open(Th, Mh);
+      o = t.open(Rh, Ch);
     } catch (u) {
       i(u);
       return;
     }
     o.onupgradeneeded = () => {
       const u = o.result;
-      u.objectStoreNames.contains(Qn) || u.createObjectStore(Qn);
+      u.objectStoreNames.contains(jn) || u.createObjectStore(jn);
     }, o.onsuccess = () => s(o.result), o.onerror = () => i(o.error || /* @__PURE__ */ new Error("IndexedDB open failed")), o.onblocked = () => i(/* @__PURE__ */ new Error("IndexedDB open blocked"));
   }).catch((s) => {
     throw n = null, s;
   })), n), a = async (s, i) => {
-    const o = (await r()).transaction(Qn, s), u = await i(o.objectStore(Qn));
+    const o = (await r()).transaction(jn, s), u = await i(o.objectStore(jn));
     return s === "readwrite" && await new Promise((l, d) => {
       o.oncomplete = () => l(), o.onerror = () => d(o.error || /* @__PURE__ */ new Error("IndexedDB transaction failed")), o.onabort = () => d(o.error || /* @__PURE__ */ new Error("IndexedDB transaction aborted"));
     }), u;
   };
   return {
-    get: (s) => a("readonly", (i) => Mr(i.get(s))),
-    set: (s, i) => a("readwrite", (o) => Mr(o.put(i, s))),
-    delete: (s) => a("readwrite", (i) => Mr(i.delete(s)))
+    get: (s) => a("readonly", (i) => Gr(i.get(s))),
+    set: (s, i) => a("readwrite", (o) => Gr(o.put(i, s))),
+    delete: (s) => a("readwrite", (i) => Gr(i.delete(s)))
   };
 }
-async function Uh(e, t = {}) {
-  const n = t.store !== void 0 ? t.store : lo();
+async function Ih(e, t = {}) {
+  const n = t.store !== void 0 ? t.store : ho();
   if (!n) return {
     hit: !1,
     record: null,
     reason: "store-unavailable"
   };
-  const r = Number.isFinite(t.now) ? t.now : Date.now(), a = Number.isFinite(t.ttlMs) ? t.ttlMs : uo;
+  const r = Number.isFinite(t.now) ? t.now : Date.now(), a = Number.isFinite(t.ttlMs) ? t.ttlMs : co;
   let s;
   try {
     s = await n.get(e);
@@ -56759,8 +56817,8 @@ async function Uh(e, t = {}) {
     reason: "hit"
   };
 }
-async function Rh(e, t, n = {}) {
-  const r = n.store !== void 0 ? n.store : lo();
+async function Dh(e, t, n = {}) {
+  const r = n.store !== void 0 ? n.store : ho();
   if (!r) return {
     stored: !1,
     reason: "store-unavailable",
@@ -56801,7 +56859,7 @@ async function Rh(e, t, n = {}) {
     record: a
   };
 }
-function Ch(e, t) {
+function Kh(e, t) {
   const n = e && e.vecmatQ4, r = e && e.prescaledFusedGateUp, a = !!(n && n._narrowPending), s = !!(r && r._narrowPending), i = [];
   return !a && !s ? {
     applied: !1,
@@ -56825,37 +56883,37 @@ var bn = Object.freeze({
   targetWgs: 128,
   lmHeadLanes: 8,
   fusion: "fold"
-}), Nh = Object.freeze([
+}), Wh = Object.freeze([
   "off",
   "pass",
   "fold"
-]), Is = Object.freeze([
+]), Ds = Object.freeze([
   "gateUp",
   "down",
   "cross"
-]), or = Object.freeze([64, 256]);
-function co(e = {}) {
+]), ur = Object.freeze([64, 256]);
+function po(e = {}) {
   let t = e.fusion, n = "init";
   if (t == null) {
     const o = globalThis.__mentriaMobileFusion;
     o != null && (t = typeof o == "string" ? o : o.mode, n = "global");
   }
   t == null && (globalThis.__narrowSg ? (t = "off", n = "default:narrow-adapter") : (t = bn.fusion, n = "default")), t === !0 && (t = "fold"), t === !1 && (t = "off");
-  const r = Nh.includes(t) ? t : "off";
+  const r = Wh.includes(t) ? t : "off";
   let a = e.fusionFolds;
   if (a === void 0) {
     const o = globalThis.__mentriaMobileFusion;
     o && typeof o == "object" && o.folds !== void 0 && (a = o.folds);
   }
-  const s = a === void 0 ? Is : Array.isArray(a) ? a : String(a).split(",").map((o) => o.trim()).filter(Boolean), i = {};
-  for (const o of Is) i[o] = r === "fold" && s.includes(o);
+  const s = a === void 0 ? Ds : Array.isArray(a) ? a : String(a).split(",").map((o) => o.trim()).filter(Boolean), i = {};
+  for (const o of Ds) i[o] = r === "fold" && s.includes(o);
   return {
     mode: r,
     folds: i,
     source: n
   };
 }
-var Ds = class {
+var Ks = class {
   constructor(e) {
     this.mode = e.mode, this.folds = { ...e.folds }, this.pending = /* @__PURE__ */ new Map(), this.tokenOpen = !1, this.safe = !1, this.epoch = 0, this.disabledReason = null, this.stats = {
       tokens: 0,
@@ -56921,14 +56979,14 @@ var Ds = class {
     };
   }
 };
-function ho(e, t = !1) {
+function fo(e, t = !1) {
   if (!e || e.mode === "off") return null;
   const n = globalThis.__mentriaMobileFoldRegistry;
-  if (!t && n instanceof Ds && n.mode === e.mode) return n;
-  const r = new Ds(e);
+  if (!t && n instanceof Ks && n.mode === e.mode) return n;
+  const r = new Ks(e);
   return globalThis.__mentriaMobileFoldRegistry = r, r;
 }
-var po = Object.freeze({
+var _o = Object.freeze({
   plain: [
     "off",
     "ksplit",
@@ -56951,31 +57009,31 @@ var po = Object.freeze({
   ],
   lmHead: ["off", "nsplit"]
 });
-function Oh(e) {
+function zh(e) {
   return e / 4 * 32;
 }
-function fo(e, t, n, r = bn.targetWgs, a = 0) {
+function mo(e, t, n, r = bn.targetWgs, a = 0) {
   const s = Math.floor(t / 4);
   if (s < 1) return 1;
-  const i = Math.max(1, Math.ceil(e / Oh(n)));
+  const i = Math.max(1, Math.ceil(e / zh(n)));
   let o = a > 0 ? a : Math.max(1, Math.round(r / i));
   o > s && (o = s);
   for (let u = o; u >= 1; u--) if (s % u === 0) return u;
   return 1;
 }
-function _o(e = {}) {
+function go(e = {}) {
   const t = [
     "off",
     "ksplit",
     "nsplit"
   ], n = e.mode || "off", r = {};
-  for (const [a, s] of Object.entries(po)) {
+  for (const [a, s] of Object.entries(_o)) {
     let i = e.kernels && e.kernels[a] || n;
     t.includes(i) || (i = "off"), s.includes(i) || (i = s.includes("nsplit") ? "nsplit" : "off"), r[a] = i;
   }
   return r;
 }
-function mo(e = {}) {
+function bo(e = {}) {
   const t = e.subgroupWidth, n = Number.isInteger(t) && t > 0 ? Math.min(256, Math.max(64, 4 * t)) : bn.wg, r = e.wg ?? n;
   if (!Number.isInteger(r) || r < 4 || r > 256 || r % 4 !== 0) throw new Error(`mobileMatvecWG must be a multiple of 4 in [4, 256], got ${r}`);
   const a = e.lmHeadLanes ?? bn.lmHeadLanes;
@@ -56991,34 +57049,34 @@ function mo(e = {}) {
     subgroupWidth: t || null
   };
 }
-var Ih = Object.freeze({
+var Fh = Object.freeze({
   vecmat: "matmul_q4_vecmat_mobile.wgsl",
   gateUp: "mlp_fused_gate_up_prescaled_mobile.wgsl",
   lmHead: "lm_head_q4_tied_mobile.wgsl",
   reduce: "matvec_partial_reduce.wgsl"
 });
-function Dh() {
+function $h() {
   const e = globalThis.__mentriaMobileMatvec;
   if (!e) return null;
   const t = typeof e == "string" ? { mode: e } : e;
   if (!t || !t.mode || t.mode === "off" || !t.shaders) return null;
   try {
-    const n = co(t);
+    const n = po(t);
     return {
       cfg: t,
-      modes: _o(t),
-      geo: mo(t),
+      modes: go(t),
+      geo: bo(t),
       fusion: n,
-      fold: ho(n)
+      fold: fo(n)
     };
   } catch (n) {
     return globalThis.console && console.warn("[mobile-matvec] bad global config: " + (n && n.message || n)), null;
   }
 }
-function xa(e, t) {
-  const n = Dh();
+function Pa(e, t) {
+  const n = $h();
   if (!n) return;
-  const r = n.cfg.shaders || {}, a = Ih;
+  const r = n.cfg.shaders || {}, a = Fh;
   try {
     const s = {
       fusion: n.fusion,
@@ -57049,14 +57107,14 @@ function xa(e, t) {
     e.mobile = null, globalThis.console && console.warn(`[mobile-matvec] auto build (${t}) failed: ` + (s && s.message || s));
   }
 }
-var Kh = Object.freeze({
+var Vh = Object.freeze({
   vecmat: "matmul_q4_vecmat_mobile.wgsl",
   gateUp: "mlp_fused_gate_up_prescaled_mobile.wgsl",
   lmHead: "lm_head_q4_tied_mobile.wgsl",
   reduce: "matvec_partial_reduce.wgsl"
-}), Ks = () => typeof performance < "u" ? performance.now() : Date.now();
-async function Wh(e, t, n = {}) {
-  const r = Ks(), a = (i, o) => {
+}), Ws = () => typeof performance < "u" ? performance.now() : Date.now();
+async function Hh(e, t, n = {}) {
+  const r = Ws(), a = (i, o) => {
     try {
       n.onFallback && n.onFallback("mobile-matvec", i, o);
     } catch {
@@ -57069,10 +57127,10 @@ async function Wh(e, t, n = {}) {
     };
   }, s = [];
   try {
-    const i = _o(n), o = n.subgroupWidth ?? (t && t.vecmatQ4 && t.vecmatQ4.subgroupWidth) ?? void 0, u = mo({
+    const i = go(n), o = n.subgroupWidth ?? (t && t.vecmatQ4 && t.vecmatQ4.subgroupWidth) ?? void 0, u = bo({
       ...n,
       subgroupWidth: o
-    }), l = co(n), d = ho(l, !0), c = {
+    }), l = po(n), d = fo(l, !0), c = {
       fusion: l,
       fold: d
     };
@@ -57085,7 +57143,7 @@ async function Wh(e, t, n = {}) {
     _ && g.push("vecmat"), m && g.push("gateUp"), b && g.push("lmHead"), w && g.push("reduce");
     const v = {};
     for (const k of g) {
-      const P = Kh[k];
+      const P = Vh[k];
       if (n.shaders && n.shaders[P]) {
         v[k] = n.shaders[P];
         continue;
@@ -57131,7 +57189,7 @@ async function Wh(e, t, n = {}) {
         folds: l.folds,
         source: l.source
       },
-      buildMs: +(Ks() - r).toFixed(1)
+      buildMs: +(Ws() - r).toFixed(1)
     };
   } catch (i) {
     for (const o of s) try {
@@ -57141,7 +57199,7 @@ async function Wh(e, t, n = {}) {
     return a("build-failed", i && i.message || i);
   }
 }
-function zh(e) {
+function Qh(e) {
   if (!e) return null;
   const t = e.vecmatQ4, n = e.prescaledFusedGateUp, r = e.lmHeadQ4Tied, a = t && t.mobile || n && n.mobile || r && r.mobile;
   if (!a) return null;
@@ -57154,7 +57212,7 @@ function zh(e) {
   }, i = Object.assign({}, t && t.mobile ? t.mobile.ksplitFactors : null, n && n.mobile ? { gateUp: n.mobile.ksplitFactors } : null), o = t && t.mobile && t.mobile.fusion || n && n.mobile && n.mobile.fusion || null, u = t && t.mobile && t.mobile.reg || n && n.mobile && n.mobile.reg || null;
   return {
     enabled: !0,
-    mode: t && t.mobile && Fh(t.mobile.modes) || n && n.mobile && n.mobile.mode || "nsplit",
+    mode: t && t.mobile && jh(t.mobile.modes) || n && n.mobile && n.mobile.mode || "nsplit",
     wg: a.wg,
     lmHeadLanes: r && r.mobile ? r.mobile.lanes : null,
     kernels: s,
@@ -57166,11 +57224,11 @@ function zh(e) {
     } : null
   };
 }
-function Fh(e) {
-  for (const t of Object.keys(po)) if (e[t] && e[t] !== "off") return e[t];
+function jh(e) {
+  for (const t of Object.keys(_o)) if (e[t] && e[t] !== "off") return e[t];
   return null;
 }
-var $h = Object.freeze({
+var Yh = Object.freeze({
   numLayers: 24,
   hiddenSize: 1024,
   intermediateSize: 3584,
@@ -57200,18 +57258,18 @@ var $h = Object.freeze({
     num_position_embeddings: 2304
   })
 });
-var r_ = Object.freeze({
+var l_ = Object.freeze({
   q4: 0.625,
   q3: 0.5,
   f32: 4,
   f16: 2,
-  kivi: di(4, 32) / 8
-}), Vh = di(4, 32) * 32 / 8, a_ = Object.freeze({
+  kivi: hi(4, 32) / 8
+}), Zh = hi(4, 32) * 32 / 8, d_ = Object.freeze({
   desktopMultiplier: 4,
   iosPerBufferMiB: 256,
   minBudgetMiB: 512
 });
-function Ws(e, t, n) {
+function zs(e, t, n) {
   if (!Number.isInteger(e) || e <= 0) throw new RangeError(`weightBytes: rows must be positive integer, got ${e}`);
   if (!Number.isInteger(t) || t <= 0) throw new RangeError(`weightBytes: cols must be positive integer, got ${t}`);
   if (n === "q4") {
@@ -57226,11 +57284,11 @@ function Ws(e, t, n) {
   if (n === "f16") return e * t * 2;
   if (n === "kivi") {
     if (t % 32 !== 0) throw new RangeError(`weightBytes(kivi): cols=${t} must be divisible by 32`);
-    return e * t / 32 * Vh;
+    return e * t / 32 * Zh;
   }
   throw new Error(`weightBytes: unknown mode '${n}'`);
 }
-function Hh(e) {
+function Xh(e) {
   if (!e || typeof e != "object") return "growmap must be an object";
   for (const a of [
     "size",
@@ -57288,7 +57346,7 @@ function Hh(e) {
   for (let a = 1; a < t; a++) if (r[a] <= r[n[a]]) return `verifyOrder violates BFS: node ${a} (pos ${r[a]}) before parent ${n[a]} (pos ${r[n[a]]})`;
   return null;
 }
-function Qh(e) {
+function Jh(e) {
   let t = e;
   if (typeof e == "string") try {
     t = JSON.parse(e);
@@ -57296,7 +57354,7 @@ function Qh(e) {
     throw new Error(`loadGrowmap: invalid JSON (${s.message})`);
   }
   if (!t || typeof t != "object") throw new Error("loadGrowmap: parsed value is not an object");
-  const n = "growmap" in t ? t.growmap : t, r = t.config ?? null, a = Hh(n);
+  const n = "growmap" in t ? t.growmap : t, r = t.config ?? null, a = Xh(n);
   if (a) throw new Error(`loadGrowmap: invalid growmap (${a})`);
   return {
     config: r,
@@ -57304,7 +57362,7 @@ function Qh(e) {
   };
 }
 var zt = -1 / 0;
-function jh(e, t, n = 1) {
+function ep(e, t, n = 1) {
   if (!Number.isFinite(e)) throw new Error(`powerLawP: b must be finite (got ${e})`);
   if (!Number.isInteger(t) || t < 1) throw new Error(`powerLawP: k must be int >= 1 (got ${t})`);
   if (!Number.isFinite(n) || n < 0 || n > 1) throw new Error(`powerLawP: alpha must be in [0,1] (got ${n})`);
@@ -57312,7 +57370,7 @@ function jh(e, t, n = 1) {
   for (let a = 1; a <= t; a++) r[a - 1] = n / Math.pow(a, e);
   return r;
 }
-function Yh(e, t, n) {
+function tp(e, t, n) {
   if (!(e instanceof Float64Array || Array.isArray(e))) throw new Error("solveSequoiaDP: p must be Float64Array or Array");
   const r = e instanceof Float64Array ? e : Float64Array.from(e), a = r.length;
   if (a < 1) throw new Error("solveSequoiaDP: p must have length >= 1");
@@ -57356,11 +57414,11 @@ function Yh(e, t, n) {
     d_max: n
   };
 }
-function go(e, t, n) {
+function wo(e, t, n) {
   const { c: r, n_max: a, d_max: s } = e;
   return t < 0 || t > a || n < 0 || n > s ? zt : r[t * (s + 1) + n];
 }
-function Zh(e, t, n, r, a) {
+function np(e, t, n, r, a) {
   const s = [];
   for (const i of t) {
     const o = r instanceof Map ? r.get(i) : r[i];
@@ -57371,7 +57429,7 @@ function Zh(e, t, n, r, a) {
       thrByD: {}
     };
     for (const l of n) {
-      const d = go(e, i, l);
+      const d = wo(e, i, l);
       if (d === zt || d < 0) {
         u.thrByD[l] = null;
         continue;
@@ -57383,7 +57441,7 @@ function Zh(e, t, n, r, a) {
   }
   return s;
 }
-function Xh(e, t) {
+function rp(e, t) {
   let n = null;
   for (const r of e) for (const a of Object.keys(r.thrByD)) {
     const s = +a, i = r.thrByD[s];
@@ -57391,13 +57449,13 @@ function Xh(e, t) {
       n: r.n,
       d: s,
       thr: i,
-      G: go(t, r.n, s),
+      G: wo(t, r.n, s),
       t_ms: r.t_ms
     });
   }
   return n;
 }
-var Pa = Object.freeze({
+var Ba = Object.freeze({
   1: 232,
   2: 234,
   4: 231,
@@ -57410,7 +57468,7 @@ var Pa = Object.freeze({
   128: 410,
   192: 510,
   256: 610
-}), Jh = Object.freeze([
+}), ap = Object.freeze([
   4,
   8,
   16,
@@ -57420,18 +57478,18 @@ var Pa = Object.freeze({
   128,
   192,
   256
-]), ep = Object.freeze([
+]), sp = Object.freeze([
   4,
   6,
   8,
   12,
   16
 ]);
-function tp(e) {
-  const { p: t, n_max: n, d_max: r, t_n_ms: a = Pa, c_drafter_ms: s = 0.1, n_grid: i = Jh, d_grid: o = ep } = e, u = Math.max(...i), l = Math.max(...o);
+function ip(e) {
+  const { p: t, n_max: n, d_max: r, t_n_ms: a = Ba, c_drafter_ms: s = 0.1, n_grid: i = ap, d_grid: o = sp } = e, u = Math.max(...i), l = Math.max(...o);
   if (n < u) throw new Error(`pickOptimalNDStar: n_max ${n} < max(n_grid) ${u}`);
   if (r < l) throw new Error(`pickOptimalNDStar: d_max ${r} < max(d_grid) ${l}`);
-  const d = Yh(t, n, r), c = Zh(d, i, o, a, s), h = Xh(c, d);
+  const d = tp(t, n, r), c = np(d, i, o, a, s), h = rp(c, d);
   if (h === null) throw new Error("pickOptimalNDStar: no feasible (n,d) in grid");
   return {
     n_star: h.n,
@@ -57443,7 +57501,7 @@ function tp(e) {
     rows: c
   };
 }
-var bo = Object.freeze([Object.freeze({
+var vo = Object.freeze([Object.freeze({
   id: "b25_paper",
   url: "tests/fixtures/sequoia_growmap_b25_paper.json",
   n_baked: 64,
@@ -57466,7 +57524,7 @@ var bo = Object.freeze([Object.freeze({
     alpha: 1
   })
 })]);
-function np(e, t) {
+function op(e, t) {
   if (!e || typeof e != "object") throw new Error("evaluateGrowmapUnderP: growmap required");
   if (!(t instanceof Float64Array) && !Array.isArray(t)) throw new Error("evaluateGrowmapUnderP: p_runtime must be Float64Array or Array");
   const n = t instanceof Float64Array ? t : Float64Array.from(t), r = e.size | 0;
@@ -57485,9 +57543,9 @@ function np(e, t) {
   for (let i = 1; i < r; i++) s += a[i];
   return s;
 }
-async function rp(e) {
+async function up(e) {
   if (!e || typeof e != "object") throw new Error("selectGrowmap: opts required");
-  const { fetcher: t, p_runtime: n, t_n_ms: r = Pa, c_drafter_ms: a = 0.1, candidates: s = bo } = e;
+  const { fetcher: t, p_runtime: n, t_n_ms: r = Ba, c_drafter_ms: a = 0.1, candidates: s = vo } = e;
   if (typeof t != "function") throw new Error("selectGrowmap: fetcher must be a function");
   if (!(n instanceof Float64Array) && !Array.isArray(n)) throw new Error("selectGrowmap: p_runtime must be Float64Array or Array");
   if (!Array.isArray(s) || s.length === 0) throw new Error("selectGrowmap: candidates must be a non-empty array");
@@ -57496,9 +57554,9 @@ async function rp(e) {
   for (const _ of s) try {
     const m = await t(_.url);
     if (typeof m != "string") throw new Error(`fetcher returned non-string for ${_.url}`);
-    const { config: b, growmap: w } = Qh(m), g = i(_.n_baked);
+    const { config: b, growmap: w } = Jh(m), g = i(_.n_baked);
     if (g == null || !Number.isFinite(g)) throw new Error(`t_n_ms missing for n=${_.n_baked}`);
-    const v = np(w, o), y = g + _.d_baked * a;
+    const v = op(w, o), y = g + _.d_baked * a;
     if (!(y > 0)) throw new Error(`non-positive denominator (t_ms=${g}, d=${_.d_baked}, c=${a})`);
     const k = v / (y / 1e3);
     u.push({
@@ -57537,7 +57595,7 @@ async function rp(e) {
   const h = l[d], p = h.cand;
   let f = null;
   try {
-    const _ = Array.from(new Set(s.map((w) => w.n_baked))).sort((w, g) => w - g), m = Array.from(new Set(s.map((w) => w.d_baked))).sort((w, g) => w - g), b = tp({
+    const _ = Array.from(new Set(s.map((w) => w.n_baked))).sort((w, g) => w - g), m = Array.from(new Set(s.map((w) => w.d_baked))).sort((w, g) => w - g), b = ip({
       p: o,
       n_max: Math.max(..._),
       d_max: Math.max(...m),
@@ -57570,15 +57628,15 @@ async function rp(e) {
     ndStarUpperBound: f
   };
 }
-var ap = 0.1;
-var sp = 2.5;
-function ip() {
-  return jh(sp, 16, 1);
+var lp = 0.1;
+var dp = 2.5;
+function cp() {
+  return ep(dp, 16, 1);
 }
-async function op(e = {}) {
-  const { fetcher: t, p_runtime: n = ip(), c_drafter_ms: r = ap, t_n_ms: a = Pa, candidates: s = bo } = e;
+async function hp(e = {}) {
+  const { fetcher: t, p_runtime: n = cp(), c_drafter_ms: r = lp, t_n_ms: a = Ba, candidates: s = vo } = e;
   if (typeof t != "function") throw new Error("initSpeculation: fetcher must be a function");
-  return await rp({
+  return await up({
     fetcher: t,
     p_runtime: n,
     c_drafter_ms: r,
@@ -57586,7 +57644,7 @@ async function op(e = {}) {
     candidates: s
   });
 }
-function wo(e) {
+function ko(e) {
   return !e || !e.chosen ? null : {
     chosenId: e.chosen.id,
     n_baked: e.chosen.n_baked,
@@ -57610,7 +57668,7 @@ function wo(e) {
     } : null
   };
 }
-var Bt = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST, up = class {
+var Bt = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST, pp = class {
   model;
   device;
   block = null;
@@ -57638,7 +57696,7 @@ var Bt = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_
         usage: Bt
       });
       return t.queue.writeBuffer(P, 0, k), P;
-    }, l = "mtp.layers.0.", [d] = i(`${l}self_attn.q_proj.weight`), [c] = i(`${l}self_attn.k_proj.weight`), h = s(`${l}self_attn.q_norm.weight`).length, p = d / (2 * h), f = c / h, [_] = i(`${l}mlp.gate_proj.weight`), m = this.model.operators, b = new gi(t, m, {
+    }, l = "mtp.layers.0.", [d] = i(`${l}self_attn.q_proj.weight`), [c] = i(`${l}self_attn.k_proj.weight`), h = s(`${l}self_attn.q_norm.weight`).length, p = d / (2 * h), f = c / h, [_] = i(`${l}mlp.gate_proj.weight`), m = this.model.operators, b = new wi(t, m, {
       hiddenSize: n,
       numQHeads: p,
       numKVHeads: f,
@@ -57659,12 +57717,12 @@ var Bt = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_
         W_o: "F32"
       }
     }), b.initCache();
-    const w = new Xn(t, m, n, _);
+    const w = new Jn(t, m, n, _);
     w.loadWeights(o(`${l}mlp.gate_proj.weight`), o(`${l}mlp.up_proj.weight`), o(`${l}mlp.down_proj.weight`), {
       gate: "F32",
       up: "F32",
       down: "F32"
-    }), this.block = new li(t, m, b, w, "attention", {
+    }), this.block = new ci(t, m, b, w, "attention", {
       hiddenSize: n,
       eps: this.eps
     }), this.block.inputLnWeight = u(`${l}input_layernorm.weight`), this.block.postAttnLnWeight = u(`${l}post_attention_layernorm.weight`), this.fcW = o("mtp.fc.weight"), this.gEmb = u("mtp.pre_fc_norm_embedding.weight"), this.gHid = u("mtp.pre_fc_norm_hidden.weight"), this.gOut = u("mtp.norm.weight");
@@ -57732,19 +57790,19 @@ var Bt = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_
     if (e < 0 || e > this.seqLen) throw new Error(`MtpHead.truncate: len=${e} outside [0, ${this.seqLen}]`);
     this.seqLen = e;
   }
-}, la = ["loop", "unrolled"];
-function lp(e, t) {
-  if (e != null && !la.includes(e)) throw new Error(`q4GemmForm: ${JSON.stringify(e)} is not one of ${la.join(", ")}`);
+}, da = ["loop", "unrolled"];
+function fp(e, t) {
+  if (e != null && !da.includes(e)) throw new Error(`q4GemmForm: ${JSON.stringify(e)} is not one of ${da.join(", ")}`);
   return e || (t ? "loop" : "unrolled");
 }
-var dp = class {
+var _p = class {
   pipeline;
   pipelineResidual;
   bindGroupLayout;
   bindGroupLayoutResidual;
   device;
   constructor(e, t, n = {}) {
-    if (this.device = e, this.form = n.form || "loop", !la.includes(this.form)) throw new Error(`FusedQ4Matmul: form ${this.form} not supported`);
+    if (this.device = e, this.form = n.form || "loop", !da.includes(this.form)) throw new Error(`FusedQ4Matmul: form ${this.form} not supported`);
     const r = "0", a = It(t, {
       HAS_RESIDUAL: "0",
       HAS_F16: r
@@ -57908,7 +57966,7 @@ var dp = class {
   }
   destroy() {
   }
-}, cp = class vo {
+}, mp = class yo {
   pipeline;
   widePipeline = null;
   ksplitPipeline = null;
@@ -58197,7 +58255,7 @@ var dp = class {
         }
       });
     }
-    this.narrowSubgroup && this._stageNarrow(), xa(this, "vecmat");
+    this.narrowSubgroup && this._stageNarrow(), Pa(this, "vecmat");
   }
   static NARROW_FIELDS = Object.freeze([
     "ksplitWidePipeline",
@@ -58214,7 +58272,7 @@ var dp = class {
   ]);
   _stageNarrow() {
     const t = {};
-    for (const n of vo.NARROW_FIELDS) this[n] && (t[n] = this[n], this[n] = null);
+    for (const n of yo.NARROW_FIELDS) this[n] && (t[n] = this[n], this[n] = null);
     this._narrowPending = t, this.narrowPublished = !1;
   }
   publishNarrow() {
@@ -58324,12 +58382,12 @@ var dp = class {
     }, t), R++) : (x.pipe.residualPart = k(f, {
       MOBILE_KSPLIT: 1,
       HAS_RESIDUAL: 1
-    }, t), R++, x.pipe.residualReduce = k(b, { HAS_RESIDUAL: 1 }, n), R++)), this.mobile = x, x.reg && (x.reg.vecmat = this), x.reg) for (const G of or)
+    }, t), R++, x.pipe.residualReduce = k(b, { HAS_RESIDUAL: 1 }, n), R++)), this.mobile = x, x.reg && (x.reg.vecmat = this), x.reg) for (const G of ur)
       o.prescaled === "ksplit" && x.reg.folds.cross && (this._foldPipe("prescaledFoldIn", G), R++), (o.residual === "ksplit" || o.plain === "ksplit") && x.reg.folds.down && (this._foldPipe("foldGateUp", G), R++);
     return R;
   }
   _foldPipe(t, n) {
-    const r = this.mobile, a = or.find((o) => o >= n);
+    const r = this.mobile, a = ur.find((o) => o >= n);
     if (!a) return null;
     const s = `${t}:${a}`;
     let i = r.foldPipes.get(s);
@@ -58375,7 +58433,7 @@ var dp = class {
     return s[0] = t, s[1] = n, s[2] = r, new Float32Array(s.buffer)[3] = a, this.pool ? this.pool.getUniform(s) : this._createParams(s);
   }
   _mobileRecord(t, n, r, a, s, i, o, u, l, d) {
-    const c = this.mobile, h = r === "ksplit", p = h ? fo(u, l, c.wg, c.targetWgs, c.forcedKsplit) : 1;
+    const c = this.mobile, h = r === "ksplit", p = h ? mo(u, l, c.wg, c.targetWgs, c.forcedKsplit) : 1;
     h && (c.ksplitFactors[`${l}x${u}`] = p);
     const f = Math.ceil(u / c.colsPerWg), _ = h ? this._mobilePart(u, p, !1) : i, m = c.reg, b = [];
     let w = null;
@@ -58759,7 +58817,7 @@ var dp = class {
       this.mobile.partBufs.clear();
     }
   }
-}, hp = class {
+}, gp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -58850,7 +58908,7 @@ var dp = class {
   }
   destroy() {
   }
-}, pp = class {
+}, bp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -58959,7 +59017,7 @@ var dp = class {
   }
   destroy() {
   }
-}, Gr = class {
+}, Lr = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -59241,7 +59299,7 @@ var dp = class {
   }
   destroy() {
   }
-}, fp = class {
+}, wp = class {
   device;
   stateType;
   fuseOutputGate;
@@ -59445,7 +59503,7 @@ var dp = class {
     for (const e of this.layers.values()) e.accBuf.destroy();
     this.layers.clear();
   }
-}, zs = class {
+}, Fs = class {
   device;
   shaderCode;
   cacheType;
@@ -59566,7 +59624,7 @@ var dp = class {
   }
   destroy() {
   }
-}, _p = class {
+}, vp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -59659,7 +59717,7 @@ var dp = class {
   }
   destroy() {
   }
-}, ko = class {
+}, So = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -59753,7 +59811,7 @@ var dp = class {
   destroy() {
     this.invFreqBuf.destroy();
   }
-}, Fs = class {
+}, $s = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -59831,7 +59889,7 @@ var dp = class {
   }
   destroy() {
   }
-}, $s = class {
+}, Vs = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -59909,7 +59967,7 @@ var dp = class {
   }
   destroy() {
   }
-}, mp = class {
+}, kp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -59983,7 +60041,7 @@ var dp = class {
   }
   destroy() {
   }
-}, gp = class {
+}, yp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -60054,7 +60112,7 @@ var dp = class {
   }
   destroy() {
   }
-}, bp = class {
+}, Sp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -60129,7 +60187,7 @@ var dp = class {
   }
   destroy() {
   }
-}, wp = class {
+}, xp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -60245,7 +60303,7 @@ var dp = class {
   }
   destroy() {
   }
-}, vp = class {
+}, Pp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -60280,7 +60338,7 @@ var dp = class {
         module: n,
         entryPoint: "main"
       }
-    }), xa(this, "lmHead");
+    }), Pa(this, "lmHead");
   }
   dispatch(e, t, n, r, a) {
     if (a % 32 !== 0) throw new Error(`LmHeadQ4Tied: H must be multiple of 32, got ${a}`);
@@ -60474,7 +60532,7 @@ var dp = class {
   }
   destroy() {
   }
-}, kp = class mn {
+}, Bp = class mn {
   pipeline;
   bindGroupLayout;
   device;
@@ -60555,7 +60613,7 @@ var dp = class {
   }
   destroy() {
   }
-}, yp = class {
+}, Ep = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -60632,7 +60690,7 @@ var dp = class {
   }
   destroy() {
   }
-}, Sp = class {
+}, qp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -60717,7 +60775,7 @@ var dp = class {
   }
   destroy() {
   }
-}, xp = class yo {
+}, Ap = class xo {
   pipeline;
   ksplitPipeline = null;
   ksplitNktPipeline = null;
@@ -60845,7 +60903,7 @@ var dp = class {
         }
       });
     }
-    this.narrowSubgroup = r.narrowSubgroup === !0, this.subgroupWidth = r.subgroupSize || 32, this.narrowPublished = !1, this._narrowPending = null, this.narrowSubgroup && this._stageNarrow(), xa(this, "gateUp");
+    this.narrowSubgroup = r.narrowSubgroup === !0, this.subgroupWidth = r.subgroupSize || 32, this.narrowPublished = !1, this._narrowPending = null, this.narrowSubgroup && this._stageNarrow(), Pa(this, "gateUp");
   }
   static NARROW_FIELDS = Object.freeze([
     "ksplitPipeline",
@@ -60854,7 +60912,7 @@ var dp = class {
   ]);
   _stageNarrow() {
     const t = {};
-    for (const n of yo.NARROW_FIELDS) this[n] && (t[n] = this[n], this[n] = null);
+    for (const n of xo.NARROW_FIELDS) this[n] && (t[n] = this[n], this[n] = null);
     this._narrowPending = t, this.narrowPublished = !1;
   }
   publishNarrow() {
@@ -60990,12 +61048,12 @@ var dp = class {
     };
     w.main = _(h, t, { MOBILE_KSPLIT: m ? 1 : 0 });
     let g = 1;
-    if (m && (w.reduce = _(f, n, { MOBILE_GATEUP: 1 }), g++), this.mobile = w, m && w.reg && w.reg.folds.gateUp) for (const v of or)
+    if (m && (w.reduce = _(f, n, { MOBILE_GATEUP: 1 }), g++), this.mobile = w, m && w.reg && w.reg.folds.gateUp) for (const v of ur)
       this._foldPipe(v), g++;
     return g;
   }
   _foldPipe(t) {
-    const n = this.mobile, r = or.find((s) => s >= t);
+    const n = this.mobile, r = ur.find((s) => s >= t);
     if (!r) return null;
     let a = n.foldPipes.get(r);
     return a || (a = n.make(n.foldLayout, n.code, {
@@ -61018,7 +61076,7 @@ var dp = class {
     }), this.mobile.partBufs.set(r, a)), a;
   }
   dispatchMobile(t, n, r, a, s, i, o, u = 1e-6) {
-    const l = this.mobile, d = l.mode === "ksplit", c = d ? fo(i, o, l.wg, l.targetWgs, l.forcedKsplit) : 1;
+    const l = this.mobile, d = l.mode === "ksplit", c = d ? mo(i, o, l.wg, l.targetWgs, l.forcedKsplit) : 1;
     d && (l.ksplitFactors[`${o}x${i}`] = c);
     const h = d ? this._mobilePart(i, c) : a, p = l.reg, f = [];
     let _ = null;
@@ -61213,7 +61271,7 @@ var dp = class {
       this.mobile.partBufs.clear();
     }
   }
-}, Pp = class {
+}, Tp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -61295,7 +61353,7 @@ var dp = class {
   }
   destroy() {
   }
-}, Bp = class {
+}, Mp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -61366,7 +61424,7 @@ var dp = class {
   }
   destroy() {
   }
-}, Ep = class {
+}, Gp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -61460,7 +61518,7 @@ var dp = class {
   }
   destroy() {
   }
-}, qp = class {
+}, Lp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -61690,7 +61748,7 @@ var dp = class {
   }
   destroy() {
   }
-}, Ap = class {
+}, Up = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -61784,7 +61842,7 @@ var dp = class {
   destroy() {
     this.invFreqBuf.destroy();
   }
-}, Tp = class {
+}, Rp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -61887,7 +61945,7 @@ var dp = class {
   destroy() {
     this.invFreqBuf.destroy();
   }
-}, Mp = class {
+}, Cp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -61998,7 +62056,7 @@ var dp = class {
     this.invFreqBuf.destroy();
   }
 };
-async function Gp(e) {
+async function Np(e) {
   const { device: t, vision: n, preflight: r, images: a, hiddenSize: s, imageTokenId: i = 248056, spatialMergeSize: o = 2, signal: u = null, pruneOpts: l = null } = e;
   if (!t) throw new Error("runVisionGenerate: device is required");
   if (!n || !n.model || typeof n.model.forward != "function") throw new Error("runVisionGenerate: vision.model with .forward() is required");
@@ -62080,7 +62138,7 @@ async function Gp(e) {
     perImageOutputs: c
   };
 }
-var Lp = class {
+var Op = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -62153,7 +62211,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, Up = class {
+}, Ip = class {
   pipeline;
   pipelineResidual;
   bindGroupLayout;
@@ -62332,7 +62390,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, Rp = class {
+}, Dp = class {
   pipeline;
   pipelineResidual;
   bindGroupLayout;
@@ -62510,7 +62568,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, Cp = class {
+}, Kp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -62630,7 +62688,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, So = class {
+}, Po = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -62697,16 +62755,16 @@ var Lp = class {
   }
   destroy() {
   }
-}, Np = class extends So {
-}, Op = class extends So {
-}, Ip = class {
+}, Wp = class extends Po {
+}, zp = class extends Po {
+}, Fp = class {
   pipeline;
   bindGroupLayout;
   device;
   bits;
   valuesPerWord;
   constructor(e, t, n = {}) {
-    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = bt(this.bits);
+    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = wt(this.bits);
     const r = e.createShaderModule({
       label: `kv_quantize_key_${this.bits}bit`,
       code: Ie(t, { kiviBits: this.bits })
@@ -62777,14 +62835,14 @@ var Lp = class {
   }
   destroy() {
   }
-}, Dp = class {
+}, $p = class {
   pipeline;
   bindGroupLayout;
   device;
   bits;
   valuesPerWord;
   constructor(e, t, n = {}) {
-    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = bt(this.bits);
+    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = wt(this.bits);
     const r = e.createShaderModule({
       label: `kv_quantize_value_${this.bits}bit`,
       code: Ie(t, { kiviBits: this.bits })
@@ -62855,14 +62913,14 @@ var Lp = class {
   }
   destroy() {
   }
-}, Kp = class {
+}, Vp = class {
   pipeline;
   bindGroupLayout;
   device;
   bits;
   valuesPerWord;
   constructor(e, t, n = {}) {
-    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = bt(this.bits);
+    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = wt(this.bits);
     const r = e.createShaderModule({ code: Ie(t, { kiviBits: this.bits }) });
     this.bindGroupLayout = e.createBindGroupLayout({ entries: [
       {
@@ -62960,14 +63018,14 @@ var Lp = class {
   }
   destroy() {
   }
-}, Wp = class {
+}, Hp = class {
   pipeline;
   bindGroupLayout;
   device;
   bits;
   valuesPerWord;
   constructor(e, t, n = {}) {
-    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = bt(this.bits);
+    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = wt(this.bits);
     const r = e.createShaderModule({ code: Ie(t, { kiviBits: this.bits }) });
     this.bindGroupLayout = e.createBindGroupLayout({ entries: [
       {
@@ -63065,7 +63123,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, xo = class {
+}, Bo = class {
   device;
   uniformCache = /* @__PURE__ */ new Map();
   uniformPool = [];
@@ -63118,7 +63176,7 @@ var Lp = class {
     for (const e of this.uniformPool) e.destroy();
     this.uniformPool.length = 0;
   }
-}, zp = class kt {
+}, Qp = class yt {
   static BLOCK = 32;
   static U32_PER_TILE = 160;
   pipeline;
@@ -63194,13 +63252,13 @@ var Lp = class {
     });
   }
   static weightU32Count(t, n) {
-    if (t % kt.BLOCK !== 0 || n % kt.BLOCK !== 0) throw new Error(`MatmulQ4KaxisDP4A: K=${t}, N=${n} must both be multiples of ${kt.BLOCK}`);
-    return t / kt.BLOCK * (n / kt.BLOCK) * kt.U32_PER_TILE;
+    if (t % yt.BLOCK !== 0 || n % yt.BLOCK !== 0) throw new Error(`MatmulQ4KaxisDP4A: K=${t}, N=${n} must both be multiples of ${yt.BLOCK}`);
+    return t / yt.BLOCK * (n / yt.BLOCK) * yt.U32_PER_TILE;
   }
   dispatchEncoded(t, n, r, a, s, i, o = null) {
     if (s <= 0 || i <= 0) throw new Error(`MatmulQ4KaxisDP4A.dispatchEncoded: N=${s} K=${i} must be positive`);
-    if (s % kt.BLOCK !== 0 || i % kt.BLOCK !== 0) throw new Error(`MatmulQ4KaxisDP4A.dispatchEncoded: N=${s} K=${i} must both be multiples of 32`);
-    const u = i / kt.BLOCK, l = s / kt.BLOCK, d = new Uint32Array([
+    if (s % yt.BLOCK !== 0 || i % yt.BLOCK !== 0) throw new Error(`MatmulQ4KaxisDP4A.dispatchEncoded: N=${s} K=${i} must both be multiples of 32`);
+    const u = i / yt.BLOCK, l = s / yt.BLOCK, d = new Uint32Array([
       s,
       i,
       u,
@@ -63264,7 +63322,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, Fp = class Qt {
+}, jp = class Qt {
   static BLOCK = 32;
   static BYTES_PER_BLOCK = 36;
   static U32_PER_BLOCK = 9;
@@ -63346,7 +63404,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, $p = class {
+}, Yp = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -63459,7 +63517,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, Vp = class Po {
+}, Zp = class Eo {
   device;
   pool = null;
   static gOffElems(t, n) {
@@ -63511,7 +63569,7 @@ var Lp = class {
     });
   }
   dispatch(t, n, r, a, s, i) {
-    const o = Po.gOffElems(i.H, i.M), u = new Uint32Array(12);
+    const o = Eo.gOffElems(i.H, i.M), u = new Uint32Array(12);
     u[0] = i.convDim, u[1] = i.srcStride, u[2] = i.H, u[3] = i.D;
     const l = new Float32Array(u.buffer);
     l[4] = i.qScale, l[5] = i.eps, l[6] = i.gCeiling, u[7] = i.Hv, u[8] = i.M, u[9] = 2 * i.Hv, u[10] = o, u[11] = 0;
@@ -63556,7 +63614,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, Hp = class {
+}, Xp = class {
   constructor(e, t) {
     this.device = e, this.bindGroupLayout = e.createBindGroupLayout({ entries: [
       {
@@ -63631,7 +63689,7 @@ var Lp = class {
     }
     this._params.clear();
   }
-}, jn = class {
+}, Yn = class {
   static wgStorageBytes(e) {
     return 640 * e;
   }
@@ -63716,7 +63774,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, Bo = class {
+}, qo = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -63817,7 +63875,7 @@ var Lp = class {
   }
   destroy() {
   }
-}, Eo = class {
+}, Ao = class {
   pipeline;
   bindGroupLayout;
   device;
@@ -63911,7 +63969,7 @@ var Lp = class {
   destroy() {
   }
 };
-var Qp = class {
+var Jp = class {
   splitPipeline;
   reducePipeline;
   bindGroupLayout;
@@ -64047,16 +64105,16 @@ var Qp = class {
     this.partialsBuf && (this.partialsBuf.destroy(), this.partialsBuf = null), this.partialsBytes = 0;
   }
 };
-var jp = Object.freeze(/* @__PURE__ */ new Set([
+var ef = Object.freeze(/* @__PURE__ */ new Set([
   4,
   5,
   6
 ]));
-function qo(e) {
+function To(e) {
   const t = e?.limits?.maxStorageBuffersPerShaderStage;
   return typeof t == "number" && t >= 9;
 }
-var Yp = class {
+var tf = class {
   pipelines = /* @__PURE__ */ new Map();
   bindGroupLayout;
   device;
@@ -64066,8 +64124,8 @@ var Yp = class {
   capabilities;
   pool = null;
   constructor(e, t, n = {}) {
-    if (!qo(e)) throw new Error(`FlashDecodeSplitKivi: needs maxStorageBuffersPerShaderStage >= 9, device has ${e?.limits?.maxStorageBuffersPerShaderStage}. Request the limit at requestDevice() time, or fall back to the materialized KIVI decode chain.`);
-    this.device = e, this.cacheType = n.cacheType || "f32", this.bits = n.bits ?? 4, this.valuesPerWord = bt(this.bits), this.splitTarget = n.splitTarget || 1024, this.splitsOverride = n.splits || 0, this.maxSplits = Math.max(n.maxSplits || 32, this.splitsOverride), this.gqaMerge = n.gqaMerge !== !1, this.shaderCode = t;
+    if (!To(e)) throw new Error(`FlashDecodeSplitKivi: needs maxStorageBuffersPerShaderStage >= 9, device has ${e?.limits?.maxStorageBuffersPerShaderStage}. Request the limit at requestDevice() time, or fall back to the materialized KIVI decode chain.`);
+    this.device = e, this.cacheType = n.cacheType || "f32", this.bits = n.bits ?? 4, this.valuesPerWord = wt(this.bits), this.splitTarget = n.splitTarget || 1024, this.splitsOverride = n.splits || 0, this.maxSplits = Math.max(n.maxSplits || 32, this.splitsOverride), this.gqaMerge = n.gqaMerge !== !1, this.shaderCode = t;
     const r = { type: "read-only-storage" }, a = { type: "storage" };
     this.bindGroupLayout = e.createBindGroupLayout({ entries: [
       {
@@ -64129,7 +64187,7 @@ var Yp = class {
     }, this._pipeline(1);
   }
   _pipeline(e) {
-    const t = this.gqaMerge && jp.has(e), n = t ? e : 1, r = this.pipelines.get(n);
+    const t = this.gqaMerge && ef.has(e), n = t ? e : 1, r = this.pipelines.get(n);
     if (r) return r;
     const a = ye(this.device, this.shaderCode, {
       cacheType: this.cacheType,
@@ -64249,16 +64307,16 @@ var Yp = class {
   destroy() {
     this.partialsBuf && (this.partialsBuf.destroy(), this.partialsBuf = null), this.partialsBytes = 0;
   }
-}, Zp = Object.freeze(/* @__PURE__ */ new Set([
+}, nf = Object.freeze(/* @__PURE__ */ new Set([
   4,
   5,
   6
 ]));
-function Xp(e) {
+function rf(e) {
   const t = e?.limits?.maxStorageBuffersPerShaderStage;
   return typeof t == "number" && t >= 8;
 }
-var Jp = class {
+var af = class {
   pipelines = /* @__PURE__ */ new Map();
   bindGroupLayout;
   device;
@@ -64269,8 +64327,8 @@ var Jp = class {
   capabilities;
   pool = null;
   constructor(e, t, n = {}) {
-    if (!Xp(e)) throw new Error(`FlashAttentionPrefillKivi: needs maxStorageBuffersPerShaderStage >= 8, device has ${e?.limits?.maxStorageBuffersPerShaderStage}.`);
-    this.device = e, this.shaderCode = t, this.cacheType = n.cacheType || "f32", this.bits = n.bits ?? 4, this.valuesPerWord = bt(this.bits), this.gqaMerge = n.gqaMerge !== !1;
+    if (!rf(e)) throw new Error(`FlashAttentionPrefillKivi: needs maxStorageBuffersPerShaderStage >= 8, device has ${e?.limits?.maxStorageBuffersPerShaderStage}.`);
+    this.device = e, this.shaderCode = t, this.cacheType = n.cacheType || "f32", this.bits = n.bits ?? 4, this.valuesPerWord = wt(this.bits), this.gqaMerge = n.gqaMerge !== !1;
     const r = { type: "read-only-storage" }, a = { type: "storage" };
     this.bindGroupLayout = e.createBindGroupLayout({ entries: [
       {
@@ -64327,7 +64385,7 @@ var Jp = class {
     }, this._pipeline(1);
   }
   _pipeline(e) {
-    const t = this.gqaMerge && Zp.has(e), n = t ? e : 1, r = this.pipelines.get(n);
+    const t = this.gqaMerge && nf.has(e), n = t ? e : 1, r = this.pipelines.get(n);
     if (r) return r;
     const a = ye(this.device, this.shaderCode, {
       cacheType: this.cacheType,
@@ -64416,18 +64474,18 @@ var Jp = class {
   }
   destroy() {
   }
-}, da = Object.freeze(/* @__PURE__ */ new Set([
+}, ca = Object.freeze(/* @__PURE__ */ new Set([
   4,
   5,
   6
 ]));
-var ca = Object.freeze([
+var ha = Object.freeze([
   1,
   2,
   3,
   4
-]), ef = 16384;
-function ur(e, t, n) {
+]), sf = 16384;
+function lr(e, t, n) {
   if (!Number.isInteger(e) || e < 1) throw new Error(`mtileWorkgroupBytes: bad groups ${e}`);
   if (!Number.isInteger(t) || t < 1) throw new Error(`mtileWorkgroupBytes: bad tileM ${t}`);
   if (!Number.isInteger(n) || n < 4 || n % 4 !== 0) throw new Error(`mtileWorkgroupBytes: head_dim ${n} must be a positive multiple of 4`);
@@ -64443,15 +64501,15 @@ function ur(e, t, n) {
     o = i(u, o), o += l;
   return i(16, o);
 }
-function Ao(e, t) {
+function Mo(e, t) {
   const { groups: n, tileM: r, headDim: a } = t || {};
-  if (!da.has(n) || !ca.includes(r) || !Number.isInteger(a) || a < 4 || a > 256 || a % 4 !== 0) return !1;
+  if (!ca.has(n) || !ha.includes(r) || !Number.isInteger(a) || a < 4 || a > 256 || a % 4 !== 0) return !1;
   const s = e?.limits?.maxStorageBuffersPerShaderStage;
   if (typeof s != "number" || s < 8) return !1;
   const i = e?.limits?.maxComputeWorkgroupStorageSize;
-  return typeof i != "number" ? !1 : ur(n, r, a) <= i;
+  return typeof i != "number" ? !1 : lr(n, r, a) <= i;
 }
-var tf = class {
+var of = class {
   pipelines = /* @__PURE__ */ new Map();
   bindGroupLayout;
   device;
@@ -64468,18 +64526,18 @@ var tf = class {
     if (!Number.isInteger(r)) throw new Error("FlashAttentionPrefillKiviMTile: opts.tileM is required (1..4)");
     if (!Number.isInteger(a)) throw new Error("FlashAttentionPrefillKiviMTile: opts.headDim is required");
     if (!Number.isInteger(s)) throw new Error("FlashAttentionPrefillKiviMTile: opts.groups is required (groups_per_kv)");
-    if (!da.has(s)) throw new Error(`FlashAttentionPrefillKiviMTile: groups_per_kv=${s} outside the tiling envelope {${[...da].join(", ")}} — use FlashAttentionPrefillKivi`);
-    if (!ca.includes(r)) throw new Error(`FlashAttentionPrefillKiviMTile: tileM=${r} not in {${ca.join(", ")}}`);
+    if (!ca.has(s)) throw new Error(`FlashAttentionPrefillKiviMTile: groups_per_kv=${s} outside the tiling envelope {${[...ca].join(", ")}} — use FlashAttentionPrefillKivi`);
+    if (!ha.includes(r)) throw new Error(`FlashAttentionPrefillKiviMTile: tileM=${r} not in {${ha.join(", ")}}`);
     if (a > 256 || a % 4 !== 0 || a < 4) throw new Error(`FlashAttentionPrefillKiviMTile: head_dim=${a} must be a multiple of 4 in [4, 256]`);
-    if (!Ao(e, {
+    if (!Mo(e, {
       groups: s,
       tileM: r,
       headDim: a
     })) {
-      const u = ur(s, r, a), l = e?.limits?.maxComputeWorkgroupStorageSize;
-      throw new Error(`FlashAttentionPrefillKiviMTile: groups=${s} tileM=${r} head_dim=${a} needs ${u} B of workgroup storage; device granted ${l} B (WebGPU default is ${ef}). Request maxComputeWorkgroupStorageSize at requestDevice() time, or fall back to FlashAttentionPrefillKivi.`);
+      const u = lr(s, r, a), l = e?.limits?.maxComputeWorkgroupStorageSize;
+      throw new Error(`FlashAttentionPrefillKiviMTile: groups=${s} tileM=${r} head_dim=${a} needs ${u} B of workgroup storage; device granted ${l} B (WebGPU default is ${sf}). Request maxComputeWorkgroupStorageSize at requestDevice() time, or fall back to FlashAttentionPrefillKivi.`);
     }
-    this.device = e, this.shaderCode = t, this.cacheType = n.cacheType || "f32", this.bits = n.bits ?? 4, this.valuesPerWord = bt(this.bits), this.tileM = r, this.headDim = a, this.groups = s, this.workgroupBytes = ur(s, r, a);
+    this.device = e, this.shaderCode = t, this.cacheType = n.cacheType || "f32", this.bits = n.bits ?? 4, this.valuesPerWord = wt(this.bits), this.tileM = r, this.headDim = a, this.groups = s, this.workgroupBytes = lr(s, r, a);
     const i = { type: "read-only-storage" }, o = { type: "storage" };
     this.bindGroupLayout = e.createBindGroupLayout({ entries: [
       {
@@ -64626,7 +64684,7 @@ var tf = class {
   }
   destroy() {
   }
-}, nf = class {
+}, uf = class {
   device;
   pool = null;
   constructor(e, t) {
@@ -64748,14 +64806,14 @@ var tf = class {
     } catch {
     }
   }
-}, To = class {
+}, Go = class {
   pipeline;
   bindGroupLayout;
   device;
   bits;
   valuesPerWord;
   constructor(e, t, n = {}) {
-    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = bt(this.bits);
+    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = wt(this.bits);
     const r = e.createShaderModule({ code: Ie(t, { kiviBits: this.bits }) });
     this.bindGroupLayout = e.createBindGroupLayout({ entries: [
       {
@@ -64856,14 +64914,14 @@ var tf = class {
   }
   destroy() {
   }
-}, Mo = class {
+}, Lo = class {
   pipeline;
   bindGroupLayout;
   device;
   bits;
   valuesPerWord;
   constructor(e, t, n = {}) {
-    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = bt(this.bits);
+    this.device = e, this.bits = n.bits ?? 4, this.valuesPerWord = wt(this.bits);
     const r = e.createShaderModule({ code: Ie(t, { kiviBits: this.bits }) });
     this.bindGroupLayout = e.createBindGroupLayout({ entries: [
       {
@@ -64965,10 +65023,10 @@ var tf = class {
   destroy() {
   }
 };
-function ha(e) {
+function pa(e) {
   return 16 + e * 8;
 }
-function Lr(e, t, n, r) {
+function Ur(e, t, n, r) {
   let a = n;
   for (; ; ) {
     const s = 2 * a + 1;
@@ -64982,9 +65040,9 @@ function Lr(e, t, n, r) {
     t[a] = t[o], t[o] = l, a = o;
   }
 }
-function Vs(e, t, n, r, a = 30) {
+function Hs(e, t, n, r, a = 30) {
   if (r > n) throw new Error(`reduceLogitRows: K=${r} > V=${n}`);
-  const s = ha(r), i = new ArrayBuffer(t * s), o = new DataView(i), u = new Float32Array(r), l = new Int32Array(r);
+  const s = pa(r), i = new ArrayBuffer(t * s), o = new DataView(i), u = new Float32Array(r), l = new Int32Array(r);
   for (let d = 0; d < t; d++) {
     const c = d * n;
     let h = -1 / 0;
@@ -64998,20 +65056,20 @@ function Vs(e, t, n, r, a = 30) {
       const v = e[c + g];
       u[g] = v, l[g] = g, v > p ? f += Math.exp(v - h) : _++;
     }
-    for (let g = (r >> 1) - 1; g >= 0; g--) Lr(u, l, g, r);
+    for (let g = (r >> 1) - 1; g >= 0; g--) Ur(u, l, g, r);
     for (let g = r; g < n; g++) {
       const v = e[c + g];
-      v > p ? f += Math.exp(v - h) : _++, v > u[0] && (u[0] = v, l[0] = g, Lr(u, l, 0, r));
+      v > p ? f += Math.exp(v - h) : _++, v > u[0] && (u[0] = v, l[0] = g, Ur(u, l, 0, r));
     }
     const m = d * s, b = m + 16, w = b + r * 4;
     for (let g = r - 1, v = r; g >= 0; g--, v--)
-      o.setUint32(b + g * 4, l[0], !0), o.setFloat32(w + g * 4, u[0], !0), u[0] = u[v - 1], l[0] = l[v - 1], Lr(u, l, 0, v - 1);
+      o.setUint32(b + g * 4, l[0], !0), o.setFloat32(w + g * 4, u[0], !0), u[0] = u[v - 1], l[0] = l[v - 1], Ur(u, l, 0, v - 1);
     o.setFloat64(m, h + Math.log(f), !0), o.setFloat32(m + 8, h, !0), o.setUint32(m + 12, _, !0);
   }
   return i;
 }
-var s_ = 64 * 1024 * 1024, i_ = 32 * 1024 * 1024;
-function Go(e, t = {}) {
+var c_ = 64 * 1024 * 1024, h_ = 32 * 1024 * 1024;
+function Uo(e, t = {}) {
   const n = [], r = [];
   e.blocks.forEach((o, u) => {
     (o.layerType === "attention" ? n : r).push(u);
@@ -65025,7 +65083,7 @@ function Go(e, t = {}) {
     modelMaxSeq: e.maxSeq,
     attnLayerIndices: n,
     dnLayerIndices: r,
-    cacheMode: Lo(a),
+    cacheMode: Ro(a),
     attn: a ? {
       numQHeads: a.numQHeads,
       numKVHeads: a.numKVHeads,
@@ -65074,16 +65132,16 @@ function Go(e, t = {}) {
   };
   return t.extra && Object.assign(i, t.extra), i;
 }
-function Lo(e) {
+function Ro(e) {
   return e ? e.useKivi ? "kivi" : e.useTurboQuant ? "turboquant" : e.useF16Cache ? "f16" : "f32" : "none";
 }
 function Gt(e, t) {
   throw new Error(`snapshotSession refused — ${e}: ${t}`);
 }
-function rf(e) {
+function lf(e) {
   (!e || !Array.isArray(e.blocks)) && Gt("model", "not loaded");
   const t = [], n = [], r = e.seqLen, a = (s, i, o, u, l, d) => {
-    s || Gt(i, "buffer is null (state not allocated — call initState first)"), si(d, s.size, i), fa(d) !== 0 && t.push({
+    s || Gt(i, "buffer is null (state not allocated — call initState first)"), oi(d, s.size, i), _a(d) !== 0 && t.push({
       key: i,
       layerIndex: o,
       role: u,
@@ -65102,7 +65160,7 @@ function rf(e) {
         const d = o.kiviSinkCount + o.kiviQuantLen + o.kiviResidualPos;
         d !== r && Gt(`attn${i}`, `KIVI cursors desynced from model.seqLen — sink=${o.kiviSinkCount} quant=${o.kiviQuantLen} residual=${o.kiviResidualPos} (total ${d}) vs seqLen ${r}. Some path rewound seqLen without rewinding the layer cursors; the resident cache does not describe a valid session.`);
         const c = o.kiviValuesPerWord, h = o.kiviGroupSize, p = o.kiviMaxQuant, f = p / h, _ = o.kiviQuantLen;
-        a(o.kiviKQuantBuf, `attn${i}.kiviKQuant`, i, "kiviKQuant", "u32", vt(0, _ / c * 4, p / c * 4, u * l)), a(o.kiviKMetaBuf, `attn${i}.kiviKMeta`, i, "kiviKMeta", "u32", vt(0, _ / h * l * 4, f * l * 4, u)), a(o.kiviVQuantBuf, `attn${i}.kiviVQuant`, i, "kiviVQuant", "u32", vt(0, _ * (l / c) * 4, p * (l / c) * 4, u)), a(o.kiviVMetaBuf, `attn${i}.kiviVMeta`, i, "kiviVMeta", "u32", vt(0, _ * (l / h) * 4, p * (l / h) * 4, u)), a(o.kiviKFullBuf, `attn${i}.kiviKFull`, i, "kiviKFull", "f32", vt(0, o.kiviKFullBuf.size, o.kiviKFullBuf.size, 1)), a(o.kiviVFullBuf, `attn${i}.kiviVFull`, i, "kiviVFull", "f32", vt(0, o.kiviVFullBuf.size, o.kiviVFullBuf.size, 1)), n.push({
+        a(o.kiviKQuantBuf, `attn${i}.kiviKQuant`, i, "kiviKQuant", "u32", kt(0, _ / c * 4, p / c * 4, u * l)), a(o.kiviKMetaBuf, `attn${i}.kiviKMeta`, i, "kiviKMeta", "u32", kt(0, _ / h * l * 4, f * l * 4, u)), a(o.kiviVQuantBuf, `attn${i}.kiviVQuant`, i, "kiviVQuant", "u32", kt(0, _ * (l / c) * 4, p * (l / c) * 4, u)), a(o.kiviVMetaBuf, `attn${i}.kiviVMeta`, i, "kiviVMeta", "u32", kt(0, _ * (l / h) * 4, p * (l / h) * 4, u)), a(o.kiviKFullBuf, `attn${i}.kiviKFull`, i, "kiviKFull", "f32", kt(0, o.kiviKFullBuf.size, o.kiviKFullBuf.size, 1)), a(o.kiviVFullBuf, `attn${i}.kiviVFull`, i, "kiviVFull", "f32", kt(0, o.kiviVFullBuf.size, o.kiviVFullBuf.size, 1)), n.push({
           index: i,
           type: "attention",
           cacheMode: "kivi",
@@ -65114,10 +65172,10 @@ function rf(e) {
         });
       } else {
         const d = o.useF16Cache ? 2 : 4, c = o.maxSeq * l * d, h = r * l * d;
-        a(o.kCacheBuf, `attn${i}.kCache`, i, "kCache", o.useF16Cache ? "f16" : "f32", vt(0, h, c, u)), a(o.vCacheBuf, `attn${i}.vCache`, i, "vCache", o.useF16Cache ? "f16" : "f32", vt(0, h, c, u)), n.push({
+        a(o.kCacheBuf, `attn${i}.kCache`, i, "kCache", o.useF16Cache ? "f16" : "f32", kt(0, h, c, u)), a(o.vCacheBuf, `attn${i}.vCache`, i, "vCache", o.useF16Cache ? "f16" : "f32", kt(0, h, c, u)), n.push({
           index: i,
           type: "attention",
-          cacheMode: Lo(o),
+          cacheMode: Ro(o),
           kivi: null
         });
       }
@@ -65125,7 +65183,7 @@ function rf(e) {
       const o = s.layer;
       o.useChunkedDecodeState && Gt(`dn${i}`, "chunked-decode DeltaNet state is not supported by v1 snapshots — the operator accumulator is allocated without COPY_SRC and cannot be read back, and mid-chunk the recurrent state is stale");
       const u = o.statePrecision;
-      a(o.convState, `dn${i}.convState`, i, "convState", "f32", vt(0, o.convState.size, o.convState.size, 1)), a(o.recurrentState, `dn${i}.recurrentState`, i, "recurrentState", u === "f16" ? "f16" : u === "f32" ? "f32" : "packed", vt(0, o.recurrentState.size, o.recurrentState.size, 1)), (u === "int8" || u === "int4") && (o.stateScales || Gt(`dn${i}`, `statePrecision is ${u} but stateScales is null`), a(o.stateScales, `dn${i}.stateScales`, i, "stateScales", "f32", vt(0, o.stateScales.size, o.stateScales.size, 1))), n.push({
+      a(o.convState, `dn${i}.convState`, i, "convState", "f32", kt(0, o.convState.size, o.convState.size, 1)), a(o.recurrentState, `dn${i}.recurrentState`, i, "recurrentState", u === "f16" ? "f16" : u === "f32" ? "f32" : "packed", kt(0, o.recurrentState.size, o.recurrentState.size, 1)), (u === "int8" || u === "int4") && (o.stateScales || Gt(`dn${i}`, `statePrecision is ${u} but stateScales is null`), a(o.stateScales, `dn${i}.stateScales`, i, "stateScales", "f32", kt(0, o.stateScales.size, o.stateScales.size, 1))), n.push({
         index: i,
         type: "deltanet",
         statePrecision: u
@@ -65136,8 +65194,8 @@ function rf(e) {
     layers: n
   };
 }
-async function af(e, t, n, r) {
-  const a = fa(t.region), s = new Uint8Array(a), i = ri(t.region, r);
+async function df(e, t, n, r) {
+  const a = _a(t.region), s = new Uint8Array(a), i = si(t.region, r);
   let o = 0;
   for (; o < i.length; ) {
     const u = [];
@@ -65159,15 +65217,15 @@ async function af(e, t, n, r) {
   }
   return s.buffer;
 }
-async function sf(e, t, n = {}) {
+async function cf(e, t, n = {}) {
   const r = (globalThis.performance || Date).now(), a = n.stagingBytes || 67108864, s = n.checksum !== !1, i = Array.isArray(n.tokens) ? n.tokens.slice() : [];
   if (i.length && i.length !== t.seqLen) throw new Error(`snapshotSession: token ledger has ${i.length} ids but model.seqLen is ${t.seqLen} — the ledger must describe exactly the resident sequence`);
-  const { entries: o, layers: u } = rf(t), l = Go(t, {
+  const { entries: o, layers: u } = lf(t), l = Uo(t, {
     modelId: n.modelId ?? null,
     extra: n.extraFingerprint
   });
   let d = 0;
-  for (const m of o) d = Math.max(d, fa(m.region));
+  for (const m of o) d = Math.max(d, _a(m.region));
   const c = Math.max(4, Math.min(a, d)), h = e.createBuffer({
     size: c,
     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
@@ -65175,7 +65233,7 @@ async function sf(e, t, n = {}) {
   }), p = [], f = n.onEntry ? null : [];
   try {
     for (let m = 0; m < o.length; m++) {
-      const b = o[m], w = await af(e, b, h, c), g = {
+      const b = o[m], w = await df(e, b, h, c), g = {
         key: b.key,
         layerIndex: b.layerIndex,
         role: b.role,
@@ -65183,14 +65241,14 @@ async function sf(e, t, n = {}) {
         bufferBytes: b.bufferBytes,
         region: b.region,
         byteLength: w.byteLength,
-        checksum: s ? ai(w) : null
+        checksum: s ? ii(w) : null
       };
       p.push(g), n.onEntry ? await n.onEntry(m, g, w) : f.push(w);
     }
   } finally {
     h.destroy();
   }
-  const _ = ru({
+  const _ = ou({
     fingerprint: l,
     seqLen: t.seqLen,
     tokens: i,
@@ -65204,8 +65262,8 @@ async function sf(e, t, n = {}) {
     ms: (globalThis.performance || Date).now() - r
   };
 }
-function Hs(e, t, n = {}) {
-  au(t, Go(e, {
+function Qs(e, t, n = {}) {
+  uu(t, Uo(e, {
     modelId: n.modelId ?? null,
     extra: n.extraFingerprint
   })), e.initState();
@@ -65217,23 +65275,23 @@ function Hs(e, t, n = {}) {
     const s = r.get(a.key);
     if (!s) throw new Error(`restoreSession refused — snapshot names buffer '${a.key}', which the loaded engine does not have`);
     if (s.size !== a.bufferBytes) throw new Error(`restoreSession refused — '${a.key}' is ${s.size} bytes on this engine, snapshot recorded ${a.bufferBytes}`);
-    return si(a.region, s.size, a.key), {
+    return oi(a.region, s.size, a.key), {
       ...a,
       buf: s
     };
   }) };
 }
-function Qs(e, t, n, r = {}) {
+function js(e, t, n, r = {}) {
   const a = n instanceof ArrayBuffer ? new Uint8Array(n) : new Uint8Array(n.buffer, n.byteOffset, n.byteLength);
   if (a.byteLength !== t.byteLength) throw new Error(`restoreSession refused — '${t.key}' payload is ${a.byteLength} bytes, manifest says ${t.byteLength}`);
   if (r.verify !== !1 && t.checksum !== null && t.checksum !== void 0) {
-    const i = ai(a);
+    const i = ii(a);
     if (i !== t.checksum) throw new Error(`restoreSession refused — '${t.key}' checksum ${i} does not match manifest ${t.checksum} (corrupt or truncated storage)`);
   }
   const s = r.uploadChunkBytes || 33554432;
-  for (const i of ri(t.region, s)) e.queue.writeBuffer(t.buf, i.bufOffset, a.buffer, a.byteOffset + i.packedOffset, i.byteLength);
+  for (const i of si(t.region, s)) e.queue.writeBuffer(t.buf, i.bufOffset, a.buffer, a.byteOffset + i.packedOffset, i.byteLength);
 }
-function js(e, t) {
+function Ys(e, t) {
   for (const n of t.layers || []) {
     const r = e.blocks[n.index];
     if (!r) throw new Error(`restoreSession refused — no block at index ${n.index}`);
@@ -65256,7 +65314,7 @@ function js(e, t) {
     tokens: t.tokens || []
   };
 }
-function Uo(e) {
+function Co(e) {
   const t = e?.blocks?.find((n) => n.layerType === "attention")?.layer;
   if (!t) throw new Error("kiviAttnGeometry: model has no attention layer");
   return {
@@ -65265,14 +65323,14 @@ function Uo(e) {
     headDim: t.headDim
   };
 }
-async function Ro(e, t, n = {}) {
+async function No(e, t, n = {}) {
   const r = Number.isFinite(n.tileM) ? Math.trunc(n.tileM) : 1, a = t.numQHeads / t.numKVHeads, s = t.headDim;
-  if (r > 1) if (Ao(e, {
+  if (r > 1) if (Mo(e, {
     groups: a,
     tileM: r,
     headDim: s
   })) try {
-    const i = new tf(e, await me("flash_attention_prefill_kivi_mtile.wgsl"), {
+    const i = new of(e, await me("flash_attention_prefill_kivi_mtile.wgsl"), {
       tileM: r,
       headDim: s,
       groups: a,
@@ -65289,13 +65347,13 @@ async function Ro(e, t, n = {}) {
   else {
     let i = null;
     try {
-      i = ur(a, r, s);
+      i = lr(a, r, s);
     } catch {
     }
     console.warn("[worker] M-tiled KIVI prefill NOT available at groups=" + a + " tileM=" + r + " head_dim=" + s + (i !== null ? " (needs " + i + " B" : " (outside the tiling envelope") + ", device granted " + e?.limits?.maxComputeWorkgroupStorageSize + " B) — using the M=1 kernel");
   }
   return {
-    op: new Jp(e, await me("flash_attention_prefill_kivi.wgsl"), {
+    op: new af(e, await me("flash_attention_prefill_kivi.wgsl"), {
       cacheType: "f32",
       bits: n.bits
     }),
@@ -65308,7 +65366,7 @@ self.addEventListener("unhandledrejection", (e) => {
   } catch {
   }
   try {
-    Tn && No(e.reason) && Tn(String(e.reason?.message || e.reason));
+    Mn && Ko(e.reason) && Mn(String(e.reason?.message || e.reason));
   } catch {
   }
   e.preventDefault?.();
@@ -65319,11 +65377,11 @@ self.addEventListener("error", (e) => {
   } catch {
   }
 });
-var Co = 1, Q = null, E = null, nn = [], wn = null, Me = null, gt = null, un = [], De = null, Ve = null, Ee = null, An = null, je = null, Ke = null, mt = null, Nt = !1, ln = 0, Ys = Promise.resolve();
-function Ur(e) {
-  const t = ln, n = Ys;
+var Oo = 1, Q = null, E = null, nn = [], wn = null, Me = null, gt = null, un = [], De = null, Ve = null, Ee = null, An = null, je = null, Ke = null, mt = null, Nt = !1, ln = 0, Zs = Promise.resolve();
+function Rr(e) {
+  const t = ln, n = Zs;
   let r;
-  return Ys = new Promise((a) => {
+  return Zs = new Promise((a) => {
     r = a;
   }), (async () => {
     try {
@@ -65337,13 +65395,20 @@ function Ur(e) {
     }
   })();
 }
-var Re = !1, dt = !1, rt = 32, Jt = !1, at = !1, lr = "feature-absent", dr = !1, pa = "", Tn = null;
-function No(e) {
+var Re = !1, dt = !1, rt = 32, Jt = !1, at = !1, dr = "feature-absent", cr = !1, fa = "", Tn = null, hf = 64;
+function Io() {
+  return ai(typeof navigator < "u" ? navigator.userAgent : "");
+}
+function Do(e) {
+  return e === !1 || e === "off" || e === null ? null : typeof e == "number" && e >= 0 ? Math.round(e * 1048576) : Io() ? hf * 1048576 : null;
+}
+var Mn = null;
+function Ko(e) {
   const t = typeof e == "string" ? e : e && typeof e.message == "string" ? e.message : "";
   return /\bUnable to make command encoder\b/.test(t) || /\bGPU[A-Za-z]+\.[A-Za-z]+: Unable to make\b/.test(t);
 }
-var cr = null, Yn = null, Lt = null, Xt = null, Zt = null;
-async function of(e, t) {
+var hr = null, Zn = null, Lt = null, Xt = null, Zt = null;
+async function pf(e, t) {
   if (!Number.isFinite(e) || e <= 0 || !Q) return;
   const n = 1024 * 1024 * 1024, r = 128 * 1024 * 1024, a = new Uint8Array(r);
   a.fill(165);
@@ -65380,7 +65445,7 @@ function Te(e, t) {
   });
 }
 function Ce(e, t, n) {
-  Tn && No(t) && (Tn(typeof t == "string" ? t : String(t && t.message || t)), n = "no-device");
+  Mn && Ko(t) && (Mn(typeof t == "string" ? t : String(t && t.message || t)), n = "no-device");
   const r = {
     type: "error",
     id: e,
@@ -65412,54 +65477,54 @@ function Ae(e, t, n, r, a, s) {
 }
 self.onmessage = async (e) => {
   const { type: t, id: n, data: r } = e.data;
-  if (dr && t !== "interrupt") return Ce(n, pa || "GPU device was lost. Reinitialize the engine to recover.", "no-device");
+  if (cr && t !== "interrupt") return Ce(n, fa || "GPU device was lost. Reinitialize the engine to recover.", "no-device");
   try {
     switch (t) {
       case "init":
-        return Te(n, await pf(r));
+        return Te(n, await wf(r));
       case "load": {
-        const a = await ff(r, n);
-        return await of(r && r.ballastBytes, r && r.ballastHot === !0), Te(n, a);
+        const a = await vf(r, n);
+        return await pf(r && r.ballastBytes, r && r.ballastHot === !0), Te(n, a);
       }
       case "generate":
-        return await Ur((a) => vf(r, n, a));
+        return await Rr((a) => Bf(r, n, a));
       case "interrupt":
         Nt = !0, ln++;
         return;
       case "swapAdapter":
-        return Te(n, await Pf(r, n));
+        return Te(n, await Mf(r, n));
       case "unloadAdapter":
-        return Te(n, Bf(r));
+        return Te(n, Gf(r));
       case "reset":
-        return Te(n, await Ur(() => Ef()));
+        return Te(n, await Rr(() => Lf()));
       case "unload":
-        return Te(n, Df());
+        return Te(n, Vf());
       case "getStats":
-        return Te(n, Wf());
+        return Te(n, Qf());
       case "encodeChat":
-        return Te(n, ro(De, r || {}));
+        return Te(n, so(De, r || {}));
       case "encode":
-        return Te(n, eh(De, r || {}));
+        return Te(n, ah(De, r || {}));
       case "decode":
-        return Te(n, th(De, r || {}));
+        return Te(n, sh(De, r || {}));
       case "loadBf16LmHead":
-        return Te(n, await Gf(r, n));
+        return Te(n, await Of(r, n));
       case "unloadBf16LmHead":
-        return Te(n, Lf());
+        return Te(n, If());
       case "enableDecayClamp":
-        return Te(n, Uf(r));
+        return Te(n, Df(r));
       case "disableDecayClamp":
-        return Te(n, Rf());
+        return Te(n, Kf());
       case "enableL23InputLnOverride":
-        return Te(n, Cf(r));
+        return Te(n, Wf(r));
       case "disableL23InputLnOverride":
-        return Te(n, Nf());
+        return Te(n, zf());
       case "readInputLnWeight":
-        return Te(n, await Of(r));
+        return Te(n, await Ff(r));
       case "forceRung":
-        return Te(n, await If(r));
+        return Te(n, await $f(r));
       case "initSpec":
-        return Te(n, await zf(r));
+        return Te(n, await jf(r));
       case "dumpKV": {
         if (r.__test !== "kv-stats-s1851") return Ce(n, "dumpKV is test-only");
         const a = E;
@@ -65513,15 +65578,15 @@ self.onmessage = async (e) => {
         });
       }
       case "setAblation":
-        return Te(n, yf(r));
+        return Te(n, qf(r));
       case "clearAblation":
-        return Te(n, Sf());
+        return Te(n, Af());
       case "captureResidualAllLayers":
-        return !r || r.__test !== "ablation-capture-s1869" ? Ce(n, "captureResidualAllLayers is test-only") : Te(n, await xf(r));
+        return !r || r.__test !== "ablation-capture-s1869" ? Ce(n, "captureResidualAllLayers is test-only") : Te(n, await Tf(r));
       case "klCapture":
-        return r.__test !== "kl-tier1-s1853" ? Ce(n, "klCapture is test-only") : Te(n, await Mf(r, n));
+        return r.__test !== "kl-tier1-s1853" ? Ce(n, "klCapture is test-only") : Te(n, await Nf(r, n));
       case "prefillOnly":
-        return Te(n, await Ur((a) => qf(r, n, a)));
+        return Te(n, await Rr((a) => Uf(r, n, a)));
       case "setDnChainMode": {
         const a = r && r.mode;
         let s = 0, i = 0, o = null;
@@ -65564,13 +65629,13 @@ self.onmessage = async (e) => {
         });
       }
       case "snapshotSession":
-        return Te(n, await Af(r || {}, n));
+        return Te(n, await Rf(r || {}, n));
       case "restoreSession":
-        return Te(n, await Tf(r || {}));
+        return Te(n, await Cf(r || {}));
       case "mtpLoad":
-        return Te(n, await $f(r));
+        return Te(n, await Zf(r));
       case "mtpBench":
-        return Te(n, await Vf(r));
+        return Te(n, await Xf(r));
       default:
         return Ce(n, `Unknown message type: ${t}`);
     }
@@ -65578,7 +65643,7 @@ self.onmessage = async (e) => {
     Ce(n, a.message, a.code);
   }
 };
-function Ba(e, t) {
+function Ea(e, t) {
   if (!(!e || typeof e != "object")) {
     if (e.m1VecmatRoute !== void 0) {
       const n = e.m1VecmatRoute === !0;
@@ -65591,17 +65656,17 @@ function Ba(e, t) {
     e.mobilePrefillWG !== void 0 && (globalThis.__mentriaMobilePrefillWG = e.mobilePrefillWG), e.mobilePrefillRM !== void 0 && (globalThis.__mentriaMobilePrefillRM = e.mobilePrefillRM), e.mobilePrefillMaxM !== void 0 && (globalThis.__mentriaMobilePrefillMaxM = e.mobilePrefillMaxM), e.mobilePrefillKsplit !== void 0 && (globalThis.__mentriaMobilePrefillKsplit = e.mobilePrefillKsplit);
   }
 }
-var Oo = 4;
-function Ea(e, t) {
+var Wo = 4;
+function qa(e, t) {
   if (!e || typeof e != "object" || e.gpuSampleBatch === void 0) return;
   const n = Number(e.gpuSampleBatch);
   if (!Number.isInteger(n) || n < 1 || n > 64) {
-    console.warn(`[worker] gpuSampleBatch ${JSON.stringify(e.gpuSampleBatch)} at ${t} ignored (integer 1..64 expected); cadence unchanged at ` + (globalThis.__mentriaGpuSampleBatch || Oo));
+    console.warn(`[worker] gpuSampleBatch ${JSON.stringify(e.gpuSampleBatch)} at ${t} ignored (integer 1..64 expected); cadence unchanged at ` + (globalThis.__mentriaGpuSampleBatch || Wo));
     return;
   }
   globalThis.__mentriaGpuSampleBatch !== n && console.log(`[worker] RESIDENT-SAMPLING readback cadence gpuSampleBatch=${n} via ${t}`), globalThis.__mentriaGpuSampleBatch = n;
 }
-function qa(e, t) {
+function Aa(e, t) {
   if (!e || typeof e != "object" || e.residentDetectorBridge === void 0) return;
   const n = e.residentDetectorBridge;
   if (n !== !0 && n !== !1) {
@@ -65610,12 +65675,12 @@ function qa(e, t) {
   }
   globalThis.__mentriaResidentDetectorBridge = n, console.log(`[worker] RESIDENT-SAMPLING detector bridge ${n ? "ENABLED" : "disabled"} via ${t}`);
 }
-function Aa() {
+function Ta() {
   const e = globalThis.__mentriaGpuSampleBatch;
-  return Number.isInteger(e) && e >= 1 && e <= 64 ? e : Oo;
+  return Number.isInteger(e) && e >= 1 && e <= 64 ? e : Wo;
 }
-var Ta = ["encodeOnly", "flushPerToken"];
-function Ma(e, t) {
+var Ma = ["encodeOnly", "flushPerToken"];
+function Ga(e, t) {
   if (!e || typeof e != "object" || e.decodeProbe === void 0) return;
   const n = e.decodeProbe;
   if (n === "encodeOnly") {
@@ -65630,26 +65695,26 @@ function Ma(e, t) {
     globalThis.__mentriaDecodeProbeMode = null;
     return;
   }
-  console.warn(`[worker] decodeProbe ${JSON.stringify(n)} at ${t} ignored (${Ta.map((r) => `'${r}'`).join(" | ")} | 'off' expected)`);
+  console.warn(`[worker] decodeProbe ${JSON.stringify(n)} at ${t} ignored (${Ma.map((r) => `'${r}'`).join(" | ")} | 'off' expected)`);
 }
-function uf() {
+function ff() {
   const e = globalThis.__mentriaDecodeProbeMode;
-  return Ta.includes(e) ? e : void 0;
+  return Ma.includes(e) ? e : void 0;
 }
-function Io(e, t) {
+function zo(e, t) {
   if (!e || typeof e != "object" || e.bindGroupCache === void 0) return;
   const n = e.bindGroupCache;
   if (n === !0) {
-    za(!0, self), console.log(`[worker] bindGroupCache ON via ${t}: decode operators reuse GPUBindGroup objects across tokens (bit-exact; counters at perDecodeToken.bindGroupCacheHits/Misses).`);
+    Fa(!0, self), console.log(`[worker] bindGroupCache ON via ${t}: decode operators reuse GPUBindGroup objects across tokens (bit-exact; counters at perDecodeToken.bindGroupCacheHits/Misses).`);
     return;
   }
   if (n === !1 || n === null || n === "off") {
-    za(!1, self);
+    Fa(!1, self);
     return;
   }
   console.warn(`[worker] bindGroupCache ${JSON.stringify(n)} at ${t} ignored (true | false expected)`);
 }
-var lf = [
+var _f = [
   "mobileMatvec",
   "mobileMatvecKernels",
   "mobileMatvecWG",
@@ -65658,9 +65723,9 @@ var lf = [
   "mobileFusion",
   "mobileFusionFolds"
 ];
-function Ga(e, t) {
+function La(e, t) {
   if (!e || typeof e != "object") return;
-  const n = lf.filter((a) => e[a] !== void 0);
+  const n = _f.filter((a) => e[a] !== void 0);
   if (n.length === 0) return;
   if (t === "generate") {
     console.warn("[worker] MOBILE-MATVEC: " + n.join("/") + " passed to generate() and IGNORED — these are load-time flags (the variants are separate compiled pipelines). Pass them to init() or loadModel() and reload.");
@@ -65669,7 +65734,7 @@ function Ga(e, t) {
   const r = { ...self.__mobileMatvecOpts || {} };
   e.mobileMatvec !== void 0 && (self.__mobileMatvecExplicit = !0), e.mobileMatvec !== void 0 && (r.mode = e.mobileMatvec), e.mobileMatvecKernels !== void 0 && (r.kernels = e.mobileMatvecKernels), e.mobileMatvecWG !== void 0 && (r.wg = e.mobileMatvecWG), e.mobileMatvecKsplit !== void 0 && (r.ksplit = e.mobileMatvecKsplit), e.mobileMatvecLmHeadLanes !== void 0 && (r.lmHeadLanes = e.mobileMatvecLmHeadLanes), e.mobileFusion !== void 0 && (r.fusion = e.mobileFusion), e.mobileFusionFolds !== void 0 && (r.fusionFolds = e.mobileFusionFolds), self.__mobileMatvecOpts = r, console.log(`[worker] MOBILE-MATVEC requested via ${t}(): mode=${r.mode} wg=${r.wg ?? "auto"} ksplit=${r.ksplit ?? "auto"} lmHeadLanes=${r.lmHeadLanes ?? "default"} fusion=${r.fusion ?? "default"}${r.fusionFolds !== void 0 ? "[" + r.fusionFolds + "]" : ""} kernels=${JSON.stringify(r.kernels || "all")}`);
 }
-function La(e, t) {
+function Ua(e, t) {
   if (!(!e || typeof e != "object" || e.prefillTile === void 0)) {
     if (t === "generate") {
       console.warn("[worker] PREFILL-TILE: prefillTile passed to generate() and IGNORED — it is a load-time flag (each arm is a separately compiled pipeline). Pass it to init() or loadModel() and reload.");
@@ -65678,7 +65743,7 @@ function La(e, t) {
     self.__prefillTileFlag = e.prefillTile, console.log(`[worker] PREFILL-TILE requested via ${t}(): ${e.prefillTile}`);
   }
 }
-function df(e) {
+function mf(e) {
   const t = e ? e.loraFuse : void 0;
   if (t == null || t === "off") return null;
   if (t !== "epilogue") throw new Error(`loraFuse: ${JSON.stringify(t)} is not a route — expected 'off' or 'epilogue'`);
@@ -65689,7 +65754,7 @@ function df(e) {
     reason: "only the q1g128 (Bonsai 1-bit) load path has the fused epilogue kernel"
   };
 }
-async function cf(e, t) {
+async function gf(e, t) {
   const n = {
     requested: "epilogue",
     armed: !1,
@@ -65713,7 +65778,7 @@ async function cf(e, t) {
     groups: E.loraFuseGroups()
   }), n.armed = !0, n.residual = !!r.loraFuse.loraRes), console.log(`[worker] fused-LoRA decode ${n.armed ? `ARMED (grouped f16 shrink + v14b_lora epilogue${n.residual ? " + residual twin" : ""})` : `DECLINED (${n.reason})`}`), n;
 }
-function hf() {
+function bf() {
   const e = self.__loraFuseVerdict;
   if (!e) return null;
   const t = E && E.operators ? E.operators.vecmatQ2G128 : null, n = Me && typeof Me.fuseSummary == "function" ? Me.fuseSummary() : null, r = t && t.loraFuse ? t.loraFuse.counts : null;
@@ -65731,7 +65796,7 @@ function hf() {
     adapters: n ? n.adapters : null
   };
 }
-var Zs = {
+var Xs = {
   mobileMatvec: "ksplit",
   mobilePrefill: "mrow"
 }, jt = {
@@ -65739,25 +65804,25 @@ var Zs = {
   b2GemmTile: "m4n4",
   b2NoSgDecode: "selsv"
 };
-function Xs(e) {
+function Js(e) {
   const t = e && e.b2KernelPickTest;
-  return t && typeof t == "object" && aa.includes(t.seedDecode) ? {
+  return t && typeof t == "object" && sa.includes(t.seedDecode) ? {
     ...jt,
     b2NoSgDecode: t.seedDecode
   } : jt;
 }
-function Rr(e) {
+function Cr(e) {
   const t = self.__mobileB2Seed;
   if (!t || !t.values) return e;
   const n = { ...e || {} };
   for (const [r, a] of Object.entries(t.values)) n[r] === void 0 && (n[r] = a);
   return n;
 }
-function Do(e, t = null) {
+function Fo(e, t = null) {
   const n = self.__narrowSg || null, r = [], a = [];
   if (e === "load" && (self.__mobileB2Seed = null, n)) {
     const d = {};
-    for (const [c, h] of Object.entries(Xs(t))) t && t[c] !== void 0 ? a.push(c) : (d[c] = h, r.push(c));
+    for (const [c, h] of Object.entries(Js(t))) t && t[c] !== void 0 ? a.push(c) : (d[c] = h, r.push(c));
     self.__mobileB2Seed = {
       values: d,
       pinned: a.filter((c) => c in jt)
@@ -65765,12 +65830,12 @@ function Do(e, t = null) {
   }
   n && (self.__mobileMatvecExplicit ? a.push("mobileMatvec") : (self.__mobileMatvecOpts = {
     ...self.__mobileMatvecOpts || {},
-    mode: Zs.mobileMatvec
-  }, r.push("mobileMatvec")), self.__mobilePrefillExplicit ? a.push("mobilePrefill") : (globalThis.__mentriaMobilePrefill = Zs.mobilePrefill, r.push("mobilePrefill")));
+    mode: Xs.mobileMatvec
+  }, r.push("mobileMatvec")), self.__mobilePrefillExplicit ? a.push("mobilePrefill") : (globalThis.__mentriaMobilePrefill = Xs.mobilePrefill, r.push("mobilePrefill")));
   const s = {
     mobileMatvec: self.__mobileMatvecOpts && self.__mobileMatvecOpts.mode || "off",
     mobilePrefill: globalThis.__mentriaMobilePrefill === "mrow" ? "mrow" : "off"
-  }, i = Xs(t);
+  }, i = Js(t);
   for (const d of Object.keys(jt)) r.includes(d) ? s[d] = i[d] : t && t[d] !== void 0 && (s[d] = t[d]);
   let o;
   n ? r.length === 0 ? o = `held: narrow-subgroup adapter at width ${n.width}, but the host passed explicit ${a.join(" + ")} — host value wins` : o = `narrow-subgroup adapter at width ${n.width}` + (n.forced ? " (forced test hook)" : "") + `: defaulted ${r.map((d) => `${d}=${s[d]}`).join(" + ")}` + (a.length ? `; host pinned ${a.join(" + ")}` : "") + " (Redmi 2B A/B: decode 0.52->2.11 tok/s, TTFT 18.1->6.7 s)" + (r.includes("mobilePrefill") ? `; mobilePrefillKsplit auto = smallest S with ceil(N/64)*S >= 4*width workgroups at the widest prefill projection (target ${4 * n.width}; S=2 at width 64, S=1 at width 16)` : "") + (r.some((d) => d in jt) ? "; Bonsai 2 no-subgroups seed (rotated q2g128 only) " + Object.keys(jt).filter((d) => r.includes(d)).map((d) => `${d}=${i[d]}`).join(" + ") + " (Mali-G57 2026-10-27: TTFT@512 146.7->54.3 s; decode selsv 319 vs lutrf 413 ms/token GPU, class E on the phone; the per-device kernel pick starts from it and verifies the decode seed on this device first, b2KernelPick)" : "") : o = `off: adapter is not narrow-subgroup eligible (${self.__narrowSgReason || "stable 32-wide subgroups, or the host opted out"}) — desktop/32-wide route unchanged`;
@@ -65787,9 +65852,9 @@ function Do(e, t = null) {
   }, l = self.__mobileProfile;
   return self.__mobileProfile = u, u.applied && (!l || l.reason !== o) && console.log(`[worker] MOBILE-PROFILE (${e}) ${o}`), u;
 }
-async function pf(e = {}) {
+async function wf(e = {}) {
   if (!navigator.gpu) throw fn("no-webgpu", "WebGPU is not available in this worker environment.");
-  Ba(e, "init"), Ga(e, "init"), La(e, "init"), Ea(e, "init"), Ma(e, "init"), Io(e, "init"), qa(e, "init"), globalThis.__mentriaShaderFetcher = me;
+  Ea(e, "init"), La(e, "init"), Ua(e, "init"), qa(e, "init"), Ga(e, "init"), zo(e, "init"), Aa(e, "init"), globalThis.__mentriaShaderFetcher = me;
   let t;
   try {
     t = await navigator.gpu.requestAdapter();
@@ -65815,27 +65880,27 @@ async function pf(e = {}) {
   }
   t.info?.subgroupMinSize === 32 && t.info?.subgroupMaxSize === 32 || (Re && (self.__sgWidthGated = !0), Re = !1), Re && n.push("subgroups");
   const r = t.features.has("timestamp-query");
-  r && n.push("timestamp-query"), self.__hasTimestampQuery = r, Jt = Re && t.features.has("chromium-experimental-subgroup-matrix"), Jt && n.push("chromium-experimental-subgroup-matrix"), Yn = eu(t, { dropDeviceFeatures: self.__dropDeviceFeatures || [] });
-  const a = $h, s = Ws(a.vocabSize, a.hiddenSize, "q4"), i = Ws(a.vocabSize, a.hiddenSize, "q4"), o = {
+  r && n.push("timestamp-query"), self.__hasTimestampQuery = r, Jt = Re && t.features.has("chromium-experimental-subgroup-matrix"), Jt && n.push("chromium-experimental-subgroup-matrix"), Zn = au(t, { dropDeviceFeatures: self.__dropDeviceFeatures || [] });
+  const a = Yh, s = zs(a.vocabSize, a.hiddenSize, "q4"), i = zs(a.vocabSize, a.hiddenSize, "q4"), o = {
     embedBytes: Number.isFinite(e?.embedBytes) ? e.embedBytes : s,
     lmHeadBytes: Number.isFinite(e?.lmHeadBytes) ? e.lmHeadBytes : i
   }, u = {};
-  e?.forceShardedWeights !== void 0 && (u.forceSharding = e.forceShardedWeights), Lt = Xo(Yn, o, u);
+  e?.forceShardedWeights !== void 0 && (u.forceSharding = e.forceShardedWeights), Lt = nu(Zn, o, u);
   {
-    const h = Zo(Yn), p = e?.narrowSubgroups === "force";
+    const h = tu(Zn), p = e?.narrowSubgroups === "force";
     self.__narrowSg = (!Re || p) && h.eligible && e?.narrowSubgroups !== !1 ? {
       ...h,
       forced: p
     } : null, self.__narrowSgReason = self.__narrowSg ? null : e?.narrowSubgroups === !1 ? "host passed narrowSubgroups:false" : Re ? `the 32/32 subgroup gate already accepted this adapter at width ${rt}` : h.reason, self.__narrowSg ? (n.includes("subgroups") || n.push("subgroups"), console.log(`[worker] NARROW-SG eligible (${self.__narrowSg.reason}) — K-split kernels will be staged and probed at load`)) : self.__sgWidthGated && console.log("[worker] NARROW-SG not eligible: " + h.reason);
   }
-  Do("init");
+  Fo("init");
   try {
     const h = navigator?.gpu?.wgslLanguageFeatures;
     at = !!(h && typeof h.has == "function" && h.has("packed_4x8_integer_dot_product"));
   } catch {
     at = !1;
   }
-  lr = at ? null : "feature-absent";
+  dr = at ? null : "feature-absent";
   const l = t.limits.maxComputeWorkgroupStorageSize;
   let d;
   e?.maxComputeWorkgroupStorageSize === !1 ? d = void 0 : Number.isFinite(e?.maxComputeWorkgroupStorageSize) ? d = Math.min(e.maxComputeWorkgroupStorageSize, l) : Number.isFinite(l) && (d = l);
@@ -65873,15 +65938,15 @@ async function pf(e = {}) {
         } catch {
         }
       }
-      at || (lr = "compile-failed", console.log("[worker] DP4A listed but fails compile — gated off"), Be("dp4a", "compile-failed", "wgslLanguageFeatures lists packed_4x8_integer_dot_product but the `requires` probe shader does not compile"));
+      at || (dr = "compile-failed", console.log("[worker] DP4A listed but fails compile — gated off"), Be("dp4a", "compile-failed", "wgslLanguageFeatures lists packed_4x8_integer_dot_product but the `requires` probe shader does not compile"));
     }
   } catch (h) {
     throw fn("no-device", `requestDevice() failed: ${h.message}`);
   }
   if (!Q) throw fn("no-device", "requestDevice() returned null.");
   const c = (h) => {
-    if (!dr && h.reason !== "destroyed") {
-      if (dr = !0, pa = `WebGPU device lost: ${h.reason || "unknown"}${h.message ? " — " + h.message : ""}`, Nt = !0, Q = null, E = null, Me = null, De = null, Yn = null, Lt = null, Ke) {
+    if (!cr && h.reason !== "destroyed") {
+      if (cr = !0, fa = `WebGPU device lost: ${h.reason || "unknown"}${h.message ? " — " + h.message : ""}`, Nt = !0, Q = null, E = null, Me = null, De = null, Zn = null, Lt = null, Ke) {
         try {
           Ke.destroy();
         } catch {
@@ -65891,7 +65956,7 @@ async function pf(e = {}) {
       self.postMessage({
         type: "device-lost",
         code: "no-device",
-        error: pa,
+        error: fa,
         reason: h.reason || "unknown"
       });
     }
@@ -65901,7 +65966,7 @@ async function pf(e = {}) {
       console.error("[inference_worker] device-lost handler threw:", h?.message || h);
     } catch {
     }
-  }), Tn = (h) => {
+  }), Mn = (h) => {
     try {
       c({
         reason: "unknown",
@@ -65913,7 +65978,7 @@ async function pf(e = {}) {
       } catch {
       }
     }
-  }, e.counters !== !1 && hu(self), Ve = new ch(), await Ve.init(), {
+  }, e.counters !== !1 && mu(self), Ve = new mh(), await Ve.init(), {
     gpu: t.info?.device || "unknown",
     adapter: self.__adapterSummary || null,
     maxBuffer: Q.limits.maxBufferSize,
@@ -65924,12 +65989,12 @@ async function pf(e = {}) {
       width: self.__narrowSg.width,
       reason: self.__narrowSg.reason
     } : null,
-    gpuSampleBatch: Aa(),
+    gpuSampleBatch: Ta(),
     m1VecmatRoute: globalThis.__mentriaM1VecmatRoute === !0,
     mobileProfile: self.__mobileProfile || null,
     narrowProbeCacheAvailable: typeof indexedDB < "u" && !!indexedDB,
     dp4a: at,
-    protocolVersion: Co,
+    protocolVersion: Oo,
     useShardedWeights: Lt.useShardedWeights,
     shardingCeiling: Lt.ceiling,
     needsEmbeddingShard: Lt.needsEmbeddingShard,
@@ -65937,27 +66002,27 @@ async function pf(e = {}) {
     shardingForced: Lt.forced
   };
 }
-function hr(e) {
+function pr(e) {
   const t = e.visionPackQ4 !== !1;
   return {
     packQ4: t,
     sharedScratch: e.visionSharedScratch !== !1,
-    releaseScratch: e.visionReleaseScratch === !0,
+    releaseScratch: e.visionReleaseScratch === void 0 ? Io() : e.visionReleaseScratch === !0,
     stream: e.streamingLoad === !0 && t,
     weightUpload: e.weightUpload === "writeBuffer" ? "writeBuffer" : null
   };
 }
-function Ko(e) {
+function $o(e) {
   const t = e && e.residency;
   if (!t) return;
   const n = (a) => (a / 1073741824).toFixed(2), r = t.f16Bytes + t.f32Bytes + (t.q4Bytes || 0);
   t.q4Bytes > 0 ? console.log(`[worker] vision weights packed Q4_0 (${n(r)} GiB resident, was ${n(t.f32EquivalentBytes)} GiB f32; ${t.q4Tensors} packed / ${t.f16Tensors} f16 / ${t.f32Tensors} f32 tensors)`) : t.f16Bytes > 0 ? console.log(`[worker] vision weights f16 (${n(r)} GiB resident, was ${n(t.f32EquivalentBytes)} GiB f32; ${t.f16Tensors} f16 / ${t.f32Tensors} f32 tensors)`) : console.log(`[worker] vision weights f32 (${n(r)} GiB resident, ${t.f32Tensors} tensors) — f16 not engaged`);
 }
-async function ff(e, t) {
-  if (Ba(e, "load"), Ga(e, "load"), La(e, "load"), Ea(e, "load"), Ma(e, "load"), Io(e, "load"), qa(e, "load"), Do("load", e), Ee = null, je = null, un = [], self.__narrowSgVerdict = null, self.__mobileMatvecVerdict = null, self.__prefillRoute = null, globalThis.__mentriaDecodeLoop = null, self.__lastGenStats = null, self.__sgWidthGated && Be("capabilities", "subgroups-width-gated", `adapter lists subgroups at ${self.__adapterSummary?.subgroupMinSize}-${self.__adapterSummary?.subgroupMaxSize} wide; kernels require a stable 32`), self.__likelyIntegratedGpu && Be("capabilities", "integrated-gpu", `${self.__adapterSummary?.vendor}/${self.__adapterSummary?.architecture}`), !Q) throw new Error("GPU not initialized — call init() first");
+async function vf(e, t) {
+  if (Ea(e, "load"), La(e, "load"), Ua(e, "load"), qa(e, "load"), Ga(e, "load"), zo(e, "load"), Aa(e, "load"), Fo("load", e), Ee = null, je = null, un = [], self.__narrowSgVerdict = null, self.__mobileMatvecVerdict = null, self.__prefillRoute = null, globalThis.__mentriaDecodeLoop = null, self.__lastGenStats = null, self.__sgWidthGated && Be("capabilities", "subgroups-width-gated", `adapter lists subgroups at ${self.__adapterSummary?.subgroupMinSize}-${self.__adapterSummary?.subgroupMaxSize} wide; kernels require a stable 32`), self.__likelyIntegratedGpu && Be("capabilities", "integrated-gpu", `${self.__adapterSummary?.vendor}/${self.__adapterSummary?.architecture}`), !Q) throw new Error("GPU not initialized — call init() first");
   if (E) throw new Error("Model already loaded — call unload() first");
-  self.__loraFuseVerdict = df(e);
-  const n = Ki(e.allowCompressedKV);
+  self.__loraFuseVerdict = mf(e);
+  const n = zi(e.allowCompressedKV);
   if (!n && e.kivi === !0) throw new Error("kivi: true asks for a compressed (KIVI 4-bit, precision class C) KV cache, but allowCompressedKV is false; drop one of the two");
   const { modelUrl: r, shards: a, tokenizerUrl: s, skipTokenizer: i, config: o, features: u } = e;
   An = e.modelId || `${r || ""}#${Array.isArray(a) ? a.join(",") : ""}`;
@@ -65977,7 +66042,7 @@ async function ff(e, t) {
   const c = [];
   let h = null;
   if (e.streamingLoad === !0) {
-    const { streamSafetensorsToGPU: C } = __mentria_chunks["./streaming_safetensors-BBzi0GtM.mjs"];
+    const { streamSafetensorsToGPU: C } = __mentria_chunks["./streaming_safetensors-5bEZv0g3.mjs"];
     h = {
       infos: /* @__PURE__ */ new Map(),
       buffers: /* @__PURE__ */ new Map(),
@@ -66019,7 +66084,7 @@ async function ff(e, t) {
     c.push(new Ft(re)), Ae(t, "download", C + 1, a.length, `Downloaded shard ${C + 1}/${a.length}`);
   }
   Ae(t, "init", 1, 3, "Creating GPU operators...");
-  const p = c[0] && c[0].metadata && c[0].metadata.q4_block_layout === "nk_t" ? "nk_t" : "kn", f = await Hf(Q, {
+  const p = c[0] && c[0].metadata && c[0].metadata.q4_block_layout === "nk_t" ? "nk_t" : "kn", f = await Jf(Q, {
     multimodal: l,
     mropeSection: d,
     q4BlockLayout: p,
@@ -66030,28 +66095,28 @@ async function ff(e, t) {
     flashAttnPrefill: e.useFlashAttnPrefill !== !1,
     q4GemmForm: e.q4GemmForm
   });
-  if (c[0] && c[0].metadata && (c[0].metadata.format === "mentria-q2g128-v1" || c[0].metadata.format === "mentria-q1g128-v1")) return _f(e, t, c, f, h);
+  if (c[0] && c[0].metadata && (c[0].metadata.format === "mentria-q2g128-v1" || c[0].metadata.format === "mentria-q1g128-v1")) return kf(e, t, c, f, h);
   if (self.__narrowSg) {
-    const C = self.__forceNarrowProbe === !0, I = Lh({
+    const C = self.__forceNarrowProbe === !0, I = Oh({
       vendor: self.__adapterSummary?.vendor,
       architecture: self.__adapterSummary?.architecture,
       device: self.__adapterDriverKey?.device,
       description: self.__adapterDriverKey?.description,
-      engineBuild: `p${Co}`,
+      engineBuild: `p${Oo}`,
       subgroupWidth: self.__narrowSg.width,
       shaderHash: self.__narrowShaderHash || "unknown",
-      relTol: oa,
-      probeN: Ph,
-      probeK: Bh,
+      relTol: ua,
+      probeN: Th,
+      probeK: Mh,
       forced: self.__narrowSg.forced === !0
     }), re = C ? {
       hit: !1,
       record: null,
       reason: "bypassed (forceNarrowProbe)"
-    } : await Uh(I, { ttlMs: uo });
+    } : await Ih(I, { ttlMs: co });
     if (re.hit) {
       const z = {
-        published: Ch(f, re.record).published,
+        published: Kh(f, re.record).published,
         width: re.record.width,
         kernels: re.record.kernels,
         ms: 0,
@@ -66063,14 +66128,14 @@ async function ff(e, t) {
       };
       self.__narrowSgVerdict = z, console.log("[worker] " + z.reason), z.published ? Be("narrow-subgroup", "enabled", `width ${z.width}: ${z.kernels.length} kernels verified in ${re.record.ms} ms (cached verdict, probe skipped)`) : Be("narrow-subgroup-probe", "probe-failed", z.reason);
     } else {
-      const z = await Ah(Q, f, { onFallback: Be }), X = await Rh(I, z, {});
+      const z = await Uh(Q, f, { onFallback: Be }), X = await Dh(I, z, {});
       z.probeCached = !1, z.cacheStatus = `${re.reason} → ${X.reason}`, z.cacheKey = I, self.__narrowSgVerdict = z, console.log("[worker] " + z.reason + ` [probe cache: ${z.cacheStatus}]`), z.published && Be("narrow-subgroup", "enabled", `width ${z.width}: ${z.kernels.length} kernels verified in ${z.ms} ms`);
     }
   }
   {
     const C = self.__mobileMatvecOpts;
     if (C && C.mode && C.mode !== "off") {
-      self.__mobileMatvecVerdict = await Wh(Q, f, {
+      self.__mobileMatvecVerdict = await Hh(Q, f, {
         mode: C.mode,
         kernels: C.kernels,
         wg: C.wg,
@@ -66085,7 +66150,7 @@ async function ff(e, t) {
       console.log("[worker] MOBILE-MATVEC " + (I.enabled ? `ENABLED mode=${I.mode} wg=${I.wg} (${I.wgFrom}) lmHeadLanes=${I.lmHeadLanes} pipelines=${I.pipelines} in ${I.buildMs} ms kernels=${JSON.stringify(I.kernels)}` + (I.fusion ? ` fusion=${I.fusion.mode}->${I.fusion.effective}` : "") : `NOT enabled (${I.reason}): ${I.detail} — shipped route unchanged`));
     }
   }
-  if (Ae(t, "init", 2, 3, "Constructing model..."), E = new sn(Q, f, o || Qf), e.residentTrim !== void 0) {
+  if (Ae(t, "init", 2, 3, "Constructing model..."), E = new sn(Q, f, o || e_), Tn = Do(e.arenaBudget), e.residentTrim !== void 0) {
     const C = E.setResidentTrim(e.residentTrim);
     console.log("[worker] residentTrim " + (C ? `ACTIVE (spec=${C.spec ? 1 : 0} prefill=${C.prefill ? 1 : 0})` : "off"));
   }
@@ -66104,11 +66169,11 @@ async function ff(e, t) {
     "gqa_score_prefill_kivi.wgsl",
     "gqa_value_agg_prefill_kivi.wgsl",
     "deltanet_recurrence_kstep.wgsl"
-  ].map(me)), R = new fi(Q, _), B = new _i(Q, m), G = new mi(Q, b), q = new ga(Q, w), U = new Bo(Q, g), W = new En(Q, v), $ = new qn(Q, y), S = new To(Q, k), M = new Mo(Q, P), T = new $p(Q, x);
+  ].map(me)), R = new mi(Q, _), B = new gi(Q, m), G = new bi(Q, b), q = new ba(Q, w), U = new qo(Q, g), W = new En(Q, v), $ = new qn(Q, y), S = new Go(Q, k), M = new Lo(Q, P), T = new Yp(Q, x);
   let A = null;
   try {
     const C = await me("flash_decode.wgsl");
-    A = new Eo(Q, C, { cacheType: "f32" });
+    A = new Ao(Q, C, { cacheType: "f32" });
   } catch (C) {
     console.warn("[worker] flash_decode unavailable:", C.message);
   }
@@ -66116,7 +66181,7 @@ async function ff(e, t) {
   let L = null;
   if (Jt) try {
     const C = await me("matmul_q4_sgmat.wgsl");
-    L = new nf(Q, C), console.log("[worker] #149 subgroup-matrix prefill GEMM ACTIVE");
+    L = new uf(Q, C), console.log("[worker] #149 subgroup-matrix prefill GEMM ACTIVE");
   } catch (C) {
     console.warn("[worker] sgmat unavailable:", C.message);
   }
@@ -66124,7 +66189,7 @@ async function ff(e, t) {
   let O = null;
   try {
     const C = await me("deltanet_norms_gates_mrow.wgsl");
-    O = new Vp(Q, C, {
+    O = new Zp(Q, C, {
       subgroups: Re,
       subgroupSize: rt || 32
     });
@@ -66135,7 +66200,7 @@ async function ff(e, t) {
     C.layerType === "deltanet" ? (C.layer.setChunkwiseOps(R, B, G, q), C.layer.setConv1dBatchOp(U), C.layer.setKStepOp(T), O && C.layer.setNormsGatesMRow(O), L && (C.layer.sgmatQ4 = L), C.layer.setOutputGate(f.outputGate), C.layer.setL2NormScale(f.l2normScale), C.layer.setConv1dSiluOp(f.conv1dSilu), C.layer.setGatesCombined(f.gatesCombined), C.layer.setMegashaderA(f.megashaderA), C.layer.setMegashaderB(f.megashaderB)) : (C.layer.setPrefillOps(W, $), L && (C.layer.sgmatQ4 = L)), L && C.mlp && (C.mlp.sgmatQ4 = L);
   let N = null;
   const F = e.kaxisDP4ACompanionUrl, Y = typeof F == "string" && F.length > 0;
-  if (Y && !at ? Be("dp4a", lr || "feature-absent", `kaxisDP4ACompanionUrl supplied but the route is gated off (${lr || "feature-absent"}); staying on the exact wide-Q4 path`) : at && !Y && Be("dp4a", "companion-not-supplied", "packed_4x8_integer_dot_product is present and the kernels compile, but no kaxisDP4ACompanionUrl was passed — the DP4A dispatch gate stays off"), at && typeof F == "string" && F.length > 0) {
+  if (Y && !at ? Be("dp4a", dr || "feature-absent", `kaxisDP4ACompanionUrl supplied but the route is gated off (${dr || "feature-absent"}); staying on the exact wide-Q4 path`) : at && !Y && Be("dp4a", "companion-not-supplied", "packed_4x8_integer_dot_product is present and the kernels compile, but no kaxisDP4ACompanionUrl was passed — the DP4A dispatch gate stays off"), at && typeof F == "string" && F.length > 0) {
     Ae(t, "download", 0, 1, "Downloading K-axis DP4A companion bundle...");
     try {
       N = new Ft(await Ve.loadShard(F, (C, I) => {
@@ -66148,16 +66213,16 @@ async function ff(e, t) {
   Ae(t, "upload", 0, 1, "Uploading weights to GPU...");
   const se = [];
   let J = !1, K = null, H = !1;
-  const D = await tc({
+  const D = await sc({
     deviceLost: Q.lost,
-    ...n ? {} : { policyCap: Bl() },
+    ...n ? {} : { policyCap: Tl() },
     onFallback: (C) => {
       se.push({
         fromRung: C.fromRung,
         toRung: C.toRung,
         reason: C.reason,
-        fromLabel: C.plan ? yt(C.plan) : null,
-        toLabel: C.nextPlan ? yt(C.nextPlan) : null,
+        fromLabel: C.plan ? St(C.plan) : null,
+        toLabel: C.nextPlan ? St(C.nextPlan) : null,
         summary: C.degradeSummary,
         lastFailurePhase: C.lastFailurePhase || null
       });
@@ -66168,8 +66233,8 @@ async function ff(e, t) {
           fromRung: C.fromRung,
           toRung: C.toRung,
           reason: C.reason,
-          fromLabel: C.plan ? yt(C.plan) : null,
-          toLabel: C.nextPlan ? yt(C.nextPlan) : null,
+          fromLabel: C.plan ? St(C.plan) : null,
+          toLabel: C.nextPlan ? St(C.nextPlan) : null,
           summary: C.degradeSummary,
           lastFailurePhase: C.lastFailurePhase || null
         });
@@ -66178,7 +66243,7 @@ async function ff(e, t) {
     },
     runOneRung: async (C, I) => {
       if (!J) {
-        const z = await Ss(Q, () => Nl(Q, c, E, {
+        const z = await xs(Q, () => Kl(Q, c, E, {
           onProgress: (X, ee) => {
             Ae(t, "upload", X, ee, "Uploading weights to GPU...");
           },
@@ -66204,8 +66269,8 @@ async function ff(e, t) {
         } catch (oe) {
           throw gt = oe?.message || String(oe), console.error(`[worker] AdapterManager init FAILED on the Q4 rung path — LoRA adapters will be unavailable: ${gt}`), new Error("AdapterManager init failed (lora_apply.wgsl): " + gt);
         }
-        const X = new Ii(Q, z);
-        Me = new Di(Q, X), E.setAdapterManager(Me), Me.setModelShapes(Wo(E)), gt = null, e.prescaledNorm !== !1 ? E.enablePrescaled(f.prescaledQ4, void 0, void 0) : console.log("[worker] prescaled norm fusion DISABLED (prescaledNorm:false) — standalone RMSNorm dispatches kept");
+        const X = new Ki(Q, z);
+        Me = new Wi(Q, X), E.setAdapterManager(Me), Me.setModelShapes(Vo(E)), gt = null, e.prescaledNorm !== !1 ? E.enablePrescaled(f.prescaledQ4, void 0, void 0) : console.log("[worker] prescaled norm fusion DISABLED (prescaledNorm:false) — standalone RMSNorm dispatches kept");
         const ee = {};
         dt && (ee.f16 = {
           kvCacheF16Append: f.kvCacheF16Append,
@@ -66223,7 +66288,7 @@ async function ff(e, t) {
           gqaValueAgg: f.gqaValueAggKivi,
           gqaScorePrefill: S,
           gqaValueAggPrefill: M
-        }, E.enableForRung(C, ee), cr = ee;
+        }, E.enableForRung(C, ee), hr = ee;
         for (const oe of E.blocks) oe.layerType === "attention" && (oe.layer.fusedNormRoPE = f.fusedNormRoPE, oe.layer.qgateDeinterleave = f.qgateDeinterleave);
         if (E.enableKaxisDP4A(f), e.enableInt4State === !0) {
           if (!f.megashaderBInt4) throw new Error("handleLoad: data.enableInt4State set but operators.megashaderBInt4 was not constructed (createAllOperators int4State flag drift)");
@@ -66241,7 +66306,7 @@ async function ff(e, t) {
         if (e.useFlashAttnPrefill !== !1) {
           if (!f.flashAttnPrefill) throw new Error("handleLoad: data.useFlashAttnPrefill set but operators.flashAttnPrefill was not constructed (createAllOperators flashAttnPrefill flag drift)");
           if (E.enableFlashAttnPrefill(f.flashAttnPrefill, f.flashAttnPrefillF16 || null), E.blocks.some((oe) => oe.layerType === "attention" && oe.layer.useKivi)) try {
-            const { op: oe, kind: pe } = await Ro(Q, Uo(E), {
+            const { op: oe, kind: pe } = await No(Q, Co(E), {
               tileM: e.prefillTileM,
               bits: f.kvQuantizeKey?.bits
             });
@@ -66252,11 +66317,11 @@ async function ff(e, t) {
             console.warn("[worker] flash-prefill-KIVI unavailable: " + oe.message + " — staying on the materialized KIVI prefill chain");
           }
         }
-        const de = new xo(Q);
+        const de = new Bo(Q);
         E.enableBufferPool(de), H = !0;
       }
       Ae(t, "upload", 1, 1, "Initializing model state...");
-      const re = await Ss(Q, () => E.initState(C));
+      const re = await xs(Q, () => E.initState(C));
       if (re.oomError || re.validationError) {
         try {
           E.disposeState();
@@ -66288,7 +66353,7 @@ async function ff(e, t) {
         lastFailurePhase: null
       };
     }
-  }), j = D.result, ae = D.plan, ie = rr(0), le = Wi({
+  }), j = D.result, ae = D.plan, ie = ar(0), le = Fi({
     attnLayers: E.blocks.filter((C) => C.layerType === "attention").map((C) => C.layer),
     stateLayers: E.blocks.filter((C) => C.layerType === "deltanet").map((C) => C.layer),
     requested: ie.kvMode,
@@ -66296,14 +66361,14 @@ async function ff(e, t) {
     rung: ae.rung,
     fallbackEvents: D.fallbackEvents,
     allowCompressedKV: n
-  }), Z = sc(le, yt(ae));
+  }), Z = lc(le, St(ae));
   Z && Be("kv-cache", "compressed", Z);
   for (const C of c) C && (C.buffer = null);
   c.length = 0, Ae(t, "init", 3, 3, "Model ready");
   const { visionModelUrl: te, visionShards: ne, visionConfig: ue, visionF16Weights: fe } = e;
   if (te) {
     if (!Array.isArray(ne) || ne.length === 0) throw new Error("handleLoad: visionModelUrl provided but visionShards missing or empty");
-    const { operators: C, tensorMap: I, config: re, weightPlan: z } = await Yi({
+    const { operators: C, tensorMap: I, config: re, weightPlan: z } = await Xi({
       device: Q,
       cache: Ve,
       shaderFetcher: me,
@@ -66311,24 +66376,24 @@ async function ff(e, t) {
       shards: ne,
       config: ue,
       f16Weights: fe === void 0 ? dt : fe === !0,
-      ...hr(e),
+      ...pr(e),
       onProgress: (X, ee, de, oe) => {
         Ae(t, X, ee, de, oe);
       }
     });
     Ae(t, "upload", 0, 1, "Uploading vision weights to GPU...");
     try {
-      Ke = ji(Q, C, re, I, {
+      Ke = Zi(Q, C, re, I, {
         weightPlan: z,
-        ...hr(e)
-      }), Ko(Ke);
+        ...pr(e)
+      }), $o(Ke);
     } finally {
       I.dispose();
     }
     Ae(t, "upload", 1, 1, "Vision tower ready");
   }
-  const V = Mn(e.ablation);
-  return await $o(e), E && typeof E.mobilePrefillReady == "function" && await E.mobilePrefillReady(), {
+  const V = Gn(e.ablation);
+  return await jo(e), E && typeof E.mobilePrefillReady == "function" && await E.mobilePrefillReady(), {
     ablation: V,
     tensors: j.tensorCount,
     totalBytes: j.totalBytes,
@@ -66360,25 +66425,25 @@ async function ff(e, t) {
     mobileMatvec: self.__mobileMatvecVerdict || null,
     mobileProfile: self.__mobileProfile || null,
     adapter: self.__adapterSummary || null,
-    capabilities: Ua(),
+    capabilities: Ra(),
     kernelVariants: dn(),
     decodeRoute: dn(),
     kv: le,
     loadPlan: {
       rung: ae.rung,
-      label: yt(ae),
-      rungsTried: D.rungsTried.map((C) => yt(rr(C))),
+      label: St(ae),
+      rungsTried: D.rungsTried.map((C) => St(ar(C))),
       fallbackEvents: se.concat(un),
       deviceReacquires: D.deviceReacquires
     }
   };
 }
-async function _f(e, t, n, r, a = null) {
+async function kf(e, t, n, r, a = null) {
   self.__b2PickJob = null, self.__b2Pick = null, Ee = null, Ae(t, "init", 2, 3, "Constructing model (q2g128)...");
-  const s = e.config || tu;
+  const s = e.config || su;
   if (s.attention.ropeTheta) {
     const S = await me("rope.wgsl");
-    r.rope = new ko(Q, S, s.attention.ropeDim || s.attention.headDim, s.attention.ropeTheta), r.fusedNormRoPE = null, r.mrope = null, r.fusedNormMRoPE = null;
+    r.rope = new So(Q, S, s.attention.ropeDim || s.attention.headDim, s.attention.ropeTheta), r.fusedNormRoPE = null, r.mrope = null, r.fusedNormMRoPE = null;
   }
   const i = n[0].metadata.format === "mentria-q1g128-v1", o = i ? "q1g128" : "q2g128", [u, l, d] = await Promise.all([
     me(`matmul_${o}_vecmat.wgsl`),
@@ -66476,12 +66541,12 @@ async function _f(e, t, n, r, a = null) {
       console.warn("[worker] subgroup probe errored — LUT fallback:", M.message), Be("subgroup-probe", "probe-errored", M.message);
     }
   }
-  let h = null, p = 0, f = !c && o === "q2g128" ? kd(Rr(e), n[0] && n[0].metadata && n[0].metadata.hadamard !== void 0 && n[0].metadata.hadamard !== null) : null, _ = null;
+  let h = null, p = 0, f = !c && o === "q2g128" ? Pd(Cr(e), n[0] && n[0].metadata && n[0].metadata.hadamard !== void 0 && n[0].metadata.hadamard !== null) : null, _ = null;
   if (!c && o === "q2g128" && f && lt[f] && lt[f].needsSubgroups) {
     const S = f, M = lt[S], T = self.__adapterSummary?.subgroupMinSize, A = self.__adapterSummary?.subgroupMaxSize;
     let L = Q.features.has("subgroups") ? T >= 16 && A <= 128 && T % 16 === 0 ? null : `subgroup sizes ${T}-${A} are not multiples of 16` : "the device was not granted 'subgroups'";
     if (!L) {
-      const O = await ws(Q, nr(await me(M.file), S), M.rows);
+      const O = await vs(Q, rr(await me(M.file), S), M.rows);
       self.__b2DecodeProbe = {
         kernel: S,
         ...O,
@@ -66492,7 +66557,7 @@ async function _f(e, t, n, r, a = null) {
   }
   if (!c && o === "q2g128") if (f && f !== "ksplit" && lt[f]) {
     const S = lt[f];
-    h = nr(await me(S.file), f), p = S.rows, console.log(`[worker] no-subgroups fallback: Bonsai 2 ternary ${f} kernel (${S.rows} rows/WG)`), Be("decode-vecmat", "no-subgroups", `Bonsai 2 ternary ${f} kernel (${S.rows} rows/WG)`);
+    h = rr(await me(S.file), f), p = S.rows, console.log(`[worker] no-subgroups fallback: Bonsai 2 ternary ${f} kernel (${S.rows} rows/WG)`), Be("decode-vecmat", "no-subgroups", `Bonsai 2 ternary ${f} kernel (${S.rows} rows/WG)`);
   } else {
     const S = f === "ksplit" ? "b2NoSgDecode / b2NoSg / b2Kernels opt-out" : "not a Hadamard-rotated bundle (the ternary no-subgroups kernels are keyed to Bonsai 2)";
     console.warn(`[worker] q2g128 no-subgroups decode stays on ksplit: ${S}`), Be("decode-vecmat", "rtile-unavailable", `ksplit: ${S}`);
@@ -66513,7 +66578,7 @@ async function _f(e, t, n, r, a = null) {
         }
       }
   }
-  if (r.vecmatQ2G128 = new hd(Q, u, d, h), p && (r.vecmatQ2G128.sgRowsPerWG = p), h && f && f !== "ksplit" && lt[f] && (r.vecmatQ2G128.noSgDecode = f), _ && (r.vecmatQ2G128.noSgDecodeNote = _), c) try {
+  if (r.vecmatQ2G128 = new md(Q, u, d, h), p && (r.vecmatQ2G128.sgRowsPerWG = p), h && f && f !== "ksplit" && lt[f] && (r.vecmatQ2G128.noSgDecode = f), _ && (r.vecmatQ2G128.noSgDecodeNote = _), c) try {
     const S = e.sgV8 === !0, M = dt && (e.sgV12 === !0 || e.sgV12 !== !1 && o === "q1g128"), T = await me(S ? `matmul_${o}_vecmat_sg_v8.wgsl` : M ? `matmul_${o}_vecmat_sg_v12.wgsl` : `matmul_${o}_vecmat_sg.wgsl`);
     if (r.vecmatQ2G128.setSubgroupShader(T), r.vecmatQ2G128.sgRowsPerWG = S ? 8 : 256, M) try {
       const A = await me(`matmul_${o}_vecmat_sg_v12b.wgsl`);
@@ -66572,8 +66637,8 @@ async function _f(e, t, n, r, a = null) {
   } catch (S) {
     console.warn("[worker] sg vecmat unavailable:", S.message), Be("decode-vecmat", "subgroup-vecmat-unavailable", S.message);
   }
-  if (r.embeddingQ2G128 = new pd(Q, l), e.q1Matvec && e.q1Matvec !== "off") {
-    self.__q1MatvecVerdict = await Yl(Q, r, {
+  if (r.embeddingQ2G128 = new gd(Q, l), e.q1Matvec && e.q1Matvec !== "off") {
+    self.__q1MatvecVerdict = await ed(Q, r, {
       mode: e.q1Matvec,
       bands: e.q1MatvecBands,
       ksplit: e.q1MatvecKsplit,
@@ -66588,7 +66653,7 @@ async function _f(e, t, n, r, a = null) {
     console.log("[worker] q1 matvec split " + (S && S.enabled ? `ACTIVE (${S.mode}, target ${S.targetWgs} wgs, ${S.pipelines} pipelines)` : `DECLINED (${S && S.reason})`));
   }
   if (e.q1Fuse !== void 0 && e.q1Fuse !== null && e.q1Fuse !== "off" || e.q1Band !== void 0 && e.q1Band !== null && Number(e.q1Band) !== 8) {
-    self.__q1BandVerdict = await ed(Q, r, {
+    self.__q1BandVerdict = await ad(Q, r, {
       rows: e.q1Band,
       sd: e.q1BandSd,
       fuse: e.q1Fuse,
@@ -66602,7 +66667,7 @@ async function _f(e, t, n, r, a = null) {
   let m = null;
   if (e.q1Concat !== void 0 && e.q1Concat !== null && e.q1Concat !== "off") {
     try {
-      m = ld({
+      m = pd({
         mode: e.q1Concat,
         fuse: e.q1Fuse,
         splitMode: e.q1Matvec
@@ -66614,7 +66679,7 @@ async function _f(e, t, n, r, a = null) {
     !S || !S.v14bPipeline || typeof S.enableQ1Concat != "function" ? (Be("q1-concat", "no-v14b", "v14b decode route is not active — the concat reads its band repack"), m = null, console.log("[worker] q1 concat DECLINED (no-v14b)")) : (S.enableQ1Concat(m), console.log(`[worker] q1 concat ACTIVE (mode=${m.mode})`));
   }
   if (self.__q1LutVerdict = null, e.q1Decode !== void 0 && e.q1Decode !== null && e.q1Decode !== "off") {
-    self.__q1LutVerdict = await ud(Q, r, {
+    self.__q1LutVerdict = await hd(Q, r, {
       mode: e.q1Decode,
       rows: e.q1DecodeRows,
       skew: e.q1LutSkew,
@@ -66650,9 +66715,9 @@ async function _f(e, t, n, r, a = null) {
     } catch (N) {
       throw new Error("hadamard: bundle metadata is not valid JSON: " + N.message);
     }
-    const M = new xd(S), [T, A] = await Promise.all([me("fwht_signed_f32.wgsl"), me("matmul_naive.wgsl")]), L = new Sd(Q, T), O = r.vecmatQ2G128;
-    if (r.vecmatQ2G128 = new Ri(Q, O, L, M, A), e.b2Kernels !== !1 && O.sgPipeline) {
-      const N = gs(e, !0), [F, Y, se, J] = await Promise.all([
+    const M = new qd(S), [T, A] = await Promise.all([me("fwht_signed_f32.wgsl"), me("matmul_naive.wgsl")]), L = new Ed(Q, T), O = r.vecmatQ2G128;
+    if (r.vecmatQ2G128 = new Ni(Q, O, L, M, A), e.b2Kernels !== !1 && O.sgPipeline) {
+      const N = bs(e, !0), [F, Y, se, J] = await Promise.all([
         me("matmul_q2g128_vecmat_tband.wgsl"),
         me("matmul_f32_smalln.wgsl"),
         N ? me(N.file) : null,
@@ -66660,7 +66725,7 @@ async function _f(e, t, n, r, a = null) {
       ]);
       r.vecmatQ2G128.enableFastRoutes(F, Y, se, N || {}), J && L.enableSubgroup512(J);
     } else if (e.b2Kernels !== !1 && e.b2NoSg !== !1 && !O.sgPipeline) {
-      const N = gs(Rr(e), !1), [F, Y] = await Promise.all([N ? me(N.file) : null, me("matmul_f32_smalln_gemm.wgsl")]);
+      const N = bs(Cr(e), !1), [F, Y] = await Promise.all([N ? me(N.file) : null, me("matmul_f32_smalln_gemm.wgsl")]);
       F && r.vecmatQ2G128.enableFastRoutes(null, null, F, N), r.vecmatQ2G128.enableNoSubgroupRoutes({
         primalGemmCode: Y,
         decodeRows: !!N && !!O.rtilePipeline
@@ -66668,15 +66733,15 @@ async function _f(e, t, n, r, a = null) {
       const se = e.b2Arms === !0 ? "all" : e.b2Arms === "decode" ? "decode" : null;
       if (se && N && O.rtilePipeline) {
         const J = {}, K = {}, H = self.__adapterSummary?.subgroupMinSize, D = self.__adapterSummary?.subgroupMaxSize;
-        for (const ie of se === "decode" ? Ti : yd) {
-          const le = lt[ie], Z = nr(await me(le.file), ie);
+        for (const ie of se === "decode" ? Gi : Bd) {
+          const le = lt[ie], Z = rr(await me(le.file), ie);
           if (le.needsSubgroups) {
             const te = Q.features.has("subgroups") ? H >= 16 && D <= 128 && H % 16 === 0 ? null : `subgroup sizes ${H}-${D} are not multiples of 16` : "the device was not granted 'subgroups'";
             if (te) {
               K[ie] = te;
               continue;
             }
-            const ne = await ws(Q, Z, le.rows);
+            const ne = await vs(Q, Z, le.rows);
             if (self.__b2DecodeProbe = {
               kernel: ie,
               ...ne,
@@ -66695,14 +66760,14 @@ async function _f(e, t, n, r, a = null) {
         console.log("[worker] b2Arms (measurement-only): " + JSON.stringify(ae));
       }
       if (O.rtilePipeline && e.b2Arms === void 0) try {
-        const J = Ad(Rr(e), e, N || null, O.noSgDecode || null, Q.limits.maxComputeWorkgroupStorageSize), K = e.b2KernelPickTest && typeof e.b2KernelPickTest == "object" ? e.b2KernelPickTest : {}, H = {
+        const J = Ld(Cr(e), e, N || null, O.noSgDecode || null, Q.limits.maxComputeWorkgroupStorageSize), K = e.b2KernelPickTest && typeof e.b2KernelPickTest == "object" ? e.b2KernelPickTest : {}, H = {
           unrolledCode: N ? N.form === "loop" ? await me("matmul_q2g128_gemm_t_unrolled.wgsl") : F : null,
           decodeCode: (j) => me(lt[j].file),
           decodeLayout: O.bindGroupLayout
         }, D = !Object.keys(J.slots).length || J.mode === "off" && !J.guard ? Promise.resolve({
           pipes: {},
           failed: {}
-        }) : Ld(Q, J, H, K);
+        }) : Nd(Q, J, H, K);
         self.__b2PickJob = {
           plan: J,
           src: H,
@@ -66714,9 +66779,9 @@ async function _f(e, t, n, r, a = null) {
         console.warn("[worker] b2 kernel pick not planned: " + (J && J.message));
       }
     }
-    r.embeddingQ2G128 = new Pd(Q, r.embeddingQ2G128, L, M), console.log(`[worker] Hadamard bundle: v${S.version} block ${M.blockSize}, sign widths ${M.widths.join("/")} — q2g128 matmul + embedding WRAPPED (forward transform before every folded projection, inverse after the lookup, W_ba primal f32); routes ` + JSON.stringify(r.vecmatQ2G128.routes));
+    r.embeddingQ2G128 = new Ad(Q, r.embeddingQ2G128, L, M), console.log(`[worker] Hadamard bundle: v${S.version} block ${M.blockSize}, sign widths ${M.widths.join("/")} — q2g128 matmul + embedding WRAPPED (forward transform before every folded projection, inverse after the lookup, W_ba primal f32); routes ` + JSON.stringify(r.vecmatQ2G128.routes));
   }
-  if (E = new sn(Q, r, s), e.residentTrim !== void 0) {
+  if (E = new sn(Q, r, s), Tn = Do(e.arenaBudget), e.residentTrim !== void 0) {
     const S = E.setResidentTrim(e.residentTrim);
     console.log("[worker] residentTrim " + (S ? `ACTIVE (spec=${S.spec ? 1 : 0} prefill=${S.prefill ? 1 : 0})` : "off"));
   }
@@ -66726,16 +66791,16 @@ async function _f(e, t, n, r, a = null) {
   }
   try {
     const S = await me("lora_apply.wgsl");
-    Me = new Di(Q, new Ii(Q, S)), E.setAdapterManager(Me), Me.setModelShapes(Wo(E)), gt = null;
+    Me = new Wi(Q, new Ki(Q, S)), E.setAdapterManager(Me), Me.setModelShapes(Vo(E)), gt = null;
   } catch (S) {
     throw gt = S?.message || String(S), console.error(`[worker] AdapterManager init FAILED on the q1g128/q2g128 load path — LoRA adapters will be unavailable: ${gt}`), new Error("AdapterManager init failed (lora_apply.wgsl): " + gt);
   }
-  if (self.__loraFuseVerdict && (self.__loraFuseVerdict = await cf(e, r)), e.flashDecode === !0) try {
+  if (self.__loraFuseVerdict && (self.__loraFuseVerdict = await gf(e, r)), e.flashDecode === !0) try {
     if (e.kivi === !0) {
       let S = 0;
-      if (!qo(Q)) console.warn(`[worker] flashDecode+kivi unavailable: needs maxStorageBuffersPerShaderStage >= 9, device has ${Q.limits.maxStorageBuffersPerShaderStage} — staying on the materialized KIVI decode chain`);
+      if (!To(Q)) console.warn(`[worker] flashDecode+kivi unavailable: needs maxStorageBuffersPerShaderStage >= 9, device has ${Q.limits.maxStorageBuffersPerShaderStage} — staying on the materialized KIVI decode chain`);
       else {
-        const M = await me("flash_decode_split_kivi.wgsl"), T = new Yp(Q, M, {
+        const M = await me("flash_decode_split_kivi.wgsl"), T = new tf(Q, M, {
           cacheType: "f32",
           bits: r.kvQuantizeKey?.bits,
           splits: e.flashDecodeSplits || 0
@@ -66748,13 +66813,13 @@ async function _f(e, t, n, r, a = null) {
       let T = null;
       if (M) {
         const L = await me("flash_decode_split.wgsl");
-        T = new Qp(Q, L, {
+        T = new Jp(Q, L, {
           cacheType: S,
           splits: e.flashDecodeSplits || 0
         });
       } else {
         const L = await me("flash_decode.wgsl");
-        T = new Eo(Q, L, { cacheType: S });
+        T = new Ao(Q, L, { cacheType: S });
       }
       let A = 0;
       for (const L of E.blocks) L.layer && typeof L.layer.setFlashDecode == "function" && L.layerType !== "deltanet" && (M ? L.layer.setFlashDecodeSplit(T) : L.layer.setFlashDecode(T), A++);
@@ -66774,11 +66839,11 @@ async function _f(e, t, n, r, a = null) {
       "conv1d_batch_update.wgsl"
     ].map(me));
     k = {
-      wy: new fi(Q, S),
-      chunkState: new _i(Q, M),
-      chunkOutput: new mi(Q, T),
-      transpose: new ga(Q, A),
-      conv1dBatch: new Bo(Q, L)
+      wy: new mi(Q, S),
+      chunkState: new gi(Q, M),
+      chunkOutput: new bi(Q, T),
+      transpose: new ba(Q, A),
+      conv1dBatch: new qo(Q, L)
     };
   }
   for (const S of E.blocks) S.layerType === "deltanet" ? (S.layer.setChunkwiseOps(k.wy, k.chunkState, k.chunkOutput, k.transpose), S.layer.setConv1dBatchOp(k.conv1dBatch), S.layer.setOutputGate(r.outputGate), S.layer.setL2NormScale(r.l2normScale), S.layer.setConv1dSiluOp(r.conv1dSilu), S.layer.setGatesCombined(r.gatesCombined), S.layer.setMegashaderA(r.megashaderA), S.layer.setMegashaderB(r.megashaderB)) : S.layer.setPrefillOps(v, y);
@@ -66800,7 +66865,7 @@ async function _f(e, t, n, r, a = null) {
   if (e.kivi === !0) {
     if (e.kvF16 === !0) throw new Error("kivi: mutually exclusive with kvF16 (pick one KV mode)");
     const [S, M] = await Promise.all(["gqa_score_prefill_kivi.wgsl", "gqa_value_agg_prefill_kivi.wgsl"].map(me));
-    r.gqaScorePrefillKivi = new To(Q, S), r.gqaValueAggPrefillKivi = new Mo(Q, M);
+    r.gqaScorePrefillKivi = new Go(Q, S), r.gqaValueAggPrefillKivi = new Lo(Q, M);
     const T = Number.isInteger(e.kiviGroupSize) ? e.kiviGroupSize : 32, A = Number.isInteger(e.kiviResidual) ? e.kiviResidual : 128, L = Number.isInteger(e.kiviSink) ? e.kiviSink : void 0;
     E.enableKivi({
       kvQuantizeKey: r.kvQuantizeKey,
@@ -66815,7 +66880,7 @@ async function _f(e, t, n, r, a = null) {
   }
   const P = n[0] && n[0].metadata && n[0].metadata.format ? String(n[0].metadata.format).replace(/^mentria-/, "").replace(/-v\d+$/, "") : "q2g128";
   Ae(t, "upload", 0, 1, `Uploading weights to GPU (${P})...`);
-  const x = zl(Q, n, E, {
+  const x = Hl(Q, n, E, {
     streamed: a,
     onProgress: (S, M) => {
       Ae(t, "upload", S, M, `Uploading weights to GPU (${P})...`);
@@ -66825,7 +66890,7 @@ async function _f(e, t, n, r, a = null) {
     weightUpload: e.weightUpload === "writeBuffer" ? "writeBuffer" : void 0
   });
   if (e.useFlashAttnPrefill !== !1 && r.flashAttnPrefill && E.enableFlashAttnPrefill(r.flashAttnPrefill, r.flashAttnPrefillF16 || null), e.kivi === !0 && e.useFlashAttnPrefill !== !1) try {
-    const { op: S, kind: M } = await Ro(Q, Uo(E), {
+    const { op: S, kind: M } = await No(Q, Co(E), {
       tileM: e.prefillTileM,
       bits: r.kvQuantizeKey?.bits
     });
@@ -66835,7 +66900,7 @@ async function _f(e, t, n, r, a = null) {
   } catch (S) {
     console.warn("[worker] flash-prefill-KIVI unavailable: " + S.message + " — staying on the materialized KIVI prefill chain");
   }
-  if (await $o(e), E.enableBufferPool(new xo(Q)), e.fusedNorm === !0 && r.vecmatQ2G128 && r.vecmatQ2G128.canFuseNorm) {
+  if (await jo(e), E.enableBufferPool(new Bo(Q)), e.fusedNorm === !0 && r.vecmatQ2G128 && r.vecmatQ2G128.canFuseNorm) {
     for (const S of E.blocks) S.fuseNormVecmat = !0;
     console.log("[worker] fused-norm ENGAGED on " + E.blocks.length + " blocks");
   }
@@ -66974,7 +67039,7 @@ async function _f(e, t, n, r, a = null) {
   const { visionModelUrl: G, visionShards: q, visionConfig: U, visionF16Weights: W } = e;
   if (G) {
     if (!Array.isArray(q) || q.length === 0) throw new Error("loadQ2G128Path: visionModelUrl provided but visionShards missing or empty");
-    const { operators: S, tensorMap: M, config: T, weightPlan: A } = await Yi({
+    const { operators: S, tensorMap: M, config: T, weightPlan: A } = await Xi({
       device: Q,
       cache: Ve,
       shaderFetcher: me,
@@ -66982,30 +67047,30 @@ async function _f(e, t, n, r, a = null) {
       shards: q,
       config: U,
       f16Weights: W === void 0 ? dt : W === !0,
-      ...hr(e),
+      ...pr(e),
       onProgress: (L, O, N, F) => {
         Ae(t, L, O, N, F);
       }
     });
     Ae(t, "upload", 0, 1, "Uploading vision weights to GPU...");
     try {
-      Ke = ji(Q, S, T, M, {
+      Ke = Zi(Q, S, T, M, {
         weightPlan: A,
-        ...hr(e)
-      }), Ko(Ke);
+        ...pr(e)
+      }), $o(Ke);
     } finally {
       M.dispose();
     }
     Ae(t, "upload", 1, 1, "Vision tower ready");
   }
-  const $ = Mn(e.ablation);
+  const $ = Gn(e.ablation);
   if (self.__b2PickJob) {
     const S = self.__b2PickJob;
     self.__b2PickJob = null, Ae(t, "init", 3, 3, "Choosing kernels for this GPU...");
     const M = {
       ...self.__adapterSummary || {},
       ...self.__adapterDriverKey || {}
-    }, T = (E && E.blocks ? E.blocks : []).flatMap((J) => J && J.mlp ? [J.mlp.gateWeight, J.mlp.upWeight] : []).filter((J) => J && (typeof J.destroy == "function" || J.buffer)), A = (E && E.blocks ? E.blocks : []).map((J) => J && J.mlp && J.mlp.downWeight).filter((J) => J && (typeof J.destroy == "function" || J.buffer)), L = E && E.lmHeadWeight && (typeof E.lmHeadWeight.destroy == "function" || E.lmHeadWeight.buffer) ? E.lmHeadWeight : null, { decision: O, report: N, pipes: F } = await Rd(Q, S.plan, S.src, s, M, S.compiled, S.hooks, T.length ? {
+    }, T = (E && E.blocks ? E.blocks : []).flatMap((J) => J && J.mlp ? [J.mlp.gateWeight, J.mlp.upWeight] : []).filter((J) => J && (typeof J.destroy == "function" || J.buffer)), A = (E && E.blocks ? E.blocks : []).map((J) => J && J.mlp && J.mlp.downWeight).filter((J) => J && (typeof J.destroy == "function" || J.buffer)), L = E && E.lmHeadWeight && (typeof E.lmHeadWeight.destroy == "function" || E.lmHeadWeight.buffer) ? E.lmHeadWeight : null, { decision: O, report: N, pipes: F } = await Id(Q, S.plan, S.src, s, M, S.compiled, S.hooks, T.length ? {
       weights: T,
       down: A,
       lmHead: L
@@ -67073,7 +67138,7 @@ async function _f(e, t, n, r, a = null) {
       q1Matvec: self.__q1MatvecVerdict && self.__q1MatvecVerdict.enabled ? self.__q1MatvecVerdict.mode : null,
       q1Band: self.__q1BandVerdict && self.__q1BandVerdict.enabled ? self.__q1BandVerdict.rows : null,
       q1Fuse: self.__q1BandVerdict && self.__q1BandVerdict.enabled && self.__q1BandVerdict.fuse === "norm" ? "norm" : null,
-      bindGroupCache: hi() ? !0 : null,
+      bindGroupCache: fi() ? !0 : null,
       weightUpload: e.weightUpload === "writeBuffer" ? "writeBuffer" : null,
       specSlots: E.specStateManager && E.specStateManager.numSlots !== 2 ? E.specStateManager.numSlots : null,
       residentTrim: E.residentTrim ? E.residentTrim.spec && E.residentTrim.prefill ? "all" : E.residentTrim.spec ? "spec" : "prefill" : null,
@@ -67092,15 +67157,15 @@ async function _f(e, t, n, r, a = null) {
     },
     format: n[0] && n[0].metadata ? n[0].metadata.format : "mentria-q2g128-v1",
     kernelVariants: dn(),
-    capabilities: Ua(),
-    kv: Wi({
+    capabilities: Ra(),
+    kv: Fi({
       attnLayers: E.blocks.filter((S) => S.layerType === "attention").map((S) => S.layer),
       stateLayers: E.blocks.filter((S) => S.layerType === "deltanet").map((S) => S.layer),
       requested: e.kivi === !0 ? `kivi${r.kvQuantizeKey?.bits ?? 4}` : e.kvF16 === !0 ? "f16" : "f32",
       requestedMaxSeq: s.attention.maxSeq,
       rung: 0,
       fallbackEvents: [],
-      allowCompressedKV: Ki(e.allowCompressedKV)
+      allowCompressedKV: zi(e.allowCompressedKV)
     }),
     loadPlan: {
       rung: 0,
@@ -67111,7 +67176,7 @@ async function _f(e, t, n, r, a = null) {
     }
   };
 }
-function mf(e) {
+function yf(e) {
   if (e == null) return null;
   if (typeof e != "object") throw new Error(`pixelPrune must be an object {method, threshold}, got ${typeof e}`);
   const t = [
@@ -67127,34 +67192,34 @@ function mf(e) {
     threshold: e.threshold
   };
 }
-function gf(e) {
+function Sf(e) {
   if (e == null) return !1;
   if (typeof e != "boolean") throw new Error(`promptLookup must be a boolean, got ${typeof e}`);
   return e;
 }
-function bf(e) {
+function xf(e) {
   if (e == null) return "prompt";
   if (e !== "prompt" && e !== "full") throw new Error(`lookupScope must be 'prompt' or 'full', got ${JSON.stringify(e)}`);
   return e;
 }
-function wf(e) {
+function Pf(e) {
   if (e != null) {
     if (!Number.isInteger(e) || e < 1 || e > 32) throw new Error(`lookupK must be an integer in [1, 32], got ${JSON.stringify(e)}`);
     return e;
   }
 }
-async function vf(e, t, n = ln) {
+async function Bf(e, t, n = ln) {
   if (!E) throw new Error("Model not loaded");
-  Ba(e, "generate"), Ga(e, "generate"), La(e, "generate"), Ea(e, "generate"), Ma(e, "generate"), globalThis.__mentriaDecodeProbe = null, qa(e, "generate"), Nt = ln !== n;
+  Ea(e, "generate"), La(e, "generate"), Ua(e, "generate"), qa(e, "generate"), Ga(e, "generate"), globalThis.__mentriaDecodeProbe = null, Aa(e, "generate"), Nt = ln !== n;
   let r, a, s, i = null, o = null, u = null;
   try {
-    r = gf(e.promptLookup), a = bf(e.lookupScope), s = wf(e.lookupK), i = Xi(e.allowedTokenIds, E.vocabSize), o = Ji(e.suppressTokens, E.vocabSize, De ? (z) => De.encode(z) : null), o && i && eo(E.vocabSize, i, o), u = va(e.stopTokenIds, E.vocabSize, De ? (z) => De.encode(z) : null, "stopTokenIds");
+    r = Sf(e.promptLookup), a = xf(e.lookupScope), s = Pf(e.lookupK), i = eo(e.allowedTokenIds, E.vocabSize), o = to(e.suppressTokens, E.vocabSize, De ? (z) => De.encode(z) : null), o && i && no(E.vocabSize, i, o), u = ka(e.stopTokenIds, E.vocabSize, De ? (z) => De.encode(z) : null, "stopTokenIds");
   } catch (z) {
     return Ce(t, z.message);
   }
   let l = "", d = e.messages, c = null;
   try {
-    const z = to(e.messages, {
+    const z = ro(e.messages, {
       assistantPrefix: e.assistantPrefix,
       continueLast: e.continueLast === !0
     });
@@ -67170,7 +67235,7 @@ async function vf(e, t, n = ln) {
       return Nt;
     },
     throwIfAborted() {
-      if (Nt) throw ni("AbortError", "Generation aborted");
+      if (Nt) throw ri("AbortError", "Generation aborted");
     }
   }, p = Array.isArray(e.images) ? e.images : null;
   let f = null, _ = null, m = null;
@@ -67179,13 +67244,13 @@ async function vf(e, t, n = ln) {
     if (!De) return Ce(t, "Tokenizer not loaded — multimodal requests need a VL tokenizer");
     let z = null;
     try {
-      z = mf(e.pixelPrune);
+      z = yf(e.pixelPrune);
     } catch (ee) {
       return Ce(t, ee.message);
     }
     let X;
     try {
-      X = fc({
+      X = bc({
         tokenizer: De,
         messages: e.messages,
         images: p,
@@ -67197,10 +67262,10 @@ async function vf(e, t, n = ln) {
     }
     if (!Ke) {
       const ee = /* @__PURE__ */ new Error(`Vision tower not loaded: ${p.length} image(s) submitted with a valid chat-template composition, but the engine was initialized without VL weights. Re-init with a VL-capable model build to enable image inputs.`);
-      throw ee.code = nu.VISION_NOT_LOADED, ee;
+      throw ee.code = iu.VISION_NOT_LOADED, ee;
     }
     try {
-      const ee = await Gp({
+      const ee = await Np({
         device: Q,
         vision: Ke,
         preflight: X,
@@ -67220,7 +67285,7 @@ async function vf(e, t, n = ln) {
   else if (e.tokenIds) b = e.tokenIds;
   else if (e.messages) {
     if (!De) throw new Error("Tokenizer not loaded — use tokenIds for pre-tokenized input");
-    const z = no(De, {
+    const z = ao(De, {
       messages: d,
       assistantPrefix: l,
       enableThinking: e.enableThinking !== !1
@@ -67237,9 +67302,9 @@ async function vf(e, t, n = ln) {
   if (b.length === 0)
     return _ && _(), Ce(t, "Prompt encoded to zero tokens");
   const w = Object.prototype.hasOwnProperty.call(e, "ablation"), g = w ? vn : null;
-  w && (Mn(e.ablation), Ee = null);
+  w && (Gn(e.ablation), Ee = null);
   let v = null, y = null;
-  const k = ii(Ee, b, E.seqLen, {
+  const k = ui(Ee, b, E.seqLen, {
     optOut: e.sessionReuse === !1,
     hasImages: !!p
   }), P = k.reusable && E.attentionCursorsInSync();
@@ -67256,7 +67321,7 @@ async function vf(e, t, n = ln) {
     };
   }
   P ? v = b.slice(k.deltaStart) : (E.initState(), Ee = null);
-  const { samplerArgs: x } = vh(e, De || null), R = new Jc(x), B = [];
+  const { samplerArgs: x } = Ph(e, De || null), R = new rh(x), B = [];
   let G = null, q = null;
   const U = [], W = (z) => {
     if (z)
@@ -67279,7 +67344,7 @@ async function vf(e, t, n = ln) {
       }
   };
   if (e.tsProfile === !0) if (self.__hasTimestampQuery === !0) try {
-    const z = new yh(Q, {
+    const z = new Eh(Q, {
       numLayers: E.numLayers,
       resolveAtStep: typeof e.tsProfileStep == "number" ? e.tsProfileStep : 1
     });
@@ -67297,7 +67362,7 @@ async function vf(e, t, n = ln) {
     reason: "no-timestamp-query"
   });
   if (e.tsAll2 === !0 || e.tsAll2 === 2 || e.tsAll === !0) if (self.__hasTimestampQuery === !0 && E.operators) try {
-    const z = new Ns(Q, {
+    const z = new Os(Q, {
       cap: typeof e.tsAllCap == "number" ? e.tsAllCap : 2e3,
       capturePrefill: e.tsAll2 === 2
     });
@@ -67322,14 +67387,14 @@ async function vf(e, t, n = ln) {
           E && E._tsProfile && E._tsProfile.profiler === z && (E._tsProfile = null), E && E._tsAll === z && (E._tsAll = null), W(await z.resolve());
         } catch (X) {
           W({
-            mode: z instanceof Ns ? "tsAll2" : "tsProfile",
+            mode: z instanceof Os ? "tsAll2" : "tsProfile",
             supported: !0,
             reason: "resolve-failed: " + (X && X.message)
           });
         }
   }, S = e.maxTokens || 256, M = performance.now();
   let T = 0;
-  const A = _u();
+  const A = wu();
   let L = 0, O = 0;
   const N = De?.eosTokenIds || (e.eosTokenIds ? new Set(e.eosTokenIds) : /* @__PURE__ */ new Set([151643, 151645])), F = b.length, Y = v ? F - v.length : 0, se = (z) => {
     try {
@@ -67434,7 +67499,7 @@ async function vf(e, t, n = ln) {
       hits: 0
     }
   } : null;
-  V && e.hybridE && (V.committed = [], V.records = [], V.history = Array.from(b), V.pld = new bi({
+  V && e.hybridE && (V.committed = [], V.records = [], V.history = Array.from(b), V.pld = new vi({
     nMax: 3,
     nMin: 1,
     K: 8
@@ -67442,12 +67507,12 @@ async function vf(e, t, n = ln) {
   const C = [];
   let I = null, re = !!l && e.includePrefix === !0;
   try {
-    const z = ih(E, R, b, {
+    const z = dh(E, R, b, {
       maxTokens: S,
       eosTokenIds: N,
       tokenizer: De,
       prefillOpts: J,
-      gpuDecodeBatchSize: typeof e.gpuDecodeBatchSize == "number" ? e.gpuDecodeBatchSize : Aa(),
+      gpuDecodeBatchSize: typeof e.gpuDecodeBatchSize == "number" ? e.gpuDecodeBatchSize : Ta(),
       dumpLogitsTopK: e.dumpLogitsTopK === !0,
       tsProfile: e.tsProfile === !0 && self.__hasTimestampQuery === !0,
       onProfile: W,
@@ -67486,7 +67551,7 @@ async function vf(e, t, n = ln) {
       allowedTokenIds: i,
       suppressTokenIds: o,
       stopTokenIds: u,
-      decodeProbe: Ta.includes(e.decodeProbe) ? e.decodeProbe : uf()
+      decodeProbe: Ma.includes(e.decodeProbe) ? e.decodeProbe : ff()
     });
     for await (const X of z) {
       if (Nt) {
@@ -67499,7 +67564,7 @@ async function vf(e, t, n = ln) {
           type: "token",
           id: t,
           data: {
-            ...Cr({
+            ...Nr({
               startTime: M,
               firstTokenMs: L,
               lastTokenMs: O,
@@ -67509,7 +67574,7 @@ async function vf(e, t, n = ln) {
             token: "",
             tokenId: -1,
             numTokens: T,
-            tokensPerSecond: ei(T, M),
+            tokensPerSecond: ti(T, M),
             finished: !0,
             finishReason: "interrupted",
             committedTokens: 0,
@@ -67523,7 +67588,7 @@ async function vf(e, t, n = ln) {
         return;
       }
       const ee = X.isStop === !0;
-      ee || (T++, bu(), C.push(X.id)), O = performance.now(), L || (L = O), X.sessionState && (I = X.sessionState);
+      ee || (T++, yu(), C.push(X.id)), O = performance.now(), L || (L = O), X.sessionState && (I = X.sessionState);
       const de = ee || X.isEos || T >= S;
       de && B.length && await $();
       const oe = re ? l : "";
@@ -67532,7 +67597,7 @@ async function vf(e, t, n = ln) {
         token: oe + (X.text || ""),
         tokenId: ee ? -1 : X.id,
         numTokens: T,
-        tokensPerSecond: ei(T, M),
+        tokensPerSecond: ti(T, M),
         finished: de,
         finishReason: ee ? "stop" : X.isEos ? "eos" : de ? "length" : void 0
       };
@@ -67543,9 +67608,9 @@ async function vf(e, t, n = ln) {
             drafts: ge.drafts,
             hits: ge.hits,
             acceptance: ge.drafts ? ge.hits / ge.drafts : null
-          }, V.records && (pe.eStats = Ff(V.records, V.committed));
+          }, V.records && (pe.eStats = Yf(V.records, V.committed));
         }
-        Object.assign(pe, Cr({
+        Object.assign(pe, Nr({
           startTime: M,
           firstTokenMs: L,
           lastTokenMs: O,
@@ -67562,7 +67627,7 @@ async function vf(e, t, n = ln) {
   } catch (z) {
     if (z && z.prefillInterrupted === !0) {
       const X = sn.PREFILL_CHUNK, ee = E ? E.seqLen : 0, de = e.sessionReuse !== !1 && !p;
-      if (Ee = !dr && de && ee > 0 && ee % X === 0 && ee <= b.length && E.attentionCursorsInSync() ? b.slice(0, ee) : null, B.length) try {
+      if (Ee = !cr && de && ee > 0 && ee % X === 0 && ee <= b.length && E.attentionCursorsInSync() ? b.slice(0, ee) : null, B.length) try {
         await $();
       } catch {
       }
@@ -67570,7 +67635,7 @@ async function vf(e, t, n = ln) {
         type: "token",
         id: t,
         data: {
-          ...Cr({
+          ...Nr({
             startTime: M,
             firstTokenMs: L,
             lastTokenMs: O,
@@ -67598,12 +67663,17 @@ async function vf(e, t, n = ln) {
     Ee = null, Ce(t, `Generation error: ${z.message}
 ${z.stack || ""}`);
   } finally {
-    mu(A);
+    vu(A);
     for (const z of B) try {
       z.dispose();
     } catch {
     }
-    if (E && (E._tsProfile && E._tsProfile.profiler && B.includes(E._tsProfile.profiler) && (E._tsProfile = null), E._tsAll && B.includes(E._tsAll) && (E._tsAll = null)), _ && _(), K > 0 && E.disableLayerNormCapture(), D > 0 && E.disableL23ResidualCapture(), ie > 0 && E.disableL23MlpCapture(), Z > 0 && E.disableL23AttentionCapture(), ne > 0 && E.disableDeltaNetStateCapture(), w && (Mn(g), Ee = null), globalThis.__mentriaDecodeProbe && globalThis.__mentriaDecodeProbe.dirty) {
+    if (E && (E._tsProfile && E._tsProfile.profiler && B.includes(E._tsProfile.profiler) && (E._tsProfile = null), E._tsAll && B.includes(E._tsAll) && (E._tsAll = null)), _ && _(), Tn !== null && E && E.device) try {
+      const z = bt.peek(E.device);
+      z && z.trimTo(Tn);
+    } catch {
+    }
+    if (K > 0 && E.disableLayerNormCapture(), D > 0 && E.disableL23ResidualCapture(), ie > 0 && E.disableL23MlpCapture(), Z > 0 && E.disableL23AttentionCapture(), ne > 0 && E.disableDeltaNetStateCapture(), w && (Gn(g), Ee = null), globalThis.__mentriaDecodeProbe && globalThis.__mentriaDecodeProbe.dirty) {
       const z = globalThis.__mentriaDecodeProbe;
       globalThis.__mentriaDecodeProbe = {
         ...z,
@@ -67619,14 +67689,14 @@ ${z.stack || ""}`);
   }
 }
 var vn = null;
-function kf(e) {
+function Ef(e) {
   const t = e.layers || [];
   if (t.length === 0) return "none(final-norm-only)";
   if (e.contiguous) return `[${t[0]}..${t[t.length - 1]}]x${t.length}`;
   const n = t.slice(0, 6).join(",");
   return `{${t.length}: ${n}${t.length > 6 ? ",…," + t[t.length - 1] : ""}}`;
 }
-function Mn(e) {
+function Gn(e) {
   if (!E) throw new Error("applyAblation: model not loaded");
   if (!e || e.alpha === 0)
     return vn !== null && (E.clearAblation(), vn = null), null;
@@ -67641,21 +67711,21 @@ function Mn(e) {
     layers: e.layers,
     finalNorm: e.finalNorm
   });
-  return vn = e, r.mode = "projout", r.extractedAtLayer = e.layer ?? null, console.log("[worker] ablation ENGAGED mode=projout alpha=" + r.alpha + " applyLayers=" + kf(r) + " finalNorm=" + r.finalNorm + " extractedAtLayer=" + r.extractedAtLayer + " dirNorm=" + r.dirNorm.toFixed(6) + " scope=" + (r.scopeChecksum >>> 0).toString(16)), r;
+  return vn = e, r.mode = "projout", r.extractedAtLayer = e.layer ?? null, console.log("[worker] ablation ENGAGED mode=projout alpha=" + r.alpha + " applyLayers=" + Ef(r) + " finalNorm=" + r.finalNorm + " extractedAtLayer=" + r.extractedAtLayer + " dirNorm=" + r.dirNorm.toFixed(6) + " scope=" + (r.scopeChecksum >>> 0).toString(16)), r;
 }
-function yf(e) {
+function qf(e) {
   if (!E) throw new Error("setAblation: model not loaded");
-  const t = Mn(e && e.ablation ? e.ablation : e);
+  const t = Gn(e && e.ablation ? e.ablation : e);
   return Ee = null, E.initState(), {
     active: t !== null,
     config: t
   };
 }
-function Sf() {
+function Af() {
   if (!E) throw new Error("clearAblation: model not loaded");
   return E.clearAblation(), vn = null, Ee = null, E.initState(), { active: !1 };
 }
-async function xf(e) {
+async function Tf(e) {
   if (!E) throw new Error("captureResidualAllLayers: model not loaded");
   const t = e && e.tokenIds;
   if (!Array.isArray(t) || t.length === 0) throw new Error("captureResidualAllLayers: tokenIds must be a non-empty array");
@@ -67674,7 +67744,7 @@ async function xf(e) {
     ablation: E.ablationConfig
   };
 }
-async function Pf(e, t) {
+async function Mf(e, t) {
   if (!E) throw new Error("Model not loaded");
   if (!Me) throw new Error("Adapter manager not initialized" + (gt ? ` — init failed at model load: ${gt}` : ""));
   if (e.name === null)
@@ -67706,29 +67776,29 @@ async function Pf(e, t) {
       active: e.name,
       fromCache: r,
       bytes: i.byteLength,
-      ...Js(e.name)
+      ...ei(e.name)
     };
   }
   return Me.activate(e.name), rn(), {
     active: e.name,
     fromCache: !0,
     bytes: 0,
-    ...Js(e.name)
+    ...ei(e.name)
   };
 }
-function Wo(e) {
+function Vo(e) {
   if (!e || typeof e.loraFuseGroups != "function") return null;
   try {
-    return Nd(e.loraFuseGroups(), e.numLayers, `${e.numLayers} layers, hidden ${e.hiddenSize}`);
+    return Kd(e.loraFuseGroups(), e.numLayers, `${e.numLayers} layers, hidden ${e.hiddenSize}`);
   } catch (t) {
     return console.warn("[worker] adapter fit check unavailable: " + (t && t.message ? t.message : t)), null;
   }
 }
-function Js(e) {
+function ei(e) {
   const t = Me && Me.fuse ? Me.fuseSummary() : null;
   return t ? { loraFuse: t.adapters[e] || null } : {};
 }
-function Bf(e) {
+function Gf(e) {
   if (!Me) throw new Error("Adapter manager not initialized");
   const { name: t } = e;
   if (!Me.adapters.has(t)) throw new Error(`Adapter "${t}" not loaded`);
@@ -67737,14 +67807,14 @@ function Bf(e) {
     active: Me.activeAdapterName
   };
 }
-function Ef() {
+function Lf() {
   if (Ee = null, je = null, !E) throw new Error("Model not loaded");
   return E.initState(), { reset: !0 };
 }
-async function qf(e, t, n = ln) {
+async function Uf(e, t, n = ln) {
   if (!E) throw new Error("prefillOnly: model not loaded");
   let r = e && e.tokenIds;
-  if (!r && e && e.messages) r = ro(De, e).ids;
+  if (!r && e && e.messages) r = so(De, e).ids;
   else if (!r && e && typeof e.prompt == "string" && e.prompt.length) {
     if (!De) throw new Error("prefillOnly: tokenizer not loaded — use tokenIds");
     r = De.encode(e.prompt);
@@ -67753,7 +67823,7 @@ async function qf(e, t, n = ln) {
   for (let d = 0; d < r.length; d++) if (!Number.isInteger(r[d]) || r[d] < 0) throw new Error(`prefillOnly: tokenIds[${d}] is not a non-negative integer`);
   if (r.length > E.maxSeq) throw new Error(`prefillOnly: ${r.length} tokens exceeds maxSeq ${E.maxSeq}`);
   Nt = ln !== n;
-  const a = ii(Ee, r, E.seqLen, { optOut: e.sessionReuse === !1 }), s = a.reusable && E.attentionCursorsInSync();
+  const a = ui(Ee, r, E.seqLen, { optOut: e.sessionReuse === !1 }), s = a.reusable && E.attentionCursorsInSync();
   let i;
   s ? i = r.slice(a.deltaStart) : (E.initState(), i = r);
   const o = performance.now();
@@ -67763,7 +67833,7 @@ async function qf(e, t, n = ln) {
       return Nt;
     },
     throwIfAborted() {
-      if (Nt) throw ni("AbortError", "Prefill aborted");
+      if (Nt) throw ri("AbortError", "Prefill aborted");
     }
   };
   if (i.length > 1 && E.prefillReady) {
@@ -67811,11 +67881,11 @@ async function qf(e, t, n = ln) {
     }
   };
 }
-async function Af(e, t) {
+async function Rf(e, t) {
   if (!E) throw new Error("snapshotSession: model not loaded");
   let n = Array.isArray(e.tokens) ? e.tokens : Ee;
   Array.isArray(n) && n.length !== E.seqLen && (console.warn(`[worker] snapshotSession: ledger ${n.length} != seqLen ${E.seqLen} — snapshotting state without a token ledger`), n = []);
-  const r = e.inline === !0, a = await sf(Q, E, {
+  const r = e.inline === !0, a = await cf(Q, E, {
     tokens: n || [],
     modelId: An,
     checksum: e.checksum !== !1,
@@ -67844,11 +67914,11 @@ async function Af(e, t) {
     ms: a.ms
   };
 }
-async function Tf(e) {
+async function Cf(e) {
   if (!E) throw new Error("restoreSession: model not loaded");
   const t = e.phase || "all";
   if (t === "begin") {
-    const { entries: i } = Hs(E, e.manifest, { modelId: An });
+    const { entries: i } = Qs(E, e.manifest, { modelId: An });
     return je = {
       manifest: e.manifest,
       entries: i,
@@ -67863,7 +67933,7 @@ async function Tf(e) {
     if (!je) throw new Error("restoreSession: no restore in progress — send phase:'begin' first");
     const i = je.entries[e.index];
     if (!i) throw new Error(`restoreSession: no entry at index ${e.index}`);
-    return Qs(Q, i, e.bytes, { verify: e.verify !== !1 }), je.uploaded.add(e.index), {
+    return js(Q, i, e.bytes, { verify: e.verify !== !1 }), je.uploaded.add(e.index), {
       index: e.index,
       key: i.key,
       uploaded: je.uploaded.size
@@ -67877,7 +67947,7 @@ async function Tf(e) {
       throw new Error(`restoreSession refused — ${i} entr${i === 1 ? "y" : "ies"} never uploaded (first missing: index ${u}, '${je.entries[u].key}')`);
     }
     await Q.queue.onSubmittedWorkDone();
-    const o = js(E, je.manifest);
+    const o = Ys(E, je.manifest);
     return Ee = o.tokens.length ? o.tokens.slice() : null, je = null, {
       restored: !0,
       seqLen: o.seqLen,
@@ -67885,12 +67955,12 @@ async function Tf(e) {
     };
   }
   if (t !== "all") throw new Error(`restoreSession: unknown phase '${t}'`);
-  const n = performance.now(), { entries: r } = Hs(E, e.manifest, { modelId: An }), a = e.buffers;
+  const n = performance.now(), { entries: r } = Qs(E, e.manifest, { modelId: An }), a = e.buffers;
   if (!Array.isArray(a) || a.length !== r.length)
     throw Ee = null, new Error(`restoreSession refused — expected ${r.length} buffers, got ${Array.isArray(a) ? a.length : typeof a}`);
-  for (let i = 0; i < r.length; i++) Qs(Q, r[i], a[i], { verify: e.verify !== !1 });
+  for (let i = 0; i < r.length; i++) js(Q, r[i], a[i], { verify: e.verify !== !1 });
   await Q.queue.onSubmittedWorkDone();
-  const s = js(E, e.manifest);
+  const s = Ys(E, e.manifest);
   return Ee = s.tokens.length ? s.tokens.slice() : null, {
     restored: !0,
     seqLen: s.seqLen,
@@ -67899,7 +67969,7 @@ async function Tf(e) {
     ms: performance.now() - n
   };
 }
-async function Mf(e, t) {
+async function Nf(e, t) {
   if (!E) throw new Error("klCapture: model not loaded");
   const n = e.tokenIds;
   if (!Array.isArray(n) || n.length === 0) throw new Error("klCapture: tokenIds must be a non-empty array");
@@ -67930,7 +68000,7 @@ async function Mf(e, t) {
         const m = performance.now();
         let b;
         try {
-          b = Vs(new Float32Array(u.getMappedRange(0, f)), p, i, s);
+          b = Hs(new Float32Array(u.getMappedRange(0, f)), p, i, s);
         } finally {
           u.unmap();
         }
@@ -67954,7 +68024,7 @@ async function Mf(e, t) {
       topK: s,
       vocabSize: i,
       mode: r,
-      recordBytes: ha(s),
+      recordBytes: pa(s),
       ms: Math.round(performance.now() - d),
       reduceMs: Math.round(l)
     };
@@ -67968,7 +68038,7 @@ async function Mf(e, t) {
         const b = performance.now();
         let w;
         try {
-          w = Vs(new Float32Array(u.getMappedRange(0, f)), p, i, s);
+          w = Hs(new Float32Array(u.getMappedRange(0, f)), p, i, s);
         } finally {
           u.unmap();
         }
@@ -67996,12 +68066,12 @@ async function Mf(e, t) {
     topK: s,
     vocabSize: i,
     mode: r,
-    recordBytes: ha(s),
+    recordBytes: pa(s),
     ms: Math.round(performance.now() - d),
     reduceMs: Math.round(l)
   };
 }
-async function Gf(e, t) {
+async function Of(e, t) {
   if (!E) throw new Error("Model not loaded");
   if (E.bf16LmHeadBuf) return {
     active: !0,
@@ -68029,7 +68099,7 @@ async function Gf(e, t) {
     sourceDtype: a.sourceDtype
   };
 }
-function Lf() {
+function If() {
   if (!E) throw new Error("Model not loaded");
   if (E.disableBf16LmHead(), mt) {
     try {
@@ -68040,7 +68110,7 @@ function Lf() {
   }
   return { active: !1 };
 }
-function Uf(e) {
+function Df(e) {
   if (!E) throw new Error("Model not loaded");
   const { gCeiling: t } = e || {};
   return E.enableDecayClamp(t), {
@@ -68048,14 +68118,14 @@ function Uf(e) {
     gCeiling: E._decayClampValue
   };
 }
-function Rf() {
+function Kf() {
   if (!E) throw new Error("Model not loaded");
   return E.disableDecayClamp(), {
     active: !1,
     gCeiling: 0
   };
 }
-function Cf(e) {
+function Wf(e) {
   if (!E) throw new Error("Model not loaded");
   const { perturbedGamma: t, layerIdx: n } = e || {};
   return E.enableL23InputLnOverride(t, n ?? 23), {
@@ -68063,11 +68133,11 @@ function Cf(e) {
     layerIdx: E._l23InputLnOverrideLayerIdx
   };
 }
-function Nf() {
+function zf() {
   if (!E) throw new Error("Model not loaded");
   return E.disableL23InputLnOverride(), { active: !1 };
 }
-async function Of(e) {
+async function Ff(e) {
   if (!E) throw new Error("Model not loaded");
   const { layerIdx: t } = e || {};
   return {
@@ -68075,20 +68145,20 @@ async function Of(e) {
     layerIdx: t ?? 23
   };
 }
-async function If(e) {
+async function $f(e) {
   if (!E) throw new Error("forceRung: model not loaded; call load() first");
   if (!e || e.__test !== "forceRung-b3-worker-i") throw new Error("forceRung: missing __test sentinel — production callers should never reach this path");
-  if (!cr) throw new Error("forceRung: capturedOpsBag is null — load() did not reach the post-W wiring block");
+  if (!hr) throw new Error("forceRung: capturedOpsBag is null — load() did not reach the post-W wiring block");
   const t = Number.isInteger(e.targetRung) ? e.targetRung : 2;
   if (t < 0 || t > 6) throw new RangeError(`forceRung: targetRung=${t} out of [0, 6]`);
-  const n = rr(t);
-  return E.disposeState(), E.enableForRung(n, cr), E.initState(n), { plan: {
+  const n = ar(t);
+  return E.disposeState(), E.enableForRung(n, hr), E.initState(n), { plan: {
     rung: n.rung,
     kvMode: n.kvMode,
     maxSeq: n.maxSeq
   } };
 }
-function Df() {
+function Vf() {
   if (rn(), Ee = null, je = null, An = null, Me && (Me.unloadAll(), Me = null), gt = null, Ke) {
     try {
       Ke.destroy();
@@ -68135,7 +68205,7 @@ function Df() {
     } catch {
     }
   }
-  return E = null, De = null, cr = null, Xt = null, Zt = null, { unloaded: !0 };
+  return E = null, De = null, hr = null, Xt = null, Zt = null, { unloaded: !0 };
 }
 function Be(e, t, n = null) {
   const r = {
@@ -68161,7 +68231,7 @@ function Be(e, t, n = null) {
   } catch {
   }
 }
-function Ua() {
+function Ra() {
   const e = {};
   if (Q && Q.limits) for (const r of [
     "maxBufferSize",
@@ -68198,7 +68268,7 @@ function Ua() {
 }
 function dn() {
   if (!E) return null;
-  const e = E.operators || {}, t = E.blocks || [], n = t.map((u) => u && u.layer).filter((u) => u && u.megashaderAOp !== void 0), r = t.map((u) => u && u.layer).filter((u) => u && u.useFlashDecode !== void 0), a = (u, l) => u.length > 0 && u.some(l), s = e.vecmatQ2G128 || null, i = e.vecmatQ4 || null, o = Ru(i);
+  const e = E.operators || {}, t = E.blocks || [], n = t.map((u) => u && u.layer).filter((u) => u && u.megashaderAOp !== void 0), r = t.map((u) => u && u.layer).filter((u) => u && u.useFlashDecode !== void 0), a = (u, l) => u.length > 0 && u.some(l), s = e.vecmatQ2G128 || null, i = e.vecmatQ4 || null, o = Iu(i);
   return {
     weightFormat: s ? "q1g128/q2g128" : i ? "q4" : "dense",
     q4Gemm: e.matmulQ4 && e.matmulQ4.form ? e.matmulQ4.form : null,
@@ -68211,9 +68281,9 @@ function dn() {
     m1VecmatRoute: o.m1VecmatRoute,
     m1VecmatRouteFlag: globalThis.__mentriaM1VecmatRoute === !0,
     m1VecmatRouteReason: o.reason,
-    mobileMatvec: zh(e),
+    mobileMatvec: Qh(e),
     mobileMatvecFlag: self.__mobileMatvecOpts && self.__mobileMatvecOpts.mode || "off",
-    mobileMatvecReason: Kf(),
+    mobileMatvecReason: Hf(),
     mobileFusionFlag: self.__mobileMatvecOpts && self.__mobileMatvecOpts.fusion !== void 0 ? self.__mobileMatvecOpts.fusion : null,
     mobileProfile: self.__mobileProfile || null,
     subgroupMatrix: Jt === !0,
@@ -68224,10 +68294,10 @@ function dn() {
     v14: s ? !!s.v14bPipeline : null,
     lut: s ? !s.sgPipeline && (s.noSgDecode ? s.noSgDecode === "lut" : s.sgRowsPerWG === 64) : null,
     residualFusionKernel: s ? !!s.dispatchWithResidual : null,
-    q1Matvec: xi(E && E.operators),
-    q1Band: Pi(E && E.operators),
-    q1Decode: Bi(E && E.operators),
-    q1Concat: cd(E && E.operators),
+    q1Matvec: Bi(E && E.operators),
+    q1Band: Ei(E && E.operators),
+    q1Decode: qi(E && E.operators),
+    q1Concat: _d(E && E.operators),
     q4Wide: i ? !!i.widePipeline : null,
     q4Ksplit: i ? !!i.ksplitPipeline : null,
     q4KsplitWide: i ? !!i.ksplitWidePipeline : null,
@@ -68242,7 +68312,7 @@ function dn() {
     kvF16: a(r, (u) => u.useF16Cache === !0),
     prefillReady: E.prefillReady === !0,
     prefillRoute: E.mobilePrefillRoute && E.mobilePrefillRoute.live ? E.mobilePrefillRoute.routeName : self.__prefillRoute || null,
-    mobilePrefill: E.mobilePrefillRoute ? Object.assign({ reason: E.mobilePrefillReason || "attached" }, E.mobilePrefillRoute.describe()) : Object.assign(vi(null), E.mobilePrefillReason ? { reason: E.mobilePrefillReason } : null),
+    mobilePrefill: E.mobilePrefillRoute ? Object.assign({ reason: E.mobilePrefillReason || "attached" }, E.mobilePrefillRoute.describe()) : Object.assign(yi(null), E.mobilePrefillReason ? { reason: E.mobilePrefillReason } : null),
     prefillTile: s && s.prefillTile && s.prefillTile !== "off" ? s.prefillTile : null,
     prefillTileFlag: self.__prefillTileFlag ?? null,
     prefillTileReason: s && s.prefillTileReason || null,
@@ -68255,17 +68325,17 @@ function dn() {
     prefillChunk: E.constructor && E.constructor.PREFILL_CHUNK ? E.constructor.PREFILL_CHUNK : E.PREFILL_CHUNK ?? null,
     decodeLoop: globalThis.__mentriaDecodeLoop || null,
     decodeLoopReasons: globalThis.__mentriaDecodeRouteInfo && globalThis.__mentriaDecodeRouteInfo.reasons || null,
-    gpuSampleBatch: Aa(),
-    bindGroupCache: hi() ? ma() : null,
-    loraFuse: hf(),
+    gpuSampleBatch: Ta(),
+    bindGroupCache: fi() ? ga() : null,
+    loraFuse: bf(),
     residentDecode: {
       argmax: !!e.argmax,
       forwardFromBuffer: typeof E.forwardFromBuffer == "function",
-      detectorRewind: ao(E)
+      detectorRewind: io(E)
     },
     maxSeq: E.maxSeq ?? null,
     numLayers: E.numLayers ?? null,
-    ...s instanceof Ri ? { hadamard: {
+    ...s instanceof Ni ? { hadamard: {
       blockSize: s.spec.blockSize,
       signWidths: s.spec.widths,
       routes: s.routes,
@@ -68280,7 +68350,7 @@ function dn() {
     } } : {}
   };
 }
-function Kf() {
+function Hf() {
   const e = self.__mobileMatvecVerdict;
   if (!e) {
     const t = self.__mobileMatvecOpts && self.__mobileMatvecOpts.mode, n = self.__mobileProfile && self.__mobileProfile.defaulted && self.__mobileProfile.defaulted.includes("mobileMatvec") ? "defaulted by the mobile profile" : "requested";
@@ -68288,7 +68358,7 @@ function Kf() {
   }
   return e.enabled ? `${e.mode}: ${e.pipelines} pipelines in ${e.buildMs} ms (wg ${e.wg} from ${e.wgFrom}, lmHeadLanes ${e.lmHeadLanes})` : `off: ${e.reason} — ${e.detail}`;
 }
-function zo() {
+function Ho() {
   try {
     const e = E && E._pool;
     return e && typeof e.getStats == "function" ? e.getStats() : null;
@@ -68296,7 +68366,7 @@ function zo() {
     return null;
   }
 }
-function Fo() {
+function Qo() {
   try {
     const e = E && E._lastDecodeMerge || null;
     return e ? {
@@ -68316,7 +68386,7 @@ function Fo() {
     return null;
   }
 }
-function Cr({ startTime: e, firstTokenMs: t, lastTokenMs: n, numGenerated: r, promptIds: a }) {
+function Nr({ startTime: e, firstTokenMs: t, lastTokenMs: n, numGenerated: r, promptIds: a }) {
   const s = qt(), i = t && n > t ? n - t : 0, o = {
     promptTokens: Array.isArray(a) ? a.length : 0,
     prefillTokens: s.promptTokens,
@@ -68331,15 +68401,15 @@ function Cr({ startTime: e, firstTokenMs: t, lastTokenMs: n, numGenerated: r, pr
     decodeRouteInfo: globalThis.__mentriaDecodeRouteInfo || null,
     kernelVariants: dn(),
     counters: s,
-    uniformCache: zo(),
-    bindGroupCache: ma(),
-    decodeMerge: Fo(),
+    uniformCache: Ho(),
+    bindGroupCache: ga(),
+    decodeMerge: Qo(),
     decodeProbe: globalThis.__mentriaDecodeProbe || null,
     fallbacks: un.slice()
   };
   return self.__lastGenStats = o, o;
 }
-function Wf() {
+function Qf() {
   return {
     engineFeatures: [
       "suppressTokens",
@@ -68358,10 +68428,12 @@ function Wf() {
     residentPeakBytes: qt().gpuBytes.peak,
     residentBuffers: qt().gpuBytes.liveBuffers,
     scratchArena: (() => {
-      const e = E ? St.peek(E.device) : null;
+      const e = E ? bt.peek(E.device) : null;
       return e ? {
         ...e.footprint(),
-        ...e.stats
+        ...e.stats,
+        budget: Tn,
+        keys: e.keys().map(([t, n]) => [t, +(n / 1048576).toFixed(2)])
       } : null;
     })(),
     specSnapshotPool: E?.specStateManager ? {
@@ -68371,17 +68443,17 @@ function Wf() {
       initialized: E.specStateManager.initialized,
       inUse: Array.isArray(E.specStateManager.slotInUse) ? E.specStateManager.slotInUse.filter(Boolean).length : 0
     } : null,
-    spec: wo(Xt),
+    spec: ko(Xt),
     counters: qt(),
-    countersInstalled: pu(),
-    countersInstallError: fu(),
-    uniformCache: zo(),
-    bindGroupCache: ma(),
-    decodeMerge: Fo(),
+    countersInstalled: gu(),
+    countersInstallError: bu(),
+    uniformCache: Ho(),
+    bindGroupCache: ga(),
+    decodeMerge: Qo(),
     decodeProbe: globalThis.__mentriaDecodeProbe || null,
     lastGeneration: self.__lastGenStats || null,
     kernelVariants: dn(),
-    capabilities: Q ? Ua() : null,
+    capabilities: Q ? Ra() : null,
     fallbacks: un.slice(),
     gpuErrors: self.__gpuErrors || {
       count: 0,
@@ -68389,10 +68461,10 @@ function Wf() {
     }
   };
 }
-async function zf(e = {}) {
+async function jf(e = {}) {
   if (typeof fetch != "function") throw new Error("initSpec: fetch is not available in this worker environment");
   const t = typeof e.fixtureBasePrefix == "string" ? e.fixtureBasePrefix : "";
-  return Xt = await op({ fetcher: async (r) => {
+  return Xt = await hp({ fetcher: async (r) => {
     const a = t ? t + r : new URL(
       /* @vite-ignore */
       `../../${r}`,
@@ -68400,9 +68472,9 @@ async function zf(e = {}) {
     ).href, s = await fetch(a);
     if (!s.ok) throw new Error(`initSpec: fetch ${a} failed: ${s.status}`);
     return await s.text();
-  } }), wo(Xt);
+  } }), ko(Xt);
 }
-function Ff(e, t) {
+function Yf(e, t) {
   const n = [
     1,
     2,
@@ -68454,18 +68526,18 @@ function Ff(e, t) {
   }
   return a;
 }
-async function $f(e = {}) {
+async function Zf(e = {}) {
   if (!E) throw new Error("mtpLoad: no model loaded (issue 'load' first)");
   if (!e.url) throw new Error("mtpLoad: data.url required");
   const t = await fetch(e.url);
   if (!t.ok) throw new Error(`mtpLoad: fetch ${e.url} -> HTTP ${t.status}`);
   const n = await t.arrayBuffer();
-  return Zt = new up(E), {
+  return Zt = new pp(E), {
     ...Zt.load(n),
     bytes: n.byteLength
   };
 }
-async function Vf(e = {}) {
+async function Xf(e = {}) {
   if (!E) throw new Error("mtpBench: no model loaded");
   const t = E.device;
   for (const o of E.blocks) o.layerType === "deltanet" && (o.layer._kstepVecmatGemm = !!e.kstepVecmat);
@@ -68721,14 +68793,14 @@ async function Vf(e = {}) {
   }
   return a.hiddenSample = i, a.seqLenAfter = E.seqLen, a;
 }
-function o_() {
+function p_() {
   return Xt && Xt.chosen ? Xt.chosen.growmap : null;
 }
-function ei(e, t) {
+function ti(e, t) {
   const n = (performance.now() - t) / 1e3;
   return n > 0 ? e / n : 0;
 }
-async function $o(e) {
+async function jo(e) {
   const t = e && e.dnChainPass;
   if (t !== "onepass" && t !== "persistent" && t !== "both" || !E) return;
   let n = t !== "onepass";
@@ -68736,18 +68808,18 @@ async function $o(e) {
     32,
     16,
     8
-  ].find((u) => jn.wgStorageBytes(u) <= r) || 0;
-  n && (!a || jn.wgStorageBytes(a) > r) && (console.warn(`[worker] dnChainPass persistent: no slice width fits ${r} B of workgroup storage` + (a ? ` (vs ${a} needs ${jn.wgStorageBytes(a)} B)` : "") + " — legacy scan kept"), n = !1);
-  const s = t !== "persistent" ? new Hp(Q, await me("deltanet_state_copy.wgsl")) : null, i = n ? new jn(Q, await me("deltanet_chunk_scan_persistent.wgsl"), { vs: a }) : null;
+  ].find((u) => Yn.wgStorageBytes(u) <= r) || 0;
+  n && (!a || Yn.wgStorageBytes(a) > r) && (console.warn(`[worker] dnChainPass persistent: no slice width fits ${r} B of workgroup storage` + (a ? ` (vs ${a} needs ${Yn.wgStorageBytes(a)} B)` : "") + " — legacy scan kept"), n = !1);
+  const s = t !== "persistent" ? new Xp(Q, await me("deltanet_state_copy.wgsl")) : null, i = n ? new Yn(Q, await me("deltanet_chunk_scan_persistent.wgsl"), { vs: a }) : null;
   let o = 0;
   for (const u of E.blocks)
     u.layerType === "deltanet" && (s && u.layer.setChainOnePass && u.layer.setChainOnePass(s), i && u.layer.setChainPersistent && u.layer.setChainPersistent(i), o++);
   console.log(`[worker] dnChainPass ${t} ARMED on ${o} DeltaNet layers (onepass ${!!s}, persistent ${i ? "vs " + i.vs : !1})`);
 }
 async function me(e) {
-  return iu(e);
+  return du(e);
 }
-async function Hf(e, t = {}) {
+async function Jf(e, t = {}) {
   const n = t.multimodal !== !1, r = t.mropeSection || [
     11,
     11,
@@ -68806,90 +68878,90 @@ async function Hf(e, t = {}) {
   t.q4BlockLayout === "nk_t" && I && (z = await me("matmul_q4_vecmat_ksplit_nkt.wgsl"));
   let X;
   I && (X = await me("matmul_q4_vecmat_ksplit_mrow.wgsl"));
-  const ee = lp(t.q4GemmForm, I), de = ee === "unrolled" ? await me("matmul_q4_fused_unrolled.wgsl") : null;
-  self.__narrowShaderHash = C > 0 ? Gh([
+  const ee = fp(t.q4GemmForm, I), de = ee === "unrolled" ? await me("matmul_q4_fused_unrolled.wgsl") : null;
+  self.__narrowShaderHash = C > 0 ? Nh([
     se,
     g,
     X
   ]) : null;
   const oe = {
-    matmul: new ci(e, h),
-    matmulQ4: new dp(e, ee === "unrolled" ? de : p, { form: ee }),
-    vecmatQ4: new cp(e, f, se, I ? J : void 0, {
+    matmul: new pi(e, h),
+    matmulQ4: new _p(e, ee === "unrolled" ? de : p, { form: ee }),
+    vecmatQ4: new mp(e, f, se, I ? J : void 0, {
       subgroups: I,
       subgroupSize: re,
       narrowSubgroup: C > 0,
       ksplitNktShaderCode: z,
       mrowShaderCode: X
     }),
-    conv1dUpdate: new ku(e, _),
-    silu: new yu(e, m),
-    siluMul: new yp(e, b),
-    fusedGateUp: new Sp(e, w),
-    prescaledFusedGateUp: new xp(e, g, {
+    conv1dUpdate: new Pu(e, _),
+    silu: new Bu(e, m),
+    siluMul: new Ep(e, b),
+    fusedGateUp: new qp(e, w),
+    prescaledFusedGateUp: new Ap(e, g, {
       subgroups: I,
       subgroupSize: re,
       narrowSubgroup: C > 0
     }),
-    l2norm: new Su(e, v),
-    rmsnorm: new Mu(e, y, {
+    l2norm: new Eu(e, v),
+    rmsnorm: new Ru(e, y, {
       subgroups: Re,
       subgroupSize: rt
     }),
-    elementwise: new pi(e, k),
-    gates: new Gu(e, P),
-    recurrence: new $a(e, x),
-    rope: new ko(e, R, 64, 1e7),
-    softmax: new Hi(e, B, {
+    elementwise: new _i(e, k),
+    gates: new Cu(e, P),
+    recurrence: new Va(e, x),
+    rope: new So(e, R, 64, 1e7),
+    softmax: new ji(e, B, {
       subgroups: Re,
       subgroupSize: rt
     }),
-    gqaScore: new Fs(e, G),
-    gqaValueAgg: new $s(e, q),
-    sigmoidGate: new mp(e, U),
-    embedding: new gp(e, W),
-    embeddingQ4: new bp(e, $),
-    embeddingQ4Shard2: new wp(e, S),
-    lmHeadQ4Tied: new vp(e, ie),
-    lmHeadQ4Batched: new kp(e, le),
-    outputGate: new Pp(e, M),
-    l2normScale: new Bp(e, T, {
+    gqaScore: new $s(e, G),
+    gqaValueAgg: new Vs(e, q),
+    sigmoidGate: new kp(e, U),
+    embedding: new yp(e, W),
+    embeddingQ4: new Sp(e, $),
+    embeddingQ4Shard2: new xp(e, S),
+    lmHeadQ4Tied: new Pp(e, ie),
+    lmHeadQ4Batched: new Bp(e, le),
+    outputGate: new Tp(e, M),
+    l2normScale: new Mp(e, T, {
       subgroups: Re,
       subgroupSize: rt
     }),
-    conv1dSilu: new Ep(e, A),
-    gatesCombined: new hp(e, L),
-    megashaderA: new pp(e, O, {
+    conv1dSilu: new Gp(e, A),
+    gatesCombined: new gp(e, L),
+    megashaderA: new bp(e, O, {
       subgroups: Re,
       subgroupSize: rt
     }),
-    megashaderB: new Gr(e, N, {
+    megashaderB: new Lr(e, N, {
       subgroups: Re,
       subgroupSize: rt
     }),
-    batchedLora: new _p(e, H),
-    argmax: new qp(e, F, await me("argmax_twophase.wgsl").catch(() => null), await me("argmax_masked.wgsl").catch(() => null)),
-    fusedNormRoPE: new Ap(e, Y, 64, 1e7, {
+    batchedLora: new vp(e, H),
+    argmax: new Lp(e, F, await me("argmax_twophase.wgsl").catch(() => null), await me("argmax_masked.wgsl").catch(() => null)),
+    fusedNormRoPE: new Up(e, Y, 64, 1e7, {
       subgroups: Re,
       subgroupSize: rt
     }),
-    qgateDeinterleave: new Lp(e, K),
-    prescaledQ4: new Up(e, D),
-    prescaledQ4Tiled: new Rp(e, j),
-    kvQuantizeKey: new Ip(e, Z),
-    kvQuantizeValue: new Dp(e, te),
-    gqaScoreKivi: new Kp(e, ne),
-    gqaValueAggKivi: new Wp(e, ue)
+    qgateDeinterleave: new Op(e, K),
+    prescaledQ4: new Ip(e, D),
+    prescaledQ4Tiled: new Dp(e, j),
+    kvQuantizeKey: new Fp(e, Z),
+    kvQuantizeValue: new $p(e, te),
+    gqaScoreKivi: new Vp(e, ne),
+    gqaValueAggKivi: new Hp(e, ue)
   };
-  if (a && (oe.megashaderBInt4 = new Gr(e, N, {
+  if (a && (oe.megashaderBInt4 = new Lr(e, N, {
     stateType: "int4",
     subgroups: Re,
     subgroupSize: rt
-  })), s && (oe.megashaderBInt8 = new Gr(e, N, {
+  })), s && (oe.megashaderBInt8 = new Lr(e, N, {
     stateType: "int8",
     subgroups: Re,
     subgroupSize: rt
-  })), i && (oe.deltanetChunkDecode = new fp(e, await me("megashader_b_chunked.wgsl"), {
+  })), i && (oe.deltanetChunkDecode = new wp(e, await me("megashader_b_chunked.wgsl"), {
     stateType: "f32",
     fuseOutputGate: !0,
     chunkCap: Math.max(16, t.chunkSize | 0),
@@ -68897,28 +68969,28 @@ async function Hf(e, t = {}) {
     subgroupSize: rt
   })), o) {
     const pe = await me("flash_attention_prefill.wgsl");
-    oe.flashAttnPrefill = new zs(e, pe, {
+    oe.flashAttnPrefill = new Fs(e, pe, {
       causal: !0,
       cacheType: "f32"
-    }), dt && (oe.flashAttnPrefillF16 = new zs(e, pe, {
+    }), dt && (oe.flashAttnPrefillF16 = new Fs(e, pe, {
       causal: !0,
       cacheType: "f16"
     }));
   }
-  if (dt && (oe.kvCacheF16Append = new Cp(e, ae), oe.gqaScoreF16 = new Fs(e, G, { cacheType: "f16" }), oe.gqaValueAggF16 = new $s(e, q, { cacheType: "f16" }), oe.recurrenceF16 = new $a(e, x, { stateType: "f16" }), oe.stateF16ToF32 = new Np(e, fe), oe.stateF32ToF16 = new Op(e, V)), n) {
+  if (dt && (oe.kvCacheF16Append = new Kp(e, ae), oe.gqaScoreF16 = new $s(e, G, { cacheType: "f16" }), oe.gqaValueAggF16 = new Vs(e, q, { cacheType: "f16" }), oe.recurrenceF16 = new Va(e, x, { stateType: "f16" }), oe.stateF16ToF32 = new Wp(e, fe), oe.stateF32ToF16 = new zp(e, V)), n) {
     const pe = c[l], ge = c[l + 1], ve = c[l + 2];
-    oe.fusedNormMRoPE = new Tp(e, pe, 64, 1e7, r, {
+    oe.fusedNormMRoPE = new Rp(e, pe, 64, 1e7, r, {
       subgroups: Re,
       subgroupSize: rt
-    }), oe.mrope = new Mp(e, ge, 64, 1e7, r), oe.visionSplice = new Vi(e, ve);
+    }), oe.mrope = new Cp(e, ge, 64, 1e7, r), oe.visionSplice = new Qi(e, ve);
   }
   if (at) {
     const pe = c[d], ge = c[d + 1];
-    oe.kaxisDP4A = new zp(e, pe), oe.quantizeQ8_1 = new Fp(e, ge);
+    oe.kaxisDP4A = new Qp(e, pe), oe.quantizeQ8_1 = new jp(e, ge);
   }
   return oe;
 }
-var Qf = {
+var e_ = {
   numLayers: 24,
   hiddenSize: 1024,
   intermediateSize: 3584,
@@ -68946,7 +69018,7 @@ var Qf = {
   ]
 };
 export {
-  o_ as getSpecGrowmap
+  p_ as getSpecGrowmap
 };
 
 //# sourceMappingURL=worker.mjs.map

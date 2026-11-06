@@ -33,6 +33,7 @@ unlockTool: true
   <symbol id="ci-chev" viewBox="0 0 24 24"><path d="m9.5 5 6.5 7-6.5 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-flash" viewBox="0 0 24 24"><path d="M13 2.5 5.5 13.5H11L10 21.5l7.7-11H12.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
   <symbol id="ci-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ci-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 </defs></svg>
 
 <section class="comms">
@@ -206,6 +207,12 @@ unlockTool: true
             <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">{{ 'tool.comms.people.add_btn' | t }}</button>
           </div>
           <p class="comms__add-err" id="comms-add-err" role="alert" hidden></p>
+        </div>
+        <label class="comms__search"><svg class="comms__i" aria-hidden="true"><use href="#ci-search"></use></svg><input class="comms__search-in" id="comms-search" type="search" placeholder="{{ 'tool.comms.home.search' | t }}" aria-label="{{ 'tool.comms.home.search' | t }}" autocomplete="off" spellcheck="false" enterkeyhint="search"></label>
+        <div class="m-seg comms__filter" id="comms-filter">
+          <button type="button" class="is-active" data-f="all" aria-pressed="true">{{ 'tool.comms.home.filter_all' | t }}</button>
+          <button type="button" data-f="people" aria-pressed="false">{{ 'tool.comms.home.filter_people' | t }}</button>
+          <button type="button" data-f="ai" aria-pressed="false">{{ 'tool.comms.home.filter_ai' | t }}</button>
         </div>
         <div class="comms__contacts-list" id="comms-contacts-list"></div>
       </div>
@@ -385,7 +392,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__contact:has(> .comms__contact-open:focus-visible){outline:2px solid var(--syn-cyan);outline-offset:-2px}
 .comms__contact-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .comms__contact-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-fg-strong);font-size:.93rem;font-weight:500}
-.comms__contact-fp{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-subtle);font-family:var(--font-mono);font-size:var(--text-2xs)}
+.comms__contact-fp{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-muted);font-family:var(--font-body);font-size:.8rem}
 .comms__unread{flex:none;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:var(--radius-pill);background:var(--syn-cyan);color:#041016;font:600 var(--text-2xs) var(--font-mono)}
 .comms__missed{flex:none;display:inline-flex;align-items:center;color:var(--syn-pink)}
 .comms__missed .comms__i{width:1.05em;height:1.05em}
@@ -394,8 +401,18 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__rowbtn--on{opacity:1;color:var(--syn-cyan)}
 .comms__rowbtn--text{padding:var(--space-1) var(--space-2);font:var(--text-2xs) var(--font-mono);opacity:.7}
 .comms__chev{flex:none;display:flex;align-items:center;color:var(--term-border-strong)}
-.comms__rooms-head{padding:var(--space-3) var(--space-2) var(--space-1);color:var(--term-subtle);font:var(--text-2xs) var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
-.comms__roomrow--current{background:var(--term-surface-3)}
+.comms__roomrow--current,.comms__contact--current{background:var(--term-surface-3)}
+.comms__contact-top{min-width:0;display:flex;align-items:baseline;gap:var(--space-2)}
+.comms__contact-top .comms__contact-name{flex:1;min-width:0}
+.comms__contact-time{flex:none;color:var(--term-subtle);font-family:var(--font-mono);font-size:var(--text-2xs)}
+.comms__avatar--tool{border-radius:var(--radius-lg)}
+.comms__avatar--tool svg{width:26px;height:26px}
+.comms__search{flex:none;height:38px;display:flex;align-items:center;gap:var(--space-2);padding:0 var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md);color:var(--term-subtle)}
+.comms__search:focus-within{border-color:var(--syn-cyan)}
+.comms__search-in{flex:1;min-width:0;padding:0;background:transparent;border:0;outline:0;color:var(--term-fg);font-family:var(--font-mono);font-size:var(--text-sm)}
+.comms__search-in::placeholder{color:var(--term-subtle)}
+.comms__filter{flex:none}
+.comms__filter>button{padding:var(--space-1) var(--space-2)}
 .comms__room-rename{max-width:12rem;padding:var(--space-1) var(--space-2)}
 .comms__id-card{flex:none;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:var(--space-3);margin:var(--space-1) 0;padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
 .comms__id-qr{flex:none;border-radius:var(--radius-sm)}
@@ -521,7 +538,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
   .comms__brand{display:block}
   .comms__profile #comms-id-on{display:none}
   .comms__side:has(#comms-adv:not([hidden])) .comms__profile #comms-id-on:not([hidden]){display:grid;order:9;flex-basis:100%;padding-top:var(--space-2)}
-  .comms__input,.comms__input--msg{font-size:16px}
+  .comms__input,.comms__input--msg,.comms__search-in{font-size:16px}
   .comms__what{max-width:88%}
   .comms__btn--icon .comms__btn-t{display:none}
   .comms__contacts-head .comms__btn--icon .comms__btn-t{display:inline}
@@ -539,6 +556,7 @@ import { holdAwake } from '/assets/js/mentria-wake.js';
 import { renderBody } from '/assets/js/comms/cards.js';
 import { openStore } from '/assets/js/comms/store.js';
 import { secretCopy } from '/assets/js/comms/identity.js';
+import { homeRows, aiHref } from '/assets/js/comms/threads.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1185,6 +1203,7 @@ const openHistory = () => {
   commsStoreP = openStore(secret).then((st) => {
     commsStore = st;
     if (st.status === 'foreign') historyBar('foreign');
+    else refreshHomeThreads();
     return st;
   }, () => {
     commsStore = null;
@@ -1202,7 +1221,7 @@ const storeLine = (cmid, from, text, ts, meta) => {
   const room = currentRoomName;
   if (!cmid || !historyOn() || !keepsHistory(room)) return;
   const t = String(text == null ? '' : text);
-  commsStore.putMessage({ id: cmid, threadId: room, from, ts: Number(ts) || Date.now(), t, parts: [{ type: 'text', text: t }], meta: meta || undefined, v: 2 }).catch(historyFail);
+  commsStore.putMessage({ id: cmid, threadId: room, from, ts: Number(ts) || Date.now(), t, parts: [{ type: 'text', text: t }], meta: meta || undefined, v: 2 }).then(refreshHomeThreads, historyFail);
 };
 
 const renderStored = (m) => {
@@ -1268,6 +1287,7 @@ const openThreadHistory = async (roomName, seq) => {
       ? { kind: 'dm', title: c.name || c.fp, participants: [{ id: c.fp, kind: 'human', name: c.name || '' }], meta: { fp: c.fp } }
       : { kind: 'room', title: (roomNotifyEntry(roomName) || {}).label || roomName, participants: [], meta: {} };
     await st.putThread({ id: roomName, ...base, updatedAt: prev ? prev.updatedAt : 0, lastReadTs: Date.now(), pinned: prev ? !!prev.pinned : false });
+    refreshHomeThreads();
     if (seq !== joinSeq) return;
     const msgs = await st.listMessages(roomName, { limit: HISTORY_PAGE });
     if (seq !== joinSeq) return;
@@ -1285,6 +1305,7 @@ document.getElementById('comms-hist-reset').addEventListener('click', async () =
   try {
     await commsStore.wipe();
     hideHistoryBar();
+    refreshHomeThreads();
     if (currentRoomName) await openThreadHistory(currentRoomName, joinSeq);
   } catch (e) {
     historyFail(e);
@@ -3855,221 +3876,279 @@ const openDmWith = async (c) => {
   }
 };
 
-const renderContacts = () => {
-  if (!els.contactList) return;
-  renderContactsBase();
-  renderRoomsSection();
+let homeFilter = 'all';
+let homeQuery = '';
+let homeThreads = [];
+let homeThreadsTimer = 0;
+
+const rowTime = (ts) => {
+  const d = new Date(ts);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return hhmmOf(ts);
+  if (now - d < 6 * 86400000) return d.toLocaleDateString(LANG, { weekday: 'short' });
+  return d.toLocaleDateString(LANG, { month: 'short', day: 'numeric' });
 };
 
-const renderRoomsSection = () => {
-  const list = savedRooms();
-  if (!list.length) return;
-  const head = document.createElement('div');
-  head.className = 'comms__rooms-head';
-  head.textContent = T.rooms.heading;
-  els.contactList.append(head);
-  for (const r of list) {
-    const row = document.createElement('div');
-    row.className = 'comms__contact comms__roomrow' + (currentRoomName === r.room ? ' comms__roomrow--current' : '');
-    const av = document.createElement('span');
-    av.className = 'comms__avatar comms__avatar--room';
-    av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
-    const openBtn = document.createElement('button');
-    openBtn.type = 'button';
-    openBtn.className = 'comms__contact-open';
-    const mid = document.createElement('span');
-    mid.className = 'comms__contact-mid';
-    const name = document.createElement('span');
-    name.className = 'comms__contact-name';
-    name.textContent = r.label || r.room;
-    const sub = document.createElement('span');
-    sub.className = 'comms__contact-fp';
-    sub.textContent = fmt(T.rooms.sub, { id: short(r.room) });
-    mid.append(name, sub);
-    openBtn.append(mid);
-    row.append(av, openBtn);
-    const unread = (unreadMap[roomUnreadKey(r.room)] || {}).n || 0;
-    if (unread > 0 && currentRoomName !== r.room) {
-      const badge = document.createElement('span');
-      badge.className = 'comms__unread';
-      badge.textContent = unread > 99 ? '99+' : String(unread);
-      badge.title = fmt(unread === 1 ? T.people.unread_one : T.people.unread_many, { n: unread });
-      row.append(badge);
-    }
-    const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
-    row.addEventListener('click', open);
-    const bell = document.createElement('button');
-    bell.type = 'button';
-    const alertsOn = !!r.notify;
-    bell.className = 'comms__rowbtn comms__rowbtn--bell' + (alertsOn ? ' comms__rowbtn--on' : '');
-    bell.title = alertsOn ? T.rooms.bell_on : T.rooms.bell_off;
-    bell.setAttribute('aria-label', bell.title);
-    bell.setAttribute('aria-pressed', String(alertsOn));
-    bell.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-bell"></use></svg>';
-    bell.addEventListener('click', (e) => { e.stopPropagation(); setRoomNotify(r.room, !alertsOn); });
-    const ren = document.createElement('button');
-    ren.type = 'button';
-    ren.className = 'comms__rowbtn';
-    ren.title = T.rooms.rename;
-    ren.setAttribute('aria-label', T.rooms.rename_label);
-    ren.textContent = T.rooms.rename;
-    ren.className = 'comms__rowbtn comms__rowbtn--text';
-    ren.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const input = document.createElement('input');
-      input.className = 'comms__input comms__room-rename';
-      input.type = 'text';
-      input.maxLength = 40;
-      input.value = r.label || r.room;
-      input.setAttribute('aria-label', T.rooms.name_label);
-      let finished = false;
-      const done = (save) => { if (finished) return; finished = true; if (save) renameRoom(r.room, input.value); renderContacts(); };
-      input.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Escape') ev.stopPropagation();
-        if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') { ev.preventDefault(); done(false); }
-      });
-      input.addEventListener('blur', () => done(true));
-      input.addEventListener('click', (ev) => ev.stopPropagation());
-      openBtn.replaceWith(mid);
-      name.replaceWith(input);
-      input.focus();
-      input.select();
-    });
-    const rm = document.createElement('button');
-    rm.type = 'button';
-    rm.className = 'comms__rowbtn';
-    rm.title = T.rooms.forget;
-    rm.setAttribute('aria-label', T.rooms.forget);
-    rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
-    rm.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.rooms.confirm_forget, { danger: true }) : Promise.resolve(true));
-      if (!ok) return;
-      forgetRoom(r.room);
-      delete unreadMap[roomUnreadKey(r.room)];
-      try { CID.setUnread(unreadMap); } catch (_) {}
+const rowMid = (title, sub, ts) => {
+  const mid = document.createElement('span');
+  mid.className = 'comms__contact-mid';
+  const top = document.createElement('span');
+  top.className = 'comms__contact-top';
+  const name = document.createElement('span');
+  name.className = 'comms__contact-name';
+  name.textContent = title;
+  top.append(name);
+  if (ts > 0) {
+    const time = document.createElement('span');
+    time.className = 'comms__contact-time';
+    time.textContent = rowTime(ts);
+    top.append(time);
+  }
+  const line = document.createElement('span');
+  line.className = 'comms__contact-fp';
+  line.textContent = sub;
+  mid.append(top, line);
+  return { mid, name };
+};
+
+const unreadBadge = (n) => {
+  const badge = document.createElement('span');
+  badge.className = 'comms__unread';
+  badge.textContent = n > 99 ? '99+' : String(n);
+  badge.title = fmt(n === 1 ? T.people.unread_one : T.people.unread_many, { n });
+  return badge;
+};
+
+const rowChev = () => {
+  const chev = document.createElement('span');
+  chev.className = 'comms__chev';
+  chev.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-chev"></use></svg>';
+  return chev;
+};
+
+const listNote = (text) => {
+  const note = document.createElement('div');
+  note.className = 'comms__id-note comms__contacts-empty';
+  note.textContent = text;
+  return note;
+};
+
+const requestRow = (r) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__contact--req';
+  const av = document.createElement('span');
+  av.className = 'comms__avatar';
+  paintAvatar(av, r.name, r.fp);
+  const { mid } = rowMid(r.name || T.people.unnamed, fmt(T.people.wants, { fp: r.fp }), 0);
+  const ok = document.createElement('button');
+  ok.type = 'button';
+  ok.className = 'comms__btn';
+  ok.textContent = T.people.accept;
+  ok.addEventListener('click', async () => {
+    try {
+      const added = await CID.addContact(r);
+      CID.dropRequest(r.fp);
       renderContacts();
       subscribeUnread();
-    });
-    row.append(bell, ren, rm);
-    els.contactList.append(row);
-  }
+      if (added) announceToContact(added);
+    } catch (err) {
+      notice(fmt(T.people.accept_failed, { reason: why(err) }));
+    }
+  });
+  const no = document.createElement('button');
+  no.type = 'button';
+  no.className = 'comms__btn comms__btn--ghost';
+  no.textContent = T.people.ignore;
+  no.addEventListener('click', () => { CID.dropRequest(r.fp); renderContacts(); });
+  row.append(av, mid, ok, no);
+  return row;
 };
 
-const renderContactsBase = () => {
-  els.contactList.innerHTML = '';
-
-  const requests = CID.getRequests();
-  requests.forEach((r) => {
-    const row = document.createElement('div');
-    row.className = 'comms__contact comms__contact--req';
-    const av = document.createElement('span');
-    av.className = 'comms__avatar';
-    paintAvatar(av, r.name, r.fp);
-    const mid = document.createElement('span');
-    mid.className = 'comms__contact-mid';
-    const name = document.createElement('span');
-    name.className = 'comms__contact-name';
-    name.textContent = r.name || T.people.unnamed;
-    const sub = document.createElement('span');
-    sub.className = 'comms__contact-fp';
-    sub.textContent = fmt(T.people.wants, { fp: r.fp });
-    mid.append(name, sub);
-    const ok = document.createElement('button');
-    ok.type = 'button';
-    ok.className = 'comms__btn';
-    ok.textContent = T.people.accept;
-    ok.addEventListener('click', async () => {
-      try {
-        const added = await CID.addContact(r);
-        CID.dropRequest(r.fp);
-        renderContacts();
-        subscribeUnread();
-        if (added) announceToContact(added);
-      } catch (err) {
-        notice(fmt(T.people.accept_failed, { reason: why(err) }));
-      }
-    });
-    const no = document.createElement('button');
-    no.type = 'button';
-    no.className = 'comms__btn comms__btn--ghost';
-    no.textContent = T.people.ignore;
-    no.addEventListener('click', () => { CID.dropRequest(r.fp); renderContacts(); });
-    row.append(av, mid, ok, no);
-    els.contactList.append(row);
+const contactRow = (c, info, missedMap) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact' + (currentDmContact && currentDmContact.fp === c.fp ? ' comms__contact--current' : '');
+  row.dataset.fp = c.fp;
+  const av = document.createElement('span');
+  av.className = 'comms__avatar';
+  av.setAttribute('aria-hidden', 'true');
+  paintAvatar(av, c.name, c.fp);
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  openBtn.setAttribute('aria-label', fmt(T.people.chat_with, { name: c.name || c.fp }));
+  const { mid } = rowMid(c.name || T.people.unnamed, info.preview || c.fp, info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn);
+  const missed = missedMap[c.fp];
+  if (missed && missed.n > 0) {
+    const mc = document.createElement('span');
+    mc.className = 'comms__missed';
+    mc.title = missed.n > 1 ? fmt(T.people.missed_many, { n: missed.n }) : T.people.missed_one;
+    mc.setAttribute('aria-label', mc.title);
+    mc.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg>';
+    row.append(mc);
+  }
+  if (info.unread > 0) row.append(unreadBadge(info.unread));
+  const rm = document.createElement('button');
+  rm.type = 'button';
+  rm.className = 'comms__rowbtn';
+  rm.title = fmt(T.people.remove, { name: c.name || c.fp });
+  rm.setAttribute('aria-label', fmt(T.people.remove, { name: c.name || c.fp }));
+  rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
+  rm.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.people.confirm_remove, { name: c.name || c.fp }), { danger: true }) : Promise.resolve(true));
+    if (!ok) return;
+    CID.removeContact(c.fp);
+    renderContacts();
+    renderPeerList();
   });
+  row.append(rm, rowChev());
+  row.addEventListener('click', () => openDmWith(c));
+  return row;
+};
 
+const roomRow = (r, info) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__roomrow' + (currentRoomName === r.room ? ' comms__roomrow--current' : '');
+  const av = document.createElement('span');
+  av.className = 'comms__avatar comms__avatar--room';
+  av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  const { mid, name } = rowMid(r.label || r.room, info.preview || fmt(T.rooms.sub, { id: short(r.room) }), info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn);
+  if (info.unread > 0 && currentRoomName !== r.room) row.append(unreadBadge(info.unread));
+  const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
+  row.addEventListener('click', open);
+  const bell = document.createElement('button');
+  bell.type = 'button';
+  const alertsOn = !!r.notify;
+  bell.className = 'comms__rowbtn comms__rowbtn--bell' + (alertsOn ? ' comms__rowbtn--on' : '');
+  bell.title = alertsOn ? T.rooms.bell_on : T.rooms.bell_off;
+  bell.setAttribute('aria-label', bell.title);
+  bell.setAttribute('aria-pressed', String(alertsOn));
+  bell.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-bell"></use></svg>';
+  bell.addEventListener('click', (e) => { e.stopPropagation(); setRoomNotify(r.room, !alertsOn); });
+  const ren = document.createElement('button');
+  ren.type = 'button';
+  ren.title = T.rooms.rename;
+  ren.setAttribute('aria-label', T.rooms.rename_label);
+  ren.textContent = T.rooms.rename;
+  ren.className = 'comms__rowbtn comms__rowbtn--text';
+  ren.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const input = document.createElement('input');
+    input.className = 'comms__input comms__room-rename';
+    input.type = 'text';
+    input.maxLength = 40;
+    input.value = r.label || r.room;
+    input.setAttribute('aria-label', T.rooms.name_label);
+    let finished = false;
+    const done = (save) => { if (finished) return; finished = true; if (save) renameRoom(r.room, input.value); renderContacts(); };
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Escape') ev.stopPropagation();
+      if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') { ev.preventDefault(); done(false); }
+    });
+    input.addEventListener('blur', () => done(true));
+    input.addEventListener('click', (ev) => ev.stopPropagation());
+    openBtn.replaceWith(mid);
+    name.replaceWith(input);
+    input.focus();
+    input.select();
+  });
+  const rm = document.createElement('button');
+  rm.type = 'button';
+  rm.className = 'comms__rowbtn';
+  rm.title = T.rooms.forget;
+  rm.setAttribute('aria-label', T.rooms.forget);
+  rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
+  rm.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.rooms.confirm_forget, { danger: true }) : Promise.resolve(true));
+    if (!ok) return;
+    forgetRoom(r.room);
+    delete unreadMap[roomUnreadKey(r.room)];
+    try { CID.setUnread(unreadMap); } catch (_) {}
+    renderContacts();
+    subscribeUnread();
+  });
+  row.append(bell, ren, rm);
+  return row;
+};
+
+const aiRow = (t, info) => {
+  const slug = t.meta && t.meta.tool === 'annotate-image' ? 'annotate-image' : 'ai-chat';
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__airow';
+  row.dataset.thread = t.id;
+  const av = document.createElement('span');
+  av.className = 'comms__avatar comms__avatar--tool';
+  av.setAttribute('aria-hidden', 'true');
+  av.innerHTML = '<svg viewBox="0 0 48 48" focusable="false"><use href="#tool-' + slug + '"></use></svg>';
+  if (!document.getElementById('tool-' + slug) && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  const { mid } = rowMid(info.title || T.people.unnamed, info.preview, info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn, rowChev());
+  row.addEventListener('click', () => { window.location.href = aiHref(t, PREFIX); });
+  return row;
+};
+
+const renderContacts = () => {
+  if (!els.contactList) return;
+  els.contactList.innerHTML = '';
+  const requests = CID.getRequests();
   const contacts = CID.getContacts();
-  if (!contacts.length && !requests.length) {
-    const empty = document.createElement('div');
-    empty.className = 'comms__id-note comms__contacts-empty';
-    empty.textContent = T.people.empty;
-    els.contactList.append(empty);
+  const rooms = savedRooms();
+  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length) {
+    els.contactList.append(listNote(T.people.empty));
+    return;
+  }
+  const rows = homeRows({ contacts, requests, rooms, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
+  if (!rows.length) {
+    els.contactList.append(listNote(T.home.at_none));
     return;
   }
   const missedMap = getMissed();
-  contacts.forEach((c) => {
-    const row = document.createElement('div');
-    row.className = 'comms__contact';
-    row.dataset.fp = c.fp;
-    const av = document.createElement('span');
-    av.className = 'comms__avatar';
-    av.setAttribute('aria-hidden', 'true');
-    paintAvatar(av, c.name, c.fp);
-    const openBtn = document.createElement('button');
-    openBtn.type = 'button';
-    openBtn.className = 'comms__contact-open';
-    openBtn.setAttribute('aria-label', fmt(T.people.chat_with, { name: c.name || c.fp }));
-    const mid = document.createElement('span');
-    mid.className = 'comms__contact-mid';
-    const name = document.createElement('span');
-    name.className = 'comms__contact-name';
-    name.textContent = c.name || T.people.unnamed;
-    const sub = document.createElement('span');
-    sub.className = 'comms__contact-fp';
-    sub.textContent = c.fp;
-    mid.append(name, sub);
-    openBtn.append(mid);
-    row.append(av, openBtn);
-    const missed = missedMap[c.fp];
-    if (missed && missed.n > 0) {
-      const mc = document.createElement('span');
-      mc.className = 'comms__missed';
-      mc.title = missed.n > 1 ? fmt(T.people.missed_many, { n: missed.n }) : T.people.missed_one;
-      mc.setAttribute('aria-label', mc.title);
-      mc.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg>';
-      row.append(mc);
-    }
-    const unread = (unreadMap[c.fp] && unreadMap[c.fp].n) || 0;
-    if (unread > 0) {
-      const badge = document.createElement('span');
-      badge.className = 'comms__unread';
-      badge.textContent = unread > 99 ? '99+' : String(unread);
-      badge.title = fmt(unread === 1 ? T.people.unread_one : T.people.unread_many, { n: unread });
-      row.append(badge);
-    }
-    const rm = document.createElement('button');
-    rm.type = 'button';
-    rm.className = 'comms__rowbtn';
-    rm.title = fmt(T.people.remove, { name: c.name || c.fp });
-    rm.setAttribute('aria-label', fmt(T.people.remove, { name: c.name || c.fp }));
-    rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
-    rm.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.people.confirm_remove, { name: c.name || c.fp }), { danger: true }) : Promise.resolve(true));
-      if (!ok) return;
-      CID.removeContact(c.fp);
-      renderContacts();
-      renderPeerList();
-    });
-    const chev = document.createElement('span');
-    chev.className = 'comms__chev';
-    chev.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-chev"></use></svg>';
-    row.append(rm, chev);
-    row.addEventListener('click', () => openDmWith(c));
-    els.contactList.append(row);
-  });
+  for (const r of rows) {
+    if (r.kind === 'request') els.contactList.append(requestRow(r.ref));
+    else if (r.kind === 'contact') els.contactList.append(contactRow(r.ref, r, missedMap));
+    else if (r.kind === 'room') els.contactList.append(roomRow(r.ref, r));
+    else els.contactList.append(aiRow(r.ref, r));
+  }
 };
+
+const refreshHomeThreads = () => {
+  clearTimeout(homeThreadsTimer);
+  homeThreadsTimer = setTimeout(async () => {
+    const next = historyOn() ? await commsStore.listThreads().catch(() => null) : [];
+    if (!next) return;
+    homeThreads = next;
+    if (els.contactList && els.contactList.querySelector('.comms__room-rename')) return;
+    renderContacts();
+  }, 120);
+};
+
+const homeSearch = document.getElementById('comms-search');
+const homeFilterBar = document.getElementById('comms-filter');
+homeSearch.addEventListener('input', () => { homeQuery = homeSearch.value; renderContacts(); });
+homeFilterBar.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-f]');
+  if (!b) return;
+  homeFilter = b.dataset.f;
+  homeFilterBar.querySelectorAll('button[data-f]').forEach((x) => {
+    const on = x === b;
+    x.classList.toggle('is-active', on);
+    x.setAttribute('aria-pressed', String(on));
+  });
+  renderContacts();
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshHomeThreads(); });
 
 const showAddError = (text) => {
   els.addErr.textContent = text || '';

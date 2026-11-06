@@ -5702,6 +5702,13 @@
         "start_over": "Empezar un historial nuevo",
         "start_over_confirm": "¿Borrar el historial anterior de este dispositivo y empezar uno nuevo?",
         "unavailable": "El historial del chat no se puede guardar en este dispositivo."
+      },
+      "home": {
+        "search": "Buscar",
+        "filter_all": "Todo",
+        "filter_people": "Personas",
+        "filter_ai": "IA",
+        "at_none": "Sin resultados"
       }
     },
     "scanner": {

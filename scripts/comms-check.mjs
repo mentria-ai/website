@@ -69,6 +69,7 @@ const check = (name, fn) => checks.push([name, fn]);
 const W = await need('/assets/js/comms/wire.js');
 const I = await need('/assets/js/comms/identity.js');
 const C = await need('/assets/js/comms/cards.js');
+const H = await need('/assets/js/comms/threads.js');
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -118,6 +119,24 @@ check('render: www links get https', () => deepEq(C.findLinks('www.example.com')
 check('render: balanced parentheses stay', () => deepEq(C.findLinks('(https://en.wikipedia.org/wiki/A_(b))').map((l) => l.href), ['https://en.wikipedia.org/wiki/A_(b)']));
 check('render: only web and mail links', () => { ok(C.allowedHref('https://x.y')); ok(C.allowedHref('mailto:a@b.c')); no(C.allowedHref(' JavaScript:alert(1)')); no(C.allowedHref('tel:123')); no(C.allowedHref('/relative')); no(C.allowedHref('data:text/html,x')); });
 check('render: outside images are spotted', () => { ok(C.isOutsideImage('https://t.example/p.gif', 'https://mentria.ai')); no(C.isOutsideImage('data:image/png;base64,AAAA', 'https://mentria.ai')); no(C.isOutsideImage('https://mentria.ai/assets/x.png', 'https://mentria.ai')); });
+
+const SRC = {
+  requests: [{ fp: 'fp-req', name: 'Req' }],
+  contacts: [{ fp: 'fp-sam', name: 'Sam' }, { fp: 'fp-noor', name: 'Noor' }],
+  rooms: [{ room: 'trip', key: 'k1', label: 'Trip' }],
+  threads: [
+    { id: 'dm-sam', kind: 'dm', title: 'Sam', meta: { fp: 'fp-sam' }, updatedAt: 300, preview: 'see you at 9' },
+    { id: 'trip', kind: 'room', title: 'Trip', meta: {}, updatedAt: 200, preview: 'tickets booked' },
+    { id: 'ai-1', kind: 'model', title: 'Explain ternary weights', meta: { tool: 'ai-chat' }, updatedAt: 250, preview: 'They store energy in their neck tendons' }
+  ],
+  unread: { 'fp-sam': { n: 2 } }
+};
+check('home: requests stay on top', () => eq(H.homeRows(SRC, { filter: 'all', query: '' })[0].kind, 'request'));
+check('home: newest activity first', () => deepEq(H.homeRows(SRC, { filter: 'people', query: '' }).filter((r) => r.kind !== 'request').map((r) => r.key), ['fp-sam', 'room:trip', 'fp-noor']));
+check('home: the AI filter keeps AI chats only', () => ok(H.homeRows(SRC, { filter: 'ai', query: '' }).every((r) => r.kind === 'ai')));
+check('home: search ignores case and reads previews', () => deepEq(H.homeRows(SRC, { filter: 'all', query: 'TENDON' }).map((r) => r.key), ['ai-1']));
+check('home: previews show plain text', () => eq(H.homeRows({ contacts: [], requests: [], rooms: [], threads: [{ id: 'ai-2', kind: 'model', title: 'T', meta: {}, updatedAt: 1, preview: '## **Bold** and `code`, a [link](https://x.y) and ![pic](https://x.y/p.png)\n- next' }], unread: {} }, { filter: 'all', query: '' })[0].preview, 'Bold and code, a link and pic next'));
+check('home: Annotate chats open in Annotate Image', () => eq(H.aiHref({ id: 'an-1', meta: { tool: 'annotate-image' } }, '/es'), '/es/tools/annotate-image/?thread=an-1'));
 
 let failed = 0;
 for (const [name, fn] of checks) {

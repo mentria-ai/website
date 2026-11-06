@@ -5702,6 +5702,13 @@
         "start_over": "Começar um novo histórico",
         "start_over_confirm": "Apagar o histórico antigo deste aparelho e começar um novo?",
         "unavailable": "O histórico de chat não pode ser salvo neste aparelho."
+      },
+      "home": {
+        "search": "Pesquisar",
+        "filter_all": "Tudo",
+        "filter_people": "Pessoas",
+        "filter_ai": "IA",
+        "at_none": "Nenhum resultado"
       }
     },
     "scanner": {

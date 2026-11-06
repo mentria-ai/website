@@ -5702,6 +5702,13 @@
         "start_over": "新しい履歴を始める",
         "start_over_confirm": "このデバイスの古い履歴を削除して、新しく始めますか？",
         "unavailable": "このデバイスではチャット履歴を保存できません。"
+      },
+      "home": {
+        "search": "検索",
+        "filter_all": "すべて",
+        "filter_people": "人",
+        "filter_ai": "AI",
+        "at_none": "一致するものはありません"
       }
     },
     "scanner": {

@@ -5702,6 +5702,13 @@
         "start_over": "Commencer un nouvel historique",
         "start_over_confirm": "Supprimer l’ancien historique de cet appareil et en commencer un nouveau ?",
         "unavailable": "L’historique des discussions ne peut pas être enregistré sur cet appareil."
+      },
+      "home": {
+        "search": "Rechercher",
+        "filter_all": "Tout",
+        "filter_people": "Personnes",
+        "filter_ai": "IA",
+        "at_none": "Aucun résultat"
       }
     },
     "scanner": {

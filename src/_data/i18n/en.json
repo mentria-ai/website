@@ -5702,6 +5702,13 @@
         "start_over": "Start a new history",
         "start_over_confirm": "Delete the old history on this device and start a new one?",
         "unavailable": "Chat history can’t be saved on this device."
+      },
+      "home": {
+        "search": "Search",
+        "filter_all": "All",
+        "filter_people": "People",
+        "filter_ai": "AI",
+        "at_none": "No matches"
       }
     },
     "scanner": {

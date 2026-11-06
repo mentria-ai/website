@@ -207,7 +207,7 @@ eleventyComputed:
 <script type="module">
 import { hasIdentity, openQuietly, askToOpen, secretCopy, stillOpen } from '/assets/js/comms/identity.js';
 import { openStore } from '/assets/js/comms/store.js';
-import { newThreadId, titleFrom, turnToMessage, messagesToTurns, legacyThreadId } from '/assets/js/comms/ai-thread.js';
+import { newThreadId, titleFrom, turnToMessage, messagesToTurns, messageIndex, legacyThreadId } from '/assets/js/comms/ai-thread.js';
 import { HANDOFF_KEY } from '/assets/js/comms/mention.js';
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
 const COPY_KEYS = {{ acCopy | dump | safe }};
@@ -698,7 +698,12 @@ function runApp(MentriaEngine, Tiers) {
       const prev = savedTurns[i];
       if (sameTurn(prev, turn)) continue;
       lastSavedTs = Math.max(Date.now(), lastSavedTs + 1);
-      await chatStore.putMessage(turnToMessage(turn, id, i, lastSavedTs), { replace: prev !== undefined });
+      let stored = await chatStore.putMessage(turnToMessage(turn, id, i, lastSavedTs), { replace: prev !== undefined });
+      while (!stored) {
+        i = nextIndex++;
+        msgIndex.set(msg, i);
+        stored = await chatStore.putMessage(turnToMessage(turn, id, i, lastSavedTs));
+      }
       savedTurns[i] = Object.assign({}, turn);
     }
   }
@@ -728,7 +733,7 @@ function runApp(MentriaEngine, Tiers) {
     warmSystemPrompt();
   }
 
-  async function renderTurns(turns, indexed) {
+  async function renderTurns(turns, indexes) {
     if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
     const shownMsgs = [];
     messagesEl.setAttribute('aria-live', 'off');
@@ -772,7 +777,7 @@ function runApp(MentriaEngine, Tiers) {
         addAssistantActions(bodyEl, () => t.text);
       }
     }
-    if (indexed) shownMsgs.forEach(([msg, i]) => msgIndex.set(msg, i));
+    if (indexes) shownMsgs.forEach(([msg, i]) => msgIndex.set(msg, indexes[i]));
     else legacyShown = { turns, msgs: shownMsgs };
     clearChatBtn.style.display = '';
     scrollToBottom();
@@ -797,7 +802,7 @@ function runApp(MentriaEngine, Tiers) {
     try { saved = window.MentriaStore ? window.MentriaStore.get('ai_chat', 'conversation') : null; } catch (_) {}
     if (!Array.isArray(saved) || !saved.length) return;
     const turns = saved.filter((t) => t && (t.role === 'user' || t.role === 'assistant') && typeof t.text === 'string').map(cleanTurn);
-    if (turns.length) await renderTurns(turns, false);
+    if (turns.length) await renderTurns(turns, null);
   }
 
   async function restoreConversation() {
@@ -817,10 +822,18 @@ function runApp(MentriaEngine, Tiers) {
     const msgs = await chatStore.listMessages(id, { limit: 100000 }).catch(() => null);
     if (!msgs || !msgs.length) return;
     const turns = messagesToTurns(msgs);
+    const indexes = [];
+    let top = -1;
+    msgs.forEach((m) => {
+      const at = messageIndex(m);
+      const i = at === null || indexes.includes(at) ? top + 1 : at;
+      indexes.push(i);
+      top = Math.max(top, i);
+    });
     threadId = id;
-    turns.forEach((t, i) => { savedTurns[i] = t; });
-    nextIndex = turns.length;
-    await renderTurns(turns, true);
+    turns.forEach((t, i) => { savedTurns[indexes[i]] = t; });
+    nextIndex = top + 1;
+    await renderTurns(turns, indexes);
   }
 
   saveBarBtn.addEventListener('click', async () => {
@@ -2055,6 +2068,7 @@ function runApp(MentriaEngine, Tiers) {
     addMessage('user', text, attachedDataUrl);
     const userMsg = { role: 'user', content: userContent };
     if (attachedImage && attachedPreview) thumbBlobs.set(userMsg, attachedPreview);
+    reuseIndex = null;
     messages.push(userMsg);
     persistConversation();
     clearChatBtn.style.display = '';

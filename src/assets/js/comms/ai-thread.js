@@ -29,6 +29,11 @@ export const messagesToTurns = (msgs) => msgs.map((m) => {
   return turn;
 });
 
+export const messageIndex = (msg) => {
+  const tail = String((msg && msg.id) || '').split(':').pop();
+  return /^[0-9]+$/.test(tail) ? Number(tail) : null;
+};
+
 export const annotateToMessages = (entry, threadId, index, ts) => {
   const label = String(entry.modeLabel || entry.mode || '');
   const text = String(entry.text == null ? '' : entry.text);

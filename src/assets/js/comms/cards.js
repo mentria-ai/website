@@ -1,6 +1,6 @@
 const TRAIL = '.,;:!?\'"';
 const CLOSERS = { ')': '(', ']': '[', '}': '{' };
-const LINK_RE = /(?<![\w@./-])(?:https?:\/\/|www\.)[^\s<>"`]+/gi;
+const LINK_RE = /(^|[^\w@./-])((?:https?:\/\/|www\.)[^\s<>"`]+)/gi;
 const CONTROL = /[\u0000-\u0020\u007f-\u009f\u00a0\u1680\u2000-\u200f\u2028\u2029\u202f\u205f\u2060\u3000\ufeff]+/g;
 const NO_LINKS = new Set(['A', 'CODE', 'PRE']);
 
@@ -18,7 +18,8 @@ export const findLinks = (text) => {
   LINK_RE.lastIndex = 0;
   let m;
   while ((m = LINK_RE.exec(s))) {
-    let url = m[0];
+    const begin = m.index + m[1].length;
+    let url = m[2];
     for (;;) {
       const last = url[url.length - 1];
       if (TRAIL.includes(last)) { url = url.slice(0, -1); continue; }
@@ -29,7 +30,7 @@ export const findLinks = (text) => {
     const bare = /^www\./i.test(url);
     const rest = url.replace(/^(?:https?:\/\/|www\.)/i, '');
     if (!rest || (bare && !rest.includes('.'))) continue;
-    out.push({ start: m.index, end: m.index + url.length, href: bare ? 'https://' + url : url });
+    out.push({ start: begin, end: begin + url.length, href: bare ? 'https://' + url : url });
   }
   return out;
 };

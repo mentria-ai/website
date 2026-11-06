@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, readdirSync, readFileSync } from 'node:fs';
 import { register } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
@@ -123,6 +123,8 @@ check('render: a bare link stops before the comma', () => deepEq(C.findLinks('se
 check('render: www links get https', () => deepEq(C.findLinks('www.example.com').map((l) => l.href), ['https://www.example.com']));
 check('render: balanced parentheses stay', () => deepEq(C.findLinks('(https://en.wikipedia.org/wiki/A_(b))').map((l) => l.href), ['https://en.wikipedia.org/wiki/A_(b)']));
 check('render: only web and mail links', () => { ok(C.allowedHref('https://x.y')); ok(C.allowedHref('mailto:a@b.c')); no(C.allowedHref(' JavaScript:alert(1)')); no(C.allowedHref('tel:123')); no(C.allowedHref('/relative')); no(C.allowedHref('data:text/html,x')); });
+check('render: no lookbehind, so older Safari can parse the modules', () => { const dir = join(repo, 'src/assets/js/comms'); for (const f of readdirSync(dir)) no(/\(\?<[=!]/.test(readFileSync(join(dir, f), 'utf8')), f); });
+check('render: an email domain is not linked', () => deepEq(C.findLinks('write to a@www.example.com or b.www.example.org'), []));
 check('render: outside images are spotted', () => { ok(C.isOutsideImage('https://t.example/p.gif', 'https://mentria.ai')); no(C.isOutsideImage('data:image/png;base64,AAAA', 'https://mentria.ai')); no(C.isOutsideImage('https://mentria.ai/assets/x.png', 'https://mentria.ai')); });
 
 const SRC = {

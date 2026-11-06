@@ -5385,7 +5385,8 @@
         "send": "enviar",
         "share_room": "compartir el enlace de esta sala",
         "link_copied": "enlace de la sala copiado — envíalo a quien quieras invitar.",
-        "link_manual": "copia este enlace para invitar a alguien: {url}"
+        "link_manual": "copia este enlace para invitar a alguien: {url}",
+        "load_image": "Cargar la imagen de {host}"
       },
       "notif": {
         "text": "recibe una notificación cuando llegue un mensaje — aunque comms esté cerrado",

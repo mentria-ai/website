@@ -5385,7 +5385,8 @@
         "send": "envoyer",
         "share_room": "partager le lien de ce salon",
         "link_copied": "lien du salon copié — envoyez-le aux personnes que vous voulez inviter.",
-        "link_manual": "copiez ce lien pour inviter quelqu’un : {url}"
+        "link_manual": "copiez ce lien pour inviter quelqu’un : {url}",
+        "load_image": "Charger l’image de {host}"
       },
       "notif": {
         "text": "recevez une notification à l’arrivée d’un message — même quand comms est fermé",

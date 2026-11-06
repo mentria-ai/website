@@ -68,6 +68,7 @@ const check = (name, fn) => checks.push([name, fn]);
 
 const W = await need('/assets/js/comms/wire.js');
 const I = await need('/assets/js/comms/identity.js');
+const C = await need('/assets/js/comms/cards.js');
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -111,6 +112,12 @@ check('identity: without a keyring only Comms can unlock', async () => { fakeIde
 check('identity: a linked identity asks the one unlock', async () => { fakeIdentity({ linked: true }); const k = fakeKeyring({ secrets: [new Uint8Array(32).fill(3)], onLaunch: () => { k.unlocked = true; } }); eq(await I.askToOpen(), 'open'); eq(k.calls.showLaunch, 1); });
 check('identity: closing the unlock leaves the chat unsaved', async () => { const f = fakeIdentity({ linked: true }); const k = fakeKeyring({ secrets: [new Uint8Array(32).fill(3)] }); eq(await I.askToOpen(), 'cancelled'); eq(k.calls.showLaunch, 1); eq(f.calls.openLinked, 0); });
 check('identity: secretCopy is a copy', () => { const f = fakeIdentity({ unlocked: true }); const s = I.secretCopy(); s[0] = 99; ok(f.secret[0] !== 99); });
+
+check('render: a bare link stops before the comma', () => deepEq(C.findLinks('see https://example.com/a, ok').map((l) => l.href), ['https://example.com/a']));
+check('render: www links get https', () => deepEq(C.findLinks('www.example.com').map((l) => l.href), ['https://www.example.com']));
+check('render: balanced parentheses stay', () => deepEq(C.findLinks('(https://en.wikipedia.org/wiki/A_(b))').map((l) => l.href), ['https://en.wikipedia.org/wiki/A_(b)']));
+check('render: only web and mail links', () => { ok(C.allowedHref('https://x.y')); ok(C.allowedHref('mailto:a@b.c')); no(C.allowedHref(' JavaScript:alert(1)')); no(C.allowedHref('tel:123')); no(C.allowedHref('/relative')); no(C.allowedHref('data:text/html,x')); });
+check('render: outside images are spotted', () => { ok(C.isOutsideImage('https://t.example/p.gif', 'https://mentria.ai')); no(C.isOutsideImage('data:image/png;base64,AAAA', 'https://mentria.ai')); no(C.isOutsideImage('https://mentria.ai/assets/x.png', 'https://mentria.ai')); });
 
 let failed = 0;
 for (const [name, fn] of checks) {

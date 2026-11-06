@@ -5385,7 +5385,8 @@
         "send": "send",
         "share_room": "share this room's link",
         "link_copied": "room link copied — send it to anyone you want to invite.",
-        "link_manual": "copy this link to invite someone: {url}"
+        "link_manual": "copy this link to invite someone: {url}",
+        "load_image": "Load image from {host}"
       },
       "notif": {
         "text": "get a notification when a message arrives — even with comms closed",

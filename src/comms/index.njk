@@ -361,6 +361,8 @@ unlockTool: true
 .comms__what blockquote { margin: .35em 0 0; padding-left: .7em; border-left: 2px solid rgba(127,127,127,.4); }
 .comms__what--sys{color:#7a838d;font-style:italic}
 .comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
+.comms__what img{max-width:100%;height:auto;border-radius:var(--radius-md,6px)}
+.comms__imgload{border-style:dashed;border-radius:var(--radius-md,6px);margin:.15rem 0;font-size:.8rem}
 
 .comms__drop--hot{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);background:rgba(110,243,197,.04)}
 .comms__prog{display:inline-block;width:96px;height:6px;background:#1a1f24;border-radius:3px;overflow:hidden;margin:0 .4rem;vertical-align:middle}
@@ -550,6 +552,7 @@ import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
 import { holdAwake } from '/assets/js/mentria-wake.js';
+import { renderBody } from '/assets/js/comms/cards.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1012,10 +1015,8 @@ const renderLine = (who, what, opts = {}) => {
   const t = document.createElement('span');
   t.className = 'comms__what' + (opts.sys ? ' comms__what--sys' : '');
   if (opts.html) t.innerHTML = opts.html;
-  else if (!opts.sys && window.renderMarkdown && /[*_`#>\[\]|\n-]/.test(String(what || ''))) {
-    t.innerHTML = renderMarkdown(String(what)) || '';
-    t.querySelectorAll('a[href]').forEach((a) => { a.target = '_blank'; a.rel = 'noopener'; });
-  } else t.textContent = what;
+  else if (opts.sys) t.textContent = what;
+  else renderBody(t, what, { from: opts.me ? 'self' : 'person', T: T.chat });
   if (opts.quiet) line.setAttribute('aria-live', 'off');
   line.append(w, t);
   const ts = (typeof opts.ts === 'number' && opts.ts > 0) ? opts.ts : Date.now();

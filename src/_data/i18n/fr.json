@@ -1960,7 +1960,12 @@
       "prompt_ocr": "Lis tout le texte de cette image et transcris-le exactement tel qu'il apparaît, en conservant l'ordre et les sauts de ligne d'origine. Inclus tous les titres, étiquettes, chiffres et le texte en petits caractères. N'ajoute aucun commentaire, note, résumé ni explication — ne renvoie que le texte transcrit, rien d'autre. Seulement si l'image ne contient véritablement aucun texte, réponds : (aucun texte trouvé).",
       "prompt_alt": "En une seule phrase brève d'au plus 20 mots, décris cette image pour un utilisateur de lecteur d'écran. Ne retiens que l'élément le plus important montré — n'énumère pas chaque détail et ne transcris pas le texte. Ne renvoie que cette courte phrase, rien d'autre.",
       "prompt_tags": "Observe attentivement l'image et liste 5 à 12 étiquettes courtes séparées par des virgules qui nomment les choses précises que tu vois : chaque élément principal par son nom, une couleur avec la chose à laquelle elle appartient, et le type de lieu. Si l'image est surtout du texte ou un document, étiquette-la ainsi (par exemple : texte, document, capture d'écran). Produis toujours des étiquettes — ne refuse jamais et n'explique pas. Ne renvoie que les étiquettes séparées par des virgules.",
-      "confirm_delete_model": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau."
+      "confirm_delete_model": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau.",
+      "save_setup": "Configurez votre identité Mentria pour garder vos discussions",
+      "save_setup_btn": "Configurer",
+      "save_unlock": "Déverrouillez pour garder cette discussion",
+      "save_unlock_btn": "Déverrouiller",
+      "save_lost": "Les messages non enregistrés sont perdus quand vous quittez cette page."
     },
     "files": {
       "db_group": "Bases de données",

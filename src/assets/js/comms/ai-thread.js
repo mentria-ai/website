@@ -29,6 +29,16 @@ export const messagesToTurns = (msgs) => msgs.map((m) => {
   return turn;
 });
 
+export const annotateToMessages = (entry, threadId, index, ts) => {
+  const label = String(entry.modeLabel || entry.mode || '');
+  const text = String(entry.text == null ? '' : entry.text);
+  const parts = entry.thumb ? [{ type: 'image', thumb: entry.thumb }, { type: 'text', text: label }] : [{ type: 'text', text: label }];
+  return [
+    { id: `${threadId}:${index * 2}`, threadId, from: 'self', ts, t: label, parts, meta: { mode: entry.mode }, v: 2 },
+    { id: `${threadId}:${index * 2 + 1}`, threadId, from: 'model', ts: ts + 1, t: text, parts: [{ type: 'text', text }], v: 2 }
+  ];
+};
+
 export const legacyThreadId = async (json) => {
   const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(json))));
   return 'ai-legacy-' + Array.from(digest.slice(0, 8), (b) => b.toString(16).padStart(2, '0')).join('');

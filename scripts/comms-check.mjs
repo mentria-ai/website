@@ -158,6 +158,8 @@ check('ai thread: titles are cut at 60 characters', () => eq(A.titleFrom('a'.rep
 check('ai thread: photo-only chats get the fallback title', () => eq(A.titleFrom('', 'Photo chat'), 'Photo chat'));
 check('ai thread: legacy ids are stable', async () => { eq(await A.legacyThreadId('[1]'), await A.legacyThreadId('[1]')); ok((await A.legacyThreadId('[1]')).startsWith('ai-legacy-')); });
 
+check('annotate: one result is a photo and an answer', () => { const [u, m] = A.annotateToMessages({ mode: 'describe', modeLabel: 'Describe', text: 'A seahorse', thumb: 'h1' }, 'an-1', 0, 5); eq(u.from, 'self'); eq(u.parts[0].thumb, 'h1'); eq(m.t, 'A seahorse'); eq(m.id, 'an-1:1'); });
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

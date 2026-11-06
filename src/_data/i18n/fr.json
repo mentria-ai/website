@@ -223,7 +223,8 @@
       "packs_lib": "packs d’apprentissage importés",
       "finance": "livre de comptes Finances",
       "radio": "J’aime et titres passés de la radio",
-      "other": "autres données enregistrées"
+      "other": "autres données enregistrées",
+      "comms_history": "historique des discussions"
     },
     "restore_replace": "Cet appareil a déjà ses propres données : {areas}. Les remplacer par celles de la sauvegarde ? Choisissez Annuler pour garder les versions de cet appareil. Les notes et tout ce qui est nouveau sont restaurés dans tous les cas.",
     "restore_totp_vault": "Cet appareil a déjà un coffre TOTP. Le remplacer par celui de la sauvegarde ? Les comptes qui ne sont que sur cet appareil seront perdus, et il s'ouvrira avec la phrase secrète de la sauvegarde.",
@@ -293,7 +294,9 @@
     "send_failed": "Impossible d’envoyer vers {tool}",
     "key_space": "ESPACE",
     "key_click": "clic",
-    "key_tap": "toucher"
+    "key_tap": "toucher",
+    "backup_history_locked": "L’historique des discussions est exclu tant que votre identité Mentria est verrouillée.",
+    "restore_history_locked": "L’historique des discussions n’a pas été restauré. Déverrouillez votre identité Mentria, puis restaurez de nouveau ce fichier."
   },
   "home": {
     "tools_heading": "Outils",

@@ -223,7 +223,8 @@
       "packs_lib": "paquetes de aprendizaje importados",
       "finance": "libro de cuentas de Finanzas",
       "radio": "me gusta y saltos de la radio",
-      "other": "otros datos guardados"
+      "other": "otros datos guardados",
+      "comms_history": "historial de chats"
     },
     "restore_replace": "Este dispositivo ya tiene sus propios datos: {areas}. ¿Reemplazarlos por los de la copia de seguridad? Elige Cancelar para conservar las versiones de este dispositivo. Las notas y todo lo nuevo se restauran de todos modos.",
     "restore_totp_vault": "Este dispositivo ya tiene una bóveda TOTP. ¿Reemplazarla por la de la copia de seguridad? Las cuentas que solo están en este dispositivo se perderán, y se abrirá con la contraseña de la copia de seguridad.",
@@ -293,7 +294,9 @@
     "send_failed": "No se pudo enviar a {tool}",
     "key_space": "ESPACIO",
     "key_click": "clic",
-    "key_tap": "toca"
+    "key_tap": "toca",
+    "backup_history_locked": "El historial de chats queda fuera mientras tu identidad de Mentria está bloqueada.",
+    "restore_history_locked": "El historial de chats no se restauró. Desbloquea tu identidad de Mentria y vuelve a restaurar este archivo."
   },
   "home": {
     "tools_heading": "Herramientas",

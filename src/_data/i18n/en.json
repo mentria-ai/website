@@ -223,7 +223,8 @@
       "packs_lib": "imported learning packs",
       "finance": "Finance ledger",
       "radio": "radio likes and skips",
-      "other": "other saved data"
+      "other": "other saved data",
+      "comms_history": "chat history"
     },
     "restore_replace": "This device already has its own {areas}. Replace them with the backup's copy? Choose Cancel to keep this device's versions. Notes and anything new are restored either way.",
     "restore_totp_vault": "This device already has a TOTP vault. Replace it with the one in the backup? Accounts that are only on this device will be lost, and the backup's passphrase will unlock it.",
@@ -293,7 +294,9 @@
     "send_failed": "Couldn’t send to {tool}",
     "key_space": "SPACE",
     "key_click": "click",
-    "key_tap": "tap"
+    "key_tap": "tap",
+    "backup_history_locked": "Chat history is left out while your Mentria identity is locked.",
+    "restore_history_locked": "Chat history wasn’t restored. Unlock your Mentria identity, then restore this file again."
   },
   "home": {
     "tools_heading": "Tools",

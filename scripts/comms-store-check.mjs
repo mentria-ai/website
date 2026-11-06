@@ -71,6 +71,16 @@ const PAGE_TESTS = async () => {
   const A = new Uint8Array(32).fill(7);
   const B = new Uint8Array(32).fill(9);
   const msg = (i) => ({ id: 'c' + i, threadId: 'dm-1', from: 'fpS', ts: i, t: 'secret words ' + i, parts: [{ type: 'text', text: 'secret words ' + i }], v: 2 });
+  const loadScript = (src) => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = () => rej(new Error('load ' + src)); document.head.append(el); });
+  const identity = { locked: false };
+  window.MentriaIdentity = { isSetUp: () => true, isUnlocked: () => !identity.locked, getSecret: () => { if (identity.locked) throw new Error('locked'); return A; } };
+  window.mentriaConfirm = async () => true;
+  await loadScript('/assets/js/mentria-store.js');
+  await loadScript('/assets/js/mentria-backup.js');
+  const PASS = 'correct horse battery staple';
+  const seedHistory = async (n) => { const s = await S.openStore(A); await s.wipe(); await s.putThread({ id: 'dm-1', kind: 'dm', title: 'Sam', participants: [], meta: { fp: 'fpS' }, updatedAt: 0, lastReadTs: 0, pinned: false }); for (let i = 1; i <= n; i++) await s.putMessage(msg(i)); s.close(); };
+  const emptyStore = async () => { const s = await S.openStore(A); await s.wipe(); s.close(); };
+  const fileOf = (sealed) => new File([sealed.blob], 'backup.json', { type: 'application/json' });
 
   test('round trip', async () => { let s = await S.openStore(A); await s.putThread({ id: 'dm-1', kind: 'dm', title: 'Sam', participants: [], meta: {}, updatedAt: 1, lastReadTs: 0, pinned: false }); ok(await s.putMessage(msg(10))); s.close(); s = await S.openStore(A); eq((await s.listMessages('dm-1'))[0].t, 'secret words 10'); eq((await s.listThreads())[0].preview, 'secret words 10'); });
   test('ciphertext at rest', async () => { const raw = await rawDump('mentria-comms'); no(raw.includes('secret words')); no(raw.includes('Sam')); });
@@ -82,6 +92,10 @@ const PAGE_TESTS = async () => {
   test('foreign secret', async () => { const s = await S.openStore(B); eq(s.status, 'foreign'); await rejects(s.listMessages('dm-1'), 'foreign'); await s.wipe(); eq(s.status, 'open'); eq((await s.listThreads()).length, 0); });
   test('unavailable', async () => { const real = indexedDB.open; indexedDB.open = () => { throw new DOMException('no', 'InvalidStateError'); }; try { eq(await S.storeAvailable(), false); await rejects(S.openStore(A), 'unavailable'); } finally { indexedDB.open = real; } });
   test('quota', async () => { const s = await S.openStore(B); const real = IDBObjectStore.prototype.put; IDBObjectStore.prototype.put = function () { throw new DOMException('full', 'QuotaExceededError'); }; try { await rejects(s.putMessage(msg(9999)), 'quota'); } finally { IDBObjectStore.prototype.put = real; } });
+
+  test('backup: history survives export and restore', async () => { await seedHistory(3); const sealed = await MentriaBackup.exportFull(PASS, {}); await emptyStore(); const data = await MentriaBackup.readBackupFile(fileOf(sealed), PASS); const res = await MentriaBackup.applyRestore(data, {}); const s = await S.openStore(A); eq((await s.listMessages('dm-1')).length, 3); eq((await s.getThread('dm-1')).title, 'Sam'); s.close(); ok(res.restored >= 4); });
+  test('backup: a locked identity leaves history out', async () => { identity.locked = true; try { const prepared = await MentriaBackup.prepareBackup(); ok((prepared.lockedAreas || []).includes('comms_history')); no(prepared.areas.some((a) => a.area === 'comms_history')); } finally { identity.locked = false; } });
+  test('backup: restoring while locked skips history and says so', async () => { await seedHistory(2); const sealed = await MentriaBackup.exportFull(PASS, {}); await emptyStore(); identity.locked = true; let res = null; try { res = await MentriaBackup.applyRestore(await MentriaBackup.readBackupFile(fileOf(sealed), PASS), {}); } finally { identity.locked = false; } ok((res.lockedAreas || []).includes('comms_history')); const s = await S.openStore(A); eq((await s.listMessages('dm-1')).length, 0); s.close(); });
 
   const out = [];
   for (const [name, fn] of tests) {

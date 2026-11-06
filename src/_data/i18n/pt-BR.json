@@ -223,7 +223,8 @@
       "packs_lib": "pacotes de aprendizado importados",
       "finance": "livro-caixa do Finanças",
       "radio": "curtidas e pulos do rádio",
-      "other": "outros dados salvos"
+      "other": "outros dados salvos",
+      "comms_history": "histórico de chats"
     },
     "restore_replace": "Este aparelho já tem seus próprios dados: {areas}. Substituí-los pelos do backup? Escolha Cancelar para manter as versões deste aparelho. As notas e tudo o que for novo são restaurados de qualquer forma.",
     "restore_totp_vault": "Este aparelho já tem um cofre TOTP. Substituí-lo pelo do backup? As contas que estão só neste aparelho serão perdidas, e ele passará a abrir com a senha do backup.",
@@ -293,7 +294,9 @@
     "send_failed": "Não foi possível enviar para {tool}",
     "key_space": "ESPAÇO",
     "key_click": "clique",
-    "key_tap": "toque"
+    "key_tap": "toque",
+    "backup_history_locked": "O histórico de chats fica de fora enquanto sua identidade Mentria está bloqueada.",
+    "restore_history_locked": "O histórico de chats não foi restaurado. Desbloqueie sua identidade Mentria e restaure este arquivo de novo."
   },
   "home": {
     "tools_heading": "Ferramentas",

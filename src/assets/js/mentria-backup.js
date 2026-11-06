@@ -310,17 +310,21 @@
     'mentria-radio': { area: 'radio' },
     'mentria-ext-db': { area: 'extdata' },
     'mentria-ext-story-studio': { area: 'extdata' },
-    'mentria-ext-finance': { area: 'finance', whole: true, prep: financeMeta, adopt: financeAdopt }
+    'mentria-ext-finance': { area: 'finance', whole: true, prep: financeMeta, adopt: financeAdopt },
+    'mentria-comms': { area: 'comms_history', history: true }
   };
+  const HISTORY_DB = 'mentria-comms';
+  const HISTORY_AREA = 'comms_history';
+  const HISTORY_MAX = 10 * 1024 * 1024;
   const EXT_DB = 'mentria-ext-';
   const hasRule = (name) => Object.prototype.hasOwnProperty.call(DB_RULES, name);
-  const backedUp = (name) => typeof name === 'string' && (hasRule(name) || (name.indexOf(EXT_DB) === 0 && name.length > EXT_DB.length));
+  const backedUp = (name) => typeof name === 'string' && ((hasRule(name) && !DB_RULES[name].history) || (name.indexOf(EXT_DB) === 0 && name.length > EXT_DB.length));
   const ruleFor = (name) => (hasRule(name) ? DB_RULES[name] : { area: 'extdata' });
   const prepare = (rule, store, key, value) => (rule.prep ? rule.prep(store, key, value) : value);
 
   const AREA_FALLBACK = {
     local: 'notes, settings and progress', packs_lib: 'imported learning packs', finance: 'Finance ledger',
-    radio: 'radio likes and skips', extdata: 'extension data', other: 'other saved data'
+    radio: 'radio likes and skips', extdata: 'extension data', comms_history: 'chat history', other: 'other saved data'
   };
   const areaLabel = (area, names) => {
     if (names && typeof names[area] === 'string' && names[area]) return names[area];
@@ -621,6 +625,83 @@
     return v;
   };
 
+  const historyExists = async () => {
+    const idb = idbFactory();
+    if (!idb) return false;
+    if (typeof idb.databases === 'function') {
+      try { return (await idb.databases()).some((d) => d && d.name === HISTORY_DB); } catch (_) {}
+    }
+    const db = await openExisting(HISTORY_DB).catch(() => null);
+    if (db) db.close();
+    return !!db;
+  };
+
+  const historyIdentity = () => {
+    const I = global.MentriaIdentity;
+    try { return I && I.isUnlocked() ? I : null; } catch (_) { return null; }
+  };
+
+  const openHistoryStore = async (I) => {
+    const mod = await import('/assets/js/comms/store.js');
+    const secret = new Uint8Array(I.getSecret());
+    try { return await mod.openStore(secret); } finally { secret.fill(0); }
+  };
+
+  const historySnapshot = async () => {
+    if (!(await historyExists())) return { comms: null, locked: false };
+    const I = historyIdentity();
+    if (!I) return { comms: null, locked: true };
+    let st = null;
+    try { st = await openHistoryStore(I); } catch (_) { return { comms: null, locked: false }; }
+    try {
+      if (st.status !== 'open') return { comms: null, locked: false };
+      const threads = await st.listThreads();
+      const all = [];
+      for (const t of threads) all.push.apply(all, await st.listMessages(t.id, { limit: Number.MAX_SAFE_INTEGER }));
+      all.sort((a, b) => b.ts - a.ts);
+      const messages = [];
+      let bytes = 0;
+      for (const m of all) {
+        const n = toUtf8.encode(JSON.stringify(m)).length + 1;
+        if (bytes + n > HISTORY_MAX) break;
+        bytes += n;
+        messages.push(m);
+      }
+      return { comms: threads.length || messages.length ? { v: 1, threads, messages } : null, locked: false };
+    } catch (_) {
+      return { comms: null, locked: false };
+    } finally {
+      st.close();
+    }
+  };
+
+  const hasHistory = (comms) => !!comms && typeof comms === 'object' && comms.v === 1 &&
+    ((Array.isArray(comms.threads) && comms.threads.length > 0) || (Array.isArray(comms.messages) && comms.messages.length > 0));
+
+  const restoreHistory = async (comms, identityChanges) => {
+    if (!hasHistory(comms)) return { written: 0, locked: false };
+    const I = historyIdentity();
+    if (!I || identityChanges) return { written: 0, locked: true };
+    let st = null;
+    try { st = await openHistoryStore(I); } catch (_) { return { written: 0, locked: false }; }
+    let written = 0;
+    try {
+      if (st.status !== 'open') return { written: 0, locked: false };
+      for (const t of Array.isArray(comms.threads) ? comms.threads : []) {
+        if (!t || typeof t.id !== 'string' || typeof t.kind !== 'string') continue;
+        if (!(await st.getThread(t.id))) { await st.putThread(t); written++; }
+      }
+      const messages = (Array.isArray(comms.messages) ? comms.messages : []).filter((m) => m && typeof m.id === 'string' && typeof m.threadId === 'string');
+      messages.sort((a, b) => (Number(a.ts) || 0) - (Number(b.ts) || 0));
+      for (const m of messages) {
+        if (await st.putMessage(m)) written++;
+      }
+    } finally {
+      st.close();
+    }
+    return { written, locked: false };
+  };
+
   const snapshot = async () => {
     const S = global.MentriaStore;
     if (!S) throw storageErr('blocked');
@@ -641,7 +722,8 @@
         db.close();
       }
     }
-    return { local, dbs };
+    const history = await historySnapshot();
+    return { local, dbs, comms: history.comms, lockedAreas: history.locked ? [HISTORY_AREA] : [] };
   };
 
   const frameHead = (type, len) => new Uint8Array([type, (len >>> 24) & 255, (len >>> 16) & 255, (len >>> 8) & 255, len & 255]);
@@ -680,12 +762,18 @@
       version: ARCHIVE_VERSION,
       exportedAt: snap.local.exportedAt,
       local: snap.local,
+      comms: snap.comms || undefined,
       dbs: snap.dbs.map((d) => ({
         name: d.name,
         version: d.version,
         stores: d.stores.map((s) => ({ name: s.name, keyPath: s.keyPath, autoIncrement: s.autoIncrement, indexes: s.indexes }))
       }))
     });
+    if (snap.comms) {
+      const n = Math.min(toUtf8.encode(JSON.stringify(snap.comms)).length, rest);
+      if (n > 0) tally(HISTORY_AREA, n, 0);
+      rest -= n;
+    }
     localSizes(snap.local).forEach((bytes, area) => {
       const n = Math.min(bytes, rest);
       if (n > 0) tally(area, n, 0);
@@ -732,6 +820,7 @@
       records,
       skipped,
       areas,
+      lockedAreas: snap.lockedAreas || [],
       total: areas.reduce((n, a) => n + a.bytes, 0)
     };
   };
@@ -973,7 +1062,7 @@
     };
     const finish = () => {
       if (!manifest || !ended || current || headFill) throw bad();
-      return { format: ARCHIVE_FORMAT, version: manifest.version, exportedAt: manifest.exportedAt, local: manifest.local, dbs, bytes };
+      return { format: ARCHIVE_FORMAT, version: manifest.version, exportedAt: manifest.exportedAt, local: manifest.local, comms: hasHistory(manifest.comms) ? manifest.comms : undefined, dbs, bytes };
     };
     return { push, finish };
   };
@@ -1374,7 +1463,7 @@
     if (copy.summary) {
       const msg = copy.summary
         .replace('{date}', formatWhen(local.exportedAt || data.exportedAt))
-        .replace('{areas}', listJoin(contentAreas(S, local, dbPlans, copy.areas)));
+        .replace('{areas}', listJoin(contentAreas(S, local, dbPlans, copy.areas).concat(full && hasHistory(data.comms) ? [areaLabel(HISTORY_AREA, copy.areas)] : [])));
       if (!(await ask(msg, false))) return { restored: 0, cancelled: true };
     }
     const keyring = await keyringCheck(local, plan);
@@ -1424,7 +1513,9 @@
       await rollbackDatabases(done);
       throw err;
     }
-    return { restored: result.restored + done.reduce((n, u) => n + u.written, 0) };
+    const identityChanges = plan.vaults.indexOf('identity.vault') >= 0 && skip.indexOf('identity.vault') < 0;
+    const history = full ? await restoreHistory(data.comms, identityChanges) : { written: 0, locked: false };
+    return { restored: result.restored + done.reduce((n, u) => n + u.written, 0) + history.written, lockedAreas: history.locked ? [HISTORY_AREA] : [] };
   }
 
   function isBlockedError(err) {

@@ -152,7 +152,7 @@
     "sync_no_peer": "Ningún dispositivo respondió con este código. Revisa el código y mantén Acerca de abierto en el otro dispositivo.",
     "sync_busy": "Este código ya lo están usando otros dos dispositivos. Crea un código nuevo en el dispositivo con el que quieres vincular este.",
     "sync_vault_totp": "Este dispositivo tiene su propia bóveda TOTP y el otro dispositivo tiene una distinta. ¿Reemplazar la bóveda de este dispositivo por la del otro? Las cuentas TOTP que solo están en este dispositivo se perderán, y se abrirá con la contraseña del otro dispositivo.",
-    "sync_vault_identity": "Este dispositivo tiene su propia identidad de Mentria y el otro dispositivo tiene una distinta. ¿Reemplazarla por la del otro dispositivo? La identidad de este dispositivo se perderá, y se abrirá con la contraseña del otro dispositivo.",
+    "sync_vault_identity": "Este dispositivo tiene su propia identidad de Mentria y el otro dispositivo tiene una distinta. ¿Reemplazarla por la del otro dispositivo? La identidad de este dispositivo se perderá, y se abrirá con la contraseña del otro dispositivo. El historial de chat guardado en este dispositivo con la identidad anterior ya no se podrá abrir.",
     "sync_vault_keyring": "Este dispositivo tiene su propio desbloqueo único y el otro dispositivo tiene uno distinto. ¿Reemplazar el de este dispositivo por el del otro? Se abrirá con el código de recuperación del otro dispositivo. Las notas, los códigos, los chats y las finanzas configurados con el desbloqueo de este dispositivo no se abrirán aquí hasta que vuelvas a incluir ese desbloqueo desde Acerca de. Se conserva en este dispositivo.",
     "sync_vault_keep": "Mantener la de este dispositivo",
     "sync_vault_replace": "Reemplazar",
@@ -5695,6 +5695,13 @@
         "overconstrained": "el dispositivo no admite esta configuración",
         "security": "bloqueado por seguridad",
         "abort": "se canceló"
+      },
+      "history": {
+        "earlier": "Mostrar mensajes anteriores",
+        "foreign": "El historial de este dispositivo se guardó con otra identidad y no se puede abrir.",
+        "start_over": "Empezar un historial nuevo",
+        "start_over_confirm": "¿Borrar el historial anterior de este dispositivo y empezar uno nuevo?",
+        "unavailable": "El historial del chat no se puede guardar en este dispositivo."
       }
     },
     "scanner": {

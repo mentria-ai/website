@@ -207,6 +207,10 @@ unlockTool: true
     <div class="comms__chatbody" id="comms-drop">
       <div class="comms__media" id="comms-media" hidden></div>
       <div class="comms__peerlist" id="comms-peerlist" hidden></div>
+      <div class="comms__upgrade comms__histbar" id="comms-hist-bar" role="status" hidden>
+        <span class="comms__upgrade-text" id="comms-hist-text"></span>
+        <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-hist-reset" type="button" hidden>{{ 'tool.comms.history.start_over' | t }}</button></div>
+      </div>
       <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
     </div>
 
@@ -453,6 +457,11 @@ unlockTool: true
 .comms__upgrade-text{flex:1 1 14rem;color:#c3ccd6;font-size:.82rem}
 .comms__upgrade-actions{display:flex;gap:.5rem;flex-wrap:wrap}
 .comms__app--chat .comms__upgrade{display:none}
+.comms__app--chat .comms__histbar{display:flex}
+.comms__app--chat .comms__histbar[hidden],.comms__histbar[hidden]{display:none}
+.comms__histbar{flex:none;margin:0 0 .5rem}
+.comms__earlier{display:block;margin:.25rem auto .75rem;padding:.3rem .8rem;border:1px solid var(--term-border,#2a2f37);border-radius:var(--radius-md,6px);background:transparent;color:var(--syn-cyan,#22d3ee);font:inherit;font-size:.8rem;cursor:pointer}
+.comms__earlier:disabled{opacity:.5;cursor:default}
 .comms__profile{display:flex;align-items:center;gap:.6rem}
 .comms__profile-spacer{flex:1}
 .comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);justify-content:start;grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
@@ -553,6 +562,8 @@ import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
 import { holdAwake } from '/assets/js/mentria-wake.js';
 import { renderBody } from '/assets/js/comms/cards.js';
+import { openStore } from '/assets/js/comms/store.js';
+import { secretCopy } from '/assets/js/comms/identity.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1092,6 +1103,7 @@ const renderPendingLine = (text, payload, cmid) => {
     if (!chatAction) { sys(T.log.not_connected); return; }
     chatAction.send(payload);
     publishChat(text, cmid);
+    storeLine(cmid, 'self', text, Date.now());
     line.line.classList.remove('comms__line--pending');
     note.remove();
     btn.remove();
@@ -1136,11 +1148,13 @@ const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp 
 const renderRemoteChat = (item, opts = {}) => {
   if (sentByMe(item)) {
     renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
+    if (!opts.stored) storeLine(item.cmid, 'self', item.text, item.ts);
     return;
   }
   let who = displayName(item.senderId);
   if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
   renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
+  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '' });
   if (!opts.silent) {
     playPing(880);
     const target = notifTargetNow();
@@ -1170,7 +1184,7 @@ const handleNostrMsg = async (msgEvent) => {
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp, sfp2 };
+    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1184,10 +1198,147 @@ const closeChatSub = () => {
   }
 };
 
+const HISTORY_PAGE = 200;
+const HISTORY_WAIT_MS = 1500;
+let commsStore = null;
+let commsStoreP = null;
+let historyNoted = '';
+
+const historyBar = (kind) => {
+  const bar = document.getElementById('comms-hist-bar');
+  if (!bar || historyNoted === kind) return;
+  historyNoted = kind;
+  document.getElementById('comms-hist-text').textContent = kind === 'foreign' ? T.history.foreign : T.history.unavailable;
+  document.getElementById('comms-hist-reset').hidden = kind !== 'foreign';
+  bar.hidden = false;
+};
+
+const hideHistoryBar = () => {
+  const bar = document.getElementById('comms-hist-bar');
+  if (bar) bar.hidden = true;
+  historyNoted = '';
+};
+
+const openHistory = () => {
+  if (commsStoreP) return commsStoreP;
+  let secret = null;
+  try { secret = secretCopy(); } catch (_) { return Promise.resolve(null); }
+  commsStoreP = openStore(secret).then((st) => {
+    commsStore = st;
+    if (st.status === 'foreign') historyBar('foreign');
+    return st;
+  }, () => {
+    commsStore = null;
+    historyBar('unavailable');
+    return null;
+  }).finally(() => { secret.fill(0); });
+  return commsStoreP;
+};
+
+const historyOn = () => !!(commsStore && commsStore.status === 'open');
+const historyFail = (e) => historyBar(e && e.code === 'foreign' ? 'foreign' : 'unavailable');
+const keepsHistory = (name) => !!(name && chatPersist && !isEphemeralRoom(name));
+
+const storeLine = (cmid, from, text, ts, meta) => {
+  const room = currentRoomName;
+  if (!cmid || !historyOn() || !keepsHistory(room)) return;
+  const t = String(text == null ? '' : text);
+  commsStore.putMessage({ id: cmid, threadId: room, from, ts: Number(ts) || Date.now(), t, parts: [{ type: 'text', text: t }], meta: meta || undefined, v: 2 }).catch(historyFail);
+};
+
+const renderStored = (m) => {
+  if (!m || !m.id || seenCmids.has(m.id)) return;
+  seenCmids.add(m.id);
+  if (m.from === 'self') {
+    renderLine('you', m.t, { me: true, quiet: true, ts: m.ts });
+    return;
+  }
+  const meta = m.meta || {};
+  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id }, { silent: true, stored: true });
+};
+
+const setEarlier = (beforeTs) => {
+  let b = document.getElementById('comms-earlier');
+  if (beforeTs == null) {
+    if (b) b.remove();
+    return;
+  }
+  if (!b) {
+    b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'comms-earlier';
+    b.className = 'comms__earlier';
+    b.textContent = T.history.earlier;
+    b.addEventListener('click', () => { showEarlier(); });
+  }
+  b.dataset.before = String(beforeTs);
+  if (els.log.firstChild !== b) els.log.prepend(b);
+};
+
+const showEarlier = async () => {
+  const b = document.getElementById('comms-earlier');
+  const room = currentRoomName;
+  const seq = joinSeq;
+  if (!b || !historyOn() || !room) return;
+  b.disabled = true;
+  try {
+    const msgs = await commsStore.listMessages(room, { before: Number(b.dataset.before), limit: HISTORY_PAGE });
+    if (seq !== joinSeq) return;
+    const fromBottom = els.log.scrollHeight - els.log.scrollTop;
+    const pinned = logPinned;
+    logPinned = false;
+    msgs.forEach(renderStored);
+    logPinned = pinned;
+    els.log.scrollTop = els.log.scrollHeight - fromBottom;
+    setEarlier(msgs.length >= HISTORY_PAGE ? msgs[0].ts : null);
+  } catch (e) {
+    historyFail(e);
+  } finally {
+    b.disabled = false;
+  }
+};
+
+const openThreadHistory = async (roomName, seq) => {
+  if (!keepsHistory(roomName) || !commsStoreP) return;
+  const st = await Promise.race([commsStoreP, new Promise((r) => setTimeout(() => r(null), HISTORY_WAIT_MS))]);
+  if (seq !== joinSeq || !st || st.status !== 'open') return;
+  const c = currentDmContact;
+  try {
+    const prev = await st.getThread(roomName);
+    const base = c && isDmRoom(roomName)
+      ? { kind: 'dm', title: c.name || c.fp, participants: [{ id: c.fp, kind: 'human', name: c.name || '' }], meta: { fp: c.fp } }
+      : { kind: 'room', title: (roomNotifyEntry(roomName) || {}).label || roomName, participants: [], meta: {} };
+    await st.putThread({ id: roomName, ...base, updatedAt: prev ? prev.updatedAt : 0, lastReadTs: Date.now(), pinned: prev ? !!prev.pinned : false });
+    if (seq !== joinSeq) return;
+    const msgs = await st.listMessages(roomName, { limit: HISTORY_PAGE });
+    if (seq !== joinSeq) return;
+    msgs.forEach(renderStored);
+    setEarlier(msgs.length >= HISTORY_PAGE ? msgs[0].ts : null);
+  } catch (e) {
+    historyFail(e);
+  }
+};
+
+document.getElementById('comms-hist-reset').addEventListener('click', async () => {
+  if (!commsStore) return;
+  const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.history.start_over_confirm, { danger: true }) : Promise.resolve(false));
+  if (!ok) return;
+  try {
+    await commsStore.wipe();
+    hideHistoryBar();
+    if (currentRoomName) await openThreadHistory(currentRoomName, joinSeq);
+  } catch (e) {
+    historyFail(e);
+  }
+});
+
 const setupChatPersistence = async (roomName, topic) => {
   chatTopic = topic || null;
   chatPersist = !!(chatTopic && chatKey);
   seenCmids = new Set();
+  const seq = joinSeq;
+  await openThreadHistory(roomName, seq);
+  if (seq !== joinSeq) return;
 
   if (!chatPersist) {
     chatSubId = null;
@@ -1698,7 +1849,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
-    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2 });
+    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2, cmid });
     playPing(880);
   };
 
@@ -1875,6 +2026,7 @@ els.send.addEventListener('submit', async (e) => {
   chatAction.send(livePayload);
   publishChat(text, cmid);
   const sent = renderLine('you', text, { me: true });
+  storeLine(cmid, 'self', text, Number(sent.line.dataset.ts));
   if (!currentDmContact && peers.size === 0) {
     const note = document.createElement('span');
     note.className = 'comms__pending-note';
@@ -3047,6 +3199,7 @@ const initIdentity = async () => {
     myId = await CID.ensureKeypair();
     myFp = await CID.fingerprint(myId.publicJwk);
     myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
+    openHistory();
     try { await CID.migrateFingerprints(); } catch (_) {}
     myProfile = CID.getProfile();
     els.idName.value = myProfile.name;

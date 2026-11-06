@@ -152,7 +152,7 @@
     "sync_no_peer": "Aucun appareil n'a répondu avec ce code. Vérifiez le code et gardez la page À propos ouverte sur l'autre appareil.",
     "sync_busy": "Ce code est déjà utilisé par deux autres appareils. Créez un nouveau code sur l'appareil avec lequel vous voulez jumeler celui-ci.",
     "sync_vault_totp": "Cet appareil a son propre coffre TOTP, et l'autre appareil en a un différent. Remplacer le coffre de cet appareil par celui de l'autre ? Les comptes TOTP qui ne sont que sur cet appareil seront perdus, et il s'ouvrira avec la phrase secrète de l'autre appareil.",
-    "sync_vault_identity": "Cet appareil a sa propre identité Mentria, et l'autre appareil en a une différente. La remplacer par celle de l'autre appareil ? L'identité de cet appareil sera perdue, et elle s'ouvrira avec la phrase secrète de l'autre appareil.",
+    "sync_vault_identity": "Cet appareil a sa propre identité Mentria, et l'autre appareil en a une différente. La remplacer par celle de l'autre appareil ? L'identité de cet appareil sera perdue, et elle s'ouvrira avec la phrase secrète de l'autre appareil. L'historique des discussions enregistré sur cet appareil sous l'ancienne identité ne pourra plus être ouvert.",
     "sync_vault_keyring": "Cet appareil a son propre déverrouillage unique, et l'autre appareil en a un différent. Le remplacer par celui de l'autre appareil ? Il s'ouvrira avec le code de récupération de l'autre appareil. Les notes, codes, discussions et finances configurés avec le déverrouillage de cet appareil ne s'ouvriront plus ici tant que vous n'aurez pas réintégré ce déverrouillage depuis À propos. Il est conservé sur cet appareil.",
     "sync_vault_keep": "Garder la version de cet appareil",
     "sync_vault_replace": "Remplacer",
@@ -5695,6 +5695,13 @@
         "overconstrained": "l’appareil ne prend pas en charge ces réglages",
         "security": "bloqué pour des raisons de sécurité",
         "abort": "opération interrompue"
+      },
+      "history": {
+        "earlier": "Afficher les messages précédents",
+        "foreign": "L’historique de cet appareil a été enregistré sous une autre identité et ne peut pas être ouvert.",
+        "start_over": "Commencer un nouvel historique",
+        "start_over_confirm": "Supprimer l’ancien historique de cet appareil et en commencer un nouveau ?",
+        "unavailable": "L’historique des discussions ne peut pas être enregistré sur cet appareil."
       }
     },
     "scanner": {

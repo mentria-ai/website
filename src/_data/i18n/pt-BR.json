@@ -152,7 +152,7 @@
     "sync_no_peer": "Nenhum aparelho respondeu com este código. Confira o código e mantenha a página Sobre aberta no outro aparelho.",
     "sync_busy": "Este código já está sendo usado por outros dois aparelhos. Crie um código novo no aparelho com o qual você quer parear este.",
     "sync_vault_totp": "Este aparelho tem o próprio cofre TOTP, e o outro aparelho tem um diferente. Substituir o cofre deste aparelho pelo do outro? As contas TOTP que estão só neste aparelho serão perdidas, e ele passará a abrir com a senha do outro aparelho.",
-    "sync_vault_identity": "Este aparelho tem a própria identidade Mentria, e o outro aparelho tem uma diferente. Substituí-la pela do outro aparelho? A identidade deste aparelho será perdida, e ela passará a abrir com a senha do outro aparelho.",
+    "sync_vault_identity": "Este aparelho tem a própria identidade Mentria, e o outro aparelho tem uma diferente. Substituí-la pela do outro aparelho? A identidade deste aparelho será perdida, e ela passará a abrir com a senha do outro aparelho. O histórico de chat salvo neste aparelho com a identidade antiga não vai mais abrir.",
     "sync_vault_keyring": "Este aparelho tem o próprio desbloqueio único, e o outro aparelho tem um diferente. Substituí-lo pelo do outro aparelho? Ele passará a abrir com o código de recuperação do outro aparelho. As notas, os códigos, as conversas e as finanças configurados com o desbloqueio deste aparelho não vão abrir aqui até você trazer esse desbloqueio de volta em Sobre. Ele fica guardado neste aparelho.",
     "sync_vault_keep": "Manter a versão deste aparelho",
     "sync_vault_replace": "Substituir",
@@ -5695,6 +5695,13 @@
         "overconstrained": "o dispositivo não aceita essa configuração",
         "security": "bloqueado por segurança",
         "abort": "a operação foi interrompida"
+      },
+      "history": {
+        "earlier": "Mostrar mensagens anteriores",
+        "foreign": "O histórico deste aparelho foi salvo com outra identidade e não pode ser aberto.",
+        "start_over": "Começar um novo histórico",
+        "start_over_confirm": "Apagar o histórico antigo deste aparelho e começar um novo?",
+        "unavailable": "O histórico de chat não pode ser salvo neste aparelho."
       }
     },
     "scanner": {

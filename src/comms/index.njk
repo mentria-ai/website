@@ -550,6 +550,7 @@ import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
 import { holdAwake } from '/assets/js/mentria-wake.js';
+import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -884,11 +885,6 @@ document.getElementById('comms-relay').addEventListener('click', () => {
 renderRelayToggle();
 let audioCtx = null;
 
-const CHAT_TOPIC_V2 = 'mentria-comms-topic-v2|';
-const CHAT_KIND = 3838;
-const EPHEMERAL_PREFIX = '!';
-const HISTORY_LOOKBACK_SEC = 7 * 24 * 60 * 60;
-const HISTORY_LIMIT = 100;
 const PROOF_LABEL = 'mentria-prof-proof-v1';
 
 let chatSubId = null;
@@ -897,79 +893,11 @@ let chatPersist = true;
 let seenCmids = new Set();
 const socketListenersAttached = new WeakSet();
 
-const isEphemeralRoom = (name) => typeof name === 'string' && name.startsWith(EPHEMERAL_PREFIX);
-const isDmRoom = (name) => typeof name === 'string' && (name.startsWith('!dm-') || name.startsWith('dm-'));
 const newCmid = () => selfId + ':' + Math.random().toString(36).slice(2);
 
 let chatKey = null;
 
-const b64encode = (bytes) => {
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-  return btoa(s);
-};
-const b64decode = (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
-const b64urlEncode = (bytes) => b64encode(bytes).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
-const b64urlDecode = (str) => {
-  const b64 = str.replaceAll('-','+').replaceAll('_','/');
-  const padded = b64 + '='.repeat((4 - b64.length % 4) % 4);
-  return b64decode(padded);
-};
-
-const decodeRoom = (part) => {
-  try { return decodeURIComponent(part); } catch (_) { return part; }
-};
-
-const parseHash = (hash) => {
-  const raw = (hash || '').slice(1).trim();
-  if (!raw) return { room: null, b64Key: null };
-  const colonIdx = raw.indexOf(':');
-  if (colonIdx === -1) return { room: decodeRoom(raw) || null, b64Key: null };
-  return { room: decodeRoom(raw.slice(0, colonIdx)) || null, b64Key: raw.slice(colonIdx + 1) || null };
-};
-
-const formatHash = (room, b64Key) => '#' + encodeURIComponent(room) + (b64Key ? ':' + b64Key : '');
-
-const deriveKey = async (b64Key) => {
-  try {
-    const raw = b64urlDecode(b64Key);
-    if (raw.length !== 32) throw new Error('key must be 32 bytes');
-    return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
-  } catch (err) {
-    console.warn('key parse failed:', err);
-    return null;
-  }
-};
-
-const topicCache = new Map();
-const chatTopicFor = (roomName, b64Key) => {
-  const id = b64Key + ':' + roomName;
-  if (!topicCache.has(id)) {
-    topicCache.set(id, (async () => {
-      const raw = b64urlDecode(b64Key);
-      if (raw.length !== 32) return null;
-      const mac = await crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-      return b64urlEncode(new Uint8Array(await crypto.subtle.sign('HMAC', mac, new TextEncoder().encode(CHAT_TOPIC_V2 + roomName))));
-    })().catch(() => null));
-  }
-  return topicCache.get(id);
-};
 try { if (MentriaStore.get('comms', 'topic_v2_since') != null) MentriaStore.remove('comms', 'topic_v2_since'); } catch (_) {}
-const expiryTags = () => [['expiration', String(Math.floor(Date.now() / 1000) + HISTORY_LOOKBACK_SEC)]];
-
-const encryptText = async (key, plaintext) => {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(plaintext));
-  return { v: 1, iv: b64encode(iv), ct: b64encode(new Uint8Array(ct)) };
-};
-
-const decryptText = async (key, payload) => {
-  if (!payload || payload.v !== 1) throw new Error('bad payload');
-  const iv = b64decode(payload.iv);
-  const ct = b64decode(payload.ct);
-  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
-  return new TextDecoder().decode(pt);
-};
 
 const short = (id) => id ? id.slice(0, 6) : T.unknown;
 
@@ -1219,17 +1147,6 @@ const renderRemoteChat = (item, opts = {}) => {
   }
 };
 
-const packChatPlain = (text, extra) => JSON.stringify(Object.assign({ v: 2, t: text, sfp: myLegacyFp || undefined, sfp2: (myFp && myFp !== myLegacyFp) ? myFp : undefined }, extra || {}));
-const unpackChatPlain = (raw) => {
-  try {
-    const o = JSON.parse(raw);
-    if (o && o.v === 2 && typeof o.t === 'string') {
-      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, sfp2: typeof o.sfp2 === 'string' ? o.sfp2 : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null };
-    }
-  } catch (_) {}
-  return { text: raw, sfp: null, sfp2: null, ctl: null };
-};
-
 const handleNostrMsg = async (msgEvent) => {
   let msg;
   try { msg = JSON.parse(msgEvent.data); } catch { return; }
@@ -1404,7 +1321,7 @@ const publishRoomCtl = async (ctl) => {
   const cmid = newCmid();
   seenCmids.add(cmid);
   try {
-    const enc = await encryptText(chatKey, packChatPlain('', { ctl }));
+    const enc = await encryptText(chatKey, packChatPlain('', { fp: myFp, legacyFp: myLegacyFp }, { ctl }));
     if (chatAction) { try { chatAction.send({ cmid, enc }); } catch (_) {} }
     rememberSentCmid(cmid);
     const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
@@ -1500,7 +1417,7 @@ const publishChat = async (text, cmid) => {
   if (!chatTopic || !chatPersist || !chatKey) return;
   rememberSentCmid(cmid);
   try {
-    const enc = await encryptText(chatKey, packChatPlain(text));
+    const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }));
     const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
@@ -1512,15 +1429,6 @@ const publishChat = async (text, cmid) => {
   } catch (err) {
     console.warn('chat publish failed:', err);
   }
-};
-
-const certFingerprints = (sdp) => {
-  const out = new Set();
-  String(sdp || '').split(/\r?\n/).forEach((line) => {
-    const m = /^a=fingerprint:(\S+)\s+([0-9A-Fa-f:]+)/.exec(line.trim());
-    if (m) out.add(m[1].toLowerCase() + ' ' + m[2].toUpperCase());
-  });
-  return Array.from(out).sort().join(',');
 };
 
 const connBinding = (peerId) => {
@@ -1572,8 +1480,6 @@ const applyVerifiedProfile = async (peerId) => {
     if (currentDmContact && currentDmContact.fp === existing.fp) currentDmContact.ring = prof.ring;
   } catch (_) {}
 };
-
-const samePubOf = (a, b) => !!(a && b && a.x === b.x && a.y === b.y);
 
 let joinSeq = 0;
 
@@ -1951,7 +1857,7 @@ els.send.addEventListener('submit', async (e) => {
   let livePayload;
   if (chatKey) {
     try {
-      const enc = await encryptText(chatKey, packChatPlain(text));
+      const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }));
       livePayload = { cmid, enc };
     } catch (err) {
       sys(fmt(T.log.enc_failed, { reason: why(err) }));

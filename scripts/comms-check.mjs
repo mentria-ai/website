@@ -71,6 +71,7 @@ const I = await need('/assets/js/comms/identity.js');
 const C = await need('/assets/js/comms/cards.js');
 const H = await need('/assets/js/comms/threads.js');
 const M = await need('/assets/js/comms/mention.js');
+const A = await need('/assets/js/comms/ai-thread.js');
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -89,7 +90,8 @@ const fakeIdentity = ({ unlocked = false, deviceOpens = false, linked = false, s
     isUnlocked: () => f.open,
     getSecret: () => { if (!f.open) throw new Error('locked'); return f.secret; },
     tryDeviceUnlock: async () => { f.calls.tryDeviceUnlock++; if (deviceOpens) f.open = true; return deviceOpens; },
-    openLinked: async (list) => { f.calls.openLinked++; if (linked && list.length) { f.open = true; return 0; } throw new Error('locked'); }
+    openLinked: async (list) => { f.calls.openLinked++; if (linked && list.length) { f.open = true; return 0; } throw new Error('locked'); },
+    lock: () => { f.open = false; }
   };
   return f;
 };
@@ -113,6 +115,8 @@ check('identity: keyring secrets open a linked identity', async () => { const f 
 check('identity: without a keyring only Comms can unlock', async () => { fakeIdentity({}); eq(await I.askToOpen(), 'elsewhere'); });
 check('identity: a linked identity asks the one unlock', async () => { fakeIdentity({ linked: true }); const k = fakeKeyring({ secrets: [new Uint8Array(32).fill(3)], onLaunch: () => { k.unlocked = true; } }); eq(await I.askToOpen(), 'open'); eq(k.calls.showLaunch, 1); });
 check('identity: closing the unlock leaves the chat unsaved', async () => { const f = fakeIdentity({ linked: true }); const k = fakeKeyring({ secrets: [new Uint8Array(32).fill(3)] }); eq(await I.askToOpen(), 'cancelled'); eq(k.calls.showLaunch, 1); eq(f.calls.openLinked, 0); });
+check('identity: a lock in another tab closes this page too', async () => { const f = fakeIdentity({ unlocked: true, linked: true }); fakeKeyring({ unlocked: false }); eq(await I.stillOpen(), false); eq(f.open, false); });
+check('identity: an open keyring keeps the page open', async () => { const f = fakeIdentity({ unlocked: true, linked: true }); fakeKeyring({ unlocked: true }); eq(await I.stillOpen(), true); eq(f.open, true); });
 check('identity: secretCopy is a copy', () => { const f = fakeIdentity({ unlocked: true }); const s = I.secretCopy(); s[0] = 99; ok(f.secret[0] !== 99); });
 
 check('render: a bare link stops before the comma', () => deepEq(C.findLinks('see https://example.com/a, ok').map((l) => l.href), ['https://example.com/a']));
@@ -143,6 +147,16 @@ check('mention: an @ at a word start opens the picker', () => eq(M.mentionQuery(
 check('mention: an @ inside a word does not', () => eq(M.mentionQuery('mail a@b.c', 10), null));
 check('mention: prefix matches come first', () => deepEq(M.matchTargets('sa', [{ kind: 'contact', id: '1', label: 'Isabel' }, { kind: 'contact', id: '2', label: 'Sam' }]).map((t) => t.label), ['Sam', 'Isabel']));
 check('mention: the chosen name leaves the message', () => eq(M.splitTarget('@Sam see you at 9', { kind: 'contact', id: '2', label: 'Sam' }).body, 'see you at 9'));
+
+const TURNS = [
+  { role: 'user', text: 'What is in this photo?', img: true, thumb: 'ab12cd' },
+  { role: 'assistant', text: 'A seahorse in a kelp bed.', model: 'b2-2b', repeatCut: false },
+  { role: 'assistant', text: 'A seahorse. A seahorse.', model: 'b2-2b', repeatCut: true }
+];
+check('ai thread: turns survive the round trip', () => deepEq(A.messagesToTurns(TURNS.map((t, i) => A.turnToMessage(t, 'ai-x', i, 1000 + i))), TURNS));
+check('ai thread: titles are cut at 60 characters', () => eq(A.titleFrom('a'.repeat(80), 'Photo chat').length, 60));
+check('ai thread: photo-only chats get the fallback title', () => eq(A.titleFrom('', 'Photo chat'), 'Photo chat'));
+check('ai thread: legacy ids are stable', async () => { eq(await A.legacyThreadId('[1]'), await A.legacyThreadId('[1]')); ok((await A.legacyThreadId('[1]')).startsWith('ai-legacy-')); });
 
 let failed = 0;
 for (const [name, fn] of checks) {

@@ -1327,7 +1327,13 @@
       "adapters_thinking_on": "raciocínio ligado",
       "adapters_thinking_either": "raciocínio opcional",
       "think_pinned": "Desafixe o adaptador para usar o pensamento profundo",
-      "search_pinned": "Desafixe o adaptador para usar a busca na web"
+      "search_pinned": "Desafixe o adaptador para usar a busca na web",
+      "save_setup": "Configure sua identidade Mentria para guardar seus chats",
+      "save_setup_btn": "Configurar",
+      "save_unlock": "Desbloqueie para guardar este chat",
+      "save_unlock_btn": "Desbloquear",
+      "save_lost": "As mensagens não salvas se perdem quando você sai desta página.",
+      "photo_chat": "Chat de foto"
     },
     "extensions": {
       "install_heading": "Instalar uma extensão",

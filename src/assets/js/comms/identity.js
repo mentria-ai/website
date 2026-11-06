@@ -60,6 +60,14 @@ export const openQuietly = async () => {
   return openFromKeyring(id);
 };
 
+export const stillOpen = async () => {
+  if (!isOpen()) return false;
+  const ring = await linkedState();
+  if (!ring || ring.st.unlocked) return true;
+  try { vaultApi().lock(); } catch (_) {}
+  return false;
+};
+
 export const askToOpen = async () => {
   if (await openQuietly()) return 'open';
   if (!hasIdentity()) return 'elsewhere';

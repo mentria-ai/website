@@ -1327,7 +1327,13 @@
       "adapters_thinking_on": "thinking on",
       "adapters_thinking_either": "thinking either",
       "think_pinned": "Unpin the adapter to use deep think",
-      "search_pinned": "Unpin the adapter to use web search"
+      "search_pinned": "Unpin the adapter to use web search",
+      "save_setup": "Set up your Mentria identity to keep your chats",
+      "save_setup_btn": "Set up",
+      "save_unlock": "Unlock to keep this chat",
+      "save_unlock_btn": "Unlock",
+      "save_lost": "Unsaved messages are lost when you leave this page.",
+      "photo_chat": "Photo chat"
     },
     "extensions": {
       "install_heading": "Install an extension",

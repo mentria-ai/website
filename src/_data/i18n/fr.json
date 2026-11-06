@@ -1327,7 +1327,13 @@
       "adapters_thinking_on": "réflexion activée",
       "adapters_thinking_either": "réflexion au choix",
       "think_pinned": "Désépinglez l’adaptateur pour utiliser la réflexion approfondie",
-      "search_pinned": "Désépinglez l’adaptateur pour utiliser la recherche web"
+      "search_pinned": "Désépinglez l’adaptateur pour utiliser la recherche web",
+      "save_setup": "Configurez votre identité Mentria pour garder vos discussions",
+      "save_setup_btn": "Configurer",
+      "save_unlock": "Déverrouillez pour garder cette discussion",
+      "save_unlock_btn": "Déverrouiller",
+      "save_lost": "Les messages non enregistrés sont perdus quand vous quittez cette page.",
+      "photo_chat": "Discussion photo"
     },
     "extensions": {
       "install_heading": "Installer une extension",

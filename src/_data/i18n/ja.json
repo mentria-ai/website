@@ -1327,7 +1327,13 @@
       "adapters_thinking_on": "思考オン",
       "adapters_thinking_either": "思考どちらでも",
       "think_pinned": "深い思考を使うにはアダプターの固定を解除してください",
-      "search_pinned": "ウェブ検索を使うにはアダプターの固定を解除してください"
+      "search_pinned": "ウェブ検索を使うにはアダプターの固定を解除してください",
+      "save_setup": "チャットを残すには Mentria ID を設定してください",
+      "save_setup_btn": "設定する",
+      "save_unlock": "このチャットを残すにはロックを解除してください",
+      "save_unlock_btn": "ロック解除",
+      "save_lost": "保存していないメッセージは、このページを離れると失われます。",
+      "photo_chat": "写真チャット"
     },
     "extensions": {
       "install_heading": "拡張機能をインストール",

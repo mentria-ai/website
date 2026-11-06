@@ -14,17 +14,6 @@ localeReload: true
 unlockTool: true
 ---
 {%- set commsHttps = "https://mentria.ai" + locale.pathPrefix + "/comms/" -%}
-<section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">comms</span></p>
-  <h1>{{ 'tools.comms.title' | t }}</h1>
-  <p>{{ 'tool.comms.lede' | t }}</p>
-</section>
-
-{% set terminalTitle = "comms.js" %}
-{% set terminalFullscreen = true %}
-{% set terminalMini = "tool" %}
-{% include "terminal-frame-open.njk" %}
-
 <svg class="comms__sprite" aria-hidden="true" focusable="false"><defs>
   <symbol id="ci-lock" viewBox="0 0 24 24"><g transform="translate(0 1)"><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="4" y="10" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="15" r="1.6" fill="currentColor"/></g></symbol>
   <symbol id="ci-phone" viewBox="0 0 24 24"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
@@ -47,6 +36,7 @@ unlockTool: true
 </defs></svg>
 
 <section class="comms">
+  <h1 class="sr-only">{{ 'tools.comms.title' | t }}</h1>
   <div class="comms__onboard" id="comms-onboard" hidden>
     <div class="comms__onboard-step" id="comms-onboard-insecure" hidden>
       <h2 class="comms__onboard-h">{{ 'tool.comms.onboard.insecure_title' | t }}</h2>
@@ -98,165 +88,169 @@ unlockTool: true
   </div>
 
   <div class="comms__app comms__app--people" id="comms-app" hidden>
-    <div class="comms__profile" id="comms-profile">
-      <div class="comms__id-row comms__id-row--you" id="comms-id-on" hidden>
-        <span class="comms__avatar comms__avatar--me" id="comms-prof-avatar" aria-hidden="true"></span>
-        <input class="comms__input comms__input--short" id="comms-id-name" type="text" maxlength="32" placeholder="{{ 'tool.comms.profile.name_placeholder' | t }}" autocomplete="nickname" aria-label="{{ 'tool.comms.profile.name_label' | t }}">
-        <span class="comms__badge comms__badge--fp" id="comms-id-fp" title="{{ 'tool.comms.profile.fp_title' | t }}"></span>
-      </div>
-      <span class="comms__profile-spacer"></span>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-lock" type="button" hidden title="{{ 'unlock.lock_now' | t }}" aria-label="{{ 'unlock.lock_now' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-adv-toggle" type="button" aria-expanded="false" title="{{ 'tool.comms.profile.settings' | t }}" aria-label="{{ 'tool.comms.profile.settings' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-gear"></use></svg></button>
-    </div>
-
-    <div class="comms__upgrade" id="comms-pk-upgrade" hidden>
-      <span class="comms__upgrade-text">{{ 'tool.comms.passkey.offer' | t }}</span>
-      <div class="comms__upgrade-actions">
-        <button class="comms__btn" id="comms-pk-enroll" type="button">{{ 'tool.comms.passkey.add' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-pk-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
-      </div>
-      <span class="comms__id-note" id="comms-pk-err" hidden></span>
-    </div>
-
-    <div class="comms__upgrade comms__link" id="comms-link" hidden>
-      <span class="comms__upgrade-text"><strong>{{ 'unlock.link_title' | t }}</strong> {{ 'unlock.link_body' | t }}</span>
-      <div class="comms__card-slot" id="comms-link-card" hidden></div>
-      <div class="comms__upgrade-actions">
-        <button class="comms__btn" id="comms-link-go" type="button" hidden>{{ 'tool.comms.guest.setup' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-link-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
-      </div>
-    </div>
-
-    <div class="comms__chathead" id="comms-chathead">
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-leave" type="button" hidden title="{{ 'tool.comms.chat.back' | t }}" aria-label="{{ 'tool.comms.chat.back' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-back"></use></svg></button>
-      <span class="comms__avatar" id="comms-chat-avatar" aria-hidden="true"></span>
-      <div class="comms__chathead-mid">
-        <span class="comms__chathead-name" id="comms-chat-title"></span>
-        <span class="comms__chathead-sub">
-          <span class="comms__sub-bit" id="comms-status">{{ 'tool.comms.chat.not_in_chat' | t }}</span>
-          <span class="comms__sub-bit" id="comms-enc" title="{{ 'tool.comms.chat.enc_title' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></span>
-          <span class="comms__sub-bit" id="comms-eph" title="{{ 'tool.comms.chat.eph_bang' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clock"></use></svg></span>
-          <span class="comms__sub-bit" id="comms-peers" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg><span id="comms-peers-n">0</span></span>
-        </span>
-      </div>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-share" type="button" hidden title="{{ 'tool.comms.chat.share_room' | t }}" aria-label="{{ 'tool.comms.chat.share_room' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg></button>
-      <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="{{ 'tool.comms.chat.call' | t }}" aria-label="{{ 'tool.comms.chat.call' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg></button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.chat.camera' | t }}" aria-label="{{ 'tool.comms.chat.camera' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-mic" type="button" hidden aria-pressed="true" title="{{ 'tool.comms.chat.mic' | t }}" aria-label="{{ 'tool.comms.chat.mic' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-mic"></use></svg></button>
-      <button class="comms__btn comms__btn--danger comms__btn--icon" id="comms-call-hangup" type="button" hidden title="{{ 'tool.comms.chat.hangup' | t }}" aria-label="{{ 'tool.comms.chat.hangup' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-hangup"></use></svg></button>
-    </div>
-
-    <div class="comms__notif" id="comms-notif" hidden>
-      <span class="comms__notif-text">{{ 'tool.comms.notif.text' | t }}</span>
-      <button class="comms__btn" id="comms-notif-enable" type="button">{{ 'tool.comms.notif.enable' | t }}</button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-notif-dismiss" type="button" title="{{ 'tool.comms.notif.dismiss' | t }}" aria-label="{{ 'tool.comms.notif.dismiss' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus" style="transform:rotate(45deg);transform-origin:center"></use></svg></button>
-    </div>
-
-    <div class="comms__id-row" id="comms-id-none" hidden>
-      <span class="comms__id-note">{{ 'tool.comms.guest.note' | t }}</span>
-      <button class="comms__btn comms__btn--ghost" id="comms-id-setup-here" type="button">{{ 'tool.comms.guest.setup' | t }}</button>
-    </div>
-
-    <div class="comms__contacts" id="comms-contacts" hidden>
-      <div class="comms__contacts-head">
-        <span class="comms__lbl">{{ 'tool.comms.people.heading' | t }}</span>
-        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share" type="button" aria-pressed="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span class="comms__btn-t" id="comms-id-share-t">{{ 'tool.comms.people.my_code' | t }}</span></button>
-        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-add-toggle" type="button" aria-expanded="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus"></use></svg><span class="comms__btn-t" id="comms-add-toggle-t">{{ 'tool.comms.people.add' | t }}</span></button>
-        <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false" hidden>{{ 'tool.comms.people.contacts' | t }}</button>
-      </div>
-      <div class="comms__id-card" id="comms-id-card" hidden>
-        <canvas class="comms__id-qr" id="comms-id-qr" width="0" height="0"></canvas>
-        <div class="comms__id-card-side">
-          <p class="comms__id-note">{{ 'tool.comms.people.code_note' | t }}</p>
-          <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
-          <div class="comms__id-card-actions">
-          <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">{{ 'tool.comms.people.copy_code' | t }}</button>
-          <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share-out" type="button" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg><span class="comms__btn-t">{{ 'tool.comms.people.share' | t }}</span></button>
+    <div class="comms__side">
+      <div class="comms__profile" id="comms-profile">
+        <span class="comms__brand" aria-hidden="true">comms<i>_</i></span>
+        <div class="comms__id-row comms__id-row--you" id="comms-id-on" hidden>
+          <span class="comms__avatar comms__avatar--me" id="comms-prof-avatar" aria-hidden="true"></span>
+          <input class="comms__input comms__input--short" id="comms-id-name" type="text" maxlength="32" placeholder="{{ 'tool.comms.profile.name_placeholder' | t }}" autocomplete="nickname" aria-label="{{ 'tool.comms.profile.name_label' | t }}">
+          <span class="comms__badge comms__badge--fp" id="comms-id-fp" title="{{ 'tool.comms.profile.fp_title' | t }}"></span>
         </div>
-        </div>
+        <span class="comms__profile-spacer"></span>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-lock" type="button" hidden title="{{ 'unlock.lock_now' | t }}" aria-label="{{ 'unlock.lock_now' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-adv-toggle" type="button" aria-expanded="false" title="{{ 'tool.comms.profile.settings' | t }}" aria-label="{{ 'tool.comms.profile.settings' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-gear"></use></svg></button>
       </div>
-      <div class="comms__add" id="comms-add" hidden>
-        <button class="comms__addopt" id="comms-scan" type="button"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span>{{ 'tool.comms.people.scan' | t }}</span></button>
-        <div class="comms__scan" id="comms-scan-wrap" hidden>
-          <video class="comms__scan-video" id="comms-scan-video" playsinline muted></video>
-          <div class="comms__scan-zoom" id="comms-scan-zoom-wrap" hidden>
-            <svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg>
-            <input type="range" id="comms-scan-zoom" min="1" max="5" step="0.1" value="1" aria-label="{{ 'tool.comms.people.zoom' | t }}">
+
+      <div class="comms__adv" id="comms-adv" hidden>
+        <div class="comms__adv-sec">
+          <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
+          <div class="comms__room">
+            <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="{{ 'tool.comms.adv.room_placeholder' | t }}">
+            <button class="comms__btn" id="comms-join" type="button">{{ 'tool.comms.adv.join' | t }}</button>
           </div>
-          <p class="comms__id-note" id="comms-scan-note">{{ 'tool.comms.people.scan_hint' | t }}</p>
-          <div class="comms__scan-actions">
-            <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-scan-torch" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.people.torch' | t }}" aria-label="{{ 'tool.comms.people.torch' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-flash"></use></svg></button>
-            <button class="comms__btn comms__btn--ghost" id="comms-scan-stop" type="button">{{ 'tool.comms.people.cancel' | t }}</button>
+          <div class="comms__room-new">
+            <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button" title="{{ 'tool.comms.adv.new_room_title' | t }}">{{ 'tool.comms.adv.new_room' | t }}</button>
+            <button class="comms__btn comms__btn--ghost" id="comms-newsaved" type="button" title="{{ 'tool.comms.adv.new_saved_title' | t }}">{{ 'tool.comms.adv.new_saved' | t }}</button>
           </div>
         </div>
-        <div class="comms__contacts-add">
-          <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="{{ 'tool.comms.people.paste_placeholder' | t }}" spellcheck="false" autocapitalize="off">
-          <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">{{ 'tool.comms.people.add_btn' | t }}</button>
+        <div class="comms__adv-sec">
+          <span class="comms__lbl">{{ 'tool.comms.adv.privacy' | t }}</span>
+          <button class="comms__relay" id="comms-relay" type="button" role="switch" aria-checked="false">
+            <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6v5c0 4.4 3 7.9 7 9 4-1.1 7-4.6 7-9V6Z"></path><path d="M9.4 11.8l1.9 1.9 3.3-3.4"></path></svg>
+            <span class="comms__relay-lbl">{{ 'tool.comms.adv.hide_ip' | t }}</span>
+            <span class="comms__relay-track" aria-hidden="true"><span class="comms__relay-thumb"></span></span>
+          </button>
+          <p class="comms__relay-note" id="comms-relay-note" hidden>{{ 'tool.comms.adv.relay_note' | t }}</p>
         </div>
-        <p class="comms__add-err" id="comms-add-err" role="alert" hidden></p>
+        <div class="comms__adv-sec comms__adv-sec--col">
+          <div class="comms__adv-row">
+            <span class="comms__lbl">{{ 'tool.comms.adv.notifications' | t }}</span>
+            <button class="comms__btn comms__btn--ghost" id="comms-push-test" type="button">{{ 'tool.comms.adv.test' | t }}</button>
+          </div>
+          <span class="comms__id-note" id="comms-push-status">…</span>
+          <span class="comms__id-note comms__push-log" id="comms-push-test-log" hidden></span>
+        </div>
+        <div class="comms__adv-sec">
+          <span class="comms__lbl">{{ 'tool.comms.adv.device' | t }}</span>
+          <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">{{ 'tool.comms.adv.sound_on' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">{{ 'tool.comms.adv.attach_ext' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">{{ 'tool.comms.adv.attach_pack' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>{{ 'tool.comms.passkey.add' | t }}</button>
+          <a class="comms__btn comms__btn--ghost" href="{{ locale.pathPrefix }}/about/">{{ 'tool.comms.adv.identity' | t }}</a>
+        </div>
       </div>
-      <div class="comms__contacts-list" id="comms-contacts-list"></div>
+
+      <div class="comms__upgrade" id="comms-pk-upgrade" hidden>
+        <span class="comms__upgrade-text">{{ 'tool.comms.passkey.offer' | t }}</span>
+        <div class="comms__upgrade-actions">
+          <button class="comms__btn" id="comms-pk-enroll" type="button">{{ 'tool.comms.passkey.add' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-pk-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
+        </div>
+        <span class="comms__id-note" id="comms-pk-err" hidden></span>
+      </div>
+
+      <div class="comms__upgrade comms__link" id="comms-link" hidden>
+        <span class="comms__upgrade-text"><strong>{{ 'unlock.link_title' | t }}</strong> {{ 'unlock.link_body' | t }}</span>
+        <div class="comms__card-slot" id="comms-link-card" hidden></div>
+        <div class="comms__upgrade-actions">
+          <button class="comms__btn" id="comms-link-go" type="button" hidden>{{ 'tool.comms.guest.setup' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-link-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
+        </div>
+      </div>
+
+      <div class="comms__notif" id="comms-notif" hidden>
+        <span class="comms__notif-text">{{ 'tool.comms.notif.text' | t }}</span>
+        <button class="comms__btn" id="comms-notif-enable" type="button">{{ 'tool.comms.notif.enable' | t }}</button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-notif-dismiss" type="button" title="{{ 'tool.comms.notif.dismiss' | t }}" aria-label="{{ 'tool.comms.notif.dismiss' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus" style="transform:rotate(45deg);transform-origin:center"></use></svg></button>
+      </div>
+
+      <div class="comms__id-row" id="comms-id-none" hidden>
+        <span class="comms__id-note">{{ 'tool.comms.guest.note' | t }}</span>
+        <button class="comms__btn comms__btn--ghost" id="comms-id-setup-here" type="button">{{ 'tool.comms.guest.setup' | t }}</button>
+      </div>
+
+      <div class="comms__contacts" id="comms-contacts" hidden>
+        <div class="comms__contacts-head">
+          <span class="comms__lbl">{{ 'tool.comms.people.heading' | t }}</span>
+          <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share" type="button" aria-pressed="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span class="comms__btn-t" id="comms-id-share-t">{{ 'tool.comms.people.my_code' | t }}</span></button>
+          <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-add-toggle" type="button" aria-expanded="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus"></use></svg><span class="comms__btn-t" id="comms-add-toggle-t">{{ 'tool.comms.people.add' | t }}</span></button>
+          <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false" hidden>{{ 'tool.comms.people.contacts' | t }}</button>
+        </div>
+        <div class="comms__id-card" id="comms-id-card" hidden>
+          <canvas class="comms__id-qr" id="comms-id-qr" width="0" height="0"></canvas>
+          <div class="comms__id-card-side">
+            <p class="comms__id-note">{{ 'tool.comms.people.code_note' | t }}</p>
+            <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
+            <div class="comms__id-card-actions">
+            <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">{{ 'tool.comms.people.copy_code' | t }}</button>
+            <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share-out" type="button" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg><span class="comms__btn-t">{{ 'tool.comms.people.share' | t }}</span></button>
+          </div>
+          </div>
+        </div>
+        <div class="comms__add" id="comms-add" hidden>
+          <button class="comms__addopt" id="comms-scan" type="button"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span>{{ 'tool.comms.people.scan' | t }}</span></button>
+          <div class="comms__scan" id="comms-scan-wrap" hidden>
+            <video class="comms__scan-video" id="comms-scan-video" playsinline muted></video>
+            <div class="comms__scan-zoom" id="comms-scan-zoom-wrap" hidden>
+              <svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg>
+              <input type="range" id="comms-scan-zoom" min="1" max="5" step="0.1" value="1" aria-label="{{ 'tool.comms.people.zoom' | t }}">
+            </div>
+            <p class="comms__id-note" id="comms-scan-note">{{ 'tool.comms.people.scan_hint' | t }}</p>
+            <div class="comms__scan-actions">
+              <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-scan-torch" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.people.torch' | t }}" aria-label="{{ 'tool.comms.people.torch' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-flash"></use></svg></button>
+              <button class="comms__btn comms__btn--ghost" id="comms-scan-stop" type="button">{{ 'tool.comms.people.cancel' | t }}</button>
+            </div>
+          </div>
+          <div class="comms__contacts-add">
+            <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="{{ 'tool.comms.people.paste_placeholder' | t }}" spellcheck="false" autocapitalize="off">
+            <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">{{ 'tool.comms.people.add_btn' | t }}</button>
+          </div>
+          <p class="comms__add-err" id="comms-add-err" role="alert" hidden></p>
+        </div>
+        <div class="comms__contacts-list" id="comms-contacts-list"></div>
+      </div>
     </div>
-
-    <div class="comms__ring" id="comms-ring" hidden>
-      <span class="comms__ring-text" id="comms-ring-text">{{ 'tool.comms.ring.incoming' | t }}</span>
-      <button class="comms__btn" id="comms-ring-accept" type="button">{{ 'tool.comms.ring.accept' | t }}</button>
-      <button class="comms__btn comms__btn--ghost" id="comms-ring-decline" type="button">{{ 'tool.comms.ring.decline' | t }}</button>
-    </div>
-
-    <div class="comms__chatbody" id="comms-drop">
-      <div class="comms__media" id="comms-media" hidden></div>
-      <div class="comms__peerlist" id="comms-peerlist" hidden></div>
-      <div class="comms__upgrade comms__histbar" id="comms-hist-bar" role="status" hidden>
-        <span class="comms__upgrade-text" id="comms-hist-text"></span>
-        <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-hist-reset" type="button" hidden>{{ 'tool.comms.history.start_over' | t }}</button></div>
-      </div>
-      <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
-    </div>
-
-    <form class="comms__send" id="comms-send" autocomplete="off">
-      <label class="comms__attach" title="{{ 'tool.comms.chat.attach' | t }}" aria-label="{{ 'tool.comms.chat.attach' | t }}"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
-      <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled>
-      <button class="comms__btn comms__btn--send" id="comms-go" type="submit" disabled title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
-    </form>
-
-    <div class="comms__adv" id="comms-adv" hidden>
-      <div class="comms__adv-sec">
-        <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
-        <div class="comms__room">
-          <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="{{ 'tool.comms.adv.room_placeholder' | t }}">
-          <button class="comms__btn" id="comms-join" type="button">{{ 'tool.comms.adv.join' | t }}</button>
+    <div class="comms__main">
+      <div class="comms__chathead" id="comms-chathead">
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-leave" type="button" hidden title="{{ 'tool.comms.chat.back' | t }}" aria-label="{{ 'tool.comms.chat.back' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-back"></use></svg></button>
+        <span class="comms__avatar" id="comms-chat-avatar" aria-hidden="true"></span>
+        <div class="comms__chathead-mid">
+          <span class="comms__chathead-name" id="comms-chat-title"></span>
+          <span class="comms__chathead-sub">
+            <span class="comms__sub-bit" id="comms-status">{{ 'tool.comms.chat.not_in_chat' | t }}</span>
+            <span class="comms__sub-bit" id="comms-enc" title="{{ 'tool.comms.chat.enc_title' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></span>
+            <span class="comms__sub-bit" id="comms-eph" title="{{ 'tool.comms.chat.eph_bang' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clock"></use></svg></span>
+            <span class="comms__sub-bit" id="comms-peers" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg><span id="comms-peers-n">0</span></span>
+          </span>
         </div>
-        <div class="comms__room-new">
-          <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button" title="{{ 'tool.comms.adv.new_room_title' | t }}">{{ 'tool.comms.adv.new_room' | t }}</button>
-          <button class="comms__btn comms__btn--ghost" id="comms-newsaved" type="button" title="{{ 'tool.comms.adv.new_saved_title' | t }}">{{ 'tool.comms.adv.new_saved' | t }}</button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-share" type="button" hidden title="{{ 'tool.comms.chat.share_room' | t }}" aria-label="{{ 'tool.comms.chat.share_room' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg></button>
+        <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="{{ 'tool.comms.chat.call' | t }}" aria-label="{{ 'tool.comms.chat.call' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.chat.camera' | t }}" aria-label="{{ 'tool.comms.chat.camera' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-mic" type="button" hidden aria-pressed="true" title="{{ 'tool.comms.chat.mic' | t }}" aria-label="{{ 'tool.comms.chat.mic' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-mic"></use></svg></button>
+        <button class="comms__btn comms__btn--danger comms__btn--icon" id="comms-call-hangup" type="button" hidden title="{{ 'tool.comms.chat.hangup' | t }}" aria-label="{{ 'tool.comms.chat.hangup' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-hangup"></use></svg></button>
+      </div>
+
+      <div class="comms__ring" id="comms-ring" hidden>
+        <span class="comms__ring-text" id="comms-ring-text">{{ 'tool.comms.ring.incoming' | t }}</span>
+        <button class="comms__btn" id="comms-ring-accept" type="button">{{ 'tool.comms.ring.accept' | t }}</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-ring-decline" type="button">{{ 'tool.comms.ring.decline' | t }}</button>
+      </div>
+
+      <div class="comms__chatbody" id="comms-drop">
+        <div class="comms__media" id="comms-media" hidden></div>
+        <div class="comms__peerlist" id="comms-peerlist" hidden></div>
+        <div class="comms__upgrade comms__histbar" id="comms-hist-bar" role="status" hidden>
+          <span class="comms__upgrade-text" id="comms-hist-text"></span>
+          <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-hist-reset" type="button" hidden>{{ 'tool.comms.history.start_over' | t }}</button></div>
         </div>
+        <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
       </div>
-      <div class="comms__adv-sec">
-        <span class="comms__lbl">{{ 'tool.comms.adv.privacy' | t }}</span>
-        <button class="comms__relay" id="comms-relay" type="button" role="switch" aria-checked="false">
-          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6v5c0 4.4 3 7.9 7 9 4-1.1 7-4.6 7-9V6Z"></path><path d="M9.4 11.8l1.9 1.9 3.3-3.4"></path></svg>
-          <span class="comms__relay-lbl">{{ 'tool.comms.adv.hide_ip' | t }}</span>
-          <span class="comms__relay-track" aria-hidden="true"><span class="comms__relay-thumb"></span></span>
-        </button>
-        <p class="comms__relay-note" id="comms-relay-note" hidden>{{ 'tool.comms.adv.relay_note' | t }}</p>
-      </div>
-      <div class="comms__adv-sec comms__adv-sec--col">
-        <div class="comms__adv-row">
-          <span class="comms__lbl">{{ 'tool.comms.adv.notifications' | t }}</span>
-          <button class="comms__btn comms__btn--ghost" id="comms-push-test" type="button">{{ 'tool.comms.adv.test' | t }}</button>
-        </div>
-        <span class="comms__id-note" id="comms-push-status">…</span>
-        <span class="comms__id-note comms__push-log" id="comms-push-test-log" hidden></span>
-      </div>
-      <div class="comms__adv-sec">
-        <span class="comms__lbl">{{ 'tool.comms.adv.device' | t }}</span>
-        <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">{{ 'tool.comms.adv.sound_on' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">{{ 'tool.comms.adv.attach_ext' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">{{ 'tool.comms.adv.attach_pack' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>{{ 'tool.comms.passkey.add' | t }}</button>
-        <a class="comms__btn comms__btn--ghost" href="{{ locale.pathPrefix }}/about/">{{ 'tool.comms.adv.identity' | t }}</a>
-      </div>
+
+      <form class="comms__send" id="comms-send" autocomplete="off">
+        <label class="comms__attach" title="{{ 'tool.comms.chat.attach' | t }}" aria-label="{{ 'tool.comms.chat.attach' | t }}"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
+        <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled>
+        <button class="comms__btn comms__btn--send" id="comms-go" type="submit" disabled title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
+      </form>
     </div>
   </div>
 
@@ -272,284 +266,265 @@ unlockTool: true
   </div>
 </section>
 
-{% include "terminal-frame-close.njk" %}
-
 <style>
-.comms{display:flex;flex-direction:column;gap:.75rem;font-family:var(--font-mono);font-size:.9rem;min-height:clamp(21rem,56vh,31rem)}
-.comms__onboard,.comms__lock{margin-top:auto;margin-bottom:auto}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+body:has(#comms-app){height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0;padding:0;display:flex;flex-direction:column}
+.comms{flex:1;min-height:0;display:flex;flex-direction:column;font-family:var(--font-body);font-size:var(--text-sm);color:var(--term-fg)}
 .comms [hidden]{display:none !important}
-.comms__onboard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;padding:2.5rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px}
-.comms__onboard-step{display:flex;flex-direction:column;align-items:center;gap:.9rem;width:100%;max-width:30rem}
-.comms__onboard-h{margin:0;font-size:1.05rem;color:var(--accent,#6ef3c5);letter-spacing:.02em;line-height:1.4;text-transform:none}
-.comms__onboard-p{margin:0;color:#c3ccd6;font-size:.85rem;line-height:1.65;max-width:26rem}
-.comms__onboard-fine{margin:0;color:#7a838d;font-size:.75rem;line-height:1.5}
-.comms__onboard-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
-.comms__add-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
-.comms__onboard-actions{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
-.comms__btn--big{padding:.7rem 1.6rem;font-size:.92rem;min-height:44px}
-.comms__input--big{max-width:18rem;text-align:center;padding:.6rem .8rem;font-size:.95rem;flex:none;width:100%}
-.comms__recovery{display:block;width:100%;max-width:24rem;background:#0a0d10;border:1px dashed var(--accent,#6ef3c5);border-radius:6px;padding:.7rem;color:var(--accent,#6ef3c5);font-size:.95rem;letter-spacing:.12em;word-break:break-all;line-height:1.6}
-.comms__lock{display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:2rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px;text-align:center}
-.comms__lock-h{margin:0;color:#c3ccd6;font-size:.95rem}
-.comms__lock-waiting{margin:0;color:var(--accent,#6ef3c5);font-size:.8rem}
-.comms__lock-alt{width:100%;max-width:24rem;color:#7a838d;font-size:.78rem}
-.comms__lock-alt summary{cursor:pointer;list-style:none;padding:.3rem}
-.comms__lock-alt summary::-webkit-details-marker{display:none}
-
-.comms__lock-row{display:none;gap:.5rem;margin-top:.6rem}
-.comms__lock-link{margin:0;max-width:26rem;color:#9ba6b1;font-size:.8rem;line-height:1.5}
-.comms__lock-link strong{color:var(--accent,#6ef3c5);font-weight:600}
-.comms__lock--card{padding:0;background:none;border:0}
-.comms__card-slot{width:100%}
-.comms__link .comms__upgrade-text strong{color:var(--accent,#6ef3c5);font-weight:600}
-.comms__link .comms__card-slot{flex:1 1 100%}
-.comms__lock-alt[open] .comms__lock-row{display:flex}
-.comms__app{display:flex;flex-direction:column;gap:.75rem}
-.comms__id-row--you{flex:1;min-width:13rem}
-.comms__contacts-head{display:flex;gap:.5rem;align-items:center}
-.comms__contacts-head .comms__btn{white-space:nowrap}
-.comms__contacts-head .comms__lbl{flex:1}
-.comms__adv{display:flex;flex-direction:column;gap:.75rem;background:#0a0d10;border:1px dashed #2a3138;border-radius:8px;padding:.85rem}
-.comms__relay{display:flex;align-items:center;gap:.55rem;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
-.comms__relay svg{color:#8b97a3;transition:color .25s}
-.comms__relay[aria-checked="true"] svg{color:var(--accent,#6ef3c5)}
-.comms__relay-lbl{font-size:.85rem}
-.comms__relay-track{width:34px;height:20px;border-radius:10px;background:rgba(255,255,255,.12);position:relative;transition:background .25s}
-.comms__relay-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#8b97a3;transition:transform .25s,background .25s}
-.comms__relay[aria-checked="true"] .comms__relay-track{background:rgba(110,243,197,.25)}
-.comms__relay[aria-checked="true"] .comms__relay-thumb{transform:translateX(14px);background:var(--accent,#6ef3c5)}
-.comms__relay-note{margin:.35rem 0 0;font-size:.75rem;color:#8b97a3;max-width:46ch}
-.comms__adv-sec{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.comms__adv-sec--col{flex-direction:column;align-items:stretch}
-.comms__adv-row{display:flex;gap:.5rem;align-items:center;justify-content:space-between}
-.comms__push-log{white-space:pre-line;background:#0a0d10;border:1px solid #1a1f24;border-radius:8px;padding:.5rem .6rem;line-height:1.6}
-.comms__contact{cursor:pointer}
-@media (max-width:640px){
-  .comms__onboard{padding:1.75rem 1rem}
-  .comms__onboard-h{font-size:1rem}
-}
-.comms__room{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;flex:1;min-width:14rem}
-.comms__room-new{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
-.comms__lbl{color:var(--term-muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
-.comms__input{background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.45rem .6rem;border-radius:6px;font-family:inherit;font-size:.9rem;flex:1;min-width:6rem}
-.comms__input:focus{outline:none;border-color:var(--accent,#6ef3c5)}
-.comms__btn{background:transparent;border:1px solid var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);padding:.4rem .8rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer;text-transform:lowercase;letter-spacing:.05em}
-
-.comms__btn:disabled{opacity:.4;cursor:not-allowed}
-.comms__btn--ghost{border-color:#3a4148;color:#9ba6b1}
-.comms:lang(ja) .comms__btn,.comms:lang(ja) .comms__lbl,.comms:lang(ja) .comms__picker-h,.comms:lang(ja) .comms__resend{text-transform:none}
-
-.comms__badge{background:#1a1f24;border:1px solid #2a3138;color:#9ba6b1;padding:.3rem .55rem;border-radius:4px;font-size:.75rem;text-transform:lowercase;letter-spacing:.05em}
-.comms__badge--offline{border-color:#e05c5c;color:#e05c5c}
-.comms__send--offline{opacity:.55}
-.comms__line--pending .comms__what{color:#9ba6b1}
-.comms__pending-note{color:#d9a84e;font-style:italic;font-size:.75rem;margin-left:.45rem}
-.comms__resend{margin-left:.5rem;background:none;border:1px solid #2a3138;color:var(--accent,#6ef3c5);border-radius:4px;padding:.1rem .5rem;font:inherit;font-size:.72rem;cursor:pointer;text-transform:lowercase}
-
-.comms__url{color:#e6edf3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
-.comms__log{min-height:14rem;max-height:24rem;overflow-y:auto;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.75rem;display:flex;flex-direction:column;gap:.4rem}
-.comms__line{display:flex;gap:.5rem;align-items:baseline;line-height:1.4}
-.comms__who{color:var(--accent,#6ef3c5);font-size:.72rem;min-width:5.5rem;letter-spacing:.05em}
-.comms__who--sys{color:#7a838d}
-.comms__who--me{color:#a8b6c5}
-.comms__what{color:#e6edf3;word-break:break-word;flex:1}
-.comms__what p { margin: 0; }
-.comms__what p + p, .comms__what ul, .comms__what ol, .comms__what pre, .comms__what table, .comms__what blockquote { margin-top: .35em; }
-.comms__what ul, .comms__what ol { padding-left: 1.2em; margin-bottom: 0; }
-.comms__what h1, .comms__what h2, .comms__what h3, .comms__what h4 { font-size: 1em; margin: .35em 0 .1em; }
-.comms__what code { font-family: var(--font-mono, ui-monospace, monospace); font-size: .88em; }
-.comms__what pre { overflow-x: auto; padding: .4em .6em; border-radius: 6px; background: rgba(127,127,127,.12); }
-.comms__what table { border-collapse: collapse; display: block; overflow-x: auto; }
-.comms__what th, .comms__what td { border: 1px solid rgba(127,127,127,.35); padding: .15em .5em; }
-.comms__what a { color: var(--accent, #6ef3c5); }
-.comms__what blockquote { margin: .35em 0 0; padding-left: .7em; border-left: 2px solid rgba(127,127,127,.4); }
-.comms__what--sys{color:#7a838d;font-style:italic}
-.comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
-.comms__what img{max-width:100%;height:auto;border-radius:var(--radius-md,6px)}
-.comms__imgload{border-style:dashed;border-radius:var(--radius-md,6px);margin:.15rem 0;font-size:.8rem}
-
-.comms__drop--hot{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);background:rgba(110,243,197,.04)}
-.comms__prog{display:inline-block;width:96px;height:6px;background:#1a1f24;border-radius:3px;overflow:hidden;margin:0 .4rem;vertical-align:middle}
-.comms__prog-fill{display:block;height:100%;background:var(--accent,#6ef3c5);width:0%;transition:width .12s linear}
-.comms__thumb{display:block;margin-top:.4rem;max-width:240px;max-height:180px;border:1px solid #2a3138;border-radius:4px;cursor:zoom-in}
-.comms__peerlist{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;padding:.2rem 0}
-.comms__chip{font-family:var(--font-mono);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;border:1px solid currentColor;line-height:1;letter-spacing:.05em}
-.comms__time{color:var(--term-subtle);font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
-.comms__btn--mute{min-width:5.5rem}
-.comms__btn--mute[aria-pressed="true"]{color:#7a838d;border-color:#3a4148}
-.comms__send{display:flex;gap:.5rem;align-items:center}
-.comms__input--msg{min-width:0}
-.comms__picker{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem}
-.comms__picker-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
-.comms__picker-card{position:relative;z-index:1;background:#0d1014;border:1px solid #2a3138;border-radius:8px;padding:1rem;width:100%;max-width:24rem;max-height:80vh;overflow:auto;display:flex;flex-direction:column;gap:.7rem}
-.comms__picker-h{margin:0;font-size:.9rem;color:var(--accent,#6ef3c5);text-transform:lowercase;letter-spacing:.05em}
-.comms__picker-list{display:flex;flex-direction:column;gap:.4rem}
-.comms__picker-item{display:flex;justify-content:space-between;align-items:center;gap:.7rem;width:100%;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.5rem .7rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer}
-
-.comms__picker-ver{color:var(--term-muted);font-size:.75rem;flex:none}
-.comms__picker-actions{display:flex;justify-content:flex-end}
-.comms__id-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.5rem .75rem}
-.comms__id-note{color:#7a838d;font-size:.78rem}
-.comms__input--short{max-width:13rem;flex:0 1 auto}
-.comms__id-card{display:flex;gap:1rem;align-items:flex-start;justify-content:center;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;flex-wrap:wrap}
-.comms__id-qr{border-radius:4px;flex:none}
-.comms__id-card-side{display:flex;flex-direction:column;gap:.5rem;flex:1;min-width:12rem}
-.comms__id-card-actions{display:flex;gap:.5rem;flex-wrap:wrap}
-.comms__url--wrap{white-space:normal;word-break:break-all;font-size:.7rem;max-height:5.5rem;overflow:auto}
-.comms__contacts{display:flex;flex-direction:column;gap:.5rem;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.6rem .75rem}
-.comms__contacts-add{display:flex;gap:.5rem;align-items:center}
-.comms__contacts-list{display:flex;flex-direction:column;gap:.3rem}
-.comms__contact{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px solid #14181d}
-.comms__contact--req{background:rgba(110,243,197,.05);border-left:2px solid var(--accent,#6ef3c5);padding-left:.5rem;border-radius:4px}
-.comms__unread{display:inline-block;min-width:1.15rem;padding:0 .3rem;border-radius:999px;background:var(--accent,#6ef3c5);color:#0a0d10;font-size:.68rem;text-align:center;line-height:1.15rem;font-weight:700}
-.comms__missed{display:inline-flex;align-items:center;color:#e5534b;flex:none}
-.comms__missed .comms__i{width:1.05em;height:1.05em}
 .comms__sprite{position:absolute;width:0;height:0;overflow:hidden}
-.comms__i{width:1em;height:1em;flex:none;vertical-align:-0.12em}
-.comms__btn--icon{display:inline-flex;align-items:center;gap:.4rem}
-.comms__btn--icon .comms__btn-t{line-height:1}
-.comms__btn.is-on{background:var(--accent,#6ef3c5);color:#0a0d10}
+.comms__i{width:1em;height:1em;flex:none;vertical-align:-.12em}
+
+.comms__onboard,.comms__lock{margin:auto;width:min(32rem,calc(100% - 2rem));display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--space-3);padding:var(--space-5) var(--space-4);background:var(--term-bg-raised);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__lock--card{padding:0;background:none;border:0}
+.comms__onboard-step{display:flex;flex-direction:column;align-items:center;gap:var(--space-3);width:100%}
+.comms__onboard-h{margin:0;font-family:var(--font-mono);font-size:var(--text-base);font-weight:600;line-height:1.4;color:var(--term-fg-strong);text-transform:none;letter-spacing:0}
+.comms__onboard-p{margin:0;max-width:26rem;color:var(--term-muted);font-size:var(--text-sm);line-height:1.6}
+.comms__onboard-fine{margin:0;color:var(--term-subtle);font-size:var(--text-xs);line-height:1.5}
+.comms__onboard-err,.comms__add-err{margin:0;color:var(--syn-pink);font-size:var(--text-xs);line-height:1.5}
+.comms__onboard-actions{display:flex;gap:var(--space-2);flex-wrap:wrap;justify-content:center}
+.comms__recovery{display:block;width:100%;max-width:24rem;padding:var(--space-3);background:var(--term-bg);border:1px dashed var(--term-border-strong);border-radius:var(--radius-md);color:var(--term-fg-strong);font-family:var(--font-mono);font-size:.95rem;letter-spacing:.12em;line-height:1.6;word-break:break-all}
+.comms__lock-h{margin:0;color:var(--term-fg);font-size:var(--text-sm)}
+.comms__lock-waiting{margin:0;color:var(--syn-cyan);font-size:var(--text-xs)}
+.comms__lock-alt{width:100%;max-width:24rem;color:var(--term-subtle);font-size:var(--text-xs)}
+.comms__lock-alt summary{cursor:pointer;list-style:none;padding:var(--space-1)}
+.comms__lock-alt summary::-webkit-details-marker{display:none}
+.comms__lock-row{display:none;gap:var(--space-2);margin-top:var(--space-2)}
+.comms__lock-alt[open] .comms__lock-row{display:flex}
+.comms__lock-link{margin:0;max-width:26rem;color:var(--term-muted);font-size:var(--text-xs);line-height:1.5}
+.comms__lock-link strong,.comms__link .comms__upgrade-text strong{color:var(--term-fg-strong);font-weight:600}
+.comms__card-slot{width:100%}
+
+.comms__btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border:1px solid transparent;border-radius:var(--radius-md);background:var(--syn-cyan);color:#041016;font-family:var(--font-mono);font-size:var(--text-sm);font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out),color var(--duration-fast) var(--ease-out),box-shadow var(--duration-fast) var(--ease-out)}
+.comms__btn--ghost{background:transparent;border-color:var(--term-border);color:var(--term-muted);font-weight:500}
+.comms__btn--danger{background:transparent;border-color:var(--syn-pink);color:var(--syn-pink);font-weight:500}
+.comms__btn--big{min-height:44px;padding:var(--space-3) var(--space-5)}
+.comms__btn--icon{padding:var(--space-2) var(--space-3)}
+.comms__btn-t{line-height:1}
+.comms__btn--mute{min-width:5.5rem}
+.comms__btn--mute[aria-pressed="true"]{color:var(--term-subtle)}
+.comms__btn.is-on{background:var(--cyan-15);border-color:var(--cyan-30);color:var(--syn-cyan)}
 .comms__btn.is-off{opacity:.45;text-decoration:line-through}
+.comms__btn:disabled{opacity:.35;cursor:not-allowed}
 .comms__btn:focus{outline:none}
-.comms__btn:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:2px}
-@media (hover: hover) and (pointer: fine){
-.comms__btn:hover:not(:disabled){background:var(--accent,#6ef3c5);color:#0a0d10}
-.comms__btn--ghost:hover{background:#3a4148;color:#e6edf3}
-.comms__btn--danger:hover:not(:disabled){background:#e5534b;color:#0a0d10}
-.comms__contact:hover{background:#10151a}
-.comms__contact:hover .comms__rowbtn{opacity:1}
-.comms__rowbtn:hover{color:#e5534b}
-.comms__addopt:hover{border-color:var(--accent,#6ef3c5)}
-.comms__picker-item:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
-.comms__resend:hover{border-color:var(--accent,#6ef3c5)}
-.comms__lock-alt summary:hover{color:#9ba6b1}
-.comms__attach:hover{color:var(--accent,#6ef3c5);border-color:var(--accent,#6ef3c5)}
-}
+.comms__btn:focus-visible{outline:2px solid var(--syn-cyan);outline-offset:2px}
+.comms__input{flex:1;min-width:6rem;padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--field-border,rgba(255,255,255,.38));border-radius:var(--radius-md);color:var(--term-fg);font-family:var(--font-mono);font-size:var(--text-sm)}
+.comms__input::placeholder{color:var(--term-subtle)}
+.comms__input:focus{outline:none;border-color:var(--syn-cyan)}
+.comms__input--big{flex:none;width:100%;max-width:18rem;padding:var(--space-3);text-align:center;font-size:.95rem}
+.comms__input--short{flex:0 1 auto;max-width:13rem}
+.comms__lbl{font-family:var(--font-mono);font-size:var(--text-2xs);letter-spacing:.1em;text-transform:uppercase;color:var(--term-muted)}
+.comms__id-note{color:var(--term-subtle);font-size:var(--text-xs)}
+.comms__badge{display:inline-flex;align-items:center;gap:.3rem;font-family:var(--font-mono);font-size:var(--text-2xs);color:var(--term-subtle)}
+.comms__badge--fp{padding:0;border:0;background:transparent;white-space:nowrap}
+.comms__badge--offline{color:var(--syn-pink)}
+.comms__url{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-fg);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__url--wrap{max-height:5.5rem;overflow:auto;white-space:normal;word-break:break-all;font-size:var(--text-2xs)}
 
-.comms__badge{display:inline-flex;align-items:center;gap:.3rem}
-.comms__add{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;padding-top:.6rem;border-top:1px solid #14181d}
-.comms__scan{display:flex;flex-direction:column;gap:.5rem;align-items:flex-start}
-.comms__scan-video{width:100%;max-width:18rem;border-radius:8px;border:1px solid #2a3138;background:#000;aspect-ratio:1;object-fit:cover}
-@media (max-width:640px){
-  .comms__btn--icon .comms__btn-t{display:none}
-  .comms__contacts-head .comms__btn--icon .comms__btn-t{display:inline}
-}
-.comms__contact:last-child{border-bottom:none}
-.comms__contact-name{color:#e6edf3;font-size:.85rem}
-.comms__contact-fp{color:var(--term-subtle);font-size:.7rem}
-.comms__rooms-head{color:var(--term-subtle);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 0 .15rem}
-.comms__avatar--room{display:inline-flex;align-items:center;justify-content:center;color:#9b6fd4}
-.comms__roomrow--current .comms__contact-name{color:var(--accent,#6ef3c5)}
-.comms__room-rename{max-width:12rem;padding:.15rem .4rem;font-size:.85rem}
-.comms__rowbtn--text{font-size:.72rem;letter-spacing:.04em;padding:.15rem .4rem;opacity:.7}
-.comms__chip-add{margin-left:.3rem;border:none;background:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0}
-.comms__btn--danger{border-color:#e5534b;color:#e5534b}
+.comms__app{flex:1;min-height:0;display:flex;flex-direction:column}
+.comms__side,.comms__main{min-width:0;min-height:0;display:flex;flex-direction:column}
+.comms__side{background:var(--term-bg-raised)}
+.comms__main{flex:1;position:relative;background:var(--term-bg)}
+.comms__app--people #comms-chathead,.comms__app--people .comms__chatbody,.comms__app--people .comms__send{display:none}
+.comms__app--people .comms__ring{display:none !important}
 
-.comms__ring{display:flex;gap:.6rem;align-items:center;background:#141a12;border:1px solid var(--accent,#6ef3c5);border-radius:6px;padding:.55rem .75rem}
-.comms__ring-text{color:var(--accent,#6ef3c5);flex:1;font-size:.85rem}
-.comms__media{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.5rem}
-.comms__tile{position:relative;background:#0d1115;border:1px solid #2a3138;border-radius:6px;overflow:hidden;min-height:72px;display:flex;align-items:center;justify-content:center}
-.comms__tile video{width:100%;height:100%;max-height:200px;object-fit:cover;display:block}
-.comms__tile-label{position:absolute;left:.4rem;bottom:.3rem;background:rgba(0,0,0,.55);color:#e6edf3;font-size:.68rem;padding:.1rem .4rem;border-radius:3px;letter-spacing:.05em}
-.comms__tile-voice{color:var(--accent,#6ef3c5);font-size:1.3rem}
+.comms__profile{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-3) var(--space-2)}
+.comms__brand{display:none;font-family:var(--font-mono);font-size:var(--text-base);font-weight:600;color:var(--term-fg-strong)}
+.comms__brand i{font-style:normal;color:var(--accent)}
+.comms__profile-spacer{flex:0}
+.comms__profile .comms__btn--icon,.comms__chathead .comms__btn--icon{width:38px;height:38px;padding:0;flex:none;border-radius:var(--radius-md)}
+.comms__profile .comms__i,.comms__chathead .comms__i{width:18px;height:18px}
+.comms__id-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);margin:0 var(--space-3) var(--space-2);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__id-row--you{flex:1;min-width:0;margin:0;padding:0;background:transparent;border:0;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"av input" "av fp";column-gap:var(--space-2);row-gap:2px;align-items:center}
+.comms__id-row--you .comms__avatar{grid-area:av}
+.comms__id-row--you .comms__input{grid-area:input;width:100%;min-width:0;padding:2px var(--space-2);background:transparent;border-color:transparent;color:var(--term-fg-strong);font-family:var(--font-body);font-size:.93rem;font-weight:500}
+.comms__id-row--you .comms__input:hover{border-color:var(--term-border)}
+.comms__id-row--you .comms__input:focus{border-color:var(--syn-cyan)}
+.comms__id-row--you .comms__badge--fp{grid-area:fp;justify-self:start;padding:0 var(--space-2)}
+.comms__avatar{width:40px;height:40px;flex:none;display:inline-grid;place-items:center;border-radius:50%;background:var(--term-surface-2);border:1px solid var(--term-border-strong);color:var(--term-fg);font-family:var(--font-mono);font-size:var(--text-sm);font-weight:600;user-select:none}
+.comms__avatar--me{width:34px;height:34px;font-size:var(--text-xs)}
+.comms__avatar--room{border-radius:var(--radius-lg);color:var(--term-muted)}
 
-.comms__upgrade{display:flex;align-items:center;gap:.6rem .9rem;flex-wrap:wrap;padding:.6rem .8rem;margin-bottom:.6rem;border:1px solid rgba(110,243,197,.35);border-radius:8px;background:rgba(110,243,197,.06)}
-.comms__upgrade-text{flex:1 1 14rem;color:#c3ccd6;font-size:.82rem}
-.comms__upgrade-actions{display:flex;gap:.5rem;flex-wrap:wrap}
-.comms__app--chat .comms__upgrade{display:none}
+.comms__upgrade,.comms__notif{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2) var(--space-3);margin:0 var(--space-3) var(--space-2);padding:var(--space-2) var(--space-3);background:var(--cyan-8);border:1px solid var(--cyan-15);border-radius:var(--radius-lg)}
+.comms__upgrade-text,.comms__notif-text{flex:1 1 12rem;color:var(--term-fg);font-size:var(--text-xs);line-height:1.5}
+.comms__upgrade-actions{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.comms__notif .comms__btn--icon{width:32px;height:32px;padding:0}
+.comms__link .comms__card-slot{flex:1 1 100%}
+.comms__histbar{margin:var(--space-2) var(--space-3) 0;background:var(--amber-8);border-color:var(--amber-30)}
 .comms__app--chat .comms__histbar{display:flex}
 .comms__app--chat .comms__histbar[hidden],.comms__histbar[hidden]{display:none}
-.comms__histbar{flex:none;margin:0 0 .5rem}
-.comms__earlier{display:block;margin:.25rem auto .75rem;padding:.3rem .8rem;border:1px solid var(--term-border,#2a2f37);border-radius:var(--radius-md,6px);background:transparent;color:var(--syn-cyan,#22d3ee);font:inherit;font-size:.8rem;cursor:pointer}
-.comms__earlier:disabled{opacity:.5;cursor:default}
-.comms__profile{display:flex;align-items:center;gap:.6rem}
-.comms__profile-spacer{flex:1}
-.comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);justify-content:start;grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
-.comms__id-row--you .comms__avatar{grid-area:av}
-.comms__id-row--you .comms__input{grid-area:input;width:100%}
-.comms__id-row--you .comms__badge--fp{grid-area:fp;justify-self:start}
-.comms__avatar{width:2.3rem;height:2.3rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex:none;user-select:none}
-.comms__avatar--me{width:2.1rem;height:2.1rem}
-.comms__badge--fp{border:0;background:transparent;color:var(--term-subtle);padding:0;font-size:.7rem}
-.comms__app--people #comms-chathead{display:none}
-.comms__app--people .comms__chatbody{display:none}
-.comms__app--people .comms__send{display:none}
-.comms__app--people .comms__ring{display:none !important}
-.comms__app--chat .comms__profile{display:none}
-.comms__app--chat .comms__contacts{display:none !important}
-.comms__app--chat #comms-id-none{display:none !important}
-.comms__app--chat .comms__adv{display:none !important}
-.comms__chathead{display:flex;align-items:center;gap:.55rem;padding:.1rem 0 .55rem;border-bottom:1px solid #14181d}
-.comms__chathead-mid{display:flex;flex-direction:column;gap:.12rem;flex:1;min-width:0}
-.comms__chathead-name{color:#e6edf3;font-size:.95rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.comms__chathead-sub{display:flex;align-items:center;gap:.55rem;color:#7a838d;font-size:.72rem;min-width:0;overflow:hidden}
-.comms__sub-bit{display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap}
-#comms-status.comms__sub-bit{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
-#comms-enc.comms__sub-bit{color:#9b6fd4}
-#comms-eph.comms__sub-bit{color:#d9a84e}
-.comms__chathead .comms__btn--icon,.comms__profile .comms__btn--icon{width:2.4rem;height:2.4rem;border-radius:50%;padding:0;justify-content:center}
-.comms__chathead .comms__i{width:1.15em;height:1.15em}
-.comms__chatbody{position:relative;display:flex;flex-direction:column;gap:.5rem}
-.comms__chatbody.comms__drop--hot .comms__log{outline:2px dashed var(--accent,#6ef3c5);outline-offset:4px}
-.comms__log{background:transparent;border:0;border-radius:8px;padding:.35rem 0;height:clamp(15rem,52vh,28rem);min-height:0;max-height:none;gap:.55rem}
-.comms__line{flex-direction:column;align-items:flex-start;gap:.18rem}
-.comms__line--me{align-items:flex-end}
-.comms__line--sys{align-items:center}
-.comms__who{min-width:0;font-size:.68rem;letter-spacing:.04em;padding:0 .45rem}
-.comms__who--me{color:var(--term-subtle);font-size:.62rem}
-.comms__what{flex:none;width:fit-content;max-width:min(52ch,84%);background:#161c23;border-radius:14px 14px 14px 5px;padding:.5rem .75rem;line-height:1.45}
-.comms__line--me .comms__what{background:#12352a;border-radius:14px 14px 5px 14px}
-.comms__line--sys .comms__what{background:#10151a;border:1px solid #171d24;border-radius:999px;padding:.28rem .75rem;font-size:.72rem;color:#6a737d;font-style:normal;text-align:center;max-width:94%}
-.comms__what--sys{color:#6a737d}
-.comms__send{align-items:center;padding-top:.4rem}
-.comms__attach{width:2.6rem;height:2.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#9ba6b1;cursor:pointer;border:1px solid #2a3138;flex:none;transition:color .15s,border-color .15s}
 
-.comms__attach .comms__i{width:1.2em;height:1.2em}
-.comms__input--msg{border-radius:999px;padding:.6rem 1rem;background:#10151a}
-.comms__btn--send{width:2.6rem;height:2.6rem;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;flex:none}
-.comms__btn--send .comms__i{width:1.15em;height:1.15em;margin-left:-.1em}
-.comms__contacts{border:0;background:transparent;padding:0;gap:.4rem}
-.comms__contacts-head{padding:0 .1rem}
-.comms__contact{gap:.65rem;padding:.55rem .45rem;border-bottom:1px solid #12161b;cursor:pointer;border-radius:10px;flex-wrap:nowrap;min-height:52px}
+.comms__adv{flex:none;display:flex;flex-direction:column;gap:var(--space-3);max-height:60%;overflow-y:auto;margin:0 var(--space-3) var(--space-2);padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__adv-sec{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
+.comms__adv-sec--col{flex-direction:column;align-items:stretch}
+.comms__adv-row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2)}
+.comms__room,.comms__room-new{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
+.comms__room{flex:1;min-width:12rem}
+.comms__relay{display:flex;align-items:center;gap:var(--space-2);padding:0;background:none;border:0;color:inherit;font:inherit;cursor:pointer}
+.comms__relay svg{color:var(--term-muted);transition:color .25s}
+.comms__relay[aria-checked="true"] svg{color:var(--syn-cyan)}
+.comms__relay-lbl{font-size:var(--text-sm)}
+.comms__relay-track{position:relative;width:34px;height:20px;border-radius:10px;background:rgba(255,255,255,.12);transition:background .25s}
+.comms__relay-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--term-muted);transition:transform .25s,background .25s}
+.comms__relay[aria-checked="true"] .comms__relay-track{background:var(--cyan-30)}
+.comms__relay[aria-checked="true"] .comms__relay-thumb{transform:translateX(14px);background:var(--syn-cyan)}
+.comms__relay-note{margin:var(--space-1) 0 0;max-width:46ch;color:var(--term-muted);font-size:var(--text-xs)}
+.comms__push-log{padding:var(--space-2);background:var(--term-bg);border:1px solid var(--term-border);border-radius:var(--radius-md);font-family:var(--font-mono);line-height:1.6;white-space:pre-line}
 
-.comms__contact-open{display:flex;flex:1;min-width:0;align-items:center;background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.comms__contact-open:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:2px}
-.comms__contact:has(> .comms__contact-open:focus-visible){outline:2px solid var(--accent,#6ef3c5);outline-offset:-2px}
-.comms__contact:has(> .comms__contact-open:focus-visible) .comms__contact-open{outline:none}
-.comms__contact--req{cursor:default}
-.comms__contact--req:hover{background:rgba(110,243,197,.05)}
-.comms__contact-mid{display:flex;flex-direction:column;gap:.12rem;flex:1;min-width:0}
-.comms__contact-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.9rem}
-.comms__contact-fp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.comms__rowbtn{opacity:0;border:0;background:transparent;color:#7a838d;cursor:pointer;padding:.45rem;border-radius:8px;flex:none;display:flex;align-items:center;transition:opacity .15s,color .15s}
-
-
-.comms__rowbtn:focus-visible{opacity:1;outline:2px solid var(--accent,#6ef3c5)}
-@media (hover:none){.comms__rowbtn{opacity:.55}}
-.comms__rowbtn.comms__rowbtn--on{opacity:1;color:var(--accent,#6ef3c5)}
-.comms__chev{color:#3a4148;flex:none;display:flex;align-items:center}
-.comms__contacts-empty{padding:.65rem .3rem}
-.comms__notif{display:flex;align-items:center;gap:.6rem;background:rgba(110,243,197,.05);border:1px solid rgba(110,243,197,.25);border-radius:10px;padding:.55rem .75rem}
-.comms__notif-text{flex:1;color:#c3ccd6;font-size:.78rem;line-height:1.45}
-.comms__app--chat .comms__notif{display:none}
-.comms__addopt{display:flex;align-items:center;gap:.65rem;width:100%;background:#0a0d10;border:1px solid #2a3138;border-radius:12px;padding:.75rem .85rem;color:#e6edf3;font:inherit;font-size:.88rem;cursor:pointer;min-height:48px;transition:border-color .15s}
-
-.comms__addopt .comms__i{color:var(--accent,#6ef3c5);width:1.25em;height:1.25em}
+.comms__contacts{flex:1;min-height:0;display:flex;flex-direction:column;gap:var(--space-2);padding:0 var(--space-2) var(--space-2)}
+.comms__contacts-head{flex:none;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) var(--space-1) 0}
+.comms__contacts-head .comms__lbl{flex:1}
+.comms__contacts-head .comms__btn{padding:var(--space-1) var(--space-2);font-size:var(--text-xs)}
+.comms__contacts-list{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.comms__contacts-empty{padding:var(--space-3) var(--space-2)}
+.comms__contact{display:flex;align-items:center;gap:var(--space-3);min-height:56px;padding:var(--space-2);border-radius:var(--radius-md);cursor:pointer}
+.comms__contact--req{background:var(--cyan-8);border:1px solid var(--cyan-15);cursor:default}
+.comms__contact--req .comms__btn{padding:var(--space-1) var(--space-3);font-size:var(--text-xs)}
+.comms__contact-open{flex:1;min-width:0;display:flex;align-items:center;margin:0;padding:0;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.comms__contact-open:focus-visible{outline:none}
+.comms__contact:has(> .comms__contact-open:focus-visible){outline:2px solid var(--syn-cyan);outline-offset:-2px}
+.comms__contact-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.comms__contact-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-fg-strong);font-size:.93rem;font-weight:500}
+.comms__contact-fp{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-subtle);font-family:var(--font-mono);font-size:var(--text-2xs)}
+.comms__unread{flex:none;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:var(--radius-pill);background:var(--syn-cyan);color:#041016;font:600 var(--text-2xs) var(--font-mono)}
+.comms__missed{flex:none;display:inline-flex;align-items:center;color:var(--syn-pink)}
+.comms__missed .comms__i{width:1.05em;height:1.05em}
+.comms__rowbtn{flex:none;display:flex;align-items:center;padding:var(--space-2);background:transparent;border:0;border-radius:var(--radius-md);color:var(--term-subtle);opacity:0;cursor:pointer;transition:opacity .15s,color .15s}
+.comms__rowbtn:focus-visible{opacity:1;outline:2px solid var(--syn-cyan)}
+.comms__rowbtn--on{opacity:1;color:var(--syn-cyan)}
+.comms__rowbtn--text{padding:var(--space-1) var(--space-2);font:var(--text-2xs) var(--font-mono);opacity:.7}
+.comms__chev{flex:none;display:flex;align-items:center;color:var(--term-border-strong)}
+.comms__rooms-head{padding:var(--space-3) var(--space-2) var(--space-1);color:var(--term-subtle);font:var(--text-2xs) var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
+.comms__roomrow--current{background:var(--term-surface-3)}
+.comms__room-rename{max-width:12rem;padding:var(--space-1) var(--space-2)}
+.comms__id-card{flex:none;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:var(--space-3);margin:var(--space-1) 0;padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__id-qr{flex:none;border-radius:var(--radius-sm)}
+.comms__id-card-side{flex:1;min-width:12rem;display:flex;flex-direction:column;gap:var(--space-2)}
+.comms__id-card-actions{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.comms__add{flex:none;display:flex;flex-direction:column;gap:var(--space-2)}
+.comms__addopt{display:flex;align-items:center;gap:var(--space-3);width:100%;min-height:48px;padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg);color:var(--term-fg);font:inherit;font-size:var(--text-sm);cursor:pointer;transition:border-color .15s}
+.comms__addopt .comms__i{width:1.25em;height:1.25em;color:var(--syn-cyan)}
+.comms__contacts-add{display:flex;align-items:center;gap:var(--space-2)}
+.comms__scan{display:flex;flex-direction:column;align-items:stretch;gap:var(--space-2);width:100%}
+.comms__scan-video{width:100%;aspect-ratio:1;object-fit:cover;background:#000;border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__scan-zoom{display:flex;align-items:center;gap:var(--space-2);color:var(--term-subtle)}
+.comms__scan-zoom input[type=range]{flex:1;min-height:28px;accent-color:var(--syn-cyan)}
+.comms__scan-actions{display:flex;align-items:center;justify-content:flex-end;gap:var(--space-2)}
 #comms-add-toggle .comms__i{transition:transform .18s ease}
 #comms-add-toggle.is-on .comms__i{transform:rotate(45deg)}
-.comms__add{border-top:0;padding-top:0}
-.comms__scan{width:100%;align-items:stretch}
-.comms__scan-video{max-width:100%;width:100%;aspect-ratio:1;border-radius:14px}
-.comms__scan-zoom{display:flex;align-items:center;gap:.6rem;color:#7a838d}
-.comms__scan-zoom .comms__i{flex:none}
-.comms__scan-zoom input[type=range]{flex:1;accent-color:var(--accent,#6ef3c5);min-height:28px}
-.comms__scan-actions{display:flex;gap:.5rem;align-items:center;justify-content:flex-end}
-.comms__id-card{margin:.2rem 0}
-@media (max-width:640px){
-  .comms__chathead .comms__btn--icon,.comms__profile .comms__btn--icon{width:2.25rem;height:2.25rem}
+
+.comms__chathead{flex:none;min-height:56px;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) var(--space-3);background:var(--term-bg-raised);border-bottom:1px solid var(--term-border)}
+.comms__chathead .comms__btn--icon:not(.comms__btn--danger){background:transparent;border-color:transparent;color:var(--term-muted)}
+.comms__chathead .comms__btn--icon.is-on{color:var(--syn-cyan)}
+.comms__chathead-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.comms__chathead-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-fg-strong);font-size:.95rem;font-weight:600}
+.comms__chathead-sub{min-width:0;overflow:hidden;display:flex;align-items:center;gap:var(--space-2);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__sub-bit{display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap}
+#comms-status.comms__sub-bit{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#comms-eph.comms__sub-bit{color:var(--syn-amber)}
+.comms__ring{flex:none;display:flex;align-items:center;gap:var(--space-2);margin:var(--space-2) var(--space-3) 0;padding:var(--space-2) var(--space-3);background:var(--cyan-8);border:1px solid var(--cyan-30);border-radius:var(--radius-lg)}
+.comms__ring-text{flex:1;color:var(--term-fg-strong);font-size:var(--text-sm)}
+.comms__media{flex:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-2);margin:var(--space-2) var(--space-3) 0;padding:var(--space-2);background:var(--term-bg-raised);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__tile{position:relative;min-height:72px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md)}
+.comms__tile video{display:block;width:100%;height:100%;max-height:200px;object-fit:cover}
+.comms__tile-label{position:absolute;left:var(--space-1);bottom:var(--space-1);padding:1px var(--space-1);background:rgba(0,0,0,.55);border-radius:var(--radius-sm);color:var(--term-fg);font:var(--text-2xs) var(--font-mono)}
+.comms__tile-voice{color:var(--syn-cyan);font-size:1.3rem}
+.comms__peerlist{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-1);padding:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) 0}
+.comms__chip{padding:2px var(--space-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-sm);color:var(--term-muted);font:var(--text-2xs) var(--font-mono);line-height:1.4}
+.comms__chip-add{margin-left:var(--space-1);padding:0;background:none;border:0;color:var(--syn-cyan);font-size:var(--text-xs);cursor:pointer}
+
+.comms__chatbody{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.comms__chatbody.comms__drop--hot{outline:2px dashed var(--syn-cyan);outline-offset:-6px}
+.comms__log{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:var(--space-2);padding:var(--space-4) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-5)}
+.comms__earlier{flex:none;align-self:center;padding:var(--space-1) var(--space-3);background:transparent;border:1px solid var(--term-border);border-radius:var(--radius-md);color:var(--syn-cyan);font:var(--text-xs) var(--font-mono);cursor:pointer}
+.comms__earlier:disabled{opacity:.5;cursor:default}
+.comms__line{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.comms__line--me{align-items:flex-end}
+.comms__line--sys{align-items:center}
+.comms__who{padding:0 var(--space-1);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-2xs)}
+.comms__who--me{color:var(--term-subtle)}
+.comms__time{margin-left:var(--space-1);color:var(--term-subtle);font-size:var(--text-2xs);font-variant-numeric:tabular-nums}
+.comms__what{max-width:min(82%,470px);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg);color:var(--term-fg);font-size:.94rem;line-height:1.5;overflow-wrap:anywhere}
+.comms__line--me .comms__what{background:var(--cyan-8);border-color:var(--cyan-15)}
+.comms__line--sys .comms__what{max-width:94%;padding:var(--space-1) 0;background:none;border:0;color:var(--term-subtle);font-family:var(--font-mono);font-size:var(--text-2xs);font-style:normal;text-align:center}
+.comms__what--sys{color:var(--term-subtle)}
+.comms__what p{margin:0}
+.comms__what p+p,.comms__what ul,.comms__what ol,.comms__what pre,.comms__what table,.comms__what blockquote{margin-top:.35em}
+.comms__what ul,.comms__what ol{margin-bottom:0;padding-left:1.2em}
+.comms__what h1,.comms__what h2,.comms__what h3,.comms__what h4{margin:.35em 0 .1em;color:var(--term-fg-strong);font-family:var(--font-body);font-size:1em;letter-spacing:0;text-transform:none}
+.comms__what code{padding:.05em .3em;background:rgba(255,255,255,.07);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:.86em}
+.comms__what pre{overflow-x:auto;padding:var(--space-2) var(--space-3);background:var(--term-bg);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__what pre code{padding:0;background:none}
+.comms__what table{display:block;overflow-x:auto;border-collapse:collapse;font-size:.86rem}
+.comms__what th,.comms__what td{padding:.2em .55em;border:1px solid var(--term-border-strong);text-align:left}
+.comms__what th{background:var(--term-surface-3);color:var(--term-fg-strong)}
+.comms__what a{color:var(--syn-cyan);text-decoration:underline}
+.comms__what blockquote{margin:.35em 0 0;padding-left:.7em;border-left:2px solid var(--term-border-strong);color:var(--term-muted)}
+.comms__what img{display:block;max-width:100%;height:auto;margin:.3rem 0;border-radius:var(--radius-md)}
+.comms__imgload{margin:var(--space-1) 0;border-style:dashed;border-radius:var(--radius-md);font-size:var(--text-xs)}
+.comms__line--pending .comms__what{opacity:.7}
+.comms__pending-note{margin-left:var(--space-2);color:var(--syn-amber);font-family:var(--font-mono);font-size:var(--text-2xs)}
+.comms__resend{margin-left:var(--space-2);padding:1px var(--space-2);background:none;border:1px solid var(--term-border-strong);border-radius:var(--radius-sm);color:var(--syn-cyan);font:var(--text-2xs) var(--font-mono);cursor:pointer}
+.comms__prog{display:inline-block;width:96px;height:4px;margin:0 var(--space-2);overflow:hidden;vertical-align:middle;background:rgba(255,255,255,.12);border-radius:2px}
+.comms__prog-fill{display:block;width:0%;height:100%;background:var(--syn-cyan);transition:width .12s linear}
+.comms__prog-text{color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
+.comms__thumb{display:block;max-width:240px;max-height:180px;margin-top:var(--space-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md);cursor:zoom-in}
+
+.comms__send{flex:none;display:flex;align-items:center;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__send:focus-within{border-color:var(--syn-cyan)}
+.comms__send--offline{opacity:.55}
+.comms__attach{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:var(--radius-md);color:var(--term-muted);cursor:pointer;transition:color .15s}
+.comms__attach .comms__i{width:18px;height:18px}
+.comms__input--msg{flex:1;min-width:0;padding:var(--space-2);background:transparent;border:0;color:var(--term-fg-strong);font-family:var(--font-body);font-size:.95rem}
+.comms__input--msg:focus{border:0}
+.comms__btn--send{width:36px;height:36px;flex:none;padding:0;border-radius:var(--radius-md)}
+.comms__btn--send .comms__i{width:18px;height:18px}
+
+.comms__picker{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:var(--space-4)}
+.comms__picker-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.comms__picker-card{position:relative;z-index:1;width:100%;max-width:24rem;max-height:80vh;overflow:auto;display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-4);background:var(--term-bg-raised);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg);box-shadow:var(--elev-3)}
+.comms__picker-h{margin:0;color:var(--term-fg-strong);font:600 var(--text-sm) var(--font-mono);letter-spacing:0;text-transform:none}
+.comms__picker-list{display:flex;flex-direction:column;gap:var(--space-1)}
+.comms__picker-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-md);color:var(--term-fg);font:inherit;font-size:var(--text-sm);text-align:left;cursor:pointer}
+.comms__picker-ver{flex:none;color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
+.comms__picker-actions{display:flex;justify-content:flex-end}
+
+@media (hover:hover) and (pointer:fine){
+  .comms__btn:hover:not(:disabled){background:var(--syn-cyan-soft);box-shadow:var(--glow-cyan-soft)}
+  .comms__btn--ghost:hover:not(:disabled){background:transparent;box-shadow:none;border-color:var(--term-border-strong);color:var(--term-fg)}
+  .comms__btn--danger:hover:not(:disabled){background:var(--pink-10);box-shadow:none}
+  .comms__btn.is-on:hover:not(:disabled){background:var(--cyan-15);box-shadow:none}
+  .comms__chathead .comms__btn--icon:not(.comms__btn--danger):hover:not(:disabled){background:transparent;box-shadow:none;color:var(--term-fg)}
+  .comms__contact:hover{background:var(--term-surface-2)}
+  .comms__contact--req:hover{background:var(--cyan-8)}
+  .comms__contact:hover .comms__rowbtn{opacity:1}
+  .comms__rowbtn:hover{color:var(--syn-pink)}
+  .comms__addopt:hover{border-color:var(--syn-cyan)}
+  .comms__picker-item:hover{border-color:var(--syn-cyan);color:var(--syn-cyan)}
+  .comms__resend:hover,.comms__earlier:hover:not(:disabled){border-color:var(--syn-cyan)}
+  .comms__lock-alt summary:hover{color:var(--term-muted)}
+  .comms__attach:hover{color:var(--term-fg)}
+}
+@media (hover:none){.comms__rowbtn{opacity:.55}}
+
+@media (min-width:721px){
+  .comms__app{display:grid;grid-template-columns:320px minmax(0,1fr)}
+  .comms__side{border-right:1px solid var(--term-border)}
+}
+@media (max-width:720px){
+  html.is-standalone body:has(#comms-app) .site-header{display:none}
+  html.is-standalone body:has(.comms__app--chat:not([hidden])){padding-bottom:0}
+  html.is-standalone body:has(.comms__app--chat:not([hidden])) .app-bar{display:none}
+  .comms__side{flex:1;background:var(--term-bg)}
+  .comms__profile-spacer{flex:1}
+  .comms__app--people .comms__main,.comms__app--chat .comms__side{display:none}
+  .comms__brand{display:block}
+  .comms__profile #comms-id-on{display:none}
+  .comms__side:has(#comms-adv:not([hidden])) .comms__profile #comms-id-on:not([hidden]){display:grid;order:9;flex-basis:100%;padding-top:var(--space-2)}
+  .comms__input,.comms__input--msg{font-size:16px}
   .comms__what{max-width:88%}
-  .comms__log{height:clamp(15rem,56vh,30rem)}
-  .comms__id-row--you{min-width:0}
+  .comms__btn--icon .comms__btn-t{display:none}
+  .comms__contacts-head .comms__btn--icon .comms__btn-t{display:inline}
 }
 </style>
 
@@ -825,18 +800,10 @@ const setView = (v) => {
   els.app.classList.toggle('comms__app--people', v !== 'chat');
 };
 
-const hueOf = (seed) => {
-  let h = 0;
-  const s = String(seed || '');
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
-  return h;
-};
 const paintAvatar = (el, name, seed) => {
   if (!el) return;
   const label = String(name || '').trim();
   el.textContent = label ? label[0].toUpperCase() : '#';
-  el.style.background = `hsl(${hueOf(seed || label)} 45% 26%)`;
-  el.style.color = `hsl(${hueOf(seed || label)} 80% 78%)`;
 };
 
 const MAX_FILE = 50 * 1024 * 1024;
@@ -934,12 +901,6 @@ const nameOf = (peerId) => {
   return (prof && prof.name) || T.people.someone;
 };
 
-const peerColor = (id) => {
-  let h = 0;
-  for (let i = 0; i < (id || '').length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return `hsl(${h % 360}, 55%, 65%)`;
-};
-
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtHtml = (tpl, vars) => escapeHtml(tpl).replace(/\{(\w+)\}/g, (m, k) => (own(vars, k) && vars[k] != null ? String(vars[k]) : m));
 const fmtKB = (n) => fmt(T.files.kb, { n: num1(n / 1024) });
@@ -973,7 +934,6 @@ const renderPeerList = () => {
   peers.forEach(p => {
     const chip = document.createElement('span');
     chip.className = 'comms__chip';
-    chip.style.color = peerColor(p);
     chip.textContent = displayName(p);
     const prof = peerProfiles.get(p);
     chip.title = prof && prof.verified && prof.fp ? fmt(T.peers.fp_title, { fp: prof.fp }) : p;
@@ -1017,7 +977,6 @@ const renderLine = (who, what, opts = {}) => {
     w.textContent = hhmmOf(opts.ts);
   } else {
     w.textContent = who;
-    if (opts.peerId) w.style.color = peerColor(opts.peerId);
     const time = document.createElement('span');
     time.className = 'comms__time';
     time.textContent = hhmmOf(opts.ts);

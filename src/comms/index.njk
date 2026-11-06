@@ -4031,6 +4031,7 @@ const contactRow = (c, info, missedMap) => {
     const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.people.confirm_remove, { name: c.name || c.fp }), { danger: true }) : Promise.resolve(true));
     if (!ok) return;
     CID.removeContact(c.fp);
+    dropStoredThreads((t) => t.kind === 'dm' && t.meta && t.meta.fp === c.fp);
     renderContacts();
     renderPeerList();
   });
@@ -4101,6 +4102,7 @@ const roomRow = (r, info) => {
     const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.rooms.confirm_forget, { danger: true }) : Promise.resolve(true));
     if (!ok) return;
     forgetRoom(r.room);
+    dropStoredThreads((t) => t.id === r.room);
     delete unreadMap[roomUnreadKey(r.room)];
     try { CID.setUnread(unreadMap); } catch (_) {}
     renderContacts();
@@ -4163,6 +4165,16 @@ const refreshHomeThreads = () => {
     if (els.contactList && els.contactList.querySelector('.comms__room-rename')) return;
     renderContacts();
   }, 120);
+};
+
+const dropStoredThreads = async (match) => {
+  if (!historyOn()) return;
+  try {
+    for (const t of await commsStore.listThreads()) if (match(t)) await commsStore.deleteThread(t.id);
+  } catch (e) {
+    historyFail(e);
+  }
+  refreshHomeThreads();
 };
 
 const homeSearch = document.getElementById('comms-search');

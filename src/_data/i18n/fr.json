@@ -5708,7 +5708,12 @@
         "filter_all": "Tout",
         "filter_people": "Personnes",
         "filter_ai": "IA",
-        "at_none": "Aucun résultat"
+        "at_none": "Aucun résultat",
+        "prompt": "écrivez à quelqu’un ou demandez à l’IA",
+        "placeholder": "Écrivez à n’importe qui ou demandez à l’IA",
+        "placeholder_desk": "Écrivez à n’importe qui ou demandez à l’IA. Tapez @ pour choisir le destinataire.",
+        "hint": "Sans @, une nouvelle discussion avec l’IA démarre sur cet appareil.",
+        "pick": "Choisissez une discussion ou commencez-en une"
       }
     },
     "scanner": {

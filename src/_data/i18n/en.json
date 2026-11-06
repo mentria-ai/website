@@ -5708,7 +5708,12 @@
         "filter_all": "All",
         "filter_people": "People",
         "filter_ai": "AI",
-        "at_none": "No matches"
+        "at_none": "No matches",
+        "prompt": "message someone or ask AI",
+        "placeholder": "Message anyone or ask AI",
+        "placeholder_desk": "Message anyone or ask AI. Type @ to pick who.",
+        "hint": "With no @, it starts a new AI chat on this device.",
+        "pick": "Pick a chat, or start one"
       }
     },
     "scanner": {

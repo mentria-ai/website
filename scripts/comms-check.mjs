@@ -70,6 +70,7 @@ const W = await need('/assets/js/comms/wire.js');
 const I = await need('/assets/js/comms/identity.js');
 const C = await need('/assets/js/comms/cards.js');
 const H = await need('/assets/js/comms/threads.js');
+const M = await need('/assets/js/comms/mention.js');
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -137,6 +138,11 @@ check('home: the AI filter keeps AI chats only', () => ok(H.homeRows(SRC, { filt
 check('home: search ignores case and reads previews', () => deepEq(H.homeRows(SRC, { filter: 'all', query: 'TENDON' }).map((r) => r.key), ['ai-1']));
 check('home: previews show plain text', () => eq(H.homeRows({ contacts: [], requests: [], rooms: [], threads: [{ id: 'ai-2', kind: 'model', title: 'T', meta: {}, updatedAt: 1, preview: '## **Bold** and `code`, a [link](https://x.y) and ![pic](https://x.y/p.png)\n- next' }], unread: {} }, { filter: 'all', query: '' })[0].preview, 'Bold and code, a link and pic next'));
 check('home: Annotate chats open in Annotate Image', () => eq(H.aiHref({ id: 'an-1', meta: { tool: 'annotate-image' } }, '/es'), '/es/tools/annotate-image/?thread=an-1'));
+
+check('mention: an @ at a word start opens the picker', () => eq(M.mentionQuery('hi @sa', 6), 'sa'));
+check('mention: an @ inside a word does not', () => eq(M.mentionQuery('mail a@b.c', 10), null));
+check('mention: prefix matches come first', () => deepEq(M.matchTargets('sa', [{ kind: 'contact', id: '1', label: 'Isabel' }, { kind: 'contact', id: '2', label: 'Sam' }]).map((t) => t.label), ['Sam', 'Isabel']));
+check('mention: the chosen name leaves the message', () => eq(M.splitTarget('@Sam see you at 9', { kind: 'contact', id: '2', label: 'Sam' }).body, 'see you at 9'));
 
 let failed = 0;
 for (const [name, fn] of checks) {

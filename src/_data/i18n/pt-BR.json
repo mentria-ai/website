@@ -5708,7 +5708,12 @@
         "filter_all": "Tudo",
         "filter_people": "Pessoas",
         "filter_ai": "IA",
-        "at_none": "Nenhum resultado"
+        "at_none": "Nenhum resultado",
+        "prompt": "mande uma mensagem ou pergunte à IA",
+        "placeholder": "Mande mensagem para qualquer pessoa ou pergunte à IA",
+        "placeholder_desk": "Mande mensagem para qualquer pessoa ou pergunte à IA. Digite @ para escolher quem.",
+        "hint": "Sem @, um novo chat com a IA começa neste aparelho.",
+        "pick": "Escolha um chat ou comece um novo"
       }
     },
     "scanner": {

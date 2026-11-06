@@ -259,6 +259,15 @@ unlockTool: true
         <button class="comms__btn comms__btn--send" id="comms-go" type="submit" disabled title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
       </form>
     </div>
+    <div class="comms__home" id="comms-home">
+      <h2 class="comms__home-h"><i aria-hidden="true">$</i> {{ 'tool.comms.home.prompt' | t }}<span class="comms__caret" aria-hidden="true"></span></h2>
+      <form class="comms__homesend" id="comms-home-send" autocomplete="off">
+        <input class="comms__input comms__input--msg" id="comms-home-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.home.placeholder_desk' | t }}" data-ph-phone="{{ 'tool.comms.home.placeholder' | t }}" data-ph-desk="{{ 'tool.comms.home.placeholder_desk' | t }}" aria-label="{{ 'tool.comms.home.placeholder' | t }}" role="combobox" aria-autocomplete="list" aria-controls="comms-at" aria-expanded="false">
+        <button class="comms__btn comms__btn--send" type="submit" title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
+        <div class="comms__at" id="comms-at" role="listbox" aria-label="{{ 'tool.comms.home.pick' | t }}" hidden></div>
+      </form>
+      <p class="comms__home-hint">{{ 'tool.comms.home.hint' | t }}</p>
+    </div>
   </div>
 
   <div class="comms__picker" id="comms-picker" hidden>
@@ -333,6 +342,23 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__side{background:var(--term-bg-raised)}
 .comms__main{flex:1;position:relative;background:var(--term-bg)}
 .comms__app--people #comms-chathead,.comms__app--people .comms__chatbody,.comms__app--people .comms__send{display:none}
+.comms__app--people .comms__main,.comms__app--chat .comms__home{display:none}
+.comms__home{min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-3);padding:var(--space-4);background:var(--term-bg)}
+.comms__home-h{margin:0;text-align:center;color:var(--term-fg-strong);font-family:var(--font-mono);font-size:var(--text-lg);font-weight:500;letter-spacing:0;text-transform:none}
+.comms__home-h i{font-style:normal;color:var(--accent)}
+.comms__caret{display:inline-block;width:.6em;height:2px;margin-left:.15em;vertical-align:baseline;background:var(--accent);animation:comms-blink 1.1s steps(2) infinite}
+@keyframes comms-blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.comms__caret{animation:none}}
+.comms__homesend{position:relative;width:min(680px,100%);display:flex;align-items:center;gap:var(--space-1);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__homesend:focus-within{border-color:var(--syn-cyan)}
+.comms__homesend .comms__input--msg{padding:var(--space-3) var(--space-2)}
+.comms__home-hint{margin:0;text-align:center;color:var(--term-subtle);font:var(--text-xs) var(--font-mono)}
+.comms__at{position:absolute;left:var(--at-x,var(--space-2));bottom:calc(100% + var(--space-1));z-index:5;width:min(280px,calc(100% - 1rem));max-height:280px;overflow-y:auto;padding:var(--space-1);background:var(--term-bg-raised);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg);box-shadow:var(--elev-3)}
+.comms__at-i{width:100%;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);background:transparent;border:0;border-radius:var(--radius-md);color:var(--term-fg);font:inherit;font-size:var(--text-sm);text-align:left;cursor:pointer}
+.comms__at-i[aria-selected="true"]{background:var(--cyan-8);color:var(--syn-cyan)}
+.comms__at-i .comms__avatar{width:28px;height:28px;font-size:var(--text-2xs)}
+.comms__at-i .comms__avatar--tool svg{width:20px;height:20px}
+.comms__at-none{padding:var(--space-2);color:var(--term-subtle);font-size:var(--text-xs)}
 .comms__app--people .comms__ring{display:none !important}
 
 .comms__profile{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-3) var(--space-2)}
@@ -526,7 +552,8 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 
 @media (min-width:721px){
   .comms__app{display:grid;grid-template-columns:320px minmax(0,1fr)}
-  .comms__side{border-right:1px solid var(--term-border)}
+  .comms__side{grid-column:1;grid-row:1;border-right:1px solid var(--term-border)}
+  .comms__main,.comms__home{grid-column:2;grid-row:1}
 }
 @media (max-width:720px){
   html.is-standalone body:has(#comms-app) .site-header{display:none}
@@ -534,7 +561,10 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
   html.is-standalone body:has(.comms__app--chat:not([hidden])) .app-bar{display:none}
   .comms__side{flex:1;background:var(--term-bg)}
   .comms__profile-spacer{flex:1}
-  .comms__app--people .comms__main,.comms__app--chat .comms__side{display:none}
+  .comms__app--chat .comms__side{display:none}
+  .comms__home{flex:none;align-items:stretch;padding:var(--space-2) var(--space-3) var(--space-3);background:var(--term-bg);border-top:1px solid var(--term-border)}
+  .comms__home-h,.comms__home-hint{display:none}
+  .comms__homesend{width:100%}
   .comms__brand{display:block}
   .comms__profile #comms-id-on{display:none}
   .comms__side:has(#comms-adv:not([hidden])) .comms__profile #comms-id-on:not([hidden]){display:grid;order:9;flex-basis:100%;padding-top:var(--space-2)}
@@ -557,6 +587,7 @@ import { renderBody } from '/assets/js/comms/cards.js';
 import { openStore } from '/assets/js/comms/store.js';
 import { secretCopy } from '/assets/js/comms/identity.js';
 import { homeRows, aiHref } from '/assets/js/comms/threads.js';
+import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -4149,6 +4180,148 @@ homeFilterBar.addEventListener('click', (e) => {
   renderContacts();
 });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshHomeThreads(); });
+
+const homeForm = document.getElementById('comms-home-send');
+const homeMsg = document.getElementById('comms-home-msg');
+const homeAt = document.getElementById('comms-at');
+const phoneWidth = window.matchMedia('(max-width: 720px)');
+let homeTarget = null;
+let atItems = [];
+let atIndex = 0;
+const homePlaceholder = () => { homeMsg.placeholder = phoneWidth.matches ? homeMsg.dataset.phPhone : homeMsg.dataset.phDesk; };
+homePlaceholder();
+if (phoneWidth.addEventListener) phoneWidth.addEventListener('change', homePlaceholder);
+
+const homeTargets = () => {
+  const out = CID.getContacts().map((c) => ({ kind: 'contact', id: c.fp, label: c.name || c.fp, ref: c }));
+  for (const r of savedRooms()) out.push({ kind: 'room', id: r.room, label: r.label || r.room, ref: r });
+  out.push({ kind: 'ai', id: 'ai', label: T.home.filter_ai });
+  return out;
+};
+
+const closeAt = () => {
+  homeAt.hidden = true;
+  homeAt.replaceChildren();
+  atItems = [];
+  homeMsg.setAttribute('aria-expanded', 'false');
+  homeMsg.removeAttribute('aria-activedescendant');
+};
+
+let atMeasure = null;
+const placeAt = () => {
+  const style = getComputedStyle(homeMsg);
+  if (!atMeasure) atMeasure = document.createElement('canvas').getContext('2d');
+  atMeasure.font = style.fontWeight + ' ' + style.fontSize + ' ' + style.fontFamily;
+  const before = homeMsg.value.slice(0, homeMsg.selectionStart);
+  const x = homeMsg.offsetLeft + (parseFloat(style.paddingLeft) || 0) + atMeasure.measureText(before.slice(0, before.lastIndexOf('@'))).width - homeMsg.scrollLeft;
+  homeAt.style.setProperty('--at-x', Math.max(4, Math.min(x, homeForm.clientWidth - homeAt.offsetWidth - 4)) + 'px');
+};
+
+const pickAt = (i) => {
+  const t = atItems[i];
+  if (!t) return;
+  const caret = homeMsg.selectionStart;
+  const before = homeMsg.value.slice(0, caret);
+  const at = before.lastIndexOf('@');
+  const insert = '@' + t.label + ' ';
+  homeMsg.value = before.slice(0, at) + insert + homeMsg.value.slice(caret).replace(/^ /, '');
+  homeMsg.setSelectionRange(at + insert.length, at + insert.length);
+  homeTarget = t;
+  closeAt();
+  homeMsg.focus();
+};
+
+const renderAt = () => {
+  const q = mentionQuery(homeMsg.value, homeMsg.selectionStart);
+  if (q == null) { closeAt(); return; }
+  atItems = matchTargets(q, homeTargets());
+  atIndex = Math.min(atIndex, Math.max(0, atItems.length - 1));
+  homeAt.replaceChildren();
+  if (!atItems.length) {
+    const none = document.createElement('div');
+    none.className = 'comms__at-none';
+    none.textContent = T.home.at_none;
+    homeAt.append(none);
+  }
+  atItems.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'comms__at-i';
+    b.id = 'comms-at-' + i;
+    b.setAttribute('role', 'option');
+    b.setAttribute('aria-selected', String(i === atIndex));
+    const av = document.createElement('span');
+    av.setAttribute('aria-hidden', 'true');
+    if (t.kind === 'contact') {
+      av.className = 'comms__avatar';
+      paintAvatar(av, t.label, t.id);
+    } else if (t.kind === 'room') {
+      av.className = 'comms__avatar comms__avatar--room';
+      av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+    } else {
+      av.className = 'comms__avatar comms__avatar--tool';
+      av.innerHTML = '<svg viewBox="0 0 48 48" focusable="false"><use href="#tool-ai-chat"></use></svg>';
+      if (!document.getElementById('tool-ai-chat') && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
+    }
+    const label = document.createElement('span');
+    label.textContent = t.label;
+    b.append(av, label);
+    b.addEventListener('mousedown', (e) => e.preventDefault());
+    b.addEventListener('click', () => pickAt(i));
+    homeAt.append(b);
+  });
+  homeAt.hidden = false;
+  homeMsg.setAttribute('aria-expanded', 'true');
+  if (atItems.length) homeMsg.setAttribute('aria-activedescendant', 'comms-at-' + atIndex);
+  else homeMsg.removeAttribute('aria-activedescendant');
+  placeAt();
+};
+
+homeMsg.addEventListener('input', () => { atIndex = 0; renderAt(); });
+homeMsg.addEventListener('keydown', (e) => {
+  if (homeAt.hidden) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (!atItems.length) return;
+    atIndex = (atIndex + (e.key === 'ArrowDown' ? 1 : atItems.length - 1)) % atItems.length;
+    renderAt();
+  } else if (e.key === 'Enter' && atItems.length) {
+    e.preventDefault();
+    pickAt(atIndex);
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeAt();
+  }
+});
+homeMsg.addEventListener('blur', () => { setTimeout(() => { if (document.activeElement !== homeMsg) closeAt(); }, 150); });
+
+const composerFor = async (target) => {
+  for (let i = 0; i < 80; i++) {
+    const here = target.kind === 'contact' ? !!currentDmContact && currentDmContact.fp === target.id : currentRoomName === target.ref.room;
+    if (here && !els.msg.disabled && chatAction) return true;
+    await new Promise((r) => setTimeout(r, 150));
+  }
+  return false;
+};
+
+homeForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  closeAt();
+  const { target, body } = splitTarget(homeMsg.value, homeTarget);
+  if (!body) return;
+  if (!target || target.kind === 'ai') {
+    try { sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({ text: body, at: Date.now() })); } catch (_) {}
+    window.location.href = PREFIX + '/tools/ai-chat/?thread=new';
+    return;
+  }
+  homeMsg.value = '';
+  homeTarget = null;
+  if (target.kind === 'contact') openDmWith(target.ref);
+  else window.location.hash = formatHash(target.ref.room, target.ref.key);
+  const ready = await composerFor(target);
+  els.msg.value = body;
+  if (ready) els.send.requestSubmit();
+});
 
 const showAddError = (text) => {
   els.addErr.textContent = text || '';

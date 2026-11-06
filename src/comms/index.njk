@@ -288,6 +288,7 @@ body:has(#comms-app){height:100vh;height:100dvh;display:flex;flex-direction:colu
 body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0;padding:0;display:flex;flex-direction:column}
 .comms{flex:1;min-height:0;display:flex;flex-direction:column;font-family:var(--font-body);font-size:var(--text-sm);color:var(--term-fg)}
 .comms [hidden]{display:none !important}
+.comms:has(>.comms__onboard:not([hidden])),.comms:has(>.comms__lock:not([hidden])){overflow-y:auto}
 .comms__sprite{position:absolute;width:0;height:0;overflow:hidden}
 .comms__i{width:1em;height:1em;flex:none;vertical-align:-.12em}
 

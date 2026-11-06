@@ -202,7 +202,11 @@ eleventyComputed:
   saveUnlock:             "tool.ai-chat.save_unlock",
   saveUnlockBtn:          "tool.ai-chat.save_unlock_btn",
   saveLost:               "tool.ai-chat.save_lost",
-  photoChat:              "tool.ai-chat.photo_chat"
+  photoChat:              "tool.ai-chat.photo_chat",
+  historyForeign:         "tool.comms.history.foreign",
+  historyUnavailable:     "tool.comms.history.unavailable",
+  historyStartOver:       "tool.comms.history.start_over",
+  historyStartOverConfirm: "tool.comms.history.start_over_confirm"
 } -%}
 <script type="module">
 import { hasIdentity, openQuietly, askToOpen, secretCopy, stillOpen } from '/assets/js/comms/identity.js';
@@ -540,6 +544,7 @@ function runApp(MentriaEngine, Tiers) {
   let handoffText = null;
   let legacyShown = null;
   let migratedId = null;
+  let historyProblem = null;
   const saveBar = document.getElementById('ac-savebar');
   const saveBarMain = document.getElementById('ac-savebar-main');
   const saveBarLost = document.getElementById('ac-savebar-lost');
@@ -591,16 +596,21 @@ function runApp(MentriaEngine, Tiers) {
     window.MentriaStore.remove('ai_chat', 'conversation');
   }
 
-  async function openHistory() {
+  async function openHistory(fresh) {
     if (historyOpen()) return true;
-    if (!(await openQuietly())) return false;
+    if (!(await openQuietly())) { historyProblem = null; return false; }
     let secret = null;
     try {
       secret = secretCopy();
       const st = await openStore(secret);
-      if (st.status !== 'open') { st.close(); return false; }
+      if (st.status !== 'open' && fresh) {
+        try { await st.wipe(); } catch (err) { st.close(); throw err; }
+      }
+      if (st.status !== 'open') { st.close(); historyProblem = 'foreign'; return false; }
       chatStore = st;
-    } catch (_) {
+      historyProblem = null;
+    } catch (err) {
+      if (err && (err.code === 'unavailable' || err.code === 'quota')) historyProblem = 'unavailable';
       return false;
     } finally {
       if (secret) secret.fill(0);
@@ -611,8 +621,14 @@ function runApp(MentriaEngine, Tiers) {
 
   function renderSaveBar() {
     const has = hasIdentity();
-    saveBarMain.textContent = has ? COPY.saveUnlock : COPY.saveSetup;
-    saveBarBtn.textContent = has ? COPY.saveUnlockBtn : COPY.saveSetupBtn;
+    if (historyProblem) {
+      saveBarMain.textContent = historyProblem === 'foreign' ? COPY.historyForeign : COPY.historyUnavailable;
+      saveBarBtn.textContent = COPY.historyStartOver;
+    } else {
+      saveBarMain.textContent = has ? COPY.saveUnlock : COPY.saveSetup;
+      saveBarBtn.textContent = has ? COPY.saveUnlockBtn : COPY.saveSetupBtn;
+    }
+    saveBarBtn.hidden = historyProblem === 'unavailable';
     saveBarLost.textContent = COPY.saveLost;
   }
 
@@ -836,14 +852,30 @@ function runApp(MentriaEngine, Tiers) {
     await renderTurns(turns, indexes);
   }
 
+  async function startOver() {
+    const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(COPY.historyStartOverConfirm, { danger: true }) : Promise.resolve(false));
+    if (!ok) return;
+    saveBarBtn.disabled = true;
+    const opened = await openHistory(true);
+    saveBarBtn.disabled = false;
+    if (opened) adoptHistory();
+    else renderSaveBar();
+  }
+
   saveBarBtn.addEventListener('click', async () => {
+    if (historyProblem === 'foreign') { await startOver(); return; }
     if (!hasIdentity()) { window.location.href = PREFIX + '/comms/'; return; }
     saveBarBtn.disabled = true;
     let result = 'cancelled';
     try { result = await askToOpen(); } catch (_) {}
     saveBarBtn.disabled = false;
     if (result === 'elsewhere') { window.location.href = PREFIX + '/comms/'; return; }
-    if (result !== 'open' || !(await openHistory())) return;
+    if (result !== 'open') return;
+    if (await openHistory()) adoptHistory();
+    else renderSaveBar();
+  });
+
+  function adoptHistory() {
     saveBar.hidden = true;
     const legacy = legacyShown;
     threadEpoch++;
@@ -861,7 +893,7 @@ function runApp(MentriaEngine, Tiers) {
     }
     legacyShown = null;
     persistConversation();
-  });
+  }
 
   clearChatBtn.addEventListener('click', clearConversation);
   const historyReady = new Promise((resolve) => setTimeout(resolve, 0)).then(restoreConversation).catch((err) => { console.warn('ai-chat history:', (err && err.code) || err); });

@@ -168,6 +168,10 @@ eleventyComputed:
     saveUnlock:       {{ ("tool.annotate-image.save_unlock"       | t) | dump | safe }},
     saveUnlockBtn:    {{ ("tool.annotate-image.save_unlock_btn"   | t) | dump | safe }},
     saveLost:         {{ ("tool.annotate-image.save_lost"         | t) | dump | safe }},
+    historyForeign:   {{ ("tool.comms.history.foreign"            | t) | dump | safe }},
+    historyUnavailable: {{ ("tool.comms.history.unavailable"      | t) | dump | safe }},
+    historyStartOver: {{ ("tool.comms.history.start_over"         | t) | dump | safe }},
+    historyStartOverConfirm: {{ ("tool.comms.history.start_over_confirm" | t) | dump | safe }},
     labels: {
       describe: {{ ("tool.annotate-image.mode_describe" | t) | dump | safe }},
       ocr:      {{ ("tool.annotate-image.mode_ocr"      | t) | dump | safe }},
@@ -215,6 +219,10 @@ eleventyComputed:
       const v = pick(key);
       if (v != null) COPY[key.replace(/_([a-z])/g, (m, c) => c.toUpperCase())] = v;
     });
+    [['foreign', 'historyForeign'], ['unavailable', 'historyUnavailable'], ['start_over', 'historyStartOver'], ['start_over_confirm', 'historyStartOverConfirm']].forEach(([key, prop]) => {
+      const v = i18n.t('tool.comms.history.' + key);
+      if (typeof v === 'string') COPY[prop] = v;
+    });
     Object.keys(COPY.labels).forEach((mode) => {
       const label = pick('mode_' + mode);
       const prompt = pick('prompt_' + mode);
@@ -241,6 +249,7 @@ eleventyComputed:
   let saveChain = Promise.resolve();
   let lastSavedTs = 0;
   let savedUrl = null;
+  let historyProblem = null;
 
   const historyMods = () => {
     if (!histMods) {
@@ -256,18 +265,23 @@ eleventyComputed:
     anStore = null;
   }
 
-  async function openAnnotateStore() {
+  async function openAnnotateStore(fresh) {
     if (anStore && anStore.status === 'open') return true;
     const { I, S } = await historyMods();
-    if (!(await I.openQuietly())) return false;
+    if (!(await I.openQuietly())) { historyProblem = null; return false; }
     let secret = null;
     try {
       secret = I.secretCopy();
       const st = await S.openStore(secret);
-      if (st.status !== 'open') { st.close(); return false; }
+      if (st.status !== 'open' && fresh) {
+        try { await st.wipe(); } catch (err) { st.close(); throw err; }
+      }
+      if (st.status !== 'open') { st.close(); historyProblem = 'foreign'; return false; }
       anStore = st;
+      historyProblem = null;
       return true;
-    } catch (_) {
+    } catch (err) {
+      if (err && (err.code === 'unavailable' || err.code === 'quota')) historyProblem = 'unavailable';
       return false;
     } finally {
       if (secret) secret.fill(0);
@@ -276,8 +290,14 @@ eleventyComputed:
 
   function renderSaveBar() {
     const has = !!(window.MentriaIdentity && MentriaIdentity.isSetUp());
-    saveBarMain.textContent = has ? COPY.saveUnlock : COPY.saveSetup;
-    saveBarBtn.textContent = has ? COPY.saveUnlockBtn : COPY.saveSetupBtn;
+    if (historyProblem) {
+      saveBarMain.textContent = historyProblem === 'foreign' ? COPY.historyForeign : COPY.historyUnavailable;
+      saveBarBtn.textContent = COPY.historyStartOver;
+    } else {
+      saveBarMain.textContent = has ? COPY.saveUnlock : COPY.saveSetup;
+      saveBarBtn.textContent = has ? COPY.saveUnlockBtn : COPY.saveSetupBtn;
+    }
+    saveBarBtn.hidden = historyProblem === 'unavailable';
     saveBarLost.textContent = COPY.saveLost;
   }
 
@@ -371,13 +391,27 @@ eleventyComputed:
   }
 
   saveBarBtn.addEventListener('click', async () => {
+    if (historyProblem === 'foreign') {
+      if (!(await window.mentriaConfirm(COPY.historyStartOverConfirm, { danger: true }))) return;
+      saveBarBtn.disabled = true;
+      const opened = await openAnnotateStore(true).catch(() => false);
+      saveBarBtn.disabled = false;
+      if (opened) adoptAnnotateStore();
+      else renderSaveBar();
+      return;
+    }
     if (!(window.MentriaIdentity && MentriaIdentity.isSetUp())) { window.location.href = PREFIX + '/comms/'; return; }
     saveBarBtn.disabled = true;
     let result = 'cancelled';
     try { result = await (await historyMods()).I.askToOpen(); } catch (_) {}
     saveBarBtn.disabled = false;
     if (result === 'elsewhere') { window.location.href = PREFIX + '/comms/'; return; }
-    if (result !== 'open' || !(await openAnnotateStore())) return;
+    if (result !== 'open') return;
+    if (await openAnnotateStore().catch(() => false)) adoptAnnotateStore();
+    else renderSaveBar();
+  });
+
+  function adoptAnnotateStore() {
     saveBar.hidden = true;
     if (!curResults.length) {
       if (askedThread) showSavedThread(askedThread);
@@ -389,7 +423,7 @@ eleventyComputed:
     const all = curResults.slice();
     const image = imageSeq;
     saveChain = saveChain.then(() => saveResults(all, image)).catch((err) => { console.warn('annotate history:', (err && err.code) || err); });
-  });
+  }
 
   if (askedThread) showSavedThread(askedThread);
 

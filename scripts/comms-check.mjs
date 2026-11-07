@@ -81,6 +81,9 @@ const F = await need('/assets/js/comms/files.js');
 const SH = await need('/assets/js/comms/sheet.js');
 const SF = await need('/assets/js/comms/self.js');
 const RM = await need('/assets/js/comms/rooms.js');
+const SG = await need('/assets/js/comms/sign.js');
+const CIDM = await need('/assets/js/mentria-comms-id.js');
+const VEC = JSON.parse(readFileSync(join(repo, 'scripts/fixtures/sig-vector.json'), 'utf8'));
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -924,6 +927,61 @@ check('files: a v2 room derives its files room from the files key', async () => 
   deepEq(two, await F.filesRoomFor('r', FIX.key, 2));
 });
 
+const memStore = () => { const m = new Map(); return { get: (ns, k) => (m.has(ns + '.' + k) ? structuredClone(m.get(ns + '.' + k)) : null), set: (ns, k, v) => { m.set(ns + '.' + k, structuredClone(v)); return true; }, remove: (ns, k) => m.delete(ns + '.' + k) }; };
+check('sign: a signed body verifies in its room', async () => { const v = await SG.verifyBody(VEC.signed, VEC.room, VEC.cmid); eq(v.ok, true); eq(v.sigFp, await SG.sigFingerprint(VEC.spub)); eq(v.ts, VEC.ts); deepEq(v.spub, VEC.spub); });
+check('sign: a body replayed into another room fails', async () => eq((await SG.verifyBody(VEC.signed, 'other-room', VEC.cmid)).ok, false));
+check('sign: a changed text, part or ctl fails', async () => { for (const k of [{ t: 'hellO' }, { p: [{ type: 'text', text: 'x' }] }, { ctl: { k: 'ring' } }]) eq((await SG.verifyBody({ ...VEC.signed, ...k }, VEC.room, VEC.cmid)).ok, false); });
+check('sign: a cmid or time change fails', async () => { eq((await SG.verifyBody(VEC.signed, VEC.room, 'abc:2')).ok, false); eq((await SG.verifyBody({ ...VEC.signed, sg: { ...VEC.signed.sg, ts: VEC.ts + 1 } }, VEC.room, VEC.cmid)).ok, false); });
+check('sign: an unsigned or malformed body is not verified', async () => { eq((await SG.verifyBody(VEC.body, VEC.room, VEC.cmid)).ok, false); eq((await SG.verifyBody({ ...VEC.signed, sg: { pub: { x: 'a', y: 'b' }, ts: 1, s: 'zz' } }, VEC.room, VEC.cmid)).ok, false); eq((await SG.verifyBody(null, VEC.room, VEC.cmid)).ok, false); eq((await SG.verifyBody({ ...VEC.signed, sg: 'x' }, VEC.room, VEC.cmid)).ok, false); });
+check('sign: a fresh signature round-trips', async () => {
+  const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const j = await crypto.subtle.exportKey('jwk', kp.publicKey);
+  const out = await SG.signBody(kp.privateKey, { x: j.x, y: j.y }, 'r', 'c:1', { v: 2, t: 'x', p: [{ type: 'text', text: 'y' }] }, 5);
+  deepEq(Object.keys(out), ['v', 't', 'p', 'sg']);
+  eq(out.sg.ts, 5);
+  eq((await SG.verifyBody(JSON.parse(JSON.stringify(out)), 'r', 'c:1')).ok, true);
+});
+check('sign: signing fingerprints differ from identity fingerprints', async () => { const a = await SG.sigFingerprint(VEC.spub); ok(/^[a-z0-9]{4}-[a-z0-9]{4}$/.test(a)); ok(a !== await CIDM.fingerprint(VEC.spub)); });
+check('id: the signing key is created once and kept in idkeys', async () => {
+  fakeIdentity({ unlocked: true });
+  window.MentriaStore = memStore();
+  await CIDM.ensureKeypair();
+  const before = MentriaStore.get('comms', 'idkeys');
+  const a = await CIDM.ensureSigningKey();
+  const b = await CIDM.ensureSigningKey();
+  eq(a.sigFp, b.sigFp);
+  deepEq(a.spub, b.spub);
+  eq(a.sigFp, await SG.sigFingerprint(a.spub));
+  const after = MentriaStore.get('comms', 'idkeys');
+  deepEq(after.pub, before.pub);
+  deepEq(after.wrapped, before.wrapped);
+  ok(after.sign && after.sign.wrapped && after.sign.wrapped.ct);
+  deepEq({ x: after.sign.pub.x, y: after.sign.pub.y }, a.spub);
+  const out = await SG.signBody(a.signKey, a.spub, 'r', 'c', { v: 2, t: 'q' });
+  eq((await SG.verifyBody(out, 'r', 'c')).ok, true);
+  deepEq((await CIDM.ensureKeypair()).publicJwk, before.pub);
+});
+check('id: a contact code carries the signing key and old codes still read', () => {
+  const code = CIDM.encodeContactCode({ name: 'A' }, { x: 'X', y: 'Y' }, null, { x: 'SX', y: 'SY' });
+  ok(code.startsWith('MC1.'));
+  deepEq(CIDM.decodeContactCode(code).spub, { x: 'SX', y: 'SY' });
+  const old = CIDM.encodeContactCode({ name: 'A' }, { x: 'X', y: 'Y' }, 'ring1234567890123456789');
+  eq(CIDM.decodeContactCode(old).spub, undefined);
+  eq(CIDM.decodeContactCode(old).ring, 'ring1234567890123456789');
+});
+check('id: contacts keep a signing key and a newer one replaces it', async () => {
+  window.MentriaStore = memStore();
+  await CIDM.addContact({ name: 'B', pub: { x: 'X1', y: 'Y1' }, spub: { x: 'S1', y: 'T1' } });
+  deepEq(CIDM.contactByPub({ x: 'X1', y: 'Y1' }).spub, { x: 'S1', y: 'T1' });
+  await CIDM.addContact({ name: 'B', pub: { x: 'X1', y: 'Y1' }, spub: { x: 'S2', y: 'T2' }, annTs: 5 });
+  deepEq(CIDM.contactByPub({ x: 'X1', y: 'Y1' }).spub, { x: 'S2', y: 'T2' });
+  await CIDM.addContact({ name: 'B', pub: { x: 'X1', y: 'Y1' }, spub: { x: 'S3', y: 'T3' }, annTs: 4 });
+  deepEq(CIDM.contactByPub({ x: 'X1', y: 'Y1' }).spub, { x: 'S2', y: 'T2' });
+  await CIDM.addContact({ name: 'B', pub: { x: 'X1', y: 'Y1' }, spub: { x: 1, y: 2 }, annTs: 9 });
+  deepEq(CIDM.contactByPub({ x: 'X1', y: 'Y1' }).spub, { x: 'S2', y: 'T2' });
+});
+check('wire: unpack keeps the signature and the parsed body', () => { const u = W.unpackChatPlain(JSON.stringify(VEC.signed)); deepEq(u.sg, VEC.signed.sg); eq(u.obj.t, 'hello'); eq(u.text, 'hello'); eq(W.unpackChatPlain('{"v":2,"t":"x"}').sg, null); });
+check('wire: packChatBody is what packChatPlain writes', () => { eq(JSON.stringify(W.packChatBody('hi', { fp: 'B', legacyFp: 'A' })), FIX.pack); eq(W.packChatPlain('hi', { fp: 'B', legacyFp: 'A' }), FIX.pack); });
 
 let failed = 0;
 for (const [name, fn] of checks) {

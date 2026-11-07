@@ -5822,6 +5822,10 @@
         "asleep": "en veille",
         "stopped": "Votre {device} a cessé de répondre.",
         "finish": "Terminer sur cet appareil"
+      },
+      "sign": {
+        "verified": "Vérifié : signé avec sa clé d'identité",
+        "my_key": "Clé de signature {fp}"
       }
     },
     "scanner": {

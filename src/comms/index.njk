@@ -184,6 +184,7 @@ unlockTool: true
           <div class="comms__id-card-side">
             <p class="comms__id-note">{{ 'tool.comms.people.code_note' | t }}</p>
             <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
+            <p class="comms__id-note comms__id-sig" id="comms-id-sig" hidden></p>
             <div class="comms__id-card-actions">
             <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">{{ 'tool.comms.people.copy_code' | t }}</button>
             <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share-out" type="button" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg><span class="comms__btn-t">{{ 'tool.comms.people.share' | t }}</span></button>
@@ -493,6 +494,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__who{padding:0 var(--space-1);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-2xs)}
 .comms__who--me{color:var(--term-subtle)}
 .comms__time{margin-left:var(--space-1);color:var(--term-subtle);font-size:var(--text-2xs);font-variant-numeric:tabular-nums}
+.comms__verified{margin-left:var(--space-1);color:var(--accent);font-size:var(--text-2xs)}
 .comms__what{max-width:min(82%,470px);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg);color:var(--term-fg);font-size:.94rem;line-height:1.5;overflow-wrap:anywhere}
 .comms__line--me .comms__what{background:var(--cyan-8);border-color:var(--cyan-15)}
 .comms__line--sys .comms__what{max-width:94%;padding:var(--space-1) 0;background:none;border:0;color:var(--term-subtle);font-family:var(--font-mono);font-size:var(--text-2xs);font-style:normal;text-align:center}
@@ -702,7 +704,8 @@ import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
-import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
+import { signBody, verifyBody, validSpub } from '/assets/js/comms/sign.js';
+import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -755,7 +758,7 @@ const els = {
   idNone: $('comms-id-none'), idLocked: $('comms-id-locked'), idOn: $('comms-id-on'),
   idPass: $('comms-id-pass'), idUnlock: $('comms-id-unlock'), idErr: $('comms-id-err'), idPasskey: $('comms-id-passkey'),
   idName: $('comms-id-name'), idFp: $('comms-id-fp'), idShare: $('comms-id-share'), idContacts: $('comms-id-contacts'),
-  idCard: $('comms-id-card'), idQr: $('comms-id-qr'), idCode: $('comms-id-code'), idCopy: $('comms-id-copy'),
+  idCard: $('comms-id-card'), idQr: $('comms-id-qr'), idCode: $('comms-id-code'), idSig: $('comms-id-sig'), idCopy: $('comms-id-copy'),
   idShareOut: $('comms-id-share-out'),
   contacts: $('comms-contacts'), contactIn: $('comms-contact-in'), contactAdd: $('comms-contact-add'), contactList: $('comms-contacts-list'),
   callStart: $('comms-call-start'), callCam: $('comms-call-cam'), callMic: $('comms-call-mic'), callHangup: $('comms-call-hangup'),
@@ -966,6 +969,7 @@ let ringTimer = null;
 let ringAccepting = false;
 let callStarting = false;
 let myId = null;
+let mySign = null;
 let myFp = null;
 let myLegacyFp = null;
 const legacyFps = new Map();
@@ -1117,6 +1121,14 @@ const renderLine = (who, what, opts = {}) => {
     w.textContent = hhmmOf(opts.ts);
   } else {
     w.textContent = who;
+    if (opts.verified) {
+      const v = document.createElement('span');
+      v.className = 'comms__verified';
+      v.textContent = '✓';
+      v.title = T.sign.verified;
+      v.setAttribute('aria-label', T.sign.verified);
+      w.append(v);
+    }
     const time = document.createElement('span');
     time.className = 'comms__time';
     time.textContent = hhmmOf(opts.ts);
@@ -1244,6 +1256,18 @@ els.share.addEventListener('click', () => {
 const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp || m.sfp === myLegacyFp));
 const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
 
+const signerFor = (sig) => {
+  if (!sig || !sig.ok) return null;
+  if (mySign && sig.sigFp === mySign.sigFp) return { me: true, sigFp: sig.sigFp };
+  const c = CID.getContacts().find((x) => x.spub && x.spub.x === sig.spub.x && x.spub.y === sig.spub.y);
+  return c ? { fp: c.fp, sigFp: sig.sigFp } : { sigFp: sig.sigFp };
+};
+const signerName = (signer) => {
+  if (!signer || !signer.fp) return null;
+  const c = CID.getContacts().find((x) => x.fp === signer.fp);
+  return c ? (c.name || null) : null;
+};
+
 const renderRemoteChat = (item, opts = {}) => {
   const files = mediaParts(item.parts).length > 0;
   if (sentByMe(item)) {
@@ -1255,9 +1279,12 @@ const renderRemoteChat = (item, opts = {}) => {
   }
   let who = displayName(item.senderId);
   if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
-  if (files) renderAttachment(who, item.parts, { peerId: item.senderId, sender: item.sfp2 || item.sfp || item.senderId || null, ts: item.ts });
-  else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
-  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '' }, item.parts);
+  const verified = !!(item.signer && item.signer.fp);
+  const signedName = verified ? signerName(item.signer) : null;
+  if (signedName) who = signedName;
+  if (files) renderAttachment(who, item.parts, { peerId: item.senderId, sender: item.sfp2 || item.sfp || item.senderId || null, ts: item.ts, verified });
+  else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts, verified });
+  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '', signer: item.signer || undefined }, item.parts);
   if (files) receiveAttachments(item, false);
   if (!opts.silent) {
     playPing(880);
@@ -1275,21 +1302,22 @@ const handleNostrMsg = async (msgEvent) => {
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     if (!content || !content.cmid || !content.enc || !chatKey || seenCmids.has(content.cmid)) return;
-    let text, sfp = null, sfp2 = null, parts = null;
+    let text, sfp = null, sfp2 = null, parts = null, sig = null;
     try {
       const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
       text = unpacked.text;
       sfp = unpacked.sfp;
       sfp2 = unpacked.sfp2;
       parts = unpacked.parts;
-      if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
+      if (unpacked.sg) sig = await verifyBody(unpacked.obj, currentRoomName, content.cmid);
+      if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp, sig); return; }
     } catch { return; }
     seenCmids.add(content.cmid);
     const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts };
+    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts, signer: signerFor(sig) };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1678,7 +1706,7 @@ const renderAttachment = (who, parts, opts = {}) => {
     if (cap.length) renderLine(who, cap.map((p) => p.text).join('\n'), { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts });
     return null;
   }
-  const line = renderLine(who, '', { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts, html: '' });
+  const line = renderLine(who, '', { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts, html: '', verified: !!opts.verified });
   const card = document.createElement('div');
   card.className = 'comms__partsbox';
   line.what.append(card);
@@ -1770,7 +1798,7 @@ const renderStored = (m) => {
     return;
   }
   const meta = m.meta || {};
-  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts }, { silent: true, stored: true });
+  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts, signer: meta.signer || null }, { silent: true, stored: true });
 };
 
 const setEarlier = (beforeTs) => {
@@ -2005,12 +2033,26 @@ const handleRoomCtl = (ctl, sfp) => {
   setSavedRooms(list);
 };
 
+const sealCache = new Map();
+const sealPlain = (text, cmid, extra) => {
+  if (cmid && sealCache.has(cmid)) return sealCache.get(cmid);
+  const body = packChatBody(text, { fp: myFp, legacyFp: myLegacyFp }, extra);
+  const room = currentRoomName;
+  const signer = mySign;
+  const out = (signer && room && cmid ? signBody(signer.signKey, signer.spub, room, cmid, body).catch(() => body) : Promise.resolve(body)).then((o) => JSON.stringify(o));
+  if (cmid) {
+    sealCache.set(cmid, out);
+    if (sealCache.size > 200) sealCache.delete(sealCache.keys().next().value);
+  }
+  return out;
+};
+
 const publishRoomCtl = async (ctl) => {
   if (!chatKey || !currentRoomName || isDmRoom(currentRoomName) || !chatTopic || !chatPersist) return false;
   const cmid = newCmid();
   seenCmids.add(cmid);
   try {
-    const enc = await encryptText(chatKey, packChatPlain('', { fp: myFp, legacyFp: myLegacyFp }, { ctl }));
+    const enc = await encryptText(chatKey, await sealPlain('', cmid, { ctl }));
     if (chatAction) { try { chatAction.send({ cmid, enc }); } catch (_) {} }
     rememberSentCmid(cmid);
     const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
@@ -2106,7 +2148,7 @@ const publishChat = async (text, cmid, extra) => {
   if (!chatTopic || !chatPersist || !chatKey) return;
   rememberSentCmid(cmid);
   try {
-    const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }, extra));
+    const enc = await encryptText(chatKey, await sealPlain(text, cmid, extra));
     const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
@@ -2161,11 +2203,14 @@ const challengePeer = (peerId, action) => {
 
 const applyVerifiedProfile = async (peerId) => {
   const prof = peerProfiles.get(peerId);
-  if (!prof || !prof.verified || !prof.pub || !prof.ring) return;
+  if (!prof || !prof.verified || !prof.pub) return;
   const existing = CID.contactByPub(prof.pub);
-  if (!existing || existing.ring === prof.ring) return;
+  if (!existing) return;
+  const ringNew = !!prof.ring && existing.ring !== prof.ring;
+  const spubNew = !!prof.spub && !(existing.spub && existing.spub.x === prof.spub.x && existing.spub.y === prof.spub.y);
+  if (!ringNew && !spubNew) return;
   try {
-    await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring });
+    await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring || existing.ring, spub: prof.spub || existing.spub });
     if (currentDmContact && currentDmContact.fp === existing.fp) currentDmContact.ring = prof.ring;
   } catch (_) {}
 };
@@ -2364,6 +2409,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       try { prof.fp = await CID.fingerprint(prof.pub); } catch {}
     }
     if (typeof data.ring === 'string') prof.ring = data.ring.slice(0, 64);
+    if (validSpub(data.spub)) prof.spub = { x: data.spub.x, y: data.spub.y };
     prof.caps = { files: data.caps && Number.isInteger(data.caps.files) ? data.caps.files : 0 };
     if (prof.fp) rememberCaps(prof.fp, prof.caps);
     if (seq !== joinSeq || !peers.has(ctx.peerId)) return;
@@ -2382,7 +2428,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   chatAction.onMessage = async (data, ctx) => {
     const cmid = data && data.cmid;
     if (cmid && seenCmids.has(cmid)) return;
-    let text, sfp = null, sfp2 = null, parts = null;
+    let text, sfp = null, sfp2 = null, parts = null, sig = null;
     if (data && data.enc) {
       if (!chatKey) return;
       try {
@@ -2391,13 +2437,14 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         sfp = unpacked.sfp;
         sfp2 = unpacked.sfp2;
         parts = unpacked.parts;
-        if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
+        if (unpacked.sg && cmid) sig = await verifyBody(unpacked.obj, currentRoomName, cmid);
+        if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp, sig); return; }
       } catch { return; }
     } else {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
-    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2, cmid, parts });
+    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2, cmid, parts, signer: signerFor(sig) });
     playPing(880);
   };
 
@@ -2566,7 +2613,7 @@ els.send.addEventListener('submit', async (e) => {
   let livePayload;
   if (chatKey) {
     try {
-      const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }));
+      const enc = await encryptText(chatKey, await sealPlain(text, cmid));
       livePayload = { cmid, enc };
     } catch (err) {
       sys(fmt(T.log.enc_failed, { reason: why(err) }));
@@ -2746,7 +2793,7 @@ const sendAttachments = async ({ items, caption }) => {
   parts.push(...toAlbums(media, newAid));
   parts.push(...files);
   const ids = { fp: myFp, legacyFp: myLegacyFp };
-  const measure = async (ps) => JSON.stringify(await encryptText(chatKey, packChatPlain(offerText(ps, T), ids, { p: ps }))).length + 700;
+  const measure = async (ps) => JSON.stringify(await encryptText(chatKey, packChatPlain(offerText(ps, T), ids, { p: ps }))).length + 1100;
   const msgs = await splitOffer(parts, measure, 60000);
   const ts = Date.now();
   renderAttachment('you', parts, { me: true, ts });
@@ -2754,7 +2801,7 @@ const sendAttachments = async ({ items, caption }) => {
     const text = offerText(m, T);
     const cmid = newCmid();
     seenCmids.add(cmid);
-    const enc = await encryptText(chatKey, packChatPlain(text, ids, { p: m }));
+    const enc = await encryptText(chatKey, await sealPlain(text, cmid, { p: m }));
     if (chatAction) chatAction.send({ cmid, enc });
     publishChat(text, cmid, { p: m });
     storeLine(cmid, 'self', text, ts, undefined, m);
@@ -3269,6 +3316,7 @@ const sendProfileTo = (peerId) => {
   if (!profAction || !myId) return;
   const payload = { name: myProfile.name, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, caps: { files: 2 } };
   if (ringToken) payload.ring = ringToken;
+  if (mySign) payload.spub = mySign.spub;
   try { profAction.send(payload, peerId || undefined); } catch {}
 };
 
@@ -3369,6 +3417,7 @@ const announceToContact = async (contact) => {
   if (!myId || !contact || !contact.pub) return;
   const payload = { v: 1, name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, ts: Date.now() };
   if (ringToken) payload.ring = ringToken;
+  if (mySign) payload.spub = mySign.spub;
   await publishToInbox(contact.pub, payload);
 };
 
@@ -3443,7 +3492,7 @@ const handleSideMsg = async (msgEvent) => {
     if (existing) {
       if (typeof payload.ts !== 'number' || payload.ts <= (existing.annTs || 0)) return;
       try {
-        const updated = await CID.addContact({ name: payload.name, pub: payload.pub, ring: payload.ring, annTs: Math.min(payload.ts, Date.now()) });
+        const updated = await CID.addContact({ name: payload.name, pub: payload.pub, ring: payload.ring, spub: payload.spub, annTs: Math.min(payload.ts, Date.now()) });
         if (currentDmContact && currentDmContact.fp === existing.fp && updated) currentDmContact = updated;
         renderContacts();
         updatePushStatus();
@@ -3924,6 +3973,8 @@ const initIdentity = async () => {
     myId = await CID.ensureKeypair();
     myFp = await CID.fingerprint(myId.publicJwk);
     myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
+    try { mySign = await CID.ensureSigningKey(); } catch (_) { mySign = null; }
+    if (els.idSig) { els.idSig.hidden = !mySign; els.idSig.textContent = mySign ? fmt(T.sign.my_key, { fp: mySign.sigFp }) : ''; }
     openHistory();
     try { await CID.migrateFingerprints(); } catch (_) {}
     myProfile = CID.getProfile();
@@ -4344,7 +4395,7 @@ const loadQr = () => {
 
 const refreshMyCode = () => {
   if (els.idCard.hidden || !myId) return;
-  const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken);
+  const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken, mySign && mySign.spub);
   els.idCode.textContent = code;
   if (!window.qrcodegen) { loadQr().then((ok) => { if (ok) refreshMyCode(); }); return; }
   try {

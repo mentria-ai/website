@@ -5822,6 +5822,10 @@
         "asleep": "スリープ中",
         "stopped": "{device}からの回答が止まりました。",
         "finish": "この端末で続ける"
+      },
+      "sign": {
+        "verified": "確認済み: 本人の ID 鍵で署名",
+        "my_key": "署名鍵 {fp}"
       }
     },
     "scanner": {

@@ -1,3 +1,5 @@
+import { sigFingerprint, validSpub } from '/assets/js/comms/sign.js';
+
 const NS = 'comms';
 const KEYS_KEY = 'idkeys';
 const PROFILE_KEY = 'profile';
@@ -50,6 +52,29 @@ export const ensureKeypair = async () => {
   });
   if (!saved) throw new Error('storage-full');
   return { publicJwk, privateKey: pair.privateKey };
+};
+
+export const ensureSigningKey = async () => {
+  const wrapKey = await wrapKeyFromSecret();
+  const stored = store().get(NS, KEYS_KEY);
+  if (!stored || !stored.pub || !stored.wrapped) throw new Error('no-keys');
+  const algo = { name: 'ECDSA', namedCurve: 'P-256' };
+  if (stored.sign && stored.sign.pub && stored.sign.wrapped) {
+    const pkcs8 = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64uDec(stored.sign.wrapped.iv) }, wrapKey, b64uDec(stored.sign.wrapped.ct));
+    const signKey = await crypto.subtle.importKey('pkcs8', pkcs8, algo, false, ['sign']);
+    const spub = { x: stored.sign.pub.x, y: stored.sign.pub.y };
+    return { spub, signKey, sigFp: await sigFingerprint(spub) };
+  }
+  const pair = await crypto.subtle.generateKey(algo, true, ['sign', 'verify']);
+  const jwk = await crypto.subtle.exportKey('jwk', pair.publicKey);
+  const pkcs8 = await crypto.subtle.exportKey('pkcs8', pair.privateKey);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, pkcs8);
+  const next = Object.assign({}, stored, { sign: { pub: { kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y }, wrapped: { iv: b64uEnc(iv), ct: b64uEnc(new Uint8Array(ct)) } } });
+  if (!store().set(NS, KEYS_KEY, next)) throw new Error('storage-full');
+  const signKey = await crypto.subtle.importKey('pkcs8', pkcs8, algo, false, ['sign']);
+  const spub = { x: jwk.x, y: jwk.y };
+  return { spub, signKey, sigFp: await sigFingerprint(spub) };
 };
 
 const fpSymbols = async (pubJwk) => {
@@ -196,6 +221,7 @@ export const saveRequest = async (payload) => {
     pub: { x: payload.pub.x, y: payload.pub.y },
     ring: payload.ring ? String(payload.ring).slice(0, 64) : undefined,
     note: payload.note ? String(payload.note).slice(0, 140) : undefined,
+    spub: validSpub(payload.spub) ? { x: payload.spub.x, y: payload.spub.y } : undefined,
     ts: Date.now()
   };
   list.push(entry);
@@ -245,12 +271,14 @@ export const addContact = async (payload) => {
     if (typeof payload.annTs === 'number' && payload.annTs <= (entry.annTs || 0)) return entry;
     entry.name = String(payload.name || entry.name || '').slice(0, 32);
     if (payload.ring) entry.ring = String(payload.ring).slice(0, 64);
+    if (validSpub(payload.spub)) entry.spub = { x: payload.spub.x, y: payload.spub.y };
   } else {
     entry = {
       fp,
       name: String(payload.name || '').slice(0, 32),
       pub: { x: payload.pub.x, y: payload.pub.y },
       ring: payload.ring ? String(payload.ring).slice(0, 64) : undefined,
+      spub: validSpub(payload.spub) ? { x: payload.spub.x, y: payload.spub.y } : undefined,
       addedAt: Date.now()
     };
     contacts.push(entry);
@@ -325,9 +353,10 @@ export const removeContact = (fp) => {
   else store().remove(NS, CONTACTS_KEY);
 };
 
-export const encodeContactCode = (profile, pubJwk, ring) => {
+export const encodeContactCode = (profile, pubJwk, ring, spub) => {
   const payload = { v: 1, name: profile.name || '', pub: { x: pubJwk.x, y: pubJwk.y } };
   if (ring) payload.ring = ring;
+  if (validSpub(spub)) payload.spub = { x: spub.x, y: spub.y };
   return 'MC1.' + b64uEnc(te.encode(JSON.stringify(payload)));
 };
 

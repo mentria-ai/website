@@ -216,23 +216,24 @@ export const offerText = (parts, T) => {
   return caption ? line + '\n' + caption : line;
 };
 
-export const packChatPlain = (text, { fp, legacyFp } = {}, extra) => {
+export const packChatBody = (text, { fp, legacyFp } = {}, extra) => {
   const more = Object.assign({}, extra || {});
   if ('p' in more) {
     const p = cleanParts(more.p);
     if (p) more.p = p;
     else delete more.p;
   }
-  return JSON.stringify(Object.assign({ v: 2, t: text, sfp: legacyFp || undefined, sfp2: (fp && fp !== legacyFp) ? fp : undefined }, more));
+  return Object.assign({ v: 2, t: text, sfp: legacyFp || undefined, sfp2: (fp && fp !== legacyFp) ? fp : undefined }, more);
 };
+export const packChatPlain = (text, ids, extra) => JSON.stringify(packChatBody(text, ids, extra));
 export const unpackChatPlain = (raw) => {
   try {
     const o = JSON.parse(raw);
     if (o && o.v === 2 && typeof o.t === 'string') {
-      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, sfp2: typeof o.sfp2 === 'string' ? o.sfp2 : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null, parts: cleanParts(o.p) };
+      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, sfp2: typeof o.sfp2 === 'string' ? o.sfp2 : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null, parts: cleanParts(o.p), sg: (o.sg && typeof o.sg === 'object') ? o.sg : null, obj: o };
     }
   } catch (_) {}
-  return { text: raw, sfp: null, sfp2: null, ctl: null, parts: null };
+  return { text: raw, sfp: null, sfp2: null, ctl: null, parts: null, sg: null, obj: null };
 };
 
 export const certFingerprints = (sdp) => {

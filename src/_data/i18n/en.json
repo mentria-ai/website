@@ -5822,6 +5822,10 @@
         "asleep": "asleep",
         "stopped": "Your {device} stopped answering.",
         "finish": "Finish on this device"
+      },
+      "sign": {
+        "verified": "Verified: signed with their identity key",
+        "my_key": "Signing key {fp}"
       }
     },
     "scanner": {

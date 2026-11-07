@@ -63,6 +63,32 @@ export const checkManifest = async ({ size, pieceSize, hashes }, mh) => {
   return (await MF.manifestHash(hashes)) === mh;
 };
 
+const AUTO_BYTES = 25e6;
+const RELAY_ASK_BYTES = 100e6;
+
+export const acceptFor = ({ self, contact, kind, size } = {}) => {
+  if (self) return 'auto';
+  if (contact && (kind === 'photo' || kind === 'image' || kind === 'video') && Number(size) < AUTO_BYTES) return 'auto';
+  return 'ask';
+};
+
+export const relayAsk = ({ self, viaRelay: relayed, size } = {}) => !self && !!relayed && Number(size) > RELAY_ASK_BYTES;
+
+export const viaRelay = async (pc) => {
+  if (!pc || typeof pc.getStats !== 'function') return null;
+  let report;
+  try { report = await pc.getStats(); } catch (_) { return null; }
+  const all = new Map();
+  report.forEach((v, k) => all.set((v && v.id) || k, v));
+  let pair = null;
+  for (const v of all.values()) if (v && v.type === 'transport' && v.selectedCandidatePairId) pair = all.get(v.selectedCandidatePairId) || pair;
+  if (!pair) for (const v of all.values()) if (v && v.type === 'candidate-pair' && (v.selected || (v.nominated && v.state === 'succeeded'))) { pair = v; break; }
+  if (!pair) return null;
+  const l = all.get(pair.localCandidateId);
+  const r = all.get(pair.remoteCandidateId);
+  return !!((l && l.candidateType === 'relay') || (r && r.candidateType === 'relay'));
+};
+
 const sameBytes = (a, b) => {
   if (!a || !b || a.length !== b.length) return false;
   for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return false;
@@ -81,14 +107,16 @@ const RATE_MS = 3000;
 const PULLING = ['queued', 'moving'];
 
 export class Transfers {
-  constructor({ store, media, onChange, canServe, device } = {}) {
+  constructor({ store, media, onChange, canServe, device, askRelay } = {}) {
     this._store = store;
     this._media = media;
     this._onChange = onChange || (() => {});
     this._canServe = canServe || (() => true);
+    this._askRelay = askRelay || (() => false);
     this._device = device || null;
     this._threads = new Map();
     this._items = new Map();
+    this._via = new Map();
     this._locked = false;
     this._timer = setInterval(() => this._tick(), TICK_MS);
   }
@@ -199,6 +227,7 @@ export class Transfers {
   }
 
   async add(rec) {
+    if (!rec || !rec.id) return null;
     const item = this._track(rec);
     this.announce(rec.threadId);
     this._pump();
@@ -245,6 +274,36 @@ export class Transfers {
     return out;
   }
 
+  _checkVia(h) {
+    const key = h.threadId + ':' + h.peerId;
+    const now = Date.now();
+    const at = this._via.get(key + '@') || 0;
+    if (now - at < 10000) return;
+    this._via.set(key + '@', now);
+    let pc = null;
+    try { pc = (h.ctx.room.getPeers && h.ctx.room.getPeers()[h.peerId]) || null; } catch (_) { pc = null; }
+    viaRelay(pc).then((v) => {
+      if (v === null) return;
+      const before = this._via.get(key);
+      this._via.set(key, v);
+      if (before !== v) this._pump();
+    }, () => {});
+  }
+
+  relayed(threadId, peerId) {
+    return this._via.get(threadId + ':' + peerId);
+  }
+
+  async allowRelay(id) {
+    const item = this._items.get(id);
+    if (!item) return;
+    item.rec.relayOk = true;
+    delete item.rec.note;
+    await this._save(item, true);
+    this._onChange(id);
+    this._pump();
+  }
+
   _strike(item, threadId, peerId) {
     const k = threadId + ':' + peerId;
     item.strikes.set(k, (item.strikes.get(k) || 0) + 1);
@@ -260,6 +319,21 @@ export class Transfers {
       if (active >= MAX_ACTIVE) break;
       const holders = this._holders(item);
       if (!holders.length) continue;
+      for (const h of holders) this._checkVia(h);
+      const relayedOnly = holders.every((h) => this._via.get(h.threadId + ':' + h.peerId) === true);
+      if (relayedOnly && !item.rec.relayOk && this._askRelay(item.rec)) {
+        if (item.rec.note !== 'relay') {
+          item.rec.note = 'relay';
+          this._save(item, true);
+          this._onChange(item.rec.id);
+        }
+        continue;
+      }
+      if (item.rec.note === 'relay') {
+        delete item.rec.note;
+        this._save(item, true);
+      }
+      item.via = relayedOnly ? 'relay' : 'direct';
       active += 1;
       if (item.rec.state !== 'moving') {
         item.rec.state = 'moving';

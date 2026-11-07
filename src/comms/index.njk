@@ -225,6 +225,7 @@ unlockTool: true
           <span class="comms__chathead-name" id="comms-chat-title"></span>
           <span class="comms__chathead-sub">
             <span class="comms__sub-bit" id="comms-status">{{ 'tool.comms.chat.not_in_chat' | t }}</span>
+            <span class="comms__sub-bit" id="comms-via" hidden>{{ 'tool.comms.files.via_relay' | t }}</span>
             <span class="comms__sub-bit" id="comms-enc" title="{{ 'tool.comms.chat.enc_title' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></span>
             <span class="comms__sub-bit" id="comms-eph" title="{{ 'tool.comms.chat.eph_bang' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clock"></use></svg></span>
             <span class="comms__sub-bit" id="comms-peers" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg><span id="comms-peers-n">0</span></span>
@@ -567,6 +568,9 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__sheet-warn{margin:0;padding:var(--space-2) var(--space-3);font-size:var(--text-sm);background:color-mix(in srgb,var(--syn-amber) 12%,transparent);border:1px solid color-mix(in srgb,var(--syn-amber) 40%,transparent);border-radius:var(--radius-md)}
 .comms__sheet-big{margin:0;color:var(--term-muted);font-size:var(--text-sm)}
 .comms__sheet-actions{display:flex;justify-content:flex-end;gap:var(--space-2)}
+.comms__acceptbar{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);font-size:var(--text-sm);background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__acceptbar-text{flex:1 1 140px}
+.comms__relaybar{background:color-mix(in srgb,var(--syn-amber) 10%,transparent);border-color:color-mix(in srgb,var(--syn-amber) 35%,transparent)}
 
 .comms__send{flex:none;display:flex;align-items:center;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
 .comms__send:focus-within{border-color:var(--syn-cyan)}
@@ -646,6 +650,7 @@ import { secretCopy } from '/assets/js/comms/identity.js';
 import { homeRows, aiHref } from '/assets/js/comms/threads.js';
 import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
 import { createAttach } from '/assets/js/comms/attach.js';
+import { acceptFor, relayAsk, viaRelay } from '/assets/js/comms/files.js';
 import { openSheet } from '/assets/js/comms/sheet.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
@@ -1370,14 +1375,14 @@ const paintAttach = async (ref) => {
   const MF = window.MentriaMediaFormat;
   let m;
   if (!rec) {
-    m = { state: 'offered', have: 0, total: 1 };
+    m = { state: 'unknown', have: 0, total: 1 };
   } else {
     const n = MF ? Math.max(1, MF.pieceCount(rec.size)) : 1;
     const have = rec.complete ? n : (st ? st.have : (MF ? MF.bfCount(MF.bfFrom(rec.have, n)) : 0));
     if (rec.role === 'out') {
       m = { state: rec.delivered ? 'done' : (st && st.rate > 0 ? 'moving' : 'queued'), local: true, have: n, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, bytes: rec.size };
     } else {
-      m = { state: rec.complete ? 'done' : rec.state, have, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, note: rec.note, bytes: Math.min(rec.size, have * PIECE_BYTES) };
+      m = { state: rec.complete ? (rec.state === 'removed' ? 'removed' : 'done') : rec.state, have, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, note: rec.note, bytes: Math.min(rec.size, have * PIECE_BYTES) };
     }
   }
   updateParts(entry.card, ref, m);
@@ -1440,26 +1445,59 @@ const renderAttachment = (who, parts, opts = {}) => {
   const card = document.createElement('div');
   card.className = 'comms__partsbox';
   line.what.append(card);
-  renderParts(card, parts, { t: opts.t || '', me: !!opts.me, T, media: () => null, onOpen: openMediaItem, onRetry: (ref) => { if (attach) attach.retry(ref); }, onOpenPdf: openInPdf, onImportPack: importPackFrom });
+  renderParts(card, parts, { t: opts.t || '', me: !!opts.me, T, media: () => null, onOpen: openMediaItem, onRetry: (ref) => { if (attach) attach.retry(ref); }, onOpenPdf: openInPdf, onImportPack: importPackFrom, onAccept: (refs) => { if (attach) refs.forEach((r) => attach.accept(r)); }, onRelayOk: (refs) => { if (attach) refs.forEach((r) => attach.allowRelay(r)); } });
   if (album) albumCards.set(album.aid, card);
   for (const it of mediaParts(parts)) { fileLines.set(it.ref, { card, part: it, me: !!opts.me }); paintAttach(it.ref); }
   return line;
 };
 
+const offerQueue = [];
 const receiveAttachments = (item, mine) => {
   const room = currentRoomName;
-  if (!attach || !attach.media || !keepsHistory(room)) return;
+  if (!keepsHistory(room)) return;
+  if (!attach || !attach.media) {
+    if (offerQueue.length < 500) offerQueue.push({ item, mine, room });
+    return;
+  }
+  receiveInto(room, item, mine);
+};
+
+const receiveInto = (room, item, mine) => {
   const items = mediaParts(item.parts);
   if (!items.length) return;
-  attach.receive(room, items, { from: item.sfp2 || item.sfp || item.senderId || '', state: mine ? 'offered' : 'queued' }).then(() => { items.forEach((p) => paintAttach(p.ref)); }, () => {});
+  const contact = isDmRoom(room);
+  const stateFor = (p) => (mine ? 'offered' : acceptFor({ self: false, contact, kind: p.type === 'image' ? 'photo' : p.type, size: p.size }) === 'auto' ? 'queued' : 'offered');
+  attach.receive(room, items, { from: item.sfp2 || item.sfp || item.senderId || '', state: stateFor }).then(() => { items.forEach((p) => paintAttach(p.ref)); }, () => {});
+};
+
+let persistAsked = false;
+let viaTimer = 0;
+const checkChatVia = async () => {
+  const el = document.getElementById('comms-via');
+  if (!el) return;
+  let relayed = false;
+  try {
+    const pcs = room && room.getPeers ? Object.values(room.getPeers()) : [];
+    for (const pc of pcs) if (await viaRelay(pc)) { relayed = true; break; }
+  } catch (_) {}
+  el.hidden = !relayed;
+};
+const watchChatVia = () => {
+  clearInterval(viaTimer);
+  const el = document.getElementById('comms-via');
+  if (el) el.hidden = true;
+  viaTimer = setInterval(checkChatVia, 8000);
+  setTimeout(checkChatVia, 2500);
 };
 
 const startFiles = async (st) => {
   if (!st || st.status !== 'open') return;
-  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: null, canServe: () => true });
+  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: null, canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
+  if (!persistAsked && matchMedia('(display-mode: standalone)').matches && navigator.storage && navigator.storage.persist) { persistAsked = true; navigator.storage.persist().catch(() => {}); }
   try {
     await attach.start(st);
     attach.setOpenThread(keepsHistory(currentRoomName) ? currentRoomName : null);
+    while (offerQueue.length) { const q = offerQueue.shift(); receiveInto(q.room, q.item, q.mine); }
   } catch (e) {
     console.warn('files could not start:', e);
   }
@@ -1868,6 +1906,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   if (attach) attach.setOpenThread(null);
   fileLines.clear();
   albumCards.clear();
+  watchChatVia();
   const leavingDm = currentDmContact;
   joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null };
   stopScan();

@@ -243,6 +243,13 @@ const TT = { sheet: { est_down: '{n} photos · {size}, downscaled', est_orig: '{
 check('sheet: estimate downscaled', () => eq(SH.estimate([{ size: 4e6, kind: 'photo', variant: 'standard', std: 6e5 }, { size: 5e6, kind: 'photo', variant: 'standard', std: 7e5 }], TT), '2 photos · 1.3 MB, downscaled'));
 check('sheet: estimate originals', () => eq(SH.estimate([{ size: 24.6e6, kind: 'video', variant: 'original' }], TT), '24.6 MB, originals'));
 
+check('accept: rules table', () => { const t = [[{ self: true, contact: false, kind: 'file', size: 2e9 }, 'auto'], [{ self: false, contact: true, kind: 'photo', size: 24e6 }, 'auto'], [{ self: false, contact: true, kind: 'video', size: 26e6 }, 'ask'], [{ self: false, contact: true, kind: 'file', size: 1e5 }, 'ask'], [{ self: false, contact: false, kind: 'photo', size: 1e5 }, 'ask']]; for (const [a, want] of t) assert.equal(F.acceptFor(a), want, JSON.stringify(a)); });
+check('accept: relay ask only for people over 100 MB', () => { eq(F.relayAsk({ self: false, viaRelay: true, size: 101e6 }), true); eq(F.relayAsk({ self: true, viaRelay: true, size: 5e9 }), false); eq(F.relayAsk({ self: false, viaRelay: false, size: 5e9 }), false); });
+check('accept: 25 MB is the line', () => eq(F.acceptFor({ self: false, contact: true, kind: 'photo', size: 25 * 1024 * 1024 }), 'ask'));
+check('accept: a relayed pair is seen in stats', async () => { const pc = { getStats: async () => new Map([['p', { type: 'candidate-pair', state: 'succeeded', nominated: true, selected: true, localCandidateId: 'l', remoteCandidateId: 'r' }], ['l', { type: 'local-candidate', candidateType: 'relay' }], ['r', { type: 'remote-candidate', candidateType: 'host' }]]) }; eq(await F.viaRelay(pc), true); const direct = { getStats: async () => new Map([['p', { type: 'candidate-pair', state: 'succeeded', nominated: true, localCandidateId: 'l', remoteCandidateId: 'r' }], ['l', { type: 'local-candidate', candidateType: 'srflx' }], ['r', { type: 'remote-candidate', candidateType: 'host' }]]) }; eq(await F.viaRelay(direct), false); });
+
+check('files: adding a missing record is ignored', async () => { const t = new F.Transfers({ store: { listMedia: async () => [] }, media: {} }); try { eq(await t.add(null), null); eq(await t.add({}), null); } finally { t.stop(); } });
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

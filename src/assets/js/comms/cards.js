@@ -303,7 +303,42 @@ const applyItem = (root, ref, m) => {
   }
   const failed = root.querySelector('.comms__parts-retry');
   if (failed) failed.hidden = !st.items.some((it) => (st.media.get(it.ref) || {}).state === 'failed');
+  bars(root);
   statusLine(root);
+};
+
+const offeredOf = (st) => (st.me ? [] : st.items.filter((it) => { const m = st.media.get(it.ref) || {}; return m.state === 'offered' || m.state === 'removed'; }));
+const relayOf = (st) => st.items.filter((it) => (st.media.get(it.ref) || {}).note === 'relay');
+
+const bars = (root) => {
+  const st = root.__parts;
+  const F = (st.T && st.T.files) || {};
+  const accept = root.querySelector('.comms__acceptbar:not(.comms__relaybar)');
+  if (accept) {
+    const offered = offeredOf(st);
+    accept.hidden = !offered.length || !!st.dismissed;
+    if (offered.length) {
+      const again = offered.every((it) => (st.media.get(it.ref) || {}).state === 'removed');
+      accept.querySelector('.comms__acceptbar-text').textContent = fill(F.accept_q, { size: fmtBytes(offered.reduce((a, it) => a + (Number(it.size) || 0), 0)) });
+      accept.querySelector('[data-act="accept"]').textContent = again ? (F.download_again || F.accept || '') : (F.accept || '');
+    }
+  }
+  const relay = root.querySelector('.comms__relaybar');
+  if (relay) relay.hidden = !relayOf(st).length || !!st.relayDismissed;
+};
+
+const barOf = (doc, cls, text, go, goAct, noAct, noText) => {
+  const bar = node(doc, 'div', cls);
+  bar.hidden = true;
+  const t = node(doc, 'span', 'comms__acceptbar-text', text);
+  const a = node(doc, 'button', 'm-btn m-btn--primary', go);
+  a.type = 'button';
+  a.dataset.act = goAct;
+  const b = node(doc, 'button', 'm-btn m-btn--ghost', noText);
+  b.type = 'button';
+  b.dataset.act = noAct;
+  bar.append(t, a, b);
+  return bar;
 };
 
 export const renderParts = (el, parts, opts = {}) => {
@@ -342,7 +377,8 @@ export const renderParts = (el, parts, opts = {}) => {
   const retry = node(doc, 'button', 'm-btn m-btn--ghost comms__parts-retry', ((opts.T || {}).files || {}).retry || '');
   retry.type = 'button';
   retry.hidden = true;
-  root.append(status, paused, retry);
+  const F0 = (opts.T && opts.T.files) || {};
+  root.append(status, paused, retry, barOf(doc, 'comms__acceptbar', '', F0.accept || '', 'accept', 'not-now', F0.not_now || ''), barOf(doc, 'comms__acceptbar comms__relaybar', F0.relay_ask || '', F0.relay_go || '', 'relay-go', 'relay-not', F0.not_now || ''));
   const captions = known.filter((p) => p.type === 'text').map((p) => p.text).join('\n').trim();
   if (captions) {
     const cap = node(doc, 'div', 'comms__caption');
@@ -361,6 +397,11 @@ export const renderParts = (el, parts, opts = {}) => {
       if (opts.onOpen) opts.onOpen(t.dataset.ref, items.filter((x) => x.type !== 'file'));
       return;
     }
+    const st = root.__parts;
+    if (t.dataset.act === 'accept') { if (opts.onAccept) opts.onAccept(offeredOf(st).map((x) => x.ref)); st.dismissed = true; bars(root); return; }
+    if (t.dataset.act === 'not-now') { st.dismissed = true; bars(root); return; }
+    if (t.dataset.act === 'relay-go') { if (opts.onRelayOk) opts.onRelayOk(relayOf(st).map((x) => x.ref)); st.relayDismissed = true; bars(root); return; }
+    if (t.dataset.act === 'relay-not') { st.relayDismissed = true; bars(root); return; }
     const card = t.closest('.comms__filecard');
     if (!card) return;
     const it = items.find((x) => x.ref === card.dataset.ref);

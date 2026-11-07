@@ -5627,7 +5627,12 @@
         "open_pdf": "Abrir en la herramienta PDF",
         "save": "Guardar",
         "retry": "Reintentar",
-        "paused": "En pausa en {size}. Sigue sola cuando Comms esté abierto en los dos."
+        "paused": "En pausa en {size}. Sigue sola cuando Comms esté abierto en los dos.",
+        "accept": "Aceptar",
+        "not_now": "Ahora no",
+        "accept_q": "{size} · aún sin descargar",
+        "relay_ask": "Esto pasa por nuestro servidor de relevo. ¿Continuar?",
+        "relay_go": "Continuar"
       },
       "attach": {
         "ext_dm": "las extensiones van de dispositivo a dispositivo — {name} no está disponible ahora mismo.",

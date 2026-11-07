@@ -5627,7 +5627,12 @@
         "open_pdf": "Abrir na ferramenta de PDF",
         "save": "Salvar",
         "retry": "Tentar de novo",
-        "paused": "Pausado em {size}. Continua sozinho quando o Comms estiver aberto nos dois."
+        "paused": "Pausado em {size}. Continua sozinho quando o Comms estiver aberto nos dois.",
+        "accept": "Aceitar",
+        "not_now": "Agora não",
+        "accept_q": "{size} · ainda não baixado",
+        "relay_ask": "Isto passa pelo nosso servidor de retransmissão. Continuar?",
+        "relay_go": "Continuar"
       },
       "attach": {
         "ext_dm": "as extensões vão de aparelho para aparelho — {name} não está online agora.",

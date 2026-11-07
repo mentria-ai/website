@@ -66,6 +66,7 @@ const PAGE_TESTS = async () => {
   test('album: layouts', () => { eq([1, 2, 3, 4, 7].map((n) => C.albumLayout(n)).join(), 'one,two,three,grid,grid'); });
   test('album: +N on the fourth tile', () => { C.renderParts(el, [album(7)], opts()); eq(el.querySelectorAll('.comms__album img').length, 4); eq(el.querySelector('.comms__album-more').textContent, '+3'); });
   test('album: blurred until done', () => { C.renderParts(el, [album(2)], opts({ state: 'moving' })); eq(el.querySelectorAll('img.is-blurred').length, 2); C.updateParts(el, REF0, { state: 'done', have: 1, total: 1 }); ok(el.querySelector('img[src="/comms-media/' + REF0 + '"]')); });
+  test('no accept bar before the file is known here', () => { C.renderParts(el, [pdf()], { ...opts(), media: () => ({ state: 'unknown' }) }); ok(el.querySelector('.comms__acceptbar').hidden); });
   test('file card: pdf gets open and save', () => { C.renderParts(el, [pdf()], opts({ state: 'done' })); ok(el.querySelector('a[download][href$="?dl=1"]')); ok(el.querySelector('[data-act="open-pdf"]')); });
   test('unknown part falls back to t', () => { C.renderParts(el, [{ type: 'unknown' }], opts({ t: 'Sent a hologram' })); eq(el.textContent.trim(), 'Sent a hologram'); });
   const loadScript = (src) => new Promise((res, rej) => { if (document.querySelector('script[src="' + src + '"]')) { res(); return; } const el2 = document.createElement('script'); el2.src = src; el2.onload = res; el2.onerror = () => rej(new Error('load ' + src)); document.head.append(el2); });

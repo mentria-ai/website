@@ -5627,7 +5627,12 @@
         "open_pdf": "Open in PDF tool",
         "save": "Save",
         "retry": "Retry",
-        "paused": "Paused at {size}. It carries on by itself when Comms is open on both."
+        "paused": "Paused at {size}. It carries on by itself when Comms is open on both.",
+        "accept": "Accept",
+        "not_now": "Not now",
+        "accept_q": "{size} · not downloaded yet",
+        "relay_ask": "This goes through our relay server. Continue?",
+        "relay_go": "Continue"
       },
       "attach": {
         "ext_dm": "extensions go device-to-device — {name} isn't connected right now.",

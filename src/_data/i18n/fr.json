@@ -5627,7 +5627,12 @@
         "open_pdf": "Ouvrir dans l’outil PDF",
         "save": "Enregistrer",
         "retry": "Réessayer",
-        "paused": "En pause à {size}. Elle reprend toute seule quand Comms est ouvert des deux côtés."
+        "paused": "En pause à {size}. Elle reprend toute seule quand Comms est ouvert des deux côtés.",
+        "accept": "Accepter",
+        "not_now": "Pas maintenant",
+        "accept_q": "{size} · pas encore téléchargé",
+        "relay_ask": "Cela passe par notre serveur relais. Continuer ?",
+        "relay_go": "Continuer"
       },
       "attach": {
         "ext_dm": "les extensions passent d’appareil à appareil — {name} n’est pas en ligne pour le moment.",

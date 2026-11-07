@@ -20,7 +20,7 @@ const newId = () => {
 const readKnocks = () => { try { return JSON.parse(localStorage.getItem(KNOCKS) || '{}') || {}; } catch (_) { return {}; } };
 const writeKnocks = (v) => { try { localStorage.setItem(KNOCKS, JSON.stringify(v)); } catch (_) {} };
 
-export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, device, canServe } = {}) => {
+export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, device, canServe, askRelay } = {}) => {
   let store = null;
   let media = null;
   let transfers = null;
@@ -105,7 +105,7 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
 
   const becomeHolder = async () => {
     holder = true;
-    transfers = new Transfers({ store, media, onChange: onTransferChange, canServe, device });
+    transfers = new Transfers({ store, media, onChange: onTransferChange, canServe, device, askRelay });
     rooms = new FilesRooms({ transfers, join: (roomId, password, t) => joinFilesRoom(roomId, password, t) });
     clearInterval(tick);
     tick = setInterval(() => { refresh(); knockTick(); }, TICK_MS);
@@ -137,7 +137,9 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
         if (rec) await transfers.add(rec);
         refresh();
       } else if (d.op === 'accept' && d.id) {
-        await transfers.add((await store.getMedia(d.id).catch(() => null)) || transfers.get(d.id) || { id: d.id });
+        const rec = await store.getMedia(d.id).catch(() => null);
+        if (!rec) return;
+        await transfers.add(rec);
         await transfers.accept(d.id);
         refresh();
       } else if (d.op === 'retry' && d.id) {
@@ -145,6 +147,10 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
         if (rec) await transfers.add(rec);
         await transfers.retry(d.id);
         refresh();
+      } else if (d.op === 'relay' && d.id) {
+        const rec = await store.getMedia(d.id).catch(() => null);
+        if (rec) await transfers.add(rec);
+        await transfers.allowRelay(d.id);
       } else if (d.op === 'pause' && d.id) {
         await transfers.pause(d.id);
       } else if (d.op === 'forget' && d.id) {
@@ -208,7 +214,7 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
         if (known) continue;
         const MF = globalThis.MentriaMediaFormat;
         const rec = {
-          id: it.ref, threadId, role: 'in', state: state || 'queued', complete: false, updatedAt: Date.now(),
+          id: it.ref, threadId, role: 'in', state: (typeof state === 'function' ? state(it) : state) || 'queued', complete: false, updatedAt: Date.now(),
           name: it.name || '', mime: it.mime || 'application/octet-stream', size: it.size, pieceSize: MF.PIECE,
           hashes: '', mh: it.mh, have: MF.bfB64(MF.bfNew(MF.pieceCount(it.size))), from: from || '',
           kind: it.type, w: it.w, h: it.h, duration: it.duration, hd: !!it.hd, where: media.sync ? 'opfs' : 'idb'
@@ -220,9 +226,15 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
       if (added.length) { if (holder) refresh(); }
       return added;
     },
-    async accept(id) { if (forward('accept', id)) { await transfers.add((await store.getMedia(id)) || transfers.get(id)); await transfers.accept(id); refresh(); } },
+    async accept(id) {
+      const rec = store ? await store.getMedia(id).catch(() => null) : null;
+      if (!rec) return;
+      if (forward('accept', id)) { await transfers.add(rec); await transfers.accept(id); refresh(); }
+    },
     async retry(id) { if (forward('retry', id)) { const rec = await store.getMedia(id).catch(() => null); if (rec) await transfers.add(rec); await transfers.retry(id); refresh(); } },
     async pause(id) { if (forward('pause', id)) await transfers.pause(id); },
+    async allowRelay(id) { if (forward('relay', id)) { const rec = await store.getMedia(id).catch(() => null); if (rec) await transfers.add(rec); await transfers.allowRelay(id); } },
+    relayed(threadId, peerId) { return transfers ? transfers.relayed(threadId, peerId) : null; },
     async removeMedia(ids) {
       const list = Array.from(ids || []);
       if (!list.length) return;

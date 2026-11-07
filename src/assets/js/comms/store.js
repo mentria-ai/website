@@ -1,5 +1,5 @@
 export const DB_NAME = 'mentria-comms';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const SALT = 'mentria-comms-store-v1';
 const PREVIEW_LEN = 120;
 const PAGE = 200;
@@ -20,6 +20,8 @@ const openDb = () => new Promise((resolve, reject) => {
     if (!db.objectStoreNames.contains('threads')) db.createObjectStore('threads', { keyPath: 'id' }).createIndex('updatedAt', 'updatedAt');
     if (!db.objectStoreNames.contains('messages')) db.createObjectStore('messages', { keyPath: 'id' }).createIndex('thread_ts', ['threadId', 'ts']);
     if (!db.objectStoreNames.contains('thumbs')) db.createObjectStore('thumbs', { keyPath: 'hash' }).createIndex('threadId', 'threadId');
+    if (!db.objectStoreNames.contains('media')) db.createObjectStore('media', { keyPath: 'id' }).createIndex('threadId', 'threadId');
+    if (!db.objectStoreNames.contains('pieces')) db.createObjectStore('pieces', { keyPath: ['id', 'i'] });
   };
   r.onsuccess = () => {
     const db = r.result;
@@ -248,13 +250,91 @@ class Store {
   }
 
   deleteThread(id) {
+    return this._write(async () => {
+      const gone = [];
+      await this._commit((tx) => {
+        tx.objectStore('threads').delete(id);
+        const m = tx.objectStore('messages').index('thread_ts').openCursor(IDBKeyRange.bound([id, -Infinity], [id, Infinity]));
+        m.onsuccess = () => { const c = m.result; if (c) { c.delete(); c.continue(); } };
+        const t = tx.objectStore('thumbs').index('threadId').openCursor(IDBKeyRange.only(id));
+        t.onsuccess = () => { const c = t.result; if (c) { c.delete(); c.continue(); } };
+        const pieces = tx.objectStore('pieces');
+        const md = tx.objectStore('media').index('threadId').openCursor(IDBKeyRange.only(id));
+        md.onsuccess = () => {
+          const c = md.result;
+          if (!c) return;
+          gone.push(c.value.id);
+          pieces.delete(IDBKeyRange.bound([c.value.id, -Infinity], [c.value.id, Infinity]));
+          c.delete();
+          c.continue();
+        };
+      }, ['threads', 'messages', 'thumbs', 'media', 'pieces']);
+      return gone;
+    });
+  }
+
+  get key() {
+    return this._key;
+  }
+
+  async _openMedia(rec) {
+    const rest = await unsealJson(this._key, rec.enc, 'media|' + rec.id);
+    return { ...rest, id: rec.id, threadId: rec.threadId, role: rec.role, state: rec.state, complete: !!rec.complete, updatedAt: rec.updatedAt };
+  }
+
+  putMedia(m) {
+    return this._write(async () => {
+      const { id, threadId, role, state, complete, updatedAt, ...rest } = m;
+      const rec = { id, threadId, role, state, complete: !!complete, updatedAt: Number(updatedAt) || Date.now(), enc: await sealJson(this._key, rest, 'media|' + id) };
+      await this._commit((tx) => { tx.objectStore('media').put(rec); }, ['media']);
+    });
+  }
+
+  async getMedia(id) {
+    this._usable();
+    const rec = await this._get('media', id);
+    if (!rec) return null;
+    try { return await this._openMedia(rec); } catch (_) { this.skipped++; return null; }
+  }
+
+  async listMedia({ threadId, states } = {}) {
+    this._usable();
+    let recs;
+    try {
+      const st = this._db.transaction('media').objectStore('media');
+      recs = await request(threadId == null ? st.getAll() : st.index('threadId').getAll(IDBKeyRange.only(threadId)));
+    } catch (e) { throw mapError(e); }
+    const out = [];
+    for (const rec of recs) {
+      if (states && !states.includes(rec.state)) continue;
+      try { out.push(await this._openMedia(rec)); } catch (_) { this.skipped++; }
+    }
+    return out.sort((a, b) => b.updatedAt - a.updatedAt);
+  }
+
+  deleteMedia(ids) {
     return this._write(() => this._commit((tx) => {
-      tx.objectStore('threads').delete(id);
-      const m = tx.objectStore('messages').index('thread_ts').openCursor(IDBKeyRange.bound([id, -Infinity], [id, Infinity]));
-      m.onsuccess = () => { const c = m.result; if (c) { c.delete(); c.continue(); } };
-      const t = tx.objectStore('thumbs').index('threadId').openCursor(IDBKeyRange.only(id));
-      t.onsuccess = () => { const c = t.result; if (c) { c.delete(); c.continue(); } };
-    }, ['threads', 'messages', 'thumbs']));
+      const media = tx.objectStore('media');
+      const pieces = tx.objectStore('pieces');
+      for (const id of ids || []) {
+        media.delete(id);
+        pieces.delete(IDBKeyRange.bound([id, -Infinity], [id, Infinity]));
+      }
+    }, ['media', 'pieces']));
+  }
+
+  putPiece(id, i, slot) {
+    return this._write(() => this._commit((tx) => {
+      const st = tx.objectStore('pieces');
+      const got = st.getKey([id, i]);
+      got.onsuccess = () => { if (got.result === undefined) st.put({ id, i, slot }); };
+    }, ['pieces']));
+  }
+
+  async getPiece(id, i) {
+    this._usable();
+    const rec = await this._get('pieces', [id, i]);
+    return rec ? rec.slot : null;
   }
 
   putThumb(hash, threadId, blob) {
@@ -289,9 +369,9 @@ class Store {
     const run = this._queue.then(async () => {
       const fresh = await newWrappedKey(this._wrap);
       await this._commit((tx) => {
-        for (const name of ['threads', 'messages', 'thumbs', 'meta']) tx.objectStore(name).clear();
+        for (const name of ['threads', 'messages', 'thumbs', 'media', 'pieces', 'meta']) tx.objectStore(name).clear();
         tx.objectStore('meta').put(fresh.record);
-      }, ['meta', 'threads', 'messages', 'thumbs']);
+      }, ['meta', 'threads', 'messages', 'thumbs', 'media', 'pieces']);
       this._key = fresh.key;
       this.status = 'open';
       this.skipped = 0;

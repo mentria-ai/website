@@ -135,6 +135,13 @@ const OPS = {
     }
     return { done: true };
   },
+  async deleteAll() {
+    await Promise.all(Array.from(handles.keys()).map(closeHandle));
+    const top = await navigator.storage.getDirectory();
+    try { await top.removeEntry('comms-media', { recursive: true }); } catch (_) {}
+    dirP = null;
+    return {};
+  },
   async dropPlain(m) {
     try { await (await (await root()).getDirectoryHandle('tmp')).removeEntry(m.id, { recursive: true }); } catch (_) {}
     return {};

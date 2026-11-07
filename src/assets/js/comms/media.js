@@ -146,6 +146,12 @@ class Media {
     if (this._worker) await this._call('delete', { ids: list }).catch(() => {});
   }
 
+  async removeAll() {
+    this._sizes.clear();
+    this._where.clear();
+    if (this._worker) await this._call('deleteAll').catch(() => {});
+  }
+
   async usage(threadId) {
     const MF = this._MF;
     let total = 0;

@@ -5609,7 +5609,18 @@
         "ext_from": "extension de {who} : {name}",
         "install": "installer",
         "installed": "installée ✓",
-        "install_failed": "échec de l’installation : {reason}"
+        "install_failed": "échec de l’installation : {reason}",
+        "offer_photo": "J’ai envoyé une photo. Mettez Mentria à jour pour la voir.",
+        "offer_photos": "J’ai envoyé {n} photos. Mettez Mentria à jour pour les voir.",
+        "offer_video": "J’ai envoyé une vidéo. Mettez Mentria à jour pour la voir.",
+        "offer_videos": "J’ai envoyé {n} vidéos. Mettez Mentria à jour pour les voir.",
+        "offer_file": "J’ai envoyé un fichier. Mettez Mentria à jour pour l’ouvrir.",
+        "offer_files": "J’ai envoyé {n} fichiers. Mettez Mentria à jour pour les ouvrir.",
+        "offer_mixed": "J’ai envoyé {n} pièces jointes. Mettez Mentria à jour pour les voir.",
+        "needs_update": "{name} doit mettre Mentria à jour pour recevoir ceci",
+        "no_space": "Pas assez d’espace sur cet appareil",
+        "out_waiting": "{file} ({size}) · en attente que l’autre personne ouvre Comms",
+        "out_done": "{file} ({size}) · livré"
       },
       "attach": {
         "ext_dm": "les extensions passent d’appareil à appareil — {name} n’est pas en ligne pour le moment.",

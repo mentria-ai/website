@@ -589,7 +589,8 @@ import { openStore } from '/assets/js/comms/store.js';
 import { secretCopy } from '/assets/js/comms/identity.js';
 import { homeRows, aiHref } from '/assets/js/comms/threads.js';
 import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
-import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
+import { createAttach } from '/assets/js/comms/attach.js';
+import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -1155,15 +1156,20 @@ const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp |
 const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
 
 const renderRemoteChat = (item, opts = {}) => {
+  const files = mediaParts(item.parts).length > 0;
   if (sentByMe(item)) {
-    renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
-    if (!opts.stored) storeLine(item.cmid, 'self', item.text, item.ts);
+    if (files) renderAttachment('you', item.parts, { me: true, ts: item.ts });
+    else renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
+    if (!opts.stored) storeLine(item.cmid, 'self', item.text, item.ts, undefined, item.parts);
+    if (files) receiveAttachments(item, true);
     return;
   }
   let who = displayName(item.senderId);
   if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
-  renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
-  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '' });
+  if (files) renderAttachment(who, item.parts, { peerId: item.senderId, ts: item.ts });
+  else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
+  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '' }, item.parts);
+  if (files) receiveAttachments(item, false);
   if (!opts.silent) {
     playPing(880);
     const target = notifTargetNow();
@@ -1180,12 +1186,13 @@ const handleNostrMsg = async (msgEvent) => {
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     if (!content || !content.cmid || !content.enc || !chatKey || seenCmids.has(content.cmid)) return;
-    let text, sfp = null, sfp2 = null;
+    let text, sfp = null, sfp2 = null, parts = null;
     try {
       const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
       text = unpacked.text;
       sfp = unpacked.sfp;
       sfp2 = unpacked.sfp2;
+      parts = unpacked.parts;
       if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
     } catch { return; }
     seenCmids.add(content.cmid);
@@ -1193,7 +1200,7 @@ const handleNostrMsg = async (msgEvent) => {
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid };
+    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1235,7 +1242,7 @@ const openHistory = () => {
   commsStoreP = openStore(secret).then((st) => {
     commsStore = st;
     if (st.status === 'foreign') historyBar('foreign');
-    else refreshHomeThreads();
+    else { refreshHomeThreads(); startFiles(st); }
     return st;
   }, () => {
     commsStore = null;
@@ -1249,22 +1256,139 @@ const historyOn = () => !!(commsStore && commsStore.status === 'open');
 const historyFail = (e) => historyBar(e && e.code === 'foreign' ? 'foreign' : 'unavailable');
 const keepsHistory = (name) => !!(name && chatPersist && !isEphemeralRoom(name));
 
-const storeLine = (cmid, from, text, ts, meta) => {
+const storeLine = (cmid, from, text, ts, meta, parts) => {
   const room = currentRoomName;
   if (!cmid || !historyOn() || !keepsHistory(room)) return;
   const t = String(text == null ? '' : text);
-  commsStore.putMessage({ id: cmid, threadId: room, from, ts: Number(ts) || Date.now(), t, parts: [{ type: 'text', text: t }], meta: meta || undefined, v: 2 }).then(refreshHomeThreads, historyFail);
+  commsStore.putMessage({ id: cmid, threadId: room, from, ts: Number(ts) || Date.now(), t, parts: parts && parts.length ? parts : [{ type: 'text', text: t }], meta: meta || undefined, v: 2 }).then(refreshHomeThreads, historyFail);
 };
+
+const MAX_SEND = 2 * 1024 * 1024 * 1024;
+let attach = null;
+let filesIce = null;
+const fileLines = new Map();
+const mediaParts = (parts) => (parts || []).flatMap((p) => (p.type === 'album' ? (p.items || []) : (p.type === 'image' || p.type === 'video' || p.type === 'file') ? [p] : []));
+
+const threadInfoFor = async (id) => {
+  if (!myId || !id) return null;
+  if (isDmRoom(id)) {
+    let fp = null;
+    try { const t = commsStore ? await commsStore.getThread(id) : null; fp = t && t.meta ? t.meta.fp : null; } catch (_) {}
+    const contacts = CID.getContacts();
+    const list = fp ? contacts.filter((c) => c.fp === fp).concat(contacts.filter((c) => c.fp !== fp)) : contacts;
+    for (const c of list) {
+      try {
+        const d = await CID.deriveDm(myId.privateKey, c.pub);
+        if (d.roomName === id) return { roomName: d.roomName, b64Key: d.b64Key, contactFp: c.fp };
+      } catch (_) {}
+    }
+    return null;
+  }
+  const r = savedRooms().find((x) => x.room === id);
+  return r && r.key ? { roomName: r.room, b64Key: r.key } : null;
+};
+
+const joinFilesRoom = async (roomId, password) => {
+  if (!filesIce) { try { filesIce = await getIce(); } catch (_) { filesIce = FALLBACK_ICE; } }
+  const rtcConfig = { iceServers: filesIce };
+  if (relayOnly && hasTurn(filesIce)) rtcConfig.iceTransportPolicy = 'relay';
+  return joinRoom({ appId: 'mentria', relayConfig: { urls: [RELAY] }, rtcConfig, password }, roomId);
+};
+
+const knockThread = async (threadId) => {
+  if (!isDmRoom(threadId)) return false;
+  const info = await threadInfoFor(threadId);
+  const c = info && info.contactFp ? freshContact(info.contactFp) : null;
+  return c ? knockContact(c, 'comms-msg') : false;
+};
+
+const PIECE_BYTES = 262144;
+const paintAttach = async (ref) => {
+  const entry = fileLines.get(ref);
+  if (!entry || !entry.line.line.isConnected || !commsStore) return;
+  let rec = null;
+  try { rec = await commsStore.getMedia(ref); } catch (_) { rec = null; }
+  const part = entry.part;
+  const name = part.name || (rec && rec.name) || '';
+  const size = Number(part.size) || 0;
+  if (rec && rec.complete && rec.state !== 'removed') {
+    entry.line.line.removeAttribute('aria-live');
+    const tpl = !entry.me ? T.files.received : (rec.role === 'out' && !rec.delivered ? T.files.out_waiting : T.files.out_done);
+    entry.line.what.innerHTML = completeHTML(tpl, { n: 1 }, name, size, part.mime || '', '/comms-media/' + encodeURIComponent(ref));
+    return;
+  }
+  if (rec && rec.state === 'paused' && rec.note === 'space') {
+    entry.line.what.textContent = T.files.no_space;
+    return;
+  }
+  const st = attach ? attach.stats(ref) : null;
+  let bytes = st ? st.bytes : 0;
+  if (!st && rec && rec.have) {
+    try { const MF = window.MentriaMediaFormat; bytes = Math.min(size, MF.bfCount(MF.bfFrom(rec.have, MF.pieceCount(size))) * PIECE_BYTES); } catch (_) {}
+  }
+  entry.line.what.innerHTML = progressHTML(entry.me ? T.files.sending : T.files.receiving, name, size, entry.me ? size : bytes);
+};
+
+let paintQueued = new Set();
+let paintFrame = 0;
+const onFileChange = (id) => {
+  if (!id || !fileLines.has(id)) return;
+  paintQueued.add(id);
+  if (paintFrame) return;
+  paintFrame = requestAnimationFrame(() => {
+    paintFrame = 0;
+    const ids = Array.from(paintQueued);
+    paintQueued = new Set();
+    ids.forEach((r) => { paintAttach(r); });
+  });
+};
+
+const renderAttachment = (who, parts, opts = {}) => {
+  const items = mediaParts(parts);
+  let first = null;
+  for (const part of items) {
+    const line = renderLine(who, '', { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts, html: progressHTML(opts.me ? T.files.sending : T.files.receiving, part.name || '', Number(part.size) || 0, 0) });
+    fileLines.set(part.ref, { line, part, me: !!opts.me });
+    paintAttach(part.ref);
+    if (!first) first = line;
+  }
+  const caption = (parts || []).filter((p) => p.type === 'text').map((p) => p.text).join('\n').trim();
+  if (caption) renderLine(who, caption, { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts });
+  return first;
+};
+
+const receiveAttachments = (item, mine) => {
+  const room = currentRoomName;
+  if (!attach || !attach.media || !keepsHistory(room)) return;
+  const items = mediaParts(item.parts);
+  if (!items.length) return;
+  attach.receive(room, items, { from: item.sfp2 || item.sfp || item.senderId || '', state: mine ? 'offered' : 'queued' }).then(() => { items.forEach((p) => paintAttach(p.ref)); }, () => {});
+};
+
+const startFiles = async (st) => {
+  if (!st || st.status !== 'open') return;
+  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: null, canServe: () => true });
+  try {
+    await attach.start(st);
+    attach.setOpenThread(keepsHistory(currentRoomName) ? currentRoomName : null);
+  } catch (e) {
+    console.warn('files could not start:', e);
+  }
+};
+
+window.addEventListener('pagehide', () => { if (attach) attach.halt(); });
+window.addEventListener('pageshow', (e) => { if (e.persisted && attach && historyOn()) startFiles(commsStore); });
 
 const renderStored = (m) => {
   if (!m || !m.id || seenCmids.has(m.id)) return;
   seenCmids.add(m.id);
   if (m.from === 'self') {
-    renderLine('you', m.t, { me: true, quiet: true, ts: m.ts });
+    if (mediaParts(m.parts).length) renderAttachment('you', m.parts, { me: true, ts: m.ts });
+    else renderLine('you', m.t, { me: true, quiet: true, ts: m.ts });
     return;
   }
   const meta = m.meta || {};
-  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id }, { silent: true, stored: true });
+  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts }, { silent: true, stored: true });
 };
 
 const setEarlier = (beforeTs) => {
@@ -1335,7 +1459,9 @@ document.getElementById('comms-hist-reset').addEventListener('click', async () =
   const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.history.start_over_confirm, { danger: true }) : Promise.resolve(false));
   if (!ok) return;
   try {
+    if (attach) await attach.wipeAll();
     await commsStore.wipe();
+    if (attach) startFiles(commsStore);
     hideHistoryBar();
     refreshHomeThreads();
     if (currentRoomName) await openThreadHistory(currentRoomName, joinSeq);
@@ -1348,6 +1474,7 @@ const setupChatPersistence = async (roomName, topic) => {
   chatTopic = topic || null;
   chatPersist = !!(chatTopic && chatKey);
   seenCmids = new Set();
+  if (attach) attach.setOpenThread(keepsHistory(roomName) ? roomName : null);
   const seq = joinSeq;
   await openThreadHistory(roomName, seq);
   if (seq !== joinSeq) return;
@@ -1577,11 +1704,11 @@ const sentCmidsFor = (fp) => {
   } catch (_) { return []; }
 };
 
-const publishChat = async (text, cmid) => {
+const publishChat = async (text, cmid, extra) => {
   if (!chatTopic || !chatPersist || !chatKey) return;
   rememberSentCmid(cmid);
   try {
-    const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }));
+    const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }, extra));
     const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
@@ -1649,6 +1776,7 @@ let joinSeq = 0;
 
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const seq = ++joinSeq;
+  if (attach) attach.setOpenThread(null);
   const leavingDm = currentDmContact;
   joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null };
   stopScan();
@@ -1831,6 +1959,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       try { prof.fp = await CID.fingerprint(prof.pub); } catch {}
     }
     if (typeof data.ring === 'string') prof.ring = data.ring.slice(0, 64);
+    prof.caps = { files: data.caps && Number.isInteger(data.caps.files) ? data.caps.files : 0 };
+    if (prof.fp) rememberCaps(prof.fp, prof.caps);
     if (seq !== joinSeq || !peers.has(ctx.peerId)) return;
     const known = peerProfiles.get(ctx.peerId);
     prof.verified = !!(known && known.verified && samePubOf(known.pub, prof.pub));
@@ -1847,7 +1977,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   chatAction.onMessage = async (data, ctx) => {
     const cmid = data && data.cmid;
     if (cmid && seenCmids.has(cmid)) return;
-    let text, sfp = null, sfp2 = null;
+    let text, sfp = null, sfp2 = null, parts = null;
     if (data && data.enc) {
       if (!chatKey) return;
       try {
@@ -1855,13 +1985,14 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         text = unpacked.text;
         sfp = unpacked.sfp;
         sfp2 = unpacked.sfp2;
+        parts = unpacked.parts;
         if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
       } catch { return; }
     } else {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
-    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2, cmid });
+    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2, cmid, parts });
     playPing(880);
   };
 
@@ -2090,7 +2221,54 @@ const sendOne = async (file, extra) => {
   line.what.innerHTML = completeHTML(n > 0 ? (n === 1 ? T.files.sent_one : T.files.sent_many) : T.files.uncertain, { n }, file.name, file.size, file.type, previewUrl);
 };
 
+const storedChat = () => !!(currentRoomName && keepsHistory(currentRoomName) && chatKey && attach && attach.media);
+
+const sendAttachment = async (file) => {
+  const roomName = currentRoomName;
+  const key = chatKey;
+  const line = renderLine('you', '', { me: true, quiet: true, html: progressHTML(T.files.sending, file.name, file.size, 0) });
+  const sent = await attach.sendFile(roomName, file, { onProgress: (i) => { line.what.innerHTML = progressHTML(T.files.sending, file.name, file.size, Math.min(file.size, i * PIECE_BYTES)); } });
+  if (roomName !== currentRoomName || key !== chatKey) {
+    line.line.removeAttribute('aria-live');
+    line.what.innerHTML = fmtHtml(T.files.send_interrupted, { name: strongName(file.name) });
+    return;
+  }
+  const parts = [{ type: 'file', ref: sent.id, mh: sent.mh, size: file.size, mime: file.type || 'application/octet-stream', name: file.name }];
+  const text = offerText(parts, T);
+  const cmid = newCmid();
+  seenCmids.add(cmid);
+  const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }, { p: parts }));
+  if (chatAction) chatAction.send({ cmid, enc });
+  publishChat(text, cmid, { p: parts });
+  storeLine(cmid, 'self', text, Number(line.line.dataset.ts) || Date.now(), undefined, parts);
+  fileLines.set(sent.id, { line, part: parts[0], me: true });
+  paintAttach(sent.id);
+  maybeRingContact();
+};
+
 const sendFiles = async (fileList) => {
+  if (storedChat()) {
+    const all = Array.from(fileList || []);
+    if (!all.length) return;
+    const tooBig = all.filter((f) => f.size > MAX_SEND);
+    const ok = all.filter((f) => f.size <= MAX_SEND);
+    if (tooBig.length) sys(fmt(T.files.skipped, { cap: fmtSize(MAX_SEND), files: tooBig.map((f) => `${f.name} ${fmtSize(f.size)}`).join(', ') }));
+    const oldPeers = Array.from(peers).filter((p) => { const pr = peerProfiles.get(p); return !(pr && pr.caps && pr.caps.files >= 2); });
+    const release = holdAwake();
+    try {
+      for (const file of ok) {
+        if (oldPeers.length && file.size <= MAX_FILE && metaAction && chunkAction) {
+          try { await sendOne(file); } catch (err) { sys(fmt(T.files.send_failed_for, { name: file.name, reason: why(err) })); }
+          continue;
+        }
+        if (oldPeers.length) sys(fmt(T.files.needs_update, { name: displayName(oldPeers[0]) }));
+        try { await sendAttachment(file); } catch (err) { sys(fmt(T.files.send_failed_for, { name: file.name, reason: why(err) })); }
+      }
+    } finally {
+      release();
+    }
+    return;
+  }
   if (!metaAction || !chunkAction || peers.size === 0) {
     if (currentDmContact) {
       sys(fmt(T.files.dm_offline, { name: whoNow() }));
@@ -2568,7 +2746,7 @@ els.ringDecline.addEventListener('click', () => { declineRings(); });
 
 const sendProfileTo = (peerId) => {
   if (!profAction || !myId) return;
-  const payload = { name: myProfile.name, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y } };
+  const payload = { name: myProfile.name, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, caps: { files: 2 } };
   if (ringToken) payload.ring = ringToken;
   try { profAction.send(payload, peerId || undefined); } catch {}
 };
@@ -3061,15 +3239,29 @@ const announceCallTo = async (contact) => {
   });
 };
 
-const knockNow = async (kind) => {
-  if (!currentDmContact) return false;
-  const fresh = freshContact(currentDmContact.fp);
-  if (fresh) currentDmContact = fresh;
-  const ring = currentDmContact.ring;
+const knockContact = async (contact, kind) => {
+  if (!contact) return false;
+  const ring = contact.ring;
   if (!ring || !window.MentriaPush || !MentriaPush.ring) return false;
   lastRingSentAt = Date.now();
   const res = await MentriaPush.ring(ring, kind);
   return !!(res && res.ok);
+};
+
+const knockNow = async (kind) => {
+  if (!currentDmContact) return false;
+  const fresh = freshContact(currentDmContact.fp);
+  if (fresh) currentDmContact = fresh;
+  return knockContact(currentDmContact, kind);
+};
+
+const CAPS_KEY = 'mentria.comms.caps';
+const rememberCaps = (fp, caps) => {
+  try {
+    const all = JSON.parse(localStorage.getItem(CAPS_KEY) || '{}') || {};
+    all[fp] = { files: caps.files || 0, at: Date.now() };
+    localStorage.setItem(CAPS_KEY, JSON.stringify(all));
+  } catch (_) {}
 };
 
 const whoNow = () => (currentDmContact && (currentDmContact.name || currentDmContact.fp)) || T.log.they;
@@ -4171,7 +4363,11 @@ const refreshHomeThreads = () => {
 const dropStoredThreads = async (match) => {
   if (!historyOn()) return;
   try {
-    for (const t of await commsStore.listThreads()) if (match(t)) await commsStore.deleteThread(t.id);
+    for (const t of await commsStore.listThreads()) {
+      if (!match(t)) continue;
+      const gone = await commsStore.deleteThread(t.id);
+      if (attach && gone && gone.length) await attach.removeMedia(gone);
+    }
   } catch (e) {
     historyFail(e);
   }

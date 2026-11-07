@@ -5609,7 +5609,18 @@
         "ext_from": "extensión de {who}: {name}",
         "install": "instalar",
         "installed": "instalada ✓",
-        "install_failed": "falló la instalación: {reason}"
+        "install_failed": "falló la instalación: {reason}",
+        "offer_photo": "Envié una foto. Actualiza Mentria para verla.",
+        "offer_photos": "Envié {n} fotos. Actualiza Mentria para verlas.",
+        "offer_video": "Envié un video. Actualiza Mentria para verlo.",
+        "offer_videos": "Envié {n} videos. Actualiza Mentria para verlos.",
+        "offer_file": "Envié un archivo. Actualiza Mentria para abrirlo.",
+        "offer_files": "Envié {n} archivos. Actualiza Mentria para abrirlos.",
+        "offer_mixed": "Envié {n} adjuntos. Actualiza Mentria para verlos.",
+        "needs_update": "{name} tiene que actualizar Mentria para recibir esto",
+        "no_space": "No hay espacio suficiente en este dispositivo",
+        "out_waiting": "{file} ({size}) · esperando a que la otra persona abra Comms",
+        "out_done": "{file} ({size}) · entregado"
       },
       "attach": {
         "ext_dm": "las extensiones van de dispositivo a dispositivo — {name} no está disponible ahora mismo.",

@@ -5609,7 +5609,18 @@
         "ext_from": "{who} からの拡張機能：{name}",
         "install": "インストール",
         "installed": "インストールしました ✓",
-        "install_failed": "インストールできませんでした：{reason}"
+        "install_failed": "インストールできませんでした：{reason}",
+        "offer_photo": "写真を1枚送りました。表示するにはMentriaを更新してください。",
+        "offer_photos": "写真を{n}枚送りました。表示するにはMentriaを更新してください。",
+        "offer_video": "動画を1本送りました。表示するにはMentriaを更新してください。",
+        "offer_videos": "動画を{n}本送りました。表示するにはMentriaを更新してください。",
+        "offer_file": "ファイルを1件送りました。開くにはMentriaを更新してください。",
+        "offer_files": "ファイルを{n}件送りました。開くにはMentriaを更新してください。",
+        "offer_mixed": "添付ファイルを{n}件送りました。表示するにはMentriaを更新してください。",
+        "needs_update": "{name}さんがこれを受け取るにはMentriaの更新が必要です",
+        "no_space": "このデバイスの空き容量が足りません",
+        "out_waiting": "{file}（{size}）· 相手がCommsを開くのを待っています",
+        "out_done": "{file}（{size}）· 届きました"
       },
       "attach": {
         "ext_dm": "拡張機能は端末から端末へ直接送られます。{name} はいま接続していません。",

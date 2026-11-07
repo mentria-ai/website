@@ -1,3 +1,5 @@
+import { b64urlDecode } from '/assets/js/comms/wire.js';
+
 const MFg = () => {
   const mf = globalThis.MentriaMediaFormat;
   if (!mf) throw new Error('media format not loaded');
@@ -503,5 +505,110 @@ export class Transfers {
     clearInterval(this._timer);
     for (const item of this._items.values()) clearTimeout(item.saveTimer);
     this._threads.clear();
+  }
+}
+
+const B32 = 'abcdefghijklmnopqrstuvwxyz234567';
+const base32 = (bytes) => {
+  let bits = 0;
+  let value = 0;
+  let out = '';
+  for (const b of bytes) {
+    value = (value << 8) | b;
+    bits += 8;
+    while (bits >= 5) { out += B32[(value >>> (bits - 5)) & 31]; bits -= 5; }
+  }
+  if (bits > 0) out += B32[(value << (5 - bits)) & 31];
+  return out;
+};
+
+const keyBytes = (b64Key) => {
+  const s = String(b64Key || '').replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+  return b64urlDecode(s);
+};
+
+export const filesRoomFor = async (roomName, b64Key) => {
+  const te = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', keyBytes(b64Key), 'HKDF', false, ['deriveBits']);
+  const idBits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: te.encode('mentria-files-room-v1'), info: te.encode(String(roomName)) }, base, 80));
+  const pwBits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: te.encode('mentria-files-key-v1'), info: te.encode(String(roomName)) }, base, 256));
+  let pw = '';
+  for (const b of pwBits) pw += String.fromCharCode(b);
+  return { roomId: 'mf-' + base32(idBits).slice(0, 16), password: btoa(pw) };
+};
+
+export class FilesRooms {
+  constructor({ transfers, join, max = 6 } = {}) {
+    this._t = transfers;
+    this._join = join;
+    this._max = max;
+    this._rooms = new Map();
+    this._paused = false;
+    this._last = [];
+    this._queue = Promise.resolve();
+    this._leaving = new Map();
+  }
+
+  sync(threads) {
+    this._last = Array.from(threads || []);
+    const run = this._queue.then(() => this._sync(this._last));
+    this._queue = run.catch(() => {});
+    return run;
+  }
+
+  async _sync(threads) {
+    if (this._paused) return;
+    const pinned = threads.filter((t) => t.pinned);
+    const rest = threads.filter((t) => !t.pinned).sort((a, b) => (b.priority || 0) - (a.priority || 0)).slice(0, this._max);
+    const want = new Map(pinned.concat(rest).map((t) => [t.id, t]));
+    for (const id of Array.from(this._rooms.keys())) if (!want.has(id)) this._leave(id);
+    for (const t of want.values()) {
+      if (this._paused) return;
+      if (this._rooms.has(t.id)) continue;
+      let ids;
+      try { ids = await filesRoomFor(t.roomName, t.b64Key); } catch (_) { continue; }
+      const leaving = this._leaving.get(ids.roomId);
+      if (leaving) await leaving;
+      if (this._paused || this._rooms.has(t.id)) continue;
+      let room = null;
+      try { room = await this._join(ids.roomId, ids.password, t); } catch (e) { console.warn('files room join failed:', e); room = null; }
+      if (!room) continue;
+      this._rooms.set(t.id, { room, roomId: ids.roomId, at: Date.now() });
+      try { await this._t.attach(t.id, room, { peerFp: t.peerFp }); } catch (e) { console.warn('files room attach failed:', e); }
+    }
+  }
+
+  _leave(id) {
+    const r = this._rooms.get(id);
+    if (!r) return;
+    this._rooms.delete(id);
+    try { this._t.detach(id); } catch (_) {}
+    const p = Promise.resolve().then(() => r.room.leave()).catch(() => {});
+    this._leaving.set(r.roomId, p);
+    p.then(() => { if (this._leaving.get(r.roomId) === p) this._leaving.delete(r.roomId); });
+  }
+
+  joined() {
+    return Array.from(this._rooms.keys());
+  }
+
+  joinedAt(id) {
+    const r = this._rooms.get(id);
+    return r ? r.at : 0;
+  }
+
+  roomOf(id) {
+    const r = this._rooms.get(id);
+    return r ? r.room : null;
+  }
+
+  pauseAll() {
+    this._paused = true;
+    for (const id of Array.from(this._rooms.keys())) this._leave(id);
+  }
+
+  resumeAll() {
+    this._paused = false;
+    return this.sync(this._last);
   }
 }

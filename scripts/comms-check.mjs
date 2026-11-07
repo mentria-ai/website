@@ -216,6 +216,28 @@ check('files: a forged manifest fails', async () => { const h = [await sha(1), a
 check('files: a wrong piece size fails', async () => { const h = [await sha(1)]; eq(await F.checkManifest({ size: 1, pieceSize: 1024, hashes: h }, await MF.manifestHash(h)), false); });
 check('files: messages are checked', () => { eq(F.cleanFilesMsg('fwq', { id: R16, i: Array(65).fill(0) }), null); eq(F.cleanFilesMsg('fwq', { id: 'x', i: [1] }), null); deepEq(F.cleanFilesMsg('fwq', { id: R16, i: [1, 2] }), { id: R16, i: [1, 2] }); });
 
+const KEY = FIX.key;
+const KEY2 = 'BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc';
+const stubT = () => ({ attached: [], attach(id) { this.attached.push(id); }, detach() {} });
+const stubRoom = () => ({ left: false, leave() { this.left = true; } });
+const threadsN = (n) => Array.from({ length: n }, (_, i) => ({ id: 't' + i, roomName: 'r' + i, b64Key: KEY, priority: i }));
+check('files: files room is stable and differs from the chat room', async () => { const a = await F.filesRoomFor('dm-abc', KEY); const b = await F.filesRoomFor('dm-abc', KEY); deepEq(a, b); ok(/^mf-[a-z2-7]{16}$/.test(a.roomId)); ok(a.roomId !== 'dm-abc'); });
+check('files: different keys give different rooms', async () => ok((await F.filesRoomFor('r', KEY)).roomId !== (await F.filesRoomFor('r', KEY2)).roomId));
+check('files: at most six rooms, newest first', async () => { const joined = []; const fr = new F.FilesRooms({ transfers: stubT(), join: (id) => { joined.push(id); return stubRoom(); }, max: 6 }); await fr.sync(threadsN(9)); eq(joined.length, 6); deepEq(fr.joined().sort(), ['t3', 't4', 't5', 't6', 't7', 't8']); });
+
+check('files: a room is not rejoined until its leave has finished', async () => {
+  const leaving = new Set();
+  const events = [];
+  const join = (id) => { if (leaving.has(id)) throw new Error('still leaving ' + id); events.push('join ' + id); return { leave: () => { leaving.add(id); events.push('leave ' + id); return new Promise((r) => setTimeout(() => { leaving.delete(id); r(); }, 40)); } }; };
+  const fr = new F.FilesRooms({ transfers: stubT(), join, max: 6 });
+  const t = threadsN(1);
+  await fr.sync(t);
+  await fr.sync([]);
+  await fr.sync(t);
+  deepEq(fr.joined(), ['t0']);
+  eq(events.filter((e) => e.startsWith('join')).length, 2);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

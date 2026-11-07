@@ -5609,7 +5609,18 @@
         "ext_from": "extension from {who}: {name}",
         "install": "install",
         "installed": "installed ✓",
-        "install_failed": "install failed: {reason}"
+        "install_failed": "install failed: {reason}",
+        "offer_photo": "Sent a photo. Update Mentria to see it.",
+        "offer_photos": "Sent {n} photos. Update Mentria to see them.",
+        "offer_video": "Sent a video. Update Mentria to see it.",
+        "offer_videos": "Sent {n} videos. Update Mentria to see them.",
+        "offer_file": "Sent a file. Update Mentria to open it.",
+        "offer_files": "Sent {n} files. Update Mentria to open them.",
+        "offer_mixed": "Sent {n} attachments. Update Mentria to see them.",
+        "needs_update": "{name} needs to update Mentria to receive this",
+        "no_space": "Not enough space on this device",
+        "out_waiting": "{file} ({size}) · waiting for the other side to open Comms",
+        "out_done": "{file} ({size}) · delivered"
       },
       "attach": {
         "ext_dm": "extensions go device-to-device — {name} isn't connected right now.",

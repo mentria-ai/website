@@ -4,6 +4,7 @@ import { register } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import vm from 'node:vm';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '..');
@@ -73,6 +74,9 @@ const H = await need('/assets/js/comms/threads.js');
 const M = await need('/assets/js/comms/mention.js');
 const A = await need('/assets/js/comms/ai-thread.js');
 const L = await need('/assets/js/comms/location.js');
+vm.runInThisContext(readFileSync(join(repo, 'src/assets/js/comms/media-format.js'), 'utf8'), { filename: 'media-format.js' });
+const MF = globalThis.MentriaMediaFormat;
+const F = await need('/assets/js/comms/files.js');
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -204,6 +208,13 @@ check('wire: bad fields are dropped', () => eq(W.cleanParts([{ type: 'file', ref
 check('wire: an oversized thumb is dropped', () => eq(W.cleanParts([img({ thumb: 'A'.repeat(16385) })])[0].thumb, undefined));
 check('wire: a big album splits under the budget', async () => { const parts = [{ type: 'text', text: 'trip' }, album(12, 15000)]; const msgs = await W.splitOffer(parts, async (ps) => JSON.stringify(ps).length * 1.4); ok(msgs.length > 1); ok(msgs.every((m) => JSON.stringify(m).length * 1.4 <= 60000)); eq(msgs.flatMap((m) => m.find((x) => x.type === 'album').items).length, 12); eq(msgs[0][0].type, 'text'); });
 check('wire: offer text for old pages', () => eq(W.offerText([album(3, 10)], { files: { offer_photos: 'Sent {n} photos. Update Mentria to see them.' } }), 'Sent 3 photos. Update Mentria to see them.'));
+
+const sha = (n) => MF.sha256(new Uint8Array([n]));
+check('files: bitfield round-trip', () => { const b = F.bfNew(13); F.bfSet(b, 0); F.bfSet(b, 12); eq(F.bfCount(F.bfFrom(F.bfB64(b), 13)), 2); });
+check('files: next pieces skip held and in flight', () => { const b = F.bfNew(20); [0, 1, 3].forEach((i) => F.bfSet(b, i)); deepEq(F.nextPieces(b, 20, new Set([2, 4]), 3), [5, 6, 7]); });
+check('files: a forged manifest fails', async () => { const h = [await sha(1), await sha(2)]; const mh = await MF.manifestHash(h); eq(await F.checkManifest({ size: 300000, pieceSize: 262144, hashes: [h[0], await sha(9)] }, mh), false); eq(await F.checkManifest({ size: 300000, pieceSize: 262144, hashes: h }, mh), true); });
+check('files: a wrong piece size fails', async () => { const h = [await sha(1)]; eq(await F.checkManifest({ size: 1, pieceSize: 1024, hashes: h }, await MF.manifestHash(h)), false); });
+check('files: messages are checked', () => { eq(F.cleanFilesMsg('fwq', { id: R16, i: Array(65).fill(0) }), null); eq(F.cleanFilesMsg('fwq', { id: 'x', i: [1] }), null); deepEq(F.cleanFilesMsg('fwq', { id: R16, i: [1, 2] }), { id: R16, i: [1, 2] }); });
 
 let failed = 0;
 for (const [name, fn] of checks) {

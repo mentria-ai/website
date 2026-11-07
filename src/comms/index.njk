@@ -549,6 +549,24 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__fname{overflow:hidden;font-size:var(--text-sm);white-space:nowrap;text-overflow:ellipsis}
 .comms__fsize,.comms__fsaved{color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
 .comms__facts{display:flex;flex-wrap:wrap;gap:var(--space-2);grid-column:1/-1}
+.comms__sheet{width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 48px);padding:var(--space-4);color:var(--term-fg);background:var(--term-bg-raised);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__sheet::backdrop{background:rgba(0,0,0,.55)}
+.comms__sheet[open]{display:flex;flex-direction:column;gap:var(--space-3);overflow:auto}
+.comms__sheet-title{margin:0;font-family:var(--font-mono);font-size:var(--text-sm);font-weight:600}
+.comms__sheet-strip{display:flex;gap:var(--space-2);margin:0;padding:0 0 var(--space-1);overflow-x:auto;list-style:none}
+.comms__sheet-item{position:relative;flex:0 0 auto;width:88px}
+.comms__sheet-thumb{display:block;width:88px;height:88px;object-fit:cover;background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__sheet-item[data-kind="file"] .comms__sheet-thumb,.comms__sheet-item[data-kind="video"] .comms__sheet-thumb:not([src]){visibility:hidden}
+.comms__sheet-item[data-kind="file"]::before,.comms__sheet-item[data-kind="video"]::before{content:'';position:absolute;inset:0 0 auto;height:88px;background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__sheet-item.is-too-big{opacity:.5}
+.comms__sheet-name{display:block;margin-top:2px;overflow:hidden;color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs);white-space:nowrap;text-overflow:ellipsis}
+.comms__sheet-rm{position:absolute;top:4px;right:4px;width:24px;height:24px;padding:0;color:#fff;font-size:16px;line-height:24px;background:rgba(0,0,0,.6);border:0;border-radius:50%;cursor:pointer}
+.comms__sheet-add{align-self:flex-start}
+.comms__sheet-caption{width:100%;resize:vertical}
+.comms__sheet-est{margin:0;color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__sheet-warn{margin:0;padding:var(--space-2) var(--space-3);font-size:var(--text-sm);background:color-mix(in srgb,var(--syn-amber) 12%,transparent);border:1px solid color-mix(in srgb,var(--syn-amber) 40%,transparent);border-radius:var(--radius-md)}
+.comms__sheet-big{margin:0;color:var(--term-muted);font-size:var(--text-sm)}
+.comms__sheet-actions{display:flex;justify-content:flex-end;gap:var(--space-2)}
 
 .comms__send{flex:none;display:flex;align-items:center;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
 .comms__send:focus-within{border-color:var(--syn-cyan)}
@@ -628,6 +646,7 @@ import { secretCopy } from '/assets/js/comms/identity.js';
 import { homeRows, aiHref } from '/assets/js/comms/threads.js';
 import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
 import { createAttach } from '/assets/js/comms/attach.js';
+import { openSheet } from '/assets/js/comms/sheet.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -2419,31 +2438,32 @@ const sendAttachments = async ({ items, caption }) => {
   maybeRingContact();
 };
 
+const deliver = async (items, caption) => {
+  const oldPeers = Array.from(peers).filter((p) => { const pr = peerProfiles.get(p); return !(pr && pr.caps && pr.caps.files >= 2); });
+  const fresh = [];
+  const release = holdAwake();
+  try {
+    for (const it of items) {
+      if (oldPeers.length && it.file.size <= MAX_FILE && metaAction && chunkAction) {
+        try { await sendOne(it.file); } catch (err) { sys(fmt(T.files.send_failed_for, { name: it.file.name, reason: why(err) })); }
+        continue;
+      }
+      if (oldPeers.length) sys(fmt(T.files.needs_update, { name: displayName(oldPeers[0]) }));
+      fresh.push(it);
+    }
+    if (fresh.length) await sendAttachments({ items: fresh, caption });
+  } catch (err) {
+    sys(fmt(T.files.send_failed_for, { name: items.map((x) => x.file.name).join(', '), reason: why(err) }));
+  } finally {
+    release();
+  }
+};
+
 const sendFiles = async (fileList) => {
   if (storedChat()) {
     const all = Array.from(fileList || []);
     if (!all.length) return;
-    const tooBig = all.filter((f) => f.size > MAX_SEND);
-    const ok = all.filter((f) => f.size <= MAX_SEND);
-    if (tooBig.length) sys(fmt(T.files.skipped, { cap: fmtSize(MAX_SEND), files: tooBig.map((f) => `${f.name} ${fmtSize(f.size)}`).join(', ') }));
-    const oldPeers = Array.from(peers).filter((p) => { const pr = peerProfiles.get(p); return !(pr && pr.caps && pr.caps.files >= 2); });
-    const fresh = [];
-    const release = holdAwake();
-    try {
-      for (const file of ok) {
-        if (oldPeers.length && file.size <= MAX_FILE && metaAction && chunkAction) {
-          try { await sendOne(file); } catch (err) { sys(fmt(T.files.send_failed_for, { name: file.name, reason: why(err) })); }
-          continue;
-        }
-        if (oldPeers.length) sys(fmt(T.files.needs_update, { name: displayName(oldPeers[0]) }));
-        fresh.push({ file, variant: 'original' });
-      }
-      if (fresh.length) {
-        try { await sendAttachments({ items: fresh, caption: '' }); } catch (err) { sys(fmt(T.files.send_failed_for, { name: fresh.map((x) => x.file.name).join(', '), reason: why(err) })); }
-      }
-    } finally {
-      release();
-    }
+    openSheet({ files: all, self: false, T, onSend: ({ items, caption }) => { deliver(items, caption); } });
     return;
   }
   if (!metaAction || !chunkAction || peers.size === 0) {

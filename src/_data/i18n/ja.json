@@ -5746,6 +5746,21 @@
         "placeholder_desk": "誰にでもメッセージ、または AI に質問。@ で相手を選べます。",
         "hint": "@ を付けずに送ると、このデバイスで新しい AI チャットが始まります。",
         "pick": "チャットを選ぶか、新しく始める"
+      },
+      "sheet": {
+        "title": "送信",
+        "add": "追加",
+        "caption": "コメントを追加",
+        "standard": "標準",
+        "hd": "HD",
+        "send": "送信",
+        "cancel": "キャンセル",
+        "est_down": "写真{n}枚 · {size}（縮小）",
+        "est_orig": "{size}（オリジナル）",
+        "est_mixed": "{n}件 · {size}（写真は縮小）",
+        "keeps_location": "このファイルには位置情報が残ります",
+        "too_big": "大きすぎて送れません（最大2 GB）",
+        "remove": "削除"
       }
     },
     "scanner": {

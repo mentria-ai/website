@@ -5746,6 +5746,21 @@
         "placeholder_desk": "Escribe a quien quieras o pregunta a la IA. Escribe @ para elegir a quién.",
         "hint": "Sin @, se abre un chat nuevo con la IA en este dispositivo.",
         "pick": "Elige un chat o empieza uno"
+      },
+      "sheet": {
+        "title": "Enviar",
+        "add": "Añadir más",
+        "caption": "Añade un comentario",
+        "standard": "Estándar",
+        "hd": "HD",
+        "send": "Enviar",
+        "cancel": "Cancelar",
+        "est_down": "{n} fotos · {size}, reducidas",
+        "est_orig": "{size}, originales",
+        "est_mixed": "{n} elementos · {size}, fotos reducidas",
+        "keeps_location": "Este archivo conserva sus datos de ubicación",
+        "too_big": "Demasiado grande para enviar: 2 GB como máximo",
+        "remove": "Quitar"
       }
     },
     "scanner": {

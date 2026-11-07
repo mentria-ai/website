@@ -77,6 +77,7 @@ const L = await need('/assets/js/comms/location.js');
 vm.runInThisContext(readFileSync(join(repo, 'src/assets/js/comms/media-format.js'), 'utf8'), { filename: 'media-format.js' });
 const MF = globalThis.MentriaMediaFormat;
 const F = await need('/assets/js/comms/files.js');
+const SH = await need('/assets/js/comms/sheet.js');
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -237,6 +238,10 @@ check('files: a room is not rejoined until its leave has finished', async () => 
   deepEq(fr.joined(), ['t0']);
   eq(events.filter((e) => e.startsWith('join')).length, 2);
 });
+
+const TT = { sheet: { est_down: '{n} photos · {size}, downscaled', est_orig: '{size}, originals', est_mixed: '{n} items · {size}, photos downscaled' } };
+check('sheet: estimate downscaled', () => eq(SH.estimate([{ size: 4e6, kind: 'photo', variant: 'standard', std: 6e5 }, { size: 5e6, kind: 'photo', variant: 'standard', std: 7e5 }], TT), '2 photos · 1.3 MB, downscaled'));
+check('sheet: estimate originals', () => eq(SH.estimate([{ size: 24.6e6, kind: 'video', variant: 'original' }], TT), '24.6 MB, originals'));
 
 let failed = 0;
 for (const [name, fn] of checks) {

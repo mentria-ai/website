@@ -5746,6 +5746,21 @@
         "placeholder_desk": "Mande mensagem para qualquer pessoa ou pergunte à IA. Digite @ para escolher quem.",
         "hint": "Sem @, um novo chat com a IA começa neste aparelho.",
         "pick": "Escolha um chat ou comece um novo"
+      },
+      "sheet": {
+        "title": "Enviar",
+        "add": "Adicionar mais",
+        "caption": "Adicione uma legenda",
+        "standard": "Padrão",
+        "hd": "HD",
+        "send": "Enviar",
+        "cancel": "Cancelar",
+        "est_down": "{n} fotos · {size}, reduzidas",
+        "est_orig": "{size}, originais",
+        "est_mixed": "{n} itens · {size}, fotos reduzidas",
+        "keeps_location": "Este arquivo mantém os dados de localização",
+        "too_big": "Grande demais para enviar: no máximo 2 GB",
+        "remove": "Remover"
       }
     },
     "scanner": {

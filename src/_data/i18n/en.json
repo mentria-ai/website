@@ -5746,6 +5746,21 @@
         "placeholder_desk": "Message anyone or ask AI. Type @ to pick who.",
         "hint": "With no @, it starts a new AI chat on this device.",
         "pick": "Pick a chat, or start one"
+      },
+      "sheet": {
+        "title": "Send",
+        "add": "Add more",
+        "caption": "Add a caption",
+        "standard": "Standard",
+        "hd": "HD",
+        "send": "Send",
+        "cancel": "Cancel",
+        "est_down": "{n} photos · {size}, downscaled",
+        "est_orig": "{size}, originals",
+        "est_mixed": "{n} items · {size}, photos downscaled",
+        "keeps_location": "This file keeps its location data",
+        "too_big": "Too big to send: 2 GB at most",
+        "remove": "Remove"
       }
     },
     "scanner": {

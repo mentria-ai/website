@@ -279,6 +279,326 @@ check('fix phone: a files room can be rejoined on demand', async () => { const j
 
 check('fix phone: a file open in another worker counts as busy on Safari and Chrome', async () => { ok(MF.isBusy({ name: 'InvalidStateError' })); ok(MF.isBusy({ name: 'NoModificationAllowedError' })); ok(!MF.isBusy({ name: 'NotFoundError' })); ok(!MF.isBusy(null)); });
 
+const aiFlush = async () => { for (let i = 0; i < 40; i++) await null; };
+const aiClock = () => {
+  let t = 1000000; let n = 0; const timers = new Map();
+  return {
+    now: () => t,
+    setTimeout: (fn, ms) => { const id = ++n; timers.set(id, { at: t + Math.max(0, ms || 0), fn }); return id; },
+    clearTimeout: (id) => { timers.delete(id); },
+    async advance(ms) {
+      const end = t + ms;
+      await aiFlush();
+      for (;;) {
+        let next = null;
+        for (const [id, x] of timers) if (x.at <= end && (!next || x.at < next[1].at || (x.at === next[1].at && id < next[0]))) next = [id, x];
+        if (!next) break;
+        timers.delete(next[0]); t = next[1].at; next[1].fn(); await aiFlush();
+      }
+      t = end; await aiFlush();
+    }
+  };
+};
+const linkedRooms = (count) => {
+  const rooms = [];
+  for (let i = 0; i < count; i++) {
+    const room = { id: 'p' + i, up: true, sent: [], actions: {}, onPeerJoin: null, onPeerLeave: null };
+    room.makeAction = (name) => {
+      if (room.actions[name]) return room.actions[name];
+      const a = { onMessage: null, send: async (data, o) => {
+        room.sent.push([name, data, o && o.target]);
+        const target = o && o.target;
+        for (const other of rooms) {
+          if (other === room || !other.up || !room.up) continue;
+          if (target && target !== other.id) continue;
+          const b = other.actions[name];
+          if (b && b.onMessage) { const copy = JSON.parse(JSON.stringify(data)); queueMicrotask(() => b.onMessage(copy, { peerId: room.id })); }
+        }
+      } };
+      room.actions[name] = a;
+      return a;
+    };
+    rooms.push(room);
+  }
+  const leave = (i) => { rooms[i].up = false; for (const r of rooms) if (r !== rooms[i] && r.onPeerLeave) r.onPeerLeave(rooms[i].id); };
+  const join = (i) => { rooms[i].up = true; for (const r of rooms) if (r !== rooms[i] && r.onPeerJoin) r.onPeerJoin(rooms[i].id); };
+  return { rooms, join, leave };
+};
+const aiDev = (id, kind = 'mac') => ({ id, name: kind === 'mac' ? 'Mac' : 'iPhone', kind });
+const aiAsk = (text = 'hello') => ({ threadId: 'ai-t1', tier: '27b', messages: [{ role: 'user', content: text }], pageLang: 'en', from: { device: aiDev('dev-phone', 'iphone') } });
+const aiHostFor = (L, clock, o = {}) => {
+  const calls = { loads: [], answers: [], signals: [] };
+  const host = new L.AiHost({
+    device: aiDev('dev-mac'), page: 'comms', clock,
+    listModels: async () => o.models || [{ tier: '27b', state: 'cached' }, { tier: 'b2-2b', state: 'cached' }],
+    load: o.load || (async (tier) => { calls.loads.push(tier); if (tier === 'b2-9b') throw new Error('model-not-cached'); return { engine: {}, tier, contextTokens: 4096 }; }),
+    answer: o.answer || (async (ctx, ask, onText, signal) => {
+      calls.answers.push(ask.messages[ask.messages.length - 1].content); calls.signals.push(signal);
+      for (const piece of ['Hel', 'lo', ' there']) {
+        if (signal.aborted) { const e = new Error('aborted'); e.name = 'AbortError'; throw e; }
+        onText(piece, { reset: false });
+        await new Promise((r) => clock.setTimeout(r, 100));
+      }
+      if (signal.aborted) { const e = new Error('aborted'); e.name = 'AbortError'; throw e; }
+      return { text: 'Hello there', tokens: 3, ms: 300 };
+    }),
+    isBusy: o.isBusy || (() => false),
+    onActivity: o.onActivity || (() => {})
+  });
+  return { host, calls };
+};
+const aiWatch = (h) => { const ev = []; for (const k of ['wait', 'tok', 'done', 'err', 'gone']) h.on(k, (x) => ev.push([k, x])); return ev; };
+
+check('ai-link: a host advertises its models and the asker lists it by device', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const seen = [];
+  const client = new L.AiClient({ onHosts: (h) => seen.push(h), clock }); client.bind(rooms[1]);
+  const { host } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await aiFlush(); await clock.advance(10);
+  const hs = client.hosts();
+  eq(hs.length, 1); eq(hs[0].peerId, 'p0'); eq(hs[0].device.id, 'dev-mac'); eq(hs[0].page, 'comms'); eq(hs[0].busy, false);
+  deepEq(hs[0].models.map((m) => m.tier), ['27b', 'b2-2b']);
+  ok(seen.length >= 1);
+});
+
+check('ai-link: an answer streams in order and finishes with stats', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const client = new L.AiClient({ clock }); client.bind(rooms[1]);
+  const { host } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h = client.ask('p0', aiAsk()); const ev = aiWatch(h);
+  await clock.advance(2000);
+  const toks = ev.filter((e) => e[0] === 'tok');
+  ok(toks.length >= 1);
+  eq(toks[toks.length - 1][1].full, 'Hello there');
+  const done = ev.find((e) => e[0] === 'done');
+  ok(done); eq(done[1].stats.tier, '27b'); eq(done[1].stats.tokens, 3);
+  ok(ev.findIndex((e) => e[0] === 'done') > ev.findIndex((e) => e[0] === 'tok'));
+  const c2 = new L.AiClient({ clock }); const { rooms: r2 } = linkedRooms(2); c2.bind(r2[1]);
+  const h2 = c2.ask('p0', aiAsk()); const ev2 = aiWatch(h2);
+  const sa = r2[1].actions.fas;
+  sa.onMessage({ op: 'tok', id: h2.id, seq: 1, text: ' world' }, { peerId: 'p0' });
+  sa.onMessage({ op: 'tok', id: h2.id, seq: 0, text: 'hello' }, { peerId: 'p0' });
+  sa.onMessage({ op: 'done', id: h2.id, seq: 2, stats: { tier: '27b', tokens: 2, ms: 1 } }, { peerId: 'p0' });
+  await aiFlush();
+  deepEq(ev2.filter((e) => e[0] === 'tok').map((e) => e[1].full), ['hello', 'hello world']);
+  eq(ev2[ev2.length - 1][0], 'done');
+});
+
+check('ai-link: a second ask waits as busy and answers after the first', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(3);
+  const a = new L.AiClient({ clock }); a.bind(rooms[1]);
+  const b = new L.AiClient({ clock }); b.bind(rooms[2]);
+  const { host, calls } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const order = [];
+  const h1 = a.ask('p0', aiAsk('one')); const e1 = aiWatch(h1); h1.on('done', () => order.push('one'));
+  await aiFlush();
+  const h2 = b.ask('p0', aiAsk('two')); const e2 = aiWatch(h2); h2.on('done', () => order.push('two'));
+  await clock.advance(5000);
+  const w = e2.find((e) => e[0] === 'wait');
+  ok(w); eq(w[1].reason, 'busy'); eq(w[1].ahead, 1);
+  deepEq(order, ['one', 'two']);
+  deepEq(calls.answers, ['one', 'two']);
+  ok(e1.some((e) => e[0] === 'done'));
+});
+
+check('ai-link: a fourth waiting ask is refused as busy', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const hs = []; const evs = [];
+  for (let i = 0; i < 5; i++) { const h = c.ask('p0', aiAsk('q' + i)); hs.push(h); evs.push(aiWatch(h)); await aiFlush(); }
+  const refused = evs.filter((ev) => ev.some((e) => e[0] === 'err' && e[1].reason === 'busy'));
+  eq(refused.length, 1);
+  ok(evs[4].some((e) => e[0] === 'err' && e[1].reason === 'busy'));
+  eq(L.QUEUE_MAX, 3);
+});
+
+check('ai-link: cancel stops the answer and frees the host', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host, calls } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h1 = c.ask('p0', aiAsk('one')); aiWatch(h1);
+  await clock.advance(50);
+  h1.cancel();
+  await aiFlush();
+  eq(calls.signals[0].aborted, true);
+  const h2 = c.ask('p0', aiAsk('two')); const e2 = aiWatch(h2);
+  await clock.advance(2000);
+  ok(e2.some((e) => e[0] === 'done'));
+  deepEq(calls.answers, ['one', 'two']);
+});
+
+check('ai-link: the asker leaving stops the answer', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host, calls } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  c.ask('p0', aiAsk('one')); await aiFlush();
+  c.ask('p0', aiAsk('two')); await clock.advance(50);
+  const before = rooms[0].sent.length;
+  host.peerLeft('p1');
+  await clock.advance(3000);
+  eq(calls.signals[0].aborted, true);
+  deepEq(calls.answers, ['one']);
+  eq(rooms[0].sent.slice(before).filter((s) => s[0] === 'fas').length, 0);
+});
+
+check('ai-link: a slow load keeps the asker waiting, not gone', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const load = async (tier, onStage) => { onStage('loading'); await new Promise((r) => clock.setTimeout(r, 3 * L.STALL_MS)); return { engine: {}, tier, contextTokens: 4096 }; };
+  const { host } = aiHostFor(L, clock, { load }); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h = c.ask('p0', aiAsk()); const ev = aiWatch(h);
+  await clock.advance(3 * L.STALL_MS + 2000);
+  ok(ev.filter((e) => e[0] === 'wait' && e[1].reason === 'loading').length >= 3);
+  eq(ev.filter((e) => e[0] === 'gone').length, 0);
+  ok(ev.some((e) => e[0] === 'done'));
+});
+
+check('ai-link: a host that goes silent is gone after STALL_MS', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const answer = async () => new Promise(() => {});
+  const load = async (tier) => ({ engine: {}, tier, contextTokens: 4096 });
+  const { host } = aiHostFor(L, clock, { answer, load }); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h = c.ask('p0', aiAsk()); const ev = aiWatch(h);
+  rooms[0].up = false;
+  await clock.advance(L.STALL_MS - 100);
+  eq(ev.filter((e) => e[0] === 'gone').length, 0);
+  await clock.advance(200);
+  eq(ev.filter((e) => e[0] === 'gone').length, 1);
+});
+
+check('ai-link: a host that leaves mid-answer is gone at once', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h = c.ask('p0', aiAsk()); const ev = aiWatch(h);
+  await clock.advance(150);
+  c.peerLeft('p0');
+  await aiFlush();
+  eq(ev.filter((e) => e[0] === 'gone').length, 1);
+  eq(c.hosts().length, 0);
+});
+
+check("ai-link: a tier the host can't load answers tier-unavailable", async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h = c.ask('p0', Object.assign(aiAsk(), { tier: 'b2-9b' })); const ev = aiWatch(h);
+  await clock.advance(500);
+  ok(ev.some((e) => e[0] === 'err' && e[1].reason === 'tier-unavailable'));
+});
+
+check('ai-link: a disabled host advertises no models and refuses asks as not-hosting', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host, calls } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  host.setEnabled(false);
+  await clock.advance(10);
+  deepEq(c.hosts()[0].models, []);
+  const h = c.ask('p0', aiAsk()); const ev = aiWatch(h);
+  await clock.advance(500);
+  ok(ev.some((e) => e[0] === 'err' && e[1].reason === 'not-hosting'));
+  eq(calls.answers.length, 0);
+});
+
+check('ai-link: asks with images, bad ids or an assistant last turn are refused as bad-request', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const good = { op: 'ai', id: 'abcDEF_-12', threadId: 'ai-t1', tier: '27b', messages: [{ role: 'user', content: 'hi' }], images: [], params: { pageLang: 'en' }, from: { device: aiDev('d1', 'iphone') } };
+  ok(L.cleanAsk(good));
+  eq(L.cleanAsk(Object.assign({}, good, { images: ['x'] })), null);
+  eq(L.cleanAsk(Object.assign({}, good, { id: 'bad id!' })), null);
+  eq(L.cleanAsk(Object.assign({}, good, { id: 'x'.repeat(65) })), null);
+  eq(L.cleanAsk(Object.assign({}, good, { threadId: 't'.repeat(201) })), null);
+  eq(L.cleanAsk(Object.assign({}, good, { messages: [{ role: 'user', content: 'a' }, { role: 'assistant', content: 'b' }] })), null);
+  eq(L.cleanAsk(Object.assign({}, good, { messages: [{ role: 'system', content: 'a' }] })), null);
+  eq(L.cleanAsk(Object.assign({}, good, { messages: Array.from({ length: 41 }, () => ({ role: 'user', content: 'a' })) })), null);
+  eq(L.cleanAsk(Object.assign({}, good, { messages: [{ role: 'user', content: 'x'.repeat(L.CHARS_MAX + L.TEXT_MAX + 1) }] })), null);
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const { host, calls } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  const got = [];
+  const sa = rooms[1].makeAction('fas'); sa.onMessage = (d) => got.push(d);
+  rooms[1].makeAction('faq').send(Object.assign({}, good, { images: ['x'] }), { target: 'p0' });
+  await clock.advance(100);
+  ok(got.some((d) => d.op === 'err' && d.reason === 'bad-request' && d.id === good.id));
+  eq(calls.answers.length, 0);
+});
+
+check('ai-link: a long thread is cut to the newest turns that fit', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const turns = Array.from({ length: 200 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', text: 'w'.repeat(299) + String(i % 10) }));
+  turns.push({ role: 'user', text: 'final question' });
+  const out = L.trimForRequest(turns);
+  ok(out.length <= L.TURNS_MAX);
+  ok(out.reduce((a, m) => a + m.content.length, 0) <= L.CHARS_MAX);
+  deepEq(out[out.length - 1], { role: 'user', content: 'final question' });
+  deepEq(out.map((m) => m.content), turns.slice(turns.length - out.length).map((t) => t.text));
+  const big = L.trimForRequest([{ role: 'user', text: 'a' }, { role: 'assistant', text: 'b' }, { role: 'user', text: 'z'.repeat(50000) }]);
+  eq(big.length, 1); eq(big[0].content.length, L.TEXT_MAX);
+  const tail = L.trimForRequest([{ role: 'user', text: 'q' }, { role: 'assistant', text: 'partial' }]);
+  deepEq(tail, [{ role: 'user', content: 'q' }]);
+});
+
+check('ai-link: a host is dropped HOST_TTL_MS after its last advert', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  eq(c.hosts().length, 1);
+  await clock.advance(L.ADVERT_MS * 3);
+  eq(c.hosts().length, 1);
+  host.close();
+  await clock.advance(L.HOST_TTL_MS + 1000);
+  eq(c.hosts().length, 0);
+});
+
+check('ai-link: a newer advert from the same device replaces the old peer', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(3);
+  const c = new L.AiClient({ clock }); c.bind(rooms[2]);
+  const a = aiHostFor(L, clock).host; a.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const b = aiHostFor(L, clock, { models: [{ tier: 'b2-4b', state: 'loaded' }] }).host; b.bind(rooms[1], { ownsPeers: false });
+  await clock.advance(10);
+  const hs = c.hosts();
+  eq(hs.length, 1); eq(hs[0].peerId, 'p1'); deepEq(hs[0].models, [{ tier: 'b2-4b', state: 'loaded' }]);
+});
+
+check('ai-link: remembered hosts keep the newest 8 devices', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const st = new MemoryStorage();
+  for (let i = 0; i < 10; i++) L.rememberHosts([{ peerId: 'p' + i, device: aiDev('dev' + i), page: 'comms', models: [{ tier: '27b', state: 'cached' }], busy: false, at: 1000 + i }], st);
+  const k = L.knownHosts(st);
+  eq(Object.keys(k).length, 8);
+  ok(!k.dev0 && !k.dev1 && k.dev9 && k.dev2);
+  deepEq(k.dev9.models, [{ tier: '27b', state: 'cached' }]);
+  ok(st.getItem('mentria.comms.aihosts'));
+  st.setItem('mentria.comms.aihosts', 'not json');
+  deepEq(L.knownHosts(st), {});
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

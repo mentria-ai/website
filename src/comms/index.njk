@@ -27,6 +27,7 @@ unlockTool: true
   <symbol id="ci-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="ci-back" viewBox="0 0 24 24"><path d="M14.5 5 8 12l6.5 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-send" viewBox="0 0 24 24"><path d="M3.5 11.2 20.2 4l-3.4 16-5.3-6.2zM11.5 13.8l8.7-9.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-devices" viewBox="0 0 24 24"><rect x="2.5" y="5" width="13" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M1.5 17.5h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="17" y="8" width="5" height="11" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
   <symbol id="ci-media" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10" r="1.8" fill="currentColor"/><path d="m4.5 17.5 5-5 3.5 3.5 2.5-2.5 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-clip" viewBox="0 0 24 24"><g transform="translate(0.9 1)"><path d="m17.5 11.5-6.1 6.1a4.3 4.3 0 0 1-6-6l7.4-7.4a3 3 0 0 1 4.2 4.2l-7.3 7.3a1.6 1.6 0 0 1-2.3-2.3l6.1-6.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g></symbol>
   <symbol id="ci-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 3.5h5M7 6.5l.8 13a1.6 1.6 0 0 0 1.6 1.5h5.2a1.6 1.6 0 0 0 1.6-1.5l.8-13M10 10.5v6M14 10.5v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
@@ -572,6 +573,8 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__sheet-actions{display:flex;justify-content:flex-end;gap:var(--space-2)}
 .comms__acceptbar{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);font-size:var(--text-sm);background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
 .comms__acceptbar-text{flex:1 1 140px}
+.comms__parts-devices{margin:0;padding:0 var(--space-2);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__parts-devices:empty{display:none}
 .comms__viewer{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;padding:0;color:#fff;background:rgba(0,0,0,.94);border:0}
 .comms__viewer[open]{display:grid;grid-template-rows:auto 1fr auto}
 .comms__viewer::backdrop{background:#000}
@@ -677,6 +680,7 @@ import { createAttach } from '/assets/js/comms/attach.js';
 import { acceptFor, relayAsk, viaRelay } from '/assets/js/comms/files.js';
 import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
+import { selfRoomFor, deviceInfo, Presence, SELF_THREAD } from '/assets/js/comms/self.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1176,7 +1180,7 @@ const setConnUI = () => {
   els.send.classList.toggle('comms__send--offline', offline);
   els.status.classList.toggle('comms__badge--offline', offline);
   if (currentRoomName) {
-    els.status.textContent = offline ? T.chat.reconnecting : (isDmRoom(currentRoomName) ? T.chat.private : fmt(T.chat.room, { room: currentRoomName }));
+    els.status.textContent = offline ? T.chat.reconnecting : (isDmRoom(currentRoomName) ? T.chat.private : inSelf() ? (selfStatus() || T.devices.title) : fmt(T.chat.room, { room: currentRoomName }));
   }
 };
 window.addEventListener('offline', setConnUI);
@@ -1219,7 +1223,7 @@ const shareUrl = (roomName, b64Key) => {
 };
 
 const refreshShareUrl = (roomName) => {
-  els.share.hidden = !roomName || isDmRoom(roomName);
+  els.share.hidden = !roomName || isDmRoom(roomName) || tidOf(roomName) === SELF_THREAD;
 };
 
 const copyRoomLink = (url) => {
@@ -1344,20 +1348,34 @@ const historyFail = (e) => historyBar(e && e.code === 'foreign' ? 'foreign' : 'u
 const keepsHistory = (name) => !!(name && chatPersist && !isEphemeralRoom(name));
 
 const storeLine = (cmid, from, text, ts, meta, parts) => {
-  const room = currentRoomName;
-  if (!cmid || !historyOn() || !keepsHistory(room)) return;
+  const room = tidOf(currentRoomName);
+  if (!cmid || !historyOn() || !keepsHistory(currentRoomName)) return;
   const t = String(text == null ? '' : text);
   commsStore.putMessage({ id: cmid, threadId: room, from, ts: Number(ts) || Date.now(), t, parts: parts && parts.length ? parts : [{ type: 'text', text: t }], meta: meta || undefined, v: 2 }).then(refreshHomeThreads, historyFail);
 };
 
 const MAX_SEND = 2 * 1024 * 1024 * 1024;
 let attach = null;
+let selfRoom = null;
+const myDevice = deviceInfo(T);
+const presence = new Presence();
+const selfPeers = new Map();
+const tidOf = (name) => (selfRoom && name === selfRoom.roomName ? SELF_THREAD : name);
+const inSelf = () => !!currentRoomName && tidOf(currentRoomName) === SELF_THREAD;
+const selfStatus = () => [fmt(T.devices.this_one, { device: myDevice.name })].concat(presence.list(myDevice.id).filter((d) => !d.me).map((d) => fmt(d.online ? T.devices.online : T.devices.asleep, { device: d.name }))).join(', ');
+const refreshSelfHeader = () => { if (inSelf()) els.status.textContent = selfStatus() || fmt(T.devices.this_one, { device: myDevice.name }); };
+const devicesLine = (rec) => {
+  const others = presence.list(myDevice.id).filter((d) => !d.me);
+  if (!others.length || !rec) return '';
+  return others.map((d) => fmt((rec.onDevices || []).includes(d.id) ? T.devices.got : T.devices.when_open, { device: d.name })).join(' · ');
+};
 let filesIce = null;
 const fileLines = new Map();
 const mediaParts = (parts) => (parts || []).flatMap((p) => (p.type === 'album' ? (p.items || []) : (p.type === 'image' || p.type === 'video' || p.type === 'file') ? [p] : []));
 
 const threadInfoFor = async (id) => {
   if (!myId || !id) return null;
+  if (id === SELF_THREAD) return selfRoom ? { roomName: selfRoom.roomName, b64Key: selfRoom.b64Key, pinned: true } : null;
   if (isDmRoom(id)) {
     let fp = null;
     try { const t = commsStore ? await commsStore.getThread(id) : null; fp = t && t.meta ? t.meta.fp : null; } catch (_) {}
@@ -1411,11 +1429,19 @@ const paintAttach = async (ref) => {
     }
   }
   updateParts(entry.card, ref, m);
+  const line = entry.card.querySelector('.comms__parts-devices');
+  if (line) line.textContent = devicesLine(rec);
 };
 
 let paintQueued = new Set();
 let paintFrame = 0;
-const onFileChange = (id) => {
+const onFileChange = (id, extra) => {
+  if (extra && extra.threadId === SELF_THREAD) {
+    if (extra.hello && extra.device) { presence.seen(extra.device, true); selfPeers.set(extra.peerId, extra.device.id); }
+    if (extra.left && selfPeers.has(extra.peerId)) { presence.gone(selfPeers.get(extra.peerId)); selfPeers.delete(extra.peerId); }
+    refreshSelfHeader();
+    if (inSelf()) for (const r of fileLines.keys()) paintAttach(r);
+  }
   if (!id || !fileLines.has(id)) return;
   paintQueued.add(id);
   if (paintFrame) return;
@@ -1473,7 +1499,7 @@ const freeUp = async (threadId) => {
 };
 
 const openMediaGrid = async () => {
-  const threadId = currentRoomName;
+  const threadId = tidOf(currentRoomName);
   if (!threadId || !commsStore || !keepsHistory(threadId)) return;
   let dlg = document.getElementById('comms-media-grid');
   if (!dlg) {
@@ -1542,13 +1568,14 @@ const renderAttachment = (who, parts, opts = {}) => {
   line.what.append(card);
   renderParts(card, parts, { t: opts.t || '', me: !!opts.me, T, media: () => null, onOpen: openMediaItem, onRetry: (ref) => { if (attach) attach.retry(ref); }, onOpenPdf: openInPdf, onImportPack: importPackFrom, onAccept: (refs) => { if (attach) refs.forEach((r) => attach.accept(r)); }, onRelayOk: (refs) => { if (attach) refs.forEach((r) => attach.allowRelay(r)); } });
   if (album) albumCards.set(album.aid, card);
+  if (inSelf()) { const dl = document.createElement('p'); dl.className = 'comms__parts-devices'; card.append(dl); }
   for (const it of mediaParts(parts)) { fileLines.set(it.ref, { card, part: it, me: !!opts.me }); paintAttach(it.ref); }
   return line;
 };
 
 const offerQueue = [];
 const receiveAttachments = (item, mine) => {
-  const room = currentRoomName;
+  const room = tidOf(currentRoomName);
   if (!keepsHistory(room)) return;
   if (!attach || !attach.media) {
     if (offerQueue.length < 500) offerQueue.push({ item, mine, room });
@@ -1561,7 +1588,7 @@ const receiveInto = (room, item, mine) => {
   const items = mediaParts(item.parts);
   if (!items.length) return;
   const contact = isDmRoom(room);
-  const stateFor = (p) => (mine ? 'offered' : acceptFor({ self: false, contact, kind: p.type === 'image' ? 'photo' : p.type, size: p.size }) === 'auto' ? 'queued' : 'offered');
+  const stateFor = (p) => (room === SELF_THREAD ? 'queued' : mine ? 'offered' : acceptFor({ self: false, contact, kind: p.type === 'image' ? 'photo' : p.type, size: p.size }) === 'auto' ? 'queued' : 'offered');
   attach.receive(room, items, { from: item.sfp2 || item.sfp || item.senderId || '', state: stateFor }).then(() => { items.forEach((p) => paintAttach(p.ref)); }, () => {});
 };
 
@@ -1587,11 +1614,20 @@ const watchChatVia = () => {
 
 const startFiles = async (st) => {
   if (!st || st.status !== 'open') return;
-  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: null, canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
+  if (!selfRoom) {
+    try { const sec = secretCopy(); try { selfRoom = await selfRoomFor(sec); } finally { sec.fill(0); } } catch (_) { selfRoom = null; }
+  }
+  if (selfRoom) {
+    try {
+      if (!(await st.getThread(SELF_THREAD))) await st.putThread({ id: SELF_THREAD, kind: 'self', title: T.devices.title, participants: [], meta: {}, updatedAt: Date.now(), lastReadTs: Date.now(), pinned: false });
+      refreshHomeThreads();
+    } catch (_) {}
+  }
+  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: myDevice, pinned: [SELF_THREAD], canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
   if (!persistAsked && matchMedia('(display-mode: standalone)').matches && navigator.storage && navigator.storage.persist) { persistAsked = true; navigator.storage.persist().catch(() => {}); }
   try {
     await attach.start(st);
-    attach.setOpenThread(keepsHistory(currentRoomName) ? currentRoomName : null);
+    attach.setOpenThread(keepsHistory(currentRoomName) ? tidOf(currentRoomName) : null);
     while (offerQueue.length) { const q = offerQueue.shift(); receiveInto(q.room, q.item, q.mine); }
   } catch (e) {
     console.warn('files could not start:', e);
@@ -1638,7 +1674,7 @@ const showEarlier = async () => {
   if (!b || !historyOn() || !room) return;
   b.disabled = true;
   try {
-    const msgs = await commsStore.listMessages(room, { before: Number(b.dataset.before), limit: HISTORY_PAGE });
+    const msgs = await commsStore.listMessages(tidOf(room), { before: Number(b.dataset.before), limit: HISTORY_PAGE });
     if (seq !== joinSeq) return;
     const fromBottom = els.log.scrollHeight - els.log.scrollTop;
     const pinned = logPinned;
@@ -1659,15 +1695,18 @@ const openThreadHistory = async (roomName, seq) => {
   const st = await Promise.race([commsStoreP, new Promise((r) => setTimeout(() => r(null), HISTORY_WAIT_MS))]);
   if (seq !== joinSeq || !st || st.status !== 'open') return;
   const c = currentDmContact;
+  const tid = tidOf(roomName);
   try {
-    const prev = await st.getThread(roomName);
-    const base = c && isDmRoom(roomName)
-      ? { kind: 'dm', title: c.name || c.fp, participants: [{ id: c.fp, kind: 'human', name: c.name || '' }], meta: { fp: c.fp } }
-      : { kind: 'room', title: (roomNotifyEntry(roomName) || {}).label || roomName, participants: [], meta: {} };
-    await st.putThread({ id: roomName, ...base, updatedAt: prev ? prev.updatedAt : 0, lastReadTs: Date.now(), pinned: prev ? !!prev.pinned : false });
+    const prev = await st.getThread(tid);
+    const base = tid === SELF_THREAD
+      ? { kind: 'self', title: T.devices.title, participants: [], meta: {} }
+      : c && isDmRoom(roomName)
+        ? { kind: 'dm', title: c.name || c.fp, participants: [{ id: c.fp, kind: 'human', name: c.name || '' }], meta: { fp: c.fp } }
+        : { kind: 'room', title: (roomNotifyEntry(roomName) || {}).label || roomName, participants: [], meta: {} };
+    await st.putThread({ id: tid, ...base, updatedAt: prev ? prev.updatedAt : 0, lastReadTs: Date.now(), pinned: prev ? !!prev.pinned : false });
     refreshHomeThreads();
     if (seq !== joinSeq) return;
-    const msgs = await st.listMessages(roomName, { limit: HISTORY_PAGE });
+    const msgs = await st.listMessages(tid, { limit: HISTORY_PAGE });
     if (seq !== joinSeq) return;
     msgs.forEach(renderStored);
     setEarlier(msgs.length >= HISTORY_PAGE ? msgs[0].ts : null);
@@ -1696,8 +1735,9 @@ const setupChatPersistence = async (roomName, topic) => {
   chatTopic = topic || null;
   chatPersist = !!(chatTopic && chatKey);
   seenCmids = new Set();
-  if (attach) attach.setOpenThread(keepsHistory(roomName) ? roomName : null);
+  if (attach) attach.setOpenThread(keepsHistory(roomName) ? tidOf(roomName) : null);
   document.getElementById('comms-media-btn').hidden = !keepsHistory(roomName);
+  if (tidOf(roomName) === SELF_THREAD) { refreshSelfHeader(); sysTop(T.devices.explainer); }
   const seq = joinSeq;
   await openThreadHistory(roomName, seq);
   if (seq !== joinSeq) return;
@@ -2062,7 +2102,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key) : null;
   if (seq !== joinSeq) return;
   if (b64Key && !chatKey) sysTop(T.log.bad_key);
-  if (chatKey && b64Key) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
+  if (chatKey && b64Key && !opts.self) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
 
   if (opts.share === false || isDmRoom(roomName)) {
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -2111,9 +2151,9 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     setTimeout(() => { if (seq === joinSeq) announceRoomRing(); }, 3000);
   }
   if (opts.contact) currentDmContact = opts.contact;
-  els.chatTitle.textContent = opts.contact ? (opts.contact.name || opts.contact.fp) : ((roomNotifyEntry(roomName) || {}).label || roomName);
+  els.chatTitle.textContent = opts.self ? T.devices.title : opts.contact ? (opts.contact.name || opts.contact.fp) : ((roomNotifyEntry(roomName) || {}).label || roomName);
   paintAvatar(els.chatAvatar, opts.contact ? (opts.contact.name || opts.contact.fp) : '#', opts.contact ? opts.contact.fp : roomName);
-  els.status.textContent = isDmRoom(roomName) ? T.chat.private : fmt(T.chat.room, { room: roomName });
+  els.status.textContent = isDmRoom(roomName) ? T.chat.private : opts.self ? (selfStatus() || T.devices.title) : fmt(T.chat.room, { room: roomName });
   els.leave.hidden = false;
   setView('chat');
   setConnUI();
@@ -2125,8 +2165,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   updatePeers();
   updateCallUI();
   if (isDmRoom(roomName)) sysTop(T.log.dm_note);
-  else sysTop(myProfile.name ? fmt(T.log.alone_named, { name: myProfile.name, room: roomName }) : fmt(T.log.alone, { room: roomName }));
-  if (chatKey && !isDmRoom(roomName)) sysTop(T.log.enc_note);
+  else if (!opts.self) sysTop(myProfile.name ? fmt(T.log.alone_named, { name: myProfile.name, room: roomName }) : fmt(T.log.alone, { room: roomName }));
+  if (chatKey && !isDmRoom(roomName) && !opts.self) sysTop(T.log.enc_note);
 
   callAction = room.makeAction('call');
   callAction.onMessage = (data, ctx) => {
@@ -2538,7 +2578,7 @@ const sendAttachments = async ({ items, caption }) => {
     }
     if (kind === 'file') part = { type: 'file', mime: mime || 'application/octet-stream', name: shortName(f.name) };
     const base = done;
-    const sent = await attach.sendFile(roomName, sendFile, { ranges: item.ranges, onProgress: (i) => { prep.what.innerHTML = progressHTML(T.files.sending, label, total, Math.min(total, base + i * PIECE_BYTES)); } });
+    const sent = await attach.sendFile(tidOf(roomName), sendFile, { ranges: item.ranges, onProgress: (i) => { prep.what.innerHTML = progressHTML(T.files.sending, label, total, Math.min(total, base + i * PIECE_BYTES)); } });
     done += sendFile.size;
     part.ref = sent.id;
     part.mh = sent.mh;
@@ -2599,7 +2639,7 @@ const sendFiles = async (fileList) => {
   if (storedChat()) {
     const all = Array.from(fileList || []);
     if (!all.length) return;
-    openSheet({ files: all, self: false, T, onSend: ({ items, caption }) => { deliver(items, caption); } });
+    openSheet({ files: all, self: inSelf(), T, onSend: ({ items, caption }) => { deliver(items, caption); } });
     return;
   }
   if (!metaAction || !chunkAction || peers.size === 0) {
@@ -2745,7 +2785,7 @@ if (muted) { els.mute.textContent = T.adv.sound_off; els.mute.setAttribute('aria
 
 const updateCallUI = () => {
   const inRoom = !!room;
-  if (inRoom && currentRoomName) els.share.hidden = isDmRoom(currentRoomName) || call.active;
+  if (inRoom && currentRoomName) els.share.hidden = isDmRoom(currentRoomName) || inSelf() || call.active;
   els.callStart.hidden = !inRoom || call.active;
   els.callCam.hidden = !call.active;
   els.callMic.hidden = !call.active;
@@ -4638,6 +4678,29 @@ const roomRow = (r, info) => {
   return row;
 };
 
+const joinSelf = async () => {
+  if (!selfRoom) return;
+  await joinNew(selfRoom.roomName, selfRoom.b64Key, { self: true, share: false });
+};
+
+const selfRow = (t, info) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__selfrow' + (inSelf() ? ' comms__contact--current' : '');
+  row.dataset.thread = SELF_THREAD;
+  const av = document.createElement('span');
+  av.className = 'comms__avatar';
+  av.setAttribute('aria-hidden', 'true');
+  av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-devices"></use></svg>';
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  const { mid } = rowMid(T.devices.title, info.preview, info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn, rowChev());
+  row.addEventListener('click', () => { joinSelf(); });
+  return row;
+};
+
 const aiRow = (t, info) => {
   const slug = t.meta && t.meta.tool === 'annotate-image' ? 'annotate-image' : 'ai-chat';
   const row = document.createElement('div');
@@ -4678,6 +4741,7 @@ const renderContacts = () => {
     if (r.kind === 'request') els.contactList.append(requestRow(r.ref));
     else if (r.kind === 'contact') els.contactList.append(contactRow(r.ref, r, missedMap));
     else if (r.kind === 'room') els.contactList.append(roomRow(r.ref, r));
+    else if (r.kind === 'self') els.contactList.append(selfRow(r.ref, r));
     else els.contactList.append(aiRow(r.ref, r));
   }
 };

@@ -78,6 +78,7 @@ vm.runInThisContext(readFileSync(join(repo, 'src/assets/js/comms/media-format.js
 const MF = globalThis.MentriaMediaFormat;
 const F = await need('/assets/js/comms/files.js');
 const SH = await need('/assets/js/comms/sheet.js');
+const SF = await need('/assets/js/comms/self.js');
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -249,6 +250,16 @@ check('accept: 25 MB is the line', () => eq(F.acceptFor({ self: false, contact: 
 check('accept: a relayed pair is seen in stats', async () => { const pc = { getStats: async () => new Map([['p', { type: 'candidate-pair', state: 'succeeded', nominated: true, selected: true, localCandidateId: 'l', remoteCandidateId: 'r' }], ['l', { type: 'local-candidate', candidateType: 'relay' }], ['r', { type: 'remote-candidate', candidateType: 'host' }]]) }; eq(await F.viaRelay(pc), true); const direct = { getStats: async () => new Map([['p', { type: 'candidate-pair', state: 'succeeded', nominated: true, localCandidateId: 'l', remoteCandidateId: 'r' }], ['l', { type: 'local-candidate', candidateType: 'srflx' }], ['r', { type: 'remote-candidate', candidateType: 'host' }]]) }; eq(await F.viaRelay(direct), false); });
 
 check('files: adding a missing record is ignored', async () => { const t = new F.Transfers({ store: { listMedia: async () => [] }, media: {} }); try { eq(await t.add(null), null); eq(await t.add({}), null); } finally { t.stop(); } });
+
+const SEC = new Uint8Array(32).fill(4);
+const syncKeyB64 = async (secret, now) => { const bucket = String(Math.floor(now / 604800000)); const base = await crypto.subtle.importKey('raw', secret, 'HKDF', false, ['deriveBits']); const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: new TextEncoder().encode('mentria-identity-key-v1'), info: new TextEncoder().encode('aes-gcm-256|w' + bucket) }, base, 256)); return W.b64urlEncode(bits); };
+check('self: same secret, same week, same room', async () => { const a = await SF.selfRoomFor(SEC, 1.7e12); const b = await SF.selfRoomFor(SEC, 1.7e12 + 1000); deepEq(a, b); ok(/^self-[a-z2-7]{16}$/.test(a.roomName)); eq(a.threadId, 'self'); });
+check('self: the room changes with the week', async () => ok((await SF.selfRoomFor(SEC, 1.7e12)).roomName !== (await SF.selfRoomFor(SEC, 1.7e12 + 604800000)).roomName));
+check('self: differs from the identity sync room', async () => ok((await SF.selfRoomFor(SEC, 1.7e12)).b64Key !== await syncKeyB64(SEC, 1.7e12)));
+check('self: device kinds from the user agent', () => { eq(SF.kindFrom('Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X)', 5), 'iphone'); eq(SF.kindFrom('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 0), 'mac'); eq(SF.kindFrom('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 5), 'ipad'); eq(SF.kindFrom('Mozilla/5.0 (Linux; Android 15; Pixel 9)', 5), 'android'); });
+
+check('files: hello offers are checked', () => { const d = F.cleanFilesMsg('fhi', { caps: { files: 2 }, have: [], want: [], offers: [{ id: R16, mh: R32, size: 5, mime: 'text/plain', name: 'a.txt', kind: 'file' }, { id: 'bad', mh: R32, size: 5 }, { id: R16, mh: 'short', size: 5 }] }); eq(d.offers.length, 1); deepEq(d.offers[0], { id: R16, mh: R32, size: 5, mime: 'text/plain', name: 'a.txt', kind: 'file' }); });
+
 
 let failed = 0;
 for (const [name, fn] of checks) {

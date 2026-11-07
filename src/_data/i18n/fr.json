@@ -5780,6 +5780,22 @@
         "close": "Fermer",
         "prev": "Précédent",
         "next": "Suivant"
+      },
+      "devices": {
+        "title": "Mes appareils",
+        "explainer": "Déposez n’importe quoi ici. Ça arrive tout seul sur vos autres appareils dès que Comms y est ouvert.",
+        "this_one": "{device} · celui-ci",
+        "asleep": "{device} · en veille",
+        "online": "{device} · en ligne",
+        "got": "sur {device} ✓",
+        "when_open": "{device} à l’ouverture",
+        "kind_mac": "Mac",
+        "kind_iphone": "iPhone",
+        "kind_ipad": "iPad",
+        "kind_android": "Android",
+        "kind_windows": "PC Windows",
+        "kind_linux": "Linux",
+        "kind_device": "Appareil"
       }
     },
     "scanner": {

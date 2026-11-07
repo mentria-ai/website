@@ -5780,6 +5780,22 @@
         "close": "Close",
         "prev": "Previous",
         "next": "Next"
+      },
+      "devices": {
+        "title": "My devices",
+        "explainer": "Drop anything here. It reaches your other devices by itself whenever Comms is open on them.",
+        "this_one": "{device} · this one",
+        "asleep": "{device} · asleep",
+        "online": "{device} · online",
+        "got": "on {device} ✓",
+        "when_open": "{device} when open",
+        "kind_mac": "Mac",
+        "kind_iphone": "iPhone",
+        "kind_ipad": "iPad",
+        "kind_android": "Android",
+        "kind_windows": "Windows PC",
+        "kind_linux": "Linux",
+        "kind_device": "Device"
       }
     },
     "scanner": {

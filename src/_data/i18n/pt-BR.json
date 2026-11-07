@@ -5780,6 +5780,22 @@
         "close": "Fechar",
         "prev": "Anterior",
         "next": "Próximo"
+      },
+      "devices": {
+        "title": "Meus dispositivos",
+        "explainer": "Solte qualquer coisa aqui. Chega sozinho aos seus outros dispositivos sempre que o Comms estiver aberto neles.",
+        "this_one": "{device} · este",
+        "asleep": "{device} · em repouso",
+        "online": "{device} · online",
+        "got": "no {device} ✓",
+        "when_open": "{device} quando abrir",
+        "kind_mac": "Mac",
+        "kind_iphone": "iPhone",
+        "kind_ipad": "iPad",
+        "kind_android": "Android",
+        "kind_windows": "PC com Windows",
+        "kind_linux": "Linux",
+        "kind_device": "Dispositivo"
       }
     },
     "scanner": {

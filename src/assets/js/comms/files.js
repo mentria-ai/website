@@ -27,12 +27,20 @@ const B64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
 const KINDS = ['mac', 'iphone', 'ipad', 'android', 'windows', 'linux', 'device'];
 const isId = (v) => typeof v === 'string' && ID_RE.test(v);
 const idList = (v) => (Array.isArray(v) ? v.filter(isId).slice(0, 500) : []);
+const MH_RE = /^[A-Za-z0-9_-]{43}$/;
+const OFFER_KINDS = ['image', 'video', 'file'];
+const cleanOffer = (o) => {
+  if (!o || typeof o !== 'object' || !isId(o.id) || typeof o.mh !== 'string' || !MH_RE.test(o.mh)) return null;
+  if (!Number.isInteger(o.size) || o.size < 0 || o.size > 2147483648) return null;
+  return { id: o.id, mh: o.mh, size: o.size, mime: String(o.mime || 'application/octet-stream').slice(0, 100), name: String(o.name || '').slice(0, 200), kind: OFFER_KINDS.includes(o.kind) ? o.kind : 'file' };
+};
 
 export const cleanFilesMsg = (action, d) => {
   if (!d || typeof d !== 'object') return null;
   if (action === 'fhi') {
     const files = d.caps && Number.isInteger(d.caps.files) ? d.caps.files : 0;
     const out = { caps: { files }, have: idList(d.have), want: idList(d.want) };
+    if (Array.isArray(d.offers)) out.offers = d.offers.slice(0, 50).map(cleanOffer).filter(Boolean);
     const dev = d.device;
     if (dev && typeof dev === 'object' && typeof dev.id === 'string' && dev.id && dev.id.length <= 64) {
       out.device = { id: dev.id, name: String(dev.name || '').slice(0, 40), kind: KINDS.includes(dev.kind) ? dev.kind : 'device' };
@@ -107,7 +115,8 @@ const RATE_MS = 3000;
 const PULLING = ['queued', 'moving'];
 
 export class Transfers {
-  constructor({ store, media, onChange, canServe, device, askRelay } = {}) {
+  constructor({ store, media, onChange, canServe, device, askRelay, offersFor } = {}) {
+    this._offersFor = offersFor || (() => null);
     this._store = store;
     this._media = media;
     this._onChange = onChange || (() => {});
@@ -219,6 +228,8 @@ export class Transfers {
     if (!ctx) return;
     const msg = Object.assign({ caps: { files: 2 } }, this._lists(threadId));
     if (this._device) msg.device = this._device;
+    const offers = this._offersFor(threadId);
+    if (offers && offers.length) msg.offers = offers.slice(0, 50);
     ctx.act.fhi.send(msg, peerId ? { target: peerId } : {}).catch(() => {});
   }
 
@@ -249,6 +260,10 @@ export class Transfers {
     return item ? Object.assign({}, item.rec) : null;
   }
 
+  completeIn(threadId, limit = 50) {
+    return Array.from(this._items.values()).map((it) => it.rec).filter((r) => r.threadId === threadId && r.complete && r.mh).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, limit);
+  }
+
   _onHello(threadId, peerId, raw, peer) {
     const d = cleanFilesMsg('fhi', raw);
     if (!d || !this._threads.has(threadId)) return;
@@ -257,7 +272,7 @@ export class Transfers {
     p.want = new Set(d.want);
     p.caps = d.caps;
     p.device = d.device || null;
-    this._onChange(null, { threadId, peerId, hello: true, device: p.device, caps: p.caps });
+    this._onChange(null, { threadId, peerId, hello: true, device: p.device, caps: p.caps, offers: d.offers || null });
     this._pump();
   }
 
@@ -587,7 +602,7 @@ export class Transfers {
 }
 
 const B32 = 'abcdefghijklmnopqrstuvwxyz234567';
-const base32 = (bytes) => {
+export const base32 = (bytes) => {
   let bits = 0;
   let value = 0;
   let out = '';

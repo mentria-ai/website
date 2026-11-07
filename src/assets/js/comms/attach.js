@@ -20,7 +20,7 @@ const newId = () => {
 const readKnocks = () => { try { return JSON.parse(localStorage.getItem(KNOCKS) || '{}') || {}; } catch (_) { return {}; } };
 const writeKnocks = (v) => { try { localStorage.setItem(KNOCKS, JSON.stringify(v)); } catch (_) {} };
 
-export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, device, canServe, askRelay } = {}) => {
+export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, device, canServe, askRelay, pinned } = {}) => {
   let store = null;
   let media = null;
   let transfers = null;
@@ -50,6 +50,7 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
     if (!holder || !rooms || stopped) return;
     const list = await pendingThreads();
     if (openThread && !list.some((t) => t.id === openThread)) list.push({ id: openThread, at: Date.now() + 1 });
+    for (const id of pinned || []) if (!list.some((t) => t.id === id)) list.push({ id, at: 0 });
     const out = [];
     for (const t of list) {
       let info = null;
@@ -76,17 +77,41 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
     }
   };
 
+  const adoptOffers = async (threadId, offers) => {
+    const MF = globalThis.MentriaMediaFormat;
+    let added = 0;
+    for (const o of offers) {
+      if (await store.getMedia(o.id).catch(() => null)) continue;
+      const rec = {
+        id: o.id, threadId, role: 'in', state: 'queued', complete: false, updatedAt: Date.now(),
+        name: o.name, mime: o.mime, size: o.size, pieceSize: MF.PIECE, hashes: '', mh: o.mh,
+        have: MF.bfB64(MF.bfNew(MF.pieceCount(o.size))), kind: o.kind, where: media.sync ? 'opfs' : 'idb'
+      };
+      try { await store.putMedia(rec); } catch (_) { continue; }
+      await transfers.add(rec);
+      added += 1;
+    }
+    if (added) refresh();
+  };
+
   const onTransferChange = async (id, extra) => {
+    if (extra && extra.hello && extra.threadId && store && extra.offers && extra.offers.length && (pinned || []).includes(extra.threadId)) {
+      await adoptOffers(extra.threadId, extra.offers);
+    }
     if (extra && extra.hello && extra.threadId && store) {
       const peer = transfers.peersOf(extra.threadId).find((p) => p.peerId === extra.peerId);
       if (peer) {
         for (const rid of peer.have) {
           const rec = transfers.get(rid);
-          if (rec && rec.role === 'out' && !rec.delivered) {
-            rec.delivered = true;
+          if (!rec) continue;
+          let dirty = false;
+          if (rec.role === 'out' && !rec.delivered) { rec.delivered = true; dirty = true; }
+          const dev = peer.device && peer.device.id;
+          if (dev && !(rec.onDevices || []).includes(dev)) { rec.onDevices = (rec.onDevices || []).concat([dev]).slice(-20); dirty = true; }
+          if (dirty) {
             try { await store.putMedia(rec); } catch (_) {}
             await transfers.add(rec);
-            changed(rid, { delivered: true });
+            changed(rid, { delivered: !!rec.delivered });
             if (chan) chan.postMessage({ op: 'change', id: rid });
           }
         }
@@ -105,7 +130,9 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
 
   const becomeHolder = async () => {
     holder = true;
-    transfers = new Transfers({ store, media, onChange: onTransferChange, canServe, device, askRelay });
+    const kindOf = (r) => (r.kind === 'image' || r.kind === 'video' || r.kind === 'file' ? r.kind : /^image\//i.test(r.mime || '') ? 'image' : /^video\//i.test(r.mime || '') ? 'video' : 'file');
+    const offersFor = (tid) => ((pinned || []).includes(tid) && transfers ? transfers.completeIn(tid, 50).map((r) => ({ id: r.id, mh: r.mh, size: r.size, mime: r.mime, name: r.name, kind: kindOf(r) })) : null);
+    transfers = new Transfers({ store, media, onChange: onTransferChange, canServe, device, askRelay, offersFor });
     rooms = new FilesRooms({ transfers, join: (roomId, password, t) => joinFilesRoom(roomId, password, t) });
     clearInterval(tick);
     tick = setInterval(() => { refresh(); knockTick(); }, TICK_MS);

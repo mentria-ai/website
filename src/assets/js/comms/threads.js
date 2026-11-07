@@ -37,6 +37,7 @@ export const homeRows = (src, view = {}) => {
   }
   for (const t of threads) {
     if (t.kind === 'model') rest.push({ kind: 'ai', key: t.id, title: t.title || '', preview: plain(t.preview), ts: t.updatedAt || 0, unread: 0, ref: t });
+    else if (t.kind === 'self') rest.push({ kind: 'self', key: 'self', title: t.title || '', preview: plain(t.preview), ts: t.updatedAt || 0, unread: 0, ref: t });
   }
   rest.sort((a, b) => b.ts - a.ts);
   const shown = (r) => (filter === 'people' ? r.kind !== 'ai' : filter === 'ai' ? r.kind === 'ai' : true);

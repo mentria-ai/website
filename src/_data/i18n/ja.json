@@ -5780,6 +5780,22 @@
         "close": "閉じる",
         "prev": "前へ",
         "next": "次へ"
+      },
+      "devices": {
+        "title": "マイデバイス",
+        "explainer": "ここに何でもドロップできます。ほかのデバイスでCommsを開いていれば自動で届きます。",
+        "this_one": "{device} · このデバイス",
+        "asleep": "{device} · スリープ中",
+        "online": "{device} · オンライン",
+        "got": "{device}に保存済み ✓",
+        "when_open": "{device}は開いたときに",
+        "kind_mac": "Mac",
+        "kind_iphone": "iPhone",
+        "kind_ipad": "iPad",
+        "kind_android": "Android",
+        "kind_windows": "Windows PC",
+        "kind_linux": "Linux",
+        "kind_device": "デバイス"
       }
     },
     "scanner": {

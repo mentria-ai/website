@@ -72,6 +72,7 @@ const C = await need('/assets/js/comms/cards.js');
 const H = await need('/assets/js/comms/threads.js');
 const M = await need('/assets/js/comms/mention.js');
 const A = await need('/assets/js/comms/ai-thread.js');
+const L = await need('/assets/js/comms/location.js');
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -162,6 +163,31 @@ check('ai thread: a message keeps its position in its id', () => { eq(A.messageI
 check('ai thread: legacy ids are stable', async () => { eq(await A.legacyThreadId('[1]'), await A.legacyThreadId('[1]')); ok((await A.legacyThreadId('[1]')).startsWith('ai-legacy-')); });
 
 check('annotate: one result is a photo and an answer', () => { const [u, m] = A.annotateToMessages({ mode: 'describe', modeLabel: 'Describe', text: 'A seahorse', thumb: 'h1' }, 'an-1', 0, 5); eq(u.from, 'self'); eq(u.parts[0].thumb, 'h1'); eq(m.t, 'A seahorse'); eq(m.id, 'an-1:1'); });
+
+const te8 = (t) => new TextEncoder().encode(t);
+const be32 = (n) => [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255];
+const be16 = (n) => [(n >> 8) & 255, n & 255];
+const cat = (...parts) => { const n = parts.reduce((a, p) => a + p.length, 0); const out = new Uint8Array(n); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } return out; };
+const tag = (type) => Uint8Array.from(type, (c) => c.charCodeAt(0));
+const box = (type, ...payload) => { const body = cat(...payload.map((p) => (p instanceof Uint8Array ? p : Uint8Array.from(p)))); return cat(Uint8Array.from(be32(body.length + 8)), tag(type), body); };
+const fullBox = (type, version, ...payload) => box(type, [version, 0, 0, 0], ...payload);
+const ftyp = (brand) => box('ftyp', tag(brand), [0, 0, 0, 0], tag(brand));
+const mdat = () => box('mdat', new Uint8Array(64).fill(7));
+const mov = ({ xyz } = {}) => cat(ftyp('qt  '), box('moov', box('mvhd', new Uint8Array(20)), box('udta', ...(xyz ? [box('©xyz', be16(te8(xyz).length), be16(0x15c7), te8(xyz))] : []), box('free', [0, 0]))), mdat());
+const mp4Keys = (pairs) => { const names = Object.keys(pairs); const keys = fullBox('keys', 0, be32(names.length), ...names.map((n) => cat(Uint8Array.from(be32(te8(n).length + 8)), tag('mdta'), te8(n)))); const ilst = box('ilst', ...names.map((n, i) => cat(Uint8Array.from(be32(8 + 16 + te8(pairs[n]).length)), Uint8Array.from(be32(i + 1)), box('data', be32(1), be32(0), te8(pairs[n]))))); return cat(ftyp('qt  '), box('moov', box('mvhd', new Uint8Array(20)), box('meta', box('hdlr', new Uint8Array(24)), keys, ilst)), mdat()); };
+const heif = ({ exif }) => { const ex = te8('Exif\0\0' + exif); const infe = fullBox('infe', 2, be16(1), be16(0), tag('Exif'), te8('\0')); const iinf = fullBox('iinf', 0, be16(1), infe); const ilocLen = 8 + 4 + 2 + 2 + (2 + 2 + 4 + 2 + 4 + 4); const head = cat(ftyp('heic')); const metaBody = (off) => cat(box('hdlr', new Uint8Array(24)), iinf, fullBox('iloc', 0, [0x44, 0x40], be16(1), be16(1), be16(0), be32(0), be16(1), be32(off), be32(ex.length))); const metaLen = 12 + metaBody(0).length; const off = head.length + metaLen + 8; return cat(head, fullBox('meta', 0, metaBody(off)), box('mdat', ex)); };
+const brokenMov = () => { const f = mov({ xyz: '+1+1/' }); const g = f.slice(); g.set(be32(9999), ftyp('qt  ').length); return g; };
+const reader = (bytes) => async (start, length) => bytes.subarray(start, Math.min(bytes.length, start + length));
+const text = (f, r) => String.fromCharCode(...f.subarray(r.start, r.end));
+const boxes = (b) => { const out = []; for (let i = 0; i + 8 <= b.length;) { const n = ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0; out.push(String.fromCharCode(b[i + 4], b[i + 5], b[i + 6], b[i + 7]) + ':' + n); if (n < 8) break; i += n; } return out; };
+
+check('location: MOV ©xyz payload is found', async () => { const f = mov({ xyz: '+51.5074-000.1278/' }); const r = await L.locationRanges(reader(f), f.length, 'mp4'); eq(r.ok, true); eq(text(f, r.ranges[0]), '+51.5074-000.1278/'); });
+check('location: MP4 keys/ilst location value is found', async () => { const f = mp4Keys({ 'com.apple.quicktime.location.ISO6709': '+48.8584+002.2945/' }); const r = await L.locationRanges(reader(f), f.length, 'mp4'); ok(r.ranges.some((x) => text(f, x).includes('+48.8584'))); });
+check('location: HEIF Exif item is found through iloc', async () => { const f = heif({ exif: 'GPS-SECRET' }); const r = await L.locationRanges(reader(f), f.length, 'heif'); ok(r.ranges.some((x) => text(f, x).includes('GPS-SECRET'))); });
+check('location: blanking keeps the size and box layout', async () => { const f = mov({ xyz: '+51.5074-000.1278/' }); const r = await L.locationRanges(reader(f), f.length, 'mp4'); const g = L.blank(f.slice(), 0, r.ranges); eq(g.length, f.length); ok(!Buffer.from(g).includes('+51.5074')); deepEq(boxes(g), boxes(f)); });
+check('location: blanking across a piece edge', () => { const b = new Uint8Array(10).fill(1); L.blank(b, 100, [{ start: 95, end: 103 }]); deepEq([...b.slice(0, 4)], [0, 0, 0, 1]); });
+check('location: a box that runs past the end is not ok', async () => { const f = brokenMov(); eq((await L.locationRanges(reader(f), f.length, 'mp4')).ok, false); });
+check('location: a file with no location has no ranges', async () => { const f = mov({}); deepEq((await L.locationRanges(reader(f), f.length, 'mp4')).ranges, []); });
 
 let failed = 0;
 for (const [name, fn] of checks) {

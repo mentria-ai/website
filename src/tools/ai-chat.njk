@@ -441,6 +441,7 @@ function runApp(MentriaEngine, Tiers) {
   const systemMessage = messages[0];
 
   const askedThread = new URLSearchParams(location.search).get('thread');
+  let regenAsked = new URLSearchParams(location.search).get('regen') === '1';
   const PHOTO_DEFAULT = 'Describe this image.';
   const restoredTurns = new WeakMap();
   const thumbBlobs = new WeakMap();
@@ -1845,6 +1846,15 @@ function runApp(MentriaEngine, Tiers) {
         inputEl.value = text;
         autoResize();
         generate();
+      }
+      if (regenAsked) {
+        regenAsked = false;
+        try {
+          const u = new URL(location.href);
+          u.searchParams.delete('regen');
+          history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+        } catch (_) {}
+        historyReady.then(() => regenerate());
       }
       return true;
     } catch (err) {

@@ -5816,7 +5816,9 @@
         "menu_title": "Answer with",
         "loaded": "loaded",
         "download": "{size} download",
-        "asleep": "asleep"
+        "asleep": "asleep",
+        "stopped": "Your {device} stopped answering.",
+        "finish": "Finish on this device"
       }
     },
     "scanner": {

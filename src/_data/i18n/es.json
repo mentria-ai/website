@@ -5816,7 +5816,9 @@
         "menu_title": "Responder con",
         "loaded": "cargado",
         "download": "descarga de {size}",
-        "asleep": "en reposo"
+        "asleep": "en reposo",
+        "stopped": "Tu {device} dejó de responder.",
+        "finish": "Terminar en este dispositivo"
       }
     },
     "scanner": {

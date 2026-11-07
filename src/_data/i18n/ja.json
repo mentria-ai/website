@@ -5816,7 +5816,9 @@
         "menu_title": "回答に使うモデル",
         "loaded": "読み込み済み",
         "download": "{size}のダウンロード",
-        "asleep": "スリープ中"
+        "asleep": "スリープ中",
+        "stopped": "{device}からの回答が止まりました。",
+        "finish": "この端末で続ける"
       }
     },
     "scanner": {

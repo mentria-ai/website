@@ -1432,7 +1432,7 @@ const aiSendMode = (stop) => {
   const use = els.go.querySelector('use');
   if (use) use.setAttribute('href', stop ? '#ci-stop' : '#ci-send');
 };
-const aiViewFor = () => aiView || (aiView = createAiView({ els, T, getStore: () => commsStore, client: aiClient, device: myDevice, renderLine, sys, renderBody, onChange: () => { refreshHomeThreads(); }, onBusy: aiSendMode }));
+const aiViewFor = () => aiView || (aiView = createAiView({ els, T, getStore: () => commsStore, client: aiClient, device: myDevice, renderLine, sys, renderBody, onChange: () => { refreshHomeThreads(); }, onBusy: aiSendMode, prefix: PREFIX }));
 const aiLocalTiers = async () => {
   const ids = AI_HOSTING ? AI_CHAIN.filter((id) => !isLegacyTier(id)) : [AI_SMALL];
   return Promise.all(ids.map(async (tier) => ({ tier, cached: await isTierCached(tier), sizeLabel: (AI_TIERS[tier] && AI_TIERS[tier].sizeLabel) || '' })));

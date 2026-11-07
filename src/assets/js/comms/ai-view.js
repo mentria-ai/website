@@ -100,7 +100,7 @@ export const openModelMenu = ({ sections, current, onPick, T } = {}) => {
 
 const HISTORY_LIMIT = 200;
 
-export const createAiView = ({ els, T, getStore, client, device, renderLine, sys, renderBody, onChange, onBusy } = {}) => {
+export const createAiView = ({ els, T, getStore, client, device, renderLine, sys, renderBody, onChange, onBusy, prefix = '' } = {}) => {
   const A = (T && T.ai) || {};
   const D = (T && T.devices) || {};
   let thread = null;
@@ -187,6 +187,27 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
     await saveThread(text, msg.ts);
   };
 
+  const finishHere = async () => {
+    if (!thread) return;
+    const store = getStore();
+    const next = Object.assign({}, thread, { meta: Object.assign({}, thread.meta, { route: null }) });
+    if (store) { try { await store.putThread(next); } catch (_) {} }
+    window.location.href = prefix + '/tools/ai-chat/?thread=' + encodeURIComponent(next.id) + '&regen=1';
+  };
+
+  const stoppedNotice = (text) => {
+    const n = sys(text);
+    if (!n || !n.line) return;
+    n.line.classList.add('comms__ai-stopped');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'comms__btn comms__btn--ghost comms__ai-act';
+    b.dataset.act = 'finish';
+    b.textContent = A.finish || '';
+    b.addEventListener('click', () => { finishHere(); });
+    n.line.append(b);
+  };
+
   const busyNow = (on) => { if (onBusy) { try { onBusy(on); } catch (_) {} } };
   const finishLive = () => {
     cancelAnimationFrame(paint);
@@ -199,7 +220,7 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
   const run = async (msgs, index, lineAt) => {
     const r = route();
     const host = client.hostFor(r.device);
-    if (!host) { sys(fill(A.offline, { device: deviceName(r) })); return; }
+    if (!host) { stoppedNotice(fill(A.offline, { device: deviceName(r) })); return; }
     const turns = messagesToTurns(msgs);
     const messages = trimForRequest(turns);
     if (!messages.length) return;
@@ -241,8 +262,8 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
       if (!me.text) ml.line.remove();
       else await saveReply(index, me.text, r.tier, { stopped: true });
       const name = deviceName(r);
+      if (reason === 'not-hosting') { stoppedNotice(fill(A.offline, { device: name })); return; }
       const text = reason === 'tier-unavailable' ? fill(A.gone_tier, { model: tierName(r.tier), device: name })
-        : reason === 'not-hosting' ? fill(A.offline, { device: name })
         : reason === 'busy' ? fill(A.busy, { device: name })
         : fill(A.failed, { device: name });
       sys(text);
@@ -253,7 +274,7 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
       finishLive();
       if (me.text) await saveReply(index, me.text, r.tier, { stopped: true });
       else ml.line.remove();
-      sys(fill(A.failed, { device: deviceName(r) }));
+      stoppedNotice(fill(A.stopped, { device: deviceName(r) }));
     });
   };
 

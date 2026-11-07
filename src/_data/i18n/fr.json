@@ -5816,7 +5816,9 @@
         "menu_title": "Répondre avec",
         "loaded": "chargé",
         "download": "téléchargement de {size}",
-        "asleep": "en veille"
+        "asleep": "en veille",
+        "stopped": "Votre {device} a cessé de répondre.",
+        "finish": "Terminer sur cet appareil"
       }
     },
     "scanner": {

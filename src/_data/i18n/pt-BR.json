@@ -5816,7 +5816,9 @@
         "menu_title": "Responder com",
         "loaded": "carregado",
         "download": "download de {size}",
-        "asleep": "em repouso"
+        "asleep": "em repouso",
+        "stopped": "Seu {device} parou de responder.",
+        "finish": "Terminar neste dispositivo"
       }
     },
     "scanner": {

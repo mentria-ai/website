@@ -147,6 +147,12 @@ class Media {
     try { await this._store.deletePieces(list); } catch (_) {}
   }
 
+  async sweep({ known, graceMs } = {}) {
+    if (!this._worker || !this.sync) return 0;
+    const res = await this._call('sweep', { known: Array.from(known || []), graceMs }).catch(() => ({ removed: 0 }));
+    return res.removed || 0;
+  }
+
   async removeAll() {
     this._sizes.clear();
     this._where.clear();

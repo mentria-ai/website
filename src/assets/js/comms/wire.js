@@ -123,13 +123,24 @@ export const cleanParts = (p) => {
   return out.length ? out : null;
 };
 
+export const toAlbums = (items, newAid) => {
+  const list = Array.from(items || []);
+  if (list.length === 1) return [list[0]];
+  const out = [];
+  for (let i = 0; i < list.length; i += 200) {
+    const chunk = list.slice(i, i + 200);
+    out.push({ type: 'album', aid: newAid(), n: chunk.length, items: chunk });
+  }
+  return out;
+};
+
 export const splitOffer = async (parts, measure, budget = 60000) => {
   const texts = parts.filter((x) => x.type === 'text');
   const rest = parts.filter((x) => x.type !== 'text');
   const msgs = [];
   let cur = texts.slice();
   const flush = () => { if (cur.length) msgs.push(cur); cur = []; };
-  const fits = async (m) => (await measure(m)) <= budget;
+  const fits = async (m) => m.length <= MAX_PARTS && (await measure(m)) <= budget;
   for (const part of rest) {
     if (part.type !== 'album') {
       if (cur.length && !(await fits(cur.concat([part])))) flush();
@@ -139,7 +150,7 @@ export const splitOffer = async (parts, measure, budget = 60000) => {
     let chunk = [];
     const withChunk = (items) => cur.concat([{ type: 'album', aid: part.aid, n: part.n, items }]);
     for (const item of part.items) {
-      if (chunk.length && !(await fits(withChunk(chunk.concat([item]))))) {
+      if (chunk.length && (chunk.length >= MAX_ITEMS || !(await fits(withChunk(chunk.concat([item])))))) {
         cur = withChunk(chunk);
         flush();
         chunk = [];

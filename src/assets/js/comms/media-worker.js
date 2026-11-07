@@ -35,7 +35,10 @@ const touch = (id) => {
   entry.timer = setTimeout(() => { closeHandle(id); }, IDLE_MS);
 };
 
+const isGone = (id) => Date.now() - (gone.get(id) || 0) < GONE_MS;
+
 const handleFor = (id, create) => {
+  if (create && isGone(id)) return Promise.reject(coded('missing'));
   let entry = handles.get(id);
   if (!entry) {
     const p = (async () => {
@@ -83,6 +86,7 @@ const OPS = {
     if (Date.now() - (gone.get(m.id) || 0) < GONE_MS) throw coded('missing');
     const slot = await MF.sealPiece(key, m.id, m.i, m.plain);
     const h = await handleFor(m.id, true);
+    if (isGone(m.id)) throw coded('missing');
     const at = MF.slotOffset(m.i);
     const n = h.write(slot, { at });
     if (n !== slot.length) {
@@ -145,6 +149,24 @@ const OPS = {
     try { await top.removeEntry('comms-media', { recursive: true }); } catch (_) {}
     dirP = null;
     return {};
+  },
+  async sweep(m) {
+    const dir = await root();
+    const known = new Set(m.known || []);
+    const grace = Number(m.graceMs) || 0;
+    try { await dir.removeEntry('tmp', { recursive: true }); } catch (_) {}
+    const now = Date.now();
+    let removed = 0;
+    for await (const [name, h] of dir.entries()) {
+      if (h.kind !== 'file' || !name.endsWith('.bin')) continue;
+      const id = name.slice(0, -4);
+      if (known.has(id) || handles.has(id)) continue;
+      let age = Infinity;
+      try { age = now - (await h.getFile()).lastModified; } catch (_) { continue; }
+      if (age < grace) continue;
+      try { await dir.removeEntry(name); removed += 1; } catch (_) {}
+    }
+    return { removed };
   },
   async dropPlain(m) {
     try { await (await (await root()).getDirectoryHandle('tmp')).removeEntry(m.id, { recursive: true }); } catch (_) {}

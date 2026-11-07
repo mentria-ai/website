@@ -304,6 +304,11 @@ class Store {
     try { return await this._openMedia(rec); } catch (_) { this.skipped++; return null; }
   }
 
+  async mediaIds() {
+    this._usable();
+    try { return await request(this._db.transaction('media').objectStore('media').getAllKeys()); } catch (e) { throw mapError(e); }
+  }
+
   async listMedia({ threadId, states } = {}) {
     this._usable();
     let recs;

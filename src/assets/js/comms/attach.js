@@ -110,8 +110,7 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
           const dev = peer.device && peer.device.id;
           if (dev && !(rec.onDevices || []).includes(dev)) { rec.onDevices = (rec.onDevices || []).concat([dev]).slice(-20); dirty = true; }
           if (dirty) {
-            try { await store.putMedia(rec); } catch (_) {}
-            await transfers.add(rec);
+            await transfers.patch(rid, { delivered: !!rec.delivered, onDevices: rec.onDevices });
             changed(rid, { delivered: !!rec.delivered });
             if (chan) chan.postMessage({ op: 'change', id: rid });
           }
@@ -133,7 +132,8 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
     holder = true;
     const kindOf = (r) => (r.kind === 'image' || r.kind === 'video' || r.kind === 'file' ? r.kind : /^image\//i.test(r.mime || '') ? 'image' : /^video\//i.test(r.mime || '') ? 'video' : 'file');
     const offersFor = (tid) => ((pinned || []).includes(tid) && transfers ? transfers.completeIn(tid, 50).map((r) => ({ id: r.id, mh: r.mh, size: r.size, mime: r.mime, name: r.name, kind: kindOf(r) })) : null);
-    transfers = new Transfers({ store, media, onChange: onTransferChange, canServe, device, askRelay, offersFor, onRoom });
+    transfers = new Transfers({ store, media, onChange: onTransferChange, canServe, device, askRelay, offersFor, onRoom, pinned });
+    try { media.sweep({ known: new Set(await store.mediaIds()), graceMs: 600000 }); } catch (_) {}
     rooms = new FilesRooms({ transfers, join: (roomId, password, t) => joinFilesRoom(roomId, password, t) });
     clearInterval(tick);
     tick = setInterval(() => { refresh(); knockTick(); }, TICK_MS);
@@ -245,7 +245,7 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
           id: it.ref, threadId, role: 'in', state: (typeof state === 'function' ? state(it) : state) || 'queued', complete: false, updatedAt: Date.now(),
           name: it.name || '', mime: it.mime || 'application/octet-stream', size: it.size, pieceSize: MF.PIECE,
           hashes: '', mh: it.mh, have: MF.bfB64(MF.bfNew(MF.pieceCount(it.size))), from: from || '',
-          kind: it.type, w: it.w, h: it.h, duration: it.duration, hd: !!it.hd, where: media.sync ? 'opfs' : 'idb'
+          kind: it.type, w: it.w, h: it.h, duration: it.duration, hd: !!it.hd, thumb: it.thumb || it.poster || undefined, where: media.sync ? 'opfs' : 'idb'
         };
         try { await store.putMedia(rec); } catch (_) { continue; }
         added.push(rec);

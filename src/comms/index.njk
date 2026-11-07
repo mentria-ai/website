@@ -677,11 +677,11 @@ import { secretCopy } from '/assets/js/comms/identity.js';
 import { homeRows, aiHref } from '/assets/js/comms/threads.js';
 import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
 import { createAttach } from '/assets/js/comms/attach.js';
-import { acceptFor, relayAsk, viaRelay } from '/assets/js/comms/files.js';
+import { acceptFor, relayAsk, viaRelay, blankedCopy, importPlan, shownState } from '/assets/js/comms/files.js';
 import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
-import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
+import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -1257,7 +1257,7 @@ const renderRemoteChat = (item, opts = {}) => {
   }
   let who = displayName(item.senderId);
   if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
-  if (files) renderAttachment(who, item.parts, { peerId: item.senderId, ts: item.ts });
+  if (files) renderAttachment(who, item.parts, { peerId: item.senderId, sender: item.sfp2 || item.sfp || item.senderId || null, ts: item.ts });
   else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
   if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '' }, item.parts);
   if (files) receiveAttachments(item, false);
@@ -1361,7 +1361,18 @@ const myDevice = deviceInfo(T);
 const presence = new Presence();
 let historySync = null;
 const selfPeers = new Map();
-const tidOf = (name) => (selfRoom && name === selfRoom.roomName ? SELF_THREAD : name);
+const oldSelfNames = new Set();
+const tidOf = (name) => ((selfRoom && name === selfRoom.roomName) || oldSelfNames.has(name) ? SELF_THREAD : name);
+let selfTimer = 0;
+const checkSelfWeek = async () => {
+  if (!selfRoom || !historyOn()) return;
+  let next = null;
+  try { const sec = secretCopy(); try { next = await selfRoomFor(sec); } finally { sec.fill(0); } } catch (_) { return; }
+  if (!next || next.roomName === selfRoom.roomName) return;
+  oldSelfNames.add(selfRoom.roomName);
+  selfRoom = next;
+  if (attach) attach.refresh();
+};
 const inSelf = () => !!currentRoomName && tidOf(currentRoomName) === SELF_THREAD;
 const selfStatus = () => [fmt(T.devices.this_one, { device: myDevice.name })].concat(presence.list(myDevice.id).filter((d) => !d.me).map((d) => fmt(d.online ? T.devices.online : T.devices.asleep, { device: d.name }))).join(', ');
 const refreshSelfHeader = () => { if (inSelf()) els.status.textContent = selfStatus() || fmt(T.devices.this_one, { device: myDevice.name }); };
@@ -1370,7 +1381,6 @@ const devicesLine = (rec) => {
   if (!others.length || !rec) return '';
   return others.map((d) => fmt((rec.onDevices || []).includes(d.id) ? T.devices.got : T.devices.when_open, { device: d.name })).join(' · ');
 };
-let filesIce = null;
 const fileLines = new Map();
 const mediaParts = (parts) => (parts || []).flatMap((p) => (p.type === 'album' ? (p.items || []) : (p.type === 'image' || p.type === 'video' || p.type === 'file') ? [p] : []));
 
@@ -1395,9 +1405,10 @@ const threadInfoFor = async (id) => {
 };
 
 const joinFilesRoom = async (roomId, password) => {
-  if (!filesIce) { try { filesIce = await getIce(); } catch (_) { filesIce = FALLBACK_ICE; } }
-  const rtcConfig = { iceServers: filesIce };
-  if (relayOnly && hasTurn(filesIce)) rtcConfig.iceTransportPolicy = 'relay';
+  let ice = FALLBACK_ICE;
+  try { ice = await getIce(); } catch (_) { ice = FALLBACK_ICE; }
+  const rtcConfig = { iceServers: ice };
+  if (relayOnly && hasTurn(ice)) rtcConfig.iceTransportPolicy = 'relay';
   return joinRoom({ appId: 'mentria', relayConfig: { urls: [RELAY] }, rtcConfig, password }, roomId);
 };
 
@@ -1423,10 +1434,14 @@ const paintAttach = async (ref) => {
   } else {
     const n = MF ? Math.max(1, MF.pieceCount(rec.size)) : 1;
     const have = rec.complete ? n : (st ? st.have : (MF ? MF.bfCount(MF.bfFrom(rec.have, n)) : 0));
+    const peers = st ? st.peers : 0;
     if (rec.role === 'out') {
-      m = { state: rec.delivered ? 'done' : (st && st.rate > 0 ? 'moving' : 'queued'), local: true, have: n, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, bytes: rec.size };
+      const live = rec.delivered ? 'done' : (st && st.rate > 0 ? 'moving' : 'queued');
+      m = { state: live === 'queued' && !peers && attach && attach.holder ? 'paused' : live, local: true, have: n, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, bytes: rec.size };
     } else {
-      m = { state: rec.complete ? (rec.state === 'removed' ? 'removed' : 'done') : rec.state, have, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, note: rec.note, bytes: Math.min(rec.size, have * PIECE_BYTES) };
+      const base = rec.complete ? (rec.state === 'removed' ? 'removed' : 'done') : rec.state;
+      const shown = base === 'moving' || base === 'queued' ? shownState(rec, { peers: attach && attach.holder ? peers : 1 }) : base;
+      m = { state: shown, have, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, note: rec.note, bytes: Math.min(rec.size, have * PIECE_BYTES) };
     }
   }
   updateParts(entry.card, ref, m);
@@ -1474,7 +1489,7 @@ const openMediaItem = async (ref, items) => {
   for (const it of (items && items.length ? items : [{ ref }])) {
     let rec = null;
     try { rec = await commsStore.getMedia(it.ref); } catch (_) { rec = null; }
-    if (rec && rec.complete && rec.state !== 'removed') list.push({ ref: it.ref, kind: it.type === 'video' || /^video\//i.test(rec.mime || '') ? 'video' : 'image', name: rec.name || it.name || '', mime: rec.mime || it.mime || '', size: rec.size });
+    if (rec && rec.complete && rec.state !== 'removed') list.push({ ref: it.ref, kind: it.type === 'video' || /^video\//i.test(rec.mime || '') ? 'video' : 'image', name: rec.name || it.name || '', mime: rec.mime || it.mime || '', size: rec.size, thumb: rec.thumb || it.thumb || it.poster || undefined });
   }
   const start = list.findIndex((x) => x.ref === ref);
   if (start < 0) return;
@@ -1555,9 +1570,9 @@ const importPackFrom = async (ref, item) => {
 
 const renderAttachment = (who, parts, opts = {}) => {
   const album = (parts || []).find((p) => p.type === 'album');
+  const sender = opts.me ? 'self' : (opts.sender || opts.peerId || null);
   const prior = album ? albumCards.get(album.aid) : null;
-  if (prior && prior.isConnected) {
-    addToAlbum(prior, album);
+  if (prior && prior.isConnected && addToAlbum(prior, album, sender)) {
     for (const it of album.items) { fileLines.set(it.ref, { card: prior, part: it, me: !!opts.me }); paintAttach(it.ref); }
     const cap = (parts || []).filter((p) => p.type === 'text');
     if (cap.length) renderLine(who, cap.map((p) => p.text).join('\n'), { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts });
@@ -1567,7 +1582,7 @@ const renderAttachment = (who, parts, opts = {}) => {
   const card = document.createElement('div');
   card.className = 'comms__partsbox';
   line.what.append(card);
-  renderParts(card, parts, { t: opts.t || '', me: !!opts.me, T, media: () => null, onOpen: openMediaItem, onRetry: (ref) => { if (attach) attach.retry(ref); }, onOpenPdf: openInPdf, onImportPack: importPackFrom, onAccept: (refs) => { if (attach) refs.forEach((r) => attach.accept(r)); }, onRelayOk: (refs) => { if (attach) refs.forEach((r) => attach.allowRelay(r)); } });
+  renderParts(card, parts, { t: opts.t || '', me: !!opts.me, sender, T, media: () => null, onOpen: openMediaItem, onRetry: (ref) => { if (attach) attach.retry(ref); }, onOpenPdf: openInPdf, onImportPack: importPackFrom, onAccept: (refs) => { if (attach) refs.forEach((r) => attach.accept(r)); }, onRelayOk: (refs) => { if (attach) refs.forEach((r) => attach.allowRelay(r)); } });
   if (album) albumCards.set(album.aid, card);
   if (inSelf()) { const dl = document.createElement('p'); dl.className = 'comms__parts-devices'; card.append(dl); }
   for (const it of mediaParts(parts)) { fileLines.set(it.ref, { card, part: it, me: !!opts.me }); paintAttach(it.ref); }
@@ -1618,6 +1633,8 @@ const startFiles = async (st) => {
   if (!selfRoom) {
     try { const sec = secretCopy(); try { selfRoom = await selfRoomFor(sec); } finally { sec.fill(0); } } catch (_) { selfRoom = null; }
   }
+  clearInterval(selfTimer);
+  selfTimer = setInterval(checkSelfWeek, 600000);
   if (selfRoom) {
     try {
       if (!(await st.getThread(SELF_THREAD))) await st.putThread({ id: SELF_THREAD, kind: 'self', title: T.devices.title, participants: [], meta: {}, updatedAt: Date.now(), lastReadTs: Date.now(), pinned: false });
@@ -1644,8 +1661,12 @@ const renderStored = (m) => {
   if (!m || !m.id || seenCmids.has(m.id)) return;
   seenCmids.add(m.id);
   if (m.from === 'self') {
-    if (mediaParts(m.parts).length) renderAttachment('you', m.parts, { me: true, ts: m.ts });
-    else renderLine('you', m.t, { me: true, quiet: true, ts: m.ts });
+    if (mediaParts(m.parts).length) {
+      renderAttachment('you', m.parts, { me: true, ts: m.ts });
+      receiveAttachments({ parts: m.parts }, true);
+    } else {
+      renderLine('you', m.t, { me: true, quiet: true, ts: m.ts });
+    }
     return;
   }
   const meta = m.meta || {};
@@ -2581,7 +2602,9 @@ const sendAttachments = async ({ items, caption }) => {
     }
     if (kind === 'file') part = { type: 'file', mime: mime || 'application/octet-stream', name: shortName(f.name) };
     const base = done;
-    const sent = await attach.sendFile(tidOf(roomName), sendFile, { ranges: item.ranges, onProgress: (i) => { prep.what.innerHTML = progressHTML(T.files.sending, label, total, Math.min(total, base + i * PIECE_BYTES)); } });
+    const plan = importPlan(item, sendFile && sendFile !== f ? sendFile : null);
+    sendFile = plan.file;
+    const sent = await attach.sendFile(tidOf(roomName), sendFile, { ranges: plan.ranges, record: { thumb: part.thumb || part.poster || undefined, kind: part.type }, onProgress: (i) => { prep.what.innerHTML = progressHTML(T.files.sending, label, total, Math.min(total, base + i * PIECE_BYTES)); } });
     done += sendFile.size;
     part.ref = sent.id;
     part.mh = sent.mh;
@@ -2597,8 +2620,7 @@ const sendAttachments = async ({ items, caption }) => {
   const parts = [];
   const cap = String(caption || '').trim();
   if (cap) parts.push({ type: 'text', text: cap.slice(0, 2000) });
-  if (media.length >= 2) parts.push({ type: 'album', aid: newAid(), n: media.length, items: media });
-  else if (media.length === 1) parts.push(media[0]);
+  parts.push(...toAlbums(media, newAid));
   parts.push(...files);
   const ids = { fp: myFp, legacyFp: myLegacyFp };
   const measure = async (ps) => JSON.stringify(await encryptText(chatKey, packChatPlain(offerText(ps, T), ids, { p: ps }))).length + 700;
@@ -2624,7 +2646,7 @@ const deliver = async (items, caption) => {
   try {
     for (const it of items) {
       if (oldPeers.length && it.file.size <= MAX_FILE && metaAction && chunkAction) {
-        try { await sendOne(it.file); } catch (err) { sys(fmt(T.files.send_failed_for, { name: it.file.name, reason: why(err) })); }
+        try { await sendOne(await blankedCopy(it.file, it.ranges)); } catch (err) { sys(fmt(T.files.send_failed_for, { name: it.file.name, reason: why(err) })); }
         continue;
       }
       if (oldPeers.length) sys(fmt(T.files.needs_update, { name: displayName(oldPeers[0]) }));
@@ -4765,6 +4787,7 @@ const dropStoredThreads = async (match) => {
   try {
     for (const t of await commsStore.listThreads()) {
       if (!match(t)) continue;
+      if (attach) await attach.removeMedia((await commsStore.listMedia({ threadId: t.id }).catch(() => [])).map((r) => r.id));
       const gone = await commsStore.deleteThread(t.id);
       if (attach && gone && gone.length) await attach.removeMedia(gone);
     }

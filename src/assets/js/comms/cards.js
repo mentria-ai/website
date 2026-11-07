@@ -304,12 +304,14 @@ const applyItem = (root, ref, m) => {
     card.classList.toggle('is-done', here);
   }
   const failed = root.querySelector('.comms__parts-retry');
-  if (failed) failed.hidden = !st.items.some((it) => (st.media.get(it.ref) || {}).state === 'failed');
+  if (failed) failed.hidden = !st.items.some((it) => retryable(st.media.get(it.ref)));
   bars(root);
   statusLine(root);
 };
 
-const offeredOf = (st) => (st.me ? [] : st.items.filter((it) => { const m = st.media.get(it.ref) || {}; return m.state === 'offered' || m.state === 'removed'; }));
+const retryable = (m) => !!m && (m.state === 'failed' || (m.state === 'paused' && m.note === 'space'));
+
+const offeredOf = (st) => st.items.filter((it) => { const m = st.media.get(it.ref) || {}; return m.state === 'offered' || m.state === 'removed'; });
 const relayOf = (st) => st.items.filter((it) => (st.media.get(it.ref) || {}).note === 'relay');
 
 const bars = (root) => {
@@ -387,12 +389,12 @@ export const renderParts = (el, parts, opts = {}) => {
     renderBody(cap, captions, { from: opts.me ? 'self' : 'person', T: opts.T });
     root.append(cap);
   }
-  root.__parts = { items, media: new Map(), me: !!opts.me, T: opts.T };
+  root.__parts = { items, media: new Map(), me: !!opts.me, T: opts.T, sender: opts.sender };
   root.addEventListener('click', (e) => {
     const t = e.target.closest('[data-act], .comms__tile, .comms__parts-retry');
     if (!t || !root.contains(t)) return;
     if (t.classList.contains('comms__parts-retry')) {
-      for (const it of items) if ((root.__parts.media.get(it.ref) || {}).state === 'failed' && opts.onRetry) opts.onRetry(it.ref);
+      for (const it of items) if (retryable(root.__parts.media.get(it.ref)) && opts.onRetry) opts.onRetry(it.ref);
       return;
     }
     if (t.classList.contains('comms__tile')) {
@@ -415,11 +417,12 @@ export const renderParts = (el, parts, opts = {}) => {
   return el;
 };
 
-export const addToAlbum = (el, album) => {
+export const addToAlbum = (el, album, sender) => {
   const root = el.querySelector('.comms__parts') || el;
   const st = root.__parts;
   const grid = root.querySelector('.comms__album');
   if (!st || !grid || !album || !Array.isArray(album.items)) return false;
+  if ((st.sender || null) !== (sender || null)) return false;
   const doc = el.ownerDocument;
   for (const it of album.items) {
     if (st.items.some((x) => x.ref === it.ref)) continue;

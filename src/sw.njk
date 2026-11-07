@@ -474,12 +474,12 @@ function parseRange(header, size) {
   return { start, end, partial: true };
 }
 
-const MEDIA_INLINE = /^(image|video|audio)\/[\w.+-]+$|^application\/pdf$/i;
+const MEDIA_INLINE = /^(image\/(png|jpeg|gif|webp|avif|heic|heif|bmp)|video\/[\w.-]+|audio\/[\w.-]+|application\/pdf)$/i;
 
 async function serveCommsMedia(event, url) {
   const MF = self.MentriaMediaFormat;
   const id = decodeURIComponent(url.pathname.slice('/comms-media/'.length));
-  const plainHeaders = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
+  const plainHeaders = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "sandbox; default-src 'none'" };
   if (!MF || !/^[A-Za-z0-9_-]{16,64}$/.test(id)) return new Response(null, { status: 404, headers: plainHeaders });
   let db;
   try { db = await openCommsDb(); } catch (_) { return new Response(null, { status: 404, headers: plainHeaders }); }

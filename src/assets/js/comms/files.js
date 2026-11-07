@@ -1,4 +1,5 @@
 import { b64urlDecode } from '/assets/js/comms/wire.js';
+import { blank } from '/assets/js/comms/location.js';
 
 const MFg = () => {
   const mf = globalThis.MentriaMediaFormat;
@@ -71,6 +72,22 @@ export const checkManifest = async ({ size, pieceSize, hashes }, mh) => {
   return (await MF.manifestHash(hashes)) === mh;
 };
 
+export const blankedCopy = async (file, ranges) => {
+  if (!ranges || !ranges.length) return file;
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  blank(bytes, 0, ranges);
+  return new File([bytes], file.name, { type: file.type, lastModified: file.lastModified });
+};
+
+export const importPlan = (item, replacement) => (replacement ? { file: replacement, ranges: undefined } : { file: item.file, ranges: item.ranges });
+
+export const shownState = (rec, { peers } = {}) => {
+  if (!rec) return 'unknown';
+  if (rec.complete) return 'done';
+  if ((rec.state === 'moving' || rec.state === 'queued') && !peers) return 'paused';
+  return rec.state;
+};
+
 const AUTO_BYTES = 25e6;
 const RELAY_ASK_BYTES = 100e6;
 
@@ -115,7 +132,8 @@ const RATE_MS = 3000;
 const PULLING = ['queued', 'moving'];
 
 export class Transfers {
-  constructor({ store, media, onChange, canServe, device, askRelay, offersFor, onRoom } = {}) {
+  constructor({ store, media, onChange, canServe, device, askRelay, offersFor, onRoom, pinned } = {}) {
+    this._pinned = new Set(pinned || []);
     this._offersFor = offersFor || (() => null);
     this._onRoom = onRoom || null;
     this._store = store;
@@ -229,7 +247,7 @@ export class Transfers {
     const ctx = this._threads.get(threadId);
     if (!ctx) return;
     const msg = Object.assign({ caps: { files: 2 } }, this._lists(threadId));
-    if (this._device) msg.device = this._device;
+    if (this._device && this._pinned.has(threadId)) msg.device = this._device;
     const offers = this._offersFor(threadId);
     if (offers && offers.length) msg.offers = offers.slice(0, 50);
     ctx.act.fhi.send(msg, peerId ? { target: peerId } : {}).catch(() => {});
@@ -260,6 +278,14 @@ export class Transfers {
   get(id) {
     const item = this._items.get(id);
     return item ? Object.assign({}, item.rec) : null;
+  }
+
+  async patch(id, fields) {
+    const item = this._items.get(id);
+    if (!item) return null;
+    Object.assign(item.rec, fields || {});
+    await this._save(item, true);
+    return Object.assign({}, item.rec);
   }
 
   completeIn(threadId, limit = 50) {
@@ -333,6 +359,7 @@ export class Transfers {
       .sort((a, b) => (a.rec.state === 'moving' ? 0 : 1) - (b.rec.state === 'moving' ? 0 : 1) || (a.rec.updatedAt || 0) - (b.rec.updatedAt || 0));
     let active = 0;
     for (const item of pulling) {
+      if (item.hashes && MFg().bfFull(item.bf, item.n)) { this._finish(item); continue; }
       if (active >= MAX_ACTIVE) break;
       const holders = this._holders(item);
       if (!holders.length) continue;
@@ -580,7 +607,9 @@ export class Transfers {
     const now = Date.now();
     const bytes = item.got.filter(([t]) => now - t <= RATE_MS).reduce((a, [, b]) => a + b, 0);
     const have = MF.bfCount(item.bf);
-    return { have, total: item.n, bytes: item.rec.complete ? item.rec.size : Math.min(item.rec.size, have * MF.PIECE), rate: bytes / (RATE_MS / 1000), via: item.via || null };
+    const ctx = this._threads.get(item.rec.threadId);
+    const peers = item.rec.role === 'in' ? this._holders(item).length : (ctx ? ctx.peers.size : 0);
+    return { have, total: item.n, bytes: item.rec.complete ? item.rec.size : Math.min(item.rec.size, have * MF.PIECE), rate: bytes / (RATE_MS / 1000), via: item.via || null, peers };
   }
 
   lock() {
@@ -656,7 +685,10 @@ export class FilesRooms {
     const pinned = threads.filter((t) => t.pinned);
     const rest = threads.filter((t) => !t.pinned).sort((a, b) => (b.priority || 0) - (a.priority || 0)).slice(0, this._max);
     const want = new Map(pinned.concat(rest).map((t) => [t.id, t]));
-    for (const id of Array.from(this._rooms.keys())) if (!want.has(id)) this._leave(id);
+    for (const id of Array.from(this._rooms.keys())) {
+      const t = want.get(id);
+      if (!t || t.roomName !== this._rooms.get(id).roomName) this._leave(id);
+    }
     for (const t of want.values()) {
       if (this._paused) return;
       if (this._rooms.has(t.id)) continue;
@@ -668,7 +700,7 @@ export class FilesRooms {
       let room = null;
       try { room = await this._join(ids.roomId, ids.password, t); } catch (e) { console.warn('files room join failed:', e); room = null; }
       if (!room) continue;
-      this._rooms.set(t.id, { room, roomId: ids.roomId, at: Date.now() });
+      this._rooms.set(t.id, { room, roomId: ids.roomId, roomName: t.roomName, at: Date.now() });
       try { await this._t.attach(t.id, room, { peerFp: t.peerFp }); } catch (e) { console.warn('files room attach failed:', e); }
     }
   }

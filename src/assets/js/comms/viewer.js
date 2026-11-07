@@ -31,6 +31,8 @@ export const openViewer = ({ items, start = 0, T, onShare } = {}) => {
   dlg.replaceChildren();
   let index = Math.max(0, Math.min(list.length - 1, Number(start) || 0));
   let closed = false;
+  const ac = new AbortController();
+  const signal = ac.signal;
 
   const top = node('div', 'comms__viewer-top');
   const counter = node('span', 'comms__viewer-count');
@@ -49,11 +51,11 @@ export const openViewer = ({ items, start = 0, T, onShare } = {}) => {
   list.forEach((it, i) => {
     const b = button('comms__viewer-thumb', null, 'go');
     b.dataset.index = String(i);
-    if (it.kind === 'image') {
+    if (it.kind === 'image' || it.thumb) {
       const img = node('img');
       img.alt = '';
       img.loading = 'lazy';
-      img.src = mediaUrl(it.ref);
+      img.src = it.thumb ? 'data:image/jpeg;base64,' + it.thumb : mediaUrl(it.ref);
       b.append(img);
     } else {
       b.append(node('span', 'comms__viewer-thumb-label', it.kind === 'video' ? '▶' : ''));
@@ -115,6 +117,7 @@ export const openViewer = ({ items, start = 0, T, onShare } = {}) => {
     else if (dx < -SWIPE_PX) go(index + 1);
   });
   dlg.addEventListener('click', async (e) => {
+    if (closed) return;
     const t = e.target.closest('[data-act]');
     if (!t || !dlg.contains(t)) return;
     const act = t.dataset.act;
@@ -142,14 +145,14 @@ export const openViewer = ({ items, start = 0, T, onShare } = {}) => {
         share.disabled = false;
       }
     }
-  });
-  dlg.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
-  document.addEventListener('keydown', onKey);
+  }, { signal });
+  dlg.addEventListener('cancel', (e) => { e.preventDefault(); close(); }, { signal });
+  document.addEventListener('keydown', onKey, { signal });
 
   const close = () => {
     if (closed) return;
     closed = true;
-    document.removeEventListener('keydown', onKey);
+    ac.abort();
     const v = stage.querySelector('video');
     if (v) { try { v.pause(); v.removeAttribute('src'); v.load(); } catch (_) {} }
     try { if (dlg.open) dlg.close(); } catch (_) {}
@@ -179,11 +182,11 @@ export const renderMediaGrid = (el, { media, usage, T, onOpen, onFree } = {}) =>
     if (rec.state === 'removed') {
       cell.classList.add('is-removed');
       cell.append(node('span', 'comms__media-label', F.removed || ''));
-    } else if (rec.complete && isImage) {
+    } else if (rec.thumb || (rec.complete && isImage)) {
       const img = node('img');
       img.alt = rec.name || '';
       img.loading = 'lazy';
-      img.src = mediaUrl(rec.id);
+      img.src = rec.thumb ? 'data:image/jpeg;base64,' + rec.thumb : mediaUrl(rec.id);
       cell.append(img);
     } else {
       cell.append(node('span', 'comms__media-label', (isVideo ? '▶ ' : '') + (rec.name || '')));

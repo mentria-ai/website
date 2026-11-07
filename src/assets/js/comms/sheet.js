@@ -124,7 +124,7 @@ export const openSheet = ({ files, self = false, T, onSend, onCancel } = {}) => 
           it.li.dataset.kind = 'file';
         }
       }
-      if (!self && (it.kind === 'photo' || it.kind === 'video')) {
+      if (!self) {
         const loc = await forPeople(it.file).catch(() => ({ kept: true }));
         if (closed || it.removed) return;
         if (loc.file) it.send = loc.file;

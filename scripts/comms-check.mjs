@@ -189,6 +189,22 @@ check('location: blanking across a piece edge', () => { const b = new Uint8Array
 check('location: a box that runs past the end is not ok', async () => { const f = brokenMov(); eq((await L.locationRanges(reader(f), f.length, 'mp4')).ok, false); });
 check('location: a file with no location has no ranges', async () => { const f = mov({}); deepEq((await L.locationRanges(reader(f), f.length, 'mp4')).ranges, []); });
 
+const b64u = (bytes) => Buffer.from(bytes).toString('base64').replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+const ref16 = (i) => b64u(new Uint8Array(16).fill(i));
+const R16 = ref16(1);
+const R32 = b64u(new Uint8Array(32).fill(2));
+const img = (over = {}) => ({ type: 'image', ref: R16, mh: R32, size: 1000, mime: 'image/jpeg', w: 320, h: 240, thumb: 'QUJD', ...over });
+const album = (n, thumbLen) => ({ type: 'album', aid: 'a1', n, items: Array.from({ length: n }, (_, i) => img({ ref: ref16(i + 10), thumb: 'A'.repeat(thumbLen) })) });
+
+check('wire: no parts means identical bytes', () => eq(W.packChatPlain('hi', { fp: 'a', legacyFp: 'a' }), '{"v":2,"t":"hi","sfp":"a"}'));
+check('wire: parts round-trip', () => { const p = [{ type: 'file', ref: R16, mh: R32, size: 10, mime: 'application/pdf', name: 'a.pdf' }]; deepEq(W.unpackChatPlain(W.packChatPlain('x', {}, { p })).parts, p); });
+check('wire: old payloads have no parts', () => eq(W.unpackChatPlain('{"v":2,"t":"hi"}').parts, null));
+check('wire: unknown part types become unknown', () => deepEq(W.cleanParts([{ type: 'hologram', x: 1 }]), [{ type: 'unknown' }]));
+check('wire: bad fields are dropped', () => eq(W.cleanParts([{ type: 'file', ref: 'not-b64!', mh: R32, size: -1 }]), null));
+check('wire: an oversized thumb is dropped', () => eq(W.cleanParts([img({ thumb: 'A'.repeat(16385) })])[0].thumb, undefined));
+check('wire: a big album splits under the budget', async () => { const parts = [{ type: 'text', text: 'trip' }, album(12, 15000)]; const msgs = await W.splitOffer(parts, async (ps) => JSON.stringify(ps).length * 1.4); ok(msgs.length > 1); ok(msgs.every((m) => JSON.stringify(m).length * 1.4 <= 60000)); eq(msgs.flatMap((m) => m.find((x) => x.type === 'album').items).length, 12); eq(msgs[0][0].type, 'text'); });
+check('wire: offer text for old pages', () => eq(W.offerText([album(3, 10)], { files: { offer_photos: 'Sent {n} photos. Update Mentria to see them.' } }), 'Sent 3 photos. Update Mentria to see them.'));
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

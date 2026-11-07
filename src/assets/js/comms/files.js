@@ -1,4 +1,4 @@
-import { b64urlDecode } from '/assets/js/comms/wire.js';
+import { b64urlDecode, roomKeys } from '/assets/js/comms/wire.js';
 import { blank } from '/assets/js/comms/location.js';
 
 const MFg = () => {
@@ -668,9 +668,11 @@ const keyBytes = (b64Key) => {
   return b64urlDecode(s);
 };
 
-export const filesRoomFor = async (roomName, b64Key) => {
+export const filesRoomFor = async (roomName, b64Key, kv = 1) => {
   const te = new TextEncoder();
-  const base = await crypto.subtle.importKey('raw', keyBytes(b64Key), 'HKDF', false, ['deriveBits']);
+  const ikm = kv === 2 ? ((await roomKeys(b64Key, 2)) || {}).filesIkm : keyBytes(b64Key);
+  if (!ikm) throw new Error('bad key');
+  const base = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
   const idBits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: te.encode('mentria-files-room-v1'), info: te.encode(String(roomName)) }, base, 80));
   const pwBits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: te.encode('mentria-files-key-v1'), info: te.encode(String(roomName)) }, base, 256));
   let pw = '';
@@ -710,7 +712,7 @@ export class FilesRooms {
       if (this._paused) return;
       if (this._rooms.has(t.id)) continue;
       let ids;
-      try { ids = await filesRoomFor(t.roomName, t.b64Key); } catch (_) { continue; }
+      try { ids = await filesRoomFor(t.roomName, t.b64Key, t.kv === 2 ? 2 : 1); } catch (_) { continue; }
       const leaving = this._leaving.get(ids.roomId);
       if (leaving) await leaving;
       if (this._paused || this._rooms.has(t.id)) continue;

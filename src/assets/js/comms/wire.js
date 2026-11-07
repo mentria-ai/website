@@ -45,13 +45,39 @@ export const deriveKey = async (b64Key) => {
   }
 };
 
+const ROOM_V2_SALT = 'mentria-room-v2';
+const keyRaw = (b64Key) => {
+  try {
+    const raw = b64urlDecode(String(b64Key || '').replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_'));
+    return raw.length === 32 ? raw : null;
+  } catch (_) { return null; }
+};
+
+export const roomKeys = async (b64Key, kv = 1, opts = {}) => {
+  const raw = keyRaw(b64Key);
+  if (!raw) return null;
+  const ex = !!opts.extractable;
+  if (kv !== 2) {
+    const chatKey = await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, ex, ['encrypt', 'decrypt']);
+    return { chatKey, topicRaw: raw, password: b64Key, filesIkm: raw };
+  }
+  const te = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', raw, 'HKDF', false, ['deriveBits']);
+  const sub = async (info) => new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: te.encode(ROOM_V2_SALT), info: te.encode(info) }, base, 256));
+  const [chat, topic, signal, files] = await Promise.all(['chat', 'topic', 'signal', 'files'].map(sub));
+  const chatKey = await crypto.subtle.importKey('raw', chat, { name: 'AES-GCM' }, ex, ['encrypt', 'decrypt']);
+  return { chatKey, topicRaw: topic, password: b64urlEncode(signal), filesIkm: files };
+};
+
 const topicCache = new Map();
-export const chatTopicFor = (roomName, b64Key) => {
-  const id = b64Key + ':' + roomName;
+export const chatTopicFor = (roomName, b64Key, kv = 1) => {
+  const v = kv === 2 ? 2 : 1;
+  const id = v + ':' + b64Key + ':' + roomName;
   if (!topicCache.has(id)) {
     topicCache.set(id, (async () => {
-      const raw = b64urlDecode(b64Key);
-      if (raw.length !== 32) return null;
+      const keys = await roomKeys(b64Key, v);
+      if (!keys) return null;
+      const raw = keys.topicRaw;
       const mac = await crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
       return b64urlEncode(new Uint8Array(await crypto.subtle.sign('HMAC', mac, new TextEncoder().encode(CHAT_TOPIC_V2 + roomName))));
     })().catch(() => null));

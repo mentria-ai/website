@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import vm from 'node:vm';
+import { hkdfSync, createHmac } from 'node:crypto';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '..');
@@ -874,6 +875,55 @@ check('rooms: a broken tab key memory reads as empty', () => {
   eq(RM.ephKeys(st).get('!x'), null);
   eq(RM.ephKeys(null).get('!x'), null);
 });
+
+const rawOf = (k) => Buffer.from(k.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+const nodeHkdfVectors = (k, room) => {
+  const ikm = rawOf(k);
+  const sub = (info) => Buffer.from(hkdfSync('sha256', ikm, Buffer.from('mentria-room-v2'), Buffer.from(info), 32));
+  const topic = sub('topic');
+  return {
+    chat: sub('chat').toString('base64url'),
+    topic: topic.toString('base64url'),
+    signal: sub('signal').toString('base64url'),
+    files: sub('files').toString('base64url'),
+    topicTag: createHmac('sha256', topic).update('mentria-comms-topic-v2|' + room).digest('base64url')
+  };
+};
+const exportRaw = async (key) => new Uint8Array(await crypto.subtle.exportKey('raw', key));
+check("keys: a v1 room keeps today's chat key, topic and password", async () => {
+  const k = await W.roomKeys(FIX.key, 1);
+  eq(await W.chatTopicFor('mentria-test-room', FIX.key, 1), FIX.topic);
+  eq(await W.chatTopicFor('mentria-test-room', FIX.key), FIX.topic);
+  eq(k.password, FIX.key);
+  eq(await W.decryptText(k.chatKey, FIX.enc), 'golden plaintext');
+  eq(Buffer.from(k.topicRaw).toString('base64'), FIX.key);
+  eq(Buffer.from(k.filesIkm).toString('base64'), FIX.key);
+});
+check('keys: a v2 room splits chat, topic, signal and files keys', async () => {
+  const want = nodeHkdfVectors(FIX.key, 'mentria-test-room');
+  const k = await W.roomKeys(FIX.key, 2, { extractable: true });
+  eq(Buffer.from(await exportRaw(k.chatKey)).toString('base64url'), want.chat);
+  eq(Buffer.from(k.topicRaw).toString('base64url'), want.topic);
+  eq(k.password, want.signal);
+  eq(Buffer.from(k.filesIkm).toString('base64url'), want.files);
+  eq(await W.chatTopicFor('mentria-test-room', FIX.key, 2), want.topicTag);
+  ok(want.topicTag !== FIX.topic);
+});
+check('keys: a v2 room never hands the chat key to signalling', async () => {
+  const want = nodeHkdfVectors(FIX.key, 'r');
+  const k = await W.roomKeys(FIX.key, 2);
+  ok(k.password !== FIX.key && k.password !== want.chat && k.password !== FIX.key.replace(/=+$/, ''));
+  eq(new Set([want.chat, want.topic, want.signal, want.files]).size, 4);
+});
+check('keys: a bad key gives nothing', async () => { eq(await W.roomKeys('short', 2), null); eq(await W.roomKeys('', 1), null); eq(await W.chatTopicFor('r', 'short', 2), null); });
+check('files: a v2 room derives its files room from the files key', async () => {
+  const one = await F.filesRoomFor('r', FIX.key, 1);
+  const two = await F.filesRoomFor('r', FIX.key, 2);
+  deepEq(one, await F.filesRoomFor('r', FIX.key));
+  ok(one.roomId !== two.roomId && one.password !== two.password);
+  deepEq(two, await F.filesRoomFor('r', FIX.key, 2));
+});
+
 
 let failed = 0;
 for (const [name, fn] of checks) {

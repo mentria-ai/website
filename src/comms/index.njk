@@ -702,7 +702,7 @@ import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
-import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
+import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -1500,7 +1500,7 @@ const threadInfoFor = async (id) => {
     return null;
   }
   const r = savedRooms().find((x) => x.room === id);
-  return r && r.key ? { roomName: r.room, b64Key: r.key } : null;
+  return r && r.key ? { roomName: r.room, b64Key: r.key, kv: r.kv === 2 ? 2 : 1 } : null;
 };
 
 const joinFilesRoom = async (roomId, password) => {
@@ -1923,12 +1923,14 @@ const rememberSentCmid = (cmid) => {
 const savedRooms = () => { try { const v = MentriaStore.get('comms', 'rooms'); return Array.isArray(v) ? v : []; } catch (_) { return []; } };
 const setSavedRooms = (list) => { try { MentriaStore.set('comms', 'rooms', list); } catch (_) {} };
 const roomUnreadKey = (roomName) => 'room:' + roomName;
-const rememberRoom = (roomName, b64Key) => {
+const rememberRoom = (roomName, b64Key, extra = {}) => {
   if (!roomName || !b64Key || isDmRoom(roomName) || isEphemeralRoom(roomName)) return;
   const list = savedRooms();
   const i = list.findIndex((r) => r.room === roomName);
   const prev = i >= 0 ? list[i] : null;
-  const entry = Object.assign({}, prev || {}, { room: roomName, key: b64Key, label: (prev && prev.label) || roomName, joinedAt: (prev && prev.joinedAt) || Date.now(), lastSeen: Date.now() });
+  const kv = extra.kv === 2 ? 2 : extra.kv === 1 ? 1 : (prev && prev.key === b64Key && prev.kv === 2 ? 2 : 1);
+  const label = (extra.label && String(extra.label).trim().slice(0, 40)) || (prev && prev.label) || roomName;
+  const entry = Object.assign({}, prev || {}, { room: roomName, key: b64Key, kv, label, joinedAt: (prev && prev.joinedAt) || Date.now(), lastSeen: Date.now() });
   if (i >= 0) list[i] = entry; else list.unshift(entry);
   setSavedRooms(list.slice(0, 50));
 };
@@ -1949,8 +1951,9 @@ const RING_TOKEN_RE = /^[A-Za-z0-9_-]{20,64}$/;
 const roomKeyCache = new Map();
 const roomCryptoKey = (entry) => {
   if (!entry || !entry.key) return Promise.resolve(null);
-  if (!roomKeyCache.has(entry.key)) roomKeyCache.set(entry.key, deriveKey(entry.key).catch(() => null));
-  return roomKeyCache.get(entry.key);
+  const id = (entry.kv === 2 ? 2 : 1) + ':' + entry.key;
+  if (!roomKeyCache.has(id)) roomKeyCache.set(id, roomKeys(entry.key, entry.kv === 2 ? 2 : 1).then((k) => (k ? k.chatKey : null)).catch(() => null));
+  return roomKeyCache.get(id);
 };
 
 const notifAllowed = () => 'Notification' in window && Notification.permission === 'granted' && !!navigator.serviceWorker;
@@ -2231,11 +2234,13 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     return;
   }
 
-  chatKey = b64Key ? await deriveKey(b64Key) : null;
-  const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key) : null;
+  const roomKv = opts.kv === 2 ? 2 : 1;
+  const keys = b64Key ? await roomKeys(b64Key, roomKv) : null;
+  chatKey = keys ? keys.chatKey : null;
+  const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key, roomKv) : null;
   if (seq !== joinSeq) return;
   if (b64Key && !chatKey) sysTop(T.log.bad_key);
-  if (chatKey && b64Key && !opts.self) { if (isEphemeralRoom(roomName)) eph.set(roomName, b64Key, opts.kv); else rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
+  if (chatKey && b64Key && !opts.self) { if (isEphemeralRoom(roomName)) eph.set(roomName, b64Key, roomKv); else rememberRoom(roomName, b64Key, { kv: roomKv }); clearUnreadFor(roomUnreadKey(roomName)); }
 
   if (opts.share === false || isDmRoom(roomName)) {
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -2257,7 +2262,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   if (relayOnly && hasTurn(iceServers)) rtcConfig.iceTransportPolicy = 'relay';
   else if (relayOnly) console.warn('hide-my-ip requested but no relay server available — connecting normally');
   const roomConfig = { appId: 'mentria', relayConfig: { urls: [RELAY] }, rtcConfig };
-  if (chatKey && b64Key) roomConfig.password = b64Key;
+  if (chatKey && b64Key) roomConfig.password = keys.password;
   const keyNotes = new Set();
   const onJoinError = (info) => {
     const reason = String((info && info.error) || '').toLowerCase();
@@ -3388,7 +3393,7 @@ const subscribeUnread = async () => {
     } catch (_) {}
   }
   for (const r of savedRooms()) {
-    const topic = await chatTopicFor(r.room, r.key);
+    const topic = await chatTopicFor(r.room, r.key, r.kv === 2 ? 2 : 1);
     if (topic) byRoom.set(topic, r);
   }
   topicToFp.clear();
@@ -3932,7 +3937,7 @@ const initIdentity = async () => {
     broadcastProfile();
     if (joinedLocked && joinTarget && currentRoomName === joinTarget.room && !isDmRoom(currentRoomName)) {
       joinedLocked = false;
-      joinNew(joinTarget.room, joinTarget.key);
+      joinNew(joinTarget.room, joinTarget.key, { kv: joinTarget.kv });
     }
     await initRingToken();
     refreshNotifBanner();

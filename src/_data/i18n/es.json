@@ -152,7 +152,7 @@
     "sync_no_peer": "Ningún dispositivo respondió con este código. Revisa el código y mantén Acerca de abierto en el otro dispositivo.",
     "sync_busy": "Este código ya lo están usando otros dos dispositivos. Crea un código nuevo en el dispositivo con el que quieres vincular este.",
     "sync_vault_totp": "Este dispositivo tiene su propia bóveda TOTP y el otro dispositivo tiene una distinta. ¿Reemplazar la bóveda de este dispositivo por la del otro? Las cuentas TOTP que solo están en este dispositivo se perderán, y se abrirá con la contraseña del otro dispositivo.",
-    "sync_vault_identity": "Este dispositivo tiene su propia identidad de Mentria y el otro dispositivo tiene una distinta. ¿Reemplazarla por la del otro dispositivo? La identidad de este dispositivo se perderá, y se abrirá con la contraseña del otro dispositivo.",
+    "sync_vault_identity": "Este dispositivo tiene su propia identidad de Mentria y el otro dispositivo tiene una distinta. ¿Reemplazarla por la del otro dispositivo? La identidad de este dispositivo se perderá, y se abrirá con la contraseña del otro dispositivo. El historial de chat guardado en este dispositivo con la identidad anterior ya no se podrá abrir.",
     "sync_vault_keyring": "Este dispositivo tiene su propio desbloqueo único y el otro dispositivo tiene uno distinto. ¿Reemplazar el de este dispositivo por el del otro? Se abrirá con el código de recuperación del otro dispositivo. Las notas, los códigos, los chats y las finanzas configurados con el desbloqueo de este dispositivo no se abrirán aquí hasta que vuelvas a incluir ese desbloqueo desde Acerca de. Se conserva en este dispositivo.",
     "sync_vault_keep": "Mantener la de este dispositivo",
     "sync_vault_replace": "Reemplazar",
@@ -223,7 +223,8 @@
       "packs_lib": "paquetes de aprendizaje importados",
       "finance": "libro de cuentas de Finanzas",
       "radio": "me gusta y saltos de la radio",
-      "other": "otros datos guardados"
+      "other": "otros datos guardados",
+      "comms_history": "historial de chats"
     },
     "restore_replace": "Este dispositivo ya tiene sus propios datos: {areas}. ¿Reemplazarlos por los de la copia de seguridad? Elige Cancelar para conservar las versiones de este dispositivo. Las notas y todo lo nuevo se restauran de todos modos.",
     "restore_totp_vault": "Este dispositivo ya tiene una bóveda TOTP. ¿Reemplazarla por la de la copia de seguridad? Las cuentas que solo están en este dispositivo se perderán, y se abrirá con la contraseña de la copia de seguridad.",
@@ -293,7 +294,9 @@
     "send_failed": "No se pudo enviar a {tool}",
     "key_space": "ESPACIO",
     "key_click": "clic",
-    "key_tap": "toca"
+    "key_tap": "toca",
+    "backup_history_locked": "El historial de chats queda fuera mientras tu identidad de Mentria está bloqueada.",
+    "restore_history_locked": "El historial de chats no se restauró. Desbloquea tu identidad de Mentria y vuelve a restaurar este archivo."
   },
   "home": {
     "tools_heading": "Herramientas",
@@ -1327,7 +1330,13 @@
       "adapters_thinking_on": "con razonamiento",
       "adapters_thinking_either": "razonamiento opcional",
       "think_pinned": "Quita el adaptador para usar el pensamiento profundo",
-      "search_pinned": "Quita el adaptador para usar la búsqueda web"
+      "search_pinned": "Quita el adaptador para usar la búsqueda web",
+      "save_setup": "Configura tu identidad de Mentria para guardar tus chats",
+      "save_setup_btn": "Configurar",
+      "save_unlock": "Desbloquea para guardar este chat",
+      "save_unlock_btn": "Desbloquear",
+      "save_lost": "Los mensajes sin guardar se pierden al salir de esta página.",
+      "photo_chat": "Chat de foto"
     },
     "extensions": {
       "install_heading": "Instalar una extensión",
@@ -1954,7 +1963,12 @@
       "prompt_ocr": "Lee todo el texto de esta imagen y transcríbelo exactamente como aparece, conservando el orden y los saltos de línea originales. Incluye todos los títulos, etiquetas, números y la letra pequeña. No añadas comentarios, notas, resúmenes ni explicaciones — devuelve solo el texto transcrito y nada más. Solo si la imagen realmente no contiene ningún texto, responde: (no se encontró texto).",
       "prompt_alt": "En una sola frase breve de 20 palabras como máximo, describe esta imagen para un usuario de lector de pantalla. Capta solo lo más importante que se muestra — no enumeres cada detalle ni transcribas texto. Devuelve solo esa frase corta y nada más.",
       "prompt_tags": "Observa la imagen con atención y enumera de 5 a 12 etiquetas cortas separadas por comas que nombren las cosas concretas que ves: cada elemento principal por su nombre, un color junto con la cosa a la que pertenece y el tipo de lugar. Si la imagen es principalmente texto o un documento, etiquétala así (por ejemplo: texto, documento, captura de pantalla). Produce siempre etiquetas — nunca te niegues ni expliques. Devuelve solo las etiquetas separadas por comas.",
-      "confirm_delete_model": "¿Eliminar el modelo de IA descargado? Otras herramientas de IA del sitio lo comparten y habrá que descargarlo de nuevo."
+      "confirm_delete_model": "¿Eliminar el modelo de IA descargado? Otras herramientas de IA del sitio lo comparten y habrá que descargarlo de nuevo.",
+      "save_setup": "Configura tu identidad de Mentria para guardar tus chats",
+      "save_setup_btn": "Configurar",
+      "save_unlock": "Desbloquea para guardar este chat",
+      "save_unlock_btn": "Desbloquear",
+      "save_lost": "Los mensajes sin guardar se pierden al salir de esta página."
     },
     "files": {
       "db_group": "Bases de datos",
@@ -5385,7 +5399,8 @@
         "send": "enviar",
         "share_room": "compartir el enlace de esta sala",
         "link_copied": "enlace de la sala copiado — envíalo a quien quieras invitar.",
-        "link_manual": "copia este enlace para invitar a alguien: {url}"
+        "link_manual": "copia este enlace para invitar a alguien: {url}",
+        "load_image": "Cargar la imagen de {host}"
       },
       "notif": {
         "text": "recibe una notificación cuando llegue un mensaje — aunque comms esté cerrado",
@@ -5594,7 +5609,36 @@
         "ext_from": "extensión de {who}: {name}",
         "install": "instalar",
         "installed": "instalada ✓",
-        "install_failed": "falló la instalación: {reason}"
+        "install_failed": "falló la instalación: {reason}",
+        "offer_photo": "Envié una foto. Actualiza Mentria para verla.",
+        "offer_photos": "Envié {n} fotos. Actualiza Mentria para verlas.",
+        "offer_video": "Envié un video. Actualiza Mentria para verlo.",
+        "offer_videos": "Envié {n} videos. Actualiza Mentria para verlos.",
+        "offer_file": "Envié un archivo. Actualiza Mentria para abrirlo.",
+        "offer_files": "Envié {n} archivos. Actualiza Mentria para abrirlos.",
+        "offer_mixed": "Envié {n} adjuntos. Actualiza Mentria para verlos.",
+        "needs_update": "{name} tiene que actualizar Mentria para recibir esto",
+        "no_space": "No hay espacio suficiente en este dispositivo",
+        "status_send": "enviando {i} de {n} · {rate} · {path}",
+        "status_recv": "recibiendo {i} de {n} · {rate} · {path}",
+        "direct": "directo",
+        "via_relay": "por el relé",
+        "saved_here": "guardado en este dispositivo",
+        "open_pdf": "Abrir en la herramienta PDF",
+        "save": "Guardar",
+        "retry": "Reintentar",
+        "paused": "En pausa en {size}. Sigue sola cuando Comms esté abierto en los dos.",
+        "accept": "Aceptar",
+        "not_now": "Ahora no",
+        "accept_q": "{size} · aún sin descargar",
+        "relay_ask": "Esto pasa por nuestro servidor de relevo. ¿Continuar?",
+        "relay_go": "Continuar",
+        "media": "Fotos, videos y archivos",
+        "on_device": "{size} en este dispositivo",
+        "free_up": "Liberar espacio",
+        "free_confirm": "¿Quitar de este dispositivo las fotos, videos y archivos de este chat? Los mensajes se quedan y puedes volver a descargarlos mientras alguien los tenga.",
+        "removed": "Quitado de este dispositivo",
+        "download_again": "Descargar de nuevo"
       },
       "attach": {
         "ext_dm": "las extensiones van de dispositivo a dispositivo — {name} no está disponible ahora mismo.",
@@ -5694,6 +5738,64 @@
         "overconstrained": "el dispositivo no admite esta configuración",
         "security": "bloqueado por seguridad",
         "abort": "se canceló"
+      },
+      "history": {
+        "earlier": "Mostrar mensajes anteriores",
+        "foreign": "El historial de este dispositivo se guardó con otra identidad y no se puede abrir.",
+        "start_over": "Empezar un historial nuevo",
+        "start_over_confirm": "¿Borrar el historial anterior de este dispositivo y empezar uno nuevo?",
+        "unavailable": "El historial del chat no se puede guardar en este dispositivo."
+      },
+      "home": {
+        "search": "Buscar",
+        "filter_all": "Todo",
+        "filter_people": "Personas",
+        "filter_ai": "IA",
+        "at_none": "Sin resultados",
+        "prompt": "escribe a alguien o pregunta a la IA",
+        "placeholder": "Escribe a quien quieras o pregunta a la IA",
+        "placeholder_desk": "Escribe a quien quieras o pregunta a la IA. Escribe @ para elegir a quién.",
+        "hint": "Sin @, se abre un chat nuevo con la IA en este dispositivo.",
+        "pick": "Elige un chat o empieza uno"
+      },
+      "sheet": {
+        "title": "Enviar",
+        "add": "Añadir más",
+        "caption": "Añade un comentario",
+        "standard": "Estándar",
+        "hd": "HD",
+        "send": "Enviar",
+        "cancel": "Cancelar",
+        "est_down": "{n} fotos · {size}, reducidas",
+        "est_orig": "{size}, originales",
+        "est_mixed": "{n} elementos · {size}, fotos reducidas",
+        "keeps_location": "Este archivo conserva sus datos de ubicación",
+        "too_big": "Demasiado grande para enviar: 2 GB como máximo",
+        "remove": "Quitar"
+      },
+      "viewer": {
+        "save": "Guardar",
+        "share": "Compartir",
+        "share_now": "Compartir ahora",
+        "close": "Cerrar",
+        "prev": "Anterior",
+        "next": "Siguiente"
+      },
+      "devices": {
+        "title": "Mis dispositivos",
+        "explainer": "Suelta aquí lo que quieras. Llega a tus otros dispositivos por sí solo siempre que Comms esté abierto en ellos.",
+        "this_one": "{device} · este",
+        "asleep": "{device} · en reposo",
+        "online": "{device} · en línea",
+        "got": "en {device} ✓",
+        "when_open": "{device} cuando se abra",
+        "kind_mac": "Mac",
+        "kind_iphone": "iPhone",
+        "kind_ipad": "iPad",
+        "kind_android": "Android",
+        "kind_windows": "PC con Windows",
+        "kind_linux": "Linux",
+        "kind_device": "Dispositivo"
       }
     },
     "scanner": {

@@ -152,7 +152,7 @@
     "sync_no_peer": "Nenhum aparelho respondeu com este código. Confira o código e mantenha a página Sobre aberta no outro aparelho.",
     "sync_busy": "Este código já está sendo usado por outros dois aparelhos. Crie um código novo no aparelho com o qual você quer parear este.",
     "sync_vault_totp": "Este aparelho tem o próprio cofre TOTP, e o outro aparelho tem um diferente. Substituir o cofre deste aparelho pelo do outro? As contas TOTP que estão só neste aparelho serão perdidas, e ele passará a abrir com a senha do outro aparelho.",
-    "sync_vault_identity": "Este aparelho tem a própria identidade Mentria, e o outro aparelho tem uma diferente. Substituí-la pela do outro aparelho? A identidade deste aparelho será perdida, e ela passará a abrir com a senha do outro aparelho.",
+    "sync_vault_identity": "Este aparelho tem a própria identidade Mentria, e o outro aparelho tem uma diferente. Substituí-la pela do outro aparelho? A identidade deste aparelho será perdida, e ela passará a abrir com a senha do outro aparelho. O histórico de chat salvo neste aparelho com a identidade antiga não vai mais abrir.",
     "sync_vault_keyring": "Este aparelho tem o próprio desbloqueio único, e o outro aparelho tem um diferente. Substituí-lo pelo do outro aparelho? Ele passará a abrir com o código de recuperação do outro aparelho. As notas, os códigos, as conversas e as finanças configurados com o desbloqueio deste aparelho não vão abrir aqui até você trazer esse desbloqueio de volta em Sobre. Ele fica guardado neste aparelho.",
     "sync_vault_keep": "Manter a versão deste aparelho",
     "sync_vault_replace": "Substituir",
@@ -223,7 +223,8 @@
       "packs_lib": "pacotes de aprendizado importados",
       "finance": "livro-caixa do Finanças",
       "radio": "curtidas e pulos do rádio",
-      "other": "outros dados salvos"
+      "other": "outros dados salvos",
+      "comms_history": "histórico de chats"
     },
     "restore_replace": "Este aparelho já tem seus próprios dados: {areas}. Substituí-los pelos do backup? Escolha Cancelar para manter as versões deste aparelho. As notas e tudo o que for novo são restaurados de qualquer forma.",
     "restore_totp_vault": "Este aparelho já tem um cofre TOTP. Substituí-lo pelo do backup? As contas que estão só neste aparelho serão perdidas, e ele passará a abrir com a senha do backup.",
@@ -293,7 +294,9 @@
     "send_failed": "Não foi possível enviar para {tool}",
     "key_space": "ESPAÇO",
     "key_click": "clique",
-    "key_tap": "toque"
+    "key_tap": "toque",
+    "backup_history_locked": "O histórico de chats fica de fora enquanto sua identidade Mentria está bloqueada.",
+    "restore_history_locked": "O histórico de chats não foi restaurado. Desbloqueie sua identidade Mentria e restaure este arquivo de novo."
   },
   "home": {
     "tools_heading": "Ferramentas",
@@ -1327,7 +1330,13 @@
       "adapters_thinking_on": "raciocínio ligado",
       "adapters_thinking_either": "raciocínio opcional",
       "think_pinned": "Desafixe o adaptador para usar o pensamento profundo",
-      "search_pinned": "Desafixe o adaptador para usar a busca na web"
+      "search_pinned": "Desafixe o adaptador para usar a busca na web",
+      "save_setup": "Configure sua identidade Mentria para guardar seus chats",
+      "save_setup_btn": "Configurar",
+      "save_unlock": "Desbloqueie para guardar este chat",
+      "save_unlock_btn": "Desbloquear",
+      "save_lost": "As mensagens não salvas se perdem quando você sai desta página.",
+      "photo_chat": "Chat de foto"
     },
     "extensions": {
       "install_heading": "Instalar uma extensão",
@@ -1954,7 +1963,12 @@
       "prompt_ocr": "Leia todo o texto desta imagem e transcreva-o exatamente como aparece, preservando a ordem e as quebras de linha originais. Inclua todos os títulos, rótulos, números e o texto em letras miúdas. Não adicione comentários, notas, resumos nem explicações — devolva apenas o texto transcrito e nada mais. Apenas se a imagem realmente não contiver texto algum, responda: (nenhum texto encontrado).",
       "prompt_alt": "Em uma única frase curta de no máximo 20 palavras, descreva esta imagem para um usuário de leitor de tela. Capture apenas o mais importante que aparece — não liste cada detalhe nem transcreva texto. Devolva apenas essa frase curta e nada mais.",
       "prompt_tags": "Observe a imagem com atenção e liste de 5 a 12 tags curtas separadas por vírgulas que nomeiem as coisas específicas que você vê: cada elemento principal pelo nome, uma cor junto com a coisa a que pertence e o tipo de lugar. Se a imagem for principalmente texto ou um documento, marque-a assim (por exemplo: texto, documento, captura de tela). Sempre produza tags — nunca recuse nem explique. Devolva apenas as tags separadas por vírgulas.",
-      "confirm_delete_model": "Excluir o modelo de IA baixado? Outras ferramentas de IA do site o compartilham e será preciso baixá-lo novamente."
+      "confirm_delete_model": "Excluir o modelo de IA baixado? Outras ferramentas de IA do site o compartilham e será preciso baixá-lo novamente.",
+      "save_setup": "Configure sua identidade Mentria para guardar seus chats",
+      "save_setup_btn": "Configurar",
+      "save_unlock": "Desbloqueie para guardar este chat",
+      "save_unlock_btn": "Desbloquear",
+      "save_lost": "As mensagens não salvas se perdem quando você sai desta página."
     },
     "files": {
       "db_group": "Bancos de dados",
@@ -5385,7 +5399,8 @@
         "send": "enviar",
         "share_room": "compartilhar o link desta sala",
         "link_copied": "link da sala copiado — envie para quem você quiser convidar.",
-        "link_manual": "copie este link para convidar alguém: {url}"
+        "link_manual": "copie este link para convidar alguém: {url}",
+        "load_image": "Carregar a imagem de {host}"
       },
       "notif": {
         "text": "receba uma notificação quando chegar uma mensagem — mesmo com o comms fechado",
@@ -5594,7 +5609,36 @@
         "ext_from": "extensão de {who}: {name}",
         "install": "instalar",
         "installed": "instalada ✓",
-        "install_failed": "falha na instalação: {reason}"
+        "install_failed": "falha na instalação: {reason}",
+        "offer_photo": "Enviei uma foto. Atualize o Mentria para ver.",
+        "offer_photos": "Enviei {n} fotos. Atualize o Mentria para ver.",
+        "offer_video": "Enviei um vídeo. Atualize o Mentria para ver.",
+        "offer_videos": "Enviei {n} vídeos. Atualize o Mentria para ver.",
+        "offer_file": "Enviei um arquivo. Atualize o Mentria para abrir.",
+        "offer_files": "Enviei {n} arquivos. Atualize o Mentria para abrir.",
+        "offer_mixed": "Enviei {n} anexos. Atualize o Mentria para ver.",
+        "needs_update": "{name} precisa atualizar o Mentria para receber isto",
+        "no_space": "Não há espaço suficiente neste dispositivo",
+        "status_send": "enviando {i} de {n} · {rate} · {path}",
+        "status_recv": "recebendo {i} de {n} · {rate} · {path}",
+        "direct": "direto",
+        "via_relay": "via retransmissão",
+        "saved_here": "salvo neste dispositivo",
+        "open_pdf": "Abrir na ferramenta de PDF",
+        "save": "Salvar",
+        "retry": "Tentar de novo",
+        "paused": "Pausado em {size}. Continua sozinho quando o Comms estiver aberto nos dois.",
+        "accept": "Aceitar",
+        "not_now": "Agora não",
+        "accept_q": "{size} · ainda não baixado",
+        "relay_ask": "Isto passa pelo nosso servidor de retransmissão. Continuar?",
+        "relay_go": "Continuar",
+        "media": "Fotos, vídeos e arquivos",
+        "on_device": "{size} neste dispositivo",
+        "free_up": "Liberar espaço",
+        "free_confirm": "Remover deste dispositivo as fotos, vídeos e arquivos desta conversa? As mensagens ficam, e você pode baixá-los de novo enquanto alguém ainda os tiver.",
+        "removed": "Removido deste dispositivo",
+        "download_again": "Baixar de novo"
       },
       "attach": {
         "ext_dm": "as extensões vão de aparelho para aparelho — {name} não está online agora.",
@@ -5694,6 +5738,64 @@
         "overconstrained": "o dispositivo não aceita essa configuração",
         "security": "bloqueado por segurança",
         "abort": "a operação foi interrompida"
+      },
+      "history": {
+        "earlier": "Mostrar mensagens anteriores",
+        "foreign": "O histórico deste aparelho foi salvo com outra identidade e não pode ser aberto.",
+        "start_over": "Começar um novo histórico",
+        "start_over_confirm": "Apagar o histórico antigo deste aparelho e começar um novo?",
+        "unavailable": "O histórico de chat não pode ser salvo neste aparelho."
+      },
+      "home": {
+        "search": "Pesquisar",
+        "filter_all": "Tudo",
+        "filter_people": "Pessoas",
+        "filter_ai": "IA",
+        "at_none": "Nenhum resultado",
+        "prompt": "mande uma mensagem ou pergunte à IA",
+        "placeholder": "Mande mensagem para qualquer pessoa ou pergunte à IA",
+        "placeholder_desk": "Mande mensagem para qualquer pessoa ou pergunte à IA. Digite @ para escolher quem.",
+        "hint": "Sem @, um novo chat com a IA começa neste aparelho.",
+        "pick": "Escolha um chat ou comece um novo"
+      },
+      "sheet": {
+        "title": "Enviar",
+        "add": "Adicionar mais",
+        "caption": "Adicione uma legenda",
+        "standard": "Padrão",
+        "hd": "HD",
+        "send": "Enviar",
+        "cancel": "Cancelar",
+        "est_down": "{n} fotos · {size}, reduzidas",
+        "est_orig": "{size}, originais",
+        "est_mixed": "{n} itens · {size}, fotos reduzidas",
+        "keeps_location": "Este arquivo mantém os dados de localização",
+        "too_big": "Grande demais para enviar: no máximo 2 GB",
+        "remove": "Remover"
+      },
+      "viewer": {
+        "save": "Salvar",
+        "share": "Compartilhar",
+        "share_now": "Compartilhar agora",
+        "close": "Fechar",
+        "prev": "Anterior",
+        "next": "Próximo"
+      },
+      "devices": {
+        "title": "Meus dispositivos",
+        "explainer": "Solte qualquer coisa aqui. Chega sozinho aos seus outros dispositivos sempre que o Comms estiver aberto neles.",
+        "this_one": "{device} · este",
+        "asleep": "{device} · em repouso",
+        "online": "{device} · online",
+        "got": "no {device} ✓",
+        "when_open": "{device} quando abrir",
+        "kind_mac": "Mac",
+        "kind_iphone": "iPhone",
+        "kind_ipad": "iPad",
+        "kind_android": "Android",
+        "kind_windows": "PC com Windows",
+        "kind_linux": "Linux",
+        "kind_device": "Dispositivo"
       }
     },
     "scanner": {

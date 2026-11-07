@@ -57,6 +57,11 @@ eleventyComputed:
     </div>
     <div class="an-result" id="an-result"></div>
   </div>
+
+  <div class="an-savebar" id="an-savebar" role="status" hidden>
+    <span class="an-savebar__text"><span id="an-savebar-main"></span><span class="an-savebar__lost" id="an-savebar-lost"></span></span>
+    <button type="button" class="an-mini-btn" id="an-savebar-btn"></button>
+  </div>
 </div>
 
 {% include "terminal-frame-close.njk" %}
@@ -105,8 +110,15 @@ eleventyComputed:
   .an-result .an-cursor { display: inline-block; width: 7px; height: 1.05em; background: var(--syn-cyan); vertical-align: text-bottom; animation: an-pulse 0.9s ease-in-out infinite; }
 
   .an-error { color: var(--syn-pink); font-family: var(--font-mono); font-size: 13px; }
+  .an-savebar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 10px 14px; border: 1px solid var(--term-border); border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: 12px; line-height: 1.45; color: var(--term-fg); }
+  .an-savebar[hidden] { display: none; }
+  .an-savebar__text { flex: 1 1 16rem; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .an-savebar__lost { color: var(--term-subtle); }
+  .an-saved + .an-saved { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--term-divider); }
+  .an-saved__label { margin-bottom: 6px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--syn-cyan); }
 </style>
 
+<script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
 <script>
 (() => {
   'use strict';
@@ -151,6 +163,15 @@ eleventyComputed:
     copyFailed:       {{ ("common.copy_failed"                    | t) | dump | safe }},
     badFile:          {{ ("tool.annotate-image.bad_file"          | t) | dump | safe }},
     sysPrompt:        {{ ("tool.annotate-image.sys_prompt"        | t) | dump | safe }},
+    saveSetup:        {{ ("tool.annotate-image.save_setup"        | t) | dump | safe }},
+    saveSetupBtn:     {{ ("tool.annotate-image.save_setup_btn"    | t) | dump | safe }},
+    saveUnlock:       {{ ("tool.annotate-image.save_unlock"       | t) | dump | safe }},
+    saveUnlockBtn:    {{ ("tool.annotate-image.save_unlock_btn"   | t) | dump | safe }},
+    saveLost:         {{ ("tool.annotate-image.save_lost"         | t) | dump | safe }},
+    historyForeign:   {{ ("tool.comms.history.foreign"            | t) | dump | safe }},
+    historyUnavailable: {{ ("tool.comms.history.unavailable"      | t) | dump | safe }},
+    historyStartOver: {{ ("tool.comms.history.start_over"         | t) | dump | safe }},
+    historyStartOverConfirm: {{ ("tool.comms.history.start_over_confirm" | t) | dump | safe }},
     labels: {
       describe: {{ ("tool.annotate-image.mode_describe" | t) | dump | safe }},
       ocr:      {{ ("tool.annotate-image.mode_ocr"      | t) | dump | safe }},
@@ -194,9 +215,13 @@ eleventyComputed:
     const shown = statusText.textContent;
     const before = Object.assign({}, COPY);
     const pick = (key) => { const v = i18n.t('tool.annotate-image.' + key); return typeof v === 'string' ? v : null; };
-    ['status_idle', 'status_loading', 'status_ready', 'status_generating', 'err_no_webgpu', 'err_load', 'err_device_lost', 'empty_response', 'copy', 'copied', 'bad_file', 'sys_prompt'].forEach((key) => {
+    ['status_idle', 'status_loading', 'status_ready', 'status_generating', 'err_no_webgpu', 'err_load', 'err_device_lost', 'empty_response', 'copy', 'copied', 'bad_file', 'sys_prompt', 'save_setup', 'save_setup_btn', 'save_unlock', 'save_unlock_btn', 'save_lost'].forEach((key) => {
       const v = pick(key);
       if (v != null) COPY[key.replace(/_([a-z])/g, (m, c) => c.toUpperCase())] = v;
+    });
+    [['foreign', 'historyForeign'], ['unavailable', 'historyUnavailable'], ['start_over', 'historyStartOver'], ['start_over_confirm', 'historyStartOverConfirm']].forEach(([key, prop]) => {
+      const v = i18n.t('tool.comms.history.' + key);
+      if (typeof v === 'string') COPY[prop] = v;
     });
     Object.keys(COPY.labels).forEach((mode) => {
       const label = pick('mode_' + mode);
@@ -208,7 +233,199 @@ eleventyComputed:
     if (was) statusText.textContent = COPY[was];
     const mode = resultLabel.getAttribute('data-mode');
     if (mode && COPY.labels[mode]) resultLabel.textContent = COPY.labels[mode];
+    if (!saveBar.hidden) renderSaveBar();
   });
+
+  const PREFIX = {{ locale.pathPrefix | dump | safe }};
+  const askedThread = new URLSearchParams(location.search).get('thread');
+  const saveBar = document.getElementById('an-savebar');
+  const saveBarMain = document.getElementById('an-savebar-main');
+  const saveBarLost = document.getElementById('an-savebar-lost');
+  const saveBarBtn = document.getElementById('an-savebar-btn');
+  let histMods = null;
+  let anStore = null;
+  let imageSeq = 0;
+  let curThread = null, curPairs = 0, curThumbBlob = null, curThumbHash = null, curResults = [];
+  let saveChain = Promise.resolve();
+  let lastSavedTs = 0;
+  let savedUrl = null;
+  let historyProblem = null;
+
+  const historyMods = () => {
+    if (!histMods) {
+      histMods = Promise.all([import('/assets/js/comms/identity.js'), import('/assets/js/comms/store.js'), import('/assets/js/comms/ai-thread.js')])
+        .then(([I, S, A]) => ({ I, S, A }))
+        .catch((err) => { histMods = null; throw err; });
+    }
+    return histMods;
+  };
+
+  function closeAnnotateStore() {
+    if (anStore) { try { anStore.close(); } catch (_) {} }
+    anStore = null;
+  }
+
+  async function openAnnotateStore(fresh) {
+    if (anStore && anStore.status === 'open') return true;
+    const { I, S } = await historyMods();
+    if (!(await I.openQuietly())) { historyProblem = null; return false; }
+    let secret = null;
+    try {
+      secret = I.secretCopy();
+      const st = await S.openStore(secret);
+      if (st.status !== 'open' && fresh) {
+        try { await st.wipe(); } catch (err) { st.close(); throw err; }
+      }
+      if (st.status !== 'open') { st.close(); historyProblem = 'foreign'; return false; }
+      anStore = st;
+      historyProblem = null;
+      return true;
+    } catch (err) {
+      if (err && (err.code === 'unavailable' || err.code === 'quota')) historyProblem = 'unavailable';
+      return false;
+    } finally {
+      if (secret) secret.fill(0);
+    }
+  }
+
+  function renderSaveBar() {
+    const has = !!(window.MentriaIdentity && MentriaIdentity.isSetUp());
+    if (historyProblem) {
+      saveBarMain.textContent = historyProblem === 'foreign' ? COPY.historyForeign : COPY.historyUnavailable;
+      saveBarBtn.textContent = COPY.historyStartOver;
+    } else {
+      saveBarMain.textContent = has ? COPY.saveUnlock : COPY.saveSetup;
+      saveBarBtn.textContent = has ? COPY.saveUnlockBtn : COPY.saveSetupBtn;
+    }
+    saveBarBtn.hidden = historyProblem === 'unavailable';
+    saveBarLost.textContent = COPY.saveLost;
+  }
+
+  function showSaveBar() {
+    renderSaveBar();
+    saveBar.hidden = false;
+  }
+
+  async function blobHash(blob) {
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()));
+    return Array.from(digest, (b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function saveResults(entries, image) {
+    if (image !== imageSeq || !entries.length) return;
+    if (!(await openAnnotateStore())) { showSaveBar(); return; }
+    const { I, A } = await historyMods();
+    if (!(await I.stillOpen())) { closeAnnotateStore(); showSaveBar(); return; }
+    if (image !== imageSeq) return;
+    if (!curThread) {
+      curThread = A.newThreadId('an');
+      curPairs = 0;
+      await anStore.putThread({
+        id: curThread,
+        kind: 'model',
+        title: A.titleFrom(entries[0].text, entries[0].modeLabel),
+        participants: [{ id: 'self', kind: 'self' }, { id: 'model', kind: 'model', name: '' }],
+        meta: { tool: 'annotate-image' },
+        updatedAt: 0,
+        lastReadTs: Date.now(),
+        pinned: false
+      });
+    }
+    if (curThumbBlob && !curThumbHash) {
+      const hash = await blobHash(curThumbBlob);
+      await anStore.putThumb(hash, curThread, curThumbBlob);
+      curThumbHash = hash;
+    }
+    for (const entry of entries) {
+      lastSavedTs = Math.max(Date.now(), lastSavedTs + 2);
+      const [asked, answered] = A.annotateToMessages(Object.assign({}, entry, { thumb: curThumbHash }), curThread, curPairs++, lastSavedTs);
+      await anStore.putMessage(asked);
+      await anStore.putMessage(answered);
+    }
+  }
+
+  function noteResult(mode, text) {
+    if (!text) return;
+    const entry = { mode, modeLabel: COPY.labels[mode] || mode, text };
+    curResults.push(entry);
+    const image = imageSeq;
+    saveChain = saveChain.then(() => saveResults([entry], image)).catch((err) => { console.warn('annotate history:', (err && err.code) || err); });
+  }
+
+  async function showSavedThread(id) {
+    if (!(await openAnnotateStore().catch(() => false))) { showSaveBar(); return; }
+    const thread = await anStore.getThread(id).catch(() => null);
+    if (!thread) return;
+    const msgs = await anStore.listMessages(id, { limit: 100000 }).catch(() => []);
+    if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
+    const pic = msgs.map((m) => (m.parts || []).find((p) => p && p.type === 'image' && p.thumb)).find(Boolean);
+    if (pic) {
+      const blob = await anStore.getThumb(pic.thumb).catch(() => null);
+      if (blob) {
+        if (savedUrl) { try { URL.revokeObjectURL(savedUrl); } catch (_) {} }
+        savedUrl = URL.createObjectURL(blob);
+        preview.src = savedUrl;
+        preview.hidden = false;
+        dropInner.style.display = 'none';
+        drop.classList.add('has-image');
+      }
+    }
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i + 1 < msgs.length; i += 2) {
+      const block = document.createElement('div');
+      block.className = 'an-saved';
+      const label = document.createElement('div');
+      label.className = 'an-saved__label';
+      label.textContent = COPY.labels[(msgs[i].meta || {}).mode] || msgs[i].t;
+      const body = document.createElement('div');
+      body.className = 'an-saved__body';
+      if (window.renderMarkdown) body.innerHTML = renderMarkdown(msgs[i + 1].t) || '';
+      else body.textContent = msgs[i + 1].t;
+      block.append(label, body);
+      frag.append(block);
+    }
+    resultLabel.textContent = thread.title || '';
+    resultLabel.removeAttribute('data-mode');
+    resultEl.replaceChildren(frag);
+    resultWrap.hidden = false;
+  }
+
+  saveBarBtn.addEventListener('click', async () => {
+    if (historyProblem === 'foreign') {
+      if (!(await window.mentriaConfirm(COPY.historyStartOverConfirm, { danger: true }))) return;
+      saveBarBtn.disabled = true;
+      const opened = await openAnnotateStore(true).catch(() => false);
+      saveBarBtn.disabled = false;
+      if (opened) adoptAnnotateStore();
+      else renderSaveBar();
+      return;
+    }
+    if (!(window.MentriaIdentity && MentriaIdentity.isSetUp())) { window.location.href = PREFIX + '/comms/'; return; }
+    saveBarBtn.disabled = true;
+    let result = 'cancelled';
+    try { result = await (await historyMods()).I.askToOpen(); } catch (_) {}
+    saveBarBtn.disabled = false;
+    if (result === 'elsewhere') { window.location.href = PREFIX + '/comms/'; return; }
+    if (result !== 'open') return;
+    if (await openAnnotateStore().catch(() => false)) adoptAnnotateStore();
+    else renderSaveBar();
+  });
+
+  function adoptAnnotateStore() {
+    saveBar.hidden = true;
+    if (!curResults.length) {
+      if (askedThread) showSavedThread(askedThread);
+      return;
+    }
+    curThread = null;
+    curPairs = 0;
+    curThumbHash = null;
+    const all = curResults.slice();
+    const image = imageSeq;
+    saveChain = saveChain.then(() => saveResults(all, image)).catch((err) => { console.warn('annotate history:', (err && err.code) || err); });
+  }
+
+  if (askedThread) showSavedThread(askedThread);
 
   if (!navigator.gpu){ setStatus('error', COPY.errNoWebgpu); dropInner.disabled = true; drop.style.pointerEvents = 'none'; drop.style.opacity = '0.5'; return; }
 
@@ -392,6 +609,7 @@ eleventyComputed:
       const text = stripThink(full.replace(/<think>[\s\S]*?<\/think>/g, '')).replace(/<\|[^|]*\|>/g, '').trim();
       const display = mode === 'tags' ? tidyTags(text) : text;
       lastText = display;
+      noteResult(mode, display);
       if (window.renderMarkdown) resultEl.innerHTML = renderMarkdown(display) || ('<p>' + esc(COPY.emptyResponse) + '</p>');
       else resultEl.textContent = display || COPY.emptyResponse;
       setStatus('ready', COPY.statusReady);
@@ -434,6 +652,12 @@ eleventyComputed:
       const img = await fileToEngineImage(file, IMG_MAX);
       if (n !== loadSeq) return;
       curName = (file.name || 'image').replace(/\.[^.]+$/, '');
+      imageSeq++;
+      curThread = null;
+      curPairs = 0;
+      curThumbBlob = img.previewBlob || null;
+      curThumbHash = null;
+      curResults = [];
       if (curUrl){ try { URL.revokeObjectURL(curUrl); } catch(_){} }
       curUrl = URL.createObjectURL(img.previewBlob || file);
       preview.src = curUrl; preview.hidden = false; dropInner.style.display = 'none';

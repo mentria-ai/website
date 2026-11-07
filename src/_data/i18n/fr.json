@@ -152,7 +152,7 @@
     "sync_no_peer": "Aucun appareil n'a répondu avec ce code. Vérifiez le code et gardez la page À propos ouverte sur l'autre appareil.",
     "sync_busy": "Ce code est déjà utilisé par deux autres appareils. Créez un nouveau code sur l'appareil avec lequel vous voulez jumeler celui-ci.",
     "sync_vault_totp": "Cet appareil a son propre coffre TOTP, et l'autre appareil en a un différent. Remplacer le coffre de cet appareil par celui de l'autre ? Les comptes TOTP qui ne sont que sur cet appareil seront perdus, et il s'ouvrira avec la phrase secrète de l'autre appareil.",
-    "sync_vault_identity": "Cet appareil a sa propre identité Mentria, et l'autre appareil en a une différente. La remplacer par celle de l'autre appareil ? L'identité de cet appareil sera perdue, et elle s'ouvrira avec la phrase secrète de l'autre appareil.",
+    "sync_vault_identity": "Cet appareil a sa propre identité Mentria, et l'autre appareil en a une différente. La remplacer par celle de l'autre appareil ? L'identité de cet appareil sera perdue, et elle s'ouvrira avec la phrase secrète de l'autre appareil. L'historique des discussions enregistré sur cet appareil sous l'ancienne identité ne pourra plus être ouvert.",
     "sync_vault_keyring": "Cet appareil a son propre déverrouillage unique, et l'autre appareil en a un différent. Le remplacer par celui de l'autre appareil ? Il s'ouvrira avec le code de récupération de l'autre appareil. Les notes, codes, discussions et finances configurés avec le déverrouillage de cet appareil ne s'ouvriront plus ici tant que vous n'aurez pas réintégré ce déverrouillage depuis À propos. Il est conservé sur cet appareil.",
     "sync_vault_keep": "Garder la version de cet appareil",
     "sync_vault_replace": "Remplacer",
@@ -223,7 +223,8 @@
       "packs_lib": "packs d’apprentissage importés",
       "finance": "livre de comptes Finances",
       "radio": "J’aime et titres passés de la radio",
-      "other": "autres données enregistrées"
+      "other": "autres données enregistrées",
+      "comms_history": "historique des discussions"
     },
     "restore_replace": "Cet appareil a déjà ses propres données : {areas}. Les remplacer par celles de la sauvegarde ? Choisissez Annuler pour garder les versions de cet appareil. Les notes et tout ce qui est nouveau sont restaurés dans tous les cas.",
     "restore_totp_vault": "Cet appareil a déjà un coffre TOTP. Le remplacer par celui de la sauvegarde ? Les comptes qui ne sont que sur cet appareil seront perdus, et il s'ouvrira avec la phrase secrète de la sauvegarde.",
@@ -293,7 +294,9 @@
     "send_failed": "Impossible d’envoyer vers {tool}",
     "key_space": "ESPACE",
     "key_click": "clic",
-    "key_tap": "toucher"
+    "key_tap": "toucher",
+    "backup_history_locked": "L’historique des discussions est exclu tant que votre identité Mentria est verrouillée.",
+    "restore_history_locked": "L’historique des discussions n’a pas été restauré. Déverrouillez votre identité Mentria, puis restaurez de nouveau ce fichier."
   },
   "home": {
     "tools_heading": "Outils",
@@ -1327,7 +1330,13 @@
       "adapters_thinking_on": "réflexion activée",
       "adapters_thinking_either": "réflexion au choix",
       "think_pinned": "Désépinglez l’adaptateur pour utiliser la réflexion approfondie",
-      "search_pinned": "Désépinglez l’adaptateur pour utiliser la recherche web"
+      "search_pinned": "Désépinglez l’adaptateur pour utiliser la recherche web",
+      "save_setup": "Configurez votre identité Mentria pour garder vos discussions",
+      "save_setup_btn": "Configurer",
+      "save_unlock": "Déverrouillez pour garder cette discussion",
+      "save_unlock_btn": "Déverrouiller",
+      "save_lost": "Les messages non enregistrés sont perdus quand vous quittez cette page.",
+      "photo_chat": "Discussion photo"
     },
     "extensions": {
       "install_heading": "Installer une extension",
@@ -1954,7 +1963,12 @@
       "prompt_ocr": "Lis tout le texte de cette image et transcris-le exactement tel qu'il apparaît, en conservant l'ordre et les sauts de ligne d'origine. Inclus tous les titres, étiquettes, chiffres et le texte en petits caractères. N'ajoute aucun commentaire, note, résumé ni explication — ne renvoie que le texte transcrit, rien d'autre. Seulement si l'image ne contient véritablement aucun texte, réponds : (aucun texte trouvé).",
       "prompt_alt": "En une seule phrase brève d'au plus 20 mots, décris cette image pour un utilisateur de lecteur d'écran. Ne retiens que l'élément le plus important montré — n'énumère pas chaque détail et ne transcris pas le texte. Ne renvoie que cette courte phrase, rien d'autre.",
       "prompt_tags": "Observe attentivement l'image et liste 5 à 12 étiquettes courtes séparées par des virgules qui nomment les choses précises que tu vois : chaque élément principal par son nom, une couleur avec la chose à laquelle elle appartient, et le type de lieu. Si l'image est surtout du texte ou un document, étiquette-la ainsi (par exemple : texte, document, capture d'écran). Produis toujours des étiquettes — ne refuse jamais et n'explique pas. Ne renvoie que les étiquettes séparées par des virgules.",
-      "confirm_delete_model": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau."
+      "confirm_delete_model": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau.",
+      "save_setup": "Configurez votre identité Mentria pour garder vos discussions",
+      "save_setup_btn": "Configurer",
+      "save_unlock": "Déverrouillez pour garder cette discussion",
+      "save_unlock_btn": "Déverrouiller",
+      "save_lost": "Les messages non enregistrés sont perdus quand vous quittez cette page."
     },
     "files": {
       "db_group": "Bases de données",
@@ -5385,7 +5399,8 @@
         "send": "envoyer",
         "share_room": "partager le lien de ce salon",
         "link_copied": "lien du salon copié — envoyez-le aux personnes que vous voulez inviter.",
-        "link_manual": "copiez ce lien pour inviter quelqu’un : {url}"
+        "link_manual": "copiez ce lien pour inviter quelqu’un : {url}",
+        "load_image": "Charger l’image de {host}"
       },
       "notif": {
         "text": "recevez une notification à l’arrivée d’un message — même quand comms est fermé",
@@ -5594,7 +5609,36 @@
         "ext_from": "extension de {who} : {name}",
         "install": "installer",
         "installed": "installée ✓",
-        "install_failed": "échec de l’installation : {reason}"
+        "install_failed": "échec de l’installation : {reason}",
+        "offer_photo": "J’ai envoyé une photo. Mettez Mentria à jour pour la voir.",
+        "offer_photos": "J’ai envoyé {n} photos. Mettez Mentria à jour pour les voir.",
+        "offer_video": "J’ai envoyé une vidéo. Mettez Mentria à jour pour la voir.",
+        "offer_videos": "J’ai envoyé {n} vidéos. Mettez Mentria à jour pour les voir.",
+        "offer_file": "J’ai envoyé un fichier. Mettez Mentria à jour pour l’ouvrir.",
+        "offer_files": "J’ai envoyé {n} fichiers. Mettez Mentria à jour pour les ouvrir.",
+        "offer_mixed": "J’ai envoyé {n} pièces jointes. Mettez Mentria à jour pour les voir.",
+        "needs_update": "{name} doit mettre Mentria à jour pour recevoir ceci",
+        "no_space": "Pas assez d’espace sur cet appareil",
+        "status_send": "envoi {i} sur {n} · {rate} · {path}",
+        "status_recv": "réception {i} sur {n} · {rate} · {path}",
+        "direct": "direct",
+        "via_relay": "via le relais",
+        "saved_here": "enregistré sur cet appareil",
+        "open_pdf": "Ouvrir dans l’outil PDF",
+        "save": "Enregistrer",
+        "retry": "Réessayer",
+        "paused": "En pause à {size}. Elle reprend toute seule quand Comms est ouvert des deux côtés.",
+        "accept": "Accepter",
+        "not_now": "Pas maintenant",
+        "accept_q": "{size} · pas encore téléchargé",
+        "relay_ask": "Cela passe par notre serveur relais. Continuer ?",
+        "relay_go": "Continuer",
+        "media": "Photos, vidéos et fichiers",
+        "on_device": "{size} sur cet appareil",
+        "free_up": "Libérer de l’espace",
+        "free_confirm": "Retirer de cet appareil les photos, vidéos et fichiers de cette discussion ? Les messages restent, et vous pourrez les retélécharger tant que quelqu’un les a encore.",
+        "removed": "Retiré de cet appareil",
+        "download_again": "Télécharger à nouveau"
       },
       "attach": {
         "ext_dm": "les extensions passent d’appareil à appareil — {name} n’est pas en ligne pour le moment.",
@@ -5694,6 +5738,64 @@
         "overconstrained": "l’appareil ne prend pas en charge ces réglages",
         "security": "bloqué pour des raisons de sécurité",
         "abort": "opération interrompue"
+      },
+      "history": {
+        "earlier": "Afficher les messages précédents",
+        "foreign": "L’historique de cet appareil a été enregistré sous une autre identité et ne peut pas être ouvert.",
+        "start_over": "Commencer un nouvel historique",
+        "start_over_confirm": "Supprimer l’ancien historique de cet appareil et en commencer un nouveau ?",
+        "unavailable": "L’historique des discussions ne peut pas être enregistré sur cet appareil."
+      },
+      "home": {
+        "search": "Rechercher",
+        "filter_all": "Tout",
+        "filter_people": "Personnes",
+        "filter_ai": "IA",
+        "at_none": "Aucun résultat",
+        "prompt": "écrivez à quelqu’un ou demandez à l’IA",
+        "placeholder": "Écrivez à n’importe qui ou demandez à l’IA",
+        "placeholder_desk": "Écrivez à n’importe qui ou demandez à l’IA. Tapez @ pour choisir le destinataire.",
+        "hint": "Sans @, une nouvelle discussion avec l’IA démarre sur cet appareil.",
+        "pick": "Choisissez une discussion ou commencez-en une"
+      },
+      "sheet": {
+        "title": "Envoyer",
+        "add": "Ajouter",
+        "caption": "Ajouter une légende",
+        "standard": "Standard",
+        "hd": "HD",
+        "send": "Envoyer",
+        "cancel": "Annuler",
+        "est_down": "{n} photos · {size}, réduites",
+        "est_orig": "{size}, originaux",
+        "est_mixed": "{n} éléments · {size}, photos réduites",
+        "keeps_location": "Ce fichier garde ses données de localisation",
+        "too_big": "Trop lourd à envoyer : 2 Go au maximum",
+        "remove": "Retirer"
+      },
+      "viewer": {
+        "save": "Enregistrer",
+        "share": "Partager",
+        "share_now": "Partager maintenant",
+        "close": "Fermer",
+        "prev": "Précédent",
+        "next": "Suivant"
+      },
+      "devices": {
+        "title": "Mes appareils",
+        "explainer": "Déposez n’importe quoi ici. Ça arrive tout seul sur vos autres appareils dès que Comms y est ouvert.",
+        "this_one": "{device} · celui-ci",
+        "asleep": "{device} · en veille",
+        "online": "{device} · en ligne",
+        "got": "sur {device} ✓",
+        "when_open": "{device} à l’ouverture",
+        "kind_mac": "Mac",
+        "kind_iphone": "iPhone",
+        "kind_ipad": "iPad",
+        "kind_android": "Android",
+        "kind_windows": "PC Windows",
+        "kind_linux": "Linux",
+        "kind_device": "Appareil"
       }
     },
     "scanner": {

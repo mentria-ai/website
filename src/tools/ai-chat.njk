@@ -82,6 +82,11 @@ eleventyComputed:
     <button type="button" class="ac__notice-btn" id="ac-notice-btn" hidden></button>
   </div>
 
+  <div class="ac__savebar" id="ac-savebar" role="status" hidden>
+    <span class="ac__savebar-text"><span id="ac-savebar-main"></span><span class="ac__savebar-lost" id="ac-savebar-lost"></span></span>
+    <button type="button" class="ac__notice-btn" id="ac-savebar-btn"></button>
+  </div>
+
   <div class="ac__input-wrap">
     <button type="button" class="ac__grip" id="ac-grip" tabindex="-1" aria-hidden="true" hidden><span class="ac__grip-line"></span></button>
     <button type="button" class="ac__attach-btn" id="ac-attach" title="{{ 'tool.ai-chat.btn_attach_image' | t }}" aria-label="{{ 'tool.ai-chat.btn_attach_image' | t }}">
@@ -104,6 +109,7 @@ eleventyComputed:
 
 {% include "tool-schema.njk" %}
 
+<script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 
 {%- set acCopy = {
@@ -190,9 +196,24 @@ eleventyComputed:
   thinking:               "tool.ai-chat.thinking",
   thoughtFor:             "tool.ai-chat.thought_for",
   thinkCut:               "tool.ai-chat.think_cut",
-  repeatCut:              "tool.ai-chat.repeat_cut"
+  repeatCut:              "tool.ai-chat.repeat_cut",
+  saveSetup:              "tool.ai-chat.save_setup",
+  saveSetupBtn:           "tool.ai-chat.save_setup_btn",
+  saveUnlock:             "tool.ai-chat.save_unlock",
+  saveUnlockBtn:          "tool.ai-chat.save_unlock_btn",
+  saveLost:               "tool.ai-chat.save_lost",
+  photoChat:              "tool.ai-chat.photo_chat",
+  historyForeign:         "tool.comms.history.foreign",
+  historyUnavailable:     "tool.comms.history.unavailable",
+  historyStartOver:       "tool.comms.history.start_over",
+  historyStartOverConfirm: "tool.comms.history.start_over_confirm"
 } -%}
 <script type="module">
+import { hasIdentity, openQuietly, askToOpen, secretCopy, stillOpen } from '/assets/js/comms/identity.js';
+import { openStore } from '/assets/js/comms/store.js';
+import { newThreadId, titleFrom, turnToMessage, messagesToTurns, messageIndex, legacyThreadId } from '/assets/js/comms/ai-thread.js';
+import { HANDOFF_KEY } from '/assets/js/comms/mention.js';
+const PREFIX = {{ locale.pathPrefix | dump | safe }};
 const COPY_KEYS = {{ acCopy | dump | safe }};
 const COPY = {
 {%- for prop, key in acCopy %}
@@ -403,6 +424,7 @@ function runApp(MentriaEngine, Tiers) {
   let sending = false;
   let attachedImage = null;       // {rgbHwc, h, w} — pending attach for the NEXT send
   let attachedDataUrl = null;
+  let attachedPreview = null;
   let attachSeq = 0;
   // conversationImages keeps every image sent in this conversation, in order.
   // The chat template re-renders the full message history every turn, so each
@@ -505,22 +527,211 @@ function runApp(MentriaEngine, Tiers) {
 
   const systemMessage = messages[0];
 
-  function persistConversation() {
-    if (!window.MentriaStore) return;
-    const turns = [];
+  const askedThread = new URLSearchParams(location.search).get('thread');
+  const PHOTO_DEFAULT = 'Describe this image.';
+  const restoredTurns = new WeakMap();
+  const thumbBlobs = new WeakMap();
+  const thumbHashes = new WeakMap();
+  const msgIndex = new WeakMap();
+  let chatStore = null;
+  let threadId = null;
+  let threadEpoch = 0;
+  let savedTurns = [];
+  let nextIndex = 0;
+  let reuseIndex = null;
+  let lastSavedTs = 0;
+  let saveChain = Promise.resolve();
+  let handoffText = null;
+  let legacyShown = null;
+  let migratedId = null;
+  let historyProblem = null;
+  const saveBar = document.getElementById('ac-savebar');
+  const saveBarMain = document.getElementById('ac-savebar-main');
+  const saveBarLost = document.getElementById('ac-savebar-lost');
+  const saveBarBtn = document.getElementById('ac-savebar-btn');
+
+  const historyOpen = () => !!(chatStore && chatStore.status === 'open');
+
+  function closeHistory() {
+    if (chatStore) { try { chatStore.close(); } catch (_) {} }
+    chatStore = null;
+  }
+
+  function cleanTurn(t) {
+    const out = { role: t.role, text: t.text };
+    if (t.img) out.img = true;
+    if (t.model) out.model = t.model;
+    if (t.repeatCut) out.repeatCut = true;
+    return out;
+  }
+
+  function threadRecord(id, turns) {
+    const first = turns.find((t) => t.role === 'user');
+    const firstText = first && !(first.img && first.text === PHOTO_DEFAULT) ? first.text : '';
+    const reply = turns.find((t) => t.role === 'assistant' && t.model);
+    return {
+      id,
+      kind: 'model',
+      title: titleFrom(firstText, COPY.photoChat),
+      participants: [{ id: 'self', kind: 'self' }, { id: 'model', kind: 'model', name: (reply && reply.model) || savedTierLabel() || '' }],
+      meta: { tool: 'ai-chat' },
+      updatedAt: 0,
+      lastReadTs: Date.now(),
+      pinned: false
+    };
+  }
+
+  async function migrateLegacy() {
+    let saved = null;
+    try { saved = window.MentriaStore ? window.MentriaStore.get('ai_chat', 'conversation') : null; } catch (_) {}
+    if (!Array.isArray(saved) || !saved.length) return;
+    const turns = saved.filter((t) => t && (t.role === 'user' || t.role === 'assistant') && typeof t.text === 'string').map(cleanTurn);
+    const id = await legacyThreadId(JSON.stringify(saved));
+    if (turns.length && !(await chatStore.getThread(id))) {
+      const now = Date.now();
+      await chatStore.putThread(threadRecord(id, turns));
+      for (let i = 0; i < turns.length; i++) await chatStore.putMessage(turnToMessage(turns[i], id, i, now - (turns.length - i) * 1000));
+    }
+    migratedId = turns.length ? id : null;
+    window.MentriaStore.remove('ai_chat', 'conversation');
+  }
+
+  async function openHistory(fresh) {
+    if (historyOpen()) return true;
+    if (!(await openQuietly())) { historyProblem = null; return false; }
+    let secret = null;
+    try {
+      secret = secretCopy();
+      const st = await openStore(secret);
+      if (st.status !== 'open' && fresh) {
+        try { await st.wipe(); } catch (err) { st.close(); throw err; }
+      }
+      if (st.status !== 'open') { st.close(); historyProblem = 'foreign'; return false; }
+      chatStore = st;
+      historyProblem = null;
+    } catch (err) {
+      if (err && (err.code === 'unavailable' || err.code === 'quota')) historyProblem = 'unavailable';
+      return false;
+    } finally {
+      if (secret) secret.fill(0);
+    }
+    try { await migrateLegacy(); } catch (err) { console.warn('ai-chat history:', (err && err.code) || err); }
+    return true;
+  }
+
+  function renderSaveBar() {
+    const has = hasIdentity();
+    if (historyProblem) {
+      saveBarMain.textContent = historyProblem === 'foreign' ? COPY.historyForeign : COPY.historyUnavailable;
+      saveBarBtn.textContent = COPY.historyStartOver;
+    } else {
+      saveBarMain.textContent = has ? COPY.saveUnlock : COPY.saveSetup;
+      saveBarBtn.textContent = has ? COPY.saveUnlockBtn : COPY.saveSetupBtn;
+    }
+    saveBarBtn.hidden = historyProblem === 'unavailable';
+    saveBarLost.textContent = COPY.saveLost;
+  }
+
+  function showSaveBar() {
+    renderSaveBar();
+    saveBar.hidden = false;
+  }
+  localeHooks.push(() => { if (!saveBar.hidden) renderSaveBar(); });
+
+  function forgetThread() {
+    threadEpoch++;
+    threadId = null;
+    savedTurns = [];
+    nextIndex = 0;
+    reuseIndex = null;
+    legacyShown = null;
+    try { history.replaceState(history.state, '', location.pathname + '?thread=new' + location.hash); } catch (_) {}
+  }
+
+  function conversationEntries() {
+    const out = [];
     for (let i = 1; i < messages.length; i++) {
       const m = messages[i];
       if (m.ephemeral) continue;
+      const kept = restoredTurns.get(m);
+      if (kept) { out.push({ msg: m, turn: kept }); continue; }
+      let turn;
       if (Array.isArray(m.content)) {
-        const txt = m.content.filter(p => p && p.type === 'text').map(p => p.text).join(' ');
-        turns.push({ role: m.role, text: txt, img: m.content.some(p => p && p.type === 'image') || undefined });
+        turn = { role: m.role, text: m.content.filter((p) => p && p.type === 'text').map((p) => p.text).join(' ') };
+        if (m.content.some((p) => p && p.type === 'image')) turn.img = true;
+        const hash = thumbHashes.get(m);
+        if (hash) turn.thumb = hash;
       } else {
-        turns.push({ role: m.role, text: String(m.content || ''), model: assistantModels.get(m), repeatCut: repeatCutReplies.has(m) || undefined });
+        turn = { role: m.role, text: String(m.content || '') };
+        const model = assistantModels.get(m);
+        if (model) turn.model = model;
+        if (repeatCutReplies.has(m)) turn.repeatCut = true;
       }
+      out.push({ msg: m, turn });
     }
-    const capped = turns.slice(-40);
-    if (capped.length) window.MentriaStore.set('ai_chat', 'conversation', capped);
-    else window.MentriaStore.remove('ai_chat', 'conversation');
+    return out;
+  }
+
+  const sameTurn = (a, b) => !!a && !!b && a.role === b.role && a.text === b.text && (a.model || '') === (b.model || '') &&
+    !!a.repeatCut === !!b.repeatCut && !!a.img === !!b.img && (a.thumb || '') === (b.thumb || '');
+
+  async function blobHash(blob) {
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()));
+    return Array.from(digest, (b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function saveEntries(entries, epoch) {
+    if (epoch !== threadEpoch || !historyOpen()) return;
+    if (!(await stillOpen())) {
+      closeHistory();
+      showSaveBar();
+      return;
+    }
+    if (!entries.length) return;
+    if (!threadId) {
+      threadId = newThreadId('ai');
+      savedTurns = [];
+      nextIndex = 0;
+      await chatStore.putThread(threadRecord(threadId, entries.map((e) => e.turn)));
+      try { history.replaceState(history.state, '', location.pathname + '?thread=' + encodeURIComponent(threadId) + location.hash); } catch (_) {}
+    }
+    const id = threadId;
+    for (const { msg, turn } of entries) {
+      if (epoch !== threadEpoch) return;
+      const blob = thumbBlobs.get(msg);
+      if (blob && !thumbHashes.get(msg)) {
+        const hash = await blobHash(blob);
+        await chatStore.putThumb(hash, id, blob);
+        thumbHashes.set(msg, hash);
+        turn.thumb = hash;
+      }
+      let i = msgIndex.get(msg);
+      if (i === undefined) {
+        if (reuseIndex !== null && turn.role === 'assistant') { i = reuseIndex; reuseIndex = null; }
+        else i = nextIndex++;
+        msgIndex.set(msg, i);
+      }
+      const prev = savedTurns[i];
+      if (sameTurn(prev, turn)) continue;
+      lastSavedTs = Math.max(Date.now(), lastSavedTs + 1);
+      let stored = await chatStore.putMessage(turnToMessage(turn, id, i, lastSavedTs), { replace: prev !== undefined });
+      while (!stored) {
+        i = nextIndex++;
+        msgIndex.set(msg, i);
+        stored = await chatStore.putMessage(turnToMessage(turn, id, i, lastSavedTs));
+      }
+      savedTurns[i] = Object.assign({}, turn);
+    }
+  }
+
+  function persistConversation() {
+    const entries = conversationEntries();
+    const epoch = threadEpoch;
+    saveChain = saveChain.then(() => historyReady).then(() => {
+      if (historyOpen()) return saveEntries(entries, epoch);
+      if (entries.length) showSaveBar();
+      return null;
+    }).catch((err) => { console.warn('ai-chat history:', (err && err.code) || err); });
   }
 
   function clearConversation() {
@@ -528,7 +739,7 @@ function runApp(MentriaEngine, Tiers) {
     if (generating) stopGeneration();
     messages = [systemMessage];
     conversationImages = [];
-    if (window.MentriaStore) window.MentriaStore.remove('ai_chat', 'conversation');
+    forgetThread();
     messagesEl.innerHTML = '';
     if (emptyEl) {
       messagesEl.appendChild(emptyEl);
@@ -538,26 +749,33 @@ function runApp(MentriaEngine, Tiers) {
     warmSystemPrompt();
   }
 
-  async function restoreConversation() {
-    if (!window.MentriaStore) return;
-    const saved = window.MentriaStore.get('ai_chat', 'conversation');
-    if (!Array.isArray(saved) || !saved.length) return;
+  async function renderTurns(turns, indexes) {
     if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
-    const turns = saved.filter((t) => t && (t.role === 'user' || t.role === 'assistant') && typeof t.text === 'string');
-    if (!turns.length) return;
+    const shownMsgs = [];
     messagesEl.setAttribute('aria-live', 'off');
-    turns.forEach((t, i) => {
+    for (let i = 0; i < turns.length; i++) {
+      const t = turns[i];
       if (t.role === 'user') {
-        const shown = t.img
+        let url = null;
+        if (t.thumb && historyOpen()) {
+          try {
+            const blob = await chatStore.getThumb(t.thumb);
+            if (blob) url = URL.createObjectURL(blob);
+          } catch (_) {}
+        }
+        const shown = t.img && !url
           ? (t.text ? t.text + ' [' + COPY.imgAltAttachedShort + ']' : '[' + COPY.imgAltAttachedShort + ']')
           : t.text;
-        addMessage('user', shown);
+        addMessage('user', shown, url);
         const next = turns[i + 1];
-        if (next && next.role === 'user') { addGhost('unanswered', false); return; }
+        if (next && next.role === 'user') { addGhost('unanswered', false); continue; }
         const engineText = t.img
-          ? (t.text || 'Describe this image.') + ' (an image was attached here in an earlier session; it is no longer available)'
+          ? (t.text || PHOTO_DEFAULT) + ' (an image was attached here in an earlier session; it is no longer available)'
           : t.text;
-        messages.push({ role: 'user', content: [{ type: 'text', text: engineText }] });
+        const msg = { role: 'user', content: [{ type: 'text', text: engineText }] };
+        restoredTurns.set(msg, t);
+        shownMsgs.push([msg, i]);
+        messages.push(msg);
         if (!next) addGhost('unanswered', true);
       } else {
         const bodyEl = addMessage('assistant', '', null, t.model || savedTierLabel());
@@ -565,6 +783,8 @@ function runApp(MentriaEngine, Tiers) {
         else bodyEl.textContent = t.text;
         const msg = { role: 'assistant', content: t.text };
         if (t.model) assistantModels.set(msg, t.model);
+        restoredTurns.set(msg, t);
+        shownMsgs.push([msg, i]);
         messages.push(msg);
         if (t.repeatCut) {
           repeatCutReplies.add(msg);
@@ -572,14 +792,111 @@ function runApp(MentriaEngine, Tiers) {
         }
         addAssistantActions(bodyEl, () => t.text);
       }
-    });
+    }
+    if (indexes) shownMsgs.forEach(([msg, i]) => msgIndex.set(msg, indexes[i]));
+    else legacyShown = { turns, msgs: shownMsgs };
     clearChatBtn.style.display = '';
     scrollToBottom();
     setTimeout(() => messagesEl.setAttribute('aria-live', 'polite'), 1500);
   }
 
+  function takeHandoff() {
+    if (askedThread !== 'new') return;
+    try {
+      const h = JSON.parse(sessionStorage.getItem(HANDOFF_KEY) || 'null');
+      sessionStorage.removeItem(HANDOFF_KEY);
+      if (h && typeof h.text === 'string' && h.text.trim() && Date.now() - Number(h.at) < 60000) {
+        handoffText = h.text;
+        inputEl.value = h.text;
+        autoResize();
+      }
+    } catch (_) {}
+  }
+
+  async function restoreLegacy() {
+    let saved = null;
+    try { saved = window.MentriaStore ? window.MentriaStore.get('ai_chat', 'conversation') : null; } catch (_) {}
+    if (!Array.isArray(saved) || !saved.length) return;
+    const turns = saved.filter((t) => t && (t.role === 'user' || t.role === 'assistant') && typeof t.text === 'string').map(cleanTurn);
+    if (turns.length) await renderTurns(turns, null);
+  }
+
+  async function restoreConversation() {
+    takeHandoff();
+    if (!(await openHistory())) {
+      if (askedThread !== 'new') await restoreLegacy();
+      return;
+    }
+    if (askedThread === 'new') return;
+    let id = askedThread;
+    if (!id) {
+      const list = await chatStore.listThreads({ kinds: ['model'] }).catch(() => []);
+      const mine = list.find((t) => t.meta && t.meta.tool === 'ai-chat');
+      id = mine ? mine.id : null;
+    }
+    if (!id || !(await chatStore.getThread(id).catch(() => null))) return;
+    const msgs = await chatStore.listMessages(id, { limit: 100000 }).catch(() => null);
+    if (!msgs || !msgs.length) return;
+    const turns = messagesToTurns(msgs);
+    const indexes = [];
+    let top = -1;
+    msgs.forEach((m) => {
+      const at = messageIndex(m);
+      const i = at === null || indexes.includes(at) ? top + 1 : at;
+      indexes.push(i);
+      top = Math.max(top, i);
+    });
+    threadId = id;
+    turns.forEach((t, i) => { savedTurns[indexes[i]] = t; });
+    nextIndex = top + 1;
+    await renderTurns(turns, indexes);
+  }
+
+  async function startOver() {
+    const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(COPY.historyStartOverConfirm, { danger: true }) : Promise.resolve(false));
+    if (!ok) return;
+    saveBarBtn.disabled = true;
+    const opened = await openHistory(true);
+    saveBarBtn.disabled = false;
+    if (opened) adoptHistory();
+    else renderSaveBar();
+  }
+
+  saveBarBtn.addEventListener('click', async () => {
+    if (historyProblem === 'foreign') { await startOver(); return; }
+    if (!hasIdentity()) { window.location.href = PREFIX + '/comms/'; return; }
+    saveBarBtn.disabled = true;
+    let result = 'cancelled';
+    try { result = await askToOpen(); } catch (_) {}
+    saveBarBtn.disabled = false;
+    if (result === 'elsewhere') { window.location.href = PREFIX + '/comms/'; return; }
+    if (result !== 'open') return;
+    if (await openHistory()) adoptHistory();
+    else renderSaveBar();
+  });
+
+  function adoptHistory() {
+    saveBar.hidden = true;
+    const legacy = legacyShown;
+    threadEpoch++;
+    savedTurns = [];
+    reuseIndex = null;
+    if (legacy && migratedId) {
+      threadId = migratedId;
+      legacy.turns.forEach((t, i) => { savedTurns[i] = t; });
+      legacy.msgs.forEach(([msg, i]) => msgIndex.set(msg, i));
+      nextIndex = legacy.turns.length;
+    } else {
+      threadId = null;
+      nextIndex = 0;
+      for (let i = 1; i < messages.length; i++) msgIndex.delete(messages[i]);
+    }
+    legacyShown = null;
+    persistConversation();
+  }
+
   clearChatBtn.addEventListener('click', clearConversation);
-  setTimeout(restoreConversation, 0);
+  const historyReady = new Promise((resolve) => setTimeout(resolve, 0)).then(restoreConversation).catch((err) => { console.warn('ai-chat history:', (err && err.code) || err); });
 
   function scrollToBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
   const nativeFieldSizing = CSS.supports('field-sizing', 'content');
@@ -1609,6 +1926,13 @@ function runApp(MentriaEngine, Tiers) {
       sendBtn.disabled = false;
       inputEl.focus();
       warmSystemPrompt();
+      if (handoffText) {
+        const text = handoffText;
+        handoffText = null;
+        inputEl.value = text;
+        autoResize();
+        generate();
+      }
       return true;
     } catch (err) {
       if (err && err.message === 'load-cut-short') {
@@ -1774,7 +2098,10 @@ function runApp(MentriaEngine, Tiers) {
     userContent.push({ type: 'text', text: text || 'Describe this image.' });
 
     addMessage('user', text, attachedDataUrl);
-    messages.push({ role: 'user', content: userContent });
+    const userMsg = { role: 'user', content: userContent };
+    if (attachedImage && attachedPreview) thumbBlobs.set(userMsg, attachedPreview);
+    reuseIndex = null;
+    messages.push(userMsg);
     persistConversation();
     clearChatBtn.style.display = '';
 
@@ -1790,6 +2117,7 @@ function runApp(MentriaEngine, Tiers) {
     }
     attachedImage = null;
     attachedDataUrl = null;
+    attachedPreview = null;
     imgPreview.style.display = 'none';
     fileInput.value = '';
 
@@ -1804,7 +2132,8 @@ function runApp(MentriaEngine, Tiers) {
     const lastBubble = bubbles.length ? bubbles[bubbles.length - 1] : null;
     const last = messages[messages.length - 1];
     if (last && last.role === 'assistant') {
-      messages.pop();
+      const replaced = messages.pop();
+      if (msgIndex.has(replaced)) reuseIndex = msgIndex.get(replaced);
       while (messages.length > 1 && messages[messages.length - 1].ephemeral) messages.pop();
       persistConversation();
       if (lastBubble) lastBubble.remove();
@@ -2222,7 +2551,7 @@ function runApp(MentriaEngine, Tiers) {
       prefixCache = null;
       messages = [systemMessage];
       conversationImages = [];
-      if (window.MentriaStore) window.MentriaStore.remove('ai_chat', 'conversation');
+      forgetThread();
       clearChatBtn.style.display = 'none';
       messagesEl.innerHTML = '';
       if (emptyEl) {
@@ -2253,6 +2582,7 @@ function runApp(MentriaEngine, Tiers) {
       imgThumb.src = url;
       imgPreview.style.display = '';
       attachedDataUrl = url;
+      attachedPreview = img.preview || null;
       attachedImage = { rgbHwc: img.rgbHwc, h: img.h, w: img.w };
     } catch (err) {
       if (seq !== attachSeq) return;
@@ -2267,6 +2597,7 @@ function runApp(MentriaEngine, Tiers) {
     if (attachedDataUrl) { try { URL.revokeObjectURL(attachedDataUrl); } catch (_) {} }
     attachedImage = null;
     attachedDataUrl = null;
+    attachedPreview = null;
     imgPreview.style.display = 'none';
     imgThumb.src = '';
     fileInput.value = '';
@@ -2692,6 +3023,21 @@ function runApp(MentriaEngine, Tiers) {
 }
 .ac__notice-btn:hover { background: rgba(34, 211, 238, 0.12); }
 .ac__notice-btn[hidden] { display: none; }
+.ac__savebar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--term-border);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--term-fg);
+  flex-shrink: 0;
+}
+.ac__savebar[hidden] { display: none; }
+.ac__savebar-text { flex: 1 1 16rem; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ac__savebar-lost { color: var(--term-subtle); }
 
 .ac__input-wrap {
   position: relative;

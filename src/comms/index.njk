@@ -14,17 +14,6 @@ localeReload: true
 unlockTool: true
 ---
 {%- set commsHttps = "https://mentria.ai" + locale.pathPrefix + "/comms/" -%}
-<section class="hero" style="padding-top:1rem;">
-  <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">comms</span></p>
-  <h1>{{ 'tools.comms.title' | t }}</h1>
-  <p>{{ 'tool.comms.lede' | t }}</p>
-</section>
-
-{% set terminalTitle = "comms.js" %}
-{% set terminalFullscreen = true %}
-{% set terminalMini = "tool" %}
-{% include "terminal-frame-open.njk" %}
-
 <svg class="comms__sprite" aria-hidden="true" focusable="false"><defs>
   <symbol id="ci-lock" viewBox="0 0 24 24"><g transform="translate(0 1)"><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="4" y="10" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="15" r="1.6" fill="currentColor"/></g></symbol>
   <symbol id="ci-phone" viewBox="0 0 24 24"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
@@ -38,15 +27,19 @@ unlockTool: true
   <symbol id="ci-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="ci-back" viewBox="0 0 24 24"><path d="M14.5 5 8 12l6.5 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-send" viewBox="0 0 24 24"><path d="M3.5 11.2 20.2 4l-3.4 16-5.3-6.2zM11.5 13.8l8.7-9.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-devices" viewBox="0 0 24 24"><rect x="2.5" y="5" width="13" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M1.5 17.5h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="17" y="8" width="5" height="11" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="ci-media" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10" r="1.8" fill="currentColor"/><path d="m4.5 17.5 5-5 3.5 3.5 2.5-2.5 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-clip" viewBox="0 0 24 24"><g transform="translate(0.9 1)"><path d="m17.5 11.5-6.1 6.1a4.3 4.3 0 0 1-6-6l7.4-7.4a3 3 0 0 1 4.2 4.2l-7.3 7.3a1.6 1.6 0 0 1-2.3-2.3l6.1-6.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g></symbol>
   <symbol id="ci-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 3.5h5M7 6.5l.8 13a1.6 1.6 0 0 0 1.6 1.5h5.2a1.6 1.6 0 0 0 1.6-1.5l.8-13M10 10.5v6M14 10.5v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
   <symbol id="ci-bell" viewBox="0 0 24 24"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.6 2.2H4.9zM10 20.6a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-chev" viewBox="0 0 24 24"><path d="m9.5 5 6.5 7-6.5 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-flash" viewBox="0 0 24 24"><path d="M13 2.5 5.5 13.5H11L10 21.5l7.7-11H12.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
   <symbol id="ci-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ci-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 </defs></svg>
 
 <section class="comms">
+  <h1 class="sr-only">{{ 'tools.comms.title' | t }}</h1>
   <div class="comms__onboard" id="comms-onboard" hidden>
     <div class="comms__onboard-step" id="comms-onboard-insecure" hidden>
       <h2 class="comms__onboard-h">{{ 'tool.comms.onboard.insecure_title' | t }}</h2>
@@ -98,161 +91,186 @@ unlockTool: true
   </div>
 
   <div class="comms__app comms__app--people" id="comms-app" hidden>
-    <div class="comms__profile" id="comms-profile">
-      <div class="comms__id-row comms__id-row--you" id="comms-id-on" hidden>
-        <span class="comms__avatar comms__avatar--me" id="comms-prof-avatar" aria-hidden="true"></span>
-        <input class="comms__input comms__input--short" id="comms-id-name" type="text" maxlength="32" placeholder="{{ 'tool.comms.profile.name_placeholder' | t }}" autocomplete="nickname" aria-label="{{ 'tool.comms.profile.name_label' | t }}">
-        <span class="comms__badge comms__badge--fp" id="comms-id-fp" title="{{ 'tool.comms.profile.fp_title' | t }}"></span>
-      </div>
-      <span class="comms__profile-spacer"></span>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-lock" type="button" hidden title="{{ 'unlock.lock_now' | t }}" aria-label="{{ 'unlock.lock_now' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-adv-toggle" type="button" aria-expanded="false" title="{{ 'tool.comms.profile.settings' | t }}" aria-label="{{ 'tool.comms.profile.settings' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-gear"></use></svg></button>
-    </div>
-
-    <div class="comms__upgrade" id="comms-pk-upgrade" hidden>
-      <span class="comms__upgrade-text">{{ 'tool.comms.passkey.offer' | t }}</span>
-      <div class="comms__upgrade-actions">
-        <button class="comms__btn" id="comms-pk-enroll" type="button">{{ 'tool.comms.passkey.add' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-pk-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
-      </div>
-      <span class="comms__id-note" id="comms-pk-err" hidden></span>
-    </div>
-
-    <div class="comms__upgrade comms__link" id="comms-link" hidden>
-      <span class="comms__upgrade-text"><strong>{{ 'unlock.link_title' | t }}</strong> {{ 'unlock.link_body' | t }}</span>
-      <div class="comms__card-slot" id="comms-link-card" hidden></div>
-      <div class="comms__upgrade-actions">
-        <button class="comms__btn" id="comms-link-go" type="button" hidden>{{ 'tool.comms.guest.setup' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-link-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
-      </div>
-    </div>
-
-    <div class="comms__chathead" id="comms-chathead">
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-leave" type="button" hidden title="{{ 'tool.comms.chat.back' | t }}" aria-label="{{ 'tool.comms.chat.back' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-back"></use></svg></button>
-      <span class="comms__avatar" id="comms-chat-avatar" aria-hidden="true"></span>
-      <div class="comms__chathead-mid">
-        <span class="comms__chathead-name" id="comms-chat-title"></span>
-        <span class="comms__chathead-sub">
-          <span class="comms__sub-bit" id="comms-status">{{ 'tool.comms.chat.not_in_chat' | t }}</span>
-          <span class="comms__sub-bit" id="comms-enc" title="{{ 'tool.comms.chat.enc_title' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></span>
-          <span class="comms__sub-bit" id="comms-eph" title="{{ 'tool.comms.chat.eph_bang' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clock"></use></svg></span>
-          <span class="comms__sub-bit" id="comms-peers" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg><span id="comms-peers-n">0</span></span>
-        </span>
-      </div>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-share" type="button" hidden title="{{ 'tool.comms.chat.share_room' | t }}" aria-label="{{ 'tool.comms.chat.share_room' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg></button>
-      <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="{{ 'tool.comms.chat.call' | t }}" aria-label="{{ 'tool.comms.chat.call' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg></button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.chat.camera' | t }}" aria-label="{{ 'tool.comms.chat.camera' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-mic" type="button" hidden aria-pressed="true" title="{{ 'tool.comms.chat.mic' | t }}" aria-label="{{ 'tool.comms.chat.mic' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-mic"></use></svg></button>
-      <button class="comms__btn comms__btn--danger comms__btn--icon" id="comms-call-hangup" type="button" hidden title="{{ 'tool.comms.chat.hangup' | t }}" aria-label="{{ 'tool.comms.chat.hangup' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-hangup"></use></svg></button>
-    </div>
-
-    <div class="comms__notif" id="comms-notif" hidden>
-      <span class="comms__notif-text">{{ 'tool.comms.notif.text' | t }}</span>
-      <button class="comms__btn" id="comms-notif-enable" type="button">{{ 'tool.comms.notif.enable' | t }}</button>
-      <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-notif-dismiss" type="button" title="{{ 'tool.comms.notif.dismiss' | t }}" aria-label="{{ 'tool.comms.notif.dismiss' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus" style="transform:rotate(45deg);transform-origin:center"></use></svg></button>
-    </div>
-
-    <div class="comms__id-row" id="comms-id-none" hidden>
-      <span class="comms__id-note">{{ 'tool.comms.guest.note' | t }}</span>
-      <button class="comms__btn comms__btn--ghost" id="comms-id-setup-here" type="button">{{ 'tool.comms.guest.setup' | t }}</button>
-    </div>
-
-    <div class="comms__contacts" id="comms-contacts" hidden>
-      <div class="comms__contacts-head">
-        <span class="comms__lbl">{{ 'tool.comms.people.heading' | t }}</span>
-        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share" type="button" aria-pressed="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span class="comms__btn-t" id="comms-id-share-t">{{ 'tool.comms.people.my_code' | t }}</span></button>
-        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-add-toggle" type="button" aria-expanded="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus"></use></svg><span class="comms__btn-t" id="comms-add-toggle-t">{{ 'tool.comms.people.add' | t }}</span></button>
-        <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false" hidden>{{ 'tool.comms.people.contacts' | t }}</button>
-      </div>
-      <div class="comms__id-card" id="comms-id-card" hidden>
-        <canvas class="comms__id-qr" id="comms-id-qr" width="0" height="0"></canvas>
-        <div class="comms__id-card-side">
-          <p class="comms__id-note">{{ 'tool.comms.people.code_note' | t }}</p>
-          <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
-          <div class="comms__id-card-actions">
-          <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">{{ 'tool.comms.people.copy_code' | t }}</button>
-          <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share-out" type="button" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg><span class="comms__btn-t">{{ 'tool.comms.people.share' | t }}</span></button>
+    <div class="comms__side">
+      <div class="comms__profile" id="comms-profile">
+        <span class="comms__brand" aria-hidden="true">comms<i>_</i></span>
+        <div class="comms__id-row comms__id-row--you" id="comms-id-on" hidden>
+          <span class="comms__avatar comms__avatar--me" id="comms-prof-avatar" aria-hidden="true"></span>
+          <input class="comms__input comms__input--short" id="comms-id-name" type="text" maxlength="32" placeholder="{{ 'tool.comms.profile.name_placeholder' | t }}" autocomplete="nickname" aria-label="{{ 'tool.comms.profile.name_label' | t }}">
+          <span class="comms__badge comms__badge--fp" id="comms-id-fp" title="{{ 'tool.comms.profile.fp_title' | t }}"></span>
         </div>
-        </div>
+        <span class="comms__profile-spacer"></span>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-lock" type="button" hidden title="{{ 'unlock.lock_now' | t }}" aria-label="{{ 'unlock.lock_now' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-adv-toggle" type="button" aria-expanded="false" title="{{ 'tool.comms.profile.settings' | t }}" aria-label="{{ 'tool.comms.profile.settings' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-gear"></use></svg></button>
       </div>
-      <div class="comms__add" id="comms-add" hidden>
-        <button class="comms__addopt" id="comms-scan" type="button"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span>{{ 'tool.comms.people.scan' | t }}</span></button>
-        <div class="comms__scan" id="comms-scan-wrap" hidden>
-          <video class="comms__scan-video" id="comms-scan-video" playsinline muted></video>
-          <div class="comms__scan-zoom" id="comms-scan-zoom-wrap" hidden>
-            <svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg>
-            <input type="range" id="comms-scan-zoom" min="1" max="5" step="0.1" value="1" aria-label="{{ 'tool.comms.people.zoom' | t }}">
+
+      <div class="comms__adv" id="comms-adv" hidden>
+        <div class="comms__adv-sec">
+          <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
+          <div class="comms__room">
+            <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="{{ 'tool.comms.adv.room_placeholder' | t }}">
+            <button class="comms__btn" id="comms-join" type="button">{{ 'tool.comms.adv.join' | t }}</button>
           </div>
-          <p class="comms__id-note" id="comms-scan-note">{{ 'tool.comms.people.scan_hint' | t }}</p>
-          <div class="comms__scan-actions">
-            <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-scan-torch" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.people.torch' | t }}" aria-label="{{ 'tool.comms.people.torch' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-flash"></use></svg></button>
-            <button class="comms__btn comms__btn--ghost" id="comms-scan-stop" type="button">{{ 'tool.comms.people.cancel' | t }}</button>
+          <div class="comms__room-new">
+            <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button" title="{{ 'tool.comms.adv.new_room_title' | t }}">{{ 'tool.comms.adv.new_room' | t }}</button>
+            <button class="comms__btn comms__btn--ghost" id="comms-newsaved" type="button" title="{{ 'tool.comms.adv.new_saved_title' | t }}">{{ 'tool.comms.adv.new_saved' | t }}</button>
           </div>
         </div>
-        <div class="comms__contacts-add">
-          <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="{{ 'tool.comms.people.paste_placeholder' | t }}" spellcheck="false" autocapitalize="off">
-          <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">{{ 'tool.comms.people.add_btn' | t }}</button>
+        <div class="comms__adv-sec">
+          <span class="comms__lbl">{{ 'tool.comms.adv.privacy' | t }}</span>
+          <button class="comms__relay" id="comms-relay" type="button" role="switch" aria-checked="false">
+            <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6v5c0 4.4 3 7.9 7 9 4-1.1 7-4.6 7-9V6Z"></path><path d="M9.4 11.8l1.9 1.9 3.3-3.4"></path></svg>
+            <span class="comms__relay-lbl">{{ 'tool.comms.adv.hide_ip' | t }}</span>
+            <span class="comms__relay-track" aria-hidden="true"><span class="comms__relay-thumb"></span></span>
+          </button>
+          <p class="comms__relay-note" id="comms-relay-note" hidden>{{ 'tool.comms.adv.relay_note' | t }}</p>
         </div>
-        <p class="comms__add-err" id="comms-add-err" role="alert" hidden></p>
+        <div class="comms__adv-sec comms__adv-sec--col">
+          <div class="comms__adv-row">
+            <span class="comms__lbl">{{ 'tool.comms.adv.notifications' | t }}</span>
+            <button class="comms__btn comms__btn--ghost" id="comms-push-test" type="button">{{ 'tool.comms.adv.test' | t }}</button>
+          </div>
+          <span class="comms__id-note" id="comms-push-status">…</span>
+          <span class="comms__id-note comms__push-log" id="comms-push-test-log" hidden></span>
+        </div>
+        <div class="comms__adv-sec">
+          <span class="comms__lbl">{{ 'tool.comms.adv.device' | t }}</span>
+          <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">{{ 'tool.comms.adv.sound_on' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">{{ 'tool.comms.adv.attach_ext' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">{{ 'tool.comms.adv.attach_pack' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>{{ 'tool.comms.passkey.add' | t }}</button>
+          <a class="comms__btn comms__btn--ghost" href="{{ locale.pathPrefix }}/about/">{{ 'tool.comms.adv.identity' | t }}</a>
+        </div>
       </div>
-      <div class="comms__contacts-list" id="comms-contacts-list"></div>
+
+      <div class="comms__upgrade" id="comms-pk-upgrade" hidden>
+        <span class="comms__upgrade-text">{{ 'tool.comms.passkey.offer' | t }}</span>
+        <div class="comms__upgrade-actions">
+          <button class="comms__btn" id="comms-pk-enroll" type="button">{{ 'tool.comms.passkey.add' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-pk-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
+        </div>
+        <span class="comms__id-note" id="comms-pk-err" hidden></span>
+      </div>
+
+      <div class="comms__upgrade comms__link" id="comms-link" hidden>
+        <span class="comms__upgrade-text"><strong>{{ 'unlock.link_title' | t }}</strong> {{ 'unlock.link_body' | t }}</span>
+        <div class="comms__card-slot" id="comms-link-card" hidden></div>
+        <div class="comms__upgrade-actions">
+          <button class="comms__btn" id="comms-link-go" type="button" hidden>{{ 'tool.comms.guest.setup' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-link-later" type="button">{{ 'tool.comms.passkey.later' | t }}</button>
+        </div>
+      </div>
+
+      <div class="comms__notif" id="comms-notif" hidden>
+        <span class="comms__notif-text">{{ 'tool.comms.notif.text' | t }}</span>
+        <button class="comms__btn" id="comms-notif-enable" type="button">{{ 'tool.comms.notif.enable' | t }}</button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-notif-dismiss" type="button" title="{{ 'tool.comms.notif.dismiss' | t }}" aria-label="{{ 'tool.comms.notif.dismiss' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus" style="transform:rotate(45deg);transform-origin:center"></use></svg></button>
+      </div>
+
+      <div class="comms__id-row" id="comms-id-none" hidden>
+        <span class="comms__id-note">{{ 'tool.comms.guest.note' | t }}</span>
+        <button class="comms__btn comms__btn--ghost" id="comms-id-setup-here" type="button">{{ 'tool.comms.guest.setup' | t }}</button>
+      </div>
+
+      <div class="comms__contacts" id="comms-contacts" hidden>
+        <div class="comms__contacts-head">
+          <span class="comms__lbl">{{ 'tool.comms.people.heading' | t }}</span>
+          <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share" type="button" aria-pressed="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span class="comms__btn-t" id="comms-id-share-t">{{ 'tool.comms.people.my_code' | t }}</span></button>
+          <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-add-toggle" type="button" aria-expanded="false"><svg class="comms__i" aria-hidden="true"><use href="#ci-plus"></use></svg><span class="comms__btn-t" id="comms-add-toggle-t">{{ 'tool.comms.people.add' | t }}</span></button>
+          <button class="comms__btn comms__btn--ghost" id="comms-id-contacts" type="button" aria-expanded="false" hidden>{{ 'tool.comms.people.contacts' | t }}</button>
+        </div>
+        <div class="comms__id-card" id="comms-id-card" hidden>
+          <canvas class="comms__id-qr" id="comms-id-qr" width="0" height="0"></canvas>
+          <div class="comms__id-card-side">
+            <p class="comms__id-note">{{ 'tool.comms.people.code_note' | t }}</p>
+            <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
+            <div class="comms__id-card-actions">
+            <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">{{ 'tool.comms.people.copy_code' | t }}</button>
+            <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share-out" type="button" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg><span class="comms__btn-t">{{ 'tool.comms.people.share' | t }}</span></button>
+          </div>
+          </div>
+        </div>
+        <div class="comms__add" id="comms-add" hidden>
+          <button class="comms__addopt" id="comms-scan" type="button"><svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg><span>{{ 'tool.comms.people.scan' | t }}</span></button>
+          <div class="comms__scan" id="comms-scan-wrap" hidden>
+            <video class="comms__scan-video" id="comms-scan-video" playsinline muted></video>
+            <div class="comms__scan-zoom" id="comms-scan-zoom-wrap" hidden>
+              <svg class="comms__i" aria-hidden="true"><use href="#ci-qr"></use></svg>
+              <input type="range" id="comms-scan-zoom" min="1" max="5" step="0.1" value="1" aria-label="{{ 'tool.comms.people.zoom' | t }}">
+            </div>
+            <p class="comms__id-note" id="comms-scan-note">{{ 'tool.comms.people.scan_hint' | t }}</p>
+            <div class="comms__scan-actions">
+              <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-scan-torch" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.people.torch' | t }}" aria-label="{{ 'tool.comms.people.torch' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-flash"></use></svg></button>
+              <button class="comms__btn comms__btn--ghost" id="comms-scan-stop" type="button">{{ 'tool.comms.people.cancel' | t }}</button>
+            </div>
+          </div>
+          <div class="comms__contacts-add">
+            <input class="comms__input" id="comms-contact-in" type="text" enterkeyhint="done" placeholder="{{ 'tool.comms.people.paste_placeholder' | t }}" spellcheck="false" autocapitalize="off">
+            <button class="comms__btn comms__btn--ghost" id="comms-contact-add" type="button">{{ 'tool.comms.people.add_btn' | t }}</button>
+          </div>
+          <p class="comms__add-err" id="comms-add-err" role="alert" hidden></p>
+        </div>
+        <label class="comms__search"><svg class="comms__i" aria-hidden="true"><use href="#ci-search"></use></svg><input class="comms__search-in" id="comms-search" type="search" placeholder="{{ 'tool.comms.home.search' | t }}" aria-label="{{ 'tool.comms.home.search' | t }}" autocomplete="off" spellcheck="false" enterkeyhint="search"></label>
+        <div class="m-seg comms__filter" id="comms-filter">
+          <button type="button" class="is-active" data-f="all" aria-pressed="true">{{ 'tool.comms.home.filter_all' | t }}</button>
+          <button type="button" data-f="people" aria-pressed="false">{{ 'tool.comms.home.filter_people' | t }}</button>
+          <button type="button" data-f="ai" aria-pressed="false">{{ 'tool.comms.home.filter_ai' | t }}</button>
+        </div>
+        <div class="comms__contacts-list" id="comms-contacts-list"></div>
+      </div>
     </div>
+    <div class="comms__main">
+      <div class="comms__chathead" id="comms-chathead">
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-leave" type="button" hidden title="{{ 'tool.comms.chat.back' | t }}" aria-label="{{ 'tool.comms.chat.back' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-back"></use></svg></button>
+        <span class="comms__avatar" id="comms-chat-avatar" aria-hidden="true"></span>
+        <div class="comms__chathead-mid">
+          <span class="comms__chathead-name" id="comms-chat-title"></span>
+          <span class="comms__chathead-sub">
+            <span class="comms__sub-bit" id="comms-status">{{ 'tool.comms.chat.not_in_chat' | t }}</span>
+            <span class="comms__sub-bit" id="comms-via" hidden>{{ 'tool.comms.files.via_relay' | t }}</span>
+            <span class="comms__sub-bit" id="comms-enc" title="{{ 'tool.comms.chat.enc_title' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg></span>
+            <span class="comms__sub-bit" id="comms-eph" title="{{ 'tool.comms.chat.eph_bang' | t }}" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clock"></use></svg></span>
+            <span class="comms__sub-bit" id="comms-peers" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg><span id="comms-peers-n">0</span></span>
+          </span>
+        </div>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-media-btn" type="button" hidden title="{{ 'tool.comms.files.media' | t }}" aria-label="{{ 'tool.comms.files.media' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-media"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-share" type="button" hidden title="{{ 'tool.comms.chat.share_room' | t }}" aria-label="{{ 'tool.comms.chat.share_room' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg></button>
+        <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="{{ 'tool.comms.chat.call' | t }}" aria-label="{{ 'tool.comms.chat.call' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.chat.camera' | t }}" aria-label="{{ 'tool.comms.chat.camera' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-mic" type="button" hidden aria-pressed="true" title="{{ 'tool.comms.chat.mic' | t }}" aria-label="{{ 'tool.comms.chat.mic' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-mic"></use></svg></button>
+        <button class="comms__btn comms__btn--danger comms__btn--icon" id="comms-call-hangup" type="button" hidden title="{{ 'tool.comms.chat.hangup' | t }}" aria-label="{{ 'tool.comms.chat.hangup' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-hangup"></use></svg></button>
+      </div>
 
-    <div class="comms__ring" id="comms-ring" hidden>
-      <span class="comms__ring-text" id="comms-ring-text">{{ 'tool.comms.ring.incoming' | t }}</span>
-      <button class="comms__btn" id="comms-ring-accept" type="button">{{ 'tool.comms.ring.accept' | t }}</button>
-      <button class="comms__btn comms__btn--ghost" id="comms-ring-decline" type="button">{{ 'tool.comms.ring.decline' | t }}</button>
+      <div class="comms__ring" id="comms-ring" hidden>
+        <span class="comms__ring-text" id="comms-ring-text">{{ 'tool.comms.ring.incoming' | t }}</span>
+        <button class="comms__btn" id="comms-ring-accept" type="button">{{ 'tool.comms.ring.accept' | t }}</button>
+        <button class="comms__btn comms__btn--ghost" id="comms-ring-decline" type="button">{{ 'tool.comms.ring.decline' | t }}</button>
+      </div>
+
+      <div class="comms__chatbody" id="comms-drop">
+        <div class="comms__media" id="comms-media" hidden></div>
+        <div class="comms__peerlist" id="comms-peerlist" hidden></div>
+        <div class="comms__upgrade comms__histbar" id="comms-hist-bar" role="status" hidden>
+          <span class="comms__upgrade-text" id="comms-hist-text"></span>
+          <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-hist-reset" type="button" hidden>{{ 'tool.comms.history.start_over' | t }}</button></div>
+        </div>
+        <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
+      </div>
+
+      <form class="comms__send" id="comms-send" autocomplete="off">
+        <label class="comms__attach" title="{{ 'tool.comms.chat.attach' | t }}" aria-label="{{ 'tool.comms.chat.attach' | t }}"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
+        <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled>
+        <button class="comms__btn comms__btn--send" id="comms-go" type="submit" disabled title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
+      </form>
     </div>
-
-    <div class="comms__chatbody" id="comms-drop">
-      <div class="comms__media" id="comms-media" hidden></div>
-      <div class="comms__peerlist" id="comms-peerlist" hidden></div>
-      <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
-    </div>
-
-    <form class="comms__send" id="comms-send" autocomplete="off">
-      <label class="comms__attach" title="{{ 'tool.comms.chat.attach' | t }}" aria-label="{{ 'tool.comms.chat.attach' | t }}"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
-      <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled>
-      <button class="comms__btn comms__btn--send" id="comms-go" type="submit" disabled title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
-    </form>
-
-    <div class="comms__adv" id="comms-adv" hidden>
-      <div class="comms__adv-sec">
-        <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
-        <div class="comms__room">
-          <input class="comms__input" id="comms-room" type="text" enterkeyhint="go" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="{{ 'tool.comms.adv.room_placeholder' | t }}">
-          <button class="comms__btn" id="comms-join" type="button">{{ 'tool.comms.adv.join' | t }}</button>
-        </div>
-        <div class="comms__room-new">
-          <button class="comms__btn comms__btn--ghost" id="comms-newroom" type="button" title="{{ 'tool.comms.adv.new_room_title' | t }}">{{ 'tool.comms.adv.new_room' | t }}</button>
-          <button class="comms__btn comms__btn--ghost" id="comms-newsaved" type="button" title="{{ 'tool.comms.adv.new_saved_title' | t }}">{{ 'tool.comms.adv.new_saved' | t }}</button>
-        </div>
-      </div>
-      <div class="comms__adv-sec">
-        <span class="comms__lbl">{{ 'tool.comms.adv.privacy' | t }}</span>
-        <button class="comms__relay" id="comms-relay" type="button" role="switch" aria-checked="false">
-          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6v5c0 4.4 3 7.9 7 9 4-1.1 7-4.6 7-9V6Z"></path><path d="M9.4 11.8l1.9 1.9 3.3-3.4"></path></svg>
-          <span class="comms__relay-lbl">{{ 'tool.comms.adv.hide_ip' | t }}</span>
-          <span class="comms__relay-track" aria-hidden="true"><span class="comms__relay-thumb"></span></span>
-        </button>
-        <p class="comms__relay-note" id="comms-relay-note" hidden>{{ 'tool.comms.adv.relay_note' | t }}</p>
-      </div>
-      <div class="comms__adv-sec comms__adv-sec--col">
-        <div class="comms__adv-row">
-          <span class="comms__lbl">{{ 'tool.comms.adv.notifications' | t }}</span>
-          <button class="comms__btn comms__btn--ghost" id="comms-push-test" type="button">{{ 'tool.comms.adv.test' | t }}</button>
-        </div>
-        <span class="comms__id-note" id="comms-push-status">…</span>
-        <span class="comms__id-note comms__push-log" id="comms-push-test-log" hidden></span>
-      </div>
-      <div class="comms__adv-sec">
-        <span class="comms__lbl">{{ 'tool.comms.adv.device' | t }}</span>
-        <button class="comms__btn comms__btn--ghost comms__btn--mute" id="comms-mute" type="button" aria-pressed="false">{{ 'tool.comms.adv.sound_on' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-attach-ext" type="button">{{ 'tool.comms.adv.attach_ext' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">{{ 'tool.comms.adv.attach_pack' | t }}</button>
-        <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>{{ 'tool.comms.passkey.add' | t }}</button>
-        <a class="comms__btn comms__btn--ghost" href="{{ locale.pathPrefix }}/about/">{{ 'tool.comms.adv.identity' | t }}</a>
-      </div>
+    <div class="comms__home" id="comms-home">
+      <h2 class="comms__home-h"><i aria-hidden="true">$</i> {{ 'tool.comms.home.prompt' | t }}<span class="comms__caret" aria-hidden="true"></span></h2>
+      <form class="comms__homesend" id="comms-home-send" autocomplete="off">
+        <input class="comms__input comms__input--msg" id="comms-home-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.home.placeholder_desk' | t }}" data-ph-phone="{{ 'tool.comms.home.placeholder' | t }}" data-ph-desk="{{ 'tool.comms.home.placeholder_desk' | t }}" aria-label="{{ 'tool.comms.home.placeholder' | t }}" role="combobox" aria-autocomplete="list" aria-controls="comms-at" aria-expanded="false">
+        <button class="comms__btn comms__btn--send" type="submit" title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
+        <div class="comms__at" id="comms-at" role="listbox" aria-label="{{ 'tool.comms.home.pick' | t }}" hidden></div>
+      </form>
+      <p class="comms__home-hint">{{ 'tool.comms.home.hint' | t }}</p>
     </div>
   </div>
 
@@ -268,281 +286,385 @@ unlockTool: true
   </div>
 </section>
 
-{% include "terminal-frame-close.njk" %}
-
 <style>
-.comms{display:flex;flex-direction:column;gap:.75rem;font-family:var(--font-mono);font-size:.9rem;min-height:clamp(21rem,56vh,31rem)}
-.comms__onboard,.comms__lock{margin-top:auto;margin-bottom:auto}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+body:has(#comms-app){height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0;padding:0;display:flex;flex-direction:column}
+.comms{flex:1;min-height:0;display:flex;flex-direction:column;font-family:var(--font-body);font-size:var(--text-sm);color:var(--term-fg)}
 .comms [hidden]{display:none !important}
-.comms__onboard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;padding:2.5rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px}
-.comms__onboard-step{display:flex;flex-direction:column;align-items:center;gap:.9rem;width:100%;max-width:30rem}
-.comms__onboard-h{margin:0;font-size:1.05rem;color:var(--accent,#6ef3c5);letter-spacing:.02em;line-height:1.4;text-transform:none}
-.comms__onboard-p{margin:0;color:#c3ccd6;font-size:.85rem;line-height:1.65;max-width:26rem}
-.comms__onboard-fine{margin:0;color:#7a838d;font-size:.75rem;line-height:1.5}
-.comms__onboard-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
-.comms__add-err{margin:0;color:#e5534b;font-size:.78rem;line-height:1.5}
-.comms__onboard-actions{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
-.comms__btn--big{padding:.7rem 1.6rem;font-size:.92rem;min-height:44px}
-.comms__input--big{max-width:18rem;text-align:center;padding:.6rem .8rem;font-size:.95rem;flex:none;width:100%}
-.comms__recovery{display:block;width:100%;max-width:24rem;background:#0a0d10;border:1px dashed var(--accent,#6ef3c5);border-radius:6px;padding:.7rem;color:var(--accent,#6ef3c5);font-size:.95rem;letter-spacing:.12em;word-break:break-all;line-height:1.6}
-.comms__lock{display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:2rem 1.25rem;background:#0d1115;border:1px solid #1a1f24;border-radius:10px;text-align:center}
-.comms__lock-h{margin:0;color:#c3ccd6;font-size:.95rem}
-.comms__lock-waiting{margin:0;color:var(--accent,#6ef3c5);font-size:.8rem}
-.comms__lock-alt{width:100%;max-width:24rem;color:#7a838d;font-size:.78rem}
-.comms__lock-alt summary{cursor:pointer;list-style:none;padding:.3rem}
-.comms__lock-alt summary::-webkit-details-marker{display:none}
-
-.comms__lock-row{display:none;gap:.5rem;margin-top:.6rem}
-.comms__lock-link{margin:0;max-width:26rem;color:#9ba6b1;font-size:.8rem;line-height:1.5}
-.comms__lock-link strong{color:var(--accent,#6ef3c5);font-weight:600}
-.comms__lock--card{padding:0;background:none;border:0}
-.comms__card-slot{width:100%}
-.comms__link .comms__upgrade-text strong{color:var(--accent,#6ef3c5);font-weight:600}
-.comms__link .comms__card-slot{flex:1 1 100%}
-.comms__lock-alt[open] .comms__lock-row{display:flex}
-.comms__app{display:flex;flex-direction:column;gap:.75rem}
-.comms__id-row--you{flex:1;min-width:13rem}
-.comms__contacts-head{display:flex;gap:.5rem;align-items:center}
-.comms__contacts-head .comms__btn{white-space:nowrap}
-.comms__contacts-head .comms__lbl{flex:1}
-.comms__adv{display:flex;flex-direction:column;gap:.75rem;background:#0a0d10;border:1px dashed #2a3138;border-radius:8px;padding:.85rem}
-.comms__relay{display:flex;align-items:center;gap:.55rem;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
-.comms__relay svg{color:#8b97a3;transition:color .25s}
-.comms__relay[aria-checked="true"] svg{color:var(--accent,#6ef3c5)}
-.comms__relay-lbl{font-size:.85rem}
-.comms__relay-track{width:34px;height:20px;border-radius:10px;background:rgba(255,255,255,.12);position:relative;transition:background .25s}
-.comms__relay-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#8b97a3;transition:transform .25s,background .25s}
-.comms__relay[aria-checked="true"] .comms__relay-track{background:rgba(110,243,197,.25)}
-.comms__relay[aria-checked="true"] .comms__relay-thumb{transform:translateX(14px);background:var(--accent,#6ef3c5)}
-.comms__relay-note{margin:.35rem 0 0;font-size:.75rem;color:#8b97a3;max-width:46ch}
-.comms__adv-sec{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.comms__adv-sec--col{flex-direction:column;align-items:stretch}
-.comms__adv-row{display:flex;gap:.5rem;align-items:center;justify-content:space-between}
-.comms__push-log{white-space:pre-line;background:#0a0d10;border:1px solid #1a1f24;border-radius:8px;padding:.5rem .6rem;line-height:1.6}
-.comms__contact{cursor:pointer}
-@media (max-width:640px){
-  .comms__onboard{padding:1.75rem 1rem}
-  .comms__onboard-h{font-size:1rem}
-}
-.comms__room{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;flex:1;min-width:14rem}
-.comms__room-new{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
-.comms__lbl{color:var(--term-muted);text-transform:lowercase;letter-spacing:.05em;font-size:.78rem}
-.comms__input{background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.45rem .6rem;border-radius:6px;font-family:inherit;font-size:.9rem;flex:1;min-width:6rem}
-.comms__input:focus{outline:none;border-color:var(--accent,#6ef3c5)}
-.comms__btn{background:transparent;border:1px solid var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);padding:.4rem .8rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer;text-transform:lowercase;letter-spacing:.05em}
-
-.comms__btn:disabled{opacity:.4;cursor:not-allowed}
-.comms__btn--ghost{border-color:#3a4148;color:#9ba6b1}
-.comms:lang(ja) .comms__btn,.comms:lang(ja) .comms__lbl,.comms:lang(ja) .comms__picker-h,.comms:lang(ja) .comms__resend{text-transform:none}
-
-.comms__badge{background:#1a1f24;border:1px solid #2a3138;color:#9ba6b1;padding:.3rem .55rem;border-radius:4px;font-size:.75rem;text-transform:lowercase;letter-spacing:.05em}
-.comms__badge--offline{border-color:#e05c5c;color:#e05c5c}
-.comms__send--offline{opacity:.55}
-.comms__line--pending .comms__what{color:#9ba6b1}
-.comms__pending-note{color:#d9a84e;font-style:italic;font-size:.75rem;margin-left:.45rem}
-.comms__resend{margin-left:.5rem;background:none;border:1px solid #2a3138;color:var(--accent,#6ef3c5);border-radius:4px;padding:.1rem .5rem;font:inherit;font-size:.72rem;cursor:pointer;text-transform:lowercase}
-
-.comms__url{color:#e6edf3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
-.comms__log{min-height:14rem;max-height:24rem;overflow-y:auto;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.75rem;display:flex;flex-direction:column;gap:.4rem}
-.comms__line{display:flex;gap:.5rem;align-items:baseline;line-height:1.4}
-.comms__who{color:var(--accent,#6ef3c5);font-size:.72rem;min-width:5.5rem;letter-spacing:.05em}
-.comms__who--sys{color:#7a838d}
-.comms__who--me{color:#a8b6c5}
-.comms__what{color:#e6edf3;word-break:break-word;flex:1}
-.comms__what p { margin: 0; }
-.comms__what p + p, .comms__what ul, .comms__what ol, .comms__what pre, .comms__what table, .comms__what blockquote { margin-top: .35em; }
-.comms__what ul, .comms__what ol { padding-left: 1.2em; margin-bottom: 0; }
-.comms__what h1, .comms__what h2, .comms__what h3, .comms__what h4 { font-size: 1em; margin: .35em 0 .1em; }
-.comms__what code { font-family: var(--font-mono, ui-monospace, monospace); font-size: .88em; }
-.comms__what pre { overflow-x: auto; padding: .4em .6em; border-radius: 6px; background: rgba(127,127,127,.12); }
-.comms__what table { border-collapse: collapse; display: block; overflow-x: auto; }
-.comms__what th, .comms__what td { border: 1px solid rgba(127,127,127,.35); padding: .15em .5em; }
-.comms__what a { color: var(--accent, #6ef3c5); }
-.comms__what blockquote { margin: .35em 0 0; padding-left: .7em; border-left: 2px solid rgba(127,127,127,.4); }
-.comms__what--sys{color:#7a838d;font-style:italic}
-.comms__what a{color:var(--accent,#6ef3c5);text-decoration:underline}
-
-.comms__drop--hot{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5);background:rgba(110,243,197,.04)}
-.comms__prog{display:inline-block;width:96px;height:6px;background:#1a1f24;border-radius:3px;overflow:hidden;margin:0 .4rem;vertical-align:middle}
-.comms__prog-fill{display:block;height:100%;background:var(--accent,#6ef3c5);width:0%;transition:width .12s linear}
-.comms__thumb{display:block;margin-top:.4rem;max-width:240px;max-height:180px;border:1px solid #2a3138;border-radius:4px;cursor:zoom-in}
-.comms__peerlist{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;padding:.2rem 0}
-.comms__chip{font-family:var(--font-mono);font-size:.7rem;padding:.2rem .5rem;border-radius:3px;border:1px solid currentColor;line-height:1;letter-spacing:.05em}
-.comms__time{color:var(--term-subtle);font-size:.66rem;margin-left:.3rem;font-variant-numeric:tabular-nums}
-.comms__btn--mute{min-width:5.5rem}
-.comms__btn--mute[aria-pressed="true"]{color:#7a838d;border-color:#3a4148}
-.comms__send{display:flex;gap:.5rem;align-items:center}
-.comms__input--msg{min-width:0}
-.comms__picker{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem}
-.comms__picker-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
-.comms__picker-card{position:relative;z-index:1;background:#0d1014;border:1px solid #2a3138;border-radius:8px;padding:1rem;width:100%;max-width:24rem;max-height:80vh;overflow:auto;display:flex;flex-direction:column;gap:.7rem}
-.comms__picker-h{margin:0;font-size:.9rem;color:var(--accent,#6ef3c5);text-transform:lowercase;letter-spacing:.05em}
-.comms__picker-list{display:flex;flex-direction:column;gap:.4rem}
-.comms__picker-item{display:flex;justify-content:space-between;align-items:center;gap:.7rem;width:100%;text-align:left;background:#0a0d10;border:1px solid #2a3138;color:#e6edf3;padding:.5rem .7rem;border-radius:6px;font-family:inherit;font-size:.85rem;cursor:pointer}
-
-.comms__picker-ver{color:var(--term-muted);font-size:.75rem;flex:none}
-.comms__picker-actions{display:flex;justify-content:flex-end}
-.comms__id-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.5rem .75rem}
-.comms__id-note{color:#7a838d;font-size:.78rem}
-.comms__input--short{max-width:13rem;flex:0 1 auto}
-.comms__id-card{display:flex;gap:1rem;align-items:flex-start;justify-content:center;background:#0d1115;border:1px dashed #2a3138;border-radius:6px;padding:.75rem;flex-wrap:wrap}
-.comms__id-qr{border-radius:4px;flex:none}
-.comms__id-card-side{display:flex;flex-direction:column;gap:.5rem;flex:1;min-width:12rem}
-.comms__id-card-actions{display:flex;gap:.5rem;flex-wrap:wrap}
-.comms__url--wrap{white-space:normal;word-break:break-all;font-size:.7rem;max-height:5.5rem;overflow:auto}
-.comms__contacts{display:flex;flex-direction:column;gap:.5rem;background:#0d1115;border:1px solid #1a1f24;border-radius:6px;padding:.6rem .75rem}
-.comms__contacts-add{display:flex;gap:.5rem;align-items:center}
-.comms__contacts-list{display:flex;flex-direction:column;gap:.3rem}
-.comms__contact{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px solid #14181d}
-.comms__contact--req{background:rgba(110,243,197,.05);border-left:2px solid var(--accent,#6ef3c5);padding-left:.5rem;border-radius:4px}
-.comms__unread{display:inline-block;min-width:1.15rem;padding:0 .3rem;border-radius:999px;background:var(--accent,#6ef3c5);color:#0a0d10;font-size:.68rem;text-align:center;line-height:1.15rem;font-weight:700}
-.comms__missed{display:inline-flex;align-items:center;color:#e5534b;flex:none}
-.comms__missed .comms__i{width:1.05em;height:1.05em}
+.comms:has(>.comms__onboard:not([hidden])),.comms:has(>.comms__lock:not([hidden])){overflow-y:auto}
 .comms__sprite{position:absolute;width:0;height:0;overflow:hidden}
-.comms__i{width:1em;height:1em;flex:none;vertical-align:-0.12em}
-.comms__btn--icon{display:inline-flex;align-items:center;gap:.4rem}
-.comms__btn--icon .comms__btn-t{line-height:1}
-.comms__btn.is-on{background:var(--accent,#6ef3c5);color:#0a0d10}
+.comms__i{width:1em;height:1em;flex:none;vertical-align:-.12em}
+
+.comms__onboard,.comms__lock{margin:auto;width:min(32rem,calc(100% - 2rem));display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--space-3);padding:var(--space-5) var(--space-4);background:var(--term-bg-raised);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__lock--card{padding:0;background:none;border:0}
+.comms__onboard-step{display:flex;flex-direction:column;align-items:center;gap:var(--space-3);width:100%}
+.comms__onboard-h{margin:0;font-family:var(--font-mono);font-size:var(--text-base);font-weight:600;line-height:1.4;color:var(--term-fg-strong);text-transform:none;letter-spacing:0}
+.comms__onboard-p{margin:0;max-width:26rem;color:var(--term-muted);font-size:var(--text-sm);line-height:1.6}
+.comms__onboard-fine{margin:0;color:var(--term-subtle);font-size:var(--text-xs);line-height:1.5}
+.comms__onboard-err,.comms__add-err{margin:0;color:var(--syn-pink);font-size:var(--text-xs);line-height:1.5}
+.comms__onboard-actions{display:flex;gap:var(--space-2);flex-wrap:wrap;justify-content:center}
+.comms__recovery{display:block;width:100%;max-width:24rem;padding:var(--space-3);background:var(--term-bg);border:1px dashed var(--term-border-strong);border-radius:var(--radius-md);color:var(--term-fg-strong);font-family:var(--font-mono);font-size:.95rem;letter-spacing:.12em;line-height:1.6;word-break:break-all}
+.comms__lock-h{margin:0;color:var(--term-fg);font-size:var(--text-sm)}
+.comms__lock-waiting{margin:0;color:var(--syn-cyan);font-size:var(--text-xs)}
+.comms__lock-alt{width:100%;max-width:24rem;color:var(--term-subtle);font-size:var(--text-xs)}
+.comms__lock-alt summary{cursor:pointer;list-style:none;padding:var(--space-1)}
+.comms__lock-alt summary::-webkit-details-marker{display:none}
+.comms__lock-row{display:none;gap:var(--space-2);margin-top:var(--space-2)}
+.comms__lock-alt[open] .comms__lock-row{display:flex}
+.comms__lock-link{margin:0;max-width:26rem;color:var(--term-muted);font-size:var(--text-xs);line-height:1.5}
+.comms__lock-link strong,.comms__link .comms__upgrade-text strong{color:var(--term-fg-strong);font-weight:600}
+.comms__card-slot{width:100%}
+
+.comms__btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border:1px solid transparent;border-radius:var(--radius-md);background:var(--syn-cyan);color:#041016;font-family:var(--font-mono);font-size:var(--text-sm);font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;cursor:pointer;transition:background var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out),color var(--duration-fast) var(--ease-out),box-shadow var(--duration-fast) var(--ease-out)}
+.comms__btn--ghost{background:transparent;border-color:var(--term-border);color:var(--term-muted);font-weight:500}
+.comms__btn--danger{background:transparent;border-color:var(--syn-pink);color:var(--syn-pink);font-weight:500}
+.comms__btn--big{min-height:44px;padding:var(--space-3) var(--space-5)}
+.comms__btn--icon{padding:var(--space-2) var(--space-3)}
+.comms__btn-t{line-height:1}
+.comms__btn--mute{min-width:5.5rem}
+.comms__btn--mute[aria-pressed="true"]{color:var(--term-subtle)}
+.comms__btn.is-on{background:var(--cyan-15);border-color:var(--cyan-30);color:var(--syn-cyan)}
 .comms__btn.is-off{opacity:.45;text-decoration:line-through}
+.comms__btn:disabled{opacity:.35;cursor:not-allowed}
 .comms__btn:focus{outline:none}
-.comms__btn:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:2px}
-@media (hover: hover) and (pointer: fine){
-.comms__btn:hover:not(:disabled){background:var(--accent,#6ef3c5);color:#0a0d10}
-.comms__btn--ghost:hover{background:#3a4148;color:#e6edf3}
-.comms__btn--danger:hover:not(:disabled){background:#e5534b;color:#0a0d10}
-.comms__contact:hover{background:#10151a}
-.comms__contact:hover .comms__rowbtn{opacity:1}
-.comms__rowbtn:hover{color:#e5534b}
-.comms__addopt:hover{border-color:var(--accent,#6ef3c5)}
-.comms__picker-item:hover{border-color:var(--accent,#6ef3c5);color:var(--accent,#6ef3c5)}
-.comms__resend:hover{border-color:var(--accent,#6ef3c5)}
-.comms__lock-alt summary:hover{color:#9ba6b1}
-.comms__attach:hover{color:var(--accent,#6ef3c5);border-color:var(--accent,#6ef3c5)}
-}
+.comms__btn:focus-visible{outline:2px solid var(--syn-cyan);outline-offset:2px}
+.comms__input{flex:1;min-width:6rem;padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--field-border,rgba(255,255,255,.38));border-radius:var(--radius-md);color:var(--term-fg);font-family:var(--font-mono);font-size:var(--text-sm)}
+.comms__input::placeholder{color:var(--term-subtle)}
+.comms__input:focus{outline:none;border-color:var(--syn-cyan)}
+.comms__input--big{flex:none;width:100%;max-width:18rem;padding:var(--space-3);text-align:center;font-size:.95rem}
+.comms__input--short{flex:0 1 auto;max-width:13rem}
+.comms__lbl{font-family:var(--font-mono);font-size:var(--text-2xs);letter-spacing:.1em;text-transform:uppercase;color:var(--term-muted)}
+.comms__id-note{color:var(--term-subtle);font-size:var(--text-xs)}
+.comms__badge{display:inline-flex;align-items:center;gap:.3rem;font-family:var(--font-mono);font-size:var(--text-2xs);color:var(--term-subtle)}
+.comms__badge--fp{padding:0;border:0;background:transparent;white-space:nowrap}
+.comms__badge--offline{color:var(--syn-pink)}
+.comms__url{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-fg);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__url--wrap{max-height:5.5rem;overflow:auto;white-space:normal;word-break:break-all;font-size:var(--text-2xs)}
 
-.comms__badge{display:inline-flex;align-items:center;gap:.3rem}
-.comms__add{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;padding-top:.6rem;border-top:1px solid #14181d}
-.comms__scan{display:flex;flex-direction:column;gap:.5rem;align-items:flex-start}
-.comms__scan-video{width:100%;max-width:18rem;border-radius:8px;border:1px solid #2a3138;background:#000;aspect-ratio:1;object-fit:cover}
-@media (max-width:640px){
-  .comms__btn--icon .comms__btn-t{display:none}
-  .comms__contacts-head .comms__btn--icon .comms__btn-t{display:inline}
-}
-.comms__contact:last-child{border-bottom:none}
-.comms__contact-name{color:#e6edf3;font-size:.85rem}
-.comms__contact-fp{color:var(--term-subtle);font-size:.7rem}
-.comms__rooms-head{color:var(--term-subtle);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 0 .15rem}
-.comms__avatar--room{display:inline-flex;align-items:center;justify-content:center;color:#9b6fd4}
-.comms__roomrow--current .comms__contact-name{color:var(--accent,#6ef3c5)}
-.comms__room-rename{max-width:12rem;padding:.15rem .4rem;font-size:.85rem}
-.comms__rowbtn--text{font-size:.72rem;letter-spacing:.04em;padding:.15rem .4rem;opacity:.7}
-.comms__chip-add{margin-left:.3rem;border:none;background:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0}
-.comms__btn--danger{border-color:#e5534b;color:#e5534b}
-
-.comms__ring{display:flex;gap:.6rem;align-items:center;background:#141a12;border:1px solid var(--accent,#6ef3c5);border-radius:6px;padding:.55rem .75rem}
-.comms__ring-text{color:var(--accent,#6ef3c5);flex:1;font-size:.85rem}
-.comms__media{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem;background:#0a0d10;border:1px solid #1a1f24;border-radius:6px;padding:.5rem}
-.comms__tile{position:relative;background:#0d1115;border:1px solid #2a3138;border-radius:6px;overflow:hidden;min-height:72px;display:flex;align-items:center;justify-content:center}
-.comms__tile video{width:100%;height:100%;max-height:200px;object-fit:cover;display:block}
-.comms__tile-label{position:absolute;left:.4rem;bottom:.3rem;background:rgba(0,0,0,.55);color:#e6edf3;font-size:.68rem;padding:.1rem .4rem;border-radius:3px;letter-spacing:.05em}
-.comms__tile-voice{color:var(--accent,#6ef3c5);font-size:1.3rem}
-
-.comms__upgrade{display:flex;align-items:center;gap:.6rem .9rem;flex-wrap:wrap;padding:.6rem .8rem;margin-bottom:.6rem;border:1px solid rgba(110,243,197,.35);border-radius:8px;background:rgba(110,243,197,.06)}
-.comms__upgrade-text{flex:1 1 14rem;color:#c3ccd6;font-size:.82rem}
-.comms__upgrade-actions{display:flex;gap:.5rem;flex-wrap:wrap}
-.comms__app--chat .comms__upgrade{display:none}
-.comms__profile{display:flex;align-items:center;gap:.6rem}
-.comms__profile-spacer{flex:1}
-.comms__id-row--you{border:0;background:transparent;padding:0;flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,16rem);justify-content:start;grid-template-areas:"av input" "av fp";column-gap:.65rem;row-gap:.15rem;align-items:center}
-.comms__id-row--you .comms__avatar{grid-area:av}
-.comms__id-row--you .comms__input{grid-area:input;width:100%}
-.comms__id-row--you .comms__badge--fp{grid-area:fp;justify-self:start}
-.comms__avatar{width:2.3rem;height:2.3rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex:none;user-select:none}
-.comms__avatar--me{width:2.1rem;height:2.1rem}
-.comms__badge--fp{border:0;background:transparent;color:var(--term-subtle);padding:0;font-size:.7rem}
-.comms__app--people #comms-chathead{display:none}
-.comms__app--people .comms__chatbody{display:none}
-.comms__app--people .comms__send{display:none}
+.comms__app{flex:1;min-height:0;display:flex;flex-direction:column}
+.comms__side,.comms__main{min-width:0;min-height:0;display:flex;flex-direction:column}
+.comms__side{background:var(--term-bg-raised)}
+.comms__main{flex:1;position:relative;background:var(--term-bg)}
+.comms__app--people #comms-chathead,.comms__app--people .comms__chatbody,.comms__app--people .comms__send{display:none}
+.comms__app--people .comms__main,.comms__app--chat .comms__home{display:none}
+.comms__home{min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-3);padding:var(--space-4);background:var(--term-bg)}
+.comms__home-h{margin:0;text-align:center;color:var(--term-fg-strong);font-family:var(--font-mono);font-size:var(--text-lg);font-weight:500;letter-spacing:0;text-transform:none}
+.comms__home-h i{font-style:normal;color:var(--accent)}
+.comms__caret{display:inline-block;width:.6em;height:2px;margin-left:.15em;vertical-align:baseline;background:var(--accent);animation:comms-blink 1.1s steps(2) infinite}
+@keyframes comms-blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.comms__caret{animation:none}}
+.comms__homesend{position:relative;width:min(680px,100%);display:flex;align-items:center;gap:var(--space-1);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__homesend:focus-within{border-color:var(--syn-cyan)}
+.comms__homesend .comms__input--msg{padding:var(--space-3) var(--space-2)}
+.comms__home-hint{margin:0;text-align:center;color:var(--term-subtle);font:var(--text-xs) var(--font-mono)}
+.comms__at{position:absolute;left:var(--at-x,var(--space-2));bottom:calc(100% + var(--space-1));z-index:5;width:min(280px,calc(100% - 1rem));max-height:280px;overflow-y:auto;padding:var(--space-1);background:var(--term-bg-raised);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg);box-shadow:var(--elev-3)}
+.comms__at-i{width:100%;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);background:transparent;border:0;border-radius:var(--radius-md);color:var(--term-fg);font:inherit;font-size:var(--text-sm);text-align:left;cursor:pointer}
+.comms__at-i[aria-selected="true"]{background:var(--cyan-8);color:var(--syn-cyan)}
+.comms__at-i .comms__avatar{width:28px;height:28px;font-size:var(--text-2xs)}
+.comms__at-i .comms__avatar--tool svg{width:20px;height:20px}
+.comms__at-none{padding:var(--space-2);color:var(--term-subtle);font-size:var(--text-xs)}
 .comms__app--people .comms__ring{display:none !important}
-.comms__app--chat .comms__profile{display:none}
-.comms__app--chat .comms__contacts{display:none !important}
-.comms__app--chat #comms-id-none{display:none !important}
-.comms__app--chat .comms__adv{display:none !important}
-.comms__chathead{display:flex;align-items:center;gap:.55rem;padding:.1rem 0 .55rem;border-bottom:1px solid #14181d}
-.comms__chathead-mid{display:flex;flex-direction:column;gap:.12rem;flex:1;min-width:0}
-.comms__chathead-name{color:#e6edf3;font-size:.95rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.comms__chathead-sub{display:flex;align-items:center;gap:.55rem;color:#7a838d;font-size:.72rem;min-width:0;overflow:hidden}
-.comms__sub-bit{display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap}
-#comms-status.comms__sub-bit{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
-#comms-enc.comms__sub-bit{color:#9b6fd4}
-#comms-eph.comms__sub-bit{color:#d9a84e}
-.comms__chathead .comms__btn--icon,.comms__profile .comms__btn--icon{width:2.4rem;height:2.4rem;border-radius:50%;padding:0;justify-content:center}
-.comms__chathead .comms__i{width:1.15em;height:1.15em}
-.comms__chatbody{position:relative;display:flex;flex-direction:column;gap:.5rem}
-.comms__chatbody.comms__drop--hot .comms__log{outline:2px dashed var(--accent,#6ef3c5);outline-offset:4px}
-.comms__log{background:transparent;border:0;border-radius:8px;padding:.35rem 0;height:clamp(15rem,52vh,28rem);min-height:0;max-height:none;gap:.55rem}
-.comms__line{flex-direction:column;align-items:flex-start;gap:.18rem}
-.comms__line--me{align-items:flex-end}
-.comms__line--sys{align-items:center}
-.comms__who{min-width:0;font-size:.68rem;letter-spacing:.04em;padding:0 .45rem}
-.comms__who--me{color:var(--term-subtle);font-size:.62rem}
-.comms__what{flex:none;width:fit-content;max-width:min(52ch,84%);background:#161c23;border-radius:14px 14px 14px 5px;padding:.5rem .75rem;line-height:1.45}
-.comms__line--me .comms__what{background:#12352a;border-radius:14px 14px 5px 14px}
-.comms__line--sys .comms__what{background:#10151a;border:1px solid #171d24;border-radius:999px;padding:.28rem .75rem;font-size:.72rem;color:#6a737d;font-style:normal;text-align:center;max-width:94%}
-.comms__what--sys{color:#6a737d}
-.comms__send{align-items:center;padding-top:.4rem}
-.comms__attach{width:2.6rem;height:2.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#9ba6b1;cursor:pointer;border:1px solid #2a3138;flex:none;transition:color .15s,border-color .15s}
 
-.comms__attach .comms__i{width:1.2em;height:1.2em}
-.comms__input--msg{border-radius:999px;padding:.6rem 1rem;background:#10151a}
-.comms__btn--send{width:2.6rem;height:2.6rem;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;flex:none}
-.comms__btn--send .comms__i{width:1.15em;height:1.15em;margin-left:-.1em}
-.comms__contacts{border:0;background:transparent;padding:0;gap:.4rem}
-.comms__contacts-head{padding:0 .1rem}
-.comms__contact{gap:.65rem;padding:.55rem .45rem;border-bottom:1px solid #12161b;cursor:pointer;border-radius:10px;flex-wrap:nowrap;min-height:52px}
+.comms__profile{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-3) var(--space-2)}
+.comms__brand{display:none;font-family:var(--font-mono);font-size:var(--text-base);font-weight:600;color:var(--term-fg-strong)}
+.comms__brand i{font-style:normal;color:var(--accent)}
+.comms__profile-spacer{flex:0}
+.comms__profile .comms__btn--icon,.comms__chathead .comms__btn--icon{width:38px;height:38px;padding:0;flex:none;border-radius:var(--radius-md)}
+.comms__profile .comms__i,.comms__chathead .comms__i{width:18px;height:18px}
+.comms__id-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);margin:0 var(--space-3) var(--space-2);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__id-row--you{flex:1;min-width:0;margin:0;padding:0;background:transparent;border:0;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"av input" "av fp";column-gap:var(--space-2);row-gap:2px;align-items:center}
+.comms__id-row--you .comms__avatar{grid-area:av}
+.comms__id-row--you .comms__input{grid-area:input;width:100%;min-width:0;padding:2px var(--space-2);background:transparent;border-color:transparent;color:var(--term-fg-strong);font-family:var(--font-body);font-size:.93rem;font-weight:500}
+.comms__id-row--you .comms__input:hover{border-color:var(--term-border)}
+.comms__id-row--you .comms__input:focus{border-color:var(--syn-cyan)}
+.comms__id-row--you .comms__badge--fp{grid-area:fp;justify-self:start;padding:0 var(--space-2)}
+.comms__avatar{width:40px;height:40px;flex:none;display:inline-grid;place-items:center;border-radius:50%;background:var(--term-surface-2);border:1px solid var(--term-border-strong);color:var(--term-fg);font-family:var(--font-mono);font-size:var(--text-sm);font-weight:600;user-select:none}
+.comms__avatar--me{width:34px;height:34px;font-size:var(--text-xs)}
+.comms__avatar--room{border-radius:var(--radius-lg);color:var(--term-muted)}
 
-.comms__contact-open{display:flex;flex:1;min-width:0;align-items:center;background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.comms__contact-open:focus-visible{outline:2px solid var(--accent,#6ef3c5);outline-offset:2px}
-.comms__contact:has(> .comms__contact-open:focus-visible){outline:2px solid var(--accent,#6ef3c5);outline-offset:-2px}
-.comms__contact:has(> .comms__contact-open:focus-visible) .comms__contact-open{outline:none}
-.comms__contact--req{cursor:default}
-.comms__contact--req:hover{background:rgba(110,243,197,.05)}
-.comms__contact-mid{display:flex;flex-direction:column;gap:.12rem;flex:1;min-width:0}
-.comms__contact-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.9rem}
-.comms__contact-fp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.comms__rowbtn{opacity:0;border:0;background:transparent;color:#7a838d;cursor:pointer;padding:.45rem;border-radius:8px;flex:none;display:flex;align-items:center;transition:opacity .15s,color .15s}
+.comms__upgrade,.comms__notif{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2) var(--space-3);margin:0 var(--space-3) var(--space-2);padding:var(--space-2) var(--space-3);background:var(--cyan-8);border:1px solid var(--cyan-15);border-radius:var(--radius-lg)}
+.comms__upgrade-text,.comms__notif-text{flex:1 1 12rem;color:var(--term-fg);font-size:var(--text-xs);line-height:1.5}
+.comms__upgrade-actions{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.comms__notif .comms__btn--icon{width:32px;height:32px;padding:0}
+.comms__link .comms__card-slot{flex:1 1 100%}
+.comms__histbar{margin:var(--space-2) var(--space-3) 0;background:var(--amber-8);border-color:var(--amber-30)}
+.comms__app--chat .comms__histbar{display:flex}
+.comms__app--chat .comms__histbar[hidden],.comms__histbar[hidden]{display:none}
 
+.comms__adv{flex:none;display:flex;flex-direction:column;gap:var(--space-3);max-height:60%;overflow-y:auto;margin:0 var(--space-3) var(--space-2);padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__adv-sec{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
+.comms__adv-sec--col{flex-direction:column;align-items:stretch}
+.comms__adv-row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2)}
+.comms__room,.comms__room-new{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
+.comms__room{flex:1;min-width:12rem}
+.comms__relay{display:flex;align-items:center;gap:var(--space-2);padding:0;background:none;border:0;color:inherit;font:inherit;cursor:pointer}
+.comms__relay svg{color:var(--term-muted);transition:color .25s}
+.comms__relay[aria-checked="true"] svg{color:var(--syn-cyan)}
+.comms__relay-lbl{font-size:var(--text-sm)}
+.comms__relay-track{position:relative;width:34px;height:20px;border-radius:10px;background:rgba(255,255,255,.12);transition:background .25s}
+.comms__relay-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--term-muted);transition:transform .25s,background .25s}
+.comms__relay[aria-checked="true"] .comms__relay-track{background:var(--cyan-30)}
+.comms__relay[aria-checked="true"] .comms__relay-thumb{transform:translateX(14px);background:var(--syn-cyan)}
+.comms__relay-note{margin:var(--space-1) 0 0;max-width:46ch;color:var(--term-muted);font-size:var(--text-xs)}
+.comms__push-log{padding:var(--space-2);background:var(--term-bg);border:1px solid var(--term-border);border-radius:var(--radius-md);font-family:var(--font-mono);line-height:1.6;white-space:pre-line}
 
-.comms__rowbtn:focus-visible{opacity:1;outline:2px solid var(--accent,#6ef3c5)}
-@media (hover:none){.comms__rowbtn{opacity:.55}}
-.comms__rowbtn.comms__rowbtn--on{opacity:1;color:var(--accent,#6ef3c5)}
-.comms__chev{color:#3a4148;flex:none;display:flex;align-items:center}
-.comms__contacts-empty{padding:.65rem .3rem}
-.comms__notif{display:flex;align-items:center;gap:.6rem;background:rgba(110,243,197,.05);border:1px solid rgba(110,243,197,.25);border-radius:10px;padding:.55rem .75rem}
-.comms__notif-text{flex:1;color:#c3ccd6;font-size:.78rem;line-height:1.45}
-.comms__app--chat .comms__notif{display:none}
-.comms__addopt{display:flex;align-items:center;gap:.65rem;width:100%;background:#0a0d10;border:1px solid #2a3138;border-radius:12px;padding:.75rem .85rem;color:#e6edf3;font:inherit;font-size:.88rem;cursor:pointer;min-height:48px;transition:border-color .15s}
-
-.comms__addopt .comms__i{color:var(--accent,#6ef3c5);width:1.25em;height:1.25em}
+.comms__contacts{flex:1;min-height:0;display:flex;flex-direction:column;gap:var(--space-2);padding:0 var(--space-2) var(--space-2)}
+.comms__contacts-head{flex:none;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) var(--space-1) 0}
+.comms__contacts-head .comms__lbl{flex:1}
+.comms__contacts-head .comms__btn{padding:var(--space-1) var(--space-2);font-size:var(--text-xs)}
+.comms__contacts-list{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.comms__contacts-empty{padding:var(--space-3) var(--space-2)}
+.comms__contact{display:flex;align-items:center;gap:var(--space-3);min-height:56px;padding:var(--space-2);border-radius:var(--radius-md);cursor:pointer}
+.comms__contact--req{background:var(--cyan-8);border:1px solid var(--cyan-15);cursor:default}
+.comms__contact--req .comms__btn{padding:var(--space-1) var(--space-3);font-size:var(--text-xs)}
+.comms__contact-open{flex:1;min-width:0;display:flex;align-items:center;margin:0;padding:0;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.comms__contact-open:focus-visible{outline:none}
+.comms__contact:has(> .comms__contact-open:focus-visible){outline:2px solid var(--syn-cyan);outline-offset:-2px}
+.comms__contact-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.comms__contact-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-fg-strong);font-size:.93rem;font-weight:500}
+.comms__contact-fp{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-muted);font-family:var(--font-body);font-size:.8rem}
+.comms__unread{flex:none;display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:var(--radius-pill);background:var(--syn-cyan);color:#041016;font:600 var(--text-2xs) var(--font-mono)}
+.comms__missed{flex:none;display:inline-flex;align-items:center;color:var(--syn-pink)}
+.comms__missed .comms__i{width:1.05em;height:1.05em}
+.comms__rowbtn{flex:none;display:flex;align-items:center;padding:var(--space-2);background:transparent;border:0;border-radius:var(--radius-md);color:var(--term-subtle);opacity:0;cursor:pointer;transition:opacity .15s,color .15s}
+.comms__rowbtn:focus-visible{opacity:1;outline:2px solid var(--syn-cyan)}
+.comms__rowbtn--on{opacity:1;color:var(--syn-cyan)}
+.comms__rowbtn--text{padding:var(--space-1) var(--space-2);font:var(--text-2xs) var(--font-mono);opacity:.7}
+.comms__chev{flex:none;display:flex;align-items:center;color:var(--term-border-strong)}
+.comms__roomrow--current,.comms__contact--current{background:var(--term-surface-3)}
+.comms__contact-top{min-width:0;display:flex;align-items:baseline;gap:var(--space-2)}
+.comms__contact-top .comms__contact-name{flex:1;min-width:0}
+.comms__contact-time{flex:none;color:var(--term-subtle);font-family:var(--font-mono);font-size:var(--text-2xs)}
+.comms__avatar--tool{border-radius:var(--radius-lg)}
+.comms__avatar--tool svg{width:26px;height:26px}
+.comms__search{flex:none;height:38px;display:flex;align-items:center;gap:var(--space-2);padding:0 var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md);color:var(--term-subtle)}
+.comms__search:focus-within{border-color:var(--syn-cyan)}
+.comms__search-in{flex:1;min-width:0;padding:0;background:transparent;border:0;outline:0;color:var(--term-fg);font-family:var(--font-mono);font-size:var(--text-sm)}
+.comms__search-in::placeholder{color:var(--term-subtle)}
+.comms__filter{flex:none}
+.comms__filter>button{padding:var(--space-1) var(--space-2)}
+.comms__room-rename{max-width:12rem;padding:var(--space-1) var(--space-2)}
+.comms__id-card{flex:none;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:var(--space-3);margin:var(--space-1) 0;padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__id-qr{flex:none;border-radius:var(--radius-sm)}
+.comms__id-card-side{flex:1;min-width:12rem;display:flex;flex-direction:column;gap:var(--space-2)}
+.comms__id-card-actions{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.comms__add{flex:none;display:flex;flex-direction:column;gap:var(--space-2)}
+.comms__addopt{display:flex;align-items:center;gap:var(--space-3);width:100%;min-height:48px;padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg);color:var(--term-fg);font:inherit;font-size:var(--text-sm);cursor:pointer;transition:border-color .15s}
+.comms__addopt .comms__i{width:1.25em;height:1.25em;color:var(--syn-cyan)}
+.comms__contacts-add{display:flex;align-items:center;gap:var(--space-2)}
+.comms__scan{display:flex;flex-direction:column;align-items:stretch;gap:var(--space-2);width:100%}
+.comms__scan-video{width:100%;aspect-ratio:1;object-fit:cover;background:#000;border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__scan-zoom{display:flex;align-items:center;gap:var(--space-2);color:var(--term-subtle)}
+.comms__scan-zoom input[type=range]{flex:1;min-height:28px;accent-color:var(--syn-cyan)}
+.comms__scan-actions{display:flex;align-items:center;justify-content:flex-end;gap:var(--space-2)}
 #comms-add-toggle .comms__i{transition:transform .18s ease}
 #comms-add-toggle.is-on .comms__i{transform:rotate(45deg)}
-.comms__add{border-top:0;padding-top:0}
-.comms__scan{width:100%;align-items:stretch}
-.comms__scan-video{max-width:100%;width:100%;aspect-ratio:1;border-radius:14px}
-.comms__scan-zoom{display:flex;align-items:center;gap:.6rem;color:#7a838d}
-.comms__scan-zoom .comms__i{flex:none}
-.comms__scan-zoom input[type=range]{flex:1;accent-color:var(--accent,#6ef3c5);min-height:28px}
-.comms__scan-actions{display:flex;gap:.5rem;align-items:center;justify-content:flex-end}
-.comms__id-card{margin:.2rem 0}
-@media (max-width:640px){
-  .comms__chathead .comms__btn--icon,.comms__profile .comms__btn--icon{width:2.25rem;height:2.25rem}
+
+.comms__chathead{flex:none;min-height:56px;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) var(--space-3);background:var(--term-bg-raised);border-bottom:1px solid var(--term-border)}
+.comms__chathead .comms__btn--icon:not(.comms__btn--danger){background:transparent;border-color:transparent;color:var(--term-muted)}
+.comms__chathead .comms__btn--icon.is-on{color:var(--syn-cyan)}
+.comms__chathead-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.comms__chathead-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--term-fg-strong);font-size:.95rem;font-weight:600}
+.comms__chathead-sub{min-width:0;overflow:hidden;display:flex;align-items:center;gap:var(--space-2);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__sub-bit{display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap}
+#comms-status.comms__sub-bit{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#comms-eph.comms__sub-bit{color:var(--syn-amber)}
+.comms__ring{flex:none;display:flex;align-items:center;gap:var(--space-2);margin:var(--space-2) var(--space-3) 0;padding:var(--space-2) var(--space-3);background:var(--cyan-8);border:1px solid var(--cyan-30);border-radius:var(--radius-lg)}
+.comms__ring-text{flex:1;color:var(--term-fg-strong);font-size:var(--text-sm)}
+.comms__media{flex:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-2);margin:var(--space-2) var(--space-3) 0;padding:var(--space-2);background:var(--term-bg-raised);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
+.comms__tile{position:relative;min-height:72px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md)}
+.comms__tile video{display:block;width:100%;height:100%;max-height:200px;object-fit:cover}
+.comms__tile-label{position:absolute;left:var(--space-1);bottom:var(--space-1);padding:1px var(--space-1);background:rgba(0,0,0,.55);border-radius:var(--radius-sm);color:var(--term-fg);font:var(--text-2xs) var(--font-mono)}
+.comms__tile-voice{color:var(--syn-cyan);font-size:1.3rem}
+.comms__peerlist{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-1);padding:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) 0}
+.comms__chip{padding:2px var(--space-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-sm);color:var(--term-muted);font:var(--text-2xs) var(--font-mono);line-height:1.4}
+.comms__chip-add{margin-left:var(--space-1);padding:0;background:none;border:0;color:var(--syn-cyan);font-size:var(--text-xs);cursor:pointer}
+
+.comms__chatbody{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.comms__chatbody.comms__drop--hot{outline:2px dashed var(--syn-cyan);outline-offset:-6px}
+.comms__log{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:var(--space-2);padding:var(--space-4) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-5)}
+.comms__earlier{flex:none;align-self:center;padding:var(--space-1) var(--space-3);background:transparent;border:1px solid var(--term-border);border-radius:var(--radius-md);color:var(--syn-cyan);font:var(--text-xs) var(--font-mono);cursor:pointer}
+.comms__earlier:disabled{opacity:.5;cursor:default}
+.comms__line{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.comms__line--me{align-items:flex-end}
+.comms__line--sys{align-items:center}
+.comms__who{padding:0 var(--space-1);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-2xs)}
+.comms__who--me{color:var(--term-subtle)}
+.comms__time{margin-left:var(--space-1);color:var(--term-subtle);font-size:var(--text-2xs);font-variant-numeric:tabular-nums}
+.comms__what{max-width:min(82%,470px);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg);color:var(--term-fg);font-size:.94rem;line-height:1.5;overflow-wrap:anywhere}
+.comms__line--me .comms__what{background:var(--cyan-8);border-color:var(--cyan-15)}
+.comms__line--sys .comms__what{max-width:94%;padding:var(--space-1) 0;background:none;border:0;color:var(--term-subtle);font-family:var(--font-mono);font-size:var(--text-2xs);font-style:normal;text-align:center}
+.comms__what--sys{color:var(--term-subtle)}
+.comms__what p{margin:0}
+.comms__what p+p,.comms__what ul,.comms__what ol,.comms__what pre,.comms__what table,.comms__what blockquote{margin-top:.35em}
+.comms__what ul,.comms__what ol{margin-bottom:0;padding-left:1.2em}
+.comms__what h1,.comms__what h2,.comms__what h3,.comms__what h4{margin:.35em 0 .1em;color:var(--term-fg-strong);font-family:var(--font-body);font-size:1em;letter-spacing:0;text-transform:none}
+.comms__what code{padding:.05em .3em;background:rgba(255,255,255,.07);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:.86em}
+.comms__what pre{overflow-x:auto;padding:var(--space-2) var(--space-3);background:var(--term-bg);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__what pre code{padding:0;background:none}
+.comms__what table{display:block;overflow-x:auto;border-collapse:collapse;font-size:.86rem}
+.comms__what th,.comms__what td{padding:.2em .55em;border:1px solid var(--term-border-strong);text-align:left}
+.comms__what th{background:var(--term-surface-3);color:var(--term-fg-strong)}
+.comms__what a{color:var(--syn-cyan);text-decoration:underline}
+.comms__what blockquote{margin:.35em 0 0;padding-left:.7em;border-left:2px solid var(--term-border-strong);color:var(--term-muted)}
+.comms__what img{display:block;max-width:100%;height:auto;margin:.3rem 0;border-radius:var(--radius-md)}
+.comms__imgload{margin:var(--space-1) 0;border-style:dashed;border-radius:var(--radius-md);font-size:var(--text-xs)}
+.comms__line--pending .comms__what{opacity:.7}
+.comms__pending-note{margin-left:var(--space-2);color:var(--syn-amber);font-family:var(--font-mono);font-size:var(--text-2xs)}
+.comms__resend{margin-left:var(--space-2);padding:1px var(--space-2);background:none;border:1px solid var(--term-border-strong);border-radius:var(--radius-sm);color:var(--syn-cyan);font:var(--text-2xs) var(--font-mono);cursor:pointer}
+.comms__prog{display:inline-block;width:96px;height:4px;margin:0 var(--space-2);overflow:hidden;vertical-align:middle;background:rgba(255,255,255,.12);border-radius:2px}
+.comms__prog-fill{display:block;width:0%;height:100%;background:var(--syn-cyan);transition:width .12s linear}
+.comms__prog-text{color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
+.comms__thumb{display:block;max-width:240px;max-height:180px;margin-top:var(--space-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md);cursor:zoom-in}
+.comms__what:has(>.comms__partsbox){padding:var(--space-1)}
+.comms__partsbox{width:min(320px,100%)}
+.comms__parts{display:flex;flex-direction:column;gap:var(--space-2)}
+.comms__parts-text{padding:var(--space-1) var(--space-2)}
+.comms__album{display:grid;gap:3px;width:100%;overflow:hidden;border-radius:var(--radius-md)}
+.comms__album--two,.comms__album--grid{grid-template-columns:1fr 1fr}
+.comms__album--three{grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr}
+.comms__album--three .comms__tile:first-child{grid-row:1/span 2;aspect-ratio:auto}
+.comms__tile{position:relative;display:block;padding:0;border:0;background:var(--term-surface-3);aspect-ratio:1;overflow:hidden;cursor:zoom-in}
+.comms__album--one .comms__tile{aspect-ratio:auto;max-height:340px}
+.comms__album--one .comms__tile-img{height:auto;max-height:340px}
+.comms__tile-img{display:block;width:100%;height:100%;object-fit:cover;transition:filter .3s ease,transform .3s ease}
+.comms__tile-img.is-blurred{filter:blur(8px);transform:scale(1.08)}
+.comms__pring{position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;transform:rotate(-90deg)}
+.comms__pring-back{fill:rgba(0,0,0,.45);stroke:rgba(255,255,255,.22);stroke-width:3}
+.comms__pring-fill{fill:none;stroke:var(--syn-cyan);stroke-width:3;stroke-linecap:round;transition:stroke-dasharray .25s ease}
+.comms__tile-play{position:absolute;left:50%;top:50%;margin:-10px 0 0 -6px;border-left:16px solid rgba(255,255,255,.92);border-top:10px solid transparent;border-bottom:10px solid transparent}
+.comms__tile:not(.is-done) .comms__tile-play{display:none}
+.comms__tile-dur{position:absolute;right:6px;bottom:6px;padding:1px 6px;color:#fff;font-family:var(--font-mono);font-size:var(--text-xs);background:rgba(0,0,0,.55);border-radius:var(--radius-sm)}
+.comms__album-more{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:600;background:rgba(0,0,0,.45)}
+.comms__parts-status{margin:0;padding:0 var(--space-2);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__parts-paused{margin:0;padding:var(--space-2) var(--space-3);color:var(--term-fg);font-size:var(--text-sm);background:color-mix(in srgb,var(--syn-amber) 12%,transparent);border:1px solid color-mix(in srgb,var(--syn-amber) 40%,transparent);border-radius:var(--radius-md)}
+.comms__parts-retry{align-self:flex-start}
+.comms__caption{padding:0 var(--space-2) var(--space-1)}
+.comms__filecard{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__filecard .comms__pring{position:static;width:28px;height:28px;margin:0}
+.comms__ficon{position:relative;display:flex;align-items:flex-end;justify-content:center;width:30px;height:36px;padding-bottom:4px;color:var(--term-fg);font-family:var(--font-mono);font-size:9px;font-weight:600;background:var(--term-border-strong);border-radius:4px}
+.comms__ficon--pdf::before{content:'PDF'}
+.comms__ficon--archive::before{content:'ZIP'}
+.comms__ficon--audio::before{content:'AUD'}
+.comms__ficon--text::before{content:'TXT'}
+.comms__ficon--other::before{content:'FILE'}
+.comms__fmeta{display:flex;flex-direction:column;min-width:0}
+.comms__fname{overflow:hidden;font-size:var(--text-sm);white-space:nowrap;text-overflow:ellipsis}
+.comms__fsize,.comms__fsaved{color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__facts{display:flex;flex-wrap:wrap;gap:var(--space-2);grid-column:1/-1}
+.comms__sheet{width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 48px);padding:var(--space-4);color:var(--term-fg);background:var(--term-bg-raised);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__sheet::backdrop{background:rgba(0,0,0,.55)}
+.comms__sheet[open]{display:flex;flex-direction:column;gap:var(--space-3);overflow:auto}
+.comms__sheet-title{margin:0;font-family:var(--font-mono);font-size:var(--text-sm);font-weight:600}
+.comms__sheet-strip{display:flex;gap:var(--space-2);margin:0;padding:0 0 var(--space-1);overflow-x:auto;list-style:none}
+.comms__sheet-item{position:relative;flex:0 0 auto;width:88px}
+.comms__sheet-thumb{display:block;width:88px;height:88px;object-fit:cover;background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__sheet-item[data-kind="file"] .comms__sheet-thumb,.comms__sheet-item[data-kind="video"] .comms__sheet-thumb:not([src]){visibility:hidden}
+.comms__sheet-item[data-kind="file"]::before,.comms__sheet-item[data-kind="video"]::before{content:'';position:absolute;inset:0 0 auto;height:88px;background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__sheet-item.is-too-big{opacity:.5}
+.comms__sheet-name{display:block;margin-top:2px;overflow:hidden;color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs);white-space:nowrap;text-overflow:ellipsis}
+.comms__sheet-rm{position:absolute;top:4px;right:4px;width:24px;height:24px;padding:0;color:#fff;font-size:16px;line-height:24px;background:rgba(0,0,0,.6);border:0;border-radius:50%;cursor:pointer}
+.comms__sheet-add{align-self:flex-start}
+.comms__sheet-caption{width:100%;resize:vertical}
+.comms__sheet-est{margin:0;color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__sheet-warn{margin:0;padding:var(--space-2) var(--space-3);font-size:var(--text-sm);background:color-mix(in srgb,var(--syn-amber) 12%,transparent);border:1px solid color-mix(in srgb,var(--syn-amber) 40%,transparent);border-radius:var(--radius-md)}
+.comms__sheet-big{margin:0;color:var(--term-muted);font-size:var(--text-sm)}
+.comms__sheet-actions{display:flex;justify-content:flex-end;gap:var(--space-2)}
+.comms__acceptbar{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);font-size:var(--text-sm);background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__acceptbar-text{flex:1 1 140px}
+.comms__parts-devices{margin:0;padding:0 var(--space-2);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__parts-devices:empty{display:none}
+.comms__viewer{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;padding:0;color:#fff;background:rgba(0,0,0,.94);border:0}
+.comms__viewer[open]{display:grid;grid-template-rows:auto 1fr auto}
+.comms__viewer::backdrop{background:#000}
+.comms__viewer-top{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);padding-top:max(var(--space-2),env(safe-area-inset-top))}
+.comms__viewer-count{font-family:var(--font-mono);font-size:var(--text-xs);opacity:.8}
+.comms__viewer-name{flex:1;overflow:hidden;font-size:var(--text-sm);white-space:nowrap;text-overflow:ellipsis}
+.comms__viewer-stage{display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden;touch-action:pan-y}
+.comms__viewer-media{max-width:100%;max-height:100%;object-fit:contain}
+.comms__viewer-nav{position:absolute;top:50%;width:44px;height:64px;margin-top:-32px;color:#fff;font-size:2rem;background:rgba(0,0,0,.35);border:0;border-radius:var(--radius-md);cursor:pointer}
+.comms__viewer-nav--prev{left:8px}
+.comms__viewer-nav--next{right:8px}
+.comms__viewer-strip{display:flex;gap:4px;padding:var(--space-2);padding-bottom:max(var(--space-2),env(safe-area-inset-bottom));overflow-x:auto}
+.comms__viewer-thumb{flex:0 0 auto;width:52px;height:52px;padding:0;overflow:hidden;color:#fff;background:#222;border:2px solid transparent;border-radius:var(--radius-sm);cursor:pointer}
+.comms__viewer-thumb.is-current{border-color:var(--syn-cyan)}
+.comms__viewer-thumb img{width:100%;height:100%;object-fit:cover}
+.comms__mediagrid{width:min(640px,calc(100vw - 32px))}
+.comms__media-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3)}
+.comms__media-usage{margin:0;color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__media-cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:4px;margin-top:var(--space-3)}
+.comms__media-cell{position:relative;aspect-ratio:1;padding:0;overflow:hidden;color:var(--term-muted);font-size:var(--text-xs);background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-sm);cursor:pointer}
+.comms__media-cell img{width:100%;height:100%;object-fit:cover}
+.comms__media-label{display:block;padding:var(--space-2);overflow:hidden;text-overflow:ellipsis}
+.comms__relaybar{background:color-mix(in srgb,var(--syn-amber) 10%,transparent);border-color:color-mix(in srgb,var(--syn-amber) 35%,transparent)}
+
+.comms__send{flex:none;display:flex;align-items:center;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__send:focus-within{border-color:var(--syn-cyan)}
+.comms__send--offline{opacity:.55}
+.comms__attach{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:var(--radius-md);color:var(--term-muted);cursor:pointer;transition:color .15s}
+.comms__attach .comms__i{width:18px;height:18px}
+.comms__input--msg{flex:1;min-width:0;padding:var(--space-2);background:transparent;border:0;color:var(--term-fg-strong);font-family:var(--font-body);font-size:.95rem}
+.comms__input--msg:focus{border:0}
+.comms__btn--send{width:36px;height:36px;flex:none;padding:0;border-radius:var(--radius-md)}
+.comms__btn--send .comms__i{width:18px;height:18px}
+
+.comms__picker{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:var(--space-4)}
+.comms__picker-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.comms__picker-card{position:relative;z-index:1;width:100%;max-width:24rem;max-height:80vh;overflow:auto;display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-4);background:var(--term-bg-raised);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg);box-shadow:var(--elev-3)}
+.comms__picker-h{margin:0;color:var(--term-fg-strong);font:600 var(--text-sm) var(--font-mono);letter-spacing:0;text-transform:none}
+.comms__picker-list{display:flex;flex-direction:column;gap:var(--space-1)}
+.comms__picker-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-md);color:var(--term-fg);font:inherit;font-size:var(--text-sm);text-align:left;cursor:pointer}
+.comms__picker-ver{flex:none;color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
+.comms__picker-actions{display:flex;justify-content:flex-end}
+
+@media (hover:hover) and (pointer:fine){
+  .comms__btn:hover:not(:disabled){background:var(--syn-cyan-soft);box-shadow:var(--glow-cyan-soft)}
+  .comms__btn--ghost:hover:not(:disabled){background:transparent;box-shadow:none;border-color:var(--term-border-strong);color:var(--term-fg)}
+  .comms__btn--danger:hover:not(:disabled){background:var(--pink-10);box-shadow:none}
+  .comms__btn.is-on:hover:not(:disabled){background:var(--cyan-15);box-shadow:none}
+  .comms__chathead .comms__btn--icon:not(.comms__btn--danger):hover:not(:disabled){background:transparent;box-shadow:none;color:var(--term-fg)}
+  .comms__contact:hover{background:var(--term-surface-2)}
+  .comms__contact--req:hover{background:var(--cyan-8)}
+  .comms__contact:hover .comms__rowbtn{opacity:1}
+  .comms__rowbtn:hover{color:var(--syn-pink)}
+  .comms__addopt:hover{border-color:var(--syn-cyan)}
+  .comms__picker-item:hover{border-color:var(--syn-cyan);color:var(--syn-cyan)}
+  .comms__resend:hover,.comms__earlier:hover:not(:disabled){border-color:var(--syn-cyan)}
+  .comms__lock-alt summary:hover{color:var(--term-muted)}
+  .comms__attach:hover{color:var(--term-fg)}
+}
+@media (hover:none){.comms__rowbtn{opacity:.55}}
+
+@media (min-width:721px){
+  .comms__app{display:grid;grid-template-columns:320px minmax(0,1fr)}
+  .comms__side{grid-column:1;grid-row:1;border-right:1px solid var(--term-border)}
+  .comms__main,.comms__home{grid-column:2;grid-row:1}
+}
+@media (max-width:720px){
+  html.is-standalone body:has(#comms-app) .site-header{display:none}
+  html.is-standalone body:has(#comms-app)>main{padding-top:env(safe-area-inset-top,0px)}
+  html.is-standalone body:has(.comms__app--chat:not([hidden])){padding-bottom:0}
+  html.is-standalone body:has(.comms__app--chat:not([hidden])) .app-bar{display:none}
+  .comms__side{flex:1;background:var(--term-bg)}
+  .comms__profile-spacer{flex:1}
+  .comms__app--chat .comms__side{display:none}
+  .comms__home{flex:none;align-items:stretch;padding:var(--space-2) var(--space-3) var(--space-3);background:var(--term-bg);border-top:1px solid var(--term-border)}
+  .comms__home-h,.comms__home-hint{display:none}
+  .comms__homesend{width:100%}
+  .comms__brand{display:block}
+  .comms__profile #comms-id-on{display:none}
+  .comms__side:has(#comms-adv:not([hidden])) .comms__profile #comms-id-on:not([hidden]){display:grid;order:9;flex-basis:100%;padding-top:var(--space-2)}
+  .comms__input,.comms__input--msg,.comms__search-in{font-size:16px}
   .comms__what{max-width:88%}
-  .comms__log{height:clamp(15rem,56vh,30rem)}
-  .comms__id-row--you{min-width:0}
+  .comms__btn--icon .comms__btn-t{display:none}
+  .comms__contacts-head .comms__btn--icon .comms__btn-t{display:inline}
 }
 </style>
 
 <script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
+<script src="/assets/js/mentria-meta-strip.js?v={{ buildHash }}"></script>
+<script src="/assets/js/mentria-image.js?v={{ buildHash }}"></script>
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 <script type="module">
 import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/assets/vendor/trystero-nostr.js';
@@ -550,6 +672,17 @@ import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
 import { holdAwake } from '/assets/js/mentria-wake.js';
+import { renderBody, renderParts, updateParts, addToAlbum } from '/assets/js/comms/cards.js';
+import { openStore } from '/assets/js/comms/store.js';
+import { secretCopy } from '/assets/js/comms/identity.js';
+import { homeRows, aiHref } from '/assets/js/comms/threads.js';
+import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
+import { createAttach } from '/assets/js/comms/attach.js';
+import { acceptFor, relayAsk, viaRelay, blankedCopy, importPlan, shownState } from '/assets/js/comms/files.js';
+import { openSheet } from '/assets/js/comms/sheet.js';
+import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
+import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
+import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -810,18 +943,10 @@ const setView = (v) => {
   els.app.classList.toggle('comms__app--people', v !== 'chat');
 };
 
-const hueOf = (seed) => {
-  let h = 0;
-  const s = String(seed || '');
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
-  return h;
-};
 const paintAvatar = (el, name, seed) => {
   if (!el) return;
   const label = String(name || '').trim();
   el.textContent = label ? label[0].toUpperCase() : '#';
-  el.style.background = `hsl(${hueOf(seed || label)} 45% 26%)`;
-  el.style.color = `hsl(${hueOf(seed || label)} 80% 78%)`;
 };
 
 const MAX_FILE = 50 * 1024 * 1024;
@@ -884,11 +1009,6 @@ document.getElementById('comms-relay').addEventListener('click', () => {
 renderRelayToggle();
 let audioCtx = null;
 
-const CHAT_TOPIC_V2 = 'mentria-comms-topic-v2|';
-const CHAT_KIND = 3838;
-const EPHEMERAL_PREFIX = '!';
-const HISTORY_LOOKBACK_SEC = 7 * 24 * 60 * 60;
-const HISTORY_LIMIT = 100;
 const PROOF_LABEL = 'mentria-prof-proof-v1';
 
 let chatSubId = null;
@@ -897,79 +1017,11 @@ let chatPersist = true;
 let seenCmids = new Set();
 const socketListenersAttached = new WeakSet();
 
-const isEphemeralRoom = (name) => typeof name === 'string' && name.startsWith(EPHEMERAL_PREFIX);
-const isDmRoom = (name) => typeof name === 'string' && (name.startsWith('!dm-') || name.startsWith('dm-'));
 const newCmid = () => selfId + ':' + Math.random().toString(36).slice(2);
 
 let chatKey = null;
 
-const b64encode = (bytes) => {
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-  return btoa(s);
-};
-const b64decode = (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
-const b64urlEncode = (bytes) => b64encode(bytes).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
-const b64urlDecode = (str) => {
-  const b64 = str.replaceAll('-','+').replaceAll('_','/');
-  const padded = b64 + '='.repeat((4 - b64.length % 4) % 4);
-  return b64decode(padded);
-};
-
-const decodeRoom = (part) => {
-  try { return decodeURIComponent(part); } catch (_) { return part; }
-};
-
-const parseHash = (hash) => {
-  const raw = (hash || '').slice(1).trim();
-  if (!raw) return { room: null, b64Key: null };
-  const colonIdx = raw.indexOf(':');
-  if (colonIdx === -1) return { room: decodeRoom(raw) || null, b64Key: null };
-  return { room: decodeRoom(raw.slice(0, colonIdx)) || null, b64Key: raw.slice(colonIdx + 1) || null };
-};
-
-const formatHash = (room, b64Key) => '#' + encodeURIComponent(room) + (b64Key ? ':' + b64Key : '');
-
-const deriveKey = async (b64Key) => {
-  try {
-    const raw = b64urlDecode(b64Key);
-    if (raw.length !== 32) throw new Error('key must be 32 bytes');
-    return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
-  } catch (err) {
-    console.warn('key parse failed:', err);
-    return null;
-  }
-};
-
-const topicCache = new Map();
-const chatTopicFor = (roomName, b64Key) => {
-  const id = b64Key + ':' + roomName;
-  if (!topicCache.has(id)) {
-    topicCache.set(id, (async () => {
-      const raw = b64urlDecode(b64Key);
-      if (raw.length !== 32) return null;
-      const mac = await crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-      return b64urlEncode(new Uint8Array(await crypto.subtle.sign('HMAC', mac, new TextEncoder().encode(CHAT_TOPIC_V2 + roomName))));
-    })().catch(() => null));
-  }
-  return topicCache.get(id);
-};
 try { if (MentriaStore.get('comms', 'topic_v2_since') != null) MentriaStore.remove('comms', 'topic_v2_since'); } catch (_) {}
-const expiryTags = () => [['expiration', String(Math.floor(Date.now() / 1000) + HISTORY_LOOKBACK_SEC)]];
-
-const encryptText = async (key, plaintext) => {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(plaintext));
-  return { v: 1, iv: b64encode(iv), ct: b64encode(new Uint8Array(ct)) };
-};
-
-const decryptText = async (key, payload) => {
-  if (!payload || payload.v !== 1) throw new Error('bad payload');
-  const iv = b64decode(payload.iv);
-  const ct = b64decode(payload.ct);
-  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
-  return new TextDecoder().decode(pt);
-};
 
 const short = (id) => id ? id.slice(0, 6) : T.unknown;
 
@@ -990,12 +1042,6 @@ const nameOf = (peerId) => {
     if (contact && contact.name) return contact.name;
   }
   return (prof && prof.name) || T.people.someone;
-};
-
-const peerColor = (id) => {
-  let h = 0;
-  for (let i = 0; i < (id || '').length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return `hsl(${h % 360}, 55%, 65%)`;
 };
 
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1031,7 +1077,6 @@ const renderPeerList = () => {
   peers.forEach(p => {
     const chip = document.createElement('span');
     chip.className = 'comms__chip';
-    chip.style.color = peerColor(p);
     chip.textContent = displayName(p);
     const prof = peerProfiles.get(p);
     chip.title = prof && prof.verified && prof.fp ? fmt(T.peers.fp_title, { fp: prof.fp }) : p;
@@ -1075,7 +1120,6 @@ const renderLine = (who, what, opts = {}) => {
     w.textContent = hhmmOf(opts.ts);
   } else {
     w.textContent = who;
-    if (opts.peerId) w.style.color = peerColor(opts.peerId);
     const time = document.createElement('span');
     time.className = 'comms__time';
     time.textContent = hhmmOf(opts.ts);
@@ -1084,10 +1128,8 @@ const renderLine = (who, what, opts = {}) => {
   const t = document.createElement('span');
   t.className = 'comms__what' + (opts.sys ? ' comms__what--sys' : '');
   if (opts.html) t.innerHTML = opts.html;
-  else if (!opts.sys && window.renderMarkdown && /[*_`#>\[\]|\n-]/.test(String(what || ''))) {
-    t.innerHTML = renderMarkdown(String(what)) || '';
-    t.querySelectorAll('a[href]').forEach((a) => { a.target = '_blank'; a.rel = 'noopener'; });
-  } else t.textContent = what;
+  else if (opts.sys) t.textContent = what;
+  else renderBody(t, what, { from: opts.me ? 'self' : 'person', T: T.chat });
   if (opts.quiet) line.setAttribute('aria-live', 'off');
   line.append(w, t);
   const ts = (typeof opts.ts === 'number' && opts.ts > 0) ? opts.ts : Date.now();
@@ -1139,7 +1181,7 @@ const setConnUI = () => {
   els.send.classList.toggle('comms__send--offline', offline);
   els.status.classList.toggle('comms__badge--offline', offline);
   if (currentRoomName) {
-    els.status.textContent = offline ? T.chat.reconnecting : (isDmRoom(currentRoomName) ? T.chat.private : fmt(T.chat.room, { room: currentRoomName }));
+    els.status.textContent = offline ? T.chat.reconnecting : (isDmRoom(currentRoomName) ? T.chat.private : inSelf() ? (selfStatus() || T.devices.title) : fmt(T.chat.room, { room: currentRoomName }));
   }
 };
 window.addEventListener('offline', setConnUI);
@@ -1163,6 +1205,7 @@ const renderPendingLine = (text, payload, cmid) => {
     if (!chatAction) { sys(T.log.not_connected); return; }
     chatAction.send(payload);
     publishChat(text, cmid);
+    storeLine(cmid, 'self', text, Date.now());
     line.line.classList.remove('comms__line--pending');
     note.remove();
     btn.remove();
@@ -1181,7 +1224,7 @@ const shareUrl = (roomName, b64Key) => {
 };
 
 const refreshShareUrl = (roomName) => {
-  els.share.hidden = !roomName || isDmRoom(roomName);
+  els.share.hidden = !roomName || isDmRoom(roomName) || tidOf(roomName) === SELF_THREAD;
 };
 
 const copyRoomLink = (url) => {
@@ -1205,29 +1248,25 @@ const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp |
 const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
 
 const renderRemoteChat = (item, opts = {}) => {
+  const files = mediaParts(item.parts).length > 0;
   if (sentByMe(item)) {
-    renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
+    if (files) renderAttachment('you', item.parts, { me: true, ts: item.ts });
+    else renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
+    if (!opts.stored) storeLine(item.cmid, 'self', item.text, item.ts, undefined, item.parts);
+    if (files) receiveAttachments(item, true);
     return;
   }
   let who = displayName(item.senderId);
   if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
-  renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
+  if (files) renderAttachment(who, item.parts, { peerId: item.senderId, sender: item.sfp2 || item.sfp || item.senderId || null, ts: item.ts });
+  else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
+  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '' }, item.parts);
+  if (files) receiveAttachments(item, false);
   if (!opts.silent) {
     playPing(880);
     const target = notifTargetNow();
     notifyLocal({ tag: target.tag, title: who, body: item.text, url: target.url });
   }
-};
-
-const packChatPlain = (text, extra) => JSON.stringify(Object.assign({ v: 2, t: text, sfp: myLegacyFp || undefined, sfp2: (myFp && myFp !== myLegacyFp) ? myFp : undefined }, extra || {}));
-const unpackChatPlain = (raw) => {
-  try {
-    const o = JSON.parse(raw);
-    if (o && o.v === 2 && typeof o.t === 'string') {
-      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, sfp2: typeof o.sfp2 === 'string' ? o.sfp2 : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null };
-    }
-  } catch (_) {}
-  return { text: raw, sfp: null, sfp2: null, ctl: null };
 };
 
 const handleNostrMsg = async (msgEvent) => {
@@ -1239,12 +1278,13 @@ const handleNostrMsg = async (msgEvent) => {
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     if (!content || !content.cmid || !content.enc || !chatKey || seenCmids.has(content.cmid)) return;
-    let text, sfp = null, sfp2 = null;
+    let text, sfp = null, sfp2 = null, parts = null;
     try {
       const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
       text = unpacked.text;
       sfp = unpacked.sfp;
       sfp2 = unpacked.sfp2;
+      parts = unpacked.parts;
       if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
     } catch { return; }
     seenCmids.add(content.cmid);
@@ -1252,7 +1292,7 @@ const handleNostrMsg = async (msgEvent) => {
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp, sfp2 };
+    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1266,10 +1306,466 @@ const closeChatSub = () => {
   }
 };
 
+const HISTORY_PAGE = 200;
+const HISTORY_WAIT_MS = 1500;
+let commsStore = null;
+let commsStoreP = null;
+let historyNoted = '';
+
+const historyBar = (kind) => {
+  const bar = document.getElementById('comms-hist-bar');
+  if (!bar || historyNoted === kind) return;
+  historyNoted = kind;
+  document.getElementById('comms-hist-text').textContent = kind === 'foreign' ? T.history.foreign : T.history.unavailable;
+  document.getElementById('comms-hist-reset').hidden = kind !== 'foreign';
+  bar.hidden = false;
+};
+
+const hideHistoryBar = () => {
+  const bar = document.getElementById('comms-hist-bar');
+  if (bar) bar.hidden = true;
+  historyNoted = '';
+};
+
+const openHistory = () => {
+  if (commsStoreP) return commsStoreP;
+  let secret = null;
+  try { secret = secretCopy(); } catch (_) { return Promise.resolve(null); }
+  commsStoreP = openStore(secret).then((st) => {
+    commsStore = st;
+    if (st.status === 'foreign') historyBar('foreign');
+    else { refreshHomeThreads(); startFiles(st); }
+    return st;
+  }, () => {
+    commsStore = null;
+    historyBar('unavailable');
+    return null;
+  }).finally(() => { secret.fill(0); });
+  return commsStoreP;
+};
+
+const historyOn = () => !!(commsStore && commsStore.status === 'open');
+const historyFail = (e) => historyBar(e && e.code === 'foreign' ? 'foreign' : 'unavailable');
+const keepsHistory = (name) => !!(name && chatPersist && !isEphemeralRoom(name));
+
+const storeLine = (cmid, from, text, ts, meta, parts) => {
+  const room = tidOf(currentRoomName);
+  if (!cmid || !historyOn() || !keepsHistory(currentRoomName)) return;
+  const t = String(text == null ? '' : text);
+  commsStore.putMessage({ id: cmid, threadId: room, from, ts: Number(ts) || Date.now(), t, parts: parts && parts.length ? parts : [{ type: 'text', text: t }], meta: meta || undefined, v: 2 }).then(refreshHomeThreads, historyFail);
+};
+
+const MAX_SEND = 2 * 1024 * 1024 * 1024;
+let attach = null;
+let selfRoom = null;
+const myDevice = deviceInfo(T);
+const presence = new Presence();
+let historySync = null;
+const selfPeers = new Map();
+const oldSelfNames = new Set();
+const tidOf = (name) => ((selfRoom && name === selfRoom.roomName) || oldSelfNames.has(name) ? SELF_THREAD : name);
+let selfTimer = 0;
+const checkSelfWeek = async () => {
+  if (!selfRoom || !historyOn()) return;
+  let next = null;
+  try { const sec = secretCopy(); try { next = await selfRoomFor(sec); } finally { sec.fill(0); } } catch (_) { return; }
+  if (!next || next.roomName === selfRoom.roomName) return;
+  oldSelfNames.add(selfRoom.roomName);
+  selfRoom = next;
+  if (attach) attach.refresh();
+};
+const inSelf = () => !!currentRoomName && tidOf(currentRoomName) === SELF_THREAD;
+const selfStatus = () => [fmt(T.devices.this_one, { device: myDevice.name })].concat(presence.list(myDevice.id).filter((d) => !d.me).map((d) => fmt(d.online ? T.devices.online : T.devices.asleep, { device: d.name }))).join(', ');
+const refreshSelfHeader = () => { if (inSelf()) els.status.textContent = selfStatus() || fmt(T.devices.this_one, { device: myDevice.name }); };
+const devicesLine = (rec) => {
+  const others = presence.list(myDevice.id).filter((d) => !d.me);
+  if (!others.length || !rec) return '';
+  return others.map((d) => fmt((rec.onDevices || []).includes(d.id) ? T.devices.got : T.devices.when_open, { device: d.name })).join(' · ');
+};
+const fileLines = new Map();
+const mediaParts = (parts) => (parts || []).flatMap((p) => (p.type === 'album' ? (p.items || []) : (p.type === 'image' || p.type === 'video' || p.type === 'file') ? [p] : []));
+
+const threadInfoFor = async (id) => {
+  if (!myId || !id) return null;
+  if (id === SELF_THREAD) return selfRoom ? { roomName: selfRoom.roomName, b64Key: selfRoom.b64Key, pinned: true } : null;
+  if (isDmRoom(id)) {
+    let fp = null;
+    try { const t = commsStore ? await commsStore.getThread(id) : null; fp = t && t.meta ? t.meta.fp : null; } catch (_) {}
+    const contacts = CID.getContacts();
+    const list = fp ? contacts.filter((c) => c.fp === fp).concat(contacts.filter((c) => c.fp !== fp)) : contacts;
+    for (const c of list) {
+      try {
+        const d = await CID.deriveDm(myId.privateKey, c.pub);
+        if (d.roomName === id) return { roomName: d.roomName, b64Key: d.b64Key, contactFp: c.fp };
+      } catch (_) {}
+    }
+    return null;
+  }
+  const r = savedRooms().find((x) => x.room === id);
+  return r && r.key ? { roomName: r.room, b64Key: r.key } : null;
+};
+
+const joinFilesRoom = async (roomId, password) => {
+  let ice = FALLBACK_ICE;
+  try { ice = await getIce(); } catch (_) { ice = FALLBACK_ICE; }
+  const rtcConfig = { iceServers: ice };
+  if (relayOnly && hasTurn(ice)) rtcConfig.iceTransportPolicy = 'relay';
+  return joinRoom({ appId: 'mentria', relayConfig: { urls: [RELAY] }, rtcConfig, password }, roomId);
+};
+
+const knockThread = async (threadId) => {
+  if (!isDmRoom(threadId)) return false;
+  const info = await threadInfoFor(threadId);
+  const c = info && info.contactFp ? freshContact(info.contactFp) : null;
+  return c ? knockContact(c, 'comms-msg') : false;
+};
+
+const PIECE_BYTES = 262144;
+const albumCards = new Map();
+const paintAttach = async (ref) => {
+  const entry = fileLines.get(ref);
+  if (!entry || !entry.card.isConnected || !commsStore) return;
+  let rec = null;
+  try { rec = await commsStore.getMedia(ref); } catch (_) { rec = null; }
+  const st = attach ? attach.stats(ref) : null;
+  const MF = window.MentriaMediaFormat;
+  let m;
+  if (!rec) {
+    m = { state: 'unknown', have: 0, total: 1 };
+  } else {
+    const n = MF ? Math.max(1, MF.pieceCount(rec.size)) : 1;
+    const have = rec.complete ? n : (st ? st.have : (MF ? MF.bfCount(MF.bfFrom(rec.have, n)) : 0));
+    const peers = st ? st.peers : 0;
+    if (rec.role === 'out') {
+      const live = rec.delivered ? 'done' : (st && st.rate > 0 ? 'moving' : 'queued');
+      m = { state: live === 'queued' && !peers && attach && attach.holder ? 'paused' : live, local: true, have: n, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, bytes: rec.size };
+    } else {
+      const base = rec.complete ? (rec.state === 'removed' ? 'removed' : 'done') : rec.state;
+      const shown = base === 'moving' || base === 'queued' ? shownState(rec, { peers: attach && attach.holder ? peers : 1 }) : base;
+      m = { state: shown, have, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, note: rec.note, bytes: Math.min(rec.size, have * PIECE_BYTES) };
+    }
+  }
+  updateParts(entry.card, ref, m);
+  const line = entry.card.querySelector('.comms__parts-devices');
+  if (line) line.textContent = devicesLine(rec);
+};
+
+let paintQueued = new Set();
+let paintFrame = 0;
+const onFileChange = (id, extra) => {
+  if (extra && extra.threadId === SELF_THREAD) {
+    if (extra.hello && extra.device) { presence.seen(extra.device, true); selfPeers.set(extra.peerId, extra.device.id); }
+    if (extra.left && selfPeers.has(extra.peerId)) { presence.gone(selfPeers.get(extra.peerId)); selfPeers.delete(extra.peerId); }
+    refreshSelfHeader();
+    if (inSelf()) for (const r of fileLines.keys()) paintAttach(r);
+  }
+  if (!id || !fileLines.has(id)) return;
+  paintQueued.add(id);
+  if (paintFrame) return;
+  paintFrame = requestAnimationFrame(() => {
+    paintFrame = 0;
+    const ids = Array.from(paintQueued);
+    paintQueued = new Set();
+    ids.forEach((r) => { paintAttach(r); });
+  });
+};
+
+const SHARE_NOW_BYTES = 50 * 1024 * 1024;
+const shareItem = async (it) => {
+  if (!attach || !attach.media || !navigator.share) return null;
+  const file = await attach.media.plainFile(it.ref, it.name || 'file', it.mime || '');
+  if (navigator.canShare && !navigator.canShare({ files: [file] })) { attach.media.dropPlain(it.ref); return null; }
+  if (file.size > SHARE_NOW_BYTES) {
+    setTimeout(() => { if (attach && attach.media) attach.media.dropPlain(it.ref); }, 300000);
+    return { later: true, file };
+  }
+  try { await navigator.share({ files: [file] }); } catch (_) {}
+  attach.media.dropPlain(it.ref);
+  return null;
+};
+
+const openMediaItem = async (ref, items) => {
+  if (!commsStore) return;
+  const list = [];
+  for (const it of (items && items.length ? items : [{ ref }])) {
+    let rec = null;
+    try { rec = await commsStore.getMedia(it.ref); } catch (_) { rec = null; }
+    if (rec && rec.complete && rec.state !== 'removed') list.push({ ref: it.ref, kind: it.type === 'video' || /^video\//i.test(rec.mime || '') ? 'video' : 'image', name: rec.name || it.name || '', mime: rec.mime || it.mime || '', size: rec.size, thumb: rec.thumb || it.thumb || it.poster || undefined });
+  }
+  const start = list.findIndex((x) => x.ref === ref);
+  if (start < 0) return;
+  openViewer({ items: list, start, T, onShare: shareItem });
+};
+
+const freeUp = async (threadId) => {
+  if (!commsStore) return;
+  const MF = window.MentriaMediaFormat;
+  let list = [];
+  try { list = await commsStore.listMedia({ threadId }); } catch (_) { return; }
+  const live = list.filter((r) => r.state !== 'removed');
+  if (attach) await attach.removeMedia(live.map((r) => r.id));
+  for (const r of live) {
+    r.state = 'removed';
+    r.complete = false;
+    r.role = 'in';
+    if (MF) r.have = MF.bfB64(MF.bfNew(MF.pieceCount(r.size)));
+    delete r.note;
+    try { await commsStore.putMedia(r); } catch (_) {}
+    paintAttach(r.id);
+  }
+};
+
+const openMediaGrid = async () => {
+  const threadId = tidOf(currentRoomName);
+  if (!threadId || !commsStore || !keepsHistory(threadId)) return;
+  let dlg = document.getElementById('comms-media-grid');
+  if (!dlg) {
+    dlg = document.createElement('dialog');
+    dlg.id = 'comms-media-grid';
+    dlg.className = 'comms__sheet comms__mediagrid';
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    document.body.append(dlg);
+  }
+  const paint = async () => {
+    let media = [];
+    try { media = await commsStore.listMedia({ threadId }); } catch (_) {}
+    const usage = attach && attach.media ? await attach.media.usage(threadId).catch(() => 0) : 0;
+    renderMediaGrid(dlg, {
+      media, usage, T,
+      onOpen: (ref) => { dlg.close(); openMediaItem(ref, media.filter((m) => /^(image|video)\//i.test(m.mime || '')).map((m) => ({ ref: m.id, type: /^video\//i.test(m.mime || '') ? 'video' : 'image' }))); },
+      onFree: async () => {
+        const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.files.free_confirm, { danger: true }) : Promise.resolve(false));
+        if (!ok) return;
+        await freeUp(threadId);
+        paint();
+      }
+    });
+  };
+  await paint();
+  try { if (!dlg.open) dlg.showModal(); } catch (_) { dlg.setAttribute('open', ''); }
+};
+document.getElementById('comms-media-btn').addEventListener('click', () => { openMediaGrid(); });
+
+const openInPdf = async (ref, item) => {
+  try {
+    const res = await fetch('/comms-media/' + encodeURIComponent(ref));
+    if (!res.ok) return;
+    const cache = await caches.open('mentria-share');
+    await cache.put('/share-target/file', new Response(res.body, { headers: { 'content-type': (item && item.mime) || 'application/pdf', 'x-file-name': encodeURIComponent((item && item.name) || 'file.pdf') } }));
+    location.href = PREFIX + '/tools/pdf/?shared=1';
+  } catch (e) {
+    sys(fmt(T.files.import_failed, { reason: why(e) }));
+  }
+};
+
+const importPackFrom = async (ref, item) => {
+  try {
+    const text = await (await fetch('/comms-media/' + encodeURIComponent(ref))).text();
+    const P = await loadPacks();
+    const res = await P.importText(text, { source: 'contact', from: whoNow() });
+    sys(res.replaced ? T.files.updated : T.files.imported);
+  } catch (e) {
+    sys(fmt(T.files.import_failed, { reason: (e && e.errors && e.errors[0]) || why(e) }));
+  }
+};
+
+const renderAttachment = (who, parts, opts = {}) => {
+  const album = (parts || []).find((p) => p.type === 'album');
+  const sender = opts.me ? 'self' : (opts.sender || opts.peerId || null);
+  const prior = album ? albumCards.get(album.aid) : null;
+  if (prior && prior.isConnected && addToAlbum(prior, album, sender)) {
+    for (const it of album.items) { fileLines.set(it.ref, { card: prior, part: it, me: !!opts.me }); paintAttach(it.ref); }
+    const cap = (parts || []).filter((p) => p.type === 'text');
+    if (cap.length) renderLine(who, cap.map((p) => p.text).join('\n'), { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts });
+    return null;
+  }
+  const line = renderLine(who, '', { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts, html: '' });
+  const card = document.createElement('div');
+  card.className = 'comms__partsbox';
+  line.what.append(card);
+  renderParts(card, parts, { t: opts.t || '', me: !!opts.me, sender, T, media: () => null, onOpen: openMediaItem, onRetry: (ref) => { if (attach) attach.retry(ref); }, onOpenPdf: openInPdf, onImportPack: importPackFrom, onAccept: (refs) => { if (attach) refs.forEach((r) => attach.accept(r)); }, onRelayOk: (refs) => { if (attach) refs.forEach((r) => attach.allowRelay(r)); } });
+  if (album) albumCards.set(album.aid, card);
+  if (inSelf()) { const dl = document.createElement('p'); dl.className = 'comms__parts-devices'; card.append(dl); }
+  for (const it of mediaParts(parts)) { fileLines.set(it.ref, { card, part: it, me: !!opts.me }); paintAttach(it.ref); }
+  return line;
+};
+
+const offerQueue = [];
+const receiveAttachments = (item, mine) => {
+  const room = tidOf(currentRoomName);
+  if (!keepsHistory(room)) return;
+  if (!attach || !attach.media) {
+    if (offerQueue.length < 500) offerQueue.push({ item, mine, room });
+    return;
+  }
+  receiveInto(room, item, mine);
+};
+
+const receiveInto = (room, item, mine) => {
+  const items = mediaParts(item.parts);
+  if (!items.length) return;
+  const contact = isDmRoom(room);
+  const stateFor = (p) => (room === SELF_THREAD ? 'queued' : mine ? 'offered' : acceptFor({ self: false, contact, kind: p.type === 'image' ? 'photo' : p.type, size: p.size }) === 'auto' ? 'queued' : 'offered');
+  attach.receive(room, items, { from: item.sfp2 || item.sfp || item.senderId || '', state: stateFor }).then(() => { items.forEach((p) => paintAttach(p.ref)); }, () => {});
+};
+
+let persistAsked = false;
+let viaTimer = 0;
+const checkChatVia = async () => {
+  const el = document.getElementById('comms-via');
+  if (!el) return;
+  let relayed = false;
+  try {
+    const pcs = room && room.getPeers ? Object.values(room.getPeers()) : [];
+    for (const pc of pcs) if (await viaRelay(pc)) { relayed = true; break; }
+  } catch (_) {}
+  el.hidden = !relayed;
+};
+const watchChatVia = () => {
+  clearInterval(viaTimer);
+  const el = document.getElementById('comms-via');
+  if (el) el.hidden = true;
+  viaTimer = setInterval(checkChatVia, 8000);
+  setTimeout(checkChatVia, 2500);
+};
+
+const startFiles = async (st) => {
+  if (!st || st.status !== 'open') return;
+  if (!selfRoom) {
+    try { const sec = secretCopy(); try { selfRoom = await selfRoomFor(sec); } finally { sec.fill(0); } } catch (_) { selfRoom = null; }
+  }
+  clearInterval(selfTimer);
+  selfTimer = setInterval(checkSelfWeek, 600000);
+  if (selfRoom) {
+    try {
+      if (!(await st.getThread(SELF_THREAD))) await st.putThread({ id: SELF_THREAD, kind: 'self', title: T.devices.title, participants: [], meta: {}, updatedAt: Date.now(), lastReadTs: Date.now(), pinned: false });
+      refreshHomeThreads();
+    } catch (_) {}
+  }
+  if (!historySync) historySync = new HistorySync({ store: st, onChange: () => { refreshHomeThreads(); } });
+  else historySync.setStore(st);
+  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: myDevice, pinned: [SELF_THREAD], onRoom: (tid, r) => { if (tid === SELF_THREAD) historySync.bind(r); }, onHello: (tid, peerId) => { if (tid === SELF_THREAD) historySync.hello(peerId).catch(() => {}); }, canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
+  if (!persistAsked && matchMedia('(display-mode: standalone)').matches && navigator.storage && navigator.storage.persist) { persistAsked = true; navigator.storage.persist().catch(() => {}); }
+  try {
+    await attach.start(st);
+    attach.setOpenThread(keepsHistory(currentRoomName) ? tidOf(currentRoomName) : null);
+    while (offerQueue.length) { const q = offerQueue.shift(); receiveInto(q.room, q.item, q.mine); }
+  } catch (e) {
+    console.warn('files could not start:', e);
+  }
+};
+
+window.addEventListener('pagehide', () => { if (attach) attach.halt(); });
+window.addEventListener('pageshow', (e) => { if (e.persisted && attach && historyOn()) startFiles(commsStore); });
+
+const renderStored = (m) => {
+  if (!m || !m.id || seenCmids.has(m.id)) return;
+  seenCmids.add(m.id);
+  if (m.from === 'self') {
+    if (mediaParts(m.parts).length) {
+      renderAttachment('you', m.parts, { me: true, ts: m.ts });
+      receiveAttachments({ parts: m.parts }, true);
+    } else {
+      renderLine('you', m.t, { me: true, quiet: true, ts: m.ts });
+    }
+    return;
+  }
+  const meta = m.meta || {};
+  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts }, { silent: true, stored: true });
+};
+
+const setEarlier = (beforeTs) => {
+  let b = document.getElementById('comms-earlier');
+  if (beforeTs == null) {
+    if (b) b.remove();
+    return;
+  }
+  if (!b) {
+    b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'comms-earlier';
+    b.className = 'comms__earlier';
+    b.textContent = T.history.earlier;
+    b.addEventListener('click', () => { showEarlier(); });
+  }
+  b.dataset.before = String(beforeTs);
+  if (els.log.firstChild !== b) els.log.prepend(b);
+};
+
+const showEarlier = async () => {
+  const b = document.getElementById('comms-earlier');
+  const room = currentRoomName;
+  const seq = joinSeq;
+  if (!b || !historyOn() || !room) return;
+  b.disabled = true;
+  try {
+    const msgs = await commsStore.listMessages(tidOf(room), { before: Number(b.dataset.before), limit: HISTORY_PAGE });
+    if (seq !== joinSeq) return;
+    const fromBottom = els.log.scrollHeight - els.log.scrollTop;
+    const pinned = logPinned;
+    logPinned = false;
+    msgs.forEach(renderStored);
+    logPinned = pinned;
+    els.log.scrollTop = els.log.scrollHeight - fromBottom;
+    setEarlier(msgs.length >= HISTORY_PAGE ? msgs[0].ts : null);
+  } catch (e) {
+    historyFail(e);
+  } finally {
+    b.disabled = false;
+  }
+};
+
+const openThreadHistory = async (roomName, seq) => {
+  if (!keepsHistory(roomName) || !commsStoreP) return;
+  const st = await Promise.race([commsStoreP, new Promise((r) => setTimeout(() => r(null), HISTORY_WAIT_MS))]);
+  if (seq !== joinSeq || !st || st.status !== 'open') return;
+  const c = currentDmContact;
+  const tid = tidOf(roomName);
+  try {
+    const prev = await st.getThread(tid);
+    const base = tid === SELF_THREAD
+      ? { kind: 'self', title: T.devices.title, participants: [], meta: {} }
+      : c && isDmRoom(roomName)
+        ? { kind: 'dm', title: c.name || c.fp, participants: [{ id: c.fp, kind: 'human', name: c.name || '' }], meta: { fp: c.fp } }
+        : { kind: 'room', title: (roomNotifyEntry(roomName) || {}).label || roomName, participants: [], meta: {} };
+    await st.putThread({ id: tid, ...base, updatedAt: prev ? prev.updatedAt : 0, lastReadTs: Date.now(), pinned: prev ? !!prev.pinned : false });
+    refreshHomeThreads();
+    if (seq !== joinSeq) return;
+    const msgs = await st.listMessages(tid, { limit: HISTORY_PAGE });
+    if (seq !== joinSeq) return;
+    msgs.forEach(renderStored);
+    setEarlier(msgs.length >= HISTORY_PAGE ? msgs[0].ts : null);
+  } catch (e) {
+    historyFail(e);
+  }
+};
+
+document.getElementById('comms-hist-reset').addEventListener('click', async () => {
+  if (!commsStore) return;
+  const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.history.start_over_confirm, { danger: true }) : Promise.resolve(false));
+  if (!ok) return;
+  try {
+    if (attach) await attach.wipeAll();
+    await commsStore.wipe();
+    if (attach) startFiles(commsStore);
+    hideHistoryBar();
+    refreshHomeThreads();
+    if (currentRoomName) await openThreadHistory(currentRoomName, joinSeq);
+  } catch (e) {
+    historyFail(e);
+  }
+});
+
 const setupChatPersistence = async (roomName, topic) => {
   chatTopic = topic || null;
   chatPersist = !!(chatTopic && chatKey);
   seenCmids = new Set();
+  if (attach) attach.setOpenThread(keepsHistory(roomName) ? tidOf(roomName) : null);
+  document.getElementById('comms-media-btn').hidden = !keepsHistory(roomName);
+  if (tidOf(roomName) === SELF_THREAD) { refreshSelfHeader(); sysTop(T.devices.explainer); }
+  const seq = joinSeq;
+  await openThreadHistory(roomName, seq);
+  if (seq !== joinSeq) return;
 
   if (!chatPersist) {
     chatSubId = null;
@@ -1404,7 +1900,7 @@ const publishRoomCtl = async (ctl) => {
   const cmid = newCmid();
   seenCmids.add(cmid);
   try {
-    const enc = await encryptText(chatKey, packChatPlain('', { ctl }));
+    const enc = await encryptText(chatKey, packChatPlain('', { fp: myFp, legacyFp: myLegacyFp }, { ctl }));
     if (chatAction) { try { chatAction.send({ cmid, enc }); } catch (_) {} }
     rememberSentCmid(cmid);
     const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
@@ -1496,11 +1992,11 @@ const sentCmidsFor = (fp) => {
   } catch (_) { return []; }
 };
 
-const publishChat = async (text, cmid) => {
+const publishChat = async (text, cmid, extra) => {
   if (!chatTopic || !chatPersist || !chatKey) return;
   rememberSentCmid(cmid);
   try {
-    const enc = await encryptText(chatKey, packChatPlain(text));
+    const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }, extra));
     const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
@@ -1512,15 +2008,6 @@ const publishChat = async (text, cmid) => {
   } catch (err) {
     console.warn('chat publish failed:', err);
   }
-};
-
-const certFingerprints = (sdp) => {
-  const out = new Set();
-  String(sdp || '').split(/\r?\n/).forEach((line) => {
-    const m = /^a=fingerprint:(\S+)\s+([0-9A-Fa-f:]+)/.exec(line.trim());
-    if (m) out.add(m[1].toLowerCase() + ' ' + m[2].toUpperCase());
-  });
-  return Array.from(out).sort().join(',');
 };
 
 const connBinding = (peerId) => {
@@ -1573,12 +2060,15 @@ const applyVerifiedProfile = async (peerId) => {
   } catch (_) {}
 };
 
-const samePubOf = (a, b) => !!(a && b && a.x === b.x && a.y === b.y);
-
 let joinSeq = 0;
 
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const seq = ++joinSeq;
+  document.getElementById('comms-media-btn').hidden = true;
+  if (attach) attach.setOpenThread(null);
+  fileLines.clear();
+  albumCards.clear();
+  watchChatVia();
   const leavingDm = currentDmContact;
   joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null };
   stopScan();
@@ -1637,7 +2127,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key) : null;
   if (seq !== joinSeq) return;
   if (b64Key && !chatKey) sysTop(T.log.bad_key);
-  if (chatKey && b64Key) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
+  if (chatKey && b64Key && !opts.self) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
 
   if (opts.share === false || isDmRoom(roomName)) {
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -1686,9 +2176,9 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     setTimeout(() => { if (seq === joinSeq) announceRoomRing(); }, 3000);
   }
   if (opts.contact) currentDmContact = opts.contact;
-  els.chatTitle.textContent = opts.contact ? (opts.contact.name || opts.contact.fp) : ((roomNotifyEntry(roomName) || {}).label || roomName);
+  els.chatTitle.textContent = opts.self ? T.devices.title : opts.contact ? (opts.contact.name || opts.contact.fp) : ((roomNotifyEntry(roomName) || {}).label || roomName);
   paintAvatar(els.chatAvatar, opts.contact ? (opts.contact.name || opts.contact.fp) : '#', opts.contact ? opts.contact.fp : roomName);
-  els.status.textContent = isDmRoom(roomName) ? T.chat.private : fmt(T.chat.room, { room: roomName });
+  els.status.textContent = isDmRoom(roomName) ? T.chat.private : opts.self ? (selfStatus() || T.devices.title) : fmt(T.chat.room, { room: roomName });
   els.leave.hidden = false;
   setView('chat');
   setConnUI();
@@ -1700,8 +2190,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   updatePeers();
   updateCallUI();
   if (isDmRoom(roomName)) sysTop(T.log.dm_note);
-  else sysTop(myProfile.name ? fmt(T.log.alone_named, { name: myProfile.name, room: roomName }) : fmt(T.log.alone, { room: roomName }));
-  if (chatKey && !isDmRoom(roomName)) sysTop(T.log.enc_note);
+  else if (!opts.self) sysTop(myProfile.name ? fmt(T.log.alone_named, { name: myProfile.name, room: roomName }) : fmt(T.log.alone, { room: roomName }));
+  if (chatKey && !isDmRoom(roomName) && !opts.self) sysTop(T.log.enc_note);
 
   callAction = room.makeAction('call');
   callAction.onMessage = (data, ctx) => {
@@ -1761,6 +2251,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       try { prof.fp = await CID.fingerprint(prof.pub); } catch {}
     }
     if (typeof data.ring === 'string') prof.ring = data.ring.slice(0, 64);
+    prof.caps = { files: data.caps && Number.isInteger(data.caps.files) ? data.caps.files : 0 };
+    if (prof.fp) rememberCaps(prof.fp, prof.caps);
     if (seq !== joinSeq || !peers.has(ctx.peerId)) return;
     const known = peerProfiles.get(ctx.peerId);
     prof.verified = !!(known && known.verified && samePubOf(known.pub, prof.pub));
@@ -1777,7 +2269,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   chatAction.onMessage = async (data, ctx) => {
     const cmid = data && data.cmid;
     if (cmid && seenCmids.has(cmid)) return;
-    let text, sfp = null, sfp2 = null;
+    let text, sfp = null, sfp2 = null, parts = null;
     if (data && data.enc) {
       if (!chatKey) return;
       try {
@@ -1785,13 +2277,14 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         text = unpacked.text;
         sfp = unpacked.sfp;
         sfp2 = unpacked.sfp2;
+        parts = unpacked.parts;
         if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
       } catch { return; }
     } else {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
-    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2 });
+    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2, cmid, parts });
     playPing(880);
   };
 
@@ -1951,7 +2444,7 @@ els.send.addEventListener('submit', async (e) => {
   let livePayload;
   if (chatKey) {
     try {
-      const enc = await encryptText(chatKey, packChatPlain(text));
+      const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }));
       livePayload = { cmid, enc };
     } catch (err) {
       sys(fmt(T.log.enc_failed, { reason: why(err) }));
@@ -1968,6 +2461,7 @@ els.send.addEventListener('submit', async (e) => {
   chatAction.send(livePayload);
   publishChat(text, cmid);
   const sent = renderLine('you', text, { me: true });
+  storeLine(cmid, 'self', text, Number(sent.line.dataset.ts));
   if (!currentDmContact && peers.size === 0) {
     const note = document.createElement('span');
     note.className = 'comms__pending-note';
@@ -2019,7 +2513,161 @@ const sendOne = async (file, extra) => {
   line.what.innerHTML = completeHTML(n > 0 ? (n === 1 ? T.files.sent_one : T.files.sent_many) : T.files.uncertain, { n }, file.name, file.size, file.type, previewUrl);
 };
 
+const storedChat = () => !!(currentRoomName && keepsHistory(currentRoomName) && chatKey && attach && attach.media);
+
+const blobB64 = (blob) => new Promise((resolve) => {
+  const r = new FileReader();
+  r.onload = () => resolve(String(r.result || '').replace(/^data:[^,]*,/, ''));
+  r.onerror = () => resolve(null);
+  r.readAsDataURL(blob);
+});
+
+const smallJpeg = async (src) => {
+  let best = null;
+  for (let q = 7; q >= 3; q -= 1) {
+    const r = await MentriaImage.renderJpeg(src, 320, q / 10);
+    if (!r) break;
+    if (!best || r.blob.size < best.blob.size) best = r;
+    if (r.blob.size <= 12288) break;
+  }
+  return best && best.blob.size <= 12288 ? best : null;
+};
+
+const videoInfo = (file) => new Promise((resolve) => {
+  let url = '';
+  try { url = URL.createObjectURL(file); } catch (_) { resolve(null); return; }
+  const v = document.createElement('video');
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = 'metadata';
+  let done = false;
+  const finish = (r) => {
+    if (done) return;
+    done = true;
+    try { v.removeAttribute('src'); v.load(); } catch (_) {}
+    URL.revokeObjectURL(url);
+    resolve(r);
+  };
+  setTimeout(() => finish(null), 8000);
+  v.onloadedmetadata = () => { try { v.currentTime = Math.min(0.1, (v.duration || 1) / 2); } catch (_) { finish({ duration: v.duration }); } };
+  v.onseeked = async () => {
+    const w = v.videoWidth;
+    const h = v.videoHeight;
+    if (!w || !h) { finish({ duration: v.duration }); return; }
+    let poster = null;
+    try { const r = await smallJpeg({ source: v, width: w, height: h, close() {} }); poster = r ? await blobB64(r.blob) : null; } catch (_) {}
+    finish({ duration: Number.isFinite(v.duration) ? v.duration : undefined, w, h, poster });
+  };
+  v.onerror = () => finish(null);
+  v.src = url;
+});
+
+const shortName = (name) => { const n = String(name || 'file'); return n.length > 200 ? n.slice(0, 190) + n.slice(n.lastIndexOf('.')).slice(0, 10) : n; };
+const jpegName = (name) => String(name || 'photo').replace(/\.[^.]+$/, '') + '.jpg';
+const newAid = () => Math.random().toString(36).slice(2, 12);
+
+const sendAttachments = async ({ items, caption }) => {
+  const roomName = currentRoomName;
+  const key = chatKey;
+  const list = Array.from(items || []);
+  if (!list.length || !storedChat()) return;
+  const total = list.reduce((a, it) => a + it.file.size, 0);
+  const label = list.length === 1 ? list[0].file.name : fmt(T.files.offer_files, { n: list.length }).split('.')[0];
+  const prep = renderLine('you', '', { me: true, quiet: true, html: progressHTML(T.files.sending, label, total, 0) });
+  const media = [];
+  const files = [];
+  let done = 0;
+  for (const item of list) {
+    const f = item.file;
+    const mime = f.type || '';
+    let kind = /^video\//i.test(mime) ? 'video' : /^image\//i.test(mime) ? 'image' : 'file';
+    let sendFile = f;
+    let part = null;
+    if (kind === 'image') {
+      const prev = window.MentriaImage ? await MentriaImage.preview(f).catch(() => null) : null;
+      if (!prev) {
+        kind = 'file';
+      } else {
+        let w = prev.w;
+        let h = prev.h;
+        if (item.variant === 'standard') {
+          const std = await MentriaImage.standard(f).catch(() => null);
+          if (std) { sendFile = new File([std.blob], jpegName(f.name), { type: 'image/jpeg', lastModified: f.lastModified }); w = std.w; h = std.h; }
+        }
+        part = { type: 'image', mime: sendFile.type || mime, name: shortName(sendFile.name), w, h, thumb: prev.blob.size <= 12288 ? await blobB64(prev.blob) : undefined, hd: item.variant !== 'standard' };
+      }
+    }
+    if (kind === 'video') {
+      const info = await videoInfo(f);
+      part = { type: 'video', mime, name: shortName(f.name), w: info && info.w, h: info && info.h, duration: info && info.duration, poster: info && info.poster };
+    }
+    if (kind === 'file') part = { type: 'file', mime: mime || 'application/octet-stream', name: shortName(f.name) };
+    const base = done;
+    const plan = importPlan(item, sendFile && sendFile !== f ? sendFile : null);
+    sendFile = plan.file;
+    const sent = await attach.sendFile(tidOf(roomName), sendFile, { ranges: plan.ranges, record: { thumb: part.thumb || part.poster || undefined, kind: part.type }, onProgress: (i) => { prep.what.innerHTML = progressHTML(T.files.sending, label, total, Math.min(total, base + i * PIECE_BYTES)); } });
+    done += sendFile.size;
+    part.ref = sent.id;
+    part.mh = sent.mh;
+    part.size = sendFile.size;
+    (kind === 'file' ? files : media).push(part);
+  }
+  if (roomName !== currentRoomName || key !== chatKey) {
+    prep.line.removeAttribute('aria-live');
+    prep.what.innerHTML = fmtHtml(T.files.send_interrupted, { name: strongName(label) });
+    return;
+  }
+  prep.line.remove();
+  const parts = [];
+  const cap = String(caption || '').trim();
+  if (cap) parts.push({ type: 'text', text: cap.slice(0, 2000) });
+  parts.push(...toAlbums(media, newAid));
+  parts.push(...files);
+  const ids = { fp: myFp, legacyFp: myLegacyFp };
+  const measure = async (ps) => JSON.stringify(await encryptText(chatKey, packChatPlain(offerText(ps, T), ids, { p: ps }))).length + 700;
+  const msgs = await splitOffer(parts, measure, 60000);
+  const ts = Date.now();
+  renderAttachment('you', parts, { me: true, ts });
+  for (const m of msgs) {
+    const text = offerText(m, T);
+    const cmid = newCmid();
+    seenCmids.add(cmid);
+    const enc = await encryptText(chatKey, packChatPlain(text, ids, { p: m }));
+    if (chatAction) chatAction.send({ cmid, enc });
+    publishChat(text, cmid, { p: m });
+    storeLine(cmid, 'self', text, ts, undefined, m);
+  }
+  maybeRingContact();
+};
+
+const deliver = async (items, caption) => {
+  const oldPeers = Array.from(peers).filter((p) => { const pr = peerProfiles.get(p); return !(pr && pr.caps && pr.caps.files >= 2); });
+  const fresh = [];
+  const release = holdAwake();
+  try {
+    for (const it of items) {
+      if (oldPeers.length && it.file.size <= MAX_FILE && metaAction && chunkAction) {
+        try { await sendOne(await blankedCopy(it.file, it.ranges)); } catch (err) { sys(fmt(T.files.send_failed_for, { name: it.file.name, reason: why(err) })); }
+        continue;
+      }
+      if (oldPeers.length) sys(fmt(T.files.needs_update, { name: displayName(oldPeers[0]) }));
+      fresh.push(it);
+    }
+    if (fresh.length) await sendAttachments({ items: fresh, caption });
+  } catch (err) {
+    sys(fmt(T.files.send_failed_for, { name: items.map((x) => x.file.name).join(', '), reason: why(err) }));
+  } finally {
+    release();
+  }
+};
+
 const sendFiles = async (fileList) => {
+  if (storedChat()) {
+    const all = Array.from(fileList || []);
+    if (!all.length) return;
+    openSheet({ files: all, self: inSelf(), T, onSend: ({ items, caption }) => { deliver(items, caption); } });
+    return;
+  }
   if (!metaAction || !chunkAction || peers.size === 0) {
     if (currentDmContact) {
       sys(fmt(T.files.dm_offline, { name: whoNow() }));
@@ -2163,7 +2811,7 @@ if (muted) { els.mute.textContent = T.adv.sound_off; els.mute.setAttribute('aria
 
 const updateCallUI = () => {
   const inRoom = !!room;
-  if (inRoom && currentRoomName) els.share.hidden = isDmRoom(currentRoomName) || call.active;
+  if (inRoom && currentRoomName) els.share.hidden = isDmRoom(currentRoomName) || inSelf() || call.active;
   els.callStart.hidden = !inRoom || call.active;
   els.callCam.hidden = !call.active;
   els.callMic.hidden = !call.active;
@@ -2497,7 +3145,7 @@ els.ringDecline.addEventListener('click', () => { declineRings(); });
 
 const sendProfileTo = (peerId) => {
   if (!profAction || !myId) return;
-  const payload = { name: myProfile.name, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y } };
+  const payload = { name: myProfile.name, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, caps: { files: 2 } };
   if (ringToken) payload.ring = ringToken;
   try { profAction.send(payload, peerId || undefined); } catch {}
 };
@@ -2990,15 +3638,29 @@ const announceCallTo = async (contact) => {
   });
 };
 
-const knockNow = async (kind) => {
-  if (!currentDmContact) return false;
-  const fresh = freshContact(currentDmContact.fp);
-  if (fresh) currentDmContact = fresh;
-  const ring = currentDmContact.ring;
+const knockContact = async (contact, kind) => {
+  if (!contact) return false;
+  const ring = contact.ring;
   if (!ring || !window.MentriaPush || !MentriaPush.ring) return false;
   lastRingSentAt = Date.now();
   const res = await MentriaPush.ring(ring, kind);
   return !!(res && res.ok);
+};
+
+const knockNow = async (kind) => {
+  if (!currentDmContact) return false;
+  const fresh = freshContact(currentDmContact.fp);
+  if (fresh) currentDmContact = fresh;
+  return knockContact(currentDmContact, kind);
+};
+
+const CAPS_KEY = 'mentria.comms.caps';
+const rememberCaps = (fp, caps) => {
+  try {
+    const all = JSON.parse(localStorage.getItem(CAPS_KEY) || '{}') || {};
+    all[fp] = { files: caps.files || 0, at: Date.now() };
+    localStorage.setItem(CAPS_KEY, JSON.stringify(all));
+  } catch (_) {}
 };
 
 const whoNow = () => (currentDmContact && (currentDmContact.name || currentDmContact.fp)) || T.log.they;
@@ -3140,6 +3802,7 @@ const initIdentity = async () => {
     myId = await CID.ensureKeypair();
     myFp = await CID.fingerprint(myId.publicJwk);
     myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
+    openHistory();
     try { await CID.migrateFingerprints(); } catch (_) {}
     myProfile = CID.getProfile();
     els.idName.value = myProfile.name;
@@ -3836,221 +4499,462 @@ const openDmWith = async (c) => {
   }
 };
 
-const renderContacts = () => {
-  if (!els.contactList) return;
-  renderContactsBase();
-  renderRoomsSection();
+let homeFilter = 'all';
+let homeQuery = '';
+let homeThreads = [];
+let homeThreadsTimer = 0;
+
+const rowTime = (ts) => {
+  const d = new Date(ts);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return hhmmOf(ts);
+  if (now - d < 6 * 86400000) return d.toLocaleDateString(LANG, { weekday: 'short' });
+  return d.toLocaleDateString(LANG, { month: 'short', day: 'numeric' });
 };
 
-const renderRoomsSection = () => {
-  const list = savedRooms();
-  if (!list.length) return;
-  const head = document.createElement('div');
-  head.className = 'comms__rooms-head';
-  head.textContent = T.rooms.heading;
-  els.contactList.append(head);
-  for (const r of list) {
-    const row = document.createElement('div');
-    row.className = 'comms__contact comms__roomrow' + (currentRoomName === r.room ? ' comms__roomrow--current' : '');
-    const av = document.createElement('span');
-    av.className = 'comms__avatar comms__avatar--room';
-    av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
-    const openBtn = document.createElement('button');
-    openBtn.type = 'button';
-    openBtn.className = 'comms__contact-open';
-    const mid = document.createElement('span');
-    mid.className = 'comms__contact-mid';
-    const name = document.createElement('span');
-    name.className = 'comms__contact-name';
-    name.textContent = r.label || r.room;
-    const sub = document.createElement('span');
-    sub.className = 'comms__contact-fp';
-    sub.textContent = fmt(T.rooms.sub, { id: short(r.room) });
-    mid.append(name, sub);
-    openBtn.append(mid);
-    row.append(av, openBtn);
-    const unread = (unreadMap[roomUnreadKey(r.room)] || {}).n || 0;
-    if (unread > 0 && currentRoomName !== r.room) {
-      const badge = document.createElement('span');
-      badge.className = 'comms__unread';
-      badge.textContent = unread > 99 ? '99+' : String(unread);
-      badge.title = fmt(unread === 1 ? T.people.unread_one : T.people.unread_many, { n: unread });
-      row.append(badge);
-    }
-    const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
-    row.addEventListener('click', open);
-    const bell = document.createElement('button');
-    bell.type = 'button';
-    const alertsOn = !!r.notify;
-    bell.className = 'comms__rowbtn comms__rowbtn--bell' + (alertsOn ? ' comms__rowbtn--on' : '');
-    bell.title = alertsOn ? T.rooms.bell_on : T.rooms.bell_off;
-    bell.setAttribute('aria-label', bell.title);
-    bell.setAttribute('aria-pressed', String(alertsOn));
-    bell.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-bell"></use></svg>';
-    bell.addEventListener('click', (e) => { e.stopPropagation(); setRoomNotify(r.room, !alertsOn); });
-    const ren = document.createElement('button');
-    ren.type = 'button';
-    ren.className = 'comms__rowbtn';
-    ren.title = T.rooms.rename;
-    ren.setAttribute('aria-label', T.rooms.rename_label);
-    ren.textContent = T.rooms.rename;
-    ren.className = 'comms__rowbtn comms__rowbtn--text';
-    ren.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const input = document.createElement('input');
-      input.className = 'comms__input comms__room-rename';
-      input.type = 'text';
-      input.maxLength = 40;
-      input.value = r.label || r.room;
-      input.setAttribute('aria-label', T.rooms.name_label);
-      let finished = false;
-      const done = (save) => { if (finished) return; finished = true; if (save) renameRoom(r.room, input.value); renderContacts(); };
-      input.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Escape') ev.stopPropagation();
-        if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') { ev.preventDefault(); done(false); }
-      });
-      input.addEventListener('blur', () => done(true));
-      input.addEventListener('click', (ev) => ev.stopPropagation());
-      openBtn.replaceWith(mid);
-      name.replaceWith(input);
-      input.focus();
-      input.select();
-    });
-    const rm = document.createElement('button');
-    rm.type = 'button';
-    rm.className = 'comms__rowbtn';
-    rm.title = T.rooms.forget;
-    rm.setAttribute('aria-label', T.rooms.forget);
-    rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
-    rm.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.rooms.confirm_forget, { danger: true }) : Promise.resolve(true));
-      if (!ok) return;
-      forgetRoom(r.room);
-      delete unreadMap[roomUnreadKey(r.room)];
-      try { CID.setUnread(unreadMap); } catch (_) {}
+const rowMid = (title, sub, ts) => {
+  const mid = document.createElement('span');
+  mid.className = 'comms__contact-mid';
+  const top = document.createElement('span');
+  top.className = 'comms__contact-top';
+  const name = document.createElement('span');
+  name.className = 'comms__contact-name';
+  name.textContent = title;
+  top.append(name);
+  if (ts > 0) {
+    const time = document.createElement('span');
+    time.className = 'comms__contact-time';
+    time.textContent = rowTime(ts);
+    top.append(time);
+  }
+  const line = document.createElement('span');
+  line.className = 'comms__contact-fp';
+  line.textContent = sub;
+  mid.append(top, line);
+  return { mid, name };
+};
+
+const unreadBadge = (n) => {
+  const badge = document.createElement('span');
+  badge.className = 'comms__unread';
+  badge.textContent = n > 99 ? '99+' : String(n);
+  badge.title = fmt(n === 1 ? T.people.unread_one : T.people.unread_many, { n });
+  return badge;
+};
+
+const rowChev = () => {
+  const chev = document.createElement('span');
+  chev.className = 'comms__chev';
+  chev.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-chev"></use></svg>';
+  return chev;
+};
+
+const listNote = (text) => {
+  const note = document.createElement('div');
+  note.className = 'comms__id-note comms__contacts-empty';
+  note.textContent = text;
+  return note;
+};
+
+const requestRow = (r) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__contact--req';
+  const av = document.createElement('span');
+  av.className = 'comms__avatar';
+  paintAvatar(av, r.name, r.fp);
+  const { mid } = rowMid(r.name || T.people.unnamed, fmt(T.people.wants, { fp: r.fp }), 0);
+  const ok = document.createElement('button');
+  ok.type = 'button';
+  ok.className = 'comms__btn';
+  ok.textContent = T.people.accept;
+  ok.addEventListener('click', async () => {
+    try {
+      const added = await CID.addContact(r);
+      CID.dropRequest(r.fp);
       renderContacts();
       subscribeUnread();
-    });
-    row.append(bell, ren, rm);
-    els.contactList.append(row);
-  }
+      if (added) announceToContact(added);
+    } catch (err) {
+      notice(fmt(T.people.accept_failed, { reason: why(err) }));
+    }
+  });
+  const no = document.createElement('button');
+  no.type = 'button';
+  no.className = 'comms__btn comms__btn--ghost';
+  no.textContent = T.people.ignore;
+  no.addEventListener('click', () => { CID.dropRequest(r.fp); renderContacts(); });
+  row.append(av, mid, ok, no);
+  return row;
 };
 
-const renderContactsBase = () => {
-  els.contactList.innerHTML = '';
-
-  const requests = CID.getRequests();
-  requests.forEach((r) => {
-    const row = document.createElement('div');
-    row.className = 'comms__contact comms__contact--req';
-    const av = document.createElement('span');
-    av.className = 'comms__avatar';
-    paintAvatar(av, r.name, r.fp);
-    const mid = document.createElement('span');
-    mid.className = 'comms__contact-mid';
-    const name = document.createElement('span');
-    name.className = 'comms__contact-name';
-    name.textContent = r.name || T.people.unnamed;
-    const sub = document.createElement('span');
-    sub.className = 'comms__contact-fp';
-    sub.textContent = fmt(T.people.wants, { fp: r.fp });
-    mid.append(name, sub);
-    const ok = document.createElement('button');
-    ok.type = 'button';
-    ok.className = 'comms__btn';
-    ok.textContent = T.people.accept;
-    ok.addEventListener('click', async () => {
-      try {
-        const added = await CID.addContact(r);
-        CID.dropRequest(r.fp);
-        renderContacts();
-        subscribeUnread();
-        if (added) announceToContact(added);
-      } catch (err) {
-        notice(fmt(T.people.accept_failed, { reason: why(err) }));
-      }
-    });
-    const no = document.createElement('button');
-    no.type = 'button';
-    no.className = 'comms__btn comms__btn--ghost';
-    no.textContent = T.people.ignore;
-    no.addEventListener('click', () => { CID.dropRequest(r.fp); renderContacts(); });
-    row.append(av, mid, ok, no);
-    els.contactList.append(row);
+const contactRow = (c, info, missedMap) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact' + (currentDmContact && currentDmContact.fp === c.fp ? ' comms__contact--current' : '');
+  row.dataset.fp = c.fp;
+  const av = document.createElement('span');
+  av.className = 'comms__avatar';
+  av.setAttribute('aria-hidden', 'true');
+  paintAvatar(av, c.name, c.fp);
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  openBtn.setAttribute('aria-label', fmt(T.people.chat_with, { name: c.name || c.fp }));
+  const { mid } = rowMid(c.name || T.people.unnamed, info.preview || c.fp, info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn);
+  const missed = missedMap[c.fp];
+  if (missed && missed.n > 0) {
+    const mc = document.createElement('span');
+    mc.className = 'comms__missed';
+    mc.title = missed.n > 1 ? fmt(T.people.missed_many, { n: missed.n }) : T.people.missed_one;
+    mc.setAttribute('aria-label', mc.title);
+    mc.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg>';
+    row.append(mc);
+  }
+  if (info.unread > 0) row.append(unreadBadge(info.unread));
+  const rm = document.createElement('button');
+  rm.type = 'button';
+  rm.className = 'comms__rowbtn';
+  rm.title = fmt(T.people.remove, { name: c.name || c.fp });
+  rm.setAttribute('aria-label', fmt(T.people.remove, { name: c.name || c.fp }));
+  rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
+  rm.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.people.confirm_remove, { name: c.name || c.fp }), { danger: true }) : Promise.resolve(true));
+    if (!ok) return;
+    CID.removeContact(c.fp);
+    dropStoredThreads((t) => t.kind === 'dm' && t.meta && t.meta.fp === c.fp);
+    renderContacts();
+    renderPeerList();
   });
+  row.append(rm, rowChev());
+  row.addEventListener('click', () => openDmWith(c));
+  return row;
+};
 
+const roomRow = (r, info) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__roomrow' + (currentRoomName === r.room ? ' comms__roomrow--current' : '');
+  const av = document.createElement('span');
+  av.className = 'comms__avatar comms__avatar--room';
+  av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  const { mid, name } = rowMid(r.label || r.room, info.preview || fmt(T.rooms.sub, { id: short(r.room) }), info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn);
+  if (info.unread > 0 && currentRoomName !== r.room) row.append(unreadBadge(info.unread));
+  const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
+  row.addEventListener('click', open);
+  const bell = document.createElement('button');
+  bell.type = 'button';
+  const alertsOn = !!r.notify;
+  bell.className = 'comms__rowbtn comms__rowbtn--bell' + (alertsOn ? ' comms__rowbtn--on' : '');
+  bell.title = alertsOn ? T.rooms.bell_on : T.rooms.bell_off;
+  bell.setAttribute('aria-label', bell.title);
+  bell.setAttribute('aria-pressed', String(alertsOn));
+  bell.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-bell"></use></svg>';
+  bell.addEventListener('click', (e) => { e.stopPropagation(); setRoomNotify(r.room, !alertsOn); });
+  const ren = document.createElement('button');
+  ren.type = 'button';
+  ren.title = T.rooms.rename;
+  ren.setAttribute('aria-label', T.rooms.rename_label);
+  ren.textContent = T.rooms.rename;
+  ren.className = 'comms__rowbtn comms__rowbtn--text';
+  ren.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const input = document.createElement('input');
+    input.className = 'comms__input comms__room-rename';
+    input.type = 'text';
+    input.maxLength = 40;
+    input.value = r.label || r.room;
+    input.setAttribute('aria-label', T.rooms.name_label);
+    let finished = false;
+    const done = (save) => { if (finished) return; finished = true; if (save) renameRoom(r.room, input.value); renderContacts(); };
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Escape') ev.stopPropagation();
+      if (ev.key === 'Enter') { ev.preventDefault(); done(true); } else if (ev.key === 'Escape') { ev.preventDefault(); done(false); }
+    });
+    input.addEventListener('blur', () => done(true));
+    input.addEventListener('click', (ev) => ev.stopPropagation());
+    openBtn.replaceWith(mid);
+    name.replaceWith(input);
+    input.focus();
+    input.select();
+  });
+  const rm = document.createElement('button');
+  rm.type = 'button';
+  rm.className = 'comms__rowbtn';
+  rm.title = T.rooms.forget;
+  rm.setAttribute('aria-label', T.rooms.forget);
+  rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
+  rm.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.rooms.confirm_forget, { danger: true }) : Promise.resolve(true));
+    if (!ok) return;
+    forgetRoom(r.room);
+    dropStoredThreads((t) => t.id === r.room);
+    delete unreadMap[roomUnreadKey(r.room)];
+    try { CID.setUnread(unreadMap); } catch (_) {}
+    renderContacts();
+    subscribeUnread();
+  });
+  row.append(bell, ren, rm);
+  return row;
+};
+
+const joinSelf = async () => {
+  if (!selfRoom) return;
+  await joinNew(selfRoom.roomName, selfRoom.b64Key, { self: true, share: false });
+};
+
+const selfRow = (t, info) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__selfrow' + (inSelf() ? ' comms__contact--current' : '');
+  row.dataset.thread = SELF_THREAD;
+  const av = document.createElement('span');
+  av.className = 'comms__avatar';
+  av.setAttribute('aria-hidden', 'true');
+  av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-devices"></use></svg>';
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  const { mid } = rowMid(T.devices.title, info.preview, info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn, rowChev());
+  row.addEventListener('click', () => { joinSelf(); });
+  return row;
+};
+
+const aiRow = (t, info) => {
+  const slug = t.meta && t.meta.tool === 'annotate-image' ? 'annotate-image' : 'ai-chat';
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__airow';
+  row.dataset.thread = t.id;
+  const av = document.createElement('span');
+  av.className = 'comms__avatar comms__avatar--tool';
+  av.setAttribute('aria-hidden', 'true');
+  av.innerHTML = '<svg viewBox="0 0 48 48" focusable="false"><use href="#tool-' + slug + '"></use></svg>';
+  if (!document.getElementById('tool-' + slug) && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  const { mid } = rowMid(info.title || T.people.unnamed, info.preview, info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn, rowChev());
+  row.addEventListener('click', () => { window.location.href = aiHref(t, PREFIX); });
+  return row;
+};
+
+const renderContacts = () => {
+  if (!els.contactList) return;
+  els.contactList.innerHTML = '';
+  const requests = CID.getRequests();
   const contacts = CID.getContacts();
-  if (!contacts.length && !requests.length) {
-    const empty = document.createElement('div');
-    empty.className = 'comms__id-note comms__contacts-empty';
-    empty.textContent = T.people.empty;
-    els.contactList.append(empty);
+  const rooms = savedRooms();
+  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length) {
+    els.contactList.append(listNote(T.people.empty));
+    return;
+  }
+  const rows = homeRows({ contacts, requests, rooms, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
+  if (!rows.length) {
+    els.contactList.append(listNote(T.home.at_none));
     return;
   }
   const missedMap = getMissed();
-  contacts.forEach((c) => {
-    const row = document.createElement('div');
-    row.className = 'comms__contact';
-    row.dataset.fp = c.fp;
-    const av = document.createElement('span');
-    av.className = 'comms__avatar';
-    av.setAttribute('aria-hidden', 'true');
-    paintAvatar(av, c.name, c.fp);
-    const openBtn = document.createElement('button');
-    openBtn.type = 'button';
-    openBtn.className = 'comms__contact-open';
-    openBtn.setAttribute('aria-label', fmt(T.people.chat_with, { name: c.name || c.fp }));
-    const mid = document.createElement('span');
-    mid.className = 'comms__contact-mid';
-    const name = document.createElement('span');
-    name.className = 'comms__contact-name';
-    name.textContent = c.name || T.people.unnamed;
-    const sub = document.createElement('span');
-    sub.className = 'comms__contact-fp';
-    sub.textContent = c.fp;
-    mid.append(name, sub);
-    openBtn.append(mid);
-    row.append(av, openBtn);
-    const missed = missedMap[c.fp];
-    if (missed && missed.n > 0) {
-      const mc = document.createElement('span');
-      mc.className = 'comms__missed';
-      mc.title = missed.n > 1 ? fmt(T.people.missed_many, { n: missed.n }) : T.people.missed_one;
-      mc.setAttribute('aria-label', mc.title);
-      mc.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg>';
-      row.append(mc);
-    }
-    const unread = (unreadMap[c.fp] && unreadMap[c.fp].n) || 0;
-    if (unread > 0) {
-      const badge = document.createElement('span');
-      badge.className = 'comms__unread';
-      badge.textContent = unread > 99 ? '99+' : String(unread);
-      badge.title = fmt(unread === 1 ? T.people.unread_one : T.people.unread_many, { n: unread });
-      row.append(badge);
-    }
-    const rm = document.createElement('button');
-    rm.type = 'button';
-    rm.className = 'comms__rowbtn';
-    rm.title = fmt(T.people.remove, { name: c.name || c.fp });
-    rm.setAttribute('aria-label', fmt(T.people.remove, { name: c.name || c.fp }));
-    rm.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-trash"></use></svg>';
-    rm.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.people.confirm_remove, { name: c.name || c.fp }), { danger: true }) : Promise.resolve(true));
-      if (!ok) return;
-      CID.removeContact(c.fp);
-      renderContacts();
-      renderPeerList();
-    });
-    const chev = document.createElement('span');
-    chev.className = 'comms__chev';
-    chev.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-chev"></use></svg>';
-    row.append(rm, chev);
-    row.addEventListener('click', () => openDmWith(c));
-    els.contactList.append(row);
-  });
+  for (const r of rows) {
+    if (r.kind === 'request') els.contactList.append(requestRow(r.ref));
+    else if (r.kind === 'contact') els.contactList.append(contactRow(r.ref, r, missedMap));
+    else if (r.kind === 'room') els.contactList.append(roomRow(r.ref, r));
+    else if (r.kind === 'self') els.contactList.append(selfRow(r.ref, r));
+    else els.contactList.append(aiRow(r.ref, r));
+  }
 };
+
+const refreshHomeThreads = () => {
+  clearTimeout(homeThreadsTimer);
+  homeThreadsTimer = setTimeout(async () => {
+    const next = historyOn() ? await commsStore.listThreads().catch(() => null) : [];
+    if (!next) return;
+    homeThreads = next;
+    if (els.contactList && els.contactList.querySelector('.comms__room-rename')) return;
+    renderContacts();
+  }, 120);
+};
+
+const dropStoredThreads = async (match) => {
+  if (!historyOn()) return;
+  try {
+    for (const t of await commsStore.listThreads()) {
+      if (!match(t)) continue;
+      if (attach) await attach.removeMedia((await commsStore.listMedia({ threadId: t.id }).catch(() => [])).map((r) => r.id));
+      const gone = await commsStore.deleteThread(t.id);
+      if (attach && gone && gone.length) await attach.removeMedia(gone);
+    }
+  } catch (e) {
+    historyFail(e);
+  }
+  refreshHomeThreads();
+};
+
+const homeSearch = document.getElementById('comms-search');
+const homeFilterBar = document.getElementById('comms-filter');
+homeSearch.addEventListener('input', () => { homeQuery = homeSearch.value; renderContacts(); });
+homeFilterBar.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-f]');
+  if (!b) return;
+  homeFilter = b.dataset.f;
+  homeFilterBar.querySelectorAll('button[data-f]').forEach((x) => {
+    const on = x === b;
+    x.classList.toggle('is-active', on);
+    x.setAttribute('aria-pressed', String(on));
+  });
+  renderContacts();
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshHomeThreads(); });
+
+const homeForm = document.getElementById('comms-home-send');
+const homeMsg = document.getElementById('comms-home-msg');
+const homeAt = document.getElementById('comms-at');
+const phoneWidth = window.matchMedia('(max-width: 720px)');
+let homeTarget = null;
+let atItems = [];
+let atIndex = 0;
+const homePlaceholder = () => { homeMsg.placeholder = phoneWidth.matches ? homeMsg.dataset.phPhone : homeMsg.dataset.phDesk; };
+homePlaceholder();
+if (phoneWidth.addEventListener) phoneWidth.addEventListener('change', homePlaceholder);
+
+const homeTargets = () => {
+  const out = CID.getContacts().map((c) => ({ kind: 'contact', id: c.fp, label: c.name || c.fp, ref: c }));
+  for (const r of savedRooms()) out.push({ kind: 'room', id: r.room, label: r.label || r.room, ref: r });
+  out.push({ kind: 'ai', id: 'ai', label: T.home.filter_ai });
+  return out;
+};
+
+const closeAt = () => {
+  homeAt.hidden = true;
+  homeAt.replaceChildren();
+  atItems = [];
+  homeMsg.setAttribute('aria-expanded', 'false');
+  homeMsg.removeAttribute('aria-activedescendant');
+};
+
+let atMeasure = null;
+const placeAt = () => {
+  const style = getComputedStyle(homeMsg);
+  if (!atMeasure) atMeasure = document.createElement('canvas').getContext('2d');
+  atMeasure.font = style.fontWeight + ' ' + style.fontSize + ' ' + style.fontFamily;
+  const before = homeMsg.value.slice(0, homeMsg.selectionStart);
+  const x = homeMsg.offsetLeft + (parseFloat(style.paddingLeft) || 0) + atMeasure.measureText(before.slice(0, before.lastIndexOf('@'))).width - homeMsg.scrollLeft;
+  homeAt.style.setProperty('--at-x', Math.max(4, Math.min(x, homeForm.clientWidth - homeAt.offsetWidth - 4)) + 'px');
+};
+
+const pickAt = (i) => {
+  const t = atItems[i];
+  if (!t) return;
+  const caret = homeMsg.selectionStart;
+  const before = homeMsg.value.slice(0, caret);
+  const at = before.lastIndexOf('@');
+  const insert = '@' + t.label + ' ';
+  homeMsg.value = before.slice(0, at) + insert + homeMsg.value.slice(caret).replace(/^ /, '');
+  homeMsg.setSelectionRange(at + insert.length, at + insert.length);
+  homeTarget = t;
+  closeAt();
+  homeMsg.focus();
+};
+
+const renderAt = () => {
+  const q = mentionQuery(homeMsg.value, homeMsg.selectionStart);
+  if (q == null) { closeAt(); return; }
+  atItems = matchTargets(q, homeTargets());
+  atIndex = Math.min(atIndex, Math.max(0, atItems.length - 1));
+  homeAt.replaceChildren();
+  if (!atItems.length) {
+    const none = document.createElement('div');
+    none.className = 'comms__at-none';
+    none.textContent = T.home.at_none;
+    homeAt.append(none);
+  }
+  atItems.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'comms__at-i';
+    b.id = 'comms-at-' + i;
+    b.setAttribute('role', 'option');
+    b.setAttribute('aria-selected', String(i === atIndex));
+    const av = document.createElement('span');
+    av.setAttribute('aria-hidden', 'true');
+    if (t.kind === 'contact') {
+      av.className = 'comms__avatar';
+      paintAvatar(av, t.label, t.id);
+    } else if (t.kind === 'room') {
+      av.className = 'comms__avatar comms__avatar--room';
+      av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+    } else {
+      av.className = 'comms__avatar comms__avatar--tool';
+      av.innerHTML = '<svg viewBox="0 0 48 48" focusable="false"><use href="#tool-ai-chat"></use></svg>';
+      if (!document.getElementById('tool-ai-chat') && window.MentriaToolsPopup) window.MentriaToolsPopup.load();
+    }
+    const label = document.createElement('span');
+    label.textContent = t.label;
+    b.append(av, label);
+    b.addEventListener('mousedown', (e) => e.preventDefault());
+    b.addEventListener('click', () => pickAt(i));
+    homeAt.append(b);
+  });
+  homeAt.hidden = false;
+  homeMsg.setAttribute('aria-expanded', 'true');
+  if (atItems.length) homeMsg.setAttribute('aria-activedescendant', 'comms-at-' + atIndex);
+  else homeMsg.removeAttribute('aria-activedescendant');
+  placeAt();
+};
+
+homeMsg.addEventListener('input', () => { atIndex = 0; renderAt(); });
+homeMsg.addEventListener('keydown', (e) => {
+  if (homeAt.hidden) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (!atItems.length) return;
+    atIndex = (atIndex + (e.key === 'ArrowDown' ? 1 : atItems.length - 1)) % atItems.length;
+    renderAt();
+  } else if (e.key === 'Enter' && atItems.length) {
+    e.preventDefault();
+    pickAt(atIndex);
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeAt();
+  }
+});
+homeMsg.addEventListener('blur', () => { setTimeout(() => { if (document.activeElement !== homeMsg) closeAt(); }, 150); });
+
+const composerFor = async (target) => {
+  for (let i = 0; i < 80; i++) {
+    const here = target.kind === 'contact' ? !!currentDmContact && currentDmContact.fp === target.id : currentRoomName === target.ref.room;
+    if (here && !els.msg.disabled && chatAction) return true;
+    await new Promise((r) => setTimeout(r, 150));
+  }
+  return false;
+};
+
+homeForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  closeAt();
+  const { target, body } = splitTarget(homeMsg.value, homeTarget);
+  if (!body) return;
+  if (!target || target.kind === 'ai') {
+    try { sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({ text: body, at: Date.now() })); } catch (_) {}
+    window.location.href = PREFIX + '/tools/ai-chat/?thread=new';
+    return;
+  }
+  homeMsg.value = '';
+  homeTarget = null;
+  if (target.kind === 'contact') openDmWith(target.ref);
+  else window.location.hash = formatHash(target.ref.room, target.ref.key);
+  const ready = await composerFor(target);
+  els.msg.value = body;
+  if (ready) els.send.requestSubmit();
+});
 
 const showAddError = (text) => {
   els.addErr.textContent = text || '';

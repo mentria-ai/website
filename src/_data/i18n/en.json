@@ -152,7 +152,7 @@
     "sync_no_peer": "No device answered with this code. Check the code, and keep About open on the other device.",
     "sync_busy": "This code is already in use by two other devices. Make a new code on the device you want to pair with.",
     "sync_vault_totp": "This device has its own TOTP vault, and the other device has a different one. Replace this device’s vault with the other device’s? TOTP accounts that are only on this device will be lost, and the other device’s passphrase will unlock it.",
-    "sync_vault_identity": "This device has its own Mentria identity, and the other device has a different one. Replace it with the other device’s? This device’s identity will be lost, and the other device’s passphrase will unlock it.",
+    "sync_vault_identity": "This device has its own Mentria identity, and the other device has a different one. Replace it with the other device’s? This device’s identity will be lost, and the other device’s passphrase will unlock it. Chat history saved on this device under the old identity will no longer open.",
     "sync_vault_keyring": "This device has its own one unlock, and the other device has a different one. Replace this device’s with the other device’s? The other device’s recovery code will unlock it. Notes, codes, chats and finances set up with this device’s unlock won’t open here until you bring that unlock back in from About. It is kept on this device.",
     "sync_vault_keep": "Keep this device’s",
     "sync_vault_replace": "Replace",
@@ -223,7 +223,8 @@
       "packs_lib": "imported learning packs",
       "finance": "Finance ledger",
       "radio": "radio likes and skips",
-      "other": "other saved data"
+      "other": "other saved data",
+      "comms_history": "chat history"
     },
     "restore_replace": "This device already has its own {areas}. Replace them with the backup's copy? Choose Cancel to keep this device's versions. Notes and anything new are restored either way.",
     "restore_totp_vault": "This device already has a TOTP vault. Replace it with the one in the backup? Accounts that are only on this device will be lost, and the backup's passphrase will unlock it.",
@@ -293,7 +294,9 @@
     "send_failed": "Couldn’t send to {tool}",
     "key_space": "SPACE",
     "key_click": "click",
-    "key_tap": "tap"
+    "key_tap": "tap",
+    "backup_history_locked": "Chat history is left out while your Mentria identity is locked.",
+    "restore_history_locked": "Chat history wasn’t restored. Unlock your Mentria identity, then restore this file again."
   },
   "home": {
     "tools_heading": "Tools",
@@ -1327,7 +1330,13 @@
       "adapters_thinking_on": "thinking on",
       "adapters_thinking_either": "thinking either",
       "think_pinned": "Unpin the adapter to use deep think",
-      "search_pinned": "Unpin the adapter to use web search"
+      "search_pinned": "Unpin the adapter to use web search",
+      "save_setup": "Set up your Mentria identity to keep your chats",
+      "save_setup_btn": "Set up",
+      "save_unlock": "Unlock to keep this chat",
+      "save_unlock_btn": "Unlock",
+      "save_lost": "Unsaved messages are lost when you leave this page.",
+      "photo_chat": "Photo chat"
     },
     "extensions": {
       "install_heading": "Install an extension",
@@ -1954,7 +1963,12 @@
       "prompt_ocr": "Read every piece of text in this image and transcribe it exactly as written, preserving the original line order and line breaks. Include all headings, labels, numbers, and fine print. Do not add any commentary, notes, summaries, or explanation — output the transcribed text and nothing else. Only if the image genuinely contains no text at all, reply: (no text found).",
       "prompt_alt": "In one brief sentence of at most 20 words, describe this image for a screen-reader user. Capture only the single most important thing shown — do not list every detail or transcribe text. Output just that one short sentence and nothing else.",
       "prompt_tags": "Look closely at the image and list 5 to 12 short, comma-separated keyword tags that name the specific things you can see: each main thing by its own name, a colour together with the thing it belongs to, and the kind of place. If the image is mostly text or a document, tag it that way (for example: text, document, screenshot). Always produce tags — never refuse or explain. Output only the comma-separated tags.",
-      "confirm_delete_model": "Delete the downloaded AI model? Other AI tools on this site share it, and it will need to be downloaded again."
+      "confirm_delete_model": "Delete the downloaded AI model? Other AI tools on this site share it, and it will need to be downloaded again.",
+      "save_setup": "Set up your Mentria identity to keep your chats",
+      "save_setup_btn": "Set up",
+      "save_unlock": "Unlock to keep this chat",
+      "save_unlock_btn": "Unlock",
+      "save_lost": "Unsaved messages are lost when you leave this page."
     },
     "files": {
       "db_group": "Databases",
@@ -5385,7 +5399,8 @@
         "send": "send",
         "share_room": "share this room's link",
         "link_copied": "room link copied — send it to anyone you want to invite.",
-        "link_manual": "copy this link to invite someone: {url}"
+        "link_manual": "copy this link to invite someone: {url}",
+        "load_image": "Load image from {host}"
       },
       "notif": {
         "text": "get a notification when a message arrives — even with comms closed",
@@ -5594,7 +5609,36 @@
         "ext_from": "extension from {who}: {name}",
         "install": "install",
         "installed": "installed ✓",
-        "install_failed": "install failed: {reason}"
+        "install_failed": "install failed: {reason}",
+        "offer_photo": "Sent a photo. Update Mentria to see it.",
+        "offer_photos": "Sent {n} photos. Update Mentria to see them.",
+        "offer_video": "Sent a video. Update Mentria to see it.",
+        "offer_videos": "Sent {n} videos. Update Mentria to see them.",
+        "offer_file": "Sent a file. Update Mentria to open it.",
+        "offer_files": "Sent {n} files. Update Mentria to open them.",
+        "offer_mixed": "Sent {n} attachments. Update Mentria to see them.",
+        "needs_update": "{name} needs to update Mentria to receive this",
+        "no_space": "Not enough space on this device",
+        "status_send": "sending {i} of {n} · {rate} · {path}",
+        "status_recv": "receiving {i} of {n} · {rate} · {path}",
+        "direct": "direct",
+        "via_relay": "via relay",
+        "saved_here": "saved on this device",
+        "open_pdf": "Open in PDF tool",
+        "save": "Save",
+        "retry": "Retry",
+        "paused": "Paused at {size}. It carries on by itself when Comms is open on both.",
+        "accept": "Accept",
+        "not_now": "Not now",
+        "accept_q": "{size} · not downloaded yet",
+        "relay_ask": "This goes through our relay server. Continue?",
+        "relay_go": "Continue",
+        "media": "Photos, videos and files",
+        "on_device": "{size} on this device",
+        "free_up": "Free up space",
+        "free_confirm": "Remove this chat's photos, videos and files from this device? The messages stay, and you can download them again while someone still has them.",
+        "removed": "Removed from this device",
+        "download_again": "Download again"
       },
       "attach": {
         "ext_dm": "extensions go device-to-device — {name} isn't connected right now.",
@@ -5694,6 +5738,64 @@
         "overconstrained": "{detail}",
         "security": "{detail}",
         "abort": "{detail}"
+      },
+      "history": {
+        "earlier": "Show earlier messages",
+        "foreign": "History on this device was saved under another identity and can’t be opened.",
+        "start_over": "Start a new history",
+        "start_over_confirm": "Delete the old history on this device and start a new one?",
+        "unavailable": "Chat history can’t be saved on this device."
+      },
+      "home": {
+        "search": "Search",
+        "filter_all": "All",
+        "filter_people": "People",
+        "filter_ai": "AI",
+        "at_none": "No matches",
+        "prompt": "message someone or ask AI",
+        "placeholder": "Message anyone or ask AI",
+        "placeholder_desk": "Message anyone or ask AI. Type @ to pick who.",
+        "hint": "With no @, it starts a new AI chat on this device.",
+        "pick": "Pick a chat, or start one"
+      },
+      "sheet": {
+        "title": "Send",
+        "add": "Add more",
+        "caption": "Add a caption",
+        "standard": "Standard",
+        "hd": "HD",
+        "send": "Send",
+        "cancel": "Cancel",
+        "est_down": "{n} photos · {size}, downscaled",
+        "est_orig": "{size}, originals",
+        "est_mixed": "{n} items · {size}, photos downscaled",
+        "keeps_location": "This file keeps its location data",
+        "too_big": "Too big to send: 2 GB at most",
+        "remove": "Remove"
+      },
+      "viewer": {
+        "save": "Save",
+        "share": "Share",
+        "share_now": "Share now",
+        "close": "Close",
+        "prev": "Previous",
+        "next": "Next"
+      },
+      "devices": {
+        "title": "My devices",
+        "explainer": "Drop anything here. It reaches your other devices by itself whenever Comms is open on them.",
+        "this_one": "{device} · this one",
+        "asleep": "{device} · asleep",
+        "online": "{device} · online",
+        "got": "on {device} ✓",
+        "when_open": "{device} when open",
+        "kind_mac": "Mac",
+        "kind_iphone": "iPhone",
+        "kind_ipad": "iPad",
+        "kind_android": "Android",
+        "kind_windows": "Windows PC",
+        "kind_linux": "Linux",
+        "kind_device": "Device"
       }
     },
     "scanner": {

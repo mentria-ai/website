@@ -771,6 +771,8 @@ localeReload: true
       codePrompt:        {{ ('unlock.backup_code_prompt'         | t) | dump | safe }},
       codeUnavailable:   {{ ('common.backup_code_unavailable'    | t) | dump | safe }},
       size:              {{ ('common.backup_size'                | t) | dump | safe }},
+      historyLocked:     {{ ('common.backup_history_locked'      | t) | dump | safe }},
+      historySkipped:    {{ ('common.restore_history_locked'     | t) | dump | safe }},
       sizeBusy:          {{ ('common.backup_size_busy'           | t) | dump | safe }},
       largeConfirm:      {{ ('common.backup_large_confirm'       | t) | dump | safe }},
       areas: {{ 'common.data_areas' | tsub | dump | safe }},
@@ -1013,7 +1015,7 @@ localeReload: true
       var parts = m.areas.filter(function (a) { return a.bytes > 0; }).map(function (a) {
         return (COPY.areas[a.area] || a.area) + ' ' + fmtBytes(a.bytes);
       });
-      sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', window.MentriaBackup.listJoin(parts));
+      sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', window.MentriaBackup.listJoin(parts)) + (m.lockedAreas && m.lockedAreas.length ? ' ' + COPY.historyLocked : '');
       sizeWarn.hidden = m.total <= window.MentriaBackup.LARGE_BYTES;
     }
 
@@ -1102,9 +1104,10 @@ localeReload: true
         setStatus(importStat, COPY.importApplying, null);
         var result = await window.MentriaBackup.applyRestore(data, COPY.restore);
         if (result.cancelled) { setStatus(importStat, COPY.importCancelled, null); return; }
-        setStatus(importStat, COPY.importDone.replace('{n}', result.restored), 'ok');
+        var heldBack = result.lockedAreas && result.lockedAreas.length;
+        setStatus(importStat, COPY.importDone.replace('{n}', result.restored) + (heldBack ? ' ' + COPY.historySkipped : ''), 'ok');
         reloading = true;
-        setTimeout(function () { location.reload(); }, 1200);
+        setTimeout(function () { location.reload(); }, heldBack ? 6000 : 1200);
       } catch (err) {
         var code = window.MentriaBackup.restoreErrorCode(err);
         if (code === 'pass' && mode.kind === 'code') code = 'code';

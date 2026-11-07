@@ -40,6 +40,18 @@ unlockTool: true
 
 <section class="comms">
   <h1 class="sr-only">{{ 'tools.comms.title' | t }}</h1>
+  <div class="comms__picker comms__invite" id="comms-invite" hidden>
+    <div class="comms__picker-backdrop"></div>
+    <div class="comms__picker-card" role="dialog" aria-modal="true" aria-labelledby="comms-invite-title">
+      <h3 class="comms__picker-h" id="comms-invite-title"></h3>
+      <p class="comms__invite-by" id="comms-invite-by" hidden></p>
+      <p class="comms__invite-ios" id="comms-invite-ios" hidden><span>{{ 'tool.comms.invite.ios' | t }}</span> <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-copy">{{ 'tool.comms.invite.copy' | t }}</button></p>
+      <div class="comms__picker-actions comms__invite-actions">
+        <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-later">{{ 'tool.comms.invite.not_now' | t }}</button>
+        <button type="button" class="comms__btn" id="comms-invite-join" hidden>{{ 'tool.comms.invite.join' | t }}</button>
+      </div>
+    </div>
+  </div>
   <div class="comms__onboard" id="comms-onboard" hidden>
     <div class="comms__onboard-step" id="comms-onboard-insecure" hidden>
       <h2 class="comms__onboard-h">{{ 'tool.comms.onboard.insecure_title' | t }}</h2>
@@ -255,6 +267,10 @@ unlockTool: true
         <div class="comms__upgrade comms__histbar" id="comms-hist-bar" role="status" hidden>
           <span class="comms__upgrade-text" id="comms-hist-text"></span>
           <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-hist-reset" type="button" hidden>{{ 'tool.comms.history.start_over' | t }}</button></div>
+        </div>
+        <div class="comms__upgrade comms__histbar" id="comms-oldlink" role="status" hidden>
+          <span class="comms__upgrade-text">{{ 'tool.comms.invite.old_link' | t }}</span>
+          <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-oldlink-make" type="button">{{ 'tool.comms.invite.make' | t }}</button><button class="comms__btn comms__btn--ghost" id="comms-oldlink-close" type="button" aria-label="{{ 'tool.comms.invite.dismiss' | t }}">&times;</button></div>
         </div>
         <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
       </div>
@@ -630,6 +646,9 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__picker-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-md);color:var(--term-fg);font:inherit;font-size:var(--text-sm);text-align:left;cursor:pointer}
 .comms__picker-ver{flex:none;color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
 .comms__picker-actions{display:flex;justify-content:flex-end}
+.comms__invite-actions{gap:var(--space-2)}
+.comms__invite-by,.comms__invite-ios{margin:0;color:var(--term-muted);font-size:var(--text-sm);overflow-wrap:anywhere}
+.comms__invite-ios{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 
 @media (hover:hover) and (pointer:fine){
   .comms__btn:hover:not(:disabled){background:var(--syn-cyan-soft);box-shadow:var(--glow-cyan-soft)}
@@ -705,6 +724,8 @@ import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
 import { signBody, verifyBody, validSpub } from '/assets/js/comms/sign.js';
+import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
+import { noteJoined, noteMember } from '/assets/js/comms/members.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -719,7 +740,6 @@ const TU = {
 const LANG = {{ locale.code | dump | safe }};
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
 const COMMS_PATH = PREFIX + '/comms/';
-const SHARE_PATH = '/comms/';
 const COMMS_HTTPS = 'https://mentria.ai' + COMMS_PATH;
 const own = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
 const fmt = (tpl, vars) => String(tpl).replace(/\{(\w+)\}/g, (m, k) => (own(vars, k) && vars[k] != null ? String(vars[k]) : m));
@@ -1224,34 +1244,181 @@ const renderPendingLine = (text, payload, cmid) => {
   pendingResends++;
 };
 
-const shareUrl = (roomName, b64Key) => {
-  const u = new URL(window.location.href);
-  u.pathname = SHARE_PATH;
-  u.search = '';
-  u.hash = formatHash(roomName, b64Key);
-  return u.toString();
-};
-
 const refreshShareUrl = (roomName) => {
-  els.share.hidden = !roomName || isDmRoom(roomName) || tidOf(roomName) === SELF_THREAD;
+  els.share.hidden = !roomName || isDmRoom(roomName) || tidOf(roomName) === SELF_THREAD || !(joinTarget && joinTarget.room === roomName && joinTarget.key);
 };
 
-const copyRoomLink = (url) => {
+const relaySockets = () => Object.values(getRelaySockets() || {}).filter((ws) => ws && ws.readyState === 1);
+const publishSigned = async (ev, waitOk = true) => {
+  let side = null;
+  try { side = await ensureSideSocket(); } catch (_) { side = null; }
+  const sockets = [side].concat(relaySockets()).filter((ws, i, all) => ws && all.indexOf(ws) === i);
+  if (!sockets.length) return false;
+  const msg = JSON.stringify(['EVENT', ev]);
+  if (!waitOk) { sockets.forEach((ws) => { try { ws.send(msg); } catch (_) {} }); return true; }
+  return new Promise((resolve) => {
+    let done = false;
+    const on = (e) => {
+      let m;
+      try { m = JSON.parse(e.data); } catch (_) { return; }
+      if (Array.isArray(m) && m[0] === 'OK' && m[1] === ev.id && m[2] === true) finish(true);
+    };
+    const finish = (v) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      sockets.forEach((ws) => { try { ws.removeEventListener('message', on); } catch (_) {} });
+      resolve(v);
+    };
+    const timer = setTimeout(() => finish(false), 6000);
+    sockets.forEach((ws) => { try { ws.addEventListener('message', on); ws.send(msg); } catch (_) {} });
+  });
+};
+let nostrToolsP = null;
+const nostrTools = () => (nostrToolsP = nostrToolsP || import('/assets/vendor/nostr-tools.js'));
+const dropEnvelope = async (evId, sk) => {
+  if (!evId || !sk) return;
+  try {
+    const { finalizeEvent } = await nostrTools();
+    await publishSigned(finalizeEvent(deletionTemplate(evId, Math.floor(Date.now() / 1000)), sk), false);
+  } catch (_) {}
+};
+
+let lastInviteUrl = null;
+const makeInvite = (roomName, b64Key, kv) => {
+  const token = newInviteToken();
+  const url = inviteUrl(window.location.origin, token);
+  const known = savedRooms().find((r) => r.room === roomName);
+  const label = (known && known.label) || roomName;
+  const published = (async () => {
+    const k = await inviteKeys(token);
+    const now = Math.floor(Date.now() / 1000);
+    const by = { name: (myProfile && myProfile.name) || '' };
+    if (myId) by.pub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
+    if (mySign) by.spub = mySign.spub;
+    const content = await sealInvite(k.aes, { v: 1, room: roomName, key: b64Key, kv: kv === 2 ? 2 : 1, label, by, exp: now + INVITE_TTL_S, once: true });
+    const { finalizeEvent } = await nostrTools();
+    const ev = finalizeEvent(envelopeTemplate(k.topic, content, now), k.sk);
+    if (!(await publishSigned(ev))) return false;
+    const list = savedRooms();
+    const entry = list.find((r) => r.room === roomName);
+    if (entry) {
+      const invites = Object.assign({}, entry.invites || {});
+      for (const [id, v] of Object.entries(invites)) if (!v || (v.exp || 0) * 1000 < Date.now()) delete invites[id];
+      invites[k.id] = { token, evId: ev.id, exp: now + INVITE_TTL_S };
+      const ids = Object.keys(invites);
+      if (ids.length > 10) ids.sort((a, b) => invites[a].exp - invites[b].exp).slice(0, ids.length - 10).forEach((id) => { delete invites[id]; });
+      entry.invites = invites;
+      setSavedRooms(list);
+    }
+    lastInviteUrl = url;
+    return true;
+  })().catch(() => false);
+  return { url, published };
+};
+
+const copyInvite = (url) => {
   const manual = () => sys(fmt(T.chat.link_manual, { url }));
   try {
-    navigator.clipboard.writeText(url).then(() => sys(T.chat.link_copied), manual);
+    navigator.clipboard.writeText(url).then(() => sys(T.invite.copied), manual);
   } catch (_) { manual(); }
 };
 
-els.share.addEventListener('click', () => {
-  if (!currentRoomName || isDmRoom(currentRoomName)) return;
-  const url = shareUrl(currentRoomName, joinTarget && joinTarget.key);
+const shareInvite = () => {
+  if (!currentRoomName || isDmRoom(currentRoomName) || !joinTarget || joinTarget.room !== currentRoomName || !joinTarget.key) return;
+  const { url, published } = makeInvite(currentRoomName, joinTarget.key, joinTarget.kv);
+  published.then((ok) => { if (!ok) sys(T.invite.offline); });
   if (typeof navigator.share === 'function') {
-    navigator.share({ url }).catch((err) => { if (!err || err.name !== 'AbortError') copyRoomLink(url); });
+    navigator.share({ url }).catch((err) => { if (!err || err.name !== 'AbortError') copyInvite(url); });
     return;
   }
-  copyRoomLink(url);
+  copyInvite(url);
+};
+els.share.addEventListener('click', shareInvite);
+
+const IOS_SAFARI = (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !navigator.standalone && !(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+let inviteSeq = 0;
+let pendingInvite = null;
+const inviteBox = () => document.getElementById('comms-invite');
+const hideInvite = () => {
+  inviteSeq++;
+  pendingInvite = null;
+  const box = inviteBox();
+  if (box) box.hidden = true;
+};
+const showInvite = (state, data = {}) => {
+  const box = inviteBox();
+  if (!box) return;
+  const title = document.getElementById('comms-invite-title');
+  const by = document.getElementById('comms-invite-by');
+  const ready = state === 'ready';
+  title.textContent = state === 'looking' ? T.invite.looking : state === 'gone' ? T.invite.gone : fmt(T.invite.join_title, { label: data.body.label });
+  by.hidden = !ready;
+  by.textContent = ready ? fmt(T.invite.by, { name: data.body.by.name || T.people.someone, fp: data.fp || '' }).trim() : '';
+  document.getElementById('comms-invite-ios').hidden = !(ready && IOS_SAFARI);
+  document.getElementById('comms-invite-copy').textContent = T.invite.copy;
+  document.getElementById('comms-invite-join').hidden = !ready;
+  box.hidden = false;
+};
+const openInviteLink = async (token) => {
+  if (parseInvite(window.location.hash)) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  hideInvite();
+  const seq = inviteSeq;
+  showInvite('looking');
+  const k = await inviteKeys(token);
+  let side = null;
+  try { side = await ensureSideSocket(); } catch (_) { side = null; }
+  const found = k ? await fetchInvite([side].concat(relaySockets()).filter((ws, i, all) => ws && all.indexOf(ws) === i), k.topic, k.aes) : null;
+  if (seq !== inviteSeq) return;
+  if (!found) { showInvite('gone'); return; }
+  let fp = '';
+  try { if (found.body.by.pub) fp = await CID.fingerprint(found.body.by.pub); } catch (_) { fp = ''; }
+  if (seq !== inviteSeq) return;
+  pendingInvite = { token, k, found };
+  showInvite('ready', { body: found.body, fp });
+};
+const announceJoined = async (roomName, inv) => {
+  for (let i = 0; i < 100; i++) {
+    if (currentRoomName !== roomName) return;
+    if (chatPersist && chatTopic) break;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  if (currentRoomName !== roomName) return;
+  const ctl = { k: 'joined', inv, jid: b64urlEncode(crypto.getRandomValues(new Uint8Array(9))), name: (myProfile && myProfile.name) || '' };
+  if (myId) ctl.pub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
+  await publishRoomCtl(ctl);
+  if (currentRoomName === roomName) sys(T.invite.used);
+};
+const claimInvite = async ({ k, found }) => {
+  const b = found.body;
+  if (isEphemeralRoom(b.room)) eph.set(b.room, b.key, b.kv);
+  else rememberRoom(b.room, b.key, { kv: b.kv, label: b.label });
+  dropEnvelope(found.evId, k.sk);
+  els.room.value = b.room;
+  await joinNew(b.room, b.key, { kv: b.kv });
+  setView('chat');
+  announceJoined(b.room, k.id);
+};
+document.getElementById('comms-invite-join').addEventListener('click', () => {
+  const p = pendingInvite;
+  hideInvite();
+  if (p) claimInvite(p);
 });
+document.getElementById('comms-invite-later').addEventListener('click', hideInvite);
+document.getElementById('comms-invite-copy').addEventListener('click', (e) => {
+  const p = pendingInvite;
+  if (!p) return;
+  const btn = e.currentTarget;
+  try { navigator.clipboard.writeText(inviteUrl(window.location.origin, p.token)).then(() => { btn.textContent = T.invite.copied_short; }, () => {}); } catch (_) {}
+});
+
+let oldLinkFor = null;
+const paintOldLink = (roomName) => {
+  const bar = document.getElementById('comms-oldlink');
+  if (bar) bar.hidden = !roomName || oldLinkFor !== roomName;
+};
+document.getElementById('comms-oldlink-make').addEventListener('click', () => { oldLinkFor = null; paintOldLink(null); shareInvite(); });
+document.getElementById('comms-oldlink-close').addEventListener('click', () => { oldLinkFor = null; paintOldLink(null); });
 
 const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp || m.sfp === myLegacyFp));
 const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
@@ -1310,7 +1477,7 @@ const handleNostrMsg = async (msgEvent) => {
       sfp2 = unpacked.sfp2;
       parts = unpacked.parts;
       if (unpacked.sg) sig = await verifyBody(unpacked.obj, currentRoomName, content.cmid);
-      if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp, sig); return; }
+      if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp, sig, typeof content.ts === 'number' ? content.ts : (ev.created_at || 0) * 1000); return; }
     } catch { return; }
     seenCmids.add(content.cmid);
     const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
@@ -1966,7 +2133,12 @@ const eph = ephKeys((() => { try { return window.sessionStorage; } catch (_) { r
 const openSavedRoom = (r) => { els.room.value = r.room; joinNew(r.room, r.key, { kv: r.kv || 1 }); };
 const importRoomLink = (target) => {
   if (isEphemeralRoom(target.room)) eph.set(target.room, target.key, target.kv);
-  else rememberRoom(target.room, target.key);
+  else {
+    rememberRoom(target.room, target.key);
+    const list = savedRooms();
+    const e = list.find((r) => r.room === target.room);
+    if (e && !e.oldSeen) { e.oldSeen = true; setSavedRooms(list); oldLinkFor = target.room; }
+  }
   window.history.replaceState(null, '', window.location.pathname + window.location.search + formatHash(target.room, null));
 };
 const forgetRoom = (roomName) => setSavedRooms(savedRooms().filter((r) => r.room !== roomName));
@@ -2017,8 +2189,29 @@ const notifTargetNow = () => {
   return { tag: 'comms-msg', url: COMMS_PATH };
 };
 
-const handleRoomCtl = (ctl, sfp) => {
-  if (!ctl || ctl.k !== 'ring' || !currentRoomName || isDmRoom(currentRoomName)) return;
+const onJoinedCtl = (ctl, sig, at) => {
+  const sigFp = sig && sig.ok ? sig.sigFp : null;
+  const mine = !!(sigFp && mySign && sigFp === mySign.sigFp);
+  const list = savedRooms();
+  const entry = list.find((r) => r.room === currentRoomName);
+  if (entry) {
+    if (sigFp) noteMember(entry, { sigFp, name: ctl.name, pub: ctl.pub, spub: sig.spub, ts: at || Date.now() });
+    noteJoined(entry, ctl, sigFp);
+    const own = entry.invites && typeof ctl.inv === 'string' ? entry.invites[ctl.inv] : null;
+    if (own && !own.claimed) {
+      own.claimed = true;
+      inviteKeys(own.token).then((k) => { if (k) dropEnvelope(own.evId, k.sk); }, () => {});
+    }
+    setSavedRooms(list);
+  }
+  const fresh = !at || Math.abs(Date.now() - at) < 120000;
+  if (fresh && !mine) sys(fmt(T.invite.joined, { name: String(ctl.name || '').slice(0, 32) || T.people.someone }));
+};
+
+const handleRoomCtl = (ctl, sfp, sig, at) => {
+  if (!ctl || !currentRoomName || isDmRoom(currentRoomName)) return;
+  if (ctl.k === 'joined') { onJoinedCtl(ctl, sig, at); return; }
+  if (ctl.k !== 'ring') return;
   const token = (typeof ctl.token === 'string' && RING_TOKEN_RE.test(ctl.token)) ? ctl.token : null;
   if (!token || (ringToken && token === ringToken)) return;
   const list = savedRooms();
@@ -2113,7 +2306,7 @@ const setRoomNotify = async (roomName, on) => {
 };
 
 if (new URLSearchParams(window.location.search).has('debug')) {
-  window.__commsDebug = { notifTargetNow, roomNotifUrl, setRoomNotify, announceRoomRing, publishRoomCtl, savedRooms, setSavedRooms, setRingToken: (t) => { ringToken = t; }, ringToken: () => ringToken };
+  window.__commsDebug = { lastInvite: () => lastInviteUrl, notifTargetNow, roomNotifUrl, setRoomNotify, announceRoomRing, publishRoomCtl, savedRooms, setSavedRooms, setRingToken: (t) => { ringToken = t; }, ringToken: () => ringToken };
 }
 
 let lastRoomRingAt = 0;
@@ -2268,6 +2461,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     els.room.value = '';
     els.status.textContent = T.chat.not_in_chat;
     els.share.hidden = true;
+    paintOldLink(null);
     els.eph.hidden = true;
     els.leave.hidden = true;
     els.callStart.hidden = true;
@@ -2294,6 +2488,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     if (window.location.hash !== nextHash) window.location.hash = nextHash;
   }
   refreshShareUrl(roomName);
+  paintOldLink(roomName);
 
   let iceServers;
   try {
@@ -2590,6 +2785,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
 };
 
 els.join.addEventListener('click', () => {
+  const tok = parseInvite(els.room.value);
+  if (tok) { els.room.value = ''; closeAdv(); openInviteLink(tok); return; }
   const name = (els.room.value || (EPHEMERAL_PREFIX + randomRoomSlug())).trim().slice(0, 64);
   const r = joinTarget && joinTarget.room === name ? joinTarget : resolveHash(formatHash(name, null), savedRooms(), eph);
   joinNew(name, r ? r.key : null, { kv: r ? r.kv : 1 });
@@ -5320,7 +5517,7 @@ els.newRoom.addEventListener('click', async () => {
   const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
   els.room.value = name;
   closeAdv();
-  await joinNew(name, key);
+  await joinNew(name, key, { kv: 2 });
 });
 
 els.newSaved.addEventListener('click', async () => {
@@ -5328,7 +5525,7 @@ els.newSaved.addEventListener('click', async () => {
   const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
   els.room.value = name;
   closeAdv();
-  await joinNew(name, key);
+  await joinNew(name, key, { kv: 2 });
   if (currentRoomName === name) sys(T.log.saved_room);
 });
 
@@ -5436,7 +5633,15 @@ const bootHash = window.location.hash && window.location.hash !== '#' ? parseHas
 if (bootHash && isDmRoom(bootHash.room)) {
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
 }
-const bootTarget = bootHash && !isDmRoom(bootHash.room) ? resolveHash(window.location.hash, savedRooms(), eph) : null;
+const bootInvite = parseInvite(window.location.hash);
+if (bootInvite) {
+  window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  window.addEventListener('load', async () => {
+    if (bootUnlock) await Promise.race([bootUnlock, new Promise((r) => setTimeout(r, 4000))]);
+    openInviteLink(bootInvite);
+  });
+}
+const bootTarget = bootHash && !bootInvite && !isDmRoom(bootHash.room) ? resolveHash(window.location.hash, savedRooms(), eph) : null;
 if (bootTarget && bootTarget.imported) importRoomLink(bootTarget);
 const hasHash = !!bootTarget;
 if (hasHash) {
@@ -5449,6 +5654,8 @@ if (hasHash) {
   });
 }
 window.addEventListener('hashchange', () => {
+  const invite = parseInvite(window.location.hash);
+  if (invite) { openInviteLink(invite); return; }
   const raw = parseHash(window.location.hash);
   if (isDmRoom(raw.room)) {
     window.history.replaceState(null, '', window.location.pathname + window.location.search);

@@ -5826,6 +5826,24 @@
       "sign": {
         "verified": "Verificado: assinado com a chave de identidade",
         "my_key": "Chave de assinatura {fp}"
+      },
+      "invite": {
+        "copied": "Link de convite copiado. Funciona uma vez, por 24 horas.",
+        "join_title": "Entrar em {label}?",
+        "by": "Convite de {name} {fp}",
+        "join": "Entrar",
+        "not_now": "Agora não",
+        "ios": "Usando o app da tela de início? Copie este convite e cole lá.",
+        "copy": "Copiar convite",
+        "copied_short": "Copiado",
+        "looking": "Procurando o convite…",
+        "gone": "Este convite expirou ou já foi usado. Peça um novo.",
+        "used": "Você entrou com um convite; ele não pode ser usado de novo.",
+        "joined": "{name} entrou com um convite",
+        "old_link": "Link antigo: nunca expira. Crie um novo convite para compartilhar.",
+        "make": "Novo convite",
+        "dismiss": "Fechar",
+        "offline": "Esse convite não chegou ao relay, então não vai funcionar. Crie outro daqui a pouco."
       }
     },
     "scanner": {

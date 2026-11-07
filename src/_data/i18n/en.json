@@ -5826,6 +5826,24 @@
       "sign": {
         "verified": "Verified: signed with their identity key",
         "my_key": "Signing key {fp}"
+      },
+      "invite": {
+        "copied": "Invite link copied. It works once, for 24 hours.",
+        "join_title": "Join {label}?",
+        "by": "Invited by {name} {fp}",
+        "join": "Join",
+        "not_now": "Not now",
+        "ios": "Using the Home Screen app? Copy this invite and paste it there.",
+        "copy": "Copy invite",
+        "copied_short": "Copied",
+        "looking": "Looking for the invite…",
+        "gone": "This invite has expired or was already used. Ask for a new one.",
+        "used": "You joined with an invite; it is now used up.",
+        "joined": "{name} joined with an invite",
+        "old_link": "Old-style link: it never expires. Make a new invite to share.",
+        "make": "New invite",
+        "dismiss": "Dismiss",
+        "offline": "That invite didn't reach the relay, so it won't work. Make a new one in a moment."
       }
     },
     "scanner": {

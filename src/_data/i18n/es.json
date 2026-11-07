@@ -5826,6 +5826,24 @@
       "sign": {
         "verified": "Verificado: firmado con su clave de identidad",
         "my_key": "Clave de firma {fp}"
+      },
+      "invite": {
+        "copied": "Enlace de invitación copiado. Funciona una vez, durante 24 horas.",
+        "join_title": "¿Unirte a {label}?",
+        "by": "Te invita {name} {fp}",
+        "join": "Unirme",
+        "not_now": "Ahora no",
+        "ios": "¿Usas la app de la pantalla de inicio? Copia esta invitación y pégala allí.",
+        "copy": "Copiar invitación",
+        "copied_short": "Copiada",
+        "looking": "Buscando la invitación…",
+        "gone": "Esta invitación caducó o ya se usó. Pide una nueva.",
+        "used": "Te uniste con una invitación; ya no se puede volver a usar.",
+        "joined": "{name} se unió con una invitación",
+        "old_link": "Enlace antiguo: nunca caduca. Crea una invitación nueva para compartir.",
+        "make": "Nueva invitación",
+        "dismiss": "Cerrar",
+        "offline": "Esa invitación no llegó al relé, así que no funcionará. Crea otra en un momento."
       }
     },
     "scanner": {

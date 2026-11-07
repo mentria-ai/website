@@ -79,6 +79,7 @@ const MF = globalThis.MentriaMediaFormat;
 const F = await need('/assets/js/comms/files.js');
 const SH = await need('/assets/js/comms/sheet.js');
 const SF = await need('/assets/js/comms/self.js');
+const RM = await need('/assets/js/comms/rooms.js');
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -842,6 +843,36 @@ check('fix I5: the page host follows the weekly room change with fresh ICE', asy
   eq(st.leaves, 1);
   eq(st.ice, 2);
   eq(st.requests.length, 1);
+});
+
+const RK = 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8';
+const ephOf = (map) => ({ get: (r) => map[r] || null, set: (r, key, kv) => { map[r] = { key, kv }; } });
+check('rooms: an imported link resolves with its key', () => deepEq(RM.resolveHash('#abc:' + RK, [], ephOf({})), { room: 'abc', key: RK, kv: 1, imported: true }));
+check('rooms: an imported link that matches a saved room keeps its kv', () => deepEq(RM.resolveHash('#abc:' + RK, [{ room: 'abc', key: RK, kv: 2 }], ephOf({})), { room: 'abc', key: RK, kv: 2, imported: true }));
+check('rooms: a bare name resolves to the saved key', () => deepEq(RM.resolveHash('#abc', [{ room: 'abc', key: RK, kv: 2 }], ephOf({})), { room: 'abc', key: RK, kv: 2, imported: false }));
+check('rooms: a bare ephemeral name resolves from this tab', () => deepEq(RM.resolveHash('#!tmp', [], ephOf({ '!tmp': { key: RK, kv: 2 } })), { room: '!tmp', key: RK, kv: 2, imported: false }));
+check('rooms: an unknown bare name joins without a key', () => deepEq(RM.resolveHash('#open', [], ephOf({})), { room: 'open', key: null, kv: 1, imported: false }));
+check('rooms: DM and invite hashes are not resolved here', () => {
+  eq(RM.resolveHash('#dm-x:' + RK, [], ephOf({})), null);
+  eq(RM.resolveHash('#!dm-x:' + RK, [], ephOf({})), null);
+  eq(RM.resolveHash('#:i1.abc', [], ephOf({})), null);
+  eq(RM.resolveHash('', [], ephOf({})), null);
+  eq(RM.resolveHash('#', [], ephOf({})), null);
+});
+check('rooms: an encoded room name resolves decoded', () => deepEq(RM.resolveHash('#Trip%20photos', [{ room: 'Trip photos', key: RK }], ephOf({})), { room: 'Trip photos', key: RK, kv: 1, imported: false }));
+check('rooms: the tab key memory keeps the newest 20', () => {
+  const st = new MemoryStorage();
+  const e = RM.ephKeys(st);
+  for (let i = 0; i < 25; i++) e.set('!r' + i, RK, 2);
+  eq(e.get('!r0'), null);
+  deepEq(e.get('!r24'), { key: RK, kv: 2 });
+  deepEq(RM.ephKeys(st).get('!r24'), { key: RK, kv: 2 });
+});
+check('rooms: a broken tab key memory reads as empty', () => {
+  const st = new MemoryStorage();
+  st.setItem('mentria.comms.ephkeys', '{nope');
+  eq(RM.ephKeys(st).get('!x'), null);
+  eq(RM.ephKeys(null).get('!x'), null);
 });
 
 let failed = 0;

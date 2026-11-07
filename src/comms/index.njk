@@ -701,6 +701,7 @@ import { TIERS as AI_TIERS, TIER_CHAIN as AI_CHAIN, SMALL_TIER as AI_SMALL, isTi
 import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
+import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1931,6 +1932,13 @@ const rememberRoom = (roomName, b64Key) => {
   if (i >= 0) list[i] = entry; else list.unshift(entry);
   setSavedRooms(list.slice(0, 50));
 };
+const eph = ephKeys((() => { try { return window.sessionStorage; } catch (_) { return null; } })());
+const openSavedRoom = (r) => { els.room.value = r.room; joinNew(r.room, r.key, { kv: r.kv || 1 }); };
+const importRoomLink = (target) => {
+  if (isEphemeralRoom(target.room)) eph.set(target.room, target.key, target.kv);
+  else rememberRoom(target.room, target.key);
+  window.history.replaceState(null, '', window.location.pathname + window.location.search + formatHash(target.room, null));
+};
 const forgetRoom = (roomName) => setSavedRooms(savedRooms().filter((r) => r.room !== roomName));
 const touchRoom = (roomName) => { const list = savedRooms(); const r = list.find((x) => x.room === roomName); if (r) { r.lastSeen = Date.now(); setSavedRooms(list); } };
 const renameRoom = (roomName, label) => { const list = savedRooms(); const r = list.find((x) => x.room === roomName); if (r) { r.label = String(label || '').trim().slice(0, 40) || r.room; setSavedRooms(list); } };
@@ -1968,11 +1976,12 @@ const closeLocalNotif = async (tag) => {
     (await reg.getNotifications({ tag })).forEach((note) => note.close());
   } catch (_) {}
 };
+const roomNotifUrl = (entry) => COMMS_PATH + (entry ? formatHash(entry.room, null) : '');
 const notifTargetNow = () => {
   if (currentDmContact) return { tag: 'comms-dm:' + currentDmContact.fp, url: COMMS_PATH };
   if (currentRoomName && !isDmRoom(currentRoomName)) {
     const entry = roomNotifyEntry(currentRoomName);
-    return { tag: 'comms-room:' + currentRoomName, url: entry ? COMMS_PATH + formatHash(entry.room, entry.key) : COMMS_PATH };
+    return { tag: 'comms-room:' + currentRoomName, url: roomNotifUrl(entry) };
   }
   return { tag: 'comms-msg', url: COMMS_PATH };
 };
@@ -2055,11 +2064,11 @@ const setRoomNotify = async (roomName, on) => {
   setSavedRooms(list);
   renderContacts();
   if (currentRoomName === roomName) { await announceRoomRing(); return; }
-  if (on) { window.location.hash = formatHash(fresh.room, fresh.key); setView('chat'); }
+  if (on) { openSavedRoom(fresh); setView('chat'); }
 };
 
 if (new URLSearchParams(window.location.search).has('debug')) {
-  window.__commsDebug = { setRoomNotify, announceRoomRing, publishRoomCtl, savedRooms, setSavedRooms, setRingToken: (t) => { ringToken = t; }, ringToken: () => ringToken };
+  window.__commsDebug = { notifTargetNow, roomNotifUrl, setRoomNotify, announceRoomRing, publishRoomCtl, savedRooms, setSavedRooms, setRingToken: (t) => { ringToken = t; }, ringToken: () => ringToken };
 }
 
 let lastRoomRingAt = 0;
@@ -2169,7 +2178,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   albumCards.clear();
   watchChatVia();
   const leavingDm = currentDmContact;
-  joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null };
+  joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null, kv: opts.kv === 2 ? 2 : 1 };
   stopScan();
   MentriaBus.unprovide('comms.peers');
   MentriaBus.unprovide('comms.share');
@@ -2226,12 +2235,12 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key) : null;
   if (seq !== joinSeq) return;
   if (b64Key && !chatKey) sysTop(T.log.bad_key);
-  if (chatKey && b64Key && !opts.self) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
+  if (chatKey && b64Key && !opts.self) { if (isEphemeralRoom(roomName)) eph.set(roomName, b64Key, opts.kv); else rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
 
   if (opts.share === false || isDmRoom(roomName)) {
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
   } else {
-    const nextHash = formatHash(roomName, b64Key);
+    const nextHash = formatHash(roomName, null);
     if (window.location.hash !== nextHash) window.location.hash = nextHash;
   }
   refreshShareUrl(roomName);
@@ -2530,8 +2539,8 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
 
 els.join.addEventListener('click', () => {
   const name = (els.room.value || (EPHEMERAL_PREFIX + randomRoomSlug())).trim().slice(0, 64);
-  const { b64Key } = parseHash(window.location.hash);
-  joinNew(name, b64Key);
+  const r = joinTarget && joinTarget.room === name ? joinTarget : resolveHash(formatHash(name, null), savedRooms(), eph);
+  joinNew(name, r ? r.key : null, { kv: r ? r.kv : 1 });
 });
 
 const aiHoldEnter = (e) => { if (e.key === 'Enter' && aiView && aiView.isOpen() && aiView.busy()) e.preventDefault(); };
@@ -3473,7 +3482,7 @@ const handleSideMsg = async (msgEvent) => {
       } catch (_) { return; }
       if (currentRoomName === savedRoom.room || ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
       countUnread(k, ts);
-      notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: COMMS_PATH + formatHash(savedRoom.room, savedRoom.key) });
+      notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: roomNotifUrl(savedRoom) });
       return;
     }
     if (currentDmContact && currentDmContact.fp === fp) {
@@ -4753,7 +4762,7 @@ const roomRow = (r, info) => {
   openBtn.append(mid);
   row.append(av, openBtn);
   if (info.unread > 0 && currentRoomName !== r.room) row.append(unreadBadge(info.unread));
-  const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
+  const open = () => { if (currentRoomName !== r.room) openSavedRoom(r); setView('chat'); };
   row.addEventListener('click', open);
   const bell = document.createElement('button');
   bell.type = 'button';
@@ -5073,7 +5082,7 @@ homeForm.addEventListener('submit', async (e) => {
   homeMsg.value = '';
   homeTarget = null;
   if (target.kind === 'contact') openDmWith(target.ref);
-  else window.location.hash = formatHash(target.ref.room, target.ref.key);
+  else openSavedRoom(target.ref);
   const ready = await composerFor(target);
   els.msg.value = body;
   if (ready) els.send.requestSubmit();
@@ -5371,30 +5380,34 @@ const bootHash = window.location.hash && window.location.hash !== '#' ? parseHas
 if (bootHash && isDmRoom(bootHash.room)) {
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
 }
-const hasHash = !!bootHash && !!bootHash.room && !isDmRoom(bootHash.room);
+const bootTarget = bootHash && !isDmRoom(bootHash.room) ? resolveHash(window.location.hash, savedRooms(), eph) : null;
+if (bootTarget && bootTarget.imported) importRoomLink(bootTarget);
+const hasHash = !!bootTarget;
 if (hasHash) {
-  const parsed = bootHash;
-  els.room.value = parsed.room;
-  refreshShareUrl(parsed.room);
+  els.room.value = bootTarget.room;
+  refreshShareUrl(bootTarget.room);
   window.addEventListener('load', async () => {
     if (bootUnlock) await Promise.race([bootUnlock, new Promise((r) => setTimeout(r, 4000))]);
     if (joinTarget) return;
-    joinNew(parsed.room, parsed.b64Key);
+    joinNew(bootTarget.room, bootTarget.key, { kv: bootTarget.kv });
   });
 }
 window.addEventListener('hashchange', () => {
-  const next = parseHash(window.location.hash);
-  if (isDmRoom(next.room)) {
+  const raw = parseHash(window.location.hash);
+  if (isDmRoom(raw.room)) {
     window.history.replaceState(null, '', window.location.pathname + window.location.search);
     refreshIdUI();
     return;
   }
-  const same = next.room
-    ? !!joinTarget && joinTarget.room === next.room && joinTarget.key === (next.b64Key || null)
+  const next = resolveHash(window.location.hash, savedRooms(), eph);
+  if (next && next.imported) importRoomLink(next);
+  const same = next
+    ? !!joinTarget && joinTarget.room === next.room && joinTarget.key === next.key
     : !joinTarget;
   if (!same) {
-    els.room.value = next.room || '';
-    joinNew(next.room, next.b64Key);
+    els.room.value = next ? next.room : '';
+    if (next) joinNew(next.room, next.key, { kv: next.kv });
+    else joinNew(null);
   }
   refreshIdUI();
 });

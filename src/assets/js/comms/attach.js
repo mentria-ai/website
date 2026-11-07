@@ -30,6 +30,15 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
   let tick = 0;
   let stopped = true;
   const chan = typeof BroadcastChannel === 'function' ? new BroadcastChannel(CHANNEL) : null;
+  let hiddenAt = 0;
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') { hiddenAt = Date.now(); return; }
+      const away = hiddenAt ? Date.now() - hiddenAt : 0;
+      hiddenAt = 0;
+      if (away > 5000 && holder && rooms && !stopped) { rooms.pauseAll(); rooms.resumeAll(); }
+    });
+  }
   const changed = (id, extra) => { try { onChange && onChange(id, extra || null); } catch (_) {} };
 
   const pendingThreads = async () => {
@@ -119,6 +128,7 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
       changed(null, extra);
       return;
     }
+    if (extra && extra.stale) { if (rooms) rooms.rejoin(extra.threadId); changed(null, extra); return; }
     if (extra && extra.left) { changed(null, extra); return; }
     if (!id) return;
     const stats = transfers.stats(id);

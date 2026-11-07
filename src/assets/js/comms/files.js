@@ -132,7 +132,9 @@ const RATE_MS = 3000;
 const PULLING = ['queued', 'moving'];
 
 export class Transfers {
-  constructor({ store, media, onChange, canServe, device, askRelay, offersFor, onRoom, pinned } = {}) {
+  constructor({ store, media, onChange, canServe, device, askRelay, offersFor, onRoom, pinned, timeoutMs, tickMs } = {}) {
+    this._timeout = timeoutMs || TIMEOUT_MS;
+    this._misses = new Map();
     this._pinned = new Set(pinned || []);
     this._offersFor = offersFor || (() => null);
     this._onRoom = onRoom || null;
@@ -146,7 +148,7 @@ export class Transfers {
     this._items = new Map();
     this._via = new Map();
     this._locked = false;
-    this._timer = setInterval(() => this._tick(), TICK_MS);
+    this._timer = setInterval(() => this._tick(), tickMs || TICK_MS);
   }
 
   _itemOf(rec) {
@@ -498,6 +500,7 @@ export class Transfers {
     if (!this._items.has(meta.id)) return;
     MF.bfSet(item.bf, i);
     item.inflight.delete(i);
+    this._misses.delete(threadId + ':' + peerId);
     const now = Date.now();
     item.got.push([now, plain.length]);
     while (item.got.length && now - item.got[0][0] > RATE_MS) item.got.shift();
@@ -561,8 +564,22 @@ export class Transfers {
 
   _tick() {
     const now = Date.now();
+    const late = new Map();
     for (const item of this._items.values()) {
-      for (const [i, f] of item.inflight) if (now - f.at > TIMEOUT_MS) item.inflight.delete(i);
+      for (const [i, f] of item.inflight) {
+        if (now - f.at <= this._timeout) continue;
+        item.inflight.delete(i);
+        late.set(f.threadId + ':' + f.peerId, f);
+      }
+    }
+    for (const [key, f] of late) {
+      const n = (this._misses.get(key) || 0) + 1;
+      this._misses.set(key, n);
+      if (n < 2) continue;
+      this._misses.delete(key);
+      const ctx = this._threads.get(f.threadId);
+      if (ctx) ctx.peers.delete(f.peerId);
+      this._onChange(null, { threadId: f.threadId, peerId: f.peerId, stale: true });
     }
     this._pump();
   }
@@ -713,6 +730,11 @@ export class FilesRooms {
     const p = Promise.resolve().then(() => r.room.leave()).catch(() => {});
     this._leaving.set(r.roomId, p);
     p.then(() => { if (this._leaving.get(r.roomId) === p) this._leaving.delete(r.roomId); });
+  }
+
+  rejoin(id) {
+    if (this._rooms.has(id)) this._leave(id);
+    return this.sync(this._last);
   }
 
   joined() {

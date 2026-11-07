@@ -662,6 +662,188 @@ check("ai-link: an empty advert from one page doesn't hide another page of the s
   eq(hs.length, 1); eq(hs[0].peerId, 'p0'); deepEq(hs[0].models, []);
 });
 
+check('fix I4: rebinding a host to a new room drops the old room jobs', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host, calls } = aiHostFor(L, clock); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  c.ask('p0', aiAsk('one')); await aiFlush();
+  c.ask('p0', aiAsk('two')); await clock.advance(50);
+  const fresh = linkedRooms(1).rooms[0];
+  const before = rooms[0].sent.length;
+  host.bind(fresh, { ownsPeers: false });
+  await clock.advance(3000);
+  eq(calls.signals[0].aborted, true);
+  deepEq(calls.answers, ['one']);
+  eq(rooms[0].sent.slice(before).filter((x) => x[0] === 'fas').length, 0);
+});
+
+check('fix I4: rebinding the asker ends its pending asks as gone', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host } = aiHostFor(L, clock, { answer: async () => new Promise(() => {}) }); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h = c.ask('p0', aiAsk()); const ev = aiWatch(h);
+  await clock.advance(50);
+  c.bind(linkedRooms(1).rooms[0]);
+  await aiFlush();
+  eq(ev.filter((e) => e[0] === 'gone').length, 1);
+  eq(c.hosts().length, 0);
+});
+
+check('fix I6: a host answers only tiers it lists', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host, calls } = aiHostFor(L, clock, { models: [{ tier: 'b2-2b', state: 'loaded' }] }); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h = c.ask('p0', aiAsk()); const ev = aiWatch(h);
+  await clock.advance(500);
+  ok(ev.some((e) => e[0] === 'err' && e[1].reason === 'tier-unavailable'));
+  eq(calls.loads.length, 0);
+});
+
+check('fix I6: a host that lists nothing answers not-hosting without loading', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const { host, calls } = aiHostFor(L, clock, { models: [] }); host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h = c.ask('p0', aiAsk()); const ev = aiWatch(h);
+  await clock.advance(500);
+  ok(ev.some((e) => e[0] === 'err' && e[1].reason === 'not-hosting'));
+  eq(calls.loads.length, 0);
+});
+
+check('fix I7: a failed answer is reported so the host can drop its engine', async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(2);
+  const c = new L.AiClient({ clock }); c.bind(rooms[1]);
+  const failures = [];
+  const host = new L.AiHost({ device: aiDev('dev-mac'), page: 'comms', clock, listModels: async () => [{ tier: '27b', state: 'loaded' }], load: async (tier) => ({ engine: {}, tier, contextTokens: 4096 }), answer: async () => { throw new Error('device lost'); }, onFailure: (ctx, err) => failures.push([ctx.tier, err.message]) });
+  host.bind(rooms[0], { ownsPeers: false });
+  await clock.advance(10);
+  const h = c.ask('p0', aiAsk()); const ev = aiWatch(h);
+  await clock.advance(500);
+  ok(ev.some((e) => e[0] === 'err' && e[1].reason === 'failed'));
+  deepEq(failures, [['27b', 'device lost']]);
+});
+
+const fakeModules = (o = {}) => {
+  const st = { calls: [], engines: [] };
+  const M = {
+    hostModels: async () => [{ tier: '27b', state: 'cached' }],
+    ensureModel: async (factory, opts) => {
+      st.calls.push(opts);
+      if (o.gate) await o.gate;
+      const e = { terminated: 0, unloaded: 0, terminate() { this.terminated++; }, async unload() { this.unloaded++; } };
+      st.engines.push(e);
+      return { engine: e, tier: opts.tier, maxSeq: 4096 };
+    }
+  };
+  return { st, modules: async () => ({ M, D: { MentriaEngine: function () {} } }) };
+};
+
+check('fix I1: unloading during a load throws the new engine away', async () => {
+  const A = await import('/assets/js/comms/ai-local.js');
+  let open; const gate = new Promise((r) => { open = r; });
+  const { st, modules } = fakeModules({ gate });
+  const local = A.createLocalEngine({ modules });
+  const p = local.load('27b');
+  await aiFlush();
+  await local.unload();
+  open();
+  await assert.rejects(p);
+  eq(local.current(), null);
+  eq(st.engines.length, 1);
+  eq(st.engines[0].terminated, 1);
+});
+
+check('fix I7: a lost GPU device drops the local engine', async () => {
+  const A = await import('/assets/js/comms/ai-local.js');
+  const { st, modules } = fakeModules();
+  const local = A.createLocalEngine({ modules });
+  await local.load('27b');
+  eq(local.current(), '27b');
+  ok(typeof st.calls[0].onDeviceLost === 'function');
+  st.calls[0].onDeviceLost({ reason: 'test' });
+  eq(local.current(), null);
+  await local.load('27b');
+  eq(st.calls.length, 2);
+});
+
+const pageHostDeps = (o = {}) => {
+  const st = { requests: [], joins: [], leaves: 0, ice: 0, derive: 0, rooms: [], unlocked: !!o.unlocked, released: 0 };
+  const names = o.names || ['self-w1'];
+  const locks = { request: (name, opts, cb) => { st.requests.push([name, opts && opts.steal]); return Promise.resolve(cb()).then(() => { st.released++; }); } };
+  const deps = {
+    device: { id: 'dev-mac', name: 'Mac', kind: 'mac' },
+    isUnlocked: () => st.unlocked,
+    locks,
+    getIce: async () => { st.ice++; return [{ urls: 'stun:x' }]; },
+    derive: async () => { const n = names[Math.min(st.derive, names.length - 1)]; st.derive++; return { roomId: 'mf-' + n, password: 'pw' }; },
+    joinRoom: async (cfg, id) => { st.joins.push([id, cfg.rtcConfig.iceServers.length]); const r = linkedRooms(1).rooms[0]; r.leave = () => { st.leaves++; }; st.rooms.push(r); return r; },
+    setInterval: () => 0
+  };
+  return { st, deps };
+};
+
+check('fix I1: AI Chat takes the host lock when a load starts, even while locked', async () => {
+  const P = await import('/assets/js/comms/ai-page-host.js');
+  const { st, deps } = pageHostDeps({ unlocked: false });
+  let eng = null;
+  const ph = P.startPageHost({ getEngine: () => eng, deps });
+  ph.loading();
+  await aiFlush();
+  deepEq(st.requests, [['mentria-ai-host', true]]);
+  eng = { engine: {}, tier: 'b2-2b', contextTokens: 4096 };
+  await ph.refresh();
+  await aiFlush();
+  eq(st.requests.length, 1);
+  eq(st.released, 0);
+  eq(st.joins.length, 0);
+  eng = null;
+  await ph.refresh();
+  await aiFlush();
+  eq(st.released, 1);
+});
+
+check('fix I1: unlocking later starts hosting', async () => {
+  const P = await import('/assets/js/comms/ai-page-host.js');
+  const { st, deps } = pageHostDeps({ unlocked: false });
+  const eng = { engine: {}, tier: 'b2-2b', contextTokens: 4096 };
+  const ph = P.startPageHost({ getEngine: () => eng, deps });
+  await ph.refresh();
+  await aiFlush();
+  eq(st.joins.length, 0);
+  st.unlocked = true;
+  await ph.refresh();
+  await aiFlush();
+  eq(st.joins.length, 1);
+  eq(st.requests.length, 1);
+});
+
+check('fix I5: the page host follows the weekly room change with fresh ICE', async () => {
+  const P = await import('/assets/js/comms/ai-page-host.js');
+  const { st, deps } = pageHostDeps({ unlocked: true, names: ['self-w1', 'self-w1', 'self-w2'] });
+  const eng = { engine: {}, tier: 'b2-2b', contextTokens: 4096 };
+  const ph = P.startPageHost({ getEngine: () => eng, deps });
+  await ph.refresh();
+  await aiFlush();
+  deepEq(st.joins.map((j) => j[0]), ['mf-self-w1']);
+  await ph.checkWeek();
+  await aiFlush();
+  deepEq(st.joins.map((j) => j[0]), ['mf-self-w1']);
+  await ph.checkWeek();
+  await aiFlush();
+  deepEq(st.joins.map((j) => j[0]), ['mf-self-w1', 'mf-self-w2']);
+  eq(st.leaves, 1);
+  eq(st.ice, 2);
+  eq(st.requests.length, 1);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

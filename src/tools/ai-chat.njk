@@ -817,6 +817,7 @@ function runApp(MentriaEngine, Tiers) {
     }
     legacyShown = null;
     persistConversation();
+    pageHost.refresh();
   }
 
   clearChatBtn.addEventListener('click', clearConversation);
@@ -1800,6 +1801,7 @@ function runApp(MentriaEngine, Tiers) {
     hideNotice('lost');
     hideNotice('postponed');
     setStatus('loading', 'statusLoadingModel');
+    pageHost.loading();
     await ensureStrip();
     try {
       const { ensureModel } = await import('/assets/js/mentria-model.js');
@@ -1870,6 +1872,7 @@ function runApp(MentriaEngine, Tiers) {
       }
       return true;
     } catch (err) {
+      pageHost.stop();
       if (err && err.message === 'load-cut-short') {
         if (strip) strip.hide();
         setStatus('idle', 'statusNoModel');
@@ -2050,7 +2053,6 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   async function runGeneration() {
-    await pageHost.idle();
     const epoch = genEpoch;
     const deepThink = deepThinkActive();
     generating = true;
@@ -2058,10 +2060,12 @@ function runApp(MentriaEngine, Tiers) {
     setStatus('generating', deepThink ? 'thinking' : 'statusGenerating');
     counterReset();
     abortCtrl = new AbortController();
+    const myAbort = abortCtrl;
+    await pageHost.idle();
     await engineIdle();
 
     if (window.renderMarkdownReady) { try { await window.renderMarkdownReady; } catch (_) {} }
-    if (epoch !== genEpoch) {
+    if (epoch !== genEpoch || myAbort.signal.aborted) {
       settleGeneration(false);
       return;
     }

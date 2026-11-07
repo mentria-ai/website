@@ -1381,7 +1381,8 @@ if (AI_HOSTING) {
     listModels: () => (aiHidden() ? Promise.resolve([]) : aiLocal.models()),
     load: (tier, onStage) => aiLocal.load(tier, onStage),
     answer: (ctx, ask, onText, signal) => answerTurns({ engine: ctx.engine, tier: ctx.tier, contextTokens: ctx.contextTokens, messages: ask.messages, pageLang: ask.params.pageLang, signal }, onText),
-    onActivity: aiActivity
+    onActivity: aiActivity,
+    onFailure: () => { if (aiLocal) aiLocal.unload(); }
   });
   aiHost.setEnabled(false);
   document.addEventListener('visibilitychange', () => { if (myDevice.kind === 'android') aiHost.advertise(); });
@@ -2533,11 +2534,14 @@ els.join.addEventListener('click', () => {
   joinNew(name, b64Key);
 });
 
+const aiHoldEnter = (e) => { if (e.key === 'Enter' && aiView && aiView.isOpen() && aiView.busy()) e.preventDefault(); };
+els.msg.addEventListener('keydown', aiHoldEnter);
+els.msg.addEventListener('keypress', aiHoldEnter);
 els.send.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (aiView && aiView.isOpen()) {
     const asked = els.msg.value.trim();
-    if (aiView.busy()) { if (e.submitter === els.go || !asked) aiView.stop(); return; }
+    if (aiView.busy()) { aiView.stop(); return; }
     if (asked) { els.msg.value = ''; aiView.send(asked); }
     return;
   }

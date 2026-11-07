@@ -208,6 +208,14 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
     n.line.append(b);
   };
 
+  const syncRetry = () => {
+    const lines = Array.from(els.log.querySelectorAll('.comms__line--ai'));
+    lines.forEach((line, i) => {
+      const b = line.querySelector('[data-act="retry"]');
+      if (b) b.hidden = i !== lines.length - 1 || !!live;
+    });
+  };
+
   const busyNow = (on) => { if (onBusy) { try { onBusy(on); } catch (_) {} } };
   const finishLive = () => {
     cancelAnimationFrame(paint);
@@ -215,6 +223,7 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
     live = null;
     busyNow(false);
     homeStatus();
+    syncRetry();
   };
 
   const run = async (msgs, index, lineAt) => {
@@ -229,6 +238,7 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
     const me = { handle, ml, text: '', index, tier: r.tier, threadId: thread.id };
     live = me;
     busyNow(true);
+    syncRetry();
     const draw = () => {
       paint = 0;
       renderBody(ml.what, me.text, { from: 'model' });
@@ -263,9 +273,9 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
       else await saveReply(index, me.text, r.tier, { stopped: true });
       const name = deviceName(r);
       if (reason === 'not-hosting') { stoppedNotice(fill(A.offline, { device: name })); return; }
+      if (reason === 'failed') { stoppedNotice(fill(A.failed, { device: name })); return; }
       const text = reason === 'tier-unavailable' ? fill(A.gone_tier, { model: tierName(r.tier), device: name })
-        : reason === 'busy' ? fill(A.busy, { device: name })
-        : fill(A.failed, { device: name });
+        : fill(A.busy, { device: name });
       sys(text);
     });
     handle.on('gone', async () => {
@@ -297,6 +307,12 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
     current: () => thread,
     busy: () => !!live,
     async open(t) {
+      if (live) {
+        const me = live;
+        try { me.handle.cancel(); } catch (_) {}
+        finishLive();
+        if (me.text) await saveReply(me.index, me.text, me.tier, { stopped: true });
+      }
       thread = t;
       live = null;
       els.log.innerHTML = '';
@@ -315,6 +331,7 @@ export const createAiView = ({ els, T, getStore, client, device, renderLine, sys
         if (m.from === 'self') renderLine('you', m.t, { me: true, quiet: true, ts: m.ts });
         else modelLine(m.t, (m.meta && m.meta.model) || replyLabel(route().tier), m.ts, messageIndex(m));
       }
+      syncRetry();
       if (els.log) els.log.scrollTop = els.log.scrollHeight;
     },
     close() {

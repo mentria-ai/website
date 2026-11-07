@@ -111,7 +111,8 @@ const bindActions = (room) => {
 const abortedError = (e) => !!e && e.name === 'AbortError';
 
 export class AiHost {
-  constructor({ device, page, listModels, load, answer, isBusy, onActivity, clock } = {}) {
+  constructor({ device, page, listModels, load, answer, isBusy, onActivity, onFailure, clock } = {}) {
+    this._onFailure = onFailure || (() => {});
     this._device = cleanDevice(device);
     this._page = page === 'ai-chat' ? 'ai-chat' : 'comms';
     this._listModels = listModels || (async () => []);
@@ -130,6 +131,12 @@ export class AiHost {
   }
 
   bind(room, { ownsPeers = false } = {}) {
+    if (this._room && this._room !== room) {
+      for (const job of this._queue) this._drop(job);
+      this._queue = [];
+      if (this._run) { this._run.gone = true; this._run.ctl.abort(); }
+    }
+    this._room = room;
     const act = bindActions(room);
     this._act = act;
     act.ask.onMessage = (d, meta) => { this._onAsk(d, meta && meta.peerId); };
@@ -322,6 +329,11 @@ export class AiHost {
     this._onActivity({ active: true, device, tier: ask.tier, stage: 'loading' });
     this._startBeat(job);
     job.stage = 'starting';
+    let listed = [];
+    try { listed = cleanModels(this._enabled ? await this._listModels() : []); } catch (_) { listed = []; }
+    if (job.ctl.signal.aborted) { this._sendTo(job, { op: 'err', id: ask.id, reason: job.reason || 'cancelled' }); return; }
+    if (!listed.length) { this._sendTo(job, { op: 'err', id: ask.id, reason: 'not-hosting' }); return; }
+    if (!listed.some((m) => m.tier === ask.tier)) { this._sendTo(job, { op: 'err', id: ask.id, reason: 'tier-unavailable' }); return; }
     let ctx;
     try {
       ctx = await this._load(ask.tier, (stage) => {
@@ -343,7 +355,9 @@ export class AiHost {
       this._sendTo(job, { op: 'done', id: ask.id, seq: job.seq, stats: { tier: ctx.tier, tokens: Number(res && res.tokens) || 0, ms: Number(res && res.ms) || 0 } });
     } catch (e) {
       this._flush(job);
-      this._sendTo(job, { op: 'err', id: ask.id, reason: (abortedError(e) || job.ctl.signal.aborted) ? (job.reason || 'cancelled') : 'failed' });
+      const aborted = abortedError(e) || job.ctl.signal.aborted;
+      if (!aborted) { try { this._onFailure(ctx, e); } catch (_) {} }
+      this._sendTo(job, { op: 'err', id: ask.id, reason: aborted ? (job.reason || 'cancelled') : 'failed' });
     }
   }
 }
@@ -359,6 +373,13 @@ export class AiClient {
   }
 
   bind(room) {
+    if (this._room && this._room !== room) {
+      for (const a of Array.from(this._asks.values())) this._finish(a, 'gone', {});
+      const had = this._hosts.size;
+      this._hosts.clear();
+      if (had) this._onHosts(this.hosts());
+    }
+    this._room = room;
     const act = bindActions(room);
     this._act = act;
     act.advert.onMessage = (d, meta) => { this._onAdvert(d, meta && meta.peerId); };

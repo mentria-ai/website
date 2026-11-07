@@ -25,7 +25,8 @@ export const homeRows = (src, view = {}) => {
     const fp = t.kind === 'dm' && t.meta && t.meta.fp;
     if (fp && (!dmByFp.has(fp) || (t.updatedAt || 0) > (dmByFp.get(fp).updatedAt || 0))) dmByFp.set(fp, t);
   }
-  const requests = (src.requests || []).map((r) => ({ kind: 'request', key: 'req:' + r.fp, title: r.name || '', preview: '', ts: 0, unread: 0, ref: r }));
+  const requests = (src.requests || []).map((r) => ({ kind: 'request', key: 'req:' + r.fp, title: r.name || '', preview: '', ts: 0, unread: 0, ref: r }))
+    .concat((src.roomInvites || []).map((r) => ({ kind: 'invite', key: 'inv:' + r.room, title: r.label || r.room, preview: r.name || '', ts: 0, unread: 0, ref: r })));
   const rest = [];
   for (const c of src.contacts || []) {
     const t = dmByFp.get(c.fp);

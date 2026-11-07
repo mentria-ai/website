@@ -5843,7 +5843,14 @@
         "old_link": "Ancien lien : il n'expire jamais. Créez une nouvelle invitation pour partager.",
         "make": "Nouvelle invitation",
         "dismiss": "Fermer",
-        "offline": "Cette invitation n'a pas atteint le relais, elle ne marchera pas. Créez-en une autre dans un instant."
+        "offline": "Cette invitation n'a pas atteint le relais, elle ne marchera pas. Créez-en une autre dans un instant.",
+        "twice_mine": "Votre lien d'invitation a servi deux fois : {a}, {b}.",
+        "twice": "Le lien d'invitation de ce salon a servi deux fois : {a}, {b}.",
+        "contact": "Inviter un contact",
+        "pick": "Inviter dans ce salon",
+        "sent": "Invitation envoyée à {name}.",
+        "from": "{name} vous invite dans {label}",
+        "no_contacts": "Ajoutez d'abord un contact."
       }
     },
     "scanner": {

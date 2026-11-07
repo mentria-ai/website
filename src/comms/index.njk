@@ -272,6 +272,10 @@ unlockTool: true
           <span class="comms__upgrade-text">{{ 'tool.comms.invite.old_link' | t }}</span>
           <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-oldlink-make" type="button">{{ 'tool.comms.invite.make' | t }}</button><button class="comms__btn comms__btn--ghost" id="comms-oldlink-close" type="button" aria-label="{{ 'tool.comms.invite.dismiss' | t }}">&times;</button></div>
         </div>
+        <div class="comms__upgrade comms__histbar" id="comms-twice" role="alert" hidden>
+          <span class="comms__upgrade-text" id="comms-twice-text"></span>
+          <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-twice-close" type="button" aria-label="{{ 'tool.comms.invite.dismiss' | t }}">&times;</button></div>
+        </div>
         <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
       </div>
 
@@ -1387,7 +1391,12 @@ const announceJoined = async (roomName, inv) => {
   const ctl = { k: 'joined', inv, jid: b64urlEncode(crypto.getRandomValues(new Uint8Array(9))), name: (myProfile && myProfile.name) || '' };
   if (myId) ctl.pub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
   await publishRoomCtl(ctl);
-  if (currentRoomName === roomName) sys(T.invite.used);
+  if (inv) {
+    const list = savedRooms();
+    const entry = list.find((r) => r.room === roomName);
+    if (entry) { recordJoin(entry, ctl, mySign ? mySign.sigFp : null); setSavedRooms(list); }
+  }
+  if (inv && currentRoomName === roomName) sys(T.invite.used);
 };
 const claimInvite = async ({ k, found }) => {
   const b = found.body;
@@ -1411,6 +1420,84 @@ document.getElementById('comms-invite-copy').addEventListener('click', (e) => {
   const btn = e.currentTarget;
   try { navigator.clipboard.writeText(inviteUrl(window.location.origin, p.token)).then(() => { btn.textContent = T.invite.copied_short; }, () => {}); } catch (_) {}
 });
+
+let twiceFor = null;
+const paintTwice = () => {
+  const bar = document.getElementById('comms-twice');
+  if (!bar) return;
+  const show = !!twiceFor && twiceFor.room === currentRoomName;
+  bar.hidden = !show;
+  if (show) document.getElementById('comms-twice-text').textContent = twiceFor.text;
+};
+document.getElementById('comms-twice-close').addEventListener('click', () => {
+  if (twiceFor) {
+    const list = savedRooms();
+    const entry = list.find((r) => r.room === twiceFor.room);
+    if (entry) { entry.twiceAck = Object.assign({}, entry.twiceAck || {}, { [twiceFor.inv]: true }); setSavedRooms(list); }
+  }
+  twiceFor = null;
+  paintTwice();
+});
+
+const roomInvites = () => { try { const v = MentriaStore.get('comms', 'room_invites'); return Array.isArray(v) ? v : []; } catch (_) { return []; } };
+const setRoomInvites = (list) => { try { MentriaStore.set('comms', 'room_invites', list.slice(-20)); } catch (_) {} };
+const takeRoomInvite = (payload) => {
+  const c = CID.contactByPub(payload.pub);
+  if (!c) return;
+  const room = typeof payload.room === 'string' ? payload.room : '';
+  if (!room || room.length > 64 || isDmRoom(room) || isEphemeralRoom(room)) return;
+  if (typeof payload.key !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(payload.key)) return;
+  if (savedRooms().some((x) => x.room === room && x.key === payload.key)) return;
+  const list = roomInvites().filter((x) => x.room !== room);
+  list.push({ fp: c.fp, name: c.name || String(payload.name || '').slice(0, 32), room, key: payload.key, kv: payload.kv === 2 ? 2 : 1, label: String(payload.label || room).slice(0, 40), ts: Date.now() });
+  setRoomInvites(list);
+  renderContacts();
+  playPing(660);
+};
+const joinRoomInvite = async (inv) => {
+  setRoomInvites(roomInvites().filter((x) => x.room !== inv.room));
+  rememberRoom(inv.room, inv.key, { kv: inv.kv, label: inv.label });
+  renderContacts();
+  els.room.value = inv.room;
+  await joinNew(inv.room, inv.key, { kv: inv.kv });
+  setView('chat');
+  announceJoined(inv.room, null);
+};
+const pickContact = (list) => {
+  const h = pickerEl.querySelector('.comms__picker-h');
+  if (h) h.textContent = T.invite.pick;
+  pickerListEl.innerHTML = '';
+  list.forEach((c) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'comms__picker-item';
+    const nm = document.createElement('span');
+    nm.textContent = c.name || T.people.unnamed;
+    const fp = document.createElement('span');
+    fp.className = 'comms__picker-ver';
+    fp.textContent = c.fp;
+    item.append(nm, fp);
+    item.addEventListener('click', () => closePicker(c));
+    pickerListEl.appendChild(item);
+  });
+  pickerOpener = (document.activeElement && document.activeElement !== document.body) ? document.activeElement : null;
+  pickerEl.hidden = false;
+  document.addEventListener('keydown', pickerTrapTab, true);
+  const first = pickerListEl.querySelector('.comms__picker-item');
+  if (first) first.focus();
+  return new Promise((res) => { pickerResolve = res; });
+};
+const inviteContact = async (r) => {
+  if (!myId || !r || !r.key) return;
+  const contacts = CID.getContacts().filter((c) => c.pub);
+  if (!contacts.length) { notice(T.invite.no_contacts); return; }
+  const c = await pickContact(contacts);
+  if (!c) return;
+  const payload = { v: 1, kind: 'room-invite', name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, ts: Date.now(), room: r.room, key: r.key, kv: r.kv === 2 ? 2 : 1, label: r.label || r.room };
+  if (mySign) payload.spub = mySign.spub;
+  await publishToInbox(c.pub, payload);
+  notice(fmt(T.invite.sent, { name: c.name || T.people.someone }));
+};
 
 let oldLinkFor = null;
 const paintOldLink = (roomName) => {
@@ -2189,6 +2276,14 @@ const notifTargetNow = () => {
   return { tag: 'comms-msg', url: COMMS_PATH };
 };
 
+const recordJoin = (entry, ctl, sigFp) => {
+  const joins = noteJoined(entry, ctl, sigFp);
+  if (!joins.twice || (entry.twiceAck && entry.twiceAck[ctl.inv])) return;
+  const own = entry.invites && typeof ctl.inv === 'string' ? entry.invites[ctl.inv] : null;
+  twiceFor = { room: entry.room, inv: ctl.inv, text: fmt(own ? T.invite.twice_mine : T.invite.twice, { a: joins.twice[0] || T.people.someone, b: joins.twice[1] || T.people.someone }) };
+  paintTwice();
+};
+
 const onJoinedCtl = (ctl, sig, at) => {
   const sigFp = sig && sig.ok ? sig.sigFp : null;
   const mine = !!(sigFp && mySign && sigFp === mySign.sigFp);
@@ -2196,7 +2291,7 @@ const onJoinedCtl = (ctl, sig, at) => {
   const entry = list.find((r) => r.room === currentRoomName);
   if (entry) {
     if (sigFp) noteMember(entry, { sigFp, name: ctl.name, pub: ctl.pub, spub: sig.spub, ts: at || Date.now() });
-    noteJoined(entry, ctl, sigFp);
+    recordJoin(entry, ctl, sigFp);
     const own = entry.invites && typeof ctl.inv === 'string' ? entry.invites[ctl.inv] : null;
     if (own && !own.claimed) {
       own.claimed = true;
@@ -2462,6 +2557,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     els.status.textContent = T.chat.not_in_chat;
     els.share.hidden = true;
     paintOldLink(null);
+    paintTwice();
     els.eph.hidden = true;
     els.leave.hidden = true;
     els.callStart.hidden = true;
@@ -2489,6 +2585,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   }
   refreshShareUrl(roomName);
   paintOldLink(roomName);
+  paintTwice();
 
   let iceServers;
   try {
@@ -3097,6 +3194,8 @@ function closePicker(value) {
 pickerEl.querySelectorAll('[data-picker-close]').forEach((el) => el.addEventListener('click', () => closePicker(null)));
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pickerEl.hidden) { e.preventDefault(); closePicker(null); } });
 function pickExtension(list) {
+  const ph = pickerEl.querySelector('.comms__picker-h');
+  if (ph) ph.textContent = T.picker.title;
   pickerListEl.innerHTML = '';
   list.forEach((ext) => {
     const item = document.createElement('button');
@@ -3685,6 +3784,7 @@ const handleSideMsg = async (msgEvent) => {
       notice(fmt(T.people.tried_call, { name: who }));
       return;
     }
+    if (payload.kind === 'room-invite') { takeRoomInvite(payload); return; }
     const existing = CID.contactByPub(payload.pub);
     if (existing) {
       if (typeof payload.ts !== 'number' || payload.ts <= (existing.annTs || 0)) return;
@@ -4926,6 +5026,27 @@ const listNote = (text) => {
   return note;
 };
 
+const inviteRow = (inv) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__contact--req';
+  const av = document.createElement('span');
+  av.className = 'comms__avatar comms__avatar--room';
+  av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+  const { mid } = rowMid(inv.label || inv.room, fmt(T.invite.from, { name: inv.name || T.people.someone, label: inv.label || inv.room }), 0);
+  const ok = document.createElement('button');
+  ok.type = 'button';
+  ok.className = 'comms__btn';
+  ok.textContent = T.invite.join;
+  ok.addEventListener('click', () => { joinRoomInvite(inv); });
+  const no = document.createElement('button');
+  no.type = 'button';
+  no.className = 'comms__btn comms__btn--ghost';
+  no.textContent = T.invite.not_now;
+  no.addEventListener('click', () => { setRoomInvites(roomInvites().filter((x) => x.room !== inv.room)); renderContacts(); });
+  row.append(av, mid, ok, no);
+  return row;
+};
+
 const requestRow = (r) => {
   const row = document.createElement('div');
   row.className = 'comms__contact comms__contact--req';
@@ -5070,7 +5191,14 @@ const roomRow = (r, info) => {
     renderContacts();
     subscribeUnread();
   });
-  row.append(bell, ren, rm);
+  const inv = document.createElement('button');
+  inv.type = 'button';
+  inv.className = 'comms__rowbtn';
+  inv.title = T.invite.contact;
+  inv.setAttribute('aria-label', T.invite.contact);
+  inv.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg>';
+  inv.addEventListener('click', (e) => { e.stopPropagation(); inviteContact(r); });
+  row.append(bell, inv, ren, rm);
   return row;
 };
 
@@ -5123,11 +5251,12 @@ const renderContacts = () => {
   const requests = CID.getRequests();
   const contacts = CID.getContacts();
   const rooms = savedRooms();
-  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length) {
+  const roomInvitesNow = roomInvites();
+  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length && !roomInvitesNow.length) {
     els.contactList.append(listNote(T.people.empty));
     return;
   }
-  const rows = homeRows({ contacts, requests, rooms, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
+  const rows = homeRows({ contacts, requests, roomInvites: roomInvitesNow, rooms, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
   if (!rows.length) {
     els.contactList.append(listNote(T.home.at_none));
     return;
@@ -5135,6 +5264,7 @@ const renderContacts = () => {
   const missedMap = getMissed();
   for (const r of rows) {
     if (r.kind === 'request') els.contactList.append(requestRow(r.ref));
+    else if (r.kind === 'invite') els.contactList.append(inviteRow(r.ref));
     else if (r.kind === 'contact') els.contactList.append(contactRow(r.ref, r, missedMap));
     else if (r.kind === 'room') els.contactList.append(roomRow(r.ref, r));
     else if (r.kind === 'self') els.contactList.append(selfRow(r.ref, r));

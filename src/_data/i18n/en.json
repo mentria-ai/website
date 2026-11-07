@@ -5843,7 +5843,14 @@
         "old_link": "Old-style link: it never expires. Make a new invite to share.",
         "make": "New invite",
         "dismiss": "Dismiss",
-        "offline": "That invite didn't reach the relay, so it won't work. Make a new one in a moment."
+        "offline": "That invite didn't reach the relay, so it won't work. Make a new one in a moment.",
+        "twice_mine": "Your invite link was used twice: {a}, {b}.",
+        "twice": "This room's invite link was used twice: {a}, {b}.",
+        "contact": "Invite a contact",
+        "pick": "Invite to this room",
+        "sent": "Invite sent to {name}.",
+        "from": "{name} invited you to {label}",
+        "no_contacts": "Add a contact first."
       }
     },
     "scanner": {

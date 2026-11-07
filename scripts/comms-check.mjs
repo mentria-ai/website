@@ -1121,6 +1121,15 @@ check('members: a rekey from a non-member or for an unknown room is refused', ()
   eq(MB.acceptRekey(e, { ...good, kind: 'room-invite' }, 'fpA'), false);
 });
 
+check('home: room invites sit with requests at the top', () => {
+  const rows = H.homeRows({ requests: [{ fp: 'f1', name: 'Req' }], roomInvites: [{ room: 'r9', label: 'Trip', name: 'Alice', key: 'k' }], contacts: [{ fp: 'c1', name: 'Zed' }], rooms: [{ room: 'r1', label: 'One' }], threads: [] });
+  deepEq(rows.slice(0, 2).map((r) => r.kind), ['request', 'invite']);
+  eq(rows[1].key, 'inv:r9');
+  eq(rows[1].title, 'Trip');
+  eq(H.homeRows({ roomInvites: [{ room: 'r9', label: 'Trip' }] }, { filter: 'ai' }).length, 0);
+  eq(H.homeRows({ roomInvites: [{ room: 'r9', label: 'Trip' }] }, { filter: 'people' }).length, 1);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

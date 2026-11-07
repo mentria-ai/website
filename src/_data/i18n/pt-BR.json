@@ -5843,7 +5843,14 @@
         "old_link": "Link antigo: nunca expira. Crie um novo convite para compartilhar.",
         "make": "Novo convite",
         "dismiss": "Fechar",
-        "offline": "Esse convite não chegou ao relay, então não vai funcionar. Crie outro daqui a pouco."
+        "offline": "Esse convite não chegou ao relay, então não vai funcionar. Crie outro daqui a pouco.",
+        "twice_mine": "Seu link de convite foi usado duas vezes: {a}, {b}.",
+        "twice": "O link de convite desta sala foi usado duas vezes: {a}, {b}.",
+        "contact": "Convidar um contato",
+        "pick": "Convidar para esta sala",
+        "sent": "Convite enviado para {name}.",
+        "from": "{name} convidou você para {label}",
+        "no_contacts": "Adicione um contato primeiro."
       }
     },
     "scanner": {

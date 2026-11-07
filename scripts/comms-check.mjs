@@ -82,6 +82,8 @@ const SH = await need('/assets/js/comms/sheet.js');
 const SF = await need('/assets/js/comms/self.js');
 const RM = await need('/assets/js/comms/rooms.js');
 const SG = await need('/assets/js/comms/sign.js');
+const IV = await need('/assets/js/comms/invite.js');
+const MB = await need('/assets/js/comms/members.js');
 const CIDM = await need('/assets/js/mentria-comms-id.js');
 const VEC = JSON.parse(readFileSync(join(repo, 'scripts/fixtures/sig-vector.json'), 'utf8'));
 
@@ -982,6 +984,142 @@ check('id: contacts keep a signing key and a newer one replaces it', async () =>
 });
 check('wire: unpack keeps the signature and the parsed body', () => { const u = W.unpackChatPlain(JSON.stringify(VEC.signed)); deepEq(u.sg, VEC.signed.sg); eq(u.obj.t, 'hello'); eq(u.text, 'hello'); eq(W.unpackChatPlain('{"v":2,"t":"x"}').sg, null); });
 check('wire: packChatBody is what packChatPlain writes', () => { eq(JSON.stringify(W.packChatBody('hi', { fp: 'B', legacyFp: 'A' })), FIX.pack); eq(W.packChatPlain('hi', { fp: 'B', legacyFp: 'A' }), FIX.pack); });
+
+const INV_TOKEN = 'AAECAwQFBgcICQoLDA0ODw';
+const nodeInvite = (token) => {
+  const ikm = Buffer.from(token, 'base64url');
+  const sub = (info, n) => Buffer.from(hkdfSync('sha256', ikm, Buffer.from('mentria-invite-v1'), Buffer.from(info), n));
+  return { topic: createHmac('sha256', sub('invite-topic', 32)).update('mentria-invite-v1').digest('base64url'), id: sub('invite-id', 9).toString('base64url'), sk: sub('invite-nostr', 32).toString('hex') };
+};
+const invBody = (over = {}) => Object.assign({ v: 1, room: 'trip', key: RK, kv: 2, label: 'Trip', by: { name: 'Alice', pub: { x: 'X', y: 'Y' } }, exp: Math.floor(Date.now() / 1000) + 3600, once: true }, over);
+class FakeSock {
+  constructor(reply) { this.reply = reply; this.sent = []; this.ls = new Set(); }
+  addEventListener(t, fn) { if (t === 'message') this.ls.add(fn); }
+  removeEventListener(t, fn) { this.ls.delete(fn); }
+  emit(m) { for (const fn of [...this.ls]) fn({ data: JSON.stringify(m), target: this }); }
+  send(s) { this.sent.push(s); const m = JSON.parse(s); if (m[0] === 'REQ' && this.reply) this.reply(this, m[1]); }
+}
+check('invite: a token makes a 22-character link that parses back', () => {
+  const t = IV.newInviteToken();
+  ok(/^[A-Za-z0-9_-]{22}$/.test(t));
+  eq(IV.inviteUrl('https://mentria.ai', t), 'https://mentria.ai/comms/#:i1.' + t);
+  eq(IV.parseInvite(IV.inviteUrl('https://mentria.ai/', t)), t);
+  eq(IV.parseInvite('#:i1.' + t), t);
+  eq(IV.parseInvite('i1.' + t), t);
+  eq(IV.parseInvite('  ' + IV.inviteUrl('https://beta.mentria.ai', t) + '  '), t);
+  eq(IV.parseInvite('#room:' + RK), null);
+  eq(IV.parseInvite('#:i1.short'), null);
+  eq(IV.parseInvite(''), null);
+});
+check('invite: keys match the independent derivation', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const want = nodeInvite(INV_TOKEN);
+  eq(k.topic, want.topic);
+  eq(k.id, want.id);
+  eq(Buffer.from(k.sk).toString('hex'), want.sk);
+  eq(k.id.length, 12);
+  eq(await IV.inviteKeys('nope'), null);
+});
+check('invite: a sealed body opens with its token', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const body = invBody();
+  const opened = await IV.openInvite(k.aes, await IV.sealInvite(k.aes, body));
+  eq(opened.room, 'trip'); eq(opened.key, RK); eq(opened.kv, 2); eq(opened.label, 'Trip'); eq(opened.by.name, 'Alice'); deepEq(opened.by.pub, { x: 'X', y: 'Y' }); eq(opened.once, true);
+});
+check('invite: a wrong token or tampered envelope opens as null', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const other = await IV.inviteKeys(IV.newInviteToken());
+  const sealed = await IV.sealInvite(k.aes, invBody());
+  eq(await IV.openInvite(other.aes, sealed), null);
+  const env = JSON.parse(sealed);
+  const ct = Buffer.from(env.ct, 'base64url'); ct[3] ^= 1;
+  eq(await IV.openInvite(k.aes, JSON.stringify({ ...env, ct: ct.toString('base64url') })), null);
+  eq(await IV.openInvite(k.aes, '{}'), null);
+  eq(await IV.openInvite(k.aes, 'not json'), null);
+  eq(await IV.openInvite(k.aes, null), null);
+});
+check('invite: an expired or malformed body opens as null', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  for (const over of [{ exp: Math.floor(Date.now() / 1000) - 5 }, { kv: 3 }, { room: '' }, { room: 'x'.repeat(65) }, { key: 'AAEC' }, { key: Buffer.alloc(31).toString('base64url') }, { v: 2 }]) {
+    eq(await IV.openInvite(k.aes, await IV.sealInvite(k.aes, invBody(over))), null);
+  }
+});
+check('invite: the envelope expires in 24 hours and the deletion names it', () => {
+  const t = IV.envelopeTemplate('topic', 'c', 1000);
+  deepEq(t, { kind: 3838, created_at: 1000, tags: [['x', 'topic'], ['expiration', String(1000 + 86400)]], content: 'c' });
+  deepEq(IV.deletionTemplate('ev1', 2000), { kind: 5, created_at: 2000, tags: [['e', 'ev1'], ['k', '3838']], content: '' });
+});
+check('invite: a slow first socket still finds the envelope', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const content = await IV.sealInvite(k.aes, invBody());
+  const silent = new FakeSock(null);
+  const slow = new FakeSock((ws, sub) => setTimeout(() => ws.emit(['EVENT', sub, { id: 'ev9', content }]), 40));
+  const t0 = Date.now();
+  const got = await IV.fetchInvite([silent, slow], k.topic, k.aes, { timeoutMs: 600, retryMs: 60 });
+  ok(got && got.evId === 'ev9' && got.body.room === 'trip');
+  ok(Date.now() - t0 < 400);
+  ok(silent.sent.some((s) => JSON.parse(s)[0] === 'CLOSE'));
+});
+check('invite: nothing found resolves null after the relays say so', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const empty = () => new FakeSock((ws, sub) => setTimeout(() => ws.emit(['EOSE', sub]), 5));
+  const t0 = Date.now();
+  eq(await IV.fetchInvite([empty(), empty()], k.topic, k.aes, { timeoutMs: 5000, retryMs: 3000 }), null);
+  ok(Date.now() - t0 < 1500);
+  eq(await IV.fetchInvite([new FakeSock(null)], k.topic, k.aes, { timeoutMs: 80, retryMs: 40 }), null);
+  eq(await IV.fetchInvite([], k.topic, k.aes), null);
+});
+check('invite: junk events under the topic are skipped', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const content = await IV.sealInvite(k.aes, invBody());
+  const s = new FakeSock((ws, sub) => { ws.emit(['EVENT', sub, { id: 'junk', content: 'garbage' }]); setTimeout(() => ws.emit(['EVENT', sub, { id: 'good', content }]), 10); });
+  eq((await IV.fetchInvite([s], k.topic, k.aes, { timeoutMs: 500 })).evId, 'good');
+});
+check('members: two signers on one invite are a double use', () => {
+  const e = { room: 'r' };
+  eq(MB.noteJoined(e, { k: 'joined', inv: 'i1', name: 'B', jid: 'j1' }, 'fpB').twice, null);
+  deepEq(MB.noteJoined(e, { k: 'joined', inv: 'i1', name: 'C', jid: 'j2' }, 'fpC').twice, ['B', 'C']);
+  deepEq(MB.noteJoined(e, { k: 'joined', inv: 'i1', name: 'C', jid: 'j2' }, 'fpC').twice, ['B', 'C']);
+});
+check('members: the same signer twice is not a double use', () => {
+  const e = { room: 'r' };
+  MB.noteJoined(e, { inv: 'i1', name: 'B', jid: 'j1' }, 'fpB');
+  eq(MB.noteJoined(e, { inv: 'i1', name: 'B phone', jid: 'j9' }, 'fpB').twice, null);
+});
+check('members: two guests are told apart by jid', () => {
+  const e = { room: 'r' };
+  MB.noteJoined(e, { inv: 'i1', name: 'G1', jid: 'a' }, null);
+  deepEq(MB.noteJoined(e, { inv: 'i1', name: 'G2', jid: 'b' }, null).twice, ['G1', 'G2']);
+  eq(MB.noteJoined(e, { inv: 'i2', name: 'x' }, null).twice, null);
+  eq(MB.noteJoined(e, { name: 'x', jid: 'c' }, 'fp').twice, null);
+});
+check('members: members are kept newest first, at most 50, without me', () => {
+  const e = { room: 'r' };
+  for (let i = 0; i < 55; i++) MB.noteMember(e, { sigFp: 'fp' + i, name: 'N' + String(i).padStart(2, '0'), pub: { x: 'x' + i, y: 'y' }, ts: i });
+  eq(Object.keys(e.members).length, 50);
+  ok(!e.members.fp0 && !!e.members.fp54);
+  const list = MB.membersOf(e, 'fp54');
+  eq(list.length, 49);
+  eq(list[0].name, 'N05');
+  deepEq(list[0].pub, { x: 'x5', y: 'y' });
+});
+check('members: a rekey from a member of the room is accepted', () => {
+  const e = { room: 'r' };
+  MB.noteMember(e, { sigFp: 'fpA', name: 'A', ts: 1 });
+  eq(MB.acceptRekey(e, { kind: 'room-rekey', room: 'r', key: RK, kv: 2 }, 'fpA'), true);
+});
+check('members: a rekey from a non-member or for an unknown room is refused', () => {
+  const e = { room: 'r' };
+  MB.noteMember(e, { sigFp: 'fpA', name: 'A', ts: 1 });
+  const good = { kind: 'room-rekey', room: 'r', key: RK, kv: 2 };
+  eq(MB.acceptRekey(e, good, 'fpZ'), false);
+  eq(MB.acceptRekey(e, good, null), false);
+  eq(MB.acceptRekey(null, good, 'fpA'), false);
+  eq(MB.acceptRekey(e, { ...good, room: 'other' }, 'fpA'), false);
+  eq(MB.acceptRekey(e, { ...good, key: 'AAEC' }, 'fpA'), false);
+  eq(MB.acceptRekey(e, { ...good, kv: 1 }, 'fpA'), false);
+  eq(MB.acceptRekey(e, { ...good, kind: 'room-invite' }, 'fpA'), false);
+});
 
 let failed = 0;
 for (const [name, fn] of checks) {

@@ -530,9 +530,9 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__album--one .comms__tile-img{height:auto;max-height:340px}
 .comms__tile-img{display:block;width:100%;height:100%;object-fit:cover;transition:filter .3s ease,transform .3s ease}
 .comms__tile-img.is-blurred{filter:blur(8px);transform:scale(1.08)}
-.comms__ring{position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;transform:rotate(-90deg)}
-.comms__ring-back{fill:rgba(0,0,0,.45);stroke:rgba(255,255,255,.22);stroke-width:3}
-.comms__ring-fill{fill:none;stroke:var(--syn-cyan);stroke-width:3;stroke-linecap:round;transition:stroke-dasharray .25s ease}
+.comms__pring{position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;transform:rotate(-90deg)}
+.comms__pring-back{fill:rgba(0,0,0,.45);stroke:rgba(255,255,255,.22);stroke-width:3}
+.comms__pring-fill{fill:none;stroke:var(--syn-cyan);stroke-width:3;stroke-linecap:round;transition:stroke-dasharray .25s ease}
 .comms__tile-play{position:absolute;left:50%;top:50%;margin:-10px 0 0 -6px;border-left:16px solid rgba(255,255,255,.92);border-top:10px solid transparent;border-bottom:10px solid transparent}
 .comms__tile:not(.is-done) .comms__tile-play{display:none}
 .comms__tile-dur{position:absolute;right:6px;bottom:6px;padding:1px 6px;color:#fff;font-family:var(--font-mono);font-size:var(--text-xs);background:rgba(0,0,0,.55);border-radius:var(--radius-sm)}
@@ -542,7 +542,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__parts-retry{align-self:flex-start}
 .comms__caption{padding:0 var(--space-2) var(--space-1)}
 .comms__filecard{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
-.comms__filecard .comms__ring{position:static;width:28px;height:28px;margin:0}
+.comms__filecard .comms__pring{position:static;width:28px;height:28px;margin:0}
 .comms__ficon{position:relative;display:flex;align-items:flex-end;justify-content:center;width:30px;height:36px;padding-bottom:4px;color:var(--term-fg);font-family:var(--font-mono);font-size:9px;font-weight:600;background:var(--term-border-strong);border-radius:4px}
 .comms__ficon--pdf::before{content:'PDF'}
 .comms__ficon--archive::before{content:'ZIP'}

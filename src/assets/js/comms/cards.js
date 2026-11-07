@@ -157,13 +157,13 @@ const node = (doc, tag, cls, text) => {
 
 const ring = (doc) => {
   const svg = doc.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('class', 'comms__ring');
+  svg.setAttribute('class', 'comms__pring');
   svg.setAttribute('viewBox', '0 0 36 36');
   svg.setAttribute('aria-hidden', 'true');
   const back = doc.createElementNS(SVG_NS, 'circle');
-  back.setAttribute('class', 'comms__ring-back');
+  back.setAttribute('class', 'comms__pring-back');
   const front = doc.createElementNS(SVG_NS, 'circle');
-  front.setAttribute('class', 'comms__ring-fill');
+  front.setAttribute('class', 'comms__pring-fill');
   for (const c of [back, front]) { c.setAttribute('cx', '18'); c.setAttribute('cy', '18'); c.setAttribute('r', String(RING_R)); }
   front.setAttribute('stroke-dasharray', '0 ' + RING_C.toFixed(2));
   svg.append(back, front);
@@ -239,7 +239,7 @@ const fileCardOf = (doc, item, T) => {
 
 const setRing = (svg, have, total, done) => {
   if (!svg) return;
-  const fillEl = svg.querySelector('.comms__ring-fill');
+  const fillEl = svg.querySelector('.comms__pring-fill');
   const pct = total > 0 ? Math.max(0, Math.min(1, have / total)) : 0;
   if (fillEl) fillEl.setAttribute('stroke-dasharray', (pct * RING_C).toFixed(2) + ' ' + RING_C.toFixed(2));
   svg.hidden = !!done;
@@ -280,26 +280,28 @@ const applyItem = (root, ref, m) => {
   if (!st) return;
   st.media.set(ref, m || {});
   const done = !!m && m.state === 'done';
+  const here = done || !!(m && m.local);
+  const quiet = here || !m || m.state === 'offered' || m.state === 'unknown' || m.state === 'removed';
   const total = m && m.total ? m.total : 1;
   const have = m && m.have ? m.have : 0;
   for (const tile of root.querySelectorAll('.comms__tile[data-ref="' + ref + '"]')) {
-    setRing(tile.querySelector('.comms__ring'), have, total, done || (m && m.state === 'offered'));
+    setRing(tile.querySelector('.comms__pring'), have, total, quiet);
     const img = tile.querySelector('img');
-    if (done && img && tile.dataset.kind === 'image') {
+    if (here && img && tile.dataset.kind === 'image') {
       img.src = mediaUrl(ref);
       img.classList.remove('is-blurred');
-    } else if (done && img) {
+    } else if (here && img) {
       img.classList.remove('is-blurred');
     }
-    tile.classList.toggle('is-done', done);
+    tile.classList.toggle('is-done', here);
   }
   for (const card of root.querySelectorAll('.comms__filecard[data-ref="' + ref + '"]')) {
-    setRing(card.querySelector('.comms__ring'), have, total, done || (m && m.state === 'offered'));
+    setRing(card.querySelector('.comms__pring'), have, total, quiet);
     const saved = card.querySelector('.comms__fsaved');
-    if (saved) saved.hidden = !done;
+    if (saved) saved.hidden = !here;
     const acts = card.querySelector('.comms__facts');
-    if (acts) acts.hidden = !done;
-    card.classList.toggle('is-done', done);
+    if (acts) acts.hidden = !here;
+    card.classList.toggle('is-done', here);
   }
   const failed = root.querySelector('.comms__parts-retry');
   if (failed) failed.hidden = !st.items.some((it) => (st.media.get(it.ref) || {}).state === 'failed');

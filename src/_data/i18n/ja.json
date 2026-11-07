@@ -1336,7 +1336,10 @@
       "save_unlock": "このチャットを残すにはロックを解除してください",
       "save_unlock_btn": "ロック解除",
       "save_lost": "保存していないメッセージは、このページを離れると失われます。",
-      "photo_chat": "写真チャット"
+      "photo_chat": "写真チャット",
+      "host_answering": "{device}のために回答しています",
+      "host_loading": "{device}のために{model}を読み込んでいます…",
+      "host_stop": "停止"
     },
     "extensions": {
       "install_heading": "拡張機能をインストール",

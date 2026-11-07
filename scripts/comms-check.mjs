@@ -643,6 +643,25 @@ check("ai-view: an asleep device's models are listed but marked asleep", async (
   eq(secs.find((x) => x.device && x.device.id === 'me'), undefined);
 });
 
+check("ai-link: an empty advert from one page doesn't hide another page of the same device", async () => {
+  const L = await import('/assets/js/comms/ai-link.js');
+  const clock = aiClock(); const { rooms } = linkedRooms(3);
+  const c = new L.AiClient({ clock }); c.bind(rooms[2]);
+  const page = aiHostFor(L, clock, { models: [{ tier: 'b2-2b', state: 'loaded' }] }).host; page.bind(rooms[1], { ownsPeers: false });
+  await clock.advance(10);
+  const comms = aiHostFor(L, clock).host; comms.bind(rooms[0], { ownsPeers: false });
+  comms.setEnabled(false);
+  await clock.advance(10);
+  let hs = c.hosts();
+  eq(hs.length, 1); eq(hs[0].peerId, 'p1'); deepEq(hs[0].models, [{ tier: 'b2-2b', state: 'loaded' }]);
+  await clock.advance(L.ADVERT_MS * 2);
+  hs = c.hosts();
+  eq(hs.length, 1); eq(hs[0].peerId, 'p1');
+  c.peerLeft('p1');
+  hs = c.hosts();
+  eq(hs.length, 1); eq(hs[0].peerId, 'p0'); deepEq(hs[0].models, []);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

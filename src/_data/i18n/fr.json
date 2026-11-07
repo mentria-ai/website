@@ -1336,7 +1336,10 @@
       "save_unlock": "Déverrouillez pour garder cette discussion",
       "save_unlock_btn": "Déverrouiller",
       "save_lost": "Les messages non enregistrés sont perdus quand vous quittez cette page.",
-      "photo_chat": "Discussion photo"
+      "photo_chat": "Discussion photo",
+      "host_answering": "Réponse en cours pour votre {device}",
+      "host_loading": "Chargement de {model} pour votre {device}…",
+      "host_stop": "Arrêter"
     },
     "extensions": {
       "install_heading": "Installer une extension",

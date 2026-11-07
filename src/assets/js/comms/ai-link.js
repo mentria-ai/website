@@ -378,8 +378,14 @@ export class AiClient {
 
   hosts() {
     const now = this._c.now();
-    for (const [id, h] of this._hosts) if (now - h.at > HOST_TTL_MS) this._hosts.delete(id);
-    return Array.from(this._hosts.values()).map((h) => Object.assign({}, h, { models: h.models.slice() }));
+    for (const [peerId, h] of this._hosts) if (now - h.at > HOST_TTL_MS) this._hosts.delete(peerId);
+    const best = new Map();
+    const rank = (h) => (h.models.length ? 1 : 0);
+    for (const h of this._hosts.values()) {
+      const cur = best.get(h.device.id);
+      if (!cur || rank(h) > rank(cur) || (rank(h) === rank(cur) && h.at > cur.at)) best.set(h.device.id, h);
+    }
+    return Array.from(best.values()).map((h) => Object.assign({}, h, { models: h.models.slice() }));
   }
 
   hostFor(deviceId) {
@@ -390,13 +396,12 @@ export class AiClient {
     if (!peerId || !d || d.v !== 1) return;
     const device = cleanDevice(d.device);
     if (!device) return;
-    this._hosts.set(device.id, { peerId, device, page: d.page === 'ai-chat' ? 'ai-chat' : 'comms', models: cleanModels(d.models), busy: !!d.busy, at: this._c.now() });
+    this._hosts.set(peerId, { peerId, device, page: d.page === 'ai-chat' ? 'ai-chat' : 'comms', models: cleanModels(d.models), busy: !!d.busy, at: this._c.now() });
     this._onHosts(this.hosts());
   }
 
   peerLeft(peerId) {
-    let changed = false;
-    for (const [id, h] of this._hosts) if (h.peerId === peerId) { this._hosts.delete(id); changed = true; }
+    const changed = this._hosts.delete(peerId);
     for (const a of Array.from(this._asks.values())) if (a.peerId === peerId) this._finish(a, 'gone', {});
     if (changed) this._onHosts(this.hosts());
   }

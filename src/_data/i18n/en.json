@@ -1336,7 +1336,10 @@
       "save_unlock": "Unlock to keep this chat",
       "save_unlock_btn": "Unlock",
       "save_lost": "Unsaved messages are lost when you leave this page.",
-      "photo_chat": "Photo chat"
+      "photo_chat": "Photo chat",
+      "host_answering": "Answering for your {device}",
+      "host_loading": "Loading {model} for your {device}…",
+      "host_stop": "Stop"
     },
     "extensions": {
       "install_heading": "Install an extension",

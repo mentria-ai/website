@@ -120,6 +120,9 @@ eleventyComputed:
   statusRereading:        "tool.ai-chat.status_rereading",
   counter:                "tool.ai-chat.counter",
   statusReady:            "tool.ai-chat.status_ready",
+  hostAnswering:          "tool.ai-chat.host_answering",
+  hostLoading:            "tool.ai-chat.host_loading",
+  hostStop:               "tool.ai-chat.host_stop",
   statusModelDeleted:     "tool.ai-chat.status_model_deleted",
   imgAltAttachedShort:    "tool.ai-chat.img_alt_attached_short",
   labelYou:               "tool.ai-chat.label_you",
@@ -213,6 +216,7 @@ import { hasIdentity, openQuietly, askToOpen, secretCopy, stillOpen } from '/ass
 import { openStore } from '/assets/js/comms/store.js';
 import { newThreadId, titleFrom, turnToMessage, messagesToTurns, messageIndex, legacyThreadId } from '/assets/js/comms/ai-thread.js';
 import { HANDOFF_KEY } from '/assets/js/comms/mention.js';
+import { startPageHost } from '/assets/js/comms/ai-page-host.js';
 import { modelFamilyFor, isSmallTier, isB2Tier, labelPrefix, asksAboutSite, systemPromptFor, replyLanguage, historyBudget, trimRepeatTail } from '/assets/js/ai-turn.js';
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
 const COPY_KEYS = {{ acCopy | dump | safe }};
@@ -440,6 +444,12 @@ function runApp(MentriaEngine, Tiers) {
 
   const systemMessage = messages[0];
 
+  const pageHost = startPageHost({
+    getEngine: () => (engine && !deviceLost ? { engine, tier: currentTier, contextTokens } : null),
+    isBusy: () => !!(generating || sending || warmPromise),
+    onAnswered: () => { if (prefixCache) prefixCache.invalidate(); },
+    strings: { answering: COPY.hostAnswering, loading: COPY.hostLoading, stop: COPY.hostStop }
+  });
   const askedThread = new URLSearchParams(location.search).get('thread');
   let regenAsked = new URLSearchParams(location.search).get('regen') === '1';
   const PHOTO_DEFAULT = 'Describe this image.';
@@ -1779,6 +1789,7 @@ function runApp(MentriaEngine, Tiers) {
     try { engine?.terminate(); } catch (_) {}
     engine = null;
     prefixCache = null;
+    pageHost.refresh();
     inputEl.disabled = true; sendBtn.disabled = true;
     loadModel();
   });
@@ -1835,6 +1846,7 @@ function runApp(MentriaEngine, Tiers) {
       updateEmptySub();
       strip.done({ tokens: 0, prime: COPY.statusReady, linger: 1200 });
       setStatus('ready', 'statusReady');
+      pageHost.refresh();
       deleteBtn.style.display = '';
       inputEl.disabled = false;
       sendBtn.disabled = false;
@@ -1909,6 +1921,7 @@ function runApp(MentriaEngine, Tiers) {
     const old = engine;
     engine = null;
     prefixCache = null;
+    pageHost.refresh();
     try { if (old && typeof old.terminate === 'function') old.terminate(); } catch (_) {}
     inputEl.disabled = true;
     sendBtn.disabled = true;
@@ -2037,6 +2050,7 @@ function runApp(MentriaEngine, Tiers) {
   }
 
   async function runGeneration() {
+    await pageHost.idle();
     const epoch = genEpoch;
     const deepThink = deepThinkActive();
     generating = true;
@@ -2437,6 +2451,7 @@ function runApp(MentriaEngine, Tiers) {
       if (old && window.__mentriaEngine === old) window.__mentriaEngine = null;
       engine = null;
       prefixCache = null;
+      pageHost.refresh();
       messages = [systemMessage];
       conversationImages = [];
       forgetThread();

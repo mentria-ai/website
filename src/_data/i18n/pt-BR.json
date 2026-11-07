@@ -1336,7 +1336,10 @@
       "save_unlock": "Desbloqueie para guardar este chat",
       "save_unlock_btn": "Desbloquear",
       "save_lost": "As mensagens não salvas se perdem quando você sai desta página.",
-      "photo_chat": "Chat de foto"
+      "photo_chat": "Chat de foto",
+      "host_answering": "Respondendo para o seu {device}",
+      "host_loading": "Carregando {model} para o seu {device}…",
+      "host_stop": "Parar"
     },
     "extensions": {
       "install_heading": "Instalar uma extensão",

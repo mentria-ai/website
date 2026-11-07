@@ -1336,7 +1336,10 @@
       "save_unlock": "このチャットを残すにはロックを解除してください",
       "save_unlock_btn": "ロック解除",
       "save_lost": "保存していないメッセージは、このページを離れると失われます。",
-      "photo_chat": "写真チャット"
+      "photo_chat": "写真チャット",
+      "host_answering": "{device}のために回答しています",
+      "host_loading": "{device}のために{model}を読み込んでいます…",
+      "host_stop": "停止"
     },
     "extensions": {
       "install_heading": "拡張機能をインストール",
@@ -5796,6 +5799,29 @@
         "kind_windows": "Windows PC",
         "kind_linux": "Linux",
         "kind_device": "デバイス"
+      },
+      "ai": {
+        "answering_for": "{device}のために回答しています",
+        "loading_for": "{device}のために{model}を読み込んでいます…",
+        "stop": "停止",
+        "from_device": "{device}の{model}が回答 · 暗号化",
+        "loading": "{device}で{model}を読み込んでいます…",
+        "offline": "{device}がオンラインではありません。{device}でCommsを開くか、この端末で続けてください。",
+        "gone_tier": "{model}はもう{device}にありません。",
+        "failed": "{device}が回答できませんでした。",
+        "busy": "{device}は処理中です。次にあなたの質問に答えます。",
+        "copy": "コピー",
+        "copied": "コピーしました",
+        "retry": "再試行",
+        "untitled": "新しいチャット",
+        "this_device": "この端末",
+        "at_label": "{device}の{model}",
+        "menu_title": "回答に使うモデル",
+        "loaded": "読み込み済み",
+        "download": "{size}のダウンロード",
+        "asleep": "スリープ中",
+        "stopped": "{device}からの回答が止まりました。",
+        "finish": "この端末で続ける"
       }
     },
     "scanner": {

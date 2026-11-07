@@ -1,5 +1,5 @@
 const TITLE_MAX = 60;
-const META_KEYS = ['model', 'repeatCut', 'img'];
+const META_KEYS = ['model', 'repeatCut', 'img', 'stopped', 'host'];
 
 export const newThreadId = (prefix) => `${prefix}-${crypto.randomUUID()}`;
 

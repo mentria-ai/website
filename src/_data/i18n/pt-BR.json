@@ -1336,7 +1336,10 @@
       "save_unlock": "Desbloqueie para guardar este chat",
       "save_unlock_btn": "Desbloquear",
       "save_lost": "As mensagens não salvas se perdem quando você sai desta página.",
-      "photo_chat": "Chat de foto"
+      "photo_chat": "Chat de foto",
+      "host_answering": "Respondendo para o seu {device}",
+      "host_loading": "Carregando {model} para o seu {device}…",
+      "host_stop": "Parar"
     },
     "extensions": {
       "install_heading": "Instalar uma extensão",
@@ -5796,6 +5799,29 @@
         "kind_windows": "PC com Windows",
         "kind_linux": "Linux",
         "kind_device": "Dispositivo"
+      },
+      "ai": {
+        "answering_for": "Respondendo para o seu {device}",
+        "loading_for": "Carregando {model} para o seu {device}…",
+        "stop": "Parar",
+        "from_device": "respostas do {model} no seu {device} · criptografado",
+        "loading": "Carregando {model} no seu {device}…",
+        "offline": "Seu {device} não está online. Abra o Comms nele ou termine neste dispositivo.",
+        "gone_tier": "{model} não está mais no seu {device}.",
+        "failed": "Seu {device} não conseguiu responder.",
+        "busy": "Seu {device} está ocupado. Sua pergunta é a próxima.",
+        "copy": "Copiar",
+        "copied": "Copiado",
+        "retry": "Tentar de novo",
+        "untitled": "Nova conversa",
+        "this_device": "Este dispositivo",
+        "at_label": "{model} no {device}",
+        "menu_title": "Responder com",
+        "loaded": "carregado",
+        "download": "download de {size}",
+        "asleep": "em repouso",
+        "stopped": "Seu {device} parou de responder.",
+        "finish": "Terminar neste dispositivo"
       }
     },
     "scanner": {

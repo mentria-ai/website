@@ -26,7 +26,7 @@ unlockTool: true
   <symbol id="ci-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 14h3v3h-3zM19 19h2v2h-2z" fill="currentColor"/></symbol>
   <symbol id="ci-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="ci-back" viewBox="0 0 24 24"><path d="M14.5 5 8 12l6.5 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-  <symbol id="ci-send" viewBox="0 0 24 24"><path d="M3.5 11.2 20.2 4l-3.4 16-5.3-6.2zM11.5 13.8l8.7-9.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></symbol><symbol id="ci-send" viewBox="0 0 24 24"><path d="M3.5 11.2 20.2 4l-3.4 16-5.3-6.2zM11.5 13.8l8.7-9.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
   <symbol id="ci-devices" viewBox="0 0 24 24"><rect x="2.5" y="5" width="13" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M1.5 17.5h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="17" y="8" width="5" height="11" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
   <symbol id="ci-media" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10" r="1.8" fill="currentColor"/><path d="m4.5 17.5 5-5 3.5 3.5 2.5-2.5 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-clip" viewBox="0 0 24 24"><g transform="translate(0.9 1)"><path d="m17.5 11.5-6.1 6.1a4.3 4.3 0 0 1-6-6l7.4-7.4a3 3 0 0 1 4.2 4.2l-7.3 7.3a1.6 1.6 0 0 1-2.3-2.3l6.1-6.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g></symbol>
@@ -234,6 +234,7 @@ unlockTool: true
           </span>
         </div>
         <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-media-btn" type="button" hidden title="{{ 'tool.comms.files.media' | t }}" aria-label="{{ 'tool.comms.files.media' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-media"></use></svg></button>
+        <button class="comms__btn comms__btn--ghost comms__aimodel" id="comms-ai-model" type="button" hidden></button>
         <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-share" type="button" hidden title="{{ 'tool.comms.chat.share_room' | t }}" aria-label="{{ 'tool.comms.chat.share_room' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg></button>
         <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="{{ 'tool.comms.chat.call' | t }}" aria-label="{{ 'tool.comms.chat.call' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg></button>
         <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.chat.camera' | t }}" aria-label="{{ 'tool.comms.chat.camera' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
@@ -516,6 +517,16 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__prog{display:inline-block;width:96px;height:4px;margin:0 var(--space-2);overflow:hidden;vertical-align:middle;background:rgba(255,255,255,.12);border-radius:2px}
 .comms__prog-fill{display:block;width:0%;height:100%;background:var(--syn-cyan);transition:width .12s linear}
 .comms__prog-text{color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
+.comms__line--ai .comms__what{max-width:100%}
+.comms__ai-actions{display:flex;gap:var(--space-1);margin-top:var(--space-1)}
+.comms__ai-act{padding:2px var(--space-2);font-size:var(--text-xs)}
+.comms__aimodel{font-family:var(--font-mono);font-size:var(--text-xs);white-space:nowrap}
+.comms__aimenu-head{margin:var(--space-3) 0 var(--space-1);font-size:var(--text-xs);color:var(--term-muted);text-transform:uppercase;letter-spacing:.04em}
+.comms__aimenu-list{display:flex;flex-direction:column;gap:2px}
+.comms__aimenu-item{display:flex;justify-content:space-between;align-items:center;gap:var(--space-2);width:100%;padding:var(--space-2) var(--space-3);font:inherit;color:var(--term-fg);text-align:left;background:none;border:1px solid transparent;border-radius:var(--radius-md);cursor:pointer}
+.comms__aimenu-item:hover:not(:disabled),.comms__aimenu-item[aria-current="true"]{border-color:var(--term-border-strong);background:var(--term-surface-2)}
+.comms__aimenu-item:disabled{opacity:.5;cursor:default}
+.comms__aimenu-note{font-size:var(--text-xs);color:var(--term-muted)}
 .comms__thumb{display:block;max-width:240px;max-height:180px;margin-top:var(--space-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md);cursor:zoom-in}
 .comms__what:has(>.comms__partsbox){padding:var(--space-1)}
 .comms__partsbox{width:min(320px,100%)}
@@ -679,6 +690,14 @@ import { homeRows, aiHref } from '/assets/js/comms/threads.js';
 import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
 import { createAttach } from '/assets/js/comms/attach.js';
 import { acceptFor, relayAsk, viaRelay, blankedCopy, importPlan, shownState } from '/assets/js/comms/files.js';
+import { AiHost, AiClient, rememberHosts, knownHosts } from '/assets/js/comms/ai-link.js';
+import { getIce, FALLBACK_ICE, RELAY } from '/assets/js/comms/ice.js';
+import { aiRoute, createAiView, modelSections, openModelMenu, tierName } from '/assets/js/comms/ai-view.js';
+import { newThreadId, titleFrom } from '/assets/js/comms/ai-thread.js';
+import { createLocalEngine } from '/assets/js/comms/ai-local.js';
+import { showHostBar } from '/assets/js/comms/ai-hostbar.js';
+import { answerTurns } from '/assets/js/ai-answer.js';
+import { TIERS as AI_TIERS, TIER_CHAIN as AI_CHAIN, SMALL_TIER as AI_SMALL, isTierCached, isLegacyTier, setUserTier } from '/assets/js/mentria-tiers.js';
 import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
@@ -723,29 +742,6 @@ const INSTALL_OPTS = {
   perms: T.perms
 };
 
-const RELAY = 'wss://relay.mentria.ai';
-const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
-
-let cachedIce = null;
-let iceExpiry = 0;
-const REFRESH_LEAD = 60;
-const FALLBACK_ICE = [{ urls: 'stun:turn.mentria.ai:3478' }];
-
-const getIce = async () => {
-  const nowS = Date.now() / 1000;
-  if (cachedIce && nowS < iceExpiry - REFRESH_LEAD) return cachedIce;
-  try {
-    const r = await fetch(TURN_CRED_URL, { cache: 'no-store' });
-    if (!r.ok) throw new Error(`status ${r.status}`);
-    const data = await r.json();
-    iceExpiry = nowS + (data.ttl || 3600);
-    cachedIce = data.iceServers || FALLBACK_ICE;
-    return cachedIce;
-  } catch (err) {
-    console.warn('turn-cred fetch failed, using STUN-only fallback:', err);
-    return FALLBACK_ICE;
-  }
-};
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -1360,6 +1356,107 @@ let attach = null;
 let selfRoom = null;
 const myDevice = deviceInfo(T);
 const presence = new Presence();
+const AI_HOSTING = myDevice.kind !== 'iphone' && myDevice.kind !== 'ipad';
+const aiLocal = AI_HOSTING ? createLocalEngine() : null;
+let aiBar = null;
+let aiLockAsked = false;
+const aiTierName = (tier) => (AI_TIERS[tier] && AI_TIERS[tier].name) || String(tier || '');
+const aiDeviceName = (d) => (d && ((T.devices && T.devices['kind_' + d.kind]) || d.name)) || '';
+const aiHidden = () => myDevice.kind === 'android' && document.visibilityState === 'hidden';
+let aiHost = null;
+const aiActivity = ({ active, device, tier, stage }) => {
+  if (!active) {
+    if (aiBar) { aiBar.hide(); aiBar = null; }
+    if (aiLocal) aiLocal.idle();
+    return;
+  }
+  const text = stage === 'loading' ? fmt(T.ai.loading_for, { model: aiTierName(tier), device: aiDeviceName(device) }) : fmt(T.ai.answering_for, { device: aiDeviceName(device) });
+  if (aiBar) aiBar.update(text);
+  else aiBar = showHostBar({ text, stopLabel: T.ai.stop, onStop: () => { if (aiHost) aiHost.stop(); } });
+};
+if (AI_HOSTING) {
+  aiHost = new AiHost({
+    device: myDevice,
+    page: 'comms',
+    listModels: () => (aiHidden() ? Promise.resolve([]) : aiLocal.models()),
+    load: (tier, onStage) => aiLocal.load(tier, onStage),
+    answer: (ctx, ask, onText, signal) => answerTurns({ engine: ctx.engine, tier: ctx.tier, contextTokens: ctx.contextTokens, messages: ask.messages, pageLang: ask.params.pageLang, signal }, onText),
+    onActivity: aiActivity,
+    onFailure: () => { if (aiLocal) aiLocal.unload(); }
+  });
+  aiHost.setEnabled(false);
+  document.addEventListener('visibilitychange', () => { if (myDevice.kind === 'android') aiHost.advertise(); });
+}
+const aiTakeLock = () => {
+  if (!aiHost || aiLockAsked) return;
+  if (!navigator.locks) { aiHost.setEnabled(true); return; }
+  aiLockAsked = true;
+  navigator.locks.request('mentria-ai-host', () => new Promise(() => { aiHost.setEnabled(true); }))
+    .catch(() => {})
+    .finally(() => {
+      aiHost.setEnabled(false);
+      if (aiLocal) aiLocal.unload();
+      aiLockAsked = false;
+      setTimeout(aiTakeLock, 1000);
+    });
+};
+let refreshAiHosts = () => {};
+const aiClient = new AiClient({ onHosts: (hosts) => { rememberHosts(hosts); refreshAiHosts(); } });
+let aiView = null;
+const aiSendMode = (stop) => {
+  els.go.dataset.mode = stop ? 'stop' : '';
+  const label = stop ? T.ai.stop : T.chat.send;
+  els.go.title = label;
+  els.go.setAttribute('aria-label', label);
+  const use = els.go.querySelector('use');
+  if (use) use.setAttribute('href', stop ? '#ci-stop' : '#ci-send');
+};
+const aiViewFor = () => aiView || (aiView = createAiView({ els, T, getStore: () => commsStore, client: aiClient, device: myDevice, renderLine, sys, renderBody, onChange: () => { refreshHomeThreads(); }, onBusy: aiSendMode, prefix: PREFIX }));
+const aiLocalTiers = async () => {
+  const ids = AI_HOSTING ? AI_CHAIN.filter((id) => !isLegacyTier(id)) : [AI_SMALL];
+  return Promise.all(ids.map(async (tier) => ({ tier, cached: await isTierCached(tier), sizeLabel: (AI_TIERS[tier] && AI_TIERS[tier].sizeLabel) || '' })));
+};
+const aiNewThread = async (route, body) => {
+  if (!commsStore) return null;
+  const now = Date.now();
+  const t = { id: newThreadId('ai'), kind: 'model', title: titleFrom(body, T.ai.untitled), participants: [], meta: { tool: 'ai-chat', route }, preview: '', updatedAt: now, lastReadTs: now, pinned: false };
+  await commsStore.putThread(t);
+  return t;
+};
+const openAiMenu = async () => {
+  const view = aiView;
+  if (!view || !view.isOpen()) return;
+  const t = view.current();
+  const sections = modelSections({ local: await aiLocalTiers(), hosts: aiClient.hosts(), known: knownHosts(), myDeviceId: myDevice.id, T });
+  openModelMenu({
+    sections,
+    current: t.meta && t.meta.route,
+    T,
+    onPick: async ({ tier, device }) => {
+      const cur = view.current();
+      if (!cur || !commsStore) return;
+      if (!device) {
+        const next = Object.assign({}, cur, { meta: Object.assign({}, cur.meta, { route: null }) });
+        await commsStore.putThread(next);
+        try { setUserTier(tier); } catch (_) {}
+        window.location.href = aiHref(next, PREFIX);
+        return;
+      }
+      const next = Object.assign({}, cur, { meta: Object.assign({}, cur.meta, { route: { device: device.id, kind: device.kind, tier } }) });
+      await commsStore.putThread(next);
+      refreshHomeThreads();
+      await view.open(next);
+    }
+  });
+};
+document.getElementById('comms-ai-model').addEventListener('click', () => { openAiMenu(); });
+const openAiThread = async (t) => {
+  const view = aiViewFor();
+  if (view.isOpen()) view.close();
+  await leaveRoom();
+  setView('chat');
+  await view.open(t);
+};
 let historySync = null;
 const selfPeers = new Map();
 const oldSelfNames = new Set();
@@ -1455,6 +1552,7 @@ let paintFrame = 0;
 const onFileChange = (id, extra) => {
   if (extra && extra.threadId === SELF_THREAD) {
     if (extra.hello && extra.device) { presence.seen(extra.device, true); selfPeers.set(extra.peerId, extra.device.id); }
+    if (extra.left) { if (aiHost) aiHost.peerLeft(extra.peerId); aiClient.peerLeft(extra.peerId); }
     if (extra.left && selfPeers.has(extra.peerId)) { presence.gone(selfPeers.get(extra.peerId)); selfPeers.delete(extra.peerId); }
     refreshSelfHeader();
     if (inSelf()) for (const r of fileLines.keys()) paintAttach(r);
@@ -1644,7 +1742,7 @@ const startFiles = async (st) => {
   }
   if (!historySync) historySync = new HistorySync({ store: st, onChange: () => { refreshHomeThreads(); } });
   else historySync.setStore(st);
-  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: myDevice, pinned: [SELF_THREAD], onRoom: (tid, r) => { if (tid === SELF_THREAD) historySync.bind(r); }, onHello: (tid, peerId) => { if (tid === SELF_THREAD) historySync.hello(peerId).catch(() => {}); }, canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
+  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: myDevice, pinned: [SELF_THREAD], onRoom: (tid, r) => { if (tid === SELF_THREAD) { historySync.bind(r); aiClient.bind(r); if (aiHost) { aiHost.bind(r, { ownsPeers: false }); aiTakeLock(); } } }, onHello: (tid, peerId) => { if (tid === SELF_THREAD) { historySync.hello(peerId).catch(() => {}); if (aiHost) aiHost.peerJoined(peerId); } }, canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
   if (!persistAsked && matchMedia('(display-mode: standalone)').matches && navigator.storage && navigator.storage.persist) { persistAsked = true; navigator.storage.persist().catch(() => {}); }
   try {
     await attach.start(st);
@@ -2064,6 +2162,7 @@ let joinSeq = 0;
 
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const seq = ++joinSeq;
+  if (aiView && aiView.isOpen()) aiView.close();
   document.getElementById('comms-media-btn').hidden = true;
   if (attach) attach.setOpenThread(null);
   fileLines.clear();
@@ -2435,8 +2534,17 @@ els.join.addEventListener('click', () => {
   joinNew(name, b64Key);
 });
 
+const aiHoldEnter = (e) => { if (e.key === 'Enter' && aiView && aiView.isOpen() && aiView.busy()) e.preventDefault(); };
+els.msg.addEventListener('keydown', aiHoldEnter);
+els.msg.addEventListener('keypress', aiHoldEnter);
 els.send.addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (aiView && aiView.isOpen()) {
+    const asked = els.msg.value.trim();
+    if (aiView.busy()) { aiView.stop(); return; }
+    if (asked) { els.msg.value = ''; aiView.send(asked); }
+    return;
+  }
   const text = els.msg.value.trim();
   if (!text || !chatAction) return;
   const cmid = newCmid();
@@ -4438,7 +4546,7 @@ const leaveRoom = async () => {
   await joinNew(null, null, { leave: true });
 };
 
-els.leave.addEventListener('click', leaveRoom);
+els.leave.addEventListener('click', () => { if (aiView && aiView.isOpen()) aiView.close(); leaveRoom(); });
 
 if (navigator.share) els.idShareOut.hidden = false;
 
@@ -4743,7 +4851,7 @@ const aiRow = (t, info) => {
   const { mid } = rowMid(info.title || T.people.unnamed, info.preview, info.ts);
   openBtn.append(mid);
   row.append(av, openBtn, rowChev());
-  row.addEventListener('click', () => { window.location.href = aiHref(t, PREFIX); });
+  row.addEventListener('click', () => { if (aiRoute(t, { myDeviceId: myDevice.id }) === 'inline') openAiThread(t); else window.location.href = aiHref(t, PREFIX); });
   return row;
 };
 
@@ -4829,6 +4937,10 @@ const homeTargets = () => {
   const out = CID.getContacts().map((c) => ({ kind: 'contact', id: c.fp, label: c.name || c.fp, ref: c }));
   for (const r of savedRooms()) out.push({ kind: 'room', id: r.room, label: r.label || r.room, ref: r });
   out.push({ kind: 'ai', id: 'ai', label: T.home.filter_ai });
+  for (const h of aiClient.hosts()) {
+    if (!h.device || h.device.id === myDevice.id) continue;
+    for (const m of h.models) out.push({ kind: 'model', id: h.device.id + ':' + m.tier, label: fmt(T.ai.at_label, { model: tierName(m.tier), device: aiDeviceName(h.device) }), ref: { device: h.device, tier: m.tier } });
+  }
   return out;
 };
 
@@ -4942,7 +5054,18 @@ homeForm.addEventListener('submit', async (e) => {
   closeAt();
   const { target, body } = splitTarget(homeMsg.value, homeTarget);
   if (!body) return;
-  if (!target || target.kind === 'ai') {
+  if (target && target.kind === 'model' && commsStore) {
+    homeMsg.value = '';
+    homeTarget = null;
+    const t = await aiNewThread({ device: target.ref.device.id, kind: target.ref.device.kind, tier: target.ref.tier }, body);
+    if (t) {
+      refreshHomeThreads();
+      await openAiThread(t);
+      aiView.send(body);
+      return;
+    }
+  }
+  if (!target || target.kind === 'ai' || target.kind === 'model') {
     try { sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({ text: body, at: Date.now() })); } catch (_) {}
     window.location.href = PREFIX + '/tools/ai-chat/?thread=new';
     return;

@@ -1336,7 +1336,10 @@
       "save_unlock": "Unlock to keep this chat",
       "save_unlock_btn": "Unlock",
       "save_lost": "Unsaved messages are lost when you leave this page.",
-      "photo_chat": "Photo chat"
+      "photo_chat": "Photo chat",
+      "host_answering": "Answering for your {device}",
+      "host_loading": "Loading {model} for your {device}…",
+      "host_stop": "Stop"
     },
     "extensions": {
       "install_heading": "Install an extension",
@@ -5796,6 +5799,29 @@
         "kind_windows": "Windows PC",
         "kind_linux": "Linux",
         "kind_device": "Device"
+      },
+      "ai": {
+        "answering_for": "Answering for your {device}",
+        "loading_for": "Loading {model} for your {device}…",
+        "stop": "Stop",
+        "from_device": "answers from {model} on your {device} · encrypted",
+        "loading": "Loading {model} on your {device}…",
+        "offline": "Your {device} isn't online. Open Comms on it, or finish on this device.",
+        "gone_tier": "{model} isn't on your {device} any more.",
+        "failed": "Your {device} couldn't answer.",
+        "busy": "Your {device} is busy. Your question is next.",
+        "copy": "Copy",
+        "copied": "Copied",
+        "retry": "Retry",
+        "untitled": "New chat",
+        "this_device": "This device",
+        "at_label": "{model} on {device}",
+        "menu_title": "Answer with",
+        "loaded": "loaded",
+        "download": "{size} download",
+        "asleep": "asleep",
+        "stopped": "Your {device} stopped answering.",
+        "finish": "Finish on this device"
       }
     },
     "scanner": {

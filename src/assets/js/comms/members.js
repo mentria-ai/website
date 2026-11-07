@@ -37,6 +37,12 @@ export const membersOf = (entry, mySigFp) => Object.entries((entry && entry.memb
   .map(([sigFp, m]) => ({ sigFp, name: m.name || '', pub: m.pub }))
   .sort((a, b) => a.name.localeCompare(b.name));
 
+export const inboxBody = (payload) => {
+  if (!payload || typeof payload !== 'object') return payload;
+  const { proof, verified, ...rest } = payload;
+  return rest;
+};
+
 export const acceptRekey = (entry, payload, senderSigFp) => !!entry && !!payload && payload.kind === 'room-rekey'
   && typeof payload.room === 'string' && payload.room === entry.room
   && keyOk(payload.key) && payload.kv === 2

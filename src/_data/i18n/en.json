@@ -5851,6 +5851,17 @@
         "sent": "Invite sent to {name}.",
         "from": "{name} invited you to {label}",
         "no_contacts": "Add a contact first."
+      },
+      "roomlock": {
+        "title": "Lock {label}",
+        "note": "Everyone you keep gets a new key in their inbox. Anyone else loses the room from now on.",
+        "go": "Lock room",
+        "short": "Lock",
+        "done": "Room locked. {n} people got the new key.",
+        "offer": "{name} locked {label}. Use the new key?",
+        "use": "Use",
+        "gone": "{name} locked this room. Ask them for a new invite.",
+        "none": "Nobody here has signed in this room yet, so only your devices keep it."
       }
     },
     "scanner": {

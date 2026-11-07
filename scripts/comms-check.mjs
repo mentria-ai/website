@@ -1130,6 +1130,23 @@ check('home: room invites sit with requests at the top', () => {
   eq(H.homeRows({ roomInvites: [{ room: 'r9', label: 'Trip' }] }, { filter: 'people' }).length, 1);
 });
 
+check('members: a signed rekey still verifies after the inbox adds its proof', async () => {
+  fakeIdentity({ unlocked: true });
+  window.MentriaStore = memStore();
+  await CIDM.ensureKeypair();
+  const me = await CIDM.ensureSigningKey();
+  const ts = 1762500000123;
+  const payload = { v: 1, kind: 'room-rekey', name: 'A', pub: { x: 'X', y: 'Y' }, ts, room: 'r', key: RK, kv: 2, label: 'R' };
+  const signed = await SG.signBody(me.signKey, me.spub, 'r', 'inbox:' + ts, payload);
+  const opened = JSON.parse(JSON.stringify(Object.assign({}, signed, { proof: 'p' })));
+  opened.verified = true;
+  eq((await SG.verifyBody(opened, 'r', 'inbox:' + ts)).ok, false);
+  const v = await SG.verifyBody(MB.inboxBody(opened), 'r', 'inbox:' + ts);
+  eq(v.ok, true);
+  eq(v.sigFp, me.sigFp);
+  deepEq(Object.keys(MB.inboxBody(opened)), Object.keys(signed));
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

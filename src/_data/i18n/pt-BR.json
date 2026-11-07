@@ -5851,6 +5851,17 @@
         "sent": "Convite enviado para {name}.",
         "from": "{name} convidou você para {label}",
         "no_contacts": "Adicione um contato primeiro."
+      },
+      "roomlock": {
+        "title": "Trancar {label}",
+        "note": "Quem você mantiver recebe uma chave nova na caixa de entrada. Os demais perdem a sala a partir de agora.",
+        "go": "Trancar sala",
+        "short": "Trancar",
+        "done": "Sala trancada. {n} pessoas receberam a chave nova.",
+        "offer": "{name} trancou {label}. Usar a chave nova?",
+        "use": "Usar",
+        "gone": "{name} trancou esta sala. Peça um novo convite.",
+        "none": "Ninguém assinou nesta sala ainda, então só os seus dispositivos a mantêm."
       }
     },
     "scanner": {

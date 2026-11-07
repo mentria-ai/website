@@ -40,6 +40,18 @@ unlockTool: true
 
 <section class="comms">
   <h1 class="sr-only">{{ 'tools.comms.title' | t }}</h1>
+  <div class="comms__picker comms__lock" id="comms-lock" hidden>
+    <div class="comms__picker-backdrop" data-lock-close></div>
+    <div class="comms__picker-card" role="dialog" aria-modal="true" aria-labelledby="comms-lock-title">
+      <h3 class="comms__picker-h" id="comms-lock-title"></h3>
+      <p class="comms__invite-by">{{ 'tool.comms.roomlock.note' | t }}</p>
+      <div class="comms__lock-list" id="comms-lock-list"></div>
+      <div class="comms__picker-actions comms__invite-actions">
+        <button type="button" class="comms__btn comms__btn--ghost" data-lock-close>{{ 'tool.comms.picker.cancel' | t }}</button>
+        <button type="button" class="comms__btn" id="comms-lock-go">{{ 'tool.comms.roomlock.go' | t }}</button>
+      </div>
+    </div>
+  </div>
   <div class="comms__picker comms__invite" id="comms-invite" hidden>
     <div class="comms__picker-backdrop"></div>
     <div class="comms__picker-card" role="dialog" aria-modal="true" aria-labelledby="comms-invite-title">
@@ -274,7 +286,11 @@ unlockTool: true
         </div>
         <div class="comms__upgrade comms__histbar" id="comms-twice" role="alert" hidden>
           <span class="comms__upgrade-text" id="comms-twice-text"></span>
-          <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-twice-close" type="button" aria-label="{{ 'tool.comms.invite.dismiss' | t }}">&times;</button></div>
+          <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-twice-lock" type="button">{{ 'tool.comms.roomlock.go' | t }}</button><button class="comms__btn comms__btn--ghost" id="comms-twice-close" type="button" aria-label="{{ 'tool.comms.invite.dismiss' | t }}">&times;</button></div>
+        </div>
+        <div class="comms__upgrade comms__histbar" id="comms-rekey" role="alert" hidden>
+          <span class="comms__upgrade-text" id="comms-rekey-text"></span>
+          <div class="comms__upgrade-actions"><button class="comms__btn" id="comms-rekey-use" type="button">{{ 'tool.comms.roomlock.use' | t }}</button><button class="comms__btn comms__btn--ghost" id="comms-rekey-later" type="button">{{ 'tool.comms.invite.not_now' | t }}</button></div>
         </div>
         <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
       </div>
@@ -651,6 +667,8 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__picker-ver{flex:none;color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
 .comms__picker-actions{display:flex;justify-content:flex-end}
 .comms__invite-actions{gap:var(--space-2)}
+.comms__lock-list{display:flex;flex-direction:column;gap:var(--space-2)}
+.comms__lock-list label{display:flex;align-items:center;gap:var(--space-2);color:var(--term-fg);font-size:var(--text-sm)}
 .comms__invite-by,.comms__invite-ios{margin:0;color:var(--term-muted);font-size:var(--text-sm);overflow-wrap:anywhere}
 .comms__invite-ios{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 
@@ -727,9 +745,9 @@ import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
-import { signBody, verifyBody, validSpub } from '/assets/js/comms/sign.js';
+import { signBody, verifyBody, validSpub, sigFingerprint } from '/assets/js/comms/sign.js';
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
-import { noteJoined, noteMember } from '/assets/js/comms/members.js';
+import { noteJoined, noteMember, membersOf, acceptRekey, inboxBody } from '/assets/js/comms/members.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1381,16 +1399,19 @@ const openInviteLink = async (token) => {
   pendingInvite = { token, k, found };
   showInvite('ready', { body: found.body, fp });
 };
-const announceJoined = async (roomName, inv) => {
+const publishCtlWhenLive = async (roomName, ctl) => {
   for (let i = 0; i < 100; i++) {
-    if (currentRoomName !== roomName) return;
-    if (chatPersist && chatTopic) break;
+    if (!joinTarget || joinTarget.room !== roomName) return false;
+    if (currentRoomName === roomName && chatPersist && chatTopic && relaySockets().length && await publishRoomCtl(ctl)) return true;
     await new Promise((r) => setTimeout(r, 200));
   }
-  if (currentRoomName !== roomName) return;
+  return false;
+};
+const announceJoined = async (roomName, inv) => {
+  if (!joinTarget || joinTarget.room !== roomName) return;
   const ctl = { k: 'joined', inv, jid: b64urlEncode(crypto.getRandomValues(new Uint8Array(9))), name: (myProfile && myProfile.name) || '' };
   if (myId) ctl.pub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
-  await publishRoomCtl(ctl);
+  await publishCtlWhenLive(roomName, ctl);
   if (inv) {
     const list = savedRooms();
     const entry = list.find((r) => r.room === roomName);
@@ -1499,6 +1520,148 @@ const inviteContact = async (r) => {
   notice(fmt(T.invite.sent, { name: c.name || T.people.someone }));
 };
 
+const pendingRekeys = () => { try { const v = MentriaStore.get('comms', 'rekeys'); return Array.isArray(v) ? v : []; } catch (_) { return []; } };
+const setPendingRekeys = (list) => { try { MentriaStore.set('comms', 'rekeys', list.slice(-20)); } catch (_) {} };
+let rekeyHidden = null;
+const paintRekey = () => {
+  const bar = document.getElementById('comms-rekey');
+  if (!bar) return;
+  const p = currentRoomName ? pendingRekeys().find((x) => x.room === currentRoomName) : null;
+  const show = !!p && rekeyHidden !== currentRoomName;
+  bar.hidden = !show;
+  if (show) document.getElementById('comms-rekey-text').textContent = fmt(T.roomlock.offer, { name: p.by || T.people.someone, label: p.label || p.room });
+};
+const KEY43 = /^[A-Za-z0-9_-]{43}$/;
+const rekeyEntry = (e, key) => {
+  e.key = key;
+  e.kv = 2;
+  e.invites = {};
+  e.joins = {};
+  e.twiceAck = {};
+  e.lockedAt = Date.now();
+};
+const applyRekey = (p) => {
+  const list = savedRooms();
+  const entry = list.find((r) => r.room === p.room);
+  setPendingRekeys(pendingRekeys().filter((x) => x.room !== p.room));
+  if (!entry || !KEY43.test(p.key)) { paintRekey(); return; }
+  rekeyEntry(entry, p.key);
+  setSavedRooms(list);
+  subscribeUnread();
+  if (currentRoomName === p.room) openSavedRoom(entry);
+  else { paintRekey(); renderContacts(); }
+};
+document.getElementById('comms-rekey-use').addEventListener('click', () => {
+  const p = pendingRekeys().find((x) => x.room === currentRoomName);
+  if (p) applyRekey(p);
+});
+document.getElementById('comms-rekey-later').addEventListener('click', () => { rekeyHidden = currentRoomName; paintRekey(); });
+const takeRekey = async (payload) => {
+  const entry = savedRooms().find((r) => r.room === payload.room);
+  if (!entry || typeof payload.ts !== 'number') return;
+  const v = await verifyBody(inboxBody(payload), payload.room, 'inbox:' + payload.ts);
+  if (!v.ok || entry.key === payload.key) return;
+  const p = { room: payload.room, key: payload.key, kv: 2, label: String(payload.label || entry.label || payload.room).slice(0, 40), by: String(payload.name || '').slice(0, 32), ts: Date.now() };
+  if (mySign && v.sigFp === mySign.sigFp) {
+    if (payload.kv === 2 && KEY43.test(payload.key)) applyRekey(p);
+    return;
+  }
+  if (!acceptRekey(entry, payload, v.sigFp)) return;
+  setPendingRekeys(pendingRekeys().filter((x) => x.room !== p.room).concat([p]));
+  rekeyHidden = null;
+  paintRekey();
+  if (currentRoomName !== p.room) notice(fmt(T.roomlock.offer, { name: p.by || T.people.someone, label: p.label }));
+};
+const onLockedCtl = (ctl, sig, at) => {
+  const sigFp = sig && sig.ok ? sig.sigFp : null;
+  if (sigFp && mySign && sigFp === mySign.sigFp) return;
+  if (at && Math.abs(Date.now() - at) > 120000) return;
+  const roomName = currentRoomName;
+  const before = (savedRooms().find((r) => r.room === roomName) || {}).key;
+  setTimeout(() => {
+    const now = savedRooms().find((r) => r.room === roomName);
+    if (!now || now.key !== before || pendingRekeys().some((x) => x.room === roomName)) return;
+    if (currentRoomName === roomName) sys(fmt(T.roomlock.gone, { name: String(ctl.name || '').slice(0, 32) || T.people.someone }));
+  }, 6000);
+};
+const noteRoomMember = (m) => {
+  if (!currentRoomName || isDmRoom(currentRoomName) || !m || !m.sigFp) return;
+  const list = savedRooms();
+  const e = list.find((r) => r.room === currentRoomName);
+  if (!e) return;
+  const prev = e.members && e.members[m.sigFp];
+  if (prev && prev.name === (m.name || prev.name) && (!m.pub || prev.pub) && Date.now() - (prev.seen || 0) < 60000) return;
+  noteMember(e, Object.assign({ ts: Date.now() }, m));
+  setSavedRooms(list);
+};
+
+const lockEl = document.getElementById('comms-lock');
+let lockRoom = null;
+const closeLock = () => { lockEl.hidden = true; lockRoom = null; document.getElementById('comms-lock-list').innerHTML = ''; };
+lockEl.querySelectorAll('[data-lock-close]').forEach((el) => el.addEventListener('click', closeLock));
+const openLock = (roomName) => {
+  const entry = savedRooms().find((r) => r.room === roomName);
+  if (!entry || !mySign || !myId) return;
+  lockRoom = roomName;
+  document.getElementById('comms-lock-title').textContent = fmt(T.roomlock.title, { label: entry.label || entry.room });
+  const listEl = document.getElementById('comms-lock-list');
+  listEl.innerHTML = '';
+  const people = membersOf(entry, mySign.sigFp).filter((m) => m.pub);
+  if (!people.length) {
+    const p = document.createElement('p');
+    p.className = 'comms__invite-by';
+    p.textContent = T.roomlock.none;
+    listEl.append(p);
+  }
+  for (const m of people) {
+    const label = document.createElement('label');
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.checked = true;
+    box.dataset.fp = m.sigFp;
+    const nm = document.createElement('span');
+    nm.textContent = m.name || T.people.unnamed;
+    label.append(box, nm);
+    listEl.append(label);
+  }
+  lockEl.hidden = false;
+  const go = document.getElementById('comms-lock-go');
+  if (go) go.focus();
+};
+const lockRoomNow = async (roomName, keepFps) => {
+  const first = savedRooms().find((r) => r.room === roomName);
+  if (!first || !mySign || !myId) return;
+  if (currentRoomName !== roomName) { openSavedRoom(first); setView('chat'); }
+  await publishCtlWhenLive(roomName, { k: 'locked', name: (myProfile && myProfile.name) || '' });
+  const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
+  const list = savedRooms();
+  const entry = list.find((r) => r.room === roomName);
+  if (!entry) return;
+  const label = entry.label || entry.room;
+  const myPub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
+  const kept = membersOf(entry, mySign.sigFp).filter((m) => m.pub && keepFps.includes(m.sigFp));
+  rekeyEntry(entry, key);
+  if (entry.members) for (const fp of Object.keys(entry.members)) if (fp !== mySign.sigFp && !keepFps.includes(fp)) delete entry.members[fp];
+  setSavedRooms(list);
+  twiceFor = null;
+  for (const pub of kept.map((m) => m.pub).concat([myPub])) {
+    const ts = Date.now();
+    const payload = { v: 1, kind: 'room-rekey', name: (myProfile && myProfile.name) || '', pub: myPub, ts, room: roomName, key, kv: 2, label };
+    try { await publishToInbox(pub, await signBody(mySign.signKey, mySign.spub, roomName, 'inbox:' + ts, payload)); } catch (_) {}
+  }
+  subscribeUnread();
+  els.room.value = roomName;
+  await joinNew(roomName, key, { kv: 2 });
+  if (currentRoomName === roomName) sys(fmt(T.roomlock.done, { n: kept.length }));
+};
+document.getElementById('comms-lock-go').addEventListener('click', async () => {
+  const roomName = lockRoom;
+  const keep = [...document.querySelectorAll('#comms-lock-list input:checked')].map((b) => b.dataset.fp);
+  closeLock();
+  if (roomName) await lockRoomNow(roomName, keep);
+});
+document.getElementById('comms-twice-lock').addEventListener('click', () => { if (twiceFor) openLock(twiceFor.room); });
+
 let oldLinkFor = null;
 const paintOldLink = (roomName) => {
   const bar = document.getElementById('comms-oldlink');
@@ -1514,7 +1677,7 @@ const signerFor = (sig) => {
   if (!sig || !sig.ok) return null;
   if (mySign && sig.sigFp === mySign.sigFp) return { me: true, sigFp: sig.sigFp };
   const c = CID.getContacts().find((x) => x.spub && x.spub.x === sig.spub.x && x.spub.y === sig.spub.y);
-  return c ? { fp: c.fp, sigFp: sig.sigFp } : { sigFp: sig.sigFp };
+  return c ? { fp: c.fp, sigFp: sig.sigFp, spub: sig.spub } : { sigFp: sig.sigFp, spub: sig.spub };
 };
 const signerName = (signer) => {
   if (!signer || !signer.fp) return null;
@@ -1536,6 +1699,7 @@ const renderRemoteChat = (item, opts = {}) => {
   const verified = !!(item.signer && item.signer.fp);
   const signedName = verified ? signerName(item.signer) : null;
   if (signedName) who = signedName;
+  if (item.signer && item.signer.sigFp && !item.signer.me && !opts.stored) noteRoomMember({ sigFp: item.signer.sigFp, name: who, spub: item.signer.spub });
   if (files) renderAttachment(who, item.parts, { peerId: item.senderId, sender: item.sfp2 || item.sfp || item.senderId || null, ts: item.ts, verified });
   else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts, verified });
   if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '', signer: item.signer || undefined }, item.parts);
@@ -2306,6 +2470,7 @@ const onJoinedCtl = (ctl, sig, at) => {
 const handleRoomCtl = (ctl, sfp, sig, at) => {
   if (!ctl || !currentRoomName || isDmRoom(currentRoomName)) return;
   if (ctl.k === 'joined') { onJoinedCtl(ctl, sig, at); return; }
+  if (ctl.k === 'locked') { onLockedCtl(ctl, sig, at); return; }
   if (ctl.k !== 'ring') return;
   const token = (typeof ctl.token === 'string' && RING_TOKEN_RE.test(ctl.token)) ? ctl.token : null;
   if (!token || (ringToken && token === ringToken)) return;
@@ -2492,6 +2657,9 @@ const challengePeer = (peerId, action) => {
 const applyVerifiedProfile = async (peerId) => {
   const prof = peerProfiles.get(peerId);
   if (!prof || !prof.verified || !prof.pub) return;
+  if (prof.spub) {
+    try { noteRoomMember({ sigFp: await sigFingerprint(prof.spub), name: prof.name, pub: prof.pub, spub: prof.spub }); } catch (_) {}
+  }
   const existing = CID.contactByPub(prof.pub);
   if (!existing) return;
   const ringNew = !!prof.ring && existing.ring !== prof.ring;
@@ -2558,6 +2726,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     els.share.hidden = true;
     paintOldLink(null);
     paintTwice();
+    paintRekey();
     els.eph.hidden = true;
     els.leave.hidden = true;
     els.callStart.hidden = true;
@@ -2586,6 +2755,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   refreshShareUrl(roomName);
   paintOldLink(roomName);
   paintTwice();
+  paintRekey();
 
   let iceServers;
   try {
@@ -3785,6 +3955,7 @@ const handleSideMsg = async (msgEvent) => {
       return;
     }
     if (payload.kind === 'room-invite') { takeRoomInvite(payload); return; }
+    if (payload.kind === 'room-rekey') { await takeRekey(payload); return; }
     const existing = CID.contactByPub(payload.pub);
     if (existing) {
       if (typeof payload.ts !== 'number' || payload.ts <= (existing.annTs || 0)) return;
@@ -5198,7 +5369,15 @@ const roomRow = (r, info) => {
   inv.setAttribute('aria-label', T.invite.contact);
   inv.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg>';
   inv.addEventListener('click', (e) => { e.stopPropagation(); inviteContact(r); });
-  row.append(bell, inv, ren, rm);
+  const lk = document.createElement('button');
+  lk.type = 'button';
+  lk.className = 'comms__rowbtn comms__rowbtn--text';
+  lk.title = T.roomlock.go;
+  lk.setAttribute('aria-label', T.roomlock.go);
+  lk.textContent = T.roomlock.short;
+  lk.hidden = !mySign;
+  lk.addEventListener('click', (e) => { e.stopPropagation(); openLock(r.room); });
+  row.append(bell, inv, lk, ren, rm);
   return row;
 };
 

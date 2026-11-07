@@ -5851,6 +5851,17 @@
         "sent": "Invitación enviada a {name}.",
         "from": "{name} te invitó a {label}",
         "no_contacts": "Primero añade un contacto."
+      },
+      "roomlock": {
+        "title": "Cerrar {label}",
+        "note": "Quienes mantengas reciben una clave nueva en su bandeja. Los demás pierden la sala desde ahora.",
+        "go": "Cerrar sala",
+        "short": "Cerrar",
+        "done": "Sala cerrada. {n} personas recibieron la clave nueva.",
+        "offer": "{name} cerró {label}. ¿Usar la clave nueva?",
+        "use": "Usar",
+        "gone": "{name} cerró esta sala. Pídele una invitación nueva.",
+        "none": "Nadie ha firmado todavía en esta sala, así que solo la conservan tus dispositivos."
       }
     },
     "scanner": {

@@ -5800,7 +5800,23 @@
       "ai": {
         "answering_for": "Réponse en cours pour votre {device}",
         "loading_for": "Chargement de {model} pour votre {device}…",
-        "stop": "Arrêter"
+        "stop": "Arrêter",
+        "from_device": "réponses de {model} sur votre {device} · chiffré",
+        "loading": "Chargement de {model} sur votre {device}…",
+        "offline": "Votre {device} n'est pas en ligne. Ouvrez Comms dessus, ou terminez sur cet appareil.",
+        "gone_tier": "{model} n'est plus sur votre {device}.",
+        "failed": "Votre {device} n'a pas pu répondre.",
+        "busy": "Votre {device} est occupé. Votre question passe ensuite.",
+        "copy": "Copier",
+        "copied": "Copié",
+        "retry": "Réessayer",
+        "untitled": "Nouvelle discussion",
+        "this_device": "Cet appareil",
+        "at_label": "{model} sur {device}",
+        "menu_title": "Répondre avec",
+        "loaded": "chargé",
+        "download": "téléchargement de {size}",
+        "asleep": "en veille"
       }
     },
     "scanner": {

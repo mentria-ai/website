@@ -5800,7 +5800,23 @@
       "ai": {
         "answering_for": "Respondiendo para tu {device}",
         "loading_for": "Cargando {model} para tu {device}…",
-        "stop": "Detener"
+        "stop": "Detener",
+        "from_device": "respuestas de {model} en tu {device} · cifrado",
+        "loading": "Cargando {model} en tu {device}…",
+        "offline": "Tu {device} no está en línea. Abre Comms en él o termina en este dispositivo.",
+        "gone_tier": "{model} ya no está en tu {device}.",
+        "failed": "Tu {device} no pudo responder.",
+        "busy": "Tu {device} está ocupado. Tu pregunta va después.",
+        "copy": "Copiar",
+        "copied": "Copiado",
+        "retry": "Reintentar",
+        "untitled": "Chat nuevo",
+        "this_device": "Este dispositivo",
+        "at_label": "{model} en {device}",
+        "menu_title": "Responder con",
+        "loaded": "cargado",
+        "download": "descarga de {size}",
+        "asleep": "en reposo"
       }
     },
     "scanner": {

@@ -599,6 +599,50 @@ check('ai-link: remembered hosts keep the newest 8 devices', async () => {
   deepEq(L.knownHosts(st), {});
 });
 
+check('ai-view: a thread set to another device opens inline, every other thread opens its page', async () => {
+  const V = await import('/assets/js/comms/ai-view.js');
+  const me = 'dev-phone';
+  eq(V.aiRoute({ id: 'ai-1', kind: 'model' }, { myDeviceId: me }), 'page');
+  eq(V.aiRoute({ id: 'ai-2', kind: 'model', meta: {} }, { myDeviceId: me }), 'page');
+  eq(V.aiRoute({ id: 'ai-3', kind: 'model', meta: { route: { device: me, kind: 'iphone', tier: 'b2-2b' } } }, { myDeviceId: me }), 'page');
+  eq(V.aiRoute({ id: 'ai-4', kind: 'model', meta: { route: { device: 'dev-mac', kind: 'mac', tier: '27b' } } }, { myDeviceId: me }), 'inline');
+  eq(V.aiRoute({ id: 'ai-5', kind: 'model', meta: { tool: 'annotate-image', route: { device: 'dev-mac', kind: 'mac', tier: '27b' } } }, { myDeviceId: me }), 'page');
+  eq(V.aiRoute(null, { myDeviceId: me }), 'page');
+});
+
+const aiMenuT = { ai: { this_device: 'This device' }, devices: { kind_mac: 'Mac', kind_windows: 'Windows PC', kind_iphone: 'iPhone' } };
+const aiMenuInput = () => ({
+  local: [{ tier: 'b2-2b', cached: true, sizeLabel: '520 MB' }, { tier: 'b2-4b', cached: false, sizeLabel: '1.1 GB' }],
+  hosts: [{ peerId: 'p1', device: { id: 'mac1', name: 'Mac', kind: 'mac' }, page: 'comms', models: [{ tier: '27b', state: 'loaded' }, { tier: 'b2-2b', state: 'cached' }], busy: false, at: 900 }],
+  known: {
+    mac1: { device: { id: 'mac1', name: 'Mac', kind: 'mac' }, models: [{ tier: '27b', state: 'cached' }], at: 800 },
+    pc1: { device: { id: 'pc1', name: 'PC', kind: 'windows' }, models: [{ tier: 'b2-9b', state: 'cached' }], at: 700 },
+    me: { device: { id: 'me', name: 'iPhone', kind: 'iphone' }, models: [], at: 990 }
+  },
+  myDeviceId: 'me', T: aiMenuT
+});
+
+check('ai-view: the menu puts this device first, then online devices, then asleep ones', async () => {
+  const V = await import('/assets/js/comms/ai-view.js');
+  const secs = V.modelSections(aiMenuInput());
+  deepEq(secs.map((x) => x.title), ['This device', 'Mac', 'Windows PC']);
+  eq(secs[0].device, null);
+  deepEq(secs[0].items.map((i) => [i.tier, i.state, i.size]), [['b2-2b', 'cached', '520 MB'], ['b2-4b', 'download', '1.1 GB']]);
+  eq(secs[1].device.id, 'mac1');
+  deepEq(secs[1].items.map((i) => [i.tier, i.state]), [['27b', 'loaded'], ['b2-2b', 'cached']]);
+  eq(secs[1].items[0].label, '27B');
+});
+
+check("ai-view: an asleep device's models are listed but marked asleep", async () => {
+  const V = await import('/assets/js/comms/ai-view.js');
+  const secs = V.modelSections(aiMenuInput());
+  const pc = secs.find((x) => x.device && x.device.id === 'pc1');
+  ok(pc);
+  deepEq(pc.items.map((i) => [i.tier, i.state]), [['b2-9b', 'asleep']]);
+  eq(pc.online, false);
+  eq(secs.find((x) => x.device && x.device.id === 'me'), undefined);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

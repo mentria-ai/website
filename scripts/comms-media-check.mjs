@@ -90,6 +90,15 @@ const PAGE_TESTS = new Function('HELPERS', `return (async () => {
   test('deleteThread returns its media', async () => { const s = await S.openStore(A); await s.putMedia(inRec(ID4, 1, 'dm-9')); eq((await s.deleteThread('dm-9')).join(), ID4); });
   test('a locked worker refuses', async () => { const s = await S.openStore(A); const m = await M.openMedia(s); m.forget(); await rejects(m.readPiece(ID3, 0), 'locked'); });
 
+  let media = null;
+  const swReady = async () => { if (!media) media = await M.openMedia(await S.openStore(A)); await navigator.serviceWorker.ready; ok(!!navigator.serviceWorker.controller, 'no controlling service worker'); };
+  test('sw: whole file', async () => { await swReady(); const b = await (await fetch('/comms-media/' + ID3)).arrayBuffer(); eq(hex(new Uint8Array(b)), hex(bytes(300000, 4))); });
+  test('sw: a range across a piece edge', async () => { await swReady(); const r = await fetch('/comms-media/' + ID3, { headers: { Range: 'bytes=262100-262299' } }); eq(r.status, 206); eq(r.headers.get('content-range'), 'bytes 262100-262299/300000'); eq(hex(new Uint8Array(await r.arrayBuffer())), hex(bytes(300000, 4).slice(262100, 262300))); });
+  test('sw: download name', async () => { await swReady(); ok(((await fetch('/comms-media/' + ID3 + '?dl=1')).headers.get('content-disposition') || '').includes('b.bin')); });
+  test('sw: an incomplete file is 404', async () => { await swReady(); eq((await fetch('/comms-media/' + ID2)).status, 404); });
+  test('sw: a restarted worker asks for the key again', async () => { await swReady(); await stopServiceWorkers(); eq((await fetch('/comms-media/' + ID3)).status, 200); });
+  test('sw: forget means 403', async () => { await swReady(); media.forget(); await sleep(100); eq((await fetch('/comms-media/' + ID3)).status, 403); });
+
   const out = [];
   for (const [name, fn] of tests) {
     try { await fn(); out.push({ name, ok: true }); } catch (e) { out.push({ name, ok: false, err: String(e && e.message || e) }); }
@@ -128,7 +137,14 @@ try {
   const page = await browser.newPage();
   const cdp = await page.createCDPSession();
   await page.exposeFunction('setQuota', async (bytes) => { await cdp.send('Storage.overrideQuotaForOrigin', bytes == null ? { origin: ORIGIN } : { origin: ORIGIN, quotaSize: bytes }); return true; });
-  await page.goto(ORIGIN + '/manifest.json');
+  await cdp.send('ServiceWorker.enable');
+  await page.exposeFunction('stopServiceWorkers', async () => { await cdp.send('ServiceWorker.stopAllWorkers'); await new Promise((r) => setTimeout(r, 300)); return true; });
+  await page.goto(ORIGIN + '/about/');
+  for (let i = 0; i < 3; i++) {
+    const controlled = await page.waitForFunction(() => !!navigator.serviceWorker.controller, { timeout: 60000 }).then(() => true, () => false);
+    if (controlled) break;
+    await page.reload();
+  }
   results = await page.evaluate(PAGE_TESTS, HELPERS).catch((e) => [{ name: 'load the media modules', ok: false, err: String(e && e.message || e).split('\n')[0] }]);
   const ctx = await browser.createBrowserContext();
   const fresh = await ctx.newPage();

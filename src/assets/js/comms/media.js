@@ -19,6 +19,20 @@ export const ensureFormat = () => {
 
 const coded = (code, msg) => Object.assign(new Error(msg || code), { code });
 
+let pageKey = null;
+let answering = false;
+const swOf = () => (typeof navigator !== 'undefined' ? navigator.serviceWorker : null);
+const answerOnce = () => {
+  const sw = swOf();
+  if (!sw || answering) return;
+  answering = true;
+  sw.addEventListener('message', (e) => {
+    const d = e.data || {};
+    if (d.type !== 'comms-media-need-key' || !e.ports || !e.ports[0]) return;
+    e.ports[0].postMessage(pageKey ? { key: pageKey } : {});
+  });
+};
+
 class Media {
   constructor(store, MF, worker, sync) {
     this._store = store;
@@ -165,15 +179,29 @@ class Media {
     if (this._worker) await this._call('dropPlain', { id }).catch(() => {});
   }
 
+  shareKey() {
+    const sw = swOf();
+    if (!sw || this._locked || !this._store) return;
+    pageKey = this._store.key;
+    answerOnce();
+    const post = (w) => { try { if (w) w.postMessage({ type: 'comms-media-key', key: pageKey }); } catch (_) {} };
+    post(sw.controller);
+    sw.ready.then((reg) => { if (reg.active && reg.active !== sw.controller) post(reg.active); }, () => {});
+  }
+
   forget() {
     this._locked = true;
+    pageKey = null;
     if (this._worker) this._call('forget').catch(() => {});
+    const sw = swOf();
+    try { if (sw && sw.controller) sw.controller.postMessage({ type: 'comms-media-forget' }); } catch (_) {}
   }
 
   async unlock(store) {
     this._store = store || this._store;
     this._locked = false;
     if (this._worker) await this._call('key', { key: this._store.key });
+    this.shareKey();
   }
 
   close() {
@@ -196,5 +224,6 @@ export const openMedia = async (store, { noSync = false } = {}) => {
       media.sync = false;
     }
   }
+  media.shareKey();
   return media;
 };

@@ -97,7 +97,10 @@
     return true;
   };
 
+  const isBusy = (e) => !!e && (e.name === 'NoModificationAllowedError' || e.name === 'InvalidStateError');
+
   g.MentriaMediaFormat = {
+    isBusy,
     PIECE, SLOT,
     pieceCount, pieceLength, slotLength, slotOffset, piecesFor,
     sealPiece, openPiece, openJson, sha256, manifestHash,

@@ -47,7 +47,7 @@ const handleFor = (id, create) => {
         try {
           return await fh.createSyncAccessHandle();
         } catch (e) {
-          if (!(e && e.name === 'NoModificationAllowedError') || tries >= 10) throw e;
+          if (!MF.isBusy(e) || tries >= 10) throw e;
           await new Promise((r) => setTimeout(r, 300));
         }
       }

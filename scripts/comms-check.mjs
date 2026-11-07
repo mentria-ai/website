@@ -277,6 +277,8 @@ check('fix I7: a transfer nobody can serve shows as paused', () => { eq(F.shownS
 check('fix phone: a holder that stops answering is dropped and reported', async () => { const h = [await sha(1), await sha(2)]; const rec = { id: R16, threadId: 'dm-x', role: 'in', state: 'queued', complete: false, size: 300000, pieceSize: 262144, mh: await MF.manifestHash(h), hashes: MF.b64(MF.joinHashes(h)), have: MF.bfB64(MF.bfNew(2)), updatedAt: 1 }; const events = []; const t = new F.Transfers({ store: { listMedia: async () => [rec], putMedia: async () => {} }, media: {}, onChange: (id, x) => { if (x) events.push(x); }, timeoutMs: 40, tickMs: 15 }); try { const room = fakeRoom(); await t.attach('dm-x', room, {}); room.actions.fhi.onMessage({ caps: { files: 2 }, have: [R16], want: [] }, { peerId: 'p1' }); await new Promise((r) => setTimeout(r, 400)); ok(events.some((x) => x.stale && x.threadId === 'dm-x' && x.peerId === 'p1')); eq(t.peersOf('dm-x').length, 0); } finally { t.stop(); } });
 check('fix phone: a files room can be rejoined on demand', async () => { const joined = []; const fr = new F.FilesRooms({ transfers: stubT(), join: (id) => { joined.push(id); return { leave: () => {} }; } }); await fr.sync(threadsN(1)); await fr.rejoin('t0'); eq(joined.length, 2); deepEq(fr.joined(), ['t0']); });
 
+check('fix phone: a file open in another worker counts as busy on Safari and Chrome', async () => { ok(MF.isBusy({ name: 'InvalidStateError' })); ok(MF.isBusy({ name: 'NoModificationAllowedError' })); ok(!MF.isBusy({ name: 'NotFoundError' })); ok(!MF.isBusy(null)); });
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

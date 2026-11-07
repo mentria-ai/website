@@ -643,6 +643,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 }
 @media (max-width:720px){
   html.is-standalone body:has(#comms-app) .site-header{display:none}
+  html.is-standalone body:has(#comms-app)>main{padding-top:env(safe-area-inset-top,0px)}
   html.is-standalone body:has(.comms__app--chat:not([hidden])){padding-bottom:0}
   html.is-standalone body:has(.comms__app--chat:not([hidden])) .app-bar{display:none}
   .comms__side{flex:1;background:var(--term-bg)}

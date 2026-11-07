@@ -213,6 +213,136 @@ check('turn: tierLabel', async () => {
   assert.equal(T.tierLabel('nope'), 'nope');
 });
 
+const fakeEngine = (tokens) => {
+  const e = { calls: [], aborted: false, encodes: 0 };
+  e.encodeChat = async (msgs) => { e.encodes++; const n = msgs.reduce((a, m) => a + String(m.content).length, 0); return { ids: new Array(Math.ceil(n / 4)) }; };
+  e.generate = async (params, cb) => {
+    e.calls.push(params);
+    for (const t of tokens) {
+      if (params.signal && params.signal.aborted) { e.aborted = true; const err = new Error('aborted'); err.name = 'AbortError'; throw err; }
+      cb({ token: t, tokenId: 1 });
+      await null;
+    }
+    if (params.signal && params.signal.aborted) e.aborted = true;
+    cb({ finished: true, committedTokens: 0 });
+  };
+  return e;
+};
+const turnsOf = (n, len) => Array.from({ length: n }, (_, i) => ({ role: (n - 1 - i) % 2 === 0 ? 'user' : 'assistant', content: String.fromCharCode(97 + (i % 26)).repeat(len) }));
+const sentChars = (msgs) => msgs.reduce((a, m) => a + String(m.content).length, 0);
+
+check('answer: keeps only the newest turns that fit the token budget', async () => {
+  const A = await import('/assets/js/ai-answer.js');
+  const T = await import('/assets/js/ai-turn.js');
+  const e = fakeEngine(['ok']);
+  const turns = turnsOf(30, 400);
+  await A.answerTurns({ engine: e, tier: 'b2-2b', contextTokens: 2048, messages: turns, pageLang: 'en' }, () => {});
+  const sent = e.calls[0].messages;
+  assert.equal(sent[0].role, 'system');
+  assert.ok(Math.ceil(sentChars(sent) / 4) <= T.historyBudget(2048, false).tokens);
+  assert.equal(T.historyBudget(2048, false).tokens, 1376);
+  assert.deepEqual(sent[sent.length - 1], turns[turns.length - 1]);
+  assert.ok(sent.length > 2 && sent.length < turns.length + 1);
+  assert.deepEqual(sent.slice(1), turns.slice(turns.length - (sent.length - 1)));
+});
+
+check('answer: always keeps the last user turn even when it alone is over budget', async () => {
+  const A = await import('/assets/js/ai-answer.js');
+  const e = fakeEngine(['ok']);
+  const turns = [{ role: 'user', content: 'hi' }, { role: 'assistant', content: 'hello' }, { role: 'user', content: 'x'.repeat(20000) }];
+  await A.answerTurns({ engine: e, tier: 'b2-2b', contextTokens: 2048, messages: turns, pageLang: 'en' }, () => {});
+  const sent = e.calls[0].messages;
+  assert.equal(sent.length, 2);
+  assert.equal(sent[1].content.length, 20000);
+});
+
+check("answer: system prompt follows AI Chat's rule for the tier", async () => {
+  const A = await import('/assets/js/ai-answer.js');
+  const T = await import('/assets/js/ai-turn.js');
+  const turns = [{ role: 'user', content: 'who are you?' }, { role: 'assistant', content: 'A helper.' }, { role: 'user', content: 'cuéntame algo, ¿qué modelo eres?' }];
+  const asks = ['who are you?', 'cuéntame algo, ¿qué modelo eres?'];
+  for (const tier of ['b2-2b', 'b2-4b', 'b2-9b']) {
+    const e = fakeEngine(['ok']);
+    await A.answerTurns({ engine: e, tier, contextTokens: 4096, messages: turns, pageLang: 'fr' }, () => {});
+    assert.equal(e.calls[0].messages[0].content, T.systemPromptFor(tier, { image: false, lang: T.replyLanguage(asks, 'fr'), site: T.isB2Tier(tier) && T.asksAboutSite(asks) }));
+  }
+  const e27 = fakeEngine(['ok']);
+  await A.answerTurns({ engine: e27, tier: '27b', contextTokens: 16384, messages: turns, pageLang: 'en' }, () => {});
+  assert.equal(e27.calls[0].messages[0].content, T.systemPromptFor('27b'));
+});
+
+check("answer: params are AI Chat's plain-chat defaults", async () => {
+  const A = await import('/assets/js/ai-answer.js');
+  for (const [ctx, max] of [[16384, 768], [4096, 768], [2048, 512], [1024, 320]]) {
+    const e = fakeEngine(['ok']);
+    const caller = new AbortController();
+    await A.answerTurns({ engine: e, tier: 'b2-4b', contextTokens: ctx, messages: [{ role: 'user', content: 'hi' }], pageLang: 'en', signal: caller.signal }, () => {});
+    const p = e.calls[0];
+    assert.equal(p.maxTokens, max, String(ctx));
+    assert.equal(p.temperature, 0); assert.equal(p.topK, 1); assert.equal(p.topP, 1); assert.equal(p.repetitionPenalty, 1.0); assert.equal(p.enableThinking, false);
+    assert.ok(p.signal && typeof p.signal.aborted === 'boolean');
+    caller.abort();
+    assert.equal(p.signal.aborted, false);
+  }
+  const e = fakeEngine(['a', 'b', 'c', 'd']);
+  const caller = new AbortController();
+  const run = A.answerTurns({ engine: e, tier: 'b2-4b', contextTokens: 2048, messages: [{ role: 'user', content: 'hi' }], pageLang: 'en', signal: caller.signal }, () => { caller.abort(); });
+  await assert.rejects(run, (err) => err.name === 'AbortError');
+  assert.equal(e.calls[0].signal.aborted, true);
+});
+
+check('answer: special tokens never reach the text', async () => {
+  const A = await import('/assets/js/ai-answer.js');
+  const e = fakeEngine(['Hi', '<|im_end|>', ' there', '<|endoftext|>']);
+  let streamed = '';
+  const r = await A.answerTurns({ engine: e, tier: 'b2-2b', contextTokens: 2048, messages: [{ role: 'user', content: 'hi' }], pageLang: 'en' }, (d, o) => { streamed = o && o.reset ? d : streamed + d; });
+  assert.equal(r.text, 'Hi there');
+  assert.equal(streamed, 'Hi there');
+  assert.equal(r.tokens, 2);
+  assert.equal(r.cut, false);
+});
+
+check('answer: a looping reply is cut and the engine is stopped', async () => {
+  const A = await import('/assets/js/ai-answer.js');
+  const T = await import('/assets/js/ai-turn.js');
+  const unit = ['The', ' keeper', ' climbed', ' the', ' stairs', ' again.', ' '];
+  const tokens = [];
+  for (let i = 0; i < 60; i++) tokens.push(...unit);
+  let expected = null;
+  let acc = '';
+  for (const t of tokens) { acc += t; const c = T.trimRepeatTail(acc); if (c !== null) { expected = c; break; } }
+  assert.ok(expected);
+  const e = fakeEngine(tokens);
+  let streamed = '';
+  const r = await A.answerTurns({ engine: e, tier: 'b2-2b', contextTokens: 2048, messages: [{ role: 'user', content: 'story' }], pageLang: 'en' }, (d, o) => { streamed = o && o.reset ? d : streamed + d; });
+  assert.equal(r.cut, true);
+  assert.equal(e.aborted, true);
+  assert.equal(r.text, expected);
+  assert.equal(streamed, expected);
+});
+
+check('answer: text after the last </think> is kept', async () => {
+  const A = await import('/assets/js/ai-answer.js');
+  const e = fakeEngine(['a', '</think>', 'b']);
+  let streamed = '';
+  let resets = 0;
+  const r = await A.answerTurns({ engine: e, tier: 'b2-2b', contextTokens: 2048, messages: [{ role: 'user', content: 'hi' }], pageLang: 'en' }, (d, o) => { if (o && o.reset) { resets++; streamed = d; } else streamed += d; });
+  assert.equal(r.text, 'b');
+  assert.equal(streamed, 'b');
+  assert.equal(resets, 1);
+});
+
+check('answer: an aborted signal rejects with AbortError and no text', async () => {
+  const A = await import('/assets/js/ai-answer.js');
+  const e = fakeEngine(['a']);
+  const caller = new AbortController();
+  caller.abort();
+  let calls = 0;
+  await assert.rejects(A.answerTurns({ engine: e, tier: 'b2-2b', contextTokens: 2048, messages: [{ role: 'user', content: 'hi' }], pageLang: 'en', signal: caller.signal }, () => { calls++; }), (err) => err.name === 'AbortError');
+  assert.equal(calls, 0);
+  assert.equal(e.calls.length, 0);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try { await fn(); console.log('PASS ' + name); }

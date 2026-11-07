@@ -5632,7 +5632,13 @@
         "not_now": "Not now",
         "accept_q": "{size} · not downloaded yet",
         "relay_ask": "This goes through our relay server. Continue?",
-        "relay_go": "Continue"
+        "relay_go": "Continue",
+        "media": "Photos, videos and files",
+        "on_device": "{size} on this device",
+        "free_up": "Free up space",
+        "free_confirm": "Remove this chat's photos, videos and files from this device? The messages stay, and you can download them again while someone still has them.",
+        "removed": "Removed from this device",
+        "download_again": "Download again"
       },
       "attach": {
         "ext_dm": "extensions go device-to-device — {name} isn't connected right now.",
@@ -5766,6 +5772,14 @@
         "keeps_location": "This file keeps its location data",
         "too_big": "Too big to send: 2 GB at most",
         "remove": "Remove"
+      },
+      "viewer": {
+        "save": "Save",
+        "share": "Share",
+        "share_now": "Share now",
+        "close": "Close",
+        "prev": "Previous",
+        "next": "Next"
       }
     },
     "scanner": {

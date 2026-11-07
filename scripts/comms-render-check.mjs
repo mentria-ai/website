@@ -81,6 +81,15 @@ const PAGE_TESTS = async () => {
   test('sheet: album of 30 decodes small, one at a time', async () => { const files = await photos(30, 4032, 3024); const log = spyBitmaps(); let h = null; try { h = await openWith(files); } finally { log.restore(); } ok(log.length >= 30, 'decoded ' + log.length); ok(log.every((c) => c.resized), 'a full-size decode happened'); eq(log.maxConcurrent, 1); h.close(); });
   test('sheet: no HD switch for my devices', async () => { const h = await openWith(await photos(2), { self: true }); ok(document.querySelector('#comms-sheet .m-seg').hidden); h.close(); });
   test('sheet: over 2 GB is left out', async () => { const h = await openWith([bigFake(2147483649)]); ok(document.querySelector('#comms-sheet [data-act="send"]').disabled); h.close(); });
+  const V = await import('/assets/js/comms/viewer.js').catch((e) => ({ openViewer: () => { throw e; }, renderMediaGrid: () => { throw e; } }));
+  const TV = { viewer: { save: 'Save', share: 'Share', share_now: 'Share now', close: 'Close', prev: 'Previous', next: 'Next' }, files: { on_device: '{size} on this device', free_up: 'Free up space', removed: 'Removed from this device' } };
+  const vitems = (n) => Array.from({ length: n }, (_, i) => ({ ref: R(60 + i), kind: 'image', name: 'p' + i + '.jpg', mime: 'image/jpeg', w: 320, h: 240 }));
+  const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true }));
+  const current = () => Number((document.querySelector('#comms-viewer') || {}).dataset ? document.querySelector('#comms-viewer').dataset.index : -1);
+  const recs = (n) => Array.from({ length: n }, (_, i) => ({ id: R(80 + i), threadId: 'dm-1', role: 'in', state: 'done', complete: true, size: 4e8, mime: 'image/jpeg', name: 'r' + i + '.jpg', kind: 'image', updatedAt: i }));
+  test('viewer: arrows move and Esc closes', async () => { V.openViewer({ items: vitems(3), start: 0, T: TV }); key('ArrowRight'); eq(current(), 1); key('Escape'); ok(!document.querySelector('#comms-viewer[open]')); });
+  test('viewer: save links to the download route', () => { const h = V.openViewer({ items: vitems(1), start: 0, T: TV }); ok(document.querySelector('#comms-viewer a[download][href$="?dl=1"]')); h.close(); });
+  test('grid: usage line and free up space', () => { V.renderMediaGrid(el, { media: recs(4), usage: 1.6e9, T: TV, onOpen() {}, onFree() {} }); eq(el.querySelector('.comms__media-usage').textContent, '1.6 GB on this device'); ok(el.querySelector('[data-act="free"]')); });
   test('a caption is plain text, never HTML', () => { C.renderParts(el, [{ type: 'text', text: '<img src=x onerror=alert(1)>' }, album(1)], opts()); eq(el.querySelectorAll('img[onerror]').length, 0); });
 
   const out = [];

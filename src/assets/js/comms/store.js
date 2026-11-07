@@ -323,6 +323,13 @@ class Store {
     }, ['media', 'pieces']));
   }
 
+  deletePieces(ids) {
+    return this._write(() => this._commit((tx) => {
+      const pieces = tx.objectStore('pieces');
+      for (const id of ids || []) pieces.delete(IDBKeyRange.bound([id, -Infinity], [id, Infinity]));
+    }, ['pieces']));
+  }
+
   putPiece(id, i, slot) {
     return this._write(() => this._commit((tx) => {
       const st = tx.objectStore('pieces');

@@ -144,6 +144,7 @@ class Media {
     if (!list.length) return;
     for (const id of list) { this._sizes.delete(id); this._where.delete(id); }
     if (this._worker) await this._call('delete', { ids: list }).catch(() => {});
+    try { await this._store.deletePieces(list); } catch (_) {}
   }
 
   async removeAll() {

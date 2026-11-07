@@ -5632,7 +5632,13 @@
         "not_now": "Agora não",
         "accept_q": "{size} · ainda não baixado",
         "relay_ask": "Isto passa pelo nosso servidor de retransmissão. Continuar?",
-        "relay_go": "Continuar"
+        "relay_go": "Continuar",
+        "media": "Fotos, vídeos e arquivos",
+        "on_device": "{size} neste dispositivo",
+        "free_up": "Liberar espaço",
+        "free_confirm": "Remover deste dispositivo as fotos, vídeos e arquivos desta conversa? As mensagens ficam, e você pode baixá-los de novo enquanto alguém ainda os tiver.",
+        "removed": "Removido deste dispositivo",
+        "download_again": "Baixar de novo"
       },
       "attach": {
         "ext_dm": "as extensões vão de aparelho para aparelho — {name} não está online agora.",
@@ -5766,6 +5772,14 @@
         "keeps_location": "Este arquivo mantém os dados de localização",
         "too_big": "Grande demais para enviar: no máximo 2 GB",
         "remove": "Remover"
+      },
+      "viewer": {
+        "save": "Salvar",
+        "share": "Compartilhar",
+        "share_now": "Compartilhar agora",
+        "close": "Fechar",
+        "prev": "Anterior",
+        "next": "Próximo"
       }
     },
     "scanner": {

@@ -5,6 +5,8 @@ const IDLE_MS = 1500;
 let key = null;
 let dirP = null;
 const handles = new Map();
+const gone = new Map();
+const GONE_MS = 10000;
 
 const coded = (code) => Object.assign(new Error(code), { code });
 const codeOf = (e) => {
@@ -78,6 +80,7 @@ const OPS = {
   },
   async write(m) {
     needKey();
+    if (Date.now() - (gone.get(m.id) || 0) < GONE_MS) throw coded('missing');
     const slot = await MF.sealPiece(key, m.id, m.i, m.plain);
     const h = await handleFor(m.id, true);
     const at = MF.slotOffset(m.i);
@@ -104,6 +107,7 @@ const OPS = {
   async delete(m) {
     const dir = await root();
     for (const id of m.ids || []) {
+      gone.set(id, Date.now());
       await closeHandle(id);
       try { await dir.removeEntry(id + '.bin'); } catch (_) {}
       try { await (await dir.getDirectoryHandle('tmp')).removeEntry(id, { recursive: true }); } catch (_) {}

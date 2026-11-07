@@ -5632,7 +5632,13 @@
         "not_now": "Pas maintenant",
         "accept_q": "{size} · pas encore téléchargé",
         "relay_ask": "Cela passe par notre serveur relais. Continuer ?",
-        "relay_go": "Continuer"
+        "relay_go": "Continuer",
+        "media": "Photos, vidéos et fichiers",
+        "on_device": "{size} sur cet appareil",
+        "free_up": "Libérer de l’espace",
+        "free_confirm": "Retirer de cet appareil les photos, vidéos et fichiers de cette discussion ? Les messages restent, et vous pourrez les retélécharger tant que quelqu’un les a encore.",
+        "removed": "Retiré de cet appareil",
+        "download_again": "Télécharger à nouveau"
       },
       "attach": {
         "ext_dm": "les extensions passent d’appareil à appareil — {name} n’est pas en ligne pour le moment.",
@@ -5766,6 +5772,14 @@
         "keeps_location": "Ce fichier garde ses données de localisation",
         "too_big": "Trop lourd à envoyer : 2 Go au maximum",
         "remove": "Retirer"
+      },
+      "viewer": {
+        "save": "Enregistrer",
+        "share": "Partager",
+        "share_now": "Partager maintenant",
+        "close": "Fermer",
+        "prev": "Précédent",
+        "next": "Suivant"
       }
     },
     "scanner": {

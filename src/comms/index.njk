@@ -27,6 +27,7 @@ unlockTool: true
   <symbol id="ci-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="ci-back" viewBox="0 0 24 24"><path d="M14.5 5 8 12l6.5 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-send" viewBox="0 0 24 24"><path d="M3.5 11.2 20.2 4l-3.4 16-5.3-6.2zM11.5 13.8l8.7-9.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+  <symbol id="ci-media" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10" r="1.8" fill="currentColor"/><path d="m4.5 17.5 5-5 3.5 3.5 2.5-2.5 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ci-clip" viewBox="0 0 24 24"><g transform="translate(0.9 1)"><path d="m17.5 11.5-6.1 6.1a4.3 4.3 0 0 1-6-6l7.4-7.4a3 3 0 0 1 4.2 4.2l-7.3 7.3a1.6 1.6 0 0 1-2.3-2.3l6.1-6.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g></symbol>
   <symbol id="ci-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 3.5h5M7 6.5l.8 13a1.6 1.6 0 0 0 1.6 1.5h5.2a1.6 1.6 0 0 0 1.6-1.5l.8-13M10 10.5v6M14 10.5v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
   <symbol id="ci-bell" viewBox="0 0 24 24"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.6 2.2H4.9zM10 20.6a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -231,6 +232,7 @@ unlockTool: true
             <span class="comms__sub-bit" id="comms-peers" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg><span id="comms-peers-n">0</span></span>
           </span>
         </div>
+        <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-media-btn" type="button" hidden title="{{ 'tool.comms.files.media' | t }}" aria-label="{{ 'tool.comms.files.media' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-media"></use></svg></button>
         <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-share" type="button" hidden title="{{ 'tool.comms.chat.share_room' | t }}" aria-label="{{ 'tool.comms.chat.share_room' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg></button>
         <button class="comms__btn comms__btn--icon" id="comms-call-start" type="button" hidden title="{{ 'tool.comms.chat.call' | t }}" aria-label="{{ 'tool.comms.chat.call' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-phone"></use></svg></button>
         <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-call-cam" type="button" hidden aria-pressed="false" title="{{ 'tool.comms.chat.camera' | t }}" aria-label="{{ 'tool.comms.chat.camera' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-cam"></use></svg></button>
@@ -570,6 +572,28 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__sheet-actions{display:flex;justify-content:flex-end;gap:var(--space-2)}
 .comms__acceptbar{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);font-size:var(--text-sm);background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
 .comms__acceptbar-text{flex:1 1 140px}
+.comms__viewer{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;padding:0;color:#fff;background:rgba(0,0,0,.94);border:0}
+.comms__viewer[open]{display:grid;grid-template-rows:auto 1fr auto}
+.comms__viewer::backdrop{background:#000}
+.comms__viewer-top{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);padding-top:max(var(--space-2),env(safe-area-inset-top))}
+.comms__viewer-count{font-family:var(--font-mono);font-size:var(--text-xs);opacity:.8}
+.comms__viewer-name{flex:1;overflow:hidden;font-size:var(--text-sm);white-space:nowrap;text-overflow:ellipsis}
+.comms__viewer-stage{display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden;touch-action:pan-y}
+.comms__viewer-media{max-width:100%;max-height:100%;object-fit:contain}
+.comms__viewer-nav{position:absolute;top:50%;width:44px;height:64px;margin-top:-32px;color:#fff;font-size:2rem;background:rgba(0,0,0,.35);border:0;border-radius:var(--radius-md);cursor:pointer}
+.comms__viewer-nav--prev{left:8px}
+.comms__viewer-nav--next{right:8px}
+.comms__viewer-strip{display:flex;gap:4px;padding:var(--space-2);padding-bottom:max(var(--space-2),env(safe-area-inset-bottom));overflow-x:auto}
+.comms__viewer-thumb{flex:0 0 auto;width:52px;height:52px;padding:0;overflow:hidden;color:#fff;background:#222;border:2px solid transparent;border-radius:var(--radius-sm);cursor:pointer}
+.comms__viewer-thumb.is-current{border-color:var(--syn-cyan)}
+.comms__viewer-thumb img{width:100%;height:100%;object-fit:cover}
+.comms__mediagrid{width:min(640px,calc(100vw - 32px))}
+.comms__media-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3)}
+.comms__media-usage{margin:0;color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__media-cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:4px;margin-top:var(--space-3)}
+.comms__media-cell{position:relative;aspect-ratio:1;padding:0;overflow:hidden;color:var(--term-muted);font-size:var(--text-xs);background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-sm);cursor:pointer}
+.comms__media-cell img{width:100%;height:100%;object-fit:cover}
+.comms__media-label{display:block;padding:var(--space-2);overflow:hidden;text-overflow:ellipsis}
 .comms__relaybar{background:color-mix(in srgb,var(--syn-amber) 10%,transparent);border-color:color-mix(in srgb,var(--syn-amber) 35%,transparent)}
 
 .comms__send{flex:none;display:flex;align-items:center;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
@@ -652,6 +676,7 @@ import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js
 import { createAttach } from '/assets/js/comms/attach.js';
 import { acceptFor, relayAsk, viaRelay } from '/assets/js/comms/files.js';
 import { openSheet } from '/assets/js/comms/sheet.js';
+import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1402,11 +1427,81 @@ const onFileChange = (id) => {
   });
 };
 
-const openMediaItem = async (ref) => {
-  let rec = null;
-  try { rec = commsStore ? await commsStore.getMedia(ref) : null; } catch (_) {}
-  if (rec && rec.complete) window.open('/comms-media/' + encodeURIComponent(ref), '_blank', 'noopener');
+const SHARE_NOW_BYTES = 50 * 1024 * 1024;
+const shareItem = async (it) => {
+  if (!attach || !attach.media || !navigator.share) return null;
+  const file = await attach.media.plainFile(it.ref, it.name || 'file', it.mime || '');
+  if (navigator.canShare && !navigator.canShare({ files: [file] })) { attach.media.dropPlain(it.ref); return null; }
+  if (file.size > SHARE_NOW_BYTES) {
+    setTimeout(() => { if (attach && attach.media) attach.media.dropPlain(it.ref); }, 300000);
+    return { later: true, file };
+  }
+  try { await navigator.share({ files: [file] }); } catch (_) {}
+  attach.media.dropPlain(it.ref);
+  return null;
 };
+
+const openMediaItem = async (ref, items) => {
+  if (!commsStore) return;
+  const list = [];
+  for (const it of (items && items.length ? items : [{ ref }])) {
+    let rec = null;
+    try { rec = await commsStore.getMedia(it.ref); } catch (_) { rec = null; }
+    if (rec && rec.complete && rec.state !== 'removed') list.push({ ref: it.ref, kind: it.type === 'video' || /^video\//i.test(rec.mime || '') ? 'video' : 'image', name: rec.name || it.name || '', mime: rec.mime || it.mime || '', size: rec.size });
+  }
+  const start = list.findIndex((x) => x.ref === ref);
+  if (start < 0) return;
+  openViewer({ items: list, start, T, onShare: shareItem });
+};
+
+const freeUp = async (threadId) => {
+  if (!commsStore) return;
+  const MF = window.MentriaMediaFormat;
+  let list = [];
+  try { list = await commsStore.listMedia({ threadId }); } catch (_) { return; }
+  const live = list.filter((r) => r.state !== 'removed');
+  if (attach) await attach.removeMedia(live.map((r) => r.id));
+  for (const r of live) {
+    r.state = 'removed';
+    r.complete = false;
+    r.role = 'in';
+    if (MF) r.have = MF.bfB64(MF.bfNew(MF.pieceCount(r.size)));
+    delete r.note;
+    try { await commsStore.putMedia(r); } catch (_) {}
+    paintAttach(r.id);
+  }
+};
+
+const openMediaGrid = async () => {
+  const threadId = currentRoomName;
+  if (!threadId || !commsStore || !keepsHistory(threadId)) return;
+  let dlg = document.getElementById('comms-media-grid');
+  if (!dlg) {
+    dlg = document.createElement('dialog');
+    dlg.id = 'comms-media-grid';
+    dlg.className = 'comms__sheet comms__mediagrid';
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    document.body.append(dlg);
+  }
+  const paint = async () => {
+    let media = [];
+    try { media = await commsStore.listMedia({ threadId }); } catch (_) {}
+    const usage = attach && attach.media ? await attach.media.usage(threadId).catch(() => 0) : 0;
+    renderMediaGrid(dlg, {
+      media, usage, T,
+      onOpen: (ref) => { dlg.close(); openMediaItem(ref, media.filter((m) => /^(image|video)\//i.test(m.mime || '')).map((m) => ({ ref: m.id, type: /^video\//i.test(m.mime || '') ? 'video' : 'image' }))); },
+      onFree: async () => {
+        const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(T.files.free_confirm, { danger: true }) : Promise.resolve(false));
+        if (!ok) return;
+        await freeUp(threadId);
+        paint();
+      }
+    });
+  };
+  await paint();
+  try { if (!dlg.open) dlg.showModal(); } catch (_) { dlg.setAttribute('open', ''); }
+};
+document.getElementById('comms-media-btn').addEventListener('click', () => { openMediaGrid(); });
 
 const openInPdf = async (ref, item) => {
   try {
@@ -1602,6 +1697,7 @@ const setupChatPersistence = async (roomName, topic) => {
   chatPersist = !!(chatTopic && chatKey);
   seenCmids = new Set();
   if (attach) attach.setOpenThread(keepsHistory(roomName) ? roomName : null);
+  document.getElementById('comms-media-btn').hidden = !keepsHistory(roomName);
   const seq = joinSeq;
   await openThreadHistory(roomName, seq);
   if (seq !== joinSeq) return;
@@ -1903,6 +1999,7 @@ let joinSeq = 0;
 
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const seq = ++joinSeq;
+  document.getElementById('comms-media-btn').hidden = true;
   if (attach) attach.setOpenThread(null);
   fileLines.clear();
   albumCards.clear();

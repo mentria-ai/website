@@ -319,7 +319,7 @@ const bars = (root) => {
     accept.hidden = !offered.length || !!st.dismissed;
     if (offered.length) {
       const again = offered.every((it) => (st.media.get(it.ref) || {}).state === 'removed');
-      accept.querySelector('.comms__acceptbar-text').textContent = fill(F.accept_q, { size: fmtBytes(offered.reduce((a, it) => a + (Number(it.size) || 0), 0)) });
+      accept.querySelector('.comms__acceptbar-text').textContent = again ? (F.removed || '') : fill(F.accept_q, { size: fmtBytes(offered.reduce((a, it) => a + (Number(it.size) || 0), 0)) });
       accept.querySelector('[data-act="accept"]').textContent = again ? (F.download_again || F.accept || '') : (F.accept || '');
     }
   }

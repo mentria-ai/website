@@ -5796,6 +5796,11 @@
         "kind_windows": "Windows PC",
         "kind_linux": "Linux",
         "kind_device": "デバイス"
+      },
+      "ai": {
+        "answering_for": "{device}のために回答しています",
+        "loading_for": "{device}のために{model}を読み込んでいます…",
+        "stop": "停止"
       }
     },
     "scanner": {

@@ -5796,6 +5796,11 @@
         "kind_windows": "PC con Windows",
         "kind_linux": "Linux",
         "kind_device": "Dispositivo"
+      },
+      "ai": {
+        "answering_for": "Respondiendo para tu {device}",
+        "loading_for": "Cargando {model} para tu {device}…",
+        "stop": "Detener"
       }
     },
     "scanner": {

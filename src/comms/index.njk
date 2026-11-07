@@ -679,6 +679,11 @@ import { homeRows, aiHref } from '/assets/js/comms/threads.js';
 import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
 import { createAttach } from '/assets/js/comms/attach.js';
 import { acceptFor, relayAsk, viaRelay, blankedCopy, importPlan, shownState } from '/assets/js/comms/files.js';
+import { AiHost, AiClient, rememberHosts } from '/assets/js/comms/ai-link.js';
+import { createLocalEngine } from '/assets/js/comms/ai-local.js';
+import { showHostBar } from '/assets/js/comms/ai-hostbar.js';
+import { answerTurns } from '/assets/js/ai-answer.js';
+import { TIERS as AI_TIERS } from '/assets/js/mentria-tiers.js';
 import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
@@ -1360,6 +1365,51 @@ let attach = null;
 let selfRoom = null;
 const myDevice = deviceInfo(T);
 const presence = new Presence();
+const AI_HOSTING = myDevice.kind !== 'iphone' && myDevice.kind !== 'ipad';
+const aiLocal = AI_HOSTING ? createLocalEngine() : null;
+let aiBar = null;
+let aiLockAsked = false;
+const aiTierName = (tier) => (AI_TIERS[tier] && AI_TIERS[tier].name) || String(tier || '');
+const aiDeviceName = (d) => (d && ((T.devices && T.devices['kind_' + d.kind]) || d.name)) || '';
+const aiHidden = () => myDevice.kind === 'android' && document.visibilityState === 'hidden';
+let aiHost = null;
+const aiActivity = ({ active, device, tier, stage }) => {
+  if (!active) {
+    if (aiBar) { aiBar.hide(); aiBar = null; }
+    if (aiLocal) aiLocal.idle();
+    return;
+  }
+  const text = stage === 'loading' ? fmt(T.ai.loading_for, { model: aiTierName(tier), device: aiDeviceName(device) }) : fmt(T.ai.answering_for, { device: aiDeviceName(device) });
+  if (aiBar) aiBar.update(text);
+  else aiBar = showHostBar({ text, stopLabel: T.ai.stop, onStop: () => { if (aiHost) aiHost.stop(); } });
+};
+if (AI_HOSTING) {
+  aiHost = new AiHost({
+    device: myDevice,
+    page: 'comms',
+    listModels: () => (aiHidden() ? Promise.resolve([]) : aiLocal.models()),
+    load: (tier, onStage) => aiLocal.load(tier, onStage),
+    answer: (ctx, ask, onText, signal) => answerTurns({ engine: ctx.engine, tier: ctx.tier, contextTokens: ctx.contextTokens, messages: ask.messages, pageLang: ask.params.pageLang, signal }, onText),
+    onActivity: aiActivity
+  });
+  aiHost.setEnabled(false);
+  document.addEventListener('visibilitychange', () => { if (myDevice.kind === 'android') aiHost.advertise(); });
+}
+const aiTakeLock = () => {
+  if (!aiHost || aiLockAsked) return;
+  if (!navigator.locks) { aiHost.setEnabled(true); return; }
+  aiLockAsked = true;
+  navigator.locks.request('mentria-ai-host', () => new Promise(() => { aiHost.setEnabled(true); }))
+    .catch(() => {})
+    .finally(() => {
+      aiHost.setEnabled(false);
+      if (aiLocal) aiLocal.unload();
+      aiLockAsked = false;
+      setTimeout(aiTakeLock, 1000);
+    });
+};
+let refreshAiHosts = () => {};
+const aiClient = new AiClient({ onHosts: (hosts) => { rememberHosts(hosts); refreshAiHosts(); } });
 let historySync = null;
 const selfPeers = new Map();
 const oldSelfNames = new Set();
@@ -1455,6 +1505,7 @@ let paintFrame = 0;
 const onFileChange = (id, extra) => {
   if (extra && extra.threadId === SELF_THREAD) {
     if (extra.hello && extra.device) { presence.seen(extra.device, true); selfPeers.set(extra.peerId, extra.device.id); }
+    if (extra.left) { if (aiHost) aiHost.peerLeft(extra.peerId); aiClient.peerLeft(extra.peerId); }
     if (extra.left && selfPeers.has(extra.peerId)) { presence.gone(selfPeers.get(extra.peerId)); selfPeers.delete(extra.peerId); }
     refreshSelfHeader();
     if (inSelf()) for (const r of fileLines.keys()) paintAttach(r);
@@ -1644,7 +1695,7 @@ const startFiles = async (st) => {
   }
   if (!historySync) historySync = new HistorySync({ store: st, onChange: () => { refreshHomeThreads(); } });
   else historySync.setStore(st);
-  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: myDevice, pinned: [SELF_THREAD], onRoom: (tid, r) => { if (tid === SELF_THREAD) historySync.bind(r); }, onHello: (tid, peerId) => { if (tid === SELF_THREAD) historySync.hello(peerId).catch(() => {}); }, canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
+  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: myDevice, pinned: [SELF_THREAD], onRoom: (tid, r) => { if (tid === SELF_THREAD) { historySync.bind(r); aiClient.bind(r); if (aiHost) { aiHost.bind(r, { ownsPeers: false }); aiTakeLock(); } } }, onHello: (tid, peerId) => { if (tid === SELF_THREAD) { historySync.hello(peerId).catch(() => {}); if (aiHost) aiHost.peerJoined(peerId); } }, canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
   if (!persistAsked && matchMedia('(display-mode: standalone)').matches && navigator.storage && navigator.storage.persist) { persistAsked = true; navigator.storage.persist().catch(() => {}); }
   try {
     await attach.start(st);

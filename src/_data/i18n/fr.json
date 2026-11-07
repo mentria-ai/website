@@ -5796,6 +5796,11 @@
         "kind_windows": "PC Windows",
         "kind_linux": "Linux",
         "kind_device": "Appareil"
+      },
+      "ai": {
+        "answering_for": "Réponse en cours pour votre {device}",
+        "loading_for": "Chargement de {model} pour votre {device}…",
+        "stop": "Arrêter"
       }
     },
     "scanner": {

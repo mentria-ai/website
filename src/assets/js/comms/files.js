@@ -339,6 +339,10 @@ export class Transfers {
       try { plain = await this._media.readPiece(d.id, i); } catch (e) { no(e && e.code === 'locked' ? 'locked' : 'missing'); return; }
       if (!this._threads.has(threadId)) return;
       try { await ctx.act.fpc.send(plain, { target: peerId, metadata: { id: d.id, i } }); } catch (_) { return; }
+      const now = Date.now();
+      item.got.push([now, plain.length]);
+      while (item.got.length && now - item.got[0][0] > RATE_MS) item.got.shift();
+      this._onChange(d.id);
     }
   }
 

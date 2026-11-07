@@ -5619,8 +5619,15 @@
         "offer_mixed": "Enviei {n} anexos. Atualize o Mentria para ver.",
         "needs_update": "{name} precisa atualizar o Mentria para receber isto",
         "no_space": "Não há espaço suficiente neste dispositivo",
-        "out_waiting": "{file} ({size}) · esperando a outra pessoa abrir o Comms",
-        "out_done": "{file} ({size}) · entregue"
+        "status_send": "enviando {i} de {n} · {rate} · {path}",
+        "status_recv": "recebendo {i} de {n} · {rate} · {path}",
+        "direct": "direto",
+        "via_relay": "via retransmissão",
+        "saved_here": "salvo neste dispositivo",
+        "open_pdf": "Abrir na ferramenta de PDF",
+        "save": "Salvar",
+        "retry": "Tentar de novo",
+        "paused": "Pausado em {size}. Continua sozinho quando o Comms estiver aberto nos dois."
       },
       "attach": {
         "ext_dm": "as extensões vão de aparelho para aparelho — {name} não está online agora.",

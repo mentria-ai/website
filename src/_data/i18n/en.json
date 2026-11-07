@@ -5619,8 +5619,15 @@
         "offer_mixed": "Sent {n} attachments. Update Mentria to see them.",
         "needs_update": "{name} needs to update Mentria to receive this",
         "no_space": "Not enough space on this device",
-        "out_waiting": "{file} ({size}) · waiting for the other side to open Comms",
-        "out_done": "{file} ({size}) · delivered"
+        "status_send": "sending {i} of {n} · {rate} · {path}",
+        "status_recv": "receiving {i} of {n} · {rate} · {path}",
+        "direct": "direct",
+        "via_relay": "via relay",
+        "saved_here": "saved on this device",
+        "open_pdf": "Open in PDF tool",
+        "save": "Save",
+        "retry": "Retry",
+        "paused": "Paused at {size}. It carries on by itself when Comms is open on both."
       },
       "attach": {
         "ext_dm": "extensions go device-to-device — {name} isn't connected right now.",

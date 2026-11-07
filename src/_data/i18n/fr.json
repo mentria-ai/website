@@ -5619,8 +5619,15 @@
         "offer_mixed": "J’ai envoyé {n} pièces jointes. Mettez Mentria à jour pour les voir.",
         "needs_update": "{name} doit mettre Mentria à jour pour recevoir ceci",
         "no_space": "Pas assez d’espace sur cet appareil",
-        "out_waiting": "{file} ({size}) · en attente que l’autre personne ouvre Comms",
-        "out_done": "{file} ({size}) · livré"
+        "status_send": "envoi {i} sur {n} · {rate} · {path}",
+        "status_recv": "réception {i} sur {n} · {rate} · {path}",
+        "direct": "direct",
+        "via_relay": "via le relais",
+        "saved_here": "enregistré sur cet appareil",
+        "open_pdf": "Ouvrir dans l’outil PDF",
+        "save": "Enregistrer",
+        "retry": "Réessayer",
+        "paused": "En pause à {size}. Elle reprend toute seule quand Comms est ouvert des deux côtés."
       },
       "attach": {
         "ext_dm": "les extensions passent d’appareil à appareil — {name} n’est pas en ligne pour le moment.",

@@ -5619,8 +5619,15 @@
         "offer_mixed": "添付ファイルを{n}件送りました。表示するにはMentriaを更新してください。",
         "needs_update": "{name}さんがこれを受け取るにはMentriaの更新が必要です",
         "no_space": "このデバイスの空き容量が足りません",
-        "out_waiting": "{file}（{size}）· 相手がCommsを開くのを待っています",
-        "out_done": "{file}（{size}）· 届きました"
+        "status_send": "送信中 {i}/{n} · {rate} · {path}",
+        "status_recv": "受信中 {i}/{n} · {rate} · {path}",
+        "direct": "直接",
+        "via_relay": "中継経由",
+        "saved_here": "このデバイスに保存済み",
+        "open_pdf": "PDFツールで開く",
+        "save": "保存",
+        "retry": "再試行",
+        "paused": "{size}で一時停止中。両方でCommsを開くと自動で続きます。"
       },
       "attach": {
         "ext_dm": "拡張機能は端末から端末へ直接送られます。{name} はいま接続していません。",

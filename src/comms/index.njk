@@ -513,6 +513,42 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__prog-fill{display:block;width:0%;height:100%;background:var(--syn-cyan);transition:width .12s linear}
 .comms__prog-text{color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
 .comms__thumb{display:block;max-width:240px;max-height:180px;margin-top:var(--space-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md);cursor:zoom-in}
+.comms__what:has(>.comms__partsbox){padding:var(--space-1)}
+.comms__partsbox{width:min(320px,100%)}
+.comms__parts{display:flex;flex-direction:column;gap:var(--space-2)}
+.comms__parts-text{padding:var(--space-1) var(--space-2)}
+.comms__album{display:grid;gap:3px;width:100%;overflow:hidden;border-radius:var(--radius-md)}
+.comms__album--two,.comms__album--grid{grid-template-columns:1fr 1fr}
+.comms__album--three{grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr}
+.comms__album--three .comms__tile:first-child{grid-row:1/span 2;aspect-ratio:auto}
+.comms__tile{position:relative;display:block;padding:0;border:0;background:var(--term-surface-3);aspect-ratio:1;overflow:hidden;cursor:zoom-in}
+.comms__album--one .comms__tile{aspect-ratio:auto;max-height:340px}
+.comms__album--one .comms__tile-img{height:auto;max-height:340px}
+.comms__tile-img{display:block;width:100%;height:100%;object-fit:cover;transition:filter .3s ease,transform .3s ease}
+.comms__tile-img.is-blurred{filter:blur(8px);transform:scale(1.08)}
+.comms__ring{position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;transform:rotate(-90deg)}
+.comms__ring-back{fill:rgba(0,0,0,.45);stroke:rgba(255,255,255,.22);stroke-width:3}
+.comms__ring-fill{fill:none;stroke:var(--syn-cyan);stroke-width:3;stroke-linecap:round;transition:stroke-dasharray .25s ease}
+.comms__tile-play{position:absolute;left:50%;top:50%;margin:-10px 0 0 -6px;border-left:16px solid rgba(255,255,255,.92);border-top:10px solid transparent;border-bottom:10px solid transparent}
+.comms__tile:not(.is-done) .comms__tile-play{display:none}
+.comms__tile-dur{position:absolute;right:6px;bottom:6px;padding:1px 6px;color:#fff;font-family:var(--font-mono);font-size:var(--text-xs);background:rgba(0,0,0,.55);border-radius:var(--radius-sm)}
+.comms__album-more{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:600;background:rgba(0,0,0,.45)}
+.comms__parts-status{margin:0;padding:0 var(--space-2);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__parts-paused{margin:0;padding:var(--space-2) var(--space-3);color:var(--term-fg);font-size:var(--text-sm);background:color-mix(in srgb,var(--syn-amber) 12%,transparent);border:1px solid color-mix(in srgb,var(--syn-amber) 40%,transparent);border-radius:var(--radius-md)}
+.comms__parts-retry{align-self:flex-start}
+.comms__caption{padding:0 var(--space-2) var(--space-1)}
+.comms__filecard{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--term-surface-3);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__filecard .comms__ring{position:static;width:28px;height:28px;margin:0}
+.comms__ficon{position:relative;display:flex;align-items:flex-end;justify-content:center;width:30px;height:36px;padding-bottom:4px;color:var(--term-fg);font-family:var(--font-mono);font-size:9px;font-weight:600;background:var(--term-border-strong);border-radius:4px}
+.comms__ficon--pdf::before{content:'PDF'}
+.comms__ficon--archive::before{content:'ZIP'}
+.comms__ficon--audio::before{content:'AUD'}
+.comms__ficon--text::before{content:'TXT'}
+.comms__ficon--other::before{content:'FILE'}
+.comms__fmeta{display:flex;flex-direction:column;min-width:0}
+.comms__fname{overflow:hidden;font-size:var(--text-sm);white-space:nowrap;text-overflow:ellipsis}
+.comms__fsize,.comms__fsaved{color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
+.comms__facts{display:flex;flex-wrap:wrap;gap:var(--space-2);grid-column:1/-1}
 
 .comms__send{flex:none;display:flex;align-items:center;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
 .comms__send:focus-within{border-color:var(--syn-cyan)}
@@ -577,6 +613,8 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 </style>
 
 <script src="/assets/js/mentria-identity.js?v={{ buildHash }}"></script>
+<script src="/assets/js/mentria-meta-strip.js?v={{ buildHash }}"></script>
+<script src="/assets/js/mentria-image.js?v={{ buildHash }}"></script>
 <script src="/assets/js/markdown.js?v={{ buildHash }}"></script>
 <script type="module">
 import { joinRoom, selfId, createPersistentEvent, getRelaySockets } from '/assets/vendor/trystero-nostr.js';
@@ -584,13 +622,13 @@ import { MentriaBus } from '/assets/js/mentria-bus.js';
 import { confirmInstall } from '/assets/js/mentria-ext-install-ui.js';
 import * as CID from '/assets/js/mentria-comms-id.js';
 import { holdAwake } from '/assets/js/mentria-wake.js';
-import { renderBody } from '/assets/js/comms/cards.js';
+import { renderBody, renderParts, updateParts, addToAlbum } from '/assets/js/comms/cards.js';
 import { openStore } from '/assets/js/comms/store.js';
 import { secretCopy } from '/assets/js/comms/identity.js';
 import { homeRows, aiHref } from '/assets/js/comms/threads.js';
 import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
 import { createAttach } from '/assets/js/comms/attach.js';
-import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
+import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -1303,30 +1341,27 @@ const knockThread = async (threadId) => {
 };
 
 const PIECE_BYTES = 262144;
+const albumCards = new Map();
 const paintAttach = async (ref) => {
   const entry = fileLines.get(ref);
-  if (!entry || !entry.line.line.isConnected || !commsStore) return;
+  if (!entry || !entry.card.isConnected || !commsStore) return;
   let rec = null;
   try { rec = await commsStore.getMedia(ref); } catch (_) { rec = null; }
-  const part = entry.part;
-  const name = part.name || (rec && rec.name) || '';
-  const size = Number(part.size) || 0;
-  if (rec && rec.complete && rec.state !== 'removed') {
-    entry.line.line.removeAttribute('aria-live');
-    const tpl = !entry.me ? T.files.received : (rec.role === 'out' && !rec.delivered ? T.files.out_waiting : T.files.out_done);
-    entry.line.what.innerHTML = completeHTML(tpl, { n: 1 }, name, size, part.mime || '', '/comms-media/' + encodeURIComponent(ref));
-    return;
-  }
-  if (rec && rec.state === 'paused' && rec.note === 'space') {
-    entry.line.what.textContent = T.files.no_space;
-    return;
-  }
   const st = attach ? attach.stats(ref) : null;
-  let bytes = st ? st.bytes : 0;
-  if (!st && rec && rec.have) {
-    try { const MF = window.MentriaMediaFormat; bytes = Math.min(size, MF.bfCount(MF.bfFrom(rec.have, MF.pieceCount(size))) * PIECE_BYTES); } catch (_) {}
+  const MF = window.MentriaMediaFormat;
+  let m;
+  if (!rec) {
+    m = { state: 'offered', have: 0, total: 1 };
+  } else {
+    const n = MF ? Math.max(1, MF.pieceCount(rec.size)) : 1;
+    const have = rec.complete ? n : (st ? st.have : (MF ? MF.bfCount(MF.bfFrom(rec.have, n)) : 0));
+    if (rec.role === 'out') {
+      m = { state: rec.delivered ? 'done' : (st && st.rate > 0 ? 'moving' : 'queued'), local: true, have: n, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, bytes: rec.size };
+    } else {
+      m = { state: rec.complete ? 'done' : rec.state, have, total: n, rate: st ? st.rate : 0, via: st ? st.via : null, note: rec.note, bytes: Math.min(rec.size, have * PIECE_BYTES) };
+    }
   }
-  entry.line.what.innerHTML = progressHTML(entry.me ? T.files.sending : T.files.receiving, name, size, entry.me ? size : bytes);
+  updateParts(entry.card, ref, m);
 };
 
 let paintQueued = new Set();
@@ -1343,18 +1378,53 @@ const onFileChange = (id) => {
   });
 };
 
-const renderAttachment = (who, parts, opts = {}) => {
-  const items = mediaParts(parts);
-  let first = null;
-  for (const part of items) {
-    const line = renderLine(who, '', { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts, html: progressHTML(opts.me ? T.files.sending : T.files.receiving, part.name || '', Number(part.size) || 0, 0) });
-    fileLines.set(part.ref, { line, part, me: !!opts.me });
-    paintAttach(part.ref);
-    if (!first) first = line;
+const openMediaItem = async (ref) => {
+  let rec = null;
+  try { rec = commsStore ? await commsStore.getMedia(ref) : null; } catch (_) {}
+  if (rec && rec.complete) window.open('/comms-media/' + encodeURIComponent(ref), '_blank', 'noopener');
+};
+
+const openInPdf = async (ref, item) => {
+  try {
+    const res = await fetch('/comms-media/' + encodeURIComponent(ref));
+    if (!res.ok) return;
+    const cache = await caches.open('mentria-share');
+    await cache.put('/share-target/file', new Response(res.body, { headers: { 'content-type': (item && item.mime) || 'application/pdf', 'x-file-name': encodeURIComponent((item && item.name) || 'file.pdf') } }));
+    location.href = PREFIX + '/tools/pdf/?shared=1';
+  } catch (e) {
+    sys(fmt(T.files.import_failed, { reason: why(e) }));
   }
-  const caption = (parts || []).filter((p) => p.type === 'text').map((p) => p.text).join('\n').trim();
-  if (caption) renderLine(who, caption, { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts });
-  return first;
+};
+
+const importPackFrom = async (ref, item) => {
+  try {
+    const text = await (await fetch('/comms-media/' + encodeURIComponent(ref))).text();
+    const P = await loadPacks();
+    const res = await P.importText(text, { source: 'contact', from: whoNow() });
+    sys(res.replaced ? T.files.updated : T.files.imported);
+  } catch (e) {
+    sys(fmt(T.files.import_failed, { reason: (e && e.errors && e.errors[0]) || why(e) }));
+  }
+};
+
+const renderAttachment = (who, parts, opts = {}) => {
+  const album = (parts || []).find((p) => p.type === 'album');
+  const prior = album ? albumCards.get(album.aid) : null;
+  if (prior && prior.isConnected) {
+    addToAlbum(prior, album);
+    for (const it of album.items) { fileLines.set(it.ref, { card: prior, part: it, me: !!opts.me }); paintAttach(it.ref); }
+    const cap = (parts || []).filter((p) => p.type === 'text');
+    if (cap.length) renderLine(who, cap.map((p) => p.text).join('\n'), { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts });
+    return null;
+  }
+  const line = renderLine(who, '', { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts, html: '' });
+  const card = document.createElement('div');
+  card.className = 'comms__partsbox';
+  line.what.append(card);
+  renderParts(card, parts, { t: opts.t || '', me: !!opts.me, T, media: () => null, onOpen: openMediaItem, onRetry: (ref) => { if (attach) attach.retry(ref); }, onOpenPdf: openInPdf, onImportPack: importPackFrom });
+  if (album) albumCards.set(album.aid, card);
+  for (const it of mediaParts(parts)) { fileLines.set(it.ref, { card, part: it, me: !!opts.me }); paintAttach(it.ref); }
+  return line;
 };
 
 const receiveAttachments = (item, mine) => {
@@ -1777,6 +1847,8 @@ let joinSeq = 0;
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const seq = ++joinSeq;
   if (attach) attach.setOpenThread(null);
+  fileLines.clear();
+  albumCards.clear();
   const leavingDm = currentDmContact;
   joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null };
   stopScan();
@@ -2223,26 +2295,127 @@ const sendOne = async (file, extra) => {
 
 const storedChat = () => !!(currentRoomName && keepsHistory(currentRoomName) && chatKey && attach && attach.media);
 
-const sendAttachment = async (file) => {
+const blobB64 = (blob) => new Promise((resolve) => {
+  const r = new FileReader();
+  r.onload = () => resolve(String(r.result || '').replace(/^data:[^,]*,/, ''));
+  r.onerror = () => resolve(null);
+  r.readAsDataURL(blob);
+});
+
+const smallJpeg = async (src) => {
+  let best = null;
+  for (let q = 7; q >= 3; q -= 1) {
+    const r = await MentriaImage.renderJpeg(src, 320, q / 10);
+    if (!r) break;
+    if (!best || r.blob.size < best.blob.size) best = r;
+    if (r.blob.size <= 12288) break;
+  }
+  return best && best.blob.size <= 12288 ? best : null;
+};
+
+const videoInfo = (file) => new Promise((resolve) => {
+  let url = '';
+  try { url = URL.createObjectURL(file); } catch (_) { resolve(null); return; }
+  const v = document.createElement('video');
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = 'metadata';
+  let done = false;
+  const finish = (r) => {
+    if (done) return;
+    done = true;
+    try { v.removeAttribute('src'); v.load(); } catch (_) {}
+    URL.revokeObjectURL(url);
+    resolve(r);
+  };
+  setTimeout(() => finish(null), 8000);
+  v.onloadedmetadata = () => { try { v.currentTime = Math.min(0.1, (v.duration || 1) / 2); } catch (_) { finish({ duration: v.duration }); } };
+  v.onseeked = async () => {
+    const w = v.videoWidth;
+    const h = v.videoHeight;
+    if (!w || !h) { finish({ duration: v.duration }); return; }
+    let poster = null;
+    try { const r = await smallJpeg({ source: v, width: w, height: h, close() {} }); poster = r ? await blobB64(r.blob) : null; } catch (_) {}
+    finish({ duration: Number.isFinite(v.duration) ? v.duration : undefined, w, h, poster });
+  };
+  v.onerror = () => finish(null);
+  v.src = url;
+});
+
+const shortName = (name) => { const n = String(name || 'file'); return n.length > 200 ? n.slice(0, 190) + n.slice(n.lastIndexOf('.')).slice(0, 10) : n; };
+const jpegName = (name) => String(name || 'photo').replace(/\.[^.]+$/, '') + '.jpg';
+const newAid = () => Math.random().toString(36).slice(2, 12);
+
+const sendAttachments = async ({ items, caption }) => {
   const roomName = currentRoomName;
   const key = chatKey;
-  const line = renderLine('you', '', { me: true, quiet: true, html: progressHTML(T.files.sending, file.name, file.size, 0) });
-  const sent = await attach.sendFile(roomName, file, { onProgress: (i) => { line.what.innerHTML = progressHTML(T.files.sending, file.name, file.size, Math.min(file.size, i * PIECE_BYTES)); } });
+  const list = Array.from(items || []);
+  if (!list.length || !storedChat()) return;
+  const total = list.reduce((a, it) => a + it.file.size, 0);
+  const label = list.length === 1 ? list[0].file.name : fmt(T.files.offer_files, { n: list.length }).split('.')[0];
+  const prep = renderLine('you', '', { me: true, quiet: true, html: progressHTML(T.files.sending, label, total, 0) });
+  const media = [];
+  const files = [];
+  let done = 0;
+  for (const item of list) {
+    const f = item.file;
+    const mime = f.type || '';
+    let kind = /^video\//i.test(mime) ? 'video' : /^image\//i.test(mime) ? 'image' : 'file';
+    let sendFile = f;
+    let part = null;
+    if (kind === 'image') {
+      const prev = window.MentriaImage ? await MentriaImage.preview(f).catch(() => null) : null;
+      if (!prev) {
+        kind = 'file';
+      } else {
+        let w = prev.w;
+        let h = prev.h;
+        if (item.variant === 'standard') {
+          const std = await MentriaImage.standard(f).catch(() => null);
+          if (std) { sendFile = new File([std.blob], jpegName(f.name), { type: 'image/jpeg', lastModified: f.lastModified }); w = std.w; h = std.h; }
+        }
+        part = { type: 'image', mime: sendFile.type || mime, name: shortName(sendFile.name), w, h, thumb: prev.blob.size <= 12288 ? await blobB64(prev.blob) : undefined, hd: item.variant !== 'standard' };
+      }
+    }
+    if (kind === 'video') {
+      const info = await videoInfo(f);
+      part = { type: 'video', mime, name: shortName(f.name), w: info && info.w, h: info && info.h, duration: info && info.duration, poster: info && info.poster };
+    }
+    if (kind === 'file') part = { type: 'file', mime: mime || 'application/octet-stream', name: shortName(f.name) };
+    const base = done;
+    const sent = await attach.sendFile(roomName, sendFile, { ranges: item.ranges, onProgress: (i) => { prep.what.innerHTML = progressHTML(T.files.sending, label, total, Math.min(total, base + i * PIECE_BYTES)); } });
+    done += sendFile.size;
+    part.ref = sent.id;
+    part.mh = sent.mh;
+    part.size = sendFile.size;
+    (kind === 'file' ? files : media).push(part);
+  }
   if (roomName !== currentRoomName || key !== chatKey) {
-    line.line.removeAttribute('aria-live');
-    line.what.innerHTML = fmtHtml(T.files.send_interrupted, { name: strongName(file.name) });
+    prep.line.removeAttribute('aria-live');
+    prep.what.innerHTML = fmtHtml(T.files.send_interrupted, { name: strongName(label) });
     return;
   }
-  const parts = [{ type: 'file', ref: sent.id, mh: sent.mh, size: file.size, mime: file.type || 'application/octet-stream', name: file.name }];
-  const text = offerText(parts, T);
-  const cmid = newCmid();
-  seenCmids.add(cmid);
-  const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }, { p: parts }));
-  if (chatAction) chatAction.send({ cmid, enc });
-  publishChat(text, cmid, { p: parts });
-  storeLine(cmid, 'self', text, Number(line.line.dataset.ts) || Date.now(), undefined, parts);
-  fileLines.set(sent.id, { line, part: parts[0], me: true });
-  paintAttach(sent.id);
+  prep.line.remove();
+  const parts = [];
+  const cap = String(caption || '').trim();
+  if (cap) parts.push({ type: 'text', text: cap.slice(0, 2000) });
+  if (media.length >= 2) parts.push({ type: 'album', aid: newAid(), n: media.length, items: media });
+  else if (media.length === 1) parts.push(media[0]);
+  parts.push(...files);
+  const ids = { fp: myFp, legacyFp: myLegacyFp };
+  const measure = async (ps) => JSON.stringify(await encryptText(chatKey, packChatPlain(offerText(ps, T), ids, { p: ps }))).length + 700;
+  const msgs = await splitOffer(parts, measure, 60000);
+  const ts = Date.now();
+  renderAttachment('you', parts, { me: true, ts });
+  for (const m of msgs) {
+    const text = offerText(m, T);
+    const cmid = newCmid();
+    seenCmids.add(cmid);
+    const enc = await encryptText(chatKey, packChatPlain(text, ids, { p: m }));
+    if (chatAction) chatAction.send({ cmid, enc });
+    publishChat(text, cmid, { p: m });
+    storeLine(cmid, 'self', text, ts, undefined, m);
+  }
   maybeRingContact();
 };
 
@@ -2254,6 +2427,7 @@ const sendFiles = async (fileList) => {
     const ok = all.filter((f) => f.size <= MAX_SEND);
     if (tooBig.length) sys(fmt(T.files.skipped, { cap: fmtSize(MAX_SEND), files: tooBig.map((f) => `${f.name} ${fmtSize(f.size)}`).join(', ') }));
     const oldPeers = Array.from(peers).filter((p) => { const pr = peerProfiles.get(p); return !(pr && pr.caps && pr.caps.files >= 2); });
+    const fresh = [];
     const release = holdAwake();
     try {
       for (const file of ok) {
@@ -2262,7 +2436,10 @@ const sendFiles = async (fileList) => {
           continue;
         }
         if (oldPeers.length) sys(fmt(T.files.needs_update, { name: displayName(oldPeers[0]) }));
-        try { await sendAttachment(file); } catch (err) { sys(fmt(T.files.send_failed_for, { name: file.name, reason: why(err) })); }
+        fresh.push({ file, variant: 'original' });
+      }
+      if (fresh.length) {
+        try { await sendAttachments({ items: fresh, caption: '' }); } catch (err) { sys(fmt(T.files.send_failed_for, { name: fresh.map((x) => x.file.name).join(', '), reason: why(err) })); }
       }
     } finally {
       release();

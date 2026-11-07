@@ -115,8 +115,9 @@ const RATE_MS = 3000;
 const PULLING = ['queued', 'moving'];
 
 export class Transfers {
-  constructor({ store, media, onChange, canServe, device, askRelay, offersFor } = {}) {
+  constructor({ store, media, onChange, canServe, device, askRelay, offersFor, onRoom } = {}) {
     this._offersFor = offersFor || (() => null);
+    this._onRoom = onRoom || null;
     this._store = store;
     this._media = media;
     this._onChange = onChange || (() => {});
@@ -181,6 +182,7 @@ export class Transfers {
     act.fwq.onMessage = (d, m) => this._onWant(threadId, m.peerId, d);
     act.fpc.onMessage = (d, m) => this._onPiece(threadId, m.peerId, d, m.metadata);
     act.fno.onMessage = (d, m) => this._onNo(threadId, m.peerId, d);
+    if (this._onRoom) { try { this._onRoom(threadId, room); } catch (_) {} }
     room.onPeerJoin = (peerId) => { peer(peerId); this._hello(threadId, peerId); };
     room.onPeerLeave = (peerId) => {
       ctx.peers.delete(peerId);

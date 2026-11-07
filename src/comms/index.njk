@@ -680,7 +680,7 @@ import { createAttach } from '/assets/js/comms/attach.js';
 import { acceptFor, relayAsk, viaRelay } from '/assets/js/comms/files.js';
 import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
-import { selfRoomFor, deviceInfo, Presence, SELF_THREAD } from '/assets/js/comms/self.js';
+import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1359,6 +1359,7 @@ let attach = null;
 let selfRoom = null;
 const myDevice = deviceInfo(T);
 const presence = new Presence();
+let historySync = null;
 const selfPeers = new Map();
 const tidOf = (name) => (selfRoom && name === selfRoom.roomName ? SELF_THREAD : name);
 const inSelf = () => !!currentRoomName && tidOf(currentRoomName) === SELF_THREAD;
@@ -1623,7 +1624,9 @@ const startFiles = async (st) => {
       refreshHomeThreads();
     } catch (_) {}
   }
-  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: myDevice, pinned: [SELF_THREAD], canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
+  if (!historySync) historySync = new HistorySync({ store: st, onChange: () => { refreshHomeThreads(); } });
+  else historySync.setStore(st);
+  if (!attach) attach = createAttach({ joinFilesRoom, threadInfo: threadInfoFor, knock: knockThread, onChange: onFileChange, device: myDevice, pinned: [SELF_THREAD], onRoom: (tid, r) => { if (tid === SELF_THREAD) historySync.bind(r); }, onHello: (tid, peerId) => { if (tid === SELF_THREAD) historySync.hello(peerId).catch(() => {}); }, canServe: () => true, askRelay: (rec) => relayAsk({ self: rec.threadId === 'self', viaRelay: true, size: rec.size }) });
   if (!persistAsked && matchMedia('(display-mode: standalone)').matches && navigator.storage && navigator.storage.persist) { persistAsked = true; navigator.storage.persist().catch(() => {}); }
   try {
     await attach.start(st);

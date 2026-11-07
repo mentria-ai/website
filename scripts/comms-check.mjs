@@ -260,6 +260,8 @@ check('self: device kinds from the user agent', () => { eq(SF.kindFrom('Mozilla/
 
 check('files: hello offers are checked', () => { const d = F.cleanFilesMsg('fhi', { caps: { files: 2 }, have: [], want: [], offers: [{ id: R16, mh: R32, size: 5, mime: 'text/plain', name: 'a.txt', kind: 'file' }, { id: 'bad', mh: R32, size: 5 }, { id: R16, mh: 'short', size: 5 }] }); eq(d.offers.length, 1); deepEq(d.offers[0], { id: R16, mh: R32, size: 5, mime: 'text/plain', name: 'a.txt', kind: 'file' }); });
 
+check('sync: newer wins', () => { eq(SF.mergeMessage({ id: 'a', ts: 1 }, { id: 'a', ts: 2 }), 'replace'); eq(SF.mergeMessage({ id: 'a', ts: 2 }, { id: 'a', ts: 1 }), 'skip'); eq(SF.mergeMessage(null, { id: 'a', ts: 1 }), 'put'); });
+check('sync: only threads newer here are sent', () => deepEq(SF.threadsToSend([{ id: 'x', updatedAt: 5 }, { id: 'y', updatedAt: 1 }, { id: 'z', updatedAt: 3 }], [{ id: 'x', updatedAt: 9 }, { id: 'y', updatedAt: 0 }]), ['y', 'z']));
 
 let failed = 0;
 for (const [name, fn] of checks) {

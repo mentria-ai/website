@@ -166,6 +166,13 @@ class Store {
     });
   }
 
+  async getMessage(id) {
+    this._usable();
+    const rec = await this._get('messages', id);
+    if (!rec) return null;
+    try { return await this._openMessage(rec); } catch (_) { this.skipped++; return null; }
+  }
+
   async getThread(id) {
     this._usable();
     const rec = await this._get('threads', id);

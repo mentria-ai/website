@@ -20,7 +20,7 @@ const newId = () => {
 const readKnocks = () => { try { return JSON.parse(localStorage.getItem(KNOCKS) || '{}') || {}; } catch (_) { return {}; } };
 const writeKnocks = (v) => { try { localStorage.setItem(KNOCKS, JSON.stringify(v)); } catch (_) {} };
 
-export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, device, canServe, askRelay, pinned } = {}) => {
+export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, device, canServe, askRelay, pinned, onRoom, onHello } = {}) => {
   let store = null;
   let media = null;
   let transfers = null;
@@ -95,6 +95,7 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
   };
 
   const onTransferChange = async (id, extra) => {
+    if (extra && extra.hello && onHello) { try { onHello(extra.threadId, extra.peerId); } catch (_) {} }
     if (extra && extra.hello && extra.threadId && store && extra.offers && extra.offers.length && (pinned || []).includes(extra.threadId)) {
       await adoptOffers(extra.threadId, extra.offers);
     }
@@ -132,7 +133,7 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
     holder = true;
     const kindOf = (r) => (r.kind === 'image' || r.kind === 'video' || r.kind === 'file' ? r.kind : /^image\//i.test(r.mime || '') ? 'image' : /^video\//i.test(r.mime || '') ? 'video' : 'file');
     const offersFor = (tid) => ((pinned || []).includes(tid) && transfers ? transfers.completeIn(tid, 50).map((r) => ({ id: r.id, mh: r.mh, size: r.size, mime: r.mime, name: r.name, kind: kindOf(r) })) : null);
-    transfers = new Transfers({ store, media, onChange: onTransferChange, canServe, device, askRelay, offersFor });
+    transfers = new Transfers({ store, media, onChange: onTransferChange, canServe, device, askRelay, offersFor, onRoom });
     rooms = new FilesRooms({ transfers, join: (roomId, password, t) => joinFilesRoom(roomId, password, t) });
     clearInterval(tick);
     tick = setInterval(() => { refresh(); knockTick(); }, TICK_MS);

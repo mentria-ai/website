@@ -676,6 +676,29 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__picker-actions{display:flex;justify-content:flex-end}
 .comms__invite-actions{gap:var(--space-2)}
 .comms__avatar--agent{font:600 var(--text-xs) var(--font-mono);color:var(--accent)}
+.comms__turn{content-visibility:auto;contain-intrinsic-size:auto 480px}
+.comms__agentmsg{padding:var(--space-1) var(--space-2)}
+.comms__agent-text{color:var(--term-fg);overflow-wrap:anywhere}
+.comms__agent-via{display:block;color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__agent-earlier,.comms__turn-more{display:block;margin:var(--space-2) auto}
+.comms__tool{margin:var(--space-1) 0;padding:var(--space-2);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__tool-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-2)}
+.comms__tool-kind{color:var(--accent);font:600 var(--text-2xs) var(--font-mono);text-transform:uppercase}
+.comms__tool-title{color:var(--term-fg-strong);font-size:var(--text-sm);overflow-wrap:anywhere}
+.comms__tool-sum{color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__tool-sum--error{color:var(--amber-60,#f5a524)}
+.comms__tool-in{display:block;margin-top:var(--space-1);color:var(--term-muted);font-size:var(--text-2xs);overflow-wrap:anywhere}
+.comms__tool-out{max-height:240px;margin:var(--space-1) 0 0;overflow:auto;color:var(--term-fg);font:var(--text-2xs)/1.45 var(--font-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.comms__tool-more{margin-top:var(--space-1)}
+.comms__thought{padding:2px var(--space-2);color:var(--term-muted);font:var(--text-2xs) var(--font-mono);background:transparent;border:1px dashed var(--term-border);border-radius:999px;cursor:pointer}
+.comms__thought-text{max-height:240px;overflow:auto;color:var(--term-muted);font:var(--text-2xs)/1.45 var(--font-mono);white-space:pre-wrap}
+.comms__agent-diff{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-2);font:var(--text-2xs) var(--font-mono)}
+.comms__diff-add{color:var(--accent)}
+.comms__diff-del{color:#ff8a80}
+.comms__diff-path{color:var(--term-muted)}
+.comms__agent-chip{display:inline-block;margin:var(--space-1) var(--space-1) 0 0;padding:2px var(--space-2);color:var(--term-fg);font-size:var(--text-2xs);border:1px solid var(--term-border);border-radius:999px}
+.comms__agent-img{display:block;max-width:100%;margin-top:var(--space-1);border-radius:var(--radius-md)}
+.comms__agent-note{margin:var(--space-1) 0;color:var(--term-muted);font-size:var(--text-2xs)}
 .comms__lock-list{display:flex;flex-direction:column;gap:var(--space-2)}
 .comms__lock-list label{display:flex;align-items:center;gap:var(--space-2);color:var(--term-fg);font-size:var(--text-sm)}
 .comms__invite-by,.comms__invite-ios{margin:0;color:var(--term-muted);font-size:var(--text-sm);overflow-wrap:anywhere}
@@ -758,6 +781,7 @@ import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink }
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
 import { bridgeKeyFromSecret, keysFromBridgeKey, bridgeCode, createBridgeClient, BRIDGE_KIND } from '/assets/js/comms/bridge.js';
+import { createAgentView } from '/assets/js/comms/agent-view.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1882,6 +1906,17 @@ const paintAgents = () => {
   const sig = JSON.stringify(list.map((a) => [a.sid, a.name, a.online, a.busy]));
   if (sig !== agentsSig) { agentsSig = sig; renderContacts(); }
 };
+let agentView = null;
+const agentViewFor = () => agentView || (agentView = createAgentView({ els, T, client: bridge, nameOf: (sid) => (agentList().find((a) => a.sid === sid) || {}).name || '' }));
+const openAgent = async (sid) => {
+  if (!bridge) return;
+  if (aiView && aiView.isOpen()) aiView.close();
+  await leaveRoom();
+  setView('chat');
+  agentViewFor().open(sid);
+  els.msg.disabled = true;
+  els.go.disabled = true;
+};
 const startBridge = async () => {
   if (bridge || !myId || !mySign || !agentsOn()) return;
   let secret;
@@ -2822,6 +2857,7 @@ let joinSeq = 0;
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const seq = ++joinSeq;
   if (aiView && aiView.isOpen()) aiView.close();
+  if (agentView && agentView.isOpen()) agentView.close();
   document.getElementById('comms-media-btn').hidden = true;
   if (attach) attach.setOpenThread(null);
   fileLines.clear();
@@ -5359,6 +5395,7 @@ const agentRow = (a, info) => {
   const { mid } = rowMid(a.name || a.sid.slice(0, 8), info.preview, info.ts);
   openBtn.append(mid);
   row.append(av, openBtn, rowChev());
+  row.addEventListener('click', () => openAgent(a.sid));
   return row;
 };
 

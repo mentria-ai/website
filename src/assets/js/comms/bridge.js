@@ -84,9 +84,10 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
   const turns = new Map();
   let chain = Promise.resolve();
   const emit = (t, m) => { for (const fn of handlers.get(t) || []) { try { fn(m); } catch (_) {} } };
-  const turnOf = (sid, n, make) => {
-    let bySid = turns.get(sid);
-    if (!bySid) { if (!make) return null; bySid = new Map(); turns.set(sid, bySid); }
+  const keyOf = (sid, sub) => sid + '|' + (sub || '');
+  const turnOf = (sid, n, make, sub) => {
+    let bySid = turns.get(keyOf(sid, sub));
+    if (!bySid) { if (!make) return null; bySid = new Map(); turns.set(keyOf(sid, sub), bySid); }
     let t = bySid.get(n);
     if (!t && make) { t = { n, slots: [], earlier: false, done: false, ts: 0 }; bySid.set(n, t); }
     return t;
@@ -95,7 +96,7 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
     if (m.t === 'here' && Array.isArray(m.sessions)) {
       for (const s of m.sessions) if (s && typeof s.sid === 'string') sessions.set(s.sid, { sid: s.sid, name: String(s.name || ''), busy: !!s.busy, lastTs: Number(s.lastTs) || 0, hereAt: now(), host: String(m.host || '') });
     } else if (m.t === 'turn' && typeof m.sid === 'string' && Number.isInteger(m.n) && Number.isInteger(m.from) && Array.isArray(m.msgs)) {
-      const t = turnOf(m.sid, m.n, true);
+      const t = turnOf(m.sid, m.n, true, m.sub);
       const tail = m.from + m.msgs.length >= t.slots.length;
       if (tail) t.slots.length = m.from;
       m.msgs.forEach((x, i) => { t.slots[m.from + i] = x; });
@@ -118,17 +119,17 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
   return {
     on: (t, fn) => { if (!handlers.has(t)) handlers.set(t, new Set()); handlers.get(t).add(fn); return () => handlers.get(t).delete(fn); },
     hello: (sid) => send(sid ? { t: 'hello', sid } : { t: 'hello' }),
-    list: (sid, before) => send(Number.isInteger(before) ? { t: 'list', sid, before } : { t: 'list', sid }),
+    list: (sid, before, sub) => send(Object.assign({ t: 'list', sid }, Number.isInteger(before) ? { before } : {}, sub ? { sub } : {})),
     open: (sid, n, before, sub) => send(Object.assign({ t: 'open', sid, n }, Number.isInteger(before) ? { before } : {}, sub ? { sub } : {})),
     get: (sid, ref, sub) => send(Object.assign({ t: 'get', sid, ref }, sub ? { sub } : {})),
     say: async (sid, text) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'say', sid, cmid, text, device })); return cmid; },
     verdict: async (sid, request_id, behavior) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'verdict', sid, cmid, request_id, behavior })); return cmid; },
     sessions: () => Array.from(sessions.values()).map((s) => Object.assign({}, s, { online: now() - s.hereAt < HERE_TTL_MS })),
-    turn: (sid, n) => {
-      const t = turnOf(sid, n, false);
+    turn: (sid, n, sub) => {
+      const t = turnOf(sid, n, false, sub);
       if (!t) return null;
       return { n, msgs: t.slots.filter(Boolean), first: t.first, earlier: t.earlier || t.first > 0, done: t.done, ts: t.ts };
     },
-    turns: (sid) => Array.from((turns.get(sid) || new Map()).keys()).sort((a, b) => a - b)
+    turns: (sid, sub) => Array.from((turns.get(keyOf(sid, sub)) || new Map()).keys()).sort((a, b) => a - b)
   };
 };

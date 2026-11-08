@@ -443,3 +443,134 @@ export const updateParts = (el, ref, m) => {
   if (!root) return;
   applyItem(root, ref, m);
 };
+
+const mk = (tag, cls, text) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+};
+const fillIn = (s, v) => String(s == null ? '' : s).replace(/\{(\w+)\}/g, (_, k) => (v[k] != null ? String(v[k]) : ''));
+
+export const resultsOf = (parts) => {
+  const map = new Map();
+  for (const p of parts || []) if (p && p.type === 'tool_result' && typeof p.callId === 'string') map.set(p.callId, p);
+  return map;
+};
+
+export const toolSummary = (call, res, A) => {
+  if (!res) return call && call.status === 'running' ? (A.status_running || '') : '';
+  if (call.kind === 'search' && Number.isInteger(res.matches)) return fillIn(A.matches, { n: res.matches });
+  if (call.kind === 'read' && Array.isArray(res.lines)) return fillIn(A.lines, { a: res.lines[0], b: res.lines[1] });
+  if (call.kind === 'run' && Number.isInteger(res.exit)) return fillIn(A.exit, { n: res.exit });
+  return res.error ? (A.status_error || '') : '';
+};
+
+const fetchInto = (btn, target, ref, opts, show) => {
+  btn.addEventListener('click', async () => {
+    if (!opts.get) return;
+    btn.disabled = true;
+    try {
+      const part = await opts.get(ref);
+      if (part) { show(part); btn.remove(); } else btn.disabled = false;
+    } catch (_) { btn.disabled = false; }
+  });
+  target.append(btn);
+};
+
+const resultBox = (res, opts, cls) => {
+  const A = opts.T || {};
+  const box = mk('div', cls);
+  const pre = mk('pre', 'comms__tool-out', res.text || '');
+  box.append(pre);
+  if (res.ref) fetchInto(mk('button', 'comms__btn comms__btn--ghost comms__tool-more', A.show_all || 'Show all'), box, res.ref, opts, (p) => { pre.textContent = p.text || ''; });
+  return box;
+};
+
+const imageSlot = (p, opts) => {
+  const A = opts.T || {};
+  const box = mk('div', 'comms__agent-imgbox');
+  const kb = p.bytes ? ' · ' + Math.max(1, Math.round(p.bytes / 1024)) + ' KB' : '';
+  fetchInto(mk('button', 'comms__btn comms__btn--ghost', (A.show_image || 'Show image') + kb), box, p.ref, opts, (part) => {
+    if (!part.b64 || !/^image\/(png|jpeg|gif|webp)$/.test(String(part.mime || ''))) { box.append(mk('span', 'comms__agent-note', part.text || '')); return; }
+    const img = mk('img', 'comms__agent-img');
+    img.alt = '';
+    img.src = 'data:' + part.mime + ';base64,' + part.b64;
+    if (opts.onImage) img.addEventListener('click', () => opts.onImage(img.src));
+    box.append(img);
+  });
+  return box;
+};
+
+export const renderAgentParts = (el, parts, opts = {}) => {
+  const A = opts.T || {};
+  const results = opts.results || new Map();
+  const calls = new Set((parts || []).filter((p) => p && p.type === 'tool_call').map((p) => p.id));
+  el.textContent = '';
+  for (const p of parts || []) {
+    if (!p || typeof p !== 'object') continue;
+    if (p.type === 'text') {
+      const d = mk('div', 'comms__agent-text');
+      renderBody(d, String(p.text || ''), { from: 'model', T: opts.TB || {} });
+      el.append(d);
+    } else if (p.type === 'thought') {
+      const wrap = mk('div', 'comms__agent-thoughtbox');
+      const b = mk('button', 'comms__thought', A.thought || 'Thought');
+      b.type = 'button';
+      b.addEventListener('click', async () => {
+        if (wrap.querySelector('.comms__thought-text')) { wrap.querySelector('.comms__thought-text').remove(); return; }
+        if (!opts.get) return;
+        const part = await opts.get(p.ref).catch(() => null);
+        if (part && part.text != null && !wrap.querySelector('.comms__thought-text')) wrap.append(mk('pre', 'comms__thought-text', part.text));
+      });
+      wrap.append(b);
+      el.append(wrap);
+    } else if (p.type === 'tool_call') {
+      const card = mk('div', 'comms__tool comms__tool--' + String(p.kind || 'other').replace(/[^a-z]/g, ''));
+      const head = mk('div', 'comms__tool-head');
+      head.append(mk('span', 'comms__tool-kind', A['kind_' + p.kind] || A.kind_other || 'Tool'), mk('span', 'comms__tool-title', String(p.title || '')));
+      const res = results.get(p.id);
+      const sum = toolSummary(p, res, A);
+      if (sum) head.append(mk('span', 'comms__tool-sum' + (p.status === 'error' ? ' comms__tool-sum--error' : ''), sum));
+      card.append(head);
+      if (p.input && p.input !== p.title) card.append(mk('code', 'comms__tool-in', String(p.input)));
+      if (res && res.text) card.append(resultBox(res, opts, 'comms__tool-result'));
+      el.append(card);
+    } else if (p.type === 'tool_result') {
+      if (calls.has(p.callId) || (opts.calls && opts.calls.has(p.callId))) continue;
+      el.append(resultBox(p, opts, 'comms__tool-result comms__tool-result--alone'));
+    } else if (p.type === 'diff') {
+      const d = mk('div', 'comms__agent-diff');
+      d.append(mk('span', 'comms__diff-add', '+' + (Number(p.added) || 0)), mk('span', 'comms__diff-del', '−' + (Number(p.removed) || 0)), mk('span', 'comms__diff-path', String(p.path || '')));
+      if (p.ref) fetchInto(mk('button', 'comms__btn comms__btn--ghost', A.show_changes || 'Show changes'), d, p.ref, opts, (part) => { d.append(mk('pre', 'comms__tool-out', part.text || '')); });
+      el.append(d);
+    } else if (p.type === 'subagent') {
+      const s = mk('div', 'comms__tool comms__tool--subagent');
+      const head = mk('div', 'comms__tool-head');
+      head.append(mk('span', 'comms__tool-kind', A.kind_subagent || 'Subagent'), mk('span', 'comms__tool-title', String(p.title || '')));
+      s.append(head);
+      if (opts.openSub && /^[a-z0-9]{6,40}$/.test(String(p.agentId || ''))) {
+        const b = mk('button', 'comms__btn comms__btn--ghost', A.open_sub || 'Open');
+        b.type = 'button';
+        b.addEventListener('click', () => opts.openSub(p.agentId, p.title));
+        s.append(b);
+      }
+      el.append(s);
+    } else if (p.type === 'status' && p.kind === 'pr') {
+      const label = 'PR #' + (Number(p.n) || 0);
+      if (allowedHref(p.url)) {
+        const a = mk('a', 'comms__agent-chip', label);
+        a.href = p.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        el.append(a);
+      } else el.append(mk('span', 'comms__agent-chip', label));
+    } else if (p.type === 'notice') {
+      el.append(mk('p', 'comms__agent-note', A['notice_' + p.code] || A.notice_unknown || ''));
+    } else if (p.type === 'image') {
+      el.append(imageSlot(p, opts));
+    } else {
+      el.append(mk('p', 'comms__agent-note', A.notice_unknown || ''));
+    }
+  }
+};

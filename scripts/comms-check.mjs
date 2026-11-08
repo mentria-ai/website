@@ -85,6 +85,7 @@ const SG = await need('/assets/js/comms/sign.js');
 const IV = await need('/assets/js/comms/invite.js');
 const MB = await need('/assets/js/comms/members.js');
 const BR = await need('/assets/js/comms/bridge.js');
+const AV = await need('/assets/js/comms/agent-view.js');
 const CIDM = await need('/assets/js/mentria-comms-id.js');
 const VEC = JSON.parse(readFileSync(join(repo, 'scripts/fixtures/sig-vector.json'), 'utf8'));
 
@@ -1310,6 +1311,25 @@ check('home: agent rows show under All and AI', () => {
   eq(a.key, 'agent:s1'); eq(a.title, 'Site session'); eq(a.preview, 'running on your Mac'); eq(a.ts, 50);
   eq(H.homeRows(src, { filter: 'ai' }).filter((r) => r.kind === 'agent').length, 1);
   eq(H.homeRows(src, { filter: 'people' }).filter((r) => r.kind === 'agent').length, 0);
+});
+
+check('view: the window keeps 40 turns and 60 cards per turn', () => {
+  const card = (i) => ({ id: 'c' + i, role: 'assistant', parts: [{ type: 'text', text: 'x' + i }] });
+  const turns = Array.from({ length: 45 }, (_, n) => ({ n, msgs: [card(0), card(1)], earlier: false }));
+  turns.push({ n: 45, msgs: Array.from({ length: 1200 }, (_, i) => card(i)), earlier: false });
+  const w = AV.agentWindow(turns, { maxTurns: 40, maxCards: 60 });
+  eq(w.shown.length, 40);
+  eq(w.shown[0].n, 6);
+  eq(w.earlierTurns, true);
+  const big = w.shown.at(-1);
+  eq(big.msgs.length, 60);
+  eq(big.msgs.at(-1).id, 'c1199');
+  eq(big.earlierCards, true);
+  eq(w.shown[0].earlierCards, false);
+  const open = AV.agentWindow(turns, { maxTurns: 40, maxCards: 60, expanded: new Set([45]) });
+  eq(open.shown.at(-1).msgs.length, 1200);
+  eq(AV.agentWindow([{ n: 0, msgs: [card(1)], earlier: false }]).earlierTurns, false);
+  eq(AV.agentWindow([{ n: 3, msgs: [card(1)], earlier: false }]).earlierTurns, true);
 });
 
 let failed = 0;

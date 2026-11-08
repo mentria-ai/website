@@ -58,6 +58,32 @@ const PAGE_TESTS = async () => {
   test('code is not linked', () => { C.renderBody(el, '`https://x.y`', { from: 'person', T }); eq(el.querySelector('code a'), null); });
   test('www links open over https', () => { C.renderBody(el, 'see www.example.com today', { from: 'person', T }); eq(el.querySelector('a').getAttribute('href'), 'https://www.example.com'); });
 
+  const TA = { thought: 'Thought', matches: '{n} matches', lines: 'lines {a}–{b}', exit: 'exit {n}', show_all: 'Show all', show_changes: 'Show changes', show_image: 'Show image', notice_compacted: 'Context compacted', notice_unknown: 'Something this page can\'t show yet', status_running: 'running', status_error: 'failed', kind_search: 'Search', kind_read: 'Read', kind_edit: 'Edit', kind_run: 'Run', kind_web: 'Web', kind_subagent: 'Subagent', kind_other: 'Tool' };
+  const agentTurn = () => [
+    { type: 'tool_call', id: 'g', title: 'TODO', kind: 'search', status: 'done', input: 'TODO .' },
+    { type: 'tool_call', id: 'r', title: 'notes.md', kind: 'read', status: 'done', input: '/a/notes.md' },
+    { type: 'tool_call', id: 'e', title: 'app.js', kind: 'edit', status: 'done', input: '/x/app.js' },
+    { type: 'diff', path: 'app.js', added: 4, removed: 2, ref: '1:0' },
+    { type: 'tool_call', id: 'b', title: 'List files', kind: 'run', status: 'done', input: 'ls' },
+    { type: 'tool_result', callId: 'g', text: 'a\nb\nc', bytes: 5, matches: 3 },
+    { type: 'tool_result', callId: 'r', text: 'x', bytes: 1, lines: [10, 12] },
+    { type: 'tool_result', callId: 'b', text: 'ok', bytes: 2, exit: 0 }
+  ];
+  test('agent: tool cards summarise search, read, edit and run', () => {
+    const parts = agentTurn();
+    C.renderAgentParts(el, parts, { T: TA, results: C.resultsOf(parts) });
+    const cards = [...el.querySelectorAll('.comms__tool')].map((c) => c.textContent);
+    ok(cards.some((t) => t.includes('Search') && t.includes('3 matches')), cards.join(' | '));
+    ok(cards.some((t) => t.includes('Read') && t.includes('lines 10–12')));
+    ok(cards.some((t) => t.includes('Run') && t.includes('exit 0')));
+    ok(el.textContent.includes('+4') && el.textContent.includes('−2'));
+    eq(el.querySelectorAll('.comms__tool-result--alone').length, 0);
+  });
+  test('agent: thinking folds into a chip', () => { C.renderAgentParts(el, [{ type: 'thought', ref: '1:0', chars: 120 }], { T: TA }); const b = el.querySelector('button.comms__thought'); ok(b && b.textContent.includes('Thought')); });
+  test('agent: unknown agent parts show the plain notice', () => { C.renderAgentParts(el, [{ type: 'hologram' }, { type: 'notice', code: 'compacted' }], { T: TA }); ok(el.textContent.includes("Something this page can't show yet")); ok(el.textContent.includes('Context compacted')); });
+  test('agent: no message HTML is ever inserted as HTML', () => { C.renderAgentParts(el, [{ type: 'text', text: '<img src=x onerror=alert(1)>' }, { type: 'tool_call', id: 'h', title: '<b onclick=alert(1)>x</b>', kind: 'run', status: 'done', input: '<script>window.__agentx=1</script>' }, { type: 'tool_result', callId: 'h', text: '<img src=y onerror=alert(2)>', bytes: 30 }], { T: TA, results: C.resultsOf([{ type: 'tool_result', callId: 'h', text: '<img src=y onerror=alert(2)>', bytes: 30 }]) }); eq(el.querySelector('[onerror]'), null); eq(el.querySelector('[onclick]'), null); eq(el.querySelector('script'), null); eq(window.__agentx, undefined); });
+  test('agent: a PR chip links out safely', () => { C.renderAgentParts(el, [{ type: 'status', kind: 'pr', n: 1545, url: 'https://github.com/o/r/pull/1545' }, { type: 'status', kind: 'pr', n: 9, url: 'javascript:alert(1)' }], { T: TA }); const links = el.querySelectorAll('a'); eq(links.length, 1); eq(links[0].getAttribute('href'), 'https://github.com/o/r/pull/1545'); ok(el.textContent.includes('PR #9')); });
+
   const R = (i) => btoa(String.fromCharCode(...new Uint8Array(16).fill(i))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const MH = btoa(String.fromCharCode(...new Uint8Array(32).fill(2))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const REF0 = R(10);

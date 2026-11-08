@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "À propos",
-    "meta_description": "Mentria est un petit studio créatif : outils, jeux et IA respectueux de la vie privée qui tournent dans votre navigateur, et packs de cartes pour apprendre.",
+    "meta_description": "Mentria est un petit studio créatif : outils, jeux et IA respectueux de la vie privée qui tournent dans votre navigateur, et packs de cartes pour apprendre. Vos données restent privées.",
     "tagline": "Apprenez et expérimentez avec une IA qui tourne sur votre appareil.",
     "copyright": "© 2026 Mentria. Tous droits réservés.",
     "image_use": "Utilisation des images",
@@ -609,7 +609,7 @@
     },
     "files": {
       "title": "Fichiers",
-      "lede": "Parcourez, exportez et supprimez les données que les outils Mentria stockent sur cet appareil. Tout reste en local.",
+      "lede": "Parcourez, exportez et supprimez les données que les outils Mentria stockent sur cet appareil. Vos données restent privées.",
       "tldr": "Un inspecteur du stockage local pour tout ce que les outils Mentria conservent sur cet appareil. Il liste l'espace de noms de chaque application — notes, coffre de l’Authentificateur 2FA, états de jeu, données d'extensions et clés héritées — avec la taille de chaque élément et sa date de modification. Consultez n'importe quelle valeur en JSON formaté, exportez un élément précis ou supprimez-le (les suppressions demandent toujours confirmation). Exportez une seule sauvegarde chiffrée de vos données enregistrées, y compris les packs d’apprentissage, le livre de comptes Finances et les bases de données des extensions, avec une phrase secrète (PBKDF2-SHA256 × 600k + AES-GCM). L'outil travaille sur les données de ce navigateur et n'écrit dans le stockage que lorsque vous confirmez une suppression."
     },
     "extensions-sdk": {

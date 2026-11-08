@@ -276,7 +276,7 @@
   {
     "slug": "files",
     "title": "Files",
-    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, 2FA Authenticator vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all.",
+    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, 2FA Authenticator vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all. Your data stays private.",
     "category": "Utility",
     "group": "Dev",
     "added": "2026-07-02"

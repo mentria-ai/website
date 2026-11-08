@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "Sobre",
-    "meta_description": "A Mentria é um pequeno estúdio criativo: ferramentas, jogos e IA com foco em privacidade que rodam no seu navegador, e pacotes de cartões para aprender.",
+    "meta_description": "A Mentria é um pequeno estúdio criativo: ferramentas, jogos e IA com foco em privacidade que rodam no seu navegador, e pacotes de cartões para aprender. Seus dados continuam privados.",
     "tagline": "Aprenda e experimente IA que roda no seu dispositivo.",
     "copyright": "© 2026 Mentria. Todos os direitos reservados.",
     "image_use": "Uso de imagens",
@@ -609,7 +609,7 @@
     },
     "files": {
       "title": "Arquivos",
-      "lede": "Navegue, exporte e exclua os dados que as ferramentas da Mentria guardam neste dispositivo. Tudo fica local.",
+      "lede": "Navegue, exporte e exclua os dados que as ferramentas da Mentria guardam neste dispositivo. Seus dados continuam privados.",
       "tldr": "Um inspetor do armazenamento local para tudo o que as ferramentas da Mentria guardam neste dispositivo. Ele lista o espaço de nomes de cada aplicativo — notas, cofre do Autenticador 2FA, estado dos jogos, dados de extensões e chaves antigas — com o tamanho de cada item e a data de modificação. Veja qualquer valor como JSON formatado, exporte um item específico ou exclua-o (as exclusões sempre pedem confirmação). Exporte um único backup criptografado dos seus dados salvos, incluindo pacotes de aprendizado, o livro-caixa do Finanças e os bancos de dados das extensões, com uma senha (PBKDF2-SHA256 × 600k + AES-GCM). A ferramenta trabalha com os dados deste navegador e só grava no armazenamento quando você confirma uma exclusão."
     },
     "extensions-sdk": {

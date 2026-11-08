@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "Acerca de",
-    "meta_description": "Mentria es un pequeño estudio creativo. Herramientas, juegos e IA centrados en la privacidad que funcionan en tu navegador. Sin cuentas, sin rastreo, y tus datos se mantienen privados.",
+    "meta_description": "Mentria es un pequeño estudio creativo: herramientas, juegos e IA centrados en la privacidad que funcionan en tu navegador, y paquetes de tarjetas para aprender. Tus datos se mantienen privados.",
     "tagline": "Aprende y experimenta con IA que funciona en tu dispositivo.",
     "copyright": "© 2026 Mentria. Todos los derechos reservados.",
     "image_use": "Uso de imágenes",
@@ -5318,7 +5318,7 @@
       }
     },
     "comms": {
-      "meta_description": "Chat entre pares, llamadas y envío de archivos — cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes.",
+      "meta_description": "Chat entre pares, llamadas y envío de archivos, sin cuentas. Los mensajes se cifran de extremo a extremo en tu dispositivo, y el servidor de Mentria solo los reenvía cifrados.",
       "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes. Comparte la URL de una sala, o intercambia códigos de contacto y escribe directamente a otras personas.",
       "unknown": "desconocido",
       "onboard": {

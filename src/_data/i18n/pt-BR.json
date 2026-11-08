@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "Sobre",
-    "meta_description": "A Mentria é um pequeno estúdio criativo. Ferramentas, jogos e IA com foco em privacidade que rodam no seu navegador. Sem contas, sem rastreamento, e seus dados continuam privados.",
+    "meta_description": "A Mentria é um pequeno estúdio criativo: ferramentas, jogos e IA com foco em privacidade que rodam no seu navegador, e pacotes de cartões para aprender. Seus dados continuam privados.",
     "tagline": "Aprenda e experimente IA que roda no seu dispositivo.",
     "copyright": "© 2026 Mentria. Todos os direitos reservados.",
     "image_use": "Uso de imagens",
@@ -5318,7 +5318,7 @@
       }
     },
     "comms": {
-      "meta_description": "Chat ponto a ponto, chamadas e envio de arquivos — criptografia de ponta a ponta, sem contas e sem nenhum servidor capaz de ler suas mensagens.",
+      "meta_description": "Chat ponto a ponto, chamadas e envio de arquivos, sem contas. As mensagens são criptografadas de ponta a ponta no seu dispositivo, e o servidor da Mentria só as repassa criptografadas.",
       "lede": "Chat ponto a ponto, chamadas de voz e vídeo, e envio de arquivos. Criptografia de ponta a ponta, sem contas e sem nenhum servidor capaz de ler suas mensagens. Compartilhe a URL de uma sala, ou troque códigos de contato e mande mensagens direto para as pessoas.",
       "unknown": "desconhecido",
       "onboard": {

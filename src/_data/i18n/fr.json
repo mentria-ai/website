@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "À propos",
-    "meta_description": "Mentria est un petit studio créatif. Des outils, des jeux et une IA respectueux de la vie privée qui tournent dans votre navigateur. Sans comptes, sans pistage, et vos données restent privées.",
+    "meta_description": "Mentria est un petit studio créatif : outils, jeux et IA respectueux de la vie privée qui tournent dans votre navigateur, et packs de cartes pour apprendre. Vos données restent privées.",
     "tagline": "Apprenez et expérimentez avec une IA qui tourne sur votre appareil.",
     "copyright": "© 2026 Mentria. Tous droits réservés.",
     "image_use": "Utilisation des images",
@@ -5318,7 +5318,7 @@
       }
     },
     "comms": {
-      "meta_description": "Chat pair-à-pair, appels et partage de fichiers — chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages.",
+      "meta_description": "Chat pair-à-pair, appels et partage de fichiers, sans compte. Les messages sont chiffrés de bout en bout sur votre appareil, et le relais de Mentria ne les transmet que chiffrés.",
       "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages. Partagez l’URL d’un salon, ou échangez vos codes de contact pour écrire directement aux gens.",
       "unknown": "inconnu",
       "onboard": {

@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "About",
-    "meta_description": "Mentria is a small creative studio. Privacy-first tools, games and AI that run in your browser. No accounts, no tracking, and your data stays private.",
+    "meta_description": "Mentria is a small creative studio making privacy-first tools, games and AI that run in your browser, plus card decks for learning. Your data stays private.",
     "tagline": "Learn and experiment with AI that runs on your device.",
     "copyright": "© 2026 Mentria. All rights reserved.",
     "image_use": "Image use",
@@ -5318,7 +5318,7 @@
       }
     },
     "comms": {
-      "meta_description": "Peer-to-peer chat, calls and file drop — end-to-end encrypted, no accounts, and no server can read your messages.",
+      "meta_description": "Peer-to-peer chat, calls and file drop, with no accounts. Messages are end-to-end encrypted on your device, and Mentria's relay only passes them on still encrypted.",
       "lede": "Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted, no accounts, and no server can read your messages. Share a room URL, or trade contact codes and message people directly.",
       "unknown": "unknown",
       "onboard": {

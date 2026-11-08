@@ -45,13 +45,39 @@ export const deriveKey = async (b64Key) => {
   }
 };
 
+const ROOM_V2_SALT = 'mentria-room-v2';
+const keyRaw = (b64Key) => {
+  try {
+    const raw = b64urlDecode(String(b64Key || '').replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_'));
+    return raw.length === 32 ? raw : null;
+  } catch (_) { return null; }
+};
+
+export const roomKeys = async (b64Key, kv = 1, opts = {}) => {
+  const raw = keyRaw(b64Key);
+  if (!raw) return null;
+  const ex = !!opts.extractable;
+  if (kv !== 2) {
+    const chatKey = await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, ex, ['encrypt', 'decrypt']);
+    return { chatKey, topicRaw: raw, password: b64Key, filesIkm: raw };
+  }
+  const te = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', raw, 'HKDF', false, ['deriveBits']);
+  const sub = async (info) => new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: te.encode(ROOM_V2_SALT), info: te.encode(info) }, base, 256));
+  const [chat, topic, signal, files] = await Promise.all(['chat', 'topic', 'signal', 'files'].map(sub));
+  const chatKey = await crypto.subtle.importKey('raw', chat, { name: 'AES-GCM' }, ex, ['encrypt', 'decrypt']);
+  return { chatKey, topicRaw: topic, password: b64urlEncode(signal), filesIkm: files };
+};
+
 const topicCache = new Map();
-export const chatTopicFor = (roomName, b64Key) => {
-  const id = b64Key + ':' + roomName;
+export const chatTopicFor = (roomName, b64Key, kv = 1) => {
+  const v = kv === 2 ? 2 : 1;
+  const id = v + ':' + b64Key + ':' + roomName;
   if (!topicCache.has(id)) {
     topicCache.set(id, (async () => {
-      const raw = b64urlDecode(b64Key);
-      if (raw.length !== 32) return null;
+      const keys = await roomKeys(b64Key, v);
+      if (!keys) return null;
+      const raw = keys.topicRaw;
       const mac = await crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
       return b64urlEncode(new Uint8Array(await crypto.subtle.sign('HMAC', mac, new TextEncoder().encode(CHAT_TOPIC_V2 + roomName))));
     })().catch(() => null));
@@ -190,23 +216,24 @@ export const offerText = (parts, T) => {
   return caption ? line + '\n' + caption : line;
 };
 
-export const packChatPlain = (text, { fp, legacyFp } = {}, extra) => {
+export const packChatBody = (text, { fp, legacyFp } = {}, extra) => {
   const more = Object.assign({}, extra || {});
   if ('p' in more) {
     const p = cleanParts(more.p);
     if (p) more.p = p;
     else delete more.p;
   }
-  return JSON.stringify(Object.assign({ v: 2, t: text, sfp: legacyFp || undefined, sfp2: (fp && fp !== legacyFp) ? fp : undefined }, more));
+  return Object.assign({ v: 2, t: text, sfp: legacyFp || undefined, sfp2: (fp && fp !== legacyFp) ? fp : undefined }, more);
 };
+export const packChatPlain = (text, ids, extra) => JSON.stringify(packChatBody(text, ids, extra));
 export const unpackChatPlain = (raw) => {
   try {
     const o = JSON.parse(raw);
     if (o && o.v === 2 && typeof o.t === 'string') {
-      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, sfp2: typeof o.sfp2 === 'string' ? o.sfp2 : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null, parts: cleanParts(o.p) };
+      return { text: o.t, sfp: typeof o.sfp === 'string' ? o.sfp : null, sfp2: typeof o.sfp2 === 'string' ? o.sfp2 : null, ctl: (o.ctl && typeof o.ctl === 'object') ? o.ctl : null, parts: cleanParts(o.p), sg: (o.sg && typeof o.sg === 'object') ? o.sg : null, obj: o };
     }
   } catch (_) {}
-  return { text: raw, sfp: null, sfp2: null, ctl: null, parts: null };
+  return { text: raw, sfp: null, sfp2: null, ctl: null, parts: null, sg: null, obj: null };
 };
 
 export const certFingerprints = (sdp) => {

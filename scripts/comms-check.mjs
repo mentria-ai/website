@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import vm from 'node:vm';
+import { hkdfSync, createHmac } from 'node:crypto';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '..');
@@ -79,6 +80,12 @@ const MF = globalThis.MentriaMediaFormat;
 const F = await need('/assets/js/comms/files.js');
 const SH = await need('/assets/js/comms/sheet.js');
 const SF = await need('/assets/js/comms/self.js');
+const RM = await need('/assets/js/comms/rooms.js');
+const SG = await need('/assets/js/comms/sign.js');
+const IV = await need('/assets/js/comms/invite.js');
+const MB = await need('/assets/js/comms/members.js');
+const CIDM = await need('/assets/js/mentria-comms-id.js');
+const VEC = JSON.parse(readFileSync(join(repo, 'scripts/fixtures/sig-vector.json'), 'utf8'));
 
 const FIX = {
   key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
@@ -842,6 +849,391 @@ check('fix I5: the page host follows the weekly room change with fresh ICE', asy
   eq(st.leaves, 1);
   eq(st.ice, 2);
   eq(st.requests.length, 1);
+});
+
+const RK = 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8';
+const ephOf = (map) => ({ get: (r) => map[r] || null, set: (r, key, kv) => { map[r] = { key, kv }; } });
+check('rooms: an imported link resolves with its key', () => deepEq(RM.resolveHash('#abc:' + RK, [], ephOf({})), { room: 'abc', key: RK, kv: 1, imported: true }));
+check('rooms: an imported link that matches a saved room keeps its kv', () => deepEq(RM.resolveHash('#abc:' + RK, [{ room: 'abc', key: RK, kv: 2 }], ephOf({})), { room: 'abc', key: RK, kv: 2, imported: true }));
+check('rooms: a bare name resolves to the saved key', () => deepEq(RM.resolveHash('#abc', [{ room: 'abc', key: RK, kv: 2 }], ephOf({})), { room: 'abc', key: RK, kv: 2, imported: false }));
+check('rooms: a bare ephemeral name resolves from this tab', () => deepEq(RM.resolveHash('#!tmp', [], ephOf({ '!tmp': { key: RK, kv: 2 } })), { room: '!tmp', key: RK, kv: 2, imported: false }));
+check('rooms: an unknown bare name joins without a key', () => deepEq(RM.resolveHash('#open', [], ephOf({})), { room: 'open', key: null, kv: 1, imported: false }));
+check('rooms: DM and invite hashes are not resolved here', () => {
+  eq(RM.resolveHash('#dm-x:' + RK, [], ephOf({})), null);
+  eq(RM.resolveHash('#!dm-x:' + RK, [], ephOf({})), null);
+  eq(RM.resolveHash('#:i1.abc', [], ephOf({})), null);
+  eq(RM.resolveHash('', [], ephOf({})), null);
+  eq(RM.resolveHash('#', [], ephOf({})), null);
+});
+check('rooms: an encoded room name resolves decoded', () => deepEq(RM.resolveHash('#Trip%20photos', [{ room: 'Trip photos', key: RK }], ephOf({})), { room: 'Trip photos', key: RK, kv: 1, imported: false }));
+check('rooms: the tab key memory keeps the newest 20', () => {
+  const st = new MemoryStorage();
+  const e = RM.ephKeys(st);
+  for (let i = 0; i < 25; i++) e.set('!r' + i, RK, 2);
+  eq(e.get('!r0'), null);
+  deepEq(e.get('!r24'), { key: RK, kv: 2 });
+  deepEq(RM.ephKeys(st).get('!r24'), { key: RK, kv: 2 });
+});
+check('rooms: a broken tab key memory reads as empty', () => {
+  const st = new MemoryStorage();
+  st.setItem('mentria.comms.ephkeys', '{nope');
+  eq(RM.ephKeys(st).get('!x'), null);
+  eq(RM.ephKeys(null).get('!x'), null);
+});
+
+const rawOf = (k) => Buffer.from(k.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+const nodeHkdfVectors = (k, room) => {
+  const ikm = rawOf(k);
+  const sub = (info) => Buffer.from(hkdfSync('sha256', ikm, Buffer.from('mentria-room-v2'), Buffer.from(info), 32));
+  const topic = sub('topic');
+  return {
+    chat: sub('chat').toString('base64url'),
+    topic: topic.toString('base64url'),
+    signal: sub('signal').toString('base64url'),
+    files: sub('files').toString('base64url'),
+    topicTag: createHmac('sha256', topic).update('mentria-comms-topic-v2|' + room).digest('base64url')
+  };
+};
+const exportRaw = async (key) => new Uint8Array(await crypto.subtle.exportKey('raw', key));
+check("keys: a v1 room keeps today's chat key, topic and password", async () => {
+  const k = await W.roomKeys(FIX.key, 1);
+  eq(await W.chatTopicFor('mentria-test-room', FIX.key, 1), FIX.topic);
+  eq(await W.chatTopicFor('mentria-test-room', FIX.key), FIX.topic);
+  eq(k.password, FIX.key);
+  eq(await W.decryptText(k.chatKey, FIX.enc), 'golden plaintext');
+  eq(Buffer.from(k.topicRaw).toString('base64'), FIX.key);
+  eq(Buffer.from(k.filesIkm).toString('base64'), FIX.key);
+});
+check('keys: a v2 room splits chat, topic, signal and files keys', async () => {
+  const want = nodeHkdfVectors(FIX.key, 'mentria-test-room');
+  const k = await W.roomKeys(FIX.key, 2, { extractable: true });
+  eq(Buffer.from(await exportRaw(k.chatKey)).toString('base64url'), want.chat);
+  eq(Buffer.from(k.topicRaw).toString('base64url'), want.topic);
+  eq(k.password, want.signal);
+  eq(Buffer.from(k.filesIkm).toString('base64url'), want.files);
+  eq(await W.chatTopicFor('mentria-test-room', FIX.key, 2), want.topicTag);
+  ok(want.topicTag !== FIX.topic);
+});
+check('keys: a v2 room never hands the chat key to signalling', async () => {
+  const want = nodeHkdfVectors(FIX.key, 'r');
+  const k = await W.roomKeys(FIX.key, 2);
+  ok(k.password !== FIX.key && k.password !== want.chat && k.password !== FIX.key.replace(/=+$/, ''));
+  eq(new Set([want.chat, want.topic, want.signal, want.files]).size, 4);
+});
+check('keys: a bad key gives nothing', async () => { eq(await W.roomKeys('short', 2), null); eq(await W.roomKeys('', 1), null); eq(await W.chatTopicFor('r', 'short', 2), null); });
+check('files: a v2 room derives its files room from the files key', async () => {
+  const one = await F.filesRoomFor('r', FIX.key, 1);
+  const two = await F.filesRoomFor('r', FIX.key, 2);
+  deepEq(one, await F.filesRoomFor('r', FIX.key));
+  ok(one.roomId !== two.roomId && one.password !== two.password);
+  deepEq(two, await F.filesRoomFor('r', FIX.key, 2));
+});
+
+const memStore = () => { const m = new Map(); return { get: (ns, k) => (m.has(ns + '.' + k) ? structuredClone(m.get(ns + '.' + k)) : null), set: (ns, k, v) => { m.set(ns + '.' + k, structuredClone(v)); return true; }, remove: (ns, k) => m.delete(ns + '.' + k) }; };
+check('sign: a signed body verifies in its room', async () => { const v = await SG.verifyBody(VEC.signed, VEC.room, VEC.cmid); eq(v.ok, true); eq(v.sigFp, await SG.sigFingerprint(VEC.spub)); eq(v.ts, VEC.ts); deepEq(v.spub, VEC.spub); });
+check('sign: a body replayed into another room fails', async () => eq((await SG.verifyBody(VEC.signed, 'other-room', VEC.cmid)).ok, false));
+check('sign: a changed text, part or ctl fails', async () => { for (const k of [{ t: 'hellO' }, { p: [{ type: 'text', text: 'x' }] }, { ctl: { k: 'ring' } }]) eq((await SG.verifyBody({ ...VEC.signed, ...k }, VEC.room, VEC.cmid)).ok, false); });
+check('sign: a cmid or time change fails', async () => { eq((await SG.verifyBody(VEC.signed, VEC.room, 'abc:2')).ok, false); eq((await SG.verifyBody({ ...VEC.signed, sg: { ...VEC.signed.sg, ts: VEC.ts + 1 } }, VEC.room, VEC.cmid)).ok, false); });
+check('sign: an unsigned or malformed body is not verified', async () => { eq((await SG.verifyBody(VEC.body, VEC.room, VEC.cmid)).ok, false); eq((await SG.verifyBody({ ...VEC.signed, sg: { pub: { x: 'a', y: 'b' }, ts: 1, s: 'zz' } }, VEC.room, VEC.cmid)).ok, false); eq((await SG.verifyBody(null, VEC.room, VEC.cmid)).ok, false); eq((await SG.verifyBody({ ...VEC.signed, sg: 'x' }, VEC.room, VEC.cmid)).ok, false); });
+check('sign: a fresh signature round-trips', async () => {
+  const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const j = await crypto.subtle.exportKey('jwk', kp.publicKey);
+  const out = await SG.signBody(kp.privateKey, { x: j.x, y: j.y }, 'r', 'c:1', { v: 2, t: 'x', p: [{ type: 'text', text: 'y' }] }, 5);
+  deepEq(Object.keys(out), ['v', 't', 'p', 'sg']);
+  eq(out.sg.ts, 5);
+  eq((await SG.verifyBody(JSON.parse(JSON.stringify(out)), 'r', 'c:1')).ok, true);
+});
+check('sign: signing fingerprints differ from identity fingerprints', async () => { const a = await SG.sigFingerprint(VEC.spub); ok(/^[a-z0-9]{4}-[a-z0-9]{4}$/.test(a)); ok(a !== await CIDM.fingerprint(VEC.spub)); });
+check('id: the signing key is created once and kept in idkeys', async () => {
+  fakeIdentity({ unlocked: true });
+  window.MentriaStore = memStore();
+  await CIDM.ensureKeypair();
+  const before = MentriaStore.get('comms', 'idkeys');
+  const a = await CIDM.ensureSigningKey();
+  const b = await CIDM.ensureSigningKey();
+  eq(a.sigFp, b.sigFp);
+  deepEq(a.spub, b.spub);
+  eq(a.sigFp, await SG.sigFingerprint(a.spub));
+  const after = MentriaStore.get('comms', 'idkeys');
+  deepEq(after.pub, before.pub);
+  deepEq(after.wrapped, before.wrapped);
+  ok(after.sign && after.sign.wrapped && after.sign.wrapped.ct);
+  deepEq({ x: after.sign.pub.x, y: after.sign.pub.y }, a.spub);
+  const out = await SG.signBody(a.signKey, a.spub, 'r', 'c', { v: 2, t: 'q' });
+  eq((await SG.verifyBody(out, 'r', 'c')).ok, true);
+  deepEq((await CIDM.ensureKeypair()).publicJwk, before.pub);
+});
+check('id: a contact code carries the signing key and old codes still read', () => {
+  const code = CIDM.encodeContactCode({ name: 'A' }, { x: 'X', y: 'Y' }, null, { spub: { x: 'SX', y: 'SY' }, s: 'sig' });
+  ok(code.startsWith('MC1.'));
+  deepEq(CIDM.decodeContactCode(code).spub, { x: 'SX', y: 'SY' });
+  eq(CIDM.decodeContactCode(code).ssig, 'sig');
+  const old = CIDM.encodeContactCode({ name: 'A' }, { x: 'X', y: 'Y' }, 'ring1234567890123456789');
+  eq(CIDM.decodeContactCode(old).spub, undefined);
+  eq(CIDM.decodeContactCode(old).ring, 'ring1234567890123456789');
+});
+check('id: contacts keep a signing key and a newer one replaces it', async () => {
+  window.MentriaStore = memStore();
+  const P = { x: 'X1', y: 'Y1' };
+  const k1 = await memberSig(); const k2 = await memberSig(); const k3 = await memberSig();
+  await CIDM.addContact({ name: 'B', pub: P, spub: k1.spub, ssig: await SG.signLink(k1.key, P) });
+  deepEq(CIDM.contactByPub(P).spub, k1.spub);
+  await CIDM.addContact({ name: 'B', pub: P, spub: k2.spub, ssig: await SG.signLink(k2.key, P), annTs: 5 });
+  deepEq(CIDM.contactByPub(P).spub, k2.spub);
+  await CIDM.addContact({ name: 'B', pub: P, spub: k3.spub, ssig: await SG.signLink(k3.key, P), annTs: 4 });
+  deepEq(CIDM.contactByPub(P).spub, k2.spub);
+  await CIDM.addContact({ name: 'B', pub: P, spub: { x: 1, y: 2 }, annTs: 9 });
+  deepEq(CIDM.contactByPub(P).spub, k2.spub);
+});
+check('wire: unpack keeps the signature and the parsed body', () => { const u = W.unpackChatPlain(JSON.stringify(VEC.signed)); deepEq(u.sg, VEC.signed.sg); eq(u.obj.t, 'hello'); eq(u.text, 'hello'); eq(W.unpackChatPlain('{"v":2,"t":"x"}').sg, null); });
+check('wire: packChatBody is what packChatPlain writes', () => { eq(JSON.stringify(W.packChatBody('hi', { fp: 'B', legacyFp: 'A' })), FIX.pack); eq(W.packChatPlain('hi', { fp: 'B', legacyFp: 'A' }), FIX.pack); });
+
+const INV_TOKEN = 'AAECAwQFBgcICQoLDA0ODw';
+const nodeInvite = (token) => {
+  const ikm = Buffer.from(token, 'base64url');
+  const sub = (info, n) => Buffer.from(hkdfSync('sha256', ikm, Buffer.from('mentria-invite-v1'), Buffer.from(info), n));
+  return { topic: createHmac('sha256', sub('invite-topic', 32)).update('mentria-invite-v1').digest('base64url'), id: sub('invite-id', 9).toString('base64url'), sk: sub('invite-nostr', 32).toString('hex') };
+};
+const invBody = (over = {}) => Object.assign({ v: 1, room: 'trip', key: RK, kv: 2, label: 'Trip', by: { name: 'Alice', pub: { x: 'X', y: 'Y' } }, exp: Math.floor(Date.now() / 1000) + 3600, once: true }, over);
+class FakeSock {
+  constructor(reply) { this.reply = reply; this.sent = []; this.ls = new Set(); }
+  addEventListener(t, fn) { if (t === 'message') this.ls.add(fn); }
+  removeEventListener(t, fn) { this.ls.delete(fn); }
+  emit(m) { for (const fn of [...this.ls]) fn({ data: JSON.stringify(m), target: this }); }
+  send(s) { this.sent.push(s); const m = JSON.parse(s); if (m[0] === 'REQ' && this.reply) this.reply(this, m[1]); }
+}
+check('invite: a token makes a 22-character link that parses back', () => {
+  const t = IV.newInviteToken();
+  ok(/^[A-Za-z0-9_-]{22}$/.test(t));
+  eq(IV.inviteUrl('https://mentria.ai', t), 'https://mentria.ai/comms/#:i1.' + t);
+  eq(IV.parseInvite(IV.inviteUrl('https://mentria.ai/', t)), t);
+  eq(IV.parseInvite('#:i1.' + t), t);
+  eq(IV.parseInvite('i1.' + t), t);
+  eq(IV.parseInvite('  ' + IV.inviteUrl('https://beta.mentria.ai', t) + '  '), t);
+  eq(IV.parseInvite('#room:' + RK), null);
+  eq(IV.parseInvite('#:i1.short'), null);
+  eq(IV.parseInvite(''), null);
+});
+check('invite: keys match the independent derivation', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const want = nodeInvite(INV_TOKEN);
+  eq(k.topic, want.topic);
+  eq(k.id, want.id);
+  eq(Buffer.from(k.sk).toString('hex'), want.sk);
+  eq(k.id.length, 12);
+  eq(await IV.inviteKeys('nope'), null);
+});
+check('invite: a sealed body opens with its token', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const body = invBody();
+  const opened = await IV.openInvite(k.aes, await IV.sealInvite(k.aes, body));
+  eq(opened.room, 'trip'); eq(opened.key, RK); eq(opened.kv, 2); eq(opened.label, 'Trip'); eq(opened.by.name, 'Alice'); deepEq(opened.by.pub, { x: 'X', y: 'Y' }); eq(opened.once, true);
+});
+check('invite: a wrong token or tampered envelope opens as null', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const other = await IV.inviteKeys(IV.newInviteToken());
+  const sealed = await IV.sealInvite(k.aes, invBody());
+  eq(await IV.openInvite(other.aes, sealed), null);
+  const env = JSON.parse(sealed);
+  const ct = Buffer.from(env.ct, 'base64url'); ct[3] ^= 1;
+  eq(await IV.openInvite(k.aes, JSON.stringify({ ...env, ct: ct.toString('base64url') })), null);
+  eq(await IV.openInvite(k.aes, '{}'), null);
+  eq(await IV.openInvite(k.aes, 'not json'), null);
+  eq(await IV.openInvite(k.aes, null), null);
+});
+check('invite: an expired or malformed body opens as null', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  for (const over of [{ exp: Math.floor(Date.now() / 1000) - 5 }, { kv: 3 }, { room: '' }, { room: 'x'.repeat(65) }, { key: 'AAEC' }, { key: Buffer.alloc(31).toString('base64url') }, { v: 2 }]) {
+    eq(await IV.openInvite(k.aes, await IV.sealInvite(k.aes, invBody(over))), null);
+  }
+});
+check('invite: the envelope expires in 24 hours and the deletion names it', () => {
+  const t = IV.envelopeTemplate('topic', 'c', 1000);
+  deepEq(t, { kind: 3838, created_at: 1000, tags: [['x', 'topic'], ['expiration', String(1000 + 86400)]], content: 'c' });
+  deepEq(IV.deletionTemplate('ev1', 2000), { kind: 5, created_at: 2000, tags: [['e', 'ev1'], ['k', '3838']], content: '' });
+});
+check('invite: a slow first socket still finds the envelope', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const content = await IV.sealInvite(k.aes, invBody());
+  const silent = new FakeSock(null);
+  const slow = new FakeSock((ws, sub) => setTimeout(() => ws.emit(['EVENT', sub, { id: 'ev9', content }]), 40));
+  const t0 = Date.now();
+  const got = await IV.fetchInvite([silent, slow], k.topic, k.aes, { timeoutMs: 600, retryMs: 60 });
+  ok(got && got.status === 'found' && got.evId === 'ev9' && got.body.room === 'trip');
+  ok(Date.now() - t0 < 400);
+  ok(silent.sent.some((s) => JSON.parse(s)[0] === 'CLOSE'));
+});
+check('invite: nothing found resolves null after the relays say so', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const empty = () => new FakeSock((ws, sub) => setTimeout(() => ws.emit(['EOSE', sub]), 5));
+  const t0 = Date.now();
+  eq((await IV.fetchInvite([empty(), empty()], k.topic, k.aes, { timeoutMs: 5000, retryMs: 3000 })).status, 'gone');
+  ok(Date.now() - t0 < 1500);
+  eq((await IV.fetchInvite([new FakeSock(null)], k.topic, k.aes, { timeoutMs: 80, retryMs: 40 })).status, 'offline');
+  eq((await IV.fetchInvite([], k.topic, k.aes)).status, 'offline');
+});
+check('invite: junk events under the topic are skipped', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const content = await IV.sealInvite(k.aes, invBody());
+  const s = new FakeSock((ws, sub) => { ws.emit(['EVENT', sub, { id: 'junk', content: 'garbage' }]); setTimeout(() => ws.emit(['EVENT', sub, { id: 'good', content }]), 10); });
+  eq((await IV.fetchInvite([s], k.topic, k.aes, { timeoutMs: 500 })).evId, 'good');
+});
+check('members: two signers on one invite are a double use', () => {
+  const e = { room: 'r' };
+  eq(MB.noteJoined(e, { k: 'joined', inv: 'i1', name: 'B', jid: 'j1' }, 'fpB').twice, null);
+  deepEq(MB.noteJoined(e, { k: 'joined', inv: 'i1', name: 'C', jid: 'j2' }, 'fpC').twice, ['B', 'C']);
+  deepEq(MB.noteJoined(e, { k: 'joined', inv: 'i1', name: 'C', jid: 'j2' }, 'fpC').twice, ['B', 'C']);
+});
+check('members: the same signer twice is not a double use', () => {
+  const e = { room: 'r' };
+  MB.noteJoined(e, { inv: 'i1', name: 'B', jid: 'j1' }, 'fpB');
+  eq(MB.noteJoined(e, { inv: 'i1', name: 'B phone', jid: 'j9' }, 'fpB').twice, null);
+});
+check('members: two guests are told apart by jid', () => {
+  const e = { room: 'r' };
+  MB.noteJoined(e, { inv: 'i1', name: 'G1', jid: 'a' }, null);
+  deepEq(MB.noteJoined(e, { inv: 'i1', name: 'G2', jid: 'b' }, null).twice, ['G1', 'G2']);
+  eq(MB.noteJoined(e, { inv: 'i2', name: 'x' }, null).twice, null);
+  eq(MB.noteJoined(e, { name: 'x', jid: 'c' }, 'fp').twice, null);
+});
+check('members: members are kept newest first, at most 50, without me', () => {
+  const e = { room: 'r' };
+  for (let i = 0; i < 55; i++) MB.noteMember(e, { sigFp: 'fp' + i, name: 'N' + String(i).padStart(2, '0'), pub: { x: 'x' + i, y: 'y' }, ts: i });
+  eq(Object.keys(e.members).length, 50);
+  ok(!e.members.fp0 && !!e.members.fp54);
+  const list = MB.membersOf(e, 'fp54');
+  eq(list.length, 49);
+  eq(list[0].name, 'N05');
+  deepEq(list[0].pub, { x: 'x5', y: 'y' });
+});
+check('members: a rekey from a member of the room is accepted', () => {
+  const e = { room: 'r' };
+  MB.noteMember(e, { sigFp: 'fpA', name: 'A', spub: { x: 'SX', y: 'SY' }, ts: 1 });
+  eq(MB.acceptRekey(e, { kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts: 5 }, { sigFp: 'fpA', spub: { x: 'SX', y: 'SY' } }), true);
+});
+check('members: a rekey from a non-member or for an unknown room is refused', () => {
+  const e = { room: 'r' };
+  const A = { sigFp: 'fpA', spub: { x: 'SX', y: 'SY' } };
+  MB.noteMember(e, { sigFp: 'fpA', name: 'A', spub: A.spub, ts: 1 });
+  const good = { kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts: 5 };
+  eq(MB.acceptRekey(e, good, { sigFp: 'fpZ', spub: A.spub }), false);
+  eq(MB.acceptRekey(e, good, null), false);
+  eq(MB.acceptRekey(null, good, A), false);
+  eq(MB.acceptRekey(e, { ...good, room: 'other' }, A), false);
+  eq(MB.acceptRekey(e, { ...good, key: 'AAEC' }, A), false);
+  eq(MB.acceptRekey(e, { ...good, kv: 1 }, A), false);
+  eq(MB.acceptRekey(e, { ...good, kind: 'room-invite' }, A), false);
+});
+
+check('home: room invites sit with requests at the top', () => {
+  const rows = H.homeRows({ requests: [{ fp: 'f1', name: 'Req' }], roomInvites: [{ room: 'r9', label: 'Trip', name: 'Alice', key: 'k' }], contacts: [{ fp: 'c1', name: 'Zed' }], rooms: [{ room: 'r1', label: 'One' }], threads: [] });
+  deepEq(rows.slice(0, 2).map((r) => r.kind), ['request', 'invite']);
+  eq(rows[1].key, 'inv:r9');
+  eq(rows[1].title, 'Trip');
+  eq(H.homeRows({ roomInvites: [{ room: 'r9', label: 'Trip' }] }, { filter: 'ai' }).length, 0);
+  eq(H.homeRows({ roomInvites: [{ room: 'r9', label: 'Trip' }] }, { filter: 'people' }).length, 1);
+});
+
+check('members: a signed rekey still verifies after the inbox adds its proof', async () => {
+  fakeIdentity({ unlocked: true });
+  window.MentriaStore = memStore();
+  await CIDM.ensureKeypair();
+  const me = await CIDM.ensureSigningKey();
+  const ts = 1762500000123;
+  const payload = { v: 1, kind: 'room-rekey', name: 'A', pub: { x: 'X', y: 'Y' }, ts, room: 'r', key: RK, kv: 2, label: 'R' };
+  const signed = await SG.signBody(me.signKey, me.spub, 'r', 'inbox:' + ts, payload);
+  const opened = JSON.parse(JSON.stringify(Object.assign({}, signed, { proof: 'p' })));
+  opened.verified = true;
+  eq((await SG.verifyBody(opened, 'r', 'inbox:' + ts)).ok, false);
+  const v = await SG.verifyBody(MB.inboxBody(opened), 'r', 'inbox:' + ts);
+  eq(v.ok, true);
+  eq(v.sigFp, me.sigFp);
+  deepEq(Object.keys(MB.inboxBody(opened)), Object.keys(signed));
+});
+
+const memberSig = async () => { const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']); const j = await crypto.subtle.exportKey('jwk', kp.publicKey); const spub = { x: j.x, y: j.y }; return { key: kp.privateKey, spub, sigFp: await SG.sigFingerprint(spub) }; };
+check('fix C1: an older or replayed rekey is refused', async () => {
+  const a = await memberSig();
+  const e = { room: 'r', keyTs: 5000 };
+  MB.noteMember(e, { sigFp: a.sigFp, name: 'A', spub: a.spub, ts: 1 });
+  const p = (ts) => ({ kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts });
+  eq(MB.rekeyDecision(e, p(4000), { sigFp: a.sigFp, spub: a.spub }, null), 'ignore');
+  eq(MB.rekeyDecision(e, p(5000), { sigFp: a.sigFp, spub: a.spub }, null), 'ignore');
+  eq(MB.rekeyDecision(e, p(6000), { sigFp: a.sigFp, spub: a.spub }, null), 'offer');
+  eq(MB.rekeyDecision(e, p(6000), { sigFp: a.sigFp, spub: a.spub }, a.spub), 'apply');
+  eq(MB.rekeyDecision(e, p(4000), { sigFp: a.sigFp, spub: a.spub }, a.spub), 'ignore');
+  eq(MB.rekeyDecision({ room: 'r', key: RK, keyTs: 1 }, p(6000), { sigFp: a.sigFp, spub: a.spub }, a.spub), 'ignore');
+});
+check("fix I1: a rekey needs the member's full signing key, not just its fingerprint", async () => {
+  const a = await memberSig();
+  const e = { room: 'r' };
+  MB.noteMember(e, { sigFp: a.sigFp, name: 'A', spub: a.spub, ts: 1 });
+  const p = { kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts: 10 };
+  eq(MB.rekeyDecision(e, p, { sigFp: a.sigFp, spub: { x: 'lookalike', y: a.spub.y } }, null), 'ignore');
+  eq(MB.rekeyDecision(e, p, { sigFp: a.sigFp, spub: a.spub }, { x: 'mine', y: a.spub.y }), 'offer');
+  const bare = { room: 'r' };
+  MB.noteMember(bare, { sigFp: a.sigFp, name: 'A', ts: 1 });
+  eq(MB.rekeyDecision(bare, p, { sigFp: a.sigFp, spub: a.spub }, null), 'ignore');
+});
+check('fix I4: a rekey keeps only the listed members and the sender', () => {
+  const e = { room: 'r' };
+  for (const fp of ['a', 'b', 'c', 'me']) MB.noteMember(e, { sigFp: fp, name: fp, ts: 1 });
+  MB.keepMembers(e, ['b', 'me'], 'a');
+  deepEq(Object.keys(e.members).sort(), ['a', 'b', 'me']);
+  MB.keepMembers(e, 'junk', 'a');
+  deepEq(Object.keys(e.members).sort(), ['a', 'b', 'me']);
+});
+check('fix I5: an envelope from another author is ignored', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const content = await IV.sealInvite(k.aes, invBody());
+  const s = new FakeSock((ws, sub) => { ws.emit(['EVENT', sub, { id: 'copy', pubkey: 'eve', content }]); setTimeout(() => ws.emit(['EVENT', sub, { id: 'real', pubkey: 'pk1', content }]), 10); });
+  const got = await IV.fetchInvite([s], k.topic, k.aes, { timeoutMs: 500, author: 'pk1' });
+  eq(got.status, 'found');
+  eq(got.evId, 'real');
+  deepEq(JSON.parse(s.sent[0])[2].authors, ['pk1']);
+});
+check('fix I7: no relay answering is offline, not gone', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  eq((await IV.fetchInvite([], k.topic, k.aes)).status, 'offline');
+  eq((await IV.fetchInvite([new FakeSock(null)], k.topic, k.aes, { timeoutMs: 80, retryMs: 40 })).status, 'offline');
+  const empty = new FakeSock((ws, sub) => setTimeout(() => ws.emit(['EOSE', sub]), 5));
+  eq((await IV.fetchInvite([empty, new FakeSock(null)], k.topic, k.aes, { timeoutMs: 600, retryMs: 30 })).status, 'gone');
+});
+check('fix I2: a link proves the signing key belongs to the identity key', async () => {
+  const a = await memberSig();
+  const pub = { x: 'PX', y: 'PY' };
+  const s = await SG.signLink(a.key, pub);
+  eq(await SG.verifyLink(pub, a.spub, s), true);
+  eq(await SG.verifyLink({ x: 'QX', y: 'PY' }, a.spub, s), false);
+  const b = await memberSig();
+  eq(await SG.verifyLink(pub, b.spub, s), false);
+  eq(await SG.verifyLink(pub, a.spub, 'junk'), false);
+  eq(await SG.verifyLink(pub, a.spub, undefined), false);
+});
+check('fix I2: a contact signing key without a valid link is ignored', async () => {
+  window.MentriaStore = memStore();
+  const a = await memberSig();
+  const pub = { x: 'X7', y: 'Y7' };
+  await CIDM.addContact({ name: 'Eve', pub, spub: a.spub });
+  eq(CIDM.contactByPub(pub).spub, undefined);
+  await CIDM.addContact({ name: 'Eve', pub, spub: a.spub, ssig: 'bad', annTs: 3 });
+  eq(CIDM.contactByPub(pub).spub, undefined);
+  await CIDM.addContact({ name: 'Eve', pub, spub: a.spub, ssig: await SG.signLink(a.key, pub), annTs: 4 });
+  deepEq(CIDM.contactByPub(pub).spub, a.spub);
+  const code = CIDM.encodeContactCode({ name: 'A' }, pub, null, { spub: a.spub, s: await SG.signLink(a.key, pub) });
+  const dec = CIDM.decodeContactCode(code);
+  deepEq(dec.spub, a.spub);
+  eq(await SG.verifyLink(pub, dec.spub, dec.ssig), true);
+});
+check('fix I8: a files room whose key changes is rejoined', async () => {
+  const joined = [];
+  const fr = new F.FilesRooms({ transfers: stubT(), join: (id) => { joined.push(id); return stubRoom(); }, max: 6 });
+  await fr.sync([{ id: 't1', roomName: 'r', b64Key: KEY, kv: 2, priority: 1 }]);
+  await fr.sync([{ id: 't1', roomName: 'r', b64Key: KEY, kv: 2, priority: 1 }]);
+  eq(joined.length, 1);
+  await fr.sync([{ id: 't1', roomName: 'r', b64Key: KEY2, kv: 2, priority: 1 }]);
+  eq(joined.length, 2);
+  ok(joined[0] !== joined[1]);
 });
 
 let failed = 0;

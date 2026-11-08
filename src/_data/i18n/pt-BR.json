@@ -5822,6 +5822,53 @@
         "asleep": "em repouso",
         "stopped": "Seu {device} parou de responder.",
         "finish": "Terminar neste dispositivo"
+      },
+      "sign": {
+        "verified": "Verificado: assinado com a chave de identidade",
+        "my_key": "Chave de assinatura {fp}"
+      },
+      "invite": {
+        "copied": "Link de convite copiado. Funciona uma vez, por 24 horas.",
+        "join_title": "Entrar em {label}?",
+        "by": "Convite de {name} {fp}",
+        "join": "Entrar",
+        "not_now": "Agora não",
+        "ios": "Usando o app da tela de início? Copie este convite e cole lá.",
+        "copy": "Copiar convite",
+        "copied_short": "Copiado",
+        "looking": "Procurando o convite…",
+        "gone": "Este convite expirou ou já foi usado. Peça um novo.",
+        "used": "Você entrou com um convite; ele não pode ser usado de novo.",
+        "joined": "{name} entrou com um convite",
+        "old_link": "Link antigo: nunca expira. Crie um novo convite para compartilhar.",
+        "make": "Novo convite",
+        "dismiss": "Fechar",
+        "twice_mine": "Seu link de convite foi usado duas vezes: {a}, {b}.",
+        "twice": "O link de convite desta sala foi usado duas vezes: {a}, {b}.",
+        "contact": "Convidar um contato",
+        "pick": "Convidar para esta sala",
+        "sent": "Convite enviado para {name}.",
+        "from": "{name} convidou você para {label}",
+        "no_contacts": "Adicione um contato primeiro.",
+        "retry": "Tentar de novo",
+        "offline_fetch": "Não foi possível alcançar o relay agora. Verifique sua conexão e tente de novo.",
+        "replace_key": "Você já tem {label} com outra chave. Trocar pela chave deste link?",
+        "making": "Criando um convite…",
+        "ready": "Convite pronto",
+        "ready_note": "Funciona uma vez, por 24 horas.",
+        "share": "Compartilhar",
+        "copy_link": "Copiar link"
+      },
+      "roomlock": {
+        "title": "Trancar {label}",
+        "note": "Quem você mantiver recebe uma chave nova na caixa de entrada. Os demais perdem a sala a partir de agora.",
+        "go": "Trancar sala",
+        "short": "Trancar",
+        "done": "Sala trancada. {n} pessoas receberam a chave nova.",
+        "offer": "{name} trancou {label}. Usar a chave nova?",
+        "use": "Usar",
+        "gone": "{name} trancou esta sala. Peça um novo convite.",
+        "none": "Ninguém assinou nesta sala ainda, então só os seus dispositivos a mantêm."
       }
     },
     "scanner": {

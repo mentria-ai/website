@@ -5822,6 +5822,53 @@
         "asleep": "en veille",
         "stopped": "Votre {device} a cessé de répondre.",
         "finish": "Terminer sur cet appareil"
+      },
+      "sign": {
+        "verified": "Vérifié : signé avec sa clé d'identité",
+        "my_key": "Clé de signature {fp}"
+      },
+      "invite": {
+        "copied": "Lien d'invitation copié. Il marche une fois, pendant 24 heures.",
+        "join_title": "Rejoindre {label} ?",
+        "by": "Invitation de {name} {fp}",
+        "join": "Rejoindre",
+        "not_now": "Plus tard",
+        "ios": "Vous utilisez l'app de l'écran d'accueil ? Copiez cette invitation et collez-la là-bas.",
+        "copy": "Copier l'invitation",
+        "copied_short": "Copiée",
+        "looking": "Recherche de l'invitation…",
+        "gone": "Cette invitation a expiré ou a déjà servi. Demandez-en une nouvelle.",
+        "used": "Vous avez rejoint avec une invitation ; elle ne peut plus servir.",
+        "joined": "{name} a rejoint avec une invitation",
+        "old_link": "Ancien lien : il n'expire jamais. Créez une nouvelle invitation pour partager.",
+        "make": "Nouvelle invitation",
+        "dismiss": "Fermer",
+        "twice_mine": "Votre lien d'invitation a servi deux fois : {a}, {b}.",
+        "twice": "Le lien d'invitation de ce salon a servi deux fois : {a}, {b}.",
+        "contact": "Inviter un contact",
+        "pick": "Inviter dans ce salon",
+        "sent": "Invitation envoyée à {name}.",
+        "from": "{name} vous invite dans {label}",
+        "no_contacts": "Ajoutez d'abord un contact.",
+        "retry": "Réessayer",
+        "offline_fetch": "Impossible de joindre le relais pour le moment. Vérifiez votre connexion et réessayez.",
+        "replace_key": "Vous avez déjà {label} avec une autre clé. La remplacer par la clé de ce lien ?",
+        "making": "Création d'une invitation…",
+        "ready": "Invitation prête",
+        "ready_note": "Elle marche une fois, pendant 24 heures.",
+        "share": "Partager",
+        "copy_link": "Copier le lien"
+      },
+      "roomlock": {
+        "title": "Verrouiller {label}",
+        "note": "Chaque personne gardée reçoit une nouvelle clé dans sa boîte. Les autres perdent le salon dès maintenant.",
+        "go": "Verrouiller le salon",
+        "short": "Verrouiller",
+        "done": "Salon verrouillé. {n} personnes ont reçu la nouvelle clé.",
+        "offer": "{name} a verrouillé {label}. Utiliser la nouvelle clé ?",
+        "use": "Utiliser",
+        "gone": "{name} a verrouillé ce salon. Demandez-lui une nouvelle invitation.",
+        "none": "Personne n'a encore signé dans ce salon, seuls vos appareils le gardent."
       }
     },
     "scanner": {

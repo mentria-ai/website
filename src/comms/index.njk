@@ -40,6 +40,33 @@ unlockTool: true
 
 <section class="comms">
   <h1 class="sr-only">{{ 'tools.comms.title' | t }}</h1>
+  <div class="comms__picker comms__lock" id="comms-lock" hidden>
+    <div class="comms__picker-backdrop" data-lock-close></div>
+    <div class="comms__picker-card" role="dialog" aria-modal="true" aria-labelledby="comms-lock-title">
+      <h3 class="comms__picker-h" id="comms-lock-title"></h3>
+      <p class="comms__invite-by">{{ 'tool.comms.roomlock.note' | t }}</p>
+      <div class="comms__lock-list" id="comms-lock-list"></div>
+      <div class="comms__picker-actions comms__invite-actions">
+        <button type="button" class="comms__btn comms__btn--ghost" data-lock-close>{{ 'tool.comms.picker.cancel' | t }}</button>
+        <button type="button" class="comms__btn" id="comms-lock-go">{{ 'tool.comms.roomlock.go' | t }}</button>
+      </div>
+    </div>
+  </div>
+  <div class="comms__picker comms__invite" id="comms-invite" hidden>
+    <div class="comms__picker-backdrop"></div>
+    <div class="comms__picker-card" role="dialog" aria-modal="true" aria-labelledby="comms-invite-title">
+      <h3 class="comms__picker-h" id="comms-invite-title"></h3>
+      <p class="comms__invite-by" id="comms-invite-by" hidden></p>
+      <p class="comms__invite-ios" id="comms-invite-ios" hidden><span>{{ 'tool.comms.invite.ios' | t }}</span> <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-copy">{{ 'tool.comms.invite.copy' | t }}</button></p>
+      <div class="comms__picker-actions comms__invite-actions">
+        <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-later">{{ 'tool.comms.invite.not_now' | t }}</button>
+        <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-copylink" hidden>{{ 'tool.comms.invite.copy_link' | t }}</button>
+        <button type="button" class="comms__btn" id="comms-invite-share" hidden>{{ 'tool.comms.invite.share' | t }}</button>
+        <button type="button" class="comms__btn" id="comms-invite-retry" hidden>{{ 'tool.comms.invite.retry' | t }}</button>
+        <button type="button" class="comms__btn" id="comms-invite-join" hidden>{{ 'tool.comms.invite.join' | t }}</button>
+      </div>
+    </div>
+  </div>
   <div class="comms__onboard" id="comms-onboard" hidden>
     <div class="comms__onboard-step" id="comms-onboard-insecure" hidden>
       <h2 class="comms__onboard-h">{{ 'tool.comms.onboard.insecure_title' | t }}</h2>
@@ -184,6 +211,7 @@ unlockTool: true
           <div class="comms__id-card-side">
             <p class="comms__id-note">{{ 'tool.comms.people.code_note' | t }}</p>
             <code class="comms__url comms__url--wrap" id="comms-id-code"></code>
+            <p class="comms__id-note comms__id-sig" id="comms-id-sig" hidden></p>
             <div class="comms__id-card-actions">
             <button class="comms__btn comms__btn--ghost" id="comms-id-copy" type="button">{{ 'tool.comms.people.copy_code' | t }}</button>
             <button class="comms__btn comms__btn--ghost comms__btn--icon" id="comms-id-share-out" type="button" hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-share"></use></svg><span class="comms__btn-t">{{ 'tool.comms.people.share' | t }}</span></button>
@@ -254,6 +282,18 @@ unlockTool: true
         <div class="comms__upgrade comms__histbar" id="comms-hist-bar" role="status" hidden>
           <span class="comms__upgrade-text" id="comms-hist-text"></span>
           <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-hist-reset" type="button" hidden>{{ 'tool.comms.history.start_over' | t }}</button></div>
+        </div>
+        <div class="comms__upgrade comms__histbar" id="comms-oldlink" role="status" hidden>
+          <span class="comms__upgrade-text">{{ 'tool.comms.invite.old_link' | t }}</span>
+          <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-oldlink-make" type="button">{{ 'tool.comms.invite.make' | t }}</button><button class="comms__btn comms__btn--ghost" id="comms-oldlink-close" type="button" aria-label="{{ 'tool.comms.invite.dismiss' | t }}">&times;</button></div>
+        </div>
+        <div class="comms__upgrade comms__histbar" id="comms-twice" role="alert" hidden>
+          <span class="comms__upgrade-text" id="comms-twice-text"></span>
+          <div class="comms__upgrade-actions"><button class="comms__btn comms__btn--ghost" id="comms-twice-lock" type="button">{{ 'tool.comms.roomlock.go' | t }}</button><button class="comms__btn comms__btn--ghost" id="comms-twice-close" type="button" aria-label="{{ 'tool.comms.invite.dismiss' | t }}">&times;</button></div>
+        </div>
+        <div class="comms__upgrade comms__histbar" id="comms-rekey" role="alert" hidden>
+          <span class="comms__upgrade-text" id="comms-rekey-text"></span>
+          <div class="comms__upgrade-actions"><button class="comms__btn" id="comms-rekey-use" type="button">{{ 'tool.comms.roomlock.use' | t }}</button><button class="comms__btn comms__btn--ghost" id="comms-rekey-later" type="button">{{ 'tool.comms.invite.not_now' | t }}</button></div>
         </div>
         <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
       </div>
@@ -493,6 +533,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__who{padding:0 var(--space-1);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-2xs)}
 .comms__who--me{color:var(--term-subtle)}
 .comms__time{margin-left:var(--space-1);color:var(--term-subtle);font-size:var(--text-2xs);font-variant-numeric:tabular-nums}
+.comms__verified{margin-left:var(--space-1);color:var(--accent);font-size:var(--text-2xs)}
 .comms__what{max-width:min(82%,470px);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg);color:var(--term-fg);font-size:.94rem;line-height:1.5;overflow-wrap:anywhere}
 .comms__line--me .comms__what{background:var(--cyan-8);border-color:var(--cyan-15)}
 .comms__line--sys .comms__what{max-width:94%;padding:var(--space-1) 0;background:none;border:0;color:var(--term-subtle);font-family:var(--font-mono);font-size:var(--text-2xs);font-style:normal;text-align:center}
@@ -628,6 +669,11 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__picker-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-md);color:var(--term-fg);font:inherit;font-size:var(--text-sm);text-align:left;cursor:pointer}
 .comms__picker-ver{flex:none;color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
 .comms__picker-actions{display:flex;justify-content:flex-end}
+.comms__invite-actions{gap:var(--space-2)}
+.comms__lock-list{display:flex;flex-direction:column;gap:var(--space-2)}
+.comms__lock-list label{display:flex;align-items:center;gap:var(--space-2);color:var(--term-fg);font-size:var(--text-sm)}
+.comms__invite-by,.comms__invite-ios{margin:0;color:var(--term-muted);font-size:var(--text-sm);overflow-wrap:anywhere}
+.comms__invite-ios{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 
 @media (hover:hover) and (pointer:fine){
   .comms__btn:hover:not(:disabled){background:var(--syn-cyan-soft);box-shadow:var(--glow-cyan-soft)}
@@ -701,7 +747,11 @@ import { TIERS as AI_TIERS, TIER_CHAIN as AI_CHAIN, SMALL_TIER as AI_SMALL, isTi
 import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
-import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, deriveKey, chatTopicFor, expiryTags, encryptText, decryptText, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
+import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
+import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink } from '/assets/js/comms/sign.js';
+import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
+import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
+import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -715,7 +765,6 @@ const TU = {
 const LANG = {{ locale.code | dump | safe }};
 const PREFIX = {{ locale.pathPrefix | dump | safe }};
 const COMMS_PATH = PREFIX + '/comms/';
-const SHARE_PATH = '/comms/';
 const COMMS_HTTPS = 'https://mentria.ai' + COMMS_PATH;
 const own = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
 const fmt = (tpl, vars) => String(tpl).replace(/\{(\w+)\}/g, (m, k) => (own(vars, k) && vars[k] != null ? String(vars[k]) : m));
@@ -754,7 +803,7 @@ const els = {
   idNone: $('comms-id-none'), idLocked: $('comms-id-locked'), idOn: $('comms-id-on'),
   idPass: $('comms-id-pass'), idUnlock: $('comms-id-unlock'), idErr: $('comms-id-err'), idPasskey: $('comms-id-passkey'),
   idName: $('comms-id-name'), idFp: $('comms-id-fp'), idShare: $('comms-id-share'), idContacts: $('comms-id-contacts'),
-  idCard: $('comms-id-card'), idQr: $('comms-id-qr'), idCode: $('comms-id-code'), idCopy: $('comms-id-copy'),
+  idCard: $('comms-id-card'), idQr: $('comms-id-qr'), idCode: $('comms-id-code'), idSig: $('comms-id-sig'), idCopy: $('comms-id-copy'),
   idShareOut: $('comms-id-share-out'),
   contacts: $('comms-contacts'), contactIn: $('comms-contact-in'), contactAdd: $('comms-contact-add'), contactList: $('comms-contacts-list'),
   callStart: $('comms-call-start'), callCam: $('comms-call-cam'), callMic: $('comms-call-mic'), callHangup: $('comms-call-hangup'),
@@ -965,6 +1014,7 @@ let ringTimer = null;
 let ringAccepting = false;
 let callStarting = false;
 let myId = null;
+let mySign = null;
 let myFp = null;
 let myLegacyFp = null;
 const legacyFps = new Map();
@@ -1116,6 +1166,14 @@ const renderLine = (who, what, opts = {}) => {
     w.textContent = hhmmOf(opts.ts);
   } else {
     w.textContent = who;
+    if (opts.verified) {
+      const v = document.createElement('span');
+      v.className = 'comms__verified';
+      v.textContent = '✓';
+      v.title = T.sign.verified;
+      v.setAttribute('aria-label', T.sign.verified);
+      w.append(v);
+    }
     const time = document.createElement('span');
     time.className = 'comms__time';
     time.textContent = hhmmOf(opts.ts);
@@ -1211,37 +1269,466 @@ const renderPendingLine = (text, payload, cmid) => {
   pendingResends++;
 };
 
-const shareUrl = (roomName, b64Key) => {
-  const u = new URL(window.location.href);
-  u.pathname = SHARE_PATH;
-  u.search = '';
-  u.hash = formatHash(roomName, b64Key);
-  return u.toString();
-};
-
 const refreshShareUrl = (roomName) => {
-  els.share.hidden = !roomName || isDmRoom(roomName) || tidOf(roomName) === SELF_THREAD;
+  els.share.hidden = !roomName || isDmRoom(roomName) || tidOf(roomName) === SELF_THREAD || !(joinTarget && joinTarget.room === roomName && joinTarget.key);
+  if (!els.share.hidden) setTimeout(() => { nostrTools().catch(() => {}); }, 1500);
 };
 
-const copyRoomLink = (url) => {
+const relaySockets = () => Object.values(getRelaySockets() || {}).filter((ws) => ws && ws.readyState === 1);
+const publishSigned = async (ev, waitOk = true) => {
+  let side = null;
+  try { side = await ensureSideSocket(); } catch (_) { side = null; }
+  const sockets = [side].concat(relaySockets()).filter((ws, i, all) => ws && all.indexOf(ws) === i);
+  if (!sockets.length) return false;
+  const msg = JSON.stringify(['EVENT', ev]);
+  if (!waitOk) { sockets.forEach((ws) => { try { ws.send(msg); } catch (_) {} }); return true; }
+  return new Promise((resolve) => {
+    let done = false;
+    const on = (e) => {
+      let m;
+      try { m = JSON.parse(e.data); } catch (_) { return; }
+      if (Array.isArray(m) && m[0] === 'OK' && m[1] === ev.id && m[2] === true) finish(true);
+    };
+    const finish = (v) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      sockets.forEach((ws) => { try { ws.removeEventListener('message', on); } catch (_) {} });
+      resolve(v);
+    };
+    const timer = setTimeout(() => finish(false), 6000);
+    sockets.forEach((ws) => { try { ws.addEventListener('message', on); ws.send(msg); } catch (_) {} });
+  });
+};
+let nostrToolsP = null;
+const nostrTools = () => (nostrToolsP = nostrToolsP || import('/assets/vendor/nostr-tools.js').catch((e) => { nostrToolsP = null; throw e; }));
+const dropEnvelope = async (evId, sk) => {
+  if (!evId || !sk) return;
+  try {
+    const { finalizeEvent } = await nostrTools();
+    await publishSigned(finalizeEvent(deletionTemplate(evId, Math.floor(Date.now() / 1000)), sk), false);
+  } catch (_) {}
+};
+
+let lastInviteUrl = null;
+const makeInvite = (roomName, b64Key, kv) => {
+  const token = newInviteToken();
+  const url = inviteUrl(window.location.origin, token);
+  const known = savedRooms().find((r) => r.room === roomName);
+  const label = (known && known.label) || roomName;
+  const published = (async () => {
+    const k = await inviteKeys(token);
+    const now = Math.floor(Date.now() / 1000);
+    const by = { name: (myProfile && myProfile.name) || '' };
+    if (myId) by.pub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
+    if (mySign) by.spub = mySign.spub;
+    const content = await sealInvite(k.aes, { v: 1, room: roomName, key: b64Key, kv: kv === 2 ? 2 : 1, label, by, exp: now + INVITE_TTL_S, once: true });
+    const { finalizeEvent } = await nostrTools();
+    const ev = finalizeEvent(envelopeTemplate(k.topic, content, now), k.sk);
+    if (!(await publishSigned(ev))) return false;
+    const list = savedRooms();
+    const entry = list.find((r) => r.room === roomName);
+    if (entry) {
+      const invites = Object.assign({}, entry.invites || {});
+      for (const [id, v] of Object.entries(invites)) if (!v || (v.exp || 0) * 1000 < Date.now()) delete invites[id];
+      invites[k.id] = { token, evId: ev.id, exp: now + INVITE_TTL_S };
+      const ids = Object.keys(invites);
+      if (ids.length > 10) ids.sort((a, b) => invites[a].exp - invites[b].exp).slice(0, ids.length - 10).forEach((id) => { delete invites[id]; });
+      entry.invites = invites;
+      setSavedRooms(list);
+    }
+    lastInviteUrl = url;
+    return true;
+  })().catch(() => false);
+  return { url, published };
+};
+
+const copyInvite = (url) => {
   const manual = () => sys(fmt(T.chat.link_manual, { url }));
   try {
-    navigator.clipboard.writeText(url).then(() => sys(T.chat.link_copied), manual);
+    navigator.clipboard.writeText(url).then(() => sys(T.invite.copied), manual);
   } catch (_) { manual(); }
 };
 
-els.share.addEventListener('click', () => {
-  if (!currentRoomName || isDmRoom(currentRoomName)) return;
-  const url = shareUrl(currentRoomName, joinTarget && joinTarget.key);
-  if (typeof navigator.share === 'function') {
-    navigator.share({ url }).catch((err) => { if (!err || err.name !== 'AbortError') copyRoomLink(url); });
-    return;
+let outgoingUrl = null;
+let inviteRetry = null;
+const shareInvite = () => {
+  if (!currentRoomName || isDmRoom(currentRoomName) || !joinTarget || joinTarget.room !== currentRoomName || !joinTarget.key) return;
+  hideInvite();
+  const seq = inviteSeq;
+  inviteRetry = shareInvite;
+  showInvite('making');
+  const { url, published } = makeInvite(currentRoomName, joinTarget.key, joinTarget.kv);
+  published.then((ok) => {
+    if (seq !== inviteSeq) return;
+    if (!ok) { showInvite('offline'); return; }
+    outgoingUrl = url;
+    showInvite('out');
+  });
+};
+els.share.addEventListener('click', shareInvite);
+
+const IOS_SAFARI = (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !navigator.standalone && !(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+let inviteSeq = 0;
+let pendingInvite = null;
+const inviteBox = () => document.getElementById('comms-invite');
+const hideInvite = () => {
+  inviteSeq++;
+  pendingInvite = null;
+  const box = inviteBox();
+  if (box) box.hidden = true;
+};
+const showInvite = (state, data = {}) => {
+  const box = inviteBox();
+  if (!box) return;
+  const title = document.getElementById('comms-invite-title');
+  const by = document.getElementById('comms-invite-by');
+  const ready = state === 'ready';
+  const out = state === 'out';
+  title.textContent = state === 'looking' ? T.invite.looking : state === 'making' ? T.invite.making : state === 'gone' ? T.invite.gone : state === 'offline' ? T.invite.offline_fetch : out ? T.invite.ready : fmt(T.invite.join_title, { label: data.body.label });
+  document.getElementById('comms-invite-retry').hidden = state !== 'offline';
+  document.getElementById('comms-invite-share').hidden = !(out && typeof navigator.share === 'function');
+  document.getElementById('comms-invite-copylink').hidden = !out;
+  by.hidden = !(ready || out);
+  by.textContent = ready ? fmt(T.invite.by, { name: data.body.by.name || T.people.someone, fp: data.fp || '' }).trim() : out ? T.invite.ready_note : '';
+  document.getElementById('comms-invite-ios').hidden = !(ready && IOS_SAFARI);
+  document.getElementById('comms-invite-copy').textContent = T.invite.copy;
+  document.getElementById('comms-invite-join').hidden = !ready;
+  box.hidden = false;
+};
+const openInviteLink = async (token) => {
+  if (parseInvite(window.location.hash)) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  hideInvite();
+  inviteRetry = () => openInviteLink(token);
+  const seq = inviteSeq;
+  showInvite('looking');
+  const k = await inviteKeys(token);
+  if (!k) { showInvite('gone'); return; }
+  let author = null;
+  try { author = (await nostrTools()).getPublicKey(k.sk); } catch (_) { author = null; }
+  let side = null;
+  try { side = await ensureSideSocket(); } catch (_) { side = null; }
+  const res = await fetchInvite([side].concat(relaySockets()).filter((ws, i, all) => ws && all.indexOf(ws) === i), k.topic, k.aes, { author });
+  if (seq !== inviteSeq) return;
+  if (res.status === 'offline') { showInvite('offline'); return; }
+  if (res.status !== 'found') { showInvite('gone'); return; }
+  const found = res;
+  let fp = '';
+  try { if (found.body.by.pub) fp = await CID.fingerprint(found.body.by.pub); } catch (_) { fp = ''; }
+  if (seq !== inviteSeq) return;
+  pendingInvite = { token, k, found };
+  showInvite('ready', { body: found.body, fp });
+};
+const publishCtlWhenLive = async (roomName, ctl) => {
+  for (let i = 0; i < 100; i++) {
+    if (!joinTarget || joinTarget.room !== roomName) return false;
+    if (currentRoomName === roomName && chatPersist && chatTopic && relaySockets().length && await publishRoomCtl(ctl)) return true;
+    await new Promise((r) => setTimeout(r, 200));
   }
-  copyRoomLink(url);
+  return false;
+};
+const announceJoined = async (roomName, inv) => {
+  if (!joinTarget || joinTarget.room !== roomName) return;
+  const ctl = { k: 'joined', inv, jid: b64urlEncode(crypto.getRandomValues(new Uint8Array(9))), name: (myProfile && myProfile.name) || '' };
+  if (myId) ctl.pub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
+  await publishCtlWhenLive(roomName, ctl);
+  if (inv) {
+    const list = savedRooms();
+    const entry = list.find((r) => r.room === roomName);
+    if (entry) { recordJoin(entry, ctl, mySign ? mySign.sigFp : null); setSavedRooms(list); }
+  }
+  if (inv && currentRoomName === roomName) sys(T.invite.used);
+};
+const claimInvite = async ({ k, found }) => {
+  const b = found.body;
+  const clash = keyConflict(b.room, b.key);
+  if (clash && !(await confirmReplaceKey(clash))) return;
+  if (isEphemeralRoom(b.room)) eph.set(b.room, b.key, b.kv);
+  else rememberRoom(b.room, b.key, { kv: b.kv, label: b.label });
+  dropEnvelope(found.evId, k.sk);
+  els.room.value = b.room;
+  await joinNew(b.room, b.key, { kv: b.kv });
+  setView('chat');
+  announceJoined(b.room, k.id);
+};
+document.getElementById('comms-invite-join').addEventListener('click', () => {
+  const p = pendingInvite;
+  hideInvite();
+  if (p) claimInvite(p);
 });
+document.getElementById('comms-invite-later').addEventListener('click', hideInvite);
+document.getElementById('comms-invite-retry').addEventListener('click', () => { if (inviteRetry) inviteRetry(); });
+document.getElementById('comms-invite-share').addEventListener('click', () => {
+  const url = outgoingUrl;
+  hideInvite();
+  if (!url) return;
+  navigator.share({ url }).catch((err) => { if (!err || err.name !== 'AbortError') copyInvite(url); });
+});
+document.getElementById('comms-invite-copylink').addEventListener('click', () => {
+  const url = outgoingUrl;
+  hideInvite();
+  if (url) copyInvite(url);
+});
+document.getElementById('comms-invite-copy').addEventListener('click', (e) => {
+  const p = pendingInvite;
+  if (!p) return;
+  const btn = e.currentTarget;
+  try { navigator.clipboard.writeText(inviteUrl(window.location.origin, p.token)).then(() => { btn.textContent = T.invite.copied_short; }, () => {}); } catch (_) {}
+});
+
+let twiceFor = null;
+const paintTwice = () => {
+  const bar = document.getElementById('comms-twice');
+  if (!bar) return;
+  const show = !!twiceFor && twiceFor.room === currentRoomName;
+  bar.hidden = !show;
+  if (show) document.getElementById('comms-twice-text').textContent = twiceFor.text;
+};
+document.getElementById('comms-twice-close').addEventListener('click', () => {
+  if (twiceFor) {
+    const list = savedRooms();
+    const entry = list.find((r) => r.room === twiceFor.room);
+    if (entry) { entry.twiceAck = Object.assign({}, entry.twiceAck || {}, { [twiceFor.inv]: true }); setSavedRooms(list); }
+  }
+  twiceFor = null;
+  paintTwice();
+});
+
+const roomInvites = () => { try { const v = MentriaStore.get('comms', 'room_invites'); return Array.isArray(v) ? v : []; } catch (_) { return []; } };
+const setRoomInvites = (list) => { try { MentriaStore.set('comms', 'room_invites', list.slice(-20)); } catch (_) {} };
+const takeRoomInvite = (payload) => {
+  const c = CID.contactByPub(payload.pub);
+  if (!c) return;
+  const room = typeof payload.room === 'string' ? payload.room : '';
+  if (!room || room.length > 64 || isDmRoom(room) || isEphemeralRoom(room)) return;
+  if (typeof payload.key !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(payload.key)) return;
+  if (savedRooms().some((x) => x.room === room && x.key === payload.key)) return;
+  const list = roomInvites().filter((x) => x.room !== room);
+  list.push({ fp: c.fp, name: c.name || String(payload.name || '').slice(0, 32), room, key: payload.key, kv: payload.kv === 2 ? 2 : 1, label: String(payload.label || room).slice(0, 40), ts: Date.now() });
+  setRoomInvites(list);
+  renderContacts();
+  playPing(660);
+};
+const joinRoomInvite = async (inv) => {
+  const clash = keyConflict(inv.room, inv.key);
+  if (clash && !(await confirmReplaceKey(clash))) return;
+  setRoomInvites(roomInvites().filter((x) => x.room !== inv.room));
+  rememberRoom(inv.room, inv.key, { kv: inv.kv, label: inv.label });
+  renderContacts();
+  els.room.value = inv.room;
+  await joinNew(inv.room, inv.key, { kv: inv.kv });
+  setView('chat');
+  announceJoined(inv.room, null);
+};
+const pickContact = (list) => {
+  const h = pickerEl.querySelector('.comms__picker-h');
+  if (h) h.textContent = T.invite.pick;
+  pickerListEl.innerHTML = '';
+  list.forEach((c) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'comms__picker-item';
+    const nm = document.createElement('span');
+    nm.textContent = c.name || T.people.unnamed;
+    const fp = document.createElement('span');
+    fp.className = 'comms__picker-ver';
+    fp.textContent = c.fp;
+    item.append(nm, fp);
+    item.addEventListener('click', () => closePicker(c));
+    pickerListEl.appendChild(item);
+  });
+  pickerOpener = (document.activeElement && document.activeElement !== document.body) ? document.activeElement : null;
+  pickerEl.hidden = false;
+  document.addEventListener('keydown', pickerTrapTab, true);
+  const first = pickerListEl.querySelector('.comms__picker-item');
+  if (first) first.focus();
+  return new Promise((res) => { pickerResolve = res; });
+};
+const inviteContact = async (r) => {
+  if (!myId || !r || !r.key) return;
+  const contacts = CID.getContacts().filter((c) => c.pub);
+  if (!contacts.length) { notice(T.invite.no_contacts); return; }
+  const c = await pickContact(contacts);
+  if (!c) return;
+  const payload = { v: 1, kind: 'room-invite', name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, ts: Date.now(), room: r.room, key: r.key, kv: r.kv === 2 ? 2 : 1, label: r.label || r.room };
+  if (mySign) payload.spub = mySign.spub;
+  await publishToInbox(c.pub, payload);
+  notice(fmt(T.invite.sent, { name: c.name || T.people.someone }));
+};
+
+const pendingRekeys = () => { try { const v = MentriaStore.get('comms', 'rekeys'); return Array.isArray(v) ? v : []; } catch (_) { return []; } };
+const setPendingRekeys = (list) => { try { MentriaStore.set('comms', 'rekeys', list.slice(-20)); } catch (_) {} };
+let rekeyHidden = null;
+const paintRekey = () => {
+  const bar = document.getElementById('comms-rekey');
+  if (!bar) return;
+  const p = currentRoomName ? pendingRekeys().find((x) => x.room === currentRoomName) : null;
+  const show = !!p && rekeyHidden !== currentRoomName;
+  bar.hidden = !show;
+  if (show) document.getElementById('comms-rekey-text').textContent = fmt(T.roomlock.offer, { name: p.by || T.people.someone, label: p.label || p.room });
+};
+const KEY43 = /^[A-Za-z0-9_-]{43}$/;
+const rekeyEntry = (e, key, ts) => {
+  e.key = key;
+  e.kv = 2;
+  e.keyTs = Math.max(Number(e.keyTs) || 0, Number(ts) || Date.now());
+  e.invites = {};
+  e.joins = {};
+  e.twiceAck = {};
+  e.lockedAt = Date.now();
+};
+const applyRekey = (p) => {
+  const list = savedRooms();
+  const entry = list.find((r) => r.room === p.room);
+  setPendingRekeys(pendingRekeys().filter((x) => x.room !== p.room));
+  if (!entry || !KEY43.test(p.key) || (p.ts && p.ts <= (Number(entry.keyTs) || 0))) { paintRekey(); return; }
+  rekeyEntry(entry, p.key, p.ts);
+  if (Array.isArray(p.keep)) keepMembers(entry, p.keep, p.sender);
+  setSavedRooms(list);
+  subscribeUnread();
+  if (attach) attach.refresh();
+  if (currentRoomName === p.room) openSavedRoom(entry);
+  else { paintRekey(); renderContacts(); }
+};
+document.getElementById('comms-rekey-use').addEventListener('click', () => {
+  const p = pendingRekeys().find((x) => x.room === currentRoomName);
+  if (p) applyRekey(p);
+});
+document.getElementById('comms-rekey-later').addEventListener('click', () => { rekeyHidden = currentRoomName; paintRekey(); });
+const takeRekey = async (payload) => {
+  const entry = savedRooms().find((r) => r.room === payload.room);
+  if (!entry || typeof payload.ts !== 'number') return;
+  const v = await verifyBody(inboxBody(payload), payload.room, 'inbox:' + payload.ts);
+  if (!v.ok) return;
+  const decision = rekeyDecision(entry, payload, v, mySign ? mySign.spub : null);
+  if (decision === 'ignore') return;
+  const member = entry.members && entry.members[v.sigFp];
+  const by = signerName(signerFor(v)) || (member && member.name) || '';
+  const keep = Array.isArray(payload.keep) ? payload.keep.filter((x) => typeof x === 'string').slice(0, 60) : null;
+  const p = { room: payload.room, key: payload.key, kv: 2, ts: payload.ts, keep, sender: v.sigFp, label: String(entry.label || payload.room).slice(0, 40), by: String(by).slice(0, 32) };
+  if (decision === 'apply') { applyRekey(p); return; }
+  const pend = pendingRekeys();
+  const prev = pend.find((x) => x.room === p.room);
+  if (prev && (Number(prev.ts) || 0) >= p.ts) return;
+  setPendingRekeys(pend.filter((x) => x.room !== p.room).concat([p]));
+  rekeyHidden = null;
+  paintRekey();
+  if (currentRoomName !== p.room) notice(fmt(T.roomlock.offer, { name: p.by || T.people.someone, label: p.label }));
+};
+const onLockedCtl = (ctl, sig, at) => {
+  if (isMySig(sig)) return;
+  if (at && Math.abs(Date.now() - at) > 120000) return;
+  const roomName = currentRoomName;
+  const before = (savedRooms().find((r) => r.room === roomName) || {}).key;
+  setTimeout(() => {
+    const now = savedRooms().find((r) => r.room === roomName);
+    if (!now || now.key !== before || pendingRekeys().some((x) => x.room === roomName)) return;
+    if (currentRoomName === roomName) sys(fmt(T.roomlock.gone, { name: String(ctl.name || '').slice(0, 32) || T.people.someone }));
+  }, 6000);
+};
+const noteRoomMember = (m) => {
+  if (!currentRoomName || isDmRoom(currentRoomName) || !m || !m.sigFp) return;
+  const list = savedRooms();
+  const e = list.find((r) => r.room === currentRoomName);
+  if (!e) return;
+  const prev = e.members && e.members[m.sigFp];
+  if (prev && prev.name === (m.name || prev.name) && (!m.pub || prev.pub) && Date.now() - (prev.seen || 0) < 60000) return;
+  noteMember(e, Object.assign({ ts: Date.now() }, m));
+  setSavedRooms(list);
+};
+
+const lockEl = document.getElementById('comms-lock');
+let lockRoom = null;
+const closeLock = () => { lockEl.hidden = true; lockRoom = null; document.getElementById('comms-lock-list').innerHTML = ''; };
+lockEl.querySelectorAll('[data-lock-close]').forEach((el) => el.addEventListener('click', closeLock));
+const openLock = (roomName) => {
+  const entry = savedRooms().find((r) => r.room === roomName);
+  if (!entry || !mySign || !myId) return;
+  lockRoom = roomName;
+  document.getElementById('comms-lock-title').textContent = fmt(T.roomlock.title, { label: entry.label || entry.room });
+  const listEl = document.getElementById('comms-lock-list');
+  listEl.innerHTML = '';
+  const people = membersOf(entry, mySign.sigFp).filter((m) => m.pub);
+  if (!people.length) {
+    const p = document.createElement('p');
+    p.className = 'comms__invite-by';
+    p.textContent = T.roomlock.none;
+    listEl.append(p);
+  }
+  for (const m of people) {
+    const label = document.createElement('label');
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.checked = true;
+    box.dataset.fp = m.sigFp;
+    const nm = document.createElement('span');
+    nm.textContent = m.name || T.people.unnamed;
+    label.append(box, nm);
+    listEl.append(label);
+  }
+  lockEl.hidden = false;
+  const go = document.getElementById('comms-lock-go');
+  if (go) go.focus();
+};
+const lockRoomNow = async (roomName, keepFps) => {
+  const first = savedRooms().find((r) => r.room === roomName);
+  if (!first || !mySign || !myId) return;
+  if (currentRoomName !== roomName) { openSavedRoom(first); setView('chat'); }
+  await publishCtlWhenLive(roomName, { k: 'locked', name: (myProfile && myProfile.name) || '' });
+  const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
+  const list = savedRooms();
+  const entry = list.find((r) => r.room === roomName);
+  if (!entry) return;
+  const label = entry.label || entry.room;
+  const myPub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
+  const kept = membersOf(entry, mySign.sigFp).filter((m) => m.pub && keepFps.includes(m.sigFp));
+  const ts = Date.now();
+  rekeyEntry(entry, key, ts);
+  keepMembers(entry, kept.map((m) => m.sigFp), mySign.sigFp);
+  setSavedRooms(list);
+  twiceFor = null;
+  const payload = { v: 1, kind: 'room-rekey', name: (myProfile && myProfile.name) || '', pub: myPub, ts, room: roomName, key, kv: 2, label, keep: kept.map((m) => m.sigFp).concat([mySign.sigFp]) };
+  const signed = await signBody(mySign.signKey, mySign.spub, roomName, 'inbox:' + ts, payload);
+  for (const pub of kept.map((m) => m.pub).concat([myPub])) {
+    try { await publishToInbox(pub, signed); } catch (_) {}
+  }
+  subscribeUnread();
+  if (attach) attach.refresh();
+  els.room.value = roomName;
+  await joinNew(roomName, key, { kv: 2 });
+  if (currentRoomName === roomName) sys(fmt(T.roomlock.done, { n: kept.length }));
+};
+document.getElementById('comms-lock-go').addEventListener('click', async () => {
+  const roomName = lockRoom;
+  const keep = [...document.querySelectorAll('#comms-lock-list input:checked')].map((b) => b.dataset.fp);
+  closeLock();
+  if (roomName) await lockRoomNow(roomName, keep);
+});
+document.getElementById('comms-twice-lock').addEventListener('click', () => { if (twiceFor) openLock(twiceFor.room); });
+
+let oldLinkFor = null;
+const paintOldLink = (roomName) => {
+  const bar = document.getElementById('comms-oldlink');
+  if (bar) bar.hidden = !roomName || oldLinkFor !== roomName;
+};
+document.getElementById('comms-oldlink-make').addEventListener('click', () => { oldLinkFor = null; paintOldLink(null); shareInvite(); });
+document.getElementById('comms-oldlink-close').addEventListener('click', () => { oldLinkFor = null; paintOldLink(null); });
 
 const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp || m.sfp === myLegacyFp));
 const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
+
+const isMySig = (sig) => !!(sig && sig.ok && mySign && sig.spub && sig.spub.x === mySign.spub.x && sig.spub.y === mySign.spub.y);
+const signerFor = (sig) => {
+  if (!sig || !sig.ok) return null;
+  if (isMySig(sig)) return { me: true, sigFp: sig.sigFp };
+  const c = CID.getContacts().find((x) => x.spub && x.spub.x === sig.spub.x && x.spub.y === sig.spub.y);
+  return c ? { fp: c.fp, sigFp: sig.sigFp, spub: sig.spub } : { sigFp: sig.sigFp, spub: sig.spub };
+};
+const signerName = (signer) => {
+  if (!signer || !signer.fp) return null;
+  const c = CID.getContacts().find((x) => x.fp === signer.fp);
+  return c ? (c.name || null) : null;
+};
 
 const renderRemoteChat = (item, opts = {}) => {
   const files = mediaParts(item.parts).length > 0;
@@ -1254,9 +1741,13 @@ const renderRemoteChat = (item, opts = {}) => {
   }
   let who = displayName(item.senderId);
   if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
-  if (files) renderAttachment(who, item.parts, { peerId: item.senderId, sender: item.sfp2 || item.sfp || item.senderId || null, ts: item.ts });
-  else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts });
-  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '' }, item.parts);
+  const verified = !!(item.signer && item.signer.fp);
+  const signedName = verified ? signerName(item.signer) : null;
+  if (signedName) who = signedName;
+  if (item.signer && item.signer.sigFp && !item.signer.me && !opts.stored) noteRoomMember({ sigFp: item.signer.sigFp, name: who, spub: item.signer.spub });
+  if (files) renderAttachment(who, item.parts, { peerId: item.senderId, sender: item.sfp2 || item.sfp || item.senderId || null, ts: item.ts, verified });
+  else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts, verified });
+  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '', signer: item.signer || undefined }, item.parts);
   if (files) receiveAttachments(item, false);
   if (!opts.silent) {
     playPing(880);
@@ -1274,21 +1765,22 @@ const handleNostrMsg = async (msgEvent) => {
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     if (!content || !content.cmid || !content.enc || !chatKey || seenCmids.has(content.cmid)) return;
-    let text, sfp = null, sfp2 = null, parts = null;
+    let text, sfp = null, sfp2 = null, parts = null, sig = null;
     try {
       const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
       text = unpacked.text;
       sfp = unpacked.sfp;
       sfp2 = unpacked.sfp2;
       parts = unpacked.parts;
-      if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
+      if (unpacked.sg) sig = await verifyBody(unpacked.obj, currentRoomName, content.cmid);
+      if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp, sig, typeof content.ts === 'number' ? content.ts : (ev.created_at || 0) * 1000); return; }
     } catch { return; }
     seenCmids.add(content.cmid);
     const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts };
+    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts, signer: signerFor(sig) };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1499,7 +1991,7 @@ const threadInfoFor = async (id) => {
     return null;
   }
   const r = savedRooms().find((x) => x.room === id);
-  return r && r.key ? { roomName: r.room, b64Key: r.key } : null;
+  return r && r.key ? { roomName: r.room, b64Key: r.key, kv: r.kv === 2 ? 2 : 1 } : null;
 };
 
 const joinFilesRoom = async (roomId, password) => {
@@ -1677,7 +2169,7 @@ const renderAttachment = (who, parts, opts = {}) => {
     if (cap.length) renderLine(who, cap.map((p) => p.text).join('\n'), { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts });
     return null;
   }
-  const line = renderLine(who, '', { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts, html: '' });
+  const line = renderLine(who, '', { me: !!opts.me, peerId: opts.peerId, quiet: true, ts: opts.ts, html: '', verified: !!opts.verified });
   const card = document.createElement('div');
   card.className = 'comms__partsbox';
   line.what.append(card);
@@ -1769,7 +2261,7 @@ const renderStored = (m) => {
     return;
   }
   const meta = m.meta || {};
-  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts }, { silent: true, stored: true });
+  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts, signer: meta.signer || null }, { silent: true, stored: true });
 };
 
 const setEarlier = (beforeTs) => {
@@ -1922,14 +2414,53 @@ const rememberSentCmid = (cmid) => {
 const savedRooms = () => { try { const v = MentriaStore.get('comms', 'rooms'); return Array.isArray(v) ? v : []; } catch (_) { return []; } };
 const setSavedRooms = (list) => { try { MentriaStore.set('comms', 'rooms', list); } catch (_) {} };
 const roomUnreadKey = (roomName) => 'room:' + roomName;
-const rememberRoom = (roomName, b64Key) => {
+const rememberRoom = (roomName, b64Key, extra = {}) => {
   if (!roomName || !b64Key || isDmRoom(roomName) || isEphemeralRoom(roomName)) return;
   const list = savedRooms();
   const i = list.findIndex((r) => r.room === roomName);
   const prev = i >= 0 ? list[i] : null;
-  const entry = Object.assign({}, prev || {}, { room: roomName, key: b64Key, label: (prev && prev.label) || roomName, joinedAt: (prev && prev.joinedAt) || Date.now(), lastSeen: Date.now() });
+  const kv = extra.kv === 2 ? 2 : extra.kv === 1 ? 1 : (prev && prev.key === b64Key && prev.kv === 2 ? 2 : 1);
+  const label = (extra.label && String(extra.label).trim().slice(0, 40)) || (prev && prev.label) || roomName;
+  const entry = Object.assign({}, prev || {}, { room: roomName, key: b64Key, kv, label, joinedAt: (prev && prev.joinedAt) || Date.now(), lastSeen: Date.now() });
   if (i >= 0) list[i] = entry; else list.unshift(entry);
   setSavedRooms(list.slice(0, 50));
+};
+const eph = ephKeys((() => { try { return window.sessionStorage; } catch (_) { return null; } })());
+const openSavedRoom = (r) => { els.room.value = r.room; joinNew(r.room, r.key, { kv: r.kv || 1 }); };
+const keyConflict = (roomName, key) => {
+  if (!roomName || isEphemeralRoom(roomName)) return null;
+  const e = savedRooms().find((r) => r.room === roomName);
+  return e && e.key && e.key !== key ? e : null;
+};
+const confirmReplaceKey = async (entry) => {
+  try { return !!(await mentriaConfirm(fmt(T.invite.replace_key, { label: entry.label || entry.room }), { danger: true })); } catch (_) { return false; }
+};
+const importRoomLink = (target) => {
+  if (keyConflict(target.room, target.key)) {
+    window.history.replaceState(null, '', window.location.pathname + window.location.search + formatHash(target.room, null));
+    return 'conflict';
+  }
+  if (isEphemeralRoom(target.room)) eph.set(target.room, target.key, target.kv);
+  else {
+    rememberRoom(target.room, target.key);
+    const list = savedRooms();
+    const e = list.find((r) => r.room === target.room);
+    if (e && !e.oldSeen) { e.oldSeen = true; setSavedRooms(list); oldLinkFor = target.room; }
+  }
+  window.history.replaceState(null, '', window.location.pathname + window.location.search + formatHash(target.room, null));
+  return 'saved';
+};
+const openConflictLink = async (target) => {
+  const e = keyConflict(target.room, target.key);
+  if (!e) { joinNew(target.room, target.key, { kv: target.kv }); return; }
+  if (await confirmReplaceKey(e)) {
+    rememberRoom(target.room, target.key, { kv: 1 });
+    els.room.value = target.room;
+    joinNew(target.room, target.key, { kv: 1 });
+    return;
+  }
+  els.room.value = e.room;
+  joinNew(e.room, e.key, { kv: e.kv === 2 ? 2 : 1 });
 };
 const forgetRoom = (roomName) => setSavedRooms(savedRooms().filter((r) => r.room !== roomName));
 const touchRoom = (roomName) => { const list = savedRooms(); const r = list.find((x) => x.room === roomName); if (r) { r.lastSeen = Date.now(); setSavedRooms(list); } };
@@ -1941,8 +2472,9 @@ const RING_TOKEN_RE = /^[A-Za-z0-9_-]{20,64}$/;
 const roomKeyCache = new Map();
 const roomCryptoKey = (entry) => {
   if (!entry || !entry.key) return Promise.resolve(null);
-  if (!roomKeyCache.has(entry.key)) roomKeyCache.set(entry.key, deriveKey(entry.key).catch(() => null));
-  return roomKeyCache.get(entry.key);
+  const id = (entry.kv === 2 ? 2 : 1) + ':' + entry.key;
+  if (!roomKeyCache.has(id)) roomKeyCache.set(id, roomKeys(entry.key, entry.kv === 2 ? 2 : 1).then((k) => (k ? k.chatKey : null)).catch(() => null));
+  return roomKeyCache.get(id);
 };
 
 const notifAllowed = () => 'Notification' in window && Notification.permission === 'granted' && !!navigator.serviceWorker;
@@ -1968,17 +2500,48 @@ const closeLocalNotif = async (tag) => {
     (await reg.getNotifications({ tag })).forEach((note) => note.close());
   } catch (_) {}
 };
+const roomNotifUrl = (entry) => COMMS_PATH + (entry ? formatHash(entry.room, null) : '');
 const notifTargetNow = () => {
   if (currentDmContact) return { tag: 'comms-dm:' + currentDmContact.fp, url: COMMS_PATH };
   if (currentRoomName && !isDmRoom(currentRoomName)) {
     const entry = roomNotifyEntry(currentRoomName);
-    return { tag: 'comms-room:' + currentRoomName, url: entry ? COMMS_PATH + formatHash(entry.room, entry.key) : COMMS_PATH };
+    return { tag: 'comms-room:' + currentRoomName, url: roomNotifUrl(entry) };
   }
   return { tag: 'comms-msg', url: COMMS_PATH };
 };
 
-const handleRoomCtl = (ctl, sfp) => {
-  if (!ctl || ctl.k !== 'ring' || !currentRoomName || isDmRoom(currentRoomName)) return;
+const recordJoin = (entry, ctl, sigFp) => {
+  const joins = noteJoined(entry, ctl, sigFp);
+  if (!joins.twice || (entry.twiceAck && entry.twiceAck[ctl.inv])) return;
+  const own = entry.invites && typeof ctl.inv === 'string' ? entry.invites[ctl.inv] : null;
+  twiceFor = { room: entry.room, inv: ctl.inv, text: fmt(own ? T.invite.twice_mine : T.invite.twice, { a: joins.twice[0] || T.people.someone, b: joins.twice[1] || T.people.someone }) };
+  paintTwice();
+};
+
+const onJoinedCtl = (ctl, sig, at) => {
+  const sigFp = sig && sig.ok ? sig.sigFp : null;
+  const mine = isMySig(sig);
+  const list = savedRooms();
+  const entry = list.find((r) => r.room === currentRoomName);
+  if (entry) {
+    if (sigFp) noteMember(entry, { sigFp, name: ctl.name, pub: ctl.pub, spub: sig.spub, ts: at || Date.now() });
+    recordJoin(entry, ctl, sigFp);
+    const own = entry.invites && typeof ctl.inv === 'string' ? entry.invites[ctl.inv] : null;
+    if (own && !own.claimed) {
+      own.claimed = true;
+      inviteKeys(own.token).then((k) => { if (k) dropEnvelope(own.evId, k.sk); }, () => {});
+    }
+    setSavedRooms(list);
+  }
+  const fresh = !at || Math.abs(Date.now() - at) < 120000;
+  if (fresh && !mine) sys(fmt(T.invite.joined, { name: String(ctl.name || '').slice(0, 32) || T.people.someone }));
+};
+
+const handleRoomCtl = (ctl, sfp, sig, at) => {
+  if (!ctl || !currentRoomName || isDmRoom(currentRoomName)) return;
+  if (ctl.k === 'joined') { onJoinedCtl(ctl, sig, at); return; }
+  if (ctl.k === 'locked') { onLockedCtl(ctl, sig, at); return; }
+  if (ctl.k !== 'ring') return;
   const token = (typeof ctl.token === 'string' && RING_TOKEN_RE.test(ctl.token)) ? ctl.token : null;
   if (!token || (ringToken && token === ringToken)) return;
   const list = savedRooms();
@@ -1993,12 +2556,26 @@ const handleRoomCtl = (ctl, sfp) => {
   setSavedRooms(list);
 };
 
+const sealCache = new Map();
+const sealPlain = (text, cmid, extra) => {
+  if (cmid && sealCache.has(cmid)) return sealCache.get(cmid);
+  const body = packChatBody(text, { fp: myFp, legacyFp: myLegacyFp }, extra);
+  const room = currentRoomName;
+  const signer = mySign;
+  const out = (signer && room && cmid ? signBody(signer.signKey, signer.spub, room, cmid, body).catch(() => body) : Promise.resolve(body)).then((o) => JSON.stringify(o));
+  if (cmid) {
+    sealCache.set(cmid, out);
+    if (sealCache.size > 200) sealCache.delete(sealCache.keys().next().value);
+  }
+  return out;
+};
+
 const publishRoomCtl = async (ctl) => {
   if (!chatKey || !currentRoomName || isDmRoom(currentRoomName) || !chatTopic || !chatPersist) return false;
   const cmid = newCmid();
   seenCmids.add(cmid);
   try {
-    const enc = await encryptText(chatKey, packChatPlain('', { fp: myFp, legacyFp: myLegacyFp }, { ctl }));
+    const enc = await encryptText(chatKey, await sealPlain('', cmid, { ctl }));
     if (chatAction) { try { chatAction.send({ cmid, enc }); } catch (_) {} }
     rememberSentCmid(cmid);
     const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
@@ -2055,11 +2632,11 @@ const setRoomNotify = async (roomName, on) => {
   setSavedRooms(list);
   renderContacts();
   if (currentRoomName === roomName) { await announceRoomRing(); return; }
-  if (on) { window.location.hash = formatHash(fresh.room, fresh.key); setView('chat'); }
+  if (on) { openSavedRoom(fresh); setView('chat'); }
 };
 
 if (new URLSearchParams(window.location.search).has('debug')) {
-  window.__commsDebug = { setRoomNotify, announceRoomRing, publishRoomCtl, savedRooms, setSavedRooms, setRingToken: (t) => { ringToken = t; }, ringToken: () => ringToken };
+  window.__commsDebug = { lastInvite: () => lastInviteUrl, notifTargetNow, roomNotifUrl, setRoomNotify, announceRoomRing, publishRoomCtl, savedRooms, setSavedRooms, setRingToken: (t) => { ringToken = t; }, ringToken: () => ringToken };
 }
 
 let lastRoomRingAt = 0;
@@ -2094,7 +2671,7 @@ const publishChat = async (text, cmid, extra) => {
   if (!chatTopic || !chatPersist || !chatKey) return;
   rememberSentCmid(cmid);
   try {
-    const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }, extra));
+    const enc = await encryptText(chatKey, await sealPlain(text, cmid, extra));
     const eventStr = await createPersistentEvent(CHAT_KIND, chatTopic, JSON.stringify({ cmid, ts: Date.now(), enc }), expiryTags());
     const sockets = getRelaySockets() || {};
     for (const ws of Object.values(sockets)) {
@@ -2149,11 +2726,17 @@ const challengePeer = (peerId, action) => {
 
 const applyVerifiedProfile = async (peerId) => {
   const prof = peerProfiles.get(peerId);
-  if (!prof || !prof.verified || !prof.pub || !prof.ring) return;
+  if (!prof || !prof.verified || !prof.pub) return;
+  if (prof.spub) {
+    try { noteRoomMember({ sigFp: await sigFingerprint(prof.spub), name: prof.name, pub: prof.pub, spub: prof.spub }); } catch (_) {}
+  }
   const existing = CID.contactByPub(prof.pub);
-  if (!existing || existing.ring === prof.ring) return;
+  if (!existing) return;
+  const ringNew = !!prof.ring && existing.ring !== prof.ring;
+  const spubNew = !!prof.spub && !(existing.spub && existing.spub.x === prof.spub.x && existing.spub.y === prof.spub.y);
+  if (!ringNew && !spubNew) return;
   try {
-    await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring });
+    await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring || existing.ring, spub: prof.spub, ssig: prof.ssig });
     if (currentDmContact && currentDmContact.fp === existing.fp) currentDmContact.ring = prof.ring;
   } catch (_) {}
 };
@@ -2169,7 +2752,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   albumCards.clear();
   watchChatVia();
   const leavingDm = currentDmContact;
-  joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null };
+  joinTarget = (opts.leave || !roomName) ? null : { room: roomName, key: b64Key || null, kv: opts.kv === 2 ? 2 : 1 };
   stopScan();
   MentriaBus.unprovide('comms.peers');
   MentriaBus.unprovide('comms.share');
@@ -2211,6 +2794,9 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     els.room.value = '';
     els.status.textContent = T.chat.not_in_chat;
     els.share.hidden = true;
+    paintOldLink(null);
+    paintTwice();
+    paintRekey();
     els.eph.hidden = true;
     els.leave.hidden = true;
     els.callStart.hidden = true;
@@ -2222,19 +2808,24 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
     return;
   }
 
-  chatKey = b64Key ? await deriveKey(b64Key) : null;
-  const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key) : null;
+  const roomKv = opts.kv === 2 ? 2 : 1;
+  const keys = b64Key ? await roomKeys(b64Key, roomKv) : null;
+  chatKey = keys ? keys.chatKey : null;
+  const topic = chatKey && !isEphemeralRoom(roomName) ? await chatTopicFor(roomName, b64Key, roomKv) : null;
   if (seq !== joinSeq) return;
   if (b64Key && !chatKey) sysTop(T.log.bad_key);
-  if (chatKey && b64Key && !opts.self) { rememberRoom(roomName, b64Key); clearUnreadFor(roomUnreadKey(roomName)); }
+  if (chatKey && b64Key && !opts.self) { if (isEphemeralRoom(roomName)) eph.set(roomName, b64Key, roomKv); else rememberRoom(roomName, b64Key, { kv: roomKv }); clearUnreadFor(roomUnreadKey(roomName)); }
 
   if (opts.share === false || isDmRoom(roomName)) {
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
   } else {
-    const nextHash = formatHash(roomName, b64Key);
+    const nextHash = formatHash(roomName, null);
     if (window.location.hash !== nextHash) window.location.hash = nextHash;
   }
   refreshShareUrl(roomName);
+  paintOldLink(roomName);
+  paintTwice();
+  paintRekey();
 
   let iceServers;
   try {
@@ -2248,7 +2839,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   if (relayOnly && hasTurn(iceServers)) rtcConfig.iceTransportPolicy = 'relay';
   else if (relayOnly) console.warn('hide-my-ip requested but no relay server available — connecting normally');
   const roomConfig = { appId: 'mentria', relayConfig: { urls: [RELAY] }, rtcConfig };
-  if (chatKey && b64Key) roomConfig.password = b64Key;
+  if (chatKey && b64Key) roomConfig.password = keys.password;
   const keyNotes = new Set();
   const onJoinError = (info) => {
     const reason = String((info && info.error) || '').toLowerCase();
@@ -2350,6 +2941,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       try { prof.fp = await CID.fingerprint(prof.pub); } catch {}
     }
     if (typeof data.ring === 'string') prof.ring = data.ring.slice(0, 64);
+    if (prof.pub && validSpub(data.spub) && await verifyLink(prof.pub, data.spub, data.ssig)) { prof.spub = { x: data.spub.x, y: data.spub.y }; prof.ssig = data.ssig; }
     prof.caps = { files: data.caps && Number.isInteger(data.caps.files) ? data.caps.files : 0 };
     if (prof.fp) rememberCaps(prof.fp, prof.caps);
     if (seq !== joinSeq || !peers.has(ctx.peerId)) return;
@@ -2368,7 +2960,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
   chatAction.onMessage = async (data, ctx) => {
     const cmid = data && data.cmid;
     if (cmid && seenCmids.has(cmid)) return;
-    let text, sfp = null, sfp2 = null, parts = null;
+    let text, sfp = null, sfp2 = null, parts = null, sig = null;
     if (data && data.enc) {
       if (!chatKey) return;
       try {
@@ -2377,13 +2969,14 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
         sfp = unpacked.sfp;
         sfp2 = unpacked.sfp2;
         parts = unpacked.parts;
-        if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp); return; }
+        if (unpacked.sg && cmid) sig = await verifyBody(unpacked.obj, currentRoomName, cmid);
+        if (unpacked.ctl) { if (cmid) seenCmids.add(cmid); handleRoomCtl(unpacked.ctl, sfp, sig); return; }
       } catch { return; }
     } else {
       text = String(data && data.text || '');
     }
     if (cmid) seenCmids.add(cmid);
-    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2, cmid, parts });
+    renderRemoteChat({ senderId: ctx.peerId, text, ts: Date.now(), sfp, sfp2, cmid, parts, signer: signerFor(sig) });
     playPing(880);
   };
 
@@ -2529,9 +3122,11 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
 };
 
 els.join.addEventListener('click', () => {
+  const tok = parseInvite(els.room.value);
+  if (tok) { els.room.value = ''; closeAdv(); openInviteLink(tok); return; }
   const name = (els.room.value || (EPHEMERAL_PREFIX + randomRoomSlug())).trim().slice(0, 64);
-  const { b64Key } = parseHash(window.location.hash);
-  joinNew(name, b64Key);
+  const r = joinTarget && joinTarget.room === name ? joinTarget : resolveHash(formatHash(name, null), savedRooms(), eph);
+  joinNew(name, r ? r.key : null, { kv: r ? r.kv : 1 });
 });
 
 const aiHoldEnter = (e) => { if (e.key === 'Enter' && aiView && aiView.isOpen() && aiView.busy()) e.preventDefault(); };
@@ -2552,7 +3147,7 @@ els.send.addEventListener('submit', async (e) => {
   let livePayload;
   if (chatKey) {
     try {
-      const enc = await encryptText(chatKey, packChatPlain(text, { fp: myFp, legacyFp: myLegacyFp }));
+      const enc = await encryptText(chatKey, await sealPlain(text, cmid));
       livePayload = { cmid, enc };
     } catch (err) {
       sys(fmt(T.log.enc_failed, { reason: why(err) }));
@@ -2732,7 +3327,7 @@ const sendAttachments = async ({ items, caption }) => {
   parts.push(...toAlbums(media, newAid));
   parts.push(...files);
   const ids = { fp: myFp, legacyFp: myLegacyFp };
-  const measure = async (ps) => JSON.stringify(await encryptText(chatKey, packChatPlain(offerText(ps, T), ids, { p: ps }))).length + 700;
+  const measure = async (ps) => JSON.stringify(await encryptText(chatKey, packChatPlain(offerText(ps, T), ids, { p: ps }))).length + 1100;
   const msgs = await splitOffer(parts, measure, 60000);
   const ts = Date.now();
   renderAttachment('you', parts, { me: true, ts });
@@ -2740,7 +3335,7 @@ const sendAttachments = async ({ items, caption }) => {
     const text = offerText(m, T);
     const cmid = newCmid();
     seenCmids.add(cmid);
-    const enc = await encryptText(chatKey, packChatPlain(text, ids, { p: m }));
+    const enc = await encryptText(chatKey, await sealPlain(text, cmid, { p: m }));
     if (chatAction) chatAction.send({ cmid, enc });
     publishChat(text, cmid, { p: m });
     storeLine(cmid, 'self', text, ts, undefined, m);
@@ -2839,6 +3434,8 @@ function closePicker(value) {
 pickerEl.querySelectorAll('[data-picker-close]').forEach((el) => el.addEventListener('click', () => closePicker(null)));
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pickerEl.hidden) { e.preventDefault(); closePicker(null); } });
 function pickExtension(list) {
+  const ph = pickerEl.querySelector('.comms__picker-h');
+  if (ph) ph.textContent = T.picker.title;
   pickerListEl.innerHTML = '';
   list.forEach((ext) => {
     const item = document.createElement('button');
@@ -3255,6 +3852,7 @@ const sendProfileTo = (peerId) => {
   if (!profAction || !myId) return;
   const payload = { name: myProfile.name, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, caps: { files: 2 } };
   if (ringToken) payload.ring = ringToken;
+  if (mySign && mySign.link) { payload.spub = mySign.spub; payload.ssig = mySign.link.s; }
   try { profAction.send(payload, peerId || undefined); } catch {}
 };
 
@@ -3355,6 +3953,7 @@ const announceToContact = async (contact) => {
   if (!myId || !contact || !contact.pub) return;
   const payload = { v: 1, name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, ts: Date.now() };
   if (ringToken) payload.ring = ringToken;
+  if (mySign && mySign.link) { payload.spub = mySign.spub; payload.ssig = mySign.link.s; }
   await publishToInbox(contact.pub, payload);
 };
 
@@ -3379,7 +3978,7 @@ const subscribeUnread = async () => {
     } catch (_) {}
   }
   for (const r of savedRooms()) {
-    const topic = await chatTopicFor(r.room, r.key);
+    const topic = await chatTopicFor(r.room, r.key, r.kv === 2 ? 2 : 1);
     if (topic) byRoom.set(topic, r);
   }
   topicToFp.clear();
@@ -3425,11 +4024,13 @@ const handleSideMsg = async (msgEvent) => {
       notice(fmt(T.people.tried_call, { name: who }));
       return;
     }
+    if (payload.kind === 'room-invite') { takeRoomInvite(payload); return; }
+    if (payload.kind === 'room-rekey') { await takeRekey(payload); return; }
     const existing = CID.contactByPub(payload.pub);
     if (existing) {
       if (typeof payload.ts !== 'number' || payload.ts <= (existing.annTs || 0)) return;
       try {
-        const updated = await CID.addContact({ name: payload.name, pub: payload.pub, ring: payload.ring, annTs: Math.min(payload.ts, Date.now()) });
+        const updated = await CID.addContact({ name: payload.name, pub: payload.pub, ring: payload.ring, spub: payload.spub, ssig: payload.ssig, annTs: Math.min(payload.ts, Date.now()) });
         if (currentDmContact && currentDmContact.fp === existing.fp && updated) currentDmContact = updated;
         renderContacts();
         updatePushStatus();
@@ -3473,7 +4074,7 @@ const handleSideMsg = async (msgEvent) => {
       } catch (_) { return; }
       if (currentRoomName === savedRoom.room || ts <= unreadFloorOf(k, savedRoom.lastSeen)) return;
       countUnread(k, ts);
-      notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: COMMS_PATH + formatHash(savedRoom.room, savedRoom.key) });
+      notifyLocal({ tag: 'comms-room:' + savedRoom.room, title: savedRoom.label || savedRoom.room, body: preview, url: roomNotifUrl(savedRoom) });
       return;
     }
     if (currentDmContact && currentDmContact.fp === fp) {
@@ -3910,6 +4511,9 @@ const initIdentity = async () => {
     myId = await CID.ensureKeypair();
     myFp = await CID.fingerprint(myId.publicJwk);
     myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
+    try { mySign = await CID.ensureSigningKey(); } catch (_) { mySign = null; }
+    if (mySign) { try { mySign.link = { spub: mySign.spub, s: await signLink(mySign.signKey, myId.publicJwk) }; } catch (_) { mySign.link = null; } }
+    if (els.idSig) { els.idSig.hidden = !mySign; els.idSig.textContent = mySign ? fmt(T.sign.my_key, { fp: mySign.sigFp }) : ''; }
     openHistory();
     try { await CID.migrateFingerprints(); } catch (_) {}
     myProfile = CID.getProfile();
@@ -3923,7 +4527,7 @@ const initIdentity = async () => {
     broadcastProfile();
     if (joinedLocked && joinTarget && currentRoomName === joinTarget.room && !isDmRoom(currentRoomName)) {
       joinedLocked = false;
-      joinNew(joinTarget.room, joinTarget.key);
+      joinNew(joinTarget.room, joinTarget.key, { kv: joinTarget.kv });
     }
     await initRingToken();
     refreshNotifBanner();
@@ -4330,7 +4934,7 @@ const loadQr = () => {
 
 const refreshMyCode = () => {
   if (els.idCard.hidden || !myId) return;
-  const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken);
+  const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken, mySign && mySign.link);
   els.idCode.textContent = code;
   if (!window.qrcodegen) { loadQr().then((ok) => { if (ok) refreshMyCode(); }); return; }
   try {
@@ -4664,6 +5268,27 @@ const listNote = (text) => {
   return note;
 };
 
+const inviteRow = (inv) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__contact--req';
+  const av = document.createElement('span');
+  av.className = 'comms__avatar comms__avatar--room';
+  av.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-lock"></use></svg>';
+  const { mid } = rowMid(inv.label || inv.room, fmt(T.invite.from, { name: inv.name || T.people.someone, label: inv.label || inv.room }), 0);
+  const ok = document.createElement('button');
+  ok.type = 'button';
+  ok.className = 'comms__btn';
+  ok.textContent = T.invite.join;
+  ok.addEventListener('click', () => { joinRoomInvite(inv); });
+  const no = document.createElement('button');
+  no.type = 'button';
+  no.className = 'comms__btn comms__btn--ghost';
+  no.textContent = T.invite.not_now;
+  no.addEventListener('click', () => { setRoomInvites(roomInvites().filter((x) => x.room !== inv.room)); renderContacts(); });
+  row.append(av, mid, ok, no);
+  return row;
+};
+
 const requestRow = (r) => {
   const row = document.createElement('div');
   row.className = 'comms__contact comms__contact--req';
@@ -4753,7 +5378,7 @@ const roomRow = (r, info) => {
   openBtn.append(mid);
   row.append(av, openBtn);
   if (info.unread > 0 && currentRoomName !== r.room) row.append(unreadBadge(info.unread));
-  const open = () => { if (currentRoomName !== r.room) window.location.hash = formatHash(r.room, r.key); setView('chat'); };
+  const open = () => { if (currentRoomName !== r.room) openSavedRoom(r); setView('chat'); };
   row.addEventListener('click', open);
   const bell = document.createElement('button');
   bell.type = 'button';
@@ -4808,7 +5433,22 @@ const roomRow = (r, info) => {
     renderContacts();
     subscribeUnread();
   });
-  row.append(bell, ren, rm);
+  const inv = document.createElement('button');
+  inv.type = 'button';
+  inv.className = 'comms__rowbtn';
+  inv.title = T.invite.contact;
+  inv.setAttribute('aria-label', T.invite.contact);
+  inv.innerHTML = '<svg class="comms__i" aria-hidden="true"><use href="#ci-users"></use></svg>';
+  inv.addEventListener('click', (e) => { e.stopPropagation(); inviteContact(r); });
+  const lk = document.createElement('button');
+  lk.type = 'button';
+  lk.className = 'comms__rowbtn comms__rowbtn--text';
+  lk.title = T.roomlock.go;
+  lk.setAttribute('aria-label', T.roomlock.go);
+  lk.textContent = T.roomlock.short;
+  lk.hidden = !mySign;
+  lk.addEventListener('click', (e) => { e.stopPropagation(); openLock(r.room); });
+  row.append(bell, inv, lk, ren, rm);
   return row;
 };
 
@@ -4861,11 +5501,12 @@ const renderContacts = () => {
   const requests = CID.getRequests();
   const contacts = CID.getContacts();
   const rooms = savedRooms();
-  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length) {
+  const roomInvitesNow = roomInvites();
+  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length && !roomInvitesNow.length) {
     els.contactList.append(listNote(T.people.empty));
     return;
   }
-  const rows = homeRows({ contacts, requests, rooms, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
+  const rows = homeRows({ contacts, requests, roomInvites: roomInvitesNow, rooms, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
   if (!rows.length) {
     els.contactList.append(listNote(T.home.at_none));
     return;
@@ -4873,6 +5514,7 @@ const renderContacts = () => {
   const missedMap = getMissed();
   for (const r of rows) {
     if (r.kind === 'request') els.contactList.append(requestRow(r.ref));
+    else if (r.kind === 'invite') els.contactList.append(inviteRow(r.ref));
     else if (r.kind === 'contact') els.contactList.append(contactRow(r.ref, r, missedMap));
     else if (r.kind === 'room') els.contactList.append(roomRow(r.ref, r));
     else if (r.kind === 'self') els.contactList.append(selfRow(r.ref, r));
@@ -5073,7 +5715,7 @@ homeForm.addEventListener('submit', async (e) => {
   homeMsg.value = '';
   homeTarget = null;
   if (target.kind === 'contact') openDmWith(target.ref);
-  else window.location.hash = formatHash(target.ref.room, target.ref.key);
+  else openSavedRoom(target.ref);
   const ready = await composerFor(target);
   els.msg.value = body;
   if (ready) els.send.requestSubmit();
@@ -5255,7 +5897,7 @@ els.newRoom.addEventListener('click', async () => {
   const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
   els.room.value = name;
   closeAdv();
-  await joinNew(name, key);
+  await joinNew(name, key, { kv: 2 });
 });
 
 els.newSaved.addEventListener('click', async () => {
@@ -5263,7 +5905,7 @@ els.newSaved.addEventListener('click', async () => {
   const key = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
   els.room.value = name;
   closeAdv();
-  await joinNew(name, key);
+  await joinNew(name, key, { kv: 2 });
   if (currentRoomName === name) sys(T.log.saved_room);
 });
 
@@ -5371,30 +6013,45 @@ const bootHash = window.location.hash && window.location.hash !== '#' ? parseHas
 if (bootHash && isDmRoom(bootHash.room)) {
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
 }
-const hasHash = !!bootHash && !!bootHash.room && !isDmRoom(bootHash.room);
+const bootInvite = parseInvite(window.location.hash);
+if (bootInvite) {
+  window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  window.addEventListener('load', async () => {
+    if (bootUnlock) await Promise.race([bootUnlock, new Promise((r) => setTimeout(r, 4000))]);
+    openInviteLink(bootInvite);
+  });
+}
+const bootTarget = bootHash && !bootInvite && !isDmRoom(bootHash.room) ? resolveHash(window.location.hash, savedRooms(), eph) : null;
+const bootConflict = !!(bootTarget && bootTarget.imported && importRoomLink(bootTarget) === 'conflict');
+const hasHash = !!bootTarget;
 if (hasHash) {
-  const parsed = bootHash;
-  els.room.value = parsed.room;
-  refreshShareUrl(parsed.room);
+  els.room.value = bootTarget.room;
+  refreshShareUrl(bootTarget.room);
   window.addEventListener('load', async () => {
     if (bootUnlock) await Promise.race([bootUnlock, new Promise((r) => setTimeout(r, 4000))]);
     if (joinTarget) return;
-    joinNew(parsed.room, parsed.b64Key);
+    if (bootConflict) { openConflictLink(bootTarget); return; }
+    joinNew(bootTarget.room, bootTarget.key, { kv: bootTarget.kv });
   });
 }
 window.addEventListener('hashchange', () => {
-  const next = parseHash(window.location.hash);
-  if (isDmRoom(next.room)) {
+  const invite = parseInvite(window.location.hash);
+  if (invite) { openInviteLink(invite); return; }
+  const raw = parseHash(window.location.hash);
+  if (isDmRoom(raw.room)) {
     window.history.replaceState(null, '', window.location.pathname + window.location.search);
     refreshIdUI();
     return;
   }
-  const same = next.room
-    ? !!joinTarget && joinTarget.room === next.room && joinTarget.key === (next.b64Key || null)
+  const next = resolveHash(window.location.hash, savedRooms(), eph);
+  if (next && next.imported && importRoomLink(next) === 'conflict') { openConflictLink(next); refreshIdUI(); return; }
+  const same = next
+    ? !!joinTarget && joinTarget.room === next.room && joinTarget.key === next.key
     : !joinTarget;
   if (!same) {
-    els.room.value = next.room || '';
-    joinNew(next.room, next.b64Key);
+    els.room.value = next ? next.room : '';
+    if (next) joinNew(next.room, next.key, { kv: next.kv });
+    else joinNew(null);
   }
   refreshIdUI();
 });

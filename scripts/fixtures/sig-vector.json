@@ -1,0 +1,35 @@
+{
+ "note": "test-only key",
+ "jwkPrivate": {
+  "kty": "EC",
+  "x": "ECCqpFvQSYNFXOVsdG2YxAB5Du8JE0ShqRHnUS8bG84",
+  "y": "DlTMq_uLUl20EqLZn_vNtN24rYnSWq0iRpZGaspBkQw",
+  "crv": "P-256",
+  "d": "R7SYuOmsKhbqvUxxdrqir1l965PtjczefsPPovgxkQo"
+ },
+ "spub": {
+  "x": "ECCqpFvQSYNFXOVsdG2YxAB5Du8JE0ShqRHnUS8bG84",
+  "y": "DlTMq_uLUl20EqLZn_vNtN24rYnSWq0iRpZGaspBkQw"
+ },
+ "room": "mentria-test-room",
+ "cmid": "abc:1",
+ "ts": 1762500000000,
+ "body": {
+  "v": 2,
+  "t": "hello",
+  "ctl": null
+ },
+ "signed": {
+  "v": 2,
+  "t": "hello",
+  "ctl": null,
+  "sg": {
+   "pub": {
+    "x": "ECCqpFvQSYNFXOVsdG2YxAB5Du8JE0ShqRHnUS8bG84",
+    "y": "DlTMq_uLUl20EqLZn_vNtN24rYnSWq0iRpZGaspBkQw"
+   },
+   "ts": 1762500000000,
+   "s": "vdHCa3ZrBnGG-9EsM9hPl0kzylF8K73aY6Mn4aC_PkcQth6ZsqLQ1M3zoJ6Sktju6UQvB4Uy-5lCuxHGHnOUAA"
+  }
+ }
+}

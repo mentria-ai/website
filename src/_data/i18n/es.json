@@ -5822,6 +5822,53 @@
         "asleep": "en reposo",
         "stopped": "Tu {device} dejó de responder.",
         "finish": "Terminar en este dispositivo"
+      },
+      "sign": {
+        "verified": "Verificado: firmado con su clave de identidad",
+        "my_key": "Clave de firma {fp}"
+      },
+      "invite": {
+        "copied": "Enlace de invitación copiado. Funciona una vez, durante 24 horas.",
+        "join_title": "¿Unirte a {label}?",
+        "by": "Te invita {name} {fp}",
+        "join": "Unirme",
+        "not_now": "Ahora no",
+        "ios": "¿Usas la app de la pantalla de inicio? Copia esta invitación y pégala allí.",
+        "copy": "Copiar invitación",
+        "copied_short": "Copiada",
+        "looking": "Buscando la invitación…",
+        "gone": "Esta invitación caducó o ya se usó. Pide una nueva.",
+        "used": "Te uniste con una invitación; ya no se puede volver a usar.",
+        "joined": "{name} se unió con una invitación",
+        "old_link": "Enlace antiguo: nunca caduca. Crea una invitación nueva para compartir.",
+        "make": "Nueva invitación",
+        "dismiss": "Cerrar",
+        "twice_mine": "Tu enlace de invitación se usó dos veces: {a}, {b}.",
+        "twice": "El enlace de invitación de esta sala se usó dos veces: {a}, {b}.",
+        "contact": "Invitar a un contacto",
+        "pick": "Invitar a esta sala",
+        "sent": "Invitación enviada a {name}.",
+        "from": "{name} te invitó a {label}",
+        "no_contacts": "Primero añade un contacto.",
+        "retry": "Reintentar",
+        "offline_fetch": "No se puede contactar con el relé ahora. Revisa tu conexión e inténtalo de nuevo.",
+        "replace_key": "Ya tienes {label} con otra clave. ¿Cambiarla por la clave de este enlace?",
+        "making": "Creando una invitación…",
+        "ready": "Invitación lista",
+        "ready_note": "Funciona una vez, durante 24 horas.",
+        "share": "Compartir",
+        "copy_link": "Copiar enlace"
+      },
+      "roomlock": {
+        "title": "Cerrar {label}",
+        "note": "Quienes mantengas reciben una clave nueva en su bandeja. Los demás pierden la sala desde ahora.",
+        "go": "Cerrar sala",
+        "short": "Cerrar",
+        "done": "Sala cerrada. {n} personas recibieron la clave nueva.",
+        "offer": "{name} cerró {label}. ¿Usar la clave nueva?",
+        "use": "Usar",
+        "gone": "{name} cerró esta sala. Pídele una invitación nueva.",
+        "none": "Nadie ha firmado todavía en esta sala, así que solo la conservan tus dispositivos."
       }
     },
     "scanner": {

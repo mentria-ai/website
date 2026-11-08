@@ -5822,6 +5822,53 @@
         "asleep": "asleep",
         "stopped": "Your {device} stopped answering.",
         "finish": "Finish on this device"
+      },
+      "sign": {
+        "verified": "Verified: signed with their identity key",
+        "my_key": "Signing key {fp}"
+      },
+      "invite": {
+        "copied": "Invite link copied. It works once, for 24 hours.",
+        "join_title": "Join {label}?",
+        "by": "Invited by {name} {fp}",
+        "join": "Join",
+        "not_now": "Not now",
+        "ios": "Using the Home Screen app? Copy this invite and paste it there.",
+        "copy": "Copy invite",
+        "copied_short": "Copied",
+        "looking": "Looking for the invite…",
+        "gone": "This invite has expired or was already used. Ask for a new one.",
+        "used": "You joined with an invite; it is now used up.",
+        "joined": "{name} joined with an invite",
+        "old_link": "Old-style link: it never expires. Make a new invite to share.",
+        "make": "New invite",
+        "dismiss": "Dismiss",
+        "twice_mine": "Your invite link was used twice: {a}, {b}.",
+        "twice": "This room's invite link was used twice: {a}, {b}.",
+        "contact": "Invite a contact",
+        "pick": "Invite to this room",
+        "sent": "Invite sent to {name}.",
+        "from": "{name} invited you to {label}",
+        "no_contacts": "Add a contact first.",
+        "retry": "Try again",
+        "offline_fetch": "Can't reach the relay right now. Check your connection and try again.",
+        "replace_key": "You already have {label} with a different key. Switch it to the key from this link?",
+        "making": "Making an invite…",
+        "ready": "Invite ready",
+        "ready_note": "It works once, for 24 hours.",
+        "share": "Share",
+        "copy_link": "Copy link"
+      },
+      "roomlock": {
+        "title": "Lock {label}",
+        "note": "Everyone you keep gets a new key in their inbox. Anyone else loses the room from now on.",
+        "go": "Lock room",
+        "short": "Lock",
+        "done": "Room locked. {n} people got the new key.",
+        "offer": "{name} locked {label}. Use the new key?",
+        "use": "Use",
+        "gone": "{name} locked this room. Ask them for a new invite.",
+        "none": "Nobody here has signed in this room yet, so only your devices keep it."
       }
     },
     "scanner": {

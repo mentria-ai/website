@@ -260,6 +260,45 @@ const PAGE_TESTS = async () => {
     v.close();
   });
 
+  test('fix: an ask shows as a question card; a tap and Send answer it; asked clears it', async () => {
+    const AV8 = await import('/assets/js/comms/agent-view.js');
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const answers = [];
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {}, answer: async (sid, id, a) => { answers.push({ sid, id, a }); return 'p:ans'; } };
+    const v = AV8.createAgentView({ els, T: { agent: { ask_send: 'Send answer', ask_other: 'Or type an answer', ask_sent: 'Answer sent', message: 'Message the {name}' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    handlers.ask({ t: 'ask', sid: 's', id: 'abcdefghijkl', questions: [{ question: 'Name the next file?', header: 'File', options: [{ label: 'red.txt', description: 'Red' }, { label: 'blue.txt' }], multiSelect: false }, { question: 'Which parts?', header: 'Parts', options: [{ label: 'a' }, { label: 'b' }, { label: 'c' }], multiSelect: true }] });
+    handlers.ask({ t: 'ask', sid: 'other', id: 'zzzzzzzzzzzz', questions: [{ question: 'Not mine', options: [{ label: 'x' }, { label: 'y' }] }] });
+    await sleep(100);
+    const card = els.log.querySelector('.comms__agent-ask');
+    ok(card, 'card');
+    ok(card.textContent.includes('Name the next file?') && card.textContent.includes('Which parts?'));
+    ok(!els.log.textContent.includes('Not mine'));
+    const opt = (label) => [...card.querySelectorAll('.comms__ask-opt')].find((b) => b.textContent.includes(label));
+    const send = card.querySelector('.comms__ask-send');
+    eq(send.disabled, true);
+    opt('red.txt').click();
+    opt('blue.txt').click();
+    eq(opt('red.txt').getAttribute('aria-pressed'), 'false');
+    eq(opt('blue.txt').getAttribute('aria-pressed'), 'true');
+    eq(send.disabled, true);
+    opt('a').click();
+    opt('c').click();
+    eq(send.disabled, false);
+    v.paint();
+    eq(els.log.querySelector('.comms__agent-ask'), card);
+    send.click();
+    await sleep(50);
+    deepEq(answers, [{ sid: 's', id: 'abcdefghijkl', a: [{ labels: ['blue.txt'] }, { labels: ['a', 'c'] }] }]);
+    ok(card.textContent.includes('Answer sent'));
+    handlers.asked({ t: 'asked', sid: 's', id: 'abcdefghijkl' });
+    await sleep(100);
+    eq(els.log.querySelector('.comms__agent-ask'), null);
+    v.close();
+  });
+
   const R = (i) => btoa(String.fromCharCode(...new Uint8Array(16).fill(i))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const MH = btoa(String.fromCharCode(...new Uint8Array(32).fill(2))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const REF0 = R(10);

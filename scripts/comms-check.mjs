@@ -1415,6 +1415,25 @@ check('fix: the pairing section shows on phones too, with phone wording', () => 
   eq(AV.pairSection({ on: true, ready: false, phone: false, T }).hidden, true);
 });
 
+check('fix: the client sends a signed answer to an ask', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  const signed = [];
+  const c = BR.createBridgeClient({ transport: t.left, keys, device: 'iPhone', sign: async (room, cmid, body) => { signed.push(room); return Object.assign({}, body, { sg: { pub: 'P', ts: 1, s: 'S' } }); } });
+  const got = [];
+  const r = new BR.Reassembler();
+  t.right.onEvent(async (x) => { const f = await BR.open(keys.aes, x); const m = f && r.push(f); if (m) got.push(m); });
+  const cmid = await c.answer('s9', 'abcdefghijkl', [{ labels: ['blue.txt'] }]);
+  await new Promise((res) => setTimeout(res, 20));
+  eq(got.length, 1);
+  eq(got[0].t, 'answer');
+  eq(got[0].cmid, cmid);
+  eq(got[0].id, 'abcdefghijkl');
+  deepEq(got[0].answers, [{ labels: ['blue.txt'] }]);
+  eq(got[0].sg.s, 'S');
+  deepEq(signed, ['s9']);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

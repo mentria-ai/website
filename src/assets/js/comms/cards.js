@@ -508,7 +508,7 @@ const imageSlot = (p, opts) => {
   return box;
 };
 
-const KIND_GLYPH = { run: '$', read: '▤', search: '⌕', edit: '✎', web: '↗', subagent: '◇', other: '•' };
+const KIND_GLYPH = { run: '$', read: '▤', search: '⌕', edit: '✎', web: '↗', subagent: '◇', ask: '?', other: '•' };
 export const TOOLISH = new Set(['tool_call', 'tool_result', 'diff']);
 
 const toolCard = (c, res, diff, opts) => {

@@ -74,6 +74,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
   let timers = [];
   let hiddenAt = 0;
   let earlierBtn = null;
+  let asks = [];
   let earliestN = 0;
   const waiters = new Map();
   const offs = [];
@@ -245,6 +246,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
       }
       out.push(box);
     }
+    if (!sub) for (const a of asks) if (a.sid === sid) out.push(askCard(a));
     const wanted = new Set(out);
     let cur = els.log.firstChild;
     for (const node of out) {
@@ -259,6 +261,64 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     else if (els.log.scrollTop !== top) els.log.scrollTop = top;
   };
   const schedule = () => { if (!paintTimer) paintTimer = setTimeout(paint, 60); };
+
+  const askReady = (a) => a.questions.every((q, i) => a.sel[i].size > 0 || a.text[i].trim());
+  const askCard = (a) => {
+    if (a.node) return a.node;
+    const card = el('div', 'comms__agent-ask');
+    const send = el('button', 'comms__btn comms__ask-send', A.ask_send || 'Send');
+    send.type = 'button';
+    const state = el('span', 'comms__agent-state');
+    const sync = () => { send.disabled = a.sent || !askReady(a); state.textContent = a.failed ? (A.unpaired || '') : a.sent ? (A.ask_sent || '') : ''; state.classList.toggle('comms__agent-state--failed', !!a.failed); };
+    a.questions.forEach((q, i) => {
+      const box = el('div', 'comms__ask-q');
+      if (q.header) box.append(el('span', 'comms__ask-head', q.header));
+      box.append(el('p', 'comms__ask-text', q.question));
+      const opts = el('div', 'comms__ask-opts');
+      const buttons = [];
+      for (const o of q.options || []) {
+        const b = el('button', 'comms__ask-opt');
+        b.type = 'button';
+        b.setAttribute('aria-pressed', 'false');
+        b.append(el('span', 'comms__ask-label', o.label));
+        if (o.description) b.append(el('span', 'comms__ask-desc', o.description));
+        b.addEventListener('click', () => {
+          if (a.sent) return;
+          if (q.multiSelect) { if (a.sel[i].has(o.label)) a.sel[i].delete(o.label); else a.sel[i].add(o.label); }
+          else { const had = a.sel[i].has(o.label); a.sel[i].clear(); if (!had) a.sel[i].add(o.label); }
+          for (const [bb, label] of buttons) bb.setAttribute('aria-pressed', String(a.sel[i].has(label)));
+          sync();
+        });
+        buttons.push([b, o.label]);
+        opts.append(b);
+      }
+      box.append(opts);
+      const other = el('input', 'comms__ask-other');
+      other.type = 'text';
+      other.maxLength = 2000;
+      other.placeholder = A.ask_other || '';
+      other.setAttribute('aria-label', A.ask_other || q.question);
+      other.addEventListener('input', () => { a.text[i] = other.value; sync(); });
+      box.append(other);
+      card.append(box);
+    });
+    send.addEventListener('click', async () => {
+      if (a.sent || !askReady(a)) return;
+      a.sent = true;
+      a.failed = null;
+      sync();
+      try {
+        a.cmid = await client.answer(a.sid, a.id, a.questions.map((q, i) => (a.text[i].trim() ? { labels: Array.from(a.sel[i]), text: a.text[i].trim() } : { labels: Array.from(a.sel[i]) })));
+      } catch (_) { a.sent = false; sync(); }
+    });
+    const foot = el('div', 'comms__ask-foot');
+    foot.append(send, state);
+    card.append(foot);
+    a.sync = sync;
+    sync();
+    a.node = card;
+    return card;
+  };
   const stopTimers = () => { timers.forEach((t) => clearInterval(t)); timers = []; };
   const fresh = () => { cache = new Map(); opened = new Set(); nodes = new Map(); dirty.clear(); expanded = new Set(); };
 
@@ -267,6 +327,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     client.reset(sid, sub || undefined);
     fresh();
     perms = [];
+    asks = [];
     if (sub) client.open(sid, 0, undefined, sub);
     else client.hello(sid);
     paint();
@@ -284,10 +345,18 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
   offs.push(client.on('turns', (m) => { if (m.sid === sid && (m.sub || null) === sub) for (const x of m.list || []) client.open(sid, x.n, undefined, sub || undefined); }));
   offs.push(client.on('here', () => { if (sid) status(); }));
   offs.push(client.on('chan', (m) => { if (m && m.sid === sid) paintComposer(); }));
+  offs.push(client.on('ask', (m) => {
+    if (!m || typeof m.sid !== 'string' || typeof m.id !== 'string' || !Array.isArray(m.questions) || !m.questions.length) return;
+    if (asks.some((x) => x.sid === m.sid && x.id === m.id)) return;
+    const questions = m.questions.slice(0, 4).map((q) => ({ question: String((q && q.question) || ''), header: String((q && q.header) || '').slice(0, 40), multiSelect: !!(q && q.multiSelect), options: (Array.isArray(q && q.options) ? q.options : []).slice(0, 6).map((o) => ({ label: String((o && o.label) || ''), description: o && o.description ? String(o.description) : '' })) }));
+    asks.push({ sid: m.sid, id: m.id, questions, sel: questions.map(() => new Set()), text: questions.map(() => ''), sent: false });
+    if (m.sid === sid) schedule();
+  }));
+  offs.push(client.on('asked', (m) => { const before = asks.length; asks = asks.filter((x) => !(m && x.sid === m.sid && x.id === m.id)); if (asks.length !== before && m.sid === sid) schedule(); }));
   offs.push(client.on('ack', (m) => { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.acked) { p.acked = true; schedule(); } }));
   offs.push(client.on('perm', (m) => { if (!m || typeof m.request_id !== 'string' || typeof m.sid !== 'string') return; if (!perms.some((x) => x.sid === m.sid && x.request_id === m.request_id)) perms.push(Object.assign({}, m)); if (m.sid === sid) paintPerm(); }));
   offs.push(client.on('part', (m) => { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(m); } }));
-  offs.push(client.on('err', (m) => { if (m && m.cmid && m.sid === sid) { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.failed) { p.failed = String(m.code || 'error'); schedule(); } } if (m.ref) { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(null); } } }));
+  offs.push(client.on('err', (m) => { if (m && m.cmid) { const q = asks.find((x) => x.cmid === m.cmid); if (q) { q.failed = String(m.code || 'error'); q.sent = false; if (q.sync) q.sync(); } } if (m && m.cmid && m.sid === sid) { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.failed) { p.failed = String(m.code || 'error'); schedule(); } } if (m.ref) { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(null); } } }));
 
   return {
     isOpen: () => !!sid,

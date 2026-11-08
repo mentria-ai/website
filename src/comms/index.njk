@@ -695,6 +695,17 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__tool-sum{color:var(--term-muted);font-size:var(--text-2xs)}
 .comms__tool-sum--error{color:var(--amber-60,#f5a524)}
 .comms__toolgroup{margin:var(--space-1) 0}
+.comms__agent-ask{margin:var(--space-2) var(--space-2) var(--space-3);padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md)}
+.comms__ask-q+.comms__ask-q{margin-top:var(--space-3)}
+.comms__ask-head{color:var(--accent);font:600 var(--text-2xs) var(--font-mono);text-transform:uppercase}
+.comms__ask-text{margin:var(--space-1) 0 var(--space-2);color:var(--term-fg-strong);font-size:var(--text-sm)}
+.comms__ask-opts{display:flex;flex-direction:column;gap:var(--space-1)}
+.comms__ask-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;padding:var(--space-2) var(--space-3);color:var(--term-fg);font:inherit;text-align:left;background:var(--term-bg);border:1px solid var(--term-border);border-radius:var(--radius-sm);cursor:pointer}
+.comms__ask-opt[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.comms__ask-label{color:var(--term-fg-strong);font-size:var(--text-sm)}
+.comms__ask-desc{color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__ask-other{width:100%;margin-top:var(--space-2);padding:var(--space-2);color:var(--term-fg);font-size:16px;background:var(--term-bg);border:1px solid var(--term-border);border-radius:var(--radius-sm)}
+.comms__ask-foot{display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-3)}
 .comms__toolgroup-sum{display:inline-flex;flex-wrap:wrap;align-items:center;gap:var(--space-3);min-height:32px;padding:4px var(--space-3);color:var(--term-muted);font:var(--text-xs) var(--font-mono);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:999px;cursor:pointer}
 .comms__toolgroup-sum[aria-expanded="true"]{border-color:var(--term-border-strong)}
 .comms__toolgroup-k{display:inline-flex;align-items:baseline;gap:4px}

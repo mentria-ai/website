@@ -128,6 +128,7 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
     open: (sid, n, before, sub) => send(Object.assign({ t: 'open', sid, n }, Number.isInteger(before) ? { before } : {}, sub ? { sub } : {})),
     get: (sid, ref, sub) => send(Object.assign({ t: 'get', sid, ref }, sub ? { sub } : {})),
     say: async (sid, text) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'say', sid, cmid, text, device })); return cmid; },
+    answer: async (sid, id, answers) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'answer', sid, cmid, id, answers })); return cmid; },
     verdict: async (sid, request_id, behavior) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'verdict', sid, cmid, request_id, behavior })); return cmid; },
     sessions: () => Array.from(sessions.values()).map((s) => Object.assign({}, s, { online: now() - s.hereAt < HERE_TTL_MS })),
     turn: (sid, n, sub) => {

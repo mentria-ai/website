@@ -187,7 +187,7 @@ const sendToPartner = (payload) => {
 };
 
 const COPY_FALLBACK = {
-  'about.sync_vault_totp': 'This device has its own TOTP vault, and the other device has a different one. Replace this device’s vault with the other device’s? TOTP accounts that are only on this device will be lost, and the other device’s passphrase will unlock it.',
+  'about.sync_vault_totp': 'This device has its own 2FA Authenticator vault, and the other device has a different one. Replace this device’s vault with the other device’s? 2FA accounts that are only on this device will be lost, and the other device’s passphrase will unlock it.',
   'about.sync_vault_identity': 'This device has its own Mentria identity, and the other device has a different one. Replace it with the other device’s? This device’s identity will be lost, and the other device’s passphrase will unlock it.',
   'about.sync_vault_keyring': 'This device has its own one unlock, and the other device has a different one. Replace this device’s with the other device’s? The other device’s recovery code will unlock it. Notes, codes, chats and finances set up with this device’s unlock won’t open here until you bring that unlock back in from About. It is kept on this device.',
   'about.sync_vault_keep': 'Keep this device’s',

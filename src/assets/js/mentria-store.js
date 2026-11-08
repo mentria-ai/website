@@ -398,7 +398,7 @@
   };
 
   const AREA_NAMES = {
-    invoice: 'invoices', totp: 'TOTP accounts', identity: 'Comms identity', comms: 'Comms rooms and contacts',
+    invoice: 'invoices', totp: '2FA accounts', identity: 'Comms identity', comms: 'Comms rooms and contacts',
     quick_notes: 'notes', packs: 'learning progress', games: 'game saves and scores', tools: 'tool settings',
     ui: 'layout settings', ai_chat: 'AI chat', ext: 'extensions', extdata: 'extension data', feed: 'feed progress',
     keyring: 'one unlock'

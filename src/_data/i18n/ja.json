@@ -5874,6 +5874,8 @@
         "heading": "エージェントのセッション",
         "connect": "この Mac を接続",
         "connect_note": "コードをコピーして、Mac で node bridge.mjs pair を実行します。返信に使う各デバイスで一度ずつ行ってください。スマートフォンからは共有クリップボードで Mac に貼り付けます。コードは Mac に残ります。",
+        "connect_phone": "このスマートフォンをペアリング",
+        "connect_note_phone": "ここでコードをコピーすると、共有クリップボードで Mac に届きます。続けて Mac で node bridge.mjs pair を実行します。一度ペアリングすれば、このスマートフォンから返信や承認ができます。",
         "copied": "ブリッジコードをコピーしました。",
         "copy_failed": "ブリッジコードをコピーできませんでした。",
         "running": "Mac で実行中",

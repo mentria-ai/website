@@ -5874,6 +5874,8 @@
         "heading": "Agent sessions",
         "connect": "Connect this Mac",
         "connect_note": "Copy the code, then run node bridge.mjs pair on the Mac. Do it once on each device you want to reply from; from a phone, paste it on the Mac through the shared clipboard. The code stays on the Mac.",
+        "connect_phone": "Pair this phone",
+        "connect_note_phone": "Copy the code here; it reaches the Mac through the shared clipboard. Then run node bridge.mjs pair on the Mac. Pair once to reply and approve from this phone.",
         "copied": "Bridge code copied.",
         "copy_failed": "Couldn't copy the bridge code.",
         "running": "running on your Mac",

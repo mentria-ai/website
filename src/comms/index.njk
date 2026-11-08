@@ -135,7 +135,7 @@ unlockTool: true
         <div class="comms__adv-sec comms__agents" id="comms-agents" hidden>
           <span class="comms__lbl">{{ 'tool.comms.agent.heading' | t }}</span>
           <button class="comms__btn comms__btn--ghost" id="comms-agents-copy" type="button">{{ 'tool.comms.agent.connect' | t }}</button>
-          <p class="comms__id-note">{{ 'tool.comms.agent.connect_note' | t }}</p>
+          <p class="comms__id-note" id="comms-agents-note">{{ 'tool.comms.agent.connect_note' | t }}</p>
         </div>
         <div class="comms__adv-sec">
           <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
@@ -796,7 +796,7 @@ import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink }
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
 import { bridgeKeyFromSecret, keysFromBridgeKey, bridgeCode, createBridgeClient, BRIDGE_KIND } from '/assets/js/comms/bridge.js';
-import { createAgentView } from '/assets/js/comms/agent-view.js';
+import { createAgentView, pairSection } from '/assets/js/comms/agent-view.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1912,7 +1912,12 @@ const agentList = () => {
 };
 const paintAgents = () => {
   const box = document.getElementById('comms-agents');
-  if (box) box.hidden = !(agentsOn() && !IOS_DEVICE && !!bridgeK);
+  if (box) {
+    const ps = pairSection({ on: agentsOn(), ready: !!bridgeK, phone: IOS_DEVICE || /Android/i.test(navigator.userAgent), T: T.agent });
+    box.hidden = ps.hidden;
+    document.getElementById('comms-agents-copy').textContent = ps.label;
+    document.getElementById('comms-agents-note').textContent = ps.note;
+  }
   const list = agentList();
   if (bridge) {
     const keep = list.map((a) => ({ sid: a.sid, name: a.name, lastTs: a.lastTs }));

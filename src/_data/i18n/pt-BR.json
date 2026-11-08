@@ -5874,6 +5874,8 @@
         "heading": "Sessões de agente",
         "connect": "Conectar este Mac",
         "connect_note": "Copie o código e rode node bridge.mjs pair no Mac. Faça isso uma vez em cada dispositivo do qual quiser responder; de um celular, cole no Mac pela área de transferência compartilhada. O código fica no Mac.",
+        "connect_phone": "Parear este celular",
+        "connect_note_phone": "Copie o código aqui; ele chega ao Mac pela área de transferência compartilhada. Depois rode node bridge.mjs pair no Mac. Pareie uma vez para responder e aprovar deste celular.",
         "copied": "Código da ponte copiado.",
         "copy_failed": "Não foi possível copiar o código da ponte.",
         "running": "rodando no seu Mac",

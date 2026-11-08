@@ -158,6 +158,8 @@ eleventyComputed:
 </div>
 {% include "terminal-frame-close.njk" %}
 
+{% include "tool-schema.njk" %}
+
 {% set pdfKeys = ["pages_count", "pages_one", "selected", "edited", "saved", "find_count", "find_none", "no_outline", "hint_highlight", "hint_text", "hint_draw", "hint_image", "hint_sign", "hint_none", "p_hint", "p_hint_touch", "p_from", "p_need_sel", "p_split_need", "p_deleted", "p_deleted_one", "p_undo", "p_keep_one", "p_locked", "p_working", "p_extracted", "p_split_done", "p_images_done", "page_label", "pass_need", "pass_wrong", "loading", "opening", "not_pdf", "bad_pdf", "offline_first", "load_failed", "save_failed", "sig_empty", "part", "color", "pages_name", "extract_name"] %}
 <script>
 window.MENTRIA_PDF_COPY = {

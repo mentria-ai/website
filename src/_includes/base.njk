@@ -258,6 +258,11 @@
     </script>
     {%- endif %}
 
+    {%- if page.url == localePrefix + "/comms/" %}
+    {%- set toolSchemaNetwork = true %}
+    {% include "tool-schema.njk" %}
+    {%- endif %}
+
     {%- if isPost %}
     <script type="application/ld+json">
     {

@@ -1,6 +1,7 @@
 {%- set _entry = ((toolCatalog | groupby("slug"))[page.fileSlug] or [{}])[0] -%}
-{%- set _categories = { "Game": "GameApplication", "Developer": "DeveloperApplication", "Security": "SecurityApplication", "Design": "DesignApplication", "Media": "MultimediaApplication", "Health": "HealthApplication" } -%}
+{%- set _categories = { "Game": "GameApplication", "Developer": "DeveloperApplication", "Security": "SecurityApplication", "Design": "DesignApplication", "Media": "MultimediaApplication", "Health": "HealthApplication", "Social": "CommunicationApplication" } -%}
 {%- set _needsWebGPU = _entry.offline == "model" -%}
+{%- set _usesNetwork = toolSchemaNetwork | default(_entry.offline == "network") -%}
 {%- set _category = toolSchemaCategory | default(_categories[_entry.category] or "UtilitiesApplication") -%}
 {%- set _browserReq = toolSchemaBrowserReq | default(("tools_page.schema.requires_webgpu" if _needsWebGPU else "tools_page.schema.requires_js") | traw) -%}
 {%- set _toolUrl = site.siteUrl ~ page.url -%}
@@ -21,10 +22,12 @@
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "featureList": [
+    {%- if not _usesNetwork %}
     {{ ("tools_page.schema.feature_browser" | traw) | dump | safe }},
+    {%- endif %}
     {{ ("tools_page.schema.feature_private" | traw) | dump | safe }},
     {{ ("tools_page.schema.feature_no_key" | traw) | dump | safe }}
-    {%- if _entry.offline != "network" %},
+    {%- if not _usesNetwork %},
     {{ ("tools_page.schema.feature_offline" | traw) | dump | safe }}
     {%- endif %}
   ],

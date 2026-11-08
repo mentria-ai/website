@@ -82,6 +82,27 @@ localeReload: true
 {% endif %}
 <p class="tools-none" id="tools-none" role="status" hidden></p>
 </div>
+{%- set listed = [] -%}
+{%- for g in groups -%}{%- set listed = listed.concat((toolList | groupby("group"))[g[0]] or []) -%}{%- endfor %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": {{ ("tools_page.title" | traw) | dump | safe }},
+  "description": {{ (("tools_page.lede" | traw) | htmlDecode | striptags) | dump | safe }},
+  "url": "{{ site.siteUrl }}{{ page.url }}",
+  "inLanguage": "{{ lang }}",
+  "isPartOf": { "@id": "{{ site.siteUrl }}/#website" },
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+      {%- for tool in listed %}
+      { "@type": "ListItem", "position": {{ loop.index }}, "url": "{{ site.siteUrl }}{{ (tool.url or ('/tools/' + tool.slug + '/')) | localeUrl(lang) }}", "name": {{ ((("tools." + tool.slug + ".title") | traw) | htmlDecode | striptags) | dump | safe }} }{% if not loop.last %},{% endif %}
+      {%- endfor %}
+    ]
+  }
+}
+</script>
 {% else %}
 <div style="margin-top: 2rem; font-family: var(--font-mono); color: var(--term-muted);">
     <p>{{ "tools_page.empty_cmd" | t }}</p>

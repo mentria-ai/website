@@ -15,7 +15,7 @@
     "description": "IA que roda no seu navegador, com ferramentas integradas, uma biblioteca de extensões e pacotes de cartões para aprender. Adicione suas próprias extensões e pacotes. Seus dados continuam privados.",
     "metaTitle": "Mentria — Aprenda e experimente IA que roda no seu dispositivo",
     "metaDescription": "IA que roda no seu navegador, com ferramentas integradas, uma biblioteca de extensões e pacotes de cartões para aprender. Adicione suas próprias extensões e pacotes. Seus dados continuam privados.",
-    "socialImageAlt": "Mentria — ferramentas, jogos e IA que rodam inteiramente no seu navegador"
+    "socialImageAlt": "Mentria — aprenda e experimente IA que roda no seu dispositivo: ferramentas, jogos, pacotes de cartões para aprender e extensões"
   },
   "nav": {
     "feed": "Feed",
@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "Sobre",
-    "meta_description": "A Mentria é um pequeno estúdio criativo. Ferramentas, jogos e IA com foco em privacidade que rodam no seu navegador. Sem contas, sem rastreamento, e seus dados continuam privados.",
+    "meta_description": "A Mentria é um pequeno estúdio criativo: ferramentas, jogos e IA com foco em privacidade que rodam no seu navegador, e pacotes de cartões para aprender.",
     "tagline": "Aprenda e experimente IA que roda no seu dispositivo.",
     "copyright": "© 2026 Mentria. Todos os direitos reservados.",
     "image_use": "Uso de imagens",
@@ -619,7 +619,7 @@
     },
     "comms": {
       "title": "Comms",
-      "lede": "Chat ponto a ponto, chamadas de voz e vídeo, e envio de arquivos. Criptografia de ponta a ponta, sem contas e sem nenhum servidor capaz de ler suas mensagens.",
+      "lede": "Chat ponto a ponto, chamadas de voz e vídeo, e envio de arquivos. Criptografia de ponta a ponta e sem contas; o relay só repassa mensagens seladas.",
       "seo_title": "Chat, chamadas e arquivos P2P criptografados"
     },
     "bubble-level": {
@@ -5323,15 +5323,15 @@
       }
     },
     "comms": {
-      "meta_description": "Chat ponto a ponto, chamadas e envio de arquivos — criptografia de ponta a ponta, sem contas e sem nenhum servidor capaz de ler suas mensagens.",
-      "lede": "Chat ponto a ponto, chamadas de voz e vídeo, e envio de arquivos. Criptografia de ponta a ponta, sem contas e sem nenhum servidor capaz de ler suas mensagens. Compartilhe a URL de uma sala, ou troque códigos de contato e mande mensagens direto para as pessoas.",
+      "meta_description": "Chat ponto a ponto, chamadas e envio de arquivos, sem contas. As mensagens são criptografadas de ponta a ponta no seu dispositivo, e o servidor da Mentria só as repassa criptografadas.",
+      "lede": "Chat ponto a ponto, chamadas de voz e vídeo, e envio de arquivos. Criptografia de ponta a ponta e sem contas; o relay só repassa mensagens seladas. Compartilhe a URL de uma sala, ou troque códigos de contato e mande mensagens direto para as pessoas.",
       "unknown": "desconhecido",
       "onboard": {
         "insecure_title": "Esta página precisa de uma conexão segura",
         "insecure_body": "Seu navegador só permite a criptografia de que o comms precisa via <strong>https</strong>. Você está em um endereço http comum, então não dá para criar chaves aqui.",
         "insecure_open": "Abra {link} em vez disso — ou use um endereço https se estiver testando localmente.",
         "intro_title": "Chat privado que roda nos seus aparelhos",
-        "intro_body": "Mensagens, chamadas e arquivos vão direto para a outra pessoa — com criptografia de ponta a ponta. Sem conta, sem número de telefone e sem servidor que consiga ler o conteúdo.",
+        "intro_body": "Mensagens, chamadas e arquivos vão direto para a outra pessoa — com criptografia de ponta a ponta. Sem conta nem número de telefone; o que passa pelo relay continua selado.",
         "start": "começar",
         "intro_fine": "Leva uns dez segundos. Tudo fica no seu aparelho.",
         "name_title": "Como as pessoas devem chamar você?",

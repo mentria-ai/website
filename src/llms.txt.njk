@@ -12,6 +12,12 @@ layout: null
 - [{{ t.title | htmlDecode | safe }}]({{ site.siteUrl }}{{ t.url or ('/tools/' ~ t.slug ~ '/') }}): {{ t.summary | htmlDecode | safe }}
 {%- endfor %}
 
+## Extensions
+- [{{ "tool.ext_gallery.title" | traw }}]({{ site.siteUrl }}/extensions/): {{ "store.lede" | traw }}
+{%- for e in extensions | default([]) %}
+- [{{ e.name | htmlDecode | safe }}]({{ site.siteUrl }}/extensions/{{ e.id }}/): {{ ("tool.ext_gallery.desc." + e.id) | traw | htmlDecode | safe }}
+{%- endfor %}
+
 ## Learn
 - [Learn]({{ site.siteUrl }}/learn/): Learning packs of cards you read, answer and come back to.
 - [Pack format]({{ site.siteUrl }}/learn/format/): How to write a learning pack.
@@ -20,6 +26,8 @@ layout: null
 - [Run an LLM in your browser]({{ site.siteUrl }}/guides/run-llm-in-browser/): How a language model runs on your own GPU in a web page with WebGPU, with a live demo, download sizes, measured speeds, browser support and limits.
 
 ## About
+- [About]({{ site.siteUrl }}/about/): {{ "about.meta_description" | traw }}
+- [Image use]({{ site.siteUrl }}/image-use/): {{ "image_use.rights" | traw }}
 - [Privacy]({{ site.siteUrl }}/privacy/): What stays on your device, what uses the network and when, and how to check it yourself.
 
 ## Optional

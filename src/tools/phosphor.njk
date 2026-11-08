@@ -632,6 +632,8 @@ localeReload: true
   </div>
 </div>
 
+{% include "tool-schema.njk" %}
+
 <script>
   window.PHOSPHOR_COPY = {
     methodMnk:   {{ ("tool.phosphor.method_mnk"   | t) | dump | safe }},

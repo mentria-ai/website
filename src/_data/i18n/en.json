@@ -5899,7 +5899,14 @@
         "earlier": "Show earlier",
         "earlier_turn": "Show earlier in this turn",
         "open_sub": "Open",
-        "from_phone": "from your phone"
+        "from_phone": "from your phone",
+        "message": "Message the {name}",
+        "signed": "Signed with your identity key, so only your devices can instruct this session.",
+        "sent": "sent",
+        "delivered": "delivered",
+        "wants": "{tool} wants to run",
+        "allow": "Allow",
+        "deny": "Deny"
       }
     },
     "scanner": {

@@ -1332,6 +1332,25 @@ check('view: the window keeps 40 turns and 60 cards per turn', () => {
   eq(AV.agentWindow([{ n: 3, msgs: [card(1)], earlier: false }]).earlierTurns, true);
 });
 
+check('say: a sent line is matched to its prompt once', () => {
+  const at = 1000000;
+  const pending = [{ cmid: 'p1', text: 'run the tests', at }, { cmid: 'p2', text: 'run the tests', at: at + 10 }, { cmid: 'p3', text: 'other', at }];
+  const msgs = [{ id: 'u1', role: 'user', via: 'phone', ts: at + 3000, parts: [{ type: 'text', text: 'run the tests' }] }, { id: 'a1', role: 'assistant', ts: at + 4000, parts: [{ type: 'text', text: 'ok' }] }];
+  deepEq(AV.matchPending(pending, msgs).map((p) => p.cmid), ['p2', 'p3']);
+  const late = [{ id: 'u9', role: 'user', via: 'phone', ts: at + 5 * 60000, parts: [{ type: 'text', text: 'other' }] }];
+  deepEq(AV.matchPending(pending, late).map((p) => p.cmid), ['p1', 'p2', 'p3']);
+  const typed = [{ id: 'u8', role: 'user', ts: at + 1000, parts: [{ type: 'text', text: 'other' }] }];
+  deepEq(AV.matchPending(pending, typed).map((p) => p.cmid), ['p1', 'p2', 'p3']);
+});
+check('perm: a resolved request clears and a late verdict is dropped', () => {
+  const perm = { request_id: 'abcde', ts: 5000 };
+  eq(AV.permResolved(perm, [{ role: 'assistant', ts: 4000, parts: [{ type: 'tool_result', callId: 'x' }] }]), false);
+  eq(AV.permResolved(perm, [{ role: 'assistant', ts: 6000, parts: [{ type: 'text', text: 'thinking' }] }]), false);
+  eq(AV.permResolved(perm, [{ role: 'assistant', ts: 6000, parts: [{ type: 'tool_result', callId: 'x' }] }]), true);
+  eq(AV.permResolved(perm, [{ role: 'user', ts: 7000, parts: [{ type: 'text', text: 'next' }] }]), true);
+  eq(AV.permResolved(null, []), true);
+});
+
 let failed = 0;
 for (const [name, fn] of checks) {
   try {

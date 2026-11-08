@@ -303,6 +303,13 @@ unlockTool: true
         <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
       </div>
 
+      <div class="comms__agent-perm" id="comms-agent-perm" role="alert" hidden>
+        <p class="comms__agent-perm-title" id="comms-agent-perm-title"></p>
+        <p class="comms__agent-perm-desc" id="comms-agent-perm-desc"></p>
+        <pre class="comms__tool-out" id="comms-agent-perm-preview"></pre>
+        <div class="comms__agent-perm-actions"><button class="comms__btn comms__btn--ghost" id="comms-agent-deny" type="button">{{ 'tool.comms.agent.deny' | t }}</button><button class="comms__btn" id="comms-agent-allow" type="button">{{ 'tool.comms.agent.allow' | t }}</button></div>
+      </div>
+      <p class="comms__agent-signed" id="comms-agent-signed" hidden>{{ 'tool.comms.agent.signed' | t }}</p>
       <form class="comms__send" id="comms-send" autocomplete="off">
         <label class="comms__attach" title="{{ 'tool.comms.chat.attach' | t }}" aria-label="{{ 'tool.comms.chat.attach' | t }}"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
         <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled>
@@ -699,6 +706,13 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__agent-chip{display:inline-block;margin:var(--space-1) var(--space-1) 0 0;padding:2px var(--space-2);color:var(--term-fg);font-size:var(--text-2xs);border:1px solid var(--term-border);border-radius:999px}
 .comms__agent-img{display:block;max-width:100%;margin-top:var(--space-1);border-radius:var(--radius-md)}
 .comms__agent-note{margin:var(--space-1) 0;color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__agent-perm{margin:var(--space-2) var(--space-3) 0;padding:var(--space-3);background:var(--amber-8);border:1px solid var(--amber-30);border-radius:var(--radius-md)}
+.comms__agent-perm-title{margin:0;color:var(--term-fg-strong);font-weight:600}
+.comms__agent-perm-desc{margin:var(--space-1) 0;color:var(--term-fg);font-size:var(--text-sm)}
+.comms__agent-perm-actions{display:flex;justify-content:flex-end;gap:var(--space-2);margin-top:var(--space-2)}
+.comms__agent-signed{margin:var(--space-1) var(--space-3) 0;color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__agent-pending .comms__line{opacity:.8}
+.comms__agent-state{margin-left:var(--space-2);color:var(--term-muted);font-size:var(--text-2xs)}
 .comms__lock-list{display:flex;flex-direction:column;gap:var(--space-2)}
 .comms__lock-list label{display:flex;align-items:center;gap:var(--space-2);color:var(--term-fg);font-size:var(--text-sm)}
 .comms__invite-by,.comms__invite-ios{margin:0;color:var(--term-muted);font-size:var(--text-sm);overflow-wrap:anywhere}
@@ -1914,8 +1928,6 @@ const openAgent = async (sid) => {
   await leaveRoom();
   setView('chat');
   agentViewFor().open(sid);
-  els.msg.disabled = true;
-  els.go.disabled = true;
 };
 const startBridge = async () => {
   if (bridge || !myId || !mySign || !agentsOn()) return;
@@ -3246,6 +3258,11 @@ els.msg.addEventListener('keydown', aiHoldEnter);
 els.msg.addEventListener('keypress', aiHoldEnter);
 els.send.addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (agentView && agentView.isOpen()) {
+    const said = els.msg.value.trim();
+    if (said) { els.msg.value = ''; agentView.say(said); }
+    return;
+  }
   if (aiView && aiView.isOpen()) {
     const asked = els.msg.value.trim();
     if (aiView.busy()) { aiView.stop(); return; }

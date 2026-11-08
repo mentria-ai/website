@@ -5899,7 +5899,14 @@
         "earlier": "Voir plus ancien",
         "earlier_turn": "Voir le début de ce tour",
         "open_sub": "Ouvrir",
-        "from_phone": "depuis votre téléphone"
+        "from_phone": "depuis votre téléphone",
+        "message": "Message pour {name}",
+        "signed": "Signé avec votre clé d’identité : seuls vos appareils peuvent donner des instructions à cette session.",
+        "sent": "envoyé",
+        "delivered": "remis",
+        "wants": "{tool} veut s’exécuter",
+        "allow": "Autoriser",
+        "deny": "Refuser"
       }
     },
     "scanner": {

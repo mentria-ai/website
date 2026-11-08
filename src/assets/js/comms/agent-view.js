@@ -23,6 +23,23 @@ export const agentWindow = (turns, { maxTurns = MAX_TURNS, maxCards = MAX_CARDS,
   return { shown, earlierTurns: sorted.length > maxTurns || (sorted.length > 0 && sorted[0].n > 0) };
 };
 
+export const PENDING_MS = 2 * 60 * 1000;
+const promptText = (m) => (m.parts || []).filter((x) => x.type === 'text').map((x) => x.text).join('\n').trim();
+
+export const matchPending = (pending, msgs) => {
+  const used = new Set();
+  const left = [];
+  for (const p of pending || []) {
+    const i = (msgs || []).findIndex((m, k) => !used.has(k) && m.role === 'user' && m.via === 'phone' && Math.abs((m.ts || 0) - p.at) <= PENDING_MS && promptText(m) === String(p.text).trim());
+    if (i >= 0) used.add(i); else left.push(p);
+  }
+  return left;
+};
+
+export const permResolved = (perm, msgs) => !perm || (msgs || []).some((m) => (m.ts || 0) > perm.ts && (m.role === 'user' || (m.parts || []).some((x) => x.type === 'tool_result')));
+
+const fillIn = (s, v) => String(s == null ? '' : s).replace(/\{(\w+)\}/g, (_, k) => (v[k] != null ? String(v[k]) : ''));
+
 const el = (tag, cls, text) => {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -36,8 +53,37 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen } = {}
   let sub = null;
   let expanded = new Set();
   let paintTimer = 0;
+  let pending = [];
+  let perms = [];
+  let placeholder = null;
   const waiters = new Map();
   const offs = [];
+  const byId = (id) => document.getElementById(id);
+  const allMsgs = () => turnsNow().flatMap((t) => t.msgs || []);
+  const paintPerm = () => {
+    const card = byId('comms-agent-perm');
+    if (!card) return;
+    const msgs = allMsgs();
+    perms = perms.filter((p) => !p.answered && !permResolved(p, msgs));
+    const p = sid && !sub ? perms[perms.length - 1] : null;
+    card.hidden = !p;
+    if (!p) return;
+    byId('comms-agent-perm-title').textContent = fillIn(A.wants, { tool: p.tool_name || '' });
+    byId('comms-agent-perm-desc').textContent = p.description || '';
+    byId('comms-agent-perm-preview').textContent = p.input_preview || '';
+    card.dataset.id = p.request_id;
+  };
+  const answer = (behavior) => {
+    const card = byId('comms-agent-perm');
+    const id = card && card.dataset.id;
+    const p = perms.find((x) => x.request_id === id);
+    if (!p || !sid) return;
+    p.answered = true;
+    client.verdict(sid, id, behavior).catch(() => {});
+    paintPerm();
+  };
+  if (byId('comms-agent-allow')) byId('comms-agent-allow').addEventListener('click', () => answer('allow'));
+  if (byId('comms-agent-deny')) byId('comms-agent-deny').addEventListener('click', () => answer('deny'));
 
   const atBottom = () => !els.log || els.log.scrollHeight - els.log.scrollTop - els.log.clientHeight < 80;
   const get = (ref) => new Promise((resolve) => {
@@ -101,6 +147,19 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen } = {}
       els.log.append(b);
     }
     for (const t of w.shown) els.log.append(renderTurn(t, t.earlierCards));
+    pending = matchPending(pending, allMsgs());
+    if (pending.length && !sub) {
+      const box = el('div', 'comms__agent-pending');
+      for (const p of pending) {
+        const line = el('div', 'comms__line comms__line--me');
+        const what = el('span', 'comms__what');
+        renderBody(what, p.text, { from: 'self', T: T.chat });
+        line.append(what, el('span', 'comms__agent-state', p.acked ? (A.delivered || '') : (A.sent || '')));
+        box.append(line);
+      }
+      els.log.append(box);
+    }
+    paintPerm();
     if (stick) els.log.scrollTop = els.log.scrollHeight;
   };
   const schedule = () => { if (!paintTimer) paintTimer = setTimeout(paint, 60); };
@@ -108,6 +167,8 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen } = {}
   offs.push(client.on('turn', (m) => { if (m.sid === sid && (m.sub || null) === sub) schedule(); }));
   offs.push(client.on('turns', (m) => { if (m.sid === sid && (m.sub || null) === sub) for (const x of m.list || []) client.open(sid, x.n, undefined, sub || undefined); }));
   offs.push(client.on('here', () => { if (sid) status(); }));
+  offs.push(client.on('ack', (m) => { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.acked) { p.acked = true; schedule(); } }));
+  offs.push(client.on('perm', (m) => { if (!m || typeof m.request_id !== 'string') return; if (!perms.some((x) => x.sid === m.sid && x.request_id === m.request_id)) perms.push(Object.assign({}, m)); if (m.sid === sid) paintPerm(); }));
   offs.push(client.on('part', (m) => { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(m); } }));
   offs.push(client.on('err', (m) => { if (m.ref) { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(null); } } }));
 
@@ -127,12 +188,34 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen } = {}
       els.callStart.hidden = true;
       els.share.hidden = true;
       status();
+      if (placeholder == null) placeholder = els.msg.placeholder;
+      const name = els.chatTitle.textContent;
+      els.msg.disabled = !!nextSub;
+      els.go.disabled = !!nextSub;
+      els.msg.placeholder = nextSub ? placeholder : fillIn(A.message, { name });
+      if (byId('comms-agent-signed')) byId('comms-agent-signed').hidden = !!nextSub;
       if (sub) client.open(sid, 0, undefined, sub);
       else client.hello(sid);
       paint();
     },
+    async say(text) {
+      if (!sid || sub || !String(text).trim()) return null;
+      const entry = { cmid: null, text: String(text), at: Date.now(), acked: false };
+      pending.push(entry);
+      paint();
+      try { entry.cmid = await client.say(sid, entry.text); } catch (_) { pending = pending.filter((x) => x !== entry); paint(); return null; }
+      return entry.cmid;
+    },
     paint,
-    close() { sid = null; sub = null; if (paintTimer) { clearTimeout(paintTimer); paintTimer = 0; } },
+    close() {
+      sid = null;
+      sub = null;
+      pending = [];
+      if (paintTimer) { clearTimeout(paintTimer); paintTimer = 0; }
+      if (placeholder != null) els.msg.placeholder = placeholder;
+      if (byId('comms-agent-signed')) byId('comms-agent-signed').hidden = true;
+      if (byId('comms-agent-perm')) byId('comms-agent-perm').hidden = true;
+    },
     destroy() { offs.forEach((f) => f()); }
   };
 };

@@ -5899,7 +5899,14 @@
         "earlier": "Ver anteriores",
         "earlier_turn": "Ver o início desta vez",
         "open_sub": "Abrir",
-        "from_phone": "do seu telefone"
+        "from_phone": "do seu telefone",
+        "message": "Mensagem para {name}",
+        "signed": "Assinado com sua chave de identidade, então só os seus dispositivos podem dar instruções a esta sessão.",
+        "sent": "enviada",
+        "delivered": "entregue",
+        "wants": "{tool} quer executar",
+        "allow": "Permitir",
+        "deny": "Negar"
       }
     },
     "scanner": {

@@ -5899,7 +5899,14 @@
         "earlier": "前を表示",
         "earlier_turn": "このターンの前の部分を表示",
         "open_sub": "開く",
-        "from_phone": "スマートフォンから"
+        "from_phone": "スマートフォンから",
+        "message": "{name} にメッセージ",
+        "signed": "あなたの ID 鍵で署名されるため、このセッションに指示できるのはあなたのデバイスだけです。",
+        "sent": "送信済み",
+        "delivered": "配信済み",
+        "wants": "{tool} を実行しようとしています",
+        "allow": "許可",
+        "deny": "拒否"
       }
     },
     "scanner": {

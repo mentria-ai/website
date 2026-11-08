@@ -5899,7 +5899,14 @@
         "earlier": "Ver anteriores",
         "earlier_turn": "Ver lo anterior de este turno",
         "open_sub": "Abrir",
-        "from_phone": "desde tu teléfono"
+        "from_phone": "desde tu teléfono",
+        "message": "Mensaje para {name}",
+        "signed": "Firmado con tu clave de identidad, así que solo tus dispositivos pueden dar instrucciones a esta sesión.",
+        "sent": "enviado",
+        "delivered": "entregado",
+        "wants": "{tool} quiere ejecutarse",
+        "allow": "Permitir",
+        "deny": "Denegar"
       }
     },
     "scanner": {

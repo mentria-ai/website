@@ -152,6 +152,38 @@ const PAGE_TESTS = async () => {
     v.close();
   });
 
+  test('fix: a live update replaces only its turn and keeps the reading position', async () => {
+    const AV5 = await import('/assets/js/comms/agent-view.js');
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const log = mkEl();
+    log.style.cssText = 'height:120px;width:300px;overflow:auto';
+    document.body.append(log);
+    const els = { log, chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const para = (i) => ({ id: 'm' + i, role: 'assistant', ts: i, parts: [{ type: 'text', text: 'line ' + i + ' ' + 'word '.repeat(120) }] });
+    const store = { 1: { n: 1, msgs: [para(0), para(1)] }, 2: { n: 2, msgs: [para(2), para(3)] }, 3: { n: 3, msgs: [para(4), para(5)] } };
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [1, 2, 3], turn: (sid, n) => store[n] || null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {} };
+    const v = AV5.createAgentView({ els, T: { agent: { message: 'Message the {name}' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    const first = log.querySelector('.comms__turn[data-n="1"]');
+    ok(log.querySelector('.comms__agent-earlier'), 'earlier button');
+    ok(log.scrollHeight > 600, 'tall enough ' + log.scrollHeight);
+    log.scrollTop = 150;
+    const removed = [];
+    const mo = new MutationObserver((list) => { for (const r of list) for (const x of r.removedNodes) removed.push(x.dataset ? x.dataset.n : '?'); });
+    mo.observe(log, { childList: true });
+    store[3] = { n: 3, msgs: [para(4), para(5), para(6)] };
+    handlers.turn({ t: 'turn', sid: 's', n: 3 });
+    await sleep(150);
+    mo.disconnect();
+    deepEq(removed, ['3']);
+    eq(log.querySelector('.comms__turn[data-n="1"]'), first);
+    eq(log.scrollTop, 150);
+    ok(log.textContent.includes('line 6'));
+    v.close();
+    log.remove();
+  });
+
   const R = (i) => btoa(String.fromCharCode(...new Uint8Array(16).fill(i))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const MH = btoa(String.fromCharCode(...new Uint8Array(32).fill(2))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const REF0 = R(10);

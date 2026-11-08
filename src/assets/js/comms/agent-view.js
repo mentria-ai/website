@@ -73,6 +73,8 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
   const dirty = new Set();
   let timers = [];
   let hiddenAt = 0;
+  let earlierBtn = null;
+  let earliestN = 0;
   const waiters = new Map();
   const offs = [];
   const byId = (id) => document.getElementById(id);
@@ -180,19 +182,24 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     paintTimer = 0;
     if (!sid) return;
     const stick = atBottom();
+    const top = els.log.scrollTop;
     const w = agentWindow(turnsNow(), { expanded });
     const out = [];
     if (w.earlierTurns && w.shown.length < MAX_TURNS && w.shown.length) {
-      const b = el('button', 'comms__btn comms__btn--ghost comms__agent-earlier', A.earlier || 'Show earlier');
-      b.type = 'button';
-      b.addEventListener('click', () => client.list(sid, w.shown[0].n, sub || undefined));
-      out.push(b);
+      earliestN = w.shown[0].n;
+      if (!earlierBtn) {
+        earlierBtn = el('button', 'comms__btn comms__btn--ghost comms__agent-earlier', A.earlier || 'Show earlier');
+        earlierBtn.type = 'button';
+        earlierBtn.addEventListener('click', () => { if (sid) client.list(sid, earliestN, sub || undefined); });
+      }
+      out.push(earlierBtn);
     }
     const keep = new Map();
     for (const t of w.shown) {
       const shape = (t.earlierCards ? 1 : 0) + ':' + t.msgs.length + ':' + (expanded.has(t.n) ? 1 : 0);
       const old = nodes.get(t.n);
       const node = old && old.shape === shape && !dirty.has(t.n) ? old.node : renderTurn(t, t.earlierCards);
+      if (old && old.node !== node && old.node.parentNode === els.log) old.node.replaceWith(node);
       keep.set(t.n, { node, shape });
       out.push(node);
     }
@@ -210,10 +217,18 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
       }
       out.push(box);
     }
-    els.log.replaceChildren(...out);
+    const wanted = new Set(out);
+    let cur = els.log.firstChild;
+    for (const node of out) {
+      while (cur && !wanted.has(cur)) { const next = cur.nextSibling; cur.remove(); cur = next; }
+      if (cur === node) { cur = cur.nextSibling; continue; }
+      els.log.insertBefore(node, cur);
+    }
+    while (cur) { const next = cur.nextSibling; cur.remove(); cur = next; }
     paintPerm();
     paintComposer();
     if (stick) els.log.scrollTop = els.log.scrollHeight;
+    else if (els.log.scrollTop !== top) els.log.scrollTop = top;
   };
   const schedule = () => { if (!paintTimer) paintTimer = setTimeout(paint, 60); };
   const stopTimers = () => { timers.forEach((t) => clearInterval(t)); timers = []; };

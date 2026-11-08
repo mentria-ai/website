@@ -508,6 +508,97 @@ const imageSlot = (p, opts) => {
   return box;
 };
 
+const KIND_GLYPH = { run: '$', read: '▤', search: '⌕', edit: '✎', web: '↗', subagent: '◇', other: '•' };
+export const TOOLISH = new Set(['tool_call', 'tool_result', 'diff']);
+
+const toolCard = (c, res, diff, opts) => {
+  const A = opts.T || {};
+  const kind = String(c.kind || 'other').replace(/[^a-z]/g, '') || 'other';
+  const card = mk('div', 'comms__tool comms__tool--' + kind);
+  const head = mk('button', 'comms__tool-head');
+  head.type = 'button';
+  head.append(mk('span', 'comms__toolgroup-g', KIND_GLYPH[kind] || KIND_GLYPH.other), mk('span', 'comms__tool-title', String(c.title || A['kind_' + kind] || A.kind_other || '')));
+  const sum = toolSummary(c, res, A);
+  if (sum) head.append(mk('span', 'comms__tool-sum' + (c.status === 'error' ? ' comms__tool-sum--error' : ''), sum));
+  if (diff) head.append(mk('span', 'comms__diff-add', '+' + (Number(diff.added) || 0)), mk('span', 'comms__diff-del', '−' + (Number(diff.removed) || 0)));
+  card.append(head);
+  const key = 'c:' + c.id;
+  const body = () => {
+    const b = mk('div', 'comms__tool-body');
+    if (c.private) { b.append(mk('p', 'comms__agent-note', A.private_file || '')); return b; }
+    const inBox = mk('code', 'comms__tool-in', '');
+    const outBox = mk('pre', 'comms__tool-out', '');
+    b.append(inBox);
+    if (res && !res.private) b.append(outBox);
+    else if (res && res.private) b.append(mk('p', 'comms__agent-note', A.private_file || ''));
+    const fill = (box, ref) => {
+      if (!ref) return;
+      const have = cached(opts, ref);
+      if (have) { box.textContent = have.text || ''; return; }
+      if (opts.get) opts.get(ref).then((part) => { if (part) box.textContent = part.text || ''; }, () => {});
+    };
+    fill(inBox, c.ref);
+    if (res && !res.private) fill(outBox, res.ref);
+    return b;
+  };
+  if (opts.opened && opts.opened.has(key)) card.append(body());
+  head.setAttribute('aria-expanded', String(!!(opts.opened && opts.opened.has(key))));
+  head.addEventListener('click', () => {
+    const open = card.querySelector('.comms__tool-body');
+    if (open) { open.remove(); if (opts.opened) opts.opened.delete(key); head.setAttribute('aria-expanded', 'false'); return; }
+    card.append(body());
+    if (opts.opened) opts.opened.add(key);
+    head.setAttribute('aria-expanded', 'true');
+  });
+  return card;
+};
+
+export const renderToolGroup = (parts, opts = {}) => {
+  const A = opts.T || {};
+  const calls = (parts || []).filter((p) => p && p.type === 'tool_call');
+  const results = opts.results || resultsOf(parts);
+  const diffs = new Map();
+  for (const p of parts || []) if (p && p.type === 'diff' && p.ref) diffs.set(p.ref, p);
+  const box = mk('div', 'comms__toolgroup');
+  const sum = mk('button', 'comms__toolgroup-sum');
+  sum.type = 'button';
+  const counts = new Map();
+  for (const c of calls) { const k = KIND_GLYPH[c.kind] ? c.kind : 'other'; counts.set(k, (counts.get(k) || 0) + 1); }
+  const label = [];
+  for (const [kind, n] of counts) {
+    const k = mk('span', 'comms__toolgroup-k');
+    k.dataset.kind = kind;
+    k.append(mk('span', 'comms__toolgroup-g', KIND_GLYPH[kind]), mk('span', 'comms__toolgroup-n', String(n)));
+    sum.append(k);
+    label.push((A['kind_' + kind] || A.kind_other || kind) + ' ' + n);
+  }
+  let added = 0;
+  let removed = 0;
+  for (const d of diffs.values()) { added += Number(d.added) || 0; removed += Number(d.removed) || 0; }
+  if (diffs.size) sum.append(mk('span', 'comms__diff-add', '+' + added), mk('span', 'comms__diff-del', '−' + removed));
+  if (calls.some((c) => c.status === 'running')) { sum.classList.add('comms__toolgroup-sum--running'); sum.append(mk('span', 'comms__toolgroup-run', A.status_running || '')); }
+  if (calls.some((c) => c.status === 'error')) sum.append(mk('span', 'comms__tool-sum comms__tool-sum--error', A.status_error || '!'));
+  sum.setAttribute('aria-label', label.join(', '));
+  box.append(sum);
+  const key = 'g:' + (calls[0] ? calls[0].id : '');
+  const list = () => {
+    const l = mk('div', 'comms__toolgroup-list');
+    for (const c of calls) l.append(toolCard(c, results.get(c.id), c.ref ? diffs.get(c.ref) : null, opts));
+    return l;
+  };
+  const isOpen = () => !!(opts.opened && opts.opened.has(key));
+  if (isOpen()) box.append(list());
+  sum.setAttribute('aria-expanded', String(isOpen()));
+  sum.addEventListener('click', () => {
+    const l = box.querySelector('.comms__toolgroup-list');
+    if (l) { l.remove(); if (opts.opened) opts.opened.delete(key); sum.setAttribute('aria-expanded', 'false'); return; }
+    box.append(list());
+    if (opts.opened) opts.opened.add(key);
+    sum.setAttribute('aria-expanded', 'true');
+  });
+  return box;
+};
+
 export const renderAgentParts = (el, parts, opts = {}) => {
   const A = opts.T || {};
   const results = opts.results || new Map();

@@ -215,6 +215,51 @@ const PAGE_TESTS = async () => {
     style.remove();
   });
 
+  test('fix: tool calls fold into symbols with counts; a tap lists them; a tap on one fetches its input and result', async () => {
+    const AV7 = await import('/assets/js/comms/agent-view.js');
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const fetched = [];
+    const msgs = [
+      { id: 'u', role: 'user', ts: 1, parts: [{ type: 'text', text: 'go' }] },
+      { id: 'a1', role: 'assistant', ts: 2, parts: [{ type: 'text', text: 'Looking.' }] },
+      { id: 'a2', role: 'assistant', ts: 3, parts: [{ type: 'tool_call', id: 'c1', title: 'List files', kind: 'run', status: 'done', tool: 'Bash', ref: '10:0' }] },
+      { id: 'r2', role: 'assistant', ts: 4, parts: [{ type: 'tool_result', callId: 'c1', bytes: 4, exit: 0, ref: '11:0' }] },
+      { id: 'a3', role: 'assistant', ts: 5, parts: [{ type: 'tool_call', id: 'c2', title: 'notes.md', kind: 'read', status: 'done', tool: 'Read', ref: '12:0' }] },
+      { id: 'r3', role: 'assistant', ts: 6, parts: [{ type: 'tool_result', callId: 'c2', bytes: 9, lines: [1, 3], ref: '13:0' }] },
+      { id: 'a4', role: 'assistant', ts: 7, parts: [{ type: 'tool_call', id: 'c3', title: 'app.js', kind: 'edit', status: 'done', tool: 'Edit', ref: '14:0' }, { type: 'diff', path: 'app.js', added: 4, removed: 1, ref: '14:0' }] },
+      { id: 'a5', role: 'assistant', ts: 8, parts: [{ type: 'tool_call', id: 'c4', title: 'Build', kind: 'run', status: 'running', tool: 'Bash', ref: '15:0' }] },
+      { id: 'a6', role: 'assistant', ts: 9, parts: [{ type: 'text', text: 'Done.' }] }
+    ];
+    const texts = { '10:0': 'ls -la', '11:0': 'a\nb', '12:0': '/x/notes.md', '13:0': 'one\ntwo' };
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [0], turn: () => ({ n: 0, msgs }), hello() {}, watch() {}, list() {}, open() {}, channel: () => true, reset() {}, get: (sid, ref) => { fetched.push(ref); setTimeout(() => handlers.part({ t: 'part', sid, ref, text: texts[ref] || '' }), 5); } };
+    const v = AV7.createAgentView({ els, T: { agent: { kind_run: 'Run', kind_read: 'Read', kind_edit: 'Edit', status_running: 'running', message: 'Message the {name}' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    const log = els.log;
+    const groups = log.querySelectorAll('.comms__toolgroup');
+    eq(groups.length, 1);
+    const k = (kind) => (groups[0].querySelector('.comms__toolgroup-k[data-kind="' + kind + '"]') || {}).textContent || '';
+    ok(k('run').includes('2') && k('read').includes('1') && k('edit').includes('1'), k('run') + '|' + k('read') + '|' + k('edit'));
+    ok(groups[0].querySelector('.comms__toolgroup-sum').textContent.includes('+4'));
+    ok(groups[0].querySelector('.comms__toolgroup-sum--running'));
+    eq(log.querySelectorAll('.comms__tool').length, 0);
+    ok(!log.textContent.includes('List files'));
+    ok(log.textContent.includes('Looking.') && log.textContent.includes('Done.'));
+    groups[0].querySelector('.comms__toolgroup-sum').click();
+    eq(log.querySelectorAll('.comms__tool').length, 4);
+    ok(log.textContent.includes('List files'));
+    eq(fetched.length, 0);
+    log.querySelector('.comms__tool .comms__tool-head').click();
+    await sleep(60);
+    deepEq(fetched.slice().sort(), ['10:0', '11:0']);
+    ok(log.textContent.includes('ls -la') && log.textContent.includes('a\nb'), log.textContent.slice(0, 200));
+    v.paint();
+    eq(log.querySelectorAll('.comms__tool').length, 4);
+    ok(log.textContent.includes('ls -la'));
+    v.close();
+  });
+
   const R = (i) => btoa(String.fromCharCode(...new Uint8Array(16).fill(i))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const MH = btoa(String.fromCharCode(...new Uint8Array(32).fill(2))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const REF0 = R(10);

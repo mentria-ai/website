@@ -689,11 +689,19 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__agent-via{display:block;color:var(--term-muted);font-size:var(--text-2xs)}
 .comms__agent-earlier,.comms__turn-more{display:block;margin:var(--space-2) auto}
 .comms__tool{margin:var(--space-1) 0;padding:var(--space-2);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-md)}
-.comms__tool-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-2)}
+.comms__tool-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-2);width:100%;padding:0;color:inherit;font:inherit;text-align:left;background:none;border:0;cursor:pointer}
 .comms__tool-kind{color:var(--accent);font:600 var(--text-2xs) var(--font-mono);text-transform:uppercase}
 .comms__tool-title{color:var(--term-fg-strong);font-size:var(--text-sm);overflow-wrap:anywhere}
 .comms__tool-sum{color:var(--term-muted);font-size:var(--text-2xs)}
 .comms__tool-sum--error{color:var(--amber-60,#f5a524)}
+.comms__toolgroup{margin:var(--space-1) 0}
+.comms__toolgroup-sum{display:inline-flex;flex-wrap:wrap;align-items:center;gap:var(--space-3);min-height:32px;padding:4px var(--space-3);color:var(--term-muted);font:var(--text-xs) var(--font-mono);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:999px;cursor:pointer}
+.comms__toolgroup-sum[aria-expanded="true"]{border-color:var(--term-border-strong)}
+.comms__toolgroup-k{display:inline-flex;align-items:baseline;gap:4px}
+.comms__toolgroup-g{color:var(--term-fg-strong);font-family:var(--font-mono)}
+.comms__toolgroup-run{color:var(--accent)}
+.comms__toolgroup-list{margin-top:var(--space-1)}
+.comms__tool-body{margin-top:var(--space-1)}
 .comms__tool-in{display:block;margin-top:var(--space-1);color:var(--term-muted);font-size:var(--text-2xs);overflow-wrap:anywhere}
 .comms__tool-out{max-height:240px;margin:var(--space-1) 0 0;overflow:auto;color:var(--term-fg);font:var(--text-2xs)/1.45 var(--font-mono);white-space:pre-wrap;overflow-wrap:anywhere}
 .comms__tool-more{margin-top:var(--space-1)}

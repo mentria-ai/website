@@ -5898,6 +5898,7 @@
         "kind_web": "Web",
         "kind_subagent": "Subagente",
         "kind_other": "Herramienta",
+        "private_file": "Archivo privado, no se muestra.",
         "earlier": "Ver anteriores",
         "earlier_turn": "Ver lo anterior de este turno",
         "open_sub": "Abrir",

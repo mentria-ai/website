@@ -5898,6 +5898,7 @@
         "kind_web": "Web",
         "kind_subagent": "サブエージェント",
         "kind_other": "ツール",
+        "private_file": "非公開ファイルのため表示しません。",
         "earlier": "前を表示",
         "earlier_turn": "このターンの前の部分を表示",
         "open_sub": "開く",

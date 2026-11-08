@@ -1,4 +1,4 @@
-import { renderAgentParts, resultsOf, renderBody } from '/assets/js/comms/cards.js';
+import { renderAgentParts, renderToolGroup, TOOLISH, resultsOf, renderBody } from '/assets/js/comms/cards.js';
 
 export const MAX_TURNS = 40;
 export const MAX_CARDS = 60;
@@ -155,8 +155,29 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     const all = (client.turn(sid, t.n, sub) || { msgs: [] }).msgs.flatMap((m) => m.parts || []);
     const results = resultsOf(all);
     const common = { T: A, get, onImage, cache, opened };
+    const callIds = new Set(all.filter((p) => p.type === 'tool_call').map((p) => p.id));
+    let run = [];
+    let group = [];
+    const flushRun = () => {
+      if (!run.length) return;
+      const msg = el('div', 'comms__agentmsg');
+      renderAgentParts(msg, run, Object.assign({ TB: T.chat, results, calls: callIds, openSub: sub ? null : (id, title) => { if (onOpen) onOpen(sid, id, title); } }, common));
+      box.append(msg);
+      run = [];
+    };
+    const flushGroup = () => {
+      if (!group.length) return;
+      if (group.some((p) => p.type === 'tool_call')) {
+        const msg = el('div', 'comms__agentmsg');
+        msg.append(renderToolGroup(group, Object.assign({ results }, common)));
+        box.append(msg);
+      }
+      group = [];
+    };
+    const flush = () => { flushRun(); flushGroup(); };
     for (const m of t.msgs) {
       if (m.role === 'user') {
+        flush();
         const line = el('div', 'comms__line comms__line--me comms__agent-prompt');
         const what = el('span', 'comms__what');
         renderBody(what, (m.parts || []).filter((p) => p.type === 'text').map((p) => p.text).join('\n'), { from: 'self', T: T.chat, hold: true });
@@ -170,11 +191,14 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
         if (m.via === 'phone') line.append(el('span', 'comms__agent-via', A.from_phone || ''));
         box.append(line);
       } else {
-        const msg = el('div', 'comms__agentmsg');
-        renderAgentParts(msg, m.parts || [], Object.assign({ TB: T.chat, results, calls: new Set(all.filter((p) => p.type === 'tool_call').map((p) => p.id)), openSub: sub ? null : (id, title) => { if (onOpen) onOpen(sid, id, title); } }, common));
-        box.append(msg);
+        for (const p of m.parts || []) {
+          if (p && TOOLISH.has(p.type)) { flushRun(); group.push(p); }
+          else { flushGroup(); run.push(p); }
+        }
+        continue;
       }
     }
+    flush();
     return box;
   };
 

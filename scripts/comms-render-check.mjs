@@ -184,6 +184,37 @@ const PAGE_TESTS = async () => {
     log.remove();
   });
 
+  test('fix: replacing a tall live turn keeps the reading position with lazy rendering', async () => {
+    const AV6 = await import('/assets/js/comms/agent-view.js');
+    const style = document.createElement('style');
+    style.textContent = '.comms__turn{content-visibility:auto;contain-intrinsic-size:auto 480px}';
+    document.head.append(style);
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const log = mkEl();
+    log.style.cssText = 'height:300px;width:300px;overflow:auto';
+    document.body.append(log);
+    const els = { log, chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const para = (i) => ({ id: 'q' + i, role: 'assistant', ts: i, parts: [{ type: 'text', text: 'para ' + i + ' ' + 'word '.repeat(120) }] });
+    let msgs = Array.from({ length: 30 }, (_, i) => para(i));
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [0], turn: () => ({ n: 0, msgs }), hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {} };
+    const v = AV6.createAgentView({ els, T: { agent: { message: 'Message the {name}' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    await sleep(50);
+    ok(log.scrollHeight > 3000, 'tall ' + log.scrollHeight);
+    const mid = Math.floor((log.scrollHeight - log.clientHeight) / 2);
+    log.scrollTop = mid;
+    await sleep(50);
+    const before = log.scrollTop;
+    msgs = msgs.concat([para(30)]);
+    handlers.turn({ t: 'turn', sid: 's', n: 0 });
+    await sleep(200);
+    ok(Math.abs(log.scrollTop - before) < 5, 'top ' + log.scrollTop + ' vs ' + before);
+    v.close();
+    log.remove();
+    style.remove();
+  });
+
   const R = (i) => btoa(String.fromCharCode(...new Uint8Array(16).fill(i))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const MH = btoa(String.fromCharCode(...new Uint8Array(32).fill(2))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const REF0 = R(10);

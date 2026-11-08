@@ -199,7 +199,11 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
       const shape = (t.earlierCards ? 1 : 0) + ':' + t.msgs.length + ':' + (expanded.has(t.n) ? 1 : 0);
       const old = nodes.get(t.n);
       const node = old && old.shape === shape && !dirty.has(t.n) ? old.node : renderTurn(t, t.earlierCards);
-      if (old && old.node !== node && old.node.parentNode === els.log) old.node.replaceWith(node);
+      if (old && old.node !== node && old.node.parentNode === els.log) {
+        const h = Math.round(old.node.getBoundingClientRect().height);
+        if (h > 0) node.style.containIntrinsicSize = 'auto ' + h + 'px';
+        old.node.replaceWith(node);
+      }
       keep.set(t.n, { node, shape });
       out.push(node);
     }

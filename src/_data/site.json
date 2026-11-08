@@ -9,7 +9,7 @@
   "metaDescription": "AI that runs in your browser, with built-in tools, an extensions library and card decks for learning. Add your own extensions and decks. Your data stays private.",
   "revisitAfter": "7 days",
   "socialImage": "/assets/img/social-card.png",
-  "robots": "index, follow",
+  "robots": "index, follow, max-image-preview:large",
   "language": "en",
   "indexNowKey": "a68ba7dfc1dc7cbfb9aab1d197d2aded"
 }

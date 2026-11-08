@@ -149,6 +149,7 @@
     {%- endif %}
 
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@mentria_ai">
     <meta name="twitter:url" content="{{ pageUrl }}">
     <meta name="twitter:title" content="{{ metaTitle }}">
     <meta name="twitter:description" content="{{ metaDescription }}">
@@ -191,7 +192,8 @@
           "@type": "Organization",
           "@id": "{{ site.siteUrl }}/#organization",
           "name": "{{ site.title }}",
-          "url": "{{ site.siteUrl }}",
+          "alternateName": "mentria.ai",
+          "url": "{{ site.siteUrl }}/",
           "logo": {
             "@type": "ImageObject",
             "url": "{{ site.siteUrl }}/assets/img/icon-512x512.png",
@@ -207,8 +209,9 @@
         {
           "@type": "WebSite",
           "@id": "{{ site.siteUrl }}/#website",
-          "url": "{{ site.siteUrl }}",
+          "url": "{{ site.siteUrl }}/",
           "name": "{{ site.title }}",
+          "alternateName": "mentria.ai",
           "description": {{ ('site.metaDescription' | traw) | dump | safe }},
           "publisher": { "@id": "{{ site.siteUrl }}/#organization" },
           "inLanguage": "{{ lang | default('en') }}"
@@ -270,7 +273,7 @@
       {%- endif %}
       "datePublished": "{{ page.date.toISOString() }}",
       "dateModified": "{{ page.date.toISOString() }}",
-      "author": { "@type": "Organization", "@id": "{{ site.siteUrl }}/#organization" },
+      "author": { "@type": "Organization", "@id": "{{ site.siteUrl }}/#organization", "name": "{{ site.title }}", "url": "{{ site.siteUrl }}/" },
       "publisher": { "@id": "{{ site.siteUrl }}/#organization" },
       "inLanguage": "{{ lang | default('en') }}"
     }

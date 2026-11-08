@@ -5901,6 +5901,7 @@
         "open_sub": "Abrir",
         "from_phone": "do seu telefone",
         "message": "Mensagem para {name}",
+        "mirror_only": "Somente leitura. Inicie esta sessão pela ponte para responder aqui.",
         "signed": "Assinado com sua chave de identidade, então só os seus dispositivos podem dar instruções a esta sessão.",
         "sent": "enviada",
         "delivered": "entregue",

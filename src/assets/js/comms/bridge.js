@@ -1,7 +1,7 @@
 import { b64urlEncode, b64urlDecode } from '/assets/js/comms/wire.js';
 
 export const BRIDGE_KIND = 23838;
-export const FRAME_MAX = 36000;
+export const FRAME_MAX = 30000;
 export const HERE_TTL_MS = 75000;
 const SALT = 'mentria-bridge-v1';
 const te = new TextEncoder();
@@ -40,16 +40,10 @@ export const open = async (aes, content) => {
 export const splitFrames = (msg, max = FRAME_MAX) => {
   const buf = te.encode(JSON.stringify(msg));
   const id = b64urlEncode(crypto.getRandomValues(new Uint8Array(9)));
-  const chunks = [];
-  let at = 0;
-  while (at < buf.length) {
-    let end = Math.min(buf.length, at + max);
-    while (end < buf.length && end > at && (buf[end] & 0xc0) === 0x80) end--;
-    chunks.push(td.decode(buf.subarray(at, end)));
-    at = end;
-  }
-  if (!chunks.length) chunks.push('');
-  return chunks.map((d, i) => ({ id, i, n: chunks.length, d }));
+  const n = Math.max(1, Math.ceil(buf.length / max));
+  const frames = [];
+  for (let i = 0; i < n; i++) frames.push({ id, i, n, d: b64urlEncode(buf.subarray(i * max, (i + 1) * max)) });
+  return frames;
 };
 
 export class Reassembler {
@@ -71,9 +65,15 @@ export class Reassembler {
     this.sets.delete(f.id);
     this.done.add(f.id);
     if (this.done.size > 512) this.done.delete(this.done.values().next().value);
-    let json = '';
-    for (let i = 0; i < s.n; i++) json += s.parts.get(i);
-    try { return JSON.parse(json); } catch (_) { return null; }
+    try {
+      const pieces = [];
+      let len = 0;
+      for (let i = 0; i < s.n; i++) { const b = b64urlDecode(s.parts.get(i)); pieces.push(b); len += b.length; }
+      const all = new Uint8Array(len);
+      let at = 0;
+      for (const b of pieces) { all.set(b, at); at += b.length; }
+      return JSON.parse(td.decode(all));
+    } catch (_) { return null; }
   }
 }
 
@@ -82,6 +82,7 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
   const handlers = new Map();
   const sessions = new Map();
   const turns = new Map();
+  const chans = new Map();
   let chain = Promise.resolve();
   const emit = (t, m) => { for (const fn of handlers.get(t) || []) { try { fn(m); } catch (_) {} } };
   const keyOf = (sid, sub) => sid + '|' + (sub || '');
@@ -93,6 +94,7 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
     return t;
   };
   const apply = (m) => {
+    if (m.t === 'chan' && typeof m.sid === 'string') chans.set(m.sid, now());
     if (m.t === 'here' && Array.isArray(m.sessions)) {
       for (const s of m.sessions) if (s && typeof s.sid === 'string') sessions.set(s.sid, { sid: s.sid, name: String(s.name || ''), busy: !!s.busy, lastTs: Number(s.lastTs) || 0, hereAt: now(), host: String(m.host || '') });
     } else if (m.t === 'turn' && typeof m.sid === 'string' && Number.isInteger(m.n) && Number.isInteger(m.from) && Array.isArray(m.msgs)) {
@@ -119,6 +121,9 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
   return {
     on: (t, fn) => { if (!handlers.has(t)) handlers.set(t, new Set()); handlers.get(t).add(fn); return () => handlers.get(t).delete(fn); },
     hello: (sid) => send(sid ? { t: 'hello', sid } : { t: 'hello' }),
+    watch: (sid) => send({ t: 'watch', sid }),
+    reset: (sid, sub) => { turns.delete(keyOf(sid, sub)); },
+    channel: (sid) => now() - (chans.has(sid) ? chans.get(sid) : -Infinity) < HERE_TTL_MS,
     list: (sid, before, sub) => send(Object.assign({ t: 'list', sid }, Number.isInteger(before) ? { before } : {}, sub ? { sub } : {})),
     open: (sid, n, before, sub) => send(Object.assign({ t: 'open', sid, n }, Number.isInteger(before) ? { before } : {}, sub ? { sub } : {})),
     get: (sid, ref, sub) => send(Object.assign({ t: 'get', sid, ref }, sub ? { sub } : {})),

@@ -120,7 +120,7 @@ export const renderBody = (el, text, opts = {}) => {
   const root = tpl.content;
   linkText(root);
   fixLinks(root);
-  if (opts.from === 'person') holdImages(root, opts.T);
+  if (opts.from === 'person' || opts.hold) holdImages(root, opts.T);
   el.replaceChildren(root);
 };
 
@@ -478,12 +478,15 @@ const fetchInto = (btn, target, ref, opts, show) => {
   target.append(btn);
 };
 
+const cached = (opts, ref) => (ref && opts.cache && opts.cache.has(ref) ? opts.cache.get(ref) : null);
+
 const resultBox = (res, opts, cls) => {
   const A = opts.T || {};
   const box = mk('div', cls);
-  const pre = mk('pre', 'comms__tool-out', res.text || '');
+  const have = cached(opts, res.ref);
+  const pre = mk('pre', 'comms__tool-out', have ? (have.text || '') : (res.text || ''));
   box.append(pre);
-  if (res.ref) fetchInto(mk('button', 'comms__btn comms__btn--ghost comms__tool-more', A.show_all || 'Show all'), box, res.ref, opts, (p) => { pre.textContent = p.text || ''; });
+  if (res.ref && !have) fetchInto(mk('button', 'comms__btn comms__btn--ghost comms__tool-more', A.show_all || 'Show all'), box, res.ref, opts, (p) => { pre.textContent = p.text || ''; });
   return box;
 };
 
@@ -491,14 +494,17 @@ const imageSlot = (p, opts) => {
   const A = opts.T || {};
   const box = mk('div', 'comms__agent-imgbox');
   const kb = p.bytes ? ' · ' + Math.max(1, Math.round(p.bytes / 1024)) + ' KB' : '';
-  fetchInto(mk('button', 'comms__btn comms__btn--ghost', (A.show_image || 'Show image') + kb), box, p.ref, opts, (part) => {
+  const show = (part) => {
     if (!part.b64 || !/^image\/(png|jpeg|gif|webp)$/.test(String(part.mime || ''))) { box.append(mk('span', 'comms__agent-note', part.text || '')); return; }
     const img = mk('img', 'comms__agent-img');
     img.alt = '';
     img.src = 'data:' + part.mime + ';base64,' + part.b64;
     if (opts.onImage) img.addEventListener('click', () => opts.onImage(img.src));
     box.append(img);
-  });
+  };
+  const have = cached(opts, p.ref);
+  if (have) show(have);
+  else fetchInto(mk('button', 'comms__btn comms__btn--ghost', (A.show_image || 'Show image') + kb), box, p.ref, opts, show);
   return box;
 };
 
@@ -511,19 +517,26 @@ export const renderAgentParts = (el, parts, opts = {}) => {
     if (!p || typeof p !== 'object') continue;
     if (p.type === 'text') {
       const d = mk('div', 'comms__agent-text');
-      renderBody(d, String(p.text || ''), { from: 'model', T: opts.TB || {} });
+      renderBody(d, String(p.text || ''), { from: 'model', T: opts.TB || {}, hold: true });
       el.append(d);
+      if (p.ref) {
+        const full = cached(opts, p.ref);
+        if (full) { d.textContent = ''; renderBody(d, String(full.text || ''), { from: 'model', T: opts.TB || {}, hold: true }); }
+        else fetchInto(mk('button', 'comms__btn comms__btn--ghost comms__tool-more', A.show_all || 'Show all'), el, p.ref, opts, (part) => { d.textContent = ''; renderBody(d, String(part.text || ''), { from: 'model', T: opts.TB || {}, hold: true }); });
+      }
     } else if (p.type === 'thought') {
       const wrap = mk('div', 'comms__agent-thoughtbox');
       const b = mk('button', 'comms__thought', A.thought || 'Thought');
       b.type = 'button';
       b.addEventListener('click', async () => {
-        if (wrap.querySelector('.comms__thought-text')) { wrap.querySelector('.comms__thought-text').remove(); return; }
+        if (wrap.querySelector('.comms__thought-text')) { wrap.querySelector('.comms__thought-text').remove(); if (opts.opened) opts.opened.delete(p.ref); return; }
         if (!opts.get) return;
         const part = await opts.get(p.ref).catch(() => null);
-        if (part && part.text != null && !wrap.querySelector('.comms__thought-text')) wrap.append(mk('pre', 'comms__thought-text', part.text));
+        if (part && part.text != null && !wrap.querySelector('.comms__thought-text')) { wrap.append(mk('pre', 'comms__thought-text', part.text)); if (opts.opened) opts.opened.add(p.ref); }
       });
       wrap.append(b);
+      const open = opts.opened && opts.opened.has(p.ref) ? cached(opts, p.ref) : null;
+      if (open && open.text != null) wrap.append(mk('pre', 'comms__thought-text', open.text));
       el.append(wrap);
     } else if (p.type === 'tool_call') {
       const card = mk('div', 'comms__tool comms__tool--' + String(p.kind || 'other').replace(/[^a-z]/g, ''));
@@ -542,7 +555,9 @@ export const renderAgentParts = (el, parts, opts = {}) => {
     } else if (p.type === 'diff') {
       const d = mk('div', 'comms__agent-diff');
       d.append(mk('span', 'comms__diff-add', '+' + (Number(p.added) || 0)), mk('span', 'comms__diff-del', '−' + (Number(p.removed) || 0)), mk('span', 'comms__diff-path', String(p.path || '')));
-      if (p.ref) fetchInto(mk('button', 'comms__btn comms__btn--ghost', A.show_changes || 'Show changes'), d, p.ref, opts, (part) => { d.append(mk('pre', 'comms__tool-out', part.text || '')); });
+      const have = cached(opts, p.ref);
+      if (have) d.append(mk('pre', 'comms__tool-out', have.text || ''));
+      else if (p.ref) fetchInto(mk('button', 'comms__btn comms__btn--ghost', A.show_changes || 'Show changes'), d, p.ref, opts, (part) => { d.append(mk('pre', 'comms__tool-out', part.text || '')); });
       el.append(d);
     } else if (p.type === 'subagent') {
       const s = mk('div', 'comms__tool comms__tool--subagent');

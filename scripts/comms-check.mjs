@@ -1253,7 +1253,7 @@ check("bridge: site keys match the daemon's goldens", async () => {
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, gk, new TextEncoder().encode('{"t":"ok"}')));
   deepEq(await BR.open(k.aes, JSON.stringify({ v: 1, iv: Buffer.from(iv).toString('base64url'), ct: Buffer.from(ct).toString('base64url') })), { t: 'ok' });
   const frames = BR.splitFrames({ pad: 'é'.repeat(50000) });
-  ok(frames.length >= 3 && frames.every((f) => Buffer.byteLength(f.d) <= 36000));
+  ok(frames.length >= 3 && frames.every((f) => Buffer.from(f.d, 'base64url').length <= 30000));
   const r = new BR.Reassembler();
   let out = null;
   for (const f of frames.slice().reverse()) out = r.push(f) || out;
@@ -1349,6 +1349,62 @@ check('perm: a resolved request clears and a late verdict is dropped', () => {
   eq(AV.permResolved(perm, [{ role: 'assistant', ts: 6000, parts: [{ type: 'tool_result', callId: 'x' }] }]), true);
   eq(AV.permResolved(perm, [{ role: 'user', ts: 7000, parts: [{ type: 'text', text: 'next' }] }]), true);
   eq(AV.permResolved(null, []), true);
+});
+
+check('fix I3: every sealed frame stays under 60 KB', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const nasty = ('"\\\u0001\u0002' + 'é漢' + '\n\t').repeat(30000);
+  const frames = BR.splitFrames({ t: 'turn', msgs: [{ parts: [{ type: 'text', text: nasty }] }] });
+  for (const f of frames) ok((await BR.seal(keys.aes, f)).length <= 60000);
+  const r = new BR.Reassembler();
+  let out = null;
+  for (const f of frames) out = r.push(f) || out;
+  eq(out.msgs[0].parts[0].text, nasty);
+});
+check("fix I5: the approval card picks only this session's requests", () => {
+  const perms = [{ sid: 'A', request_id: 'aaaaa', ts: 10 }, { sid: 'B', request_id: 'bbbbb', ts: 20 }];
+  const msgsA = [{ role: 'assistant', ts: 30, parts: [{ type: 'tool_result', callId: 'x' }] }];
+  const r = AV.visiblePerm(perms, 'A', msgsA);
+  eq(r.perm, null);
+  deepEq(r.kept.map((p) => p.request_id), ['bbbbb']);
+  const r2 = AV.visiblePerm(perms, 'B', []);
+  eq(r2.perm.request_id, 'bbbbb');
+  deepEq(r2.kept.map((p) => p.request_id), ['aaaaa', 'bbbbb']);
+});
+check('fix I9: reset drops held turns', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  const c = BR.createBridgeClient({ transport: t.left, keys, sign: async (sid, cmid, body) => body });
+  const send = async (m) => { for (const f of BR.splitFrames(m)) await t.right.publish(await BR.seal(keys.aes, f)); };
+  await send({ t: 'turn', sid: 's', n: 1, from: 0, msgs: [{ id: 'm', role: 'user', parts: [] }], earlier: false, done: false });
+  await new Promise((r) => setTimeout(r, 20));
+  deepEq(c.turns('s'), [1]);
+  c.reset('s');
+  deepEq(c.turns('s'), []);
+});
+check('fix M5: the composer waits for a channel', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  let clock = 1000;
+  const c = BR.createBridgeClient({ transport: t.left, keys, sign: async (sid, cmid, body) => body, now: () => clock });
+  const send = async (m) => { for (const f of BR.splitFrames(m)) await t.right.publish(await BR.seal(keys.aes, f)); };
+  eq(c.channel('s'), false);
+  await send({ t: 'chan', sid: 's' });
+  await new Promise((r) => setTimeout(r, 20));
+  eq(c.channel('s'), true);
+  clock += 80000;
+  eq(c.channel('s'), false);
+});
+check('fix C1: the client sends a cheap watch', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  const c = BR.createBridgeClient({ transport: t.left, keys, sign: async (sid, cmid, body) => body });
+  const got = [];
+  const r = new BR.Reassembler();
+  t.right.onEvent(async (x) => { const f = await BR.open(keys.aes, x); const m = f && r.push(f); if (m) got.push(m); });
+  await c.watch('s7');
+  await new Promise((res) => setTimeout(res, 20));
+  deepEq(got, [{ t: 'watch', sid: 's7' }]);
 });
 
 let failed = 0;

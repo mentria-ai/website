@@ -4043,7 +4043,7 @@ const ensureSideSocket = () => {
       sideWs = ws;
       const isReconnect = sideOpens++ > 0;
       done(ws);
-      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); if (bridgeResubscribe) bridgeResubscribe(); }
+      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); if (bridgeResubscribe) bridgeResubscribe().then(() => { if (agentView && agentView.isOpen()) agentView.resume(); }); }
     });
     ws.addEventListener('error', () => { done(null); });
     ws.addEventListener('close', () => {

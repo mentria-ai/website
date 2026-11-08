@@ -5901,6 +5901,7 @@
         "open_sub": "Open",
         "from_phone": "from your phone",
         "message": "Message the {name}",
+        "mirror_only": "Watching only. Start this session from the bridge to reply here.",
         "signed": "Signed with your identity key, so only your devices can instruct this session.",
         "sent": "sent",
         "delivered": "delivered",

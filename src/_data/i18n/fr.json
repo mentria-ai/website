@@ -5901,6 +5901,7 @@
         "open_sub": "Ouvrir",
         "from_phone": "depuis votre téléphone",
         "message": "Message pour {name}",
+        "mirror_only": "Lecture seule. Lancez cette session depuis le pont pour répondre ici.",
         "signed": "Signé avec votre clé d’identité : seuls vos appareils peuvent donner des instructions à cette session.",
         "sent": "envoyé",
         "delivered": "remis",

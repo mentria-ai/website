@@ -5843,7 +5843,6 @@
         "old_link": "Old-style link: it never expires. Make a new invite to share.",
         "make": "New invite",
         "dismiss": "Dismiss",
-        "offline": "That invite didn't reach the relay, so it won't work. Make a new one in a moment.",
         "twice_mine": "Your invite link was used twice: {a}, {b}.",
         "twice": "This room's invite link was used twice: {a}, {b}.",
         "contact": "Invite a contact",
@@ -5853,7 +5852,12 @@
         "no_contacts": "Add a contact first.",
         "retry": "Try again",
         "offline_fetch": "Can't reach the relay right now. Check your connection and try again.",
-        "replace_key": "You already have {label} with a different key. Switch it to the key from this link?"
+        "replace_key": "You already have {label} with a different key. Switch it to the key from this link?",
+        "making": "Making an invite…",
+        "ready": "Invite ready",
+        "ready_note": "It works once, for 24 hours.",
+        "share": "Share",
+        "copy_link": "Copy link"
       },
       "roomlock": {
         "title": "Lock {label}",

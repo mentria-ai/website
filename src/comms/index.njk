@@ -60,6 +60,8 @@ unlockTool: true
       <p class="comms__invite-ios" id="comms-invite-ios" hidden><span>{{ 'tool.comms.invite.ios' | t }}</span> <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-copy">{{ 'tool.comms.invite.copy' | t }}</button></p>
       <div class="comms__picker-actions comms__invite-actions">
         <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-later">{{ 'tool.comms.invite.not_now' | t }}</button>
+        <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-copylink" hidden>{{ 'tool.comms.invite.copy_link' | t }}</button>
+        <button type="button" class="comms__btn" id="comms-invite-share" hidden>{{ 'tool.comms.invite.share' | t }}</button>
         <button type="button" class="comms__btn" id="comms-invite-retry" hidden>{{ 'tool.comms.invite.retry' | t }}</button>
         <button type="button" class="comms__btn" id="comms-invite-join" hidden>{{ 'tool.comms.invite.join' | t }}</button>
       </div>
@@ -1269,6 +1271,7 @@ const renderPendingLine = (text, payload, cmid) => {
 
 const refreshShareUrl = (roomName) => {
   els.share.hidden = !roomName || isDmRoom(roomName) || tidOf(roomName) === SELF_THREAD || !(joinTarget && joinTarget.room === roomName && joinTarget.key);
+  if (!els.share.hidden) setTimeout(() => { nostrTools().catch(() => {}); }, 1500);
 };
 
 const relaySockets = () => Object.values(getRelaySockets() || {}).filter((ws) => ws && ws.readyState === 1);
@@ -1298,7 +1301,7 @@ const publishSigned = async (ev, waitOk = true) => {
   });
 };
 let nostrToolsP = null;
-const nostrTools = () => (nostrToolsP = nostrToolsP || import('/assets/vendor/nostr-tools.js'));
+const nostrTools = () => (nostrToolsP = nostrToolsP || import('/assets/vendor/nostr-tools.js').catch((e) => { nostrToolsP = null; throw e; }));
 const dropEnvelope = async (evId, sk) => {
   if (!evId || !sk) return;
   try {
@@ -1347,15 +1350,21 @@ const copyInvite = (url) => {
   } catch (_) { manual(); }
 };
 
+let outgoingUrl = null;
+let inviteRetry = null;
 const shareInvite = () => {
   if (!currentRoomName || isDmRoom(currentRoomName) || !joinTarget || joinTarget.room !== currentRoomName || !joinTarget.key) return;
+  hideInvite();
+  const seq = inviteSeq;
+  inviteRetry = shareInvite;
+  showInvite('making');
   const { url, published } = makeInvite(currentRoomName, joinTarget.key, joinTarget.kv);
-  published.then((ok) => { if (!ok) sys(T.invite.offline); });
-  if (typeof navigator.share === 'function') {
-    navigator.share({ url }).catch((err) => { if (!err || err.name !== 'AbortError') copyInvite(url); });
-    return;
-  }
-  copyInvite(url);
+  published.then((ok) => {
+    if (seq !== inviteSeq) return;
+    if (!ok) { showInvite('offline'); return; }
+    outgoingUrl = url;
+    showInvite('out');
+  });
 };
 els.share.addEventListener('click', shareInvite);
 
@@ -1375,20 +1384,22 @@ const showInvite = (state, data = {}) => {
   const title = document.getElementById('comms-invite-title');
   const by = document.getElementById('comms-invite-by');
   const ready = state === 'ready';
-  title.textContent = state === 'looking' ? T.invite.looking : state === 'gone' ? T.invite.gone : state === 'offline' ? T.invite.offline_fetch : fmt(T.invite.join_title, { label: data.body.label });
+  const out = state === 'out';
+  title.textContent = state === 'looking' ? T.invite.looking : state === 'making' ? T.invite.making : state === 'gone' ? T.invite.gone : state === 'offline' ? T.invite.offline_fetch : out ? T.invite.ready : fmt(T.invite.join_title, { label: data.body.label });
   document.getElementById('comms-invite-retry').hidden = state !== 'offline';
-  by.hidden = !ready;
-  by.textContent = ready ? fmt(T.invite.by, { name: data.body.by.name || T.people.someone, fp: data.fp || '' }).trim() : '';
+  document.getElementById('comms-invite-share').hidden = !(out && typeof navigator.share === 'function');
+  document.getElementById('comms-invite-copylink').hidden = !out;
+  by.hidden = !(ready || out);
+  by.textContent = ready ? fmt(T.invite.by, { name: data.body.by.name || T.people.someone, fp: data.fp || '' }).trim() : out ? T.invite.ready_note : '';
   document.getElementById('comms-invite-ios').hidden = !(ready && IOS_SAFARI);
   document.getElementById('comms-invite-copy').textContent = T.invite.copy;
   document.getElementById('comms-invite-join').hidden = !ready;
   box.hidden = false;
 };
-let inviteToken = null;
 const openInviteLink = async (token) => {
   if (parseInvite(window.location.hash)) window.history.replaceState(null, '', window.location.pathname + window.location.search);
   hideInvite();
-  inviteToken = token;
+  inviteRetry = () => openInviteLink(token);
   const seq = inviteSeq;
   showInvite('looking');
   const k = await inviteKeys(token);
@@ -1446,7 +1457,18 @@ document.getElementById('comms-invite-join').addEventListener('click', () => {
   if (p) claimInvite(p);
 });
 document.getElementById('comms-invite-later').addEventListener('click', hideInvite);
-document.getElementById('comms-invite-retry').addEventListener('click', () => { if (inviteToken) openInviteLink(inviteToken); });
+document.getElementById('comms-invite-retry').addEventListener('click', () => { if (inviteRetry) inviteRetry(); });
+document.getElementById('comms-invite-share').addEventListener('click', () => {
+  const url = outgoingUrl;
+  hideInvite();
+  if (!url) return;
+  navigator.share({ url }).catch((err) => { if (!err || err.name !== 'AbortError') copyInvite(url); });
+});
+document.getElementById('comms-invite-copylink').addEventListener('click', () => {
+  const url = outgoingUrl;
+  hideInvite();
+  if (url) copyInvite(url);
+});
 document.getElementById('comms-invite-copy').addEventListener('click', (e) => {
   const p = pendingInvite;
   if (!p) return;

@@ -5843,7 +5843,6 @@
         "old_link": "Enlace antiguo: nunca caduca. Crea una invitación nueva para compartir.",
         "make": "Nueva invitación",
         "dismiss": "Cerrar",
-        "offline": "Esa invitación no llegó al relé, así que no funcionará. Crea otra en un momento.",
         "twice_mine": "Tu enlace de invitación se usó dos veces: {a}, {b}.",
         "twice": "El enlace de invitación de esta sala se usó dos veces: {a}, {b}.",
         "contact": "Invitar a un contacto",
@@ -5853,7 +5852,12 @@
         "no_contacts": "Primero añade un contacto.",
         "retry": "Reintentar",
         "offline_fetch": "No se puede contactar con el relé ahora. Revisa tu conexión e inténtalo de nuevo.",
-        "replace_key": "Ya tienes {label} con otra clave. ¿Cambiarla por la clave de este enlace?"
+        "replace_key": "Ya tienes {label} con otra clave. ¿Cambiarla por la clave de este enlace?",
+        "making": "Creando una invitación…",
+        "ready": "Invitación lista",
+        "ready_note": "Funciona una vez, durante 24 horas.",
+        "share": "Compartir",
+        "copy_link": "Copiar enlace"
       },
       "roomlock": {
         "title": "Cerrar {label}",

@@ -5843,7 +5843,6 @@
         "old_link": "Link antigo: nunca expira. Crie um novo convite para compartilhar.",
         "make": "Novo convite",
         "dismiss": "Fechar",
-        "offline": "Esse convite não chegou ao relay, então não vai funcionar. Crie outro daqui a pouco.",
         "twice_mine": "Seu link de convite foi usado duas vezes: {a}, {b}.",
         "twice": "O link de convite desta sala foi usado duas vezes: {a}, {b}.",
         "contact": "Convidar um contato",
@@ -5853,7 +5852,12 @@
         "no_contacts": "Adicione um contato primeiro.",
         "retry": "Tentar de novo",
         "offline_fetch": "Não foi possível alcançar o relay agora. Verifique sua conexão e tente de novo.",
-        "replace_key": "Você já tem {label} com outra chave. Trocar pela chave deste link?"
+        "replace_key": "Você já tem {label} com outra chave. Trocar pela chave deste link?",
+        "making": "Criando um convite…",
+        "ready": "Convite pronto",
+        "ready_note": "Funciona uma vez, por 24 horas.",
+        "share": "Compartilhar",
+        "copy_link": "Copiar link"
       },
       "roomlock": {
         "title": "Trancar {label}",

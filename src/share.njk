@@ -18,6 +18,7 @@ eleventyExcludeFromSitemap: true
   </figure>
   <div class="shr__actions" id="shr-actions" hidden>
     <a class="m-btn m-btn--primary shr__act" id="shr-annotate" href="/tools/annotate-image/?shared=1">{{ "share_target.annotate" | t }}</a>
+    <a class="m-btn m-btn--ghost shr__act" id="shr-ask" href="/tools/ai-chat/?shared=1">{{ "share_target.ask" | t }}</a>
     <a class="m-btn m-btn--ghost shr__act" href="/tools/qr-scanner/?shared=1">{{ "share_target.qr" | t }}</a>
     <a class="m-btn m-btn--ghost shr__act" href="/tools/exif/?shared=1">{{ "share_target.exif" | t }}</a>
     <a class="m-btn m-btn--ghost shr__act" href="/tools/image-compressor/?shared=1">{{ "share_target.compress" | t }}</a>
@@ -39,7 +40,7 @@ eleventyExcludeFromSitemap: true
   $('shr-name').textContent = name;
   $('shr-preview').hidden = false;
   $('shr-actions').hidden = false;
-  if (!navigator.gpu) $('shr-annotate').hidden = true;
+  if (!navigator.gpu) { $('shr-annotate').hidden = true; $('shr-ask').hidden = true; }
   $('shr-cancel').addEventListener('click', async () => {
     try { await (await caches.open('mentria-share')).delete('/share-target/file'); } catch (_) {}
     location.href = '/';

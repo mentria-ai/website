@@ -746,7 +746,8 @@ async function handleShareTarget(request) {
   const headers = { 'content-type': 'text/plain; charset=utf-8' };
   if (title && title !== body) headers['x-share-title'] = encodeURIComponent(title);
   await cache.put('/share-target/text', new Response(body, { headers }));
-  return Response.redirect('/tools/quick-notes/?shared=1', 303);
+  const ask = !!(self.navigator && self.navigator.gpu) && !/^https?:\/\/\S+$/i.test(body);
+  return Response.redirect(ask ? '/tools/ai-chat/?shared=1' : '/tools/quick-notes/?shared=1', 303);
 }
 
 function bufferedResponse(body, resp) {

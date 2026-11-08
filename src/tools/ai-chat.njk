@@ -151,6 +151,8 @@ eleventyComputed:
   noModelNotice:          "tool.ai-chat.no_model_notice",
   loadCutNotice:          "tool.ai-chat.load_cut_notice",
   btnChooseModel:         "tool.ai-chat.btn_choose_model",
+  sharedNotice:           "tool.ai-chat.shared_notice",
+  btnSaveNote:            "tool.ai-chat.btn_save_note",
   tierLabel:              "tool.ai-chat.tier_label",
   tierFast:               "tool.ai-chat.tier_fast",
   tierBetter:             "tool.ai-chat.tier_better",
@@ -450,8 +452,12 @@ function runApp(MentriaEngine, Tiers) {
     onAnswered: () => { if (prefixCache) prefixCache.invalidate(); },
     strings: { answering: COPY.hostAnswering, loading: COPY.hostLoading, stop: COPY.hostStop }
   });
-  const askedThread = new URLSearchParams(location.search).get('thread');
-  let regenAsked = new URLSearchParams(location.search).get('regen') === '1';
+  const pageQuery = new URLSearchParams(location.search);
+  const askLink = takeAskLink();
+  const sharedAsk = askLink !== null || pageQuery.get('shared') === '1';
+  const askedThread = sharedAsk ? 'new' : pageQuery.get('thread');
+  let regenAsked = !sharedAsk && pageQuery.get('regen') === '1';
+  let sharedBody = '';
   const PHOTO_DEFAULT = 'Describe this image.';
   const restoredTurns = new WeakMap();
   const thumbBlobs = new WeakMap();
@@ -724,8 +730,39 @@ function runApp(MentriaEngine, Tiers) {
     setTimeout(() => messagesEl.setAttribute('aria-live', 'polite'), 1500);
   }
 
+  function takeAskLink() {
+    const m = /^#ask=([\s\S]*)$/.exec(location.hash);
+    if (!m) return null;
+    try { history.replaceState(history.state, '', location.pathname + location.search); } catch (_) {}
+    let text = m[1];
+    try { text = decodeURIComponent(text); } catch (_) {}
+    return text.trim() ? text : null;
+  }
+
+  function placeShared(text) {
+    const body = String(text || '').trim();
+    if (!body) return;
+    sharedBody = body;
+    inputEl.value = body + '\n\n';
+    autoResize();
+    const end = inputEl.value.length;
+    try { inputEl.setSelectionRange(end, end); } catch (_) {}
+    inputEl.scrollTop = inputEl.scrollHeight;
+    if (!inputEl.disabled) inputEl.focus();
+    if (!notice) showNotice('shared', 'sharedNotice', null, 'btnSaveNote', saveSharedNote);
+  }
+
+  function saveSharedNote() {
+    const text = inputEl.value.trim() || sharedBody;
+    if (text && window.MentriaUI && MentriaUI.sendTo) MentriaUI.sendTo('quick-notes', { text });
+  }
+
+  function attachShared(file) {
+    if (file && /^image\//.test(file.type || '')) attachFile(file);
+  }
+
   function takeHandoff() {
-    if (askedThread !== 'new') return;
+    if (askedThread !== 'new' || sharedAsk) return;
     try {
       const h = JSON.parse(sessionStorage.getItem(HANDOFF_KEY) || 'null');
       sessionStorage.removeItem(HANDOFF_KEY);
@@ -1994,6 +2031,7 @@ function runApp(MentriaEngine, Tiers) {
 
     inputEl.value = '';
     autoResize();
+    hideNotice('shared');
     dropUnanswered();
 
     // Build user content (mirrors HF chat-template content-array shape)
@@ -2566,6 +2604,13 @@ function runApp(MentriaEngine, Tiers) {
     renderNotice();
   });
 
+  if (askLink !== null) placeShared(askLink);
+  else if (sharedAsk && window.MentriaUI && MentriaUI.consumeShared) MentriaUI.consumeShared(attachShared, placeShared);
+  window.addEventListener('hashchange', () => {
+    const text = takeAskLink();
+    if (text !== null) placeShared(text);
+  });
+
   /* ── Init ────────────────────────────────────────── */
   (async () => {
     tierDecision = await Tiers.decideTier();
@@ -2915,7 +2960,8 @@ function runApp(MentriaEngine, Tiers) {
   flex-shrink: 0;
 }
 .ac__notice[hidden] { display: none; }
-.ac__notice[data-kind="postponed"] { color: var(--term-fg); }
+.ac__notice[data-kind="postponed"],
+.ac__notice[data-kind="shared"] { color: var(--term-fg); }
 .ac__notice-text { flex: 1 1 16rem; min-width: 0; }
 .ac__notice-btn {
   flex-shrink: 0;

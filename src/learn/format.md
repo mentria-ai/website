@@ -25,7 +25,7 @@ eleventyComputed:
 
 ## The file
 
-Save it as `something.mentria.json` and import it on the [Learn page]({{ locale.pathPrefix }}/learn/), or drop it there. Packs stay on the device that imported them. Nothing is uploaded.
+Save it as `something.mentria.json` and import it on the [Learn page]({{ locale.pathPrefix }}/learn/), or drop it there. Packs stay on the device that imported them and aren't uploaded.
 
 A pack can also come from a link, pasted on the Learn page or opened as `https://mentria.ai/learn/?pack=<url>`, but only when the link points at mentria.ai, `cdn.mentria.ai`, `mentria-ai.github.io` or Hugging Face (`huggingface.co`, `*.hf.co`) over HTTPS. The site's content security policy blocks every other host, so the Learn page refuses those links and says so instead of fetching them. A pack kept anywhere else travels as a file: download it, then import it from your device.
 

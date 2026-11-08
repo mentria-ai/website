@@ -73,7 +73,7 @@ flowchart LR
 
 ## Tools
 
-Thirty-five client-side tools and games, all offline-capable.
+Built-in tools and games that run in your browser; most work offline.
 
 | | |
 |---|---|
@@ -81,7 +81,7 @@ Thirty-five client-side tools and games, all offline-capable.
 | **🎮 Games** | [Chess](https://mentria.ai/tools/chess/) · [Sudoku](https://mentria.ai/tools/sudoku/) · [Ludo](https://mentria.ai/tools/ludo/) · [Tetris](https://mentria.ai/tools/tetris/) · [Breakout](https://mentria.ai/tools/breakout/) · [Flappy](https://mentria.ai/tools/flappy/) · [Minesweeper](https://mentria.ai/tools/minesweeper/) · [PHOSPHOR](https://mentria.ai/tools/phosphor/) |
 | **🔧 Utilities** | [Markdown → PDF](https://mentria.ai/tools/markdown-pdf/) · [QR & Barcode](https://mentria.ai/tools/qr-scanner/) · [2FA Authenticator](https://mentria.ai/tools/totp/) · [EXIF Inspector](https://mentria.ai/tools/exif/) · [Quick Notes](https://mentria.ai/tools/quick-notes/) · [Invoice](https://mentria.ai/tools/invoice/) · [Countdown](https://mentria.ai/tools/countdown-timer/) · [Files](https://mentria.ai/tools/files/) · [Base64](https://mentria.ai/tools/base64-codec/) · [Color Picker](https://mentria.ai/tools/color-picker/) · [Decision Wheel](https://mentria.ai/tools/decision-wheel/) · [Coin Flip](https://mentria.ai/tools/coin-flip/) |
 | **📱 Sensors** | [Bubble Level](https://mentria.ai/tools/bubble-level/) · [Decibel Meter](https://mentria.ai/tools/decibel-meter/) · [Compass](https://mentria.ai/tools/compass/) · [GPS Speedometer](https://mentria.ai/tools/speedometer/) · [Ruler](https://mentria.ai/tools/ruler/) · [Step Counter](https://mentria.ai/tools/step-counter/) |
-| **🔗 Together** | [Comms](https://mentria.ai/comms/) (end-to-end encrypted P2P rooms, files, markdown) · [Extensions](https://mentria.ai/tools/extensions/) (run your own single-file tools, never uploaded) |
+| **🔗 Together** | [Comms](https://mentria.ai/comms/) (end-to-end encrypted P2P rooms, files, markdown) · [Extensions](https://mentria.ai/tools/extensions/) (run your own single-file tools) |
 
 ## Run it locally
 

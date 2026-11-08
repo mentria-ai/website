@@ -22,7 +22,7 @@
   {
     "slug": "qr-scanner",
     "title": "QR & Barcode Scanner + Generator",
-    "summary": "Scan QR codes and barcodes, or generate a QR code from any link or text — all on-device, nothing uploaded.",
+    "summary": "Scan QR codes and barcodes, or generate a QR code from any link or text — right on your device.",
     "category": "Utility",
     "group": "Dev"
   },
@@ -50,7 +50,7 @@
   {
     "slug": "calculator",
     "title": "Calculator",
-    "summary": "Calculator online with no app to install — type or tap an expression and watch the answer update as you go, with brackets, percent, powers, square roots, sin/cos/tan in degrees or radians, ln, log, π and e. Keeps your last 20 calculations on this device; nothing is uploaded.",
+    "summary": "Calculator online with no app to install — type or tap an expression and watch the answer update as you go, with brackets, percent, powers, square roots, sin/cos/tan in degrees or radians, ln, log, π and e. Keeps your last 20 calculations on this device.",
     "category": "Utility",
     "group": "Everyday",
     "added": "2026-09-24"
@@ -58,7 +58,7 @@
   {
     "slug": "unit-converter",
     "title": "Unit Converter",
-    "summary": "Unit converter online with no app to install — length, weight, temperature, volume, area, speed, time, data (kB and KiB), pressure, energy, fuel economy (L/100 km to mpg) and angles. Type in either field to see the other update with the exact factor or formula and a quick-reference table; it all runs on-device and nothing is uploaded.",
+    "summary": "Unit converter online with no app to install — length, weight, temperature, volume, area, speed, time, data (kB and KiB), pressure, energy, fuel economy (L/100 km to mpg) and angles. Type in either field to see the other update with the exact factor or formula and a quick-reference table; it all runs on-device.",
     "category": "Utility",
     "group": "Everyday",
     "added": "2026-09-24"
@@ -88,7 +88,7 @@
   {
     "slug": "json-formatter",
     "title": "JSON Formatter & Validator",
-    "summary": "JSON formatter and validator in the browser: pretty-print, minify or sort keys, with the exact line and column for every error, a collapsible tree that copies paths like $.items[3].name, and big numbers kept digit for digit. Runs on-device; nothing is uploaded.",
+    "summary": "JSON formatter and validator in the browser: pretty-print, minify or sort keys, with the exact line and column for every error, a collapsible tree that copies paths like $.items[3].name, and big numbers kept digit for digit. Runs on-device, so your JSON isn't uploaded.",
     "category": "Developer",
     "group": "Dev",
     "added": "2026-09-24"
@@ -111,7 +111,7 @@
   {
     "slug": "exif",
     "title": "EXIF Inspector",
-    "summary": "See the metadata hiding in a photo — camera, timestamps, GPS position — and download a byte-identical clean copy with it all stripped. Nothing is uploaded.",
+    "summary": "See the metadata hiding in a photo — camera, timestamps, GPS position — and download a byte-identical clean copy with it all stripped. Your photos aren't uploaded.",
     "category": "Security",
     "group": "Everyday"
   },
@@ -125,7 +125,7 @@
   {
     "slug": "image-compressor",
     "title": "Image Compressor",
-    "summary": "Compress and resize images online with no app to install — shrink JPEG, PNG and WebP photos, convert formats and strip EXIF location data, all on your device. Nothing is uploaded.",
+    "summary": "Compress and resize images online with no app to install — shrink JPEG, PNG and WebP photos, convert formats and strip EXIF location data, all on your device, without uploading them.",
     "category": "Design",
     "group": "Create",
     "added": "2026-09-24"
@@ -133,7 +133,7 @@
   {
     "slug": "annotate-image",
     "title": "Annotate Image",
-    "summary": "Upload an image, get an instant on-device AI description, alt-text, transcription, or tags — tested one-tap prompts, nothing uploaded. Open images straight from your file manager.",
+    "summary": "Upload an image, get an instant on-device AI description, alt-text, transcription, or tags — tested one-tap prompts, and the image stays on your device. Open images straight from your file manager.",
     "category": "AI",
     "group": "AI",
     "offline": "model"
@@ -269,14 +269,14 @@
   {
     "slug": "extensions",
     "title": "Extensions",
-    "summary": "Install private single-file extensions that live only on your device — they get a launcher tile, optional command-palette entries, and their own local storage, and are never part of the public site.",
+    "summary": "Install private single-file extensions on your device — they get a launcher tile, optional command-palette entries, and their own local storage, and are never part of the public site.",
     "category": "Utility",
     "group": "Dev"
   },
   {
     "slug": "files",
     "title": "Files",
-    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, 2FA Authenticator vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all.",
+    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, 2FA Authenticator vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all. Your data stays private.",
     "category": "Utility",
     "group": "Dev",
     "added": "2026-07-02"

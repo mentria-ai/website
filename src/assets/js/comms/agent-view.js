@@ -47,6 +47,8 @@ export const visiblePerm = (perms, sid, msgs) => {
 export const pairSection = ({ on, ready, phone, T = {} }) => ({ hidden: !(on && ready), label: phone ? (T.connect_phone || T.connect || '') : (T.connect || ''), note: phone ? (T.connect_note_phone || T.connect_note || '') : (T.connect_note || '') });
 
 export const RESUME_MS = 75000;
+const SIGNED_KEY = 'mentria.comms.agent_signed_seen';
+const signedSeen = () => { try { return localStorage.getItem(SIGNED_KEY) === '1'; } catch (_) { return false; } };
 const CACHE_MAX = 40;
 
 const fillIn = (s, v) => String(s == null ? '' : s).replace(/\{(\w+)\}/g, (_, k) => (v[k] != null ? String(v[k]) : ''));
@@ -135,7 +137,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     els.msg.disabled = !live;
     els.go.disabled = !live;
     els.msg.placeholder = sub ? placeholder : live ? fillIn(A.message, { name: els.chatTitle.textContent }) : (A.mirror_only || placeholder);
-    if (byId('comms-agent-signed')) byId('comms-agent-signed').hidden = !live;
+    if (byId('comms-agent-signed')) byId('comms-agent-signed').hidden = !live || signedSeen();
   };
 
   const renderTurn = (t, earlierCards) => {
@@ -168,7 +170,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     };
     const flushGroup = () => {
       if (!group.length) return;
-      if (group.some((p) => p.type === 'tool_call')) {
+      if (group.some((p) => p.type === 'tool_call' || p.type === 'thought')) {
         const msg = el('div', 'comms__agentmsg');
         msg.append(renderToolGroup(group, Object.assign({ results }, common)));
         box.append(msg);
@@ -353,7 +355,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     if (m.sid === sid) schedule();
   }));
   offs.push(client.on('asked', (m) => { const before = asks.length; asks = asks.filter((x) => !(m && x.sid === m.sid && x.id === m.id)); if (asks.length !== before && m.sid === sid) schedule(); }));
-  offs.push(client.on('ack', (m) => { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.acked) { p.acked = true; schedule(); } }));
+  offs.push(client.on('ack', (m) => { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.acked) { p.acked = true; try { localStorage.setItem(SIGNED_KEY, '1'); } catch (_) {} schedule(); } }));
   offs.push(client.on('perm', (m) => { if (!m || typeof m.request_id !== 'string' || typeof m.sid !== 'string') return; if (!perms.some((x) => x.sid === m.sid && x.request_id === m.request_id)) perms.push(Object.assign({}, m)); if (m.sid === sid) paintPerm(); }));
   offs.push(client.on('part', (m) => { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(m); } }));
   offs.push(client.on('err', (m) => { if (m && m.cmid) { const q = asks.find((x) => x.cmid === m.cmid); if (q) { q.failed = String(m.code || 'error'); q.sent = false; if (q.sync) q.sync(); } } if (m && m.cmid && m.sid === sid) { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.failed) { p.failed = String(m.code || 'error'); schedule(); } } if (m.ref) { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(null); } } }));

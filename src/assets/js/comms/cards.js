@@ -508,8 +508,25 @@ const imageSlot = (p, opts) => {
   return box;
 };
 
-const KIND_GLYPH = { run: '$', read: '▤', search: '⌕', edit: '✎', web: '↗', subagent: '◇', ask: '?', other: '•' };
-export const TOOLISH = new Set(['tool_call', 'tool_result', 'diff']);
+const KIND_GLYPH = { run: '$', read: '▤', search: '⌕', edit: '✎', web: '↗', subagent: '◇', ask: '?', thought: '∴', other: '•' };
+export const TOOLISH = new Set(['tool_call', 'tool_result', 'diff', 'thought']);
+
+const thoughtBox = (p, opts) => {
+  const A = opts.T || {};
+  const wrap = mk('div', 'comms__agent-thoughtbox');
+  const b = mk('button', 'comms__thought', A.thought || 'Thought');
+  b.type = 'button';
+  b.addEventListener('click', async () => {
+    if (wrap.querySelector('.comms__thought-text')) { wrap.querySelector('.comms__thought-text').remove(); if (opts.opened) opts.opened.delete(p.ref); return; }
+    if (!opts.get) return;
+    const part = await opts.get(p.ref).catch(() => null);
+    if (part && part.text != null && !wrap.querySelector('.comms__thought-text')) { wrap.append(mk('pre', 'comms__thought-text', part.text)); if (opts.opened) opts.opened.add(p.ref); }
+  });
+  wrap.append(b);
+  const open = opts.opened && opts.opened.has(p.ref) ? cached(opts, p.ref) : null;
+  if (open && open.text != null) wrap.append(mk('pre', 'comms__thought-text', open.text));
+  return wrap;
+};
 
 const toolCard = (c, res, diff, opts) => {
   const A = opts.T || {};
@@ -563,6 +580,8 @@ export const renderToolGroup = (parts, opts = {}) => {
   const sum = mk('button', 'comms__toolgroup-sum');
   sum.type = 'button';
   const counts = new Map();
+  const thoughts = (parts || []).filter((p) => p && p.type === 'thought');
+  if (thoughts.length) counts.set('thought', thoughts.length);
   for (const c of calls) { const k = KIND_GLYPH[c.kind] ? c.kind : 'other'; counts.set(k, (counts.get(k) || 0) + 1); }
   const label = [];
   for (const [kind, n] of counts) {
@@ -570,7 +589,7 @@ export const renderToolGroup = (parts, opts = {}) => {
     k.dataset.kind = kind;
     k.append(mk('span', 'comms__toolgroup-g', KIND_GLYPH[kind]), mk('span', 'comms__toolgroup-n', String(n)));
     sum.append(k);
-    label.push((A['kind_' + kind] || A.kind_other || kind) + ' ' + n);
+    label.push((kind === 'thought' ? A.thought : A['kind_' + kind] || A.kind_other || kind) + ' ' + n);
   }
   let added = 0;
   let removed = 0;
@@ -580,10 +599,13 @@ export const renderToolGroup = (parts, opts = {}) => {
   if (calls.some((c) => c.status === 'error')) sum.append(mk('span', 'comms__tool-sum comms__tool-sum--error', A.status_error || '!'));
   sum.setAttribute('aria-label', label.join(', '));
   box.append(sum);
-  const key = 'g:' + (calls[0] ? calls[0].id : '');
+  const key = 'g:' + (calls[0] ? calls[0].id : thoughts[0] ? thoughts[0].ref : '');
   const list = () => {
     const l = mk('div', 'comms__toolgroup-list');
-    for (const c of calls) l.append(toolCard(c, results.get(c.id), c.ref ? diffs.get(c.ref) : null, opts));
+    for (const p of parts || []) {
+      if (p && p.type === 'thought') l.append(thoughtBox(p, opts));
+      else if (p && p.type === 'tool_call') l.append(toolCard(p, results.get(p.id), p.ref ? diffs.get(p.ref) : null, opts));
+    }
     return l;
   };
   const isOpen = () => !!(opts.opened && opts.opened.has(key));
@@ -616,19 +638,7 @@ export const renderAgentParts = (el, parts, opts = {}) => {
         else fetchInto(mk('button', 'comms__btn comms__btn--ghost comms__tool-more', A.show_all || 'Show all'), el, p.ref, opts, (part) => { d.textContent = ''; renderBody(d, String(part.text || ''), { from: 'model', T: opts.TB || {}, hold: true }); });
       }
     } else if (p.type === 'thought') {
-      const wrap = mk('div', 'comms__agent-thoughtbox');
-      const b = mk('button', 'comms__thought', A.thought || 'Thought');
-      b.type = 'button';
-      b.addEventListener('click', async () => {
-        if (wrap.querySelector('.comms__thought-text')) { wrap.querySelector('.comms__thought-text').remove(); if (opts.opened) opts.opened.delete(p.ref); return; }
-        if (!opts.get) return;
-        const part = await opts.get(p.ref).catch(() => null);
-        if (part && part.text != null && !wrap.querySelector('.comms__thought-text')) { wrap.append(mk('pre', 'comms__thought-text', part.text)); if (opts.opened) opts.opened.add(p.ref); }
-      });
-      wrap.append(b);
-      const open = opts.opened && opts.opened.has(p.ref) ? cached(opts, p.ref) : null;
-      if (open && open.text != null) wrap.append(mk('pre', 'comms__thought-text', open.text));
-      el.append(wrap);
+      el.append(thoughtBox(p, opts));
     } else if (p.type === 'tool_call') {
       const card = mk('div', 'comms__tool comms__tool--' + String(p.kind || 'other').replace(/[^a-z]/g, ''));
       const head = mk('div', 'comms__tool-head');
@@ -671,6 +681,9 @@ export const renderAgentParts = (el, parts, opts = {}) => {
         a.rel = 'noopener noreferrer';
         el.append(a);
       } else el.append(mk('span', 'comms__agent-chip', label));
+    } else if (p.type === 'notice' && p.code === 'task') {
+      const line = Array.isArray(p.answers) && p.answers.length ? '? ' + fillIn(A.ask_answered, { a: p.answers.map(String).join(' · ') }) : p.status === 'failed' || p.status === 'killed' ? (A.task_failed || '') : (A.task_done || '');
+      el.append(mk('p', 'comms__agent-note comms__agent-task', line));
     } else if (p.type === 'notice') {
       el.append(mk('p', 'comms__agent-note', A['notice_' + p.code] || A.notice_unknown || ''));
     } else if (p.type === 'image') {

@@ -299,6 +299,63 @@ const PAGE_TESTS = async () => {
     v.close();
   });
 
+  test('fix: thoughts fold into the activity row and a task notice is one small line', async () => {
+    const AV9 = await import('/assets/js/comms/agent-view.js');
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const msgs = [
+      { id: 'u', role: 'user', ts: 1, parts: [{ type: 'text', text: 'ask me' }] },
+      { id: 'a1', role: 'assistant', ts: 2, parts: [{ type: 'thought', ref: '5:0', chars: 40 }] },
+      { id: 'a2', role: 'assistant', ts: 3, parts: [{ type: 'tool_call', id: 'q1', title: 'Red or blue?', kind: 'ask', status: 'done', ref: '6:0' }] },
+      { id: 'a3', role: 'assistant', ts: 4, parts: [{ type: 'notice', code: 'task', status: 'completed', answers: ['blue.txt'] }] },
+      { id: 'a4', role: 'assistant', ts: 5, parts: [{ type: 'thought', ref: '8:0', chars: 10 }] },
+      { id: 'a5', role: 'assistant', ts: 6, parts: [{ type: 'text', text: 'Made blue.txt' }] }
+    ];
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [0], turn: () => ({ n: 0, msgs }), hello() {}, watch() {}, list() {}, open() {}, channel: () => true, reset() {}, get: (sid, ref) => { setTimeout(() => handlers.part({ t: 'part', sid, ref, text: 'THINKING ' + ref }), 5); } };
+    const v = AV9.createAgentView({ els, T: { agent: { thought: 'Thought', kind_ask: 'Question', ask_answered: 'Answered: {a}', message: 'Message the {name}' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    const log = els.log;
+    eq(log.querySelectorAll('button.comms__thought').length, 0);
+    const rows = log.querySelectorAll('.comms__toolgroup');
+    eq(rows.length, 2);
+    ok(rows[0].querySelector('.comms__toolgroup-k[data-kind="thought"]') && rows[0].querySelector('.comms__toolgroup-k[data-kind="ask"]'));
+    ok(rows[1].querySelector('.comms__toolgroup-k[data-kind="thought"]'));
+    const note = log.querySelector('.comms__agent-task');
+    ok(note && note.textContent.includes('Answered: blue.txt'), note ? note.textContent : 'none');
+    eq(log.querySelectorAll('.comms__line--me').length, 1);
+    rows[0].querySelector('.comms__toolgroup-sum').click();
+    const th = rows[0].querySelector('button.comms__thought');
+    ok(th, 'thought entry');
+    th.click();
+    await sleep(50);
+    ok(rows[0].textContent.includes('THINKING 5:0'));
+    v.close();
+  });
+  test('fix: the signed note shows until this device has a delivered message', async () => {
+    const AV10 = await import('/assets/js/comms/agent-view.js');
+    try { localStorage.removeItem('mentria.comms.agent_signed_seen'); } catch (_) {}
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const note = mkEl('p');
+    note.id = 'comms-agent-signed';
+    document.body.append(note);
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {}, say: async () => 'p:one' };
+    const v = AV10.createAgentView({ els, T: { agent: { sent: 'sent', delivered: 'delivered', message: 'Message the {name}' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    eq(note.hidden, false);
+    await v.say('hi');
+    handlers.ack({ t: 'ack', sid: 's', cmid: 'p:one' });
+    await sleep(100);
+    eq(note.hidden, true);
+    v.close();
+    v.open('s', null, 'S');
+    eq(note.hidden, true);
+    v.close();
+    note.remove();
+  });
+
   const R = (i) => btoa(String.fromCharCode(...new Uint8Array(16).fill(i))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const MH = btoa(String.fromCharCode(...new Uint8Array(32).fill(2))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const REF0 = R(10);

@@ -51,7 +51,7 @@ const DEFAULT_COPY = {
   failed: 'Couldn’t run an on-device model on this device.',
   chooseTitle: 'Choose your AI model',
   chooseHint: 'Your device can run up to {name}. Bigger models are smarter but download more.',
-  choosePitch: 'Runs fully on your device — private, free, and works offline after the one-time download.',
+  choosePitch: 'Runs on your device — free, works offline after the one-time download, and your data stays private.',
   chooseSample: 'Ask things like “explain quantum computing simply” and the answer is generated on your own hardware.',
   chooseNotNow: 'Not now',
   continueBg: 'Continue in background',

@@ -2,7 +2,7 @@
   "webmcp": {
     "panel_title": "On-device AI",
     "panel_close": "Dismiss",
-    "panel_privacy": "Answered by the model on this device — nothing was sent anywhere.",
+    "panel_privacy": "Answered by the model on this device.",
     "panel_error": "The local model could not answer: ",
     "panel_busy": "The on-device model is busy in another tab. Try again in a moment.",
     "panel_summarize": "Summarizing your saved notes privately",
@@ -36,7 +36,7 @@
     "copyright": "© 2026 Mentria. All rights reserved.",
     "image_use": "Image use",
     "s1_label": "what this is",
-    "s1_p1": "Mentria is a small creative studio that builds software the do-it-yourself way: made by hand, shipped when it's ready, and answering to nobody but the people who use it. The site you're reading is a progressive web app. Everything inside it, from the tools and games to the AI, runs on the device in front of you. There is no backend pinging your prompts to a server farm. There are no trackers measuring how long you stared at the homepage.",
+    "s1_p1": "Mentria is a small creative studio that builds software the do-it-yourself way: made by hand, shipped when it's ready, and answering to nobody but the people who use it. The site you're reading is a progressive web app. The built-in tools, the games and the AI run on the device in front of you. There is no backend pinging your prompts to a server farm. There are no trackers measuring how long you stared at the homepage.",
     "s1_p2": "We make <strong>tools that respect you</strong>: notes, timers, a QR scanner, an authenticator, an invoice maker, a shelf of games, AI chat that runs entirely in your browser, an infinite radio, and a daily feed of visual explainers. No accounts, no email capture, no cookie banner. If something here is useful to you, it stays useful when your wifi cuts out, and it stays useful five years from now, when whichever startup you signed up to has pivoted, lapsed, or vanished.",
     "ship_label": "what we ship",
     "ship_h": "Four shelves",
@@ -56,8 +56,8 @@
     "stack_8": "pdf tool on pdf.js (apache-2.0) and pdf-lib (mit)",
     "principles_label": "principles",
     "principles_h": "Three rules",
-    "principle_1": "no servers in the loop",
-    "principle_2": "no tracking, no accounts",
+    "principle_1": "ai runs on your device",
+    "principle_2": "no accounts, no analytics",
     "principle_3": "source on github",
     "contact": "contact",
     "update_check": "Check for updates",
@@ -73,7 +73,7 @@
     "data_section_title": "Your data",
     "advanced_title": "Advanced settings",
     "advanced_sub": "Backups, identity and device sync",
-    "data_section_lede": "What you make here is stored only in this browser. A backup is one encrypted file that you keep, so clearing the browser or changing phones doesn't take your work with it.",
+    "data_section_lede": "What you make here is stored in this browser. A backup is one encrypted file that you keep, so clearing the browser or changing phones doesn't take your work with it.",
     "data_in_label": "In a backup",
     "data_in_body": "Notes, invoices, AI chats, tool and layout settings, game saves, learning progress and the packs you imported, 2FA accounts, your Mentria identity and Comms rooms, the Finance ledger (still locked with its own passphrase), radio likes, and installed extensions with their data, such as Story Studio decks and images.",
     "data_out_label": "Not in a backup",
@@ -108,7 +108,7 @@
     "data_import_done": "Restored — reloading…",
     "data_import_fail": "Failed: {err}",
     "sync_section_title": "Sync devices",
-    "sync_section_lede": "Pair two devices with a one-time code. Data syncs peer-to-peer, end-to-end encrypted. Our relay never sees your data.",
+    "sync_section_lede": "Pair two devices with a one-time code. Data syncs peer-to-peer, end-to-end encrypted. Anything that passes through the relay stays sealed.",
     "sync_pair_title": "Pair a new device",
     "sync_pair_lede": "Show this code on the other device. The code is the encryption key — don't share it elsewhere.",
     "sync_pair_button": "Generate code",
@@ -315,7 +315,7 @@
       "pin_action": "Pin {name}",
       "unpin_action": "Unpin {name}"
     },
-    "value_prop": "Free tools that run entirely in your browser — no account, no tracking, works offline.",
+    "value_prop": "Free tools that run entirely in your browser — no account, no analytics, works offline.",
     "try_label": "try:",
     "feed": {
       "heading": "FEED_",
@@ -381,7 +381,7 @@
     "macos_step3": "Click <strong>Add</strong>.",
     "chrome_step1": "Click the <strong>install</strong> icon in your browser's address bar.",
     "chrome_step2": "Or open the menu (⋮) and choose <strong>Install Mentria</strong>.",
-    "note": "Once installed, Mentria runs offline and your local data stays on your device.",
+    "note": "Once installed, Mentria runs offline, and your data stays private.",
     "notif_message_one": "New message",
     "notif_message_many": "{n} new messages",
     "notif_ring": "Someone is trying to reach you.",
@@ -405,33 +405,33 @@
     "base64-codec": {
       "title": "Base64 Codec",
       "lede": "Encode and decode text or files to and from Base64. Supports images, documents, and any file type. Everything runs locally in your browser.",
-      "tldr": "A privacy-first encoder and decoder for text and files. Encoding and decoding both happen in your browser using vanilla JavaScript — no upload, no server. Drag a file in or paste a Base64 string and copy or download the result. Works offline, with no size limit beyond browser memory."
+      "tldr": "A privacy-first encoder and decoder for text and files. Encoding and decoding both happen in your browser using vanilla JavaScript, so your text and files aren't uploaded. Drag a file in or paste a Base64 string and copy or download the result. Works offline, with no size limit beyond browser memory."
     },
     "extensions": {
       "title": "Extensions",
-      "lede": "Install private single-file extensions that live only on this device. They appear in your launcher and command palette — and never on the public site.",
-      "tldr": "A bring-your-own-tool platform. An extension is one HTML file with an embedded manifest; install it here and it gets a tile in your launcher, optional command-palette entries, and its own local storage that rides your encrypted backup. Extensions run with full access on this device, so only install files from people you trust. Nothing about them is ever uploaded."
+      "lede": "Install private single-file extensions on this device. They appear in your launcher and command palette — and never on the public site.",
+      "tldr": "A bring-your-own-tool platform. An extension is one HTML file with an embedded manifest; install it here and it gets a tile in your launcher, optional command-palette entries, and its own local storage that rides your encrypted backup. Extensions run with full access on this device, so only install files from people you trust. Installing one doesn't upload it anywhere, though an extension can use the network itself."
     },
     "coin-flip": {
       "title": "Coin Flip",
       "lede": "Heads or tails — flip a coin instantly. Run a best-of series for tiebreakers. Works offline.",
-      "tldr": "A no-frills coin flip backed by the browser's secure RNG (Web Crypto). Heads or tails is decided locally; nothing is logged or sent to a server. Keeps a running history per session. Useful for quick decisions, fair starts, or settling tabletop arguments — instant on every device.",
+      "tldr": "A no-frills coin flip backed by the browser's secure RNG (Web Crypto). Heads or tails is decided locally, in your browser. Keeps a running history per session. Useful for quick decisions, fair starts, or settling tabletop arguments — instant on every device.",
       "seo_title": "Coin Flip Online: Heads or Tails"
     },
     "color-picker": {
       "title": "Color Picker",
       "lede": "Pick any color, view its HEX / RGB / HSL values, and generate harmonious palettes. Works offline.",
-      "tldr": "Pick, sample, and save colors entirely in your browser. Outputs HEX, RGB, and HSL side by side. Saved swatches persist via localStorage; nothing is uploaded. Click into the picker, copy any value to clipboard, or build a small palette for design or code. Works offline."
+      "tldr": "Pick, sample, and save colors entirely in your browser. Outputs HEX, RGB, and HSL side by side. Saved swatches are kept in this browser's localStorage. Click into the picker, copy any value to clipboard, or build a small palette for design or code. Works offline."
     },
     "countdown-timer": {
       "title": "Countdown Timer",
       "lede": "Set a duration or pick a target time. Up to 4 independent timers with alarm sound.",
-      "tldr": "Run up to four countdown timers in parallel with optional system notifications when they finish, even when the tab is hidden. Set a duration or a target date and time, name each timer, save presets. The audio alarm and notification fire from your browser; nothing is logged or sent to a server."
+      "tldr": "Run up to four countdown timers in parallel with optional system notifications when they finish, even when the tab is hidden. Set a duration or a target date and time, name each timer, save presets. The audio alarm and notification fire from your browser; with notifications on, Mentria's server only gets a wake-up time, so the alert still arrives after you leave the tab."
     },
     "decision-wheel": {
       "title": "Decision Wheel",
       "lede": "Can't decide? Spin the wheel and let fate choose. Works offline.",
-      "tldr": "Spin a customizable wheel to pick from your own list of options. Add or remove choices on the fly; the outcome is selected locally with the browser's RNG. No accounts, no trackers, no server. Useful for restaurant picks, task assignment, or anything you would otherwise flip a coin for."
+      "tldr": "Spin a customizable wheel to pick from your own list of options. Add or remove choices on the fly; the outcome is selected locally with the browser's RNG. No account needed. Useful for restaurant picks, task assignment, or anything you would otherwise flip a coin for."
     },
     "flappy": {
       "title": "Flappy",
@@ -441,12 +441,12 @@
     "invoice": {
       "title": "Invoice Generator",
       "lede": "Build clean, single-page invoices in your browser. Auto-saves as you type. Print to A4 or export to JSON.",
-      "tldr": "Build clean A4 invoices in your browser and save them as PDF via the browser's print dialog. Add line items, currency, bank details, footnotes; auto-saves to localStorage so refreshes do not lose data. Import or export the whole invoice as JSON. No accounts, no server — every byte stays on your device."
+      "tldr": "Build clean A4 invoices in your browser and save them as PDF via the browser's print dialog. Add line items, currency, bank details, footnotes; auto-saves to localStorage so refreshes do not lose data. Import or export the whole invoice as JSON. No accounts; your invoices are saved in this browser."
     },
     "markdown-pdf": {
       "title": "Markdown → PDF",
       "lede": "Write markdown, see a live preview, and download a clean professional PDF. Auto-saves to your browser. Your documents stay private.",
-      "tldr": "A markdown editor with live preview and one-click PDF export through your browser's print dialog. Imports and exports .md files, auto-saves drafts locally, supports GitHub-flavored markdown including tables and task lists. No upload, no account, no server — everything runs in pure client-side JavaScript and works offline."
+      "tldr": "A markdown editor with live preview and one-click PDF export through your browser's print dialog. Imports and exports .md files, auto-saves drafts locally, supports GitHub-flavored markdown including tables and task lists. No account needed: it runs in pure client-side JavaScript, works offline, and your documents stay private."
     },
     "pdf": {
       "title": "PDF Reader & Editor",
@@ -463,7 +463,7 @@
     "quick-notes": {
       "title": "Quick Notes",
       "lede": "A minimal scratchpad that lives in your browser. Create multiple notes, auto-saved on every keystroke.",
-      "tldr": "A keyboard-first notepad that auto-saves every keystroke to your browser's localStorage. Multiple notes, dark synthwave aesthetic. Notes never leave your device — no sync, no accounts, no server. Use it as a scratchpad for tasks, snippets, or thoughts you will come back to in a tab."
+      "tldr": "A keyboard-first notepad that auto-saves every keystroke to your browser's localStorage. Multiple notes, dark synthwave aesthetic. Notes are saved in this browser, with no account needed. Use it as a scratchpad for tasks, snippets, or thoughts you will come back to in a tab."
     },
     "activity": {
       "downloading": "downloading",
@@ -522,7 +522,7 @@
       "failed": "Couldn’t run an on-device model on this device.",
       "chooseTitle": "Choose your AI model",
       "chooseHint": "Your device can run up to {name}. Bigger models are smarter but download more.",
-      "choosePitch": "Runs fully on your device — private, free, and works offline after the one-time download.",
+      "choosePitch": "Runs on your device — free, works offline after the one-time download, and your data stays private.",
       "chooseSample": "Ask things like “explain quantum computing simply” and the answer is generated on your own hardware.",
       "chooseNotNow": "Not now",
       "continueBg": "Continue in background",
@@ -547,18 +547,18 @@
       "title": "2FA Authenticator",
       "short": "2FA Codes",
       "lede": "Two-factor (2FA) login codes, like an authenticator app. Standard TOTP codes, with your secrets stored encrypted in this browser.",
-      "tldr": "Standards-compliant TOTP (RFC 6238) running entirely in your browser. Secrets are encrypted at rest with AES-GCM-256; a master key is wrapped by both a passphrase (PBKDF2-SHA256 × 600k) and optionally a WebAuthn PRF-derived key for your device's face, fingerprint or PIN unlock. Mandatory encrypted JSON backup before the first secret saves — losing your only authenticator means lockout otherwise. Works offline. No accounts, no sync server.",
+      "tldr": "Standards-compliant TOTP (RFC 6238) running entirely in your browser. Secrets are encrypted at rest with AES-GCM-256; a master key is wrapped by both a passphrase (PBKDF2-SHA256 × 600k) and optionally a WebAuthn PRF-derived key for your device's face, fingerprint or PIN unlock. Mandatory encrypted JSON backup before the first secret saves — losing your only authenticator means lockout otherwise. Works offline. No accounts; device sync is end-to-end encrypted.",
       "seo_title": "2FA Authenticator Online: TOTP Code Generator"
     },
     "exif": {
       "title": "EXIF Inspector",
-      "lede": "See what a photo secretly carries — camera details, timestamps, GPS location — and download a clean copy with it all removed. Nothing is uploaded.",
+      "lede": "See what a photo secretly carries — camera details, timestamps, GPS location — and download a clean copy with it all removed. Your photos aren't uploaded.",
       "tldr": "Reads EXIF, XMP, IPTC and other embedded metadata from JPEG, PNG and WebP images entirely in your browser: camera model, capture time, and the GPS position many phones embed silently. One tap produces a stripped copy with the metadata removed at byte level — pixels untouched, color profile kept — and the copy is re-parsed to verify it is clean before download. Your photos are never uploaded."
     },
     "radio": {
       "title": "Infinite Radio",
       "lede": "AI-generated epic cinematic music, streaming infinitely. Learns your taste on your device, and your listening stays private.",
-      "tldr": "Infinite AI-generated cinematic music streaming in your browser. Tracks come from a public catalog and play through the browser's native HTML5 audio element (crossfaded between two players); your listening history and likes stay on-device in IndexedDB to learn your taste locally over time. No accounts, no tracking, no server-side personalization — pure client-side."
+      "tldr": "Infinite AI-generated cinematic music streaming in your browser. Tracks come from a public catalog and play through the browser's native HTML5 audio element (crossfaded between two players); your listening history and likes stay on-device in IndexedDB to learn your taste locally over time. No accounts and no server-side personalization."
     },
     "tetris": {
       "title": "Tetris",
@@ -572,19 +572,19 @@
     },
     "step-counter": {
       "title": "Step Counter",
-      "lede": "Count your steps on a walk, right in the browser. Uses your phone's motion sensor — nothing is uploaded.",
-      "tldr": "A session-based pedometer that reads your phone's accelerometer through the DeviceMotion API and counts steps with on-device peak detection. Start a session and walk with the screen on — it tracks steps, distance, pace, and a daily goal ring. All processing stays in the browser: no account, no upload, no background tracking. Desktops and devices without a motion sensor show a disabled state. Daily totals persist on this device, with a 7-day chart and goal streaks. Pocket mode keeps the screen on but pure black (best on OLED) so steps keep counting in your pocket; short locked-screen gaps are filled from your walking pace and labeled as estimates."
+      "lede": "Count your steps on a walk, right in the browser. Uses your phone's motion sensor, and your steps stay private.",
+      "tldr": "A session-based pedometer that reads your phone's accelerometer through the DeviceMotion API and counts steps with on-device peak detection. Start a session and walk with the screen on — it tracks steps, distance, pace, and a daily goal ring. Steps are counted in the browser, with no account and no background tracking. Desktops and devices without a motion sensor show a disabled state. Daily totals persist on this device, with a 7-day chart and goal streaks. Pocket mode keeps the screen on but pure black (best on OLED) so steps keep counting in your pocket; short locked-screen gaps are filled from your walking pace and labeled as estimates."
     },
     "qr-scanner": {
       "title": "QR & Barcode Scanner + Generator",
       "short": "QR Scanner",
-      "lede": "Scan QR codes and barcodes, or generate a QR code from any link or text — all on-device, nothing uploaded.",
-      "tldr": "Two tools in one, both fully on-device. Scan mode reads QR codes and barcodes from your camera or an uploaded image: it uses the browser's native BarcodeDetector when available (Chromium, with the widest format support) and falls back to a built-in JavaScript decoder elsewhere, so QR scanning works on Safari and Firefox too. Generate mode turns any link or text into a QR code with a built-in encoder. Nothing is uploaded and there is no server round-trip — decoded results can be copied or opened, and generated codes downloaded as PNG, copied, or shared."
+      "lede": "Scan QR codes and barcodes, or generate a QR code from any link or text — right on your device.",
+      "tldr": "Two tools in one, both fully on-device. Scan mode reads QR codes and barcodes from your camera or an uploaded image: it uses the browser's native BarcodeDetector when available (Chromium, with the widest format support) and falls back to a built-in JavaScript decoder elsewhere, so QR scanning works on Safari and Firefox too. Generate mode turns any link or text into a QR code with a built-in encoder. Camera frames and images aren't uploaded, and there is no server round-trip — decoded results can be copied or opened, and generated codes downloaded as PNG, copied, or shared."
     },
     "breakout": {
       "title": "Breakout",
       "lede": "Brick-buster meets paddle game. Catch falling powerups, clear the wall, survive levels that get faster and meaner. Runs in your browser and works offline.",
-      "tldr": "A Breakout-style brick-buster: bounce the ball off your paddle to clear walls of bricks across levels that speed up, catching falling powerups (and dodging the bad ones). Built on HTML5 Canvas with deterministic physics and mouse, keyboard, and touch controls. Score, lives, and the high-score table all live in client-side JavaScript — no third-party scripts, no server, and it works offline once cached."
+      "tldr": "A Breakout-style brick-buster: bounce the ball off your paddle to clear walls of bricks across levels that speed up, catching falling powerups (and dodging the bad ones). Built on HTML5 Canvas with deterministic physics and mouse, keyboard, and touch controls. Score, lives, and the high-score table all live in client-side JavaScript — no third-party scripts, and it works offline once cached."
     },
     "sudoku": {
       "title": "Sudoku",
@@ -599,11 +599,11 @@
     "chess": {
       "title": "Chess",
       "lede": "Local engine, hot-seat, and peer-to-peer online play. Full rules with castling, en passant, promotion; an alpha-beta engine with four strengths, eval bar, and hints.",
-      "tldr": "A complete chess implementation that runs entirely in your browser. The rules engine covers castling, en passant, promotion, check/checkmate/stalemate, and draws (50-move, insufficient material, threefold repetition), with full SAN move notation. Play hot-seat on one device, against a built-in alpha-beta engine (four strengths from Beginner to Brutal, running in a Web Worker so the UI never freezes) with a live evaluation bar, candidate lines, and move hints — or online against a friend over an encrypted peer-to-peer connection using a share-code (our relay only brokers the connection; moves flow device-to-device). Drag or tap to move, scrub the move history, flip the board, undo, and resign. No accounts, no analytics, works offline."
+      "tldr": "A complete chess implementation that runs entirely in your browser. The rules engine covers castling, en passant, promotion, check/checkmate/stalemate, and draws (50-move, insufficient material, threefold repetition), with full SAN move notation. Play hot-seat on one device, against a built-in alpha-beta engine (four strengths from Beginner to Brutal, running in a Web Worker so the UI never freezes) with a live evaluation bar, candidate lines, and move hints — or online against a friend over an encrypted peer-to-peer connection using a share-code. Drag or tap to move, scrub the move history, flip the board, undo, and resign. No accounts, no analytics, works offline."
     },
     "annotate-image": {
       "title": "Annotate Image",
-      "lede": "Upload an image and get an instant AI description, alt-text, transcription, or tags — with tested one-tap prompts. Runs locally in your browser, nothing uploaded.",
+      "lede": "Upload an image and get an instant AI description, alt-text, transcription, or tags — with tested one-tap prompts. Runs locally in your browser, and the image stays on your device.",
       "tldr": "A focused, vision-powered companion to AI Chat: drop in an image and a tested prompt runs automatically — no need to write one. Switch between Describe, Read text (OCR), Alt-text, and Objects/tags with one tap. It runs the same on-device model as AI Chat, with its vision part (shared cache — if you've already shown AI Chat a picture, no extra download), entirely in your browser via WebGPU. The image is processed on your device, and your data stays private. Drag-and-drop, paste, file-pick, or 'open with' from your file manager once installed. Copy or download the result. WebGPU required (recent Chrome/Edge, or Safari 26+).",
       "seo_title": "AI Image Annotator: Alt Text, OCR and Tags"
     },
@@ -614,8 +614,8 @@
     },
     "extensions-sdk": {
       "title": "Extension SDK",
-      "lede": "Build single-file extensions that run locally in Mentria — no store, no server, no upload.",
-      "tldr": "Extensions are single HTML files that run inside Mentria with a small host API: storage scoped to the extension, theme tokens, toasts, launcher tiles and command-palette entries. Installing is a human-confirmed local import — nothing is uploaded, remotely reviewed, or auto-updated. This page documents the manifest and host API and ships a copy-paste starter."
+      "lede": "Build single-file extensions that run locally in Mentria — one HTML file, no build step.",
+      "tldr": "Extensions are single HTML files that run inside Mentria with a small host API: storage scoped to the extension, theme tokens, toasts, launcher tiles and command-palette entries. Installing is a human-confirmed local import — the file isn't uploaded, reviewed remotely or updated automatically. This page documents the manifest and host API and ships a copy-paste starter."
     },
     "comms": {
       "title": "Comms",
@@ -635,12 +635,12 @@
     "compass": {
       "title": "Compass",
       "lede": "A compass online with no app to install — open it in your browser and read your magnetic heading straight from your phone's sensor.",
-      "tldr": "Point your phone and read the heading. This compass runs entirely in your browser on your phone's built-in magnetometer, so there is nothing to install, no account, and nothing sent anywhere. The dial turns so your heading always sits under the top marker, and a tap freezes a bearing you want to keep. It reads magnetic north, which differs from true north by your local declination."
+      "tldr": "Point your phone and read the heading. This compass runs entirely in your browser on your phone's built-in magnetometer, so there is nothing to install, no account, and the readings aren't sent anywhere. The dial turns so your heading always sits under the top marker, and a tap freezes a bearing you want to keep. It reads magnetic north, which differs from true north by your local declination."
     },
     "speedometer": {
       "title": "GPS Speedometer",
       "lede": "A GPS speedometer online — no app to install. Live speed in km/h, mph or knots, plus trip distance, all computed on your device.",
-      "tldr": "Turn any phone into a speedometer: this reads your device's GPS through the browser and shows your live speed on a big dial, in km/h, mph or knots. It also keeps a running trip — distance, moving time, average and top speed — that survives a reload. Your position never leaves the device: no account, no upload, no tracking."
+      "tldr": "Turn any phone into a speedometer: this reads your device's GPS through the browser and shows your live speed on a big dial, in km/h, mph or knots. It also keeps a running trip — distance, moving time, average and top speed — that survives a reload. Your position never leaves the device, and there's no account."
     },
     "ruler": {
       "title": "Online Ruler",
@@ -665,30 +665,30 @@
     },
     "forge": {
       "title": "Forge",
-      "lede": "Describe a 3D scene and the on-device 27B model writes it in three.js, renders it in a sandbox, checks it, and repairs it once. No server, nothing uploaded.",
+      "lede": "Describe a 3D scene and the on-device 27B model writes it in three.js, renders it in a sandbox, checks it, and repairs it once. Your prompts stay private.",
       "tldr": "Forge turns a sentence into a live three.js scene. The 27B model running in your browser writes only the body of an ES module; the page owns the renderer, camera and render loop, renders the body in a sandboxed frame, reads the pixels and the scene graph to check that something is visible and moving with no errors, and if a check fails it sends the exact problem back to the model for one repair. You get the running scene, the code, and a standalone HTML file to keep. Everything runs on your device."
     },
     "unit-converter": {
       "title": "Unit Converter",
       "short": "Unit Converter",
-      "lede": "A unit converter online with no app to install — length, weight, temperature, volume, data, fuel economy and more, converted on your device with nothing uploaded.",
+      "lede": "A unit converter online with no app to install — length, weight, temperature, volume, data, fuel economy and more, converted on your device.",
       "tldr": "Type a number on either side and the other side updates as you type, across twelve categories from centimetres and pounds to gibibytes, psi and miles per gallon. Factors follow the exact official definitions (an inch is exactly 25.4 mm, a US gallon exactly 3.785411784 litres), and a line under the fields shows the factor or formula for the pair you picked. Temperature and fuel economy aren't simple multiplications, so they use the proper formulas, including the reciprocal jump from L/100 km to mpg. Everything runs in your browser and works offline; nothing you type is uploaded, and only your last category and units are remembered on this device."
     },
     "world-clock": {
       "title": "World Clock",
       "lede": "A world clock online with no app to install — see the time in any city and convert a time between time zones with daylight saving handled, all on your device.",
-      "tldr": "Keep a list of cities and watch their local time tick alongside yours, with the date, the UTC offset and whether it is day or night there. Pick a date and time in any of your cities and every clock switches to that same moment; daylight-saving changes are handled, and when a time is skipped or happens twice, the tool tells you what it is showing. Time zones and offsets come from the time zone data built into your browser, so it works offline and nothing is uploaded. Your list and your 12- or 24-hour choice are saved on this device only."
+      "tldr": "Keep a list of cities and watch their local time tick alongside yours, with the date, the UTC offset and whether it is day or night there. Pick a date and time in any of your cities and every clock switches to that same moment; daylight-saving changes are handled, and when a time is skipped or happens twice, the tool tells you what it is showing. Time zones and offsets come from the time zone data built into your browser, so it works offline. Your list and your 12- or 24-hour choice are saved on this device."
     },
     "password-generator": {
       "title": "Password Generator",
       "short": "Password Generator",
-      "lede": "A password generator online with no app to install — make strong random passwords or easy-to-type passphrases right on your device, with nothing uploaded or saved.",
+      "lede": "A password generator online with no app to install — make strong random passwords or easy-to-type passphrases right on your device, without saving the passwords.",
       "tldr": "Pick a length and the kinds of characters you want, or switch to passphrase mode for a few random words from EFF's short wordlist. Every character and word is drawn without bias from your browser's cryptographic random number generator, and each password is guaranteed to include every character set you switch on. The entropy readout shows how much guessing your settings demand, so you can see what extra length or one more word buys you. It all runs on your device: only your settings are remembered, and generated passwords are never stored, logged or sent anywhere."
     },
     "image-compressor": {
       "title": "Image Compressor",
-      "lede": "Compress images online with no app to install — shrink JPEG, PNG and WebP files, resize them and convert formats right in your browser. Nothing is uploaded.",
-      "tldr": "Drop in photos or screenshots and get smaller copies in seconds. Pick JPEG, WebP or PNG, set the quality, and optionally cap the width and height or scale by a percentage — the aspect ratio is kept and nothing is ever enlarged. Every image is decoded and re-encoded by your own browser, so nothing is uploaded and it keeps working offline. Re-encoding also strips EXIF metadata such as GPS location and camera details. Compare before and after with a slider, then download one image or all of them."
+      "lede": "Compress images online with no app to install — shrink JPEG, PNG and WebP files, resize them and convert formats right in your browser. Your images aren't uploaded.",
+      "tldr": "Drop in photos or screenshots and get smaller copies in seconds. Pick JPEG, WebP or PNG, set the quality, and optionally cap the width and height or scale by a percentage — the aspect ratio is kept and nothing is ever enlarged. Every image is decoded and re-encoded by your own browser, so your images aren't uploaded and it keeps working offline. Re-encoding also strips EXIF metadata such as GPS location and camera details. Compare before and after with a slider, then download one image or all of them."
     },
     "calculator": {
       "title": "Calculator",
@@ -698,23 +698,23 @@
     "json-formatter": {
       "title": "JSON Formatter & Validator",
       "short": "JSON Formatter",
-      "lede": "A JSON formatter and validator online with no app to install — pretty-print, minify or sort keys, and see the exact line and column where invalid JSON breaks. It runs on your device; nothing is uploaded.",
+      "lede": "A JSON formatter and validator online with no app to install — pretty-print, minify or sort keys, and see the exact line and column where invalid JSON breaks. It runs on your device, so your JSON isn't uploaded.",
       "tldr": "Paste JSON, drop a file or open one, and it is checked as you type: invalid input gets the exact line and column plus the offending snippet with a caret under the mistake. Format it with 2 spaces, 4 spaces or tabs, minify it, or sort every object's keys, then copy the result or download it as a .json file. The tree view opens large documents one level at a time and copies the path of any value, like $.items[3].name. Numbers too big or too precise for JavaScript are flagged and kept digit for digit instead of being silently rounded. Everything runs in your browser, so the JSON never leaves your device."
     },
     "video-player": {
       "title": "Video Player",
       "lede": "Play videos from your phone or computer, with resume, speed control, subtitles and picture-in-picture. Your files never leave your device.",
-      "tldr": "Open a few videos or a whole folder and they become a playlist with thumbnails. Mentria remembers where you stopped in each one, so you can pick up later, and on a computer or an Android phone it can remember the folder too. Change the speed from 0.25× to 3×, jump 10 seconds, load .srt or .vtt subtitles and nudge their timing, or pop the video out into picture-in-picture. Nothing is uploaded: the player reads the files straight from your device, and it warns you when a file uses a format your browser can't play."
+      "tldr": "Open a few videos or a whole folder and they become a playlist with thumbnails. Mentria remembers where you stopped in each one, so you can pick up later, and on a computer or an Android phone it can remember the folder too. Change the speed from 0.25× to 3×, jump 10 seconds, load .srt or .vtt subtitles and nudge their timing, or pop the video out into picture-in-picture. Your videos aren't uploaded: the player reads the files straight from your device, and it warns you when a file uses a format your browser can't play."
     },
     "gallery": {
       "title": "Gallery",
       "lede": "Browse the photos and videos on your phone or computer in a fast grid grouped by month, with zoom, slideshow and photo details. Your files never leave your device.",
-      "tldr": "Open a folder, or pick a handful of photos and videos, and they appear in a grid grouped by the month each photo was taken. Tap one to see it full screen: swipe between photos, pinch or double-tap to zoom, play videos in place, or start a slideshow that keeps the screen on. Details shows the camera, lens, exposure and location saved in the photo. On a computer or an Android phone Mentria can remember your folders; everywhere else it keeps thumbnails and dates, so the same photos open faster next time. Nothing is uploaded: the gallery reads files straight from your device."
+      "tldr": "Open a folder, or pick a handful of photos and videos, and they appear in a grid grouped by the month each photo was taken. Tap one to see it full screen: swipe between photos, pinch or double-tap to zoom, play videos in place, or start a slideshow that keeps the screen on. Details shows the camera, lens, exposure and location saved in the photo. On a computer or an Android phone Mentria can remember your folders; everywhere else it keeps thumbnails and dates, so the same photos open faster next time. Your photos aren't uploaded: the gallery reads files straight from your device."
     },
     "music-player": {
       "title": "Music Player",
       "lede": "Play the music on your phone or computer with albums, artists, playlists, shuffle and a sleep timer. Your files never leave your device.",
-      "tldr": "Open some songs or a whole folder and Mentria builds a library from their tags: songs, albums with cover art, and artists, with search. Play in order or shuffle, repeat, line songs up in a queue, and keep playlists that you can export as M3U. Lock-screen and headphone controls work, a sleep timer fades the music out, and on a computer a mini player can float above other windows. It reads MP3, AAC, FLAC, Ogg, Opus and WAV; Apple Lossless and AIFF play on Apple devices. Nothing is uploaded: the player reads files straight from your device."
+      "tldr": "Open some songs or a whole folder and Mentria builds a library from their tags: songs, albums with cover art, and artists, with search. Play in order or shuffle, repeat, line songs up in a queue, and keep playlists that you can export as M3U. Lock-screen and headphone controls work, a sleep timer fades the music out, and on a computer a mini player can float above other windows. It reads MP3, AAC, FLAC, Ogg, Opus and WAV; Apple Lossless and AIFF play on Apple devices. Your music isn't uploaded: the player reads files straight from your device."
     },
     "fpv-drone": {
       "title": "SKYRUSH FPV",
@@ -2094,7 +2094,7 @@
         "image-gen": "Generate images from a text prompt on Mentria's shared render node. Free, no setup — describe the scene and wait your turn.",
         "story-studio": "Build your own story decks: generate images on Mentria's render node or import your own, write captions, and stitch slides into a swipeable story.",
         "meal-planner": "Plan the week's meals, get a shopping list grouped by aisle, and use up what's in your pantry. Comes with 30 starter recipes and nutrition estimates from USDA data.",
-        "pregnancy-check": "Information and test timing, not a diagnosis: when a home pregnancy test is reliable, planning a pregnancy, and your due date, weeks and appointments. Everything stays on this device.",
+        "pregnancy-check": "Information and test timing, not a diagnosis: when a home pregnancy test is reliable, planning a pregnancy, and your due date, weeks and appointments. What you enter stays on this device.",
         "fpv-drone": "Fly a racing drone through glowing gates over hills, a container yard and a desert canyon. Acro or self-level flight, medals, ghost races and a free-flight map. Works with touch, controller or keyboard.",
         "nitro-racer": "Arcade street racing against five rivals: drift to fill your nitro, hit the jumps and chase medals on a neon city circuit, a coastal highway and a desert canyon. Works with touch, tilt, controller or keyboard.",
         "finance": "Track spending, budgets, bills, investments and taxes, with forecasts. Encrypted on your device and synced only between your own devices.",
@@ -2119,7 +2119,7 @@
       },
       "perm": {
         "finance": {
-          "network": "Only for syncing your own devices and for optional bill reminders. Sync passes through Mentria's relay encrypted, so the relay can't read your ledger; reminders send just a wake-up time. Nothing readable is stored."
+          "network": "Only for syncing your own devices and for optional bill reminders. Sync is end-to-end encrypted, and anything that passes through Mentria's relay stays sealed; reminders send just a wake-up time."
         },
         "scanner": {
           "camera": "Only while the scan screen is open. Photos are processed on this device."
@@ -2197,7 +2197,7 @@
       "ref_100": "Live concert",
       "ref_110": "Chainsaw",
       "honesty_note": "Phone and laptop microphones are not calibrated instruments. The readings here are estimates — genuinely useful for comparing one room, machine or moment with another, but not valid as workplace, legal or medical measurements.",
-      "privacy_note": "Sound is analysed live on your device and discarded frame by frame. Nothing is recorded, stored or sent anywhere."
+      "privacy_note": "Sound is analysed live on your device and discarded frame by frame. The sound isn't recorded, stored or sent anywhere."
     },
     "compass": {
       "btn_start": "Start compass",
@@ -2236,7 +2236,7 @@
     "speedometer": {
       "start_title": "Live speed from GPS",
       "start_body": "This tool reads your device's location while it is open, so it can work out how fast you are moving.",
-      "start_privacy": "Your position is used on this device only. Nothing is sent anywhere — the speed, distance and trip are all computed in your browser.",
+      "start_privacy": "Your position is used on this device only: the speed, distance and trip are all computed in your browser.",
       "start_btn": "Start tracking",
       "desktop_note": "Laptops and desktops without GPS get a coarse Wi-Fi position, so the speed may sit at 0 and the trip may not add up. Phones and tablets report real GPS speed.",
       "btn_stop": "Stop",
@@ -3346,7 +3346,7 @@
       "drop": "Drop videos or a folder here",
       "open_files": "Open videos",
       "open_folder": "Open folder",
-      "drop_hint": "Your videos stay on this device. Nothing is uploaded.",
+      "drop_hint": "Your videos stay on this device and aren't uploaded.",
       "ios_hint": "On iPhone, choose videos each time or open a folder from Files. Mentria remembers where you stopped.",
       "saved_title": "Your folders",
       "recent_title": "Continue watching",
@@ -3392,7 +3392,7 @@
       "drop": "Drop photos, videos or a folder here",
       "open_files": "Open photos",
       "open_folder": "Open folder",
-      "drop_hint": "Your photos stay on this device. Nothing is uploaded.",
+      "drop_hint": "Your photos stay on this device and aren't uploaded.",
       "ios_hint": "On iPhone, Open photos picks from your library and Open folder works with folders in the Files app. Mentria keeps thumbnails and dates, so the same photos open faster next time.",
       "saved_title": "Your folders",
       "open": "Open",
@@ -3458,7 +3458,7 @@
       "drop": "Drop songs or a folder here",
       "open_files": "Open music",
       "open_folder": "Open folder",
-      "drop_hint": "Your music stays on this device. Nothing is uploaded.",
+      "drop_hint": "Your music stays on this device and isn't uploaded.",
       "ios_hint": "On iPhone, choose songs or a folder from the Files app each visit. Songs in Apple Music can't be opened. Mentria keeps song details and covers, so the same files load faster next time.",
       "lock_hint": "On iPhone, if the next song doesn't start while the lock screen is on, press play there to restart it. For long listening, a Safari tab is more reliable than the home-screen app.",
       "saved_title": "Your folders",
@@ -3945,8 +3945,8 @@
         "no_upcoming": "No bills in the next 2 weeks"
       },
       "setup": {
-        "lede": "Track spending, budgets, bills, investments and taxes. Everything is encrypted on this device; nothing is uploaded to Mentria.",
-        "point_local": "Your data stays in this browser, locked with a passphrase only you know.",
+        "lede": "Track spending, budgets, bills, investments and taxes. Your records are stored encrypted on this device and synced only between your own devices.",
+        "point_local": "Your records are stored encrypted in this browser, locked with a passphrase only you know.",
         "point_sync": "Pair your phone and computer to sync them directly, device to device.",
         "point_ai": "Type entries in plain words; the on-device model can help when it's downloaded.",
         "ios_home": "On iPhone and iPad, add mentria.ai to your Home Screen first. Safari can clear site data after 7 days without a visit; Home Screen apps keep it.",
@@ -4180,7 +4180,7 @@
         "export_paired": "It's been a while since your last backup file. Export one to keep an offline copy.",
         "export": "Export backup",
         "welcome_title": "Your ledger is ready",
-        "welcome_body": "Add what you spend as it happens, or import a bank statement to start with history. Everything stays encrypted on this device.",
+        "welcome_body": "Add what you spend as it happens, or import a bank statement to start with history. Your records are stored encrypted on this device.",
         "first_entry": "Add an expense",
         "import": "Import a statement",
         "add_account": "Add an account",
@@ -4473,7 +4473,7 @@
         "widget_amounts": "Show amounts on the home screen tile",
         "widget_hint": "Off keeps the tile to \"Finance\" with no numbers.",
         "about": "About",
-        "about_body": "Finance stores everything encrypted in this browser. Sync goes directly between your devices; Mentria's relay only helps them find each other.",
+        "about_body": "Finance stores everything encrypted in this browser. Sync between your devices is end-to-end encrypted, and anything that passes through the relay stays sealed.",
         "version": "Version {v}",
         "reminders_title": "Reminders",
         "reminders": "Remind me about bills on this device",
@@ -5242,7 +5242,7 @@
         "remove_body": "This only hides {name} from your list. It keeps its copy of your ledger and can still sync with your other devices. That copy stays encrypted: opening it needs your passphrase, recovery code or a passkey, unless the device was set to unlock automatically. To cut a lost device off, export a backup with \"Include keys\" turned off, erase Finance on your devices, restore the backup on one of them and pair the others with it. The restored ledger gets a new key the lost device doesn't have.",
         "removed": "Device removed",
         "add_body": "On the other device, open Finance, choose \"I use Finance on another device\" and type this code. It works for 10 minutes.",
-        "add_hint": "Both devices need to be online. Your ledger goes directly between them, encrypted; nothing is stored on a server.",
+        "add_hint": "Both devices need to be online. Your ledger goes straight between them, end-to-end encrypted.",
         "waiting": "Waiting for your other device…",
         "peer_found": "Found {name}. Check it shows the same number:",
         "approve": "Numbers match, send",
@@ -5333,7 +5333,7 @@
         "intro_title": "Private chat that runs on your devices",
         "intro_body": "Messages, calls and files go straight to the other person — encrypted end to end. No account and no phone number; anything that passes through the relay stays sealed.",
         "start": "get started",
-        "intro_fine": "Takes about ten seconds. Everything stays on your device.",
+        "intro_fine": "Takes about ten seconds. Your keys are created on this device.",
         "name_title": "What should people call you?",
         "name_placeholder": "your name",
         "create": "create my identity",
@@ -6380,18 +6380,18 @@
   "privacy": {
     "title": "Privacy",
     "desc": "What stays on your device, what uses the network and when, and how to check it yourself.",
-    "lede": "Mentria has no accounts, no ads and no tracking. The AI runs on your device, and what you make here is stored in your browser. Here's what does use the network, so you can check it yourself.",
+    "lede": "Mentria has no accounts, no ads and no analytics scripts. The AI runs on your device, and what you make here is stored in your browser. Here's what does use the network, so you can check it yourself.",
     "device_h": "Stays on your device",
     "device_ai_b": "AI chats and prompts.",
     "device_ai": "Mentria's built-in AI tools run the model on your device's graphics chip, so your questions, the answers and the pictures you show the AI are processed in your browser and not sent to a server.",
     "device_files_b": "Files you open.",
-    "device_files": "Photos, videos, music, PDFs and documents are read inside the page. Tools that change a file give you a new copy to save, without uploading anything.",
+    "device_files": "Photos, videos, music, PDFs and documents are read inside the page. Tools that change a file give you a new copy to save, without uploading it.",
     "device_sensors_b": "Camera, microphone, motion and location.",
     "device_sensors": "Phone tools read them inside the page while you use them, and the readings aren't sent anywhere.",
     "device_saved_b": "What you save.",
     "device_saved": "Notes, settings, learning progress, imported packs, the extensions you add, game saves and your Mentria identity live in this browser's storage. Clearing the site's data removes them.",
     "device_backup_b": "Backups.",
-    "device_backup": "A backup is one encrypted file that you download and keep. Mentria never gets a copy, and nobody can open it without your passphrase.",
+    "device_backup": "A backup is one encrypted file that you download and keep. Mentria never gets a copy, and it opens only with your passphrase or recovery code.",
     "net_h": "What uses the network",
     "net_lede": "What connects, when, and what the other side can see.",
     "net_site_name": "Loading Mentria",

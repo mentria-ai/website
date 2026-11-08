@@ -21,11 +21,11 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 <section class="sdk">
   <p class="sdk__lang" role="note">{{ "tool.extensions-sdk.english_only" | t }}</p>
-  <p class="sdk__lead">A Mentria extension is a single <code>.html</code> file — markup, styles and script in one document. There is no build step, no bundler and no upload: the file lives only on your device, in local storage, and runs on the site the moment you install it.</p>
+  <p class="sdk__lead">A Mentria extension is a single <code>.html</code> file — markup, styles and script in one document. There is no build step and no bundler: you import the file into this browser's storage, and it runs on the site the moment you install it.</p>
 
   <div class="sdk__callout" role="note">
     <p class="sdk__callout-title">Trust model — read this once</p>
-    <p>Your extension runs inside an <code>&lt;iframe&gt;</code> (its own document), but that frame is <strong>same-origin</strong> with the host page. That is structural isolation, not a security sandbox: an installed extension can reach the host. The real safeguards are human ones — you install it yourself after a naming prompt, the source never leaves your device, and the file size is capped. Only install extensions you would be willing to run as your own code.</p>
+    <p>Your extension runs inside an <code>&lt;iframe&gt;</code> (its own document), but that frame is <strong>same-origin</strong> with the host page. That is structural isolation, not a security sandbox: an installed extension can reach the host. The real safeguards are human ones — you install it yourself after a naming prompt, and the file size is capped. Only install extensions you would be willing to run as your own code.</p>
   </div>
 
   <h2 class="sdk__h2">{{ "tool.extensions-sdk.heading_start" | t }}</h2>

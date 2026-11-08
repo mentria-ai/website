@@ -135,6 +135,23 @@ const PAGE_TESTS = async () => {
     v.close();
   });
 
+  test('fix: a message refused by the bridge says why instead of staying sent', async () => {
+    const AV4 = await import('/assets/js/comms/agent-view.js');
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {}, say: async () => 'p:abc' };
+    const v = AV4.createAgentView({ els, T: { agent: { sent: 'sent', delivered: 'delivered', unpaired: 'not delivered: pair this device', message: 'Message the {name}' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    await v.say('hello');
+    await sleep(100);
+    ok(els.log.textContent.includes('sent'));
+    handlers.err({ t: 'err', sid: 's', cmid: 'p:abc', code: 'unpaired' });
+    await sleep(100);
+    ok(els.log.textContent.includes('not delivered: pair this device'), els.log.textContent);
+    v.close();
+  });
+
   const R = (i) => btoa(String.fromCharCode(...new Uint8Array(16).fill(i))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const MH = btoa(String.fromCharCode(...new Uint8Array(32).fill(2))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const REF0 = R(10);

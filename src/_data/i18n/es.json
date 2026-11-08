@@ -5873,7 +5873,7 @@
       "agent": {
         "heading": "Sesiones de agente",
         "connect": "Conectar este Mac",
-        "connect_note": "Copia el código y ejecuta node bridge.mjs pair en este Mac. El código se lee del portapapeles y se queda en este Mac.",
+        "connect_note": "Copia el código y ejecuta node bridge.mjs pair en el Mac. Hazlo una vez en cada dispositivo desde el que quieras responder; desde un teléfono, pégalo en el Mac con el portapapeles compartido. El código se queda en el Mac.",
         "copied": "Código del puente copiado.",
         "copy_failed": "No se pudo copiar el código del puente.",
         "running": "en ejecución en tu Mac",
@@ -5905,6 +5905,7 @@
         "signed": "Firmado con tu clave de identidad, así que solo tus dispositivos pueden dar instrucciones a esta sesión.",
         "sent": "enviado",
         "delivered": "entregado",
+        "unpaired": "No entregado: primero empareja este dispositivo en Sesiones de agente.",
         "wants": "{tool} quiere ejecutarse",
         "allow": "Permitir",
         "deny": "Denegar"

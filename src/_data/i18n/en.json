@@ -5873,7 +5873,7 @@
       "agent": {
         "heading": "Agent sessions",
         "connect": "Connect this Mac",
-        "connect_note": "Copy the code, then run node bridge.mjs pair on this Mac. The code is read from the clipboard and stays on this Mac.",
+        "connect_note": "Copy the code, then run node bridge.mjs pair on the Mac. Do it once on each device you want to reply from; from a phone, paste it on the Mac through the shared clipboard. The code stays on the Mac.",
         "copied": "Bridge code copied.",
         "copy_failed": "Couldn't copy the bridge code.",
         "running": "running on your Mac",
@@ -5905,6 +5905,7 @@
         "signed": "Signed with your identity key, so only your devices can instruct this session.",
         "sent": "sent",
         "delivered": "delivered",
+        "unpaired": "Not delivered: pair this device first under Agent sessions.",
         "wants": "{tool} wants to run",
         "allow": "Allow",
         "deny": "Deny"

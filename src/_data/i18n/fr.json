@@ -5873,7 +5873,7 @@
       "agent": {
         "heading": "Sessions d'agent",
         "connect": "Connecter ce Mac",
-        "connect_note": "Copiez le code, puis lancez node bridge.mjs pair sur ce Mac. Le code est lu dans le presse-papiers et reste sur ce Mac.",
+        "connect_note": "Copiez le code, puis lancez node bridge.mjs pair sur le Mac. Faites-le une fois sur chaque appareil depuis lequel vous voulez répondre ; depuis un téléphone, collez-le sur le Mac via le presse-papiers partagé. Le code reste sur le Mac.",
         "copied": "Code du pont copié.",
         "copy_failed": "Impossible de copier le code du pont.",
         "running": "en cours sur votre Mac",
@@ -5905,6 +5905,7 @@
         "signed": "Signé avec votre clé d’identité : seuls vos appareils peuvent donner des instructions à cette session.",
         "sent": "envoyé",
         "delivered": "remis",
+        "unpaired": "Non remis : associez d’abord cet appareil dans Sessions d’agent.",
         "wants": "{tool} veut s’exécuter",
         "allow": "Autoriser",
         "deny": "Refuser"

@@ -203,7 +203,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
         const line = el('div', 'comms__line comms__line--me');
         const what = el('span', 'comms__what');
         renderBody(what, p.text, { from: 'self', T: T.chat });
-        line.append(what, el('span', 'comms__agent-state', p.acked ? (A.delivered || '') : (A.sent || '')));
+        line.append(what, el('span', 'comms__agent-state' + (p.failed ? ' comms__agent-state--failed' : ''), p.failed ? (A.unpaired || '') : p.acked ? (A.delivered || '') : (A.sent || '')));
         box.append(line);
       }
       out.push(box);
@@ -242,7 +242,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
   offs.push(client.on('ack', (m) => { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.acked) { p.acked = true; schedule(); } }));
   offs.push(client.on('perm', (m) => { if (!m || typeof m.request_id !== 'string' || typeof m.sid !== 'string') return; if (!perms.some((x) => x.sid === m.sid && x.request_id === m.request_id)) perms.push(Object.assign({}, m)); if (m.sid === sid) paintPerm(); }));
   offs.push(client.on('part', (m) => { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(m); } }));
-  offs.push(client.on('err', (m) => { if (m.ref) { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(null); } } }));
+  offs.push(client.on('err', (m) => { if (m && m.cmid && m.sid === sid) { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.failed) { p.failed = String(m.code || 'error'); schedule(); } } if (m.ref) { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(null); } } }));
 
   return {
     isOpen: () => !!sid,

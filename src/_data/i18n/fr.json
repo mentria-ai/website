@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "À propos",
-    "meta_description": "Mentria est un petit studio créatif : outils, jeux et IA respectueux de la vie privée qui tournent dans votre navigateur, et packs de cartes pour apprendre. Vos données restent privées.",
+    "meta_description": "Mentria est un petit studio créatif : outils, jeux et IA respectueux de la vie privée qui tournent dans votre navigateur, et packs de cartes pour apprendre.",
     "tagline": "Apprenez et expérimentez avec une IA qui tourne sur votre appareil.",
     "copyright": "© 2026 Mentria. Tous droits réservés.",
     "image_use": "Utilisation des images",
@@ -617,7 +617,7 @@
     },
     "comms": {
       "title": "Comms",
-      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages.",
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout et sans compte ; le relais ne transmet que des messages scellés.",
       "seo_title": "Messagerie, appels et fichiers P2P chiffrés"
     },
     "bubble-level": {
@@ -5319,14 +5319,14 @@
     },
     "comms": {
       "meta_description": "Chat pair-à-pair, appels et partage de fichiers, sans compte. Les messages sont chiffrés de bout en bout sur votre appareil, et le relais de Mentria ne les transmet que chiffrés.",
-      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages. Partagez l’URL d’un salon, ou échangez vos codes de contact pour écrire directement aux gens.",
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout et sans compte ; le relais ne transmet que des messages scellés. Partagez l’URL d’un salon, ou échangez vos codes de contact pour écrire directement aux gens.",
       "unknown": "inconnu",
       "onboard": {
         "insecure_title": "Cette page a besoin d’une connexion sécurisée",
         "insecure_body": "Votre navigateur n’autorise le chiffrement dont comms a besoin qu’en <strong>https</strong>. Vous êtes sur une adresse http simple, donc aucune clé ne peut être créée ici.",
         "insecure_open": "Ouvrez plutôt {link} — ou utilisez une adresse https si vous testez en local.",
         "intro_title": "Un chat privé qui fonctionne sur vos appareils",
-        "intro_body": "Messages, appels et fichiers vont directement à l’autre personne — chiffrés de bout en bout. Pas de compte, pas de numéro de téléphone, et aucun serveur capable de les lire.",
+        "intro_body": "Messages, appels et fichiers vont directement à l’autre personne — chiffrés de bout en bout. Pas de compte ni de numéro de téléphone ; ce qui passe par le relais reste scellé.",
         "start": "commencer",
         "intro_fine": "Cela prend une dizaine de secondes. Tout reste sur votre appareil.",
         "name_title": "Comment voulez-vous qu’on vous appelle ?",

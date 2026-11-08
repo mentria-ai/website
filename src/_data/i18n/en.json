@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "About",
-    "meta_description": "Mentria is a small creative studio making privacy-first tools, games and AI that run in your browser, plus card decks for learning. Your data stays private.",
+    "meta_description": "Mentria is a small creative studio making privacy-first tools, games and AI that run in your browser, plus card decks for learning.",
     "tagline": "Learn and experiment with AI that runs on your device.",
     "copyright": "© 2026 Mentria. All rights reserved.",
     "image_use": "Image use",
@@ -617,7 +617,7 @@
     },
     "comms": {
       "title": "Comms",
-      "lede": "Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted, no accounts, and no server can read your messages.",
+      "lede": "Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted, with no accounts; the relay only passes sealed messages.",
       "seo_title": "Encrypted P2P Chat, Calls and File Sharing"
     },
     "bubble-level": {
@@ -5319,14 +5319,14 @@
     },
     "comms": {
       "meta_description": "Peer-to-peer chat, calls and file drop, with no accounts. Messages are end-to-end encrypted on your device, and Mentria's relay only passes them on still encrypted.",
-      "lede": "Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted, no accounts, and no server can read your messages. Share a room URL, or trade contact codes and message people directly.",
+      "lede": "Peer-to-peer chat, voice and video calls, and file drop. End-to-end encrypted, with no accounts; the relay only passes sealed messages. Share a room URL, or trade contact codes and message people directly.",
       "unknown": "unknown",
       "onboard": {
         "insecure_title": "This page needs a secure connection",
         "insecure_body": "Your browser only allows the encryption comms depends on over <strong>https</strong>. You're on a plain http address, so keys can't be created here.",
         "insecure_open": "Open {link} instead — or use an https address if you're testing locally.",
         "intro_title": "Private chat that runs on your devices",
-        "intro_body": "Messages, calls and files go straight to the other person — encrypted end to end. No account, no phone number, and no server that can read them.",
+        "intro_body": "Messages, calls and files go straight to the other person — encrypted end to end. No account and no phone number; anything that passes through the relay stays sealed.",
         "start": "get started",
         "intro_fine": "Takes about ten seconds. Everything stays on your device.",
         "name_title": "What should people call you?",

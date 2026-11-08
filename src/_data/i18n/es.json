@@ -31,7 +31,7 @@
   },
   "about": {
     "title": "Acerca de",
-    "meta_description": "Mentria es un pequeño estudio creativo: herramientas, juegos e IA centrados en la privacidad que funcionan en tu navegador, y paquetes de tarjetas para aprender. Tus datos se mantienen privados.",
+    "meta_description": "Mentria es un pequeño estudio creativo: herramientas, juegos e IA centrados en la privacidad que funcionan en tu navegador, y paquetes de tarjetas para aprender.",
     "tagline": "Aprende y experimenta con IA que funciona en tu dispositivo.",
     "copyright": "© 2026 Mentria. Todos los derechos reservados.",
     "image_use": "Uso de imágenes",
@@ -617,7 +617,7 @@
     },
     "comms": {
       "title": "Comms",
-      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes.",
+      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo y sin cuentas; el relé solo pasa mensajes sellados.",
       "seo_title": "Chat, llamadas y archivos P2P cifrados"
     },
     "bubble-level": {
@@ -5319,14 +5319,14 @@
     },
     "comms": {
       "meta_description": "Chat entre pares, llamadas y envío de archivos, sin cuentas. Los mensajes se cifran de extremo a extremo en tu dispositivo, y el servidor de Mentria solo los reenvía cifrados.",
-      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo, sin cuentas y sin ningún servidor que pueda leer tus mensajes. Comparte la URL de una sala, o intercambia códigos de contacto y escribe directamente a otras personas.",
+      "lede": "Chat entre pares, llamadas de voz y video, y envío de archivos. Cifrado de extremo a extremo y sin cuentas; el relé solo pasa mensajes sellados. Comparte la URL de una sala, o intercambia códigos de contacto y escribe directamente a otras personas.",
       "unknown": "desconocido",
       "onboard": {
         "insecure_title": "Esta página necesita una conexión segura",
         "insecure_body": "Tu navegador solo permite el cifrado que usa comms a través de <strong>https</strong>. Estás en una dirección http normal, así que aquí no se pueden crear claves.",
         "insecure_open": "Abre {link} en su lugar — o usa una dirección https si estás haciendo pruebas en local.",
         "intro_title": "Chat privado que funciona en tus dispositivos",
-        "intro_body": "Los mensajes, las llamadas y los archivos van directo a la otra persona — cifrados de extremo a extremo. Sin cuenta, sin número de teléfono y sin un servidor que pueda leerlos.",
+        "intro_body": "Los mensajes, las llamadas y los archivos van directo a la otra persona — cifrados de extremo a extremo. Sin cuenta ni número de teléfono; lo que pasa por el relé va sellado.",
         "start": "empezar",
         "intro_fine": "Tarda unos diez segundos. Todo se queda en tu dispositivo.",
         "name_title": "¿Cómo quieres que te llamen?",

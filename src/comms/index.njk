@@ -1921,7 +1921,7 @@ const paintAgents = () => {
   if (sig !== agentsSig) { agentsSig = sig; renderContacts(); }
 };
 let agentView = null;
-const agentViewFor = () => agentView || (agentView = createAgentView({ els, T, client: bridge, nameOf: (sid) => (agentList().find((a) => a.sid === sid) || {}).name || '' }));
+const agentViewFor = () => agentView || (agentView = createAgentView({ els, T, client: bridge, nameOf: (sid) => (agentList().find((a) => a.sid === sid) || {}).name || '', onOpen: (sid, id, title) => agentViewFor().open(sid, id, title || T.agent.kind_subagent) }));
 const openAgent = async (sid) => {
   if (!bridge) return;
   if (aiView && aiView.isOpen()) aiView.close();
@@ -5280,7 +5280,12 @@ const leaveRoom = async () => {
   await joinNew(null, null, { leave: true });
 };
 
-els.leave.addEventListener('click', () => { if (aiView && aiView.isOpen()) aiView.close(); leaveRoom(); });
+els.leave.addEventListener('click', () => {
+  const at = agentView && agentView.isOpen() ? agentView.current() : null;
+  if (at && at.sub) { agentView.open(at.sid); return; }
+  if (aiView && aiView.isOpen()) aiView.close();
+  leaveRoom();
+});
 
 if (navigator.share) els.idShareOut.hidden = false;
 

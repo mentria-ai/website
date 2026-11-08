@@ -127,7 +127,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen } = {}
         box.append(line);
       } else {
         const msg = el('div', 'comms__agentmsg');
-        renderAgentParts(msg, m.parts || [], { T: A, TB: T.chat, results, calls: new Set(all.filter((p) => p.type === 'tool_call').map((p) => p.id)), get, onImage, openSub: sub ? null : (id) => { if (onOpen) onOpen(sid, id); } });
+        renderAgentParts(msg, m.parts || [], { T: A, TB: T.chat, results, calls: new Set(all.filter((p) => p.type === 'tool_call').map((p) => p.id)), get, onImage, openSub: sub ? null : (id, title) => { if (onOpen) onOpen(sid, id, title); } });
         box.append(msg);
       }
     }

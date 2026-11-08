@@ -75,7 +75,7 @@
     "advanced_sub": "Backups, identity and device sync",
     "data_section_lede": "What you make here is stored only in this browser. A backup is one encrypted file that you keep, so clearing the browser or changing phones doesn't take your work with it.",
     "data_in_label": "In a backup",
-    "data_in_body": "Notes, invoices, AI chats, tool and layout settings, game saves, learning progress and the packs you imported, TOTP accounts, your Mentria identity and Comms rooms, the Finance ledger (still locked with its own passphrase), radio likes, and installed extensions with their data, such as Story Studio decks and images.",
+    "data_in_body": "Notes, invoices, AI chats, tool and layout settings, game saves, learning progress and the packs you imported, 2FA accounts, your Mentria identity and Comms rooms, the Finance ledger (still locked with its own passphrase), radio likes, and installed extensions with their data, such as Story Studio decks and images.",
     "data_out_label": "Not in a backup",
     "data_out_body": "Downloaded AI models and offline copies of pages and decks, which download again when you need them. Your photo, video and music library, its thumbnails and where you stopped watching, which rebuild when you add your folders again. Folder access, scheduled notifications and “unlock on this device” settings, which only work on the device that made them.",
     "data_usage_label": "Usage",
@@ -151,7 +151,7 @@
     "sync_confirm_replace": "This device already has its own {areas}. Pairing replaces them with the other device’s copy. Continue?",
     "sync_no_peer": "No device answered with this code. Check the code, and keep About open on the other device.",
     "sync_busy": "This code is already in use by two other devices. Make a new code on the device you want to pair with.",
-    "sync_vault_totp": "This device has its own TOTP vault, and the other device has a different one. Replace this device’s vault with the other device’s? TOTP accounts that are only on this device will be lost, and the other device’s passphrase will unlock it.",
+    "sync_vault_totp": "This device has its own 2FA Authenticator vault, and the other device has a different one. Replace this device’s vault with the other device’s? 2FA accounts that are only on this device will be lost, and the other device’s passphrase will unlock it.",
     "sync_vault_identity": "This device has its own Mentria identity, and the other device has a different one. Replace it with the other device’s? This device’s identity will be lost, and the other device’s passphrase will unlock it. Chat history saved on this device under the old identity will no longer open.",
     "sync_vault_keyring": "This device has its own one unlock, and the other device has a different one. Replace this device’s with the other device’s? The other device’s recovery code will unlock it. Notes, codes, chats and finances set up with this device’s unlock won’t open here until you bring that unlock back in from About. It is kept on this device.",
     "sync_vault_keep": "Keep this device’s",
@@ -206,7 +206,7 @@
     "ai_model_offline": "You're offline. The model downloads once you're back online.",
     "data_areas": {
       "invoice": "invoices",
-      "totp": "TOTP accounts",
+      "totp": "2FA accounts",
       "identity": "Mentria identity",
       "keyring": "one unlock",
       "comms": "Comms rooms and contacts",
@@ -227,7 +227,7 @@
       "comms_history": "chat history"
     },
     "restore_replace": "This device already has its own {areas}. Replace them with the backup's copy? Choose Cancel to keep this device's versions. Notes and anything new are restored either way.",
-    "restore_totp_vault": "This device already has a TOTP vault. Replace it with the one in the backup? Accounts that are only on this device will be lost, and the backup's passphrase will unlock it.",
+    "restore_totp_vault": "This device already has a 2FA Authenticator vault. Replace it with the one in the backup? Accounts that are only on this device will be lost, and the backup's passphrase will unlock it.",
     "restore_identity_vault": "This device already has a Mentria identity. Replace it with the one in the backup? This device's identity is replaced, and the backup's passphrase will unlock it.",
     "restore_keyring_vault": "This device already has its own one unlock. Replace it with the one in the backup? The backup's recovery code will unlock it. Notes, codes, chats and finances set up with this device's unlock won't open here until you bring that unlock back in from About. It is kept on this device.",
     "restore_summary": "Restore the backup from {date}? It holds {areas}. Anything this device doesn't have yet is added, and you'll be asked before anything here is replaced. Cancel leaves this device as it is.",
@@ -544,9 +544,11 @@
       "tldr": "Motivational Quote generates original aphorisms with the same on-device model as AI Chat, running entirely in your browser via WebGPU. No server, no API key, no account. The model loads on first visit and is cached locally for instant reuse."
     },
     "totp": {
-      "title": "TOTP",
-      "lede": "Two-factor authentication codes that live in your browser, encrypted at rest. Nothing on a server.",
-      "tldr": "Standards-compliant TOTP (RFC 6238) running entirely in your browser. Secrets are encrypted at rest with AES-GCM-256; a master key is wrapped by both a passphrase (PBKDF2-SHA256 × 600k) and optionally a WebAuthn PRF-derived key for your device's face, fingerprint or PIN unlock. Mandatory encrypted JSON backup before the first secret saves — losing your only authenticator means lockout otherwise. Works offline. No accounts, no sync server."
+      "title": "2FA Authenticator",
+      "short": "2FA Codes",
+      "lede": "Two-factor (2FA) login codes, like an authenticator app. Standard TOTP codes, with your secrets stored encrypted in this browser.",
+      "tldr": "Standards-compliant TOTP (RFC 6238) running entirely in your browser. Secrets are encrypted at rest with AES-GCM-256; a master key is wrapped by both a passphrase (PBKDF2-SHA256 × 600k) and optionally a WebAuthn PRF-derived key for your device's face, fingerprint or PIN unlock. Mandatory encrypted JSON backup before the first secret saves — losing your only authenticator means lockout otherwise. Works offline. No accounts, no sync server.",
+      "seo_title": "2FA Authenticator Online: TOTP Code Generator"
     },
     "exif": {
       "title": "EXIF Inspector",
@@ -608,7 +610,7 @@
     "files": {
       "title": "Files",
       "lede": "Browse, export, and delete the data Mentria tools store on this device. Everything stays local.",
-      "tldr": "A local storage inspector for everything Mentria tools keep on this device. It lists each app's namespace — notes, TOTP vault, game state, extension data, and legacy keys — with item sizes and modified dates. View any value as pretty-printed JSON, export a single item, or delete it (deletes always ask first). Export one encrypted backup of your saved data, including learning packs, the Finance ledger and extension databases, with a passphrase (PBKDF2-SHA256 × 600k + AES-GCM). Nothing is uploaded; the tool only writes to storage when you confirm a delete."
+      "tldr": "A local storage inspector for everything Mentria tools keep on this device. It lists each app's namespace — notes, 2FA Authenticator vault, game state, extension data, and legacy keys — with item sizes and modified dates. View any value as pretty-printed JSON, export a single item, or delete it (deletes always ask first). Export one encrypted backup of your saved data, including learning packs, the Finance ledger and extension databases, with a passphrase (PBKDF2-SHA256 × 600k + AES-GCM). The tool works on the data in this browser and only writes to storage when you confirm a delete."
     },
     "extensions-sdk": {
       "title": "Extension SDK",
@@ -1478,7 +1480,7 @@
       "note_no_camera": "No camera was found on this device. You can still scan an image file.",
       "note_camera_error": "The camera could not be started. You can still scan an image file.",
       "note_no_match": "No code found in that image. Try a clearer photo.",
-      "to_totp": "Authenticator code found. Opening TOTP…",
+      "to_totp": "Authenticator code found. Opening 2FA Authenticator…",
       "unsupported_title": "Not supported here",
       "unsupported_body": "This browser doesn't support barcode detection. Try a recent Chromium browser such as Chrome or Edge.",
       "mode_scan": "Scan",
@@ -1551,7 +1553,7 @@
       "locked_lede_setup": "Pick a passphrase to set up your vault. You will use it every time you unlock.",
       "handoff_unlock": "Unlock your vault to add the code you scanned.",
       "handoff_setup": "Create your vault to add the code you scanned.",
-      "locked_lede_unlock": "Enter your passphrase to unlock your TOTP vault.",
+      "locked_lede_unlock": "Enter your passphrase to unlock your 2FA vault.",
       "pass_label": "Passphrase",
       "pass_confirm": "Confirm passphrase",
       "setup_button": "Create vault",
@@ -1566,7 +1568,7 @@
       "unlock_failed": "Unlock failed — wrong passphrase or corrupt vault.",
       "prf_unsupported": "Your device's face, fingerprint or PIN unlock failed or isn't supported here.",
       "add_button": "Add account",
-      "add_title": "Add TOTP account",
+      "add_title": "Add 2FA account",
       "paste_uri_label": "Paste otpauth:// URI",
       "or_manual": "— or fill in manually —",
       "issuer_label": "Issuer (e.g. GitHub)",
@@ -1589,7 +1591,7 @@
       "prf_enroll_failed": "Couldn't add face, fingerprint or PIN unlock",
       "prf_enroll_relock": "Lock, unlock with your passphrase, then try again.",
       "backup_gate_title": "Back up before you save",
-      "backup_gate_lede": "TOTP secrets cannot be recovered if you lose this device or forget your passphrase. Download an encrypted backup now — it uses a passphrase you choose (can be the same as your vault).",
+      "backup_gate_lede": "2FA secrets cannot be recovered if you lose this device or forget your passphrase. Download an encrypted backup now — it uses a passphrase you choose (can be the same as your vault).",
       "backup_gate_confirm": "Download backup and save",
       "backup_unsaved_title": "Not saved — download a backup",
       "backup_unsaved_lede": "Your browser didn't let this site store your vault, so the account you just added isn't kept on this device. Download an encrypted backup now — it's the only copy.",
@@ -1605,15 +1607,15 @@
       "scan_denied": "Camera access denied. Allow camera permission in your browser settings and try again.",
       "scan_no_camera": "No camera available on this device.",
       "scan_secure_required": "Camera access needs HTTPS. Use the live site, not a local URL.",
-      "scan_invalid_qr": "That QR code isn't a TOTP setup code or an authenticator export. Try again.",
+      "scan_invalid_qr": "That QR code isn't a 2FA setup code or an authenticator export. Try again.",
       "next_label": "next:",
       "add_secret_bad_chars": "Secret has invalid characters: {chars}. Base32 uses only A–Z and 2–7 — check for 0/O, 1/I/L, 8/B look-alikes.",
       "autolock_label": "auto-lock",
       "autolock_off": "off",
       "create_lede": "Create your vault. Your one unlock opens it.",
       "linked_missing": "This vault opens with a one unlock that isn't on this device. Restore a backup that includes it, or sync with a device that has it.",
-      "backup_gate_lede_code": "TOTP secrets can't be recovered if you lose this device. Download a backup now. It's protected by your recovery code.",
-      "backup_gate_lede_linked": "TOTP secrets can't be recovered if you lose this device. Your recovery code can't protect this backup right now, so choose a passphrase for the file. You'll need it to restore.",
+      "backup_gate_lede_code": "2FA secrets can't be recovered if you lose this device. Download a backup now. It's protected by your recovery code.",
+      "backup_gate_lede_linked": "2FA secrets can't be recovered if you lose this device. Your recovery code can't protect this backup right now, so choose a passphrase for the file. You'll need it to restore.",
       "old_unlock": "Or use your old passphrase"
     },
     "exif": {
@@ -2000,7 +2002,7 @@
       "models_share": "includes {n} of downloaded AI models",
       "erase_button": "Erase this device…",
       "erase_title": "Erase everything on this device",
-      "erase_lede": "This deletes all Mentria data in this browser: notes, your TOTP vault, settings, comms identity and saved rooms, learning progress and imported packs, downloaded AI models, offline files, radio history and scheduled notifications. Other devices, sync partners and files you've downloaded aren't touched. Close other Mentria tabs first so they can't write data back.",
+      "erase_lede": "This deletes all Mentria data in this browser: notes, your 2FA Authenticator vault, settings, comms identity and saved rooms, learning progress and imported packs, downloaded AI models, offline files, radio history and scheduled notifications. Other devices, sync partners and files you've downloaded aren't touched. Close other Mentria tabs first so they can't write data back.",
       "erase_type": "Type “{word}” to confirm",
       "erase_word": "erase",
       "erase_confirm": "Erase everything",
@@ -2027,7 +2029,7 @@
       "export_confirm": "Download backup",
       "cancel": "Cancel",
       "ns_quick_notes": "Quick Notes",
-      "ns_totp": "TOTP",
+      "ns_totp": "2FA Authenticator",
       "ns_tools": "Tool settings",
       "ns_games": "Games",
       "ns_identity": "Identity",

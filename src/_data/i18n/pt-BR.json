@@ -75,7 +75,7 @@
     "advanced_sub": "Backups, identidade e sincronização de dispositivos",
     "data_section_lede": "O que você cria aqui fica guardado só neste navegador. Um backup é um único arquivo criptografado que você guarda, então limpar o navegador ou trocar de celular não leva o seu trabalho junto.",
     "data_in_label": "No backup",
-    "data_in_body": "Notas, faturas, chats de IA, configurações das ferramentas e do layout, jogos salvos, progresso de aprendizado e os pacotes que você importou, contas TOTP, sua identidade Mentria e as salas do Comms, o livro-caixa do Finanças (ainda protegido pela própria frase secreta), as curtidas do rádio e as extensões instaladas com seus dados, como os decks e imagens do Story Studio.",
+    "data_in_body": "Notas, faturas, chats de IA, configurações das ferramentas e do layout, jogos salvos, progresso de aprendizado e os pacotes que você importou, contas 2FA, sua identidade Mentria e as salas do Comms, o livro-caixa do Finanças (ainda protegido pela própria frase secreta), as curtidas do rádio e as extensões instaladas com seus dados, como os decks e imagens do Story Studio.",
     "data_out_label": "Fora do backup",
     "data_out_body": "Os modelos de IA baixados e as cópias offline de páginas e decks, que são baixados de novo quando você precisa. Sua biblioteca de fotos, vídeos e músicas, as miniaturas e onde você parou de assistir, que são reconstruídas quando você adiciona suas pastas de novo. O acesso a pastas, as notificações agendadas e as configurações de “desbloquear neste aparelho”, que só funcionam no aparelho em que foram criadas.",
     "data_usage_label": "Uso",
@@ -151,7 +151,7 @@
     "sync_confirm_replace": "Este aparelho já tem seus próprios dados: {areas}. O pareamento os substitui pela cópia do outro aparelho. Continuar?",
     "sync_no_peer": "Nenhum aparelho respondeu com este código. Confira o código e mantenha a página Sobre aberta no outro aparelho.",
     "sync_busy": "Este código já está sendo usado por outros dois aparelhos. Crie um código novo no aparelho com o qual você quer parear este.",
-    "sync_vault_totp": "Este aparelho tem o próprio cofre TOTP, e o outro aparelho tem um diferente. Substituir o cofre deste aparelho pelo do outro? As contas TOTP que estão só neste aparelho serão perdidas, e ele passará a abrir com a senha do outro aparelho.",
+    "sync_vault_totp": "Este aparelho tem o próprio cofre do Autenticador 2FA, e o outro aparelho tem um diferente. Substituir o cofre deste aparelho pelo do outro? As contas 2FA que estão só neste aparelho serão perdidas, e ele passará a abrir com a senha do outro aparelho.",
     "sync_vault_identity": "Este aparelho tem a própria identidade Mentria, e o outro aparelho tem uma diferente. Substituí-la pela do outro aparelho? A identidade deste aparelho será perdida, e ela passará a abrir com a senha do outro aparelho. O histórico de chat salvo neste aparelho com a identidade antiga não vai mais abrir.",
     "sync_vault_keyring": "Este aparelho tem o próprio desbloqueio único, e o outro aparelho tem um diferente. Substituí-lo pelo do outro aparelho? Ele passará a abrir com o código de recuperação do outro aparelho. As notas, os códigos, as conversas e as finanças configurados com o desbloqueio deste aparelho não vão abrir aqui até você trazer esse desbloqueio de volta em Sobre. Ele fica guardado neste aparelho.",
     "sync_vault_keep": "Manter a versão deste aparelho",
@@ -206,7 +206,7 @@
     "ai_model_offline": "Você está offline. O modelo será baixado quando você voltar a ficar online.",
     "data_areas": {
       "invoice": "faturas",
-      "totp": "contas TOTP",
+      "totp": "contas 2FA",
       "identity": "identidade Mentria",
       "keyring": "desbloqueio único",
       "comms": "salas e contatos do Comms",
@@ -227,7 +227,7 @@
       "comms_history": "histórico de chats"
     },
     "restore_replace": "Este aparelho já tem seus próprios dados: {areas}. Substituí-los pelos do backup? Escolha Cancelar para manter as versões deste aparelho. As notas e tudo o que for novo são restaurados de qualquer forma.",
-    "restore_totp_vault": "Este aparelho já tem um cofre TOTP. Substituí-lo pelo do backup? As contas que estão só neste aparelho serão perdidas, e ele passará a abrir com a senha do backup.",
+    "restore_totp_vault": "Este aparelho já tem um cofre do Autenticador 2FA. Substituí-lo pelo do backup? As contas que estão só neste aparelho serão perdidas, e ele passará a abrir com a senha do backup.",
     "restore_identity_vault": "Este aparelho já tem uma identidade Mentria. Substituí-la pela do backup? A identidade deste aparelho é substituída, e ela passará a abrir com a senha do backup.",
     "restore_keyring_vault": "Este aparelho já tem o próprio desbloqueio único. Substituí-lo pelo do backup? Ele passará a abrir com o código de recuperação do backup. As notas, os códigos, as conversas e as finanças configurados com o desbloqueio deste aparelho não vão abrir aqui até você trazer esse desbloqueio de volta em Sobre. Ele fica guardado neste aparelho.",
     "restore_summary": "Restaurar o backup de {date}? Ele contém: {areas}. O que este aparelho ainda não tem é adicionado, e você será consultado antes de qualquer substituição aqui. Cancelar deixa este aparelho como está.",
@@ -575,9 +575,11 @@
       "tldr": "Um quebra-tijolos no estilo Breakout: rebata a bola com a raquete para destruir paredes de tijolos em níveis que ficam mais rápidos, pegando os power-ups que caem (e desviando dos ruins). Construído em HTML5 Canvas com física determinística e controles de mouse, teclado e toque. Pontuação, vidas e a tabela de recordes ficam no JavaScript do lado do cliente — sem scripts de terceiros, sem servidor, e funciona offline depois de armazenado em cache."
     },
     "totp": {
-      "title": "TOTP",
-      "lede": "Códigos de dois fatores que ficam no seu navegador, criptografados em repouso. Nada em um servidor.",
-      "tldr": "TOTP em conformidade com o padrão (RFC 6238) rodando totalmente no seu navegador. Os segredos são criptografados em repouso com AES-GCM-256; uma chave mestra é embalada por uma frase secreta (PBKDF2-SHA256 × 600k) e opcionalmente por uma chave derivada de WebAuthn PRF para o desbloqueio do seu dispositivo por rosto, digital ou PIN. Backup JSON criptografado obrigatório antes do primeiro segredo — perder seu único autenticador significa bloqueio. Funciona offline. Sem contas, sem servidor de sincronização."
+      "title": "Autenticador 2FA",
+      "short": "Códigos 2FA",
+      "lede": "Códigos de login de dois fatores (2FA), como um app autenticador. Códigos TOTP padrão, com seus segredos guardados criptografados neste navegador.",
+      "tldr": "TOTP em conformidade com o padrão (RFC 6238) rodando totalmente no seu navegador. Os segredos são criptografados em repouso com AES-GCM-256; uma chave mestra é embalada por uma frase secreta (PBKDF2-SHA256 × 600k) e opcionalmente por uma chave derivada de WebAuthn PRF para o desbloqueio do seu dispositivo por rosto, digital ou PIN. Backup JSON criptografado obrigatório antes do primeiro segredo — perder seu único autenticador significa bloqueio. Funciona offline. Sem contas, sem servidor de sincronização.",
+      "seo_title": "Autenticador 2FA online: gerador de códigos TOTP"
     },
     "exif": {
       "title": "Inspetor EXIF",
@@ -608,7 +610,7 @@
     "files": {
       "title": "Arquivos",
       "lede": "Navegue, exporte e exclua os dados que as ferramentas da Mentria guardam neste dispositivo. Tudo fica local.",
-      "tldr": "Um inspetor do armazenamento local para tudo o que as ferramentas da Mentria guardam neste dispositivo. Ele lista o espaço de nomes de cada aplicativo — notas, cofre TOTP, estado dos jogos, dados de extensões e chaves antigas — com o tamanho de cada item e a data de modificação. Veja qualquer valor como JSON formatado, exporte um item específico ou exclua-o (as exclusões sempre pedem confirmação). Exporte um único backup criptografado dos seus dados salvos, incluindo pacotes de aprendizado, o livro-caixa do Finanças e os bancos de dados das extensões, com uma senha (PBKDF2-SHA256 × 600k + AES-GCM). Nada é enviado; a ferramenta só grava no armazenamento quando você confirma uma exclusão."
+      "tldr": "Um inspetor do armazenamento local para tudo o que as ferramentas da Mentria guardam neste dispositivo. Ele lista o espaço de nomes de cada aplicativo — notas, cofre do Autenticador 2FA, estado dos jogos, dados de extensões e chaves antigas — com o tamanho de cada item e a data de modificação. Veja qualquer valor como JSON formatado, exporte um item específico ou exclua-o (as exclusões sempre pedem confirmação). Exporte um único backup criptografado dos seus dados salvos, incluindo pacotes de aprendizado, o livro-caixa do Finanças e os bancos de dados das extensões, com uma senha (PBKDF2-SHA256 × 600k + AES-GCM). A ferramenta trabalha com os dados deste navegador e só grava no armazenamento quando você confirma uma exclusão."
     },
     "extensions-sdk": {
       "title": "SDK de extensões",
@@ -1478,7 +1480,7 @@
       "note_no_camera": "Nenhuma câmera foi encontrada neste dispositivo. Você ainda pode ler um arquivo de imagem.",
       "note_camera_error": "Não foi possível iniciar a câmera. Você ainda pode ler um arquivo de imagem.",
       "note_no_match": "Nenhum código encontrado nessa imagem. Tente uma foto mais nítida.",
-      "to_totp": "Código de autenticação encontrado. Abrindo o TOTP…",
+      "to_totp": "Código de autenticação encontrado. Abrindo o Autenticador 2FA…",
       "unsupported_title": "Sem suporte aqui",
       "unsupported_body": "Este navegador não suporta detecção de código de barras. Tente um navegador Chromium recente como Chrome ou Edge.",
       "mode_scan": "Escanear",
@@ -1551,7 +1553,7 @@
       "locked_lede_setup": "Escolha uma frase secreta para configurar seu cofre. Você a usará a cada desbloqueio.",
       "handoff_unlock": "Desbloqueie seu cofre para adicionar o código escaneado.",
       "handoff_setup": "Crie seu cofre para adicionar o código escaneado.",
-      "locked_lede_unlock": "Digite sua frase secreta para desbloquear seu cofre TOTP.",
+      "locked_lede_unlock": "Digite sua frase secreta para desbloquear seu cofre 2FA.",
       "pass_label": "Frase secreta",
       "pass_confirm": "Confirmar frase secreta",
       "setup_button": "Criar cofre",
@@ -1566,7 +1568,7 @@
       "unlock_failed": "Falha ao desbloquear — frase secreta incorreta ou cofre corrompido.",
       "prf_unsupported": "O desbloqueio do seu dispositivo por rosto, digital ou PIN falhou ou não é compatível aqui.",
       "add_button": "Adicionar conta",
-      "add_title": "Adicionar conta TOTP",
+      "add_title": "Adicionar conta 2FA",
       "paste_uri_label": "Colar URI otpauth://",
       "or_manual": "— ou preencha manualmente —",
       "issuer_label": "Emissor (ex. GitHub)",
@@ -1589,7 +1591,7 @@
       "prf_enroll_failed": "Não foi possível adicionar o desbloqueio por rosto, digital ou PIN",
       "prf_enroll_relock": "Bloqueie, desbloqueie com sua frase secreta e tente novamente.",
       "backup_gate_title": "Faça backup antes de salvar",
-      "backup_gate_lede": "Segredos TOTP não podem ser recuperados se você perder este dispositivo ou esquecer a frase secreta. Baixe um backup criptografado agora — usa uma frase secreta de sua escolha (pode ser a mesma do cofre).",
+      "backup_gate_lede": "Segredos 2FA não podem ser recuperados se você perder este dispositivo ou esquecer a frase secreta. Baixe um backup criptografado agora — usa uma frase secreta de sua escolha (pode ser a mesma do cofre).",
       "backup_gate_confirm": "Baixar backup e salvar",
       "backup_unsaved_title": "Não salvo — baixe um backup",
       "backup_unsaved_lede": "Seu navegador não deixou este site guardar seu cofre, então a conta que você acabou de adicionar não fica neste dispositivo. Baixe agora um backup criptografado — ele é a única cópia.",
@@ -1605,15 +1607,15 @@
       "scan_denied": "Acesso à câmera negado. Permita o acesso nas configurações do navegador e tente novamente.",
       "scan_no_camera": "Nenhuma câmera disponível neste dispositivo.",
       "scan_secure_required": "O acesso à câmera requer HTTPS. Use o site em produção, não uma URL local.",
-      "scan_invalid_qr": "Esse QR não é um código de configuração TOTP nem uma exportação de autenticador. Tente novamente.",
+      "scan_invalid_qr": "Esse QR não é um código de configuração 2FA nem uma exportação de autenticador. Tente novamente.",
       "next_label": "próximo:",
       "add_secret_bad_chars": "O segredo tem caracteres inválidos: {chars}. Base32 usa apenas A–Z e 2–7 — verifique confusões como 0/O, 1/I/L, 8/B.",
       "autolock_label": "bloqueio auto",
       "autolock_off": "não",
       "create_lede": "Crie seu cofre. Seu desbloqueio único o abre.",
       "linked_missing": "Este cofre abre com um desbloqueio único que não está neste dispositivo. Restaure um backup que o inclua ou sincronize com um dispositivo que o tenha.",
-      "backup_gate_lede_code": "Segredos TOTP não podem ser recuperados se você perder este dispositivo. Baixe um backup agora. Ele é protegido pelo seu código de recuperação.",
-      "backup_gate_lede_linked": "Segredos TOTP não podem ser recuperados se você perder este dispositivo. No momento, seu código de recuperação não consegue proteger este backup, então escolha uma frase secreta para o arquivo. Você vai precisar dela para restaurar.",
+      "backup_gate_lede_code": "Segredos 2FA não podem ser recuperados se você perder este dispositivo. Baixe um backup agora. Ele é protegido pelo seu código de recuperação.",
+      "backup_gate_lede_linked": "Segredos 2FA não podem ser recuperados se você perder este dispositivo. No momento, seu código de recuperação não consegue proteger este backup, então escolha uma frase secreta para o arquivo. Você vai precisar dela para restaurar.",
       "old_unlock": "Ou use sua frase secreta antiga"
     },
     "exif": {
@@ -2000,7 +2002,7 @@
       "models_share": "inclui {n} de modelos de IA baixados",
       "erase_button": "Apagar este aparelho…",
       "erase_title": "Apagar tudo neste aparelho",
-      "erase_lede": "Isso exclui todos os dados do Mentria neste navegador: notas, seu cofre TOTP, configurações, identidade e salas salvas do Comms, progresso de aprendizado e pacotes importados, modelos de IA baixados, arquivos offline, histórico do rádio e notificações agendadas. Outros aparelhos, parceiros de sincronização e arquivos que você baixou não são afetados. Feche antes as outras abas do Mentria para que não gravem dados de novo.",
+      "erase_lede": "Isso exclui todos os dados do Mentria neste navegador: notas, seu cofre do Autenticador 2FA, configurações, identidade e salas salvas do Comms, progresso de aprendizado e pacotes importados, modelos de IA baixados, arquivos offline, histórico do rádio e notificações agendadas. Outros aparelhos, parceiros de sincronização e arquivos que você baixou não são afetados. Feche antes as outras abas do Mentria para que não gravem dados de novo.",
       "erase_type": "Digite “{word}” para confirmar",
       "erase_word": "apagar",
       "erase_confirm": "Apagar tudo",
@@ -2027,7 +2029,7 @@
       "export_confirm": "Baixar backup",
       "cancel": "Cancelar",
       "ns_quick_notes": "Notas rápidas",
-      "ns_totp": "TOTP",
+      "ns_totp": "Autenticador 2FA",
       "ns_tools": "Configurações das ferramentas",
       "ns_games": "Jogos",
       "ns_identity": "Identidade",

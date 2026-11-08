@@ -95,8 +95,8 @@
   },
   {
     "slug": "totp",
-    "title": "TOTP",
-    "summary": "Two-factor codes that live in your browser, not on a server. Encrypted at rest, unlocked with a passphrase or your device's face, fingerprint or PIN. Mandatory encrypted backup before your first secret saves.",
+    "title": "2FA Authenticator",
+    "summary": "Two-factor (2FA) login codes, like an authenticator app. A standard TOTP one-time password (OTP) generator, with secrets stored encrypted in this browser and unlocked with a passphrase or your device's face, fingerprint or PIN. Mandatory encrypted backup before your first secret saves.",
     "category": "Security",
     "group": "Everyday"
   },
@@ -276,7 +276,7 @@
   {
     "slug": "files",
     "title": "Files",
-    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, TOTP vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all. Your data stays private.",
+    "summary": "Browse, export, and delete everything Mentria tools store on this device — notes, 2FA Authenticator vault, game state, extension data, and legacy keys. View any value, export a single item, or download an encrypted backup of it all.",
     "category": "Utility",
     "group": "Dev",
     "added": "2026-07-02"

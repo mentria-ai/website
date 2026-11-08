@@ -36,12 +36,15 @@ export const homeRows = (src, view = {}) => {
     const t = byId.get(r.room);
     rest.push({ kind: 'room', key: 'room:' + r.room, title: r.label || r.room, preview: t ? plain(t.preview) : '', ts: t ? t.updatedAt || 0 : 0, unread: count('room:' + r.room), ref: r });
   }
+  for (const a of src.agents || []) {
+    rest.push({ kind: 'agent', key: 'agent:' + a.sid, title: a.name || '', preview: a.preview || '', ts: a.lastTs || 0, unread: 0, online: !!a.online, ref: a });
+  }
   for (const t of threads) {
     if (t.kind === 'model') rest.push({ kind: 'ai', key: t.id, title: t.title || '', preview: plain(t.preview), ts: t.updatedAt || 0, unread: 0, ref: t });
     else if (t.kind === 'self') rest.push({ kind: 'self', key: 'self', title: t.title || '', preview: plain(t.preview), ts: t.updatedAt || 0, unread: 0, ref: t });
   }
   rest.sort((a, b) => b.ts - a.ts);
-  const shown = (r) => (filter === 'people' ? r.kind !== 'ai' : filter === 'ai' ? r.kind === 'ai' : true);
+  const shown = (r) => (filter === 'people' ? r.kind !== 'ai' && r.kind !== 'agent' : filter === 'ai' ? r.kind === 'ai' || r.kind === 'agent' : true);
   const matches = (r) => !query || lower(r.title).includes(query) || lower(r.preview).includes(query);
   return requests.concat(rest).filter((r) => shown(r) && matches(r));
 };

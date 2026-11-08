@@ -132,6 +132,11 @@ unlockTool: true
       </div>
 
       <div class="comms__adv" id="comms-adv" hidden>
+        <div class="comms__adv-sec comms__agents" id="comms-agents" hidden>
+          <span class="comms__lbl">{{ 'tool.comms.agent.heading' | t }}</span>
+          <button class="comms__btn comms__btn--ghost" id="comms-agents-copy" type="button">{{ 'tool.comms.agent.connect' | t }}</button>
+          <p class="comms__id-note" id="comms-agents-note">{{ 'tool.comms.agent.connect_note' | t }}</p>
+        </div>
         <div class="comms__adv-sec">
           <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
           <div class="comms__room">
@@ -298,6 +303,13 @@ unlockTool: true
         <div class="comms__log" id="comms-log" aria-live="polite" aria-relevant="additions"></div>
       </div>
 
+      <div class="comms__agent-perm" id="comms-agent-perm" role="alert" hidden>
+        <p class="comms__agent-perm-title" id="comms-agent-perm-title"></p>
+        <p class="comms__agent-perm-desc" id="comms-agent-perm-desc"></p>
+        <pre class="comms__tool-out" id="comms-agent-perm-preview"></pre>
+        <div class="comms__agent-perm-actions"><button class="comms__btn comms__btn--ghost" id="comms-agent-deny" type="button">{{ 'tool.comms.agent.deny' | t }}</button><button class="comms__btn" id="comms-agent-allow" type="button">{{ 'tool.comms.agent.allow' | t }}</button></div>
+      </div>
+      <p class="comms__agent-signed" id="comms-agent-signed" hidden>{{ 'tool.comms.agent.signed' | t }}</p>
       <form class="comms__send" id="comms-send" autocomplete="off">
         <label class="comms__attach" title="{{ 'tool.comms.chat.attach' | t }}" aria-label="{{ 'tool.comms.chat.attach' | t }}"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
         <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled>
@@ -670,6 +682,58 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__picker-ver{flex:none;color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
 .comms__picker-actions{display:flex;justify-content:flex-end}
 .comms__invite-actions{gap:var(--space-2)}
+.comms__avatar--agent{font:600 var(--text-xs) var(--font-mono);color:var(--accent)}
+.comms__turn{content-visibility:auto;contain-intrinsic-size:auto 480px}
+.comms__agentmsg{padding:var(--space-1) var(--space-2)}
+.comms__agent-text{color:var(--term-fg);overflow-wrap:anywhere}
+.comms__agent-via{display:block;color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__agent-earlier,.comms__turn-more{display:block;margin:var(--space-2) auto}
+.comms__tool{margin:var(--space-1) 0;padding:var(--space-2);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-md)}
+.comms__tool-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-2);width:100%;padding:0;color:inherit;font:inherit;text-align:left;background:none;border:0;cursor:pointer}
+.comms__tool-kind{color:var(--accent);font:600 var(--text-2xs) var(--font-mono);text-transform:uppercase}
+.comms__tool-title{color:var(--term-fg-strong);font-size:var(--text-sm);overflow-wrap:anywhere}
+.comms__tool-sum{color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__tool-sum--error{color:var(--amber-60,#f5a524)}
+.comms__toolgroup{margin:var(--space-1) 0}
+.comms__agent-task{margin:var(--space-1) 0;color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
+.comms__agent-ask{margin:var(--space-2) var(--space-2) var(--space-3);padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-md)}
+.comms__ask-q+.comms__ask-q{margin-top:var(--space-3)}
+.comms__ask-head{color:var(--accent);font:600 var(--text-2xs) var(--font-mono);text-transform:uppercase}
+.comms__ask-text{margin:var(--space-1) 0 var(--space-2);color:var(--term-fg-strong);font-size:var(--text-sm)}
+.comms__ask-opts{display:flex;flex-direction:column;gap:var(--space-1)}
+.comms__ask-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;padding:var(--space-2) var(--space-3);color:var(--term-fg);font:inherit;text-align:left;background:var(--term-bg);border:1px solid var(--term-border);border-radius:var(--radius-sm);cursor:pointer}
+.comms__ask-opt[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.comms__ask-label{color:var(--term-fg-strong);font-size:var(--text-sm)}
+.comms__ask-desc{color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__ask-other{width:100%;margin-top:var(--space-2);padding:var(--space-2);color:var(--term-fg);font-size:16px;background:var(--term-bg);border:1px solid var(--term-border);border-radius:var(--radius-sm)}
+.comms__ask-foot{display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-3)}
+.comms__toolgroup-sum{display:inline-flex;flex-wrap:wrap;align-items:center;gap:var(--space-3);min-height:32px;padding:4px var(--space-3);color:var(--term-muted);font:var(--text-xs) var(--font-mono);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:999px;cursor:pointer}
+.comms__toolgroup-sum[aria-expanded="true"]{border-color:var(--term-border-strong)}
+.comms__toolgroup-k{display:inline-flex;align-items:baseline;gap:4px}
+.comms__toolgroup-g{color:var(--term-fg-strong);font-family:var(--font-mono)}
+.comms__toolgroup-run{color:var(--accent)}
+.comms__toolgroup-list{margin-top:var(--space-1)}
+.comms__tool-body{margin-top:var(--space-1)}
+.comms__tool-in{display:block;margin-top:var(--space-1);color:var(--term-muted);font-size:var(--text-2xs);overflow-wrap:anywhere}
+.comms__tool-out{max-height:240px;margin:var(--space-1) 0 0;overflow:auto;color:var(--term-fg);font:var(--text-2xs)/1.45 var(--font-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.comms__tool-more{margin-top:var(--space-1)}
+.comms__thought{padding:2px var(--space-2);color:var(--term-muted);font:var(--text-2xs) var(--font-mono);background:transparent;border:1px dashed var(--term-border);border-radius:999px;cursor:pointer}
+.comms__thought-text{max-height:240px;overflow:auto;color:var(--term-muted);font:var(--text-2xs)/1.45 var(--font-mono);white-space:pre-wrap}
+.comms__agent-diff{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-2);font:var(--text-2xs) var(--font-mono)}
+.comms__diff-add{color:var(--accent)}
+.comms__diff-del{color:#ff8a80}
+.comms__diff-path{color:var(--term-muted)}
+.comms__agent-chip{display:inline-block;margin:var(--space-1) var(--space-1) 0 0;padding:2px var(--space-2);color:var(--term-fg);font-size:var(--text-2xs);border:1px solid var(--term-border);border-radius:999px}
+.comms__agent-img{display:block;max-width:100%;margin-top:var(--space-1);border-radius:var(--radius-md)}
+.comms__agent-note{margin:var(--space-1) 0;color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__agent-perm{margin:var(--space-2) var(--space-3) 0;padding:var(--space-3);background:var(--amber-8);border:1px solid var(--amber-30);border-radius:var(--radius-md)}
+.comms__agent-perm-title{margin:0;color:var(--term-fg-strong);font-weight:600}
+.comms__agent-perm-desc{margin:var(--space-1) 0;color:var(--term-fg);font-size:var(--text-sm)}
+.comms__agent-perm-actions{display:flex;justify-content:flex-end;gap:var(--space-2);margin-top:var(--space-2)}
+.comms__agent-signed{margin:var(--space-1) var(--space-3) 0;color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__agent-pending .comms__line{opacity:.8}
+.comms__agent-state{margin-left:var(--space-2);color:var(--term-muted);font-size:var(--text-2xs)}
+.comms__agent-state--failed{color:var(--amber-60,#f5a524)}
 .comms__lock-list{display:flex;flex-direction:column;gap:var(--space-2)}
 .comms__lock-list label{display:flex;align-items:center;gap:var(--space-2);color:var(--term-fg);font-size:var(--text-sm)}
 .comms__invite-by,.comms__invite-ios{margin:0;color:var(--term-muted);font-size:var(--text-sm);overflow-wrap:anywhere}
@@ -751,6 +815,8 @@ import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
 import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink } from '/assets/js/comms/sign.js';
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
+import { bridgeKeyFromSecret, keysFromBridgeKey, bridgeCode, createBridgeClient, BRIDGE_KIND } from '/assets/js/comms/bridge.js';
+import { createAgentView, pairSection } from '/assets/js/comms/agent-view.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1847,6 +1913,89 @@ const MAX_SEND = 2 * 1024 * 1024 * 1024;
 let attach = null;
 let selfRoom = null;
 const myDevice = deviceInfo(T);
+const AGENTS_KEY = 'mentria.comms.agents_on';
+const AGENT_SESSIONS_KEY = 'mentria.comms.agent_sessions';
+try { if (new URLSearchParams(window.location.search).get('agents') === '1') localStorage.setItem(AGENTS_KEY, '1'); } catch (_) {}
+const agentsOn = () => { try { return localStorage.getItem(AGENTS_KEY) === '1'; } catch (_) { return false; } };
+const IOS_DEVICE = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let bridge = null;
+let bridgeK = null;
+let bridgeResubscribe = null;
+let agentsSig = '';
+const knownAgents = () => { try { const v = JSON.parse(localStorage.getItem(AGENT_SESSIONS_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => x && typeof x.sid === 'string') : []; } catch (_) { return []; } };
+const agentList = () => {
+  if (!agentsOn()) return [];
+  const live = bridge ? bridge.sessions() : [];
+  const byId = new Map(knownAgents().map((a) => [a.sid, { sid: a.sid, name: a.name, online: false, busy: false, lastTs: a.lastTs || 0 }]));
+  for (const x of live) byId.set(x.sid, { sid: x.sid, name: x.name, online: x.online, busy: x.busy, lastTs: x.lastTs || 0 });
+  return Array.from(byId.values()).map((a) => Object.assign(a, { preview: a.online ? T.agent.running : T.agent.offline }));
+};
+const paintAgents = () => {
+  const box = document.getElementById('comms-agents');
+  if (box) {
+    const ps = pairSection({ on: agentsOn(), ready: !!bridgeK, phone: IOS_DEVICE || /Android/i.test(navigator.userAgent), T: T.agent });
+    box.hidden = ps.hidden;
+    document.getElementById('comms-agents-copy').textContent = ps.label;
+    document.getElementById('comms-agents-note').textContent = ps.note;
+  }
+  const list = agentList();
+  if (bridge) {
+    const keep = list.map((a) => ({ sid: a.sid, name: a.name, lastTs: a.lastTs }));
+    try { localStorage.setItem(AGENT_SESSIONS_KEY, JSON.stringify(keep.slice(-20))); } catch (_) {}
+  }
+  const sig = JSON.stringify(list.map((a) => [a.sid, a.name, a.online, a.busy]));
+  if (sig !== agentsSig) { agentsSig = sig; renderContacts(); }
+};
+let agentView = null;
+const agentViewFor = () => agentView || (agentView = createAgentView({ els, T, client: bridge, nameOf: (sid) => (agentList().find((a) => a.sid === sid) || {}).name || '', onOpen: (sid, id, title) => agentViewFor().open(sid, id, title || T.agent.kind_subagent) }));
+const openAgent = async (sid) => {
+  if (!bridge) return;
+  if (aiView && aiView.isOpen()) aiView.close();
+  await leaveRoom();
+  setView('chat');
+  agentViewFor().open(sid);
+};
+const startBridge = async () => {
+  if (bridge || !myId || !mySign || !agentsOn()) return;
+  let secret;
+  try { secret = secretCopy(); } catch (_) { return; }
+  bridgeK = await bridgeKeyFromSecret(secret);
+  try { secret.fill(0); } catch (_) {}
+  const keys = await keysFromBridgeKey(bridgeK);
+  const handlers = new Set();
+  const subId = 'br-' + Math.random().toString(36).slice(2);
+  let attached = null;
+  const onMsg = (e) => {
+    let m;
+    try { m = JSON.parse(e.data); } catch (_) { return; }
+    if (Array.isArray(m) && m[0] === 'EVENT' && m[1] === subId && m[2] && m[2].kind === BRIDGE_KIND) for (const fn of handlers) fn(m[2].content);
+  };
+  bridgeResubscribe = async () => {
+    const ws = await ensureSideSocket();
+    if (!ws) return;
+    if (attached !== ws) { ws.addEventListener('message', onMsg); attached = ws; }
+    ws.send(JSON.stringify(['REQ', subId, { kinds: [BRIDGE_KIND], '#x': [keys.topic], since: Math.floor(Date.now() / 1000) - 60 }]));
+  };
+  const transport = {
+    publish: async (content) => {
+      const ev = await createPersistentEvent(BRIDGE_KIND, keys.topic, content, []);
+      const ws = await ensureSideSocket();
+      if (ws) ws.send(ev);
+    },
+    onEvent: (fn) => { handlers.add(fn); }
+  };
+  bridge = createBridgeClient({ transport, keys, device: myDevice.name, sign: (sid, cmid, body) => signBody(mySign.signKey, mySign.spub, 'bridge:' + sid, cmid, body) });
+  bridge.on('here', paintAgents);
+  await bridgeResubscribe();
+  bridge.hello();
+  setInterval(() => { if (bridge && !document.hidden) bridge.hello(); }, 60000);
+  setInterval(paintAgents, 30000);
+  paintAgents();
+};
+document.getElementById('comms-agents-copy').addEventListener('click', async () => {
+  if (!bridgeK || !mySign) return;
+  try { await navigator.clipboard.writeText(bridgeCode({ k: bridgeK, spub: mySign.spub, sigFp: mySign.sigFp })); notice(T.agent.copied); } catch (_) { notice(T.agent.copy_failed); }
+});
 const presence = new Presence();
 const AI_HOSTING = myDevice.kind !== 'iphone' && myDevice.kind !== 'ipad';
 const aiLocal = AI_HOSTING ? createLocalEngine() : null;
@@ -2746,6 +2895,7 @@ let joinSeq = 0;
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
   const seq = ++joinSeq;
   if (aiView && aiView.isOpen()) aiView.close();
+  if (agentView && agentView.isOpen()) agentView.close();
   document.getElementById('comms-media-btn').hidden = true;
   if (attach) attach.setOpenThread(null);
   fileLines.clear();
@@ -3134,6 +3284,11 @@ els.msg.addEventListener('keydown', aiHoldEnter);
 els.msg.addEventListener('keypress', aiHoldEnter);
 els.send.addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (agentView && agentView.isOpen()) {
+    const said = els.msg.value.trim();
+    if (said) { els.msg.value = ''; agentView.say(said); }
+    return;
+  }
   if (aiView && aiView.isOpen()) {
     const asked = els.msg.value.trim();
     if (aiView.busy()) { aiView.stop(); return; }
@@ -3914,7 +4069,7 @@ const ensureSideSocket = () => {
       sideWs = ws;
       const isReconnect = sideOpens++ > 0;
       done(ws);
-      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); }
+      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); if (bridgeResubscribe) bridgeResubscribe().then(() => { if (agentView && agentView.isOpen()) agentView.resume(); }); }
     });
     ws.addEventListener('error', () => { done(null); });
     ws.addEventListener('close', () => {
@@ -4513,6 +4668,7 @@ const initIdentity = async () => {
     myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
     try { mySign = await CID.ensureSigningKey(); } catch (_) { mySign = null; }
     if (mySign) { try { mySign.link = { spub: mySign.spub, s: await signLink(mySign.signKey, myId.publicJwk) }; } catch (_) { mySign.link = null; } }
+    startBridge().catch(() => {});
     if (els.idSig) { els.idSig.hidden = !mySign; els.idSig.textContent = mySign ? fmt(T.sign.my_key, { fp: mySign.sigFp }) : ''; }
     openHistory();
     try { await CID.migrateFingerprints(); } catch (_) {}
@@ -5150,7 +5306,12 @@ const leaveRoom = async () => {
   await joinNew(null, null, { leave: true });
 };
 
-els.leave.addEventListener('click', () => { if (aiView && aiView.isOpen()) aiView.close(); leaveRoom(); });
+els.leave.addEventListener('click', () => {
+  const at = agentView && agentView.isOpen() ? agentView.current() : null;
+  if (at && at.sub) { agentView.open(at.sid); return; }
+  if (aiView && aiView.isOpen()) aiView.close();
+  leaveRoom();
+});
 
 if (navigator.share) els.idShareOut.hidden = false;
 
@@ -5266,6 +5427,24 @@ const listNote = (text) => {
   note.className = 'comms__id-note comms__contacts-empty';
   note.textContent = text;
   return note;
+};
+
+const agentRow = (a, info) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__agentrow';
+  row.dataset.sid = a.sid;
+  const av = document.createElement('span');
+  av.className = 'comms__avatar comms__avatar--agent';
+  av.setAttribute('aria-hidden', 'true');
+  av.textContent = '>_';
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  const { mid } = rowMid(a.name || a.sid.slice(0, 8), info.preview, info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn, rowChev());
+  row.addEventListener('click', () => openAgent(a.sid));
+  return row;
 };
 
 const inviteRow = (inv) => {
@@ -5502,11 +5681,12 @@ const renderContacts = () => {
   const contacts = CID.getContacts();
   const rooms = savedRooms();
   const roomInvitesNow = roomInvites();
-  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length && !roomInvitesNow.length) {
+  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length && !roomInvitesNow.length && !agentList().length) {
     els.contactList.append(listNote(T.people.empty));
     return;
   }
-  const rows = homeRows({ contacts, requests, roomInvites: roomInvitesNow, rooms, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
+  const agents = agentList();
+  const rows = homeRows({ contacts, requests, roomInvites: roomInvitesNow, rooms, agents, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
   if (!rows.length) {
     els.contactList.append(listNote(T.home.at_none));
     return;
@@ -5515,6 +5695,7 @@ const renderContacts = () => {
   for (const r of rows) {
     if (r.kind === 'request') els.contactList.append(requestRow(r.ref));
     else if (r.kind === 'invite') els.contactList.append(inviteRow(r.ref));
+    else if (r.kind === 'agent') els.contactList.append(agentRow(r.ref, r));
     else if (r.kind === 'contact') els.contactList.append(contactRow(r.ref, r, missedMap));
     else if (r.kind === 'room') els.contactList.append(roomRow(r.ref, r));
     else if (r.kind === 'self') els.contactList.append(selfRow(r.ref, r));

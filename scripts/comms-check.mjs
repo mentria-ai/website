@@ -84,6 +84,8 @@ const RM = await need('/assets/js/comms/rooms.js');
 const SG = await need('/assets/js/comms/sign.js');
 const IV = await need('/assets/js/comms/invite.js');
 const MB = await need('/assets/js/comms/members.js');
+const BR = await need('/assets/js/comms/bridge.js');
+const AV = await need('/assets/js/comms/agent-view.js');
 const CIDM = await need('/assets/js/mentria-comms-id.js');
 const VEC = JSON.parse(readFileSync(join(repo, 'scripts/fixtures/sig-vector.json'), 'utf8'));
 
@@ -1234,6 +1236,202 @@ check('fix I8: a files room whose key changes is rejoined', async () => {
   await fr.sync([{ id: 't1', roomName: 'r', b64Key: KEY2, kv: 2, priority: 1 }]);
   eq(joined.length, 2);
   ok(joined[0] !== joined[1]);
+});
+
+const BK = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 1));
+const bridgeGolden = (k) => {
+  const sub = (info) => Buffer.from(hkdfSync('sha256', Buffer.from(k), Buffer.from('mentria-bridge-v1'), Buffer.from(info), 32));
+  return { aes: sub('aes').toString('hex'), topic: createHmac('sha256', sub('topic')).update('mentria-bridge-topic-v1').digest('base64url') };
+};
+const pairT = () => { const a = new Set(), b = new Set(); return { left: { publish: async (c) => { for (const f of b) f(c); }, onEvent: (f) => a.add(f) }, right: { publish: async (c) => { for (const f of a) f(c); }, onEvent: (f) => b.add(f) } }; };
+check("bridge: site keys match the daemon's goldens", async () => {
+  const k = await BR.keysFromBridgeKey(BK);
+  const g = bridgeGolden(BK);
+  eq(k.topic, g.topic);
+  const gk = await crypto.subtle.importKey('raw', Buffer.from(g.aes, 'hex'), { name: 'AES-GCM' }, false, ['encrypt']);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, gk, new TextEncoder().encode('{"t":"ok"}')));
+  deepEq(await BR.open(k.aes, JSON.stringify({ v: 1, iv: Buffer.from(iv).toString('base64url'), ct: Buffer.from(ct).toString('base64url') })), { t: 'ok' });
+  const frames = BR.splitFrames({ pad: 'é'.repeat(50000) });
+  ok(frames.length >= 3 && frames.every((f) => Buffer.from(f.d, 'base64url').length <= 30000));
+  const r = new BR.Reassembler();
+  let out = null;
+  for (const f of frames.slice().reverse()) out = r.push(f) || out;
+  eq(out.pad.length, 50000);
+  const code = BR.bridgeCode({ k: BK, spub: { x: 'X', y: 'Y' }, sigFp: 'abcd-efgh' });
+  ok(code.startsWith('MB1.'));
+  deepEq(JSON.parse(Buffer.from(code.slice(4), 'base64url').toString()), { v: 1, k: Buffer.from(BK).toString('base64url'), spub: { x: 'X', y: 'Y' }, sigFp: 'abcd-efgh' });
+});
+check('bridge: the bridge key comes from the identity secret and differs from the self room', async () => {
+  const secret = new Uint8Array(32).fill(5);
+  const k = await BR.bridgeKeyFromSecret(secret);
+  eq(Buffer.from(k).toString('hex'), Buffer.from(hkdfSync('sha256', Buffer.from(secret), Buffer.from('mentria-bridge-v1'), Buffer.from('bridge-key|v1'), 32)).toString('hex'));
+  const self = await SF.selfRoomFor(secret, 0);
+  ok(Buffer.from(k).toString('base64url') !== self.b64Key);
+  ok(Buffer.from(k).toString('hex') !== Buffer.from(await BR.bridgeKeyFromSecret(new Uint8Array(32).fill(6))).toString('hex'));
+});
+check('client: a reconnect resumes from the newest turn without duplicating cards', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  const c = BR.createBridgeClient({ transport: t.left, keys, sign: async (sid, cmid, body) => body });
+  const send = async (m) => { for (const f of BR.splitFrames(m)) await t.right.publish(await BR.seal(keys.aes, f)); };
+  const msg = (i) => ({ id: 'm' + i, role: i ? 'assistant' : 'user', ts: i, parts: [{ type: 'text', text: 't' + i }] });
+  await send({ t: 'turn', sid: 's', n: 4, from: 0, msgs: [0, 1, 2].map(msg), earlier: false, done: false });
+  await send({ t: 'turn', sid: 's', n: 4, from: 2, msgs: [2, 3].map(msg), earlier: false, done: false });
+  await send({ t: 'turn', sid: 's', n: 4, from: 0, msgs: [0, 1, 2, 3].map(msg), earlier: false, done: true });
+  await new Promise((r) => setTimeout(r, 30));
+  const turn = c.turn('s', 4);
+  deepEq(turn.msgs.map((m) => m.id), ['m0', 'm1', 'm2', 'm3']);
+  eq(turn.done, true);
+  await send({ t: 'turn', sid: 's', n: 5, from: 70, msgs: [70, 71].map(msg), earlier: true, done: false });
+  await send({ t: 'turn', sid: 's', n: 5, from: 10, msgs: [10, 11].map(msg), earlier: true, done: false });
+  await new Promise((r) => setTimeout(r, 30));
+  deepEq(c.turn('s', 5).msgs.map((m) => m.id), ['m10', 'm11', 'm70', 'm71']);
+  deepEq(c.turns('s'), [4, 5]);
+});
+check('client: say and verdict go out signed for their session', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  const signed = [];
+  const c = BR.createBridgeClient({ transport: t.left, keys, device: 'iPhone', sign: async (sid, cmid, body) => { signed.push({ sid, cmid }); return Object.assign({}, body, { sg: 'S' }); } });
+  const got = [];
+  const r = new BR.Reassembler();
+  t.right.onEvent(async (x) => { const f = await BR.open(keys.aes, x); const m = f && r.push(f); if (m) got.push(m); });
+  const cmid = await c.say('s9', 'hello');
+  await c.verdict('s9', 'abcde', 'allow');
+  await new Promise((res) => setTimeout(res, 30));
+  eq(got[0].t, 'say'); eq(got[0].text, 'hello'); eq(got[0].cmid, cmid); eq(got[0].device, 'iPhone'); eq(got[0].sg, 'S');
+  eq(got[1].t, 'verdict'); eq(got[1].request_id, 'abcde'); eq(got[1].behavior, 'allow');
+  deepEq(signed.map((x) => x.sid), ['s9', 's9']);
+});
+check('home: agent rows show under All and AI', () => {
+  const src = { agents: [{ sid: 's1', name: 'Site session', online: true, lastTs: 50, preview: 'running on your Mac' }], contacts: [{ fp: 'c1', name: 'Zed' }] };
+  const all = H.homeRows(src);
+  const a = all.find((r) => r.kind === 'agent');
+  eq(a.key, 'agent:s1'); eq(a.title, 'Site session'); eq(a.preview, 'running on your Mac'); eq(a.ts, 50);
+  eq(H.homeRows(src, { filter: 'ai' }).filter((r) => r.kind === 'agent').length, 1);
+  eq(H.homeRows(src, { filter: 'people' }).filter((r) => r.kind === 'agent').length, 0);
+});
+
+check('view: the window keeps 40 turns and 60 cards per turn', () => {
+  const card = (i) => ({ id: 'c' + i, role: 'assistant', parts: [{ type: 'text', text: 'x' + i }] });
+  const turns = Array.from({ length: 45 }, (_, n) => ({ n, msgs: [card(0), card(1)], earlier: false }));
+  turns.push({ n: 45, msgs: Array.from({ length: 1200 }, (_, i) => card(i)), earlier: false });
+  const w = AV.agentWindow(turns, { maxTurns: 40, maxCards: 60 });
+  eq(w.shown.length, 40);
+  eq(w.shown[0].n, 6);
+  eq(w.earlierTurns, true);
+  const big = w.shown.at(-1);
+  eq(big.msgs.length, 60);
+  eq(big.msgs.at(-1).id, 'c1199');
+  eq(big.earlierCards, true);
+  eq(w.shown[0].earlierCards, false);
+  const open = AV.agentWindow(turns, { maxTurns: 40, maxCards: 60, expanded: new Set([45]) });
+  eq(open.shown.at(-1).msgs.length, 1200);
+  eq(AV.agentWindow([{ n: 0, msgs: [card(1)], earlier: false }]).earlierTurns, false);
+  eq(AV.agentWindow([{ n: 3, msgs: [card(1)], earlier: false }]).earlierTurns, true);
+});
+
+check('say: a sent line is matched to its prompt once', () => {
+  const at = 1000000;
+  const pending = [{ cmid: 'p1', text: 'run the tests', at }, { cmid: 'p2', text: 'run the tests', at: at + 10 }, { cmid: 'p3', text: 'other', at }];
+  const msgs = [{ id: 'u1', role: 'user', via: 'phone', ts: at + 3000, parts: [{ type: 'text', text: 'run the tests' }] }, { id: 'a1', role: 'assistant', ts: at + 4000, parts: [{ type: 'text', text: 'ok' }] }];
+  deepEq(AV.matchPending(pending, msgs).map((p) => p.cmid), ['p2', 'p3']);
+  const late = [{ id: 'u9', role: 'user', via: 'phone', ts: at + 5 * 60000, parts: [{ type: 'text', text: 'other' }] }];
+  deepEq(AV.matchPending(pending, late).map((p) => p.cmid), ['p1', 'p2', 'p3']);
+  const typed = [{ id: 'u8', role: 'user', ts: at + 1000, parts: [{ type: 'text', text: 'other' }] }];
+  deepEq(AV.matchPending(pending, typed).map((p) => p.cmid), ['p1', 'p2', 'p3']);
+});
+check('perm: a resolved request clears and a late verdict is dropped', () => {
+  const perm = { request_id: 'abcde', ts: 5000 };
+  eq(AV.permResolved(perm, [{ role: 'assistant', ts: 4000, parts: [{ type: 'tool_result', callId: 'x' }] }]), false);
+  eq(AV.permResolved(perm, [{ role: 'assistant', ts: 6000, parts: [{ type: 'text', text: 'thinking' }] }]), false);
+  eq(AV.permResolved(perm, [{ role: 'assistant', ts: 6000, parts: [{ type: 'tool_result', callId: 'x' }] }]), true);
+  eq(AV.permResolved(perm, [{ role: 'user', ts: 7000, parts: [{ type: 'text', text: 'next' }] }]), true);
+  eq(AV.permResolved(null, []), true);
+});
+
+check('fix I3: every sealed frame stays under 60 KB', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const nasty = ('"\\\u0001\u0002' + 'é漢' + '\n\t').repeat(30000);
+  const frames = BR.splitFrames({ t: 'turn', msgs: [{ parts: [{ type: 'text', text: nasty }] }] });
+  for (const f of frames) ok((await BR.seal(keys.aes, f)).length <= 60000);
+  const r = new BR.Reassembler();
+  let out = null;
+  for (const f of frames) out = r.push(f) || out;
+  eq(out.msgs[0].parts[0].text, nasty);
+});
+check("fix I5: the approval card picks only this session's requests", () => {
+  const perms = [{ sid: 'A', request_id: 'aaaaa', ts: 10 }, { sid: 'B', request_id: 'bbbbb', ts: 20 }];
+  const msgsA = [{ role: 'assistant', ts: 30, parts: [{ type: 'tool_result', callId: 'x' }] }];
+  const r = AV.visiblePerm(perms, 'A', msgsA);
+  eq(r.perm, null);
+  deepEq(r.kept.map((p) => p.request_id), ['bbbbb']);
+  const r2 = AV.visiblePerm(perms, 'B', []);
+  eq(r2.perm.request_id, 'bbbbb');
+  deepEq(r2.kept.map((p) => p.request_id), ['aaaaa', 'bbbbb']);
+});
+check('fix I9: reset drops held turns', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  const c = BR.createBridgeClient({ transport: t.left, keys, sign: async (sid, cmid, body) => body });
+  const send = async (m) => { for (const f of BR.splitFrames(m)) await t.right.publish(await BR.seal(keys.aes, f)); };
+  await send({ t: 'turn', sid: 's', n: 1, from: 0, msgs: [{ id: 'm', role: 'user', parts: [] }], earlier: false, done: false });
+  await new Promise((r) => setTimeout(r, 20));
+  deepEq(c.turns('s'), [1]);
+  c.reset('s');
+  deepEq(c.turns('s'), []);
+});
+check('fix M5: the composer waits for a channel', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  let clock = 1000;
+  const c = BR.createBridgeClient({ transport: t.left, keys, sign: async (sid, cmid, body) => body, now: () => clock });
+  const send = async (m) => { for (const f of BR.splitFrames(m)) await t.right.publish(await BR.seal(keys.aes, f)); };
+  eq(c.channel('s'), false);
+  await send({ t: 'chan', sid: 's' });
+  await new Promise((r) => setTimeout(r, 20));
+  eq(c.channel('s'), true);
+  clock += 80000;
+  eq(c.channel('s'), false);
+});
+check('fix C1: the client sends a cheap watch', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  const c = BR.createBridgeClient({ transport: t.left, keys, sign: async (sid, cmid, body) => body });
+  const got = [];
+  const r = new BR.Reassembler();
+  t.right.onEvent(async (x) => { const f = await BR.open(keys.aes, x); const m = f && r.push(f); if (m) got.push(m); });
+  await c.watch('s7');
+  await new Promise((res) => setTimeout(res, 20));
+  deepEq(got, [{ t: 'watch', sid: 's7' }]);
+});
+
+check('fix: the pairing section shows on phones too, with phone wording', () => {
+  const T = { connect: 'Connect this Mac', connect_note: 'mac note', connect_phone: 'Pair this phone', connect_note_phone: 'phone note' };
+  deepEq(AV.pairSection({ on: true, ready: true, phone: true, T }), { hidden: false, label: 'Pair this phone', note: 'phone note' });
+  deepEq(AV.pairSection({ on: true, ready: true, phone: false, T }), { hidden: false, label: 'Connect this Mac', note: 'mac note' });
+  eq(AV.pairSection({ on: false, ready: true, phone: true, T }).hidden, true);
+  eq(AV.pairSection({ on: true, ready: false, phone: false, T }).hidden, true);
+});
+
+check('fix: the client sends a signed answer to an ask', async () => {
+  const keys = await BR.keysFromBridgeKey(BK);
+  const t = pairT();
+  const signed = [];
+  const c = BR.createBridgeClient({ transport: t.left, keys, device: 'iPhone', sign: async (room, cmid, body) => { signed.push(room); return Object.assign({}, body, { sg: { pub: 'P', ts: 1, s: 'S' } }); } });
+  const got = [];
+  const r = new BR.Reassembler();
+  t.right.onEvent(async (x) => { const f = await BR.open(keys.aes, x); const m = f && r.push(f); if (m) got.push(m); });
+  const cmid = await c.answer('s9', 'abcdefghijkl', [{ labels: ['blue.txt'] }]);
+  await new Promise((res) => setTimeout(res, 20));
+  eq(got.length, 1);
+  eq(got[0].t, 'answer');
+  eq(got[0].cmid, cmid);
+  eq(got[0].id, 'abcdefghijkl');
+  deepEq(got[0].answers, [{ labels: ['blue.txt'] }]);
+  eq(got[0].sg.s, 'S');
+  deepEq(signed, ['s9']);
 });
 
 let failed = 0;

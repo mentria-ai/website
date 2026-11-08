@@ -71,11 +71,13 @@ export const envelopeTemplate = (topic, content, nowS) => ({ kind: INVITE_KIND, 
 
 export const deletionTemplate = (evId, nowS) => ({ kind: 5, created_at: nowS, tags: [['e', evId], ['k', String(INVITE_KIND)]], content: '' });
 
-export const fetchInvite = (sockets, topic, aes, { timeoutMs = 8000, retryMs = 3000, now = () => Date.now() } = {}) => new Promise((resolve) => {
+export const fetchInvite = (sockets, topic, aes, { timeoutMs = 8000, retryMs = 3000, now = () => Date.now(), author = null } = {}) => new Promise((resolve) => {
   const list = (sockets || []).filter(Boolean);
-  if (!list.length || !topic || !aes) { resolve(null); return; }
+  if (!list.length || !topic || !aes) { resolve({ status: 'offline' }); return; }
   const sub = 'iv-' + Math.random().toString(36).slice(2);
-  const req = JSON.stringify(['REQ', sub, { kinds: [INVITE_KIND], '#x': [topic], limit: 5 }]);
+  const filter = { kinds: [INVITE_KIND], '#x': [topic], limit: 5 };
+  if (author) filter.authors = [author];
+  const req = JSON.stringify(['REQ', sub, filter]);
   const asked = new Set();
   const ended = new Set();
   const timers = [];
@@ -99,18 +101,20 @@ export const fetchInvite = (sockets, topic, aes, { timeoutMs = 8000, retryMs = 3
       ended.add(e.target || e.currentTarget || m);
       if (ended.size >= asked.size) {
         if (asked.size < list.length) askRest();
-        else setTimeout(() => { if (ended.size >= list.length) finish(null); }, 400);
+        else setTimeout(() => { if (ended.size >= list.length) finish({ status: 'gone' }); }, 400);
       }
       return;
     }
     if (m[0] !== 'EVENT' || !m[2]) return;
+    ended.add(e.target || e.currentTarget || m);
+    if (author && m[2].pubkey !== author) return;
     const body = await openInvite(aes, m[2].content, now());
-    if (body) finish({ body, evId: m[2].id });
+    if (body) finish({ status: 'found', body, evId: m[2].id });
   };
   const ask = (ws) => {
     try { ws.addEventListener('message', onMsg); ws.send(req); asked.add(ws); } catch (_) {}
   };
   ask(list[0]);
   if (list.length > 1) timers.push(setTimeout(() => { if (!done) askRest(); }, retryMs));
-  timers.push(setTimeout(() => finish(null), timeoutMs));
+  timers.push(setTimeout(() => finish({ status: ended.size ? 'gone' : 'offline' }), timeoutMs));
 });

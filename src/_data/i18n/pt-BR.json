@@ -5850,7 +5850,10 @@
         "pick": "Convidar para esta sala",
         "sent": "Convite enviado para {name}.",
         "from": "{name} convidou você para {label}",
-        "no_contacts": "Adicione um contato primeiro."
+        "no_contacts": "Adicione um contato primeiro.",
+        "retry": "Tentar de novo",
+        "offline_fetch": "Não foi possível alcançar o relay agora. Verifique sua conexão e tente de novo.",
+        "replace_key": "Você já tem {label} com outra chave. Trocar pela chave deste link?"
       },
       "roomlock": {
         "title": "Trancar {label}",

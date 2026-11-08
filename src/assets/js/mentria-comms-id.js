@@ -1,4 +1,4 @@
-import { sigFingerprint, validSpub } from '/assets/js/comms/sign.js';
+import { sigFingerprint, validSpub, verifyLink } from '/assets/js/comms/sign.js';
 
 const NS = 'comms';
 const KEYS_KEY = 'idkeys';
@@ -215,13 +215,15 @@ export const saveRequest = async (payload) => {
   if (getContacts().some((c) => samePub(c.pub, payload.pub))) return null;
   const list = getRequests();
   if (list.some((r) => samePub(r.pub, payload.pub))) return null;
+  const linked = validSpub(payload.spub) && await verifyLink(payload.pub, payload.spub, payload.ssig);
   const entry = {
     fp,
     name: String(payload.name || '').slice(0, 32),
     pub: { x: payload.pub.x, y: payload.pub.y },
     ring: payload.ring ? String(payload.ring).slice(0, 64) : undefined,
     note: payload.note ? String(payload.note).slice(0, 140) : undefined,
-    spub: validSpub(payload.spub) ? { x: payload.spub.x, y: payload.spub.y } : undefined,
+    spub: linked ? { x: payload.spub.x, y: payload.spub.y } : undefined,
+    ssig: linked ? payload.ssig : undefined,
     ts: Date.now()
   };
   list.push(entry);
@@ -265,20 +267,21 @@ export const contactByPub = (pub) => getContacts().find((c) => samePub(c.pub, pu
 export const addContact = async (payload) => {
   if (!payload || !payload.pub || !payload.pub.x || !payload.pub.y) throw new Error('bad contact code');
   const fp = await fingerprint(payload.pub);
+  const linked = validSpub(payload.spub) && await verifyLink(payload.pub, payload.spub, payload.ssig);
   const contacts = getContacts();
   let entry = contacts.find((c) => samePub(c.pub, payload.pub));
   if (entry) {
     if (typeof payload.annTs === 'number' && payload.annTs <= (entry.annTs || 0)) return entry;
     entry.name = String(payload.name || entry.name || '').slice(0, 32);
     if (payload.ring) entry.ring = String(payload.ring).slice(0, 64);
-    if (validSpub(payload.spub)) entry.spub = { x: payload.spub.x, y: payload.spub.y };
+    if (linked) entry.spub = { x: payload.spub.x, y: payload.spub.y };
   } else {
     entry = {
       fp,
       name: String(payload.name || '').slice(0, 32),
       pub: { x: payload.pub.x, y: payload.pub.y },
       ring: payload.ring ? String(payload.ring).slice(0, 64) : undefined,
-      spub: validSpub(payload.spub) ? { x: payload.spub.x, y: payload.spub.y } : undefined,
+      spub: linked ? { x: payload.spub.x, y: payload.spub.y } : undefined,
       addedAt: Date.now()
     };
     contacts.push(entry);
@@ -353,10 +356,10 @@ export const removeContact = (fp) => {
   else store().remove(NS, CONTACTS_KEY);
 };
 
-export const encodeContactCode = (profile, pubJwk, ring, spub) => {
+export const encodeContactCode = (profile, pubJwk, ring, link) => {
   const payload = { v: 1, name: profile.name || '', pub: { x: pubJwk.x, y: pubJwk.y } };
   if (ring) payload.ring = ring;
-  if (validSpub(spub)) payload.spub = { x: spub.x, y: spub.y };
+  if (link && validSpub(link.spub) && typeof link.s === 'string') { payload.spub = { x: link.spub.x, y: link.spub.y }; payload.ssig = link.s; }
   return 'MC1.' + b64uEnc(te.encode(JSON.stringify(payload)));
 };
 

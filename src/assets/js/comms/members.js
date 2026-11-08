@@ -43,7 +43,29 @@ export const inboxBody = (payload) => {
   return rest;
 };
 
-export const acceptRekey = (entry, payload, senderSigFp) => !!entry && !!payload && payload.kind === 'room-rekey'
+const samePub = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
+
+const rekeyShape = (entry, payload) => !!entry && !!payload && payload.kind === 'room-rekey'
   && typeof payload.room === 'string' && payload.room === entry.room
   && keyOk(payload.key) && payload.kv === 2
-  && !!senderSigFp && !!(entry.members && entry.members[senderSigFp]);
+  && typeof payload.ts === 'number' && payload.ts > (Number(entry.keyTs) || 0);
+
+export const acceptRekey = (entry, payload, sig) => {
+  if (!rekeyShape(entry, payload) || !sig || !sig.sigFp || !pubOk(sig.spub)) return false;
+  const m = entry.members && entry.members[sig.sigFp];
+  return !!m && samePub(m.spub, sig.spub);
+};
+
+export const rekeyDecision = (entry, payload, sig, mySpub) => {
+  if (!rekeyShape(entry, payload) || !sig || !pubOk(sig.spub) || payload.key === entry.key) return 'ignore';
+  if (mySpub && samePub(sig.spub, mySpub)) return 'apply';
+  return acceptRekey(entry, payload, sig) ? 'offer' : 'ignore';
+};
+
+export const keepMembers = (entry, keep, senderSigFp) => {
+  if (!entry || !Array.isArray(keep)) return entry;
+  const allow = new Set(keep.filter((k) => typeof k === 'string'));
+  if (senderSigFp) allow.add(senderSigFp);
+  entry.members = Object.fromEntries(Object.entries(entry.members || {}).filter(([fp]) => allow.has(fp)));
+  return entry;
+};

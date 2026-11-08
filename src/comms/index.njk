@@ -60,6 +60,7 @@ unlockTool: true
       <p class="comms__invite-ios" id="comms-invite-ios" hidden><span>{{ 'tool.comms.invite.ios' | t }}</span> <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-copy">{{ 'tool.comms.invite.copy' | t }}</button></p>
       <div class="comms__picker-actions comms__invite-actions">
         <button type="button" class="comms__btn comms__btn--ghost" id="comms-invite-later">{{ 'tool.comms.invite.not_now' | t }}</button>
+        <button type="button" class="comms__btn" id="comms-invite-retry" hidden>{{ 'tool.comms.invite.retry' | t }}</button>
         <button type="button" class="comms__btn" id="comms-invite-join" hidden>{{ 'tool.comms.invite.join' | t }}</button>
       </div>
     </div>
@@ -745,9 +746,9 @@ import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
-import { signBody, verifyBody, validSpub, sigFingerprint } from '/assets/js/comms/sign.js';
+import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink } from '/assets/js/comms/sign.js';
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
-import { noteJoined, noteMember, membersOf, acceptRekey, inboxBody } from '/assets/js/comms/members.js';
+import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1374,7 +1375,8 @@ const showInvite = (state, data = {}) => {
   const title = document.getElementById('comms-invite-title');
   const by = document.getElementById('comms-invite-by');
   const ready = state === 'ready';
-  title.textContent = state === 'looking' ? T.invite.looking : state === 'gone' ? T.invite.gone : fmt(T.invite.join_title, { label: data.body.label });
+  title.textContent = state === 'looking' ? T.invite.looking : state === 'gone' ? T.invite.gone : state === 'offline' ? T.invite.offline_fetch : fmt(T.invite.join_title, { label: data.body.label });
+  document.getElementById('comms-invite-retry').hidden = state !== 'offline';
   by.hidden = !ready;
   by.textContent = ready ? fmt(T.invite.by, { name: data.body.by.name || T.people.someone, fp: data.fp || '' }).trim() : '';
   document.getElementById('comms-invite-ios').hidden = !(ready && IOS_SAFARI);
@@ -1382,17 +1384,24 @@ const showInvite = (state, data = {}) => {
   document.getElementById('comms-invite-join').hidden = !ready;
   box.hidden = false;
 };
+let inviteToken = null;
 const openInviteLink = async (token) => {
   if (parseInvite(window.location.hash)) window.history.replaceState(null, '', window.location.pathname + window.location.search);
   hideInvite();
+  inviteToken = token;
   const seq = inviteSeq;
   showInvite('looking');
   const k = await inviteKeys(token);
+  if (!k) { showInvite('gone'); return; }
+  let author = null;
+  try { author = (await nostrTools()).getPublicKey(k.sk); } catch (_) { author = null; }
   let side = null;
   try { side = await ensureSideSocket(); } catch (_) { side = null; }
-  const found = k ? await fetchInvite([side].concat(relaySockets()).filter((ws, i, all) => ws && all.indexOf(ws) === i), k.topic, k.aes) : null;
+  const res = await fetchInvite([side].concat(relaySockets()).filter((ws, i, all) => ws && all.indexOf(ws) === i), k.topic, k.aes, { author });
   if (seq !== inviteSeq) return;
-  if (!found) { showInvite('gone'); return; }
+  if (res.status === 'offline') { showInvite('offline'); return; }
+  if (res.status !== 'found') { showInvite('gone'); return; }
+  const found = res;
   let fp = '';
   try { if (found.body.by.pub) fp = await CID.fingerprint(found.body.by.pub); } catch (_) { fp = ''; }
   if (seq !== inviteSeq) return;
@@ -1421,6 +1430,8 @@ const announceJoined = async (roomName, inv) => {
 };
 const claimInvite = async ({ k, found }) => {
   const b = found.body;
+  const clash = keyConflict(b.room, b.key);
+  if (clash && !(await confirmReplaceKey(clash))) return;
   if (isEphemeralRoom(b.room)) eph.set(b.room, b.key, b.kv);
   else rememberRoom(b.room, b.key, { kv: b.kv, label: b.label });
   dropEnvelope(found.evId, k.sk);
@@ -1435,6 +1446,7 @@ document.getElementById('comms-invite-join').addEventListener('click', () => {
   if (p) claimInvite(p);
 });
 document.getElementById('comms-invite-later').addEventListener('click', hideInvite);
+document.getElementById('comms-invite-retry').addEventListener('click', () => { if (inviteToken) openInviteLink(inviteToken); });
 document.getElementById('comms-invite-copy').addEventListener('click', (e) => {
   const p = pendingInvite;
   if (!p) return;
@@ -1476,6 +1488,8 @@ const takeRoomInvite = (payload) => {
   playPing(660);
 };
 const joinRoomInvite = async (inv) => {
+  const clash = keyConflict(inv.room, inv.key);
+  if (clash && !(await confirmReplaceKey(clash))) return;
   setRoomInvites(roomInvites().filter((x) => x.room !== inv.room));
   rememberRoom(inv.room, inv.key, { kv: inv.kv, label: inv.label });
   renderContacts();
@@ -1532,9 +1546,10 @@ const paintRekey = () => {
   if (show) document.getElementById('comms-rekey-text').textContent = fmt(T.roomlock.offer, { name: p.by || T.people.someone, label: p.label || p.room });
 };
 const KEY43 = /^[A-Za-z0-9_-]{43}$/;
-const rekeyEntry = (e, key) => {
+const rekeyEntry = (e, key, ts) => {
   e.key = key;
   e.kv = 2;
+  e.keyTs = Math.max(Number(e.keyTs) || 0, Number(ts) || Date.now());
   e.invites = {};
   e.joins = {};
   e.twiceAck = {};
@@ -1544,10 +1559,12 @@ const applyRekey = (p) => {
   const list = savedRooms();
   const entry = list.find((r) => r.room === p.room);
   setPendingRekeys(pendingRekeys().filter((x) => x.room !== p.room));
-  if (!entry || !KEY43.test(p.key)) { paintRekey(); return; }
-  rekeyEntry(entry, p.key);
+  if (!entry || !KEY43.test(p.key) || (p.ts && p.ts <= (Number(entry.keyTs) || 0))) { paintRekey(); return; }
+  rekeyEntry(entry, p.key, p.ts);
+  if (Array.isArray(p.keep)) keepMembers(entry, p.keep, p.sender);
   setSavedRooms(list);
   subscribeUnread();
+  if (attach) attach.refresh();
   if (currentRoomName === p.room) openSavedRoom(entry);
   else { paintRekey(); renderContacts(); }
 };
@@ -1560,21 +1577,24 @@ const takeRekey = async (payload) => {
   const entry = savedRooms().find((r) => r.room === payload.room);
   if (!entry || typeof payload.ts !== 'number') return;
   const v = await verifyBody(inboxBody(payload), payload.room, 'inbox:' + payload.ts);
-  if (!v.ok || entry.key === payload.key) return;
-  const p = { room: payload.room, key: payload.key, kv: 2, label: String(payload.label || entry.label || payload.room).slice(0, 40), by: String(payload.name || '').slice(0, 32), ts: Date.now() };
-  if (mySign && v.sigFp === mySign.sigFp) {
-    if (payload.kv === 2 && KEY43.test(payload.key)) applyRekey(p);
-    return;
-  }
-  if (!acceptRekey(entry, payload, v.sigFp)) return;
-  setPendingRekeys(pendingRekeys().filter((x) => x.room !== p.room).concat([p]));
+  if (!v.ok) return;
+  const decision = rekeyDecision(entry, payload, v, mySign ? mySign.spub : null);
+  if (decision === 'ignore') return;
+  const member = entry.members && entry.members[v.sigFp];
+  const by = signerName(signerFor(v)) || (member && member.name) || '';
+  const keep = Array.isArray(payload.keep) ? payload.keep.filter((x) => typeof x === 'string').slice(0, 60) : null;
+  const p = { room: payload.room, key: payload.key, kv: 2, ts: payload.ts, keep, sender: v.sigFp, label: String(entry.label || payload.room).slice(0, 40), by: String(by).slice(0, 32) };
+  if (decision === 'apply') { applyRekey(p); return; }
+  const pend = pendingRekeys();
+  const prev = pend.find((x) => x.room === p.room);
+  if (prev && (Number(prev.ts) || 0) >= p.ts) return;
+  setPendingRekeys(pend.filter((x) => x.room !== p.room).concat([p]));
   rekeyHidden = null;
   paintRekey();
   if (currentRoomName !== p.room) notice(fmt(T.roomlock.offer, { name: p.by || T.people.someone, label: p.label }));
 };
 const onLockedCtl = (ctl, sig, at) => {
-  const sigFp = sig && sig.ok ? sig.sigFp : null;
-  if (sigFp && mySign && sigFp === mySign.sigFp) return;
+  if (isMySig(sig)) return;
   if (at && Math.abs(Date.now() - at) > 120000) return;
   const roomName = currentRoomName;
   const before = (savedRooms().find((r) => r.room === roomName) || {}).key;
@@ -1640,16 +1660,18 @@ const lockRoomNow = async (roomName, keepFps) => {
   const label = entry.label || entry.room;
   const myPub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
   const kept = membersOf(entry, mySign.sigFp).filter((m) => m.pub && keepFps.includes(m.sigFp));
-  rekeyEntry(entry, key);
-  if (entry.members) for (const fp of Object.keys(entry.members)) if (fp !== mySign.sigFp && !keepFps.includes(fp)) delete entry.members[fp];
+  const ts = Date.now();
+  rekeyEntry(entry, key, ts);
+  keepMembers(entry, kept.map((m) => m.sigFp), mySign.sigFp);
   setSavedRooms(list);
   twiceFor = null;
+  const payload = { v: 1, kind: 'room-rekey', name: (myProfile && myProfile.name) || '', pub: myPub, ts, room: roomName, key, kv: 2, label, keep: kept.map((m) => m.sigFp).concat([mySign.sigFp]) };
+  const signed = await signBody(mySign.signKey, mySign.spub, roomName, 'inbox:' + ts, payload);
   for (const pub of kept.map((m) => m.pub).concat([myPub])) {
-    const ts = Date.now();
-    const payload = { v: 1, kind: 'room-rekey', name: (myProfile && myProfile.name) || '', pub: myPub, ts, room: roomName, key, kv: 2, label };
-    try { await publishToInbox(pub, await signBody(mySign.signKey, mySign.spub, roomName, 'inbox:' + ts, payload)); } catch (_) {}
+    try { await publishToInbox(pub, signed); } catch (_) {}
   }
   subscribeUnread();
+  if (attach) attach.refresh();
   els.room.value = roomName;
   await joinNew(roomName, key, { kv: 2 });
   if (currentRoomName === roomName) sys(fmt(T.roomlock.done, { n: kept.length }));
@@ -1673,9 +1695,10 @@ document.getElementById('comms-oldlink-close').addEventListener('click', () => {
 const sentByMe = (m) => (m.sfp2 ? m.sfp2 === myFp : !!m.sfp && (m.sfp === myFp || m.sfp === myLegacyFp));
 const sentBy = (m, c) => (m.sfp2 ? m.sfp2 === c.fp : !!m.sfp && (m.sfp === c.fp || m.sfp === legacyFps.get(c.fp)));
 
+const isMySig = (sig) => !!(sig && sig.ok && mySign && sig.spub && sig.spub.x === mySign.spub.x && sig.spub.y === mySign.spub.y);
 const signerFor = (sig) => {
   if (!sig || !sig.ok) return null;
-  if (mySign && sig.sigFp === mySign.sigFp) return { me: true, sigFp: sig.sigFp };
+  if (isMySig(sig)) return { me: true, sigFp: sig.sigFp };
   const c = CID.getContacts().find((x) => x.spub && x.spub.x === sig.spub.x && x.spub.y === sig.spub.y);
   return c ? { fp: c.fp, sigFp: sig.sigFp, spub: sig.spub } : { sigFp: sig.sigFp, spub: sig.spub };
 };
@@ -2382,7 +2405,19 @@ const rememberRoom = (roomName, b64Key, extra = {}) => {
 };
 const eph = ephKeys((() => { try { return window.sessionStorage; } catch (_) { return null; } })());
 const openSavedRoom = (r) => { els.room.value = r.room; joinNew(r.room, r.key, { kv: r.kv || 1 }); };
+const keyConflict = (roomName, key) => {
+  if (!roomName || isEphemeralRoom(roomName)) return null;
+  const e = savedRooms().find((r) => r.room === roomName);
+  return e && e.key && e.key !== key ? e : null;
+};
+const confirmReplaceKey = async (entry) => {
+  try { return !!(await mentriaConfirm(fmt(T.invite.replace_key, { label: entry.label || entry.room }), { danger: true })); } catch (_) { return false; }
+};
 const importRoomLink = (target) => {
+  if (keyConflict(target.room, target.key)) {
+    window.history.replaceState(null, '', window.location.pathname + window.location.search + formatHash(target.room, null));
+    return 'conflict';
+  }
   if (isEphemeralRoom(target.room)) eph.set(target.room, target.key, target.kv);
   else {
     rememberRoom(target.room, target.key);
@@ -2391,6 +2426,19 @@ const importRoomLink = (target) => {
     if (e && !e.oldSeen) { e.oldSeen = true; setSavedRooms(list); oldLinkFor = target.room; }
   }
   window.history.replaceState(null, '', window.location.pathname + window.location.search + formatHash(target.room, null));
+  return 'saved';
+};
+const openConflictLink = async (target) => {
+  const e = keyConflict(target.room, target.key);
+  if (!e) { joinNew(target.room, target.key, { kv: target.kv }); return; }
+  if (await confirmReplaceKey(e)) {
+    rememberRoom(target.room, target.key, { kv: 1 });
+    els.room.value = target.room;
+    joinNew(target.room, target.key, { kv: 1 });
+    return;
+  }
+  els.room.value = e.room;
+  joinNew(e.room, e.key, { kv: e.kv === 2 ? 2 : 1 });
 };
 const forgetRoom = (roomName) => setSavedRooms(savedRooms().filter((r) => r.room !== roomName));
 const touchRoom = (roomName) => { const list = savedRooms(); const r = list.find((x) => x.room === roomName); if (r) { r.lastSeen = Date.now(); setSavedRooms(list); } };
@@ -2450,7 +2498,7 @@ const recordJoin = (entry, ctl, sigFp) => {
 
 const onJoinedCtl = (ctl, sig, at) => {
   const sigFp = sig && sig.ok ? sig.sigFp : null;
-  const mine = !!(sigFp && mySign && sigFp === mySign.sigFp);
+  const mine = isMySig(sig);
   const list = savedRooms();
   const entry = list.find((r) => r.room === currentRoomName);
   if (entry) {
@@ -2666,7 +2714,7 @@ const applyVerifiedProfile = async (peerId) => {
   const spubNew = !!prof.spub && !(existing.spub && existing.spub.x === prof.spub.x && existing.spub.y === prof.spub.y);
   if (!ringNew && !spubNew) return;
   try {
-    await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring || existing.ring, spub: prof.spub || existing.spub });
+    await CID.addContact({ name: existing.name || prof.name, pub: prof.pub, ring: prof.ring || existing.ring, spub: prof.spub, ssig: prof.ssig });
     if (currentDmContact && currentDmContact.fp === existing.fp) currentDmContact.ring = prof.ring;
   } catch (_) {}
 };
@@ -2871,7 +2919,7 @@ const joinNew = async (roomName, b64Key = null, opts = {}) => {
       try { prof.fp = await CID.fingerprint(prof.pub); } catch {}
     }
     if (typeof data.ring === 'string') prof.ring = data.ring.slice(0, 64);
-    if (validSpub(data.spub)) prof.spub = { x: data.spub.x, y: data.spub.y };
+    if (prof.pub && validSpub(data.spub) && await verifyLink(prof.pub, data.spub, data.ssig)) { prof.spub = { x: data.spub.x, y: data.spub.y }; prof.ssig = data.ssig; }
     prof.caps = { files: data.caps && Number.isInteger(data.caps.files) ? data.caps.files : 0 };
     if (prof.fp) rememberCaps(prof.fp, prof.caps);
     if (seq !== joinSeq || !peers.has(ctx.peerId)) return;
@@ -3782,7 +3830,7 @@ const sendProfileTo = (peerId) => {
   if (!profAction || !myId) return;
   const payload = { name: myProfile.name, pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, caps: { files: 2 } };
   if (ringToken) payload.ring = ringToken;
-  if (mySign) payload.spub = mySign.spub;
+  if (mySign && mySign.link) { payload.spub = mySign.spub; payload.ssig = mySign.link.s; }
   try { profAction.send(payload, peerId || undefined); } catch {}
 };
 
@@ -3883,7 +3931,7 @@ const announceToContact = async (contact) => {
   if (!myId || !contact || !contact.pub) return;
   const payload = { v: 1, name: (myProfile && myProfile.name) || '', pub: { x: myId.publicJwk.x, y: myId.publicJwk.y }, ts: Date.now() };
   if (ringToken) payload.ring = ringToken;
-  if (mySign) payload.spub = mySign.spub;
+  if (mySign && mySign.link) { payload.spub = mySign.spub; payload.ssig = mySign.link.s; }
   await publishToInbox(contact.pub, payload);
 };
 
@@ -3960,7 +4008,7 @@ const handleSideMsg = async (msgEvent) => {
     if (existing) {
       if (typeof payload.ts !== 'number' || payload.ts <= (existing.annTs || 0)) return;
       try {
-        const updated = await CID.addContact({ name: payload.name, pub: payload.pub, ring: payload.ring, spub: payload.spub, annTs: Math.min(payload.ts, Date.now()) });
+        const updated = await CID.addContact({ name: payload.name, pub: payload.pub, ring: payload.ring, spub: payload.spub, ssig: payload.ssig, annTs: Math.min(payload.ts, Date.now()) });
         if (currentDmContact && currentDmContact.fp === existing.fp && updated) currentDmContact = updated;
         renderContacts();
         updatePushStatus();
@@ -4442,6 +4490,7 @@ const initIdentity = async () => {
     myFp = await CID.fingerprint(myId.publicJwk);
     myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
     try { mySign = await CID.ensureSigningKey(); } catch (_) { mySign = null; }
+    if (mySign) { try { mySign.link = { spub: mySign.spub, s: await signLink(mySign.signKey, myId.publicJwk) }; } catch (_) { mySign.link = null; } }
     if (els.idSig) { els.idSig.hidden = !mySign; els.idSig.textContent = mySign ? fmt(T.sign.my_key, { fp: mySign.sigFp }) : ''; }
     openHistory();
     try { await CID.migrateFingerprints(); } catch (_) {}
@@ -4863,7 +4912,7 @@ const loadQr = () => {
 
 const refreshMyCode = () => {
   if (els.idCard.hidden || !myId) return;
-  const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken, mySign && mySign.spub);
+  const code = CID.encodeContactCode(myProfile, myId.publicJwk, ringToken, mySign && mySign.link);
   els.idCode.textContent = code;
   if (!window.qrcodegen) { loadQr().then((ok) => { if (ok) refreshMyCode(); }); return; }
   try {
@@ -5951,7 +6000,7 @@ if (bootInvite) {
   });
 }
 const bootTarget = bootHash && !bootInvite && !isDmRoom(bootHash.room) ? resolveHash(window.location.hash, savedRooms(), eph) : null;
-if (bootTarget && bootTarget.imported) importRoomLink(bootTarget);
+const bootConflict = !!(bootTarget && bootTarget.imported && importRoomLink(bootTarget) === 'conflict');
 const hasHash = !!bootTarget;
 if (hasHash) {
   els.room.value = bootTarget.room;
@@ -5959,6 +6008,7 @@ if (hasHash) {
   window.addEventListener('load', async () => {
     if (bootUnlock) await Promise.race([bootUnlock, new Promise((r) => setTimeout(r, 4000))]);
     if (joinTarget) return;
+    if (bootConflict) { openConflictLink(bootTarget); return; }
     joinNew(bootTarget.room, bootTarget.key, { kv: bootTarget.kv });
   });
 }
@@ -5972,7 +6022,7 @@ window.addEventListener('hashchange', () => {
     return;
   }
   const next = resolveHash(window.location.hash, savedRooms(), eph);
-  if (next && next.imported) importRoomLink(next);
+  if (next && next.imported && importRoomLink(next) === 'conflict') { openConflictLink(next); refreshIdUI(); return; }
   const same = next
     ? !!joinTarget && joinTarget.room === next.room && joinTarget.key === next.key
     : !joinTarget;

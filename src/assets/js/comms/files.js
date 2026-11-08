@@ -706,7 +706,8 @@ export class FilesRooms {
     const want = new Map(pinned.concat(rest).map((t) => [t.id, t]));
     for (const id of Array.from(this._rooms.keys())) {
       const t = want.get(id);
-      if (!t || t.roomName !== this._rooms.get(id).roomName) this._leave(id);
+      const cur = this._rooms.get(id);
+      if (!t || t.roomName !== cur.roomName || t.b64Key !== cur.b64Key || (t.kv === 2 ? 2 : 1) !== cur.kv) this._leave(id);
     }
     for (const t of want.values()) {
       if (this._paused) return;
@@ -719,7 +720,7 @@ export class FilesRooms {
       let room = null;
       try { room = await this._join(ids.roomId, ids.password, t); } catch (e) { console.warn('files room join failed:', e); room = null; }
       if (!room) continue;
-      this._rooms.set(t.id, { room, roomId: ids.roomId, roomName: t.roomName, at: Date.now() });
+      this._rooms.set(t.id, { room, roomId: ids.roomId, roomName: t.roomName, b64Key: t.b64Key, kv: t.kv === 2 ? 2 : 1, at: Date.now() });
       try { await this._t.attach(t.id, room, { peerFp: t.peerFp }); } catch (e) { console.warn('files room attach failed:', e); }
     }
   }

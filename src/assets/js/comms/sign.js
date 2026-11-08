@@ -40,6 +40,22 @@ export const sigFingerprint = async (spub) => {
   return out.slice(0, 4) + '-' + out.slice(4, 8);
 };
 
+const LINK_LABEL = 'mentria-link-v1';
+const linkInput = (pub) => te.encode(LINK_LABEL + '|' + pub.x + '|' + pub.y);
+
+export const signLink = async (signKey, pub) => b64uEnc(await crypto.subtle.sign(ALG, signKey, linkInput(pub)));
+
+export const verifyLink = async (pub, spub, s) => {
+  if (!validSpub(pub) || !validSpub(spub) || typeof s !== 'string') return false;
+  try {
+    const key = await importPub(spub);
+    if (!key) return false;
+    const raw = b64uDec(s);
+    if (raw.length !== 64) return false;
+    return await crypto.subtle.verify(ALG, key, raw, linkInput(pub));
+  } catch (_) { return false; }
+};
+
 export const signBody = async (signKey, spub, room, cmid, body, ts = Date.now()) => {
   const sig = await crypto.subtle.sign(ALG, signKey, sigInput(room, cmid, ts, body));
   return Object.assign({}, body, { sg: { pub: { x: spub.x, y: spub.y }, ts, s: b64uEnc(sig) } });

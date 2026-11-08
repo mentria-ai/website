@@ -5850,7 +5850,10 @@
         "pick": "Invite to this room",
         "sent": "Invite sent to {name}.",
         "from": "{name} invited you to {label}",
-        "no_contacts": "Add a contact first."
+        "no_contacts": "Add a contact first.",
+        "retry": "Try again",
+        "offline_fetch": "Can't reach the relay right now. Check your connection and try again.",
+        "replace_key": "You already have {label} with a different key. Switch it to the key from this link?"
       },
       "roomlock": {
         "title": "Lock {label}",

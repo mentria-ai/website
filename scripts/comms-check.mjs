@@ -964,23 +964,26 @@ check('id: the signing key is created once and kept in idkeys', async () => {
   deepEq((await CIDM.ensureKeypair()).publicJwk, before.pub);
 });
 check('id: a contact code carries the signing key and old codes still read', () => {
-  const code = CIDM.encodeContactCode({ name: 'A' }, { x: 'X', y: 'Y' }, null, { x: 'SX', y: 'SY' });
+  const code = CIDM.encodeContactCode({ name: 'A' }, { x: 'X', y: 'Y' }, null, { spub: { x: 'SX', y: 'SY' }, s: 'sig' });
   ok(code.startsWith('MC1.'));
   deepEq(CIDM.decodeContactCode(code).spub, { x: 'SX', y: 'SY' });
+  eq(CIDM.decodeContactCode(code).ssig, 'sig');
   const old = CIDM.encodeContactCode({ name: 'A' }, { x: 'X', y: 'Y' }, 'ring1234567890123456789');
   eq(CIDM.decodeContactCode(old).spub, undefined);
   eq(CIDM.decodeContactCode(old).ring, 'ring1234567890123456789');
 });
 check('id: contacts keep a signing key and a newer one replaces it', async () => {
   window.MentriaStore = memStore();
-  await CIDM.addContact({ name: 'B', pub: { x: 'X1', y: 'Y1' }, spub: { x: 'S1', y: 'T1' } });
-  deepEq(CIDM.contactByPub({ x: 'X1', y: 'Y1' }).spub, { x: 'S1', y: 'T1' });
-  await CIDM.addContact({ name: 'B', pub: { x: 'X1', y: 'Y1' }, spub: { x: 'S2', y: 'T2' }, annTs: 5 });
-  deepEq(CIDM.contactByPub({ x: 'X1', y: 'Y1' }).spub, { x: 'S2', y: 'T2' });
-  await CIDM.addContact({ name: 'B', pub: { x: 'X1', y: 'Y1' }, spub: { x: 'S3', y: 'T3' }, annTs: 4 });
-  deepEq(CIDM.contactByPub({ x: 'X1', y: 'Y1' }).spub, { x: 'S2', y: 'T2' });
-  await CIDM.addContact({ name: 'B', pub: { x: 'X1', y: 'Y1' }, spub: { x: 1, y: 2 }, annTs: 9 });
-  deepEq(CIDM.contactByPub({ x: 'X1', y: 'Y1' }).spub, { x: 'S2', y: 'T2' });
+  const P = { x: 'X1', y: 'Y1' };
+  const k1 = await memberSig(); const k2 = await memberSig(); const k3 = await memberSig();
+  await CIDM.addContact({ name: 'B', pub: P, spub: k1.spub, ssig: await SG.signLink(k1.key, P) });
+  deepEq(CIDM.contactByPub(P).spub, k1.spub);
+  await CIDM.addContact({ name: 'B', pub: P, spub: k2.spub, ssig: await SG.signLink(k2.key, P), annTs: 5 });
+  deepEq(CIDM.contactByPub(P).spub, k2.spub);
+  await CIDM.addContact({ name: 'B', pub: P, spub: k3.spub, ssig: await SG.signLink(k3.key, P), annTs: 4 });
+  deepEq(CIDM.contactByPub(P).spub, k2.spub);
+  await CIDM.addContact({ name: 'B', pub: P, spub: { x: 1, y: 2 }, annTs: 9 });
+  deepEq(CIDM.contactByPub(P).spub, k2.spub);
 });
 check('wire: unpack keeps the signature and the parsed body', () => { const u = W.unpackChatPlain(JSON.stringify(VEC.signed)); deepEq(u.sg, VEC.signed.sg); eq(u.obj.t, 'hello'); eq(u.text, 'hello'); eq(W.unpackChatPlain('{"v":2,"t":"x"}').sg, null); });
 check('wire: packChatBody is what packChatPlain writes', () => { eq(JSON.stringify(W.packChatBody('hi', { fp: 'B', legacyFp: 'A' })), FIX.pack); eq(W.packChatPlain('hi', { fp: 'B', legacyFp: 'A' }), FIX.pack); });
@@ -1056,7 +1059,7 @@ check('invite: a slow first socket still finds the envelope', async () => {
   const slow = new FakeSock((ws, sub) => setTimeout(() => ws.emit(['EVENT', sub, { id: 'ev9', content }]), 40));
   const t0 = Date.now();
   const got = await IV.fetchInvite([silent, slow], k.topic, k.aes, { timeoutMs: 600, retryMs: 60 });
-  ok(got && got.evId === 'ev9' && got.body.room === 'trip');
+  ok(got && got.status === 'found' && got.evId === 'ev9' && got.body.room === 'trip');
   ok(Date.now() - t0 < 400);
   ok(silent.sent.some((s) => JSON.parse(s)[0] === 'CLOSE'));
 });
@@ -1064,10 +1067,10 @@ check('invite: nothing found resolves null after the relays say so', async () =>
   const k = await IV.inviteKeys(INV_TOKEN);
   const empty = () => new FakeSock((ws, sub) => setTimeout(() => ws.emit(['EOSE', sub]), 5));
   const t0 = Date.now();
-  eq(await IV.fetchInvite([empty(), empty()], k.topic, k.aes, { timeoutMs: 5000, retryMs: 3000 }), null);
+  eq((await IV.fetchInvite([empty(), empty()], k.topic, k.aes, { timeoutMs: 5000, retryMs: 3000 })).status, 'gone');
   ok(Date.now() - t0 < 1500);
-  eq(await IV.fetchInvite([new FakeSock(null)], k.topic, k.aes, { timeoutMs: 80, retryMs: 40 }), null);
-  eq(await IV.fetchInvite([], k.topic, k.aes), null);
+  eq((await IV.fetchInvite([new FakeSock(null)], k.topic, k.aes, { timeoutMs: 80, retryMs: 40 })).status, 'offline');
+  eq((await IV.fetchInvite([], k.topic, k.aes)).status, 'offline');
 });
 check('invite: junk events under the topic are skipped', async () => {
   const k = await IV.inviteKeys(INV_TOKEN);
@@ -1105,20 +1108,21 @@ check('members: members are kept newest first, at most 50, without me', () => {
 });
 check('members: a rekey from a member of the room is accepted', () => {
   const e = { room: 'r' };
-  MB.noteMember(e, { sigFp: 'fpA', name: 'A', ts: 1 });
-  eq(MB.acceptRekey(e, { kind: 'room-rekey', room: 'r', key: RK, kv: 2 }, 'fpA'), true);
+  MB.noteMember(e, { sigFp: 'fpA', name: 'A', spub: { x: 'SX', y: 'SY' }, ts: 1 });
+  eq(MB.acceptRekey(e, { kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts: 5 }, { sigFp: 'fpA', spub: { x: 'SX', y: 'SY' } }), true);
 });
 check('members: a rekey from a non-member or for an unknown room is refused', () => {
   const e = { room: 'r' };
-  MB.noteMember(e, { sigFp: 'fpA', name: 'A', ts: 1 });
-  const good = { kind: 'room-rekey', room: 'r', key: RK, kv: 2 };
-  eq(MB.acceptRekey(e, good, 'fpZ'), false);
+  const A = { sigFp: 'fpA', spub: { x: 'SX', y: 'SY' } };
+  MB.noteMember(e, { sigFp: 'fpA', name: 'A', spub: A.spub, ts: 1 });
+  const good = { kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts: 5 };
+  eq(MB.acceptRekey(e, good, { sigFp: 'fpZ', spub: A.spub }), false);
   eq(MB.acceptRekey(e, good, null), false);
-  eq(MB.acceptRekey(null, good, 'fpA'), false);
-  eq(MB.acceptRekey(e, { ...good, room: 'other' }, 'fpA'), false);
-  eq(MB.acceptRekey(e, { ...good, key: 'AAEC' }, 'fpA'), false);
-  eq(MB.acceptRekey(e, { ...good, kv: 1 }, 'fpA'), false);
-  eq(MB.acceptRekey(e, { ...good, kind: 'room-invite' }, 'fpA'), false);
+  eq(MB.acceptRekey(null, good, A), false);
+  eq(MB.acceptRekey(e, { ...good, room: 'other' }, A), false);
+  eq(MB.acceptRekey(e, { ...good, key: 'AAEC' }, A), false);
+  eq(MB.acceptRekey(e, { ...good, kv: 1 }, A), false);
+  eq(MB.acceptRekey(e, { ...good, kind: 'room-invite' }, A), false);
 });
 
 check('home: room invites sit with requests at the top', () => {
@@ -1145,6 +1149,91 @@ check('members: a signed rekey still verifies after the inbox adds its proof', a
   eq(v.ok, true);
   eq(v.sigFp, me.sigFp);
   deepEq(Object.keys(MB.inboxBody(opened)), Object.keys(signed));
+});
+
+const memberSig = async () => { const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']); const j = await crypto.subtle.exportKey('jwk', kp.publicKey); const spub = { x: j.x, y: j.y }; return { key: kp.privateKey, spub, sigFp: await SG.sigFingerprint(spub) }; };
+check('fix C1: an older or replayed rekey is refused', async () => {
+  const a = await memberSig();
+  const e = { room: 'r', keyTs: 5000 };
+  MB.noteMember(e, { sigFp: a.sigFp, name: 'A', spub: a.spub, ts: 1 });
+  const p = (ts) => ({ kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts });
+  eq(MB.rekeyDecision(e, p(4000), { sigFp: a.sigFp, spub: a.spub }, null), 'ignore');
+  eq(MB.rekeyDecision(e, p(5000), { sigFp: a.sigFp, spub: a.spub }, null), 'ignore');
+  eq(MB.rekeyDecision(e, p(6000), { sigFp: a.sigFp, spub: a.spub }, null), 'offer');
+  eq(MB.rekeyDecision(e, p(6000), { sigFp: a.sigFp, spub: a.spub }, a.spub), 'apply');
+  eq(MB.rekeyDecision(e, p(4000), { sigFp: a.sigFp, spub: a.spub }, a.spub), 'ignore');
+  eq(MB.rekeyDecision({ room: 'r', key: RK, keyTs: 1 }, p(6000), { sigFp: a.sigFp, spub: a.spub }, a.spub), 'ignore');
+});
+check("fix I1: a rekey needs the member's full signing key, not just its fingerprint", async () => {
+  const a = await memberSig();
+  const e = { room: 'r' };
+  MB.noteMember(e, { sigFp: a.sigFp, name: 'A', spub: a.spub, ts: 1 });
+  const p = { kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts: 10 };
+  eq(MB.rekeyDecision(e, p, { sigFp: a.sigFp, spub: { x: 'lookalike', y: a.spub.y } }, null), 'ignore');
+  eq(MB.rekeyDecision(e, p, { sigFp: a.sigFp, spub: a.spub }, { x: 'mine', y: a.spub.y }), 'offer');
+  const bare = { room: 'r' };
+  MB.noteMember(bare, { sigFp: a.sigFp, name: 'A', ts: 1 });
+  eq(MB.rekeyDecision(bare, p, { sigFp: a.sigFp, spub: a.spub }, null), 'ignore');
+});
+check('fix I4: a rekey keeps only the listed members and the sender', () => {
+  const e = { room: 'r' };
+  for (const fp of ['a', 'b', 'c', 'me']) MB.noteMember(e, { sigFp: fp, name: fp, ts: 1 });
+  MB.keepMembers(e, ['b', 'me'], 'a');
+  deepEq(Object.keys(e.members).sort(), ['a', 'b', 'me']);
+  MB.keepMembers(e, 'junk', 'a');
+  deepEq(Object.keys(e.members).sort(), ['a', 'b', 'me']);
+});
+check('fix I5: an envelope from another author is ignored', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  const content = await IV.sealInvite(k.aes, invBody());
+  const s = new FakeSock((ws, sub) => { ws.emit(['EVENT', sub, { id: 'copy', pubkey: 'eve', content }]); setTimeout(() => ws.emit(['EVENT', sub, { id: 'real', pubkey: 'pk1', content }]), 10); });
+  const got = await IV.fetchInvite([s], k.topic, k.aes, { timeoutMs: 500, author: 'pk1' });
+  eq(got.status, 'found');
+  eq(got.evId, 'real');
+  deepEq(JSON.parse(s.sent[0])[2].authors, ['pk1']);
+});
+check('fix I7: no relay answering is offline, not gone', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  eq((await IV.fetchInvite([], k.topic, k.aes)).status, 'offline');
+  eq((await IV.fetchInvite([new FakeSock(null)], k.topic, k.aes, { timeoutMs: 80, retryMs: 40 })).status, 'offline');
+  const empty = new FakeSock((ws, sub) => setTimeout(() => ws.emit(['EOSE', sub]), 5));
+  eq((await IV.fetchInvite([empty, new FakeSock(null)], k.topic, k.aes, { timeoutMs: 600, retryMs: 30 })).status, 'gone');
+});
+check('fix I2: a link proves the signing key belongs to the identity key', async () => {
+  const a = await memberSig();
+  const pub = { x: 'PX', y: 'PY' };
+  const s = await SG.signLink(a.key, pub);
+  eq(await SG.verifyLink(pub, a.spub, s), true);
+  eq(await SG.verifyLink({ x: 'QX', y: 'PY' }, a.spub, s), false);
+  const b = await memberSig();
+  eq(await SG.verifyLink(pub, b.spub, s), false);
+  eq(await SG.verifyLink(pub, a.spub, 'junk'), false);
+  eq(await SG.verifyLink(pub, a.spub, undefined), false);
+});
+check('fix I2: a contact signing key without a valid link is ignored', async () => {
+  window.MentriaStore = memStore();
+  const a = await memberSig();
+  const pub = { x: 'X7', y: 'Y7' };
+  await CIDM.addContact({ name: 'Eve', pub, spub: a.spub });
+  eq(CIDM.contactByPub(pub).spub, undefined);
+  await CIDM.addContact({ name: 'Eve', pub, spub: a.spub, ssig: 'bad', annTs: 3 });
+  eq(CIDM.contactByPub(pub).spub, undefined);
+  await CIDM.addContact({ name: 'Eve', pub, spub: a.spub, ssig: await SG.signLink(a.key, pub), annTs: 4 });
+  deepEq(CIDM.contactByPub(pub).spub, a.spub);
+  const code = CIDM.encodeContactCode({ name: 'A' }, pub, null, { spub: a.spub, s: await SG.signLink(a.key, pub) });
+  const dec = CIDM.decodeContactCode(code);
+  deepEq(dec.spub, a.spub);
+  eq(await SG.verifyLink(pub, dec.spub, dec.ssig), true);
+});
+check('fix I8: a files room whose key changes is rejoined', async () => {
+  const joined = [];
+  const fr = new F.FilesRooms({ transfers: stubT(), join: (id) => { joined.push(id); return stubRoom(); }, max: 6 });
+  await fr.sync([{ id: 't1', roomName: 'r', b64Key: KEY, kv: 2, priority: 1 }]);
+  await fr.sync([{ id: 't1', roomName: 'r', b64Key: KEY, kv: 2, priority: 1 }]);
+  eq(joined.length, 1);
+  await fr.sync([{ id: 't1', roomName: 'r', b64Key: KEY2, kv: 2, priority: 1 }]);
+  eq(joined.length, 2);
+  ok(joined[0] !== joined[1]);
 });
 
 let failed = 0;

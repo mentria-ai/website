@@ -5850,7 +5850,10 @@
         "pick": "Inviter dans ce salon",
         "sent": "Invitation envoyée à {name}.",
         "from": "{name} vous invite dans {label}",
-        "no_contacts": "Ajoutez d'abord un contact."
+        "no_contacts": "Ajoutez d'abord un contact.",
+        "retry": "Réessayer",
+        "offline_fetch": "Impossible de joindre le relais pour le moment. Vérifiez votre connexion et réessayez.",
+        "replace_key": "Vous avez déjà {label} avec une autre clé. La remplacer par la clé de ce lien ?"
       },
       "roomlock": {
         "title": "Verrouiller {label}",

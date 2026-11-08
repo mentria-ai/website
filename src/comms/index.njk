@@ -132,6 +132,11 @@ unlockTool: true
       </div>
 
       <div class="comms__adv" id="comms-adv" hidden>
+        <div class="comms__adv-sec comms__agents" id="comms-agents" hidden>
+          <span class="comms__lbl">{{ 'tool.comms.agent.heading' | t }}</span>
+          <button class="comms__btn comms__btn--ghost" id="comms-agents-copy" type="button">{{ 'tool.comms.agent.connect' | t }}</button>
+          <p class="comms__id-note">{{ 'tool.comms.agent.connect_note' | t }}</p>
+        </div>
         <div class="comms__adv-sec">
           <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
           <div class="comms__room">
@@ -670,6 +675,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__picker-ver{flex:none;color:var(--term-muted);font:var(--text-2xs) var(--font-mono)}
 .comms__picker-actions{display:flex;justify-content:flex-end}
 .comms__invite-actions{gap:var(--space-2)}
+.comms__avatar--agent{font:600 var(--text-xs) var(--font-mono);color:var(--accent)}
 .comms__lock-list{display:flex;flex-direction:column;gap:var(--space-2)}
 .comms__lock-list label{display:flex;align-items:center;gap:var(--space-2);color:var(--term-fg);font-size:var(--text-sm)}
 .comms__invite-by,.comms__invite-ios{margin:0;color:var(--term-muted);font-size:var(--text-sm);overflow-wrap:anywhere}
@@ -751,6 +757,7 @@ import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
 import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink } from '/assets/js/comms/sign.js';
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
+import { bridgeKeyFromSecret, keysFromBridgeKey, bridgeCode, createBridgeClient, BRIDGE_KIND } from '/assets/js/comms/bridge.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1847,6 +1854,75 @@ const MAX_SEND = 2 * 1024 * 1024 * 1024;
 let attach = null;
 let selfRoom = null;
 const myDevice = deviceInfo(T);
+const AGENTS_KEY = 'mentria.comms.agents_on';
+const AGENT_SESSIONS_KEY = 'mentria.comms.agent_sessions';
+try { if (new URLSearchParams(window.location.search).get('agents') === '1') localStorage.setItem(AGENTS_KEY, '1'); } catch (_) {}
+const agentsOn = () => { try { return localStorage.getItem(AGENTS_KEY) === '1'; } catch (_) { return false; } };
+const IOS_DEVICE = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let bridge = null;
+let bridgeK = null;
+let bridgeResubscribe = null;
+let agentsSig = '';
+const knownAgents = () => { try { const v = JSON.parse(localStorage.getItem(AGENT_SESSIONS_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => x && typeof x.sid === 'string') : []; } catch (_) { return []; } };
+const agentList = () => {
+  if (!agentsOn()) return [];
+  const live = bridge ? bridge.sessions() : [];
+  const byId = new Map(knownAgents().map((a) => [a.sid, { sid: a.sid, name: a.name, online: false, busy: false, lastTs: a.lastTs || 0 }]));
+  for (const x of live) byId.set(x.sid, { sid: x.sid, name: x.name, online: x.online, busy: x.busy, lastTs: x.lastTs || 0 });
+  return Array.from(byId.values()).map((a) => Object.assign(a, { preview: a.online ? T.agent.running : T.agent.offline }));
+};
+const paintAgents = () => {
+  const box = document.getElementById('comms-agents');
+  if (box) box.hidden = !(agentsOn() && !IOS_DEVICE && !!bridgeK);
+  const list = agentList();
+  if (bridge) {
+    const keep = list.map((a) => ({ sid: a.sid, name: a.name, lastTs: a.lastTs }));
+    try { localStorage.setItem(AGENT_SESSIONS_KEY, JSON.stringify(keep.slice(-20))); } catch (_) {}
+  }
+  const sig = JSON.stringify(list.map((a) => [a.sid, a.name, a.online, a.busy]));
+  if (sig !== agentsSig) { agentsSig = sig; renderContacts(); }
+};
+const startBridge = async () => {
+  if (bridge || !myId || !mySign || !agentsOn()) return;
+  let secret;
+  try { secret = secretCopy(); } catch (_) { return; }
+  bridgeK = await bridgeKeyFromSecret(secret);
+  try { secret.fill(0); } catch (_) {}
+  const keys = await keysFromBridgeKey(bridgeK);
+  const handlers = new Set();
+  const subId = 'br-' + Math.random().toString(36).slice(2);
+  let attached = null;
+  const onMsg = (e) => {
+    let m;
+    try { m = JSON.parse(e.data); } catch (_) { return; }
+    if (Array.isArray(m) && m[0] === 'EVENT' && m[1] === subId && m[2] && m[2].kind === BRIDGE_KIND) for (const fn of handlers) fn(m[2].content);
+  };
+  bridgeResubscribe = async () => {
+    const ws = await ensureSideSocket();
+    if (!ws) return;
+    if (attached !== ws) { ws.addEventListener('message', onMsg); attached = ws; }
+    ws.send(JSON.stringify(['REQ', subId, { kinds: [BRIDGE_KIND], '#x': [keys.topic], since: Math.floor(Date.now() / 1000) - 60 }]));
+  };
+  const transport = {
+    publish: async (content) => {
+      const ev = await createPersistentEvent(BRIDGE_KIND, keys.topic, content, []);
+      const ws = await ensureSideSocket();
+      if (ws) ws.send(ev);
+    },
+    onEvent: (fn) => { handlers.add(fn); }
+  };
+  bridge = createBridgeClient({ transport, keys, device: myDevice.name, sign: (sid, cmid, body) => signBody(mySign.signKey, mySign.spub, 'bridge:' + sid, cmid, body) });
+  bridge.on('here', paintAgents);
+  await bridgeResubscribe();
+  bridge.hello();
+  setInterval(() => { if (bridge && !document.hidden) bridge.hello(); }, 60000);
+  setInterval(paintAgents, 30000);
+  paintAgents();
+};
+document.getElementById('comms-agents-copy').addEventListener('click', async () => {
+  if (!bridgeK || !mySign) return;
+  try { await navigator.clipboard.writeText(bridgeCode({ k: bridgeK, spub: mySign.spub, sigFp: mySign.sigFp })); notice(T.agent.copied); } catch (_) { notice(T.agent.copy_failed); }
+});
 const presence = new Presence();
 const AI_HOSTING = myDevice.kind !== 'iphone' && myDevice.kind !== 'ipad';
 const aiLocal = AI_HOSTING ? createLocalEngine() : null;
@@ -3914,7 +3990,7 @@ const ensureSideSocket = () => {
       sideWs = ws;
       const isReconnect = sideOpens++ > 0;
       done(ws);
-      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); }
+      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); if (bridgeResubscribe) bridgeResubscribe(); }
     });
     ws.addEventListener('error', () => { done(null); });
     ws.addEventListener('close', () => {
@@ -4513,6 +4589,7 @@ const initIdentity = async () => {
     myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
     try { mySign = await CID.ensureSigningKey(); } catch (_) { mySign = null; }
     if (mySign) { try { mySign.link = { spub: mySign.spub, s: await signLink(mySign.signKey, myId.publicJwk) }; } catch (_) { mySign.link = null; } }
+    startBridge().catch(() => {});
     if (els.idSig) { els.idSig.hidden = !mySign; els.idSig.textContent = mySign ? fmt(T.sign.my_key, { fp: mySign.sigFp }) : ''; }
     openHistory();
     try { await CID.migrateFingerprints(); } catch (_) {}
@@ -5268,6 +5345,23 @@ const listNote = (text) => {
   return note;
 };
 
+const agentRow = (a, info) => {
+  const row = document.createElement('div');
+  row.className = 'comms__contact comms__agentrow';
+  row.dataset.sid = a.sid;
+  const av = document.createElement('span');
+  av.className = 'comms__avatar comms__avatar--agent';
+  av.setAttribute('aria-hidden', 'true');
+  av.textContent = '>_';
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'comms__contact-open';
+  const { mid } = rowMid(a.name || a.sid.slice(0, 8), info.preview, info.ts);
+  openBtn.append(mid);
+  row.append(av, openBtn, rowChev());
+  return row;
+};
+
 const inviteRow = (inv) => {
   const row = document.createElement('div');
   row.className = 'comms__contact comms__contact--req';
@@ -5502,11 +5596,12 @@ const renderContacts = () => {
   const contacts = CID.getContacts();
   const rooms = savedRooms();
   const roomInvitesNow = roomInvites();
-  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length && !roomInvitesNow.length) {
+  if (!contacts.length && !requests.length && !rooms.length && !homeThreads.length && !roomInvitesNow.length && !agentList().length) {
     els.contactList.append(listNote(T.people.empty));
     return;
   }
-  const rows = homeRows({ contacts, requests, roomInvites: roomInvitesNow, rooms, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
+  const agents = agentList();
+  const rows = homeRows({ contacts, requests, roomInvites: roomInvitesNow, rooms, agents, threads: homeThreads, unread: unreadMap }, { filter: homeFilter, query: homeQuery });
   if (!rows.length) {
     els.contactList.append(listNote(T.home.at_none));
     return;
@@ -5515,6 +5610,7 @@ const renderContacts = () => {
   for (const r of rows) {
     if (r.kind === 'request') els.contactList.append(requestRow(r.ref));
     else if (r.kind === 'invite') els.contactList.append(inviteRow(r.ref));
+    else if (r.kind === 'agent') els.contactList.append(agentRow(r.ref, r));
     else if (r.kind === 'contact') els.contactList.append(contactRow(r.ref, r, missedMap));
     else if (r.kind === 'room') els.contactList.append(roomRow(r.ref, r));
     else if (r.kind === 'self') els.contactList.append(selfRow(r.ref, r));

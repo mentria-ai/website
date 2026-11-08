@@ -5869,6 +5869,15 @@
         "use": "Usar",
         "gone": "{name} cerró esta sala. Pídele una invitación nueva.",
         "none": "Nadie ha firmado todavía en esta sala, así que solo la conservan tus dispositivos."
+      },
+      "agent": {
+        "heading": "Sesiones de agente",
+        "connect": "Conectar este Mac",
+        "connect_note": "Copia el código y ejecuta node bridge.mjs pair en este Mac. El código se lee del portapapeles y se queda en este Mac.",
+        "copied": "Código del puente copiado.",
+        "copy_failed": "No se pudo copiar el código del puente.",
+        "running": "en ejecución en tu Mac",
+        "offline": "Mac sin conexión"
       }
     },
     "scanner": {

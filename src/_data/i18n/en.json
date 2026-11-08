@@ -5869,6 +5869,15 @@
         "use": "Use",
         "gone": "{name} locked this room. Ask them for a new invite.",
         "none": "Nobody here has signed in this room yet, so only your devices keep it."
+      },
+      "agent": {
+        "heading": "Agent sessions",
+        "connect": "Connect this Mac",
+        "connect_note": "Copy the code, then run node bridge.mjs pair on this Mac. The code is read from the clipboard and stays on this Mac.",
+        "copied": "Bridge code copied.",
+        "copy_failed": "Couldn't copy the bridge code.",
+        "running": "running on your Mac",
+        "offline": "Mac offline"
       }
     },
     "scanner": {

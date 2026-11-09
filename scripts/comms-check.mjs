@@ -834,6 +834,25 @@ check('fix I1: unlocking later starts hosting', async () => {
   eq(st.requests.length, 1);
 });
 
+check('fix: a model switch keeps the page host lock', async () => {
+  const P = await import('/assets/js/comms/ai-page-host.js');
+  const { st, deps } = pageHostDeps({ unlocked: true });
+  let eng = { engine: {}, tier: 'b2-2b', contextTokens: 4096 };
+  const ph = P.startPageHost({ getEngine: () => eng, deps });
+  await ph.refresh();
+  await aiFlush();
+  eq(st.requests.length, 1);
+  eng = null;
+  await ph.refresh();
+  ph.loading();
+  await aiFlush();
+  eq(st.requests.length, 2);
+  eng = { engine: {}, tier: 'b2-4b', contextTokens: 4096 };
+  await ph.refresh();
+  await aiFlush();
+  eq(st.requests.length, 2);
+});
+
 check('fix I5: the page host follows the weekly room change with fresh ICE', async () => {
   const P = await import('/assets/js/comms/ai-page-host.js');
   const { st, deps } = pageHostDeps({ unlocked: true, names: ['self-w1', 'self-w1', 'self-w2'] });
@@ -1043,6 +1062,10 @@ check('invite: a wrong token or tampered envelope opens as null', async () => {
   eq(await IV.openInvite(k.aes, 'not json'), null);
   eq(await IV.openInvite(k.aes, null), null);
 });
+check('invite: a room named like the private devices thread opens as null', async () => {
+  const k = await IV.inviteKeys(INV_TOKEN);
+  eq(await IV.openInvite(k.aes, await IV.sealInvite(k.aes, { ...invBody(), room: 'self' })), null);
+});
 check('invite: an expired or malformed body opens as null', async () => {
   const k = await IV.inviteKeys(INV_TOKEN);
   for (const over of [{ exp: Math.floor(Date.now() / 1000) - 5 }, { kv: 3 }, { room: '' }, { room: 'x'.repeat(65) }, { key: 'AAEC' }, { key: Buffer.alloc(31).toString('base64url') }, { v: 2 }]) {
@@ -1125,6 +1148,15 @@ check('members: a rekey from a non-member or for an unknown room is refused', ()
   eq(MB.acceptRekey(e, { ...good, key: 'AAEC' }, A), false);
   eq(MB.acceptRekey(e, { ...good, kv: 1 }, A), false);
   eq(MB.acceptRekey(e, { ...good, kind: 'room-invite' }, A), false);
+});
+check('members: a rekey dated in the future is refused', () => {
+  const e = { room: 'r' };
+  const A = { sigFp: 'fpA', spub: { x: 'SX', y: 'SY' } };
+  MB.noteMember(e, { sigFp: 'fpA', name: 'A', spub: A.spub, ts: 1 });
+  const now = Date.now();
+  eq(MB.acceptRekey(e, { kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts: now + 60000 }, A), true);
+  eq(MB.acceptRekey(e, { kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts: now + 3600000 }, A), false);
+  eq(MB.acceptRekey(e, { kind: 'room-rekey', room: 'r', key: RK, kv: 2, ts: 1e15 }, A), false);
 });
 
 check('home: room invites sit with requests at the top', () => {

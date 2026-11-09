@@ -49,7 +49,7 @@ export const openInvite = async (aes, content, nowMs = Date.now()) => {
     const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64urlDecode(env.iv) }, aes, b64urlDecode(env.ct));
     const body = JSON.parse(new TextDecoder().decode(plain));
     if (!body || body.v !== 1) return null;
-    if (typeof body.room !== 'string' || body.room.length < 1 || body.room.length > 64) return null;
+    if (typeof body.room !== 'string' || body.room.length < 1 || body.room.length > 64 || body.room === 'self') return null;
     if (!keyOk(body.key)) return null;
     if (body.kv !== 1 && body.kv !== 2) return null;
     if (typeof body.exp !== 'number' || body.exp * 1000 <= nowMs) return null;

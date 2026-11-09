@@ -70,10 +70,12 @@ export const startPageHost = ({ getEngine, isBusy, onAnswered, strings = {}, dep
   const takeLock = () => {
     if (release) return;
     if (!d.locks) { if (host) host.setEnabled(true); release = () => {}; return; }
-    const held = new Promise((r) => { release = r; });
-    d.locks.request(LOCK, { steal: true }, () => { if (host) host.setEnabled(true); return held; })
+    let mine = null;
+    const held = new Promise((r) => { mine = r; });
+    release = mine;
+    d.locks.request(LOCK, { steal: true }, () => { if (host && release === mine) host.setEnabled(true); return held; })
       .catch(() => {})
-      .finally(() => { release = null; if (host) host.setEnabled(false); });
+      .finally(() => { if (release !== mine) return; release = null; if (host) host.setEnabled(false); });
   };
 
   const dropLock = () => {

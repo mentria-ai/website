@@ -70,16 +70,24 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
     await rooms.sync(out);
   };
 
+  let refreshTimer = null;
+  const refreshSoon = () => {
+    if (refreshTimer) return;
+    refreshTimer = setTimeout(() => { refreshTimer = null; refresh(); }, 1000);
+  };
+
   const knockTick = async () => {
     if (!holder || !rooms || stopped || !knock) return;
     const now = Date.now();
     const knocks = readKnocks();
+    let list = null;
     for (const id of rooms.joined()) {
       if (now - rooms.joinedAt(id) < KNOCK_AFTER_MS) continue;
       if (transfers.peersOf(id).length) continue;
       if (now - (knocks[id] || 0) < KNOCK_EVERY_MS) continue;
-      const pending = (await pendingThreads()).some((t) => t.id === id);
-      if (!pending) continue;
+      if (!list) list = await pendingThreads();
+      const pending = list.find((t) => t.id === id);
+      if (!pending || (knocks[id] || 0) >= pending.at) continue;
       knocks[id] = now;
       writeKnocks(knocks);
       try { await knock(id); } catch (_) {}
@@ -135,7 +143,7 @@ export const createAttach = ({ joinFilesRoom, threadInfo, knock, onChange, devic
     changed(id, { stats });
     if (chan) chan.postMessage({ op: 'change', id, stats });
     const rec = transfers.get(id);
-    if (rec && rec.complete) refresh();
+    if (rec && rec.complete) refreshSoon();
   };
 
   const becomeHolder = async () => {

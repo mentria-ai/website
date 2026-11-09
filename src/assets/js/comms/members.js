@@ -43,12 +43,15 @@ export const inboxBody = (payload) => {
   return rest;
 };
 
+const REKEY_SKEW_MS = 10 * 60 * 1000;
+
 const samePub = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
 
 const rekeyShape = (entry, payload) => !!entry && !!payload && payload.kind === 'room-rekey'
   && typeof payload.room === 'string' && payload.room === entry.room
   && keyOk(payload.key) && payload.kv === 2
-  && typeof payload.ts === 'number' && payload.ts > (Number(entry.keyTs) || 0);
+  && typeof payload.ts === 'number' && payload.ts > (Number(entry.keyTs) || 0)
+  && payload.ts <= Date.now() + REKEY_SKEW_MS;
 
 export const acceptRekey = (entry, payload, sig) => {
   if (!rekeyShape(entry, payload) || !sig || !sig.sigFp || !pubOk(sig.spub)) return false;

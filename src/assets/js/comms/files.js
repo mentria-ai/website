@@ -126,6 +126,7 @@ const IN_FLIGHT = 8;
 const TIMEOUT_MS = 15000;
 const SAVE_MS = 1000;
 const STRIKES = 3;
+const SERVE_MAX = 32;
 const TICK_MS = 4000;
 const ASK_AGAIN_MS = 10000;
 const RATE_MS = 3000;
@@ -242,7 +243,7 @@ export class Transfers {
       if (item.rec.complete) have.push(item.rec.id);
       else if (PULLING.includes(item.rec.state)) want.push(item.rec.id);
     }
-    return { have: have.slice(0, 500), want: want.slice(0, 500) };
+    return { have: have.slice(-500), want: want.slice(-500) };
   }
 
   _hello(threadId, peerId) {
@@ -453,16 +454,26 @@ export class Transfers {
     if (this._locked) { no('locked'); return; }
     if (!item || item.rec.threadId !== threadId || !this._canServe(item.rec, ctx.peerFp(peerId))) { no('missing'); return; }
     const MF = MFg();
+    const p = ctx.peers.get(peerId);
+    if (!p) return;
+    if (!p.serving) p.serving = new Set();
     for (const i of d.i) {
       if (i >= item.n || !MF.bfHas(item.bf, i)) continue;
-      let plain;
-      try { plain = await this._media.readPiece(d.id, i); } catch (e) { no(e && e.code === 'locked' ? 'locked' : 'missing'); return; }
-      if (!this._threads.has(threadId)) return;
-      try { await ctx.act.fpc.send(plain, { target: peerId, metadata: { id: d.id, i } }); } catch (_) { return; }
-      const now = Date.now();
-      item.got.push([now, plain.length]);
-      while (item.got.length && now - item.got[0][0] > RATE_MS) item.got.shift();
-      this._onChange(d.id);
+      const key = d.id + ':' + i;
+      if (p.serving.has(key) || p.serving.size >= SERVE_MAX) continue;
+      p.serving.add(key);
+      try {
+        let plain;
+        try { plain = await this._media.readPiece(d.id, i); } catch (e) { no(e && e.code === 'locked' ? 'locked' : 'missing'); return; }
+        if (!this._threads.has(threadId)) return;
+        try { await ctx.act.fpc.send(plain, { target: peerId, metadata: { id: d.id, i } }); } catch (_) { return; }
+        const now = Date.now();
+        item.got.push([now, plain.length]);
+        while (item.got.length && now - item.got[0][0] > RATE_MS) item.got.shift();
+        this._onChange(d.id);
+      } finally {
+        p.serving.delete(key);
+      }
     }
   }
 

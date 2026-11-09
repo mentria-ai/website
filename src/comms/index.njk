@@ -1250,7 +1250,7 @@ const renderLine = (who, what, opts = {}) => {
   t.className = 'comms__what' + (opts.sys ? ' comms__what--sys' : '');
   if (opts.html) t.innerHTML = opts.html;
   else if (opts.sys) t.textContent = what;
-  else renderBody(t, what, { from: opts.me ? 'self' : 'person', T: T.chat });
+  else renderBody(t, what, { from: opts.me ? 'self' : 'person', hold: !!opts.hold, T: T.chat });
   if (opts.quiet) line.setAttribute('aria-live', 'off');
   line.append(w, t);
   const ts = (typeof opts.ts === 'number' && opts.ts > 0) ? opts.ts : Date.now();
@@ -1801,7 +1801,7 @@ const renderRemoteChat = (item, opts = {}) => {
   const files = mediaParts(item.parts).length > 0;
   if (sentByMe(item)) {
     if (files) renderAttachment('you', item.parts, { me: true, ts: item.ts });
-    else renderLine('you', item.text, { me: true, quiet: true, ts: item.ts });
+    else renderLine('you', item.text, { me: true, quiet: true, ts: item.ts, hold: !(item.signer && item.signer.me) });
     if (!opts.stored) storeLine(item.cmid, 'self', item.text, item.ts, undefined, item.parts);
     if (files) receiveAttachments(item, true);
     return;
@@ -2565,7 +2565,7 @@ const savedRooms = () => { try { const v = MentriaStore.get('comms', 'rooms'); r
 const setSavedRooms = (list) => { try { MentriaStore.set('comms', 'rooms', list); } catch (_) {} };
 const roomUnreadKey = (roomName) => 'room:' + roomName;
 const rememberRoom = (roomName, b64Key, extra = {}) => {
-  if (!roomName || !b64Key || isDmRoom(roomName) || isEphemeralRoom(roomName)) return;
+  if (!roomName || !b64Key || roomName === SELF_THREAD || isDmRoom(roomName) || isEphemeralRoom(roomName)) return;
   const list = savedRooms();
   const i = list.findIndex((r) => r.room === roomName);
   const prev = i >= 0 ? list[i] : null;
@@ -2894,6 +2894,7 @@ const applyVerifiedProfile = async (peerId) => {
 let joinSeq = 0;
 
 const joinNew = async (roomName, b64Key = null, opts = {}) => {
+  if (roomName === SELF_THREAD) return;
   const seq = ++joinSeq;
   if (aiView && aiView.isOpen()) aiView.close();
   if (agentView && agentView.isOpen()) agentView.close();

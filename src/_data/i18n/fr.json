@@ -95,7 +95,7 @@
     "advanced_sub": "Sauvegardes, identité et synchronisation des appareils",
     "data_section_lede": "Ce que vous créez ici est stocké dans ce navigateur. Une sauvegarde est un seul fichier chiffré que vous gardez, pour qu'un effacement du navigateur ou un changement de téléphone n'emporte pas votre travail.",
     "data_in_label": "Dans une sauvegarde",
-    "data_in_body": "Notes, factures, chats IA, réglages des outils et d'affichage, parties enregistrées, progression d'apprentissage et packs importés, comptes 2FA, votre identité Mentria et vos salons Comms, le livre de comptes Finances (toujours verrouillé par sa propre phrase secrète), les J’aime de la radio, et les extensions installées avec leurs données, comme les decks et images de Story Studio.",
+    "data_in_body": "Notes, factures, chats IA, réglages des outils et d'affichage, parties enregistrées, progression d'apprentissage et packs importés, comptes 2FA, votre identité Mentria et vos salons Comms, le livre de comptes Finances (toujours verrouillé par sa propre phrase secrète), les J’aime de la radio, et les extensions installées avec leurs données, comme les packs et images de Story Studio.",
     "data_out_label": "Hors sauvegarde",
     "data_out_body": "Les modèles d’IA téléchargés et les copies hors ligne des pages et des decks, qui se téléchargent à nouveau quand vous en avez besoin. Votre bibliothèque de photos, vidéos et musiques, ses miniatures et l’endroit où vous vous êtes arrêté, qui se reconstruisent quand vous ajoutez à nouveau vos dossiers. L’accès aux dossiers, les notifications programmées et les réglages « déverrouiller sur cet appareil », qui ne fonctionnent que sur l’appareil qui les a créés.",
     "data_usage_label": "Utilisation",

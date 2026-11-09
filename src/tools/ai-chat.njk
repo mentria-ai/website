@@ -457,7 +457,7 @@ function runApp(MentriaEngine, Tiers) {
   const askLink = takeAskLink();
   const sharedAsk = askLink !== null || pageQuery.get('shared') === '1';
   const askedThread = sharedAsk ? 'new' : pageQuery.get('thread');
-  let regenAsked = !sharedAsk && pageQuery.get('regen') === '1';
+  let regenAsked = !sharedAsk && pageQuery.get('regen') === '1' && (() => { try { return new URL(document.referrer).origin === location.origin; } catch (_) { return false; } })();
   let sharedBody = '';
   const PHOTO_DEFAULT = 'Describe this image.';
   const restoredTurns = new WeakMap();
@@ -670,6 +670,7 @@ function runApp(MentriaEngine, Tiers) {
     if (generating) stopGeneration();
     messages = [systemMessage];
     conversationImages = [];
+    dropLegacy();
     forgetThread();
     messagesEl.innerHTML = '';
     if (emptyEl) {
@@ -751,6 +752,15 @@ function runApp(MentriaEngine, Tiers) {
     inputEl.scrollTop = inputEl.scrollHeight;
     if (!inputEl.disabled) inputEl.focus();
     if (!notice) showNotice('shared', 'sharedNotice', null, 'btnSaveNote', saveSharedNote);
+  }
+
+  function sharedPending() {
+    return !!sharedBody && !!inputEl.value.trim();
+  }
+
+  function dropLegacy() {
+    if (!legacyShown) return;
+    try { if (window.MentriaStore) window.MentriaStore.remove('ai_chat', 'conversation'); } catch (_) {}
   }
 
   function saveSharedNote() {
@@ -1914,13 +1924,15 @@ function runApp(MentriaEngine, Tiers) {
       if (err && err.message === 'load-cut-short') {
         if (strip) strip.hide();
         setStatus('idle', 'statusNoModel');
-        showNotice('postponed', 'loadCutNotice', null, 'btnReloadModel', () => loadModel());
+        if (sharedPending()) showNotice('shared', 'sharedNotice', null, 'btnSaveNote', saveSharedNote);
+        else showNotice('postponed', 'loadCutNotice', null, 'btnReloadModel', () => loadModel());
         return false;
       }
       if (err && err.message === 'download-postponed') {
         if (strip) strip.hide();
         setStatus('idle', 'statusNoModel');
-        showNotice('postponed', 'noModelNotice', null, 'btnChooseModel', () => loadModel(true));
+        if (sharedPending()) showNotice('shared', 'sharedNotice', null, 'btnSaveNote', saveSharedNote);
+        else showNotice('postponed', 'noModelNotice', null, 'btnChooseModel', () => loadModel(true));
         noticeBtn.focus({ preventScroll: true });
         return false;
       }

@@ -717,6 +717,7 @@ try {
           var setUpdateChip = function (chip, on) {
             chip.hidden = !on;
             document.documentElement.classList.toggle('m-update-on', on);
+            if (on) document.documentElement.style.setProperty('--m-update-h', chip.offsetHeight + 'px');
           };
           var setPending = function (sw) {
             pending = sw;

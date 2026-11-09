@@ -111,6 +111,12 @@ npm run build   # production build → ./build
 The site shares one ladder: 2B · 4B · 9B · 27B. The three small tiers are Ternary Bonsai 2 by PrismML, built on Qwen3.5 (Apache-2.0): every weight is −1, 0 or +1, about 2 bits with one scale per group of 128, repacked for this engine and published with their evaluations at [Ternary-Bonsai-2-2B-mentria](https://huggingface.co/mentriaai/Ternary-Bonsai-2-2B-mentria), [4B](https://huggingface.co/mentriaai/Ternary-Bonsai-2-4B-mentria) and [9B](https://huggingface.co/mentriaai/Ternary-Bonsai-2-9B-mentria). The 27B is Bonsai-27B, also by PrismML, natively 1-bit, repacked for this engine and published with its evaluation at [huggingface.co/mentriaai/Bonsai-27B-mentria](https://huggingface.co/mentriaai/Bonsai-27B-mentria). On the first visit a device check loads the best model the hardware qualifies for and runs a real generation to prove the route works, dropping a tier if it does not, then remembers the verdict. Bigger models are an explicit one-time choice, never a surprise download, and the check can be sent to the background or stopped at any point.
 </details>
 
+## Who builds this
+
+Mentria is built by one developer who would rather stay anonymous: no investors, no team and no face on it. The aim is technology that keeps your data private, stays open for anyone to read, and reaches as close to the cutting edge as a browser allows: an engine written from scratch that runs some of the best open AI models on your own device, with every tool built around it. Your notes, files and questions, and the AI that answers them, should belong to you.
+
+If Mentria is useful to you, a ⭐ [star](https://github.com/mentria-ai/website/stargazers) helps other people find it, and [sponsoring](https://github.com/sponsors/mentria-ai) helps keep it going.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

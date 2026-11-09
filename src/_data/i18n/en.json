@@ -5701,6 +5701,7 @@
         "send_interrupted": "send interrupted — {name}: everyone left the room",
         "all_left": "all peers left during send",
         "send_failed_for": "send failed for {name}: {reason}",
+        "save_failed": "save failed for {name}: {reason}",
         "dm_offline": "files go straight device-to-device, so {name} has to be online too. they're not connected right now.",
         "pinged": "pinged their device — try again once they open comms.",
         "nobody": "nobody is connected to this room yet — files send directly, so someone has to be here.",
@@ -5734,6 +5735,7 @@
         "saved_here": "saved on this device",
         "open_pdf": "Open in PDF tool",
         "save": "Save",
+        "save_now": "Save now",
         "retry": "Retry",
         "paused": "Paused at {size}. It carries on by itself when Comms is open on both.",
         "accept": "Accept",
@@ -5883,6 +5885,7 @@
       },
       "viewer": {
         "save": "Save",
+        "save_now": "Save now",
         "share": "Share",
         "share_now": "Share now",
         "close": "Close",

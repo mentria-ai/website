@@ -5701,6 +5701,7 @@
         "send_interrupted": "envoi interrompu — {name} : tout le monde a quitté le salon",
         "all_left": "tout le monde est parti pendant l’envoi",
         "send_failed_for": "échec de l’envoi de {name} : {reason}",
+        "save_failed": "échec de l’enregistrement de {name} : {reason}",
         "dm_offline": "les fichiers passent directement d’appareil à appareil, donc {name} doit aussi être en ligne. ce n’est pas le cas pour le moment.",
         "pinged": "son appareil a été alerté — réessayez quand cette personne aura ouvert comms.",
         "nobody": "personne n’est encore connecté à ce salon — les fichiers sont envoyés directement, il faut donc que quelqu’un soit là.",
@@ -5734,6 +5735,7 @@
         "saved_here": "enregistré sur cet appareil",
         "open_pdf": "Ouvrir dans l’outil PDF",
         "save": "Enregistrer",
+        "save_now": "Enregistrer maintenant",
         "retry": "Réessayer",
         "paused": "En pause à {size}. Elle reprend toute seule quand Comms est ouvert des deux côtés.",
         "accept": "Accepter",
@@ -5883,6 +5885,7 @@
       },
       "viewer": {
         "save": "Enregistrer",
+        "save_now": "Enregistrer maintenant",
         "share": "Partager",
         "share_now": "Partager maintenant",
         "close": "Fermer",

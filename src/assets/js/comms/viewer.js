@@ -1,4 +1,4 @@
-import { fmtBytes } from '/assets/js/comms/cards.js';
+import { fmtBytes, fileTap, clearTap } from '/assets/js/comms/cards.js';
 
 const SWIPE_PX = 40;
 const fill = (tpl, vars) => String(tpl == null ? '' : tpl).replace(/\{(\w+)\}/g, (m, k) => (Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k]) : m));
@@ -18,7 +18,19 @@ const button = (cls, label, act) => {
   return b;
 };
 
-export const openViewer = ({ items, start = 0, T, onShare } = {}) => {
+export const downloadFile = (file) => {
+  const url = URL.createObjectURL(file);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = file.name || 'file';
+  a.hidden = true;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 120000);
+};
+
+export const openViewer = ({ items, start = 0, T, onShare, onSave, saveOpensSheet = false } = {}) => {
   const V = (T && T.viewer) || {};
   const list = Array.from(items || []).filter((it) => it && it.ref);
   let dlg = document.getElementById('comms-viewer');
@@ -37,9 +49,10 @@ export const openViewer = ({ items, start = 0, T, onShare } = {}) => {
   const top = node('div', 'comms__viewer-top');
   const counter = node('span', 'comms__viewer-count');
   const name = node('span', 'comms__viewer-name');
-  const save = node('a', 'm-btn m-btn--ghost comms__viewer-save', V.save || '');
+  const save = button('m-btn m-btn--ghost comms__viewer-save', V.save || '', 'save');
+  save.hidden = !onSave;
   const share = button('m-btn m-btn--ghost comms__viewer-share', V.share || '', 'share');
-  share.hidden = !(onShare && navigator.share);
+  share.hidden = !(onShare && navigator.share) || (saveOpensSheet && !!onSave);
   const closeBtn = button('m-btn m-btn--ghost comms__viewer-close', V.close || '×', 'close');
   top.append(counter, name, save, share, closeBtn);
   const stage = node('div', 'comms__viewer-stage');
@@ -65,17 +78,14 @@ export const openViewer = ({ items, start = 0, T, onShare } = {}) => {
   strip.hidden = list.length < 2;
   dlg.append(top, stage, prev, next, strip);
 
-  let shareFile = null;
   const show = () => {
     const it = list[index];
     if (!it) return;
     dlg.dataset.index = String(index);
     counter.textContent = list.length > 1 ? (index + 1) + ' / ' + list.length : '';
     name.textContent = it.name || '';
-    save.href = mediaUrl(it.ref) + '?dl=1';
-    save.setAttribute('download', it.name || '');
-    share.textContent = V.share || '';
-    shareFile = null;
+    clearTap(save, V.save);
+    clearTap(share, V.share);
     const old = stage.querySelector('video');
     if (old) { try { old.pause(); } catch (_) {} }
     let el;
@@ -127,23 +137,10 @@ export const openViewer = ({ items, start = 0, T, onShare } = {}) => {
     else if (act === 'go') go(Number(t.dataset.index));
     else if (act === 'share' && onShare) {
       const it = list[index];
-      if (shareFile) {
-        const f = shareFile;
-        shareFile = null;
-        share.textContent = V.share || '';
-        try { await navigator.share({ files: [f] }); } catch (_) {}
-        return;
-      }
-      share.disabled = true;
-      try {
-        const res = await onShare(it, { now: true });
-        if (res && res.later) {
-          shareFile = res.file;
-          share.textContent = V.share_now || V.share || '';
-        }
-      } finally {
-        share.disabled = false;
-      }
+      await fileTap(share, async () => { const res = await onShare(it, { now: true }); return list[index] === it ? res : null; }, V.share, V.share_now);
+    } else if (act === 'save' && onSave) {
+      const it = list[index];
+      await fileTap(save, async () => { const res = await onSave(it); return list[index] === it ? res : null; }, V.save, V.save_now);
     }
   }, { signal });
   dlg.addEventListener('cancel', (e) => { e.preventDefault(); close(); }, { signal });

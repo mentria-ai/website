@@ -183,6 +183,26 @@ const fileKind = (mime, name) => {
 
 const mediaUrl = (ref) => '/comms-media/' + encodeURIComponent(ref);
 
+const readyFiles = new WeakMap();
+export const clearTap = (btn, label) => { readyFiles.delete(btn); btn.textContent = label || ''; };
+export const fileTap = async (btn, run, label, now) => {
+  const ready = readyFiles.get(btn);
+  if (ready) {
+    clearTap(btn, label);
+    try { await navigator.share({ files: [ready] }); } catch (_) {}
+    return;
+  }
+  if (btn.disabled) return;
+  btn.disabled = true;
+  try {
+    const res = await run();
+    if (res && res.later && btn.isConnected) { readyFiles.set(btn, res.file); btn.textContent = now || label || ''; }
+  } catch (_) {
+  } finally {
+    btn.disabled = false;
+  }
+};
+
 const tileOf = (doc, item, more) => {
   const b = node(doc, 'button', 'comms__tile');
   b.type = 'button';
@@ -229,9 +249,9 @@ const fileCardOf = (doc, item, T) => {
     imp.dataset.act = 'import-pack';
     acts.append(imp);
   }
-  const save = node(doc, 'a', 'm-btn m-btn--ghost comms__fact', F.save || '');
-  save.href = mediaUrl(item.ref) + '?dl=1';
-  save.setAttribute('download', item.name || '');
+  const save = node(doc, 'button', 'm-btn m-btn--ghost comms__fact', F.save || '');
+  save.type = 'button';
+  save.dataset.act = 'save';
   acts.append(save);
   card.append(acts);
   return card;
@@ -411,6 +431,7 @@ export const renderParts = (el, parts, opts = {}) => {
     const it = items.find((x) => x.ref === card.dataset.ref);
     if (t.dataset.act === 'open-pdf' && opts.onOpenPdf) { e.preventDefault(); opts.onOpenPdf(card.dataset.ref, it); }
     if (t.dataset.act === 'import-pack' && opts.onImportPack) { e.preventDefault(); opts.onImportPack(card.dataset.ref, it); }
+    if (t.dataset.act === 'save' && opts.onSave) { const F = (opts.T && opts.T.files) || {}; fileTap(t, () => opts.onSave(card.dataset.ref, it), F.save, F.save_now); }
   });
   el.replaceChildren(root);
   for (const it of items) applyItem(root, it.ref, opts.media ? opts.media(it.ref) : null);

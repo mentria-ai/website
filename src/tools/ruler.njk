@@ -1083,11 +1083,17 @@ html.rl-ov-on .app-bar { display: none !important; }
     resolve();
   }
 
+  var laidSize = '';
+  function overlaySize() {
+    return ovCanvas.clientWidth + 'x' + ovCanvas.clientHeight + '@' + (window.devicePixelRatio || 1);
+  }
+
   function layoutOverlay() {
     state.dpr = window.devicePixelRatio || 1;
     var w = ovCanvas.clientWidth;
     var h = ovCanvas.clientHeight;
     if (!w || !h) return;
+    laidSize = overlaySize();
     viewH = h;
     var bw = Math.max(1, Math.round(w * state.dpr));
     var bh = Math.max(1, Math.round(h * state.dpr));
@@ -1626,7 +1632,7 @@ html.rl-ov-on .app-bar { display: none !important; }
   window.addEventListener('orientationchange', schedule);
   if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule);
   if (window.ResizeObserver) {
-    try { new ResizeObserver(schedule).observe(ov); } catch (e) {}
+    try { new ResizeObserver(function () { if (isOpen() && laidSize === overlaySize()) return; schedule(); }).observe(ov); } catch (e) {}
   }
 
   var dprQuery = null;

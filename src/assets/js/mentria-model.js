@@ -51,7 +51,7 @@ const DEFAULT_COPY = {
   failed: 'Couldn’t run an on-device model on this device.',
   chooseTitle: 'Choose your AI model',
   chooseHint: 'Your device can run up to {name}. Bigger models are smarter but download more.',
-  choosePitch: 'Runs fully on your device — private, free, and works offline after the one-time download.',
+  choosePitch: 'Runs on your device — free, works offline after the one-time download, and your data stays private.',
   chooseSample: 'Ask things like “explain quantum computing simply” and the answer is generated on your own hardware.',
   chooseNotNow: 'Not now',
   continueBg: 'Continue in background',
@@ -416,6 +416,20 @@ function requestPersistentStorage() {
   } catch (_) {}
 }
 
+export async function hostModels() {
+  if (typeof navigator === 'undefined' || !navigator.gpu) return [];
+  let d = null;
+  try { d = await Tiers.decideTier(); } catch (_) { return []; }
+  if (!d || !d.tier || (d.signals && d.signals.ios)) return [];
+  const allowed = new Set([Tiers.SMALL_TIER].concat(d.eligible || []));
+  const out = [];
+  for (const id of Tiers.TIER_CHAIN) {
+    if (!allowed.has(id) || Tiers.isLegacyTier(id)) continue;
+    if (await Tiers.isTierCached(id)) out.push({ tier: id, state: 'cached' });
+  }
+  return out;
+}
+
 export async function ensureModel(engineFactory, opts) {
   opts = opts || {};
   if (opts.guardReload && loadWasCut()) throw new Error('load-cut-short');
@@ -479,7 +493,8 @@ async function loadModelFor(engineFactory, opts) {
   };
 
   if (cachedOnly) {
-    const c = await Tiers.effectiveTier({ cachedOnly: true });
+    const asked = typeof opts.tier === 'string' && Tiers.TIERS[opts.tier] ? opts.tier : null;
+    const c = opts.tier ? (asked && await Tiers.isTierCached(asked) ? asked : null) : await Tiers.effectiveTier({ cachedOnly: true });
     if (!c) throw new Error('model-not-cached');
     return loadCached(c);
   }

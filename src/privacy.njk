@@ -8,7 +8,9 @@ permalink: "{{ locale.pathPrefix }}/privacy/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'privacy.title' | t }}"
+  seoTitle: "{{ 'privacy.seo_title' | t }}"
   description: "{{ 'privacy.desc' | t }}"
+  seoDescription: "{{ 'privacy.seo_description' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">privacy</span></p>

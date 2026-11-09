@@ -2,7 +2,7 @@
   "webmcp": {
     "panel_title": "IA sur l'appareil",
     "panel_close": "Fermer",
-    "panel_privacy": "Réponse générée par le modèle de cet appareil — rien n'a été envoyé nulle part.",
+    "panel_privacy": "Réponse générée par le modèle de cet appareil.",
     "panel_error": "Le modèle local n'a pas pu répondre : ",
     "panel_busy": "Le modèle sur l'appareil est occupé dans un autre onglet. Réessayez dans un instant.",
     "panel_summarize": "Résumé privé de vos notes en cours",
@@ -15,7 +15,7 @@
     "description": "Une IA qui tourne dans votre navigateur, avec des outils intégrés, une bibliothèque d’extensions et des packs de cartes pour apprendre. Ajoutez vos propres extensions et packs. Vos données restent privées.",
     "metaTitle": "Mentria — Apprenez et expérimentez avec une IA qui tourne sur votre appareil",
     "metaDescription": "Une IA qui tourne dans votre navigateur, avec des outils intégrés, une bibliothèque d’extensions et des packs de cartes pour apprendre. Ajoutez vos propres extensions et packs. Vos données restent privées.",
-    "socialImageAlt": "Mentria — des outils, des jeux et de l'IA qui tournent entièrement dans votre navigateur"
+    "socialImageAlt": "Mentria — apprenez et expérimentez avec une IA qui tourne sur votre appareil : outils, jeux, packs de cartes pour apprendre et extensions"
   },
   "nav": {
     "feed": "Fil",
@@ -31,14 +31,34 @@
   },
   "about": {
     "title": "À propos",
-    "meta_description": "Mentria est un petit studio créatif. Des outils, des jeux et une IA respectueux de la vie privée qui tournent dans votre navigateur. Sans comptes, sans pistage, et vos données restent privées.",
+    "meta_description": "Mentria est un petit studio créatif : outils, jeux et IA respectueux de la vie privée qui tournent dans votre navigateur, et packs de cartes pour apprendre. Vos données restent privées.",
     "tagline": "Apprenez et expérimentez avec une IA qui tourne sur votre appareil.",
     "copyright": "© 2026 Mentria. Tous droits réservés.",
     "image_use": "Utilisation des images",
     "s1_label": "ce que c'est",
-    "s1_p1": "Mentria est un petit studio créatif qui fabrique des logiciels de façon artisanale : faits main, publiés quand ils sont prêts, et qui ne rendent de comptes qu'aux personnes qui les utilisent. Le site que vous lisez est une application web progressive. Tout ce qu'il contient, des outils et des jeux à l'IA, s'exécute sur l'appareil devant vous. Aucun backend n'envoie vos prompts vers une ferme de serveurs. Aucun traqueur ne mesure le temps passé à regarder la page d'accueil.",
-    "s1_p2": "Nous créons des <strong>outils qui vous respectent</strong> : des notes, des minuteurs, un scanner QR, un authentificateur, un générateur de factures, une étagère de jeux, un chat IA qui s'exécute entièrement dans votre navigateur, une radio infinie et un fil quotidien d'explications visuelles. Pas de comptes, pas de capture d'e-mail, pas de bandeau cookies. Si quelque chose ici vous est utile, ça le reste quand votre wifi coupe, et ça le reste dans cinq ans, quand la startup à laquelle vous vous êtes inscrit aura pivoté, périclité ou disparu.",
-    "ship_label": "ce que nous publions",
+    "s1_p1": "Mentria est un studio d'une seule personne qui fabrique des logiciels de façon artisanale : faits main, publiés quand ils sont prêts, et qui ne rendent de comptes qu'aux personnes qui les utilisent. Le site que vous lisez est une application web progressive. Les outils intégrés, les jeux et l'IA s'exécutent sur l'appareil devant vous. Aucun backend n'envoie vos prompts vers une ferme de serveurs. Aucun traqueur ne mesure le temps passé à regarder la page d'accueil.",
+    "s1_p2": "Je crée des <strong>outils qui vous respectent</strong> : des notes, des minuteurs, un scanner QR, un authentificateur, un générateur de factures, une étagère de jeux, un chat IA qui s'exécute entièrement dans votre navigateur, une radio infinie et un fil quotidien d'explications visuelles. Pas de comptes, pas de capture d'e-mail, pas de bandeau cookies. Si quelque chose ici vous est utile, ça le reste quand votre wifi coupe, et ça le reste dans cinq ans, quand la startup à laquelle vous vous êtes inscrit aura pivoté, périclité ou disparu.",
+    "maker_label": "qui est derrière",
+    "maker_h": "Une seule personne derrière tout ça",
+    "maker_role": "dev en solo",
+    "maker_name_hidden": "nom masqué",
+    "maker_p1": "Derrière Mentria, il y a une seule personne, qui préfère rester anonyme. Pas d'investisseurs, pas d'équipe, et pas de visage à mettre dessus. Le travail doit parler de lui-même, et garder mon identité privée part de la même conviction que garder la vôtre privée.",
+    "maker_p2": "Je veux une technologie qui respecte votre vie privée, ouverte à la lecture de tous, et aussi proche de la pointe que le permet un navigateur. J'écris donc le moteur qui fait tourner certains des meilleurs modèles d'IA ouverts directement sur votre appareil, et je construis chaque outil autour de lui.",
+    "maker_p3": "Le but : rendre à chacun sa capacité d'agir. Vos notes, vos fichiers, vos questions et l'IA qui y répond devraient vous appartenir, aujourd'hui comme dans l'avenir qui vient. Je construis tout cela d'abord pour moi, et pour toutes celles et ceux qui veulent la même chose.",
+    "maker_v1": "privé",
+    "maker_v1_sub": "vos données restent privées",
+    "maker_v2": "ouvert",
+    "maker_v2_sub": "le code est sur GitHub",
+    "maker_v3": "de pointe",
+    "maker_v3_sub": "un moteur écrit de zéro",
+    "maker_v4": "IA personnalisable",
+    "maker_v4_sub": "sur votre appareil, avec des adaptateurs interchangeables",
+    "maker_goal": "votre autonomie",
+    "maker_goal_sub": "de retour entre vos mains",
+    "maker_support": "Si Mentria vous est utile, une étoile aide d'autres personnes à découvrir le projet, et un parrainage aide à le faire vivre.",
+    "maker_star": "Mettre une étoile sur GitHub",
+    "maker_sponsor": "Soutenir",
+    "ship_label": "ce que je publie",
     "ship_h": "Quatre étagères",
     "shelf_tools": "Outils",
     "shelf_games": "Jeux",
@@ -56,8 +76,8 @@
     "stack_8": "outil pdf avec pdf.js (apache-2.0) et pdf-lib (mit)",
     "principles_label": "principes",
     "principles_h": "Trois règles",
-    "principle_1": "aucun serveur dans la boucle",
-    "principle_2": "aucun pistage, aucun compte",
+    "principle_1": "l'ia tourne sur votre appareil",
+    "principle_2": "aucun compte, aucun script d'analyse",
     "principle_3": "code source sur github",
     "contact": "contact",
     "update_check": "Vérifier les mises à jour",
@@ -73,9 +93,9 @@
     "data_section_title": "Vos données",
     "advanced_title": "Paramètres avancés",
     "advanced_sub": "Sauvegardes, identité et synchronisation des appareils",
-    "data_section_lede": "Ce que vous créez ici est stocké uniquement dans ce navigateur. Une sauvegarde est un seul fichier chiffré que vous gardez, pour qu'un effacement du navigateur ou un changement de téléphone n'emporte pas votre travail.",
+    "data_section_lede": "Ce que vous créez ici est stocké dans ce navigateur. Une sauvegarde est un seul fichier chiffré que vous gardez, pour qu'un effacement du navigateur ou un changement de téléphone n'emporte pas votre travail.",
     "data_in_label": "Dans une sauvegarde",
-    "data_in_body": "Notes, factures, chats IA, réglages des outils et d'affichage, parties enregistrées, progression d'apprentissage et packs importés, comptes TOTP, votre identité Mentria et vos salons Comms, le livre de comptes Finances (toujours verrouillé par sa propre phrase secrète), les J’aime de la radio, et les extensions installées avec leurs données, comme les decks et images de Story Studio.",
+    "data_in_body": "Notes, factures, chats IA, réglages des outils et d'affichage, parties enregistrées, progression d'apprentissage et packs importés, comptes 2FA, votre identité Mentria et vos salons Comms, le livre de comptes Finances (toujours verrouillé par sa propre phrase secrète), les J’aime de la radio, et les extensions installées avec leurs données, comme les packs et images de Story Studio.",
     "data_out_label": "Hors sauvegarde",
     "data_out_body": "Les modèles d’IA téléchargés et les copies hors ligne des pages et des decks, qui se téléchargent à nouveau quand vous en avez besoin. Votre bibliothèque de photos, vidéos et musiques, ses miniatures et l’endroit où vous vous êtes arrêté, qui se reconstruisent quand vous ajoutez à nouveau vos dossiers. L’accès aux dossiers, les notifications programmées et les réglages « déverrouiller sur cet appareil », qui ne fonctionnent que sur l’appareil qui les a créés.",
     "data_usage_label": "Utilisation",
@@ -108,7 +128,7 @@
     "data_import_done": "Restauration terminée — rechargement…",
     "data_import_fail": "Échec : {err}",
     "sync_section_title": "Synchroniser les appareils",
-    "sync_section_lede": "Appariez deux appareils avec un code à usage unique. Les données se synchronisent en pair-à-pair, chiffrées de bout en bout. Notre relais ne voit jamais vos données.",
+    "sync_section_lede": "Appariez deux appareils avec un code à usage unique. Les données se synchronisent en pair-à-pair, chiffrées de bout en bout. Ce qui passe par le relais reste scellé.",
     "sync_pair_title": "Appairer un nouvel appareil",
     "sync_pair_lede": "Affichez ce code sur l'autre appareil. Le code est la clé de chiffrement — ne le partagez pas ailleurs.",
     "sync_pair_button": "Générer un code",
@@ -151,8 +171,8 @@
     "sync_confirm_replace": "Cet appareil a déjà ses propres données : {areas}. Le jumelage les remplace par la copie de l'autre appareil. Continuer ?",
     "sync_no_peer": "Aucun appareil n'a répondu avec ce code. Vérifiez le code et gardez la page À propos ouverte sur l'autre appareil.",
     "sync_busy": "Ce code est déjà utilisé par deux autres appareils. Créez un nouveau code sur l'appareil avec lequel vous voulez jumeler celui-ci.",
-    "sync_vault_totp": "Cet appareil a son propre coffre TOTP, et l'autre appareil en a un différent. Remplacer le coffre de cet appareil par celui de l'autre ? Les comptes TOTP qui ne sont que sur cet appareil seront perdus, et il s'ouvrira avec la phrase secrète de l'autre appareil.",
-    "sync_vault_identity": "Cet appareil a sa propre identité Mentria, et l'autre appareil en a une différente. La remplacer par celle de l'autre appareil ? L'identité de cet appareil sera perdue, et elle s'ouvrira avec la phrase secrète de l'autre appareil.",
+    "sync_vault_totp": "Cet appareil a son propre coffre de l’Authentificateur 2FA, et l'autre appareil en a un différent. Remplacer le coffre de cet appareil par celui de l'autre ? Les comptes 2FA qui ne sont que sur cet appareil seront perdus, et il s'ouvrira avec la phrase secrète de l'autre appareil.",
+    "sync_vault_identity": "Cet appareil a sa propre identité Mentria, et l'autre appareil en a une différente. La remplacer par celle de l'autre appareil ? L'identité de cet appareil sera perdue, et elle s'ouvrira avec la phrase secrète de l'autre appareil. L'historique des discussions enregistré sur cet appareil sous l'ancienne identité ne pourra plus être ouvert.",
     "sync_vault_keyring": "Cet appareil a son propre déverrouillage unique, et l'autre appareil en a un différent. Le remplacer par celui de l'autre appareil ? Il s'ouvrira avec le code de récupération de l'autre appareil. Les notes, codes, discussions et finances configurés avec le déverrouillage de cet appareil ne s'ouvriront plus ici tant que vous n'aurez pas réintégré ce déverrouillage depuis À propos. Il est conservé sur cet appareil.",
     "sync_vault_keep": "Garder la version de cet appareil",
     "sync_vault_replace": "Remplacer",
@@ -183,7 +203,8 @@
     "whats_new_since": "Nouveautés depuis {tag}",
     "update_now": "Mettre à jour maintenant",
     "release_notes": "Notes de version sur GitHub",
-    "privacy": "Confidentialité"
+    "privacy": "Confidentialité",
+    "seo_title": "À propos de Mentria : IA et outils de navigateur"
   },
   "common": {
     "undo": "Annuler",
@@ -206,7 +227,7 @@
     "ai_model_offline": "Vous êtes hors ligne. Le modèle se téléchargera dès que vous serez de nouveau en ligne.",
     "data_areas": {
       "invoice": "factures",
-      "totp": "comptes TOTP",
+      "totp": "comptes 2FA",
       "identity": "identité Mentria",
       "keyring": "déverrouillage unique",
       "comms": "salons et contacts Comms",
@@ -223,10 +244,11 @@
       "packs_lib": "packs d’apprentissage importés",
       "finance": "livre de comptes Finances",
       "radio": "J’aime et titres passés de la radio",
-      "other": "autres données enregistrées"
+      "other": "autres données enregistrées",
+      "comms_history": "historique des discussions"
     },
     "restore_replace": "Cet appareil a déjà ses propres données : {areas}. Les remplacer par celles de la sauvegarde ? Choisissez Annuler pour garder les versions de cet appareil. Les notes et tout ce qui est nouveau sont restaurés dans tous les cas.",
-    "restore_totp_vault": "Cet appareil a déjà un coffre TOTP. Le remplacer par celui de la sauvegarde ? Les comptes qui ne sont que sur cet appareil seront perdus, et il s'ouvrira avec la phrase secrète de la sauvegarde.",
+    "restore_totp_vault": "Cet appareil a déjà un coffre de l’Authentificateur 2FA. Le remplacer par celui de la sauvegarde ? Les comptes qui ne sont que sur cet appareil seront perdus, et il s'ouvrira avec la phrase secrète de la sauvegarde.",
     "restore_identity_vault": "Cet appareil a déjà une identité Mentria. La remplacer par celle de la sauvegarde ? L'identité de cet appareil est remplacée, et elle s'ouvrira avec la phrase secrète de la sauvegarde.",
     "restore_keyring_vault": "Cet appareil a déjà son propre déverrouillage unique. Le remplacer par celui de la sauvegarde ? Il s'ouvrira avec le code de récupération de la sauvegarde. Les notes, codes, discussions et finances configurés avec le déverrouillage de cet appareil ne s'ouvriront plus ici tant que vous n'aurez pas réintégré ce déverrouillage depuis À propos. Il est conservé sur cet appareil.",
     "restore_summary": "Restaurer la sauvegarde du {date} ? Elle contient : {areas}. Ce que cet appareil n'a pas encore est ajouté, et on vous demandera avant de remplacer quoi que ce soit ici. Annuler laisse cet appareil tel quel.",
@@ -293,7 +315,10 @@
     "send_failed": "Impossible d’envoyer vers {tool}",
     "key_space": "ESPACE",
     "key_click": "clic",
-    "key_tap": "toucher"
+    "key_tap": "toucher",
+    "backup_history_locked": "L’historique des discussions est exclu tant que votre identité Mentria est verrouillée.",
+    "restore_history_locked": "L’historique des discussions n’a pas été restauré. Déverrouillez votre identité Mentria, puis restaurez de nouveau ce fichier.",
+    "star_cta": "Ce site est open source sur GitHub, fait par une seule personne."
   },
   "home": {
     "tools_heading": "Outils",
@@ -312,7 +337,7 @@
       "pin_action": "Épingler {name}",
       "unpin_action": "Désépingler {name}"
     },
-    "value_prop": "Des outils gratuits qui tournent entièrement dans votre navigateur — sans compte, sans pistage, fonctionne hors ligne.",
+    "value_prop": "Des outils gratuits qui tournent entièrement dans votre navigateur — sans compte, sans scripts d'analyse, fonctionne hors ligne.",
     "try_label": "essayez :",
     "feed": {
       "heading": "FIL_",
@@ -344,7 +369,9 @@
       "feature_offline": "Fonctionne hors ligne une fois en cache"
     },
     "related_ai": "Mentria fait aussi tourner une IA sur votre appareil, en toute confidentialité.",
-    "related_ai_link": "Essayer le chat IA"
+    "related_ai_link": "Essayer le chat IA",
+    "seo_title": "Outils en ligne gratuits dans votre navigateur",
+    "seo_description": "Outils, jeux et applis d’IA gratuits dans le navigateur, sans inscription : règle, podomètre, calculatrice, éditeur PDF, chat IA et plus. La plupart hors ligne."
   },
   "feed_page": {
     "title": "Fil",
@@ -378,13 +405,14 @@
     "macos_step3": "Cliquez sur <strong>Ajouter</strong>.",
     "chrome_step1": "Cliquez sur l'icône d'<strong>installation</strong> dans la barre d'adresse de votre navigateur.",
     "chrome_step2": "Ou ouvrez le menu (⋮) et choisissez <strong>Installer Mentria</strong>.",
-    "note": "Une fois installée, Mentria fonctionne hors ligne et vos données locales restent sur votre appareil.",
+    "note": "Une fois installée, Mentria fonctionne hors ligne et vos données restent privées.",
     "notif_message_one": "Nouveau message",
     "notif_message_many": "{n} nouveaux messages",
     "notif_ring": "Quelqu'un essaie de vous joindre.",
     "notif_reminder": "Vous avez un rappel.",
     "update_title": "Nouvelle version disponible",
     "update_btn": "Mettre à jour",
+    "update_whats_new": "Nouveautés",
     "update_later": "Plus tard"
   },
   "lang_switcher": {
@@ -397,70 +425,93 @@
       "title": "Chat IA",
       "lede": "Ternary Bonsai 2 et Bonsai 27B de PrismML, fonctionnant localement dans votre navigateur. Pas de serveur, pas de clés API. Prend en charge la vision.",
       "tldr": "AI Chat exécute Ternary Bonsai 2 de PrismML, basé sur Qwen3.5, localement dans votre navigateur via WebGPU, et Bonsai 27B sur les ordinateurs qui ont assez de mémoire. Vos messages et vos images sont traités sur votre appareil, et vos données restent privées — pas de serveur, pas de clé API, pas de compte. Prend en charge l'entrée visuelle. Le modèle se charge au premier clic ; les visites suivantes démarrent instantanément depuis le cache local.",
-      "seo_title": "Chat IA privé qui tourne dans votre navigateur"
+      "seo_title": "Chat IA privé qui tourne dans votre navigateur",
+      "seo_description": "Discutez avec une IA qui tourne en local dans votre navigateur grâce à WebGPU. Sans compte ni clé API, elle lit aussi les images, et vos chats restent privés."
     },
     "base64-codec": {
       "title": "Codec Base64",
       "lede": "Encodez et décodez du texte ou des fichiers en Base64. Prend en charge les images, les documents et tout type de fichier. Tout fonctionne localement dans votre navigateur.",
-      "tldr": "Un encodeur et décodeur axé confidentialité pour texte et fichiers. L'encodage et le décodage s'effectuent dans votre navigateur en JavaScript natif — pas d'envoi, pas de serveur. Glissez un fichier ou collez une chaîne Base64, puis copiez ou téléchargez le résultat. Fonctionne hors ligne, sans limite de taille au-delà de la mémoire du navigateur."
+      "tldr": "Un encodeur et décodeur axé confidentialité pour texte et fichiers. L'encodage et le décodage s'effectuent dans votre navigateur en JavaScript natif : vos textes et fichiers ne sont pas envoyés. Glissez un fichier ou collez une chaîne Base64, puis copiez ou téléchargez le résultat. Fonctionne hors ligne, sans limite de taille au-delà de la mémoire du navigateur.",
+      "seo_title": "Encodeur et décodeur Base64 : texte et fichiers",
+      "seo_description": "Encodez du texte ou un fichier en Base64, ou décodez du Base64 en texte, image ou document. Tout se fait dans le navigateur : vos fichiers ne sont pas envoyés."
     },
     "extensions": {
       "title": "Extensions",
-      "lede": "Installez des extensions privées en un seul fichier qui vivent uniquement sur cet appareil. Elles apparaissent dans votre lanceur et votre palette de commandes — jamais sur le site public.",
-      "tldr": "Une plateforme où vous apportez vos propres outils. Une extension est un fichier HTML avec un manifeste intégré ; installez-la ici et elle obtient une tuile dans votre lanceur, des entrées optionnelles dans la palette de commandes, et son propre stockage local inclus dans votre sauvegarde chiffrée. Les extensions s'exécutent avec un accès complet sur cet appareil : n'installez que des fichiers de personnes en qui vous avez confiance. Rien à leur sujet n'est jamais envoyé."
+      "lede": "Installez des extensions privées en un seul fichier sur cet appareil. Elles apparaissent dans votre lanceur et votre palette de commandes — jamais sur le site public.",
+      "tldr": "Une plateforme où vous apportez vos propres outils. Une extension est un fichier HTML avec un manifeste intégré ; installez-la ici et elle obtient une tuile dans votre lanceur, des entrées optionnelles dans la palette de commandes, et son propre stockage local inclus dans votre sauvegarde chiffrée. Les extensions s'exécutent avec un accès complet sur cet appareil : n'installez que des fichiers de personnes en qui vous avez confiance. L'installer ne l'envoie nulle part, mais une extension peut elle-même utiliser le réseau.",
+      "seo_title": "Extensions Mentria : installez des applis privées",
+      "seo_description": "Installez des extensions privées d’un seul fichier sur cet appareil, chacune avec sa tuile, ses commandes facultatives et son stockage, hors du site public."
     },
     "coin-flip": {
       "title": "Pile ou face",
       "lede": "Pile ou face — lancez une pièce instantanément. Lancez une série au meilleur des N pour départager. Fonctionne hors ligne.",
-      "tldr": "Un pile ou face minimaliste appuyé sur le RNG sécurisé du navigateur (Web Crypto). Le résultat est décidé localement ; rien n'est enregistré ni envoyé à un serveur. Conserve un historique par session. Pratique pour des décisions rapides, des départs équitables ou trancher des débats de table — instantané sur tout appareil.",
-      "seo_title": "Pile ou face en ligne : lancer une pièce"
+      "tldr": "Un pile ou face minimaliste appuyé sur le RNG sécurisé du navigateur (Web Crypto). Le résultat est décidé localement, dans votre navigateur. Conserve un historique par session. Pratique pour des décisions rapides, des départs équitables ou trancher des débats de table — instantané sur tout appareil.",
+      "seo_title": "Pile ou face en ligne : lancer une pièce",
+      "seo_description": "Jouez à pile ou face en ligne. Lancez une série au meilleur des manches pour départager, regardez la pièce tourner et tomber, même hors ligne, dans le navigateur."
     },
     "color-picker": {
       "title": "Sélecteur de couleurs",
       "lede": "Choisissez n'importe quelle couleur, voyez ses valeurs HEX / RGB / HSL, et générez des palettes harmonieuses. Fonctionne hors ligne.",
-      "tldr": "Choisissez, prélevez et sauvegardez des couleurs entièrement dans votre navigateur. Sortie en HEX, RGB et HSL côte à côte. Les nuanciers enregistrés persistent via localStorage ; rien n'est envoyé. Cliquez dans le sélecteur, copiez n'importe quelle valeur dans le presse-papiers ou composez une petite palette pour le design ou le code. Fonctionne hors ligne."
+      "tldr": "Choisissez, prélevez et sauvegardez des couleurs entièrement dans votre navigateur. Sortie en HEX, RGB et HSL côte à côte. Les nuanciers enregistrés sont conservés dans le localStorage de ce navigateur. Cliquez dans le sélecteur, copiez n'importe quelle valeur dans le presse-papiers ou composez une petite palette pour le design ou le code. Fonctionne hors ligne.",
+      "seo_title": "Sélecteur de couleurs : HEX, RGB, HSL et palettes",
+      "seo_description": "Choisissez une couleur, copiez sa valeur HEX, RGB ou HSL, puis créez des palettes assorties. Sélecteur de couleurs gratuit, dans le navigateur et hors ligne."
     },
     "countdown-timer": {
       "title": "Compte à rebours",
       "lede": "Définissez une durée ou choisissez une heure cible. Jusqu'à 4 minuteries indépendantes avec son d'alarme.",
-      "tldr": "Lancez jusqu'à quatre minuteurs en parallèle, avec notifications système optionnelles à la fin, même quand l'onglet est masqué. Choisissez une durée ou une date et heure cible, nommez chaque minuteur, sauvegardez des préréglages. L'alarme audio et la notification se déclenchent depuis votre navigateur ; rien n'est enregistré ni envoyé à un serveur."
+      "tldr": "Lancez jusqu'à quatre minuteurs en parallèle, avec notifications système optionnelles à la fin, même quand l'onglet est masqué. Choisissez une durée ou une date et heure cible, nommez chaque minuteur, sauvegardez des préréglages. L'alarme audio et la notification se déclenchent depuis votre navigateur ; avec les notifications activées, le serveur de Mentria ne reçoit que l'heure du réveil, pour que l'alerte arrive même après avoir quitté l'onglet.",
+      "seo_title": "Compte à rebours en ligne : minuteurs avec alarme",
+      "seo_description": "Réglez une durée ou comptez jusqu’à une date et une heure. Lancez plusieurs minuteurs à la fois, nommez-les, et une alarme sonne à la fin. Hors ligne aussi."
     },
     "decision-wheel": {
       "title": "Roue de décision",
       "lede": "Indécis ? Faites tourner la roue et laissez le destin choisir. Fonctionne hors ligne.",
-      "tldr": "Faites tourner une roue personnalisable pour choisir parmi votre propre liste d'options. Ajoutez ou retirez des choix à la volée ; le résultat est tiré localement avec le RNG du navigateur. Pas de comptes, pas de traceurs, pas de serveur. Idéal pour choisir un restaurant, attribuer des tâches ou tout ce que vous trancheriez sinon à pile ou face."
+      "tldr": "Faites tourner une roue personnalisable pour choisir parmi votre propre liste d'options. Ajoutez ou retirez des choix à la volée ; le résultat est tiré localement avec le RNG du navigateur. Aucun compte nécessaire. Idéal pour choisir un restaurant, attribuer des tâches ou tout ce que vous trancheriez sinon à pile ou face.",
+      "seo_title": "Roue de décision : tournez pour décider oui ou non",
+      "seo_description": "Indécis ? Faites tourner la roue : oui, non, à vous de voir, ou attendez et réessayez. Une roue de décision gratuite dans votre navigateur, même hors ligne."
     },
     "flappy": {
       "title": "Flappy",
       "lede": "Un avion en papier traversant une pile de prompts terminal. Touchez, cliquez ou appuyez sur ESPACE pour battre des ailes. Ne crashez pas le prompt.",
-      "tldr": "Une version navigateur de Flappy Bird à l'esthétique synthwave-terminal. HTML5 Canvas pur — pas d'installation, pas d'inscription, pas de scripts tiers. État du jeu, meilleur score et audio fonctionnent côté client et restent sur votre appareil. Touchez, cliquez ou appuyez sur espace pour battre des ailes. Fonctionne hors ligne une fois en cache."
+      "tldr": "Une version navigateur de Flappy Bird à l'esthétique synthwave-terminal. HTML5 Canvas pur — pas d'installation, pas d'inscription, pas de scripts tiers. État du jeu, meilleur score et audio fonctionnent côté client et restent sur votre appareil. Touchez, cliquez ou appuyez sur espace pour battre des ailes. Fonctionne hors ligne une fois en cache.",
+      "seo_title": "Flappy Plane : jeu à une touche, gratuit en ligne",
+      "seo_description": "Un avion en papier entre des piles de prompts : touchez, cliquez ou tapez Espace pour battre des ailes, sans crasher le prompt. Flappy gratuit, même hors ligne."
     },
     "invoice": {
       "title": "Générateur de factures",
       "lede": "Créez des factures épurées d'une page dans votre navigateur. Auto-enregistrement pendant la saisie. Imprimez en A4 ou exportez en JSON.",
-      "tldr": "Construisez des factures A4 propres dans votre navigateur et enregistrez-les en PDF via la boîte de dialogue d'impression du navigateur. Ajoutez des lignes, devise, coordonnées bancaires, notes ; auto-enregistrement dans localStorage pour ne rien perdre au rechargement. Importez ou exportez la facture entière en JSON. Pas de compte, pas de serveur — chaque octet reste sur votre appareil."
+      "tldr": "Construisez des factures A4 propres dans votre navigateur et enregistrez-les en PDF via la boîte de dialogue d'impression du navigateur. Ajoutez des lignes, devise, coordonnées bancaires, notes ; auto-enregistrement dans localStorage pour ne rien perdre au rechargement. Importez ou exportez la facture entière en JSON. Pas de compte ; vos factures sont enregistrées dans ce navigateur.",
+      "seo_title": "Générateur de factures gratuit à imprimer",
+      "seo_description": "Créez des factures épurées d’une page dans le navigateur : enregistrées à la frappe, imprimées en A4 ou PDF, exportées en JSON. Vos factures restent privées."
     },
     "markdown-pdf": {
       "title": "Markdown → PDF",
       "lede": "Écrivez du markdown, voyez un aperçu en direct, et téléchargez un PDF professionnel et propre. Sauvegarde automatique dans votre navigateur. Vos documents restent privés.",
-      "tldr": "Un éditeur markdown avec aperçu en direct et export PDF en un clic via la boîte de dialogue d'impression du navigateur. Importe et exporte des fichiers .md, sauvegarde les brouillons localement, prend en charge le markdown GitHub-flavored avec tableaux et listes de tâches. Pas d'envoi, pas de compte, pas de serveur — tout fonctionne en JavaScript côté client et hors ligne."
+      "tldr": "Un éditeur markdown avec aperçu en direct et export PDF en un clic via la boîte de dialogue d'impression du navigateur. Importe et exporte des fichiers .md, sauvegarde les brouillons localement, prend en charge le markdown GitHub-flavored avec tableaux et listes de tâches. Aucun compte nécessaire : tout fonctionne en JavaScript côté client, même hors ligne, et vos documents restent privés.",
+      "seo_title": "Convertir Markdown en PDF avec aperçu en direct",
+      "seo_description": "Écrivez en Markdown, voyez l’aperçu en direct, téléchargez un PDF net et professionnel. Le texte s’enregistre dans le navigateur. Vos documents restent privés."
     },
     "pdf": {
       "title": "Lecteur et éditeur PDF",
       "short": "PDF",
       "lede": "Ouvrez, lisez et modifiez des PDF sur votre appareil : recherche, surlignage, notes et signatures, formulaires, et fusion, découpage ou réorganisation des pages.",
-      "tldr": "Ouvrez un PDF et lisez-le avec le zoom, les miniatures des pages, le sommaire du document, la recherche et un mode de lecture sombre. Passez en mode Modifier pour surligner du texte, ajouter des notes, dessiner, placer des images ou signer ; les champs de formulaire se remplissent directement sur la page. Pages affiche chaque page sous forme de carte : faites-les glisser pour les réorganiser, faites-les pivoter, supprimez-les, extrayez-les ou découpez le document, ajoutez un autre PDF pour les fusionner, ou enregistrez des pages en images. Votre PDF s'ouvre dans le navigateur sans être envoyé en ligne, et après votre première visite l'outil fonctionne aussi hors connexion."
+      "tldr": "Ouvrez un PDF et lisez-le avec le zoom, les miniatures des pages, le sommaire du document, la recherche et un mode de lecture sombre. Passez en mode Modifier pour surligner du texte, ajouter des notes, dessiner, placer des images ou signer ; les champs de formulaire se remplissent directement sur la page. Pages affiche chaque page sous forme de carte : faites-les glisser pour les réorganiser, faites-les pivoter, supprimez-les, extrayez-les ou découpez le document, ajoutez un autre PDF pour les fusionner, ou enregistrez des pages en images. Votre PDF s'ouvre dans le navigateur sans être envoyé en ligne, et après votre première visite l'outil fonctionne aussi hors connexion.",
+      "seo_title": "Éditeur PDF en ligne : signer, fusionner, découper",
+      "seo_description": "Modifiez vos PDF dans le navigateur : recherche, surlignage, notes, signatures, formulaires, fusion, découpage, tri des pages. Vos fichiers ne sont pas envoyés."
     },
     "minesweeper": {
       "title": "Démineur",
       "lede": "Casse-tête logique classique en tenue de terminal. Cliquez pour creuser, clic droit (ou mode F) pour marquer un drapeau. Les chiffres comptent les mines adjacentes. Ne touchez pas aux roses.",
       "tldr": "Le Démineur classique reconstruit avec une esthétique synthwave/terminal. Préréglages de difficulté (facile, moyen, difficile, extrême), commandes clavier et tactiles, meilleurs temps persistants dans localStorage. Pas d'installation, pas d'inscription, pas d'analytique ; la logique de jeu et le chrono fonctionnent localement. Hors ligne une fois la page chargée.",
-      "seo_title": "Démineur en ligne : de facile à extrême"
+      "seo_title": "Démineur en ligne : de facile à extrême",
+      "seo_description": "Le Démineur classique en ligne, de facile à extrême. Clic pour creuser, clic droit ou mode F pour un drapeau, souris, tactile ou clavier. Records enregistrés."
     },
     "quick-notes": {
       "title": "Notes rapides",
       "lede": "Un bloc-notes minimaliste qui vit dans votre navigateur. Créez plusieurs notes, sauvegardées à chaque frappe.",
-      "tldr": "Un bloc-notes pensé clavier qui auto-enregistre chaque frappe dans le localStorage du navigateur. Notes multiples, esthétique synthwave sombre. Vos notes ne quittent jamais votre appareil — pas de synchro, pas de comptes, pas de serveur. À utiliser comme brouillon pour tâches, snippets ou pensées à reprendre dans un onglet."
+      "tldr": "Un bloc-notes pensé clavier qui auto-enregistre chaque frappe dans le localStorage du navigateur. Notes multiples, esthétique synthwave sombre. Vos notes sont enregistrées dans ce navigateur, sans compte. À utiliser comme brouillon pour tâches, snippets ou pensées à reprendre dans un onglet.",
+      "seo_title": "Notes rapides : bloc-notes en ligne autosauvegardé",
+      "seo_description": "Un bloc-notes en ligne minimaliste dans votre navigateur. Plusieurs notes, enregistrées à chaque frappe, sans compte ni inscription. Vos notes restent privées."
     },
     "activity": {
       "downloading": "téléchargement",
@@ -519,7 +570,7 @@
       "failed": "Impossible d’exécuter un modèle sur cet appareil.",
       "chooseTitle": "Choisissez votre modèle d’IA",
       "chooseHint": "Votre appareil peut exécuter jusqu’à {name}. Les modèles plus grands sont plus intelligents mais se téléchargent davantage.",
-      "choosePitch": "Fonctionne entièrement sur votre appareil — privé, gratuit, et hors ligne après le téléchargement unique.",
+      "choosePitch": "Fonctionne sur votre appareil — gratuit, hors ligne après le téléchargement unique, et vos données restent privées.",
       "chooseSample": "Demandez par exemple « explique-moi l'informatique quantique simplement » — la réponse est générée sur votre propre matériel.",
       "chooseNotNow": "Plus tard",
       "continueBg": "Continuer en arrière-plan",
@@ -538,178 +589,232 @@
     "quote": {
       "title": "Citation motivante",
       "lede": "Citations originales générées par IA, fonctionnant localement dans votre navigateur.",
-      "tldr": "Citation motivante génère des aphorismes originaux avec le même modèle local qu'AI Chat, fonctionnant entièrement dans votre navigateur via WebGPU. Pas de serveur, pas de clé API, pas de compte. Le modèle se charge à la première visite et reste en cache localement pour une réutilisation instantanée."
+      "tldr": "Citation motivante génère des aphorismes originaux avec le même modèle local qu'AI Chat, fonctionnant entièrement dans votre navigateur via WebGPU. Pas de serveur, pas de clé API, pas de compte. Le modèle se charge à la première visite et reste en cache localement pour une réutilisation instantanée.",
+      "seo_title": "Générateur de citations motivantes par IA",
+      "seo_description": "Des citations motivantes originales, écrites par une IA qui tourne en local dans votre navigateur. Générez-en une quand vous voulez et partagez vos préférées."
     },
     "radio": {
       "title": "Radio infinie",
       "lede": "Musique cinématographique épique générée par IA, en streaming infini. Apprend vos goûts sur votre appareil, et votre écoute reste privée.",
-      "tldr": "Musique cinématographique infinie générée par IA, en streaming direct dans votre navigateur. Les pistes proviennent d'un catalogue public et sont lues via l'élément audio HTML5 natif du navigateur (avec un fondu enchaîné entre deux lecteurs) ; votre historique d'écoute et vos « j'aime » restent sur l'appareil dans IndexedDB pour apprendre vos goûts localement avec le temps. Pas de compte, pas de tracking, pas de personnalisation côté serveur."
+      "tldr": "Musique cinématographique infinie générée par IA, en streaming direct dans votre navigateur. Les pistes proviennent d'un catalogue public et sont lues via l'élément audio HTML5 natif du navigateur (avec un fondu enchaîné entre deux lecteurs) ; votre historique d'écoute et vos « j'aime » restent sur l'appareil dans IndexedDB pour apprendre vos goûts localement avec le temps. Pas de compte, et pas de personnalisation côté serveur.",
+      "seo_title": "Radio infinie : musique IA qui ne s’arrête jamais",
+      "seo_description": "Musique cinématographique générée par IA, diffusée sans fin ni coupure. La radio apprend vos goûts sur votre appareil, et votre historique d’écoute reste privé."
     },
     "tetris": {
       "title": "Tetris",
       "lede": "Empilez des tétrominos. Effacez des lignes. La vitesse augmente toutes les 10 lignes. Pièces en cyan, violet, rose, ambre, vert — la palette Mentria.",
-      "tldr": "Tetris natif navigateur à l'esthétique terminal. HTML5 Canvas, apparition de pièces fidèle avec la logique Super Rotation System, file de hold, pièce fantôme, gravité par niveau. Meilleur score sauvegardé dans localStorage. Pas d'installation, pas d'inscription, pas de scripts tiers — logique de jeu et timing côté client, et le jeu fonctionne hors ligne."
+      "tldr": "Tetris natif navigateur à l'esthétique terminal. HTML5 Canvas, apparition de pièces fidèle avec la logique Super Rotation System, file de hold, pièce fantôme, gravité par niveau. Meilleur score sauvegardé dans localStorage. Pas d'installation, pas d'inscription, pas de scripts tiers — logique de jeu et timing côté client, et le jeu fonctionne hors ligne.",
+      "seo_title": "Tetris en ligne : jeu de blocs gratuit",
+      "seo_description": "Empilez les blocs et effacez des lignes dans ce Tetris gratuit en ligne. La vitesse monte au fil du jeu. Au toucher, au clavier ou à la souris, même hors ligne."
     },
     "search": {
       "title": "Recherche",
       "lede": "Trouvez des outils et des publications du fil. Tapez n'importe quelle requête — mot-clé ou langage naturel.",
-      "tldr": "Recherche sur l'ensemble du site appuyée par un index construit à la compilation, couvrant chaque outil et chaque publication en 5 langues. Le mode par défaut est une correspondance floue instantanée par mots-clés sur titres, descriptions et TL;DR — sans téléchargement de modèle, sans serveur. Quand un modèle d'IA local est déjà en cache (après avoir utilisé AI Chat ou Citation motivante), un résumé IA optionnel apparaît au-dessus des résultats."
+      "tldr": "Recherche sur l'ensemble du site appuyée par un index construit à la compilation, couvrant chaque outil et chaque publication en 5 langues. Le mode par défaut est une correspondance floue instantanée par mots-clés sur titres, descriptions et TL;DR — sans téléchargement de modèle, sans serveur. Quand un modèle d'IA local est déjà en cache (après avoir utilisé AI Chat ou Citation motivante), un résumé IA optionnel apparaît au-dessus des résultats.",
+      "seo_title": "Rechercher sur Mentria : outils, jeux et packs",
+      "seo_description": "Cherchez parmi les outils, jeux et packs de Mentria. Mot-clé ou simple question : les résultats s’affichent pendant la frappe, et l’IA locale peut les résumer."
     },
     "step-counter": {
       "title": "Compteur de pas",
-      "lede": "Comptez vos pas en marchant, directement dans le navigateur. Utilise le capteur de mouvement de votre téléphone — rien n'est envoyé.",
-      "tldr": "Un podomètre par session qui lit l'accéléromètre de votre téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lancez une session et marchez avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Tout le traitement reste dans le navigateur : pas de compte, pas d'envoi, pas de suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé. Les totaux quotidiens restent sur cet appareil, avec un graphique sur 7 jours et des séries d'objectifs. Le mode poche garde l'écran allumé mais tout noir (idéal sur OLED) pour continuer à compter dans la poche ; les courtes interruptions écran verrouillé sont comblées d'après votre cadence et marquées comme estimations."
+      "lede": "Comptez vos pas en marchant, directement dans le navigateur. Utilise le capteur de mouvement de votre téléphone, et vos pas restent privés.",
+      "tldr": "Un podomètre par session qui lit l'accéléromètre de votre téléphone via l'API DeviceMotion et compte les pas par détection de pics sur l'appareil. Lancez une session et marchez avec l'écran allumé — il suit les pas, la distance, le rythme et un anneau d'objectif quotidien. Les pas sont comptés dans le navigateur, sans compte et sans suivi en arrière-plan. Les appareils sans capteur de mouvement affichent un état désactivé. Les totaux quotidiens restent sur cet appareil, avec un graphique sur 7 jours et des séries d'objectifs. Le mode poche garde l'écran allumé mais tout noir (idéal sur OLED) pour continuer à compter dans la poche ; les courtes interruptions écran verrouillé sont comblées d'après votre cadence et marquées comme estimations.",
+      "seo_title": "Compteur de pas en ligne : podomètre sans appli",
+      "seo_description": "Comptez vos pas en marchant, dans le navigateur, via le capteur de mouvement du téléphone. Objectif, série et 7 jours d’historique. Vos pas restent privés."
     },
     "qr-scanner": {
       "title": "Scanner et générateur de QR codes et codes-barres",
       "short": "Scanner QR",
-      "lede": "Scannez des QR codes et des codes-barres, ou générez un QR code à partir de n'importe quel lien ou texte — tout en local, rien n'est envoyé.",
-      "tldr": "Deux outils en un, entièrement en local. Le mode scan lit les QR codes et codes-barres depuis la caméra ou une image : il utilise l'API native BarcodeDetector quand elle est disponible (Chromium, avec la meilleure prise en charge des formats) et bascule sur un décodeur JavaScript intégré ailleurs, donc le scan des QR fonctionne aussi sur Safari et Firefox. Le mode génération transforme un lien ou un texte en QR code grâce à un encodeur intégré. Rien n'est envoyé et il n'y a aucun aller-retour serveur : les résultats lus peuvent être copiés ou ouverts, et les codes générés téléchargés en PNG, copiés ou partagés."
+      "lede": "Scannez des QR codes et des codes-barres, ou générez un QR code à partir de n'importe quel lien ou texte — directement sur votre appareil.",
+      "tldr": "Deux outils en un, entièrement en local. Le mode scan lit les QR codes et codes-barres depuis la caméra ou une image : il utilise l'API native BarcodeDetector quand elle est disponible (Chromium, avec la meilleure prise en charge des formats) et bascule sur un décodeur JavaScript intégré ailleurs, donc le scan des QR fonctionne aussi sur Safari et Firefox. Le mode génération transforme un lien ou un texte en QR code grâce à un encodeur intégré. Les images de la caméra et les fichiers ne sont pas envoyés, et il n'y a aucun aller-retour serveur : les résultats lus peuvent être copiés ou ouverts, et les codes générés téléchargés en PNG, copiés ou partagés.",
+      "seo_title": "Scanner et générateur de QR codes en ligne",
+      "seo_description": "Scannez QR codes et codes-barres avec la caméra ou une photo, ou créez un QR code depuis un lien ou un texte. Scanner et générateur gratuit, sur votre appareil."
     },
     "breakout": {
       "title": "Breakout",
       "lede": "Casse-briques rencontre raquette. Attrapez les power-ups qui tombent, dégagez le mur, survivez à des niveaux de plus en plus rapides et exigeants. Fonctionne dans votre navigateur, même hors ligne.",
-      "tldr": "Un casse-briques façon Breakout : renvoyez la balle avec votre raquette pour détruire des murs de briques au fil de niveaux de plus en plus rapides, en attrapant les bonus qui tombent (et en évitant les mauvais). Construit sur HTML5 Canvas avec une physique déterministe et des commandes souris, clavier et tactiles. Score, vies et tableau des records vivent dans le JavaScript côté client — aucun script tiers, aucun serveur, et ça marche hors ligne une fois en cache."
+      "tldr": "Un casse-briques façon Breakout : renvoyez la balle avec votre raquette pour détruire des murs de briques au fil de niveaux de plus en plus rapides, en attrapant les bonus qui tombent (et en évitant les mauvais). Construit sur HTML5 Canvas avec une physique déterministe et des commandes souris, clavier et tactiles. Score, vies et tableau des records vivent dans le JavaScript côté client — aucun script tiers, et ça marche hors ligne une fois en cache.",
+      "seo_title": "Casse-briques Breakout : jeu gratuit en ligne"
     },
     "totp": {
-      "title": "TOTP",
-      "lede": "Codes de double authentification qui restent dans votre navigateur, chiffrés au repos. Rien sur un serveur.",
-      "tldr": "TOTP conforme au standard (RFC 6238) entièrement dans votre navigateur. Les secrets sont chiffrés au repos avec AES-GCM-256 ; une clé maître est protégée par une phrase secrète (PBKDF2-SHA256 × 600k) et optionnellement par une clé dérivée de WebAuthn PRF pour le déverrouillage de votre appareil par visage, empreinte ou code PIN. Sauvegarde chiffrée JSON obligatoire avant le premier enregistrement — perdre votre unique authentificateur signifie verrouillage sinon. Fonctionne hors ligne. Sans compte, sans serveur de sync."
+      "title": "Authentificateur 2FA",
+      "short": "Codes 2FA",
+      "lede": "Codes de connexion à double authentification (2FA), comme une application d’authentification. Des codes TOTP standard, avec vos secrets stockés chiffrés dans ce navigateur.",
+      "tldr": "TOTP conforme au standard (RFC 6238) entièrement dans votre navigateur. Les secrets sont chiffrés au repos avec AES-GCM-256 ; une clé maître est protégée par une phrase secrète (PBKDF2-SHA256 × 600k) et optionnellement par une clé dérivée de WebAuthn PRF pour le déverrouillage de votre appareil par visage, empreinte ou code PIN. Sauvegarde chiffrée JSON obligatoire avant le premier enregistrement — perdre votre unique authentificateur signifie verrouillage sinon. Fonctionne hors ligne. Sans compte ; la synchronisation entre appareils est chiffrée de bout en bout.",
+      "seo_title": "Authentificateur 2FA en ligne : générateur de codes TOTP",
+      "seo_description": "Codes de connexion 2FA dans le navigateur, comme une appli d’authentification. Codes TOTP standard, secrets chiffrés sur cet appareil et sauvegarde chiffrée."
     },
     "exif": {
       "title": "Inspecteur EXIF",
-      "lede": "Découvrez ce qu'une photo transporte en secret — détails de l'appareil, horodatages, position GPS — et téléchargez une copie propre, tout retiré. Rien n'est envoyé.",
-      "tldr": "Lit les métadonnées EXIF, XMP, IPTC et autres intégrées aux images JPEG, PNG et WebP, entièrement dans votre navigateur : modèle d'appareil, date de prise de vue et la position GPS que beaucoup de téléphones ajoutent silencieusement. Un appui produit une copie nettoyée au niveau des octets — pixels intacts, profil colorimétrique conservé — et la copie est réanalysée pour vérifier qu'elle est propre avant le téléchargement. Vos photos ne sont jamais envoyées."
+      "lede": "Découvrez ce qu'une photo transporte en secret — détails de l'appareil, horodatages, position GPS — et téléchargez une copie propre, tout retiré. Vos photos ne sont pas envoyées.",
+      "tldr": "Lit les métadonnées EXIF, XMP, IPTC et autres intégrées aux images JPEG, PNG et WebP, entièrement dans votre navigateur : modèle d'appareil, date de prise de vue et la position GPS que beaucoup de téléphones ajoutent silencieusement. Un appui produit une copie nettoyée au niveau des octets — pixels intacts, profil colorimétrique conservé — et la copie est réanalysée pour vérifier qu'elle est propre avant le téléchargement. Vos photos ne sont jamais envoyées.",
+      "seo_title": "Inspecteur EXIF : voir et effacer les métadonnées"
     },
     "sudoku": {
       "title": "Sudoku",
       "lede": "Casse-tête logique en habit de terminal. Générateur à solution unique, quatre difficultés, annotations au crayon. Fonctionne dans votre navigateur, même hors ligne.",
-      "tldr": "Sudoku 9×9 classique repensé avec une esthétique synthwave de terminal. Un générateur par retour sur trace garantit exactement une solution à quatre difficultés (facile → expert) ; annotations au crayon, surbrillance des pairs et du même chiffre, détection de conflits en direct, trois erreurs avant la fin et jusqu'à trois indices. Les meilleurs temps par difficulté sont enregistrés sur l'appareil. Clavier, souris et tactile fonctionnent. Sans installation, sans inscription, sans analytique — la génération et la résolution s'exécutent localement dans votre navigateur, et ça marche hors ligne."
+      "tldr": "Sudoku 9×9 classique repensé avec une esthétique synthwave de terminal. Un générateur par retour sur trace garantit exactement une solution à quatre difficultés (facile → expert) ; annotations au crayon, surbrillance des pairs et du même chiffre, détection de conflits en direct, trois erreurs avant la fin et jusqu'à trois indices. Les meilleurs temps par difficulté sont enregistrés sur l'appareil. Clavier, souris et tactile fonctionnent. Sans installation, sans inscription, sans analytique — la génération et la résolution s'exécutent localement dans votre navigateur, et ça marche hors ligne.",
+      "seo_title": "Sudoku en ligne gratuit : de facile à expert",
+      "seo_description": "Sudoku gratuit en ligne. Chaque grille a une solution unique : quatre niveaux, annotations, indices et records. Clavier, souris ou tactile, même hors ligne."
     },
     "ludo": {
       "title": "Ludo",
       "lede": "Quatre pions à la maison, vous gagnez. Faites un six pour sortir, capturez au contact, abritez-vous sur les étoiles sûres. Affrontez les bots ou jouez chacun son tour.",
-      "tldr": "Le classique jeu de course en croix-et-cercle, repensé sur canvas HTML5 avec une esthétique synthwave de terminal. Faites un six pour libérer un pion, avancez dans le sens horaire, tombez sur un adversaire pour le renvoyer à la maison et reposez-vous sur les étoiles sûres. Un 6, une capture ou atteindre le centre accorde un nouveau lancer. Jouez de 2 à 4 joueurs contre les bots ou chacun son tour sur un même appareil. Sans installation, sans inscription, sans analytique — les dés et l'IA s'exécutent localement dans votre navigateur, et ça marche hors ligne."
+      "tldr": "Le classique jeu de course en croix-et-cercle, repensé sur canvas HTML5 avec une esthétique synthwave de terminal. Faites un six pour libérer un pion, avancez dans le sens horaire, tombez sur un adversaire pour le renvoyer à la maison et reposez-vous sur les étoiles sûres. Un 6, une capture ou atteindre le centre accorde un nouveau lancer. Jouez de 2 à 4 joueurs contre les bots ou chacun son tour sur un même appareil. Sans installation, sans inscription, sans analytique — les dés et l'IA s'exécutent localement dans votre navigateur, et ça marche hors ligne.",
+      "seo_title": "Ludo en ligne : jouez contre des bots ou des amis",
+      "seo_description": "Ramenez vos quatre pions à la maison : un six pour sortir, capture au contact, abri sur les étoiles. Jouez contre les bots ou chacun son tour, même hors ligne."
     },
     "chess": {
       "title": "Échecs",
       "lede": "Moteur local, chacun son tour et jeu en ligne de pair à pair. Règles complètes avec roque, prise en passant et promotion ; moteur alpha-bêta à quatre niveaux, barre d'évaluation et indices.",
-      "tldr": "Une implémentation d'échecs complète qui s'exécute entièrement dans votre navigateur. Le moteur de règles couvre le roque, la prise en passant, la promotion, échec/échec et mat/pat et les nulles (règle des 50 coups, matériel insuffisant, triple répétition), avec notation SAN complète. Jouez chacun son tour sur un appareil, contre un moteur alpha-bêta intégré (quatre niveaux, de Débutant à Brutal, exécuté dans un Web Worker pour que l'interface ne gèle jamais) avec barre d'évaluation en direct, lignes candidates et indices — ou en ligne contre un ami via une connexion P2P chiffrée à l'aide d'un code. Glissez ou touchez pour jouer, parcourez l'historique, retournez l'échiquier, annulez et abandonnez. Sans comptes, sans analytique, fonctionne hors ligne."
+      "tldr": "Une implémentation d'échecs complète qui s'exécute entièrement dans votre navigateur. Le moteur de règles couvre le roque, la prise en passant, la promotion, échec/échec et mat/pat et les nulles (règle des 50 coups, matériel insuffisant, triple répétition), avec notation SAN complète. Jouez chacun son tour sur un appareil, contre un moteur alpha-bêta intégré (quatre niveaux, de Débutant à Brutal, exécuté dans un Web Worker pour que l'interface ne gèle jamais) avec barre d'évaluation en direct, lignes candidates et indices — ou en ligne contre un ami via une connexion P2P chiffrée à l'aide d'un code. Glissez ou touchez pour jouer, parcourez l'historique, retournez l'échiquier, annulez et abandonnez. Sans comptes, sans analytique, fonctionne hors ligne.",
+      "seo_title": "Échecs en ligne : contre l’ordinateur ou un ami"
     },
     "annotate-image": {
       "title": "Annoter une image",
-      "lede": "Importez une image et obtenez instantanément une description IA, un texte alternatif, une transcription ou des étiquettes — avec des prompts testés en un toucher. S'exécute localement dans votre navigateur, rien n'est envoyé.",
+      "lede": "Importez une image et obtenez instantanément une description IA, un texte alternatif, une transcription ou des étiquettes — avec des prompts testés en un toucher. S'exécute localement dans votre navigateur, et l'image reste sur votre appareil.",
       "tldr": "Un compagnon ciblé doté de vision pour AI Chat : déposez une image et un prompt testé s'exécute automatiquement — pas besoin d'en écrire un. Basculez entre Décrire, Lire le texte (OCR), Texte alternatif et Objets/étiquettes en un toucher. Il exécute le même modèle local qu'AI Chat, avec sa partie vision (cache partagé — si vous avez déjà montré une image à AI Chat, aucun téléchargement supplémentaire), entièrement dans votre navigateur via WebGPU. L'image est traitée sur votre appareil, et vos données restent privées. Glisser-déposer, coller, choisir un fichier, ou « ouvrir avec » depuis votre gestionnaire de fichiers une fois installé. Copiez ou téléchargez le résultat. WebGPU requis (Chrome/Edge récent, ou Safari 26+).",
       "seo_title": "Annotation d’images par IA : texte alternatif et OCR"
     },
     "files": {
       "title": "Fichiers",
-      "lede": "Parcourez, exportez et supprimez les données que les outils Mentria stockent sur cet appareil. Tout reste en local.",
-      "tldr": "Un inspecteur du stockage local pour tout ce que les outils Mentria conservent sur cet appareil. Il liste l'espace de noms de chaque application — notes, coffre TOTP, états de jeu, données d'extensions et clés héritées — avec la taille de chaque élément et sa date de modification. Consultez n'importe quelle valeur en JSON formaté, exportez un élément précis ou supprimez-le (les suppressions demandent toujours confirmation). Exportez une seule sauvegarde chiffrée de vos données enregistrées, y compris les packs d’apprentissage, le livre de comptes Finances et les bases de données des extensions, avec une phrase secrète (PBKDF2-SHA256 × 600k + AES-GCM). Rien n'est envoyé ; l'outil n'écrit dans le stockage que lorsque vous confirmez une suppression."
+      "lede": "Parcourez, exportez et supprimez les données que les outils Mentria stockent sur cet appareil. Vos données restent privées.",
+      "tldr": "Un inspecteur du stockage local pour tout ce que les outils Mentria conservent sur cet appareil. Il liste l'espace de noms de chaque application — notes, coffre de l’Authentificateur 2FA, états de jeu, données d'extensions et clés héritées — avec la taille de chaque élément et sa date de modification. Consultez n'importe quelle valeur en JSON formaté, exportez un élément précis ou supprimez-le (les suppressions demandent toujours confirmation). Exportez une seule sauvegarde chiffrée de vos données enregistrées, y compris les packs d’apprentissage, le livre de comptes Finances et les bases de données des extensions, avec une phrase secrète (PBKDF2-SHA256 × 600k + AES-GCM). L'outil travaille sur les données de ce navigateur et n'écrit dans le stockage que lorsque vous confirmez une suppression.",
+      "seo_title": "Fichiers : gérez les données des outils Mentria",
+      "seo_description": "Voyez, exportez et effacez ce que les outils Mentria stockent sur cet appareil : notes, coffre 2FA, parties, extensions. Téléchargez-en une sauvegarde chiffrée."
     },
     "extensions-sdk": {
       "title": "SDK des extensions",
-      "lede": "Créez des extensions monofichier qui s’exécutent localement dans Mentria — sans boutique, sans serveur, sans envoi.",
-      "tldr": "Les extensions sont des fichiers HTML uniques exécutés dans Mentria avec une petite API hôte : stockage propre à l’extension, jetons de thème, notifications, tuiles du lanceur et commandes. L’installation est un import local confirmé par l’utilisateur — rien n’est envoyé, revu à distance ni mis à jour automatiquement. Cette page documente le manifeste et l’API hôte, avec un starter à copier-coller."
+      "lede": "Créez des extensions monofichier qui s’exécutent localement dans Mentria — un seul fichier HTML, sans étape de build.",
+      "tldr": "Les extensions sont des fichiers HTML uniques exécutés dans Mentria avec une petite API hôte : stockage propre à l’extension, jetons de thème, notifications, tuiles du lanceur et commandes. L’installation est un import local confirmé par l’utilisateur — le fichier n’est ni envoyé, ni revu à distance, ni mis à jour automatiquement. Cette page documente le manifeste et l’API hôte, avec un starter à copier-coller.",
+      "seo_title": "SDK des extensions : créez une extension Mentria",
+      "seo_description": "Créez des extensions qui tournent en local dans Mentria : un seul fichier HTML, sans build. Lisez la référence du SDK et installez la vôtre depuis un fichier."
     },
     "comms": {
       "title": "Comms",
-      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages.",
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout et sans compte ; le relais ne transmet que des messages scellés.",
       "seo_title": "Messagerie, appels et fichiers P2P chiffrés"
     },
     "bubble-level": {
       "title": "Niveau à bulle",
       "lede": "Transformez votre téléphone en niveau à bulle en ligne : un vrai niveau sans installer d'application, précis à 0,1° et utilisable hors ligne.",
-      "tldr": "Posez le téléphone sur une étagère : l'outil lit l'inclinaison directement depuis l'accéléromètre. À plat, vous obtenez une bulle ronde à deux axes ; posé sur la tranche, une fiole de niveau de menuisier. Vos mesures restent privées, et un simple appui corrige le biais propre au téléphone."
+      "tldr": "Posez le téléphone sur une étagère : l'outil lit l'inclinaison directement depuis l'accéléromètre. À plat, vous obtenez une bulle ronde à deux axes ; posé sur la tranche, une fiole de niveau de menuisier. Vos mesures restent privées, et un simple appui corrige le biais propre au téléphone.",
+      "seo_title": "Niveau à bulle en ligne pour votre téléphone",
+      "seo_description": "Transformez votre téléphone en niveau à bulle sans application. Bulle sur deux axes à plat, niveau de menuisier sur la tranche, précis à 0,1°, même hors ligne."
     },
     "decibel-meter": {
       "title": "Sonomètre",
       "lede": "Un sonomètre en ligne dans votre navigateur : mesurez le bruit en dB avec le micro de votre téléphone ou de votre ordinateur, sans installer d'application.",
-      "tldr": "Dirigez le micro de votre téléphone ou de votre ordinateur vers ce qui fait du bruit : le niveau s'affiche en décibels en temps réel, avec le minimum, la moyenne et le pic de la session, plus une échelle de sons du quotidien pour situer la mesure. Les micros de téléphone ne sont pas des instruments étalonnés : ces chiffres sont de bonnes estimations pour comparer deux pièces ou deux moments, pas des mesures légales. Rien n'est enregistré : le son est analysé sur votre appareil, image par image, et n'en sort jamais."
+      "tldr": "Dirigez le micro de votre téléphone ou de votre ordinateur vers ce qui fait du bruit : le niveau s'affiche en décibels en temps réel, avec le minimum, la moyenne et le pic de la session, plus une échelle de sons du quotidien pour situer la mesure. Les micros de téléphone ne sont pas des instruments étalonnés : ces chiffres sont de bonnes estimations pour comparer deux pièces ou deux moments, pas des mesures légales. Rien n'est enregistré : le son est analysé sur votre appareil, image par image, et n'en sort jamais.",
+      "seo_title": "Sonomètre en ligne : mesurez le bruit en dB",
+      "seo_description": "Mesurez le bruit en dB avec le micro du téléphone ou du PC, sans appli. Niveau en direct, pic maintenu, min, moyenne et max. Le son n’est jamais enregistré."
     },
     "compass": {
       "title": "Boussole",
       "lede": "Une boussole en ligne sans application à installer : ouvrez-la dans le navigateur et lisez votre cap magnétique directement depuis le capteur du téléphone.",
-      "tldr": "Pointez votre téléphone et lisez le cap. Cette boussole fonctionne entièrement dans votre navigateur grâce au magnétomètre du téléphone : rien à installer, aucun compte, et aucune donnée ne quitte l'appareil. La rose tourne pour que votre cap reste toujours sous le repère du haut, et une simple pression fige le cap que vous voulez garder. Elle indique le nord magnétique, qui s'écarte du nord géographique selon la déclinaison locale."
+      "tldr": "Pointez votre téléphone et lisez le cap. Cette boussole fonctionne entièrement dans votre navigateur grâce au magnétomètre du téléphone : rien à installer, aucun compte, et les mesures ne sont envoyées nulle part. La rose tourne pour que votre cap reste toujours sous le repère du haut, et une simple pression fige le cap que vous voulez garder. Elle indique le nord magnétique, qui s'écarte du nord géographique selon la déclinaison locale.",
+      "seo_title": "Boussole en ligne dans le navigateur du téléphone",
+      "seo_description": "Une boussole en ligne sans application à installer. Dans le navigateur du téléphone, lisez votre cap magnétique via le capteur, fixez un azimut et suivez-le."
     },
     "speedometer": {
       "title": "Compteur de vitesse GPS",
       "lede": "Un compteur de vitesse en ligne par GPS, sans installer d'application. Votre vitesse en direct en km/h, mph ou nœuds, avec la distance du trajet, calculée sur votre appareil.",
-      "tldr": "Transformez n'importe quel téléphone en compteur de vitesse : l'outil lit le GPS de l'appareil via le navigateur et affiche votre vitesse en direct sur un grand cadran, en km/h, mph ou nœuds. Il suit aussi votre trajet — distance, temps en mouvement, moyenne et vitesse maximale — et le conserve après un rechargement. Votre position ne quitte jamais l'appareil : pas de compte, pas d'envoi, pas de pistage."
+      "tldr": "Transformez n'importe quel téléphone en compteur de vitesse : l'outil lit le GPS de l'appareil via le navigateur et affiche votre vitesse en direct sur un grand cadran, en km/h, mph ou nœuds. Il suit aussi votre trajet — distance, temps en mouvement, moyenne et vitesse maximale — et le conserve après un rechargement. Votre position ne quitte jamais l'appareil, et aucun compte n'est nécessaire.",
+      "seo_title": "Compteur de vitesse GPS en ligne : km/h ou mph",
+      "seo_description": "Compteur de vitesse GPS en ligne, sans appli. Vitesse en direct en km/h, mph ou nœuds sur un grand cadran, avec distance, temps en mouvement, moyenne et max."
     },
     "ruler": {
       "title": "Règle en ligne",
       "lede": "Une règle en ligne à taille réelle : mesurez en cm, mm et pouces directement à l'écran, et calibrez-la avec une carte bancaire pour que les millimètres soient justes.",
       "tldr": "Une règle dessinée directement sur votre écran, avec les centimètres et les millimètres sur un bord et les pouces jusqu'au 1/16 sur l'autre. Aucun navigateur ne peut connaître la taille réelle de votre écran : vous calibrez donc une fois en ajustant un contour sur une carte bancaire, ou en saisissant une longueur que vous connaissez déjà, et les graduations deviennent fidèles. Faites glisser les deux repères pour mesurer ce que vous posez sur la vitre ; tout fonctionne hors ligne et le calibrage reste sur cet appareil.",
-      "seo_title": "Règle en ligne taille réelle (cm et mm)"
+      "seo_title": "Règle en ligne taille réelle (cm et mm)",
+      "seo_description": "Une règle graduée en ligne à taille réelle en cm, mm et pouces. Calibrez-la une fois avec une carte bancaire pour des graduations justes, puis mesurez tout."
     },
     "phosphor": {
       "title": "PHOSPHOR",
       "lede": "Contre-la-montre de combat dans le navigateur : sprint, glissade, escalade et carabine automatique sur cinq parcours au crépuscule. Médailles, course aux fantômes, jeu hors ligne.",
-      "tldr": "FPS contre-la-montre dans le navigateur, médailles et fantômes."
+      "tldr": "FPS contre-la-montre dans le navigateur, médailles et fantômes.",
+      "seo_title": "PHOSPHOR : FPS contre-la-montre gratuit en ligne",
+      "seo_description": "Contre-la-montre en vue subjective dans le navigateur : sprint, glissade, escalade et tir au crépuscule. Médailles, course contre votre fantôme, jeu hors ligne."
     },
     "model-mirror": {
       "title": "Miroir de modèles",
       "lede": "Aidez à distribuer les modèles locaux de Mentria en pair-à-pair. Gardez cet onglet ouvert et votre navigateur devient un miroir.",
-      "tldr": "Votre navigateur partage les modèles locaux de Mentria avec les autres visiteurs en P2P, avec le téléchargement officiel en secours automatique. Sans compte ni installation."
+      "tldr": "Votre navigateur partage les modèles locaux de Mentria avec les autres visiteurs en P2P, avec le téléchargement officiel en secours automatique. Sans compte ni installation.",
+      "seo_title": "Miroir de modèles : partagez l’IA en pair-à-pair",
+      "seo_description": "Gardez cet onglet ouvert et votre navigateur aide à livrer en P2P les modèles d’IA locaux de Mentria aux visiteurs, avec le téléchargement officiel en secours."
     },
     "console": {
       "title": "Console",
       "lede": "Discutez avec le modèle local pendant qu'il utilise les apps Mentria sur un écran de téléphone partagé — ou laissez-le jouer un utilisateur test et rapporter ce qu'il trouve.",
-      "tldr": "La Console place un écran Mentria au format téléphone à côté d'un chat. Demandez au modèle 27B local de faire quelque chose (« lance un minuteur de 5 minutes ») : il ouvre l'app et la manipule sous vos yeux — chaque action est visible et il doit citer l'écran pour déclarer la tâche terminée. Lancez une session test : il explore une app comme une personne fictive, puis rédige un rapport de bugs à transformer en issues. Vos conversations restent privées."
+      "tldr": "La Console place un écran Mentria au format téléphone à côté d'un chat. Demandez au modèle 27B local de faire quelque chose (« lance un minuteur de 5 minutes ») : il ouvre l'app et la manipule sous vos yeux — chaque action est visible et il doit citer l'écran pour déclarer la tâche terminée. Lancez une session test : il explore une app comme une personne fictive, puis rédige un rapport de bugs à transformer en issues. Vos conversations restent privées.",
+      "seo_title": "Console IA : un modèle local qui utilise des apps",
+      "seo_description": "Discutez avec une IA locale qui ouvre et utilise les apps Mentria sur un écran de téléphone partagé, ou faites-en un testeur qui rapporte ce qu’il trouve."
     },
     "forge": {
       "title": "Forge",
-      "lede": "Décrivez une scène 3D : le modèle 27B sur votre appareil l’écrit en three.js, la rend dans un bac à sable, la vérifie et la répare une fois. Sans serveur, rien n’est envoyé.",
+      "lede": "Décrivez une scène 3D : le modèle 27B sur votre appareil l’écrit en three.js, la rend dans un bac à sable, la vérifie et la répare une fois. Vos prompts restent privés.",
       "tldr": "Forge transforme une phrase en scène three.js vivante. Le modèle 27B qui tourne dans votre navigateur n’écrit que le corps d’un module ES ; la page possède le renderer, la caméra et la boucle de rendu, exécute le corps dans un cadre isolé, lit les pixels et le graphe de scène pour vérifier que quelque chose est visible et bouge sans erreur, et si une vérification échoue elle renvoie le problème exact au modèle pour une réparation. Vous obtenez la scène en marche, le code et un HTML autonome. Tout tourne sur votre appareil."
     },
     "unit-converter": {
       "title": "Convertisseur d’unités",
       "short": "Conversion d’unités",
-      "lede": "Un convertisseur d’unités en ligne, sans application à installer : longueur, poids, température, volume, données, consommation de carburant et plus encore, calculés sur votre appareil sans rien envoyer.",
-      "tldr": "Saisissez un nombre d’un côté ou de l’autre : l’autre côté se met à jour pendant la frappe, dans douze catégories qui vont des centimètres et des livres aux gibioctets, aux psi et aux miles par gallon. Les facteurs suivent les définitions officielles exactes (un pouce vaut exactement 25,4 mm, un gallon US exactement 3,785411784 litres), et une ligne sous les champs affiche le facteur ou la formule de la paire choisie. La température et la consommation de carburant ne sont pas de simples multiplications : elles utilisent les bonnes formules, y compris le passage réciproque des L/100 km aux mpg. Tout fonctionne dans votre navigateur, même hors ligne ; rien de ce que vous saisissez n’est envoyé, et seules votre dernière catégorie et vos unités sont mémorisées sur cet appareil."
+      "lede": "Un convertisseur d’unités en ligne, sans application à installer : longueur, poids, température, volume, données, consommation de carburant et plus encore, calculés sur votre appareil.",
+      "tldr": "Saisissez un nombre d’un côté ou de l’autre : l’autre côté se met à jour pendant la frappe, dans douze catégories qui vont des centimètres et des livres aux gibioctets, aux psi et aux miles par gallon. Les facteurs suivent les définitions officielles exactes (un pouce vaut exactement 25,4 mm, un gallon US exactement 3,785411784 litres), et une ligne sous les champs affiche le facteur ou la formule de la paire choisie. La température et la consommation de carburant ne sont pas de simples multiplications : elles utilisent les bonnes formules, y compris le passage réciproque des L/100 km aux mpg. Tout fonctionne dans votre navigateur, même hors ligne ; rien de ce que vous saisissez n’est envoyé, et seules votre dernière catégorie et vos unités sont mémorisées sur cet appareil.",
+      "seo_title": "Convertisseur d’unités en ligne : longueur, poids",
+      "seo_description": "Longueur, poids, température, volume, surface, vitesse, données, pression, énergie, consommation : tapez dans un champ, voyez la formule, même hors ligne."
     },
     "world-clock": {
       "title": "Horloge mondiale",
       "lede": "Une horloge mondiale en ligne sans application à installer : l’heure de n’importe quelle ville et la conversion d’un horaire entre fuseaux, heure d’été comprise, le tout sur votre appareil.",
-      "tldr": "Gardez une liste de villes et regardez leur heure défiler à côté de la vôtre, avec la date, le décalage UTC et le jour ou la nuit d’un coup d’œil. Choisissez une date et une heure dans l’une de vos villes et toutes les horloges passent à ce même instant ; les changements d’heure sont pris en compte, et quand une heure est sautée ou se répète, l’outil vous dit ce qu’il affiche. Les fuseaux et leurs décalages viennent des données intégrées à votre navigateur : tout fonctionne hors ligne et rien n’est envoyé. Votre liste et le format 12 h ou 24 h restent uniquement sur cet appareil."
+      "tldr": "Gardez une liste de villes et regardez leur heure défiler à côté de la vôtre, avec la date, le décalage UTC et le jour ou la nuit d’un coup d’œil. Choisissez une date et une heure dans l’une de vos villes et toutes les horloges passent à ce même instant ; les changements d’heure sont pris en compte, et quand une heure est sautée ou se répète, l’outil vous dit ce qu’il affiche. Les fuseaux et leurs décalages viennent des données intégrées à votre navigateur : tout fonctionne hors ligne. Votre liste et le format 12 h ou 24 h sont enregistrés sur cet appareil.",
+      "seo_title": "Horloge mondiale et conversion de fuseaux horaires",
+      "seo_description": "L’heure des villes du monde entier et la conversion d’un horaire entre fuseaux, heure d’été comprise. Format 12 ou 24 heures, et ça fonctionne aussi hors ligne."
     },
     "password-generator": {
       "title": "Générateur de mots de passe",
       "short": "Mots de passe",
-      "lede": "Un générateur de mots de passe en ligne, sans application à installer : créez des mots de passe aléatoires robustes ou des phrases de passe faciles à taper, directement sur votre appareil, sans rien envoyer ni enregistrer.",
-      "tldr": "Choisissez la longueur et les types de caractères voulus, ou passez en mode phrase de passe pour obtenir quelques mots tirés au hasard dans la liste courte de l’EFF. Chaque caractère et chaque mot est tiré sans biais par le générateur de nombres aléatoires cryptographique de votre navigateur, et chaque mot de passe contient forcément au moins un caractère de chaque jeu activé. L’indicateur d’entropie montre combien de tentatives vos réglages imposent à un attaquant : vous voyez ainsi ce que rapporte un peu plus de longueur ou un mot supplémentaire. Tout se passe sur votre appareil : seuls vos réglages sont mémorisés, et les mots de passe générés ne sont jamais enregistrés, journalisés ni envoyés nulle part."
+      "lede": "Un générateur de mots de passe en ligne, sans application à installer : créez des mots de passe aléatoires robustes ou des phrases de passe faciles à taper, directement sur votre appareil, sans enregistrer les mots de passe.",
+      "tldr": "Choisissez la longueur et les types de caractères voulus, ou passez en mode phrase de passe pour obtenir quelques mots tirés au hasard dans la liste courte de l’EFF. Chaque caractère et chaque mot est tiré sans biais par le générateur de nombres aléatoires cryptographique de votre navigateur, et chaque mot de passe contient forcément au moins un caractère de chaque jeu activé. L’indicateur d’entropie montre combien de tentatives vos réglages imposent à un attaquant : vous voyez ainsi ce que rapporte un peu plus de longueur ou un mot supplémentaire. Tout se passe sur votre appareil : seuls vos réglages sont mémorisés, et les mots de passe générés ne sont jamais enregistrés, journalisés ni envoyés nulle part.",
+      "seo_title": "Générateur de mot de passe fort et phrase de passe"
     },
     "image-compressor": {
       "title": "Compresseur d’images",
-      "lede": "Compressez vos images en ligne sans application à installer : réduisez vos fichiers JPEG, PNG et WebP, redimensionnez-les et changez leur format directement dans le navigateur. Rien n’est envoyé.",
-      "tldr": "Déposez des photos ou des captures d’écran et obtenez des copies plus légères en quelques secondes. Choisissez JPEG, WebP ou PNG, réglez la qualité et, si besoin, limitez la largeur et la hauteur ou réduisez par pourcentage : les proportions sont conservées et rien n’est jamais agrandi. Chaque image est décodée puis réencodée par votre propre navigateur : rien n’est envoyé et l’outil fonctionne même hors ligne. Le réencodage supprime aussi les métadonnées EXIF, comme la position GPS et les informations sur l’appareil photo. Comparez l’avant et l’après avec un curseur, puis téléchargez une image ou toutes à la fois."
+      "lede": "Compressez vos images en ligne sans application à installer : réduisez vos fichiers JPEG, PNG et WebP, redimensionnez-les et changez leur format directement dans le navigateur. Vos images ne sont pas envoyées.",
+      "tldr": "Déposez des photos ou des captures d’écran et obtenez des copies plus légères en quelques secondes. Choisissez JPEG, WebP ou PNG, réglez la qualité et, si besoin, limitez la largeur et la hauteur ou réduisez par pourcentage : les proportions sont conservées et rien n’est jamais agrandi. Chaque image est décodée puis réencodée par votre propre navigateur : vos images ne sont pas envoyées et l’outil fonctionne même hors ligne. Le réencodage supprime aussi les métadonnées EXIF, comme la position GPS et les informations sur l’appareil photo. Comparez l’avant et l’après avec un curseur, puis téléchargez une image ou toutes à la fois.",
+      "seo_title": "Compresseur d’images en ligne : JPEG, PNG, WebP"
     },
     "calculator": {
       "title": "Calculatrice",
       "lede": "Une calculatrice en ligne sans application à installer : tapez ou touchez une opération et voyez le résultat au fil de la saisie, avec des fonctions scientifiques, sans que rien ne quitte votre appareil.",
-      "tldr": "Une calculatrice qui fonctionne entièrement dans votre navigateur : rien à installer, aucun compte, et rien de ce que vous tapez ne quitte votre appareil. Saisissez une opération au clavier ou touchez le pavé, et le résultat s’affiche au fur et à mesure ; appuyez sur = ou Entrée pour la garder dans l’historique, puis choisissez un calcul précédent pour le réutiliser. Elle gère les parenthèses, les puissances, les racines carrées, sin, cos et tan en degrés ou en radians, ln, log, π et e, et comprend 2π ou 2(3+4) comme vous les écririez sur papier. Le pourcentage fonctionne comme sur une calculatrice de bureau (200 + 10 % donne 220, alors que 10 % seul vaut 0,1) et les résultats sont arrondis à 12 chiffres significatifs, donc 0,1 + 0,2 affiche 0,3."
+      "tldr": "Une calculatrice qui fonctionne entièrement dans votre navigateur : rien à installer, aucun compte, et rien de ce que vous tapez ne quitte votre appareil. Saisissez une opération au clavier ou touchez le pavé, et le résultat s’affiche au fur et à mesure ; appuyez sur = ou Entrée pour la garder dans l’historique, puis choisissez un calcul précédent pour le réutiliser. Elle gère les parenthèses, les puissances, les racines carrées, sin, cos et tan en degrés ou en radians, ln, log, π et e, et comprend 2π ou 2(3+4) comme vous les écririez sur papier. Le pourcentage fonctionne comme sur une calculatrice de bureau (200 + 10 % donne 220, alors que 10 % seul vaut 0,1) et les résultats sont arrondis à 12 chiffres significatifs, donc 0,1 + 0,2 affiche 0,3.",
+      "seo_title": "Calculatrice en ligne avec fonctions scientifiques"
     },
     "json-formatter": {
       "title": "Formateur et validateur JSON",
       "short": "Formateur JSON",
-      "lede": "Un formateur et validateur JSON en ligne, sans rien installer : indentez, minifiez ou triez les clés, et voyez la ligne et la colonne exactes où un JSON invalide casse. Tout se passe sur votre appareil ; rien n’est envoyé.",
-      "tldr": "Collez du JSON, déposez un fichier ou ouvrez-en un : il est vérifié pendant la saisie, et en cas d’erreur vous obtenez la ligne et la colonne exactes ainsi que l’extrait fautif, avec un ^ sous l’erreur. Indentez-le avec 2 espaces, 4 espaces ou des tabulations, minifiez-le ou triez les clés de chaque objet, puis copiez le résultat ou téléchargez-le en fichier .json. La vue en arbre ouvre les gros documents niveau par niveau et copie le chemin de n’importe quelle valeur, comme $.items[3].name. Les nombres trop grands ou trop précis pour JavaScript sont signalés et conservés chiffre pour chiffre au lieu d’être arrondis en silence. Tout fonctionne dans votre navigateur : le JSON ne quitte jamais votre appareil."
+      "lede": "Un formateur et validateur JSON en ligne, sans rien installer : indentez, minifiez ou triez les clés, et voyez la ligne et la colonne exactes où un JSON invalide casse. Tout se passe sur votre appareil : votre JSON n’est pas envoyé.",
+      "tldr": "Collez du JSON, déposez un fichier ou ouvrez-en un : il est vérifié pendant la saisie, et en cas d’erreur vous obtenez la ligne et la colonne exactes ainsi que l’extrait fautif, avec un ^ sous l’erreur. Indentez-le avec 2 espaces, 4 espaces ou des tabulations, minifiez-le ou triez les clés de chaque objet, puis copiez le résultat ou téléchargez-le en fichier .json. La vue en arbre ouvre les gros documents niveau par niveau et copie le chemin de n’importe quelle valeur, comme $.items[3].name. Les nombres trop grands ou trop précis pour JavaScript sont signalés et conservés chiffre pour chiffre au lieu d’être arrondis en silence. Tout fonctionne dans votre navigateur : le JSON ne quitte jamais votre appareil.",
+      "seo_title": "Formateur et validateur JSON en ligne"
     },
     "video-player": {
       "title": "Lecteur vidéo",
       "lede": "Lisez les vidéos de votre téléphone ou de votre ordinateur, avec reprise, vitesse, sous-titres et image dans l’image. Vos fichiers ne quittent jamais votre appareil.",
-      "tldr": "Ouvrez quelques vidéos ou un dossier entier : ils deviennent une liste de lecture avec miniatures. Mentria retient où vous vous êtes arrêté dans chacune pour reprendre plus tard, et sur un ordinateur ou un téléphone Android il peut aussi retenir le dossier. Réglez la vitesse de 0,25× à 3×, sautez de 10 secondes, chargez des sous-titres .srt ou .vtt et ajustez leur synchronisation, ou détachez la vidéo en image dans l’image. Rien n’est envoyé : le lecteur lit les fichiers directement depuis votre appareil et vous prévient quand un fichier utilise un format que votre navigateur ne sait pas lire."
+      "tldr": "Ouvrez quelques vidéos ou un dossier entier : ils deviennent une liste de lecture avec miniatures. Mentria retient où vous vous êtes arrêté dans chacune pour reprendre plus tard, et sur un ordinateur ou un téléphone Android il peut aussi retenir le dossier. Réglez la vitesse de 0,25× à 3×, sautez de 10 secondes, chargez des sous-titres .srt ou .vtt et ajustez leur synchronisation, ou détachez la vidéo en image dans l’image. Vos vidéos ne sont pas envoyées : le lecteur lit les fichiers directement depuis votre appareil et vous prévient quand un fichier utilise un format que votre navigateur ne sait pas lire.",
+      "seo_title": "Lecteur vidéo en ligne pour vos fichiers",
+      "seo_description": "Lisez dans le navigateur les vidéos de votre téléphone ou ordinateur : dossier entier, reprise où vous en étiez, vitesse, sous-titres et image dans l’image."
     },
     "gallery": {
       "title": "Galerie",
       "lede": "Parcourez les photos et vidéos de votre téléphone ou de votre ordinateur dans une grille rapide classée par mois, avec zoom, diaporama et détails de chaque photo. Vos fichiers ne quittent jamais votre appareil.",
-      "tldr": "Ouvrez un dossier, ou choisissez quelques photos et vidéos : elles s’affichent dans une grille classée par mois de prise de vue. Touchez-en une pour la voir en plein écran : balayez d’une photo à l’autre, pincez ou touchez deux fois pour zoomer, lisez les vidéos sur place ou lancez un diaporama qui garde l’écran allumé. Détails affiche l’appareil, l’objectif, l’exposition et le lieu enregistrés dans la photo. Sur un ordinateur ou un téléphone Android, Mentria peut retenir vos dossiers ; ailleurs, il garde les miniatures et les dates, pour que les mêmes photos s’ouvrent plus vite la fois suivante. Rien n’est envoyé : la galerie lit les fichiers directement depuis votre appareil."
+      "tldr": "Ouvrez un dossier, ou choisissez quelques photos et vidéos : elles s’affichent dans une grille classée par mois de prise de vue. Touchez-en une pour la voir en plein écran : balayez d’une photo à l’autre, pincez ou touchez deux fois pour zoomer, lisez les vidéos sur place ou lancez un diaporama qui garde l’écran allumé. Détails affiche l’appareil, l’objectif, l’exposition et le lieu enregistrés dans la photo. Sur un ordinateur ou un téléphone Android, Mentria peut retenir vos dossiers ; ailleurs, il garde les miniatures et les dates, pour que les mêmes photos s’ouvrent plus vite la fois suivante. Vos photos ne sont pas envoyées : la galerie lit les fichiers directement depuis votre appareil.",
+      "seo_title": "Galerie photo et visionneuse d’images"
     },
     "music-player": {
       "title": "Lecteur de musique",
       "lede": "Écoutez la musique de votre téléphone ou de votre ordinateur avec albums, artistes, playlists, lecture aléatoire et minuterie de veille. Vos fichiers ne quittent jamais votre appareil.",
-      "tldr": "Ouvrez quelques morceaux ou un dossier entier : Mentria crée une bibliothèque à partir de leurs tags, avec morceaux, albums illustrés et artistes, et une recherche. Lisez dans l’ordre ou en aléatoire, répétez, mettez des morceaux en file d’attente et gardez des playlists exportables en M3U. Les commandes de l’écran verrouillé et des écouteurs fonctionnent, la minuterie baisse la musique jusqu’à l’arrêt et, sur un ordinateur, un mini-lecteur peut flotter au-dessus des autres fenêtres. Il lit le MP3, l’AAC, le FLAC, l’Ogg, l’Opus et le WAV ; l’Apple Lossless et l’AIFF se lisent sur les appareils Apple. Rien n’est envoyé : le lecteur lit les fichiers directement depuis votre appareil."
+      "tldr": "Ouvrez quelques morceaux ou un dossier entier : Mentria crée une bibliothèque à partir de leurs tags, avec morceaux, albums illustrés et artistes, et une recherche. Lisez dans l’ordre ou en aléatoire, répétez, mettez des morceaux en file d’attente et gardez des playlists exportables en M3U. Les commandes de l’écran verrouillé et des écouteurs fonctionnent, la minuterie baisse la musique jusqu’à l’arrêt et, sur un ordinateur, un mini-lecteur peut flotter au-dessus des autres fenêtres. Il lit le MP3, l’AAC, le FLAC, l’Ogg, l’Opus et le WAV ; l’Apple Lossless et l’AIFF se lisent sur les appareils Apple. Votre musique n’est pas envoyée : le lecteur lit les fichiers directement depuis votre appareil.",
+      "seo_title": "Lecteur de musique en ligne pour vos fichiers",
+      "seo_description": "Votre musique sur mobile ou PC : albums, artistes, playlists et export M3U, aléatoire, écran verrouillé, minuterie de veille. Vos fichiers ne sont pas envoyés."
     },
     "fpv-drone": {
       "title": "SKYRUSH FPV",
@@ -732,6 +837,7 @@
     "title": "Ouvrir la photo partagée",
     "lede": "Choisissez quoi en faire. La photo reste sur cet appareil.",
     "annotate": "La décrire avec l’IA sur l’appareil",
+    "ask": "Interroger Chat IA à son sujet",
     "qr": "Y chercher un QR code ou un code-barres",
     "exif": "Lire les détails de la photo (EXIF)",
     "compress": "La rendre plus légère (compresser)",
@@ -1298,6 +1404,8 @@
       "no_model_notice": "Choisissez un modèle pour commencer à discuter. Il se télécharge une fois, puis fonctionne sur cet appareil.",
       "load_cut_notice": "La dernière fois, la page a redémarré pendant le chargement du modèle. Pour éviter que cela recommence en boucle, il ne se charge pas tout seul cette fois.",
       "btn_choose_model": "Choisir un modèle",
+      "shared_notice": "Le texte partagé est dans la zone de message. Ajoutez une question en dessous, puis envoyez.",
+      "btn_save_note": "Enregistrer comme note",
       "interrupted": "Interrompue : le GPU a été réinitialisé avant la fin de cette réponse.",
       "err_context_full": "La conversation dépasse la mémoire du modèle. Démarrez une nouvelle discussion pour continuer.",
       "status_too_long": "Message trop long",
@@ -1327,7 +1435,16 @@
       "adapters_thinking_on": "réflexion activée",
       "adapters_thinking_either": "réflexion au choix",
       "think_pinned": "Désépinglez l’adaptateur pour utiliser la réflexion approfondie",
-      "search_pinned": "Désépinglez l’adaptateur pour utiliser la recherche web"
+      "search_pinned": "Désépinglez l’adaptateur pour utiliser la recherche web",
+      "save_setup": "Configurez votre identité Mentria pour garder vos discussions",
+      "save_setup_btn": "Configurer",
+      "save_unlock": "Déverrouillez pour garder cette discussion",
+      "save_unlock_btn": "Déverrouiller",
+      "save_lost": "Les messages non enregistrés sont perdus quand vous quittez cette page.",
+      "photo_chat": "Discussion photo",
+      "host_answering": "Réponse en cours pour votre {device}",
+      "host_loading": "Chargement de {model} pour votre {device}…",
+      "host_stop": "Arrêter"
     },
     "extensions": {
       "install_heading": "Installer une extension",
@@ -1463,7 +1580,7 @@
       "note_no_camera": "Aucune caméra trouvée sur cet appareil. Vous pouvez quand même scanner un fichier image.",
       "note_camera_error": "Impossible de démarrer la caméra. Vous pouvez quand même scanner un fichier image.",
       "note_no_match": "Aucun code trouvé dans cette image. Essayez une photo plus nette.",
-      "to_totp": "Code d’authentification trouvé. Ouverture de TOTP…",
+      "to_totp": "Code d’authentification trouvé. Ouverture de l’Authentificateur 2FA…",
       "unsupported_title": "Non pris en charge ici",
       "unsupported_body": "Ce navigateur ne prend pas en charge la détection de codes-barres. Essayez un navigateur Chromium récent comme Chrome ou Edge.",
       "mode_scan": "Scanner",
@@ -1536,7 +1653,7 @@
       "locked_lede_setup": "Choisissez une phrase secrète pour configurer votre coffre. Vous l'utiliserez à chaque déverrouillage.",
       "handoff_unlock": "Déverrouillez votre coffre pour ajouter le code scanné.",
       "handoff_setup": "Créez votre coffre pour ajouter le code scanné.",
-      "locked_lede_unlock": "Saisissez votre phrase secrète pour déverrouiller votre coffre TOTP.",
+      "locked_lede_unlock": "Saisissez votre phrase secrète pour déverrouiller votre coffre 2FA.",
       "pass_label": "Phrase secrète",
       "pass_confirm": "Confirmer la phrase secrète",
       "setup_button": "Créer le coffre",
@@ -1551,7 +1668,7 @@
       "unlock_failed": "Déverrouillage échoué — phrase secrète erronée ou coffre corrompu.",
       "prf_unsupported": "Le déverrouillage de votre appareil par visage, empreinte ou code PIN a échoué ou n'est pas pris en charge ici.",
       "add_button": "Ajouter un compte",
-      "add_title": "Ajouter un compte TOTP",
+      "add_title": "Ajouter un compte 2FA",
       "paste_uri_label": "Coller l'URI otpauth://",
       "or_manual": "— ou remplir manuellement —",
       "issuer_label": "Émetteur (ex. GitHub)",
@@ -1574,7 +1691,7 @@
       "prf_enroll_failed": "Impossible d'ajouter le déverrouillage par visage, empreinte ou code PIN",
       "prf_enroll_relock": "Verrouillez, déverrouillez avec votre phrase secrète, puis réessayez.",
       "backup_gate_title": "Sauvegardez avant d'enregistrer",
-      "backup_gate_lede": "Les secrets TOTP ne peuvent pas être récupérés si vous perdez cet appareil ou oubliez votre phrase secrète. Téléchargez maintenant une sauvegarde chiffrée — elle utilise une phrase secrète de votre choix (peut être la même que celle du coffre).",
+      "backup_gate_lede": "Les secrets 2FA ne peuvent pas être récupérés si vous perdez cet appareil ou oubliez votre phrase secrète. Téléchargez maintenant une sauvegarde chiffrée — elle utilise une phrase secrète de votre choix (peut être la même que celle du coffre).",
       "backup_gate_confirm": "Télécharger et enregistrer",
       "backup_unsaved_title": "Non enregistré — téléchargez une sauvegarde",
       "backup_unsaved_lede": "Votre navigateur n’a pas laissé ce site enregistrer votre coffre, le compte que vous venez d’ajouter n’est donc pas conservé sur cet appareil. Téléchargez maintenant une sauvegarde chiffrée : c’est la seule copie.",
@@ -1590,15 +1707,15 @@
       "scan_denied": "Accès à la caméra refusé. Autorisez la caméra dans les réglages du navigateur puis réessayez.",
       "scan_no_camera": "Aucune caméra disponible sur cet appareil.",
       "scan_secure_required": "L'accès à la caméra nécessite HTTPS. Utilisez le site en ligne, pas une URL locale.",
-      "scan_invalid_qr": "Ce QR n’est ni un code de configuration TOTP ni un export d’authentificateur. Réessayez.",
+      "scan_invalid_qr": "Ce QR n’est ni un code de configuration 2FA ni un export d’authentificateur. Réessayez.",
       "next_label": "suivant :",
       "add_secret_bad_chars": "Le secret contient des caractères non valides : {chars}. Le Base32 n'utilise que A–Z et 2–7 — attention aux confusions 0/O, 1/I/L, 8/B.",
       "autolock_label": "verrou auto",
       "autolock_off": "off",
       "create_lede": "Créez votre coffre. Votre déverrouillage unique l'ouvre.",
       "linked_missing": "Ce coffre s'ouvre avec un déverrouillage unique qui n'est pas sur cet appareil. Restaurez une sauvegarde qui le contient, ou synchronisez avec un appareil qui l'a.",
-      "backup_gate_lede_code": "Les secrets TOTP ne peuvent pas être récupérés si vous perdez cet appareil. Téléchargez une sauvegarde maintenant. Elle est protégée par votre code de récupération.",
-      "backup_gate_lede_linked": "Les secrets TOTP ne peuvent pas être récupérés si vous perdez cet appareil. Votre code de récupération ne peut pas protéger cette sauvegarde pour le moment : choisissez une phrase secrète pour le fichier. Vous en aurez besoin pour restaurer.",
+      "backup_gate_lede_code": "Les secrets 2FA ne peuvent pas être récupérés si vous perdez cet appareil. Téléchargez une sauvegarde maintenant. Elle est protégée par votre code de récupération.",
+      "backup_gate_lede_linked": "Les secrets 2FA ne peuvent pas être récupérés si vous perdez cet appareil. Votre code de récupération ne peut pas protéger cette sauvegarde pour le moment : choisissez une phrase secrète pour le fichier. Vous en aurez besoin pour restaurer.",
       "old_unlock": "Ou utilisez votre ancienne phrase secrète"
     },
     "exif": {
@@ -1954,7 +2071,12 @@
       "prompt_ocr": "Lis tout le texte de cette image et transcris-le exactement tel qu'il apparaît, en conservant l'ordre et les sauts de ligne d'origine. Inclus tous les titres, étiquettes, chiffres et le texte en petits caractères. N'ajoute aucun commentaire, note, résumé ni explication — ne renvoie que le texte transcrit, rien d'autre. Seulement si l'image ne contient véritablement aucun texte, réponds : (aucun texte trouvé).",
       "prompt_alt": "En une seule phrase brève d'au plus 20 mots, décris cette image pour un utilisateur de lecteur d'écran. Ne retiens que l'élément le plus important montré — n'énumère pas chaque détail et ne transcris pas le texte. Ne renvoie que cette courte phrase, rien d'autre.",
       "prompt_tags": "Observe attentivement l'image et liste 5 à 12 étiquettes courtes séparées par des virgules qui nomment les choses précises que tu vois : chaque élément principal par son nom, une couleur avec la chose à laquelle elle appartient, et le type de lieu. Si l'image est surtout du texte ou un document, étiquette-la ainsi (par exemple : texte, document, capture d'écran). Produis toujours des étiquettes — ne refuse jamais et n'explique pas. Ne renvoie que les étiquettes séparées par des virgules.",
-      "confirm_delete_model": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau."
+      "confirm_delete_model": "Supprimer le modèle d'IA téléchargé ? Les autres outils d'IA du site le partagent et il devra être téléchargé à nouveau.",
+      "save_setup": "Configurez votre identité Mentria pour garder vos discussions",
+      "save_setup_btn": "Configurer",
+      "save_unlock": "Déverrouillez pour garder cette discussion",
+      "save_unlock_btn": "Déverrouiller",
+      "save_lost": "Les messages non enregistrés sont perdus quand vous quittez cette page."
     },
     "files": {
       "db_group": "Bases de données",
@@ -1980,7 +2102,7 @@
       "models_share": "dont {n} de modèles d’IA téléchargés",
       "erase_button": "Effacer cet appareil…",
       "erase_title": "Tout effacer sur cet appareil",
-      "erase_lede": "Cela supprime toutes les données Mentria de ce navigateur : notes, coffre TOTP, réglages, identité et salons enregistrés de Comms, progression d’apprentissage et packs importés, modèles d’IA téléchargés, fichiers hors ligne, historique de la radio et notifications programmées. Les autres appareils, les appareils synchronisés et les fichiers que vous avez téléchargés ne sont pas touchés. Fermez d’abord les autres onglets Mentria pour qu’ils ne réécrivent pas de données.",
+      "erase_lede": "Cela supprime toutes les données Mentria de ce navigateur : notes, coffre de l’Authentificateur 2FA, réglages, identité et salons enregistrés de Comms, progression d’apprentissage et packs importés, modèles d’IA téléchargés, fichiers hors ligne, historique de la radio et notifications programmées. Les autres appareils, les appareils synchronisés et les fichiers que vous avez téléchargés ne sont pas touchés. Fermez d’abord les autres onglets Mentria pour qu’ils ne réécrivent pas de données.",
       "erase_type": "Tapez « {word} » pour confirmer",
       "erase_word": "effacer",
       "erase_confirm": "Tout effacer",
@@ -2007,7 +2129,7 @@
       "export_confirm": "Télécharger la sauvegarde",
       "cancel": "Annuler",
       "ns_quick_notes": "Notes rapides",
-      "ns_totp": "TOTP",
+      "ns_totp": "Authentificateur 2FA",
       "ns_tools": "Réglages des outils",
       "ns_games": "Jeux",
       "ns_identity": "Identité",
@@ -2072,7 +2194,7 @@
         "image-gen": "Générez des images à partir d'un texte sur le nœud de rendu partagé de Mentria. Gratuit, sans configuration : décrivez la scène et attendez votre tour.",
         "story-studio": "Créez vos propres decks d'histoires : générez des images sur le nœud de rendu de Mentria ou importez les vôtres, écrivez des légendes et assemblez les diapositives en une histoire à faire défiler.",
         "meal-planner": "Planifiez les repas de la semaine, obtenez une liste de courses classée par rayon et finissez ce qui reste dans vos placards. Avec 30 recettes pour commencer et des estimations nutritionnelles issues des données de l'USDA.",
-        "pregnancy-check": "Des informations et le bon moment pour faire un test, pas un diagnostic : quand un test de grossesse urinaire est fiable, la préparation d'une grossesse, la date du terme, les semaines et les rendez-vous. Tout reste sur cet appareil.",
+        "pregnancy-check": "Des informations et le bon moment pour faire un test, pas un diagnostic : quand un test de grossesse urinaire est fiable, la préparation d'une grossesse, la date du terme, les semaines et les rendez-vous. Ce que vous saisissez reste sur cet appareil.",
         "fpv-drone": "Pilotez un drone de course à travers des portes lumineuses au-dessus de collines, d'un parc à conteneurs et d'un canyon désertique. Vol acrobatique ou auto-stabilisé, médailles, courses contre des fantômes et une carte de vol libre. Fonctionne au toucher, à la manette ou au clavier.",
         "nitro-racer": "Course de rue arcade contre cinq rivaux : driftez pour remplir votre nitro, prenez les tremplins et visez les médailles sur un circuit urbain néon, une route côtière et un canyon désertique. Fonctionne au toucher, à l'inclinaison, à la manette ou au clavier.",
         "finance": "Suivez vos dépenses, budgets, factures, placements et impôts, avec des prévisions. Chiffré sur votre appareil et synchronisé uniquement entre vos propres appareils.",
@@ -2097,7 +2219,7 @@
       },
       "perm": {
         "finance": {
-          "network": "Uniquement pour synchroniser vos propres appareils et pour les rappels de paiement facultatifs. La synchronisation passe chiffrée par le relais de Mentria, qui ne peut pas lire votre livre de comptes ; les rappels n'envoient qu'une heure de réveil. Rien de lisible n'est conservé."
+          "network": "Uniquement pour synchroniser vos propres appareils et pour les rappels de paiement facultatifs. La synchronisation est chiffrée de bout en bout, et ce qui passe par le relais de Mentria reste scellé ; les rappels n'envoient qu'une heure de réveil."
         },
         "scanner": {
           "camera": "Uniquement quand l’écran de numérisation est ouvert. Les photos sont traitées sur cet appareil."
@@ -2175,7 +2297,7 @@
       "ref_100": "Concert live",
       "ref_110": "Tronçonneuse",
       "honesty_note": "Les micros de téléphone et d'ordinateur ne sont pas des instruments étalonnés. Les valeurs affichées ici sont des estimations : très utiles pour comparer une pièce, une machine ou un moment à un autre, mais sans valeur pour une mesure professionnelle, légale ou médicale.",
-      "privacy_note": "Le son est analysé en direct sur votre appareil et jeté image par image. Rien n'est enregistré, stocké ni envoyé où que ce soit."
+      "privacy_note": "Le son est analysé en direct sur votre appareil et jeté image par image. Le son n'est ni enregistré, ni stocké, ni envoyé où que ce soit."
     },
     "compass": {
       "btn_start": "Démarrer la boussole",
@@ -2214,7 +2336,7 @@
     "speedometer": {
       "start_title": "Vitesse en direct par GPS",
       "start_body": "Cet outil lit la position de votre appareil tant qu'il est ouvert, afin de calculer votre vitesse.",
-      "start_privacy": "Votre position n'est utilisée que sur cet appareil. Rien n'est envoyé nulle part : la vitesse, la distance et le trajet sont calculés dans votre navigateur.",
+      "start_privacy": "Votre position n'est utilisée que sur cet appareil : la vitesse, la distance et le trajet sont calculés dans votre navigateur.",
       "start_btn": "Démarrer le suivi",
       "desktop_note": "Les ordinateurs portables et fixes sans GPS obtiennent une position approximative par Wi-Fi : la vitesse peut rester à 0 et le trajet ne rien totaliser. Les téléphones et tablettes donnent une vraie vitesse GPS.",
       "btn_stop": "Arrêter",
@@ -3324,7 +3446,7 @@
       "drop": "Déposez des vidéos ou un dossier ici",
       "open_files": "Ouvrir des vidéos",
       "open_folder": "Ouvrir un dossier",
-      "drop_hint": "Vos vidéos restent sur cet appareil. Rien n’est envoyé.",
+      "drop_hint": "Vos vidéos restent sur cet appareil et ne sont pas envoyées.",
       "ios_hint": "Sur iPhone, choisissez les vidéos à chaque fois ou ouvrez un dossier depuis Fichiers. Mentria retient où vous vous êtes arrêté.",
       "saved_title": "Vos dossiers",
       "recent_title": "Reprendre",
@@ -3370,7 +3492,7 @@
       "drop": "Déposez des photos, des vidéos ou un dossier ici",
       "open_files": "Ouvrir des photos",
       "open_folder": "Ouvrir un dossier",
-      "drop_hint": "Vos photos restent sur cet appareil. Rien n’est envoyé.",
+      "drop_hint": "Vos photos restent sur cet appareil et ne sont pas envoyées.",
       "ios_hint": "Sur iPhone, Ouvrir des photos puise dans votre photothèque et Ouvrir un dossier fonctionne avec les dossiers de l’app Fichiers. Mentria garde les miniatures et les dates, pour que les mêmes photos s’ouvrent plus vite la fois suivante.",
       "saved_title": "Vos dossiers",
       "open": "Ouvrir",
@@ -3436,7 +3558,7 @@
       "drop": "Déposez des morceaux ou un dossier ici",
       "open_files": "Ouvrir de la musique",
       "open_folder": "Ouvrir un dossier",
-      "drop_hint": "Votre musique reste sur cet appareil. Rien n’est envoyé.",
+      "drop_hint": "Votre musique reste sur cet appareil et n’est pas envoyée.",
       "ios_hint": "Sur iPhone, choisissez des morceaux ou un dossier de l’app Fichiers à chaque visite. Les morceaux d’Apple Music ne peuvent pas être ouverts. Mentria garde les informations et les pochettes, pour que les mêmes fichiers se chargent plus vite la fois suivante.",
       "lock_hint": "Sur iPhone, si le morceau suivant ne démarre pas alors que l'écran verrouillé est allumé, appuyez sur lecture à cet endroit pour relancer la musique. Pour une longue écoute, un onglet Safari est plus fiable que l'app de l'écran d'accueil.",
       "saved_title": "Vos dossiers",
@@ -3923,8 +4045,8 @@
         "no_upcoming": "Aucune facture dans les 2 prochaines semaines"
       },
       "setup": {
-        "lede": "Suivez vos dépenses, budgets, factures, placements et impôts. Tout est chiffré sur cet appareil ; rien n'est envoyé à Mentria.",
-        "point_local": "Vos données restent dans ce navigateur, verrouillées par une phrase secrète que personne d'autre ne connaît.",
+        "lede": "Suivez vos dépenses, budgets, factures, placements et impôts. Vos données sont stockées chiffrées sur cet appareil et ne se synchronisent qu'entre vos propres appareils.",
+        "point_local": "Vos données sont stockées chiffrées dans ce navigateur, verrouillées par une phrase secrète que personne d'autre ne connaît.",
         "point_sync": "Appairez votre téléphone et votre ordinateur pour les synchroniser directement, d'appareil à appareil.",
         "point_ai": "Saisissez vos opérations en langage courant ; le modèle sur l'appareil peut vous aider une fois téléchargé.",
         "ios_home": "Sur iPhone et iPad, ajoutez d'abord mentria.ai à votre écran d'accueil. Safari peut effacer les données d'un site après 7 jours sans visite ; les apps de l'écran d'accueil les conservent.",
@@ -4158,7 +4280,7 @@
         "export_paired": "Votre dernier fichier de sauvegarde date un peu. Exportez-en un pour garder une copie hors ligne.",
         "export": "Exporter une sauvegarde",
         "welcome_title": "Votre livre de comptes est prêt",
-        "welcome_body": "Ajoutez vos dépenses au fil de l'eau, ou importez un relevé bancaire pour démarrer avec votre historique. Tout reste chiffré sur cet appareil.",
+        "welcome_body": "Ajoutez vos dépenses au fil de l'eau, ou importez un relevé bancaire pour démarrer avec votre historique. Vos données sont stockées chiffrées sur cet appareil.",
         "first_entry": "Ajouter une dépense",
         "import": "Importer un relevé",
         "add_account": "Ajouter un compte",
@@ -4451,7 +4573,7 @@
         "widget_amounts": "Afficher les montants sur la tuile de l'écran d'accueil",
         "widget_hint": "Désactivé, la tuile affiche seulement « Finances », sans chiffres.",
         "about": "À propos",
-        "about_body": "Finances stocke tout de façon chiffrée dans ce navigateur. La synchronisation passe directement entre vos appareils ; le relais de Mentria les aide seulement à se trouver.",
+        "about_body": "Finances stocke tout de façon chiffrée dans ce navigateur. La synchronisation entre vos appareils est chiffrée de bout en bout, et ce qui passe par le relais reste scellé.",
         "version": "Version {v}",
         "reminders_title": "Rappels",
         "reminders": "Me rappeler les paiements sur cet appareil",
@@ -5220,7 +5342,7 @@
         "remove_body": "Cela masque seulement {name} dans votre liste. Il garde sa copie de votre livre de comptes et peut encore se synchroniser avec vos autres appareils. Cette copie reste chiffrée : pour l'ouvrir, il faut votre phrase secrète, votre code de récupération ou une clé d'accès, sauf si l'appareil était réglé pour se déverrouiller automatiquement. Pour couper un appareil perdu, exportez une sauvegarde en décochant « Inclure les clés », effacez Finances sur vos appareils, restaurez la sauvegarde sur l'un d'eux et appairez les autres avec lui. Le livre de comptes restauré reçoit une nouvelle clé que l'appareil perdu n'a pas.",
         "removed": "Appareil retiré",
         "add_body": "Sur l'autre appareil, ouvrez Finances, choisissez « J'utilise Finances sur un autre appareil » et saisissez ce code. Il est valable 10 minutes.",
-        "add_hint": "Les deux appareils doivent être en ligne. Votre livre de comptes passe directement de l'un à l'autre, chiffré ; rien n'est stocké sur un serveur.",
+        "add_hint": "Les deux appareils doivent être en ligne. Votre livre de comptes passe directement de l'un à l'autre, chiffré de bout en bout.",
         "waiting": "En attente de votre autre appareil…",
         "peer_found": "{name} trouvé. Vérifiez qu'il affiche le même nombre :",
         "approve": "Les nombres correspondent, envoyer",
@@ -5301,17 +5423,17 @@
       }
     },
     "comms": {
-      "meta_description": "Chat pair-à-pair, appels et partage de fichiers — chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages.",
-      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout, sans compte, et aucun serveur ne peut lire vos messages. Partagez l’URL d’un salon, ou échangez vos codes de contact pour écrire directement aux gens.",
+      "meta_description": "Chat pair-à-pair, appels et partage de fichiers, sans compte. Les messages sont chiffrés de bout en bout sur votre appareil, et le relais de Mentria ne les transmet que chiffrés.",
+      "lede": "Chat pair-à-pair, appels audio et vidéo, et partage de fichiers. Chiffré de bout en bout et sans compte ; le relais ne transmet que des messages scellés. Partagez l’URL d’un salon, ou échangez vos codes de contact pour écrire directement aux gens.",
       "unknown": "inconnu",
       "onboard": {
         "insecure_title": "Cette page a besoin d’une connexion sécurisée",
         "insecure_body": "Votre navigateur n’autorise le chiffrement dont comms a besoin qu’en <strong>https</strong>. Vous êtes sur une adresse http simple, donc aucune clé ne peut être créée ici.",
         "insecure_open": "Ouvrez plutôt {link} — ou utilisez une adresse https si vous testez en local.",
         "intro_title": "Un chat privé qui fonctionne sur vos appareils",
-        "intro_body": "Messages, appels et fichiers vont directement à l’autre personne — chiffrés de bout en bout. Pas de compte, pas de numéro de téléphone, et aucun serveur capable de les lire.",
+        "intro_body": "Messages, appels et fichiers vont directement à l’autre personne — chiffrés de bout en bout. Pas de compte ni de numéro de téléphone ; ce qui passe par le relais reste scellé.",
         "start": "commencer",
-        "intro_fine": "Cela prend une dizaine de secondes. Tout reste sur votre appareil.",
+        "intro_fine": "Cela prend une dizaine de secondes. Vos clés sont créées sur cet appareil.",
         "name_title": "Comment voulez-vous qu’on vous appelle ?",
         "name_placeholder": "votre nom",
         "create": "créer mon identité",
@@ -5385,7 +5507,8 @@
         "send": "envoyer",
         "share_room": "partager le lien de ce salon",
         "link_copied": "lien du salon copié — envoyez-le aux personnes que vous voulez inviter.",
-        "link_manual": "copiez ce lien pour inviter quelqu’un : {url}"
+        "link_manual": "copiez ce lien pour inviter quelqu’un : {url}",
+        "load_image": "Charger l’image de {host}"
       },
       "notif": {
         "text": "recevez une notification à l’arrivée d’un message — même quand comms est fermé",
@@ -5594,7 +5717,36 @@
         "ext_from": "extension de {who} : {name}",
         "install": "installer",
         "installed": "installée ✓",
-        "install_failed": "échec de l’installation : {reason}"
+        "install_failed": "échec de l’installation : {reason}",
+        "offer_photo": "J’ai envoyé une photo. Mettez Mentria à jour pour la voir.",
+        "offer_photos": "J’ai envoyé {n} photos. Mettez Mentria à jour pour les voir.",
+        "offer_video": "J’ai envoyé une vidéo. Mettez Mentria à jour pour la voir.",
+        "offer_videos": "J’ai envoyé {n} vidéos. Mettez Mentria à jour pour les voir.",
+        "offer_file": "J’ai envoyé un fichier. Mettez Mentria à jour pour l’ouvrir.",
+        "offer_files": "J’ai envoyé {n} fichiers. Mettez Mentria à jour pour les ouvrir.",
+        "offer_mixed": "J’ai envoyé {n} pièces jointes. Mettez Mentria à jour pour les voir.",
+        "needs_update": "{name} doit mettre Mentria à jour pour recevoir ceci",
+        "no_space": "Pas assez d’espace sur cet appareil",
+        "status_send": "envoi {i} sur {n} · {rate} · {path}",
+        "status_recv": "réception {i} sur {n} · {rate} · {path}",
+        "direct": "direct",
+        "via_relay": "via le relais",
+        "saved_here": "enregistré sur cet appareil",
+        "open_pdf": "Ouvrir dans l’outil PDF",
+        "save": "Enregistrer",
+        "retry": "Réessayer",
+        "paused": "En pause à {size}. Elle reprend toute seule quand Comms est ouvert des deux côtés.",
+        "accept": "Accepter",
+        "not_now": "Pas maintenant",
+        "accept_q": "{size} · pas encore téléchargé",
+        "relay_ask": "Cela passe par notre serveur relais. Continuer ?",
+        "relay_go": "Continuer",
+        "media": "Photos, vidéos et fichiers",
+        "on_device": "{size} sur cet appareil",
+        "free_up": "Libérer de l’espace",
+        "free_confirm": "Retirer de cet appareil les photos, vidéos et fichiers de cette discussion ? Les messages restent, et vous pourrez les retélécharger tant que quelqu’un les a encore.",
+        "removed": "Retiré de cet appareil",
+        "download_again": "Télécharger à nouveau"
       },
       "attach": {
         "ext_dm": "les extensions passent d’appareil à appareil — {name} n’est pas en ligne pour le moment.",
@@ -5694,6 +5846,184 @@
         "overconstrained": "l’appareil ne prend pas en charge ces réglages",
         "security": "bloqué pour des raisons de sécurité",
         "abort": "opération interrompue"
+      },
+      "history": {
+        "earlier": "Afficher les messages précédents",
+        "foreign": "L’historique de cet appareil a été enregistré sous une autre identité et ne peut pas être ouvert.",
+        "start_over": "Commencer un nouvel historique",
+        "start_over_confirm": "Supprimer l’ancien historique de cet appareil et en commencer un nouveau ?",
+        "unavailable": "L’historique des discussions ne peut pas être enregistré sur cet appareil."
+      },
+      "home": {
+        "search": "Rechercher",
+        "filter_all": "Tout",
+        "filter_people": "Personnes",
+        "filter_ai": "IA",
+        "at_none": "Aucun résultat",
+        "prompt": "écrivez à quelqu’un ou demandez à l’IA",
+        "placeholder": "Écrivez à n’importe qui ou demandez à l’IA",
+        "placeholder_desk": "Écrivez à n’importe qui ou demandez à l’IA. Tapez @ pour choisir le destinataire.",
+        "hint": "Sans @, une nouvelle discussion avec l’IA démarre sur cet appareil.",
+        "pick": "Choisissez une discussion ou commencez-en une"
+      },
+      "sheet": {
+        "title": "Envoyer",
+        "add": "Ajouter",
+        "caption": "Ajouter une légende",
+        "standard": "Standard",
+        "hd": "HD",
+        "send": "Envoyer",
+        "cancel": "Annuler",
+        "est_down": "{n} photos · {size}, réduites",
+        "est_orig": "{size}, originaux",
+        "est_mixed": "{n} éléments · {size}, photos réduites",
+        "keeps_location": "Ce fichier garde ses données de localisation",
+        "too_big": "Trop lourd à envoyer : 2 Go au maximum",
+        "remove": "Retirer"
+      },
+      "viewer": {
+        "save": "Enregistrer",
+        "share": "Partager",
+        "share_now": "Partager maintenant",
+        "close": "Fermer",
+        "prev": "Précédent",
+        "next": "Suivant"
+      },
+      "devices": {
+        "title": "Mes appareils",
+        "explainer": "Déposez n’importe quoi ici. Ça arrive tout seul sur vos autres appareils dès que Comms y est ouvert.",
+        "this_one": "{device} · celui-ci",
+        "asleep": "{device} · en veille",
+        "online": "{device} · en ligne",
+        "got": "sur {device} ✓",
+        "when_open": "{device} à l’ouverture",
+        "kind_mac": "Mac",
+        "kind_iphone": "iPhone",
+        "kind_ipad": "iPad",
+        "kind_android": "Android",
+        "kind_windows": "PC Windows",
+        "kind_linux": "Linux",
+        "kind_device": "Appareil"
+      },
+      "ai": {
+        "answering_for": "Réponse en cours pour votre {device}",
+        "loading_for": "Chargement de {model} pour votre {device}…",
+        "stop": "Arrêter",
+        "from_device": "réponses de {model} sur votre {device} · chiffré",
+        "loading": "Chargement de {model} sur votre {device}…",
+        "offline": "Votre {device} n'est pas en ligne. Ouvrez Comms dessus, ou terminez sur cet appareil.",
+        "gone_tier": "{model} n'est plus sur votre {device}.",
+        "failed": "Votre {device} n'a pas pu répondre.",
+        "busy": "Votre {device} est occupé. Votre question passe ensuite.",
+        "copy": "Copier",
+        "copied": "Copié",
+        "retry": "Réessayer",
+        "untitled": "Nouvelle discussion",
+        "this_device": "Cet appareil",
+        "at_label": "{model} sur {device}",
+        "menu_title": "Répondre avec",
+        "loaded": "chargé",
+        "download": "téléchargement de {size}",
+        "asleep": "en veille",
+        "stopped": "Votre {device} a cessé de répondre.",
+        "finish": "Terminer sur cet appareil"
+      },
+      "sign": {
+        "verified": "Vérifié : signé avec sa clé d'identité",
+        "my_key": "Clé de signature {fp}"
+      },
+      "invite": {
+        "copied": "Lien d'invitation copié. Il marche une fois, pendant 24 heures.",
+        "join_title": "Rejoindre {label} ?",
+        "by": "Invitation de {name} {fp}",
+        "join": "Rejoindre",
+        "not_now": "Plus tard",
+        "ios": "Vous utilisez l'app de l'écran d'accueil ? Copiez cette invitation et collez-la là-bas.",
+        "copy": "Copier l'invitation",
+        "copied_short": "Copiée",
+        "looking": "Recherche de l'invitation…",
+        "gone": "Cette invitation a expiré ou a déjà servi. Demandez-en une nouvelle.",
+        "used": "Vous avez rejoint avec une invitation ; elle ne peut plus servir.",
+        "joined": "{name} a rejoint avec une invitation",
+        "old_link": "Ancien lien : il n'expire jamais. Créez une nouvelle invitation pour partager.",
+        "make": "Nouvelle invitation",
+        "dismiss": "Fermer",
+        "twice_mine": "Votre lien d'invitation a servi deux fois : {a}, {b}.",
+        "twice": "Le lien d'invitation de ce salon a servi deux fois : {a}, {b}.",
+        "contact": "Inviter un contact",
+        "pick": "Inviter dans ce salon",
+        "sent": "Invitation envoyée à {name}.",
+        "from": "{name} vous invite dans {label}",
+        "no_contacts": "Ajoutez d'abord un contact.",
+        "retry": "Réessayer",
+        "offline_fetch": "Impossible de joindre le relais pour le moment. Vérifiez votre connexion et réessayez.",
+        "replace_key": "Vous avez déjà {label} avec une autre clé. La remplacer par la clé de ce lien ?",
+        "making": "Création d'une invitation…",
+        "ready": "Invitation prête",
+        "ready_note": "Elle marche une fois, pendant 24 heures.",
+        "share": "Partager",
+        "copy_link": "Copier le lien"
+      },
+      "roomlock": {
+        "title": "Verrouiller {label}",
+        "note": "Chaque personne gardée reçoit une nouvelle clé dans sa boîte. Les autres perdent le salon dès maintenant.",
+        "go": "Verrouiller le salon",
+        "short": "Verrouiller",
+        "done": "Salon verrouillé. {n} personnes ont reçu la nouvelle clé.",
+        "offer": "{name} a verrouillé {label}. Utiliser la nouvelle clé ?",
+        "use": "Utiliser",
+        "gone": "{name} a verrouillé ce salon. Demandez-lui une nouvelle invitation.",
+        "none": "Personne n'a encore signé dans ce salon, seuls vos appareils le gardent."
+      },
+      "agent": {
+        "heading": "Sessions d'agent",
+        "connect": "Connecter ce Mac",
+        "connect_note": "Copiez le code, puis lancez node bridge.mjs pair sur le Mac. Faites-le une fois sur chaque appareil depuis lequel vous voulez répondre ; depuis un téléphone, collez-le sur le Mac via le presse-papiers partagé. Le code reste sur le Mac.",
+        "connect_phone": "Associer ce téléphone",
+        "connect_note_phone": "Copiez le code ici ; il arrive sur le Mac via le presse-papiers partagé. Lancez ensuite node bridge.mjs pair sur le Mac. Associez une fois pour répondre et approuver depuis ce téléphone.",
+        "copied": "Code du pont copié.",
+        "copy_failed": "Impossible de copier le code du pont.",
+        "running": "en cours sur votre Mac",
+        "offline": "Mac hors ligne",
+        "thought": "Réflexion",
+        "matches": "{n} résultats",
+        "lines": "lignes {a}–{b}",
+        "exit": "sortie {n}",
+        "show_all": "Tout afficher",
+        "show_changes": "Voir les changements",
+        "show_image": "Voir l'image",
+        "notice_compacted": "Contexte résumé",
+        "notice_unknown": "Quelque chose que cette page ne sait pas encore afficher",
+        "status_running": "en cours",
+        "status_error": "échec",
+        "kind_search": "Recherche",
+        "kind_read": "Lecture",
+        "kind_edit": "Modification",
+        "kind_run": "Commande",
+        "kind_web": "Web",
+        "kind_subagent": "Sous-agent",
+        "kind_other": "Outil",
+        "kind_ask": "Question",
+        "ask_send": "Envoyer la réponse",
+        "ask_other": "Ou écrivez une réponse",
+        "ask_sent": "réponse envoyée",
+        "ask_answered": "Répondu : {a}",
+        "task_done": "Tâche en arrière-plan terminée",
+        "task_failed": "La tâche en arrière-plan a échoué",
+        "private_file": "Fichier privé, non affiché.",
+        "earlier": "Voir plus ancien",
+        "earlier_turn": "Voir le début de ce tour",
+        "open_sub": "Ouvrir",
+        "from_phone": "depuis votre téléphone",
+        "message": "Message pour {name}",
+        "mirror_only": "Lecture seule. Lancez cette session depuis le pont pour répondre ici.",
+        "signed": "Signé avec votre clé d’identité : seuls vos appareils peuvent donner des instructions à cette session.",
+        "sent": "envoyé",
+        "delivered": "remis",
+        "unpaired": "Non remis : associez d’abord cet appareil dans Sessions d’agent.",
+        "wants": "{tool} veut s’exécuter",
+        "allow": "Autoriser",
+        "deny": "Refuser"
       }
     },
     "scanner": {
@@ -6016,7 +6346,9 @@
     "search_placeholder": "Rechercher un pack par titre",
     "no_match": "Aucun pack ne correspond à « {q} ».",
     "see_all": "Voir les {n}",
-    "show_less": "Voir moins"
+    "show_less": "Voir moins",
+    "seo_title": "Apprendre avec des cartes : lire, quiz et révision",
+    "seo_description": "Apprenez avec des packs de cartes à lire, pour vous tester et y revenir. Commencez par les nôtres (nature, sciences, IA) ou importez les vôtres pour réviser."
   },
   "stream": {
     "hero_title": "Un fil qui enseigne.",
@@ -6093,7 +6425,14 @@
     "build_body": "Une extension est un seul fichier HTML. Le SDK explique le format et ce qu’une extension peut utiliser.",
     "manage_link": "Gérer les extensions installées",
     "perm_camera": "Caméra",
-    "perm_camera_desc": "Peut utiliser la caméra une fois que vous l’autorisez."
+    "perm_camera_desc": "Peut utiliser la caméra une fois que vous l’autorisez.",
+    "seo_title": "Extensions Mentria : de petites applis à ajouter",
+    "seo_description": "Petites applis pour Mentria : jeux, minuteur de concentration, planificateur de repas. Essayez, installez d’un geste pour le hors ligne, retirez à tout moment.",
+    "seo_desc": {
+      "dice-roller": "Lancez des dés en ligne en notation standard (2d6+1) ou tirez au sort dans votre liste. Un lanceur de dés gratuit à installer dans Mentria, même hors ligne.",
+      "pomodoro-timer": "Un minuteur pomodoro avec phases de travail et de pause. Le décompte continue même si vous rechargez la page. À installer dans Mentria, utilisable hors ligne.",
+      "image-gen": "Générez une image depuis un texte sur le nœud de rendu partagé de Mentria. Gratuit, sans configuration : décrivez la scène, attendez votre tour, gardez l’image."
+    }
   },
   "image_use": {
     "title": "Utiliser les images de Mentria",
@@ -6101,7 +6440,8 @@
     "rights": "Toutes les images de Mentria sont © Mentria. Tous droits réservés.",
     "share": "Vous pouvez créer un lien vers n’importe quelle page ou la partager telle quelle.",
     "ask": "Pour utiliser une image ailleurs, demandez-nous d’abord :",
-    "contact": "contactez-nous sur X"
+    "contact": "contactez-nous sur X",
+    "seo_description": "Toutes nos images, dont celles des packs d’apprentissage, sont © Mentria, tous droits réservés. Voici comment demander avant d’en réutiliser une."
   },
   "games": {
     "kit": {
@@ -6150,18 +6490,18 @@
   "privacy": {
     "title": "Confidentialité",
     "desc": "Ce qui reste sur votre appareil, ce qui utilise le réseau et quand, et comment le vérifier vous-même.",
-    "lede": "Mentria n’a ni comptes, ni publicités, ni pistage. L’IA tourne sur votre appareil, et ce que vous créez ici est enregistré dans votre navigateur. Voici ce qui utilise le réseau, pour que vous puissiez le vérifier vous-même.",
+    "lede": "Mentria n’a ni comptes, ni publicités, ni scripts d’analyse. L’IA tourne sur votre appareil, et ce que vous créez ici est enregistré dans votre navigateur. Voici ce qui utilise le réseau, pour que vous puissiez le vérifier vous-même.",
     "device_h": "Reste sur votre appareil",
     "device_ai_b": "Conversations et requêtes à l’IA.",
     "device_ai": "Les outils d’IA intégrés à Mentria font tourner le modèle sur la puce graphique de votre appareil : vos questions, les réponses et les images que vous montrez à l’IA sont traitées dans votre navigateur et ne sont envoyées à aucun serveur.",
     "device_files_b": "Les fichiers que vous ouvrez.",
-    "device_files": "Photos, vidéos, musique, PDF et documents sont lus dans la page. Les outils qui modifient un fichier vous en donnent une nouvelle copie à enregistrer, sans rien mettre en ligne.",
+    "device_files": "Photos, vidéos, musique, PDF et documents sont lus dans la page. Les outils qui modifient un fichier vous en donnent une nouvelle copie à enregistrer, sans le mettre en ligne.",
     "device_sensors_b": "Caméra, micro, mouvement et position.",
     "device_sensors": "Les outils pour téléphone les lisent dans la page pendant que vous les utilisez, et les mesures ne sont envoyées nulle part.",
     "device_saved_b": "Ce que vous enregistrez.",
     "device_saved": "Notes, réglages, progression d’apprentissage, packs importés, extensions que vous ajoutez, sauvegardes de jeux et votre identité Mentria restent dans le stockage de ce navigateur. Effacer les données du site les supprime.",
     "device_backup_b": "Sauvegardes.",
-    "device_backup": "Une sauvegarde est un seul fichier chiffré que vous téléchargez et conservez. Mentria n’en reçoit jamais de copie, et personne ne peut l’ouvrir sans votre phrase.",
+    "device_backup": "Une sauvegarde est un seul fichier chiffré que vous téléchargez et conservez. Mentria n’en reçoit jamais de copie, et elle ne s’ouvre qu’avec votre phrase ou votre code de récupération.",
     "net_h": "Ce qui utilise le réseau",
     "net_lede": "Ce qui se connecte, quand, et ce que l’autre côté peut voir.",
     "net_site_name": "Charger Mentria",
@@ -6203,7 +6543,9 @@
     "ask_body": "Vous avez repéré une erreur sur cette page ou vous avez une question ?",
     "ask_github": "Ouvrez une issue sur GitHub",
     "ask_x": "écrivez-nous sur X",
-    "updated": "Dernière mise à jour : 9 octobre 2026."
+    "updated": "Dernière mise à jour : 8 novembre 2026.",
+    "seo_title": "Confidentialité : ce qui reste sur votre appareil",
+    "seo_description": "Vos données chez Mentria : ce qui reste sur votre appareil, ce qui passe par le réseau et quand, comment le vérifier. Ni comptes, ni pubs, ni scripts d’analyse."
   },
   "guide_llm": {
     "title": "Faire tourner un LLM dans votre navigateur",

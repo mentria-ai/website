@@ -35,6 +35,12 @@ jobs:
           node scripts/unlock-storage-check.mjs
       - name: Check Document Scanner geometry, detection and export logic
         run: node scripts/scanner-check.mjs
+      - name: Check Comms messages, history and home logic
+        run: node scripts/comms-check.mjs
+      - name: Check shared image helpers
+        run: node scripts/image-check.mjs
+      - name: Check the shared AI prompt rules
+        run: node scripts/ai-turn-check.mjs
       - name: Check learning pack review, text and validation logic
         run: node scripts/packs-logic-check.mjs
       - name: Check story submission parsing, validation and upload checks

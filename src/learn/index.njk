@@ -8,7 +8,9 @@ permalink: "{{ locale.pathPrefix }}/learn/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'learn.title' | t }}"
+  seoTitle: "{{ 'learn.seo_title' | t }}"
   description: "{{ 'learn.lede' | t }}"
+  seoDescription: "{{ 'learn.seo_description' | t }}"
 localeReload: true
 ---
 <link rel="stylesheet" href="/assets/css/learn.css?v={{ buildHash }}">

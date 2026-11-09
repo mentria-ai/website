@@ -195,7 +195,6 @@ html.is-fullscreen-tool body .terminal-frame--fullscreen .mp__panes {
 html.is-fullscreen-tool body .terminal-frame--fullscreen .comms {
   flex: 1 0 auto;
 }
-html.is-fullscreen-tool body .terminal-frame--fullscreen .comms:has(> .comms__app--chat:not([hidden])),
 html.is-fullscreen-tool body .terminal-frame--fullscreen .comms__app--chat,
 html.is-fullscreen-tool body .terminal-frame--fullscreen .comms__app--chat .comms__chatbody {
   flex: 1 1 0;

@@ -8,7 +8,9 @@ permalink: "{{ locale.pathPrefix }}/tools/extensions/sdk/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.extensions-sdk.title' | t }}"
+  seoTitle: "{{ 'tools.extensions-sdk.seo_title' | t }}"
   description: "{{ 'tools.extensions-sdk.lede' | t }}"
+  seoDescription: "{{ 'tools.extensions-sdk.seo_description' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/extensions/">extensions</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">sdk</span></p>
@@ -21,11 +23,11 @@ eleventyComputed:
 {% include "terminal-frame-open.njk" %}
 <section class="sdk">
   <p class="sdk__lang" role="note">{{ "tool.extensions-sdk.english_only" | t }}</p>
-  <p class="sdk__lead">A Mentria extension is a single <code>.html</code> file — markup, styles and script in one document. There is no build step, no bundler and no upload: the file lives only on your device, in local storage, and runs on the site the moment you install it.</p>
+  <p class="sdk__lead">A Mentria extension is a single <code>.html</code> file — markup, styles and script in one document. There is no build step and no bundler: you import the file into this browser's storage, and it runs on the site the moment you install it.</p>
 
   <div class="sdk__callout" role="note">
     <p class="sdk__callout-title">Trust model — read this once</p>
-    <p>Your extension runs inside an <code>&lt;iframe&gt;</code> (its own document), but that frame is <strong>same-origin</strong> with the host page. That is structural isolation, not a security sandbox: an installed extension can reach the host. The real safeguards are human ones — you install it yourself after a naming prompt, the source never leaves your device, and the file size is capped. Only install extensions you would be willing to run as your own code.</p>
+    <p>Your extension runs inside an <code>&lt;iframe&gt;</code> (its own document), but that frame is <strong>same-origin</strong> with the host page. That is structural isolation, not a security sandbox: an installed extension can reach the host. The real safeguards are human ones — you install it yourself after a naming prompt, and the file size is capped. Only install extensions you would be willing to run as your own code.</p>
   </div>
 
   <h2 class="sdk__h2">{{ "tool.extensions-sdk.heading_start" | t }}</h2>
@@ -186,6 +188,7 @@ eleventyComputed:
     <li><strong>Share over comms</strong>: from an installed row, <em>share</em> hands the file to an open <a href="{{ locale.pathPrefix }}/comms/">comms</a> session; the peer gets the same trust prompt, attributed <em>from you</em>, before anything installs. If comms is closed it points you there.</li>
     <li><strong>Export</strong>: <em>export</em> downloads the stored source back out as <code>&lt;id&gt;.html</code>, so an extension is always portable.</li>
   </ul>
+  {% include "star-cta.njk" %}
 </section>
 {% include "terminal-frame-close.njk" %}
 

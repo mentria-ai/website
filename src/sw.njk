@@ -4,6 +4,7 @@ eleventyExcludeFromCollections: true
 ---
 {% set localeAlt = locales | selectattr("pathPrefix") | sort(false, true, "pathPrefix") | join("|", "pathPrefix") | replace("/", "") -%}
 importScripts('/assets/js/mentria-push-db.js?v={{ buildHash }}');
+importScripts('/assets/js/comms/media-format.js?v={{ buildHash }}');
 const CACHE_NAME = 'mentria-cache-{{ buildHash }}';
 const MODELS_CACHE = 'mentria-models';
 const MODELS_MARKER = 'mentria-models-{{ modelsVersion }}';
@@ -37,6 +38,7 @@ const ASSETS = [
   '/assets/js/tool-launcher.js',
   '/assets/js/mentria-media.js',
   '/assets/js/mentria-meta-strip.js',
+  '/assets/js/mentria-image.js',
   '/assets/js/mentria-media-worker.js',
   '/assets/js/mentria-media-tags.js',
   '/assets/i18n/en.json',
@@ -168,6 +170,8 @@ const ASSETS = [
   '/assets/js/mentria-wake.js',
   '/assets/js/mentria-model-cache.js',
   '/assets/js/mentria-model.js',
+  '/assets/js/ai-turn.js',
+  '/assets/js/ai-answer.js',
   '/assets/js/mentria-activity.js',
   '/assets/js/mentria-extensions.js',
   '/assets/js/mentria-ext-host.js',
@@ -192,6 +196,34 @@ const ASSETS = [
   '/assets/js/unlock-copy.{{ l.code | lower }}.js',
 {%- endfor %}
   '/assets/js/mentria-comms-id.js',
+  '/assets/js/comms/wire.js',
+  '/assets/js/comms/rooms.js',
+  '/assets/js/comms/sign.js',
+  '/assets/js/comms/invite.js',
+  '/assets/js/comms/members.js',
+  '/assets/js/comms/bridge.js',
+  '/assets/js/comms/agent-view.js',
+  '/assets/js/comms/identity.js',
+  '/assets/js/comms/store.js',
+  '/assets/js/comms/cards.js',
+  '/assets/js/comms/threads.js',
+  '/assets/js/comms/mention.js',
+  '/assets/js/comms/ai-thread.js',
+  '/assets/js/comms/location.js',
+  '/assets/js/comms/media-format.js',
+  '/assets/js/comms/media-worker.js',
+  '/assets/js/comms/media.js',
+  '/assets/js/comms/files.js',
+  '/assets/js/comms/attach.js',
+  '/assets/js/comms/sheet.js',
+  '/assets/js/comms/viewer.js',
+  '/assets/js/comms/self.js',
+  '/assets/js/comms/ai-link.js',
+  '/assets/js/comms/ai-local.js',
+  '/assets/js/comms/ai-hostbar.js',
+  '/assets/js/comms/ai-view.js',
+  '/assets/js/comms/ice.js',
+  '/assets/js/comms/ai-page-host.js',
   '/assets/js/mentria-gamepad.js',
   '/assets/js/mentria-push-db.js',
   '/assets/js/mentria-push.js',
@@ -396,9 +428,125 @@ function altPaths(path) {
   return out;
 }
 
+let commsMediaKey = null;
+
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+  const type = event.data && event.data.type;
+  if (type === 'SKIP_WAITING') self.skipWaiting();
+  else if (type === 'comms-media-key') commsMediaKey = event.data.key || null;
+  else if (type === 'comms-media-forget') commsMediaKey = null;
 });
+
+function askMediaKey(client) {
+  if (!client) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const ch = new MessageChannel();
+    const timer = setTimeout(() => resolve(null), 2000);
+    ch.port1.onmessage = (e) => { clearTimeout(timer); resolve(e.data && e.data.key ? e.data.key : null); };
+    try { client.postMessage({ type: 'comms-media-need-key' }, [ch.port2]); } catch (_) { clearTimeout(timer); resolve(null); }
+  });
+}
+
+async function mediaKeyFor(event) {
+  if (commsMediaKey) return commsMediaKey;
+  let key = null;
+  if (event.clientId) key = await askMediaKey(await self.clients.get(event.clientId));
+  if (!key) {
+    const all = await self.clients.matchAll({ type: 'window' });
+    key = (await Promise.all(all.map(askMediaKey))).find(Boolean) || null;
+  }
+  if (key) commsMediaKey = key;
+  return key;
+}
+
+function openCommsDb() {
+  return new Promise((resolve, reject) => {
+    let r;
+    try { r = indexedDB.open('mentria-comms'); } catch (e) { reject(e); return; }
+    r.onupgradeneeded = () => { try { r.transaction.abort(); } catch (_) {} };
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+}
+
+function idbGet(db, store, key) {
+  return new Promise((resolve, reject) => {
+    const r = db.transaction(store).objectStore(store).get(key);
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+}
+
+function parseRange(header, size) {
+  if (!header) return { start: 0, end: size - 1, partial: false };
+  const m = /^bytes=(\d*)-(\d*)/.exec(header.trim());
+  if (!m || (m[1] === '' && m[2] === '')) return null;
+  let start, end;
+  if (m[1] === '') { start = Math.max(0, size - Number(m[2])); end = size - 1; }
+  else { start = Number(m[1]); end = m[2] === '' ? size - 1 : Math.min(Number(m[2]), size - 1); }
+  if (!(start <= end) || start >= size) return null;
+  return { start, end, partial: true };
+}
+
+const MEDIA_INLINE = /^(image\/(png|jpeg|gif|webp|avif|heic|heif|bmp)|video\/[\w.-]+|audio\/[\w.-]+|application\/pdf)$/i;
+
+async function serveCommsMedia(event, url) {
+  const MF = self.MentriaMediaFormat;
+  const id = decodeURIComponent(url.pathname.slice('/comms-media/'.length));
+  const plainHeaders = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "sandbox; default-src 'none'" };
+  if (!MF || !/^[A-Za-z0-9_-]{16,64}$/.test(id)) return new Response(null, { status: 404, headers: plainHeaders });
+  let db;
+  try { db = await openCommsDb(); } catch (_) { return new Response(null, { status: 404, headers: plainHeaders }); }
+  let rec = null;
+  try { rec = await idbGet(db, 'media', id); } catch (_) { rec = null; }
+  if (!rec || !rec.complete) { db.close(); return new Response(null, { status: 404, headers: plainHeaders }); }
+  const key = await mediaKeyFor(event);
+  if (!key) { db.close(); return new Response(null, { status: 403, headers: plainHeaders }); }
+  let info;
+  try { info = await MF.openJson(key, rec.enc, 'media|' + id); } catch (_) { db.close(); return new Response(null, { status: 403, headers: plainHeaders }); }
+  const size = Number(info.size) || 0;
+  const mime = MEDIA_INLINE.test(String(info.mime || '')) ? info.mime : 'application/octet-stream';
+  const headers = Object.assign({ 'Accept-Ranges': 'bytes', 'Content-Type': mime }, plainHeaders);
+  if (url.searchParams.get('dl') === '1') headers['Content-Disposition'] = "attachment; filename*=UTF-8''" + encodeURIComponent(String(info.name || 'file'));
+  if (!size) { db.close(); headers['Content-Length'] = '0'; return new Response(null, { status: 200, headers }); }
+  const range = parseRange(event.request.headers.get('range'), size);
+  if (!range) { db.close(); return new Response(null, { status: 416, headers: Object.assign({ 'Content-Range': 'bytes */' + size }, plainHeaders) }); }
+  let file = null;
+  if (info.where !== 'idb') {
+    try {
+      const root = await navigator.storage.getDirectory();
+      file = await (await (await root.getDirectoryHandle('comms-media')).getFileHandle(id + '.bin')).getFile();
+    } catch (_) { db.close(); return new Response(null, { status: 404, headers: plainHeaders }); }
+  }
+  const slotOf = async (i) => {
+    if (file) return new Uint8Array(await file.slice(MF.slotOffset(i), MF.slotOffset(i) + MF.slotLength(size, i)).arrayBuffer());
+    const p = await idbGet(db, 'pieces', [id, i]);
+    if (!p) throw new Error('missing');
+    return p.slot;
+  };
+  const span = MF.piecesFor(size, range.start, range.end);
+  let i = span.first;
+  const body = new ReadableStream({
+    async pull(ctrl) {
+      if (i > span.last) { db.close(); ctrl.close(); return; }
+      try {
+        const plain = await MF.openPiece(key, id, i, await slotOf(i));
+        const base = i * MF.PIECE;
+        const from = i === span.first ? range.start - base : 0;
+        const to = i === span.last ? range.end - base + 1 : plain.length;
+        ctrl.enqueue(plain.subarray(from, to));
+        i += 1;
+      } catch (e) {
+        db.close();
+        ctrl.error(e);
+      }
+    },
+    cancel() { db.close(); }
+  });
+  headers['Content-Length'] = String(range.end - range.start + 1);
+  if (range.partial) headers['Content-Range'] = 'bytes ' + range.start + '-' + range.end + '/' + size;
+  return new Response(body, { status: range.partial ? 206 : 200, headers });
+}
 
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
@@ -598,7 +746,8 @@ async function handleShareTarget(request) {
   const headers = { 'content-type': 'text/plain; charset=utf-8' };
   if (title && title !== body) headers['x-share-title'] = encodeURIComponent(title);
   await cache.put('/share-target/text', new Response(body, { headers }));
-  return Response.redirect('/tools/quick-notes/?shared=1', 303);
+  const ask = !!(self.navigator && self.navigator.gpu) && !/^https?:\/\/\S+$/i.test(body);
+  return Response.redirect(ask ? '/tools/ai-chat/?shared=1' : '/tools/quick-notes/?shared=1', 303);
 }
 
 function bufferedResponse(body, resp) {
@@ -671,6 +820,11 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
+  if (url.origin === self.location.origin && url.pathname.startsWith('/comms-media/')) {
+    event.respondWith(serveCommsMedia(event, url));
+    return;
+  }
 
   if (isTokenizerFile(url)) {
     event.respondWith((async () => {

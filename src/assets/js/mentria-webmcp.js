@@ -264,12 +264,12 @@ async function registerLocalAi() {
   await safeRegister({
     name: 'local_ai__ask',
     title: 'Ask the on-device model',
-    description: 'Run a prompt on the language model that executes on this device\u2019s GPU. Nothing is sent to any server. First use may download the model to this device.',
+    description: 'Run a prompt on the language model that executes on this device\u2019s GPU. First use may download the model to this device.',
     inputSchema: { type: 'object', properties: { prompt: { type: 'string' } }, required: ['prompt'] },
     execute: (args) => tracked('local_ai__ask', args, async () => {
       const prompt = String((args || {}).prompt || '').slice(0, 4000);
       if (!prompt.trim()) throw new Error('prompt is required');
-      const answer = await askLocal('You are the on-device assistant of mentria.ai, a privacy-first site where everything runs locally in the browser: 30+ tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. If asked about the person\'s notes, say that the notes__summarize_private tool reads and summarizes them on this device. Answer briefly and plainly.', prompt, { maxTokens: 220, source: 'agent', onToken: panelStream });
+      const answer = await askLocal('You are the on-device assistant of mentria.ai, a privacy-first site that runs AI and tools in the browser: built-in tools (quick notes, timers, QR codes, unit converter, color picker, base64, rulers and levels), games (chess, sudoku, ludo, breakout, flappy, a retro FPS), P2P comms chat, Story Studio decks, and an AI-learning feed. You are a language model running on this device via WebGPU. When asked what is available or possible here, list items from that inventory. If asked about the person\'s notes, say that the notes__summarize_private tool reads and summarizes them on this device. Answer briefly and plainly.', prompt, { maxTokens: 220, source: 'agent', onToken: panelStream });
       return { answer, ranOn: 'this device' };
     })
   });

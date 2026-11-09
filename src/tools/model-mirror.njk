@@ -8,7 +8,9 @@ permalink: "{{ locale.pathPrefix }}/tools/model-mirror/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.model-mirror.title' | t }}"
+  seoTitle: "{{ 'tools.model-mirror.seo_title' | t }}"
   description: "{{ 'tools.model-mirror.lede' | t }}"
+  seoDescription: "{{ 'tools.model-mirror.seo_description' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">model-mirror</span></p>

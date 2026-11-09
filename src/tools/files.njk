@@ -8,7 +8,9 @@ permalink: "{{ locale.pathPrefix }}/tools/files/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.files.title' | t }}"
+  seoTitle: "{{ 'tools.files.seo_title' | t }}"
   description: "{{ 'tools.files.lede' | t }}"
+  seoDescription: "{{ 'tools.files.seo_description' | t }}"
 localeReload: true
 ---
 <section class="hero" style="padding-top:1rem;">
@@ -229,6 +231,8 @@ localeReload: true
     restoreCancelled: {{ ("common.restore_cancelled" | t) | dump | safe }},
     exportBusy:   {{ ("about.data_export_busy" | t) | dump | safe }},
     size:         {{ ("common.backup_size" | t) | dump | safe }},
+    historyLocked: {{ ("common.backup_history_locked" | t) | dump | safe }},
+    historySkipped: {{ ("common.restore_history_locked" | t) | dump | safe }},
     sizeBusy:     {{ ("common.backup_size_busy" | t) | dump | safe }},
     largeConfirm: {{ ("common.backup_large_confirm" | t) | dump | safe }},
     areas: {{ "common.data_areas" | tsub | dump | safe }},
@@ -1144,7 +1148,7 @@ localeReload: true
 
   function showSize(m) {
     const parts = m.areas.filter((a) => a.bytes > 0).map((a) => (COPY.areas[a.area] || a.area) + ' ' + fmtBytes(a.bytes));
-    sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', MentriaBackup.listJoin(parts));
+    sizeEl.textContent = COPY.size.replace('{size}', fmtBytes(m.total)).replace('{parts}', MentriaBackup.listJoin(parts)) + (m.lockedAreas && m.lockedAreas.length ? ' ' + COPY.historyLocked : '');
     sizeWarn.hidden = m.total <= MentriaBackup.LARGE_BYTES;
   }
 
@@ -1263,9 +1267,10 @@ localeReload: true
         btn.disabled = false;
         return;
       }
-      out.textContent = COPY.restoreDone.replace('{n}', result.restored);
+      const heldBack = result.lockedAreas && result.lockedAreas.length;
+      out.textContent = COPY.restoreDone.replace('{n}', result.restored) + (heldBack ? ' ' + COPY.historySkipped : '');
       reloading = true;
-      setTimeout(() => { location.reload(); }, 1200);
+      setTimeout(() => { location.reload(); }, heldBack ? 6000 : 1200);
     } catch (err) {
       const raw = MentriaBackup.restoreErrorCode(err);
       const code = raw === 'pass' && mode.kind === 'code' ? 'code' : raw === 'pass' && mode.kind === 'key' ? 'damaged' : raw;

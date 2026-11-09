@@ -1,5 +1,6 @@
 import http from 'node:http';
-import { createReadStream, statSync, rmSync, mkdtempSync } from 'node:fs';
+import { createReadStream, statSync, rmSync, mkdtempSync, existsSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, extname, normalize, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import puppeteer from 'puppeteer-core';
@@ -9,6 +10,7 @@ if (!BUILD) { console.log('usage: node scripts/comms-media-check.mjs <build dir>
 const PORT = Number(process.env.MEDIA_PORT) || 8095;
 const ORIGIN = 'http://127.0.0.1:' + PORT;
 const PROFILE = mkdtempSync(join(tmpdir(), 'comms-media-check-'));
+const DOWNLOADS = mkdtempSync(join(tmpdir(), 'comms-media-check-dl-'));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.txt': 'text/plain' };
 
 function serve(dir, port) {
@@ -93,6 +95,7 @@ const PAGE_TESTS = new Function('HELPERS', `return (async () => {
   const ID8 = 'CAgICAgICAgICAgICAgICA';
   test('fix I2: writes queued before a delete leave no file', async () => { const s = await S.openStore(A); const m = await M.openMedia(s); const ps = []; const piece = bytes(262144, 6); for (let i = 0; i < 160; i++) ps.push(m.writePiece(ID6, i, piece).catch(() => {})); await sleep(5); await m.removeFiles([ID6]); await Promise.all(ps); await sleep(400); no(await opfsExists('comms-media/' + ID6 + '.bin'), 'the file came back'); });
   test('fix I3: a sweep removes share copies and files with no record', async () => { const s = await S.openStore(A); const m = await M.openMedia(s); await m.importFile(new File([bytes(300000, 7)], 'keep.bin'), { threadId: 'dm-1', id: ID7 }); await m.writePiece(ID8, 0, bytes(1000, 8)); await m.closeFile(ID8); await m.plainFile(ID7, 'keep.bin', 'application/octet-stream'); ok(await opfsExists('comms-media/tmp/' + ID7 + '/keep.bin')); await m.sweep({ known: new Set(await s.mediaIds()), graceMs: 0 }); no(await opfsExists('comms-media/tmp/' + ID7 + '/keep.bin'), 'share copy left'); no(await opfsExists('comms-media/' + ID8 + '.bin'), 'orphan left'); ok(await opfsExists('comms-media/' + ID7 + '.bin'), 'a known file was swept'); });
+  test('save: the saved copy downloads in full, without the service worker', async () => { const V = await import('/assets/js/comms/viewer.js'); const s = await S.openStore(A); const m = await M.openMedia(s); const id = 'CgoKCgoKCgoKCgoKCgoKCg'; const data = bytes(700000, 9); await m.importFile(new File([data], 'clip.mp4', { type: 'video/mp4' }), { threadId: 'dm-1', id }); V.downloadFile(await m.plainFile(id, 'clip.mp4', 'video/mp4')); const got = await waitDownload('clip.mp4'); eq(got.size, 700000); eq(got.sha, hex(new Uint8Array(await crypto.subtle.digest('SHA-256', data)))); });
   test('a locked worker refuses', async () => { const s = await S.openStore(A); const m = await M.openMedia(s); m.forget(); await rejects(m.readPiece(ID3, 0), 'locked'); });
 
   let media = null;
@@ -144,6 +147,9 @@ try {
   const cdp = await page.createCDPSession();
   await page.exposeFunction('setQuota', async (bytes) => { await cdp.send('Storage.overrideQuotaForOrigin', bytes == null ? { origin: ORIGIN } : { origin: ORIGIN, quotaSize: bytes }); return true; });
   await cdp.send('ServiceWorker.enable');
+  const bcdp = await browser.target().createCDPSession();
+  await bcdp.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: DOWNLOADS });
+  await page.exposeFunction('waitDownload', async (name) => { const f = join(DOWNLOADS, name); for (let i = 0; i < 150; i++) { if (existsSync(f) && !existsSync(f + '.crdownload')) { const b = readFileSync(f); return { size: b.length, sha: createHash('sha256').update(b).digest('hex') }; } await new Promise((r) => setTimeout(r, 200)); } return { size: -1, sha: '' }; });
   await page.exposeFunction('stopServiceWorkers', async () => { await cdp.send('ServiceWorker.stopAllWorkers'); await new Promise((r) => setTimeout(r, 300)); return true; });
   await page.goto(ORIGIN + '/about/');
   for (let i = 0; i < 3; i++) {
@@ -161,6 +167,7 @@ try {
   await browser.close();
   server.close();
   rmSync(PROFILE, { recursive: true, force: true });
+  rmSync(DOWNLOADS, { recursive: true, force: true });
 }
 let failed = 0;
 for (const r of results) {

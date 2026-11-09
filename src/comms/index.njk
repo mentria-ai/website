@@ -641,17 +641,18 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__parts-devices{margin:0;padding:0 var(--space-2);color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs)}
 .comms__parts-devices:empty{display:none}
 .comms__viewer{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;padding:0;color:#fff;background:rgba(0,0,0,.94);border:0}
-.comms__viewer[open]{display:grid;grid-template-rows:auto 1fr auto}
+.comms__viewer[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);padding-bottom:env(safe-area-inset-bottom)}
 .comms__viewer::backdrop{background:#000}
-.comms__viewer-top{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);padding-top:max(var(--space-2),env(safe-area-inset-top))}
+.comms__viewer-top{display:flex;align-items:center;gap:var(--space-2);min-width:0;padding:var(--space-2) var(--space-3);padding-top:max(var(--space-2),env(safe-area-inset-top))}
 .comms__viewer-count{font-family:var(--font-mono);font-size:var(--text-xs);opacity:.8}
-.comms__viewer-name{flex:1;overflow:hidden;font-size:var(--text-sm);white-space:nowrap;text-overflow:ellipsis}
+.comms__viewer-name{flex:1;min-width:0;overflow:hidden;font-size:var(--text-sm);white-space:nowrap;text-overflow:ellipsis}
 .comms__viewer-stage{display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden;touch-action:pan-y}
 .comms__viewer-media{max-width:100%;max-height:100%;object-fit:contain}
 .comms__viewer-nav{position:absolute;top:50%;width:44px;height:64px;margin-top:-32px;color:#fff;font-size:2rem;background:rgba(0,0,0,.35);border:0;border-radius:var(--radius-md);cursor:pointer}
 .comms__viewer-nav--prev{left:8px}
 .comms__viewer-nav--next{right:8px}
-.comms__viewer-strip{display:flex;gap:4px;padding:var(--space-2);padding-bottom:max(var(--space-2),env(safe-area-inset-bottom));overflow-x:auto}
+.comms__viewer-strip{display:flex;gap:4px;padding:var(--space-2);overflow-x:auto}
+.comms__viewer-strip[hidden]{display:none}
 .comms__viewer-thumb{flex:0 0 auto;width:52px;height:52px;padding:0;overflow:hidden;color:#fff;background:#222;border:2px solid transparent;border-radius:var(--radius-sm);cursor:pointer}
 .comms__viewer-thumb.is-current{border-color:var(--syn-cyan)}
 .comms__viewer-thumb img{width:100%;height:100%;object-fit:cover}
@@ -810,7 +811,7 @@ import { showHostBar } from '/assets/js/comms/ai-hostbar.js';
 import { answerTurns } from '/assets/js/ai-answer.js';
 import { TIERS as AI_TIERS, TIER_CHAIN as AI_CHAIN, SMALL_TIER as AI_SMALL, isTierCached, isLegacyTier, setUserTier } from '/assets/js/mentria-tiers.js';
 import { openSheet } from '/assets/js/comms/sheet.js';
-import { openViewer, renderMediaGrid } from '/assets/js/comms/viewer.js';
+import { openViewer, renderMediaGrid, downloadFile } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
 import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink } from '/assets/js/comms/sign.js';
@@ -2211,16 +2212,36 @@ const onFileChange = (id, extra) => {
 };
 
 const SHARE_NOW_BYTES = 50 * 1024 * 1024;
+const SAVE_OPENS_SHEET = IOS_DEVICE;
+const dropPlainLater = (ref) => setTimeout(() => { if (attach && attach.media) attach.media.dropPlain(ref); }, 300000);
 const shareItem = async (it) => {
-  if (!attach || !attach.media || !navigator.share) return null;
+  if (!attach || !attach.media || !navigator.share) return false;
   const file = await attach.media.plainFile(it.ref, it.name || 'file', it.mime || '');
-  if (navigator.canShare && !navigator.canShare({ files: [file] })) { attach.media.dropPlain(it.ref); return null; }
+  if (navigator.canShare && !navigator.canShare({ files: [file] })) { attach.media.dropPlain(it.ref); return false; }
   if (file.size > SHARE_NOW_BYTES) {
-    setTimeout(() => { if (attach && attach.media) attach.media.dropPlain(it.ref); }, 300000);
+    dropPlainLater(it.ref);
     return { later: true, file };
   }
-  try { await navigator.share({ files: [file] }); } catch (_) {}
+  try {
+    await navigator.share({ files: [file] });
+  } catch (e) {
+    if (e && e.name === 'NotAllowedError') { dropPlainLater(it.ref); return { later: true, file }; }
+  }
   attach.media.dropPlain(it.ref);
+  return null;
+};
+const saveItem = async (it) => {
+  if (!attach || !attach.media) return null;
+  try {
+    if (SAVE_OPENS_SHEET) {
+      const res = await shareItem(it);
+      if (res !== false) return res;
+    }
+    downloadFile(await attach.media.plainFile(it.ref, it.name || 'file', it.mime || ''));
+    dropPlainLater(it.ref);
+  } catch (e) {
+    sys(fmt(T.files.save_failed, { name: it.name || '', reason: why(e) }));
+  }
   return null;
 };
 
@@ -2234,7 +2255,7 @@ const openMediaItem = async (ref, items) => {
   }
   const start = list.findIndex((x) => x.ref === ref);
   if (start < 0) return;
-  openViewer({ items: list, start, T, onShare: shareItem });
+  openViewer({ items: list, start, T, onShare: shareItem, onSave: saveItem, saveOpensSheet: SAVE_OPENS_SHEET });
 };
 
 const freeUp = async (threadId) => {
@@ -2323,7 +2344,7 @@ const renderAttachment = (who, parts, opts = {}) => {
   const card = document.createElement('div');
   card.className = 'comms__partsbox';
   line.what.append(card);
-  renderParts(card, parts, { t: opts.t || '', me: !!opts.me, sender, T, media: () => null, onOpen: openMediaItem, onRetry: (ref) => { if (attach) attach.retry(ref); }, onOpenPdf: openInPdf, onImportPack: importPackFrom, onAccept: (refs) => { if (attach) refs.forEach((r) => attach.accept(r)); }, onRelayOk: (refs) => { if (attach) refs.forEach((r) => attach.allowRelay(r)); } });
+  renderParts(card, parts, { t: opts.t || '', me: !!opts.me, sender, T, media: () => null, onOpen: openMediaItem, onRetry: (ref) => { if (attach) attach.retry(ref); }, onOpenPdf: openInPdf, onImportPack: importPackFrom, onSave: (ref, it) => saveItem({ ref, name: (it && it.name) || '', mime: (it && it.mime) || '' }), onAccept: (refs) => { if (attach) refs.forEach((r) => attach.accept(r)); }, onRelayOk: (refs) => { if (attach) refs.forEach((r) => attach.allowRelay(r)); } });
   if (album) albumCards.set(album.aid, card);
   if (inSelf()) { const dl = document.createElement('p'); dl.className = 'comms__parts-devices'; card.append(dl); }
   for (const it of mediaParts(parts)) { fileLines.set(it.ref, { card, part: it, me: !!opts.me }); paintAttach(it.ref); }

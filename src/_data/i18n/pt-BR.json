@@ -5701,6 +5701,7 @@
         "send_interrupted": "envio interrompido — {name}: todo mundo saiu da sala",
         "all_left": "todos saíram durante o envio",
         "send_failed_for": "falha ao enviar {name}: {reason}",
+        "save_failed": "falha ao salvar {name}: {reason}",
         "dm_offline": "os arquivos vão direto de aparelho para aparelho, então {name} também precisa estar online. agora a pessoa não está conectada.",
         "pinged": "avisamos o aparelho da pessoa — tente de novo quando ela abrir o comms.",
         "nobody": "ainda não tem ninguém conectado a esta sala — os arquivos vão direto, então alguém precisa estar aqui.",
@@ -5734,6 +5735,7 @@
         "saved_here": "salvo neste dispositivo",
         "open_pdf": "Abrir na ferramenta de PDF",
         "save": "Salvar",
+        "save_now": "Salvar agora",
         "retry": "Tentar de novo",
         "paused": "Pausado em {size}. Continua sozinho quando o Comms estiver aberto nos dois.",
         "accept": "Aceitar",
@@ -5883,6 +5885,7 @@
       },
       "viewer": {
         "save": "Salvar",
+        "save_now": "Salvar agora",
         "share": "Compartilhar",
         "share_now": "Compartilhar agora",
         "close": "Fechar",

@@ -8,7 +8,9 @@ permalink: "{{ locale.pathPrefix }}/extensions/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tool.ext_gallery.title' | t }}"
+  seoTitle: "{{ 'store.seo_title' | t }}"
   description: "{{ 'store.lede' | t }}"
+  seoDescription: "{{ 'store.seo_description' | t }}"
 ---
 <link rel="stylesheet" href="/assets/css/store.css?v={{ buildHash }}">
 {% set cardPrefix = locale.pathPrefix %}

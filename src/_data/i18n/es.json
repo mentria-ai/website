@@ -183,7 +183,8 @@
     "whats_new_since": "Novedades desde {tag}",
     "update_now": "Actualizar ahora",
     "release_notes": "Notas de la versión en GitHub",
-    "privacy": "Privacidad"
+    "privacy": "Privacidad",
+    "seo_title": "Sobre Mentria: IA y herramientas en tu navegador"
   },
   "common": {
     "undo": "Deshacer",
@@ -347,7 +348,9 @@
       "feature_offline": "Funciona sin conexión una vez en caché"
     },
     "related_ai": "Mentria también ejecuta IA en tu dispositivo, de forma privada.",
-    "related_ai_link": "Probar el chat de IA"
+    "related_ai_link": "Probar el chat de IA",
+    "seo_title": "Herramientas online gratis en tu navegador",
+    "seo_description": "Herramientas, juegos e IA gratis en el navegador, sin registro: regla, contador de pasos, calculadora, editor PDF, chat de IA y más. La mayoría va sin conexión."
   },
   "feed_page": {
     "title": "Feed",
@@ -400,70 +403,93 @@
       "title": "Chat IA",
       "lede": "Ternary Bonsai 2 y Bonsai 27B de PrismML, ejecutándose localmente en tu navegador. Sin servidor, sin claves de API. Compatible con imágenes.",
       "tldr": "AI Chat ejecuta Ternary Bonsai 2 de PrismML, basado en Qwen3.5, localmente en tu navegador mediante WebGPU, y Bonsai 27B en ordenadores con memoria suficiente. Tus mensajes e imágenes se procesan en tu dispositivo, y tus datos se mantienen privados — sin servidor, sin clave de API, sin cuenta. Admite entrada visual. El modelo se descarga al primer clic; las visitas posteriores arrancan al instante desde la caché local.",
-      "seo_title": "Chat de IA privado que funciona en tu navegador"
+      "seo_title": "Chat de IA privado que funciona en tu navegador",
+      "seo_description": "Chatea con una IA local en tu navegador gracias a WebGPU. Sin cuenta ni clave de API, lee imágenes y tus chats se mantienen privados en tu dispositivo."
     },
     "base64-codec": {
       "title": "Codificador Base64",
       "lede": "Codifica y decodifica texto o archivos en Base64. Compatible con imágenes, documentos y cualquier tipo de archivo. Todo se ejecuta localmente en tu navegador.",
-      "tldr": "Codificador y decodificador para texto y archivos enfocado en privacidad. La codificación y decodificación ocurren en tu navegador con JavaScript estándar, así que tus textos y archivos no se suben. Arrastra un archivo o pega una cadena Base64 y copia o descarga el resultado. Funciona sin conexión, sin más límite de tamaño que la memoria del navegador."
+      "tldr": "Codificador y decodificador para texto y archivos enfocado en privacidad. La codificación y decodificación ocurren en tu navegador con JavaScript estándar, así que tus textos y archivos no se suben. Arrastra un archivo o pega una cadena Base64 y copia o descarga el resultado. Funciona sin conexión, sin más límite de tamaño que la memoria del navegador.",
+      "seo_title": "Base64: codificar y decodificar texto y archivos",
+      "seo_description": "Codifica texto o archivos en Base64, o decodifícalo a texto, imágenes y documentos. Funciona en tu navegador, así que tus archivos no se suben a ningún sitio."
     },
     "extensions": {
       "title": "Extensiones",
       "lede": "Instala extensiones privadas de un solo archivo en este dispositivo. Aparecen en tu lanzador y en la paleta de comandos, y nunca en el sitio público.",
-      "tldr": "Una plataforma trae-tu-propia-herramienta. Una extensión es un archivo HTML con un manifiesto integrado; instálala aquí y obtiene una ficha en tu lanzador, entradas opcionales en la paleta de comandos y su propio almacenamiento local que se incluye en tu copia de seguridad cifrada. Las extensiones se ejecutan con acceso completo en este dispositivo, así que instala solo archivos de personas de confianza. Instalar una no la sube a ningún sitio, aunque una extensión puede usar la red por su cuenta."
+      "tldr": "Una plataforma trae-tu-propia-herramienta. Una extensión es un archivo HTML con un manifiesto integrado; instálala aquí y obtiene una ficha en tu lanzador, entradas opcionales en la paleta de comandos y su propio almacenamiento local que se incluye en tu copia de seguridad cifrada. Las extensiones se ejecutan con acceso completo en este dispositivo, así que instala solo archivos de personas de confianza. Instalar una no la sube a ningún sitio, aunque una extensión puede usar la red por su cuenta.",
+      "seo_title": "Extensiones: instala pequeñas apps privadas",
+      "seo_description": "Instala extensiones privadas de un archivo en este dispositivo: icono en el lanzador, entradas opcionales en la paleta y datos propios, fuera del sitio público."
     },
     "coin-flip": {
       "title": "Lanzar moneda",
       "lede": "Cara o cruz — lanza una moneda al instante. Ejecuta una serie al mejor de N para desempates. Funciona sin conexión.",
       "tldr": "Un cara o cruz simple respaldado por el RNG seguro del navegador (Web Crypto). El resultado se decide localmente, en tu navegador. Mantiene un historial por sesión. Útil para decisiones rápidas, sorteos justos o resolver discusiones de mesa — instantáneo en cualquier dispositivo.",
-      "seo_title": "Lanzar una moneda online: cara o cruz"
+      "seo_title": "Lanzar una moneda online: cara o cruz",
+      "seo_description": "Lanza una moneda online a cara o cruz. Juega una serie al mejor de varias para desempatar, mira cómo gira y cae, y sigue lanzando sin conexión en tu navegador."
     },
     "color-picker": {
       "title": "Selector de color",
       "lede": "Elige cualquier color, ve sus valores HEX / RGB / HSL, y genera paletas armoniosas. Funciona sin conexión.",
-      "tldr": "Elige, muestrea y guarda colores por completo en tu navegador. Devuelve HEX, RGB y HSL lado a lado. Las muestras guardadas se conservan en el localStorage de este navegador. Haz clic en el selector, copia cualquier valor al portapapeles o arma una pequeña paleta para diseño o código. Funciona sin conexión."
+      "tldr": "Elige, muestrea y guarda colores por completo en tu navegador. Devuelve HEX, RGB y HSL lado a lado. Las muestras guardadas se conservan en el localStorage de este navegador. Haz clic en el selector, copia cualquier valor al portapapeles o arma una pequeña paleta para diseño o código. Funciona sin conexión.",
+      "seo_title": "Selector de color online: HEX, RGB, HSL y paletas",
+      "seo_description": "Elige cualquier color, copia su valor HEX, RGB o HSL y crea paletas a juego con él. Un selector de color gratis que funciona en tu navegador y sin conexión."
     },
     "countdown-timer": {
       "title": "Temporizador",
       "lede": "Establece una duración o elige una hora objetivo. Hasta 4 temporizadores independientes con sonido de alarma.",
-      "tldr": "Ejecuta hasta cuatro temporizadores en paralelo con notificaciones del sistema opcionales al finalizar, incluso con la pestaña oculta. Define una duración o una fecha y hora objetivo, nombra cada temporizador, guarda preajustes. La alarma de audio y la notificación se disparan desde tu navegador; con las notificaciones activadas, el servidor de Mentria solo recibe la hora de aviso, para que la alerta llegue aunque salgas de la pestaña."
+      "tldr": "Ejecuta hasta cuatro temporizadores en paralelo con notificaciones del sistema opcionales al finalizar, incluso con la pestaña oculta. Define una duración o una fecha y hora objetivo, nombra cada temporizador, guarda preajustes. La alarma de audio y la notificación se disparan desde tu navegador; con las notificaciones activadas, el servidor de Mentria solo recibe la hora de aviso, para que la alerta llegue aunque salgas de la pestaña.",
+      "seo_title": "Temporizador online con alarma: varios a la vez",
+      "seo_description": "Elige una duración o cuenta atrás hasta una fecha y hora. Varios temporizadores a la vez, cada uno con título, y una alarma al terminar. Funciona sin conexión."
     },
     "decision-wheel": {
       "title": "Rueda de decisiones",
       "lede": "¿No puedes decidir? Gira la rueda y deja que el destino elija. Funciona sin conexión.",
-      "tldr": "Gira una rueda personalizable para elegir entre tu propia lista de opciones. Añade o elimina opciones al vuelo; el resultado se selecciona localmente con el RNG del navegador. No necesitas cuenta. Útil para elegir restaurante, asignar tareas o cualquier cosa para la que normalmente lanzarías una moneda."
+      "tldr": "Gira una rueda personalizable para elegir entre tu propia lista de opciones. Añade o elimina opciones al vuelo; el resultado se selecciona localmente con el RNG del navegador. No necesitas cuenta. Útil para elegir restaurante, asignar tareas o cualquier cosa para la que normalmente lanzarías una moneda.",
+      "seo_title": "Rueda de decisiones: gira para decidir sí o no",
+      "seo_description": "¿No te decides? Gira la rueda para un sí, un no, un tú decides o un espera y prueba otra vez. Rueda de decisiones gratis en tu navegador, también sin conexión."
     },
     "flappy": {
       "title": "Flappy",
       "lede": "Un avión de papel sorteando una pila de prompts del terminal. Toca, haz clic o presiona ESPACIO para aletear. No choques con el prompt.",
-      "tldr": "Una versión nativa del navegador de Flappy Bird con estética synthwave-terminal. HTML5 Canvas puro — sin instalación, sin registro, sin scripts de terceros. Estado del juego, récord y audio se ejecutan del lado del cliente y permanecen en tu dispositivo. Toca, haz clic o pulsa espacio para aletear. Funciona sin conexión una vez cacheado."
+      "tldr": "Una versión nativa del navegador de Flappy Bird con estética synthwave-terminal. HTML5 Canvas puro — sin instalación, sin registro, sin scripts de terceros. Estado del juego, récord y audio se ejecutan del lado del cliente y permanecen en tu dispositivo. Toca, haz clic o pulsa espacio para aletear. Funciona sin conexión una vez cacheado.",
+      "seo_title": "Flappy Plane: juego de un toque gratis online",
+      "seo_description": "Guía un avión de papel entre prompts apilados. Toca, haz clic o pulsa espacio para aletear sin chocar con el prompt. Juego flappy gratis, también sin conexión."
     },
     "invoice": {
       "title": "Generador de facturas",
       "lede": "Crea facturas limpias de una página en tu navegador. Se guardan mientras escribes. Imprime en A4 o exporta a JSON.",
-      "tldr": "Crea facturas A4 limpias en tu navegador y guárdalas como PDF mediante el diálogo de impresión del navegador. Agrega ítems, moneda, datos bancarios, notas al pie; se autoguarda en localStorage para que las recargas no pierdan datos. Importa o exporta toda la factura como JSON. Sin cuentas; tus facturas se guardan en este navegador."
+      "tldr": "Crea facturas A4 limpias en tu navegador y guárdalas como PDF mediante el diálogo de impresión del navegador. Agrega ítems, moneda, datos bancarios, notas al pie; se autoguarda en localStorage para que las recargas no pierdan datos. Importa o exporta toda la factura como JSON. Sin cuentas; tus facturas se guardan en este navegador.",
+      "seo_title": "Generador de facturas gratis para crear e imprimir",
+      "seo_description": "Crea facturas de una página en el navegador: se guardan al escribir, se imprimen en A4 o PDF y pasan a JSON para editarlas. Tus facturas se mantienen privadas."
     },
     "markdown-pdf": {
       "title": "Markdown → PDF",
       "lede": "Escribe markdown, ve una vista previa en vivo, y descarga un PDF profesional y limpio. Se guarda automáticamente en tu navegador. Tus documentos se mantienen privados.",
-      "tldr": "Un editor de markdown con vista previa en vivo y exportación a PDF de un clic mediante el diálogo de impresión del navegador. Importa y exporta archivos .md, autoguarda borradores localmente, admite markdown estilo GitHub incluyendo tablas y listas de tareas. No necesitas cuenta: corre en JavaScript del lado del cliente, funciona sin conexión y tus documentos se mantienen privados."
+      "tldr": "Un editor de markdown con vista previa en vivo y exportación a PDF de un clic mediante el diálogo de impresión del navegador. Importa y exporta archivos .md, autoguarda borradores localmente, admite markdown estilo GitHub incluyendo tablas y listas de tareas. No necesitas cuenta: corre en JavaScript del lado del cliente, funciona sin conexión y tus documentos se mantienen privados.",
+      "seo_title": "Convertir Markdown a PDF con vista previa en vivo",
+      "seo_description": "Escribe Markdown con vista previa en vivo y descarga un PDF limpio y profesional. Se guarda en el navegador al escribir y tus documentos se mantienen privados."
     },
     "pdf": {
       "title": "Lector y editor de PDF",
       "short": "PDF",
       "lede": "Abre, lee y edita PDF en tu dispositivo: busca, resalta, añade notas y firmas, rellena formularios y une, divide o reordena páginas.",
-      "tldr": "Abre un PDF y léelo con zoom, miniaturas de las páginas, el índice del documento, búsqueda y un modo de lectura oscuro. Cambia a Editar para resaltar texto, añadir notas, dibujar, colocar imágenes o firmar; los campos de los formularios se rellenan directamente en la página. Páginas muestra cada página como una tarjeta: arrastra para reordenar, gira, elimina, extrae o divide, añade otro PDF para unirlos o guarda páginas como imágenes. Tu PDF se abre en el navegador y no se sube, y después de la primera visita la herramienta también funciona sin conexión."
+      "tldr": "Abre un PDF y léelo con zoom, miniaturas de las páginas, el índice del documento, búsqueda y un modo de lectura oscuro. Cambia a Editar para resaltar texto, añadir notas, dibujar, colocar imágenes o firmar; los campos de los formularios se rellenan directamente en la página. Páginas muestra cada página como una tarjeta: arrastra para reordenar, gira, elimina, extrae o divide, añade otro PDF para unirlos o guarda páginas como imágenes. Tu PDF se abre en el navegador y no se sube, y después de la primera visita la herramienta también funciona sin conexión.",
+      "seo_title": "Editor de PDF online: lee, firma, une y divide",
+      "seo_description": "Abre, lee y edita PDF en tu navegador: busca, resalta, añade notas y firmas, rellena formularios y une, divide o reordena páginas. Tus archivos no se suben."
     },
     "minesweeper": {
       "title": "Buscaminas",
       "lede": "Clásico rompecabezas lógico con vestimenta de terminal. Haz clic para cavar, clic derecho (o modo F) para marcar bandera. Los números cuentan minas adyacentes. No pulses los rosas.",
       "tldr": "El clásico Buscaminas reconstruido con estética synthwave/terminal. Niveles preestablecidos (fácil, medio, difícil, extremo), controles de teclado y táctil, mejores tiempos persistentes en localStorage. Sin instalación, sin registro, sin analítica; la lógica del juego y el cronómetro se ejecutan localmente en tu navegador. Funciona sin conexión una vez cargada la página.",
-      "seo_title": "Buscaminas online: de fácil a extremo, con teclado"
+      "seo_title": "Buscaminas online: de fácil a extremo, con teclado",
+      "seo_description": "Buscaminas clásico online, de fácil a extremo. Clic para cavar, clic derecho o modo F para marcar, con ratón, táctil o teclado. Se guardan tus mejores tiempos."
     },
     "quick-notes": {
       "title": "Notas rápidas",
       "lede": "Una libreta mínima que vive en tu navegador. Crea múltiples notas, guardadas automáticamente en cada pulsación.",
-      "tldr": "Un bloc de notas centrado en el teclado que autoguarda cada pulsación en el localStorage del navegador. Múltiples notas, estética synthwave oscura. Las notas se guardan en este navegador, sin necesidad de cuenta. Úsalo como cuaderno para tareas, fragmentos o ideas a las que volver en una pestaña."
+      "tldr": "Un bloc de notas centrado en el teclado que autoguarda cada pulsación en el localStorage del navegador. Múltiples notas, estética synthwave oscura. Las notas se guardan en este navegador, sin necesidad de cuenta. Úsalo como cuaderno para tareas, fragmentos o ideas a las que volver en una pestaña.",
+      "seo_title": "Bloc de notas online: se guarda mientras escribes",
+      "seo_description": "Bloc de notas online minimalista que vive en tu navegador. Varias notas, guardadas en cada pulsación, sin cuenta ni registro. Tus notas se mantienen privadas."
     },
     "activity": {
       "downloading": "descargando",
@@ -541,65 +567,85 @@
     "quote": {
       "title": "Cita motivadora",
       "lede": "Citas originales generadas por IA, ejecutándose localmente en tu navegador.",
-      "tldr": "Frase Motivacional genera aforismos originales con el mismo modelo local que AI Chat, ejecutándose por completo en tu navegador mediante WebGPU. Sin servidor, sin clave de API, sin cuenta. El modelo se descarga en la primera visita y queda en caché localmente para reutilizarlo al instante."
+      "tldr": "Frase Motivacional genera aforismos originales con el mismo modelo local que AI Chat, ejecutándose por completo en tu navegador mediante WebGPU. Sin servidor, sin clave de API, sin cuenta. El modelo se descarga en la primera visita y queda en caché localmente para reutilizarlo al instante.",
+      "seo_title": "Generador de frases motivadoras con IA online",
+      "seo_description": "Frases motivadoras originales escritas por un modelo de IA que funciona en local en tu navegador. Genera una nueva cuando quieras y comparte tus favoritas."
     },
     "radio": {
       "title": "Radio infinita",
       "lede": "Música cinematográfica épica generada por IA, transmitiendo infinitamente. Aprende tus gustos en tu dispositivo, y lo que escuchas se mantiene privado.",
-      "tldr": "Música cinematográfica infinita generada por IA, en streaming directo en tu navegador. Las pistas vienen de un catálogo público y se reproducen con el elemento de audio HTML5 nativo del navegador (con crossfade entre dos reproductores); tu historial de escucha y tus 'me gusta' permanecen en el dispositivo en IndexedDB para aprender tu gusto localmente con el tiempo. Sin cuentas y sin personalización del lado del servidor."
+      "tldr": "Música cinematográfica infinita generada por IA, en streaming directo en tu navegador. Las pistas vienen de un catálogo público y se reproducen con el elemento de audio HTML5 nativo del navegador (con crossfade entre dos reproductores); tu historial de escucha y tus 'me gusta' permanecen en el dispositivo en IndexedDB para aprender tu gusto localmente con el tiempo. Sin cuentas y sin personalización del lado del servidor.",
+      "seo_title": "Radio infinita: música con IA que nunca se acaba",
+      "seo_description": "Música cinematográfica creada por IA que suena sin fin. Aprende tus gustos en tu dispositivo mientras escuchas, y tu historial de escucha se mantiene privado."
     },
     "tetris": {
       "title": "Tetris",
       "lede": "Apila tetrominós. Despeja líneas. La velocidad aumenta cada 10 líneas. Piezas en cian, púrpura, rosa, ámbar, verde — la paleta de Mentria.",
-      "tldr": "Tetris nativo del navegador con estética terminal. HTML5 Canvas, generación de piezas precisa con la lógica del Super Rotation System, cola de hold, pieza fantasma, gravedad por nivel. Récord guardado en localStorage. Sin instalación, sin registro, sin scripts de terceros — la lógica del juego y los tiempos corren del lado del cliente y el juego funciona sin conexión."
+      "tldr": "Tetris nativo del navegador con estética terminal. HTML5 Canvas, generación de piezas precisa con la lógica del Super Rotation System, cola de hold, pieza fantasma, gravedad por nivel. Récord guardado en localStorage. Sin instalación, sin registro, sin scripts de terceros — la lógica del juego y los tiempos corren del lado del cliente y el juego funciona sin conexión.",
+      "seo_title": "Tetris online: juego de bloques gratis",
+      "seo_description": "Apila los bloques que caen y completa líneas en este Tetris gratis para el navegador. La velocidad sube al avanzar. Con táctil, teclado o ratón, y sin conexión."
     },
     "search": {
       "title": "Búsqueda",
       "lede": "Encuentra herramientas y entradas del feed. Escribe cualquier consulta — palabra clave o lenguaje natural.",
-      "tldr": "Búsqueda en todo el sitio respaldada por un índice generado al compilar, con todas las herramientas y entradas del feed en 5 idiomas. El modo por defecto es coincidencia difusa instantánea por palabras clave en títulos, descripciones y TL;DRs — sin descarga de modelo, sin servidor. Si ya hay un modelo de IA local en caché (tras usar AI Chat o Frase Motivacional), aparece un resumen de IA opcional sobre los resultados."
+      "tldr": "Búsqueda en todo el sitio respaldada por un índice generado al compilar, con todas las herramientas y entradas del feed en 5 idiomas. El modo por defecto es coincidencia difusa instantánea por palabras clave en títulos, descripciones y TL;DRs — sin descarga de modelo, sin servidor. Si ya hay un modelo de IA local en caché (tras usar AI Chat o Frase Motivacional), aparece un resumen de IA opcional sobre los resultados.",
+      "seo_title": "Buscar en Mentria: herramientas, juegos y paquetes",
+      "seo_description": "Busca en todo Mentria: herramientas, juegos y paquetes. Escribe una palabra clave o una pregunta; los resultados salen al escribir y la IA local puede resumirlos."
     },
     "step-counter": {
       "title": "Contador de pasos",
       "lede": "Cuenta tus pasos al caminar, directamente en el navegador. Usa el sensor de movimiento de tu teléfono, y tus pasos se mantienen privados.",
-      "tldr": "Un podómetro por sesión que lee el acelerómetro de tu teléfono mediante la API DeviceMotion y cuenta pasos con detección de picos en el dispositivo. Inicia una sesión y camina con la pantalla encendida — registra pasos, distancia, ritmo y un anillo de meta diaria. Los pasos se cuentan en el navegador, sin cuenta y sin seguimiento en segundo plano. Los equipos sin sensor de movimiento muestran un estado desactivado. Los totales diarios se guardan en este dispositivo, con un gráfico de 7 días y rachas de objetivo. El modo bolsillo mantiene la pantalla encendida pero en negro puro (ideal en OLED) para seguir contando en el bolsillo; los huecos cortos con pantalla bloqueada se rellenan según tu ritmo y se marcan como estimaciones."
+      "tldr": "Un podómetro por sesión que lee el acelerómetro de tu teléfono mediante la API DeviceMotion y cuenta pasos con detección de picos en el dispositivo. Inicia una sesión y camina con la pantalla encendida — registra pasos, distancia, ritmo y un anillo de meta diaria. Los pasos se cuentan en el navegador, sin cuenta y sin seguimiento en segundo plano. Los equipos sin sensor de movimiento muestran un estado desactivado. Los totales diarios se guardan en este dispositivo, con un gráfico de 7 días y rachas de objetivo. El modo bolsillo mantiene la pantalla encendida pero en negro puro (ideal en OLED) para seguir contando en el bolsillo; los huecos cortos con pantalla bloqueada se rellenan según tu ritmo y se marcan como estimaciones.",
+      "seo_title": "Contador de pasos online: podómetro sin app",
+      "seo_description": "Cuenta tus pasos al caminar en el navegador con el sensor del móvil. Ponte una meta, mantén la racha y ve 7 días de historial. Tus pasos se mantienen privados."
     },
     "qr-scanner": {
       "title": "Escáner y generador de QR y códigos de barras",
       "short": "Escáner QR",
       "lede": "Escanea códigos QR y de barras, o genera un código QR a partir de cualquier enlace o texto, directamente en tu dispositivo.",
-      "tldr": "Dos herramientas en una, ambas totalmente en el dispositivo. El modo escáner lee códigos QR y de barras desde la cámara o una imagen: usa la API nativa BarcodeDetector cuando está disponible (Chromium, con la mayor compatibilidad de formatos) y recurre a un decodificador JavaScript integrado en el resto, así que escanear QR también funciona en Safari y Firefox. El modo generar convierte cualquier enlace o texto en un código QR con un codificador integrado. Las imágenes de la cámara y los archivos no se suben, y no hay ida y vuelta al servidor: los resultados leídos se pueden copiar o abrir, y los códigos generados descargar como PNG, copiar o compartir."
+      "tldr": "Dos herramientas en una, ambas totalmente en el dispositivo. El modo escáner lee códigos QR y de barras desde la cámara o una imagen: usa la API nativa BarcodeDetector cuando está disponible (Chromium, con la mayor compatibilidad de formatos) y recurre a un decodificador JavaScript integrado en el resto, así que escanear QR también funciona en Safari y Firefox. El modo generar convierte cualquier enlace o texto en un código QR con un codificador integrado. Las imágenes de la cámara y los archivos no se suben, y no hay ida y vuelta al servidor: los resultados leídos se pueden copiar o abrir, y los códigos generados descargar como PNG, copiar o compartir.",
+      "seo_title": "Escáner y generador de códigos QR online",
+      "seo_description": "Escanea códigos QR y de barras con la cámara o desde una foto, o crea un QR con cualquier enlace o texto. Un escáner y generador de QR gratis en tu dispositivo."
     },
     "breakout": {
       "title": "Breakout",
       "lede": "Rompe-ladrillos con paleta. Atrapa los power-ups que caen, despeja el muro, sobrevive niveles cada vez más rápidos y duros. Funciona en tu navegador, también sin conexión.",
-      "tldr": "Un rompeladrillos estilo Breakout: rebota la bola con tu pala para romper muros de ladrillos en niveles que se aceleran, atrapando potenciadores que caen (y esquivando los malos). Construido sobre HTML5 Canvas con física determinista y controles de ratón, teclado y táctiles. La puntuación, las vidas y la tabla de récords viven en JavaScript del lado del cliente: sin scripts de terceros, y funciona sin conexión una vez en caché."
+      "tldr": "Un rompeladrillos estilo Breakout: rebota la bola con tu pala para romper muros de ladrillos en niveles que se aceleran, atrapando potenciadores que caen (y esquivando los malos). Construido sobre HTML5 Canvas con física determinista y controles de ratón, teclado y táctiles. La puntuación, las vidas y la tabla de récords viven en JavaScript del lado del cliente: sin scripts de terceros, y funciona sin conexión una vez en caché.",
+      "seo_title": "Breakout: juego de romper ladrillos gratis online"
     },
     "totp": {
       "title": "Autenticador 2FA",
       "short": "Códigos 2FA",
       "lede": "Códigos de inicio de sesión de doble factor (2FA), como una app de autenticación. Códigos TOTP estándar, con tus secretos guardados cifrados en este navegador.",
       "tldr": "TOTP conforme al estándar (RFC 6238) ejecutándose enteramente en tu navegador. Los secretos se cifran en reposo con AES-GCM-256; una clave maestra se envuelve mediante una frase de contraseña (PBKDF2-SHA256 × 600k) y opcionalmente una clave derivada de WebAuthn PRF para desbloquear con la cara, la huella o el PIN de tu dispositivo. Copia de seguridad cifrada JSON obligatoria antes de guardar el primer secreto: perder tu único autenticador implica bloqueo. Funciona sin conexión. Sin cuentas; la sincronización entre dispositivos está cifrada de extremo a extremo.",
-      "seo_title": "Autenticador 2FA online: generador de códigos TOTP"
+      "seo_title": "Autenticador 2FA online: generador de códigos TOTP",
+      "seo_description": "Obtén códigos 2FA en tu navegador, como con una app de autenticación: TOTP estándar, con tus secretos cifrados en este dispositivo y copia de seguridad cifrada."
     },
     "exif": {
       "title": "Inspector EXIF",
       "lede": "Descubre lo que una foto lleva oculto — datos de cámara, fechas, ubicación GPS — y descarga una copia limpia sin nada de eso. Tus fotos no se suben.",
-      "tldr": "Lee metadatos EXIF, XMP, IPTC y otros incrustados en imágenes JPEG, PNG y WebP directamente en tu navegador: modelo de cámara, fecha de captura y la posición GPS que muchos teléfonos añaden en silencio. Con un toque genera una copia con los metadatos eliminados a nivel de bytes — los píxeles no se tocan y el perfil de color se conserva — y la copia se vuelve a analizar para verificar que está limpia antes de descargarla. Tus fotos nunca se suben."
+      "tldr": "Lee metadatos EXIF, XMP, IPTC y otros incrustados en imágenes JPEG, PNG y WebP directamente en tu navegador: modelo de cámara, fecha de captura y la posición GPS que muchos teléfonos añaden en silencio. Con un toque genera una copia con los metadatos eliminados a nivel de bytes — los píxeles no se tocan y el perfil de color se conserva — y la copia se vuelve a analizar para verificar que está limpia antes de descargarla. Tus fotos nunca se suben.",
+      "seo_title": "Inspector EXIF: ve y borra los datos de tus fotos"
     },
     "sudoku": {
       "title": "Sudoku",
       "lede": "Rompecabezas lógico con estética de terminal. Generador de solución única, cuatro dificultades, anotaciones a lápiz. Funciona en tu navegador, también sin conexión.",
-      "tldr": "Sudoku 9×9 clásico reconstruido con una estética synthwave de terminal. Un generador por backtracking garantiza exactamente una solución en cuatro dificultades (fácil → experto); anotaciones a lápiz, resaltado de pares y del mismo número, detección de conflictos en vivo, tres errores antes de perder y hasta tres pistas. Los mejores tiempos por dificultad se guardan en tu dispositivo. Funciona con teclado, ratón y táctil. Sin instalaciones, sin registro, sin analíticas: la generación y resolución se ejecutan localmente en tu navegador, y funciona sin conexión."
+      "tldr": "Sudoku 9×9 clásico reconstruido con una estética synthwave de terminal. Un generador por backtracking garantiza exactamente una solución en cuatro dificultades (fácil → experto); anotaciones a lápiz, resaltado de pares y del mismo número, detección de conflictos en vivo, tres errores antes de perder y hasta tres pistas. Los mejores tiempos por dificultad se guardan en tu dispositivo. Funciona con teclado, ratón y táctil. Sin instalaciones, sin registro, sin analíticas: la generación y resolución se ejecutan localmente en tu navegador, y funciona sin conexión.",
+      "seo_title": "Sudoku online gratis: de fácil a experto",
+      "seo_description": "Juega al Sudoku gratis en el navegador: solución única, cuatro niveles, notas a lápiz, pistas y mejores tiempos. Con teclado, ratón o táctil, y sin conexión."
     },
     "ludo": {
       "title": "Ludo",
       "lede": "Cuatro fichas a casa, ganas. Saca un seis para salir, captura al contacto, refúgiate en las estrellas seguras. Juega contra los bots o por turnos.",
-      "tldr": "El clásico juego de carreras de cruz y círculo, reconstruido sobre canvas HTML5 con estética synthwave de terminal. Saca un seis para liberar una ficha, avanza en sentido horario, cae sobre un rival para enviarlo a casa y descansa en las estrellas seguras. Un 6, una captura o llegar al centro otorga otra tirada. Juega de 2 a 4 jugadores contra los bots o por turnos en un mismo dispositivo. Sin instalaciones, sin registro, sin analíticas: los dados y la IA se ejecutan localmente en tu navegador, y funciona sin conexión."
+      "tldr": "El clásico juego de carreras de cruz y círculo, reconstruido sobre canvas HTML5 con estética synthwave de terminal. Saca un seis para liberar una ficha, avanza en sentido horario, cae sobre un rival para enviarlo a casa y descansa en las estrellas seguras. Un 6, una captura o llegar al centro otorga otra tirada. Juega de 2 a 4 jugadores contra los bots o por turnos en un mismo dispositivo. Sin instalaciones, sin registro, sin analíticas: los dados y la IA se ejecutan localmente en tu navegador, y funciona sin conexión.",
+      "seo_title": "Ludo online: juega contra bots o con amigos",
+      "seo_description": "Cuatro fichas a casa en el clásico juego de mesa: saca un seis para salir, captura, refúgiate en las estrellas y juega con bots o por turnos sin conexión."
     },
     "chess": {
       "title": "Ajedrez",
       "lede": "Motor local, por turnos y juego en línea de igual a igual. Reglas completas con enroque, al paso y coronación; motor alfa-beta con cuatro niveles, barra de evaluación y pistas.",
-      "tldr": "Una implementación completa de ajedrez que se ejecuta enteramente en tu navegador. El motor de reglas cubre enroque, captura al paso, coronación, jaque/jaque mate/ahogado y tablas (regla de 50 movimientos, material insuficiente, triple repetición), con notación SAN completa. Juega por turnos en un dispositivo, contra un motor alfa-beta integrado (cuatro niveles, de Principiante a Brutal, ejecutándose en un Web Worker para que la interfaz nunca se congele) con barra de evaluación en vivo, líneas candidatas y pistas — o en línea contra un amigo por una conexión P2P cifrada usando un código. Arrastra o toca para mover, repasa el historial, gira el tablero, deshaz y abandona. Sin cuentas, sin analíticas, funciona sin conexión."
+      "tldr": "Una implementación completa de ajedrez que se ejecuta enteramente en tu navegador. El motor de reglas cubre enroque, captura al paso, coronación, jaque/jaque mate/ahogado y tablas (regla de 50 movimientos, material insuficiente, triple repetición), con notación SAN completa. Juega por turnos en un dispositivo, contra un motor alfa-beta integrado (cuatro niveles, de Principiante a Brutal, ejecutándose en un Web Worker para que la interfaz nunca se congele) con barra de evaluación en vivo, líneas candidatas y pistas — o en línea contra un amigo por una conexión P2P cifrada usando un código. Arrastra o toca para mover, repasa el historial, gira el tablero, deshaz y abandona. Sin cuentas, sin analíticas, funciona sin conexión.",
+      "seo_title": "Ajedrez online: juega contra la máquina o un amigo"
     },
     "annotate-image": {
       "title": "Anotar imagen",
@@ -610,12 +656,16 @@
     "files": {
       "title": "Archivos",
       "lede": "Explora, exporta y elimina los datos que las herramientas de Mentria guardan en este dispositivo. Tus datos se mantienen privados.",
-      "tldr": "Un inspector del almacenamiento local para todo lo que las herramientas de Mentria guardan en este dispositivo. Muestra el espacio de nombres de cada aplicación — notas, bóveda del Autenticador 2FA, estado de los juegos, datos de extensiones y claves heredadas — con el tamaño de cada elemento y su fecha de modificación. Consulta cualquier valor como JSON con formato, exporta un elemento concreto o elimínalo (las eliminaciones siempre piden confirmación). Exporta una única copia de seguridad cifrada de tus datos guardados, incluidos los paquetes de aprendizaje, el libro de cuentas de Finanzas y las bases de datos de las extensiones, con una contraseña (PBKDF2-SHA256 × 600k + AES-GCM). La herramienta trabaja con los datos de este navegador y solo escribe en el almacenamiento cuando confirmas una eliminación."
+      "tldr": "Un inspector del almacenamiento local para todo lo que las herramientas de Mentria guardan en este dispositivo. Muestra el espacio de nombres de cada aplicación — notas, bóveda del Autenticador 2FA, estado de los juegos, datos de extensiones y claves heredadas — con el tamaño de cada elemento y su fecha de modificación. Consulta cualquier valor como JSON con formato, exporta un elemento concreto o elimínalo (las eliminaciones siempre piden confirmación). Exporta una única copia de seguridad cifrada de tus datos guardados, incluidos los paquetes de aprendizaje, el libro de cuentas de Finanzas y las bases de datos de las extensiones, con una contraseña (PBKDF2-SHA256 × 600k + AES-GCM). La herramienta trabaja con los datos de este navegador y solo escribe en el almacenamiento cuando confirmas una eliminación.",
+      "seo_title": "Archivos: ve y gestiona lo que guarda Mentria",
+      "seo_description": "Explora, exporta y borra lo que Mentria guarda en este dispositivo: notas, bóveda 2FA, partidas y datos de extensiones. Descarga una copia de seguridad cifrada."
     },
     "extensions-sdk": {
       "title": "SDK de extensiones",
       "lede": "Crea extensiones de un solo archivo que se ejecutan localmente en Mentria — un solo archivo HTML, sin paso de compilación.",
-      "tldr": "Las extensiones son archivos HTML únicos que se ejecutan dentro de Mentria con una pequeña API: almacenamiento propio de la extensión, tokens de tema, avisos, mosaicos del lanzador y comandos. Instalar es una importación local confirmada por el usuario — el archivo no se sube, no se revisa a distancia ni se actualiza solo. Esta página documenta el manifiesto y la API, e incluye un ejemplo listo para copiar."
+      "tldr": "Las extensiones son archivos HTML únicos que se ejecutan dentro de Mentria con una pequeña API: almacenamiento propio de la extensión, tokens de tema, avisos, mosaicos del lanzador y comandos. Instalar es una importación local confirmada por el usuario — el archivo no se sube, no se revisa a distancia ni se actualiza solo. Esta página documenta el manifiesto y la API, e incluye un ejemplo listo para copiar.",
+      "seo_title": "SDK de extensiones: crea una extensión de Mentria",
+      "seo_description": "Crea extensiones de un solo archivo que funcionan en local en Mentria: un HTML, sin compilar. Lee la referencia del SDK e instala tu extensión desde un archivo."
     },
     "comms": {
       "title": "Comms",
@@ -625,43 +675,58 @@
     "bubble-level": {
       "title": "Nivel de burbuja",
       "lede": "Convierte tu móvil en un nivel de burbuja online: un nivel de albañil sin instalar ninguna app, con precisión de 0,1° y que funciona sin conexión.",
-      "tldr": "Apoya el móvil en una estantería y la herramienta lee la inclinación directamente del acelerómetro. Túmbalo en plano para ver una burbuja circular de dos ejes, o ponlo de canto para usar el tubo de un nivel de carpintero. Tus mediciones se mantienen privadas, y con un toque corriges el sesgo del propio móvil."
+      "tldr": "Apoya el móvil en una estantería y la herramienta lee la inclinación directamente del acelerómetro. Túmbalo en plano para ver una burbuja circular de dos ejes, o ponlo de canto para usar el tubo de un nivel de carpintero. Tus mediciones se mantienen privadas, y con un toque corriges el sesgo del propio móvil.",
+      "seo_title": "Nivel de burbuja online para tu móvil",
+      "seo_description": "Convierte tu móvil en un nivel de burbuja sin instalar apps. Burbuja de dos ejes en plano, nivel de albañil de canto, lecturas de 0,1° y funciona sin conexión."
     },
     "decibel-meter": {
       "title": "Medidor de decibelios",
       "lede": "Un medidor de sonido en el navegador: mide el ruido en dB con el micrófono del móvil o del portátil, sin instalar ninguna app.",
-      "tldr": "Apunta el micrófono del móvil o del portátil hacia lo que hace ruido y verás el nivel en decibelios en tiempo real, con el mínimo, la media y el pico de la sesión y una escala de sonidos cotidianos como referencia. Los micrófonos de los teléfonos no son instrumentos calibrados, así que los números son buenas estimaciones para comparar espacios, no mediciones legales. No se graba nada: el sonido se analiza en tu dispositivo, fotograma a fotograma, y nunca sale de él."
+      "tldr": "Apunta el micrófono del móvil o del portátil hacia lo que hace ruido y verás el nivel en decibelios en tiempo real, con el mínimo, la media y el pico de la sesión y una escala de sonidos cotidianos como referencia. Los micrófonos de los teléfonos no son instrumentos calibrados, así que los números son buenas estimaciones para comparar espacios, no mediciones legales. No se graba nada: el sonido se analiza en tu dispositivo, fotograma a fotograma, y nunca sale de él.",
+      "seo_title": "Medidor de decibelios online: mide el ruido en dB",
+      "seo_description": "Mide el ruido en decibelios con el micro del móvil o portátil, sin app. dB en vivo, pico retenido y mínimo, media y pico de la sesión. El audio nunca se graba."
     },
     "compass": {
       "title": "Brújula",
       "lede": "Una brújula online sin app que instalar: ábrela en el navegador y lee tu rumbo magnético directamente desde el sensor del móvil.",
-      "tldr": "Apunta con el móvil y lee el rumbo. Esta brújula funciona por completo en tu navegador con el magnetómetro del teléfono, así que no hay nada que instalar ni cuentas, y las lecturas no se envían a ningún sitio. La rosa gira para que tu rumbo quede siempre bajo la marca superior, y con un toque puedes fijar el rumbo que quieras conservar. Marca el norte magnético, que se aparta del norte geográfico según la declinación de tu zona."
+      "tldr": "Apunta con el móvil y lee el rumbo. Esta brújula funciona por completo en tu navegador con el magnetómetro del teléfono, así que no hay nada que instalar ni cuentas, y las lecturas no se envían a ningún sitio. La rosa gira para que tu rumbo quede siempre bajo la marca superior, y con un toque puedes fijar el rumbo que quieras conservar. Marca el norte magnético, que se aparta del norte geográfico según la declinación de tu zona.",
+      "seo_title": "Brújula online: funciona en el navegador del móvil",
+      "seo_description": "Brújula online sin app que instalar. Ábrela en el navegador del móvil, lee tu rumbo magnético con el sensor del teléfono, fija una dirección y sigue adelante."
     },
     "speedometer": {
       "title": "Velocímetro GPS",
       "lede": "Un velocímetro online por GPS, sin instalar ninguna app. Velocidad en tiempo real en km/h, mph o nudos, con la distancia del trayecto, todo calculado en tu dispositivo.",
-      "tldr": "Convierte cualquier móvil en un velocímetro: lee el GPS del dispositivo a través del navegador y muestra tu velocidad en directo en una esfera grande, en km/h, mph o nudos. Además lleva la cuenta del trayecto —distancia, tiempo en marcha, media y velocidad máxima— y la conserva aunque recargues la página. Tu posición nunca sale del dispositivo, y no necesitas cuenta."
+      "tldr": "Convierte cualquier móvil en un velocímetro: lee el GPS del dispositivo a través del navegador y muestra tu velocidad en directo en una esfera grande, en km/h, mph o nudos. Además lleva la cuenta del trayecto —distancia, tiempo en marcha, media y velocidad máxima— y la conserva aunque recargues la página. Tu posición nunca sale del dispositivo, y no necesitas cuenta.",
+      "seo_title": "Velocímetro GPS online: velocidad en km/h o mph",
+      "seo_description": "Velocímetro GPS online sin instalar apps. Velocidad en vivo en km/h, mph o nudos en un dial grande, con distancia, tiempo en marcha, velocidad media y máxima."
     },
     "ruler": {
       "title": "Regla online",
       "lede": "Una regla online a tamaño real: mide en cm, mm y pulgadas en la propia pantalla y calíbrala con una tarjeta bancaria para que los milímetros sean de verdad.",
       "tldr": "Una regla dibujada directamente sobre tu pantalla, con centímetros y milímetros en un borde y pulgadas hasta 1/16 en el otro. Ningún navegador puede saber cuánto mide tu pantalla, así que la calibras una vez ajustando un contorno a una tarjeta bancaria (o escribiendo una medida que ya conozcas) y a partir de ahí las marcas son fieles. Arrastra los dos marcadores para medir lo que apoyes sobre el cristal: funciona sin conexión y guarda la calibración en este dispositivo.",
-      "seo_title": "Regla online a tamaño real (cm y mm)"
+      "seo_title": "Regla virtual online a tamaño real (cm y mm)",
+      "seo_description": "Regla virtual a tamaño real: mide en cm, mm y pulgadas en tu pantalla. Calíbrala una vez con una tarjeta bancaria para marcas exactas y mide lo que quieras."
     },
     "phosphor": {
       "title": "PHOSPHOR",
       "lede": "Contrarreloj de combate en el navegador: esprinta, deslízate, escala y dispara una carabina automática en cinco recorridos al atardecer. Medallas, fantasmas rivales y juego sin conexión.",
-      "tldr": "FPS de contrarreloj en el navegador con medallas y fantasmas."
+      "tldr": "FPS de contrarreloj en el navegador con medallas y fantasmas.",
+      "seo_title": "PHOSPHOR: juego FPS contrarreloj gratis online",
+      "seo_description": "Contrarreloj FPS en el navegador: esprinta, deslízate, escala y dispara en circuitos al atardecer. Gana medallas, reta a tu fantasma y juega sin conexión."
     },
     "model-mirror": {
       "title": "Espejo de modelos",
       "lede": "Ayuda a distribuir los modelos locales de Mentria entre pares. Mantén esta pestaña abierta y tu navegador se convierte en un espejo.",
-      "tldr": "Tu navegador comparte los modelos locales de Mentria con otros visitantes por P2P, con la descarga oficial como respaldo automático. Sin cuenta y sin instalación."
+      "tldr": "Tu navegador comparte los modelos locales de Mentria con otros visitantes por P2P, con la descarga oficial como respaldo automático. Sin cuenta y sin instalación.",
+      "seo_title": "Espejo de modelos: comparte modelos de IA en P2P",
+      "seo_description": "Deja esta pestaña abierta y tu navegador ayudará a repartir entre pares los modelos de IA locales de Mentria a otros, con la descarga oficial de respaldo."
     },
     "console": {
       "title": "Consola",
       "lede": "Chatea con el modelo local mientras usa las apps de Mentria en una pantalla de móvil compartida, o deja que actúe como usuario de prueba y te cuente lo que encuentra.",
-      "tldr": "La Consola pone una pantalla de Mentria tamaño móvil junto a un chat. Pide al modelo 27B local que haga algo (\"pon un temporizador de 5 minutos\") y abrirá la app y la usará delante de ti: cada acción se muestra y debe citar la pantalla para afirmar que terminó. Inicia una sesión de prueba y explorará una app como una persona inventada, con un informe de fallos que puedes convertir en issues. Tus conversaciones se mantienen privadas."
+      "tldr": "La Consola pone una pantalla de Mentria tamaño móvil junto a un chat. Pide al modelo 27B local que haga algo (\"pon un temporizador de 5 minutos\") y abrirá la app y la usará delante de ti: cada acción se muestra y debe citar la pantalla para afirmar que terminó. Inicia una sesión de prueba y explorará una app como una persona inventada, con un informe de fallos que puedes convertir en issues. Tus conversaciones se mantienen privadas.",
+      "seo_title": "Consola de IA: un modelo local que usa apps",
+      "seo_description": "Chatea con una IA local mientras abre y usa apps de Mentria en una pantalla de móvil compartida, o deja que haga de usuario de prueba y te cuente qué encuentra."
     },
     "forge": {
       "title": "Forge",
@@ -672,49 +737,62 @@
       "title": "Conversor de unidades",
       "short": "Conversor de unidades",
       "lede": "Un conversor de unidades online sin instalar ninguna app: longitud, peso, temperatura, volumen, datos, consumo de combustible y más, calculado en tu dispositivo.",
-      "tldr": "Escribe un número en cualquiera de los dos lados y el otro se actualiza mientras escribes, en doce categorías que van de centímetros y libras a gibibytes, psi y millas por galón. Los factores siguen las definiciones oficiales exactas (una pulgada son exactamente 25,4 mm y un galón estadounidense, exactamente 3,785411784 litros), y bajo los campos una línea muestra el factor o la fórmula del par elegido. La temperatura y el consumo de combustible no son simples multiplicaciones, así que usan las fórmulas correctas, incluido el salto recíproco de L/100 km a mpg. Todo funciona en tu navegador y sin conexión: nada de lo que escribes se sube a ningún sitio y en este dispositivo solo se recuerdan la última categoría y las unidades."
+      "tldr": "Escribe un número en cualquiera de los dos lados y el otro se actualiza mientras escribes, en doce categorías que van de centímetros y libras a gibibytes, psi y millas por galón. Los factores siguen las definiciones oficiales exactas (una pulgada son exactamente 25,4 mm y un galón estadounidense, exactamente 3,785411784 litros), y bajo los campos una línea muestra el factor o la fórmula del par elegido. La temperatura y el consumo de combustible no son simples multiplicaciones, así que usan las fórmulas correctas, incluido el salto recíproco de L/100 km a mpg. Todo funciona en tu navegador y sin conexión: nada de lo que escribes se sube a ningún sitio y en este dispositivo solo se recuerdan la última categoría y las unidades.",
+      "seo_title": "Conversor de unidades: longitud, peso, temperatura",
+      "seo_description": "Convierte longitud, peso, temperatura, volumen, área, velocidad, datos, presión, energía y consumo de combustible en ambos sentidos, con fórmula y sin conexión."
     },
     "world-clock": {
       "title": "Reloj mundial",
       "lede": "Un reloj mundial online sin instalar ninguna app: consulta la hora de cualquier ciudad y convierte una hora entre zonas horarias con el horario de verano ya resuelto, todo en tu dispositivo.",
-      "tldr": "Guarda una lista de ciudades y mira cómo avanza su hora junto a la tuya, con la fecha, la diferencia con UTC y si allí es de día o de noche. Elige una fecha y una hora en cualquiera de tus ciudades y todos los relojes pasan a ese mismo instante; los cambios de horario de verano se tienen en cuenta y, si una hora no existe o se repite, la herramienta te explica qué está mostrando. Las zonas horarias y sus diferencias salen de los datos que ya incluye tu navegador, así que funciona sin conexión. Tu lista y el formato de 12 o 24 horas se guardan en este dispositivo."
+      "tldr": "Guarda una lista de ciudades y mira cómo avanza su hora junto a la tuya, con la fecha, la diferencia con UTC y si allí es de día o de noche. Elige una fecha y una hora en cualquiera de tus ciudades y todos los relojes pasan a ese mismo instante; los cambios de horario de verano se tienen en cuenta y, si una hora no existe o se repite, la herramienta te explica qué está mostrando. Las zonas horarias y sus diferencias salen de los datos que ya incluye tu navegador, así que funciona sin conexión. Tu lista y el formato de 12 o 24 horas se guardan en este dispositivo.",
+      "seo_title": "Reloj mundial y conversor de zonas horarias",
+      "seo_description": "Mira la hora en ciudades del mundo y convierte horas entre zonas horarias, con el horario de verano incluido. Formato de 12 o 24 horas y funciona sin conexión."
     },
     "password-generator": {
       "title": "Generador de contraseñas",
       "short": "Generador de contraseñas",
       "lede": "Un generador de contraseñas online sin app que instalar: crea contraseñas aleatorias robustas o frases de contraseña fáciles de teclear en tu propio dispositivo, sin guardar las contraseñas.",
-      "tldr": "Elige la longitud y los tipos de caracteres que quieras, o cambia al modo frase de contraseña para obtener unas cuantas palabras al azar de la lista corta de la EFF. Cada carácter y cada palabra se eligen sin sesgo con el generador criptográfico de números aleatorios de tu navegador, y cada contraseña incluye siempre al menos un carácter de cada conjunto que actives. El indicador de entropía muestra cuánto trabajo de adivinación exigen tus ajustes, para que veas qué ganas con un poco más de longitud o con una palabra extra. Todo funciona en tu dispositivo: solo se recuerdan tus ajustes, y las contraseñas generadas nunca se guardan, se registran ni se envían a ninguna parte."
+      "tldr": "Elige la longitud y los tipos de caracteres que quieras, o cambia al modo frase de contraseña para obtener unas cuantas palabras al azar de la lista corta de la EFF. Cada carácter y cada palabra se eligen sin sesgo con el generador criptográfico de números aleatorios de tu navegador, y cada contraseña incluye siempre al menos un carácter de cada conjunto que actives. El indicador de entropía muestra cuánto trabajo de adivinación exigen tus ajustes, para que veas qué ganas con un poco más de longitud o con una palabra extra. Todo funciona en tu dispositivo: solo se recuerdan tus ajustes, y las contraseñas generadas nunca se guardan, se registran ni se envían a ninguna parte.",
+      "seo_title": "Generador de contraseñas seguras y frases clave"
     },
     "image-compressor": {
       "title": "Compresor de imágenes",
       "lede": "Comprime imágenes online sin instalar ninguna app: reduce archivos JPEG, PNG y WebP, cámbiales el tamaño y conviértelos de formato en el propio navegador. Tus imágenes no se suben.",
-      "tldr": "Arrastra fotos o capturas de pantalla y obtén copias más ligeras en segundos. Elige JPEG, WebP o PNG, ajusta la calidad y, si quieres, limita el ancho y el alto o escala por porcentaje: la proporción se mantiene y nunca se amplía nada. Cada imagen se decodifica y se vuelve a codificar en tu propio navegador, así que tus imágenes no se suben y sigue funcionando sin conexión. Al recodificar también se eliminan los metadatos EXIF, como la ubicación GPS y los datos de la cámara. Compara el antes y el después con un deslizador y descarga una imagen o todas a la vez."
+      "tldr": "Arrastra fotos o capturas de pantalla y obtén copias más ligeras en segundos. Elige JPEG, WebP o PNG, ajusta la calidad y, si quieres, limita el ancho y el alto o escala por porcentaje: la proporción se mantiene y nunca se amplía nada. Cada imagen se decodifica y se vuelve a codificar en tu propio navegador, así que tus imágenes no se suben y sigue funcionando sin conexión. Al recodificar también se eliminan los metadatos EXIF, como la ubicación GPS y los datos de la cámara. Compara el antes y el después con un deslizador y descarga una imagen o todas a la vez.",
+      "seo_title": "Compresor de imágenes online: JPEG, PNG y WebP"
     },
     "calculator": {
       "title": "Calculadora",
       "lede": "Una calculadora online sin app que instalar: escribe o toca una operación y ve el resultado al instante, con funciones científicas, y nada de lo que escribes sale nunca de tu dispositivo.",
-      "tldr": "Una calculadora que funciona por completo en tu navegador: nada que instalar, sin cuentas, y nada de lo que escribes sale de tu dispositivo. Escribe la operación con el teclado o tócala en el teclado de la calculadora y el resultado aparece sobre la marcha; pulsa = o Intro para guardarla en el historial y elige cualquier cálculo anterior para volver a usarlo. Admite paréntesis, potencias, raíces cuadradas, seno, coseno y tangente en grados o radianes, ln, log, π y e, y entiende 2π o 2(3+4) tal como los escribirías en papel. El porcentaje funciona como en una calculadora de oficina (200 + 10% da 220, mientras que 10% solo es 0,1) y los resultados se redondean a 12 cifras significativas, así que 0,1 + 0,2 da 0,3."
+      "tldr": "Una calculadora que funciona por completo en tu navegador: nada que instalar, sin cuentas, y nada de lo que escribes sale de tu dispositivo. Escribe la operación con el teclado o tócala en el teclado de la calculadora y el resultado aparece sobre la marcha; pulsa = o Intro para guardarla en el historial y elige cualquier cálculo anterior para volver a usarlo. Admite paréntesis, potencias, raíces cuadradas, seno, coseno y tangente en grados o radianes, ln, log, π y e, y entiende 2π o 2(3+4) tal como los escribirías en papel. El porcentaje funciona como en una calculadora de oficina (200 + 10% da 220, mientras que 10% solo es 0,1) y los resultados se redondean a 12 cifras significativas, así que 0,1 + 0,2 da 0,3.",
+      "seo_title": "Calculadora online con funciones científicas"
     },
     "json-formatter": {
       "title": "Formateador y validador de JSON",
       "short": "Formateador JSON",
       "lede": "Un formateador y validador de JSON online sin instalar nada: embellece, minifica u ordena las claves, y ve la línea y la columna exactas donde falla un JSON no válido. Funciona en tu dispositivo, así que tu JSON no se sube.",
-      "tldr": "Pega JSON, suelta un archivo o ábrelo, y se valida mientras escribes: si algo falla, verás la línea y la columna exactas junto al fragmento problemático, con un ^ bajo el error. Formatéalo con 2 espacios, 4 espacios o tabulaciones, minifícalo u ordena las claves de cada objeto, y luego copia el resultado o descárgalo como archivo .json. La vista de árbol abre los documentos grandes nivel a nivel y copia la ruta de cualquier valor, como $.items[3].name. Los números demasiado grandes o precisos para JavaScript se señalan y se conservan cifra a cifra en lugar de redondearse en silencio. Todo ocurre en tu navegador, así que el JSON nunca sale de tu dispositivo."
+      "tldr": "Pega JSON, suelta un archivo o ábrelo, y se valida mientras escribes: si algo falla, verás la línea y la columna exactas junto al fragmento problemático, con un ^ bajo el error. Formatéalo con 2 espacios, 4 espacios o tabulaciones, minifícalo u ordena las claves de cada objeto, y luego copia el resultado o descárgalo como archivo .json. La vista de árbol abre los documentos grandes nivel a nivel y copia la ruta de cualquier valor, como $.items[3].name. Los números demasiado grandes o precisos para JavaScript se señalan y se conservan cifra a cifra en lugar de redondearse en silencio. Todo ocurre en tu navegador, así que el JSON nunca sale de tu dispositivo.",
+      "seo_title": "Formateador y validador de JSON online"
     },
     "video-player": {
       "title": "Reproductor de vídeo",
       "lede": "Reproduce vídeos de tu móvil u ordenador con reanudación, control de velocidad, subtítulos e imagen en imagen. Tus archivos nunca salen de tu dispositivo.",
-      "tldr": "Abre unos vídeos o una carpeta entera y se convierten en una lista con miniaturas. Mentria recuerda dónde te quedaste en cada uno para que sigas más tarde, y en un ordenador o un móvil Android también puede recordar la carpeta. Cambia la velocidad de 0,25× a 3×, salta 10 segundos, carga subtítulos .srt o .vtt y ajusta su sincronización, o saca el vídeo en imagen en imagen. Tus vídeos no se suben: el reproductor lee los archivos directamente de tu dispositivo y te avisa cuando un archivo usa un formato que tu navegador no puede reproducir."
+      "tldr": "Abre unos vídeos o una carpeta entera y se convierten en una lista con miniaturas. Mentria recuerda dónde te quedaste en cada uno para que sigas más tarde, y en un ordenador o un móvil Android también puede recordar la carpeta. Cambia la velocidad de 0,25× a 3×, salta 10 segundos, carga subtítulos .srt o .vtt y ajusta su sincronización, o saca el vídeo en imagen en imagen. Tus vídeos no se suben: el reproductor lee los archivos directamente de tu dispositivo y te avisa cuando un archivo usa un formato que tu navegador no puede reproducir.",
+      "seo_title": "Reproductor de vídeo online para tus archivos",
+      "seo_description": "Mira en el navegador los vídeos de tu móvil u ordenador. Abre una carpeta, sigue donde lo dejaste, cambia la velocidad, carga subtítulos o usa imagen en imagen."
     },
     "gallery": {
       "title": "Galería",
       "lede": "Explora las fotos y vídeos de tu móvil u ordenador en una cuadrícula rápida agrupada por meses, con zoom, presentación y detalles de cada foto. Tus archivos nunca salen de tu dispositivo.",
-      "tldr": "Abre una carpeta, o elige unas cuantas fotos y vídeos, y aparecerán en una cuadrícula agrupada por el mes en que se hizo cada foto. Toca una para verla a pantalla completa: desliza entre fotos, pellizca o toca dos veces para hacer zoom, reproduce vídeos ahí mismo o inicia una presentación que mantiene la pantalla encendida. Detalles muestra la cámara, el objetivo, la exposición y la ubicación guardadas en la foto. En un ordenador o un móvil Android, Mentria puede recordar tus carpetas; en los demás guarda miniaturas y fechas, así que las mismas fotos se abren más rápido la próxima vez. Tus fotos no se suben: la galería lee los archivos directamente de tu dispositivo."
+      "tldr": "Abre una carpeta, o elige unas cuantas fotos y vídeos, y aparecerán en una cuadrícula agrupada por el mes en que se hizo cada foto. Toca una para verla a pantalla completa: desliza entre fotos, pellizca o toca dos veces para hacer zoom, reproduce vídeos ahí mismo o inicia una presentación que mantiene la pantalla encendida. Detalles muestra la cámara, el objetivo, la exposición y la ubicación guardadas en la foto. En un ordenador o un móvil Android, Mentria puede recordar tus carpetas; en los demás guarda miniaturas y fechas, así que las mismas fotos se abren más rápido la próxima vez. Tus fotos no se suben: la galería lee los archivos directamente de tu dispositivo.",
+      "seo_title": "Galería de fotos y visor de imágenes online"
     },
     "music-player": {
       "title": "Reproductor de música",
       "lede": "Escucha la música de tu móvil u ordenador con álbumes, artistas, listas, modo aleatorio y temporizador. Tus archivos nunca salen de tu dispositivo.",
-      "tldr": "Abre unas canciones o una carpeta entera y Mentria crea una biblioteca a partir de sus etiquetas: canciones, álbumes con portada y artistas, con búsqueda. Reproduce en orden o en aleatorio, repite, pon canciones en cola y guarda listas que puedes exportar en M3U. Funcionan los controles de la pantalla de bloqueo y de los auriculares, el temporizador baja la música hasta apagarla y, en un ordenador, un minirreproductor puede flotar sobre otras ventanas. Lee MP3, AAC, FLAC, Ogg, Opus y WAV; Apple Lossless y AIFF se reproducen en dispositivos Apple. Tu música no se sube: el reproductor lee los archivos directamente de tu dispositivo."
+      "tldr": "Abre unas canciones o una carpeta entera y Mentria crea una biblioteca a partir de sus etiquetas: canciones, álbumes con portada y artistas, con búsqueda. Reproduce en orden o en aleatorio, repite, pon canciones en cola y guarda listas que puedes exportar en M3U. Funcionan los controles de la pantalla de bloqueo y de los auriculares, el temporizador baja la música hasta apagarla y, en un ordenador, un minirreproductor puede flotar sobre otras ventanas. Lee MP3, AAC, FLAC, Ogg, Opus y WAV; Apple Lossless y AIFF se reproducen en dispositivos Apple. Tu música no se sube: el reproductor lee los archivos directamente de tu dispositivo.",
+      "seo_title": "Reproductor de música online para tus archivos",
+      "seo_description": "Escucha tu música del móvil u ordenador: álbumes, artistas, listas M3U, aleatorio, controles en pantalla de bloqueo y temporizador. Tus archivos no se suben."
     },
     "fpv-drone": {
       "title": "SKYRUSH FPV",
@@ -6246,7 +6324,9 @@
     "search_placeholder": "Busca paquetes por título",
     "no_match": "Ningún paquete coincide con «{q}».",
     "see_all": "Ver los {n}",
-    "show_less": "Ver menos"
+    "show_less": "Ver menos",
+    "seo_title": "Aprende con tarjetas: lee, ponte a prueba y repasa",
+    "seo_description": "Aprende con paquetes de tarjetas para leer, ponerte a prueba y repasar. Empieza con los nuestros de naturaleza, ciencia e IA, o importa tus propios paquetes."
   },
   "stream": {
     "hero_title": "Un feed que enseña.",
@@ -6323,7 +6403,14 @@
     "build_body": "Una extensión es un único archivo HTML. El SDK explica el formato y lo que puede usar una extensión.",
     "manage_link": "Gestionar extensiones instaladas",
     "perm_camera": "Cámara",
-    "perm_camera_desc": "Puede usar la cámara una vez que lo permitas."
+    "perm_camera_desc": "Puede usar la cámara una vez que lo permitas.",
+    "seo_title": "Extensiones de Mentria: pequeñas apps para añadir",
+    "seo_description": "Pequeñas apps para Mentria: juegos, temporizador de concentración, planificador de comidas y más. Pruébalas, instálalas para usarlas sin conexión y quítalas.",
+    "seo_desc": {
+      "dice-roller": "Tira dados online con notación estándar como 2d6+1 o elige al azar de tu propia lista. Un lanzador de dados gratis para instalar en Mentria y usar sin conexión.",
+      "pomodoro-timer": "Temporizador pomodoro para concentrarte, con fases de trabajo y descanso. La cuenta sigue aunque recargues la página. Instálalo en Mentria y úsalo sin conexión.",
+      "image-gen": "Genera imágenes desde un texto en el nodo de render compartido de Mentria. Gratis y sin configurar nada: describe la escena, espera tu turno y guarda la imagen."
+    }
   },
   "image_use": {
     "title": "Uso de las imágenes de Mentria",
@@ -6331,7 +6418,8 @@
     "rights": "Todas las imágenes de Mentria son © Mentria. Todos los derechos reservados.",
     "share": "Puedes enlazar cualquier página o compartirla tal como está.",
     "ask": "Para usar una imagen en otro lugar, pregúntanos primero:",
-    "contact": "escríbenos en X"
+    "contact": "escríbenos en X",
+    "seo_description": "Todas las imágenes de Mentria, incluidas las de los paquetes de aprendizaje, son © Mentria, todos los derechos reservados. Así pides permiso para reusarlas."
   },
   "games": {
     "kit": {
@@ -6433,7 +6521,9 @@
     "ask_body": "¿Has visto algo incorrecto en esta página o tienes una pregunta?",
     "ask_github": "Abre una incidencia en GitHub",
     "ask_x": "escríbenos en X",
-    "updated": "Última actualización: 8 de noviembre de 2026."
+    "updated": "Última actualización: 8 de noviembre de 2026.",
+    "seo_title": "Privacidad en Mentria: qué queda en tu dispositivo",
+    "seo_description": "Cómo trata Mentria tus datos: qué queda en tu dispositivo, qué usa la red y cuándo, y cómo comprobarlo tú. Sin cuentas, sin anuncios ni scripts de analítica."
   },
   "guide_llm": {
     "title": "Ejecuta un LLM en tu navegador",

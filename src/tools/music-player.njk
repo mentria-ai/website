@@ -8,7 +8,9 @@ permalink: "{{ locale.pathPrefix }}/tools/music-player/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.music-player.title' | t }}"
+  seoTitle: "{{ 'tools.music-player.seo_title' | t }}"
   description: "{{ 'tools.music-player.lede' | t }}"
+  seoDescription: "{{ 'tools.music-player.seo_description' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">music-player</span></p>

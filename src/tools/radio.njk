@@ -8,7 +8,9 @@ permalink: "{{ locale.pathPrefix }}/tools/radio/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.radio.title' | t }}"
+  seoTitle: "{{ 'tools.radio.seo_title' | t }}"
   description: "{{ 'tools.radio.lede' | t }}"
+  seoDescription: "{{ 'tools.radio.seo_description' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">radio</span></p>

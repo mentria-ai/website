@@ -110,7 +110,7 @@
     {% set baseUrl = site.siteUrl | default('/') %}
     {% set pageUrl = baseUrl ~ page.url %}
     {% set metaTitle = (fullTitle or (seoTitle and (seoTitle ~ " | " ~ site.title)) or (title and (title ~ " | " ~ site.title)) or ("site.metaTitle" | t)) | htmlDecode %}
-    {% set metaDescription = (description | default(("site.metaDescription" | t))) | htmlDecode %}
+    {% set metaDescription = ((seoDescription or description) | default(("site.metaDescription" | t))) | htmlDecode %}
     {% set socialImage = socialImageOverride or (site.siteUrl ~ (site.socialImage | default('/assets/img/icon-512x512.png'))) %}
     {% set isPost = tags and ('post' in tags) %}
     {% macro ogLocale(code) %}{% set region = { 'en': 'US', 'ja': 'JP' }[code] %}{{ code | replace('-', '_') if '-' in code else code ~ '_' ~ (region or code | upper) }}{% endmacro %}

@@ -8,7 +8,9 @@ permalink: "{{ locale.pathPrefix }}/tools/extensions/sdk/index.html"
 eleventyComputed:
   lang: "{{ locale.code }}"
   title: "{{ 'tools.extensions-sdk.title' | t }}"
+  seoTitle: "{{ 'tools.extensions-sdk.seo_title' | t }}"
   description: "{{ 'tools.extensions-sdk.lede' | t }}"
+  seoDescription: "{{ 'tools.extensions-sdk.seo_description' | t }}"
 ---
 <section class="hero" style="padding-top:1rem;">
   <p class="eyebrow eyebrow--crumbs"><a class="eyebrow__link" href="{{ locale.pathPrefix }}/" aria-label="{{ 'nav.home' | t }}">~</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/">tools</a><span class="eyebrow__sep">/</span><a class="eyebrow__link" href="{{ locale.pathPrefix }}/tools/extensions/">extensions</a><span class="eyebrow__sep">/</span><span class="eyebrow__current">sdk</span></p>

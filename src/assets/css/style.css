@@ -1565,6 +1565,13 @@ html.mentria-no-motion [data-requires="motion"] { display: none !important; }
   box-shadow: var(--elev-3), var(--glow-cyan-soft);
 }
 .m-update[hidden] { display: none; }
+.star-cta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; margin: 28px 0 8px; padding: 14px 16px; border: 1px dashed var(--term-border-strong); border-radius: 12px; }
+.star-cta__text { margin: 0; flex: 1 1 240px; font-size: 0.875rem; line-height: 1.55; color: var(--term-muted); }
+.star-cta__btn { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border: 1px solid rgba(251, 191, 36, 0.55); border-radius: 999px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--term-fg-strong); background: rgba(251, 191, 36, 0.06); text-decoration: none; transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s; }
+.star-cta__btn svg { width: 15px; height: 15px; fill: var(--syn-amber); transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.star-cta__btn:hover, .star-cta__btn:focus-visible { color: var(--term-fg-strong); border-color: var(--syn-amber); background: rgba(251, 191, 36, 0.12); box-shadow: 0 0 18px rgba(251, 191, 36, 0.22); }
+.star-cta__btn:hover svg, .star-cta__btn:focus-visible svg { transform: rotate(144deg) scale(1.15); }
+@media (prefers-reduced-motion: reduce) { .star-cta__btn svg { transition: none; } }
 .m-update__text { flex: 1; min-width: 0; }
 #m-update .m-update__text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.35; }
 .m-update__new { padding: 3px 0; margin: -1px 0 -3px; font-size: 0.7rem; color: var(--syn-cyan); text-decoration: underline dotted; text-underline-offset: 3px; }

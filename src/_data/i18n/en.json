@@ -317,7 +317,8 @@
     "key_click": "click",
     "key_tap": "tap",
     "backup_history_locked": "Chat history is left out while your Mentria identity is locked.",
-    "restore_history_locked": "Chat history wasn’t restored. Unlock your Mentria identity, then restore this file again."
+    "restore_history_locked": "Chat history wasn’t restored. Unlock your Mentria identity, then restore this file again.",
+    "star_cta": "This site is open source on GitHub, built by one person."
   },
   "home": {
     "tools_heading": "Tools",

@@ -317,7 +317,8 @@
     "key_click": "clic",
     "key_tap": "toucher",
     "backup_history_locked": "L’historique des discussions est exclu tant que votre identité Mentria est verrouillée.",
-    "restore_history_locked": "L’historique des discussions n’a pas été restauré. Déverrouillez votre identité Mentria, puis restaurez de nouveau ce fichier."
+    "restore_history_locked": "L’historique des discussions n’a pas été restauré. Déverrouillez votre identité Mentria, puis restaurez de nouveau ce fichier.",
+    "star_cta": "Ce site est open source sur GitHub, fait par une seule personne."
   },
   "home": {
     "tools_heading": "Outils",

@@ -693,6 +693,11 @@ try {
       })();
 } catch (e) { console.error(e); }
 try {
+      if (window.self === window.top && window.console && console.info) {
+        console.info('%c mentria %c This site is open source, built by one person. Read the code or leave a star: https://github.com/mentria-ai/website', 'background:#6ef3c5;color:#0a0a0a;font-weight:700;border-radius:3px;padding:1px 4px', 'color:inherit');
+      }
+} catch (e) { console.error(e); }
+try {
       if ('serviceWorker' in navigator) {
         (function () {
           var controlledBy = navigator.serviceWorker.controller;

@@ -54,6 +54,7 @@ localeReload: true
     <div class="about-whatsnew__row">
       <button type="button" class="about-refresh about-refresh--go" id="about-whatsnew-go"><span class="about-refresh__label">{{ "about.update_now" | t }}</span></button>
       <a class="about-whatsnew__link" id="about-whatsnew-link" href="https://github.com/mentria-ai/website/releases" target="_blank" rel="noopener">{{ "about.release_notes" | t }}</a>
+      <a class="about-whatsnew__link about-whatsnew__star" href="https://github.com/mentria-ai/website" target="_blank" rel="noopener">★ {{ "about.maker_star" | t }}</a>
     </div>
   </section>
 
@@ -455,6 +456,8 @@ localeReload: true
   a.about-whatsnew__tag:hover { color: var(--term-fg); }
   .about-whatsnew__row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
   .about-whatsnew__link { font-family: var(--font-mono); font-size: 12px; color: var(--term-muted); }
+  .about-whatsnew__star { color: var(--syn-amber); }
+  .about-whatsnew__star:hover { color: var(--term-fg-strong); }
   .about-refresh--go { color: var(--accent); border-color: var(--accent); }
   .about-copyright { font-size: 12px; }
   .about-refresh { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 12px; padding: 7px 14px; border: 1px solid var(--term-border); border-radius: 999px; background: transparent; color: var(--term-fg); cursor: pointer; transition: color 120ms, border-color 120ms, box-shadow 150ms; }

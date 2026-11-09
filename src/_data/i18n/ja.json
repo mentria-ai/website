@@ -317,7 +317,8 @@
     "key_click": "クリック",
     "key_tap": "タップ",
     "backup_history_locked": "Mentria ID がロックされている間は、チャット履歴は含まれません。",
-    "restore_history_locked": "チャット履歴は復元されませんでした。Mentria ID のロックを解除してから、このファイルをもう一度復元してください。"
+    "restore_history_locked": "チャット履歴は復元されませんでした。Mentria ID のロックを解除してから、このファイルをもう一度復元してください。",
+    "star_cta": "このサイトは GitHub でオープンソースとして公開していて、ひとりでつくっています。"
   },
   "home": {
     "tools_heading": "ツール",

@@ -317,7 +317,8 @@
     "key_click": "clique",
     "key_tap": "toque",
     "backup_history_locked": "O histórico de chats fica de fora enquanto sua identidade Mentria está bloqueada.",
-    "restore_history_locked": "O histórico de chats não foi restaurado. Desbloqueie sua identidade Mentria e restaure este arquivo de novo."
+    "restore_history_locked": "O histórico de chats não foi restaurado. Desbloqueie sua identidade Mentria e restaure este arquivo de novo.",
+    "star_cta": "Este site é de código aberto no GitHub e é feito por uma pessoa só."
   },
   "home": {
     "tools_heading": "Ferramentas",

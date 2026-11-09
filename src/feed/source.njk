@@ -9,12 +9,13 @@ eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
   title: "{{ pair.deck.subtitle | tloc(pair.locale.code) }} · Source"
+  seoTitle: "{% set s = pair.deck.subtitle | tloc(pair.locale.code) %}{% set full = s ~ ' · Source' %}{{ s if (full.length + 10) > 70 else full }}"
   socialImageOverride: "{{ pair.deck.cover_image }}"
   preloadImage: "{% set s = pair.deck.slides[0] %}{% if s.image and s.image_status != 'pending' %}{{ s.image }}{% endif %}"
   description: |-
     {%- set ja = pair.locale.code == "ja" -%}
-    {%- set minLen = 50 if ja else 110 -%}
-    {%- set maxLen = 80 if ja else 160 -%}
+    {%- set minLen = 70 if ja else 140 -%}
+    {%- set maxLen = 110 if ja else 160 -%}
     {%- set desc = "" -%}
     {%- set done = false -%}
     {%- for slide in pair.deck.slides -%}

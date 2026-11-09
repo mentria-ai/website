@@ -10,6 +10,7 @@ eleventyComputed:
   lang: "{{ pair.locale.code }}"
   title: "{{ pair.ext.name }} · {{ 'store.kind' | t }}"
   description: "{{ ('tool.ext_gallery.desc.' + pair.ext.id) | t }}"
+  seoDescription: "{% set k = 'store.seo_desc.' + pair.ext.id %}{% if k | hasKey %}{{ k | t }}{% endif %}"
 ---
 <link rel="stylesheet" href="/assets/css/store.css?v={{ buildHash }}">
 {% set ext = pair.ext %}

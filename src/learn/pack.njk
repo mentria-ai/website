@@ -9,7 +9,30 @@ eleventyExcludeFromSitemap: true
 eleventyComputed:
   lang: "{{ pair.locale.code }}"
   title: "{{ pair.pack.title | tloc(pair.locale.code) }} · {{ 'learn.title' | t }}"
-  description: "{{ pair.pack.title | tloc(pair.locale.code) }} · {{ pair.pack.subtitle | tloc(pair.locale.code) }}"
+  seoTitle: "{% set s = pair.pack.title | tloc(pair.locale.code) %}{% set full = s ~ ' · ' ~ ('learn.title' | traw) %}{{ s if (full.length + 10) > 70 else full }}"
+  description: |-
+    {%- set ja = pair.locale.code == "ja" -%}
+    {%- set minLen = 70 if ja else 140 -%}
+    {%- set maxLen = 110 if ja else 160 -%}
+    {%- set desc = "" -%}
+    {%- set done = false -%}
+    {%- for card in pair.pack.cards -%}
+    {%- set caption = card.caption | tloc(pair.locale.code) | striptags | htmlDecode | replace(r/[\uD83C-\uD83E][\uDC00-\uDFFF]\uFE0F?\s*/g, "") | trim -%}
+    {%- if caption and not done -%}
+    {%- if not r/[.!?。！？…]["'”’»」』)）]*$/.test(caption) -%}{%- set caption = caption ~ ("。" if ja else ".") -%}{%- endif -%}
+    {%- set joined = (desc ~ (" " if (not ja or (desc | last) in "?!") else "") ~ caption) if desc else caption -%}
+    {%- if joined.length <= maxLen -%}
+    {%- set desc = joined -%}
+    {%- else -%}
+    {%- if desc.length < minLen -%}
+    {%- set cut = joined | truncate(maxLen - 1, ja, "") | replace(r/[\s,;:、，—–\-«“‘(（「『…\uD800-\uDBFF]+$/, "") -%}
+    {%- set desc = cut if r/[.!?。！？]$/.test(cut) else cut ~ "…" -%}
+    {%- endif -%}
+    {%- set done = true -%}
+    {%- endif -%}
+    {%- endif -%}
+    {%- endfor -%}
+    {{ (desc or ((pair.pack.title | tloc(pair.locale.code)) ~ " · " ~ (pair.pack.subtitle | tloc(pair.locale.code)))) | safe }}
   socialImageOverride: "{{ pair.pack.cover }}"
   preloadImage: "{% for c in pair.pack.cards %}{% if c.id == pair.pack.sections[0].cards[0] and c.image %}{{ c.image }}{% endif %}{% endfor %}"
   robots: "{% if not pair.deckPath %}noindex, follow{% endif %}"

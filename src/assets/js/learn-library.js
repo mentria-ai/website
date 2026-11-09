@@ -52,7 +52,7 @@
     var pct = sum && sum.total ? Math.round((sum.seen / sum.total) * 100) : 0;
     li.innerHTML =
       '<a class="learn-tile__link" href="' + esc(prefix + '/learn/play/?id=' + encodeURIComponent(row.id)) + '">' +
-        (row.cover ? '<img class="learn-tile__cover" src="' + esc(row.cover) + '" alt="" loading="lazy">' : '<span class="learn-tile__cover learn-tile__cover--blank"></span>') +
+        (row.cover ? '<img class="learn-tile__cover" src="' + esc(row.cover) + '" alt="' + esc(P.text(row.title, lang)) + '" aria-hidden="true" loading="lazy">' : '<span class="learn-tile__cover learn-tile__cover--blank"></span>') +
         '<span class="learn-tile__body">' +
           '<span class="learn-tile__title">' + esc(P.text(row.title, lang)) + '</span>' +
           '<span class="learn-tile__meta">' + esc(tn('cards_n', row.cards)) + (row.source === 'contact' ? ' · ' + esc(t('from_contact')) : '') + '</span>' +

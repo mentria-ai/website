@@ -710,10 +710,14 @@ try {
             var chip = document.getElementById('m-update');
             var later = false;
             try { later = !!sessionStorage.getItem('m-update-later'); } catch (_) {}
-            if (chip && !later) chip.hidden = false;
+            if (chip && !later) setUpdateChip(chip, true);
           });
           var pending = null;
           var registration = null;
+          var setUpdateChip = function (chip, on) {
+            chip.hidden = !on;
+            document.documentElement.classList.toggle('m-update-on', on);
+          };
           var setPending = function (sw) {
             pending = sw;
             var dots = document.querySelectorAll('[data-update-dot]');
@@ -751,7 +755,7 @@ try {
               if (!sw) return;
               setPending(sw);
               try { if (sessionStorage.getItem('m-update-later')) return; } catch (_) {}
-              chip.hidden = false;
+              setUpdateChip(chip, true);
             };
             if (reg.waiting && navigator.serviceWorker.controller) show(reg.waiting);
             reg.addEventListener('updatefound', function () {
@@ -762,12 +766,12 @@ try {
               });
             });
             document.getElementById('m-update-go').addEventListener('click', function () {
-              chip.hidden = true;
+              setUpdateChip(chip, false);
               window.MentriaUpdate.apply();
             });
             document.getElementById('m-update-later').addEventListener('click', function () {
               try { sessionStorage.setItem('m-update-later', '1'); } catch (_) {}
-              chip.hidden = true;
+              setUpdateChip(chip, false);
             });
           }).catch(function () {});
         })();
@@ -1095,7 +1099,9 @@ try {
           var was = document.activeElement;
           peekFrom = (was && was !== document.body && !hero.contains(was)) ? was : btn;
           hero.insertAdjacentElement('beforebegin', scrim);
+          for (var up = hero.parentElement; up && up.tagName !== 'MAIN' && up !== document.body; up = up.parentElement) up.classList.add('hero-peek-path');
           hero.classList.add('hero--peek');
+          document.documentElement.classList.add('hero-peek-on');
           btn.setAttribute('aria-expanded', 'true');
           var d = hero.querySelector('.tldr');
           if (d) d.open = true;
@@ -1120,6 +1126,8 @@ try {
           window.removeEventListener('keydown', onKey, true);
           shield(false);
           hero.classList.remove('hero--peek');
+          document.documentElement.classList.remove('hero-peek-on');
+          Array.prototype.forEach.call(document.querySelectorAll('.hero-peek-path'), function (el) { el.classList.remove('hero-peek-path'); });
           if (scrim.parentNode) scrim.parentNode.removeChild(scrim);
           btn.setAttribute('aria-expanded', 'false');
           if (peekAttrs) {

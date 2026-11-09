@@ -153,7 +153,7 @@
     if (cover) {
       if (!media) {
         media = el('img', 'feed-card__media stream-hero__bg');
-        media.alt = '';
+        media.setAttribute('aria-hidden', 'true');
         media.decoding = 'async';
         media.fetchPriority = 'high';
         media.addEventListener('error', heroWithoutCover);
@@ -161,6 +161,7 @@
         heroCard.insertBefore(media, heroCard.firstChild);
       }
       if (media.getAttribute('src') !== cover) media.src = cover;
+      media.alt = tx((cont || pick).title) || '';
       heroCard.classList.add('stream-card--hero-media');
       heroCard.style.setProperty('--feed-card-bg', 'url("' + cover + '")');
     }

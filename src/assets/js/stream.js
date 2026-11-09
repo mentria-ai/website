@@ -20,7 +20,7 @@
     if (item.cover) sec.style.setProperty('--feed-card-bg', 'url("' + item.cover + '")');
     var href = item.href || (prefix + '/learn/' + item.id + '/');
     sec.innerHTML =
-      (item.cover ? '<img class="feed-card__media" src="' + esc(item.cover) + '" alt="" loading="lazy" decoding="async">' : '<div class="feed-card__color-bg stream-card__blank"></div>') +
+      (item.cover ? '<img class="feed-card__media" src="' + esc(item.cover) + '" alt="' + esc(tx(item.title)) + '" aria-hidden="true" loading="lazy" decoding="async">' : '<div class="feed-card__color-bg stream-card__blank"></div>') +
       '<div class="feed-card__gradient"></div>' +
       '<div class="stream-chip stream-chip--' + kind + '">' + esc(label) + '</div>' +
       '<div class="feed-card__info">' +
@@ -226,7 +226,7 @@
         if (d.image) { note.classList.add('stream-card--cover'); note.classList.remove('stream-card--note'); note.style.setProperty('--feed-card-bg', 'url("' + d.image + '")'); }
         var chip = '<p class="stream-chip stream-chip--today">' + esc(tx(d.chip) || t('today')) + '</p>';
         note.innerHTML =
-          (d.image ? '<img class="feed-card__media" src="' + esc(d.image) + '" alt="" loading="lazy" decoding="async"><div class="feed-card__gradient"></div>' + chip : '') +
+          (d.image ? '<img class="feed-card__media" src="' + esc(d.image) + '" alt="' + esc(tx(d.title)) + '" aria-hidden="true" loading="lazy" decoding="async"><div class="feed-card__gradient"></div>' + chip : '') +
           '<div class="' + (d.image ? 'feed-card__info' : 'stream-note') + '">' +
             (d.image ? '' : chip) +
             '<h2 class="' + (d.image ? 'feed-card__title' : 'stream-note__title') + '">' + esc(tx(d.title)) + '</h2>' +

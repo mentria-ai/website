@@ -95,7 +95,7 @@
     "advanced_sub": "Backups, identidade e sincronização de dispositivos",
     "data_section_lede": "O que você cria aqui fica guardado neste navegador. Um backup é um único arquivo criptografado que você guarda, então limpar o navegador ou trocar de celular não leva o seu trabalho junto.",
     "data_in_label": "No backup",
-    "data_in_body": "Notas, faturas, chats de IA, configurações das ferramentas e do layout, jogos salvos, progresso de aprendizado e os pacotes que você importou, contas 2FA, sua identidade Mentria e as salas do Comms, o livro-caixa do Finanças (ainda protegido pela própria frase secreta), as curtidas do rádio e as extensões instaladas com seus dados, como os decks e imagens do Story Studio.",
+    "data_in_body": "Notas, faturas, chats de IA, configurações das ferramentas e do layout, jogos salvos, progresso de aprendizado e os pacotes que você importou, contas 2FA, sua identidade Mentria e as salas do Comms, o livro-caixa do Finanças (ainda protegido pela própria frase secreta), as curtidas do rádio e as extensões instaladas com seus dados, como os pacotes e imagens do Story Studio.",
     "data_out_label": "Fora do backup",
     "data_out_body": "Os modelos de IA baixados e as cópias offline de páginas e decks, que são baixados de novo quando você precisa. Sua biblioteca de fotos, vídeos e músicas, as miniaturas e onde você parou de assistir, que são reconstruídas quando você adiciona suas pastas de novo. O acesso a pastas, as notificações agendadas e as configurações de “desbloquear neste aparelho”, que só funcionam no aparelho em que foram criadas.",
     "data_usage_label": "Uso",
@@ -684,8 +684,8 @@
     },
     "extensions-sdk": {
       "title": "SDK de extensões",
-      "lede": "Crie extensões de arquivo único que rodam localmente no Mentria — um único arquivo HTML, sem etapa de build.",
-      "tldr": "Extensões são arquivos HTML únicos que rodam dentro do Mentria com uma pequena API: armazenamento próprio da extensão, tokens de tema, avisos, blocos do launcher e comandos. Instalar é uma importação local confirmada pelo usuário — o arquivo não é enviado, revisado remotamente nem atualizado sozinho. Esta página documenta o manifesto e a API, com um exemplo pronto para copiar.",
+      "lede": "Crie extensões de arquivo único que rodam localmente na Mentria — um único arquivo HTML, sem etapa de build.",
+      "tldr": "Extensões são arquivos HTML únicos que rodam dentro da Mentria com uma pequena API: armazenamento próprio da extensão, tokens de tema, avisos, blocos do launcher e comandos. Instalar é uma importação local confirmada pelo usuário — o arquivo não é enviado, revisado remotamente nem atualizado sozinho. Esta página documenta o manifesto e a API, com um exemplo pronto para copiar.",
       "seo_title": "SDK de extensões: crie uma extensão da Mentria",
       "seo_description": "Crie extensões de arquivo único que rodam localmente na Mentria: um arquivo HTML, sem etapa de build. Leia a referência do SDK e instale a sua de um arquivo."
     },
@@ -799,20 +799,20 @@
     "video-player": {
       "title": "Player de vídeo",
       "lede": "Assista aos vídeos do seu celular ou computador com retomada, controle de velocidade, legendas e picture-in-picture. Seus arquivos nunca saem do seu dispositivo.",
-      "tldr": "Abra alguns vídeos ou uma pasta inteira e eles viram uma playlist com miniaturas. O Mentria lembra onde você parou em cada um para você continuar depois e, no computador ou no Android, também pode lembrar a pasta. Mude a velocidade de 0,25× a 3×, pule 10 segundos, carregue legendas .srt ou .vtt e ajuste a sincronia, ou abra o vídeo em picture-in-picture. Seus vídeos não são enviados: o player lê os arquivos direto do seu dispositivo e avisa quando um arquivo usa um formato que o seu navegador não consegue reproduzir.",
+      "tldr": "Abra alguns vídeos ou uma pasta inteira e eles viram uma playlist com miniaturas. A Mentria lembra onde você parou em cada um para você continuar depois e, no computador ou no Android, também pode lembrar a pasta. Mude a velocidade de 0,25× a 3×, pule 10 segundos, carregue legendas .srt ou .vtt e ajuste a sincronia, ou abra o vídeo em picture-in-picture. Seus vídeos não são enviados: o player lê os arquivos direto do seu dispositivo e avisa quando um arquivo usa um formato que o seu navegador não consegue reproduzir.",
       "seo_title": "Player de vídeo online para os seus arquivos",
       "seo_description": "Assista aos vídeos do celular ou PC no navegador. Abra uma pasta inteira, continue de onde parou, mude a velocidade, carregue legendas e use picture-in-picture."
     },
     "gallery": {
       "title": "Galeria",
       "lede": "Veja as fotos e vídeos do seu celular ou computador em uma grade rápida agrupada por mês, com zoom, apresentação de slides e detalhes de cada foto. Seus arquivos nunca saem do seu dispositivo.",
-      "tldr": "Abra uma pasta, ou escolha algumas fotos e vídeos, e eles aparecem em uma grade agrupada pelo mês em que cada foto foi tirada. Toque em uma para vê-la em tela cheia: deslize entre as fotos, faça pinça ou toque duas vezes para dar zoom, assista aos vídeos ali mesmo ou inicie uma apresentação que mantém a tela ligada. Detalhes mostra a câmera, a lente, a exposição e o local salvos na foto. No computador ou no Android, o Mentria pode lembrar suas pastas; nos outros, ele guarda miniaturas e datas, então as mesmas fotos abrem mais rápido da próxima vez. Suas fotos não são enviadas: a galeria lê os arquivos direto do seu dispositivo.",
+      "tldr": "Abra uma pasta, ou escolha algumas fotos e vídeos, e eles aparecem em uma grade agrupada pelo mês em que cada foto foi tirada. Toque em uma para vê-la em tela cheia: deslize entre as fotos, faça pinça ou toque duas vezes para dar zoom, assista aos vídeos ali mesmo ou inicie uma apresentação que mantém a tela ligada. Detalhes mostra a câmera, a lente, a exposição e o local salvos na foto. No computador ou no Android, a Mentria pode lembrar suas pastas; nos outros, ela guarda miniaturas e datas, então as mesmas fotos abrem mais rápido da próxima vez. Suas fotos não são enviadas: a galeria lê os arquivos direto do seu dispositivo.",
       "seo_title": "Galeria de fotos e visualizador de imagens online"
     },
     "music-player": {
       "title": "Player de música",
       "lede": "Ouça as músicas do seu celular ou computador com álbuns, artistas, playlists, modo aleatório e timer para dormir. Seus arquivos nunca saem do seu dispositivo.",
-      "tldr": "Abra algumas músicas ou uma pasta inteira e o Mentria monta uma biblioteca com as tags delas: músicas, álbuns com capa e artistas, com busca. Toque em ordem ou no aleatório, repita, coloque músicas na fila e mantenha playlists que você pode exportar em M3U. Os controles da tela de bloqueio e dos fones funcionam, o timer abaixa a música até parar e, no computador, um miniplayer pode flutuar sobre outras janelas. Lê MP3, AAC, FLAC, Ogg, Opus e WAV; Apple Lossless e AIFF tocam em dispositivos Apple. Suas músicas não são enviadas: o player lê os arquivos direto do seu dispositivo.",
+      "tldr": "Abra algumas músicas ou uma pasta inteira e a Mentria monta uma biblioteca com as tags delas: músicas, álbuns com capa e artistas, com busca. Toque em ordem ou no aleatório, repita, coloque músicas na fila e mantenha playlists que você pode exportar em M3U. Os controles da tela de bloqueio e dos fones funcionam, o timer abaixa a música até parar e, no computador, um miniplayer pode flutuar sobre outras janelas. Lê MP3, AAC, FLAC, Ogg, Opus e WAV; Apple Lossless e AIFF tocam em dispositivos Apple. Suas músicas não são enviadas: o player lê os arquivos direto do seu dispositivo.",
       "seo_title": "Player de música para seus arquivos no navegador",
       "seo_description": "Ouça músicas do celular ou PC: álbuns, artistas, playlists em M3U, aleatório, controles na tela bloqueada e timer para dormir. Seus arquivos não são enviados."
     },
@@ -2102,7 +2102,7 @@
       "models_share": "inclui {n} de modelos de IA baixados",
       "erase_button": "Apagar este aparelho…",
       "erase_title": "Apagar tudo neste aparelho",
-      "erase_lede": "Isso exclui todos os dados do Mentria neste navegador: notas, seu cofre do Autenticador 2FA, configurações, identidade e salas salvas do Comms, progresso de aprendizado e pacotes importados, modelos de IA baixados, arquivos offline, histórico do rádio e notificações agendadas. Outros aparelhos, parceiros de sincronização e arquivos que você baixou não são afetados. Feche antes as outras abas do Mentria para que não gravem dados de novo.",
+      "erase_lede": "Isso exclui todos os dados da Mentria neste navegador: notas, seu cofre do Autenticador 2FA, configurações, identidade e salas salvas do Comms, progresso de aprendizado e pacotes importados, modelos de IA baixados, arquivos offline, histórico do rádio e notificações agendadas. Outros aparelhos, parceiros de sincronização e arquivos que você baixou não são afetados. Feche antes as outras abas da Mentria para que não gravem dados de novo.",
       "erase_type": "Digite “{word}” para confirmar",
       "erase_word": "apagar",
       "erase_confirm": "Apagar tudo",
@@ -2219,7 +2219,7 @@
       },
       "perm": {
         "finance": {
-          "network": "Só para sincronizar seus próprios aparelhos e para os lembretes de contas opcionais. A sincronização é criptografada de ponta a ponta, e o que passa pelo servidor de retransmissão do Mentria continua selado; os lembretes enviam só um horário de aviso."
+          "network": "Só para sincronizar seus próprios aparelhos e para os lembretes de contas opcionais. A sincronização é criptografada de ponta a ponta, e o que passa pelo servidor de retransmissão da Mentria continua selado; os lembretes enviam só um horário de aviso."
         },
         "scanner": {
           "camera": "Só enquanto a tela de digitalização está aberta. As fotos são processadas neste dispositivo."
@@ -5718,14 +5718,14 @@
         "install": "instalar",
         "installed": "instalada ✓",
         "install_failed": "falha na instalação: {reason}",
-        "offer_photo": "Enviei uma foto. Atualize o Mentria para ver.",
-        "offer_photos": "Enviei {n} fotos. Atualize o Mentria para ver.",
-        "offer_video": "Enviei um vídeo. Atualize o Mentria para ver.",
-        "offer_videos": "Enviei {n} vídeos. Atualize o Mentria para ver.",
-        "offer_file": "Enviei um arquivo. Atualize o Mentria para abrir.",
-        "offer_files": "Enviei {n} arquivos. Atualize o Mentria para abrir.",
-        "offer_mixed": "Enviei {n} anexos. Atualize o Mentria para ver.",
-        "needs_update": "{name} precisa atualizar o Mentria para receber isto",
+        "offer_photo": "Enviei uma foto. Atualize a Mentria para ver.",
+        "offer_photos": "Enviei {n} fotos. Atualize a Mentria para ver.",
+        "offer_video": "Enviei um vídeo. Atualize a Mentria para ver.",
+        "offer_videos": "Enviei {n} vídeos. Atualize a Mentria para ver.",
+        "offer_file": "Enviei um arquivo. Atualize a Mentria para abrir.",
+        "offer_files": "Enviei {n} arquivos. Atualize a Mentria para abrir.",
+        "offer_mixed": "Enviei {n} anexos. Atualize a Mentria para ver.",
+        "needs_update": "{name} precisa atualizar a Mentria para receber isto",
         "no_space": "Não há espaço suficiente neste dispositivo",
         "status_send": "enviando {i} de {n} · {rate} · {path}",
         "status_recv": "recebendo {i} de {n} · {rate} · {path}",
@@ -6435,7 +6435,7 @@
     }
   },
   "image_use": {
-    "title": "Uso das imagens do Mentria",
+    "title": "Uso das imagens da Mentria",
     "lede": "As imagens do Mentria, incluindo as dos decks e dos pacotes de aprendizado, são feitas para este site.",
     "rights": "Todas as imagens do Mentria são © Mentria. Todos os direitos reservados.",
     "share": "Você pode criar links para qualquer página ou compartilhá-la como está.",

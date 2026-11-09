@@ -1574,7 +1574,7 @@ html.mentria-no-motion [data-requires="motion"] { display: none !important; }
 @media (prefers-reduced-motion: reduce) { .star-cta__btn svg { transition: none; } }
 .m-update__text { flex: 1; min-width: 0; }
 #m-update .m-update__text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.35; }
-.m-update__new { padding: 3px 0; margin: -1px 0 -3px; font-size: 0.7rem; color: var(--syn-cyan); text-decoration: underline dotted; text-underline-offset: 3px; }
+.m-update__new { padding: 5px 0; margin: -3px 0 -5px; font-size: 0.7rem; color: var(--syn-cyan); text-decoration: underline dotted; text-underline-offset: 3px; }
 .m-update__new:hover, .m-update__new:focus-visible { color: var(--accent); }
 html.is-standalone .m-update { bottom: calc(var(--app-bar-h) + 12px); }
 html:not(.is-fullscreen-tool):has(.pwa-install-banner--visible) .m-update { bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }

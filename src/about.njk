@@ -872,18 +872,19 @@ localeReload: true
       setTimeout(function () { scramble(role, finalRole, 760, true); }, 820);
     }
     new IntersectionObserver(function (es) {
-      for (var i = 0; i < es.length; i++) {
-        sec.classList.toggle('is-seen', es[i].isIntersecting);
-        face.show(es[i].isIntersecting);
-      }
+      for (var i = 0; i < es.length; i++) sec.classList.toggle('is-seen', es[i].isIntersecting);
     }, { threshold: 0 }).observe(sec);
+    var faceBox = sec.querySelector('.about-maker__face');
+    if (faceBox) new IntersectionObserver(function (es) {
+      for (var i = 0; i < es.length; i++) face.show(es[i].isIntersecting);
+    }, { threshold: 0 }).observe(faceBox);
     var io = new IntersectionObserver(function (es) {
       for (var i = 0; i < es.length; i++) {
         if (!es[i].isIntersecting) continue;
         if (es[i].target === term) start(); else sec.classList.add('is-flow');
         io.unobserve(es[i].target);
       }
-    }, { threshold: 0.35 });
+    }, { threshold: 0, rootMargin: '0px 0px -30% 0px' });
     io.observe(term);
     io.observe(flow);
   })();

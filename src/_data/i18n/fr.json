@@ -6069,7 +6069,8 @@
         "clock": "Non remis : l'horloge de cet appareil et celle de l'ordinateur ont plus de 5 minutes d'écart. Réglez l'heure automatique sur les deux et réessayez.",
         "unpaired": "Non remis : cet appareil n'est pas dans la liste d'appareils de l'ordinateur.",
         "approve_note": "Approuvez d'abord ici. Les deux écrans affichent ensuite le même code court.",
-        "waiting_code": "Approuvé. En attente de l'ordinateur…"
+        "waiting_code": "Approuvé. En attente de l'ordinateur…",
+        "command": "Non exécuté : les commandes avec barre oblique ne s'exécutent que sur l'ordinateur."
       }
     },
     "scanner": {

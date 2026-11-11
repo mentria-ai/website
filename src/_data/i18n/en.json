@@ -6069,7 +6069,8 @@
         "clock": "Not delivered: this device's clock and the computer's differ by more than 5 minutes. Set both to automatic time and try again.",
         "unpaired": "Not delivered: this device isn't on the computer's device list.",
         "approve_note": "Approve here first. Then both screens show the same short code.",
-        "waiting_code": "Approved. Waiting for the computer…"
+        "waiting_code": "Approved. Waiting for the computer…",
+        "command": "Not run: slash commands only run at the computer."
       }
     },
     "scanner": {

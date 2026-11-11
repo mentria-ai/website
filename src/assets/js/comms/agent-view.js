@@ -62,7 +62,7 @@ const el = (tag, cls, text) => {
 export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepAliveMs = 60000, statusMs = 15000, resumeMs = RESUME_MS } = {}) => {
   const A = (T && T.agent) || {};
   const C = (T && T.cc) || {};
-  const failNote = (code) => (code === 'clock' ? (C.clock || A.unpaired || '') : (C.unpaired || A.unpaired || ''));
+  const failNote = (code) => (code === 'clock' ? (C.clock || A.unpaired || '') : code === 'command' ? (C.command || A.unpaired || '') : (C.unpaired || A.unpaired || ''));
   let sid = null;
   let sub = null;
   let expanded = new Set();

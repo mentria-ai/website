@@ -416,7 +416,7 @@ const PAGE_TESTS = async () => {
     document.body.append(card);
     return card;
   };
-  const TP = { agent: { wants: '{tool} wants to run', message: 'Message the {name}', sent: 'sent', delivered: 'delivered', unpaired: 'not delivered', ask_send: 'Send answer', ask_other: 'Or type' }, cc: { local: 'Answer this at the computer.', answered_here: 'Answered at the computer.', clock: 'Not delivered: check this device clock.', unpaired: 'Not delivered: not on the list.' }, chat: {} };
+  const TP = { agent: { wants: '{tool} wants to run', message: 'Message the {name}', sent: 'sent', delivered: 'delivered', unpaired: 'not delivered', ask_send: 'Send answer', ask_other: 'Or type' }, cc: { local: 'Answer this at the computer.', answered_here: 'Answered at the computer.', clock: 'Not delivered: check this device clock.', unpaired: 'Not delivered: not on the list.', command: 'Not run: slash commands only run at the computer.' }, chat: {} };
   const agentRig = async () => {
     const AVx = await import('/assets/js/comms/agent-view.js?' + Math.random());
     const mkEl = (tag) => document.createElement(tag || 'div');
@@ -472,6 +472,12 @@ const PAGE_TESTS = async () => {
     await sleep(100);
     ok(r2.els.log.textContent.includes('Not delivered: not on the list.'), r2.els.log.textContent);
     r2.done();
+    const r3 = await agentRig();
+    await r3.v.say('/model x');
+    r3.handlers.err({ t: 'err', sid: 's', cmid: 'p:1', code: 'command' });
+    await sleep(100);
+    ok(r3.els.log.textContent.includes('Not run: slash commands only run at the computer.'), r3.els.log.textContent);
+    r3.done();
   });
 
   test('cards: a verdict refused for clock comes back with the note', async () => {

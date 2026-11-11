@@ -2,6 +2,7 @@ import { WORDS } from '/assets/js/comms/cc-words.js';
 import { seal, open } from '/assets/js/comms/bridge.js';
 import { signBody, verifyBody, validSpub } from '/assets/js/comms/sign.js';
 import { b64urlEncode, b64urlDecode } from '/assets/js/comms/wire.js';
+import { trustedFps } from '/assets/js/comms/devices.js';
 
 export const CC_LINK = /^#cc1\.([A-Za-z0-9_-]{43})$/;
 const SALT = 'mentria-cc-v1';
@@ -48,6 +49,9 @@ export const unwrapChannelKey = async (record, me) => {
 
 const okRecord = (r) => isObj(r) && typeof r.cid === 'string' && r.cid.length > 0;
 
+const sgKey = (x) => (isObj(x) && isObj(x.sg) ? String(x.sg.s) : '');
+const unionBy = (xs, cap) => { const out = new Map(); for (const x of xs) if (sgKey(x) && !out.has(sgKey(x))) out.set(sgKey(x), x); return Array.from(out.values()).slice(-cap); };
+
 export const mergeComputerRecords = (a, b) => {
   const la = isObj(a) && Array.isArray(a.list) ? a.list : null;
   const lb = isObj(b) && Array.isArray(b.list) ? b.list : null;
@@ -59,12 +63,46 @@ export const mergeComputerRecords = (a, b) => {
     const had = by.get(r.cid);
     if (!had) { by.set(r.cid, r); continue; }
     const removed = !!(had.removed || r.removed);
-    const kr = Number(r.kver) || 0, kh = Number(had.kver) || 0;
-    let win = kr > kh ? r : had;
-    if (kr === kh && isObj(r.wrapped) && isObj(had.wrapped)) win = Object.assign({}, had, { wrapped: Object.assign({}, r.wrapped, had.wrapped) });
-    by.set(r.cid, removed && !win.removed ? Object.assign({}, win, { removed: true }) : win);
+    const same = samePub(had.spub, r.spub) && samePub(had.dh, r.dh);
+    const out = Object.assign({}, had, { removed });
+    if (same) {
+      const kr = Number(r.kver) || 0, kh = Number(had.kver) || 0;
+      if (kr > kh) Object.assign(out, { kver: r.kver, wrapped: r.wrapped });
+      else if (kr === kh && isObj(r.wrapped) && isObj(had.wrapped)) out.wrapped = Object.assign({}, r.wrapped, had.wrapped);
+      out.approvals = unionBy([].concat(had.approvals || [], r.approvals || []), 16);
+      out.proofs = unionBy([].concat(had.proofs || [], r.proofs || []).sort((x, y) => (Number(x.kver) || 0) - (Number(y.kver) || 0)), 8);
+    }
+    by.set(r.cid, out);
   }
   return { v: 1, list: Array.from(by.values()).sort((x, y) => (Number(x.added) || 0) - (Number(y.added) || 0) || (x.cid < y.cid ? -1 : 1)) };
+};
+
+export const approveComputer = (rec, me) => signBody(me.sign.signKey, me.sign.spub, 'cc-computer', rec.cid, { t: 'cc-computer', cid: rec.cid, spub: { x: rec.spub.x, y: rec.spub.y }, dh: { x: rec.dh.x, y: rec.dh.y } });
+
+const proofSigned = async (rec, p) => {
+  if (!isObj(p) || !isObj(p.sg)) return false;
+  const v = p.t === 'cc-ready' ? await verifyBody(p, 'cc-pair:' + rec.cid, 'ready') : (p.t === 'cc-rekey' || p.t === 'cc-keys') && typeof p.cmid === 'string' ? await verifyBody(p, 'cc:' + rec.cid, p.cmid) : { ok: false };
+  return !!v.ok && samePub(v.spub, rec.spub);
+};
+
+export const verifyComputer = async (rec, trust, myFp) => {
+  if (!okRecord(rec) || rec.removed || !validSpub(rec.spub) || !validSpub(rec.dh)) return false;
+  const fps = trustedFps(trust);
+  let approved = false;
+  for (const a of rec.approvals || []) {
+    if (!isObj(a) || a.cid !== rec.cid || !samePub(a.spub, rec.spub) || !samePub(a.dh, rec.dh)) continue;
+    const v = await verifyBody(a, 'cc-computer', rec.cid);
+    if (v.ok && fps.includes(v.sigFp)) { approved = true; break; }
+  }
+  if (!approved) return false;
+  const mine = isObj(rec.wrapped) ? rec.wrapped[myFp] : null;
+  if (!isObj(mine)) return false;
+  for (const p of rec.proofs || []) {
+    if (!isObj(p) || p.kver !== rec.kver || !isObj(p.wrapped) || !isObj(p.wrapped[myFp])) continue;
+    if (p.wrapped[myFp].iv !== mine.iv || p.wrapped[myFp].ct !== mine.ct) continue;
+    if (await proofSigned(rec, p)) return true;
+  }
+  return false;
 };
 
 export const getComputers = () => {
@@ -111,8 +149,9 @@ export const acceptPairing = ({ S, me, entry, list, ring = '', transport, now = 
       if (!code) return;
       const v = await verifyBody(m, 'cc-pair:' + m.cid, 'ready');
       if (!v.ok || !samePub(v.spub, chosen.spub) || !Number.isInteger(m.kver) || !isObj(m.wrapped)) return;
-      const record = { cid: m.cid, name: String(chosen.name || '').slice(0, 40), spub: { x: chosen.spub.x, y: chosen.spub.y }, dh: { x: chosen.dh.x, y: chosen.dh.y }, kver: m.kver, wrapped: m.wrapped, added: now(), removed: false };
+      const record = { cid: m.cid, name: String(chosen.name || '').slice(0, 40), spub: { x: chosen.spub.x, y: chosen.spub.y }, dh: { x: chosen.dh.x, y: chosen.dh.y }, kver: m.kver, wrapped: m.wrapped, added: now(), removed: false, proofs: [m] };
       if (!(await unwrapChannelKey(record, me))) return;
+      record.approvals = [await approveComputer(record, me)];
       state = 'ready';
       if (off) off();
       save(record);
@@ -213,15 +252,16 @@ export const createMultiClient = () => {
 
 export const helloFields = ({ ring, list }) => Object.assign({}, ring ? { ring } : {}, list && !list.needsSign ? { list } : {});
 
-export const applyHostKeys = (cid, msg) => {
+export const applyHostKeys = async (cid, msg) => {
   if (!isObj(msg) || !Number.isInteger(msg.kver) || !isObj(msg.wrapped)) return false;
   const cur = getComputers();
   const rec = cur.list.find((r) => r.cid === cid);
-  if (!rec || rec.removed) return false;
+  if (!rec || rec.removed || !(await proofSigned(rec, msg))) return false;
   const kver = Number(rec.kver) || 0;
   let next = null;
   if (msg.t === 'cc-rekey' && msg.kver > kver) next = Object.assign({}, rec, { kver: msg.kver, wrapped: msg.wrapped });
   else if (msg.t === 'cc-keys' && msg.kver === kver) next = Object.assign({}, rec, { wrapped: Object.assign({}, rec.wrapped || {}, msg.wrapped) });
   if (!next) return false;
+  next.proofs = unionBy([].concat(rec.proofs || [], [msg]), 8);
   return window.MentriaStore.set('comms', 'computers', { v: 1, list: cur.list.map((r) => (r.cid === cid ? next : r)) });
 };

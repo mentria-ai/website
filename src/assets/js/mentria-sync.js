@@ -1,7 +1,8 @@
 import { joinRoom, selfId } from '/assets/vendor/trystero-nostr.js';
 import { mergeDeviceRecords, mergeInvites, mergeJoins } from '/assets/js/comms/devices.js';
+import { mergeComputerRecords } from '/assets/js/comms/cc.js';
 
-const RECORD_MERGES = { 'comms.devices': mergeDeviceRecords, 'comms.devinvite': mergeInvites, 'comms.devjoin': mergeJoins };
+const RECORD_MERGES = { 'comms.devices': mergeDeviceRecords, 'comms.devinvite': mergeInvites, 'comms.devjoin': mergeJoins, 'comms.computers': mergeComputerRecords };
 
 const RELAY = 'wss://relay.mentria.ai';
 const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';

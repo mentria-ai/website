@@ -848,7 +848,7 @@ import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelop
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
 import { keysFromBridgeKey, createBridgeClient, BRIDGE_KIND, HERE_TTL_MS } from '/assets/js/comms/bridge.js';
 import { createAgentView } from '/assets/js/comms/agent-view.js';
-import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer, helloFields, applyHostKeys } from '/assets/js/comms/cc.js';
+import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer, helloFields, applyHostKeys, verifyComputer, approveComputer, getComputers, mergeComputerRecords } from '/assets/js/comms/cc.js';
 import { ensureDeviceKeys } from '/assets/js/comms/devkey.js';
 import * as DEV from '/assets/js/comms/devices.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
@@ -2033,6 +2033,10 @@ const startComputerChannels = () => ccStarting || (ccStarting = (async () => {
     const cur = ccClients.get(rec.cid);
     if (cur && cur.kver === rec.kver) continue;
     if (cur) stopComputer(rec.cid);
+    if (!(await verifyComputer(rec, devTrust(), myDev.sign.sigFp))) continue;
+    if (!(rec.approvals || []).some((a) => a && a.sg && a.sg.pub && a.sg.pub.x === myDev.sign.spub.x && a.sg.pub.y === myDev.sign.spub.y)) {
+      try { MentriaStore.set('comms', 'computers', mergeComputerRecords(getComputers(), { v: 1, list: [Object.assign({}, rec, { approvals: (rec.approvals || []).concat([await approveComputer(rec, myDev)]) })] })); } catch (_) {}
+    }
     const K = await unwrapChannelKey(rec, myDev);
     if (!K) continue;
     const keys = await keysFromBridgeKey(K);
@@ -2055,8 +2059,8 @@ const startComputerChannels = () => ccStarting || (ccStarting = (async () => {
       if (gone.length) { try { localStorage.setItem(AGENT_SESSIONS_KEY, JSON.stringify(knownAgents().filter((a) => !gone.includes(a.sid)))); } catch (_) {} }
       paintAgents();
     });
-    client.on('cc-rekey', (m) => { applyHostKeys(rec.cid, m); });
-    client.on('cc-keys', (m) => { applyHostKeys(rec.cid, m); });
+    client.on('cc-rekey', (m) => { applyHostKeys(rec.cid, m).catch(() => {}); });
+    client.on('cc-keys', (m) => { applyHostKeys(rec.cid, m).catch(() => {}); });
     ccClients.set(rec.cid, entry);
     bridge.add(rec.cid, client);
     client.hello().catch(() => {});

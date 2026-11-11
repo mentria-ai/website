@@ -138,6 +138,22 @@ const PAGE_TESTS = async () => {
     } finally { window.mentriaConfirm = real; }
     eq(asked, 0);
   });
+  test('sync: comms.computers merges without the replace prompt and Disconnect sticks', async () => {
+    const k = { spub: { x: 'sx', y: 'sy' }, dh: { x: 'dx', y: 'dy' } };
+    MentriaStore.set('comms', 'computers', { v: 1, list: [Object.assign({ cid: 'c1', name: 'Mac', kver: 1, removed: true, added: 1 }, k)] }, { mtime: Date.now() - 5000 });
+    let asked = 0;
+    const real = window.mentriaConfirm;
+    window.mentriaConfirm = async () => { asked++; return false; };
+    try {
+      const incoming = { v: 1, list: [Object.assign({ cid: 'c1', name: 'Mac', kver: 1, removed: false, added: 1 }, k), Object.assign({ cid: 'c2', name: 'Linux', kver: 1, removed: false, added: 2 }, k)] };
+      await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.computers': JSON.stringify(incoming) } }, meta: { 'comms.computers': Date.now() + 1000 } });
+    } finally { window.mentriaConfirm = real; }
+    eq(asked, 0);
+    const got = MentriaStore.get('comms', 'computers');
+    eq(got.list.find((r) => r.cid === 'c1').removed, true);
+    ok(got.list.some((r) => r.cid === 'c2'));
+  });
+
   test('sync: comms.devkey never leaves the device', async () => {
     const me = await DKM.ensureDeviceKeys();
     const rec = MentriaStore.get('comms', 'devkey');

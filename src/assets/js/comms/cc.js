@@ -193,3 +193,5 @@ export const createMultiClient = () => {
   }
   return api;
 };
+
+export const helloFields = ({ ring, list }) => Object.assign({}, ring ? { ring } : {}, list && !list.needsSign ? { list } : {});

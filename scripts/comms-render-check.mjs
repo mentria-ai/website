@@ -408,6 +408,72 @@ const PAGE_TESTS = async () => {
   test('grid: usage line and free up space', () => { V.renderMediaGrid(el, { media: recs(4), usage: 1.6e9, T: TV, onOpen() {}, onFree() {} }); eq(el.querySelector('.comms__media-usage').textContent, '1.6 GB on this device'); ok(el.querySelector('[data-act="free"]')); });
   test('a caption is plain text, never HTML', () => { C.renderParts(el, [{ type: 'text', text: '<img src=x onerror=alert(1)>' }, album(1)], opts()); eq(el.querySelectorAll('img[onerror]').length, 0); });
 
+  const permDom = () => {
+    const card = document.createElement('div');
+    card.id = 'comms-agent-perm';
+    card.hidden = true;
+    card.innerHTML = '<p id="comms-agent-perm-title"></p><p id="comms-agent-perm-desc"></p><pre id="comms-agent-perm-preview"></pre><p id="comms-agent-perm-note" hidden></p><div id="comms-agent-perm-actions"><button id="comms-agent-deny" type="button">Deny</button><button id="comms-agent-allow" type="button">Allow</button></div>';
+    document.body.append(card);
+    return card;
+  };
+  const TP = { agent: { wants: '{tool} wants to run', message: 'Message the {name}', sent: 'sent', delivered: 'delivered', unpaired: 'not delivered', ask_send: 'Send answer', ask_other: 'Or type' }, cc: { local: 'Answer this at the computer.', answered_here: 'Answered at the computer.', clock: 'Not delivered: check this device clock.', unpaired: 'Not delivered: not on the list.' }, chat: {} };
+  const agentRig = async () => {
+    const AVx = await import('/assets/js/comms/agent-view.js?' + Math.random());
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const verdicts = [];
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {}, say: async () => 'p:1', verdict: async (...a) => { verdicts.push(a); return 'v:1'; }, answer: async () => 'a:1' };
+    const card = permDom();
+    const v = AVx.createAgentView({ els, T: TP, client });
+    v.open('s', null, 'S');
+    return { v, els, handlers, verdicts, card, done: () => { v.close(); card.remove(); } };
+  };
+  test('cards: verdict echoes the perm call id and hash', async () => {
+    const r = await agentRig();
+    r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r1', tool_name: 'Bash', description: 'd', input_preview: 'npm test', call: { id: 'r1', hash: 'HASH1' }, ts: Date.now() });
+    await sleep(50);
+    eq(r.card.hidden, false);
+    document.getElementById('comms-agent-allow').click();
+    await sleep(20);
+    deepEq(r.verdicts, [['s', 'r1', 'allow', { id: 'r1', hash: 'HASH1' }]]);
+    r.done();
+  });
+  test('cards: local perm shows answer-at-computer and no buttons', async () => {
+    const r = await agentRig();
+    r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r2', tool_name: 'Edit', input_preview: '.claude/settings.json', call: { id: 'r2', hash: 'H' }, local: true, ts: Date.now() });
+    await sleep(50);
+    eq(r.card.hidden, false);
+    eq(document.getElementById('comms-agent-perm-note').hidden, false);
+    eq(document.getElementById('comms-agent-perm-note').textContent, 'Answer this at the computer.');
+    eq(document.getElementById('comms-agent-perm-actions').hidden, true);
+    r.done();
+  });
+  test('cards: resolved replaces the buttons with answered-at-computer', async () => {
+    const r = await agentRig();
+    r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r3', tool_name: 'Bash', input_preview: 'ls', call: { id: 'r3', hash: 'H' }, ts: Date.now() });
+    await sleep(50);
+    r.handlers.resolved({ t: 'resolved', sid: 's', request_id: 'r3', where: 'computer' });
+    await sleep(50);
+    eq(document.getElementById('comms-agent-perm-note').textContent, 'Answered at the computer.');
+    eq(document.getElementById('comms-agent-perm-actions').hidden, true);
+    r.done();
+  });
+  test('cards: err clock and unpaired show their notes', async () => {
+    const r = await agentRig();
+    const c1 = await r.v.say('one');
+    r.handlers.err({ t: 'err', sid: 's', cmid: 'p:1', code: 'clock' });
+    await sleep(100);
+    ok(r.els.log.textContent.includes('Not delivered: check this device clock.'), r.els.log.textContent);
+    r.done();
+    const r2 = await agentRig();
+    await r2.v.say('two');
+    r2.handlers.err({ t: 'err', sid: 's', cmid: 'p:1', code: 'unpaired' });
+    await sleep(100);
+    ok(r2.els.log.textContent.includes('Not delivered: not on the list.'), r2.els.log.textContent);
+    r2.done();
+  });
+
   const out = [];
   for (const [name, fn] of tests) {
     el = document.createElement('div');

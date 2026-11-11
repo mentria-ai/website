@@ -6059,7 +6059,11 @@
         "disconnect": "Disconnect",
         "disconnect_confirm": "Disconnect {name}? Its sessions stop showing here until you connect it again.",
         "disconnected": "{name} disconnected.",
-        "ok": "OK"
+        "ok": "OK",
+        "local": "Answer this at the computer. Changes to Claude Code's own settings and some tools are only approved there.",
+        "answered_here": "Answered at the computer.",
+        "clock": "Not delivered: this device's clock is off by more than 5 minutes. Set the time automatically and try again.",
+        "unpaired": "Not delivered: this device isn't on the computer's device list."
       }
     },
     "scanner": {

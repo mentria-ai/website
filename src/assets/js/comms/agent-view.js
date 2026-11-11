@@ -61,6 +61,8 @@ const el = (tag, cls, text) => {
 
 export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepAliveMs = 60000, statusMs = 15000, resumeMs = RESUME_MS } = {}) => {
   const A = (T && T.agent) || {};
+  const C = (T && T.cc) || {};
+  const failNote = (code) => (code === 'clock' ? (C.clock || A.unpaired || '') : (C.unpaired || A.unpaired || ''));
   let sid = null;
   let sub = null;
   let expanded = new Set();
@@ -94,6 +96,11 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     byId('comms-agent-perm-title').textContent = fillIn(A.wants, { tool: p.tool_name || '' });
     byId('comms-agent-perm-desc').textContent = p.description || '';
     byId('comms-agent-perm-preview').textContent = p.input_preview || '';
+    const note = byId('comms-agent-perm-note');
+    const actions = byId('comms-agent-perm-actions');
+    const said = p.resolvedHere ? (C.answered_here || '') : p.local ? (C.local || '') : '';
+    if (note) { note.hidden = !said; note.textContent = said; }
+    if (actions) actions.hidden = !!said;
     card.dataset.id = p.request_id;
     card.dataset.sid = p.sid;
   };
@@ -101,9 +108,9 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     const card = byId('comms-agent-perm');
     const id = card && card.dataset.id;
     const p = perms.find((x) => x.request_id === id && x.sid === sid);
-    if (!p || !sid) return;
+    if (!p || !sid || p.local || p.resolvedHere) return;
     p.answered = true;
-    client.verdict(sid, id, behavior).catch(() => {});
+    client.verdict(sid, id, behavior, p.call).catch(() => {});
     paintPerm();
   };
   if (byId('comms-agent-allow')) byId('comms-agent-allow').addEventListener('click', () => answer('allow'));
@@ -242,7 +249,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
         const line = el('div', 'comms__line comms__line--me');
         const what = el('span', 'comms__what');
         renderBody(what, p.text, { from: 'self', T: T.chat });
-        line.append(what, el('span', 'comms__agent-state' + (p.failed ? ' comms__agent-state--failed' : ''), p.failed ? (A.unpaired || '') : p.acked ? (A.delivered || '') : (A.sent || '')));
+        line.append(what, el('span', 'comms__agent-state' + (p.failed ? ' comms__agent-state--failed' : ''), p.failed ? failNote(p.failed) : p.acked ? (A.delivered || '') : (A.sent || '')));
         box.append(line);
       }
       out.push(box);
@@ -270,7 +277,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     const send = el('button', 'comms__btn comms__ask-send', A.ask_send || 'Send');
     send.type = 'button';
     const state = el('span', 'comms__agent-state');
-    const sync = () => { send.disabled = a.sent || !askReady(a); state.textContent = a.failed ? (A.unpaired || '') : a.sent ? (A.ask_sent || '') : ''; state.classList.toggle('comms__agent-state--failed', !!a.failed); };
+    const sync = () => { send.disabled = a.sent || !askReady(a); state.textContent = a.doneHere ? (C.answered_here || '') : a.failed ? failNote(a.failed) : a.sent ? (A.ask_sent || '') : ''; state.classList.toggle('comms__agent-state--failed', !!a.failed); };
     a.questions.forEach((q, i) => {
       const box = el('div', 'comms__ask-q');
       if (q.header) box.append(el('span', 'comms__ask-head', q.header));
@@ -353,7 +360,21 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     asks.push({ sid: m.sid, id: m.id, questions, sel: questions.map(() => new Set()), text: questions.map(() => ''), sent: false });
     if (m.sid === sid) schedule();
   }));
-  offs.push(client.on('asked', (m) => { const before = asks.length; asks = asks.filter((x) => !(m && x.sid === m.sid && x.id === m.id)); if (asks.length !== before && m.sid === sid) schedule(); }));
+  offs.push(client.on('asked', (m) => {
+    if (m && m.where === 'computer') {
+      const q = asks.find((x) => x.sid === m.sid && x.id === m.id);
+      if (q && !q.doneHere) { q.doneHere = true; q.sent = true; if (q.sync) q.sync(); setTimeout(() => { asks = asks.filter((x) => x !== q); if (m.sid === sid) schedule(); }, 6000); }
+      return;
+    }
+    const before = asks.length; asks = asks.filter((x) => !(m && x.sid === m.sid && x.id === m.id)); if (asks.length !== before && m.sid === sid) schedule();
+  }));
+  offs.push(client.on('resolved', (m) => {
+    const p = perms.find((x) => m && x.sid === m.sid && x.request_id === m.request_id);
+    if (!p || p.resolvedHere) return;
+    p.resolvedHere = true;
+    if (m.sid === sid) paintPerm();
+    setTimeout(() => { p.answered = true; if (m.sid === sid) paintPerm(); }, 6000);
+  }));
   offs.push(client.on('ack', (m) => { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.acked) { p.acked = true; try { localStorage.setItem(SIGNED_KEY, '1'); } catch (_) {} schedule(); } }));
   offs.push(client.on('perm', (m) => { if (!m || typeof m.request_id !== 'string' || typeof m.sid !== 'string') return; if (!perms.some((x) => x.sid === m.sid && x.request_id === m.request_id)) perms.push(Object.assign({}, m)); if (m.sid === sid) paintPerm(); }));
   offs.push(client.on('part', (m) => { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(m); } }));

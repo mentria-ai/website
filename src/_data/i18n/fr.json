@@ -6059,7 +6059,11 @@
         "disconnect": "Déconnecter",
         "disconnect_confirm": "Déconnecter {name} ? Ses sessions n'apparaissent plus ici jusqu'à ce que vous le reconnectiez.",
         "disconnected": "{name} déconnecté.",
-        "ok": "OK"
+        "ok": "OK",
+        "local": "Répondez sur l'ordinateur. Les changements des réglages de Claude Code et certains outils ne s'approuvent que là.",
+        "answered_here": "Répondu sur l'ordinateur.",
+        "clock": "Non remis : l'horloge de cet appareil a plus de 5 minutes d'écart. Réglez l'heure automatiquement et réessayez.",
+        "unpaired": "Non remis : cet appareil n'est pas dans la liste d'appareils de l'ordinateur."
       }
     },
     "scanner": {

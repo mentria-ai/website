@@ -329,6 +329,13 @@ check('cc: a here with a gone session removes it', async () => {
   deepEq(client.sessions().map((x) => x.sid), ['s2']);
 }, false);
 
+check('cc: hello carries the ring token only when alerts are on', async () => {
+  const list = { v: 1, ver: 2 };
+  deepEq(CCM.helloFields({ ring: 'tok', list }), { ring: 'tok', list });
+  deepEq(CCM.helloFields({ ring: null, list }), { list });
+  deepEq(CCM.helloFields({ ring: '', list: Object.assign({ needsSign: true }, list) }), {});
+}, false);
+
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;
 for (const [name, fn, needsPlugin] of checks) {

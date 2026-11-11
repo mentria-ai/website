@@ -330,7 +330,8 @@ unlockTool: true
         <p class="comms__agent-perm-title" id="comms-agent-perm-title"></p>
         <p class="comms__agent-perm-desc" id="comms-agent-perm-desc"></p>
         <pre class="comms__tool-out" id="comms-agent-perm-preview"></pre>
-        <div class="comms__agent-perm-actions"><button class="comms__btn comms__btn--ghost" id="comms-agent-deny" type="button">{{ 'tool.comms.agent.deny' | t }}</button><button class="comms__btn" id="comms-agent-allow" type="button">{{ 'tool.comms.agent.allow' | t }}</button></div>
+        <p class="comms__id-note" id="comms-agent-perm-note" hidden></p>
+        <div class="comms__agent-perm-actions" id="comms-agent-perm-actions"><button class="comms__btn comms__btn--ghost" id="comms-agent-deny" type="button">{{ 'tool.comms.agent.deny' | t }}</button><button class="comms__btn" id="comms-agent-allow" type="button">{{ 'tool.comms.agent.allow' | t }}</button></div>
       </div>
       <p class="comms__agent-signed" id="comms-agent-signed" hidden>{{ 'tool.comms.agent.signed' | t }}</p>
       <form class="comms__send" id="comms-send" autocomplete="off">
@@ -758,7 +759,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__agent-note{margin:var(--space-1) 0;color:var(--term-muted);font-size:var(--text-2xs)}
 .comms__agent-perm{margin:var(--space-2) var(--space-3) 0;padding:var(--space-3);background:var(--amber-8);border:1px solid var(--amber-30);border-radius:var(--radius-md)}
 .comms__agent-perm-title{margin:0;color:var(--term-fg-strong);font-weight:600}
-.comms__agent-perm-desc{margin:var(--space-1) 0;color:var(--term-fg);font-size:var(--text-sm)}
+.comms__agent-perm-desc{margin:var(--space-1) 0;color:var(--term-fg);font-size:var(--text-sm);overflow-wrap:anywhere}
 .comms__agent-perm-actions{display:flex;justify-content:flex-end;gap:var(--space-2);margin-top:var(--space-2)}
 .comms__agent-signed{margin:var(--space-1) var(--space-3) 0;color:var(--term-muted);font-size:var(--text-2xs)}
 .comms__agent-pending .comms__line{opacity:.8}
@@ -847,7 +848,7 @@ import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelop
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
 import { keysFromBridgeKey, createBridgeClient, BRIDGE_KIND, HERE_TTL_MS } from '/assets/js/comms/bridge.js';
 import { createAgentView } from '/assets/js/comms/agent-view.js';
-import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer } from '/assets/js/comms/cc.js';
+import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer, helloFields } from '/assets/js/comms/cc.js';
 import { ensureDeviceKeys } from '/assets/js/comms/devkey.js';
 import * as DEV from '/assets/js/comms/devices.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
@@ -2015,7 +2016,7 @@ const ccPublish = async (topic, content) => {
   if (ws) ws.send(ev);
   return !!ws;
 };
-const ccHello = () => { const trust = devTrust(); return Object.assign({}, ringToken ? { ring: ringToken } : {}, trust && !trust.needsSign ? { list: trust } : {}); };
+const ccHello = () => helloFields({ ring: ringToken, list: devTrust() });
 const stopComputer = (cid) => {
   const e = ccClients.get(cid);
   if (e) { try { e.off(); } catch (_) {} }

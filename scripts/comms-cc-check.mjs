@@ -314,6 +314,21 @@ check('cc: Disconnect sends a signed revoke and hides the computer', async () =>
   deepEq(CCM.liveComputers().map((x) => x.cid), []);
 }, false);
 
+check('cc: a here with a gone session removes it', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(6));
+  const host = await hostKey();
+  const t = memTransport();
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => body, host: { spub: host.spub, room: 'cc:c1' } });
+  const send = async (cmid, sessions) => { for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', cmid, { t: 'here', cmid, sessions, host: 'Mac' }))) t.feed(c); };
+  await send('h1', [{ sid: 's1', name: 'one', busy: false, lastTs: 1 }]);
+  await send('h2', [{ sid: 's2', name: 'two', busy: true, lastTs: 2 }]);
+  await tick(60);
+  deepEq(client.sessions().map((x) => x.sid).sort(), ['s1', 's2']);
+  await send('h3', [{ sid: 's1', name: 'one', gone: true }]);
+  await tick(60);
+  deepEq(client.sessions().map((x) => x.sid), ['s2']);
+}, false);
+
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;
 for (const [name, fn, needsPlugin] of checks) {

@@ -6030,13 +6030,14 @@
         "from_phone": "depuis votre téléphone",
         "message": "Message pour {name}",
         "mirror_only": "Lecture seule. Lancez cette session depuis le pont pour répondre ici.",
-        "signed": "Signé avec votre clé d’identité : seuls vos appareils peuvent donner des instructions à cette session.",
+        "signed": "Signé sur cet appareil : seuls vos appareils peuvent donner des instructions à cette session.",
         "sent": "envoyé",
         "delivered": "remis",
         "unpaired": "Non remis : associez d’abord cet appareil dans Sessions d’agent.",
         "wants": "{tool} veut s’exécuter",
         "allow": "Autoriser",
-        "deny": "Refuser"
+        "deny": "Refuser",
+        "running_on": "en cours sur {name}"
       },
       "cc": {
         "computers": "Ordinateurs",

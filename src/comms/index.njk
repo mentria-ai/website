@@ -1961,8 +1961,8 @@ const agentList = () => {
   if (!live.length) return [];
   const cids = new Set(live.map((r) => r.cid));
   const byId = new Map(knownAgents().filter((a) => !a.cid || cids.has(a.cid)).map((a) => [a.sid, { sid: a.sid, name: a.name, cid: a.cid, online: false, busy: false, lastTs: a.lastTs || 0 }]));
-  for (const x of bridge.sessions()) byId.set(x.sid, { sid: x.sid, name: x.name, cid: x.cid, online: x.online, busy: x.busy, lastTs: x.lastTs || 0 });
-  return Array.from(byId.values()).map((a) => Object.assign(a, { preview: a.online ? T.agent.running : T.agent.offline }));
+  for (const x of bridge.sessions()) byId.set(x.sid, { sid: x.sid, name: x.name, cid: x.cid, host: x.host, online: x.online, busy: x.busy, lastTs: x.lastTs || 0 });
+  return Array.from(byId.values()).map((a) => Object.assign(a, { preview: a.online ? (a.host ? fmt(T.agent.running_on, { name: a.host }) : T.agent.running) : T.agent.offline }));
 };
 const paintAgents = () => {
   const list = agentList();
@@ -2046,7 +2046,12 @@ const startComputerChannels = () => ccStarting || (ccStarting = (async () => {
       hello: ccHello
     });
     const entry = { client, off, kver: rec.kver, seen: 0, name: rec.name, topic: keys.topic };
-    client.on('here', () => { entry.seen = Date.now(); paintAgents(); });
+    client.on('here', (m) => {
+      entry.seen = Date.now();
+      const gone = (m.sessions || []).filter((x) => x && x.gone).map((x) => x.sid);
+      if (gone.length) { try { localStorage.setItem(AGENT_SESSIONS_KEY, JSON.stringify(knownAgents().filter((a) => !gone.includes(a.sid)))); } catch (_) {} }
+      paintAgents();
+    });
     ccClients.set(rec.cid, entry);
     bridge.add(rec.cid, client);
     client.hello().catch(() => {});

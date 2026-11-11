@@ -6030,13 +6030,14 @@
         "from_phone": "from your phone",
         "message": "Message the {name}",
         "mirror_only": "Watching only. Start this session from the bridge to reply here.",
-        "signed": "Signed with your identity key, so only your devices can instruct this session.",
+        "signed": "Signed on this device, so only your devices can instruct this session.",
         "sent": "sent",
         "delivered": "delivered",
         "unpaired": "Not delivered: pair this device first under Agent sessions.",
         "wants": "{tool} wants to run",
         "allow": "Allow",
-        "deny": "Deny"
+        "deny": "Deny",
+        "running_on": "running on {name}"
       },
       "cc": {
         "computers": "Computers",

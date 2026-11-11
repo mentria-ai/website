@@ -98,7 +98,11 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
   const apply = (m) => {
     if (m.t === 'chan' && typeof m.sid === 'string') chans.set(m.sid, now());
     if (m.t === 'here' && Array.isArray(m.sessions)) {
-      for (const s of m.sessions) if (s && typeof s.sid === 'string') sessions.set(s.sid, { sid: s.sid, name: String(s.name || ''), busy: !!s.busy, lastTs: Number(s.lastTs) || 0, hereAt: now(), host: String(m.host || '') });
+      for (const s of m.sessions) {
+        if (!s || typeof s.sid !== 'string') continue;
+        if (s.gone) sessions.delete(s.sid);
+        else sessions.set(s.sid, { sid: s.sid, name: String(s.name || ''), busy: !!s.busy, lastTs: Number(s.lastTs) || 0, hereAt: now(), host: String(m.host || '') });
+      }
     } else if (m.t === 'turn' && typeof m.sid === 'string' && Number.isInteger(m.n) && Number.isInteger(m.from) && Array.isArray(m.msgs)) {
       const t = turnOf(m.sid, m.n, true, m.sub);
       const tail = m.from + m.msgs.length >= t.slots.length;

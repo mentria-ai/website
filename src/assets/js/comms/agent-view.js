@@ -128,7 +128,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
   const status = () => {
     if (!sid) return;
     const s = client.sessions().find((x) => x.sid === sid);
-    els.status.textContent = s && s.online ? (A.running || '') : (A.offline || '');
+    els.status.textContent = s && s.online ? (s.host && A.running_on ? A.running_on.replace('{name}', s.host) : (A.running || '')) : (A.offline || '');
   };
   const paintComposer = () => {
     if (!sid) return;

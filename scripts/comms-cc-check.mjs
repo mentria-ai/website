@@ -252,8 +252,9 @@ check('cc: host message with a bad or missing signature is dropped', async () =>
   for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', 'h:good', here('good')))) t.feed(c);
   for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', 'h:old', here('old'), Date.now() - 11 * 60000))) t.feed(c);
   await tick(80);
-  deepEq(seen, ['good']);
-  deepEq(client.sessions().map((x) => x.name), ['good']);
+  deepEq(seen, ['good', 'old']);
+  deepEq(client.sessions().map((x) => x.name).sort(), ['good', 'old']);
+  eq(client.clockOff(), true);
 }, false);
 check('cc: hello carries the ring token and the newest list', async () => {
   const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(4));
@@ -367,6 +368,22 @@ check('cc: the phone follows a rekey without the owner noticing', async () => {
   const merged = CCM.mergeComputerRecords({ v: 1, list: [Object.assign({}, both, { wrapped: { [A.me.sign.sigFp]: both.wrapped[A.me.sign.sigFp] } })] }, { v: 1, list: [Object.assign({}, both, { wrapped: { [B.me.sign.sigFp]: both.wrapped[B.me.sign.sigFp] } })] });
   deepEq(Object.keys(merged.list[0].wrapped).sort(), [A.me.sign.sigFp, B.me.sign.sigFp].sort());
 });
+
+check('cc: a host message from a skewed clock still arrives and flags the clock', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(8));
+  const host = await hostKey();
+  const t = memTransport();
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => body, host: { spub: host.spub, room: 'cc:c1' } });
+  let flagged = 0;
+  client.on('clock', () => { flagged++; });
+  const errs = [];
+  client.on('err', (m) => errs.push(m.code));
+  for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', 'e:1', { t: 'err', cmid: 'e:1', sid: 's1', code: 'clock' }, Date.now() - 20 * 60000))) t.feed(c);
+  await tick(60);
+  deepEq(errs, ['clock']);
+  eq(flagged, 1);
+  eq(client.clockOff(), true);
+}, false);
 
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;

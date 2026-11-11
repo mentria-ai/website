@@ -6066,7 +6066,7 @@
         "ok": "OK",
         "local": "Answer this at the computer. Changes to Claude Code's own settings and some tools are only approved there.",
         "answered_here": "Answered at the computer.",
-        "clock": "Not delivered: this device's clock is off by more than 5 minutes. Set the time automatically and try again.",
+        "clock": "Not delivered: this device's clock and the computer's differ by more than 5 minutes. Set both to automatic time and try again.",
         "unpaired": "Not delivered: this device isn't on the computer's device list."
       }
     },

@@ -6066,7 +6066,7 @@
         "ok": "OK",
         "local": "Responda isto no computador. Mudanças nas configurações do Claude Code e algumas ferramentas só são aprovadas lá.",
         "answered_here": "Respondido no computador.",
-        "clock": "Não entregue: o relógio deste dispositivo está mais de 5 minutos fora. Ative a hora automática e tente de novo.",
+        "clock": "Não entregue: o relógio deste dispositivo e o do computador diferem em mais de 5 minutos. Ative a hora automática nos dois e tente de novo.",
         "unpaired": "Não entregue: este dispositivo não está na lista de dispositivos do computador."
       }
     },

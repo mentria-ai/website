@@ -82,6 +82,7 @@ export class Reassembler {
 export const createBridgeClient = ({ transport, keys, sign, device = 'phone', now = () => Date.now(), host = null, hello = null }) => {
   const reasm = new Reassembler();
   const handlers = new Map();
+  let clockOff = false;
   const sessions = new Map();
   const turns = new Map();
   const chans = new Map();
@@ -119,9 +120,10 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
     if (!host) return m;
     if (typeof m.cmid !== 'string' || !m.sg) return null;
     const v = await verifyBody(m, host.room, m.cmid);
-    if (!v.ok || v.spub.x !== host.spub.x || v.spub.y !== host.spub.y || Math.abs(now() - v.ts) > HOST_MAX_AGE_MS) return null;
-    const { sg, ...body } = m;
-    return body;
+    if (!v.ok || v.spub.x !== host.spub.x || v.spub.y !== host.spub.y) return null;
+    if (Math.abs(now() - v.ts) > HOST_MAX_AGE_MS && !clockOff) { clockOff = true; emit('clock', { skew: now() - v.ts }); }
+    else if (Math.abs(now() - v.ts) <= HOST_MAX_AGE_MS) clockOff = false;
+    return m;
   };
   transport.onEvent((content) => {
     chain = chain.then(async () => {
@@ -137,6 +139,7 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
     on: (t, fn) => { if (!handlers.has(t)) handlers.set(t, new Set()); handlers.get(t).add(fn); return () => handlers.get(t).delete(fn); },
     hello: (sid) => send(Object.assign({ t: 'hello' }, sid ? { sid } : {}, hello ? hello() : {})),
     post: (msg) => send(msg),
+    clockOff: () => clockOff,
     watch: (sid) => send({ t: 'watch', sid }),
     reset: (sid, sub) => { turns.delete(keyOf(sid, sub)); },
     channel: (sid) => now() - (chans.has(sid) ? chans.get(sid) : -Infinity) < HERE_TTL_MS,

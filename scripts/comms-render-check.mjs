@@ -474,6 +474,20 @@ const PAGE_TESTS = async () => {
     r2.done();
   });
 
+  test('cards: a verdict refused for clock comes back with the note', async () => {
+    const r = await agentRig();
+    r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r9', tool_name: 'Bash', input_preview: 'ls', call: { id: 'r9', hash: 'H' }, ts: Date.now() });
+    await sleep(50);
+    document.getElementById('comms-agent-allow').click();
+    await sleep(30);
+    r.handlers.err({ t: 'err', sid: 's', cmid: 'v:1', code: 'clock' });
+    await sleep(50);
+    eq(r.card.hidden, false);
+    eq(document.getElementById('comms-agent-perm-note').textContent, 'Not delivered: check this device clock.');
+    eq(document.getElementById('comms-agent-perm-actions').hidden, false);
+    r.done();
+  });
+
   const out = [];
   for (const [name, fn] of tests) {
     el = document.createElement('div');

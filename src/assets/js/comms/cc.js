@@ -133,3 +133,63 @@ export const acceptPairing = ({ S, me, entry, list, ring = '', transport, now = 
     cancel: () => { state = 'cancelled'; if (off) off(); }
   };
 };
+
+export const liveComputers = () => getComputers().list.filter((r) => !r.removed);
+
+export const markRemoved = (cid) => {
+  const cur = getComputers();
+  const rec = cur.list.find((r) => r.cid === cid);
+  if (!rec) return false;
+  return window.MentriaStore.set('comms', 'computers', mergeComputerRecords(cur, { v: 1, list: [Object.assign({}, rec, { removed: true })] }));
+};
+
+export const disconnectComputer = async ({ cid, client, me }) => {
+  const cmid = 'r:' + b64urlEncode(crypto.getRandomValues(new Uint8Array(9)));
+  if (client) {
+    try { await client.post(await signBody(me.sign.signKey, me.sign.spub, 'cc:' + cid, cmid, { t: 'cc-revoke', cid, cmid })); } catch (_) {}
+  }
+  markRemoved(cid);
+};
+
+const ROUTED = ['watch', 'list', 'open', 'get', 'say', 'answer', 'verdict'];
+
+export const createMultiClient = () => {
+  const clients = new Map();
+  const subs = new Set();
+  const ownerOf = (sid) => { for (const c of clients.values()) if (c.sessions().some((s) => s.sid === sid)) return c; return null; };
+  const remove = (cid) => {
+    for (const s of subs) { const off = s.offs.get(cid); if (off) off(); s.offs.delete(cid); }
+    clients.delete(cid);
+  };
+  const api = {
+    add: (cid, client) => { remove(cid); clients.set(cid, client); for (const s of subs) s.offs.set(cid, client.on(s.t, s.fn)); },
+    remove,
+    has: (cid) => clients.has(cid),
+    cids: () => Array.from(clients.keys()),
+    client: (cid) => clients.get(cid) || null,
+    ownerCid: (sid) => { for (const [cid, c] of clients) if (c.sessions().some((s) => s.sid === sid)) return cid; return null; },
+    on: (t, fn) => {
+      const s = { t, fn, offs: new Map() };
+      subs.add(s);
+      for (const [cid, c] of clients) s.offs.set(cid, c.on(t, fn));
+      return () => { for (const off of s.offs.values()) off(); subs.delete(s); };
+    },
+    hello: async (sid) => {
+      if (sid) { const c = ownerOf(sid); if (c) return c.hello(sid); }
+      await Promise.all(Array.from(clients.values()).map((c) => c.hello()));
+    },
+    reset: (sid, sub) => { const c = ownerOf(sid); if (c) c.reset(sid, sub); },
+    channel: (sid) => { const c = ownerOf(sid); return !!c && c.channel(sid); },
+    sessions: () => Array.from(clients.entries()).flatMap(([cid, c]) => c.sessions().map((s) => Object.assign({}, s, { cid }))),
+    turn: (sid, n, sub) => { const c = ownerOf(sid); return c ? c.turn(sid, n, sub) : null; },
+    turns: (sid, sub) => { const c = ownerOf(sid); return c ? c.turns(sid, sub) : []; }
+  };
+  for (const name of ROUTED) {
+    api[name] = async (sid, ...rest) => {
+      const c = ownerOf(sid);
+      if (!c) throw new Error('no-session');
+      return c[name](sid, ...rest);
+    };
+  }
+  return api;
+};

@@ -1441,14 +1441,6 @@ check('fix C1: the client sends a cheap watch', async () => {
   deepEq(got, [{ t: 'watch', sid: 's7' }]);
 });
 
-check('fix: the pairing section shows on phones too, with phone wording', () => {
-  const T = { connect: 'Connect this Mac', connect_note: 'mac note', connect_phone: 'Pair this phone', connect_note_phone: 'phone note' };
-  deepEq(AV.pairSection({ on: true, ready: true, phone: true, T }), { hidden: false, label: 'Pair this phone', note: 'phone note' });
-  deepEq(AV.pairSection({ on: true, ready: true, phone: false, T }), { hidden: false, label: 'Connect this Mac', note: 'mac note' });
-  eq(AV.pairSection({ on: false, ready: true, phone: true, T }).hidden, true);
-  eq(AV.pairSection({ on: true, ready: false, phone: false, T }).hidden, true);
-});
-
 check('fix: the client sends a signed answer to an ask', async () => {
   const keys = await BR.keysFromBridgeKey(BK);
   const t = pairT();

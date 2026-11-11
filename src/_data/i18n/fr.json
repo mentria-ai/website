@@ -6037,6 +6037,28 @@
         "wants": "{tool} veut s’exécuter",
         "allow": "Autoriser",
         "deny": "Refuser"
+      },
+      "cc": {
+        "computers": "Ordinateurs",
+        "computer": "votre ordinateur",
+        "connect_title": "Connecter Claude Code sur {name} ?",
+        "check_note": "Vérifiez que l'ordinateur affiche le même code.",
+        "approve": "Approuver",
+        "confirm": "Appuyez maintenant sur Allow sur l'ordinateur. Il affiche {code}.",
+        "opening": "Ouverture du lien…",
+        "connected": "Claude Code sur {name} est connecté.",
+        "denied": "L'ordinateur a refusé la connexion.",
+        "expired": "Ce lien a expiré ou a déjà servi. Lancez /mentria sur l'ordinateur pour en obtenir un nouveau.",
+        "conflict": "Quelqu'un d'autre a aussi ouvert ce lien, il a donc été arrêté. Lancez /mentria sur l'ordinateur pour en obtenir un nouveau.",
+        "unlock": "Déverrouillez Comms pour connecter Claude Code.",
+        "not_trusted": "Cet appareil n'est pas encore dans votre liste d'appareils. Ajoutez-le d'abord depuis un autre de vos appareils.",
+        "online": "en ligne",
+        "last_seen": "vu à {when}",
+        "not_seen": "pas encore vu",
+        "disconnect": "Déconnecter",
+        "disconnect_confirm": "Déconnecter {name} ? Ses sessions n'apparaissent plus ici jusqu'à ce que vous le reconnectiez.",
+        "disconnected": "{name} déconnecté.",
+        "ok": "OK"
       }
     },
     "scanner": {

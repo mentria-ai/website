@@ -44,7 +44,6 @@ export const visiblePerm = (perms, sid, msgs) => {
   return { perm: mine.length ? mine[mine.length - 1] : null, kept };
 };
 
-export const pairSection = ({ on, ready, phone, T = {} }) => ({ hidden: !(on && ready), label: phone ? (T.connect_phone || T.connect || '') : (T.connect || ''), note: phone ? (T.connect_note_phone || T.connect_note || '') : (T.connect_note || '') });
 
 export const RESUME_MS = 75000;
 const SIGNED_KEY = 'mentria.comms.agent_signed_seen';

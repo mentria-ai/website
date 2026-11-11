@@ -6037,6 +6037,28 @@
         "wants": "{tool} quer executar",
         "allow": "Permitir",
         "deny": "Negar"
+      },
+      "cc": {
+        "computers": "Computadores",
+        "computer": "seu computador",
+        "connect_title": "Conectar o Claude Code em {name}?",
+        "check_note": "Confira se o computador mostra o mesmo código.",
+        "approve": "Aprovar",
+        "confirm": "Agora toque em Allow no computador. Ele mostra {code}.",
+        "opening": "Abrindo o link…",
+        "connected": "O Claude Code em {name} está conectado.",
+        "denied": "O computador recusou a conexão.",
+        "expired": "Este link expirou ou já foi usado. Rode /mentria no computador para gerar um novo.",
+        "conflict": "Outra pessoa também abriu este link, então ele foi interrompido. Rode /mentria no computador para gerar um novo.",
+        "unlock": "Desbloqueie o Comms para conectar o Claude Code.",
+        "not_trusted": "Este dispositivo ainda não está na sua lista de dispositivos. Adicione-o primeiro a partir de outro dispositivo seu.",
+        "online": "online",
+        "last_seen": "visto às {when}",
+        "not_seen": "ainda não visto",
+        "disconnect": "Desconectar",
+        "disconnect_confirm": "Desconectar {name}? As sessões dele deixam de aparecer aqui até você conectá-lo de novo.",
+        "disconnected": "{name} desconectado.",
+        "ok": "OK"
       }
     },
     "scanner": {

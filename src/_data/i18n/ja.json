@@ -6037,6 +6037,28 @@
         "wants": "{tool} を実行しようとしています",
         "allow": "許可",
         "deny": "拒否"
+      },
+      "cc": {
+        "computers": "コンピューター",
+        "computer": "あなたのコンピューター",
+        "connect_title": "{name} の Claude Code を接続しますか？",
+        "check_note": "コンピューターに同じコードが表示されていることを確認してください。",
+        "approve": "承認",
+        "confirm": "コンピューターで Allow を押してください。{code} と表示されています。",
+        "opening": "リンクを開いています…",
+        "connected": "{name} の Claude Code を接続しました。",
+        "denied": "コンピューターが接続を拒否しました。",
+        "expired": "このリンクは期限切れか、すでに使われています。コンピューターで /mentria を実行して新しいリンクを作ってください。",
+        "conflict": "ほかの人もこのリンクを開いたため、停止しました。コンピューターで /mentria を実行して新しいリンクを作ってください。",
+        "unlock": "Claude Code を接続するには Comms のロックを解除してください。",
+        "not_trusted": "このデバイスはまだデバイス一覧にありません。先にほかのデバイスから追加してください。",
+        "online": "オンライン",
+        "last_seen": "最終確認 {when}",
+        "not_seen": "まだ確認されていません",
+        "disconnect": "接続を解除",
+        "disconnect_confirm": "{name} の接続を解除しますか？もう一度接続するまで、そのセッションはここに表示されません。",
+        "disconnected": "{name} の接続を解除しました。",
+        "ok": "OK"
       }
     },
     "scanner": {

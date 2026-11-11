@@ -1,8 +1,10 @@
 import { b64urlEncode, b64urlDecode } from '/assets/js/comms/wire.js';
+import { verifyBody } from '/assets/js/comms/sign.js';
 
 export const BRIDGE_KIND = 23838;
 export const FRAME_MAX = 30000;
 export const HERE_TTL_MS = 75000;
+export const HOST_MAX_AGE_MS = 600000;
 const SALT = 'mentria-bridge-v1';
 const te = new TextEncoder();
 const td = new TextDecoder();
@@ -77,7 +79,7 @@ export class Reassembler {
   }
 }
 
-export const createBridgeClient = ({ transport, keys, sign, device = 'phone', now = () => Date.now() }) => {
+export const createBridgeClient = ({ transport, keys, sign, device = 'phone', now = () => Date.now(), host = null, hello = null }) => {
   const reasm = new Reassembler();
   const handlers = new Map();
   const sessions = new Map();
@@ -109,18 +111,28 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
     }
     emit(m.t, m);
   };
+  const fromHost = async (m) => {
+    if (!host) return m;
+    if (typeof m.cmid !== 'string' || !m.sg) return null;
+    const v = await verifyBody(m, host.room, m.cmid);
+    if (!v.ok || v.spub.x !== host.spub.x || v.spub.y !== host.spub.y || Math.abs(now() - v.ts) > HOST_MAX_AGE_MS) return null;
+    const { sg, ...body } = m;
+    return body;
+  };
   transport.onEvent((content) => {
     chain = chain.then(async () => {
       const f = await open(keys.aes, content);
-      const m = f && reasm.push(f);
-      if (m && typeof m.t === 'string') apply(m);
+      const raw = f && reasm.push(f);
+      const m = raw && typeof raw.t === 'string' ? await fromHost(raw) : null;
+      if (m) apply(m);
     }).catch(() => {});
   });
   const send = async (msg) => { for (const f of splitFrames(msg)) await transport.publish(await seal(keys.aes, f)); };
   const cmidNew = () => 'p:' + b64urlEncode(crypto.getRandomValues(new Uint8Array(9)));
   return {
     on: (t, fn) => { if (!handlers.has(t)) handlers.set(t, new Set()); handlers.get(t).add(fn); return () => handlers.get(t).delete(fn); },
-    hello: (sid) => send(sid ? { t: 'hello', sid } : { t: 'hello' }),
+    hello: (sid) => send(Object.assign({ t: 'hello' }, sid ? { sid } : {}, hello ? hello() : {})),
+    post: (msg) => send(msg),
     watch: (sid) => send({ t: 'watch', sid }),
     reset: (sid, sub) => { turns.delete(keyOf(sid, sub)); },
     channel: (sid) => now() - (chans.has(sid) ? chans.get(sid) : -Infinity) < HERE_TTL_MS,

@@ -103,6 +103,7 @@ unlockTool: true
   <div class="comms__lock" id="comms-id-locked" hidden>
     <p class="comms__lock-link" id="comms-lock-link" hidden><strong>{{ 'unlock.link_title' | t }}</strong> {{ 'unlock.link_body' | t }}</p>
     <p class="comms__lock-h" id="comms-lock-title">{{ 'tool.comms.lock.title' | t }}</p>
+    <p class="comms__lock-link" id="comms-lock-cc" hidden>{{ 'tool.comms.cc.unlock' | t }}</p>
     <p class="comms__lock-waiting" id="comms-lock-waiting" hidden></p>
     <div class="comms__card-slot" id="comms-id-card-slot" hidden></div>
     <button class="comms__btn comms__btn--ghost" id="comms-lock-old" type="button" aria-expanded="false" aria-controls="comms-id-passkey comms-lock-alt" hidden>{{ 'tool.comms.lock.old_unlock' | t }}</button>
@@ -132,10 +133,9 @@ unlockTool: true
       </div>
 
       <div class="comms__adv" id="comms-adv" hidden>
-        <div class="comms__adv-sec comms__agents" id="comms-agents" hidden>
-          <span class="comms__lbl">{{ 'tool.comms.agent.heading' | t }}</span>
-          <button class="comms__btn comms__btn--ghost" id="comms-agents-copy" type="button">{{ 'tool.comms.agent.connect' | t }}</button>
-          <p class="comms__id-note" id="comms-agents-note">{{ 'tool.comms.agent.connect_note' | t }}</p>
+        <div class="comms__adv-sec comms__adv-sec--col" id="comms-computers" hidden>
+          <span class="comms__lbl">{{ 'tool.comms.cc.computers' | t }}</span>
+          <ul class="comms__devs" id="comms-computers-list"></ul>
         </div>
         <div class="comms__adv-sec comms__adv-sec--col" id="comms-devs" hidden>
           <span class="comms__lbl">{{ 'tool.comms.devices.title' | t }}</span>
@@ -177,6 +177,16 @@ unlockTool: true
           <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">{{ 'tool.comms.adv.attach_pack' | t }}</button>
           <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>{{ 'tool.comms.passkey.add' | t }}</button>
           <a class="comms__btn comms__btn--ghost" href="{{ locale.pathPrefix }}/about/">{{ 'tool.comms.adv.identity' | t }}</a>
+        </div>
+      </div>
+
+      <div class="comms__upgrade comms__cc" id="comms-cc" role="alert" hidden>
+        <span class="comms__upgrade-text" id="comms-cc-text"></span>
+        <span class="comms__cc-code" id="comms-cc-code" hidden></span>
+        <span class="comms__id-note" id="comms-cc-note" hidden></span>
+        <div class="comms__upgrade-actions">
+          <button class="comms__btn" id="comms-cc-approve" type="button" hidden>{{ 'tool.comms.cc.approve' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-cc-later" type="button">{{ 'tool.comms.invite.not_now' | t }}</button>
         </div>
       </div>
 
@@ -462,6 +472,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__adv{flex:none;display:flex;flex-direction:column;gap:var(--space-3);max-height:60%;overflow-y:auto;margin:0 var(--space-3) var(--space-2);padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
 .comms__adv-sec{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 .comms__adv-sec--col{flex-direction:column;align-items:stretch}
+.comms__cc-code{font-family:var(--font-mono);font-size:var(--text-lg);letter-spacing:.04em;color:var(--accent,#6ef3c5)}
 .comms__devs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--space-1)}
 .comms__dev{display:flex;align-items:center;gap:var(--space-2);min-height:36px}
 .comms__dev-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -834,11 +845,16 @@ import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
 import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink } from '/assets/js/comms/sign.js';
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
-import { bridgeKeyFromSecret, keysFromBridgeKey, bridgeCode, createBridgeClient, BRIDGE_KIND } from '/assets/js/comms/bridge.js';
-import { createAgentView, pairSection } from '/assets/js/comms/agent-view.js';
+import { keysFromBridgeKey, createBridgeClient, BRIDGE_KIND, HERE_TTL_MS } from '/assets/js/comms/bridge.js';
+import { createAgentView } from '/assets/js/comms/agent-view.js';
+import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer } from '/assets/js/comms/cc.js';
 import { ensureDeviceKeys } from '/assets/js/comms/devkey.js';
 import * as DEV from '/assets/js/comms/devices.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
+
+let ccLink = parseCcLink(window.location.hash);
+if (ccLink) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+if (ccLink && document.getElementById('comms-lock-cc')) document.getElementById('comms-lock-cc').hidden = false;
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -1934,89 +1950,192 @@ const MAX_SEND = 2 * 1024 * 1024 * 1024;
 let attach = null;
 let selfRoom = null;
 const myDevice = deviceInfo(T);
-const AGENTS_KEY = 'mentria.comms.agents_on';
 const AGENT_SESSIONS_KEY = 'mentria.comms.agent_sessions';
-try { if (new URLSearchParams(window.location.search).get('agents') === '1') localStorage.setItem(AGENTS_KEY, '1'); } catch (_) {}
-const agentsOn = () => { try { return localStorage.getItem(AGENTS_KEY) === '1'; } catch (_) { return false; } };
 const IOS_DEVICE = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-let bridge = null;
-let bridgeK = null;
-let bridgeResubscribe = null;
+const bridge = createMultiClient();
+const ccClients = new Map();
 let agentsSig = '';
 const knownAgents = () => { try { const v = JSON.parse(localStorage.getItem(AGENT_SESSIONS_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => x && typeof x.sid === 'string') : []; } catch (_) { return []; } };
 const agentList = () => {
-  if (!agentsOn()) return [];
-  const live = bridge ? bridge.sessions() : [];
-  const byId = new Map(knownAgents().map((a) => [a.sid, { sid: a.sid, name: a.name, online: false, busy: false, lastTs: a.lastTs || 0 }]));
-  for (const x of live) byId.set(x.sid, { sid: x.sid, name: x.name, online: x.online, busy: x.busy, lastTs: x.lastTs || 0 });
+  const live = liveComputers();
+  if (!live.length) return [];
+  const cids = new Set(live.map((r) => r.cid));
+  const byId = new Map(knownAgents().filter((a) => !a.cid || cids.has(a.cid)).map((a) => [a.sid, { sid: a.sid, name: a.name, cid: a.cid, online: false, busy: false, lastTs: a.lastTs || 0 }]));
+  for (const x of bridge.sessions()) byId.set(x.sid, { sid: x.sid, name: x.name, cid: x.cid, online: x.online, busy: x.busy, lastTs: x.lastTs || 0 });
   return Array.from(byId.values()).map((a) => Object.assign(a, { preview: a.online ? T.agent.running : T.agent.offline }));
 };
 const paintAgents = () => {
-  const box = document.getElementById('comms-agents');
-  if (box) {
-    const ps = pairSection({ on: agentsOn(), ready: !!bridgeK, phone: IOS_DEVICE || /Android/i.test(navigator.userAgent), T: T.agent });
-    box.hidden = ps.hidden;
-    document.getElementById('comms-agents-copy').textContent = ps.label;
-    document.getElementById('comms-agents-note').textContent = ps.note;
-  }
   const list = agentList();
-  if (bridge) {
-    const keep = list.map((a) => ({ sid: a.sid, name: a.name, lastTs: a.lastTs }));
+  if (ccClients.size) {
+    const keep = list.map((a) => ({ sid: a.sid, name: a.name, cid: a.cid, lastTs: a.lastTs }));
     try { localStorage.setItem(AGENT_SESSIONS_KEY, JSON.stringify(keep.slice(-20))); } catch (_) {}
   }
   const sig = JSON.stringify(list.map((a) => [a.sid, a.name, a.online, a.busy]));
   if (sig !== agentsSig) { agentsSig = sig; renderContacts(); }
+  paintComputers();
 };
 let agentView = null;
 const agentViewFor = () => agentView || (agentView = createAgentView({ els, T, client: bridge, nameOf: (sid) => (agentList().find((a) => a.sid === sid) || {}).name || '', onOpen: (sid, id, title) => agentViewFor().open(sid, id, title || T.agent.kind_subagent) }));
 const openAgent = async (sid) => {
-  if (!bridge) return;
+  if (!ccClients.size) return;
   if (aiView && aiView.isOpen()) aiView.close();
   await leaveRoom();
   setView('chat');
   agentViewFor().open(sid);
 };
-const startBridge = async () => {
-  if (bridge || !myId || !mySign || !agentsOn()) return;
-  let secret;
-  try { secret = secretCopy(); } catch (_) { return; }
-  bridgeK = await bridgeKeyFromSecret(secret);
-  try { secret.fill(0); } catch (_) {}
-  const keys = await keysFromBridgeKey(bridgeK);
-  const handlers = new Set();
-  const subId = 'br-' + Math.random().toString(36).slice(2);
-  let attached = null;
-  const onMsg = (e) => {
-    let m;
-    try { m = JSON.parse(e.data); } catch (_) { return; }
-    if (Array.isArray(m) && m[0] === 'EVENT' && m[1] === subId && m[2] && m[2].kind === BRIDGE_KIND) for (const fn of handlers) fn(m[2].content);
-  };
-  bridgeResubscribe = async () => {
-    const ws = await ensureSideSocket();
-    if (!ws) return;
-    if (attached !== ws) { ws.addEventListener('message', onMsg); attached = ws; }
-    ws.send(JSON.stringify(['REQ', subId, { kinds: [BRIDGE_KIND], '#x': [keys.topic], since: Math.floor(Date.now() / 1000) - 60 }]));
-  };
-  const transport = {
-    publish: async (content) => {
-      const ev = await createPersistentEvent(BRIDGE_KIND, keys.topic, content, []);
-      const ws = await ensureSideSocket();
-      if (ws) ws.send(ev);
-    },
-    onEvent: (fn) => { handlers.add(fn); }
-  };
-  bridge = createBridgeClient({ transport, keys, device: myDevice.name, sign: (sid, cmid, body) => signBody(mySign.signKey, mySign.spub, 'bridge:' + sid, cmid, body) });
-  bridge.on('here', paintAgents);
-  await bridgeResubscribe();
-  bridge.hello();
-  setInterval(() => { if (bridge && !document.hidden) bridge.hello(); }, 60000);
-  setInterval(paintAgents, 30000);
+const ccTopics = new Map();
+const ccSubId = 'cc-' + Math.random().toString(36).slice(2);
+let ccAttached = null;
+let ccResubTimer = null;
+const ccOnMsg = (e) => {
+  let m;
+  try { m = JSON.parse(e.data); } catch (_) { return; }
+  if (!Array.isArray(m) || m[0] !== 'EVENT' || m[1] !== ccSubId || !m[2] || m[2].kind !== BRIDGE_KIND || !Array.isArray(m[2].tags)) return;
+  const x = m[2].tags.find((t) => Array.isArray(t) && t[0] === 'x');
+  const fns = x && ccTopics.get(x[1]);
+  if (fns) for (const fn of Array.from(fns)) fn(m[2].content);
+};
+const ccResubscribe = async () => {
+  const ws = await ensureSideSocket();
+  if (!ws) return;
+  if (ccAttached !== ws) { ws.addEventListener('message', ccOnMsg); ccAttached = ws; }
+  if (!ccTopics.size) { ws.send(JSON.stringify(['CLOSE', ccSubId])); return; }
+  ws.send(JSON.stringify(['REQ', ccSubId, { kinds: [BRIDGE_KIND], '#x': Array.from(ccTopics.keys()), since: Math.floor(Date.now() / 1000) - 60 }]));
+};
+const ccSoon = () => { clearTimeout(ccResubTimer); ccResubTimer = setTimeout(() => { ccResubscribe().catch(() => {}); }, 30); };
+const ccWatch = (topic, fn) => {
+  if (!ccTopics.has(topic)) ccTopics.set(topic, new Set());
+  ccTopics.get(topic).add(fn);
+  ccSoon();
+  return () => { const set = ccTopics.get(topic); if (set) { set.delete(fn); if (!set.size) ccTopics.delete(topic); } ccSoon(); };
+};
+const ccPublish = async (topic, content) => {
+  const ev = await createPersistentEvent(BRIDGE_KIND, topic, content, []);
+  const ws = await ensureSideSocket();
+  if (ws) ws.send(ev);
+  return !!ws;
+};
+const ccHello = () => { const trust = devTrust(); return Object.assign({}, ringToken ? { ring: ringToken } : {}, trust && !trust.needsSign ? { list: trust } : {}); };
+const stopComputer = (cid) => {
+  const e = ccClients.get(cid);
+  if (e) { try { e.off(); } catch (_) {} }
+  ccClients.delete(cid);
+  bridge.remove(cid);
+};
+let ccStarting = null;
+const startComputerChannels = () => ccStarting || (ccStarting = (async () => {
+  if (!myDev) return;
+  const live = liveComputers();
+  const want = new Set(live.map((r) => r.cid));
+  for (const cid of Array.from(ccClients.keys())) if (!want.has(cid)) stopComputer(cid);
+  for (const rec of live) {
+    const cur = ccClients.get(rec.cid);
+    if (cur && cur.kver === rec.kver) continue;
+    if (cur) stopComputer(rec.cid);
+    const K = await unwrapChannelKey(rec, myDev);
+    if (!K) continue;
+    const keys = await keysFromBridgeKey(K);
+    const handlers = new Set();
+    const off = ccWatch(keys.topic, (c) => { for (const fn of handlers) fn(c); });
+    const client = createBridgeClient({
+      transport: { publish: (c) => ccPublish(keys.topic, c), onEvent: (fn) => { handlers.add(fn); } },
+      keys,
+      device: myDevice.name,
+      sign: (sid, cmid, body) => signBody(myDev.sign.signKey, myDev.sign.spub, 'bridge:' + sid, cmid, body),
+      host: { spub: rec.spub, room: 'cc:' + rec.cid },
+      hello: ccHello
+    });
+    const entry = { client, off, kver: rec.kver, seen: 0, name: rec.name, topic: keys.topic };
+    client.on('here', () => { entry.seen = Date.now(); paintAgents(); });
+    ccClients.set(rec.cid, entry);
+    bridge.add(rec.cid, client);
+    client.hello().catch(() => {});
+  }
+  paintAgents();
+})().catch(() => {}).finally(() => { ccStarting = null; }));
+setInterval(() => { if (ccClients.size && !document.hidden) bridge.hello().catch(() => {}); }, 60000);
+setInterval(paintAgents, 30000);
+const paintComputers = () => {
+  const sec = document.getElementById('comms-computers');
+  const ul = document.getElementById('comms-computers-list');
+  if (!sec || !ul) return;
+  const live = myDev ? liveComputers() : [];
+  sec.hidden = !live.length;
+  if (sec.hidden) return;
+  ul.replaceChildren(...live.map((rec) => {
+    const li = document.createElement('li');
+    li.className = 'comms__dev';
+    const name = document.createElement('span');
+    name.className = 'comms__dev-name';
+    name.textContent = rec.name || T.cc.computer;
+    const meta = document.createElement('span');
+    meta.className = 'comms__dev-meta';
+    const seen = (ccClients.get(rec.cid) || {}).seen || 0;
+    meta.textContent = seen && Date.now() - seen < HERE_TTL_MS ? T.cc.online : seen ? fmt(T.cc.last_seen, { when: new Date(seen).toLocaleTimeString(LANG, { hour: '2-digit', minute: '2-digit' }) }) : T.cc.not_seen;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'comms__btn comms__btn--ghost';
+    b.textContent = T.cc.disconnect;
+    b.addEventListener('click', () => disconnectOne(rec));
+    li.append(name, meta, b);
+    return li;
+  }));
+};
+const disconnectOne = async (rec) => {
+  const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.cc.disconnect_confirm, { name: rec.name || T.cc.computer }), { danger: true }) : Promise.resolve(false));
+  if (!ok) return;
+  const e = ccClients.get(rec.cid);
+  await disconnectComputer({ cid: rec.cid, client: e ? e.client : null, me: myDev });
+  stopComputer(rec.cid);
+  notice(fmt(T.cc.disconnected, { name: rec.name || T.cc.computer }));
   paintAgents();
 };
-document.getElementById('comms-agents-copy').addEventListener('click', async () => {
-  if (!bridgeK || !mySign) return;
-  try { await navigator.clipboard.writeText(bridgeCode({ k: bridgeK, spub: mySign.spub, sigFp: mySign.sigFp })); notice(T.agent.copied); } catch (_) { notice(T.agent.copy_failed); }
+let ccFlow = null;
+const showCc = ({ text = '', code = '', note = '', ask = false, done = false } = {}) => {
+  const bar = document.getElementById('comms-cc');
+  if (!bar) return;
+  bar.hidden = !text;
+  document.getElementById('comms-cc-text').textContent = text;
+  const c = document.getElementById('comms-cc-code');
+  c.hidden = !code;
+  c.textContent = code;
+  const n = document.getElementById('comms-cc-note');
+  n.hidden = !note;
+  n.textContent = note;
+  document.getElementById('comms-cc-approve').hidden = !ask;
+  document.getElementById('comms-cc-later').textContent = done ? T.cc.ok : T.invite.not_now;
+};
+const startCc = async () => {
+  const lockNote = document.getElementById('comms-lock-cc');
+  if (lockNote) lockNote.hidden = !ccLink;
+  if (!ccLink || !myDev) return;
+  const S = ccLink;
+  ccLink = null;
+  if (lockNote) lockNote.hidden = true;
+  if (ccFlow) ccFlow.cancel();
+  const trust = devTrust();
+  if (!trust || !DEV.trustedFps(trust).includes(myDev.sign.sigFp)) { showCc({ text: T.cc.not_trusted, done: true }); return; }
+  showCc({ text: T.cc.opening });
+  let offer = null;
+  const flow = acceptPairing({ S, me: myDev, entry: myDevEntry(), list: trust, ring: ringToken || '', transport: { publish: ccPublish, subscribe: ccWatch } });
+  ccFlow = flow;
+  const quiet = setTimeout(() => { if (ccFlow === flow && !offer) { flow.cancel(); showCc({ text: T.cc.expired, done: true }); } }, 20000);
+  flow.onOffer((o) => { offer = o; clearTimeout(quiet); showCc({ text: fmt(T.cc.connect_title, { name: o.name || T.cc.computer }), code: o.code, note: T.cc.check_note, ask: true }); });
+  flow.onConflict(() => { clearTimeout(quiet); flow.cancel(); showCc({ text: T.cc.conflict, done: true }); });
+  flow.onDenied(() => { showCc({ text: T.cc.denied, done: true }); });
+  flow.onReady((rec) => { showCc({ text: fmt(T.cc.connected, { name: rec.name || T.cc.computer }), done: true }); startComputerChannels(); });
+};
+document.getElementById('comms-cc-approve').addEventListener('click', async () => {
+  const flow = ccFlow;
+  if (!flow) return;
+  const code = document.getElementById('comms-cc-code').textContent;
+  try {
+    await flow.approve();
+    showCc({ text: fmt(T.cc.confirm, { code }), code });
+  } catch (_) { showCc({ text: T.cc.expired, done: true }); }
 });
+document.getElementById('comms-cc-later').addEventListener('click', () => { if (ccFlow && ccFlow.state() !== 'ready') ccFlow.cancel(); ccFlow = null; showCc({}); });
+window.addEventListener('mentria:write', (e) => { const d = e.detail || {}; if (myDev && d.ns === 'comms' && d.key === 'computers') startComputerChannels(); });
 const presence = new Presence();
 let myDev = null;
 let devAsk = null;
@@ -2133,6 +2252,8 @@ const removeDevice = async (d) => {
 const initDevices = async () => {
   myDev = await ensureDeviceKeys();
   await refreshDevices();
+  startComputerChannels();
+  startCc();
 };
 document.getElementById('comms-devjoin-add').addEventListener('click', async () => {
   const ask = devAsk;
@@ -4242,7 +4363,7 @@ const ensureSideSocket = () => {
       sideWs = ws;
       const isReconnect = sideOpens++ > 0;
       done(ws);
-      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); if (bridgeResubscribe) bridgeResubscribe().then(() => { if (agentView && agentView.isOpen()) agentView.resume(); }); }
+      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); if (ccTopics.size) ccResubscribe().then(() => { if (agentView && agentView.isOpen()) agentView.resume(); }); }
     });
     ws.addEventListener('error', () => { done(null); });
     ws.addEventListener('close', () => {
@@ -4842,7 +4963,6 @@ const initIdentity = async () => {
     try { mySign = await CID.ensureSigningKey(); } catch (_) { mySign = null; }
     if (mySign) { try { mySign.link = { spub: mySign.spub, s: await signLink(mySign.signKey, myId.publicJwk) }; } catch (_) { mySign.link = null; } }
     initDevices().catch(() => {});
-    startBridge().catch(() => {});
     if (els.idSig) { els.idSig.hidden = !mySign; els.idSig.textContent = mySign ? fmt(T.sign.my_key, { fp: mySign.sigFp }) : ''; }
     openHistory();
     try { await CID.migrateFingerprints(); } catch (_) {}
@@ -6390,6 +6510,8 @@ if (hasHash) {
   });
 }
 window.addEventListener('hashchange', () => {
+  const cc = parseCcLink(window.location.hash);
+  if (cc) { window.history.replaceState(null, '', window.location.pathname + window.location.search); ccLink = cc; startCc(); return; }
   const invite = parseInvite(window.location.hash);
   if (invite) { openInviteLink(invite); return; }
   const raw = parseHash(window.location.hash);

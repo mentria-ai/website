@@ -6037,6 +6037,28 @@
         "wants": "{tool} wants to run",
         "allow": "Allow",
         "deny": "Deny"
+      },
+      "cc": {
+        "computers": "Computers",
+        "computer": "your computer",
+        "connect_title": "Connect Claude Code on {name}?",
+        "check_note": "Check that the computer shows the same code.",
+        "approve": "Approve",
+        "confirm": "Now press Allow on the computer. It shows {code}.",
+        "opening": "Opening the link…",
+        "connected": "Claude Code on {name} is connected.",
+        "denied": "The computer refused the connection.",
+        "expired": "This link expired or was already used. Run /mentria on the computer for a new one.",
+        "conflict": "Someone else opened this link too, so it was stopped. Run /mentria on the computer for a new one.",
+        "unlock": "Unlock Comms to connect Claude Code.",
+        "not_trusted": "This device isn't on your device list yet. Add it from one of your other devices first.",
+        "online": "online",
+        "last_seen": "last seen {when}",
+        "not_seen": "not seen yet",
+        "disconnect": "Disconnect",
+        "disconnect_confirm": "Disconnect {name}? Its sessions stop showing here until you connect it again.",
+        "disconnected": "{name} disconnected.",
+        "ok": "OK"
       }
     },
     "scanner": {

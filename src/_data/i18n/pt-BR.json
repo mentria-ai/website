@@ -5906,7 +5906,17 @@
         "kind_android": "Android",
         "kind_windows": "PC com Windows",
         "kind_linux": "Linux",
-        "kind_device": "Dispositivo"
+        "kind_device": "Dispositivo",
+        "keys_note": "Cada dispositivo tem a própria chave. Se perder um, remova aqui e ele deixa de funcionar nos seus computadores conectados.",
+        "this_device": "este dispositivo",
+        "remove": "Remover",
+        "remove_confirm": "Remover {name}? Ele não poderá mais ler nem agir nos seus computadores conectados.",
+        "removed": "{name} removido.",
+        "add_ask": "Adicionar {name} aos seus dispositivos?",
+        "add": "Adicionar",
+        "added": "{name} foi adicionado aos seus dispositivos.",
+        "waiting": "Este dispositivo aguarda que outro dos seus dispositivos o adicione.",
+        "removed_here": "Este dispositivo foi removido dos seus dispositivos. Seus computadores conectados não o aceitam mais."
       },
       "ai": {
         "answering_for": "Respondendo para o seu {device}",

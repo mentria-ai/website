@@ -1,4 +1,7 @@
 import { joinRoom, selfId } from '/assets/vendor/trystero-nostr.js';
+import { mergeDeviceRecords, mergeInvites, mergeJoins } from '/assets/js/comms/devices.js';
+
+const RECORD_MERGES = { 'comms.devices': mergeDeviceRecords, 'comms.devinvite': mergeInvites, 'comms.devjoin': mergeJoins };
 
 const RELAY = 'wss://relay.mentria.ai';
 const TURN_CRED_URL = 'https://relay.mentria.ai/turn-cred';
@@ -770,6 +773,13 @@ const mergeV2 = async (msg, isBack) => {
       return;
     }
 
+    if (RECORD_MERGES[suffix]) {
+      const value = RECORD_MERGES[suffix](parseRaw(rawLocal), parseRaw(rawIn));
+      if (value == null || JSON.stringify(value) === String(rawLocal)) { keeps.push(suffix); summary.kept++; }
+      else unions.push({ suffix, ns, key, value });
+      return;
+    }
+
     const inWins = (inMtime != null) && (localMtime == null || inMtime > localMtime);
     if (inWins) {
       lwwReplace.push({ suffix, ns, key, raw: rawIn, mtime: inMtime });
@@ -1343,5 +1353,6 @@ const status = () => ({
 
 window.MentriaSync = {
   start, joinWithCode, joinWithIdentity, disconnect, on, status,
-  formatCode, normalizeCode, restoreRescue, rescueInfo
+  formatCode, normalizeCode, restoreRescue, rescueInfo,
+  applySnapshot: (msg) => mergeV2(msg, true)
 };

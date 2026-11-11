@@ -5906,7 +5906,17 @@
         "kind_android": "Android",
         "kind_windows": "Windows PC",
         "kind_linux": "Linux",
-        "kind_device": "Device"
+        "kind_device": "Device",
+        "keys_note": "Each device has its own key. Remove a lost one here and it stops working on your connected computers.",
+        "this_device": "this device",
+        "remove": "Remove",
+        "remove_confirm": "Remove {name}? It won't be able to read or act on your connected computers.",
+        "removed": "{name} removed.",
+        "add_ask": "Add {name} to your devices?",
+        "add": "Add",
+        "added": "{name} added to your devices.",
+        "waiting": "This device waits for one of your other devices to add it.",
+        "removed_here": "This device was removed from your devices. Your connected computers no longer accept it."
       },
       "ai": {
         "answering_for": "Answering for your {device}",

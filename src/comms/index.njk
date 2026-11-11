@@ -137,6 +137,11 @@ unlockTool: true
           <button class="comms__btn comms__btn--ghost" id="comms-agents-copy" type="button">{{ 'tool.comms.agent.connect' | t }}</button>
           <p class="comms__id-note" id="comms-agents-note">{{ 'tool.comms.agent.connect_note' | t }}</p>
         </div>
+        <div class="comms__adv-sec comms__adv-sec--col" id="comms-devs" hidden>
+          <span class="comms__lbl">{{ 'tool.comms.devices.title' | t }}</span>
+          <ul class="comms__devs" id="comms-devs-list"></ul>
+          <p class="comms__id-note" id="comms-devs-note">{{ 'tool.comms.devices.keys_note' | t }}</p>
+        </div>
         <div class="comms__adv-sec">
           <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
           <div class="comms__room">
@@ -172,6 +177,14 @@ unlockTool: true
           <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">{{ 'tool.comms.adv.attach_pack' | t }}</button>
           <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>{{ 'tool.comms.passkey.add' | t }}</button>
           <a class="comms__btn comms__btn--ghost" href="{{ locale.pathPrefix }}/about/">{{ 'tool.comms.adv.identity' | t }}</a>
+        </div>
+      </div>
+
+      <div class="comms__upgrade" id="comms-devjoin" role="alert" hidden>
+        <span class="comms__upgrade-text" id="comms-devjoin-text"></span>
+        <div class="comms__upgrade-actions">
+          <button class="comms__btn" id="comms-devjoin-add" type="button">{{ 'tool.comms.devices.add' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-devjoin-later" type="button">{{ 'tool.comms.invite.not_now' | t }}</button>
         </div>
       </div>
 
@@ -449,6 +462,10 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__adv{flex:none;display:flex;flex-direction:column;gap:var(--space-3);max-height:60%;overflow-y:auto;margin:0 var(--space-3) var(--space-2);padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
 .comms__adv-sec{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 .comms__adv-sec--col{flex-direction:column;align-items:stretch}
+.comms__devs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--space-1)}
+.comms__dev{display:flex;align-items:center;gap:var(--space-2);min-height:36px}
+.comms__dev-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comms__dev-meta{color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs);white-space:nowrap}
 .comms__adv-row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2)}
 .comms__room,.comms__room-new{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 .comms__room{flex:1;min-width:12rem}
@@ -819,6 +836,8 @@ import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelop
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
 import { bridgeKeyFromSecret, keysFromBridgeKey, bridgeCode, createBridgeClient, BRIDGE_KIND } from '/assets/js/comms/bridge.js';
 import { createAgentView, pairSection } from '/assets/js/comms/agent-view.js';
+import { ensureDeviceKeys } from '/assets/js/comms/devkey.js';
+import * as DEV from '/assets/js/comms/devices.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
@@ -1999,6 +2018,137 @@ document.getElementById('comms-agents-copy').addEventListener('click', async () 
   try { await navigator.clipboard.writeText(bridgeCode({ k: bridgeK, spub: mySign.spub, sigFp: mySign.sigFp })); notice(T.agent.copied); } catch (_) { notice(T.agent.copy_failed); }
 });
 const presence = new Presence();
+let myDev = null;
+let devAsk = null;
+const devHidden = new Set();
+let devBusy = null;
+let devAgain = false;
+const devGet = (k) => { try { return MentriaStore.get('comms', k); } catch (_) { return null; } };
+const devSet = (k, v) => { try { return MentriaStore.set('comms', k, v); } catch (_) { return false; } };
+const devTrust = () => devGet('devtrust');
+const devKind = (k) => (T.devices && T.devices['kind_' + k]) || '';
+const devLabel = (e) => { const k = devKind(e && e.kind); const n = (e && e.name) || ''; return k && n && k !== n ? n + ' (' + k + ')' : (n || k || (e && e.sigFp) || ''); };
+const myDevEntry = () => ({ sigFp: myDev.sign.sigFp, spub: myDev.sign.spub, dh: myDev.dh.pub, name: myDevice.name, kind: myDevice.kind, added: Date.now() });
+const paintDevices = (list) => {
+  const sec = document.getElementById('comms-devs');
+  const ul = document.getElementById('comms-devs-list');
+  const note = document.getElementById('comms-devs-note');
+  if (!sec || !ul) return;
+  sec.hidden = !list || !myDev;
+  if (sec.hidden) return;
+  const fp = myDev.sign.sigFp;
+  const trusted = DEV.trustedFps(list);
+  const mine = trusted.includes(fp);
+  ul.replaceChildren(...list.devices.filter((d) => trusted.includes(d.sigFp)).map((d) => {
+    const li = document.createElement('li');
+    li.className = 'comms__dev';
+    const name = document.createElement('span');
+    name.className = 'comms__dev-name';
+    name.textContent = devLabel(d);
+    li.append(name);
+    if (d.sigFp === fp) {
+      const meta = document.createElement('span');
+      meta.className = 'comms__dev-meta';
+      meta.textContent = T.devices.this_device;
+      li.append(meta);
+    } else if (mine) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'comms__btn comms__btn--ghost';
+      b.textContent = T.devices.remove;
+      b.addEventListener('click', () => removeDevice(d));
+      li.append(b);
+    }
+    return li;
+  }));
+  note.textContent = (list.removed || []).includes(fp) ? T.devices.removed_here : mine ? T.devices.keys_note : T.devices.waiting;
+  const bar = document.getElementById('comms-devjoin');
+  const ask = mine && devAsk && !devHidden.has(devAsk.sigFp) ? devAsk : null;
+  bar.hidden = !ask;
+  if (ask) document.getElementById('comms-devjoin-text').textContent = fmt(T.devices.add_ask, { name: devLabel(ask) });
+};
+const refreshDevicesOnce = async () => {
+  if (!myDev) return;
+  const fp = myDev.sign.sigFp;
+  let trust = devTrust();
+  const shared = devGet('devices');
+  if (!trust && !shared) {
+    trust = await DEV.makeGenesis(myDev, myDevEntry());
+    devSet('devtrust', trust);
+    devSet('devices', trust);
+  } else if (shared && JSON.stringify(shared) !== JSON.stringify(trust)) {
+    if (shared.needsSign && trust && DEV.trustedFps(trust).includes(fp)) {
+      const r = await DEV.foldUnion(trust, shared, myDev);
+      if (r.list) { trust = r.list; devSet('devtrust', trust); devSet('devices', trust); }
+      for (const a of r.asks || []) if (!devAsk && !devHidden.has(a.sigFp)) devAsk = a;
+    } else if (await DEV.acceptList(trust, shared, fp)) {
+      trust = shared;
+      devSet('devtrust', trust);
+    } else if (!trust) {
+      trust = await DEV.makeGenesis(myDev, myDevEntry());
+      devSet('devtrust', trust);
+    } else if (!shared.needsSign && shared.ver <= trust.ver) {
+      devSet('devices', trust);
+    }
+  }
+  const joins = devGet('devjoin') || {};
+  const family = shared && !shared.needsSign && (await DEV.verifyList(shared)) ? shared : trust;
+  if (!DEV.trustedFps(family).includes(fp) && !(family.removed || []).includes(fp) && !joins[fp]) {
+    const invite = devGet('devinvite');
+    devSet('devjoin', DEV.mergeJoins(joins, { [fp]: await DEV.makeJoin(myDevEntry(), invite && invite.nonce, myDev) }));
+  }
+  if (DEV.trustedFps(trust).includes(fp)) {
+    const invite = devGet('devinvite');
+    let changed = false;
+    for (const j of Object.values(joins)) {
+      if (!j || !j.entry || DEV.trustedFps(trust).includes(j.entry.sigFp)) continue;
+      const r = await DEV.handleJoin(trust, j, invite, myDev);
+      if (r.list) { trust = r.list; changed = true; notice(fmt(T.devices.added, { name: devLabel(j.entry) })); }
+      else if (r.ask && !devAsk && !devHidden.has(r.ask.sigFp)) devAsk = r.ask;
+    }
+    if (changed) { devSet('devtrust', trust); devSet('devices', trust); }
+    const done = Object.keys(joins).filter((k) => DEV.trustedFps(trust).includes(k) || (trust.removed || []).includes(k));
+    if (done.length) { const left = Object.assign({}, joins); done.forEach((k) => delete left[k]); if (Object.keys(left).length) devSet('devjoin', left); else MentriaStore.remove('comms', 'devjoin'); }
+    if (devAsk && (DEV.trustedFps(trust).includes(devAsk.sigFp) || (trust.removed || []).includes(devAsk.sigFp))) devAsk = null;
+  }
+  paintDevices(trust);
+};
+const refreshDevices = () => {
+  if (devBusy) { devAgain = true; return devBusy; }
+  devBusy = (async () => { do { devAgain = false; await refreshDevicesOnce(); } while (devAgain); })().catch(() => {}).finally(() => { devBusy = null; });
+  return devBusy;
+};
+const removeDevice = async (d) => {
+  const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.devices.remove_confirm, { name: devLabel(d) }), { danger: true }) : Promise.resolve(false));
+  if (!ok) return;
+  await refreshDevices();
+  const trust = devTrust();
+  if (!trust) return;
+  const next = await DEV.withoutDevice(trust, myDev, d.sigFp);
+  devSet('devtrust', next);
+  devSet('devices', next);
+  notice(fmt(T.devices.removed, { name: devLabel(d) }));
+  paintDevices(next);
+};
+const initDevices = async () => {
+  myDev = await ensureDeviceKeys();
+  await refreshDevices();
+};
+document.getElementById('comms-devjoin-add').addEventListener('click', async () => {
+  const ask = devAsk;
+  if (!ask) return;
+  devAsk = null;
+  const trust = devTrust();
+  try {
+    const next = await DEV.withDevice(trust, myDev, ask);
+    devSet('devtrust', next);
+    devSet('devices', next);
+    notice(fmt(T.devices.added, { name: devLabel(ask) }));
+  } catch (_) {}
+  refreshDevices();
+});
+document.getElementById('comms-devjoin-later').addEventListener('click', () => { if (devAsk) devHidden.add(devAsk.sigFp); devAsk = null; paintDevices(devTrust()); });
+window.addEventListener('mentria:write', (e) => { const d = e.detail || {}; if (myDev && d.remote && d.ns === 'comms' && (d.key === 'devices' || d.key === 'devjoin' || d.key === 'devinvite')) refreshDevices(); });
 const AI_HOSTING = myDevice.kind !== 'iphone' && myDevice.kind !== 'ipad';
 const aiLocal = AI_HOSTING ? createLocalEngine() : null;
 let aiBar = null;
@@ -4691,6 +4841,7 @@ const initIdentity = async () => {
     myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
     try { mySign = await CID.ensureSigningKey(); } catch (_) { mySign = null; }
     if (mySign) { try { mySign.link = { spub: mySign.spub, s: await signLink(mySign.signKey, myId.publicJwk) }; } catch (_) { mySign.link = null; } }
+    initDevices().catch(() => {});
     startBridge().catch(() => {});
     if (els.idSig) { els.idSig.hidden = !mySign; els.idSig.textContent = mySign ? fmt(T.sign.my_key, { fp: mySign.sigFp }) : ''; }
     openHistory();

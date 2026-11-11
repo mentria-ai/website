@@ -5906,7 +5906,17 @@
         "kind_android": "Android",
         "kind_windows": "Windows PC",
         "kind_linux": "Linux",
-        "kind_device": "デバイス"
+        "kind_device": "デバイス",
+        "keys_note": "デバイスごとに専用の鍵があります。なくしたデバイスはここで外すと、接続中のコンピューターで使えなくなります。",
+        "this_device": "このデバイス",
+        "remove": "外す",
+        "remove_confirm": "{name} を外しますか？接続中のコンピューターでの閲覧や操作ができなくなります。",
+        "removed": "{name} を外しました。",
+        "add_ask": "{name} をあなたのデバイスに追加しますか？",
+        "add": "追加",
+        "added": "{name} をあなたのデバイスに追加しました。",
+        "waiting": "このデバイスは、ほかのデバイスに追加されるのを待っています。",
+        "removed_here": "このデバイスはあなたのデバイスから外されました。接続中のコンピューターはもう受け付けません。"
       },
       "ai": {
         "answering_for": "{device}のために回答しています",

@@ -123,16 +123,19 @@ const PAGE_TESTS = async () => {
     window.mentriaConfirm = async () => { asked++; return false; };
     try {
       await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.devices': JSON.stringify(theirs) } }, meta: { 'comms.devices': Date.now() + 1000 } });
+      const got = MentriaStore.get('comms', 'devices');
+      eq(got.ver, 2);
+      ok(got.sg && got.sg.s);
+      eq(got.needsSign, undefined);
+      const newer = await DV.withDevice(got, A.me, (got.devices.some((d) => d.sigFp === B.entry.sigFp) ? C : B).entry);
+      MentriaStore.set('comms', 'devices', newer);
+      await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.devices': JSON.stringify(mine) } }, meta: { 'comms.devices': Date.now() + 3000 } });
+      eq(MentriaStore.get('comms', 'devices').ver, newer.ver);
+      const forged = Object.assign({}, newer, { ver: 99, needsSign: true });
+      delete forged.sg;
+      await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.devices': JSON.stringify(forged) } }, meta: { 'comms.devices': Date.now() + 4000 } });
+      eq(MentriaStore.get('comms', 'devices').ver, newer.ver);
     } finally { window.mentriaConfirm = real; }
-    eq(asked, 0);
-    const got = MentriaStore.get('comms', 'devices');
-    eq(got.needsSign, true);
-    eq(got.devices.length, 3);
-    const newer = await DV.resign(got, A.me);
-    await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.devices': JSON.stringify(mine) } }, meta: { 'comms.devices': Date.now() + 2000 } });
-    MentriaStore.set('comms', 'devices', newer);
-    await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.devices': JSON.stringify(mine) } }, meta: { 'comms.devices': Date.now() + 3000 } });
-    eq(MentriaStore.get('comms', 'devices').ver, newer.ver);
     eq(asked, 0);
   });
   test('sync: comms.devkey never leaves the device', async () => {

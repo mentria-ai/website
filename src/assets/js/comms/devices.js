@@ -2,7 +2,8 @@ import { signBody, verifyBody, sigFingerprint, validSpub } from '/assets/js/comm
 
 export const MAX_DEVICES = 32;
 const MAX_REMOVED = 256;
-const INVITE_MS = 24 * 3600 * 1000;
+const INVITE_MS = 15 * 60 * 1000;
+export const MAX_JUMP = 64;
 const JOIN_KEEP_MS = 7 * 24 * 3600 * 1000;
 const MAX_JOINS = 16;
 
@@ -23,7 +24,7 @@ const okEntry = (e) => isObj(e) && typeof e.sigFp === 'string' && validSpub(e.sp
 
 const order = (devices) => devices.slice().sort((a, b) => (a.added - b.added) || (a.sigFp < b.sigFp ? -1 : a.sigFp > b.sigFp ? 1 : 0));
 
-const signList = (me, ver, devices, removed) => {
+export const signList = (me, ver, devices, removed) => {
   const body = { v: 1, kind: 'mentria-devices', ver, ts: Date.now(), devices: order(devices), removed: Array.from(new Set(removed)).slice(-MAX_REMOVED), by: me.sign.sigFp };
   return signBody(me.sign.signKey, me.sign.spub, 'devices', 'v' + ver, body);
 };
@@ -56,11 +57,6 @@ export const withoutDevice = async (list, me, sigFp) => {
   return signList(me, list.ver + 1, list.devices.filter((d) => d.sigFp !== sigFp), (list.removed || []).concat([sigFp]));
 };
 
-export const resign = async (list, me) => {
-  assertTrusted(list, me);
-  return signList(me, list.ver + 1, list.devices, list.removed || []);
-};
-
 export const verifyList = async (list) => {
   try {
     if (!isObj(list) || list.v !== 1 || list.kind !== 'mentria-devices' || !Number.isInteger(list.ver) || list.ver < 1) return false;
@@ -79,29 +75,18 @@ export const verifyList = async (list) => {
   } catch (_) { return false; }
 };
 
-const bodyKey = (l) => JSON.stringify([order(l.devices || []).map((d) => d.sigFp), Array.from(new Set(l.removed || [])).sort()]);
+const signed = (x) => isObj(x) && Number.isInteger(x.ver) && Array.isArray(x.devices) && !x.needsSign && isObj(x.sg) && typeof x.sg.s === 'string';
 
 export const mergeDeviceRecords = (a, b) => {
-  const okA = isObj(a) && Number.isInteger(a.ver) && Array.isArray(a.devices);
-  const okB = isObj(b) && Number.isInteger(b.ver) && Array.isArray(b.devices);
-  if (!okA) return okB ? b : (a || b || null);
-  if (!okB) return a;
+  if (!signed(a)) return signed(b) ? b : (a || b || null);
+  if (!signed(b)) return a;
   if (a.ver !== b.ver) return a.ver > b.ver ? a : b;
-  if (!a.needsSign && !b.needsSign && bodyKey(a) === bodyKey(b)) return ((a.sg && a.sg.s) || '') <= ((b.sg && b.sg.s) || '') ? a : b;
-  const removed = Array.from(new Set([].concat(a.removed || [], b.removed || []))).sort();
-  const gone = new Set(removed);
-  const byFp = new Map();
-  for (const d of [].concat(a.devices, b.devices)) {
-    if (!okEntry(d) || gone.has(d.sigFp)) continue;
-    const had = byFp.get(d.sigFp);
-    if (!had || (Number(d.added) || 0) < had.added) byFp.set(d.sigFp, clean(d));
-  }
-  return { v: 1, kind: 'mentria-devices', ver: a.ver, ts: Math.max(Number(a.ts) || 0, Number(b.ts) || 0), devices: order(Array.from(byFp.values())), removed, by: a.by <= b.by ? a.by : b.by, needsSign: true };
+  return a.sg.s <= b.sg.s ? a : b;
 };
 
-export const makeInvite = async (me) => {
+export const makeInvite = async (me, { ttlMs = INVITE_MS } = {}) => {
   const nonce = b64uEnc(crypto.getRandomValues(new Uint8Array(16)));
-  return signBody(me.sign.signKey, me.sign.spub, 'devinvite', nonce, { v: 1, nonce, exp: Date.now() + INVITE_MS, by: me.sign.sigFp });
+  return signBody(me.sign.signKey, me.sign.spub, 'devinvite', nonce, { v: 1, nonce, exp: Date.now() + ttlMs, by: me.sign.sigFp });
 };
 
 export const mergeInvites = (a, b) => {
@@ -130,7 +115,7 @@ export const mergeJoins = (a, b, now = Date.now()) => {
 };
 
 const inviteOk = async (list, invite, nonce) => {
-  if (!isObj(invite) || !nonce || invite.nonce !== nonce || !(invite.exp > Date.now()) || invite.exp - Date.now() > INVITE_MS + 60000) return false;
+  if (!isObj(invite) || !nonce || invite.nonce !== nonce || !(invite.exp > Date.now()) || invite.exp - Date.now() > INVITE_MS + 5000) return false;
   if (!trustedFps(list).includes(invite.by)) return false;
   const signer = list.devices.find((d) => d.sigFp === invite.by);
   const v = await verifyBody(invite, 'devinvite', invite.nonce);
@@ -144,27 +129,38 @@ export const handleJoin = async (list, join, invite, me) => {
     const v = await verifyBody(join, 'devjoin', entry.sigFp);
     if (!v.ok || !samePub(v.spub, entry.spub) || v.sigFp !== entry.sigFp) return {};
     if ((list.removed || []).includes(entry.sigFp) || list.devices.some((d) => d.sigFp === entry.sigFp)) return {};
-    if (await inviteOk(list, invite, join.nonce)) return { list: await withDevice(list, me, entry) };
+    if (await inviteOk(list, invite, join.nonce)) return { list: await withDevice(list, me, entry), consumed: true };
     return { ask: clean(entry) };
   } catch (_) { return {}; }
 };
 
-export const acceptList = async (current, candidate, myFp) => {
-  if (!(await verifyList(candidate))) return false;
-  if (!isObj(current)) return true;
-  if (candidate.ver <= current.ver) return false;
-  const trusted = trustedFps(current);
-  if (trusted.includes(candidate.by)) return true;
-  return trusted.length === 1 && trusted[0] === myFp && trustedFps(candidate).includes(myFp);
+const keepsRemovals = (current, candidate) => {
+  const was = new Set(current.removed || []);
+  for (const fp of was) if (!(candidate.removed || []).includes(fp)) return false;
+  return !candidate.devices.some((d) => was.has(d.sigFp));
 };
 
-export const foldUnion = async (current, union, me) => {
-  assertTrusted(current, me);
-  const removed = new Set([].concat(current.removed || [], (isObj(union) && Array.isArray(union.removed)) ? union.removed : []));
-  if (removed.has(me.sign.sigFp)) return { asks: [], removedSelf: true };
-  const known = new Set(current.devices.map((d) => d.sigFp));
-  const asks = ((isObj(union) && Array.isArray(union.devices)) ? union.devices : []).filter((d) => okEntry(d) && !known.has(d.sigFp) && !removed.has(d.sigFp)).map(clean);
-  const ver = Math.max(current.ver, (isObj(union) && Number.isInteger(union.ver)) ? union.ver : 0) + 1;
-  const list = await signList(me, ver, current.devices.filter((d) => !removed.has(d.sigFp)), Array.from(removed));
-  return { list, asks };
+export const acceptList = async (current, candidate) => {
+  if (!isObj(current) || !(await verifyList(candidate))) return false;
+  if (candidate.ver <= current.ver || candidate.ver > current.ver + MAX_JUMP) return false;
+  if (!trustedFps(current).includes(candidate.by)) return false;
+  return keepsRemovals(current, candidate);
+};
+
+export const foldLists = async (current, other, me) => {
+  if (!isObj(current) || !trustedFps(current).includes(me.sign.sigFp)) return null;
+  if (!(await verifyList(other)) || !trustedFps(current).includes(other.by)) return null;
+  if (other.ver > current.ver + MAX_JUMP) return null;
+  const removed = new Set([].concat(current.removed || [], other.removed || []));
+  if (removed.has(me.sign.sigFp)) return null;
+  const byFp = new Map();
+  for (const d of [].concat(current.devices, other.devices)) if (!removed.has(d.sigFp) && !byFp.has(d.sigFp)) byFp.set(d.sigFp, clean(d));
+  const list = await signList(me, Math.max(current.ver, other.ver) + 1, Array.from(byFp.values()), Array.from(removed));
+  return { list, removed: current.devices.filter((d) => removed.has(d.sigFp)).map(clean) };
+};
+
+export const canAdopt = async (current, candidate, myFp) => {
+  if (!isObj(current) || current.devices.length !== 1 || current.devices[0].sigFp !== myFp || (current.removed || []).length) return null;
+  if (!(await verifyList(candidate)) || candidate.by === myFp || !trustedFps(candidate).includes(myFp)) return null;
+  return clean(candidate.devices.find((d) => d.sigFp === candidate.by));
 };

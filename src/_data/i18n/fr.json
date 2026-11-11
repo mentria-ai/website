@@ -5916,7 +5916,11 @@
         "add": "Ajouter",
         "added": "{name} a été ajouté à vos appareils.",
         "waiting": "Cet appareil attend qu'un de vos autres appareils l'ajoute.",
-        "removed_here": "Cet appareil a été retiré de vos appareils. Vos ordinateurs connectés ne l'acceptent plus."
+        "removed_here": "Cet appareil a été retiré de vos appareils. Vos ordinateurs connectés ne l'acceptent plus.",
+        "adopt_ask": "{name} ({fp}) a ajouté cet appareil à vos appareils. Utiliser cette liste ici ? N'acceptez que si vous venez d'ajouter cet appareil là-bas.",
+        "adopt": "Utiliser",
+        "adopted": "Cet appareil utilise maintenant votre liste d'appareils.",
+        "removed_elsewhere": "Retirés de vos appareils depuis un autre appareil : {names}."
       },
       "ai": {
         "answering_for": "Réponse en cours pour votre {device}",

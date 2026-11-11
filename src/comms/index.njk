@@ -2149,6 +2149,7 @@ window.addEventListener('mentria:write', (e) => { const d = e.detail || {}; if (
 const presence = new Presence();
 let myDev = null;
 let devAsk = null;
+let devAdopt = null;
 const devHidden = new Set();
 let devBusy = null;
 let devAgain = false;
@@ -2193,36 +2194,52 @@ const paintDevices = (list) => {
   note.textContent = (list.removed || []).includes(fp) ? T.devices.removed_here : mine ? T.devices.keys_note : T.devices.waiting;
   const bar = document.getElementById('comms-devjoin');
   const ask = mine && devAsk && !devHidden.has(devAsk.sigFp) ? devAsk : null;
-  bar.hidden = !ask;
-  if (ask) document.getElementById('comms-devjoin-text').textContent = fmt(T.devices.add_ask, { name: devLabel(ask) });
+  bar.hidden = !ask && !devAdopt;
+  if (devAdopt) {
+    document.getElementById('comms-devjoin-text').textContent = fmt(T.devices.adopt_ask, { name: devLabel(devAdopt.signer), fp: devAdopt.signer.sigFp });
+    document.getElementById('comms-devjoin-add').textContent = T.devices.adopt;
+  } else if (ask) {
+    document.getElementById('comms-devjoin-text').textContent = fmt(T.devices.add_ask, { name: devLabel(ask) + ' · ' + ask.sigFp });
+    document.getElementById('comms-devjoin-add').textContent = T.devices.add;
+  }
 };
 const refreshDevicesOnce = async () => {
   if (!myDev) return;
   const fp = myDev.sign.sigFp;
   let trust = devTrust();
   const shared = devGet('devices');
-  if (!trust && !shared) {
+  if (!trust) {
     trust = await DEV.makeGenesis(myDev, myDevEntry());
     devSet('devtrust', trust);
-    devSet('devices', trust);
-  } else if (shared && JSON.stringify(shared) !== JSON.stringify(trust)) {
-    if (shared.needsSign && trust && DEV.trustedFps(trust).includes(fp)) {
-      const r = await DEV.foldUnion(trust, shared, myDev);
-      if (r.list) { trust = r.list; devSet('devtrust', trust); devSet('devices', trust); }
-      for (const a of r.asks || []) if (!devAsk && !devHidden.has(a.sigFp)) devAsk = a;
-    } else if (await DEV.acceptList(trust, shared, fp)) {
+    if (!shared) devSet('devices', trust);
+  }
+  let gone = [];
+  devAdopt = null;
+  if (shared && JSON.stringify(shared) !== JSON.stringify(trust)) {
+    if (await DEV.acceptList(trust, shared)) {
+      const keep = DEV.trustedFps(shared);
+      gone = trust.devices.filter((d) => !keep.includes(d.sigFp) && d.sigFp !== fp);
       trust = shared;
       devSet('devtrust', trust);
       bridge.hello().catch(() => {});
-    } else if (!trust) {
-      trust = await DEV.makeGenesis(myDev, myDevEntry());
-      devSet('devtrust', trust);
-    } else if (!shared.needsSign && shared.ver <= trust.ver) {
-      devSet('devices', trust);
+    } else {
+      const folded = shared.ver <= trust.ver ? await DEV.foldLists(trust, shared, myDev) : null;
+      if (folded) {
+        gone = folded.removed;
+        trust = folded.list;
+        devSet('devtrust', trust);
+        devSet('devices', trust);
+        bridge.hello().catch(() => {});
+      } else {
+        const signer = await DEV.canAdopt(trust, shared, fp);
+        if (signer && !devHidden.has('adopt:' + shared.by + ':' + shared.ver)) devAdopt = { list: shared, signer };
+        else if (!signer && (shared.ver <= trust.ver || !(await DEV.verifyList(shared)))) devSet('devices', trust);
+      }
     }
   }
+  if (gone.length) notice(fmt(T.devices.removed_elsewhere, { names: gone.map(devLabel).join(', ') }));
   const joins = devGet('devjoin') || {};
-  const family = shared && !shared.needsSign && (await DEV.verifyList(shared)) ? shared : trust;
+  const family = shared && (await DEV.verifyList(shared)) ? shared : trust;
   if (!DEV.trustedFps(family).includes(fp) && !(family.removed || []).includes(fp) && !joins[fp]) {
     const invite = devGet('devinvite');
     devSet('devjoin', DEV.mergeJoins(joins, { [fp]: await DEV.makeJoin(myDevEntry(), invite && invite.nonce, myDev) }));
@@ -2233,7 +2250,7 @@ const refreshDevicesOnce = async () => {
     for (const j of Object.values(joins)) {
       if (!j || !j.entry || DEV.trustedFps(trust).includes(j.entry.sigFp)) continue;
       const r = await DEV.handleJoin(trust, j, invite, myDev);
-      if (r.list) { trust = r.list; changed = true; notice(fmt(T.devices.added, { name: devLabel(j.entry) })); }
+      if (r.list) { trust = r.list; changed = true; notice(fmt(T.devices.added, { name: devLabel(j.entry) })); if (r.consumed) MentriaStore.remove('comms', 'devinvite'); }
       else if (r.ask && !devAsk && !devHidden.has(r.ask.sigFp)) devAsk = r.ask;
     }
     if (changed) { devSet('devtrust', trust); devSet('devices', trust); bridge.hello().catch(() => {}); }
@@ -2268,6 +2285,13 @@ const initDevices = async () => {
   startCc();
 };
 document.getElementById('comms-devjoin-add').addEventListener('click', async () => {
+  if (devAdopt) {
+    const a = devAdopt;
+    devAdopt = null;
+    if (await DEV.canAdopt(devTrust(), a.list, myDev.sign.sigFp)) { devSet('devtrust', a.list); notice(T.devices.adopted); bridge.hello().catch(() => {}); }
+    refreshDevices();
+    return;
+  }
   const ask = devAsk;
   if (!ask) return;
   devAsk = null;
@@ -2281,7 +2305,7 @@ document.getElementById('comms-devjoin-add').addEventListener('click', async () 
   } catch (_) {}
   refreshDevices();
 });
-document.getElementById('comms-devjoin-later').addEventListener('click', () => { if (devAsk) devHidden.add(devAsk.sigFp); devAsk = null; paintDevices(devTrust()); });
+document.getElementById('comms-devjoin-later').addEventListener('click', () => { if (devAdopt) devHidden.add('adopt:' + devAdopt.list.by + ':' + devAdopt.list.ver); else if (devAsk) devHidden.add(devAsk.sigFp); devAdopt = null; devAsk = null; paintDevices(devTrust()); });
 window.addEventListener('mentria:write', (e) => { const d = e.detail || {}; if (myDev && d.remote && d.ns === 'comms' && (d.key === 'devices' || d.key === 'devjoin' || d.key === 'devinvite')) refreshDevices(); });
 const AI_HOSTING = myDevice.kind !== 'iphone' && myDevice.kind !== 'ipad';
 const aiLocal = AI_HOSTING ? createLocalEngine() : null;

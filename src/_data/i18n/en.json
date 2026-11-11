@@ -5916,7 +5916,11 @@
         "add": "Add",
         "added": "{name} added to your devices.",
         "waiting": "This device waits for one of your other devices to add it.",
-        "removed_here": "This device was removed from your devices. Your connected computers no longer accept it."
+        "removed_here": "This device was removed from your devices. Your connected computers no longer accept it.",
+        "adopt_ask": "{name} ({fp}) added this device to your devices. Use that device list here? Only accept if you just added this device there.",
+        "adopt": "Use",
+        "adopted": "This device now uses your device list.",
+        "removed_elsewhere": "Removed from your devices on another device: {names}."
       },
       "ai": {
         "answering_for": "Answering for your {device}",

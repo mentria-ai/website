@@ -88,6 +88,7 @@ const pairOnce = async ({ offerEveryMs = 40, compNow } = {}) => {
   const { A, B, list } = await family();
   const comp = computer();
   const p = P.startPairing({ computer: comp, publish: bus.publish, stream: bus.stream, site: 'https://mentria.ai', offerEveryMs, now: compNow });
+  p.__computer = comp;
   useDevice(A);
   const S = CCM.parseCcLink('#' + p.link.split('#')[1]);
   const phone = CCM.acceptPairing({ S, me: A.me, entry: A.entry, list, ring: 'ringA', transport: bus.transport });
@@ -294,6 +295,10 @@ check('cc: the combined client routes each session to its computer', async () =>
   A.emit('here', { x: 3 });
   deepEq(heard, [1, 2]);
   eq(await multi.say('a1', 'gone').catch(() => 'refused'), 'refused');
+  const before = B.calls.length;
+  await multi.hello('new-sid');
+  await multi.open('new-sid', 0);
+  deepEq(B.calls.slice(before), [['hello', 'new-sid'], ['open', 'new-sid']]);
 }, false);
 check('cc: Disconnect sends a signed revoke and hides the computer', async () => {
   const D = await siteDevice('iPhone', 'iphone');
@@ -335,6 +340,33 @@ check('cc: hello carries the ring token only when alerts are on', async () => {
   deepEq(CCM.helloFields({ ring: null, list }), { list });
   deepEq(CCM.helloFields({ ring: '', list: Object.assign({ needsSign: true }, list) }), {});
 }, false);
+
+check('cc: the phone follows a rekey without the owner noticing', async () => {
+  const { A, B, p, phone } = await pairOnce();
+  phone.onOffer(() => {});
+  await tick(80);
+  await phone.approve();
+  await tick(60);
+  const res = await p.allow();
+  await tick(80);
+  useDevice(A);
+  const rec = window.MentriaStore.get('comms', 'computers').list[0];
+  const K2 = PC.randomBytes(32);
+  const compKeys = p.__computer;
+  const wrapped = { [A.me.sign.sigFp]: PW.wrapFor(K2, compKeys.dh.priv, A.entry.dh, rec.cid, A.me.sign.sigFp) };
+  eq(CCM.applyHostKeys(rec.cid, { t: 'cc-rekey', kver: 2, wrapped }), true);
+  const now = window.MentriaStore.get('comms', 'computers').list[0];
+  eq(now.kver, 2);
+  deepEq(await CCM.unwrapChannelKey(now, A.me), K2);
+  eq(CCM.applyHostKeys(rec.cid, { t: 'cc-rekey', kver: 1, wrapped: rec.wrapped }), false);
+  eq(window.MentriaStore.get('comms', 'computers').list[0].kver, 2);
+  const wrappedB = { [B.me.sign.sigFp]: PW.wrapFor(K2, compKeys.dh.priv, B.entry.dh, rec.cid, B.me.sign.sigFp) };
+  eq(CCM.applyHostKeys(rec.cid, { t: 'cc-keys', kver: 2, wrapped: wrappedB }), true);
+  const both = window.MentriaStore.get('comms', 'computers').list[0];
+  deepEq(Object.keys(both.wrapped).sort(), [A.me.sign.sigFp, B.me.sign.sigFp].sort());
+  const merged = CCM.mergeComputerRecords({ v: 1, list: [Object.assign({}, both, { wrapped: { [A.me.sign.sigFp]: both.wrapped[A.me.sign.sigFp] } })] }, { v: 1, list: [Object.assign({}, both, { wrapped: { [B.me.sign.sigFp]: both.wrapped[B.me.sign.sigFp] } })] });
+  deepEq(Object.keys(merged.list[0].wrapped).sort(), [A.me.sign.sigFp, B.me.sign.sigFp].sort());
+});
 
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;

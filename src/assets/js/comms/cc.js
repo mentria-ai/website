@@ -57,7 +57,9 @@ export const mergeComputerRecords = (a, b) => {
     const had = by.get(r.cid);
     if (!had) { by.set(r.cid, r); continue; }
     const removed = !!(had.removed || r.removed);
-    const win = (Number(r.kver) || 0) > (Number(had.kver) || 0) ? r : had;
+    const kr = Number(r.kver) || 0, kh = Number(had.kver) || 0;
+    let win = kr > kh ? r : had;
+    if (kr === kh && isObj(r.wrapped) && isObj(had.wrapped)) win = Object.assign({}, had, { wrapped: Object.assign({}, r.wrapped, had.wrapped) });
     by.set(r.cid, removed && !win.removed ? Object.assign({}, win, { removed: true }) : win);
   }
   return { v: 1, list: Array.from(by.values()).sort((x, y) => (Number(x.added) || 0) - (Number(y.added) || 0) || (x.cid < y.cid ? -1 : 1)) };
@@ -176,7 +178,7 @@ export const createMultiClient = () => {
     },
     hello: async (sid) => {
       if (sid) { const c = ownerOf(sid); if (c) return c.hello(sid); }
-      await Promise.all(Array.from(clients.values()).map((c) => c.hello()));
+      await Promise.all(Array.from(clients.values()).map((c) => (sid ? c.hello(sid) : c.hello())));
     },
     reset: (sid, sub) => { const c = ownerOf(sid); if (c) c.reset(sid, sub); },
     channel: (sid) => { const c = ownerOf(sid); return !!c && c.channel(sid); },
@@ -184,14 +186,29 @@ export const createMultiClient = () => {
     turn: (sid, n, sub) => { const c = ownerOf(sid); return c ? c.turn(sid, n, sub) : null; },
     turns: (sid, sub) => { const c = ownerOf(sid); return c ? c.turns(sid, sub) : []; }
   };
+  const SHARED = new Set(['watch', 'list', 'open', 'get']);
   for (const name of ROUTED) {
     api[name] = async (sid, ...rest) => {
       const c = ownerOf(sid);
-      if (!c) throw new Error('no-session');
-      return c[name](sid, ...rest);
+      if (c) return c[name](sid, ...rest);
+      if (!SHARED.has(name) || !clients.size) throw new Error('no-session');
+      await Promise.all(Array.from(clients.values()).map((x) => x[name](sid, ...rest)));
     };
   }
   return api;
 };
 
 export const helloFields = ({ ring, list }) => Object.assign({}, ring ? { ring } : {}, list && !list.needsSign ? { list } : {});
+
+export const applyHostKeys = (cid, msg) => {
+  if (!isObj(msg) || !Number.isInteger(msg.kver) || !isObj(msg.wrapped)) return false;
+  const cur = getComputers();
+  const rec = cur.list.find((r) => r.cid === cid);
+  if (!rec || rec.removed) return false;
+  const kver = Number(rec.kver) || 0;
+  let next = null;
+  if (msg.t === 'cc-rekey' && msg.kver > kver) next = Object.assign({}, rec, { kver: msg.kver, wrapped: msg.wrapped });
+  else if (msg.t === 'cc-keys' && msg.kver === kver) next = Object.assign({}, rec, { wrapped: Object.assign({}, rec.wrapped || {}, msg.wrapped) });
+  if (!next) return false;
+  return window.MentriaStore.set('comms', 'computers', { v: 1, list: cur.list.map((r) => (r.cid === cid ? next : r)) });
+};

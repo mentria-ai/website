@@ -848,7 +848,7 @@ import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelop
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
 import { keysFromBridgeKey, createBridgeClient, BRIDGE_KIND, HERE_TTL_MS } from '/assets/js/comms/bridge.js';
 import { createAgentView } from '/assets/js/comms/agent-view.js';
-import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer, helloFields } from '/assets/js/comms/cc.js';
+import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer, helloFields, applyHostKeys } from '/assets/js/comms/cc.js';
 import { ensureDeviceKeys } from '/assets/js/comms/devkey.js';
 import * as DEV from '/assets/js/comms/devices.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
@@ -2048,11 +2048,15 @@ const startComputerChannels = () => ccStarting || (ccStarting = (async () => {
     });
     const entry = { client, off, kver: rec.kver, seen: 0, name: rec.name, topic: keys.topic };
     client.on('here', (m) => {
+      const first = !entry.seen;
       entry.seen = Date.now();
+      if (first && agentView && agentView.isOpen()) agentView.resume();
       const gone = (m.sessions || []).filter((x) => x && x.gone).map((x) => x.sid);
       if (gone.length) { try { localStorage.setItem(AGENT_SESSIONS_KEY, JSON.stringify(knownAgents().filter((a) => !gone.includes(a.sid)))); } catch (_) {} }
       paintAgents();
     });
+    client.on('cc-rekey', (m) => { applyHostKeys(rec.cid, m); });
+    client.on('cc-keys', (m) => { applyHostKeys(rec.cid, m); });
     ccClients.set(rec.cid, entry);
     bridge.add(rec.cid, client);
     client.hello().catch(() => {});
@@ -2209,6 +2213,7 @@ const refreshDevicesOnce = async () => {
     } else if (await DEV.acceptList(trust, shared, fp)) {
       trust = shared;
       devSet('devtrust', trust);
+      bridge.hello().catch(() => {});
     } else if (!trust) {
       trust = await DEV.makeGenesis(myDev, myDevEntry());
       devSet('devtrust', trust);
@@ -2231,7 +2236,7 @@ const refreshDevicesOnce = async () => {
       if (r.list) { trust = r.list; changed = true; notice(fmt(T.devices.added, { name: devLabel(j.entry) })); }
       else if (r.ask && !devAsk && !devHidden.has(r.ask.sigFp)) devAsk = r.ask;
     }
-    if (changed) { devSet('devtrust', trust); devSet('devices', trust); }
+    if (changed) { devSet('devtrust', trust); devSet('devices', trust); bridge.hello().catch(() => {}); }
     const done = Object.keys(joins).filter((k) => DEV.trustedFps(trust).includes(k) || (trust.removed || []).includes(k));
     if (done.length) { const left = Object.assign({}, joins); done.forEach((k) => delete left[k]); if (Object.keys(left).length) devSet('devjoin', left); else MentriaStore.remove('comms', 'devjoin'); }
     if (devAsk && (DEV.trustedFps(trust).includes(devAsk.sigFp) || (trust.removed || []).includes(devAsk.sigFp))) devAsk = null;
@@ -2254,6 +2259,7 @@ const removeDevice = async (d) => {
   devSet('devices', next);
   notice(fmt(T.devices.removed, { name: devLabel(d) }));
   paintDevices(next);
+  bridge.hello().catch(() => {});
 };
 const initDevices = async () => {
   myDev = await ensureDeviceKeys();
@@ -2270,6 +2276,7 @@ document.getElementById('comms-devjoin-add').addEventListener('click', async () 
     const next = await DEV.withDevice(trust, myDev, ask);
     devSet('devtrust', next);
     devSet('devices', next);
+    bridge.hello().catch(() => {});
     notice(fmt(T.devices.added, { name: devLabel(ask) }));
   } catch (_) {}
   refreshDevices();

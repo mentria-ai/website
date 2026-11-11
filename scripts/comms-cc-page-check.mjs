@@ -101,11 +101,14 @@ try {
     await page.type('#comms-id-card-slot input[name="recovery-code"]', shared.code);
     await page.keyboard.press('Enter');
     await until(() => visible(page, '#comms-cc-approve'), 40000, 'connect card');
-    const card = await page.evaluate(() => ({ text: document.getElementById('comms-cc-text').textContent, code: document.getElementById('comms-cc-code').textContent }));
-    if (!card.text.includes('Mac')) throw new Error('card text: ' + card.text);
+    const title = await page.evaluate(() => document.getElementById('comms-cc-text').textContent);
+    if (!title.includes('Mac')) throw new Error('card text: ' + title);
+    if (await visible(page, '#comms-cc-code')) throw new Error('code shown before Approve');
     if (!(await noOverflow(page))) throw new Error('connect card overflows at 393 px');
-    await page.screenshot({ path: join(tmpdir(), 'cc-connect-card.png') });
     await page.click('#comms-cc-approve');
+    await until(() => visible(page, '#comms-cc-code'), 30000, 'code after the reveal');
+    const card = { code: await page.$eval('#comms-cc-code', (el) => el.textContent) };
+    await page.screenshot({ path: join(tmpdir(), 'cc-connect-card.png') });
     await until(() => !!shared.accepted, 30000, 'computer saw the accept');
     if (shared.accepted.code !== card.code) throw new Error('codes differ: ' + shared.accepted.code + ' vs ' + card.code);
     shared.res = await shared.pairing.allow();

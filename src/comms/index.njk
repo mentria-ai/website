@@ -2130,7 +2130,8 @@ const startCc = async () => {
   const flow = acceptPairing({ S, me: myDev, entry: myDevEntry(), list: trust, ring: ringToken || '', transport: { publish: ccPublish, subscribe: ccWatch } });
   ccFlow = flow;
   const quiet = setTimeout(() => { if (ccFlow === flow && !offer) { flow.cancel(); showCc({ text: T.cc.expired, done: true }); } }, 20000);
-  flow.onOffer((o) => { offer = o; clearTimeout(quiet); showCc({ text: fmt(T.cc.connect_title, { name: o.name || T.cc.computer }), code: o.code, note: T.cc.check_note, ask: true }); });
+  flow.onOffer((o) => { offer = o; clearTimeout(quiet); showCc({ text: fmt(T.cc.connect_title, { name: o.name || T.cc.computer }), note: T.cc.approve_note, ask: true }); });
+  flow.onCode(({ code }) => { showCc({ text: fmt(T.cc.confirm, { code }), code, note: T.cc.check_note }); });
   flow.onConflict(() => { clearTimeout(quiet); flow.cancel(); showCc({ text: T.cc.conflict, done: true }); });
   flow.onDenied(() => { showCc({ text: T.cc.denied, done: true }); });
   flow.onReady((rec) => { showCc({ text: fmt(T.cc.connected, { name: rec.name || T.cc.computer }), done: true }); startComputerChannels(); });
@@ -2138,10 +2139,9 @@ const startCc = async () => {
 document.getElementById('comms-cc-approve').addEventListener('click', async () => {
   const flow = ccFlow;
   if (!flow) return;
-  const code = document.getElementById('comms-cc-code').textContent;
   try {
     await flow.approve();
-    showCc({ text: fmt(T.cc.confirm, { code }), code });
+    showCc({ text: T.cc.waiting_code });
   } catch (_) { showCc({ text: T.cc.expired, done: true }); }
 });
 document.getElementById('comms-cc-later').addEventListener('click', () => { if (ccFlow && ccFlow.state() !== 'ready') ccFlow.cancel(); ccFlow = null; showCc({}); });

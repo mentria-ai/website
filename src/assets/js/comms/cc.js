@@ -27,8 +27,10 @@ export const pairKeys = async (S) => {
   return { key: await aesKey(await hkdfBits(S, 'pair-key')), topic: b64urlEncode(new Uint8Array(await crypto.subtle.sign('HMAC', mac, te.encode('mentria-cc-pair-topic-v1')))) };
 };
 
-export const sasCode = async (S, cpub, dpub) => {
-  const h = new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('mentria-cc-sas-v1|' + b64urlEncode(S) + '|' + cpub.x + '|' + cpub.y + '|' + dpub.x + '|' + dpub.y)));
+export const commitOf = async (nonceB64u) => b64urlEncode(new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('mentria-cc-commit-v1|' + nonceB64u))));
+
+export const sasCode = async (S, cpub, dpub, nonce) => {
+  const h = new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('mentria-cc-sas-v1|' + b64urlEncode(S) + '|' + cpub.x + '|' + cpub.y + '|' + dpub.x + '|' + dpub.y + '|' + b64urlEncode(nonce))));
   return WORDS[h[0]] + '-' + String(h[1] % 100).padStart(2, '0') + '-' + WORDS[h[2]];
 };
 
@@ -72,11 +74,12 @@ export const getComputers = () => {
 export const saveComputer = (record) => window.MentriaStore.set('comms', 'computers', mergeComputerRecords(getComputers(), { v: 1, list: [record] }));
 
 export const acceptPairing = ({ S, me, entry, list, ring = '', transport, now = () => Date.now(), save = saveComputer }) => {
-  const on = { offer: new Set(), ready: new Set(), denied: new Set(), conflict: new Set() };
+  const on = { offer: new Set(), code: new Set(), ready: new Set(), denied: new Set(), conflict: new Set() };
   const fire = (k, x) => { for (const fn of on[k]) { try { fn(x); } catch (_) {} } };
   const offers = new Map();
   let state = 'waiting';
   let chosen = null;
+  let code = null;
   let off = null;
   let chain = Promise.resolve();
   const keysP = pairKeys(S);
@@ -85,18 +88,27 @@ export const acceptPairing = ({ S, me, entry, list, ring = '', transport, now = 
     const m = await open(key, content);
     if (!isObj(m) || m.v !== 1 || typeof m.cid !== 'string') return;
     if (m.t === 'cc-offer') {
-      if (!validSpub(m.spub) || !validSpub(m.dh) || !Number.isFinite(m.exp) || m.exp <= now() || m.exp - now() > LINK_MS + 60000) return;
+      if (!validSpub(m.spub) || !validSpub(m.dh) || !Number.isFinite(m.exp) || m.exp <= now() || m.exp - now() > LINK_MS + 60000 || typeof m.commit !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(m.commit)) return;
       if (offers.has(m.cid) || state === 'conflict') return;
       offers.set(m.cid, m);
       if (offers.size > 1) {
         if (state === 'waiting' || state === 'approved') { state = 'conflict'; fire('conflict', {}); }
         return;
       }
-      if (state === 'waiting') fire('offer', { cid: m.cid, name: String(m.name || '').slice(0, 40), code: await sasCode(S, m.spub, me.sign.spub), exp: m.exp });
+      if (state === 'waiting') fire('offer', { cid: m.cid, name: String(m.name || '').slice(0, 40), exp: m.exp });
       return;
     }
     if (!chosen || m.cid !== chosen.cid || state !== 'approved') return;
+    if (m.t === 'cc-reveal') {
+      if (code || typeof m.nonce !== 'string' || (await commitOf(m.nonce)) !== chosen.commit) return;
+      let nonce;
+      try { nonce = b64urlDecode(m.nonce); } catch (_) { return; }
+      code = await sasCode(S, chosen.spub, me.sign.spub, nonce);
+      fire('code', { code });
+      return;
+    }
     if (m.t === 'cc-ready') {
+      if (!code) return;
       const v = await verifyBody(m, 'cc-pair:' + m.cid, 'ready');
       if (!v.ok || !samePub(v.spub, chosen.spub) || !Number.isInteger(m.kver) || !isObj(m.wrapped)) return;
       const record = { cid: m.cid, name: String(chosen.name || '').slice(0, 40), spub: { x: chosen.spub.x, y: chosen.spub.y }, dh: { x: chosen.dh.x, y: chosen.dh.y }, kver: m.kver, wrapped: m.wrapped, added: now(), removed: false };
@@ -119,6 +131,7 @@ export const acceptPairing = ({ S, me, entry, list, ring = '', transport, now = 
   });
   return {
     onOffer: (fn) => { on.offer.add(fn); },
+    onCode: (fn) => { on.code.add(fn); },
     onReady: (fn) => { on.ready.add(fn); },
     onDenied: (fn) => { on.denied.add(fn); },
     onConflict: (fn) => { on.conflict.add(fn); },

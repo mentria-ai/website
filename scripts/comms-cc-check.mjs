@@ -121,20 +121,22 @@ check('cc: computer records merge by kver and removal sticks', () => {
 check('cc: words list identical in both repos', () => { deepEq(Array.from(SITE_WORDS), Array.from(PLUGIN_WORDS)); eq(SITE_WORDS.length, 256); });
 check('cc: full pairing over the memory gateway: codes match on both sides', async () => {
   const { A, B, comp, p, S, phone } = await pairOnce();
-  let offer = null, accept = null, ready = null;
+  let offer = null, accept = null, ready = null, code = null;
   phone.onOffer((o) => { offer = o; });
+  phone.onCode((x) => { code = x.code; });
   p.onAccept((a) => { accept = a; });
   phone.onReady((r) => { ready = r; });
   await tick(100);
   ok(offer, 'offer');
   eq(offer.name, 'studio');
   eq(offer.cid, p.cid);
+  eq(offer.code, undefined);
   await phone.approve();
   await tick(100);
   ok(accept, 'accept');
-  eq(accept.code, offer.code);
+  ok(code, 'code after the reveal');
+  eq(accept.code, code);
   eq(accept.device.sigFp, A.entry.sigFp);
-  eq(offer.code, PW.sasCode(S, comp.sign.spub, A.entry.spub));
   const res = await p.allow();
   await tick(100);
   ok(ready, 'ready');
@@ -220,7 +222,7 @@ check('cc: every device on the list can unwrap K; a device off the list cannot',
 });
 check('cc: two offers on one link stop the pairing', async () => {
   const { bus, p, S, phone } = await pairOnce();
-  const fakeOffer = { t: 'cc-offer', v: 1, cid: 'fakecid', name: 'evil', spub: computer().sign.spub, dh: computer().dh.pub, exp: Date.now() + 60000 };
+  const fakeOffer = { t: 'cc-offer', v: 1, cid: 'fakecid', name: 'evil', spub: computer().sign.spub, dh: computer().dh.pub, exp: Date.now() + 60000, commit: 'A'.repeat(43) };
   let offers = 0, conflict = false;
   phone.onOffer(() => { offers++; });
   phone.onConflict(() => { conflict = true; });
@@ -384,6 +386,21 @@ check('cc: a host message from a skewed clock still arrives and flags the clock'
   eq(flagged, 1);
   eq(client.clockOff(), true);
 }, false);
+
+check('cc: a reveal that does not match the commit shows no code', async () => {
+  const { bus, p, S, phone } = await pairOnce();
+  let offer = null, code = null;
+  phone.onOffer((o) => { offer = o; });
+  phone.onCode((x) => { code = x.code; });
+  p.onAccept(() => {});
+  await tick(80);
+  const pk = PW.pairKeys(S);
+  p.cancel();
+  await phone.approve();
+  await bus.publish(pk.topic, PW.seal(pk.key, { t: 'cc-reveal', v: 1, cid: offer.cid, nonce: PC.b64u.enc(PC.randomBytes(16)) }));
+  await tick(80);
+  eq(code, null);
+});
 
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;

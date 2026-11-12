@@ -87,6 +87,8 @@ const MB = await need('/assets/js/comms/members.js');
 const BR = await need('/assets/js/comms/bridge.js');
 const AV = await need('/assets/js/comms/agent-view.js');
 const CIDM = await need('/assets/js/mentria-comms-id.js');
+const DK = await need('/assets/js/comms/devkey.js');
+const DV = await need('/assets/js/comms/devices.js');
 const VEC = JSON.parse(readFileSync(join(repo, 'scripts/fixtures/sig-vector.json'), 'utf8'));
 
 const FIX = {
@@ -163,6 +165,12 @@ check('home: Annotate chats open in Annotate Image', () => eq(H.aiHref({ id: 'an
 
 check('mention: an @ at a word start opens the picker', () => eq(M.mentionQuery('hi @sa', 6), 'sa'));
 check('mention: an @ inside a word does not', () => eq(M.mentionQuery('mail a@b.c', 10), null));
+check('mention: insertTag puts @handle in place of the typed query and keeps the rest', () => {
+  deepEq(M.insertTag('ask @si', 7, 'site'), { text: 'ask @site ', caret: 10 });
+  deepEq(M.insertTag('@e later', 2, 'engine'), { text: '@engine later', caret: 8 });
+  deepEq(M.insertTag('@site and @en', 13, 'engine'), { text: '@site and @engine ', caret: 18 });
+  deepEq(M.insertTag('no tag here', 5, 'site'), { text: 'no tag here', caret: 5 });
+});
 check('mention: prefix matches come first', () => deepEq(M.matchTargets('sa', [{ kind: 'contact', id: '1', label: 'Isabel' }, { kind: 'contact', id: '2', label: 'Sam' }]).map((t) => t.label), ['Sam', 'Isabel']));
 check('mention: the chosen name leaves the message', () => eq(M.splitTarget('@Sam see you at 9', { kind: 'contact', id: '2', label: 'Sam' }).body, 'see you at 9'));
 
@@ -1131,6 +1139,36 @@ check('members: members are kept newest first, at most 50, without me', () => {
   eq(list[0].name, 'N05');
   deepEq(list[0].pub, { x: 'x5', y: 'y' });
 });
+check('members: sessions are kept by computer and handle, newest 20, with their on state', () => {
+  const e = { room: 'r' };
+  const C = { x: 'CX', y: 'CY' };
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Site', handle: 'site', host: 'Mac', on: true, ts: 1 });
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Engine', handle: 'engine', host: 'Mac', on: true, ts: 2 });
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Site', handle: 'site', host: 'Mac', on: false, ts: 3 });
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Bad', handle: 'Bad Handle!', host: 'Mac', on: true, ts: 4 });
+  MB.noteAgent(e, { sigFp: '', spub: C, name: 'X', handle: 'x', host: 'Mac', on: true, ts: 5 });
+  deepEq(MB.agentsOf(e).map((a) => [a.name, a.handle, a.on, a.sigFp]), [['Engine', 'engine', true, 'fpC'], ['Site', 'site', false, 'fpC']]);
+  deepEq(MB.agentsOf(e)[0].spub, C);
+  eq(Object.keys(e.members || {}).length, 0);
+  for (let i = 0; i < 25; i++) MB.noteAgent(e, { sigFp: 'fp' + i, spub: C, name: 'S' + i, handle: 's' + i, host: 'Mac', on: true, ts: 10 + i });
+  eq(MB.agentsOf(e).length, 20);
+  ok(!MB.agentsOf(e).some((a) => a.handle === 'site'));
+});
+check('members: a session post reads as name · computer, verified only when the key is a trusted computer', () => {
+  const C = { x: 'CX', y: 'CY' };
+  const body = { v: 2, t: 'done', agent: { name: 'Site', handle: 'site', host: 'Mac' } };
+  deepEq(MB.agentSender(body, { ok: true, spub: C, sigFp: 'fpC' }, [{ name: 'Studio Mac', spub: C }]), { who: 'Site · Studio Mac', verified: true, handle: 'site', sigFp: 'fpC' });
+  eq(MB.agentSender(body, { ok: true, spub: { x: 'OX', y: 'OY' }, sigFp: 'fpO' }, [{ name: 'Studio Mac', spub: C }]), null);
+  eq(MB.agentSender(body, null, []), null);
+  eq(MB.agentSender({ v: 2, t: 'x' }, { ok: true, spub: C, sigFp: 'fpC' }, []), null);
+  eq(MB.agentSender({ v: 2, t: 'x', agent: { name: 'A', handle: 'NO SPACES', host: 'h' } }, { ok: true, spub: C, sigFp: 'fpC' }, []), null);
+});
+check('members: roomsWithComputer finds the rooms where a computer has sessions', () => {
+  const C = { x: 'CX', y: 'CY' }, D = { x: 'DX', y: 'DY' };
+  const rooms = [{ room: 'a', agents: { 'f/site': { sigFp: 'f', spub: C, handle: 'site', name: 'site', on: true } } }, { room: 'b', agents: { 'g/eng': { sigFp: 'g', spub: D, handle: 'eng', name: 'eng', on: true } } }, { room: 'c' }];
+  deepEq(MB.roomsWithComputer(rooms, C), ['a']);
+  deepEq(MB.roomsWithComputer(rooms, { x: 'ZX', y: 'ZY' }), []);
+});
 check('members: a rekey from a member of the room is accepted', () => {
   const e = { room: 'r' };
   MB.noteMember(e, { sigFp: 'fpA', name: 'A', spub: { x: 'SX', y: 'SY' }, ts: 1 });
@@ -1439,14 +1477,6 @@ check('fix C1: the client sends a cheap watch', async () => {
   deepEq(got, [{ t: 'watch', sid: 's7' }]);
 });
 
-check('fix: the pairing section shows on phones too, with phone wording', () => {
-  const T = { connect: 'Connect this Mac', connect_note: 'mac note', connect_phone: 'Pair this phone', connect_note_phone: 'phone note' };
-  deepEq(AV.pairSection({ on: true, ready: true, phone: true, T }), { hidden: false, label: 'Pair this phone', note: 'phone note' });
-  deepEq(AV.pairSection({ on: true, ready: true, phone: false, T }), { hidden: false, label: 'Connect this Mac', note: 'mac note' });
-  eq(AV.pairSection({ on: false, ready: true, phone: true, T }).hidden, true);
-  eq(AV.pairSection({ on: true, ready: false, phone: false, T }).hidden, true);
-});
-
 check('fix: the client sends a signed answer to an ask', async () => {
   const keys = await BR.keysFromBridgeKey(BK);
   const t = pairT();
@@ -1464,6 +1494,211 @@ check('fix: the client sends a signed answer to an ask', async () => {
   deepEq(got[0].answers, [{ labels: ['blue.txt'] }]);
   eq(got[0].sg.s, 'S');
   deepEq(signed, ['s9']);
+});
+
+const devStoreCtx = () => { const ctx = { localStorage: new MemoryStorage(), dispatchEvent: () => true, CustomEvent: class { constructor(n, o) { this.detail = o && o.detail; } }, Blob, navigator: {} }; ctx.window = ctx; vm.runInNewContext(readFileSync(join(repo, 'src/assets/js/mentria-store.js'), 'utf8'), ctx, { filename: 'mentria-store.js' }); return ctx.MentriaStore; };
+const newDevice = async (name = 'Mac', kind = 'mac') => {
+  window.MentriaStore = memStore();
+  const me = await DK.ensureDeviceKeys();
+  return { me, store: window.MentriaStore, entry: { sigFp: me.sign.sigFp, spub: me.sign.spub, dh: me.dh.pub, name, kind, added: Date.now() } };
+};
+check('devkey: made once, wrapped, local only', async () => {
+  fakeIdentity({ unlocked: true });
+  window.MentriaStore = memStore();
+  const a = await DK.ensureDeviceKeys();
+  const b = await DK.ensureDeviceKeys();
+  eq(a.sign.sigFp, b.sign.sigFp);
+  deepEq(a.dh.pub, b.dh.pub);
+  eq(a.sign.sigFp, await SG.sigFingerprint(a.sign.spub));
+  const rec = MentriaStore.get('comms', 'devkey');
+  eq(rec.v, 1);
+  ok(rec.sign.wrapped.ct && rec.dh.wrapped.ct);
+  no(JSON.stringify(rec).includes('"d"'));
+  eq(MentriaStore.get('comms', 'idkeys'), null);
+  const out = await SG.signBody(a.sign.signKey, a.sign.spub, 'r', 'c', { t: 1 });
+  eq((await SG.verifyBody(out, 'r', 'c')).ok, true);
+  ok(devStoreCtx().isLocalOnly('comms.devkey'));
+  fakeIdentity({ unlocked: false });
+  let threw = false;
+  try { await DK.ensureDeviceKeys(); } catch (_) { threw = true; }
+  ok(threw);
+});
+check('devices: genesis verifies; tampering fails', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice();
+  const list = await DV.makeGenesis(A.me, A.entry);
+  eq(list.ver, 1);
+  eq(list.kind, 'mentria-devices');
+  eq(list.by, A.entry.sigFp);
+  eq(await DV.verifyList(list), true);
+  deepEq(DV.trustedFps(list), [A.entry.sigFp]);
+  eq(await DV.verifyList(Object.assign({}, list, { ver: 2 })), false);
+  eq(await DV.verifyList(Object.assign({}, list, { devices: list.devices.concat([Object.assign({}, A.entry, { sigFp: 'zzzz-zzzz' })]) })), false);
+  eq(await DV.verifyList(Object.assign({}, list, { removed: [A.entry.sigFp] })), false);
+  const { sg, ...bare } = list;
+  eq(await DV.verifyList(bare), false);
+  eq(await DV.verifyList(null), false);
+});
+check('devices: removed device cannot sign an accepted list', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  let list = await DV.makeGenesis(A.me, A.entry);
+  list = await DV.withDevice(list, A.me, B.entry);
+  eq(list.ver, 2);
+  eq(await DV.verifyList(list), true);
+  deepEq(DV.trustedFps(list).sort(), [A.entry.sigFp, B.entry.sigFp].sort());
+  const cut = await DV.withoutDevice(list, A.me, B.entry.sigFp);
+  eq(cut.ver, 3);
+  eq(await DV.verifyList(cut), true);
+  deepEq(cut.removed, [B.entry.sigFp]);
+  deepEq(DV.trustedFps(cut), [A.entry.sigFp]);
+  const forged = await DV.withDevice(Object.assign({}, cut, { by: B.entry.sigFp }), B.me, Object.assign({}, B.entry, { added: 2 })).catch(() => null);
+  ok(forged === null || (await DV.verifyList(forged)) === false);
+  let selfThrew = false;
+  try { await DV.withoutDevice(cut, A.me, A.entry.sigFp); } catch (_) { selfThrew = true; }
+  ok(selfThrew);
+});
+check('devices: join with a fresh invite nonce auto-adds; without one asks', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  const list = await DV.makeGenesis(A.me, A.entry);
+  const invite = await DV.makeInvite(A.me);
+  ok(invite.exp - Date.now() <= 15 * 60 * 1000 && invite.exp - Date.now() > 14 * 60 * 1000);
+  const join = await DV.makeJoin(B.entry, invite.nonce, B.me);
+  const r = await DV.handleJoin(list, join, invite, A.me);
+  ok(r.list);
+  eq(await DV.verifyList(r.list), true);
+  ok(DV.trustedFps(r.list).includes(B.entry.sigFp));
+  const cold = await DV.handleJoin(list, await DV.makeJoin(B.entry, '', B.me), invite, A.me);
+  eq(cold.list, undefined);
+  eq(cold.ask.sigFp, B.entry.sigFp);
+  const stale = Object.assign({}, invite, { exp: Date.now() - 1 });
+  eq((await DV.handleJoin(list, join, stale, A.me)).list, undefined);
+  const forgedJoin = Object.assign({}, join, { entry: Object.assign({}, join.entry, { name: 'Evil' }) });
+  deepEq(await DV.handleJoin(list, forgedJoin, invite, A.me), {});
+});
+check('devices: a removed sigFp is never re-added', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  let list = await DV.withDevice(await DV.makeGenesis(A.me, A.entry), A.me, B.entry);
+  list = await DV.withoutDevice(list, A.me, B.entry.sigFp);
+  const invite = await DV.makeInvite(A.me);
+  deepEq(await DV.handleJoin(list, await DV.makeJoin(B.entry, invite.nonce, B.me), invite, A.me), {});
+  let threw = false;
+  try { await DV.withDevice(list, A.me, B.entry); } catch (_) { threw = true; }
+  ok(threw);
+});
+check('devices: joins and invites merge without losing entries', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  const C = await newDevice('iPad', 'ipad');
+  const jb = await DV.makeJoin(B.entry, '', B.me);
+  const jc = await DV.makeJoin(C.entry, '', C.me);
+  const m = DV.mergeJoins({ [B.entry.sigFp]: jb }, { [C.entry.sigFp]: jc });
+  deepEq(Object.keys(m).sort(), [B.entry.sigFp, C.entry.sigFp].sort());
+  const i1 = await DV.makeInvite(A.me);
+  const i2 = Object.assign({}, i1, { exp: i1.exp + 5 });
+  eq(DV.mergeInvites(i1, i2), i2);
+  eq(DV.mergeInvites(i2, i1), i2);
+});
+
+
+check('devices: same-ver lists merge to one signed list, never an unsigned union', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  const C = await newDevice('iPad', 'ipad');
+  const base = await DV.makeGenesis(A.me, A.entry);
+  const left = await DV.withDevice(base, A.me, B.entry);
+  const right = await DV.withDevice(base, A.me, C.entry);
+  const m = DV.mergeDeviceRecords(left, right);
+  ok(m === left || m === right);
+  eq(DV.mergeDeviceRecords(right, left), m);
+  eq(m.needsSign, undefined);
+  const forged = { v: 1, kind: 'mentria-devices', ver: 99, ts: 1, devices: [A.entry], removed: [B.entry.sigFp], by: A.entry.sigFp, needsSign: true };
+  eq(DV.mergeDeviceRecords(left, forged), left);
+  eq(DV.mergeDeviceRecords(forged, left), left);
+});
+check('devices: an unsigned or forged list from sync is never signed or adopted', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  const L = await newDevice('Lost', 'iphone');
+  let trust = await DV.withDevice(await DV.withDevice(await DV.makeGenesis(A.me, A.entry), A.me, B.entry), A.me, L.entry);
+  trust = await DV.withoutDevice(trust, A.me, L.entry.sigFp);
+  const unsigned = { v: 1, kind: 'mentria-devices', ver: trust.ver + 50, ts: 1, devices: [A.entry], removed: [B.entry.sigFp, L.entry.sigFp], by: A.entry.sigFp, needsSign: true };
+  eq(await DV.acceptList(trust, unsigned), false);
+  eq(await DV.foldLists(trust, unsigned, A.me), null);
+  const byLost = await DV.makeGenesis(L.me, L.entry);
+  const lostFamily = await DV.withDevice(Object.assign({}, byLost, { ver: trust.ver + 1 }), L.me, A.entry).catch(() => null);
+  ok(lostFamily === null || (await DV.acceptList(trust, lostFamily)) === false);
+  eq(await DV.foldLists(trust, byLost, A.me), null);
+  const solo = await DV.makeGenesis(A.me, A.entry);
+  eq(await DV.acceptList(solo, await DV.withDevice(await DV.makeGenesis(L.me, L.entry), L.me, A.entry)), false);
+  eq(await DV.acceptList(null, trust), false);
+});
+check('devices: removals are permanent and version jumps are bounded', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  const L = await newDevice('Lost', 'iphone');
+  const v1 = await DV.withDevice(await DV.withDevice(await DV.makeGenesis(A.me, A.entry), A.me, B.entry), A.me, L.entry);
+  const cut = await DV.withoutDevice(v1, A.me, L.entry.sigFp);
+  eq(await DV.acceptList(v1, cut), true);
+  const sneaky = await DV.signList(B.me, cut.ver + 1, cut.devices.concat([L.entry]), []);
+  eq(await DV.acceptList(cut, sneaky), false);
+  const forgetful = await DV.signList(B.me, cut.ver + 1, cut.devices, []);
+  eq(await DV.acceptList(cut, forgetful), false);
+  const huge = await DV.signList(B.me, cut.ver + 65, cut.devices, cut.removed);
+  eq(await DV.acceptList(cut, huge), false);
+  const fine = await DV.signList(B.me, cut.ver + 64, cut.devices, cut.removed);
+  eq(await DV.acceptList(cut, fine), true);
+});
+check('devices: a fold uses only verified lists from trusted signers and keeps removals', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  const C = await newDevice('iPad', 'ipad');
+  const D = await newDevice('Phone', 'android');
+  const base = await DV.withDevice(await DV.withDevice(await DV.makeGenesis(A.me, A.entry), A.me, B.entry), A.me, C.entry);
+  const mine = await DV.withoutDevice(base, A.me, C.entry.sigFp);
+  const theirs = await DV.withDevice(base, B.me, D.entry);
+  const r = await DV.foldLists(mine, theirs, A.me);
+  eq(r.list.ver, Math.max(mine.ver, theirs.ver) + 1);
+  eq(await DV.verifyList(r.list), true);
+  deepEq(DV.trustedFps(r.list).sort(), [A.entry.sigFp, B.entry.sigFp, D.entry.sigFp].sort());
+  ok(r.list.removed.includes(C.entry.sigFp));
+  deepEq(r.removed.map((d) => d.sigFp), []);
+  const r2 = await DV.foldLists(theirs, mine, B.me);
+  deepEq(r2.removed.map((d) => d.sigFp), [C.entry.sigFp]);
+});
+check('devices: a solo device adopts a family list only through canAdopt', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  const fam = await DV.withDevice(await DV.makeGenesis(A.me, A.entry), A.me, B.entry);
+  const soloB = await DV.makeGenesis(B.me, B.entry);
+  const signer = await DV.canAdopt(soloB, fam, B.entry.sigFp);
+  eq(signer.sigFp, A.entry.sigFp);
+  eq(await DV.canAdopt(fam, fam, B.entry.sigFp), null);
+  eq(await DV.canAdopt(soloB, await DV.makeGenesis(A.me, A.entry), B.entry.sigFp), null);
+  eq(await DV.canAdopt(soloB, Object.assign({}, fam, { ver: 9 }), B.entry.sigFp), null);
+});
+check('devices: an invite lasts 15 minutes and is consumed by the join it admits', async () => {
+  fakeIdentity({ unlocked: true });
+  const A = await newDevice('Mac', 'mac');
+  const B = await newDevice('iPhone', 'iphone');
+  const list = await DV.makeGenesis(A.me, A.entry);
+  const invite = await DV.makeInvite(A.me);
+  const r = await DV.handleJoin(list, await DV.makeJoin(B.entry, invite.nonce, B.me), invite, A.me);
+  eq(r.consumed, true);
+  ok(r.list);
+  const old = await DV.makeInvite(A.me, { ttlMs: 16 * 60 * 1000 });
+  eq((await DV.handleJoin(list, await DV.makeJoin(B.entry, old.nonce, B.me), old, A.me)).list, undefined);
 });
 
 let failed = 0;

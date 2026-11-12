@@ -52,6 +52,18 @@ unlockTool: true
       </div>
     </div>
   </div>
+  <div class="comms__picker comms__lock" id="comms-sess" hidden>
+    <div class="comms__picker-backdrop" data-sess-close></div>
+    <div class="comms__picker-card" role="dialog" aria-modal="true" aria-labelledby="comms-sess-title">
+      <h3 class="comms__picker-h" id="comms-sess-title"></h3>
+      <p class="comms__invite-by">{{ 'tool.comms.rooms.sessions_note' | t }}</p>
+      <div class="comms__lock-list" id="comms-sess-list"></div>
+      <p class="comms__invite-by" id="comms-sess-state" aria-live="polite"></p>
+      <div class="comms__picker-actions comms__invite-actions">
+        <button type="button" class="comms__btn" data-sess-close>{{ 'tool.comms.rooms.sessions_done' | t }}</button>
+      </div>
+    </div>
+  </div>
   <div class="comms__picker comms__invite" id="comms-invite" hidden>
     <div class="comms__picker-backdrop"></div>
     <div class="comms__picker-card" role="dialog" aria-modal="true" aria-labelledby="comms-invite-title">
@@ -103,6 +115,7 @@ unlockTool: true
   <div class="comms__lock" id="comms-id-locked" hidden>
     <p class="comms__lock-link" id="comms-lock-link" hidden><strong>{{ 'unlock.link_title' | t }}</strong> {{ 'unlock.link_body' | t }}</p>
     <p class="comms__lock-h" id="comms-lock-title">{{ 'tool.comms.lock.title' | t }}</p>
+    <p class="comms__lock-link" id="comms-lock-cc" hidden>{{ 'tool.comms.cc.unlock' | t }}</p>
     <p class="comms__lock-waiting" id="comms-lock-waiting" hidden></p>
     <div class="comms__card-slot" id="comms-id-card-slot" hidden></div>
     <button class="comms__btn comms__btn--ghost" id="comms-lock-old" type="button" aria-expanded="false" aria-controls="comms-id-passkey comms-lock-alt" hidden>{{ 'tool.comms.lock.old_unlock' | t }}</button>
@@ -132,10 +145,14 @@ unlockTool: true
       </div>
 
       <div class="comms__adv" id="comms-adv" hidden>
-        <div class="comms__adv-sec comms__agents" id="comms-agents" hidden>
-          <span class="comms__lbl">{{ 'tool.comms.agent.heading' | t }}</span>
-          <button class="comms__btn comms__btn--ghost" id="comms-agents-copy" type="button">{{ 'tool.comms.agent.connect' | t }}</button>
-          <p class="comms__id-note" id="comms-agents-note">{{ 'tool.comms.agent.connect_note' | t }}</p>
+        <div class="comms__adv-sec comms__adv-sec--col" id="comms-computers" hidden>
+          <span class="comms__lbl">{{ 'tool.comms.cc.computers' | t }}</span>
+          <ul class="comms__devs" id="comms-computers-list"></ul>
+        </div>
+        <div class="comms__adv-sec comms__adv-sec--col" id="comms-devs" hidden>
+          <span class="comms__lbl">{{ 'tool.comms.devices.title' | t }}</span>
+          <ul class="comms__devs" id="comms-devs-list"></ul>
+          <p class="comms__id-note" id="comms-devs-note">{{ 'tool.comms.devices.keys_note' | t }}</p>
         </div>
         <div class="comms__adv-sec">
           <span class="comms__lbl">{{ 'tool.comms.adv.room' | t }}</span>
@@ -172,6 +189,24 @@ unlockTool: true
           <button class="comms__btn comms__btn--ghost" id="comms-attach-pack" type="button">{{ 'tool.comms.adv.attach_pack' | t }}</button>
           <button class="comms__btn comms__btn--ghost" id="comms-pk-settings" type="button" hidden>{{ 'tool.comms.passkey.add' | t }}</button>
           <a class="comms__btn comms__btn--ghost" href="{{ locale.pathPrefix }}/about/">{{ 'tool.comms.adv.identity' | t }}</a>
+        </div>
+      </div>
+
+      <div class="comms__upgrade comms__cc" id="comms-cc" role="alert" hidden>
+        <span class="comms__upgrade-text" id="comms-cc-text"></span>
+        <span class="comms__cc-code" id="comms-cc-code" hidden></span>
+        <span class="comms__id-note" id="comms-cc-note" hidden></span>
+        <div class="comms__upgrade-actions">
+          <button class="comms__btn" id="comms-cc-approve" type="button" hidden>{{ 'tool.comms.cc.approve' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-cc-later" type="button">{{ 'tool.comms.invite.not_now' | t }}</button>
+        </div>
+      </div>
+
+      <div class="comms__upgrade" id="comms-devjoin" role="alert" hidden>
+        <span class="comms__upgrade-text" id="comms-devjoin-text"></span>
+        <div class="comms__upgrade-actions">
+          <button class="comms__btn" id="comms-devjoin-add" type="button">{{ 'tool.comms.devices.add' | t }}</button>
+          <button class="comms__btn comms__btn--ghost" id="comms-devjoin-later" type="button">{{ 'tool.comms.invite.not_now' | t }}</button>
         </div>
       </div>
 
@@ -307,13 +342,15 @@ unlockTool: true
         <p class="comms__agent-perm-title" id="comms-agent-perm-title"></p>
         <p class="comms__agent-perm-desc" id="comms-agent-perm-desc"></p>
         <pre class="comms__tool-out" id="comms-agent-perm-preview"></pre>
-        <div class="comms__agent-perm-actions"><button class="comms__btn comms__btn--ghost" id="comms-agent-deny" type="button">{{ 'tool.comms.agent.deny' | t }}</button><button class="comms__btn" id="comms-agent-allow" type="button">{{ 'tool.comms.agent.allow' | t }}</button></div>
+        <p class="comms__id-note" id="comms-agent-perm-note" hidden></p>
+        <div class="comms__agent-perm-actions" id="comms-agent-perm-actions"><button class="comms__btn comms__btn--ghost" id="comms-agent-deny" type="button">{{ 'tool.comms.agent.deny' | t }}</button><button class="comms__btn" id="comms-agent-allow" type="button">{{ 'tool.comms.agent.allow' | t }}</button></div>
       </div>
       <p class="comms__agent-signed" id="comms-agent-signed" hidden>{{ 'tool.comms.agent.signed' | t }}</p>
       <form class="comms__send" id="comms-send" autocomplete="off">
         <label class="comms__attach" title="{{ 'tool.comms.chat.attach' | t }}" aria-label="{{ 'tool.comms.chat.attach' | t }}"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
         <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled>
         <button class="comms__btn comms__btn--send" id="comms-go" type="submit" disabled title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
+        <div class="comms__at" id="comms-room-at" role="listbox" aria-label="{{ 'tool.comms.rooms.sessions' | t }}" hidden></div>
       </form>
     </div>
     <div class="comms__home" id="comms-home">
@@ -449,6 +486,11 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__adv{flex:none;display:flex;flex-direction:column;gap:var(--space-3);max-height:60%;overflow-y:auto;margin:0 var(--space-3) var(--space-2);padding:var(--space-3);background:var(--term-surface-2);border:1px solid var(--term-border);border-radius:var(--radius-lg)}
 .comms__adv-sec{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 .comms__adv-sec--col{flex-direction:column;align-items:stretch}
+.comms__cc-code{font-family:var(--font-mono);font-size:var(--text-lg);letter-spacing:.04em;color:var(--accent,#6ef3c5)}
+.comms__devs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--space-1)}
+.comms__dev{display:flex;align-items:center;gap:var(--space-2);min-height:36px}
+.comms__dev-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comms__dev-meta{color:var(--term-muted);font-family:var(--font-mono);font-size:var(--text-xs);white-space:nowrap}
 .comms__adv-row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2)}
 .comms__room,.comms__room-new{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 .comms__room{flex:1;min-width:12rem}
@@ -665,7 +707,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__media-label{display:block;padding:var(--space-2);overflow:hidden;text-overflow:ellipsis}
 .comms__relaybar{background:color-mix(in srgb,var(--syn-amber) 10%,transparent);border-color:color-mix(in srgb,var(--syn-amber) 35%,transparent)}
 
-.comms__send{flex:none;display:flex;align-items:center;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__send{position:relative;flex:none;display:flex;align-items:center;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
 .comms__send:focus-within{border-color:var(--syn-cyan)}
 .comms__send--offline{opacity:.55}
 .comms__attach{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:var(--radius-md);color:var(--term-muted);cursor:pointer;transition:color .15s}
@@ -730,7 +772,7 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__agent-note{margin:var(--space-1) 0;color:var(--term-muted);font-size:var(--text-2xs)}
 .comms__agent-perm{margin:var(--space-2) var(--space-3) 0;padding:var(--space-3);background:var(--amber-8);border:1px solid var(--amber-30);border-radius:var(--radius-md)}
 .comms__agent-perm-title{margin:0;color:var(--term-fg-strong);font-weight:600}
-.comms__agent-perm-desc{margin:var(--space-1) 0;color:var(--term-fg);font-size:var(--text-sm)}
+.comms__agent-perm-desc{margin:var(--space-1) 0;color:var(--term-fg);font-size:var(--text-sm);overflow-wrap:anywhere}
 .comms__agent-perm-actions{display:flex;justify-content:flex-end;gap:var(--space-2);margin-top:var(--space-2)}
 .comms__agent-signed{margin:var(--space-1) var(--space-3) 0;color:var(--term-muted);font-size:var(--text-2xs)}
 .comms__agent-pending .comms__line{opacity:.8}
@@ -799,7 +841,7 @@ import { renderBody, renderParts, updateParts, addToAlbum } from '/assets/js/com
 import { openStore } from '/assets/js/comms/store.js';
 import { secretCopy } from '/assets/js/comms/identity.js';
 import { homeRows, aiHref } from '/assets/js/comms/threads.js';
-import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget } from '/assets/js/comms/mention.js';
+import { HANDOFF_KEY, mentionQuery, matchTargets, splitTarget, insertTag } from '/assets/js/comms/mention.js';
 import { createAttach } from '/assets/js/comms/attach.js';
 import { acceptFor, relayAsk, viaRelay, blankedCopy, importPlan, shownState } from '/assets/js/comms/files.js';
 import { AiHost, AiClient, rememberHosts, knownHosts } from '/assets/js/comms/ai-link.js';
@@ -814,12 +856,21 @@ import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid, downloadFile } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
-import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink } from '/assets/js/comms/sign.js';
+import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink, signRoomBody } from '/assets/js/comms/sign.js';
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
-import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
-import { bridgeKeyFromSecret, keysFromBridgeKey, bridgeCode, createBridgeClient, BRIDGE_KIND } from '/assets/js/comms/bridge.js';
-import { createAgentView, pairSection } from '/assets/js/comms/agent-view.js';
+import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody, noteAgent, agentsOf, agentSender, roomsWithComputer } from '/assets/js/comms/members.js';
+const ccTrusted = new Map();
+const trustedComputers = () => Array.from(ccTrusted.values());
+import { keysFromBridgeKey, createBridgeClient, BRIDGE_KIND, HERE_TTL_MS } from '/assets/js/comms/bridge.js';
+import { createAgentView } from '/assets/js/comms/agent-view.js';
+import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer, helloFields, applyHostKeys, verifyComputer, approveComputer, getComputers, mergeComputerRecords, roomAddMsg, lockPlan, sendUntilReply } from '/assets/js/comms/cc.js';
+import { ensureDeviceKeys } from '/assets/js/comms/devkey.js';
+import * as DEV from '/assets/js/comms/devices.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
+
+let ccLink = parseCcLink(window.location.hash);
+if (ccLink) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+if (ccLink && document.getElementById('comms-lock-cc')) document.getElementById('comms-lock-cc').hidden = false;
 
 const loadPacks = () => import('/assets/js/mentria-packs.js').then(() => window.MentriaPacks || null);
 
@@ -1705,11 +1756,22 @@ const noteRoomMember = (m) => {
   setSavedRooms(list);
 };
 
+const noteRoomAgent = (a, roomName = currentRoomName) => {
+  if (!roomName || isDmRoom(roomName) || !a || !a.sigFp) return;
+  const list = savedRooms();
+  const e = list.find((r) => r.room === roomName);
+  if (!e) return;
+  const prev = e.agents && e.agents[a.sigFp + '/' + a.handle];
+  if (prev && prev.on === !!a.on && prev.name === String(a.name || a.handle).slice(0, 40) && Date.now() - (prev.seen || 0) < 60000) return;
+  noteAgent(e, a);
+  setSavedRooms(list);
+};
+
 const lockEl = document.getElementById('comms-lock');
 let lockRoom = null;
 const closeLock = () => { lockEl.hidden = true; lockRoom = null; document.getElementById('comms-lock-list').innerHTML = ''; };
 lockEl.querySelectorAll('[data-lock-close]').forEach((el) => el.addEventListener('click', closeLock));
-const openLock = (roomName) => {
+const openLock = (roomName, untick = null) => {
   const entry = savedRooms().find((r) => r.room === roomName);
   if (!entry || !mySign || !myId) return;
   lockRoom = roomName;
@@ -1717,7 +1779,8 @@ const openLock = (roomName) => {
   const listEl = document.getElementById('comms-lock-list');
   listEl.innerHTML = '';
   const people = membersOf(entry, mySign.sigFp).filter((m) => m.pub);
-  if (!people.length) {
+  const agents = agentsOf(entry);
+  if (!people.length && !agents.length) {
     const p = document.createElement('p');
     p.className = 'comms__invite-by';
     p.textContent = T.roomlock.none;
@@ -1734,11 +1797,23 @@ const openLock = (roomName) => {
     label.append(box, nm);
     listEl.append(label);
   }
+  for (const a of agents) {
+    const label = document.createElement('label');
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.checked = true;
+    box.dataset.agent = a.key;
+    if (untick && untick(a)) box.checked = false;
+    const nm = document.createElement('span');
+    nm.textContent = fmt(T.rooms.session_on, { name: a.name, computer: a.host || T.cc.computer, handle: a.handle });
+    label.append(box, nm);
+    listEl.append(label);
+  }
   lockEl.hidden = false;
   const go = document.getElementById('comms-lock-go');
   if (go) go.focus();
 };
-const lockRoomNow = async (roomName, keepFps) => {
+const lockRoomNow = async (roomName, keepFps, keepAgents = []) => {
   const first = savedRooms().find((r) => r.room === roomName);
   if (!first || !mySign || !myId) return;
   if (currentRoomName !== roomName) { openSavedRoom(first); setView('chat'); }
@@ -1751,14 +1826,30 @@ const lockRoomNow = async (roomName, keepFps) => {
   const myPub = { x: myId.publicJwk.x, y: myId.publicJwk.y };
   const kept = membersOf(entry, mySign.sigFp).filter((m) => m.pub && keepFps.includes(m.sigFp));
   const ts = Date.now();
+  const roomAgents = agentsOf(entry);
   rekeyEntry(entry, key, ts);
   keepMembers(entry, kept.map((m) => m.sigFp), mySign.sigFp);
+  entry.agents = Object.fromEntries(Object.entries(entry.agents || {}).filter(([k]) => keepAgents.includes(k)));
   setSavedRooms(list);
   twiceFor = null;
   const payload = { v: 1, kind: 'room-rekey', name: (myProfile && myProfile.name) || '', pub: myPub, ts, room: roomName, key, kv: 2, label, keep: kept.map((m) => m.sigFp).concat([mySign.sigFp]) };
   const signed = await signBody(mySign.signKey, mySign.spub, roomName, 'inbox:' + ts, payload);
   for (const pub of kept.map((m) => m.pub).concat([myPub])) {
     try { await publishToInbox(pub, signed); } catch (_) {}
+  }
+  const byCid = new Map();
+  for (const step of lockPlan({ room: roomName, key, kv: 2, agents: roomAgents, keep: keepAgents, sessions: bridge.sessions(), trusted: trustedComputers() })) {
+    if (!byCid.has(step.cid)) byCid.set(step.cid, []);
+    byCid.get(step.cid).push(step);
+  }
+  for (const steps of byCid.values()) {
+    (async () => {
+      for (const step of steps) {
+        let got = null;
+        if (step.sid) { try { got = await sendRoomMsg(step.sid, step.msg); } catch (_) {} }
+        if (!got) pendingAdd(step.cid, step.msg);
+      }
+    })();
   }
   subscribeUnread();
   if (attach) attach.refresh();
@@ -1768,11 +1859,94 @@ const lockRoomNow = async (roomName, keepFps) => {
 };
 document.getElementById('comms-lock-go').addEventListener('click', async () => {
   const roomName = lockRoom;
-  const keep = [...document.querySelectorAll('#comms-lock-list input:checked')].map((b) => b.dataset.fp);
+  const keep = [...document.querySelectorAll('#comms-lock-list input[data-fp]:checked')].map((b) => b.dataset.fp);
+  const keepAgents = [...document.querySelectorAll('#comms-lock-list input[data-agent]:checked')].map((b) => b.dataset.agent);
   closeLock();
-  if (roomName) await lockRoomNow(roomName, keep);
+  if (roomName) await lockRoomNow(roomName, keep, keepAgents);
 });
 document.getElementById('comms-twice-lock').addEventListener('click', () => { if (twiceFor) openLock(twiceFor.room); });
+
+const roomWaiters = new Map();
+const ROOM_REPLY_MS = 6000;
+const waitRoomReply = (cmid) => new Promise((resolve) => {
+  roomWaiters.set(cmid, resolve);
+  setTimeout(() => { if (roomWaiters.delete(cmid)) resolve(null); }, ROOM_REPLY_MS);
+});
+const sendRoomMsg = (sid, msg) => sendUntilReply(() => bridge.room(sid, msg), waitRoomReply, { resend: (id) => bridge.resend(sid, id) });
+const pendingGet = () => { try { const v = MentriaStore.get('comms', 'ccpending'); return v && typeof v === 'object' ? v : {}; } catch (_) { return {}; } };
+const pendingAdd = (cid, msg) => {
+  if (!cid || !msg) return;
+  const all = pendingGet();
+  all[cid] = (Array.isArray(all[cid]) ? all[cid] : []).concat([msg]).slice(-20);
+  try { MentriaStore.set('comms', 'ccpending', all); } catch (_) {}
+};
+let pendingBusy = false;
+const flushPending = async () => {
+  if (pendingBusy) return;
+  const all = pendingGet();
+  const due = Object.entries(all).filter(([cid, list]) => Array.isArray(list) && list.length && bridge.sessions().some((x) => x.cid === cid && x.online));
+  if (!due.length) return;
+  pendingBusy = true;
+  try {
+    for (const [cid, list] of due) {
+      const live = bridge.sessions().find((x) => x.cid === cid && x.online);
+      if (!live) continue;
+      let sent = 0;
+      for (const msg of list) { let got = null; try { got = await sendRoomMsg(live.sid, msg); } catch (_) {} if (!got) break; sent++; }
+      const now = pendingGet();
+      now[cid] = (now[cid] || []).slice(sent);
+      if (!now[cid].length) delete now[cid];
+      try { MentriaStore.set('comms', 'ccpending', now); } catch (_) {}
+    }
+  } finally { pendingBusy = false; }
+};
+
+const sessEl = document.getElementById('comms-sess');
+const sessState = document.getElementById('comms-sess-state');
+let sessRoom = null;
+const closeSess = () => { sessEl.hidden = true; sessRoom = null; document.getElementById('comms-sess-list').replaceChildren(); };
+sessEl.querySelectorAll('[data-sess-close]').forEach((el) => el.addEventListener('click', closeSess));
+const paintSess = () => {
+  if (!sessRoom) return;
+  const listEl = document.getElementById('comms-sess-list');
+  listEl.replaceChildren();
+  const live = bridge.sessions().filter((x) => x.online && x.handle);
+  if (!live.length) {
+    const p = document.createElement('p');
+    p.className = 'comms__invite-by';
+    p.textContent = T.rooms.sessions_none;
+    listEl.append(p);
+    return;
+  }
+  for (const x of live) {
+    const label = document.createElement('label');
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.checked = (x.rooms || []).includes(sessRoom);
+    box.addEventListener('change', () => { toggleSession(x, box.checked); });
+    const nm = document.createElement('span');
+    nm.textContent = fmt(T.rooms.session_on, { name: x.name, computer: x.host || T.cc.computer, handle: x.handle });
+    label.append(box, nm);
+    listEl.append(label);
+  }
+};
+const toggleSession = async (x, on) => {
+  const entry = savedRooms().find((r) => r.room === sessRoom);
+  if (!entry || !entry.key) return;
+  sessState.textContent = '';
+  let got = null;
+  try { got = await sendRoomMsg(x.sid, on ? roomAddMsg(entry, trustedComputers()) : { t: 'room-drop', room: entry.room }); } catch (_) {}
+  if (!got) sessState.textContent = T.rooms.session_failed;
+};
+const openSess = (roomName) => {
+  const entry = savedRooms().find((r) => r.room === roomName);
+  if (!entry || !myDev) return;
+  sessRoom = roomName;
+  document.getElementById('comms-sess-title').textContent = fmt(T.rooms.sessions_title, { label: entry.label || entry.room });
+  sessState.textContent = '';
+  paintSess();
+  sessEl.hidden = false;
+};
 
 let oldLinkFor = null;
 const paintOldLink = (roomName) => {
@@ -1809,13 +1983,17 @@ const renderRemoteChat = (item, opts = {}) => {
   }
   let who = displayName(item.senderId);
   if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
-  const verified = !!(item.signer && item.signer.fp);
+  let verified = !!(item.signer && item.signer.fp);
   const signedName = verified ? signerName(item.signer) : null;
   if (signedName) who = signedName;
-  if (item.signer && item.signer.sigFp && !item.signer.me && !opts.stored) noteRoomMember({ sigFp: item.signer.sigFp, name: who, spub: item.signer.spub });
+  if (item.agent) {
+    who = item.agent.who;
+    verified = !!item.agent.verified;
+    if (!opts.stored && item.signer && item.agent.raw) noteRoomAgent({ sigFp: item.agent.sigFp, spub: item.signer.spub, name: item.agent.raw.name, handle: item.agent.handle, host: item.agent.raw.host, on: true, ts: item.ts });
+  } else if (item.signer && item.signer.sigFp && !item.signer.me && !opts.stored) noteRoomMember({ sigFp: item.signer.sigFp, name: who, spub: item.signer.spub });
   if (files) renderAttachment(who, item.parts, { peerId: item.senderId, sender: item.sfp2 || item.sfp || item.senderId || null, ts: item.ts, verified });
   else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts, verified });
-  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '', signer: item.signer || undefined }, item.parts);
+  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '', signer: item.signer || undefined, agent: item.agent ? { who: item.agent.who, verified: !!item.agent.verified, handle: item.agent.handle, sigFp: item.agent.sigFp } : undefined }, item.parts);
   if (files) receiveAttachments(item, false);
   if (!opts.silent) {
     playPing(880);
@@ -1833,7 +2011,7 @@ const handleNostrMsg = async (msgEvent) => {
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     if (!content || !content.cmid || !content.enc || !chatKey || seenCmids.has(content.cmid)) return;
-    let text, sfp = null, sfp2 = null, parts = null, sig = null;
+    let text, sfp = null, sfp2 = null, parts = null, sig = null, agent = null;
     try {
       const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
       text = unpacked.text;
@@ -1842,13 +2020,15 @@ const handleNostrMsg = async (msgEvent) => {
       parts = unpacked.parts;
       if (unpacked.sg) sig = await verifyBody(unpacked.obj, currentRoomName, content.cmid);
       if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp, sig, typeof content.ts === 'number' ? content.ts : (ev.created_at || 0) * 1000); return; }
+      agent = unpacked.obj ? agentSender(unpacked.obj, sig, trustedComputers()) : null;
+      if (agent) agent.raw = unpacked.obj.agent;
     } catch { return; }
     seenCmids.add(content.cmid);
     const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts, signer: signerFor(sig) };
+    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts, signer: signerFor(sig), agent };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1915,90 +2095,380 @@ const MAX_SEND = 2 * 1024 * 1024 * 1024;
 let attach = null;
 let selfRoom = null;
 const myDevice = deviceInfo(T);
-const AGENTS_KEY = 'mentria.comms.agents_on';
 const AGENT_SESSIONS_KEY = 'mentria.comms.agent_sessions';
-try { if (new URLSearchParams(window.location.search).get('agents') === '1') localStorage.setItem(AGENTS_KEY, '1'); } catch (_) {}
-const agentsOn = () => { try { return localStorage.getItem(AGENTS_KEY) === '1'; } catch (_) { return false; } };
 const IOS_DEVICE = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-let bridge = null;
-let bridgeK = null;
-let bridgeResubscribe = null;
+const bridge = createMultiClient();
+bridge.on('room-ok', (m) => {
+  const w = m && typeof m.cmid === 'string' ? roomWaiters.get(m.cmid) : null;
+  if (w) { roomWaiters.delete(m.cmid); w(m); }
+  if (!m || !sessRoom || m.room !== sessRoom) return;
+  sessState.textContent = m.ok ? (m.on ? T.rooms.session_added : T.rooms.session_removed) : T.rooms.session_failed;
+});
+bridge.on('here', () => { if (!sessEl.hidden) paintSess(); flushPending(); });
+const ccClients = new Map();
 let agentsSig = '';
 const knownAgents = () => { try { const v = JSON.parse(localStorage.getItem(AGENT_SESSIONS_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => x && typeof x.sid === 'string') : []; } catch (_) { return []; } };
 const agentList = () => {
-  if (!agentsOn()) return [];
-  const live = bridge ? bridge.sessions() : [];
-  const byId = new Map(knownAgents().map((a) => [a.sid, { sid: a.sid, name: a.name, online: false, busy: false, lastTs: a.lastTs || 0 }]));
-  for (const x of live) byId.set(x.sid, { sid: x.sid, name: x.name, online: x.online, busy: x.busy, lastTs: x.lastTs || 0 });
-  return Array.from(byId.values()).map((a) => Object.assign(a, { preview: a.online ? T.agent.running : T.agent.offline }));
+  const live = liveComputers();
+  if (!live.length) return [];
+  const cids = new Set(live.map((r) => r.cid));
+  const byId = new Map(knownAgents().filter((a) => !a.cid || cids.has(a.cid)).map((a) => [a.sid, { sid: a.sid, name: a.name, cid: a.cid, online: false, busy: false, lastTs: a.lastTs || 0 }]));
+  for (const x of bridge.sessions()) byId.set(x.sid, { sid: x.sid, name: x.name, cid: x.cid, host: x.host, online: x.online, busy: x.busy, lastTs: x.lastTs || 0 });
+  return Array.from(byId.values()).map((a) => Object.assign(a, { preview: a.online ? (a.host ? fmt(T.agent.running_on, { name: a.host }) : T.agent.running) : T.agent.offline }));
 };
 const paintAgents = () => {
-  const box = document.getElementById('comms-agents');
-  if (box) {
-    const ps = pairSection({ on: agentsOn(), ready: !!bridgeK, phone: IOS_DEVICE || /Android/i.test(navigator.userAgent), T: T.agent });
-    box.hidden = ps.hidden;
-    document.getElementById('comms-agents-copy').textContent = ps.label;
-    document.getElementById('comms-agents-note').textContent = ps.note;
-  }
   const list = agentList();
-  if (bridge) {
-    const keep = list.map((a) => ({ sid: a.sid, name: a.name, lastTs: a.lastTs }));
+  if (ccClients.size) {
+    const keep = list.map((a) => ({ sid: a.sid, name: a.name, cid: a.cid, lastTs: a.lastTs }));
     try { localStorage.setItem(AGENT_SESSIONS_KEY, JSON.stringify(keep.slice(-20))); } catch (_) {}
   }
   const sig = JSON.stringify(list.map((a) => [a.sid, a.name, a.online, a.busy]));
   if (sig !== agentsSig) { agentsSig = sig; renderContacts(); }
+  paintComputers();
 };
 let agentView = null;
 const agentViewFor = () => agentView || (agentView = createAgentView({ els, T, client: bridge, nameOf: (sid) => (agentList().find((a) => a.sid === sid) || {}).name || '', onOpen: (sid, id, title) => agentViewFor().open(sid, id, title || T.agent.kind_subagent) }));
 const openAgent = async (sid) => {
-  if (!bridge) return;
+  if (!ccClients.size) return;
   if (aiView && aiView.isOpen()) aiView.close();
   await leaveRoom();
   setView('chat');
   agentViewFor().open(sid);
 };
-const startBridge = async () => {
-  if (bridge || !myId || !mySign || !agentsOn()) return;
-  let secret;
-  try { secret = secretCopy(); } catch (_) { return; }
-  bridgeK = await bridgeKeyFromSecret(secret);
-  try { secret.fill(0); } catch (_) {}
-  const keys = await keysFromBridgeKey(bridgeK);
-  const handlers = new Set();
-  const subId = 'br-' + Math.random().toString(36).slice(2);
-  let attached = null;
-  const onMsg = (e) => {
-    let m;
-    try { m = JSON.parse(e.data); } catch (_) { return; }
-    if (Array.isArray(m) && m[0] === 'EVENT' && m[1] === subId && m[2] && m[2].kind === BRIDGE_KIND) for (const fn of handlers) fn(m[2].content);
-  };
-  bridgeResubscribe = async () => {
-    const ws = await ensureSideSocket();
-    if (!ws) return;
-    if (attached !== ws) { ws.addEventListener('message', onMsg); attached = ws; }
-    ws.send(JSON.stringify(['REQ', subId, { kinds: [BRIDGE_KIND], '#x': [keys.topic], since: Math.floor(Date.now() / 1000) - 60 }]));
-  };
-  const transport = {
-    publish: async (content) => {
-      const ev = await createPersistentEvent(BRIDGE_KIND, keys.topic, content, []);
-      const ws = await ensureSideSocket();
-      if (ws) ws.send(ev);
-    },
-    onEvent: (fn) => { handlers.add(fn); }
-  };
-  bridge = createBridgeClient({ transport, keys, device: myDevice.name, sign: (sid, cmid, body) => signBody(mySign.signKey, mySign.spub, 'bridge:' + sid, cmid, body) });
-  bridge.on('here', paintAgents);
-  await bridgeResubscribe();
-  bridge.hello();
-  setInterval(() => { if (bridge && !document.hidden) bridge.hello(); }, 60000);
-  setInterval(paintAgents, 30000);
-  paintAgents();
+const ccTopics = new Map();
+const ccSubId = 'cc-' + Math.random().toString(36).slice(2);
+let ccAttached = null;
+let ccResubTimer = null;
+const ccOnMsg = (e) => {
+  let m;
+  try { m = JSON.parse(e.data); } catch (_) { return; }
+  if (!Array.isArray(m) || m[0] !== 'EVENT' || m[1] !== ccSubId || !m[2] || m[2].kind !== BRIDGE_KIND || !Array.isArray(m[2].tags)) return;
+  const x = m[2].tags.find((t) => Array.isArray(t) && t[0] === 'x');
+  const fns = x && ccTopics.get(x[1]);
+  if (fns) for (const fn of Array.from(fns)) fn(m[2].content);
 };
-document.getElementById('comms-agents-copy').addEventListener('click', async () => {
-  if (!bridgeK || !mySign) return;
-  try { await navigator.clipboard.writeText(bridgeCode({ k: bridgeK, spub: mySign.spub, sigFp: mySign.sigFp })); notice(T.agent.copied); } catch (_) { notice(T.agent.copy_failed); }
+const ccResubscribe = async () => {
+  const ws = await ensureSideSocket();
+  if (!ws) return;
+  if (ccAttached !== ws) { ws.addEventListener('message', ccOnMsg); ccAttached = ws; }
+  if (!ccTopics.size) { ws.send(JSON.stringify(['CLOSE', ccSubId])); return; }
+  ws.send(JSON.stringify(['REQ', ccSubId, { kinds: [BRIDGE_KIND], '#x': Array.from(ccTopics.keys()), since: Math.floor(Date.now() / 1000) - 60 }]));
+};
+const ccSoon = () => { clearTimeout(ccResubTimer); ccResubTimer = setTimeout(() => { ccResubscribe().catch(() => {}); }, 30); };
+const ccWatch = (topic, fn) => {
+  if (!ccTopics.has(topic)) ccTopics.set(topic, new Set());
+  ccTopics.get(topic).add(fn);
+  ccSoon();
+  return () => { const set = ccTopics.get(topic); if (set) { set.delete(fn); if (!set.size) ccTopics.delete(topic); } ccSoon(); };
+};
+const ccPublish = async (topic, content) => {
+  const ev = await createPersistentEvent(BRIDGE_KIND, topic, content, []);
+  const ws = await ensureSideSocket();
+  if (ws) ws.send(ev);
+  return !!ws;
+};
+const ccHello = () => helloFields({ ring: ringToken, list: devTrust() });
+const stopComputer = (cid) => {
+  const e = ccClients.get(cid);
+  if (e) { try { e.off(); } catch (_) {} }
+  ccClients.delete(cid);
+  ccTrusted.delete(cid);
+  bridge.remove(cid);
+};
+let ccStarting = null;
+const startComputerChannels = () => ccStarting || (ccStarting = (async () => {
+  if (!myDev) return;
+  const live = liveComputers();
+  const want = new Set(live.map((r) => r.cid));
+  for (const cid of Array.from(ccClients.keys())) if (!want.has(cid)) stopComputer(cid);
+  for (const rec of live) {
+    const cur = ccClients.get(rec.cid);
+    if (cur && cur.kver === rec.kver) continue;
+    if (cur) stopComputer(rec.cid);
+    if (!(await verifyComputer(rec, devTrust(), myDev.sign.sigFp))) continue;
+    ccTrusted.set(rec.cid, { cid: rec.cid, name: rec.name || '', spub: rec.spub });
+    if (!(rec.approvals || []).some((a) => a && a.sg && a.sg.pub && a.sg.pub.x === myDev.sign.spub.x && a.sg.pub.y === myDev.sign.spub.y)) {
+      try { MentriaStore.set('comms', 'computers', mergeComputerRecords(getComputers(), { v: 1, list: [Object.assign({}, rec, { approvals: (rec.approvals || []).concat([await approveComputer(rec, myDev)]) })] })); } catch (_) {}
+    }
+    const K = await unwrapChannelKey(rec, myDev);
+    if (!K) continue;
+    const keys = await keysFromBridgeKey(K);
+    const handlers = new Set();
+    const off = ccWatch(keys.topic, (c) => { for (const fn of handlers) fn(c); });
+    const client = createBridgeClient({
+      transport: { publish: (c) => ccPublish(keys.topic, c), onEvent: (fn) => { handlers.add(fn); } },
+      keys,
+      device: myDevice.name,
+      sign: (sid, cmid, body) => signBody(myDev.sign.signKey, myDev.sign.spub, 'bridge:' + sid, cmid, body),
+      host: { spub: rec.spub, room: 'cc:' + rec.cid },
+      hello: ccHello
+    });
+    const entry = { client, off, kver: rec.kver, seen: 0, name: rec.name, topic: keys.topic };
+    client.on('here', (m) => {
+      const first = !entry.seen;
+      entry.seen = Date.now();
+      if (first && agentView && agentView.isOpen()) agentView.resume();
+      const gone = (m.sessions || []).filter((x) => x && x.gone).map((x) => x.sid);
+      if (gone.length) { try { localStorage.setItem(AGENT_SESSIONS_KEY, JSON.stringify(knownAgents().filter((a) => !gone.includes(a.sid)))); } catch (_) {} }
+      paintAgents();
+    });
+    client.on('cc-rekey', (m) => { applyHostKeys(rec.cid, m).catch(() => {}); });
+    client.on('cc-keys', (m) => { applyHostKeys(rec.cid, m).catch(() => {}); });
+    ccClients.set(rec.cid, entry);
+    bridge.add(rec.cid, client);
+    client.hello().catch(() => {});
+  }
+  paintAgents();
+})().catch(() => {}).finally(() => { ccStarting = null; }));
+setInterval(() => { if (ccClients.size && !document.hidden) bridge.hello().catch(() => {}); }, 60000);
+setInterval(paintAgents, 30000);
+const paintComputers = () => {
+  const sec = document.getElementById('comms-computers');
+  const ul = document.getElementById('comms-computers-list');
+  if (!sec || !ul) return;
+  const live = myDev ? liveComputers() : [];
+  sec.hidden = !live.length;
+  if (sec.hidden) return;
+  ul.replaceChildren(...live.map((rec) => {
+    const li = document.createElement('li');
+    li.className = 'comms__dev';
+    const name = document.createElement('span');
+    name.className = 'comms__dev-name';
+    name.textContent = rec.name || T.cc.computer;
+    const meta = document.createElement('span');
+    meta.className = 'comms__dev-meta';
+    const seen = (ccClients.get(rec.cid) || {}).seen || 0;
+    meta.textContent = seen && Date.now() - seen < HERE_TTL_MS ? T.cc.online : seen ? fmt(T.cc.last_seen, { when: new Date(seen).toLocaleTimeString(LANG, { hour: '2-digit', minute: '2-digit' }) }) : T.cc.not_seen;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'comms__btn comms__btn--ghost';
+    b.textContent = T.cc.disconnect;
+    b.addEventListener('click', () => disconnectOne(rec));
+    li.append(name, meta, b);
+    return li;
+  }));
+};
+const disconnectOne = async (rec) => {
+  const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.cc.disconnect_confirm, { name: rec.name || T.cc.computer }), { danger: true }) : Promise.resolve(false));
+  if (!ok) return;
+  const e = ccClients.get(rec.cid);
+  await disconnectComputer({ cid: rec.cid, client: e ? e.client : null, me: myDev });
+  stopComputer(rec.cid);
+  notice(fmt(T.cc.disconnected, { name: rec.name || T.cc.computer }));
+  paintAgents();
+  const rooms = roomsWithComputer(savedRooms(), rec.spub);
+  if (rooms.length && mySign) {
+    sys(fmt(T.rooms.disconnect_lock, { name: rec.name || T.cc.computer, rooms: rooms.map((r) => { const e = savedRooms().find((x) => x.room === r); return (e && e.label) || r; }).join(', ') }));
+    openLock(rooms[0], (a) => samePubOf(a.spub, rec.spub));
+  }
+};
+let ccFlow = null;
+const showCc = ({ text = '', code = '', note = '', ask = false, done = false } = {}) => {
+  const bar = document.getElementById('comms-cc');
+  if (!bar) return;
+  bar.hidden = !text;
+  document.getElementById('comms-cc-text').textContent = text;
+  const c = document.getElementById('comms-cc-code');
+  c.hidden = !code;
+  c.textContent = code;
+  const n = document.getElementById('comms-cc-note');
+  n.hidden = !note;
+  n.textContent = note;
+  document.getElementById('comms-cc-approve').hidden = !ask;
+  document.getElementById('comms-cc-later').textContent = done ? T.cc.ok : T.invite.not_now;
+};
+const startCc = async () => {
+  const lockNote = document.getElementById('comms-lock-cc');
+  if (lockNote) lockNote.hidden = !ccLink;
+  if (!ccLink || !myDev) return;
+  const S = ccLink;
+  ccLink = null;
+  if (lockNote) lockNote.hidden = true;
+  if (ccFlow) ccFlow.cancel();
+  const trust = devTrust();
+  if (!trust || !DEV.trustedFps(trust).includes(myDev.sign.sigFp)) { showCc({ text: T.cc.not_trusted, done: true }); return; }
+  showCc({ text: T.cc.opening });
+  let offer = null;
+  const flow = acceptPairing({ S, me: myDev, entry: myDevEntry(), list: trust, ring: ringToken || '', transport: { publish: ccPublish, subscribe: ccWatch } });
+  ccFlow = flow;
+  const quiet = setTimeout(() => { if (ccFlow === flow && !offer) { flow.cancel(); showCc({ text: T.cc.expired, done: true }); } }, 20000);
+  flow.onOffer((o) => { offer = o; clearTimeout(quiet); showCc({ text: fmt(T.cc.connect_title, { name: o.name || T.cc.computer }), note: T.cc.approve_note, ask: true }); });
+  flow.onCode(({ code }) => { showCc({ text: fmt(T.cc.confirm, { code }), code, note: T.cc.check_note }); });
+  flow.onConflict(() => { clearTimeout(quiet); flow.cancel(); showCc({ text: T.cc.conflict, done: true }); });
+  flow.onDenied(() => { showCc({ text: T.cc.denied, done: true }); });
+  flow.onReady((rec) => { showCc({ text: fmt(T.cc.connected, { name: rec.name || T.cc.computer }), done: true }); startComputerChannels(); });
+};
+document.getElementById('comms-cc-approve').addEventListener('click', async () => {
+  const flow = ccFlow;
+  if (!flow) return;
+  try {
+    await flow.approve();
+    showCc({ text: T.cc.waiting_code });
+  } catch (_) { showCc({ text: T.cc.expired, done: true }); }
 });
+document.getElementById('comms-cc-later').addEventListener('click', () => { if (ccFlow && ccFlow.state() !== 'ready') ccFlow.cancel(); ccFlow = null; showCc({}); });
+window.addEventListener('mentria:write', (e) => { const d = e.detail || {}; if (myDev && d.ns === 'comms' && d.key === 'computers') startComputerChannels(); });
 const presence = new Presence();
+let myDev = null;
+let devAsk = null;
+let devAdopt = null;
+const devHidden = new Set();
+let devBusy = null;
+let devAgain = false;
+const devGet = (k) => { try { return MentriaStore.get('comms', k); } catch (_) { return null; } };
+const devSet = (k, v) => { try { return MentriaStore.set('comms', k, v); } catch (_) { return false; } };
+const devTrust = () => devGet('devtrust');
+const devKind = (k) => (T.devices && T.devices['kind_' + k]) || '';
+const devLabel = (e) => { const k = devKind(e && e.kind); const n = (e && e.name) || ''; return k && n && k !== n ? n + ' (' + k + ')' : (n || k || (e && e.sigFp) || ''); };
+const myDevEntry = () => ({ sigFp: myDev.sign.sigFp, spub: myDev.sign.spub, dh: myDev.dh.pub, name: myDevice.name, kind: myDevice.kind, added: Date.now() });
+const paintDevices = (list) => {
+  const sec = document.getElementById('comms-devs');
+  const ul = document.getElementById('comms-devs-list');
+  const note = document.getElementById('comms-devs-note');
+  if (!sec || !ul) return;
+  sec.hidden = !list || !myDev;
+  if (sec.hidden) return;
+  const fp = myDev.sign.sigFp;
+  const trusted = DEV.trustedFps(list);
+  const mine = trusted.includes(fp);
+  ul.replaceChildren(...list.devices.filter((d) => trusted.includes(d.sigFp)).map((d) => {
+    const li = document.createElement('li');
+    li.className = 'comms__dev';
+    const name = document.createElement('span');
+    name.className = 'comms__dev-name';
+    name.textContent = devLabel(d);
+    li.append(name);
+    if (d.sigFp === fp) {
+      const meta = document.createElement('span');
+      meta.className = 'comms__dev-meta';
+      meta.textContent = T.devices.this_device;
+      li.append(meta);
+    } else if (mine) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'comms__btn comms__btn--ghost';
+      b.textContent = T.devices.remove;
+      b.addEventListener('click', () => removeDevice(d));
+      li.append(b);
+    }
+    return li;
+  }));
+  note.textContent = (list.removed || []).includes(fp) ? T.devices.removed_here : mine ? T.devices.keys_note : T.devices.waiting;
+  const bar = document.getElementById('comms-devjoin');
+  const ask = mine && devAsk && !devHidden.has(devAsk.sigFp) ? devAsk : null;
+  bar.hidden = !ask && !devAdopt;
+  if (devAdopt) {
+    document.getElementById('comms-devjoin-text').textContent = fmt(T.devices.adopt_ask, { name: devLabel(devAdopt.signer), fp: devAdopt.signer.sigFp });
+    document.getElementById('comms-devjoin-add').textContent = T.devices.adopt;
+  } else if (ask) {
+    document.getElementById('comms-devjoin-text').textContent = fmt(T.devices.add_ask, { name: devLabel(ask) + ' · ' + ask.sigFp });
+    document.getElementById('comms-devjoin-add').textContent = T.devices.add;
+  }
+};
+const refreshDevicesOnce = async () => {
+  if (!myDev) return;
+  const fp = myDev.sign.sigFp;
+  let trust = devTrust();
+  const shared = devGet('devices');
+  if (!trust) {
+    trust = await DEV.makeGenesis(myDev, myDevEntry());
+    devSet('devtrust', trust);
+    if (!shared) devSet('devices', trust);
+  }
+  let gone = [];
+  devAdopt = null;
+  if (shared && JSON.stringify(shared) !== JSON.stringify(trust)) {
+    if (await DEV.acceptList(trust, shared)) {
+      const keep = DEV.trustedFps(shared);
+      gone = trust.devices.filter((d) => !keep.includes(d.sigFp) && d.sigFp !== fp);
+      trust = shared;
+      devSet('devtrust', trust);
+      bridge.hello().catch(() => {});
+    } else {
+      const folded = shared.ver <= trust.ver ? await DEV.foldLists(trust, shared, myDev) : null;
+      if (folded) {
+        gone = folded.removed;
+        trust = folded.list;
+        devSet('devtrust', trust);
+        devSet('devices', trust);
+        bridge.hello().catch(() => {});
+      } else {
+        const signer = await DEV.canAdopt(trust, shared, fp);
+        if (signer && !devHidden.has('adopt:' + shared.by + ':' + shared.ver)) devAdopt = { list: shared, signer };
+        else if (!signer && (shared.ver <= trust.ver || !(await DEV.verifyList(shared)))) devSet('devices', trust);
+      }
+    }
+  }
+  if (gone.length) notice(fmt(T.devices.removed_elsewhere, { names: gone.map(devLabel).join(', ') }));
+  const joins = devGet('devjoin') || {};
+  const family = shared && (await DEV.verifyList(shared)) ? shared : trust;
+  if (!DEV.trustedFps(family).includes(fp) && !(family.removed || []).includes(fp) && !joins[fp]) {
+    const invite = devGet('devinvite');
+    devSet('devjoin', DEV.mergeJoins(joins, { [fp]: await DEV.makeJoin(myDevEntry(), invite && invite.nonce, myDev) }));
+  }
+  if (DEV.trustedFps(trust).includes(fp)) {
+    const invite = devGet('devinvite');
+    let changed = false;
+    for (const j of Object.values(joins)) {
+      if (!j || !j.entry || DEV.trustedFps(trust).includes(j.entry.sigFp)) continue;
+      const r = await DEV.handleJoin(trust, j, invite, myDev);
+      if (r.list) { trust = r.list; changed = true; notice(fmt(T.devices.added, { name: devLabel(j.entry) })); if (r.consumed) MentriaStore.remove('comms', 'devinvite'); }
+      else if (r.ask && !devAsk && !devHidden.has(r.ask.sigFp)) devAsk = r.ask;
+    }
+    if (changed) { devSet('devtrust', trust); devSet('devices', trust); bridge.hello().catch(() => {}); }
+    const done = Object.keys(joins).filter((k) => DEV.trustedFps(trust).includes(k) || (trust.removed || []).includes(k));
+    if (done.length) { const left = Object.assign({}, joins); done.forEach((k) => delete left[k]); if (Object.keys(left).length) devSet('devjoin', left); else MentriaStore.remove('comms', 'devjoin'); }
+    if (devAsk && (DEV.trustedFps(trust).includes(devAsk.sigFp) || (trust.removed || []).includes(devAsk.sigFp))) devAsk = null;
+  }
+  paintDevices(trust);
+};
+const refreshDevices = () => {
+  if (devBusy) { devAgain = true; return devBusy; }
+  devBusy = (async () => { do { devAgain = false; await refreshDevicesOnce(); } while (devAgain); })().catch(() => {}).finally(() => { devBusy = null; });
+  return devBusy;
+};
+const removeDevice = async (d) => {
+  const ok = await (typeof mentriaConfirm === 'function' ? mentriaConfirm(fmt(T.devices.remove_confirm, { name: devLabel(d) }), { danger: true }) : Promise.resolve(false));
+  if (!ok) return;
+  await refreshDevices();
+  const trust = devTrust();
+  if (!trust) return;
+  const next = await DEV.withoutDevice(trust, myDev, d.sigFp);
+  devSet('devtrust', next);
+  devSet('devices', next);
+  notice(fmt(T.devices.removed, { name: devLabel(d) }));
+  paintDevices(next);
+  bridge.hello().catch(() => {});
+};
+const initDevices = async () => {
+  myDev = await ensureDeviceKeys();
+  await refreshDevices();
+  startComputerChannels();
+  startCc();
+};
+document.getElementById('comms-devjoin-add').addEventListener('click', async () => {
+  if (devAdopt) {
+    const a = devAdopt;
+    devAdopt = null;
+    if (await DEV.canAdopt(devTrust(), a.list, myDev.sign.sigFp)) { devSet('devtrust', a.list); notice(T.devices.adopted); bridge.hello().catch(() => {}); }
+    refreshDevices();
+    return;
+  }
+  const ask = devAsk;
+  if (!ask) return;
+  devAsk = null;
+  const trust = devTrust();
+  try {
+    const next = await DEV.withDevice(trust, myDev, ask);
+    devSet('devtrust', next);
+    devSet('devices', next);
+    bridge.hello().catch(() => {});
+    notice(fmt(T.devices.added, { name: devLabel(ask) }));
+  } catch (_) {}
+  refreshDevices();
+});
+document.getElementById('comms-devjoin-later').addEventListener('click', () => { if (devAdopt) devHidden.add('adopt:' + devAdopt.list.by + ':' + devAdopt.list.ver); else if (devAsk) devHidden.add(devAsk.sigFp); devAdopt = null; devAsk = null; paintDevices(devTrust()); });
+window.addEventListener('mentria:write', (e) => { const d = e.detail || {}; if (myDev && d.remote && d.ns === 'comms' && (d.key === 'devices' || d.key === 'devjoin' || d.key === 'devinvite')) refreshDevices(); });
 const AI_HOSTING = myDevice.kind !== 'iphone' && myDevice.kind !== 'ipad';
 const aiLocal = AI_HOSTING ? createLocalEngine() : null;
 let aiBar = null;
@@ -2432,7 +2902,7 @@ const renderStored = (m) => {
     return;
   }
   const meta = m.meta || {};
-  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts, signer: meta.signer || null }, { silent: true, stored: true });
+  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts, signer: meta.signer || null, agent: meta.agent && typeof meta.agent.who === 'string' ? meta.agent : null }, { silent: true, stored: true });
 };
 
 const setEarlier = (beforeTs) => {
@@ -2712,6 +3182,13 @@ const handleRoomCtl = (ctl, sfp, sig, at) => {
   if (!ctl || !currentRoomName || isDmRoom(currentRoomName)) return;
   if (ctl.k === 'joined') { onJoinedCtl(ctl, sig, at); return; }
   if (ctl.k === 'locked') { onLockedCtl(ctl, sig, at); return; }
+  if (ctl.k === 'agent') {
+    if (!sig || !sig.ok) return;
+    const comp = trustedComputers().find((c) => samePubOf(c.spub, sig.spub));
+    if (!comp) return;
+    noteRoomAgent({ sigFp: sig.sigFp, spub: sig.spub, name: ctl.name, handle: ctl.handle, host: (comp && comp.name) || ctl.host, on: ctl.on !== false, ts: at || Date.now() });
+    return;
+  }
   if (ctl.k !== 'ring') return;
   const token = (typeof ctl.token === 'string' && RING_TOKEN_RE.test(ctl.token)) ? ctl.token : null;
   if (!token || (ringToken && token === ringToken)) return;
@@ -2733,7 +3210,8 @@ const sealPlain = (text, cmid, extra) => {
   const body = packChatBody(text, { fp: myFp, legacyFp: myLegacyFp }, extra);
   const room = currentRoomName;
   const signer = mySign;
-  const out = (signer && room && cmid ? signBody(signer.signKey, signer.spub, room, cmid, body).catch(() => body) : Promise.resolve(body)).then((o) => JSON.stringify(o));
+  const dev = myDev && myDev.sign ? { signKey: myDev.sign.signKey, spub: myDev.sign.spub } : null;
+  const out = ((signer || dev) && room && cmid ? signRoomBody(body, room, cmid, signer, dev).catch(() => body) : Promise.resolve(body)).then((o) => JSON.stringify(o));
   if (cmid) {
     sealCache.set(cmid, out);
     if (sealCache.size > 200) sealCache.delete(sealCache.keys().next().value);
@@ -3303,6 +3781,57 @@ els.join.addEventListener('click', () => {
 });
 
 const aiHoldEnter = (e) => { if (e.key === 'Enter' && aiView && aiView.isOpen() && aiView.busy()) e.preventDefault(); };
+const roomAt = document.getElementById('comms-room-at');
+let roomAtItems = [];
+let roomAtIndex = 0;
+const roomAgentTargets = () => {
+  if (!currentRoomName || isDmRoom(currentRoomName) || (agentView && agentView.isOpen()) || (aiView && aiView.isOpen())) return [];
+  const e = savedRooms().find((r) => r.room === currentRoomName);
+  return e ? agentsOf(e).map((a) => ({ kind: 'agent', id: a.key, label: a.handle, name: a.name, host: a.host })) : [];
+};
+const closeRoomAt = () => { roomAt.hidden = true; roomAt.replaceChildren(); roomAtItems = []; roomAtIndex = 0; };
+const pickRoomAt = (i) => {
+  const t = roomAtItems[i];
+  if (!t) return;
+  const r = insertTag(els.msg.value, els.msg.selectionStart, t.label);
+  els.msg.value = r.text;
+  els.msg.setSelectionRange(r.caret, r.caret);
+  closeRoomAt();
+  els.msg.focus();
+};
+const renderRoomAt = () => {
+  const q = mentionQuery(els.msg.value, els.msg.selectionStart);
+  roomAtItems = q == null ? [] : matchTargets(q, roomAgentTargets());
+  if (!roomAtItems.length) { closeRoomAt(); return; }
+  roomAtIndex = Math.min(roomAtIndex, roomAtItems.length - 1);
+  roomAt.replaceChildren();
+  roomAtItems.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'comms__at-i';
+    b.setAttribute('role', 'option');
+    b.setAttribute('aria-selected', String(i === roomAtIndex));
+    const av = document.createElement('span');
+    av.className = 'comms__avatar comms__avatar--agent';
+    av.setAttribute('aria-hidden', 'true');
+    av.textContent = '>_';
+    const label = document.createElement('span');
+    label.textContent = '@' + t.label + ' · ' + t.name + (t.host ? ' · ' + t.host : '');
+    b.append(av, label);
+    b.addEventListener('mousedown', (e) => e.preventDefault());
+    b.addEventListener('click', () => pickRoomAt(i));
+    roomAt.append(b);
+  });
+  roomAt.hidden = false;
+};
+els.msg.addEventListener('input', renderRoomAt);
+els.msg.addEventListener('blur', () => setTimeout(closeRoomAt, 150));
+els.msg.addEventListener('keydown', (e) => {
+  if (roomAt.hidden || !roomAtItems.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); roomAtIndex = (roomAtIndex + (e.key === 'ArrowDown' ? 1 : roomAtItems.length - 1)) % roomAtItems.length; renderRoomAt(); return; }
+  if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); e.stopImmediatePropagation(); pickRoomAt(roomAtIndex); return; }
+  if (e.key === 'Escape') { e.preventDefault(); closeRoomAt(); }
+}, true);
 els.msg.addEventListener('keydown', aiHoldEnter);
 els.msg.addEventListener('keypress', aiHoldEnter);
 els.send.addEventListener('submit', async (e) => {
@@ -3582,7 +4111,17 @@ const sendFiles = async (fileList) => {
 };
 
 els.drop.addEventListener('drop', (e) => { sendFiles(e.dataTransfer.files); });
-els.file.addEventListener('change', (e) => { sendFiles(e.target.files); e.target.value = ''; });
+els.file.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  if (agentView && agentView.isOpen()) {
+    const caption = els.msg.value.trim();
+    els.msg.value = '';
+    (async () => { for (let i = 0; i < Math.min(files.length, 5); i++) await agentView.sendFile(files[i], i === 0 ? caption : ''); })();
+    return;
+  }
+  sendFiles(files);
+});
 
 const pickerEl = document.getElementById('comms-picker');
 const pickerListEl = document.getElementById('comms-picker-list');
@@ -4092,7 +4631,7 @@ const ensureSideSocket = () => {
       sideWs = ws;
       const isReconnect = sideOpens++ > 0;
       done(ws);
-      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); if (bridgeResubscribe) bridgeResubscribe().then(() => { if (agentView && agentView.isOpen()) agentView.resume(); }); }
+      if (isReconnect && myId) { subscribeInbox(); subscribeUnread(); if (ccTopics.size) ccResubscribe().then(() => { if (agentView && agentView.isOpen()) agentView.resume(); }); }
     });
     ws.addEventListener('error', () => { done(null); });
     ws.addEventListener('close', () => {
@@ -4691,7 +5230,7 @@ const initIdentity = async () => {
     myLegacyFp = await CID.legacyFingerprint(myId.publicJwk);
     try { mySign = await CID.ensureSigningKey(); } catch (_) { mySign = null; }
     if (mySign) { try { mySign.link = { spub: mySign.spub, s: await signLink(mySign.signKey, myId.publicJwk) }; } catch (_) { mySign.link = null; } }
-    startBridge().catch(() => {});
+    initDevices().catch(() => {});
     if (els.idSig) { els.idSig.hidden = !mySign; els.idSig.textContent = mySign ? fmt(T.sign.my_key, { fp: mySign.sigFp }) : ''; }
     openHistory();
     try { await CID.migrateFingerprints(); } catch (_) {}
@@ -5650,7 +6189,15 @@ const roomRow = (r, info) => {
   lk.textContent = T.roomlock.short;
   lk.hidden = !mySign;
   lk.addEventListener('click', (e) => { e.stopPropagation(); openLock(r.room); });
-  row.append(bell, inv, lk, ren, rm);
+  const ss = document.createElement('button');
+  ss.type = 'button';
+  ss.className = 'comms__rowbtn comms__rowbtn--text';
+  ss.title = T.rooms.sessions;
+  ss.setAttribute('aria-label', T.rooms.sessions);
+  ss.textContent = '>_';
+  ss.hidden = !ccTrusted.size;
+  ss.addEventListener('click', (e) => { e.stopPropagation(); openSess(r.room); });
+  row.append(bell, inv, ss, lk, ren, rm);
   return row;
 };
 
@@ -6239,6 +6786,8 @@ if (hasHash) {
   });
 }
 window.addEventListener('hashchange', () => {
+  const cc = parseCcLink(window.location.hash);
+  if (cc) { window.history.replaceState(null, '', window.location.pathname + window.location.search); ccLink = cc; startCc(); return; }
   const invite = parseInvite(window.location.hash);
   if (invite) { openInviteLink(invite); return; }
   const raw = parseHash(window.location.hash);

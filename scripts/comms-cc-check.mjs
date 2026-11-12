@@ -1,0 +1,608 @@
+import assert from 'node:assert/strict';
+import { mkdtempSync, writeFileSync, rmSync, existsSync } from 'node:fs';
+import { register } from 'node:module';
+import { tmpdir } from 'node:os';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const repo = resolve(here, '..');
+const CC = process.env.MENTRIA_CC ? resolve(process.env.MENTRIA_CC) : '';
+const hasCC = !!CC && existsSync(join(CC, 'plugins/mentria/lib/pairing.js'));
+const tmp = mkdtempSync(join(tmpdir(), 'comms-cc-check-'));
+process.on('exit', () => rmSync(tmp, { recursive: true, force: true }));
+const hooksPath = join(tmp, 'hooks.mjs');
+writeFileSync(hooksPath, [
+  "let root = '';",
+  'export async function initialize(data) { root = data.root; }',
+  'export async function resolve(specifier, context, next) {',
+  "  if (specifier.startsWith('/assets/')) return { url: root + specifier, format: 'module', shortCircuit: true };",
+  '  return next(specifier, context);',
+  '}'
+].join('\n'));
+register(pathToFileURL(hooksPath).href, import.meta.url, { data: { root: pathToFileURL(join(repo, 'src')).href } });
+
+class MemoryStorage {
+  constructor() { this.map = new Map(); }
+  get length() { return this.map.size; }
+  key(i) { const k = Array.from(this.map.keys())[i]; return k === undefined ? null : k; }
+  getItem(k) { return this.map.has(String(k)) ? this.map.get(String(k)) : null; }
+  setItem(k, v) { this.map.set(String(k), String(v)); }
+  removeItem(k) { this.map.delete(String(k)); }
+  clear() { this.map.clear(); }
+}
+Object.defineProperty(globalThis, 'localStorage', { value: new MemoryStorage(), configurable: true, writable: true });
+globalThis.window = globalThis;
+const memStore = () => { const m = new Map(); return { get: (ns, k) => (m.has(ns + '.' + k) ? structuredClone(m.get(ns + '.' + k)) : null), set: (ns, k, v) => { m.set(ns + '.' + k, structuredClone(v)); return true; }, remove: (ns, k) => m.delete(ns + '.' + k) }; };
+let secret = new Uint8Array(32).fill(5);
+window.MentriaIdentity = { isSetUp: () => true, isUnlocked: () => true, getSecret: () => secret };
+
+const eq = (a, b) => assert.equal(a, b);
+const deepEq = (a, b) => assert.deepEqual(a, b);
+const ok = (v, m) => assert.ok(v, m);
+const tick = (ms = 30) => new Promise((r) => setTimeout(r, ms));
+
+const CCM = await import('/assets/js/comms/cc.js');
+const DV = await import('/assets/js/comms/devices.js');
+const DK = await import('/assets/js/comms/devkey.js');
+const SITE_WORDS = (await import('/assets/js/comms/cc-words.js')).WORDS;
+const P = hasCC ? await import(pathToFileURL(join(CC, 'plugins/mentria/lib/pairing.js')).href) : null;
+const PC = hasCC ? await import(pathToFileURL(join(CC, 'plugins/mentria/lib/crypto.js')).href) : null;
+const PW = hasCC ? await import(pathToFileURL(join(CC, 'plugins/mentria/lib/wire.js')).href) : null;
+const PSG = hasCC ? await import(pathToFileURL(join(CC, 'plugins/mentria/lib/sign.js')).href) : null;
+const PLUGIN_WORDS = hasCC ? (await import(pathToFileURL(join(CC, 'plugins/mentria/lib/words.js')).href)).WORDS : null;
+
+const createBus = () => {
+  const topics = new Map();
+  const get = (t) => { if (!topics.has(t)) topics.set(t, { events: [], subs: new Set() }); return topics.get(t); };
+  const publish = async (topic, content) => { const t = get(topic); t.events.push(content); for (const fn of t.subs) setTimeout(() => fn(content), 0); return true; };
+  const stream = (topic, onContent, { signal } = {}) => new Promise((done) => {
+    const t = get(topic);
+    for (const c of t.events) setTimeout(() => { if (!(signal && signal.aborted)) onContent(c); }, 0);
+    const fn = (c) => { if (!(signal && signal.aborted)) onContent(c); };
+    t.subs.add(fn);
+    if (signal) signal.addEventListener('abort', () => { t.subs.delete(fn); done(); }, { once: true });
+  });
+  const transport = { publish, subscribe: (topic, fn) => { const t = get(topic); t.subs.add(fn); return () => t.subs.delete(fn); } };
+  return { publish, stream, transport };
+};
+
+const siteDevice = async (name, kind) => {
+  window.MentriaStore = memStore();
+  secret = crypto.getRandomValues(new Uint8Array(32));
+  const me = await DK.ensureDeviceKeys();
+  const entry = { sigFp: me.sign.sigFp, spub: me.sign.spub, dh: me.dh.pub, name, kind, added: Date.now() };
+  return { me, entry, store: window.MentriaStore, secret };
+};
+const useDevice = (d) => { window.MentriaStore = d.store; secret = d.secret; };
+const computer = () => { const s = PC.p256Keygen(); const d = PC.p256Keygen(); return { name: 'studio', sign: { priv: s.priv, spub: s.pub }, dh: { priv: d.priv, pub: d.pub } }; };
+const family = async () => {
+  const A = await siteDevice('iPhone', 'iphone');
+  const B = await siteDevice('Mac', 'mac');
+  useDevice(A);
+  const list = await DV.withDevice(await DV.makeGenesis(A.me, A.entry), A.me, B.entry);
+  window.__trust = list;
+  return { A, B, list };
+};
+const pairOnce = async ({ offerEveryMs = 40, compNow } = {}) => {
+  const bus = createBus();
+  const { A, B, list } = await family();
+  const comp = computer();
+  const p = P.startPairing({ computer: comp, publish: bus.publish, stream: bus.stream, site: 'https://mentria.ai', offerEveryMs, now: compNow });
+  p.__computer = comp;
+  useDevice(A);
+  const S = CCM.parseCcLink('#' + p.link.split('#')[1]);
+  const phone = CCM.acceptPairing({ S, me: A.me, entry: A.entry, list, ring: 'ringA', transport: bus.transport });
+  return { bus, A, B, list, comp, p, S, phone };
+};
+
+const checks = [];
+const check = (name, fn, needsPlugin = true) => checks.push([name, fn, needsPlugin]);
+
+check('cc: parseCcLink reads only a well-formed link', () => {
+  const S = crypto.getRandomValues(new Uint8Array(32));
+  const enc = Buffer.from(S).toString('base64url');
+  deepEq(CCM.parseCcLink('#cc1.' + enc), S);
+  eq(CCM.parseCcLink('#cc1.' + enc + 'x'), null);
+  eq(CCM.parseCcLink('#cc2.' + enc), null);
+  eq(CCM.parseCcLink('#room/key'), null);
+  eq(CCM.parseCcLink(''), null);
+}, false);
+check('cc: computer records merge by kver and removal sticks', () => {
+  const k = { spub: { x: 'sx', y: 'sy' }, dh: { x: 'dx', y: 'dy' } };
+  const r = (o) => Object.assign({}, k, o);
+  const a = { v: 1, list: [r({ cid: 'c1', name: 'a', kver: 1, removed: false }), r({ cid: 'c2', name: 'b', kver: 3, removed: false })] };
+  const b = { v: 1, list: [r({ cid: 'c1', name: 'a', kver: 2, removed: false }), r({ cid: 'c2', name: 'b', kver: 1, removed: true }), r({ cid: 'c3', name: 'c', kver: 1, removed: false })] };
+  const m = CCM.mergeComputerRecords(a, b);
+  const by = Object.fromEntries(m.list.map((x) => [x.cid, x]));
+  eq(by.c1.kver, 2);
+  eq(by.c2.removed, true);
+  eq(by.c3.name, 'c');
+  deepEq(CCM.mergeComputerRecords(b, a).list.map((x) => x.cid).sort(), ['c1', 'c2', 'c3']);
+  eq(CCM.mergeComputerRecords(null, a), a);
+}, false);
+check('cc: words list identical in both repos', () => { deepEq(Array.from(SITE_WORDS), Array.from(PLUGIN_WORDS)); eq(SITE_WORDS.length, 256); });
+check('cc: full pairing over the memory gateway: codes match on both sides', async () => {
+  const { A, B, comp, p, S, phone } = await pairOnce();
+  let offer = null, accept = null, ready = null, code = null;
+  phone.onOffer((o) => { offer = o; });
+  phone.onCode((x) => { code = x.code; });
+  p.onAccept((a) => { accept = a; });
+  phone.onReady((r) => { ready = r; });
+  await tick(100);
+  ok(offer, 'offer');
+  eq(offer.name, 'studio');
+  eq(offer.cid, p.cid);
+  eq(offer.code, undefined);
+  await phone.approve();
+  await tick(100);
+  ok(accept, 'accept');
+  ok(code, 'code after the reveal');
+  eq(accept.code, code);
+  eq(accept.device.sigFp, A.entry.sigFp);
+  const res = await p.allow();
+  await tick(100);
+  ok(ready, 'ready');
+  const saved = window.MentriaStore.get('comms', 'computers');
+  eq(saved.list.length, 1);
+  eq(saved.list[0].cid, p.cid);
+  deepEq(await CCM.unwrapChannelKey(saved.list[0], A.me), res.K);
+  useDevice(B);
+  deepEq(await CCM.unwrapChannelKey(saved.list[0], B.me), res.K);
+});
+check('cc: a second phone that opens the same link after the first gets nothing', async () => {
+  const { bus, p, S, phone } = await pairOnce();
+  phone.onOffer(() => {});
+  await tick(80);
+  await phone.approve();
+  await tick(60);
+  await p.allow();
+  await tick(60);
+  const X = await siteDevice('Late', 'android');
+  const xl = await DV.makeGenesis(X.me, X.entry);
+  const late = CCM.acceptPairing({ S, me: X.me, entry: X.entry, list: xl, ring: '', transport: bus.transport });
+  let seen = 0;
+  late.onOffer(() => { seen++; });
+  await tick(250);
+  eq(seen, 0);
+  late.cancel();
+});
+check('cc: link older than 10 minutes is refused on both sides', async () => {
+  const { p, phone } = await pairOnce({ compNow: () => Date.now() - 600001 });
+  let seen = 0;
+  phone.onOffer(() => { seen++; });
+  await tick(150);
+  eq(seen, 0);
+  await assert.rejects(phone.approve());
+  p.cancel();
+});
+check('cc: deny on the computer leaves no computer record', async () => {
+  const { p, phone } = await pairOnce();
+  let denied = false, ready = false;
+  phone.onDenied(() => { denied = true; });
+  phone.onReady(() => { ready = true; });
+  p.onAccept(() => {});
+  await tick(80);
+  await phone.approve();
+  await tick(80);
+  await p.deny();
+  await tick(80);
+  ok(denied);
+  no(ready);
+  eq(window.MentriaStore.get('comms', 'computers'), null);
+});
+check('cc: a forged accept (bad signature or list) never reaches onAccept', async () => {
+  const { bus, A, p, S } = await pairOnce();
+  let n = 0;
+  p.onAccept(() => { n++; });
+  const X = await siteDevice('Evil', 'device');
+  const xl = await DV.makeGenesis(X.me, X.entry);
+  useDevice(A);
+  const wrongList = CCM.acceptPairing({ S, me: A.me, entry: A.entry, list: xl, ring: '', transport: bus.transport });
+  wrongList.onOffer(() => {});
+  await tick(80);
+  await wrongList.approve();
+  await tick(80);
+  eq(n, 0);
+  p.cancel();
+});
+check('cc: every device on the list can unwrap K; a device off the list cannot', async () => {
+  const { A, B, p, phone } = await pairOnce();
+  phone.onOffer(() => {});
+  await tick(80);
+  await phone.approve();
+  await tick(60);
+  const res = await p.allow();
+  await tick(80);
+  useDevice(A);
+  const rec = window.MentriaStore.get('comms', 'computers').list[0];
+  const C = await siteDevice('Off', 'device');
+  eq(await CCM.unwrapChannelKey(rec, C.me), null);
+  const stolen = Object.assign({}, rec, { wrapped: { [C.me.sign.sigFp]: rec.wrapped[A.me.sign.sigFp] } });
+  eq(await CCM.unwrapChannelKey(stolen, C.me), null);
+  useDevice(B);
+  deepEq(await CCM.unwrapChannelKey(rec, B.me), res.K);
+});
+check('cc: two offers on one link stop the pairing', async () => {
+  const { bus, p, S, phone } = await pairOnce();
+  const fakeOffer = { t: 'cc-offer', v: 1, cid: 'fakecid', name: 'evil', spub: computer().sign.spub, dh: computer().dh.pub, exp: Date.now() + 60000, commit: 'A'.repeat(43) };
+  let offers = 0, conflict = false;
+  phone.onOffer(() => { offers++; });
+  phone.onConflict(() => { conflict = true; });
+  await tick(80);
+  await bus.publish(PW.pairKeys(S).topic, PW.seal(PW.pairKeys(S).key, fakeOffer));
+  await tick(80);
+  ok(conflict);
+  await assert.rejects(phone.approve());
+  p.cancel();
+});
+
+const BRM = await import('/assets/js/comms/bridge.js');
+const SGM = await import('/assets/js/comms/sign.js');
+const memTransport = () => { const fns = new Set(); const sent = []; return { sent, publish: async (c) => { sent.push(c); }, onEvent: (fn) => fns.add(fn), feed: (c) => { for (const fn of fns) fn(c); } }; };
+const hostKey = async () => { const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']); const j = await crypto.subtle.exportKey('jwk', kp.publicKey); return { key: kp.privateKey, spub: { x: j.x, y: j.y } }; };
+const frameOut = async (keys, msg) => Promise.all(BRM.splitFrames(msg).map((f) => BRM.seal(keys.aes, f)));
+check('cc: host message with a bad or missing signature is dropped', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(3));
+  const host = await hostKey();
+  const other = await hostKey();
+  const t = memTransport();
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => body, host: { spub: host.spub, room: 'cc:c1' } });
+  const seen = [];
+  client.on('here', (m) => seen.push(m.sessions[0].name));
+  const here = (name) => ({ t: 'here', cmid: 'h:' + name, sessions: [{ sid: 's-' + name, name, busy: false, lastTs: 1 }], host: 'x' });
+  for (const c of await frameOut(keys, here('unsigned'))) t.feed(c);
+  for (const c of await frameOut(keys, await SGM.signBody(other.key, other.spub, 'cc:c1', 'h:forged', here('forged')))) t.feed(c);
+  for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c2', 'h:room', here('room')))) t.feed(c);
+  for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', 'h:good', here('good')))) t.feed(c);
+  for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', 'h:old', here('old'), Date.now() - 11 * 60000))) t.feed(c);
+  await tick(80);
+  deepEq(seen, ['good', 'old']);
+  deepEq(client.sessions().map((x) => x.name).sort(), ['good', 'old']);
+  eq(client.clockOff(), true);
+}, false);
+check('cc: hello carries the ring token and the newest list', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(4));
+  const t = memTransport();
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => body, hello: () => ({ ring: 'r1', list: { v: 1, ver: 3 } }) });
+  await client.hello();
+  const r = new BRM.Reassembler();
+  let m = null;
+  for (const c of t.sent) m = r.push(await BRM.open(keys.aes, c)) || m;
+  eq(m.t, 'hello');
+  eq(m.ring, 'r1');
+  eq(m.list.ver, 3);
+}, false);
+check('cc: the combined client routes each session to its computer', async () => {
+  const mk = () => { const calls = []; const subs = new Map(); let sessions = []; return { calls, set: (s) => { sessions = s; }, emit: (t, m) => { for (const fn of subs.get(t) || []) fn(m); }, client: { on: (t, fn) => { if (!subs.has(t)) subs.set(t, new Set()); subs.get(t).add(fn); return () => subs.get(t).delete(fn); }, hello: async (sid) => calls.push(['hello', sid]), watch: async (sid) => calls.push(['watch', sid]), say: async (sid, text) => { calls.push(['say', sid, text]); return 'c1'; }, verdict: async (sid) => calls.push(['verdict', sid]), answer: async (sid) => calls.push(['answer', sid]), list: async (sid) => calls.push(['list', sid]), open: async (sid) => calls.push(['open', sid]), get: async (sid) => calls.push(['get', sid]), reset: () => {}, channel: (sid) => sid === 'a1', sessions: () => sessions, turn: (sid, n) => ({ n, sid }), turns: (sid) => [sid.length] } }; };
+  const A = mk(), B = mk();
+  A.set([{ sid: 'a1', name: 'one', online: true }]);
+  B.set([{ sid: 'b1', name: 'two', online: true }]);
+  const multi = CCM.createMultiClient();
+  const heard = [];
+  multi.on('here', (m) => heard.push(m.x));
+  multi.add('ca', A.client);
+  multi.add('cb', B.client);
+  A.emit('here', { x: 1 });
+  B.emit('here', { x: 2 });
+  deepEq(heard, [1, 2]);
+  deepEq(multi.sessions().map((s) => [s.sid, s.cid]), [['a1', 'ca'], ['b1', 'cb']]);
+  await multi.say('b1', 'hi');
+  await multi.watch('a1');
+  deepEq(B.calls, [['say', 'b1', 'hi']]);
+  deepEq(A.calls, [['watch', 'a1']]);
+  eq(multi.channel('a1'), true);
+  eq(multi.channel('b1'), false);
+  await multi.hello();
+  deepEq(A.calls.slice(-1), [['hello', undefined]]);
+  deepEq(B.calls.slice(-1), [['hello', undefined]]);
+  multi.remove('ca');
+  deepEq(multi.sessions().map((s) => s.sid), ['b1']);
+  A.emit('here', { x: 3 });
+  deepEq(heard, [1, 2]);
+  eq(await multi.say('a1', 'gone').catch(() => 'refused'), 'refused');
+  const before = B.calls.length;
+  await multi.hello('new-sid');
+  await multi.open('new-sid', 0);
+  deepEq(B.calls.slice(before), [['hello', 'new-sid'], ['open', 'new-sid']]);
+}, false);
+check('cc: Disconnect sends a signed revoke and hides the computer', async () => {
+  const D = await siteDevice('iPhone', 'iphone');
+  window.MentriaStore.set('comms', 'computers', { v: 1, list: [{ cid: 'c9', name: 'studio', kver: 1, removed: false }] });
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(5));
+  const t = memTransport();
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => body });
+  await CCM.disconnectComputer({ cid: 'c9', client, me: D.me });
+  const r = new BRM.Reassembler();
+  let m = null;
+  for (const c of t.sent) m = r.push(await BRM.open(keys.aes, c)) || m;
+  eq(m.t, 'cc-revoke');
+  eq(m.cid, 'c9');
+  const v = await SGM.verifyBody(m, 'cc:c9', m.cmid);
+  eq(v.ok, true);
+  eq(v.sigFp, D.me.sign.sigFp);
+  eq(window.MentriaStore.get('comms', 'computers').list[0].removed, true);
+  deepEq(CCM.liveComputers().map((x) => x.cid), []);
+}, false);
+
+check('cc: a here with a gone session removes it', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(6));
+  const host = await hostKey();
+  const t = memTransport();
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => body, host: { spub: host.spub, room: 'cc:c1' } });
+  const send = async (cmid, sessions) => { for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', cmid, { t: 'here', cmid, sessions, host: 'Mac' }))) t.feed(c); };
+  await send('h1', [{ sid: 's1', name: 'one', busy: false, lastTs: 1 }]);
+  await send('h2', [{ sid: 's2', name: 'two', busy: true, lastTs: 2 }]);
+  await tick(60);
+  deepEq(client.sessions().map((x) => x.sid).sort(), ['s1', 's2']);
+  await send('h3', [{ sid: 's1', name: 'one', gone: true }]);
+  await tick(60);
+  deepEq(client.sessions().map((x) => x.sid), ['s2']);
+}, false);
+
+check('cc: hello carries the ring token only when alerts are on', async () => {
+  const list = { v: 1, ver: 2 };
+  deepEq(CCM.helloFields({ ring: 'tok', list }), { ring: 'tok', list });
+  deepEq(CCM.helloFields({ ring: null, list }), { list });
+  deepEq(CCM.helloFields({ ring: '', list: Object.assign({ needsSign: true }, list) }), {});
+}, false);
+
+check('cc: the phone follows a rekey without the owner noticing', async () => {
+  const { A, B, p, phone } = await pairOnce();
+  phone.onOffer(() => {});
+  await tick(80);
+  await phone.approve();
+  await tick(60);
+  await p.allow();
+  await tick(80);
+  useDevice(A);
+  const rec = window.MentriaStore.get('comms', 'computers').list[0];
+  eq(await CCM.verifyComputer(rec, A.list || window.__trust, A.me.sign.sigFp), true);
+  const comp = p.__computer;
+  const K2 = PC.randomBytes(32);
+  const hostSigned = (body) => { const cmid = 'h:' + Math.random().toString(36).slice(2); return PSG.signBody(comp.sign.priv, comp.sign.spub, 'cc:' + rec.cid, cmid, Object.assign({}, body, { cmid })); };
+  const wrapped = { [A.me.sign.sigFp]: PW.wrapFor(K2, comp.dh.priv, A.entry.dh, rec.cid, A.me.sign.sigFp) };
+  eq(await CCM.applyHostKeys(rec.cid, { t: 'cc-rekey', kver: 2, wrapped }), false);
+  eq(await CCM.applyHostKeys(rec.cid, hostSigned({ t: 'cc-rekey', kver: 2, wrapped })), true);
+  const now = window.MentriaStore.get('comms', 'computers').list[0];
+  eq(now.kver, 2);
+  deepEq(await CCM.unwrapChannelKey(now, A.me), K2);
+  eq(await CCM.verifyComputer(now, window.__trust, A.me.sign.sigFp), true);
+  eq(await CCM.applyHostKeys(rec.cid, hostSigned({ t: 'cc-rekey', kver: 1, wrapped: rec.wrapped })), false);
+  const wrappedB = { [B.me.sign.sigFp]: PW.wrapFor(K2, comp.dh.priv, B.entry.dh, rec.cid, B.me.sign.sigFp) };
+  eq(await CCM.applyHostKeys(rec.cid, hostSigned({ t: 'cc-keys', kver: 2, wrapped: wrappedB })), true);
+  const both = window.MentriaStore.get('comms', 'computers').list[0];
+  deepEq(Object.keys(both.wrapped).sort(), [A.me.sign.sigFp, B.me.sign.sigFp].sort());
+  eq(await CCM.verifyComputer(both, window.__trust, B.me.sign.sigFp), true);
+});
+check('cc: a computer record needs a trusted approval and computer-signed keys', async () => {
+  const { A, p, phone } = await pairOnce();
+  phone.onOffer(() => {});
+  await tick(80);
+  await phone.approve();
+  await tick(60);
+  await p.allow();
+  await tick(80);
+  useDevice(A);
+  const rec = window.MentriaStore.get('comms', 'computers').list[0];
+  const trust = window.__trust;
+  eq(await CCM.verifyComputer(rec, trust, A.me.sign.sigFp), true);
+  const imp = computer();
+  eq(await CCM.verifyComputer(Object.assign({}, rec, { spub: imp.sign.spub }), trust, A.me.sign.sigFp), false);
+  const K3 = PC.randomBytes(32);
+  const forgedWrap = { [A.me.sign.sigFp]: PW.wrapFor(K3, imp.dh.priv, A.entry.dh, rec.cid, A.me.sign.sigFp) };
+  eq(await CCM.verifyComputer(Object.assign({}, rec, { dh: imp.dh.pub, wrapped: forgedWrap }), trust, A.me.sign.sigFp), false);
+  eq(await CCM.verifyComputer(Object.assign({}, rec, { approvals: [] }), trust, A.me.sign.sigFp), false);
+  const X = await siteDevice('Lost', 'iphone');
+  const byLost = await CCM.approveComputer(rec, X.me);
+  eq(await CCM.verifyComputer(Object.assign({}, rec, { approvals: [byLost] }), trust, A.me.sign.sigFp), false);
+});
+check('cc: computer records merge without losing approvals and Disconnect sticks', async () => {
+  const { A, p, phone } = await pairOnce();
+  phone.onOffer(() => {});
+  await tick(80);
+  await phone.approve();
+  await tick(60);
+  await p.allow();
+  await tick(80);
+  useDevice(A);
+  const rec = window.MentriaStore.get('comms', 'computers').list[0];
+  const imp = computer();
+  const swapped = Object.assign({}, rec, { spub: imp.sign.spub, kver: 9 });
+  const m1 = CCM.mergeComputerRecords({ v: 1, list: [rec] }, { v: 1, list: [swapped] });
+  deepEq(m1.list[0].spub, rec.spub);
+  const gone = Object.assign({}, rec, { removed: true });
+  const m2 = CCM.mergeComputerRecords({ v: 1, list: [gone] }, { v: 1, list: [Object.assign({}, rec, { removed: false })] });
+  eq(m2.list[0].removed, true);
+  const B2 = await siteDevice('Mac', 'mac');
+  const extra = await CCM.approveComputer(rec, B2.me);
+  const m3 = CCM.mergeComputerRecords({ v: 1, list: [rec] }, { v: 1, list: [Object.assign({}, rec, { approvals: [extra] })] });
+  eq(m3.list[0].approvals.length, 2);
+});
+
+const WIRE = await import('/assets/js/comms/wire.js');
+const SSG = await import('/assets/js/comms/sign.js');
+const PR = hasCC ? await import(pathToFileURL(join(CC, 'plugins/mentria/lib/room.js')).href) : null;
+const ROOMKEY = WIRE.b64urlEncode(new Uint8Array(32).fill(9));
+
+check('room: the plugin derives the same topics as the page for v1 and v2 rooms', async () => {
+  for (const kv of [1, 2]) eq(PR.chatTopic('Agents room', ROOMKEY, kv), await WIRE.chatTopicFor('Agents room', ROOMKEY, kv));
+});
+
+check('room: a body sealed on the page opens in the plugin, and the other way', async () => {
+  const site = await WIRE.roomKeys(ROOMKEY, 2);
+  const plug = PR.roomKeys(ROOMKEY, 2);
+  const enc = await WIRE.encryptText(site.chatKey, JSON.stringify({ v: 2, t: 'from page' }));
+  assert.deepEqual(PR.openRoom(plug.chat, enc), { v: 2, t: 'from page' });
+  const back = PR.sealRoom(plug.chat, { v: 2, t: 'from plugin' });
+  assert.deepEqual(JSON.parse(await WIRE.decryptText(site.chatKey, back)), { v: 2, t: 'from plugin' });
+  eq(WIRE.unpackChatPlain(await WIRE.decryptText(site.chatKey, back)).text, 'from plugin');
+});
+
+check('room: a session post signed by the computer verifies on the page, and a page message verifies in the plugin', async () => {
+  const k = PC.p256Keygen();
+  const body = PR.agentBody('done', { name: 'Site', handle: 'site', host: 'Mac' });
+  const signed = PSG.signBody(k.priv, k.pub, 'agents', 'site:1', body);
+  const v = await SSG.verifyBody(JSON.parse(JSON.stringify(signed)), 'agents', 'site:1');
+  eq(v.ok, true);
+  eq(v.sigFp, PSG.sigFingerprint(k.pub));
+  const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const jwk = await crypto.subtle.exportKey('jwk', pair.publicKey);
+  const page = await SSG.signBody(pair.privateKey, { x: jwk.x, y: jwk.y }, 'agents', 'me:1', WIRE.packChatBody('@site go', { fp: 'abcd-efgh' }));
+  const pv = PSG.verifyBody(JSON.parse(JSON.stringify(page)), 'agents', 'me:1');
+  eq(pv.ok, true);
+  eq(pv.sigFp, await SSG.sigFingerprint({ x: jwk.x, y: jwk.y }));
+});
+
+check('cc: room messages from the phone are signed for the session and here carries handle and rooms', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(4));
+  const host = await hostKey();
+  const t = memTransport();
+  const signedFor = [];
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => { signedFor.push([sid, cmid, body.t]); return body; }, host: { spub: host.spub, room: 'cc:c1' } });
+  const here = { t: 'here', cmid: 'h:1', host: 'Mac', sessions: [{ sid: 's1', name: 'Site', handle: 'site', rooms: ['agents', 7], busy: false, lastTs: 1 }] };
+  for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', 'h:1', here))) t.feed(c);
+  await tick(50);
+  deepEq([client.sessions()[0].handle, client.sessions()[0].rooms], ['site', ['agents']]);
+  const cmid = await client.room('s1', { t: 'room-add', room: 'agents', key: 'K'.repeat(43), kv: 2, label: 'Agents', computers: [] });
+  ok(/^p:/.test(cmid));
+  deepEq(signedFor, [['s1', cmid, 'room-add']]);
+  let refused = false;
+  try { await client.room('s1', { t: 'say', text: 'x' }); } catch (_) { refused = true; }
+  eq(refused, true);
+}, false);
+
+check('cc: room-add carries the room key, label and the trusted computers', () => {
+  const C = { x: 'CX', y: 'CY' };
+  deepEq(CCM.roomAddMsg({ room: 'agents', key: 'K'.repeat(43), kv: 2, label: 'Agents' }, [{ cid: 'c1', name: 'Mac', spub: C }]), { t: 'room-add', room: 'agents', key: 'K'.repeat(43), kv: 2, label: 'Agents', computers: [{ name: 'Mac', spub: C }] });
+  deepEq(CCM.roomAddMsg({ room: 'r', key: 'K'.repeat(43) }, []).kv, 1);
+}, false);
+
+check('cc: lock room sends the new key to computers that keep a session and drops the rest, queueing what cannot go now', () => {
+  const A = { x: 'AX', y: 'AY' }, B = { x: 'BX', y: 'BY' }, Z = { x: 'ZX', y: 'ZY' };
+  const trusted = [{ cid: 'ca', name: 'Mac', spub: A }, { cid: 'cb', name: 'Laptop', spub: B }];
+  const agents = [
+    { key: 'fa/site', spub: A, handle: 'site' },
+    { key: 'fa/docs', spub: A, handle: 'docs' },
+    { key: 'fb/engine', spub: B, handle: 'engine' },
+    { key: 'fz/ghost', spub: Z, handle: 'ghost' }
+  ];
+  const sessions = [{ sid: 's-site', cid: 'ca', online: true }, { sid: 's-eng', cid: 'cb', online: false }];
+  const plan = CCM.lockPlan({ room: 'agents', key: 'N'.repeat(43), kv: 2, agents, keep: ['fa/site'], sessions, trusted });
+  deepEq(plan.map((p) => [p.cid, p.sid, p.msg.t, p.msg.handle || '']), [['ca', 's-site', 'room-key', ''], ['ca', 's-site', 'room-drop', 'docs'], ['cb', null, 'room-drop', 'engine']]);
+  deepEq(plan[0].msg.computers, [{ name: 'Mac', spub: A }, { name: 'Laptop', spub: B }]);
+  eq(plan[0].msg.key, 'N'.repeat(43));
+}, false);
+
+check('room: a page message signed with both keys is the owner for the plugin; the identity key alone is not', async () => {
+  const RR = await import(pathToFileURL(join(CC, 'plugins/mentria/lib/roomrun.js')).href);
+  const mk = async () => { const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']); const j = await crypto.subtle.exportKey('jwk', kp.publicKey); return { signKey: kp.privateKey, spub: { x: j.x, y: j.y } }; };
+  const ident = await mk();
+  const dev = await mk();
+  const devFp = await SSG.sigFingerprint(dev.spub);
+  const list = { v: 1, kind: 'mentria-devices', ver: 1, ts: 1, devices: [{ sigFp: devFp, spub: dev.spub, name: 'iPhone', kind: 'iphone' }], removed: [], by: devFp };
+  const chat = await WIRE.roomKeys(ROOMKEY, 2);
+  const comp = PC.p256Keygen();
+  const tagged = [], ctx = [];
+  const now = Date.now();
+  const run = RR.createRoomRunner({ entry: { room: 'agents', key: ROOMKEY, kv: 2, label: 'Agents', computers: [] }, me: { name: 'Site', handle: 'site', host: 'Mac' }, computer: { priv: comp.priv, spub: comp.pub }, list: () => list, now: () => now, joinedAt: now, seen: new Set(), publish: async () => true, onTagged: (x) => tagged.push(x), onContext: (x) => ctx.push(x) });
+  const send = async (signed, cmid) => run.push(JSON.stringify({ cmid, ts: now, enc: await WIRE.encryptText(chat.chatKey, JSON.stringify(signed)) }));
+  const both = await SSG.signRoomBody(WIRE.packChatBody('@site go', { fp: 'abcd-efgh' }), 'agents', 'me:1', ident, dev);
+  eq((await SSG.verifyBody(both, 'agents', 'me:1')).ok, true);
+  await send(both, 'me:1');
+  await send(await SSG.signRoomBody(WIRE.packChatBody('@site identity only', { fp: 'abcd-efgh' }), 'agents', 'me:2', ident, null), 'me:2');
+  deepEq(tagged.map((x) => [x.kind, x.who]), [['owner', 'iPhone']]);
+  deepEq(ctx.map((x) => x.kind), ['other']);
+});
+
+check('cc: a room message with no reply is sent again as the same signed message', async () => {
+  let n = 0;
+  const sent = [];
+  const send = async () => { const id = 'p:' + (++n); sent.push('send ' + id); return id; };
+  const resend = async (id) => { sent.push('resend ' + id); return true; };
+  let calls = 0;
+  const second = async (id) => (++calls === 2 ? { t: 'room-ok', cmid: id, ok: true } : null);
+  deepEq(await CCM.sendUntilReply(send, second, { resend }), { t: 'room-ok', cmid: 'p:1', ok: true });
+  deepEq(sent, ['send p:1', 'resend p:1']);
+  sent.length = 0;
+  eq(await CCM.sendUntilReply(send, async () => null, { resend }), null);
+  deepEq(sent, ['send p:2', 'resend p:2']);
+}, false);
+
+check('cc: a phone message is resent as the same signed message, never signed again', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(6));
+  const host = await hostKey();
+  const t = memTransport();
+  let signs = 0;
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => { signs++; return body; }, host: { spub: host.spub, room: 'cc:c1' } });
+  const cmid = await client.say('s1', 'hello');
+  const first = t.sent.length;
+  eq(await client.resend(cmid), true);
+  eq(t.sent.length, first * 2);
+  eq(signs, 1);
+  eq(await client.resend('p:unknown'), false);
+}, false);
+
+const SF = await import('/assets/js/comms/sendfile.js');
+const fileLink = ({ drop = () => false, silent = false } = {}) => {
+  const got = new Map();
+  const sent = [];
+  let box = null;
+  const reply = (id, m) => { if (!silent) got.set(id, Object.assign({ cmid: id }, m)); };
+  return {
+    sent,
+    attach: (b) => { box = b; },
+    offer: async (meta) => { const id = 'p:o' + (sent.length + 1); sent.push(['offer', id]); const r = box ? box.offer(Object.assign({ cmid: id }, meta)) : { ok: true }; reply(id, r.ok ? Object.assign({ done: false }, box ? box.status(id) : { have: 0, need: [0] }) : { done: true, ok: false, err: r.err }); return id; },
+    resend: async (id) => { sent.push(['resend', id]); return true; },
+    part: async (id, i, d, w) => { sent.push(['part', i, !!w]); if (drop(i)) return; const st = box.part(id, i, d); if (st.complete) reply(id, st.ok ? { have: st.have, need: [], done: true, ok: true } : { done: true, ok: false, err: st.err }); else if (w) reply(id, { have: st.have, need: st.need, done: false }); },
+    waitGot: async (id) => { const m = got.get(id) || null; got.delete(id); return m; }
+  };
+};
+
+check('file: the phone sends a file the plugin assembles byte for byte, resending what a lossy link dropped', async () => {
+  const IB = await import(pathToFileURL(join(CC, 'plugins/mentria/lib/inbox.js')).href);
+  eq(SF.PART_BYTES, IB.PART_BYTES);
+  const bytes = Uint8Array.from({ length: SF.PART_BYTES * 30 + 77 }, (_, i) => (i * 7) & 255);
+  const box = IB.createInbox();
+  const once = new Set([5, 29]);
+  let dropped = 0;
+  const link = fileLink({ drop: (i) => { if (!once.has(i)) return false; once.delete(i); dropped++; return true; } });
+  link.attach(box);
+  const progress = [];
+  const r = await SF.sendFile({ bytes, name: 'pic.png', mime: 'image/png', text: '' }, { offer: link.offer, resend: link.resend, part: link.part, waitGot: link.waitGot, onProgress: (x) => progress.push(x), window: 8 });
+  eq(r, 'ok');
+  eq(dropped, 2);
+  const out = box.take('p:o1');
+  eq(out.bytes.length, bytes.length);
+  ok(out.bytes.every((b, i) => b === bytes[i]));
+  eq(progress[progress.length - 1], 1);
+  eq(link.sent.filter((x) => x[0] === 'part' && x[1] === 5).length, 2);
+});
+
+check('file: the phone names files the way the plugin does', async () => {
+  const IB = await import(pathToFileURL(join(CC, 'plugins/mentria/lib/inbox.js')).href);
+  for (const n of ['IMG 0001.HEIC', '../../etc/passwd', 'a\\b\\c.txt', 'we ird\u0000na\nme;rm -rf.png', '', '.hidden', 'x'.repeat(200) + '.jpeg', 'résumé final.pdf']) {
+    eq(SF.safeName(n), IB.safeName(n));
+    eq(IB.safeName(SF.safeName(n)), SF.safeName(n));
+  }
+});
+
+check('file: no answer fails after the quiet rounds; too big never offers', async () => {
+  const quiet = fileLink({ silent: true });
+  quiet.attach({ offer: () => ({ ok: true }), status: () => ({ have: 0, need: [0] }), part: () => ({ have: 0, need: [], complete: false }) });
+  eq(await SF.sendFile({ bytes: new Uint8Array(100), name: 'a', mime: 'x/y', text: '' }, { offer: quiet.offer, resend: quiet.resend, part: quiet.part, waitGot: quiet.waitGot, quietRounds: 2 }), 'failed');
+  ok(quiet.sent.length <= 6);
+  const big = fileLink();
+  eq(await SF.sendFile({ bytes: new Uint8Array(SF.MAX_BYTES + 1), name: 'a', mime: 'x/y', text: '' }, { offer: big.offer, resend: big.resend, part: big.part, waitGot: big.waitGot }), 'too-big');
+  eq(big.sent.length, 0);
+});
+
+const no = (v) => assert.ok(!v);
+let failed = 0, skipped = 0;
+for (const [name, fn, needsPlugin] of checks) {
+  if (needsPlugin && !hasCC) { skipped++; console.log('SKIP ' + name + ' (set MENTRIA_CC)'); continue; }
+  try { await fn(); console.log('PASS ' + name); }
+  catch (e) { failed++; console.log('FAIL ' + name); console.log('     ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join('\n     ') : e)); }
+}
+console.log('comms cc: ' + (checks.length - failed - skipped) + '/' + (checks.length - skipped) + ' passed' + (skipped ? ', ' + skipped + ' skipped' : ''));
+process.exit(failed ? 1 : 0);

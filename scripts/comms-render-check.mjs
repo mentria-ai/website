@@ -80,6 +80,7 @@ const PAGE_TESTS = async () => {
     ok(el.textContent.includes('+4') && el.textContent.includes('−2'));
     eq(el.querySelectorAll('.comms__tool-result--alone').length, 0);
   });
+  test('agent: a slash command output shows in a mono box', () => { C.renderAgentParts(el, [{ type: 'tool_result', callId: 'out:4', text: 'Set model to Haiku 5.5', bytes: 22 }], { T: TA }); const pre = el.querySelector('.comms__tool-result--alone pre.comms__tool-out'); ok(pre && pre.textContent === 'Set model to Haiku 5.5', el.innerHTML); });
   test('agent: thinking folds into a chip', () => { C.renderAgentParts(el, [{ type: 'thought', ref: '1:0', chars: 120 }], { T: TA }); const b = el.querySelector('button.comms__thought'); ok(b && b.textContent.includes('Thought')); });
   test('agent: unknown agent parts show the plain notice', () => { C.renderAgentParts(el, [{ type: 'hologram' }, { type: 'notice', code: 'compacted' }], { T: TA }); ok(el.textContent.includes("Something this page can't show yet")); ok(el.textContent.includes('Context compacted')); });
   test('agent: no message HTML is ever inserted as HTML', () => { C.renderAgentParts(el, [{ type: 'text', text: '<img src=x onerror=alert(1)>' }, { type: 'tool_call', id: 'h', title: '<b onclick=alert(1)>x</b>', kind: 'run', status: 'done', input: '<script>window.__agentx=1</script>' }, { type: 'tool_result', callId: 'h', text: '<img src=y onerror=alert(2)>', bytes: 30 }], { T: TA, results: C.resultsOf([{ type: 'tool_result', callId: 'h', text: '<img src=y onerror=alert(2)>', bytes: 30 }]) }); eq(el.querySelector('[onerror]'), null); eq(el.querySelector('[onclick]'), null); eq(el.querySelector('script'), null); eq(window.__agentx, undefined); });
@@ -214,6 +215,27 @@ const PAGE_TESTS = async () => {
     v.close();
     log.remove();
     style.remove();
+  });
+
+  test('fix: a slash command output with no tool call shows in the turn, and a listed call keeps its result in its card', async () => {
+    const AV8 = await import('/assets/js/comms/agent-view.js');
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const msgs = [
+      { id: 'u', role: 'user', ts: 1, via: 'phone', parts: [{ type: 'text', text: '/rename rigtest' }] },
+      { id: 'o', role: 'assistant', ts: 2, parts: [{ type: 'tool_result', callId: 'out:2', text: 'Session renamed to: rigtest', bytes: 27 }] },
+      { id: 'a', role: 'assistant', ts: 3, parts: [{ type: 'tool_call', id: 'c1', title: 'List files', kind: 'run', status: 'done', tool: 'Bash' }] },
+      { id: 'r', role: 'assistant', ts: 4, parts: [{ type: 'tool_result', callId: 'c1', text: 'XYZ', bytes: 3, exit: 0 }] }
+    ];
+    const client = { on: () => () => {}, sessions: () => [{ sid: 's', online: true }], turns: () => [0], turn: () => ({ n: 0, msgs }), hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {} };
+    const v = AV8.createAgentView({ els, T: { agent: { message: 'Message the {name}' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    await sleep(50);
+    const alone = [...els.log.querySelectorAll('.comms__tool-result--alone')];
+    eq(alone.length, 1);
+    ok(alone[0].textContent.includes('Session renamed to: rigtest'), els.log.textContent);
+    ok(!alone[0].textContent.includes('XYZ'));
+    v.close();
   });
 
   test('fix: tool calls fold into symbols with counts; a tap lists them; a tap on one fetches its input and result', async () => {
@@ -407,6 +429,140 @@ const PAGE_TESTS = async () => {
   test('fix C2a: an undecodable HEIC still has its location found', async () => { const be32 = (n) => [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255]; const be16 = (n) => [(n >> 8) & 255, n & 255]; const tag = (t) => Array.from(t, (c) => c.charCodeAt(0)); const box = (t, ...p) => { const body = [].concat(...p); return be32(body.length + 8).concat(tag(t), body); }; const full = (t, v, ...p) => box(t, [v, 0, 0, 0], ...p); const ex = tag('Exif\0\0GPS-SECRET'); const infe = full('infe', 2, be16(1), be16(0), tag('Exif'), [0]); const iinf = full('iinf', 0, be16(1), infe); const ftyp = box('ftyp', tag('heic'), [0, 0, 0, 0], tag('heic')); const body = (off) => box('hdlr', new Array(24).fill(0)).concat(iinf, full('iloc', 0, [0x44, 0x40], be16(1), be16(1), be16(0), be32(0), be16(1), be32(off), be32(ex.length))); const metaLen = 12 + body(0).length; const off = ftyp.length + metaLen + 8; const bytes = new Uint8Array(ftyp.concat(full('meta', 0, body(off)), box('mdat', ex))); let sent = null; const h = SH.openSheet({ files: [new File([bytes], 'p.heic', { type: 'image/heic' })], self: false, T: TS, onSend: (r) => { sent = r; } }); await h.ready; document.querySelector('#comms-sheet [data-act="send"]').click(); ok(sent && sent.items[0].ranges && sent.items[0].ranges.length === 1, JSON.stringify(sent && sent.items[0])); });
   test('grid: usage line and free up space', () => { V.renderMediaGrid(el, { media: recs(4), usage: 1.6e9, T: TV, onOpen() {}, onFree() {} }); eq(el.querySelector('.comms__media-usage').textContent, '1.6 GB on this device'); ok(el.querySelector('[data-act="free"]')); });
   test('a caption is plain text, never HTML', () => { C.renderParts(el, [{ type: 'text', text: '<img src=x onerror=alert(1)>' }, album(1)], opts()); eq(el.querySelectorAll('img[onerror]').length, 0); });
+
+  const permDom = () => {
+    const card = document.createElement('div');
+    card.id = 'comms-agent-perm';
+    card.hidden = true;
+    card.innerHTML = '<p id="comms-agent-perm-title"></p><p id="comms-agent-perm-desc"></p><pre id="comms-agent-perm-preview"></pre><p id="comms-agent-perm-note" hidden></p><div id="comms-agent-perm-actions"><button id="comms-agent-deny" type="button">Deny</button><button id="comms-agent-allow" type="button">Allow</button></div>';
+    document.body.append(card);
+    return card;
+  };
+  const TP = { agent: { wants: '{tool} wants to run', message: 'Message the {name}', sent: 'sent', delivered: 'delivered', unpaired: 'not delivered', ask_send: 'Send answer', ask_other: 'Or type' }, cc: { local: 'Answer this at the computer.', answered_here: 'Answered at the computer.', clock: 'Not delivered: check this device clock.', unpaired: 'Not delivered: not on the list.', command: 'Not run: this command only runs at the computer.', command_unknown: 'Not run: this session has no such command.' }, chat: {} };
+  const agentRig = async () => {
+    const AVx = await import('/assets/js/comms/agent-view.js?' + Math.random());
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const verdicts = [];
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {}, say: async () => 'p:1', verdict: async (...a) => { verdicts.push(a); return 'v:1'; }, answer: async () => 'a:1' };
+    const card = permDom();
+    const v = AVx.createAgentView({ els, T: TP, client });
+    v.open('s', null, 'S');
+    return { v, els, handlers, verdicts, card, done: () => { v.close(); card.remove(); } };
+  };
+  test('agent: a message with no delivered note is sent again, and not after it is delivered', async () => {
+    const AVr = await import('/assets/js/comms/agent-view.js?' + Math.random());
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const resent = [];
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {}, say: async () => 'p:9', resend: async (sid, cmid) => { resent.push([sid, cmid]); return true; } };
+    const v = AVr.createAgentView({ els, T: TP, client, resendMs: [60, 160] });
+    v.open('s', null, 'S');
+    await v.say('hi');
+    await sleep(100);
+    deepEq(resent, [['s', 'p:9']]);
+    handlers.ack({ t: 'ack', sid: 's', cmid: 'p:9' });
+    await sleep(120);
+    deepEq(resent, [['s', 'p:9']]);
+    v.close();
+  });
+  test('agent: a file sent to a session shows sending progress, then delivered', async () => {
+    const AVf = await import('/assets/js/comms/agent-view.js?' + Math.random());
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const parts = [];
+    let release;
+    const gate = new Promise((r) => { release = r; });
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {}, resend: async () => true,
+      fileOffer: async (sid, meta) => { setTimeout(() => handlers['file-got']({ t: 'file-got', sid, cmid: 'p:f', have: 0, need: [0], done: false }), 5); return 'p:f'; },
+      filePart: async (sid, id, i, d, w) => { parts.push([i, !!w]); if (w) { await gate; setTimeout(() => handlers['file-got']({ t: 'file-got', sid, cmid: 'p:f', have: 1, need: [], done: true, ok: true }), 5); } } };
+    const v = AVf.createAgentView({ els, T: { agent: { sent: 'sent', delivered: 'delivered', file_sending: 'sending {pct}%' }, cc: {}, chat: {} }, client });
+    v.open('s', null, 'S');
+    try {
+      const file = new File([new Uint8Array(1000).fill(7)], 'notes.txt', { type: 'text/plain' });
+      const done = v.sendFile(file, '');
+      await sleep(150);
+      ok(els.log.textContent.includes('notes.txt') && els.log.textContent.includes('sending 0%'), els.log.textContent);
+      release();
+      eq(await done, 'ok');
+      await sleep(150);
+      ok(els.log.textContent.includes('delivered'), els.log.textContent);
+      deepEq(parts, [[0, true]]);
+    } finally { v.close(); }
+  });
+  test('cards: verdict echoes the perm call id and hash', async () => {
+    const r = await agentRig();
+    r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r1', tool_name: 'Bash', description: 'd', input_preview: 'npm test', call: { id: 'r1', hash: 'HASH1' }, ts: Date.now() });
+    await sleep(50);
+    eq(r.card.hidden, false);
+    document.getElementById('comms-agent-allow').click();
+    await sleep(20);
+    deepEq(r.verdicts, [['s', 'r1', 'allow', { id: 'r1', hash: 'HASH1' }]]);
+    r.done();
+  });
+  test('cards: local perm shows answer-at-computer and no buttons', async () => {
+    const r = await agentRig();
+    r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r2', tool_name: 'Edit', input_preview: '.claude/settings.json', call: { id: 'r2', hash: 'H' }, local: true, ts: Date.now() });
+    await sleep(50);
+    eq(r.card.hidden, false);
+    eq(document.getElementById('comms-agent-perm-note').hidden, false);
+    eq(document.getElementById('comms-agent-perm-note').textContent, 'Answer this at the computer.');
+    eq(document.getElementById('comms-agent-perm-actions').hidden, true);
+    r.done();
+  });
+  test('cards: resolved replaces the buttons with answered-at-computer', async () => {
+    const r = await agentRig();
+    r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r3', tool_name: 'Bash', input_preview: 'ls', call: { id: 'r3', hash: 'H' }, ts: Date.now() });
+    await sleep(50);
+    r.handlers.resolved({ t: 'resolved', sid: 's', request_id: 'r3', where: 'computer' });
+    await sleep(50);
+    eq(document.getElementById('comms-agent-perm-note').textContent, 'Answered at the computer.');
+    eq(document.getElementById('comms-agent-perm-actions').hidden, true);
+    r.done();
+  });
+  test('cards: err clock and unpaired show their notes', async () => {
+    const r = await agentRig();
+    const c1 = await r.v.say('one');
+    r.handlers.err({ t: 'err', sid: 's', cmid: 'p:1', code: 'clock' });
+    await sleep(100);
+    ok(r.els.log.textContent.includes('Not delivered: check this device clock.'), r.els.log.textContent);
+    r.done();
+    const r2 = await agentRig();
+    await r2.v.say('two');
+    r2.handlers.err({ t: 'err', sid: 's', cmid: 'p:1', code: 'unpaired' });
+    await sleep(100);
+    ok(r2.els.log.textContent.includes('Not delivered: not on the list.'), r2.els.log.textContent);
+    r2.done();
+    const r3 = await agentRig();
+    await r3.v.say('/model x');
+    r3.handlers.err({ t: 'err', sid: 's', cmid: 'p:1', code: 'command' });
+    await sleep(100);
+    ok(r3.els.log.textContent.includes('Not run: this command only runs at the computer.'), r3.els.log.textContent);
+    r3.done();
+    const r4 = await agentRig();
+    await r4.v.say('/nosuch');
+    r4.handlers.err({ t: 'err', sid: 's', cmid: 'p:1', code: 'command-unknown' });
+    await sleep(100);
+    ok(r4.els.log.textContent.includes('Not run: this session has no such command.'), r4.els.log.textContent);
+    r4.done();
+  });
+
+  test('cards: a verdict refused for clock comes back with the note', async () => {
+    const r = await agentRig();
+    r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r9', tool_name: 'Bash', input_preview: 'ls', call: { id: 'r9', hash: 'H' }, ts: Date.now() });
+    await sleep(50);
+    document.getElementById('comms-agent-allow').click();
+    await sleep(30);
+    r.handlers.err({ t: 'err', sid: 's', cmid: 'v:1', code: 'clock' });
+    await sleep(50);
+    eq(r.card.hidden, false);
+    eq(document.getElementById('comms-agent-perm-note').textContent, 'Not delivered: check this device clock.');
+    eq(document.getElementById('comms-agent-perm-actions').hidden, false);
+    r.done();
+  });
 
   const out = [];
   for (const [name, fn] of tests) {

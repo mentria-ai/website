@@ -1,8 +1,10 @@
 import { b64urlEncode, b64urlDecode } from '/assets/js/comms/wire.js';
+import { verifyBody } from '/assets/js/comms/sign.js';
 
 export const BRIDGE_KIND = 23838;
 export const FRAME_MAX = 30000;
 export const HERE_TTL_MS = 75000;
+export const HOST_MAX_AGE_MS = 600000;
 const SALT = 'mentria-bridge-v1';
 const te = new TextEncoder();
 const td = new TextDecoder();
@@ -77,13 +79,17 @@ export class Reassembler {
   }
 }
 
-export const createBridgeClient = ({ transport, keys, sign, device = 'phone', now = () => Date.now() }) => {
+export const createBridgeClient = ({ transport, keys, sign, device = 'phone', now = () => Date.now(), host = null, hello = null }) => {
   const reasm = new Reassembler();
   const handlers = new Map();
+  let clockOff = false;
   const sessions = new Map();
   const turns = new Map();
   const chans = new Map();
   let chain = Promise.resolve();
+  const ROOM_MSGS = new Set(['room-add', 'room-drop', 'room-key']);
+  const kept = new Map();
+  const keep = (cmid, m) => { kept.set(cmid, m); while (kept.size > 30) kept.delete(kept.keys().next().value); };
   const emit = (t, m) => { for (const fn of handlers.get(t) || []) { try { fn(m); } catch (_) {} } };
   const keyOf = (sid, sub) => sid + '|' + (sub || '');
   const turnOf = (sid, n, make, sub) => {
@@ -96,7 +102,11 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
   const apply = (m) => {
     if (m.t === 'chan' && typeof m.sid === 'string') chans.set(m.sid, now());
     if (m.t === 'here' && Array.isArray(m.sessions)) {
-      for (const s of m.sessions) if (s && typeof s.sid === 'string') sessions.set(s.sid, { sid: s.sid, name: String(s.name || ''), busy: !!s.busy, lastTs: Number(s.lastTs) || 0, hereAt: now(), host: String(m.host || '') });
+      for (const s of m.sessions) {
+        if (!s || typeof s.sid !== 'string') continue;
+        if (s.gone) sessions.delete(s.sid);
+        else sessions.set(s.sid, { sid: s.sid, name: String(s.name || ''), handle: typeof s.handle === 'string' ? s.handle.slice(0, 40) : '', rooms: Array.isArray(s.rooms) ? s.rooms.filter((r) => typeof r === 'string' && r.length <= 120).slice(0, 16) : [], busy: !!s.busy, lastTs: Number(s.lastTs) || 0, hereAt: now(), host: String(m.host || '') });
+      }
     } else if (m.t === 'turn' && typeof m.sid === 'string' && Number.isInteger(m.n) && Number.isInteger(m.from) && Array.isArray(m.msgs)) {
       const t = turnOf(m.sid, m.n, true, m.sub);
       const tail = m.from + m.msgs.length >= t.slots.length;
@@ -109,27 +119,50 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
     }
     emit(m.t, m);
   };
+  const fromHost = async (m) => {
+    if (!host) return m;
+    if (typeof m.cmid !== 'string' || !m.sg) return null;
+    const v = await verifyBody(m, host.room, m.cmid);
+    if (!v.ok || v.spub.x !== host.spub.x || v.spub.y !== host.spub.y) return null;
+    if (Math.abs(now() - v.ts) > HOST_MAX_AGE_MS && !clockOff) { clockOff = true; emit('clock', { skew: now() - v.ts }); }
+    else if (Math.abs(now() - v.ts) <= HOST_MAX_AGE_MS) clockOff = false;
+    return m;
+  };
   transport.onEvent((content) => {
     chain = chain.then(async () => {
       const f = await open(keys.aes, content);
-      const m = f && reasm.push(f);
-      if (m && typeof m.t === 'string') apply(m);
+      const raw = f && reasm.push(f);
+      const m = raw && typeof raw.t === 'string' ? await fromHost(raw) : null;
+      if (m) apply(m);
     }).catch(() => {});
   });
   const send = async (msg) => { for (const f of splitFrames(msg)) await transport.publish(await seal(keys.aes, f)); };
   const cmidNew = () => 'p:' + b64urlEncode(crypto.getRandomValues(new Uint8Array(9)));
   return {
     on: (t, fn) => { if (!handlers.has(t)) handlers.set(t, new Set()); handlers.get(t).add(fn); return () => handlers.get(t).delete(fn); },
-    hello: (sid) => send(sid ? { t: 'hello', sid } : { t: 'hello' }),
+    hello: (sid) => send(Object.assign({ t: 'hello' }, sid ? { sid } : {}, hello ? hello() : {})),
+    post: (msg) => send(msg),
+    clockOff: () => clockOff,
     watch: (sid) => send({ t: 'watch', sid }),
     reset: (sid, sub) => { turns.delete(keyOf(sid, sub)); },
     channel: (sid) => now() - (chans.has(sid) ? chans.get(sid) : -Infinity) < HERE_TTL_MS,
     list: (sid, before, sub) => send(Object.assign({ t: 'list', sid }, Number.isInteger(before) ? { before } : {}, sub ? { sub } : {})),
     open: (sid, n, before, sub) => send(Object.assign({ t: 'open', sid, n }, Number.isInteger(before) ? { before } : {}, sub ? { sub } : {})),
     get: (sid, ref, sub) => send(Object.assign({ t: 'get', sid, ref }, sub ? { sub } : {})),
-    say: async (sid, text) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'say', sid, cmid, text, device })); return cmid; },
+    room: async (sid, msg) => {
+      if (!msg || !ROOM_MSGS.has(msg.t)) throw new Error('not a room message');
+      const cmid = cmidNew();
+      const m = await sign(sid, cmid, Object.assign({}, msg, { sid, cmid }));
+      keep(cmid, m);
+      await send(m);
+      return cmid;
+    },
+    say: async (sid, text) => { const cmid = cmidNew(); const m = await sign(sid, cmid, { t: 'say', sid, cmid, text, device }); keep(cmid, m); await send(m); return cmid; },
+    fileOffer: async (sid, meta) => { const cmid = cmidNew(); const m = await sign(sid, cmid, Object.assign({ t: 'file-offer', sid, cmid }, meta)); keep(cmid, m); await send(m); return cmid; },
+    filePart: (sid, id, i, d, w) => send(Object.assign({ t: 'file-part', sid, id, i, d }, w ? { w: 1 } : {})),
+    resend: async (cmid) => { const m = kept.get(cmid); if (!m) return false; await send(m); return true; },
     answer: async (sid, id, answers) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'answer', sid, cmid, id, answers })); return cmid; },
-    verdict: async (sid, request_id, behavior) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'verdict', sid, cmid, request_id, behavior })); return cmid; },
+    verdict: async (sid, request_id, behavior, call, reason) => { const cmid = cmidNew(); await send(await sign(sid, cmid, Object.assign({ t: 'verdict', sid, cmid, request_id, behavior }, call && typeof call.id === 'string' && typeof call.hash === 'string' ? { call: { id: call.id, hash: call.hash } } : {}, reason ? { reason: String(reason).slice(0, 500) } : {}))); return cmid; },
     sessions: () => Array.from(sessions.values()).map((s) => Object.assign({}, s, { online: now() - s.hereAt < HERE_TTL_MS })),
     turn: (sid, n, sub) => {
       const t = turnOf(sid, n, false, sub);

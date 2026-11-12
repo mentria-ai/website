@@ -291,3 +291,12 @@ export const lockPlan = ({ room, key, kv, agents, keep, sessions, trusted }) => 
   }
   return out;
 };
+
+export const sendUntilReply = async (send, waitReply, { tries = 2 } = {}) => {
+  for (let i = 0; i < tries; i++) {
+    const id = await send();
+    const got = await waitReply(id);
+    if (got) return got;
+  }
+  return null;
+};

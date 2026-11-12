@@ -515,6 +515,22 @@ check('room: a page message signed with both keys is the owner for the plugin; t
   deepEq(ctx.map((x) => x.kind), ['other']);
 });
 
+check('cc: a room message with no reply is sent again once, with a fresh id', async () => {
+  let n = 0;
+  const sent = [];
+  const send = async () => { const id = 'p:' + (++n); sent.push(id); return id; };
+  const quiet = async () => null;
+  const second = async (id) => (id === 'p:2' ? { t: 'room-ok', cmid: id, ok: true } : null);
+  deepEq(await CCM.sendUntilReply(send, second), { t: 'room-ok', cmid: 'p:2', ok: true });
+  deepEq(sent, ['p:1', 'p:2']);
+  sent.length = 0;
+  eq(await CCM.sendUntilReply(send, quiet), null);
+  eq(sent.length, 2);
+  sent.length = 0;
+  deepEq(await CCM.sendUntilReply(send, async (id) => ({ cmid: id })), { cmid: 'p:5' });
+  eq(sent.length, 1);
+}, false);
+
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;
 for (const [name, fn, needsPlugin] of checks) {

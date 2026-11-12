@@ -863,7 +863,7 @@ const ccTrusted = new Map();
 const trustedComputers = () => Array.from(ccTrusted.values());
 import { keysFromBridgeKey, createBridgeClient, BRIDGE_KIND, HERE_TTL_MS } from '/assets/js/comms/bridge.js';
 import { createAgentView } from '/assets/js/comms/agent-view.js';
-import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer, helloFields, applyHostKeys, verifyComputer, approveComputer, getComputers, mergeComputerRecords, roomAddMsg, lockPlan } from '/assets/js/comms/cc.js';
+import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer, helloFields, applyHostKeys, verifyComputer, approveComputer, getComputers, mergeComputerRecords, roomAddMsg, lockPlan, sendUntilReply } from '/assets/js/comms/cc.js';
 import { ensureDeviceKeys } from '/assets/js/comms/devkey.js';
 import * as DEV from '/assets/js/comms/devices.js';
 import { CHAT_KIND, EPHEMERAL_PREFIX, HISTORY_LOOKBACK_SEC, HISTORY_LIMIT, isEphemeralRoom, isDmRoom, b64urlEncode, parseHash, formatHash, roomKeys, chatTopicFor, expiryTags, encryptText, decryptText, packChatBody, packChatPlain, unpackChatPlain, offerText, splitOffer, toAlbums, certFingerprints, samePubOf } from '/assets/js/comms/wire.js';
@@ -1837,7 +1837,7 @@ const lockRoomNow = async (roomName, keepFps, keepAgents = []) => {
     try { await publishToInbox(pub, signed); } catch (_) {}
   }
   for (const step of lockPlan({ room: roomName, key, kv: 2, agents: roomAgents, keep: keepAgents, sessions: bridge.sessions(), trusted: trustedComputers() })) {
-    if (step.sid) bridge.room(step.sid, step.msg).catch(() => pendingAdd(step.cid, step.msg));
+    if (step.sid) sendRoomMsg(step.sid, step.msg).then((got) => { if (!got) pendingAdd(step.cid, step.msg); }, () => pendingAdd(step.cid, step.msg));
     else pendingAdd(step.cid, step.msg);
   }
   subscribeUnread();
@@ -1855,6 +1855,13 @@ document.getElementById('comms-lock-go').addEventListener('click', async () => {
 });
 document.getElementById('comms-twice-lock').addEventListener('click', () => { if (twiceFor) openLock(twiceFor.room); });
 
+const roomWaiters = new Map();
+const ROOM_REPLY_MS = 6000;
+const waitRoomReply = (cmid) => new Promise((resolve) => {
+  roomWaiters.set(cmid, resolve);
+  setTimeout(() => { if (roomWaiters.delete(cmid)) resolve(null); }, ROOM_REPLY_MS);
+});
+const sendRoomMsg = (sid, msg) => sendUntilReply(() => bridge.room(sid, msg), waitRoomReply);
 const pendingGet = () => { try { const v = MentriaStore.get('comms', 'ccpending'); return v && typeof v === 'object' ? v : {}; } catch (_) { return {}; } };
 const pendingAdd = (cid, msg) => {
   if (!cid || !msg) return;
@@ -1874,7 +1881,7 @@ const flushPending = async () => {
       const live = bridge.sessions().find((x) => x.cid === cid && x.online);
       if (!live) continue;
       let sent = 0;
-      for (const msg of list) { try { await bridge.room(live.sid, msg); sent++; } catch (_) { break; } }
+      for (const msg of list) { let got = null; try { got = await sendRoomMsg(live.sid, msg); } catch (_) {} if (!got) break; sent++; }
       const now = pendingGet();
       now[cid] = (now[cid] || []).slice(sent);
       if (!now[cid].length) delete now[cid];
@@ -1916,8 +1923,9 @@ const toggleSession = async (x, on) => {
   const entry = savedRooms().find((r) => r.room === sessRoom);
   if (!entry || !entry.key) return;
   sessState.textContent = '';
-  try { await bridge.room(x.sid, on ? roomAddMsg(entry, trustedComputers()) : { t: 'room-drop', room: entry.room }); }
-  catch (_) { sessState.textContent = T.rooms.session_failed; }
+  let got = null;
+  try { got = await sendRoomMsg(x.sid, on ? roomAddMsg(entry, trustedComputers()) : { t: 'room-drop', room: entry.room }); } catch (_) {}
+  if (!got) sessState.textContent = T.rooms.session_failed;
 };
 const openSess = (roomName) => {
   const entry = savedRooms().find((r) => r.room === roomName);
@@ -2080,6 +2088,8 @@ const AGENT_SESSIONS_KEY = 'mentria.comms.agent_sessions';
 const IOS_DEVICE = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const bridge = createMultiClient();
 bridge.on('room-ok', (m) => {
+  const w = m && typeof m.cmid === 'string' ? roomWaiters.get(m.cmid) : null;
+  if (w) { roomWaiters.delete(m.cmid); w(m); }
   if (!m || !sessRoom || m.room !== sessRoom) return;
   sessState.textContent = m.ok ? (m.on ? T.rooms.session_added : T.rooms.session_removed) : T.rooms.session_failed;
 });

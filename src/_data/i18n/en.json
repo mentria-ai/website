@@ -5600,7 +5600,8 @@
         "session_on": "{name} · {computer} · @{handle}",
         "session_added": "Added. The session reads this room now.",
         "session_removed": "Removed from this room.",
-        "session_failed": "The session didn't answer. Try again while it's on."
+        "session_failed": "The session didn't answer. Try again while it's on.",
+        "disconnect_lock": "{name} was in {rooms}. Lock each room to take it out: its sessions are unticked."
       },
       "ring": {
         "incoming": "incoming call",

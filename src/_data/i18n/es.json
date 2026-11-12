@@ -5600,7 +5600,8 @@
         "session_on": "{name} · {computer} · @{handle}",
         "session_added": "Añadida. La sesión ya lee esta sala.",
         "session_removed": "Quitada de esta sala.",
-        "session_failed": "La sesión no respondió. Inténtalo de nuevo mientras esté activa."
+        "session_failed": "La sesión no respondió. Inténtalo de nuevo mientras esté activa.",
+        "disconnect_lock": "{name} estaba en {rooms}. Bloquea cada sala para sacarlo: sus sesiones están desmarcadas."
       },
       "ring": {
         "incoming": "llamada entrante",

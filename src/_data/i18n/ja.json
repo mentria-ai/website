@@ -5600,7 +5600,8 @@
         "session_on": "{name} · {computer} · @{handle}",
         "session_added": "追加しました。セッションがこのルームを読み始めました。",
         "session_removed": "このルームから外しました。",
-        "session_failed": "セッションが応答しませんでした。オンのときにもう一度お試しください。"
+        "session_failed": "セッションが応答しませんでした。オンのときにもう一度お試しください。",
+        "disconnect_lock": "{name} は {rooms} に参加していました。各ルームをロックして外してください。そのセッションのチェックは外してあります。"
       },
       "ring": {
         "incoming": "着信",

@@ -5600,7 +5600,8 @@
         "session_on": "{name} · {computer} · @{handle}",
         "session_added": "Ajoutée. La session lit maintenant ce salon.",
         "session_removed": "Retirée de ce salon.",
-        "session_failed": "La session n'a pas répondu. Réessayez pendant qu'elle est active."
+        "session_failed": "La session n'a pas répondu. Réessayez pendant qu'elle est active.",
+        "disconnect_lock": "{name} était dans {rooms}. Verrouillez chaque salon pour le retirer : ses sessions sont décochées."
       },
       "ring": {
         "incoming": "appel entrant",

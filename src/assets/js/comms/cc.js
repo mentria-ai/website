@@ -295,9 +295,10 @@ export const lockPlan = ({ room, key, kv, agents, keep, sessions, trusted }) => 
   return out;
 };
 
-export const sendUntilReply = async (send, waitReply, { tries = 2 } = {}) => {
+export const sendUntilReply = async (send, waitReply, { tries = 2, resend = null } = {}) => {
+  const id = await send();
   for (let i = 0; i < tries; i++) {
-    const id = await send();
+    if (i > 0 && resend) await resend(id);
     const got = await waitReply(id);
     if (got) return got;
   }

@@ -1158,10 +1158,16 @@ check('members: a session post reads as name · computer, verified only when the
   const C = { x: 'CX', y: 'CY' };
   const body = { v: 2, t: 'done', agent: { name: 'Site', handle: 'site', host: 'Mac' } };
   deepEq(MB.agentSender(body, { ok: true, spub: C, sigFp: 'fpC' }, [{ name: 'Studio Mac', spub: C }]), { who: 'Site · Studio Mac', verified: true, handle: 'site', sigFp: 'fpC' });
-  deepEq(MB.agentSender(body, { ok: true, spub: { x: 'OX', y: 'OY' }, sigFp: 'fpO' }, [{ name: 'Studio Mac', spub: C }]), { who: 'Site · Mac', verified: false, handle: 'site', sigFp: 'fpO' });
+  eq(MB.agentSender(body, { ok: true, spub: { x: 'OX', y: 'OY' }, sigFp: 'fpO' }, [{ name: 'Studio Mac', spub: C }]), null);
   eq(MB.agentSender(body, null, []), null);
   eq(MB.agentSender({ v: 2, t: 'x' }, { ok: true, spub: C, sigFp: 'fpC' }, []), null);
   eq(MB.agentSender({ v: 2, t: 'x', agent: { name: 'A', handle: 'NO SPACES', host: 'h' } }, { ok: true, spub: C, sigFp: 'fpC' }, []), null);
+});
+check('members: roomsWithComputer finds the rooms where a computer has sessions', () => {
+  const C = { x: 'CX', y: 'CY' }, D = { x: 'DX', y: 'DY' };
+  const rooms = [{ room: 'a', agents: { 'f/site': { sigFp: 'f', spub: C, handle: 'site', name: 'site', on: true } } }, { room: 'b', agents: { 'g/eng': { sigFp: 'g', spub: D, handle: 'eng', name: 'eng', on: true } } }, { room: 'c' }];
+  deepEq(MB.roomsWithComputer(rooms, C), ['a']);
+  deepEq(MB.roomsWithComputer(rooms, { x: 'ZX', y: 'ZY' }), []);
 });
 check('members: a rekey from a member of the room is accepted', () => {
   const e = { room: 'r' };

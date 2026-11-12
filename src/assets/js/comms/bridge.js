@@ -152,7 +152,9 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
     room: async (sid, msg) => {
       if (!msg || !ROOM_MSGS.has(msg.t)) throw new Error('not a room message');
       const cmid = cmidNew();
-      await send(await sign(sid, cmid, Object.assign({}, msg, { sid, cmid })));
+      const m = await sign(sid, cmid, Object.assign({}, msg, { sid, cmid }));
+      keep(cmid, m);
+      await send(m);
       return cmid;
     },
     say: async (sid, text) => { const cmid = cmidNew(); const m = await sign(sid, cmid, { t: 'say', sid, cmid, text, device }); keep(cmid, m); await send(m); return cmid; },

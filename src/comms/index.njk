@@ -858,7 +858,7 @@ import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/as
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
 import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink, signRoomBody } from '/assets/js/comms/sign.js';
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
-import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody, noteAgent, agentsOf, agentSender } from '/assets/js/comms/members.js';
+import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody, noteAgent, agentsOf, agentSender, roomsWithComputer } from '/assets/js/comms/members.js';
 const ccTrusted = new Map();
 const trustedComputers = () => Array.from(ccTrusted.values());
 import { keysFromBridgeKey, createBridgeClient, BRIDGE_KIND, HERE_TTL_MS } from '/assets/js/comms/bridge.js';
@@ -1771,7 +1771,7 @@ const lockEl = document.getElementById('comms-lock');
 let lockRoom = null;
 const closeLock = () => { lockEl.hidden = true; lockRoom = null; document.getElementById('comms-lock-list').innerHTML = ''; };
 lockEl.querySelectorAll('[data-lock-close]').forEach((el) => el.addEventListener('click', closeLock));
-const openLock = (roomName) => {
+const openLock = (roomName, untick = null) => {
   const entry = savedRooms().find((r) => r.room === roomName);
   if (!entry || !mySign || !myId) return;
   lockRoom = roomName;
@@ -1803,6 +1803,7 @@ const openLock = (roomName) => {
     box.type = 'checkbox';
     box.checked = true;
     box.dataset.agent = a.key;
+    if (untick && untick(a)) box.checked = false;
     const nm = document.createElement('span');
     nm.textContent = fmt(T.rooms.session_on, { name: a.name, computer: a.host || T.cc.computer, handle: a.handle });
     label.append(box, nm);
@@ -1836,9 +1837,19 @@ const lockRoomNow = async (roomName, keepFps, keepAgents = []) => {
   for (const pub of kept.map((m) => m.pub).concat([myPub])) {
     try { await publishToInbox(pub, signed); } catch (_) {}
   }
+  const byCid = new Map();
   for (const step of lockPlan({ room: roomName, key, kv: 2, agents: roomAgents, keep: keepAgents, sessions: bridge.sessions(), trusted: trustedComputers() })) {
-    if (step.sid) sendRoomMsg(step.sid, step.msg).then((got) => { if (!got) pendingAdd(step.cid, step.msg); }, () => pendingAdd(step.cid, step.msg));
-    else pendingAdd(step.cid, step.msg);
+    if (!byCid.has(step.cid)) byCid.set(step.cid, []);
+    byCid.get(step.cid).push(step);
+  }
+  for (const steps of byCid.values()) {
+    (async () => {
+      for (const step of steps) {
+        let got = null;
+        if (step.sid) { try { got = await sendRoomMsg(step.sid, step.msg); } catch (_) {} }
+        if (!got) pendingAdd(step.cid, step.msg);
+      }
+    })();
   }
   subscribeUnread();
   if (attach) attach.refresh();
@@ -1861,7 +1872,7 @@ const waitRoomReply = (cmid) => new Promise((resolve) => {
   roomWaiters.set(cmid, resolve);
   setTimeout(() => { if (roomWaiters.delete(cmid)) resolve(null); }, ROOM_REPLY_MS);
 });
-const sendRoomMsg = (sid, msg) => sendUntilReply(() => bridge.room(sid, msg), waitRoomReply);
+const sendRoomMsg = (sid, msg) => sendUntilReply(() => bridge.room(sid, msg), waitRoomReply, { resend: (id) => bridge.resend(sid, id) });
 const pendingGet = () => { try { const v = MentriaStore.get('comms', 'ccpending'); return v && typeof v === 'object' ? v : {}; } catch (_) { return {}; } };
 const pendingAdd = (cid, msg) => {
   if (!cid || !msg) return;
@@ -2245,6 +2256,11 @@ const disconnectOne = async (rec) => {
   stopComputer(rec.cid);
   notice(fmt(T.cc.disconnected, { name: rec.name || T.cc.computer }));
   paintAgents();
+  const rooms = roomsWithComputer(savedRooms(), rec.spub);
+  if (rooms.length && mySign) {
+    sys(fmt(T.rooms.disconnect_lock, { name: rec.name || T.cc.computer, rooms: rooms.map((r) => { const e = savedRooms().find((x) => x.room === r); return (e && e.label) || r; }).join(', ') }));
+    openLock(rooms[0], (a) => samePubOf(a.spub, rec.spub));
+  }
 };
 let ccFlow = null;
 const showCc = ({ text = '', code = '', note = '', ask = false, done = false } = {}) => {
@@ -3169,6 +3185,7 @@ const handleRoomCtl = (ctl, sfp, sig, at) => {
   if (ctl.k === 'agent') {
     if (!sig || !sig.ok) return;
     const comp = trustedComputers().find((c) => samePubOf(c.spub, sig.spub));
+    if (!comp) return;
     noteRoomAgent({ sigFp: sig.sigFp, spub: sig.spub, name: ctl.name, handle: ctl.handle, host: (comp && comp.name) || ctl.host, on: ctl.on !== false, ts: at || Date.now() });
     return;
   }

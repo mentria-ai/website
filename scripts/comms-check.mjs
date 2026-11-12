@@ -165,6 +165,12 @@ check('home: Annotate chats open in Annotate Image', () => eq(H.aiHref({ id: 'an
 
 check('mention: an @ at a word start opens the picker', () => eq(M.mentionQuery('hi @sa', 6), 'sa'));
 check('mention: an @ inside a word does not', () => eq(M.mentionQuery('mail a@b.c', 10), null));
+check('mention: insertTag puts @handle in place of the typed query and keeps the rest', () => {
+  deepEq(M.insertTag('ask @si', 7, 'site'), { text: 'ask @site ', caret: 10 });
+  deepEq(M.insertTag('@e later', 2, 'engine'), { text: '@engine later', caret: 8 });
+  deepEq(M.insertTag('@site and @en', 13, 'engine'), { text: '@site and @engine ', caret: 18 });
+  deepEq(M.insertTag('no tag here', 5, 'site'), { text: 'no tag here', caret: 5 });
+});
 check('mention: prefix matches come first', () => deepEq(M.matchTargets('sa', [{ kind: 'contact', id: '1', label: 'Isabel' }, { kind: 'contact', id: '2', label: 'Sam' }]).map((t) => t.label), ['Sam', 'Isabel']));
 check('mention: the chosen name leaves the message', () => eq(M.splitTarget('@Sam see you at 9', { kind: 'contact', id: '2', label: 'Sam' }).body, 'see you at 9'));
 

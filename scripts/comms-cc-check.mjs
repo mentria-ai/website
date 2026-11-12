@@ -454,6 +454,46 @@ check('room: a session post signed by the computer verifies on the page, and a p
   eq(pv.sigFp, await SSG.sigFingerprint({ x: jwk.x, y: jwk.y }));
 });
 
+check('cc: room messages from the phone are signed for the session and here carries handle and rooms', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(4));
+  const host = await hostKey();
+  const t = memTransport();
+  const signedFor = [];
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => { signedFor.push([sid, cmid, body.t]); return body; }, host: { spub: host.spub, room: 'cc:c1' } });
+  const here = { t: 'here', cmid: 'h:1', host: 'Mac', sessions: [{ sid: 's1', name: 'Site', handle: 'site', rooms: ['agents', 7], busy: false, lastTs: 1 }] };
+  for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', 'h:1', here))) t.feed(c);
+  await tick(50);
+  deepEq([client.sessions()[0].handle, client.sessions()[0].rooms], ['site', ['agents']]);
+  const cmid = await client.room('s1', { t: 'room-add', room: 'agents', key: 'K'.repeat(43), kv: 2, label: 'Agents', computers: [] });
+  ok(/^p:/.test(cmid));
+  deepEq(signedFor, [['s1', cmid, 'room-add']]);
+  let refused = false;
+  try { await client.room('s1', { t: 'say', text: 'x' }); } catch (_) { refused = true; }
+  eq(refused, true);
+}, false);
+
+check('cc: room-add carries the room key, label and the trusted computers', () => {
+  const C = { x: 'CX', y: 'CY' };
+  deepEq(CCM.roomAddMsg({ room: 'agents', key: 'K'.repeat(43), kv: 2, label: 'Agents' }, [{ cid: 'c1', name: 'Mac', spub: C }]), { t: 'room-add', room: 'agents', key: 'K'.repeat(43), kv: 2, label: 'Agents', computers: [{ name: 'Mac', spub: C }] });
+  deepEq(CCM.roomAddMsg({ room: 'r', key: 'K'.repeat(43) }, []).kv, 1);
+}, false);
+
+check('cc: lock room sends the new key to computers that keep a session and drops the rest, queueing what cannot go now', () => {
+  const A = { x: 'AX', y: 'AY' }, B = { x: 'BX', y: 'BY' }, Z = { x: 'ZX', y: 'ZY' };
+  const trusted = [{ cid: 'ca', name: 'Mac', spub: A }, { cid: 'cb', name: 'Laptop', spub: B }];
+  const agents = [
+    { key: 'fa/site', spub: A, handle: 'site' },
+    { key: 'fa/docs', spub: A, handle: 'docs' },
+    { key: 'fb/engine', spub: B, handle: 'engine' },
+    { key: 'fz/ghost', spub: Z, handle: 'ghost' }
+  ];
+  const sessions = [{ sid: 's-site', cid: 'ca', online: true }, { sid: 's-eng', cid: 'cb', online: false }];
+  const plan = CCM.lockPlan({ room: 'agents', key: 'N'.repeat(43), kv: 2, agents, keep: ['fa/site'], sessions, trusted });
+  deepEq(plan.map((p) => [p.cid, p.sid, p.msg.t, p.msg.handle || '']), [['ca', 's-site', 'room-key', ''], ['ca', 's-site', 'room-drop', 'docs'], ['cb', null, 'room-drop', 'engine']]);
+  deepEq(plan[0].msg.computers, [{ name: 'Mac', spub: A }, { name: 'Laptop', spub: B }]);
+  eq(plan[0].msg.key, 'N'.repeat(43));
+}, false);
+
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;
 for (const [name, fn, needsPlugin] of checks) {

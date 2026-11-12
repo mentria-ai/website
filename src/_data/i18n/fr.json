@@ -6050,7 +6050,10 @@
         "wants": "{tool} veut s’exécuter",
         "allow": "Autoriser",
         "deny": "Refuser",
-        "running_on": "en cours sur {name}"
+        "running_on": "en cours sur {name}",
+        "file_sending": "envoi {pct} %",
+        "file_failed": "Non envoyé : la session n'a pas reçu le fichier. Réessayez.",
+        "file_too_big": "Non envoyé : seuls les fichiers jusqu'à 10 Mo peuvent aller à une session."
       },
       "cc": {
         "computers": "Ordinateurs",

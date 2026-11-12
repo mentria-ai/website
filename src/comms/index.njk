@@ -4094,7 +4094,17 @@ const sendFiles = async (fileList) => {
 };
 
 els.drop.addEventListener('drop', (e) => { sendFiles(e.dataTransfer.files); });
-els.file.addEventListener('change', (e) => { sendFiles(e.target.files); e.target.value = ''; });
+els.file.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  if (agentView && agentView.isOpen()) {
+    const caption = els.msg.value.trim();
+    els.msg.value = '';
+    (async () => { for (let i = 0; i < Math.min(files.length, 5); i++) await agentView.sendFile(files[i], i === 0 ? caption : ''); })();
+    return;
+  }
+  sendFiles(files);
+});
 
 const pickerEl = document.getElementById('comms-picker');
 const pickerListEl = document.getElementById('comms-picker-list');

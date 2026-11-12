@@ -6050,7 +6050,10 @@
         "wants": "{tool} を実行しようとしています",
         "allow": "許可",
         "deny": "拒否",
-        "running_on": "{name} で実行中"
+        "running_on": "{name} で実行中",
+        "file_sending": "送信中 {pct}%",
+        "file_failed": "送信できませんでした：セッションがファイルを受け取りませんでした。もう一度お試しください。",
+        "file_too_big": "送信できませんでした：セッションに送れるのは 10 MB までのファイルです。"
       },
       "cc": {
         "computers": "コンピューター",

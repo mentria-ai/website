@@ -156,6 +156,8 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
       return cmid;
     },
     say: async (sid, text) => { const cmid = cmidNew(); const m = await sign(sid, cmid, { t: 'say', sid, cmid, text, device }); keep(cmid, m); await send(m); return cmid; },
+    fileOffer: async (sid, meta) => { const cmid = cmidNew(); const m = await sign(sid, cmid, Object.assign({ t: 'file-offer', sid, cmid }, meta)); keep(cmid, m); await send(m); return cmid; },
+    filePart: (sid, id, i, d, w) => send(Object.assign({ t: 'file-part', sid, id, i, d }, w ? { w: 1 } : {})),
     resend: async (cmid) => { const m = kept.get(cmid); if (!m) return false; await send(m); return true; },
     answer: async (sid, id, answers) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'answer', sid, cmid, id, answers })); return cmid; },
     verdict: async (sid, request_id, behavior, call, reason) => { const cmid = cmidNew(); await send(await sign(sid, cmid, Object.assign({ t: 'verdict', sid, cmid, request_id, behavior }, call && typeof call.id === 'string' && typeof call.hash === 'string' ? { call: { id: call.id, hash: call.hash } } : {}, reason ? { reason: String(reason).slice(0, 500) } : {}))); return cmid; },

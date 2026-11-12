@@ -468,6 +468,31 @@ const PAGE_TESTS = async () => {
     deepEq(resent, [['s', 'p:9']]);
     v.close();
   });
+  test('agent: a file sent to a session shows sending progress, then delivered', async () => {
+    const AVf = await import('/assets/js/comms/agent-view.js?' + Math.random());
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const parts = [];
+    let release;
+    const gate = new Promise((r) => { release = r; });
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {}, resend: async () => true,
+      fileOffer: async (sid, meta) => { setTimeout(() => handlers['file-got']({ t: 'file-got', sid, cmid: 'p:f', have: 0, need: [0], done: false }), 5); return 'p:f'; },
+      filePart: async (sid, id, i, d, w) => { parts.push([i, !!w]); if (w) { await gate; setTimeout(() => handlers['file-got']({ t: 'file-got', sid, cmid: 'p:f', have: 1, need: [], done: true, ok: true }), 5); } } };
+    const v = AVf.createAgentView({ els, T: { agent: { sent: 'sent', delivered: 'delivered', file_sending: 'sending {pct}%' }, cc: {}, chat: {} }, client });
+    v.open('s', null, 'S');
+    try {
+      const file = new File([new Uint8Array(1000).fill(7)], 'notes.txt', { type: 'text/plain' });
+      const done = v.sendFile(file, '');
+      await sleep(150);
+      ok(els.log.textContent.includes('notes.txt') && els.log.textContent.includes('sending 0%'), els.log.textContent);
+      release();
+      eq(await done, 'ok');
+      await sleep(150);
+      ok(els.log.textContent.includes('delivered'), els.log.textContent);
+      deepEq(parts, [[0, true]]);
+    } finally { v.close(); }
+  });
   test('cards: verdict echoes the perm call id and hash', async () => {
     const r = await agentRig();
     r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r1', tool_name: 'Bash', description: 'd', input_preview: 'npm test', call: { id: 'r1', hash: 'HASH1' }, ts: Date.now() });

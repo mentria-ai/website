@@ -6050,7 +6050,10 @@
         "wants": "{tool} quiere ejecutarse",
         "allow": "Permitir",
         "deny": "Denegar",
-        "running_on": "en ejecución en {name}"
+        "running_on": "en ejecución en {name}",
+        "file_sending": "enviando {pct}%",
+        "file_failed": "No enviado: la sesión no recibió el archivo. Inténtalo de nuevo.",
+        "file_too_big": "No enviado: a una sesión solo pueden ir archivos de hasta 10 MB."
       },
       "cc": {
         "computers": "Computadoras",

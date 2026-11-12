@@ -545,6 +545,60 @@ check('cc: a phone message is resent as the same signed message, never signed ag
   eq(await client.resend('p:unknown'), false);
 }, false);
 
+const SF = await import('/assets/js/comms/sendfile.js');
+const fileLink = ({ drop = () => false, silent = false } = {}) => {
+  const got = new Map();
+  const sent = [];
+  let box = null;
+  const reply = (id, m) => { if (!silent) got.set(id, Object.assign({ cmid: id }, m)); };
+  return {
+    sent,
+    attach: (b) => { box = b; },
+    offer: async (meta) => { const id = 'p:o' + (sent.length + 1); sent.push(['offer', id]); const r = box ? box.offer(Object.assign({ cmid: id }, meta)) : { ok: true }; reply(id, r.ok ? Object.assign({ done: false }, box ? box.status(id) : { have: 0, need: [0] }) : { done: true, ok: false, err: r.err }); return id; },
+    resend: async (id) => { sent.push(['resend', id]); return true; },
+    part: async (id, i, d, w) => { sent.push(['part', i, !!w]); if (drop(i)) return; const st = box.part(id, i, d); if (st.complete) reply(id, st.ok ? { have: st.have, need: [], done: true, ok: true } : { done: true, ok: false, err: st.err }); else if (w) reply(id, { have: st.have, need: st.need, done: false }); },
+    waitGot: async (id) => { const m = got.get(id) || null; got.delete(id); return m; }
+  };
+};
+
+check('file: the phone sends a file the plugin assembles byte for byte, resending what a lossy link dropped', async () => {
+  const IB = await import(pathToFileURL(join(CC, 'plugins/mentria/lib/inbox.js')).href);
+  eq(SF.PART_BYTES, IB.PART_BYTES);
+  const bytes = Uint8Array.from({ length: SF.PART_BYTES * 30 + 77 }, (_, i) => (i * 7) & 255);
+  const box = IB.createInbox();
+  const once = new Set([5, 29]);
+  let dropped = 0;
+  const link = fileLink({ drop: (i) => { if (!once.has(i)) return false; once.delete(i); dropped++; return true; } });
+  link.attach(box);
+  const progress = [];
+  const r = await SF.sendFile({ bytes, name: 'pic.png', mime: 'image/png', text: '' }, { offer: link.offer, resend: link.resend, part: link.part, waitGot: link.waitGot, onProgress: (x) => progress.push(x), window: 8 });
+  eq(r, 'ok');
+  eq(dropped, 2);
+  const out = box.take('p:o1');
+  eq(out.bytes.length, bytes.length);
+  ok(out.bytes.every((b, i) => b === bytes[i]));
+  eq(progress[progress.length - 1], 1);
+  eq(link.sent.filter((x) => x[0] === 'part' && x[1] === 5).length, 2);
+});
+
+check('file: the phone names files the way the plugin does', async () => {
+  const IB = await import(pathToFileURL(join(CC, 'plugins/mentria/lib/inbox.js')).href);
+  for (const n of ['IMG 0001.HEIC', '../../etc/passwd', 'a\\b\\c.txt', 'we ird\u0000na\nme;rm -rf.png', '', '.hidden', 'x'.repeat(200) + '.jpeg', 'résumé final.pdf']) {
+    eq(SF.safeName(n), IB.safeName(n));
+    eq(IB.safeName(SF.safeName(n)), SF.safeName(n));
+  }
+});
+
+check('file: no answer fails after the quiet rounds; too big never offers', async () => {
+  const quiet = fileLink({ silent: true });
+  quiet.attach({ offer: () => ({ ok: true }), status: () => ({ have: 0, need: [0] }), part: () => ({ have: 0, need: [], complete: false }) });
+  eq(await SF.sendFile({ bytes: new Uint8Array(100), name: 'a', mime: 'x/y', text: '' }, { offer: quiet.offer, resend: quiet.resend, part: quiet.part, waitGot: quiet.waitGot, quietRounds: 2 }), 'failed');
+  ok(quiet.sent.length <= 6);
+  const big = fileLink();
+  eq(await SF.sendFile({ bytes: new Uint8Array(SF.MAX_BYTES + 1), name: 'a', mime: 'x/y', text: '' }, { offer: big.offer, resend: big.resend, part: big.part, waitGot: big.waitGot }), 'too-big');
+  eq(big.sent.length, 0);
+});
+
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;
 for (const [name, fn, needsPlugin] of checks) {

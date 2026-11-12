@@ -6050,7 +6050,10 @@
         "wants": "{tool} wants to run",
         "allow": "Allow",
         "deny": "Deny",
-        "running_on": "running on {name}"
+        "running_on": "running on {name}",
+        "file_sending": "sending {pct}%",
+        "file_failed": "Not sent: the session didn't take the file. Try again.",
+        "file_too_big": "Not sent: files up to 10 MB can go to a session."
       },
       "cc": {
         "computers": "Computers",

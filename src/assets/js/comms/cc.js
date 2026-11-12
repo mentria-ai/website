@@ -222,6 +222,8 @@ export const createMultiClient = () => {
     cids: () => Array.from(clients.keys()),
     client: (cid) => clients.get(cid) || null,
     room: (sid, msg) => { const c = ownerOf(sid); return c ? c.room(sid, msg) : Promise.reject(new Error('no session')); },
+    fileOffer: (sid, meta) => { const c = ownerOf(sid); return c ? c.fileOffer(sid, meta) : Promise.reject(new Error('no session')); },
+    filePart: (sid, id, i, d, w) => { const c = ownerOf(sid); return c ? c.filePart(sid, id, i, d, w) : Promise.reject(new Error('no session')); },
     resend: (sid, cmid) => { const c = ownerOf(sid); return c && c.resend ? c.resend(cmid) : Promise.resolve(false); },
     ownerCid: (sid) => { for (const [cid, c] of clients) if (c.sessions().some((s) => s.sid === sid)) return cid; return null; },
     on: (t, fn) => {

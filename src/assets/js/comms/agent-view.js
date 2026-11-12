@@ -38,13 +38,12 @@ export const matchPending = (pending, msgs) => {
 
 export const permResolved = (perm, msgs) => !perm || (msgs || []).some((m) => (m.ts || 0) > perm.ts && (m.role === 'user' || (m.parts || []).some((x) => x.type === 'tool_result')));
 
-export const visiblePerm = (perms, sid, msgs) => {
-  const kept = (perms || []).filter((p) => !p.answered && (p.sid !== sid || !permResolved(p, msgs)));
-  const mine = kept.filter((p) => p.sid === sid);
+export const visiblePerm = (perms, sid, msgs, now = Date.now()) => {
+  const kept = (perms || []).filter((p) => (!p.answered || now - (p.answeredAt || 0) < 120000) && (p.sid !== sid || !permResolved(p, msgs)));
+  const mine = kept.filter((p) => p.sid === sid && !p.answered);
   return { perm: mine.length ? mine[mine.length - 1] : null, kept };
 };
 
-export const pairSection = ({ on, ready, phone, T = {} }) => ({ hidden: !(on && ready), label: phone ? (T.connect_phone || T.connect || '') : (T.connect || ''), note: phone ? (T.connect_note_phone || T.connect_note || '') : (T.connect_note || '') });
 
 export const RESUME_MS = 75000;
 const SIGNED_KEY = 'mentria.comms.agent_signed_seen';
@@ -62,6 +61,8 @@ const el = (tag, cls, text) => {
 
 export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepAliveMs = 60000, statusMs = 15000, resumeMs = RESUME_MS } = {}) => {
   const A = (T && T.agent) || {};
+  const C = (T && T.cc) || {};
+  const failNote = (code) => (code === 'clock' ? (C.clock || A.unpaired || '') : code === 'command' ? (C.command || A.unpaired || '') : code === 'command-unknown' ? (C.command_unknown || C.command || A.unpaired || '') : (C.unpaired || A.unpaired || ''));
   let sid = null;
   let sub = null;
   let expanded = new Set();
@@ -95,6 +96,11 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     byId('comms-agent-perm-title').textContent = fillIn(A.wants, { tool: p.tool_name || '' });
     byId('comms-agent-perm-desc').textContent = p.description || '';
     byId('comms-agent-perm-preview').textContent = p.input_preview || '';
+    const note = byId('comms-agent-perm-note');
+    const actions = byId('comms-agent-perm-actions');
+    const said = p.resolvedHere ? (C.answered_here || '') : p.local ? (C.local || '') : p.failed ? failNote(p.failed) : '';
+    if (note) { note.hidden = !said; note.textContent = said; }
+    if (actions) actions.hidden = !!(p.resolvedHere || p.local);
     card.dataset.id = p.request_id;
     card.dataset.sid = p.sid;
   };
@@ -102,9 +108,11 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     const card = byId('comms-agent-perm');
     const id = card && card.dataset.id;
     const p = perms.find((x) => x.request_id === id && x.sid === sid);
-    if (!p || !sid) return;
+    if (!p || !sid || p.local || p.resolvedHere) return;
     p.answered = true;
-    client.verdict(sid, id, behavior).catch(() => {});
+    p.answeredAt = Date.now();
+    p.failed = null;
+    client.verdict(sid, id, behavior, p.call).then((cmid) => { p.cmid = cmid; }, () => { p.answered = false; paintPerm(); });
     paintPerm();
   };
   if (byId('comms-agent-allow')) byId('comms-agent-allow').addEventListener('click', () => answer('allow'));
@@ -129,7 +137,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
   const status = () => {
     if (!sid) return;
     const s = client.sessions().find((x) => x.sid === sid);
-    els.status.textContent = s && s.online ? (A.running || '') : (A.offline || '');
+    els.status.textContent = s && s.online ? (s.host && A.running_on ? A.running_on.replace('{name}', s.host) : (A.running || '')) : (A.offline || '');
   };
   const paintComposer = () => {
     if (!sid) return;
@@ -170,9 +178,15 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     };
     const flushGroup = () => {
       if (!group.length) return;
+      const orphans = group.filter((p) => p.type === 'tool_result' && !callIds.has(p.callId));
+      if (orphans.length) {
+        const msg = el('div', 'comms__agentmsg');
+        renderAgentParts(msg, orphans, Object.assign({ TB: T.chat, results, calls: callIds }, common));
+        box.append(msg);
+      }
       if (group.some((p) => p.type === 'tool_call' || p.type === 'thought')) {
         const msg = el('div', 'comms__agentmsg');
-        msg.append(renderToolGroup(group, Object.assign({ results }, common)));
+        msg.append(renderToolGroup(group.filter((p) => !orphans.includes(p)), Object.assign({ results }, common)));
         box.append(msg);
       }
       group = [];
@@ -243,7 +257,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
         const line = el('div', 'comms__line comms__line--me');
         const what = el('span', 'comms__what');
         renderBody(what, p.text, { from: 'self', T: T.chat });
-        line.append(what, el('span', 'comms__agent-state' + (p.failed ? ' comms__agent-state--failed' : ''), p.failed ? (A.unpaired || '') : p.acked ? (A.delivered || '') : (A.sent || '')));
+        line.append(what, el('span', 'comms__agent-state' + (p.failed ? ' comms__agent-state--failed' : ''), p.failed ? failNote(p.failed) : p.acked ? (A.delivered || '') : (A.sent || '')));
         box.append(line);
       }
       out.push(box);
@@ -271,7 +285,7 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     const send = el('button', 'comms__btn comms__ask-send', A.ask_send || 'Send');
     send.type = 'button';
     const state = el('span', 'comms__agent-state');
-    const sync = () => { send.disabled = a.sent || !askReady(a); state.textContent = a.failed ? (A.unpaired || '') : a.sent ? (A.ask_sent || '') : ''; state.classList.toggle('comms__agent-state--failed', !!a.failed); };
+    const sync = () => { send.disabled = a.sent || !askReady(a); state.textContent = a.doneHere ? (C.answered_here || '') : a.failed ? failNote(a.failed) : a.sent ? (A.ask_sent || '') : ''; state.classList.toggle('comms__agent-state--failed', !!a.failed); };
     a.questions.forEach((q, i) => {
       const box = el('div', 'comms__ask-q');
       if (q.header) box.append(el('span', 'comms__ask-head', q.header));
@@ -354,11 +368,25 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     asks.push({ sid: m.sid, id: m.id, questions, sel: questions.map(() => new Set()), text: questions.map(() => ''), sent: false });
     if (m.sid === sid) schedule();
   }));
-  offs.push(client.on('asked', (m) => { const before = asks.length; asks = asks.filter((x) => !(m && x.sid === m.sid && x.id === m.id)); if (asks.length !== before && m.sid === sid) schedule(); }));
+  offs.push(client.on('asked', (m) => {
+    if (m && m.where === 'computer') {
+      const q = asks.find((x) => x.sid === m.sid && x.id === m.id);
+      if (q && !q.doneHere) { q.doneHere = true; q.sent = true; if (q.sync) q.sync(); setTimeout(() => { asks = asks.filter((x) => x !== q); if (m.sid === sid) schedule(); }, 6000); }
+      return;
+    }
+    const before = asks.length; asks = asks.filter((x) => !(m && x.sid === m.sid && x.id === m.id)); if (asks.length !== before && m.sid === sid) schedule();
+  }));
+  offs.push(client.on('resolved', (m) => {
+    const p = perms.find((x) => m && x.sid === m.sid && x.request_id === m.request_id);
+    if (!p || p.resolvedHere) return;
+    p.resolvedHere = true;
+    if (m.sid === sid) paintPerm();
+    setTimeout(() => { p.answered = true; if (m.sid === sid) paintPerm(); }, 6000);
+  }));
   offs.push(client.on('ack', (m) => { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.acked) { p.acked = true; try { localStorage.setItem(SIGNED_KEY, '1'); } catch (_) {} schedule(); } }));
   offs.push(client.on('perm', (m) => { if (!m || typeof m.request_id !== 'string' || typeof m.sid !== 'string') return; if (!perms.some((x) => x.sid === m.sid && x.request_id === m.request_id)) perms.push(Object.assign({}, m)); if (m.sid === sid) paintPerm(); }));
   offs.push(client.on('part', (m) => { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(m); } }));
-  offs.push(client.on('err', (m) => { if (m && m.cmid) { const q = asks.find((x) => x.cmid === m.cmid); if (q) { q.failed = String(m.code || 'error'); q.sent = false; if (q.sync) q.sync(); } } if (m && m.cmid && m.sid === sid) { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.failed) { p.failed = String(m.code || 'error'); schedule(); } } if (m.ref) { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(null); } } }));
+  offs.push(client.on('err', (m) => { const pv = m && m.cmid ? perms.find((x) => x.cmid === m.cmid) : null; if (pv) { pv.answered = false; pv.failed = String(m.code || 'error'); if (pv.sid === sid) paintPerm(); } if (m && m.cmid) { const q = asks.find((x) => x.cmid === m.cmid); if (q) { q.failed = String(m.code || 'error'); q.sent = false; if (q.sync) q.sync(); } } if (m && m.cmid && m.sid === sid) { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.failed) { p.failed = String(m.code || 'error'); schedule(); } } if (m.ref) { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(null); } } }));
 
   return {
     isOpen: () => !!sid,

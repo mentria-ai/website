@@ -1654,11 +1654,24 @@ localeReload: true
       } catch (_) {}
     }
 
+    async function writeDeviceInvite() {
+      try {
+        if (!window.MentriaIdentity || !window.MentriaIdentity.isUnlocked() || !window.MentriaStore) return;
+        var dk = await import('/assets/js/comms/devkey.js');
+        var dv = await import('/assets/js/comms/devices.js');
+        var me = await dk.ensureDeviceKeys();
+        var trust = window.MentriaStore.get('comms', 'devtrust');
+        if (!trust || dv.trustedFps(trust).indexOf(me.sign.sigFp) < 0) return;
+        window.MentriaStore.set('comms', 'devinvite', await dv.makeInvite(me));
+      } catch (_) {}
+    }
+
     startBtn.addEventListener('click', function () {
       whenReady(async function () {
         startBtn.disabled = true;
         joinBtn.disabled = true;
         try {
+          await writeDeviceInvite();
           var code = await window.MentriaSync.start();
           codeValue.textContent = code;
           renderQR('mentria-sync://' + code);

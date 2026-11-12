@@ -97,6 +97,76 @@ const PAGE_TESTS = async () => {
   test('backup: a locked identity leaves history out', async () => { identity.locked = true; try { const prepared = await MentriaBackup.prepareBackup(); ok((prepared.lockedAreas || []).includes('comms_history')); no(prepared.areas.some((a) => a.area === 'comms_history')); } finally { identity.locked = false; } });
   test('backup: restoring while locked skips history and says so', async () => { await seedHistory(2); const sealed = await MentriaBackup.exportFull(PASS, {}); await emptyStore(); identity.locked = true; let res = null; try { res = await MentriaBackup.applyRestore(await MentriaBackup.readBackupFile(fileOf(sealed), PASS), {}); } finally { identity.locked = false; } ok((res.lockedAreas || []).includes('comms_history')); const s = await S.openStore(A); eq((await s.listMessages('dm-1')).length, 0); s.close(); });
 
+  const DV = await import('/assets/js/comms/devices.js');
+  const SGN = await import('/assets/js/comms/sign.js');
+  const DKM = await import('/assets/js/comms/devkey.js');
+  await import('/assets/js/mentria-sync.js');
+  const fakeDevice = async (name, kind) => {
+    const s = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    const d = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+    const sj = await crypto.subtle.exportKey('jwk', s.publicKey);
+    const dj = await crypto.subtle.exportKey('jwk', d.publicKey);
+    const spub = { x: sj.x, y: sj.y };
+    const sigFp = await SGN.sigFingerprint(spub);
+    return { me: { sign: { spub, signKey: s.privateKey, sigFp }, dh: { pub: { x: dj.x, y: dj.y } } }, entry: { sigFp, spub, dh: { x: dj.x, y: dj.y }, name, kind, added: Date.now() } };
+  };
+  test('sync: comms.devices conflicts merge without the replace prompt', async () => {
+    const A = await fakeDevice('Mac', 'mac');
+    const B = await fakeDevice('iPhone', 'iphone');
+    const C = await fakeDevice('iPad', 'ipad');
+    const base = await DV.makeGenesis(A.me, A.entry);
+    const mine = await DV.withDevice(base, A.me, B.entry);
+    const theirs = await DV.withDevice(base, A.me, C.entry);
+    MentriaStore.set('comms', 'devices', mine, { mtime: Date.now() - 5000 });
+    let asked = 0;
+    const real = window.mentriaConfirm;
+    window.mentriaConfirm = async () => { asked++; return false; };
+    try {
+      await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.devices': JSON.stringify(theirs) } }, meta: { 'comms.devices': Date.now() + 1000 } });
+      const got = MentriaStore.get('comms', 'devices');
+      eq(got.ver, 2);
+      ok(got.sg && got.sg.s);
+      eq(got.needsSign, undefined);
+      const newer = await DV.withDevice(got, A.me, (got.devices.some((d) => d.sigFp === B.entry.sigFp) ? C : B).entry);
+      MentriaStore.set('comms', 'devices', newer);
+      await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.devices': JSON.stringify(mine) } }, meta: { 'comms.devices': Date.now() + 3000 } });
+      eq(MentriaStore.get('comms', 'devices').ver, newer.ver);
+      const forged = Object.assign({}, newer, { ver: 99, needsSign: true });
+      delete forged.sg;
+      await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.devices': JSON.stringify(forged) } }, meta: { 'comms.devices': Date.now() + 4000 } });
+      eq(MentriaStore.get('comms', 'devices').ver, newer.ver);
+    } finally { window.mentriaConfirm = real; }
+    eq(asked, 0);
+  });
+  test('sync: comms.computers merges without the replace prompt and Disconnect sticks', async () => {
+    const k = { spub: { x: 'sx', y: 'sy' }, dh: { x: 'dx', y: 'dy' } };
+    MentriaStore.set('comms', 'computers', { v: 1, list: [Object.assign({ cid: 'c1', name: 'Mac', kver: 1, removed: true, added: 1 }, k)] }, { mtime: Date.now() - 5000 });
+    let asked = 0;
+    const real = window.mentriaConfirm;
+    window.mentriaConfirm = async () => { asked++; return false; };
+    try {
+      const incoming = { v: 1, list: [Object.assign({ cid: 'c1', name: 'Mac', kver: 1, removed: false, added: 1 }, k), Object.assign({ cid: 'c2', name: 'Linux', kver: 1, removed: false, added: 2 }, k)] };
+      await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.computers': JSON.stringify(incoming) } }, meta: { 'comms.computers': Date.now() + 1000 } });
+    } finally { window.mentriaConfirm = real; }
+    eq(asked, 0);
+    const got = MentriaStore.get('comms', 'computers');
+    eq(got.list.find((r) => r.cid === 'c1').removed, true);
+    ok(got.list.some((r) => r.cid === 'c2'));
+  });
+
+  test('sync: comms.devkey never leaves the device', async () => {
+    const me = await DKM.ensureDeviceKeys();
+    const rec = MentriaStore.get('comms', 'devkey');
+    ok(rec && rec.sign);
+    const dump = MentriaStore.exportAll();
+    no('comms.devkey' in (dump.store || {}));
+    no(JSON.stringify(dump).includes(rec.sign.wrapped.ct));
+    const other = Object.assign({}, rec, { created: 1, sign: Object.assign({}, rec.sign, { pub: { x: 'X', y: 'Y' } }) });
+    await MentriaSync.applySnapshot({ v: 2, data: { store: { 'comms.devkey': JSON.stringify(other) } }, meta: { 'comms.devkey': Date.now() + 9000 } });
+    eq(MentriaStore.get('comms', 'devkey').sign.pub.x, rec.sign.pub.x);
+    eq((await DKM.ensureDeviceKeys()).sign.sigFp, me.sign.sigFp);
+  });
+
   const out = [];
   for (const [name, fn] of tests) {
     try { await fn(); out.push({ name, ok: true }); } catch (e) { out.push({ name, ok: false, err: String(e && e.message || e) }); }

@@ -1133,6 +1133,30 @@ check('members: members are kept newest first, at most 50, without me', () => {
   eq(list[0].name, 'N05');
   deepEq(list[0].pub, { x: 'x5', y: 'y' });
 });
+check('members: sessions are kept by computer and handle, newest 20, with their on state', () => {
+  const e = { room: 'r' };
+  const C = { x: 'CX', y: 'CY' };
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Site', handle: 'site', host: 'Mac', on: true, ts: 1 });
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Engine', handle: 'engine', host: 'Mac', on: true, ts: 2 });
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Site', handle: 'site', host: 'Mac', on: false, ts: 3 });
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Bad', handle: 'Bad Handle!', host: 'Mac', on: true, ts: 4 });
+  MB.noteAgent(e, { sigFp: '', spub: C, name: 'X', handle: 'x', host: 'Mac', on: true, ts: 5 });
+  deepEq(MB.agentsOf(e).map((a) => [a.name, a.handle, a.on, a.sigFp]), [['Engine', 'engine', true, 'fpC'], ['Site', 'site', false, 'fpC']]);
+  deepEq(MB.agentsOf(e)[0].spub, C);
+  eq(Object.keys(e.members || {}).length, 0);
+  for (let i = 0; i < 25; i++) MB.noteAgent(e, { sigFp: 'fp' + i, spub: C, name: 'S' + i, handle: 's' + i, host: 'Mac', on: true, ts: 10 + i });
+  eq(MB.agentsOf(e).length, 20);
+  ok(!MB.agentsOf(e).some((a) => a.handle === 'site'));
+});
+check('members: a session post reads as name · computer, verified only when the key is a trusted computer', () => {
+  const C = { x: 'CX', y: 'CY' };
+  const body = { v: 2, t: 'done', agent: { name: 'Site', handle: 'site', host: 'Mac' } };
+  deepEq(MB.agentSender(body, { ok: true, spub: C, sigFp: 'fpC' }, [{ name: 'Studio Mac', spub: C }]), { who: 'Site · Studio Mac', verified: true, handle: 'site', sigFp: 'fpC' });
+  deepEq(MB.agentSender(body, { ok: true, spub: { x: 'OX', y: 'OY' }, sigFp: 'fpO' }, [{ name: 'Studio Mac', spub: C }]), { who: 'Site · Mac', verified: false, handle: 'site', sigFp: 'fpO' });
+  eq(MB.agentSender(body, null, []), null);
+  eq(MB.agentSender({ v: 2, t: 'x' }, { ok: true, spub: C, sigFp: 'fpC' }, []), null);
+  eq(MB.agentSender({ v: 2, t: 'x', agent: { name: 'A', handle: 'NO SPACES', host: 'h' } }, { ok: true, spub: C, sigFp: 'fpC' }, []), null);
+});
 check('members: a rekey from a member of the room is accepted', () => {
   const e = { room: 'r' };
   MB.noteMember(e, { sigFp: 'fpA', name: 'A', spub: { x: 'SX', y: 'SY' }, ts: 1 });

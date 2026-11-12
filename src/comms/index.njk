@@ -845,7 +845,7 @@ import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/as
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
 import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink } from '/assets/js/comms/sign.js';
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
-import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody } from '/assets/js/comms/members.js';
+import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody, noteAgent, agentsOf, agentSender } from '/assets/js/comms/members.js';
 import { keysFromBridgeKey, createBridgeClient, BRIDGE_KIND, HERE_TTL_MS } from '/assets/js/comms/bridge.js';
 import { createAgentView } from '/assets/js/comms/agent-view.js';
 import { parseCcLink, acceptPairing, unwrapChannelKey, createMultiClient, liveComputers, disconnectComputer, helloFields, applyHostKeys, verifyComputer, approveComputer, getComputers, mergeComputerRecords } from '/assets/js/comms/cc.js';
@@ -1741,6 +1741,17 @@ const noteRoomMember = (m) => {
   setSavedRooms(list);
 };
 
+const noteRoomAgent = (a, roomName = currentRoomName) => {
+  if (!roomName || isDmRoom(roomName) || !a || !a.sigFp) return;
+  const list = savedRooms();
+  const e = list.find((r) => r.room === roomName);
+  if (!e) return;
+  const prev = e.agents && e.agents[a.sigFp + '/' + a.handle];
+  if (prev && prev.on === !!a.on && prev.name === String(a.name || a.handle).slice(0, 40) && Date.now() - (prev.seen || 0) < 60000) return;
+  noteAgent(e, a);
+  setSavedRooms(list);
+};
+
 const lockEl = document.getElementById('comms-lock');
 let lockRoom = null;
 const closeLock = () => { lockEl.hidden = true; lockRoom = null; document.getElementById('comms-lock-list').innerHTML = ''; };
@@ -1845,13 +1856,17 @@ const renderRemoteChat = (item, opts = {}) => {
   }
   let who = displayName(item.senderId);
   if (currentDmContact && sentBy(item, currentDmContact)) who = currentDmContact.name || who;
-  const verified = !!(item.signer && item.signer.fp);
+  let verified = !!(item.signer && item.signer.fp);
   const signedName = verified ? signerName(item.signer) : null;
   if (signedName) who = signedName;
-  if (item.signer && item.signer.sigFp && !item.signer.me && !opts.stored) noteRoomMember({ sigFp: item.signer.sigFp, name: who, spub: item.signer.spub });
+  if (item.agent) {
+    who = item.agent.who;
+    verified = !!item.agent.verified;
+    if (!opts.stored && item.signer && item.agent.raw) noteRoomAgent({ sigFp: item.agent.sigFp, spub: item.signer.spub, name: item.agent.raw.name, handle: item.agent.handle, host: item.agent.raw.host, on: true, ts: item.ts });
+  } else if (item.signer && item.signer.sigFp && !item.signer.me && !opts.stored) noteRoomMember({ sigFp: item.signer.sigFp, name: who, spub: item.signer.spub });
   if (files) renderAttachment(who, item.parts, { peerId: item.senderId, sender: item.sfp2 || item.sfp || item.senderId || null, ts: item.ts, verified });
   else renderLine(who, item.text, { peerId: item.senderId, quiet: !!opts.silent, ts: item.ts, verified });
-  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '', signer: item.signer || undefined }, item.parts);
+  if (!opts.stored) storeLine(item.cmid, item.sfp2 || item.sfp || item.senderId || '', item.text, item.ts, { sfp: item.sfp || null, sfp2: item.sfp2 || null, senderId: item.senderId || '', signer: item.signer || undefined, agent: item.agent ? { who: item.agent.who, verified: !!item.agent.verified, handle: item.agent.handle, sigFp: item.agent.sigFp } : undefined }, item.parts);
   if (files) receiveAttachments(item, false);
   if (!opts.silent) {
     playPing(880);
@@ -1869,7 +1884,7 @@ const handleNostrMsg = async (msgEvent) => {
     let content;
     try { content = JSON.parse(ev.content); } catch { return; }
     if (!content || !content.cmid || !content.enc || !chatKey || seenCmids.has(content.cmid)) return;
-    let text, sfp = null, sfp2 = null, parts = null, sig = null;
+    let text, sfp = null, sfp2 = null, parts = null, sig = null, agent = null;
     try {
       const unpacked = unpackChatPlain(await decryptText(chatKey, content.enc));
       text = unpacked.text;
@@ -1878,13 +1893,15 @@ const handleNostrMsg = async (msgEvent) => {
       parts = unpacked.parts;
       if (unpacked.sg) sig = await verifyBody(unpacked.obj, currentRoomName, content.cmid);
       if (unpacked.ctl) { seenCmids.add(content.cmid); handleRoomCtl(unpacked.ctl, sfp, sig, typeof content.ts === 'number' ? content.ts : (ev.created_at || 0) * 1000); return; }
+      agent = unpacked.obj ? agentSender(unpacked.obj, sig, trustedComputers()) : null;
+      if (agent) agent.raw = unpacked.obj.agent;
     } catch { return; }
     seenCmids.add(content.cmid);
     const senderId = (content.cmid.split(':')[0]) || ev.pubkey;
     const evTs = (ev.created_at || 0) * 1000;
     let ts = (typeof content.ts === 'number' && content.ts > 0) ? content.ts : evTs;
     if (evTs > 0 && Math.abs(ts - evTs) > 120000) ts = evTs;
-    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts, signer: signerFor(sig) };
+    const item = { senderId, text, ts, sfp, sfp2, cmid: content.cmid, parts, signer: signerFor(sig), agent };
     renderRemoteChat(item, { silent: ts < roomJoinedAt - 2000 });
   }
 };
@@ -1955,6 +1972,8 @@ const AGENT_SESSIONS_KEY = 'mentria.comms.agent_sessions';
 const IOS_DEVICE = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const bridge = createMultiClient();
 const ccClients = new Map();
+const ccTrusted = new Map();
+const trustedComputers = () => Array.from(ccTrusted.values());
 let agentsSig = '';
 const knownAgents = () => { try { const v = JSON.parse(localStorage.getItem(AGENT_SESSIONS_KEY) || '[]'); return Array.isArray(v) ? v.filter((x) => x && typeof x.sid === 'string') : []; } catch (_) { return []; } };
 const agentList = () => {
@@ -2021,6 +2040,7 @@ const stopComputer = (cid) => {
   const e = ccClients.get(cid);
   if (e) { try { e.off(); } catch (_) {} }
   ccClients.delete(cid);
+  ccTrusted.delete(cid);
   bridge.remove(cid);
 };
 let ccStarting = null;
@@ -2034,6 +2054,7 @@ const startComputerChannels = () => ccStarting || (ccStarting = (async () => {
     if (cur && cur.kver === rec.kver) continue;
     if (cur) stopComputer(rec.cid);
     if (!(await verifyComputer(rec, devTrust(), myDev.sign.sigFp))) continue;
+    ccTrusted.set(rec.cid, { cid: rec.cid, name: rec.name || '', spub: rec.spub });
     if (!(rec.approvals || []).some((a) => a && a.sg && a.sg.pub && a.sg.pub.x === myDev.sign.spub.x && a.sg.pub.y === myDev.sign.spub.y)) {
       try { MentriaStore.set('comms', 'computers', mergeComputerRecords(getComputers(), { v: 1, list: [Object.assign({}, rec, { approvals: (rec.approvals || []).concat([await approveComputer(rec, myDev)]) })] })); } catch (_) {}
     }
@@ -2744,7 +2765,7 @@ const renderStored = (m) => {
     return;
   }
   const meta = m.meta || {};
-  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts, signer: meta.signer || null }, { silent: true, stored: true });
+  renderRemoteChat({ senderId: meta.senderId || '', text: m.t, ts: m.ts, sfp: meta.sfp || null, sfp2: meta.sfp2 || null, cmid: m.id, parts: m.parts, signer: meta.signer || null, agent: meta.agent && typeof meta.agent.who === 'string' ? meta.agent : null }, { silent: true, stored: true });
 };
 
 const setEarlier = (beforeTs) => {
@@ -3024,6 +3045,12 @@ const handleRoomCtl = (ctl, sfp, sig, at) => {
   if (!ctl || !currentRoomName || isDmRoom(currentRoomName)) return;
   if (ctl.k === 'joined') { onJoinedCtl(ctl, sig, at); return; }
   if (ctl.k === 'locked') { onLockedCtl(ctl, sig, at); return; }
+  if (ctl.k === 'agent') {
+    if (!sig || !sig.ok) return;
+    const comp = trustedComputers().find((c) => samePubOf(c.spub, sig.spub));
+    noteRoomAgent({ sigFp: sig.sigFp, spub: sig.spub, name: ctl.name, handle: ctl.handle, host: (comp && comp.name) || ctl.host, on: ctl.on !== false, ts: at || Date.now() });
+    return;
+  }
   if (ctl.k !== 'ring') return;
   const token = (typeof ctl.token === 'string' && RING_TOKEN_RE.test(ctl.token)) ? ctl.token : null;
   if (!token || (ringToken && token === ringToken)) return;

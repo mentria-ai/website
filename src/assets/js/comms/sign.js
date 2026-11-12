@@ -76,3 +76,12 @@ export const verifyBody = async (obj, room, cmid) => {
     return { ok: true, spub, sigFp: await sigFingerprint(spub), ts: sg.ts };
   } catch (_) { return no; }
 };
+
+export const signRoomBody = async (body, room, cmid, ident, dev, ts = Date.now()) => {
+  let out = body;
+  if (dev && dev.signKey && validSpub(dev.spub)) {
+    const d = await signBody(dev.signKey, dev.spub, room, cmid, body, ts);
+    out = Object.assign({}, body, { dsg: d.sg });
+  }
+  return ident && ident.signKey && validSpub(ident.spub) ? signBody(ident.signKey, ident.spub, room, cmid, out, ts) : out;
+};

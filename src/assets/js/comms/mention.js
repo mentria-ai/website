@@ -33,3 +33,13 @@ export const splitTarget = (text, chosen) => {
   if (at < 0 || (at > 0 && !space(s[at - 1])) || (after && !space(after[0]))) return { target: null, body: s.trim() };
   return { target: chosen, body: (s.slice(0, at) + after.slice(1)).trim() };
 };
+
+export const insertTag = (text, caret, handle) => {
+  const s = String(text == null ? '' : text);
+  const end = Math.max(0, Math.min(caret == null ? s.length : caret, s.length));
+  const q = mentionQuery(s, end);
+  if (q == null) return { text: s, caret: end };
+  const at = end - q.length - 1;
+  const head = s.slice(0, at) + '@' + handle + ' ';
+  return { text: head + s.slice(end).replace(/^ /, ''), caret: head.length };
+};

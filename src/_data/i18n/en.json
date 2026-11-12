@@ -5591,7 +5591,17 @@
         "alerts_ios": "alerts need comms installed on your home screen first (share button → add to home screen).",
         "alerts_unsupported": "alerts are not available in this browser.",
         "alerts_denied": "alerts stay off — notifications were not allowed.",
-        "alerts_failed": "could not register this device for alerts — try again in a moment."
+        "alerts_failed": "could not register this device for alerts — try again in a moment.",
+        "sessions": "Sessions",
+        "sessions_title": "Sessions in {label}",
+        "sessions_none": "No Claude Code sessions are on. Type /mentria in a session first.",
+        "sessions_note": "A session in this room reads every message here and acts only when you tag it with its @name.",
+        "sessions_done": "Done",
+        "session_on": "{name} · {computer} · @{handle}",
+        "session_added": "Added. The session reads this room now.",
+        "session_removed": "Removed from this room.",
+        "session_failed": "The session didn't answer. Try again while it's on.",
+        "disconnect_lock": "{name} was in {rooms}. Lock each room to take it out: its sessions are unticked."
       },
       "ring": {
         "incoming": "incoming call",
@@ -6041,7 +6051,10 @@
         "wants": "{tool} wants to run",
         "allow": "Allow",
         "deny": "Deny",
-        "running_on": "running on {name}"
+        "running_on": "running on {name}",
+        "file_sending": "sending {pct}%",
+        "file_failed": "Not sent: the session didn't take the file. Try again.",
+        "file_too_big": "Not sent: files up to 10 MB can go to a session."
       },
       "cc": {
         "computers": "Computers",

@@ -5591,7 +5591,17 @@
         "alerts_ios": "アラートを使うには、まず Comms をホーム画面に追加してください（共有ボタン → ホーム画面に追加）。",
         "alerts_unsupported": "このブラウザーではアラートを使えません。",
         "alerts_denied": "通知が許可されなかったため、アラートはオフのままです。",
-        "alerts_failed": "この端末をアラート用に登録できませんでした。少し待ってからもう一度お試しください。"
+        "alerts_failed": "この端末をアラート用に登録できませんでした。少し待ってからもう一度お試しください。",
+        "sessions": "セッション",
+        "sessions_title": "{label} のセッション",
+        "sessions_none": "Claude Code のセッションがオンになっていません。先にセッションで /mentria と入力してください。",
+        "sessions_note": "このルームのセッションはすべてのメッセージを読み、@名前 でタグ付けされたときだけ動きます。",
+        "sessions_done": "完了",
+        "session_on": "{name} · {computer} · @{handle}",
+        "session_added": "追加しました。セッションがこのルームを読み始めました。",
+        "session_removed": "このルームから外しました。",
+        "session_failed": "セッションが応答しませんでした。オンのときにもう一度お試しください。",
+        "disconnect_lock": "{name} は {rooms} に参加していました。各ルームをロックして外してください。そのセッションのチェックは外してあります。"
       },
       "ring": {
         "incoming": "着信",
@@ -6041,7 +6051,10 @@
         "wants": "{tool} を実行しようとしています",
         "allow": "許可",
         "deny": "拒否",
-        "running_on": "{name} で実行中"
+        "running_on": "{name} で実行中",
+        "file_sending": "送信中 {pct}%",
+        "file_failed": "送信できませんでした：セッションがファイルを受け取りませんでした。もう一度お試しください。",
+        "file_too_big": "送信できませんでした：セッションに送れるのは 10 MB までのファイルです。"
       },
       "cc": {
         "computers": "コンピューター",

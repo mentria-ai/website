@@ -5591,7 +5591,17 @@
         "alerts_ios": "para los avisos, primero instala comms en tu pantalla de inicio (botón compartir → añadir a pantalla de inicio).",
         "alerts_unsupported": "los avisos no están disponibles en este navegador.",
         "alerts_denied": "los avisos siguen desactivados — no se permitieron las notificaciones.",
-        "alerts_failed": "no se pudo registrar este dispositivo para los avisos — inténtalo de nuevo en un momento."
+        "alerts_failed": "no se pudo registrar este dispositivo para los avisos — inténtalo de nuevo en un momento.",
+        "sessions": "Sesiones",
+        "sessions_title": "Sesiones en {label}",
+        "sessions_none": "No hay sesiones de Claude Code activas. Escribe /mentria en una sesión primero.",
+        "sessions_note": "Una sesión en esta sala lee cada mensaje y solo actúa cuando la etiquetas con su @nombre.",
+        "sessions_done": "Listo",
+        "session_on": "{name} · {computer} · @{handle}",
+        "session_added": "Añadida. La sesión ya lee esta sala.",
+        "session_removed": "Quitada de esta sala.",
+        "session_failed": "La sesión no respondió. Inténtalo de nuevo mientras esté activa.",
+        "disconnect_lock": "{name} estaba en {rooms}. Bloquea cada sala para sacarlo: sus sesiones están desmarcadas."
       },
       "ring": {
         "incoming": "llamada entrante",
@@ -6041,7 +6051,10 @@
         "wants": "{tool} quiere ejecutarse",
         "allow": "Permitir",
         "deny": "Denegar",
-        "running_on": "en ejecución en {name}"
+        "running_on": "en ejecución en {name}",
+        "file_sending": "enviando {pct}%",
+        "file_failed": "No enviado: la sesión no recibió el archivo. Inténtalo de nuevo.",
+        "file_too_big": "No enviado: a una sesión solo pueden ir archivos de hasta 10 MB."
       },
       "cc": {
         "computers": "Computadoras",

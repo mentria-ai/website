@@ -420,6 +420,183 @@ check('cc: computer records merge without losing approvals and Disconnect sticks
   eq(m3.list[0].approvals.length, 2);
 });
 
+const WIRE = await import('/assets/js/comms/wire.js');
+const SSG = await import('/assets/js/comms/sign.js');
+const PR = hasCC ? await import(pathToFileURL(join(CC, 'plugins/mentria/lib/room.js')).href) : null;
+const ROOMKEY = WIRE.b64urlEncode(new Uint8Array(32).fill(9));
+
+check('room: the plugin derives the same topics as the page for v1 and v2 rooms', async () => {
+  for (const kv of [1, 2]) eq(PR.chatTopic('Agents room', ROOMKEY, kv), await WIRE.chatTopicFor('Agents room', ROOMKEY, kv));
+});
+
+check('room: a body sealed on the page opens in the plugin, and the other way', async () => {
+  const site = await WIRE.roomKeys(ROOMKEY, 2);
+  const plug = PR.roomKeys(ROOMKEY, 2);
+  const enc = await WIRE.encryptText(site.chatKey, JSON.stringify({ v: 2, t: 'from page' }));
+  assert.deepEqual(PR.openRoom(plug.chat, enc), { v: 2, t: 'from page' });
+  const back = PR.sealRoom(plug.chat, { v: 2, t: 'from plugin' });
+  assert.deepEqual(JSON.parse(await WIRE.decryptText(site.chatKey, back)), { v: 2, t: 'from plugin' });
+  eq(WIRE.unpackChatPlain(await WIRE.decryptText(site.chatKey, back)).text, 'from plugin');
+});
+
+check('room: a session post signed by the computer verifies on the page, and a page message verifies in the plugin', async () => {
+  const k = PC.p256Keygen();
+  const body = PR.agentBody('done', { name: 'Site', handle: 'site', host: 'Mac' });
+  const signed = PSG.signBody(k.priv, k.pub, 'agents', 'site:1', body);
+  const v = await SSG.verifyBody(JSON.parse(JSON.stringify(signed)), 'agents', 'site:1');
+  eq(v.ok, true);
+  eq(v.sigFp, PSG.sigFingerprint(k.pub));
+  const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const jwk = await crypto.subtle.exportKey('jwk', pair.publicKey);
+  const page = await SSG.signBody(pair.privateKey, { x: jwk.x, y: jwk.y }, 'agents', 'me:1', WIRE.packChatBody('@site go', { fp: 'abcd-efgh' }));
+  const pv = PSG.verifyBody(JSON.parse(JSON.stringify(page)), 'agents', 'me:1');
+  eq(pv.ok, true);
+  eq(pv.sigFp, await SSG.sigFingerprint({ x: jwk.x, y: jwk.y }));
+});
+
+check('cc: room messages from the phone are signed for the session and here carries handle and rooms', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(4));
+  const host = await hostKey();
+  const t = memTransport();
+  const signedFor = [];
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => { signedFor.push([sid, cmid, body.t]); return body; }, host: { spub: host.spub, room: 'cc:c1' } });
+  const here = { t: 'here', cmid: 'h:1', host: 'Mac', sessions: [{ sid: 's1', name: 'Site', handle: 'site', rooms: ['agents', 7], busy: false, lastTs: 1 }] };
+  for (const c of await frameOut(keys, await SGM.signBody(host.key, host.spub, 'cc:c1', 'h:1', here))) t.feed(c);
+  await tick(50);
+  deepEq([client.sessions()[0].handle, client.sessions()[0].rooms], ['site', ['agents']]);
+  const cmid = await client.room('s1', { t: 'room-add', room: 'agents', key: 'K'.repeat(43), kv: 2, label: 'Agents', computers: [] });
+  ok(/^p:/.test(cmid));
+  deepEq(signedFor, [['s1', cmid, 'room-add']]);
+  let refused = false;
+  try { await client.room('s1', { t: 'say', text: 'x' }); } catch (_) { refused = true; }
+  eq(refused, true);
+}, false);
+
+check('cc: room-add carries the room key, label and the trusted computers', () => {
+  const C = { x: 'CX', y: 'CY' };
+  deepEq(CCM.roomAddMsg({ room: 'agents', key: 'K'.repeat(43), kv: 2, label: 'Agents' }, [{ cid: 'c1', name: 'Mac', spub: C }]), { t: 'room-add', room: 'agents', key: 'K'.repeat(43), kv: 2, label: 'Agents', computers: [{ name: 'Mac', spub: C }] });
+  deepEq(CCM.roomAddMsg({ room: 'r', key: 'K'.repeat(43) }, []).kv, 1);
+}, false);
+
+check('cc: lock room sends the new key to computers that keep a session and drops the rest, queueing what cannot go now', () => {
+  const A = { x: 'AX', y: 'AY' }, B = { x: 'BX', y: 'BY' }, Z = { x: 'ZX', y: 'ZY' };
+  const trusted = [{ cid: 'ca', name: 'Mac', spub: A }, { cid: 'cb', name: 'Laptop', spub: B }];
+  const agents = [
+    { key: 'fa/site', spub: A, handle: 'site' },
+    { key: 'fa/docs', spub: A, handle: 'docs' },
+    { key: 'fb/engine', spub: B, handle: 'engine' },
+    { key: 'fz/ghost', spub: Z, handle: 'ghost' }
+  ];
+  const sessions = [{ sid: 's-site', cid: 'ca', online: true }, { sid: 's-eng', cid: 'cb', online: false }];
+  const plan = CCM.lockPlan({ room: 'agents', key: 'N'.repeat(43), kv: 2, agents, keep: ['fa/site'], sessions, trusted });
+  deepEq(plan.map((p) => [p.cid, p.sid, p.msg.t, p.msg.handle || '']), [['ca', 's-site', 'room-key', ''], ['ca', 's-site', 'room-drop', 'docs'], ['cb', null, 'room-drop', 'engine']]);
+  deepEq(plan[0].msg.computers, [{ name: 'Mac', spub: A }, { name: 'Laptop', spub: B }]);
+  eq(plan[0].msg.key, 'N'.repeat(43));
+}, false);
+
+check('room: a page message signed with both keys is the owner for the plugin; the identity key alone is not', async () => {
+  const RR = await import(pathToFileURL(join(CC, 'plugins/mentria/lib/roomrun.js')).href);
+  const mk = async () => { const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']); const j = await crypto.subtle.exportKey('jwk', kp.publicKey); return { signKey: kp.privateKey, spub: { x: j.x, y: j.y } }; };
+  const ident = await mk();
+  const dev = await mk();
+  const devFp = await SSG.sigFingerprint(dev.spub);
+  const list = { v: 1, kind: 'mentria-devices', ver: 1, ts: 1, devices: [{ sigFp: devFp, spub: dev.spub, name: 'iPhone', kind: 'iphone' }], removed: [], by: devFp };
+  const chat = await WIRE.roomKeys(ROOMKEY, 2);
+  const comp = PC.p256Keygen();
+  const tagged = [], ctx = [];
+  const now = Date.now();
+  const run = RR.createRoomRunner({ entry: { room: 'agents', key: ROOMKEY, kv: 2, label: 'Agents', computers: [] }, me: { name: 'Site', handle: 'site', host: 'Mac' }, computer: { priv: comp.priv, spub: comp.pub }, list: () => list, now: () => now, joinedAt: now, seen: new Set(), publish: async () => true, onTagged: (x) => tagged.push(x), onContext: (x) => ctx.push(x) });
+  const send = async (signed, cmid) => run.push(JSON.stringify({ cmid, ts: now, enc: await WIRE.encryptText(chat.chatKey, JSON.stringify(signed)) }));
+  const both = await SSG.signRoomBody(WIRE.packChatBody('@site go', { fp: 'abcd-efgh' }), 'agents', 'me:1', ident, dev);
+  eq((await SSG.verifyBody(both, 'agents', 'me:1')).ok, true);
+  await send(both, 'me:1');
+  await send(await SSG.signRoomBody(WIRE.packChatBody('@site identity only', { fp: 'abcd-efgh' }), 'agents', 'me:2', ident, null), 'me:2');
+  deepEq(tagged.map((x) => [x.kind, x.who]), [['owner', 'iPhone']]);
+  deepEq(ctx.map((x) => x.kind), ['other']);
+});
+
+check('cc: a room message with no reply is sent again as the same signed message', async () => {
+  let n = 0;
+  const sent = [];
+  const send = async () => { const id = 'p:' + (++n); sent.push('send ' + id); return id; };
+  const resend = async (id) => { sent.push('resend ' + id); return true; };
+  let calls = 0;
+  const second = async (id) => (++calls === 2 ? { t: 'room-ok', cmid: id, ok: true } : null);
+  deepEq(await CCM.sendUntilReply(send, second, { resend }), { t: 'room-ok', cmid: 'p:1', ok: true });
+  deepEq(sent, ['send p:1', 'resend p:1']);
+  sent.length = 0;
+  eq(await CCM.sendUntilReply(send, async () => null, { resend }), null);
+  deepEq(sent, ['send p:2', 'resend p:2']);
+}, false);
+
+check('cc: a phone message is resent as the same signed message, never signed again', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(6));
+  const host = await hostKey();
+  const t = memTransport();
+  let signs = 0;
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => { signs++; return body; }, host: { spub: host.spub, room: 'cc:c1' } });
+  const cmid = await client.say('s1', 'hello');
+  const first = t.sent.length;
+  eq(await client.resend(cmid), true);
+  eq(t.sent.length, first * 2);
+  eq(signs, 1);
+  eq(await client.resend('p:unknown'), false);
+}, false);
+
+const SF = await import('/assets/js/comms/sendfile.js');
+const fileLink = ({ drop = () => false, silent = false } = {}) => {
+  const got = new Map();
+  const sent = [];
+  let box = null;
+  const reply = (id, m) => { if (!silent) got.set(id, Object.assign({ cmid: id }, m)); };
+  return {
+    sent,
+    attach: (b) => { box = b; },
+    offer: async (meta) => { const id = 'p:o' + (sent.length + 1); sent.push(['offer', id]); const r = box ? box.offer(Object.assign({ cmid: id }, meta)) : { ok: true }; reply(id, r.ok ? Object.assign({ done: false }, box ? box.status(id) : { have: 0, need: [0] }) : { done: true, ok: false, err: r.err }); return id; },
+    resend: async (id) => { sent.push(['resend', id]); return true; },
+    part: async (id, i, d, w) => { sent.push(['part', i, !!w]); if (drop(i)) return; const st = box.part(id, i, d); if (st.complete) reply(id, st.ok ? { have: st.have, need: [], done: true, ok: true } : { done: true, ok: false, err: st.err }); else if (w) reply(id, { have: st.have, need: st.need, done: false }); },
+    waitGot: async (id) => { const m = got.get(id) || null; got.delete(id); return m; }
+  };
+};
+
+check('file: the phone sends a file the plugin assembles byte for byte, resending what a lossy link dropped', async () => {
+  const IB = await import(pathToFileURL(join(CC, 'plugins/mentria/lib/inbox.js')).href);
+  eq(SF.PART_BYTES, IB.PART_BYTES);
+  const bytes = Uint8Array.from({ length: SF.PART_BYTES * 30 + 77 }, (_, i) => (i * 7) & 255);
+  const box = IB.createInbox();
+  const once = new Set([5, 29]);
+  let dropped = 0;
+  const link = fileLink({ drop: (i) => { if (!once.has(i)) return false; once.delete(i); dropped++; return true; } });
+  link.attach(box);
+  const progress = [];
+  const r = await SF.sendFile({ bytes, name: 'pic.png', mime: 'image/png', text: '' }, { offer: link.offer, resend: link.resend, part: link.part, waitGot: link.waitGot, onProgress: (x) => progress.push(x), window: 8 });
+  eq(r, 'ok');
+  eq(dropped, 2);
+  const out = box.take('p:o1');
+  eq(out.bytes.length, bytes.length);
+  ok(out.bytes.every((b, i) => b === bytes[i]));
+  eq(progress[progress.length - 1], 1);
+  eq(link.sent.filter((x) => x[0] === 'part' && x[1] === 5).length, 2);
+});
+
+check('file: the phone names files the way the plugin does', async () => {
+  const IB = await import(pathToFileURL(join(CC, 'plugins/mentria/lib/inbox.js')).href);
+  for (const n of ['IMG 0001.HEIC', '../../etc/passwd', 'a\\b\\c.txt', 'we ird\u0000na\nme;rm -rf.png', '', '.hidden', 'x'.repeat(200) + '.jpeg', 'résumé final.pdf']) {
+    eq(SF.safeName(n), IB.safeName(n));
+    eq(IB.safeName(SF.safeName(n)), SF.safeName(n));
+  }
+});
+
+check('file: no answer fails after the quiet rounds; too big never offers', async () => {
+  const quiet = fileLink({ silent: true });
+  quiet.attach({ offer: () => ({ ok: true }), status: () => ({ have: 0, need: [0] }), part: () => ({ have: 0, need: [], complete: false }) });
+  eq(await SF.sendFile({ bytes: new Uint8Array(100), name: 'a', mime: 'x/y', text: '' }, { offer: quiet.offer, resend: quiet.resend, part: quiet.part, waitGot: quiet.waitGot, quietRounds: 2 }), 'failed');
+  ok(quiet.sent.length <= 6);
+  const big = fileLink();
+  eq(await SF.sendFile({ bytes: new Uint8Array(SF.MAX_BYTES + 1), name: 'a', mime: 'x/y', text: '' }, { offer: big.offer, resend: big.resend, part: big.part, waitGot: big.waitGot }), 'too-big');
+  eq(big.sent.length, 0);
+});
+
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;
 for (const [name, fn, needsPlugin] of checks) {

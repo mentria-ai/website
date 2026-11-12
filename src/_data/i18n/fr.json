@@ -5591,7 +5591,17 @@
         "alerts_ios": "pour les alertes, installez d’abord comms sur votre écran d’accueil (bouton partager → sur l’écran d’accueil).",
         "alerts_unsupported": "les alertes ne sont pas disponibles dans ce navigateur.",
         "alerts_denied": "les alertes restent désactivées — les notifications n’ont pas été autorisées.",
-        "alerts_failed": "impossible d’enregistrer cet appareil pour les alertes — réessayez dans un instant."
+        "alerts_failed": "impossible d’enregistrer cet appareil pour les alertes — réessayez dans un instant.",
+        "sessions": "Sessions",
+        "sessions_title": "Sessions dans {label}",
+        "sessions_none": "Aucune session Claude Code n'est active. Tapez d'abord /mentria dans une session.",
+        "sessions_note": "Une session dans ce salon lit chaque message et n'agit que lorsque vous la mentionnez avec son @nom.",
+        "sessions_done": "Terminé",
+        "session_on": "{name} · {computer} · @{handle}",
+        "session_added": "Ajoutée. La session lit maintenant ce salon.",
+        "session_removed": "Retirée de ce salon.",
+        "session_failed": "La session n'a pas répondu. Réessayez pendant qu'elle est active.",
+        "disconnect_lock": "{name} était dans {rooms}. Verrouillez chaque salon pour le retirer : ses sessions sont décochées."
       },
       "ring": {
         "incoming": "appel entrant",
@@ -6041,7 +6051,10 @@
         "wants": "{tool} veut s’exécuter",
         "allow": "Autoriser",
         "deny": "Refuser",
-        "running_on": "en cours sur {name}"
+        "running_on": "en cours sur {name}",
+        "file_sending": "envoi {pct} %",
+        "file_failed": "Non envoyé : la session n'a pas reçu le fichier. Réessayez.",
+        "file_too_big": "Non envoyé : seuls les fichiers jusqu'à 10 Mo peuvent aller à une session."
       },
       "cc": {
         "computers": "Ordinateurs",

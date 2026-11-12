@@ -221,6 +221,10 @@ export const createMultiClient = () => {
     has: (cid) => clients.has(cid),
     cids: () => Array.from(clients.keys()),
     client: (cid) => clients.get(cid) || null,
+    room: (sid, msg) => { const c = ownerOf(sid); return c ? c.room(sid, msg) : Promise.reject(new Error('no session')); },
+    fileOffer: (sid, meta) => { const c = ownerOf(sid); return c ? c.fileOffer(sid, meta) : Promise.reject(new Error('no session')); },
+    filePart: (sid, id, i, d, w) => { const c = ownerOf(sid); return c ? c.filePart(sid, id, i, d, w) : Promise.reject(new Error('no session')); },
+    resend: (sid, cmid) => { const c = ownerOf(sid); return c && c.resend ? c.resend(cmid) : Promise.resolve(false); },
     ownerCid: (sid) => { for (const [cid, c] of clients) if (c.sessions().some((s) => s.sid === sid)) return cid; return null; },
     on: (t, fn) => {
       const s = { t, fn, offs: new Map() };
@@ -264,4 +268,39 @@ export const applyHostKeys = async (cid, msg) => {
   if (!next) return false;
   next.proofs = unionBy([].concat(rec.proofs || [], [msg]), 8);
   return window.MentriaStore.set('comms', 'computers', { v: 1, list: cur.list.map((r) => (r.cid === cid ? next : r)) });
+};
+
+const computersOf = (trusted) => (trusted || []).filter((c) => c && validSpub(c.spub)).slice(0, 16).map((c) => ({ name: String(c.name || '').slice(0, 32), spub: { x: c.spub.x, y: c.spub.y } }));
+
+export const roomAddMsg = (entry, trusted) => ({ t: 'room-add', room: entry.room, key: entry.key, kv: entry.kv === 2 ? 2 : 1, label: String(entry.label || entry.room || '').slice(0, 60), computers: computersOf(trusted) });
+
+export const lockPlan = ({ room, key, kv, agents, keep, sessions, trusted }) => {
+  const cidOf = (spub) => { const c = (trusted || []).find((x) => samePub(x.spub, spub)); return c ? c.cid : null; };
+  const byCid = new Map();
+  for (const a of agents || []) {
+    const cid = cidOf(a.spub);
+    if (!cid) continue;
+    const e = byCid.get(cid) || { keep: false, drops: [] };
+    if ((keep || []).includes(a.key)) e.keep = true;
+    else e.drops.push(a.handle);
+    byCid.set(cid, e);
+  }
+  const computers = computersOf(trusted);
+  const out = [];
+  for (const [cid, e] of byCid) {
+    const live = (sessions || []).find((x) => x.cid === cid && x.online);
+    const msgs = (e.keep ? [{ t: 'room-key', room, key, kv: kv === 2 ? 2 : 1, computers }] : []).concat(e.drops.map((h) => ({ t: 'room-drop', room, handle: h })));
+    for (const msg of msgs) out.push({ cid, sid: live ? live.sid : null, msg });
+  }
+  return out;
+};
+
+export const sendUntilReply = async (send, waitReply, { tries = 2, resend = null } = {}) => {
+  const id = await send();
+  for (let i = 0; i < tries; i++) {
+    if (i > 0 && resend) await resend(id);
+    const got = await waitReply(id);
+    if (got) return got;
+  }
+  return null;
 };

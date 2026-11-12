@@ -1,4 +1,5 @@
 import { renderAgentParts, renderToolGroup, TOOLISH, resultsOf, renderBody } from '/assets/js/comms/cards.js';
+import { sendFile as sendFileTo, safeName } from '/assets/js/comms/sendfile.js';
 
 export const MAX_TURNS = 40;
 export const MAX_CARDS = 60;
@@ -59,10 +60,10 @@ const el = (tag, cls, text) => {
   return e;
 };
 
-export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepAliveMs = 60000, statusMs = 15000, resumeMs = RESUME_MS } = {}) => {
+export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepAliveMs = 60000, statusMs = 15000, resumeMs = RESUME_MS, resendMs = [6000, 15000] } = {}) => {
   const A = (T && T.agent) || {};
   const C = (T && T.cc) || {};
-  const failNote = (code) => (code === 'clock' ? (C.clock || A.unpaired || '') : code === 'command' ? (C.command || A.unpaired || '') : code === 'command-unknown' ? (C.command_unknown || C.command || A.unpaired || '') : (C.unpaired || A.unpaired || ''));
+  const failNote = (code) => (code === 'file' ? (A.file_failed || A.unpaired || '') : code === 'file-big' ? (A.file_too_big || A.unpaired || '') : code === 'clock' ? (C.clock || A.unpaired || '') : code === 'command' ? (C.command || A.unpaired || '') : code === 'command-unknown' ? (C.command_unknown || C.command || A.unpaired || '') : (C.unpaired || A.unpaired || ''));
   let sid = null;
   let sub = null;
   let expanded = new Set();
@@ -257,7 +258,8 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
         const line = el('div', 'comms__line comms__line--me');
         const what = el('span', 'comms__what');
         renderBody(what, p.text, { from: 'self', T: T.chat });
-        line.append(what, el('span', 'comms__agent-state' + (p.failed ? ' comms__agent-state--failed' : ''), p.failed ? failNote(p.failed) : p.acked ? (A.delivered || '') : (A.sent || '')));
+        const busyFile = p.file && !p.acked && !p.failed;
+        line.append(what, el('span', 'comms__agent-state' + (p.failed ? ' comms__agent-state--failed' : ''), p.failed ? failNote(p.failed) : p.acked ? (A.delivered || '') : busyFile ? fillIn(A.file_sending || '{pct}%', { pct: Math.round((p.progress || 0) * 100) }) : (A.sent || '')));
         box.append(line);
       }
       out.push(box);
@@ -383,6 +385,17 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
     if (m.sid === sid) paintPerm();
     setTimeout(() => { p.answered = true; if (m.sid === sid) paintPerm(); }, 6000);
   }));
+  const gotBox = new Map();
+  const gotWait = new Map();
+  offs.push(client.on('file-got', (m) => {
+    if (!m || typeof m.cmid !== 'string') return;
+    const w = gotWait.get(m.cmid);
+    if (w) { gotWait.delete(m.cmid); w(m); } else gotBox.set(m.cmid, m);
+  }));
+  const waitGot = (id, ms = 8000) => {
+    if (gotBox.has(id)) { const m = gotBox.get(id); gotBox.delete(id); return Promise.resolve(m); }
+    return new Promise((resolve) => { gotWait.set(id, resolve); setTimeout(() => { if (gotWait.get(id) === resolve) { gotWait.delete(id); resolve(null); } }, ms); });
+  };
   offs.push(client.on('ack', (m) => { const p = pending.find((x) => x.cmid === m.cmid); if (p && !p.acked) { p.acked = true; try { localStorage.setItem(SIGNED_KEY, '1'); } catch (_) {} schedule(); } }));
   offs.push(client.on('perm', (m) => { if (!m || typeof m.request_id !== 'string' || typeof m.sid !== 'string') return; if (!perms.some((x) => x.sid === m.sid && x.request_id === m.request_id)) perms.push(Object.assign({}, m)); if (m.sid === sid) paintPerm(); }));
   offs.push(client.on('part', (m) => { const key = m.sid + '|' + (m.sub || '') + '|' + m.ref; const fn = waiters.get(key); if (fn) { waiters.delete(key); fn(m); } }));
@@ -418,7 +431,40 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
       pending.push(entry);
       paint();
       try { entry.cmid = await client.say(sid, entry.text); } catch (_) { pending = pending.filter((x) => x !== entry); paint(); return null; }
+      const to = sid;
+      for (const ms of resendMs) setTimeout(() => { if (!entry.acked && !entry.failed && pending.includes(entry) && client.resend) client.resend(to, entry.cmid).catch(() => {}); }, ms);
       return entry.cmid;
+    },
+    async sendFile(file, caption) {
+      if (!sid || sub || !file) return null;
+      const to = sid;
+      let blob = file;
+      let mime = file.type || 'application/octet-stream';
+      let name = file.name || 'file';
+      if (/^image\//.test(mime) && globalThis.MentriaImage && globalThis.MentriaImage.standard) {
+        const std = await globalThis.MentriaImage.standard(file).catch(() => null);
+        if (std && std.blob) { blob = std.blob; mime = 'image/jpeg'; name = name.replace(/\.[^.]*$/, '') + '.jpg'; }
+      }
+      name = safeName(name);
+      const text = String(caption || '').trim();
+      const entry = { cmid: null, text: text || name, file: name, at: Date.now(), acked: false, progress: 0 };
+      pending.push(entry);
+      paint();
+      let r = 'failed';
+      try {
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        r = await sendFileTo({ bytes, name, mime, text }, {
+          offer: async (meta) => { entry.cmid = await client.fileOffer(to, meta); return entry.cmid; },
+          resend: (id) => client.resend(to, id),
+          part: (id, i, d, w) => client.filePart(to, id, i, d, w),
+          waitGot,
+          onProgress: (x) => { entry.progress = x; schedule(); }
+        });
+      } catch (_) { r = 'failed'; }
+      if (r === 'ok') entry.acked = true;
+      else entry.failed = r === 'too-big' ? 'file-big' : 'file';
+      schedule();
+      return r;
     },
     paint,
     resume,

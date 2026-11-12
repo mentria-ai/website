@@ -72,3 +72,32 @@ export const keepMembers = (entry, keep, senderSigFp) => {
   entry.members = Object.fromEntries(Object.entries(entry.members || {}).filter(([fp]) => allow.has(fp)));
   return entry;
 };
+
+const AGENTS_MAX = 20;
+const HANDLE_RE = /^[a-z0-9_.-]{1,40}$/;
+
+export const noteAgent = (entry, { sigFp, spub, name, handle, host, on, ts } = {}) => {
+  if (!entry || typeof sigFp !== 'string' || !sigFp || !pubOk(spub) || !HANDLE_RE.test(String(handle || ''))) return entry;
+  const agents = Object.assign({}, entry.agents || {});
+  const key = sigFp + '/' + handle;
+  const prev = agents[key] || {};
+  agents[key] = { sigFp, spub: { x: spub.x, y: spub.y }, name: String(name || handle).slice(0, 40), handle, host: String(host || '').slice(0, 32), on: !!on, seen: Math.max(prev.seen || 0, Number(ts) || 0) };
+  entry.agents = Object.fromEntries(Object.entries(agents).sort((a, b) => (b[1].seen || 0) - (a[1].seen || 0)).slice(0, AGENTS_MAX));
+  return entry;
+};
+
+export const agentsOf = (entry) => Object.entries((entry && entry.agents) || {})
+  .map(([key, a]) => ({ key, sigFp: a.sigFp, spub: a.spub, name: a.name, handle: a.handle, host: a.host, on: !!a.on }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+export const agentSender = (obj, sig, trusted) => {
+  const a = obj && obj.agent;
+  if (!a || typeof a !== 'object' || !sig || !sig.ok || !pubOk(sig.spub) || !HANDLE_RE.test(String(a.handle || ''))) return null;
+  const comp = (trusted || []).find((c) => c && samePub(c.spub, sig.spub));
+  if (!comp) return null;
+  const name = String(a.name || a.handle).slice(0, 40);
+  const host = String((comp && comp.name) || a.host || '').slice(0, 32);
+  return { who: host ? name + ' · ' + host : name, verified: !!comp, handle: a.handle, sigFp: sig.sigFp };
+};
+
+export const roomsWithComputer = (rooms, spub) => (Array.isArray(rooms) ? rooms : []).filter((r) => r && Object.values(r.agents || {}).some((a) => samePub(a.spub, spub))).map((r) => r.room);

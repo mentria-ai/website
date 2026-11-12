@@ -165,6 +165,12 @@ check('home: Annotate chats open in Annotate Image', () => eq(H.aiHref({ id: 'an
 
 check('mention: an @ at a word start opens the picker', () => eq(M.mentionQuery('hi @sa', 6), 'sa'));
 check('mention: an @ inside a word does not', () => eq(M.mentionQuery('mail a@b.c', 10), null));
+check('mention: insertTag puts @handle in place of the typed query and keeps the rest', () => {
+  deepEq(M.insertTag('ask @si', 7, 'site'), { text: 'ask @site ', caret: 10 });
+  deepEq(M.insertTag('@e later', 2, 'engine'), { text: '@engine later', caret: 8 });
+  deepEq(M.insertTag('@site and @en', 13, 'engine'), { text: '@site and @engine ', caret: 18 });
+  deepEq(M.insertTag('no tag here', 5, 'site'), { text: 'no tag here', caret: 5 });
+});
 check('mention: prefix matches come first', () => deepEq(M.matchTargets('sa', [{ kind: 'contact', id: '1', label: 'Isabel' }, { kind: 'contact', id: '2', label: 'Sam' }]).map((t) => t.label), ['Sam', 'Isabel']));
 check('mention: the chosen name leaves the message', () => eq(M.splitTarget('@Sam see you at 9', { kind: 'contact', id: '2', label: 'Sam' }).body, 'see you at 9'));
 
@@ -1132,6 +1138,36 @@ check('members: members are kept newest first, at most 50, without me', () => {
   eq(list.length, 49);
   eq(list[0].name, 'N05');
   deepEq(list[0].pub, { x: 'x5', y: 'y' });
+});
+check('members: sessions are kept by computer and handle, newest 20, with their on state', () => {
+  const e = { room: 'r' };
+  const C = { x: 'CX', y: 'CY' };
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Site', handle: 'site', host: 'Mac', on: true, ts: 1 });
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Engine', handle: 'engine', host: 'Mac', on: true, ts: 2 });
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Site', handle: 'site', host: 'Mac', on: false, ts: 3 });
+  MB.noteAgent(e, { sigFp: 'fpC', spub: C, name: 'Bad', handle: 'Bad Handle!', host: 'Mac', on: true, ts: 4 });
+  MB.noteAgent(e, { sigFp: '', spub: C, name: 'X', handle: 'x', host: 'Mac', on: true, ts: 5 });
+  deepEq(MB.agentsOf(e).map((a) => [a.name, a.handle, a.on, a.sigFp]), [['Engine', 'engine', true, 'fpC'], ['Site', 'site', false, 'fpC']]);
+  deepEq(MB.agentsOf(e)[0].spub, C);
+  eq(Object.keys(e.members || {}).length, 0);
+  for (let i = 0; i < 25; i++) MB.noteAgent(e, { sigFp: 'fp' + i, spub: C, name: 'S' + i, handle: 's' + i, host: 'Mac', on: true, ts: 10 + i });
+  eq(MB.agentsOf(e).length, 20);
+  ok(!MB.agentsOf(e).some((a) => a.handle === 'site'));
+});
+check('members: a session post reads as name · computer, verified only when the key is a trusted computer', () => {
+  const C = { x: 'CX', y: 'CY' };
+  const body = { v: 2, t: 'done', agent: { name: 'Site', handle: 'site', host: 'Mac' } };
+  deepEq(MB.agentSender(body, { ok: true, spub: C, sigFp: 'fpC' }, [{ name: 'Studio Mac', spub: C }]), { who: 'Site · Studio Mac', verified: true, handle: 'site', sigFp: 'fpC' });
+  eq(MB.agentSender(body, { ok: true, spub: { x: 'OX', y: 'OY' }, sigFp: 'fpO' }, [{ name: 'Studio Mac', spub: C }]), null);
+  eq(MB.agentSender(body, null, []), null);
+  eq(MB.agentSender({ v: 2, t: 'x' }, { ok: true, spub: C, sigFp: 'fpC' }, []), null);
+  eq(MB.agentSender({ v: 2, t: 'x', agent: { name: 'A', handle: 'NO SPACES', host: 'h' } }, { ok: true, spub: C, sigFp: 'fpC' }, []), null);
+});
+check('members: roomsWithComputer finds the rooms where a computer has sessions', () => {
+  const C = { x: 'CX', y: 'CY' }, D = { x: 'DX', y: 'DY' };
+  const rooms = [{ room: 'a', agents: { 'f/site': { sigFp: 'f', spub: C, handle: 'site', name: 'site', on: true } } }, { room: 'b', agents: { 'g/eng': { sigFp: 'g', spub: D, handle: 'eng', name: 'eng', on: true } } }, { room: 'c' }];
+  deepEq(MB.roomsWithComputer(rooms, C), ['a']);
+  deepEq(MB.roomsWithComputer(rooms, { x: 'ZX', y: 'ZY' }), []);
 });
 check('members: a rekey from a member of the room is accepted', () => {
   const e = { room: 'r' };

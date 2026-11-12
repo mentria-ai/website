@@ -87,6 +87,9 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
   const turns = new Map();
   const chans = new Map();
   let chain = Promise.resolve();
+  const ROOM_MSGS = new Set(['room-add', 'room-drop', 'room-key']);
+  const kept = new Map();
+  const keep = (cmid, m) => { kept.set(cmid, m); while (kept.size > 30) kept.delete(kept.keys().next().value); };
   const emit = (t, m) => { for (const fn of handlers.get(t) || []) { try { fn(m); } catch (_) {} } };
   const keyOf = (sid, sub) => sid + '|' + (sub || '');
   const turnOf = (sid, n, make, sub) => {
@@ -102,7 +105,7 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
       for (const s of m.sessions) {
         if (!s || typeof s.sid !== 'string') continue;
         if (s.gone) sessions.delete(s.sid);
-        else sessions.set(s.sid, { sid: s.sid, name: String(s.name || ''), busy: !!s.busy, lastTs: Number(s.lastTs) || 0, hereAt: now(), host: String(m.host || '') });
+        else sessions.set(s.sid, { sid: s.sid, name: String(s.name || ''), handle: typeof s.handle === 'string' ? s.handle.slice(0, 40) : '', rooms: Array.isArray(s.rooms) ? s.rooms.filter((r) => typeof r === 'string' && r.length <= 120).slice(0, 16) : [], busy: !!s.busy, lastTs: Number(s.lastTs) || 0, hereAt: now(), host: String(m.host || '') });
       }
     } else if (m.t === 'turn' && typeof m.sid === 'string' && Number.isInteger(m.n) && Number.isInteger(m.from) && Array.isArray(m.msgs)) {
       const t = turnOf(m.sid, m.n, true, m.sub);
@@ -146,7 +149,18 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
     list: (sid, before, sub) => send(Object.assign({ t: 'list', sid }, Number.isInteger(before) ? { before } : {}, sub ? { sub } : {})),
     open: (sid, n, before, sub) => send(Object.assign({ t: 'open', sid, n }, Number.isInteger(before) ? { before } : {}, sub ? { sub } : {})),
     get: (sid, ref, sub) => send(Object.assign({ t: 'get', sid, ref }, sub ? { sub } : {})),
-    say: async (sid, text) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'say', sid, cmid, text, device })); return cmid; },
+    room: async (sid, msg) => {
+      if (!msg || !ROOM_MSGS.has(msg.t)) throw new Error('not a room message');
+      const cmid = cmidNew();
+      const m = await sign(sid, cmid, Object.assign({}, msg, { sid, cmid }));
+      keep(cmid, m);
+      await send(m);
+      return cmid;
+    },
+    say: async (sid, text) => { const cmid = cmidNew(); const m = await sign(sid, cmid, { t: 'say', sid, cmid, text, device }); keep(cmid, m); await send(m); return cmid; },
+    fileOffer: async (sid, meta) => { const cmid = cmidNew(); const m = await sign(sid, cmid, Object.assign({ t: 'file-offer', sid, cmid }, meta)); keep(cmid, m); await send(m); return cmid; },
+    filePart: (sid, id, i, d, w) => send(Object.assign({ t: 'file-part', sid, id, i, d }, w ? { w: 1 } : {})),
+    resend: async (cmid) => { const m = kept.get(cmid); if (!m) return false; await send(m); return true; },
     answer: async (sid, id, answers) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'answer', sid, cmid, id, answers })); return cmid; },
     verdict: async (sid, request_id, behavior, call, reason) => { const cmid = cmidNew(); await send(await sign(sid, cmid, Object.assign({ t: 'verdict', sid, cmid, request_id, behavior }, call && typeof call.id === 'string' && typeof call.hash === 'string' ? { call: { id: call.id, hash: call.hash } } : {}, reason ? { reason: String(reason).slice(0, 500) } : {}))); return cmid; },
     sessions: () => Array.from(sessions.values()).map((s) => Object.assign({}, s, { online: now() - s.hereAt < HERE_TTL_MS })),

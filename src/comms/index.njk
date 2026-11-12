@@ -856,7 +856,7 @@ import { openSheet } from '/assets/js/comms/sheet.js';
 import { openViewer, renderMediaGrid, downloadFile } from '/assets/js/comms/viewer.js';
 import { selfRoomFor, deviceInfo, Presence, SELF_THREAD, HistorySync } from '/assets/js/comms/self.js';
 import { resolveHash, ephKeys } from '/assets/js/comms/rooms.js';
-import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink } from '/assets/js/comms/sign.js';
+import { signBody, verifyBody, validSpub, sigFingerprint, signLink, verifyLink, signRoomBody } from '/assets/js/comms/sign.js';
 import { newInviteToken, inviteUrl, parseInvite, inviteKeys, sealInvite, envelopeTemplate, deletionTemplate, fetchInvite, INVITE_TTL_S } from '/assets/js/comms/invite.js';
 import { noteJoined, noteMember, membersOf, rekeyDecision, keepMembers, inboxBody, noteAgent, agentsOf, agentSender } from '/assets/js/comms/members.js';
 const ccTrusted = new Map();
@@ -3183,7 +3183,8 @@ const sealPlain = (text, cmid, extra) => {
   const body = packChatBody(text, { fp: myFp, legacyFp: myLegacyFp }, extra);
   const room = currentRoomName;
   const signer = mySign;
-  const out = (signer && room && cmid ? signBody(signer.signKey, signer.spub, room, cmid, body).catch(() => body) : Promise.resolve(body)).then((o) => JSON.stringify(o));
+  const dev = myDev && myDev.sign ? { signKey: myDev.sign.signKey, spub: myDev.sign.spub } : null;
+  const out = ((signer || dev) && room && cmid ? signRoomBody(body, room, cmid, signer, dev).catch(() => body) : Promise.resolve(body)).then((o) => JSON.stringify(o));
   if (cmid) {
     sealCache.set(cmid, out);
     if (sealCache.size > 200) sealCache.delete(sealCache.keys().next().value);

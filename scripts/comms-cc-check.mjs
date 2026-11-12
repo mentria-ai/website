@@ -494,6 +494,27 @@ check('cc: lock room sends the new key to computers that keep a session and drop
   eq(plan[0].msg.key, 'N'.repeat(43));
 }, false);
 
+check('room: a page message signed with both keys is the owner for the plugin; the identity key alone is not', async () => {
+  const RR = await import(pathToFileURL(join(CC, 'plugins/mentria/lib/roomrun.js')).href);
+  const mk = async () => { const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']); const j = await crypto.subtle.exportKey('jwk', kp.publicKey); return { signKey: kp.privateKey, spub: { x: j.x, y: j.y } }; };
+  const ident = await mk();
+  const dev = await mk();
+  const devFp = await SSG.sigFingerprint(dev.spub);
+  const list = { v: 1, kind: 'mentria-devices', ver: 1, ts: 1, devices: [{ sigFp: devFp, spub: dev.spub, name: 'iPhone', kind: 'iphone' }], removed: [], by: devFp };
+  const chat = await WIRE.roomKeys(ROOMKEY, 2);
+  const comp = PC.p256Keygen();
+  const tagged = [], ctx = [];
+  const now = Date.now();
+  const run = RR.createRoomRunner({ entry: { room: 'agents', key: ROOMKEY, kv: 2, label: 'Agents', computers: [] }, me: { name: 'Site', handle: 'site', host: 'Mac' }, computer: { priv: comp.priv, spub: comp.pub }, list: () => list, now: () => now, joinedAt: now, seen: new Set(), publish: async () => true, onTagged: (x) => tagged.push(x), onContext: (x) => ctx.push(x) });
+  const send = async (signed, cmid) => run.push(JSON.stringify({ cmid, ts: now, enc: await WIRE.encryptText(chat.chatKey, JSON.stringify(signed)) }));
+  const both = await SSG.signRoomBody(WIRE.packChatBody('@site go', { fp: 'abcd-efgh' }), 'agents', 'me:1', ident, dev);
+  eq((await SSG.verifyBody(both, 'agents', 'me:1')).ok, true);
+  await send(both, 'me:1');
+  await send(await SSG.signRoomBody(WIRE.packChatBody('@site identity only', { fp: 'abcd-efgh' }), 'agents', 'me:2', ident, null), 'me:2');
+  deepEq(tagged.map((x) => [x.kind, x.who]), [['owner', 'iPhone']]);
+  deepEq(ctx.map((x) => x.kind), ['other']);
+});
+
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;
 for (const [name, fn, needsPlugin] of checks) {

@@ -59,7 +59,7 @@ const el = (tag, cls, text) => {
   return e;
 };
 
-export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepAliveMs = 60000, statusMs = 15000, resumeMs = RESUME_MS } = {}) => {
+export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepAliveMs = 60000, statusMs = 15000, resumeMs = RESUME_MS, resendMs = [6000, 15000] } = {}) => {
   const A = (T && T.agent) || {};
   const C = (T && T.cc) || {};
   const failNote = (code) => (code === 'clock' ? (C.clock || A.unpaired || '') : code === 'command' ? (C.command || A.unpaired || '') : code === 'command-unknown' ? (C.command_unknown || C.command || A.unpaired || '') : (C.unpaired || A.unpaired || ''));
@@ -418,6 +418,8 @@ export const createAgentView = ({ els, T, client, nameOf, onImage, onOpen, keepA
       pending.push(entry);
       paint();
       try { entry.cmid = await client.say(sid, entry.text); } catch (_) { pending = pending.filter((x) => x !== entry); paint(); return null; }
+      const to = sid;
+      for (const ms of resendMs) setTimeout(() => { if (!entry.acked && !entry.failed && pending.includes(entry) && client.resend) client.resend(to, entry.cmid).catch(() => {}); }, ms);
       return entry.cmid;
     },
     paint,

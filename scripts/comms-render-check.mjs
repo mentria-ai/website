@@ -451,6 +451,23 @@ const PAGE_TESTS = async () => {
     v.open('s', null, 'S');
     return { v, els, handlers, verdicts, card, done: () => { v.close(); card.remove(); } };
   };
+  test('agent: a message with no delivered note is sent again, and not after it is delivered', async () => {
+    const AVr = await import('/assets/js/comms/agent-view.js?' + Math.random());
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const handlers = {};
+    const resent = [];
+    const client = { on: (t, fn) => { handlers[t] = fn; return () => {}; }, sessions: () => [{ sid: 's', online: true }], turns: () => [], turn: () => null, hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {}, say: async () => 'p:9', resend: async (sid, cmid) => { resent.push([sid, cmid]); return true; } };
+    const v = AVr.createAgentView({ els, T: TP, client, resendMs: [60, 160] });
+    v.open('s', null, 'S');
+    await v.say('hi');
+    await sleep(100);
+    deepEq(resent, [['s', 'p:9']]);
+    handlers.ack({ t: 'ack', sid: 's', cmid: 'p:9' });
+    await sleep(120);
+    deepEq(resent, [['s', 'p:9']]);
+    v.close();
+  });
   test('cards: verdict echoes the perm call id and hash', async () => {
     const r = await agentRig();
     r.handlers.perm({ t: 'perm', sid: 's', request_id: 'r1', tool_name: 'Bash', description: 'd', input_preview: 'npm test', call: { id: 'r1', hash: 'HASH1' }, ts: Date.now() });

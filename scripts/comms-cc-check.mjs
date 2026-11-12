@@ -531,6 +531,20 @@ check('cc: a room message with no reply is sent again once, with a fresh id', as
   eq(sent.length, 1);
 }, false);
 
+check('cc: a phone message is resent as the same signed message, never signed again', async () => {
+  const keys = await BRM.keysFromBridgeKey(new Uint8Array(32).fill(6));
+  const host = await hostKey();
+  const t = memTransport();
+  let signs = 0;
+  const client = BRM.createBridgeClient({ transport: t, keys, sign: async (sid, cmid, body) => { signs++; return body; }, host: { spub: host.spub, room: 'cc:c1' } });
+  const cmid = await client.say('s1', 'hello');
+  const first = t.sent.length;
+  eq(await client.resend(cmid), true);
+  eq(t.sent.length, first * 2);
+  eq(signs, 1);
+  eq(await client.resend('p:unknown'), false);
+}, false);
+
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;
 for (const [name, fn, needsPlugin] of checks) {

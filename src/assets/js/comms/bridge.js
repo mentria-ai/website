@@ -88,6 +88,8 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
   const chans = new Map();
   let chain = Promise.resolve();
   const ROOM_MSGS = new Set(['room-add', 'room-drop', 'room-key']);
+  const kept = new Map();
+  const keep = (cmid, m) => { kept.set(cmid, m); while (kept.size > 30) kept.delete(kept.keys().next().value); };
   const emit = (t, m) => { for (const fn of handlers.get(t) || []) { try { fn(m); } catch (_) {} } };
   const keyOf = (sid, sub) => sid + '|' + (sub || '');
   const turnOf = (sid, n, make, sub) => {
@@ -153,7 +155,8 @@ export const createBridgeClient = ({ transport, keys, sign, device = 'phone', no
       await send(await sign(sid, cmid, Object.assign({}, msg, { sid, cmid })));
       return cmid;
     },
-    say: async (sid, text) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'say', sid, cmid, text, device })); return cmid; },
+    say: async (sid, text) => { const cmid = cmidNew(); const m = await sign(sid, cmid, { t: 'say', sid, cmid, text, device }); keep(cmid, m); await send(m); return cmid; },
+    resend: async (cmid) => { const m = kept.get(cmid); if (!m) return false; await send(m); return true; },
     answer: async (sid, id, answers) => { const cmid = cmidNew(); await send(await sign(sid, cmid, { t: 'answer', sid, cmid, id, answers })); return cmid; },
     verdict: async (sid, request_id, behavior, call, reason) => { const cmid = cmidNew(); await send(await sign(sid, cmid, Object.assign({ t: 'verdict', sid, cmid, request_id, behavior }, call && typeof call.id === 'string' && typeof call.hash === 'string' ? { call: { id: call.id, hash: call.hash } } : {}, reason ? { reason: String(reason).slice(0, 500) } : {}))); return cmid; },
     sessions: () => Array.from(sessions.values()).map((s) => Object.assign({}, s, { online: now() - s.hereAt < HERE_TTL_MS })),

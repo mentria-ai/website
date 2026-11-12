@@ -420,6 +420,40 @@ check('cc: computer records merge without losing approvals and Disconnect sticks
   eq(m3.list[0].approvals.length, 2);
 });
 
+const WIRE = await import('/assets/js/comms/wire.js');
+const SSG = await import('/assets/js/comms/sign.js');
+const PR = hasCC ? await import(pathToFileURL(join(CC, 'plugins/mentria/lib/room.js')).href) : null;
+const ROOMKEY = WIRE.b64urlEncode(new Uint8Array(32).fill(9));
+
+check('room: the plugin derives the same topics as the page for v1 and v2 rooms', async () => {
+  for (const kv of [1, 2]) eq(PR.chatTopic('Agents room', ROOMKEY, kv), await WIRE.chatTopicFor('Agents room', ROOMKEY, kv));
+});
+
+check('room: a body sealed on the page opens in the plugin, and the other way', async () => {
+  const site = await WIRE.roomKeys(ROOMKEY, 2);
+  const plug = PR.roomKeys(ROOMKEY, 2);
+  const enc = await WIRE.encryptText(site.chatKey, JSON.stringify({ v: 2, t: 'from page' }));
+  assert.deepEqual(PR.openRoom(plug.chat, enc), { v: 2, t: 'from page' });
+  const back = PR.sealRoom(plug.chat, { v: 2, t: 'from plugin' });
+  assert.deepEqual(JSON.parse(await WIRE.decryptText(site.chatKey, back)), { v: 2, t: 'from plugin' });
+  eq(WIRE.unpackChatPlain(await WIRE.decryptText(site.chatKey, back)).text, 'from plugin');
+});
+
+check('room: a session post signed by the computer verifies on the page, and a page message verifies in the plugin', async () => {
+  const k = PC.p256Keygen();
+  const body = PR.agentBody('done', { name: 'Site', handle: 'site', host: 'Mac' });
+  const signed = PSG.signBody(k.priv, k.pub, 'agents', 'site:1', body);
+  const v = await SSG.verifyBody(JSON.parse(JSON.stringify(signed)), 'agents', 'site:1');
+  eq(v.ok, true);
+  eq(v.sigFp, PSG.sigFingerprint(k.pub));
+  const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const jwk = await crypto.subtle.exportKey('jwk', pair.publicKey);
+  const page = await SSG.signBody(pair.privateKey, { x: jwk.x, y: jwk.y }, 'agents', 'me:1', WIRE.packChatBody('@site go', { fp: 'abcd-efgh' }));
+  const pv = PSG.verifyBody(JSON.parse(JSON.stringify(page)), 'agents', 'me:1');
+  eq(pv.ok, true);
+  eq(pv.sigFp, await SSG.sigFingerprint({ x: jwk.x, y: jwk.y }));
+});
+
 const no = (v) => assert.ok(!v);
 let failed = 0, skipped = 0;
 for (const [name, fn, needsPlugin] of checks) {

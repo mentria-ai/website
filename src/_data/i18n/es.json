@@ -6070,7 +6070,8 @@
         "unpaired": "No entregado: este dispositivo no está en la lista de dispositivos de la computadora.",
         "approve_note": "Aprueba aquí primero. Después ambas pantallas muestran el mismo código corto.",
         "waiting_code": "Aprobado. Esperando a la computadora…",
-        "command": "No se ejecutó: los comandos con barra solo se ejecutan en la computadora."
+        "command": "No se ejecutó: este comando solo se ejecuta en la computadora.",
+        "command_unknown": "No se ejecutó: esta sesión no tiene ese comando."
       }
     },
     "scanner": {

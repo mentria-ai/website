@@ -80,6 +80,7 @@ const PAGE_TESTS = async () => {
     ok(el.textContent.includes('+4') && el.textContent.includes('−2'));
     eq(el.querySelectorAll('.comms__tool-result--alone').length, 0);
   });
+  test('agent: a slash command output shows in a mono box', () => { C.renderAgentParts(el, [{ type: 'tool_result', callId: 'out:4', text: 'Set model to Haiku 5.5', bytes: 22 }], { T: TA }); const pre = el.querySelector('.comms__tool-result--alone pre.comms__tool-out'); ok(pre && pre.textContent === 'Set model to Haiku 5.5', el.innerHTML); });
   test('agent: thinking folds into a chip', () => { C.renderAgentParts(el, [{ type: 'thought', ref: '1:0', chars: 120 }], { T: TA }); const b = el.querySelector('button.comms__thought'); ok(b && b.textContent.includes('Thought')); });
   test('agent: unknown agent parts show the plain notice', () => { C.renderAgentParts(el, [{ type: 'hologram' }, { type: 'notice', code: 'compacted' }], { T: TA }); ok(el.textContent.includes("Something this page can't show yet")); ok(el.textContent.includes('Context compacted')); });
   test('agent: no message HTML is ever inserted as HTML', () => { C.renderAgentParts(el, [{ type: 'text', text: '<img src=x onerror=alert(1)>' }, { type: 'tool_call', id: 'h', title: '<b onclick=alert(1)>x</b>', kind: 'run', status: 'done', input: '<script>window.__agentx=1</script>' }, { type: 'tool_result', callId: 'h', text: '<img src=y onerror=alert(2)>', bytes: 30 }], { T: TA, results: C.resultsOf([{ type: 'tool_result', callId: 'h', text: '<img src=y onerror=alert(2)>', bytes: 30 }]) }); eq(el.querySelector('[onerror]'), null); eq(el.querySelector('[onclick]'), null); eq(el.querySelector('script'), null); eq(window.__agentx, undefined); });
@@ -214,6 +215,27 @@ const PAGE_TESTS = async () => {
     v.close();
     log.remove();
     style.remove();
+  });
+
+  test('fix: a slash command output with no tool call shows in the turn, and a listed call keeps its result in its card', async () => {
+    const AV8 = await import('/assets/js/comms/agent-view.js');
+    const mkEl = (tag) => document.createElement(tag || 'div');
+    const els = { log: mkEl(), chatTitle: mkEl('span'), chatAvatar: mkEl('span'), status: mkEl('span'), leave: mkEl('button'), peers: mkEl(), enc: mkEl(), callStart: mkEl('button'), share: mkEl('button'), msg: mkEl('input'), go: mkEl('button') };
+    const msgs = [
+      { id: 'u', role: 'user', ts: 1, via: 'phone', parts: [{ type: 'text', text: '/rename rigtest' }] },
+      { id: 'o', role: 'assistant', ts: 2, parts: [{ type: 'tool_result', callId: 'out:2', text: 'Session renamed to: rigtest', bytes: 27 }] },
+      { id: 'a', role: 'assistant', ts: 3, parts: [{ type: 'tool_call', id: 'c1', title: 'List files', kind: 'run', status: 'done', tool: 'Bash' }] },
+      { id: 'r', role: 'assistant', ts: 4, parts: [{ type: 'tool_result', callId: 'c1', text: 'XYZ', bytes: 3, exit: 0 }] }
+    ];
+    const client = { on: () => () => {}, sessions: () => [{ sid: 's', online: true }], turns: () => [0], turn: () => ({ n: 0, msgs }), hello() {}, watch() {}, list() {}, open() {}, get() {}, channel: () => true, reset() {} };
+    const v = AV8.createAgentView({ els, T: { agent: { message: 'Message the {name}' }, chat: {} }, client });
+    v.open('s', null, 'S');
+    await sleep(50);
+    const alone = [...els.log.querySelectorAll('.comms__tool-result--alone')];
+    eq(alone.length, 1);
+    ok(alone[0].textContent.includes('Session renamed to: rigtest'), els.log.textContent);
+    ok(!alone[0].textContent.includes('XYZ'));
+    v.close();
   });
 
   test('fix: tool calls fold into symbols with counts; a tap lists them; a tap on one fetches its input and result', async () => {
@@ -416,7 +438,7 @@ const PAGE_TESTS = async () => {
     document.body.append(card);
     return card;
   };
-  const TP = { agent: { wants: '{tool} wants to run', message: 'Message the {name}', sent: 'sent', delivered: 'delivered', unpaired: 'not delivered', ask_send: 'Send answer', ask_other: 'Or type' }, cc: { local: 'Answer this at the computer.', answered_here: 'Answered at the computer.', clock: 'Not delivered: check this device clock.', unpaired: 'Not delivered: not on the list.', command: 'Not run: slash commands only run at the computer.' }, chat: {} };
+  const TP = { agent: { wants: '{tool} wants to run', message: 'Message the {name}', sent: 'sent', delivered: 'delivered', unpaired: 'not delivered', ask_send: 'Send answer', ask_other: 'Or type' }, cc: { local: 'Answer this at the computer.', answered_here: 'Answered at the computer.', clock: 'Not delivered: check this device clock.', unpaired: 'Not delivered: not on the list.', command: 'Not run: this command only runs at the computer.', command_unknown: 'Not run: this session has no such command.' }, chat: {} };
   const agentRig = async () => {
     const AVx = await import('/assets/js/comms/agent-view.js?' + Math.random());
     const mkEl = (tag) => document.createElement(tag || 'div');
@@ -476,8 +498,14 @@ const PAGE_TESTS = async () => {
     await r3.v.say('/model x');
     r3.handlers.err({ t: 'err', sid: 's', cmid: 'p:1', code: 'command' });
     await sleep(100);
-    ok(r3.els.log.textContent.includes('Not run: slash commands only run at the computer.'), r3.els.log.textContent);
+    ok(r3.els.log.textContent.includes('Not run: this command only runs at the computer.'), r3.els.log.textContent);
     r3.done();
+    const r4 = await agentRig();
+    await r4.v.say('/nosuch');
+    r4.handlers.err({ t: 'err', sid: 's', cmid: 'p:1', code: 'command-unknown' });
+    await sleep(100);
+    ok(r4.els.log.textContent.includes('Not run: this session has no such command.'), r4.els.log.textContent);
+    r4.done();
   });
 
   test('cards: a verdict refused for clock comes back with the note', async () => {

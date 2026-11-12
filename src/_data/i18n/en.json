@@ -6070,7 +6070,8 @@
         "unpaired": "Not delivered: this device isn't on the computer's device list.",
         "approve_note": "Approve here first. Then both screens show the same short code.",
         "waiting_code": "Approved. Waiting for the computer…",
-        "command": "Not run: slash commands only run at the computer."
+        "command": "Not run: this command only runs at the computer.",
+        "command_unknown": "Not run: this session has no such command."
       }
     },
     "scanner": {

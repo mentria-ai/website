@@ -76,6 +76,41 @@ try {
   await page.goto(ORIGIN + '/comms/', { waitUntil: 'load' });
   shared.code = await onboard(page, 'Tester');
 
+  await check('chat box: a multi-line box that grows with long text, Enter sends and Shift+Enter breaks the line', async () => {
+    const base = await page.evaluate(() => {
+      const m = document.getElementById('comms-msg');
+      window.__shown = [];
+      for (let el = m; el && el !== document.body; el = el.parentElement) {
+        if (el.hidden) { el.hidden = false; window.__shown.push(['hidden', el]); }
+        if (getComputedStyle(el).display === 'none') { window.__shown.push(['display', el, el.style.display]); el.style.display = 'block'; }
+      }
+      m.disabled = false;
+      m.value = '';
+      m.dispatchEvent(new Event('input'));
+      return { tag: m.tagName, ac: m.getAttribute('autocomplete'), h: m.getBoundingClientRect().height };
+    });
+    if (base.tag !== 'TEXTAREA') throw new Error('tag ' + base.tag);
+    if (base.ac !== 'off') throw new Error('autocomplete ' + base.ac);
+    await page.focus('#comms-msg');
+    await page.keyboard.type('word '.repeat(60));
+    const grown = await page.evaluate(() => document.getElementById('comms-msg').getBoundingClientRect().height);
+    if (!(grown > base.h * 2)) throw new Error('did not grow: ' + base.h + ' -> ' + grown);
+    await page.keyboard.type('word '.repeat(400));
+    const capped = await page.evaluate(() => { const m = document.getElementById('comms-msg'); return { h: m.getBoundingClientRect().height, scroll: m.scrollHeight > m.clientHeight }; });
+    if (!(capped.h < 220) || !capped.scroll) throw new Error('not capped: ' + JSON.stringify(capped));
+    await page.evaluate(() => { const m = document.getElementById('comms-msg'); m.value = 'one'; m.dispatchEvent(new Event('input')); });
+    await page.keyboard.down('Shift');
+    await page.keyboard.press('Enter');
+    await page.keyboard.up('Shift');
+    await page.keyboard.type('two');
+    const v1 = await page.$eval('#comms-msg', (m) => m.value);
+    if (v1 !== 'one\ntwo') throw new Error('shift-enter: ' + JSON.stringify(v1));
+    await page.keyboard.press('Enter');
+    const v2 = await page.$eval('#comms-msg', (m) => m.value);
+    if (v2.includes('two\n')) throw new Error('enter added a line: ' + JSON.stringify(v2));
+    await page.evaluate(() => { const m = document.getElementById('comms-msg'); m.value = ''; m.dispatchEvent(new Event('input')); m.disabled = true; for (const [k, el, v] of (window.__shown || []).reverse()) { if (k === 'hidden') el.hidden = true; else el.style.display = v; } });
+  });
+
   await check('cc: #cc1 link is stripped from the address bar immediately', async () => {
     const ac = new AbortController();
     shared.ac = ac;

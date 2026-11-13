@@ -348,7 +348,7 @@ unlockTool: true
       <p class="comms__agent-signed" id="comms-agent-signed" hidden>{{ 'tool.comms.agent.signed' | t }}</p>
       <form class="comms__send" id="comms-send" autocomplete="off">
         <label class="comms__attach" title="{{ 'tool.comms.chat.attach' | t }}" aria-label="{{ 'tool.comms.chat.attach' | t }}"><input type="file" id="comms-file" multiple hidden><svg class="comms__i" aria-hidden="true"><use href="#ci-clip"></use></svg></label>
-        <input class="comms__input comms__input--msg" id="comms-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled>
+        <textarea class="comms__input comms__input--msg" id="comms-msg" rows="1" enterkeyhint="send" autocomplete="off" autocapitalize="sentences" placeholder="{{ 'tool.comms.chat.msg_placeholder' | t }}" disabled></textarea>
         <button class="comms__btn comms__btn--send" id="comms-go" type="submit" disabled title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
         <div class="comms__at" id="comms-room-at" role="listbox" aria-label="{{ 'tool.comms.rooms.sessions' | t }}" hidden></div>
       </form>
@@ -356,7 +356,7 @@ unlockTool: true
     <div class="comms__home" id="comms-home">
       <h2 class="comms__home-h"><i aria-hidden="true">$</i> {{ 'tool.comms.home.prompt' | t }}<span class="comms__caret" aria-hidden="true"></span></h2>
       <form class="comms__homesend" id="comms-home-send" autocomplete="off">
-        <input class="comms__input comms__input--msg" id="comms-home-msg" type="text" enterkeyhint="send" placeholder="{{ 'tool.comms.home.placeholder_desk' | t }}" data-ph-phone="{{ 'tool.comms.home.placeholder' | t }}" data-ph-desk="{{ 'tool.comms.home.placeholder_desk' | t }}" aria-label="{{ 'tool.comms.home.placeholder' | t }}" role="combobox" aria-autocomplete="list" aria-controls="comms-at" aria-expanded="false">
+        <input class="comms__input comms__input--msg" id="comms-home-msg" type="text" enterkeyhint="send" autocomplete="off" placeholder="{{ 'tool.comms.home.placeholder_desk' | t }}" data-ph-phone="{{ 'tool.comms.home.placeholder' | t }}" data-ph-desk="{{ 'tool.comms.home.placeholder_desk' | t }}" aria-label="{{ 'tool.comms.home.placeholder' | t }}" role="combobox" aria-autocomplete="list" aria-controls="comms-at" aria-expanded="false">
         <button class="comms__btn comms__btn--send" type="submit" title="{{ 'tool.comms.chat.send' | t }}" aria-label="{{ 'tool.comms.chat.send' | t }}"><svg class="comms__i" aria-hidden="true"><use href="#ci-send"></use></svg></button>
         <div class="comms__at" id="comms-at" role="listbox" aria-label="{{ 'tool.comms.home.pick' | t }}" hidden></div>
       </form>
@@ -707,12 +707,13 @@ body:has(#comms-app)>main{flex:1;min-height:0;width:100%;max-width:none;margin:0
 .comms__media-label{display:block;padding:var(--space-2);overflow:hidden;text-overflow:ellipsis}
 .comms__relaybar{background:color-mix(in srgb,var(--syn-amber) 10%,transparent);border-color:color-mix(in srgb,var(--syn-amber) 35%,transparent)}
 
-.comms__send{position:relative;flex:none;display:flex;align-items:center;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
+.comms__send{position:relative;flex:none;display:flex;align-items:flex-end;gap:var(--space-1);margin:var(--space-2) max(var(--space-3),calc((100% - 760px) / 2)) var(--space-3);padding:var(--space-1);background:var(--term-surface-2);border:1px solid var(--term-border-strong);border-radius:var(--radius-lg)}
 .comms__send:focus-within{border-color:var(--syn-cyan)}
 .comms__send--offline{opacity:.55}
 .comms__attach{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:var(--radius-md);color:var(--term-muted);cursor:pointer;transition:color .15s}
 .comms__attach .comms__i{width:18px;height:18px}
 .comms__input--msg{flex:1;min-width:0;padding:var(--space-2);background:transparent;border:0;color:var(--term-fg-strong);font-family:var(--font-body);font-size:.95rem}
+textarea.comms__input--msg{display:block;resize:none;line-height:1.4;max-height:calc(1.4em * 6 + var(--space-2) * 2);overflow-y:hidden;overflow-wrap:anywhere;align-self:center}
 .comms__input--msg:focus{border:0}
 .comms__btn--send{width:36px;height:36px;flex:none;padding:0;border-radius:var(--radius-md)}
 .comms__btn--send .comms__i{width:18px;height:18px}
@@ -949,6 +950,19 @@ const els = {
   link: $('comms-link'), linkCard: $('comms-link-card'), linkGo: $('comms-link-go'), linkLater: $('comms-link-later'),
   obCard: $('comms-onboard-card')
 };
+const MSG_VALUE = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
+const growMsg = () => {
+  const m = els.msg;
+  if (!m || m.tagName !== 'TEXTAREA') return;
+  m.style.height = 'auto';
+  const max = parseFloat(getComputedStyle(m).maxHeight) || 160;
+  m.style.height = Math.min(m.scrollHeight, max) + 'px';
+  m.style.overflowY = m.scrollHeight > max ? 'auto' : 'hidden';
+};
+if (els.msg && els.msg.tagName === 'TEXTAREA' && MSG_VALUE) {
+  Object.defineProperty(els.msg, 'value', { configurable: true, get() { return MSG_VALUE.get.call(this); }, set(v) { MSG_VALUE.set.call(this, v); growMsg(); } });
+  els.msg.addEventListener('input', growMsg);
+}
 
 const APPLE_DEVICE = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
 const passkeyCopy = {
@@ -3834,6 +3848,11 @@ els.msg.addEventListener('keydown', (e) => {
 }, true);
 els.msg.addEventListener('keydown', aiHoldEnter);
 els.msg.addEventListener('keypress', aiHoldEnter);
+els.msg.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || e.shiftKey || e.altKey || e.isComposing || e.keyCode === 229 || e.defaultPrevented) return;
+  e.preventDefault();
+  els.send.requestSubmit();
+});
 els.send.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (agentView && agentView.isOpen()) {
@@ -4115,9 +4134,7 @@ els.file.addEventListener('change', (e) => {
   const files = Array.from(e.target.files || []);
   e.target.value = '';
   if (agentView && agentView.isOpen()) {
-    const caption = els.msg.value.trim();
-    els.msg.value = '';
-    (async () => { for (let i = 0; i < Math.min(files.length, 5); i++) await agentView.sendFile(files[i], i === 0 ? caption : ''); })();
+    (async () => { for (let i = 0; i < Math.min(files.length, 5); i++) await agentView.sendFile(files[i], ''); })();
     return;
   }
   sendFiles(files);

@@ -140,6 +140,51 @@ test('validate: matching cloze translations stay quiet', () => {
   assert.equal(P.validate(cloze('A {{a}}.', ['x', 'y'])).ok, false);
 });
 
+const webpCover = (n) => 'data:image/webp;base64,' + 'A'.repeat(n);
+
+test('covers: a built-in cover the size of a real deck cover is kept, and so are image links', () => {
+  const u = webpCover(110000);
+  assert.equal(P.safeCover(u), u);
+  assert.equal(P.safeCover('https://cdn.mentria.ai/deck/00_cover.webp'), 'https://cdn.mentria.ai/deck/00_cover.webp');
+  assert.equal(P.safeCover('/assets/packs/example-qkv.svg'), '/assets/packs/example-qkv.svg');
+});
+
+test('covers: oversized, non-image or broken covers are dropped', () => {
+  assert.equal(P.safeCover(webpCover(600 * 1024)), null);
+  assert.equal(P.safeCover('data:image/svg+xml;base64,PHN2Zz4='), null);
+  assert.equal(P.safeCover('data:image/webp;base64,AAAA"onerror=x'), null);
+  assert.equal(P.safeCover('data:image/webp;base64,AA AA'), null);
+  assert.equal(P.safeCover('data:text/html;base64,PGI+'), null);
+  assert.equal(P.safeCover('javascript:alert(1)'), null);
+  assert.equal(P.safeCover('https://cdn.mentria.ai/' + 'a'.repeat(5000)), null);
+  assert.equal(P.safeCover(''), null);
+  assert.equal(P.safeCover(42), null);
+});
+
+test('covers: the course list, which syncs between devices, keeps only small covers', () => {
+  assert.equal(P.safeCover(webpCover(110000), P.SYNC_COVER_MAX), null);
+  assert.equal(P.safeCover(webpCover(1000), P.SYNC_COVER_MAX), webpCover(1000));
+});
+
+test('covers: a library row falls back to the cover inside the stored pack', () => {
+  const cover = webpCover(50000);
+  const row = P.rowView({ id: 'p', cover: null, cards: 1, pack: { id: 'p', cover, cards: [{ id: 'c', type: 'cloze' }] } });
+  assert.equal(row.cover, cover);
+  assert.equal(row.pack, undefined);
+  assert.deepEqual(row.cardList, [{ id: 'c', type: 'cloze', guess: false }]);
+  assert.equal(P.rowView({ id: 'q', cover: null, pack: { id: 'q', cover: webpCover(600 * 1024), cards: [] } }).cover, null);
+  assert.equal(P.rowView({ id: 'r', cover: '/assets/packs/example-qkv.svg', pack: { id: 'r', cards: [] } }).cover, '/assets/packs/example-qkv.svg');
+});
+
+test('validate: a cover the library would not show is a warning, a good one is quiet', () => {
+  const bad = Object.assign(cloze('A {{a}}.', ['x']), { cover: webpCover(600 * 1024) });
+  const v = P.validate(bad);
+  assert.equal(v.ok, true);
+  assert.equal(v.warnings.length, 1);
+  assert.match(v.warnings[0], /^cover: /);
+  assert.deepEqual(P.validate(Object.assign(cloze('A {{a}}.', ['x']), { cover: webpCover(110000) })).warnings, []);
+});
+
 let failed = 0;
 for (const [name, fn] of tests) {
   try {

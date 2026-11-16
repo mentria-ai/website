@@ -8,6 +8,7 @@
   var ID_RE = /^[a-z0-9][a-z0-9._-]{0,99}$/i;
   var ID_RULE = 'letters, digits, dots, dashes and underscores, starting with a letter or digit; 1-100 chars';
   var DB = 'mentria-packs', STORE = 'packs', VER = 1;
+  var COVER_MAX = 512 * 1024, SYNC_COVER_MAX = 4096;
   var CONNECT_HOSTS = ['cdn.mentria.ai', 'mentria-ai.github.io', 'relay.mentria.ai', 'huggingface.co'];
   var CONNECT_SUFFIXES = ['.huggingface.co', '.hf.co'];
   var LINK_RULE = 'links must point to mentria.ai, cdn.mentria.ai, mentria-ai.github.io or huggingface.co';
@@ -49,9 +50,12 @@
     try { return new Blob([JSON.stringify(obj)]).size; } catch (_) { return JSON.stringify(obj).length; }
   }
 
-  function safeCover(u) {
-    if (typeof u !== 'string' || !u || u.length > 4096 || /[\s"'<>`]/.test(u)) return null;
-    if (/^data:image\/(png|jpe?g|gif|webp|avif);base64,/i.test(u) || /^https:\/\//i.test(u)) return u;
+  function safeCover(u, max) {
+    var cap = typeof max === 'number' ? max : COVER_MAX;
+    if (typeof u !== 'string' || !u || u.length > cap || /[\s"'<>`]/.test(u)) return null;
+    if (/^data:/i.test(u)) return /^data:image\/(png|jpe?g|gif|webp|avif);base64,[A-Za-z0-9+\/]+={0,2}$/i.test(u) ? u : null;
+    if (u.length > SYNC_COVER_MAX) return null;
+    if (/^https:\/\//i.test(u)) return u;
     return /^[a-z][a-z0-9+.-]*:/i.test(u) || /^\/\//.test(u) ? null : u;
   }
 
@@ -67,6 +71,7 @@
     if (!isText(pack.title)) err('title: required text');
     if (pack.subtitle != null && !isText(pack.subtitle)) err('subtitle: text');
     if (pack.language != null && typeof pack.language !== 'string') err('language: string');
+    if (pack.cover != null && !safeCover(pack.cover)) warn('cover: will not show; use an https or site image link, or a PNG, JPEG, GIF, WebP or AVIF data URI of at most ' + COVER_MAX + ' characters');
     if (pack.modes != null) {
       if (!Array.isArray(pack.modes)) err('modes: array');
       else pack.modes.forEach(function (m) { if (['read', 'quiz', 'review', 'budget'].indexOf(m) < 0) warn('modes: unknown mode ' + m); });
@@ -335,7 +340,7 @@
         var courses = getCourses();
         var prev = courses[course.id];
         courses[course.id] = {
-          id: course.id, version: course.version || 1, title: course.title, subtitle: course.subtitle || null, cover: safeCover(course.cover) || (packs[0] && safeCover(packs[0].cover)) || null,
+          id: course.id, version: course.version || 1, title: course.title, subtitle: course.subtitle || null, cover: safeCover(course.cover, SYNC_COVER_MAX) || (packs[0] && safeCover(packs[0].cover, SYNC_COVER_MAX)) || null,
           packs: packs.map(function (p) { return p.id; }), added: prev ? prev.added : Date.now(), updated: Date.now(), source: (meta && meta.source) || 'import'
         };
         saveCourses(courses);
@@ -413,14 +418,16 @@
     });
   }
   function get(id) { return tx('readonly', function (s) { return s.get(id); }).catch(function () { return undefined; }); }
+  function rowView(r) {
+    var o = Object.assign({}, r);
+    if (r.pack && Array.isArray(r.pack.cards)) o.cardList = r.pack.cards.map(function (c) { return { id: c.id, type: c.type, guess: !!c.guess }; });
+    o.cover = safeCover(r.cover) || (r.pack ? safeCover(r.pack.cover) : null);
+    delete o.pack;
+    return o;
+  }
   function list() {
     return tx('readonly', function (s) { return s.getAll(); }).then(function (rows) {
-      return (rows || []).map(function (r) {
-        var o = Object.assign({}, r);
-        if (r.pack && Array.isArray(r.pack.cards)) o.cardList = r.pack.cards.map(function (c) { return { id: c.id, type: c.type, guess: !!c.guess }; });
-        delete o.pack;
-        return o;
-      }).sort(function (a, b) { return (b.updated || b.added) - (a.updated || a.added); });
+      return (rows || []).map(rowView).sort(function (a, b) { return (b.updated || b.added) - (a.updated || a.added); });
     }).catch(function () { return []; });
   }
   function remove(id) {
@@ -570,7 +577,8 @@
     put: put, get: get, list: list, remove: remove,
     importText: importText, importFile: importFile, importUrl: importUrl, linkProblem: linkProblem,
     getProgress: getProgress, recordSeen: recordSeen, recordAnswer: recordAnswer, setMode: setMode, resetProgress: resetProgress, summary: summary, progressSaved: progressSaved,
-    dayKey: dayKey, getDays: getDays, week: week
+    dayKey: dayKey, getDays: getDays, week: week,
+    safeCover: safeCover, rowView: rowView, SYNC_COVER_MAX: SYNC_COVER_MAX
   };
   global.MentriaPacks = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

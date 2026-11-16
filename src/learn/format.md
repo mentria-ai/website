@@ -158,7 +158,7 @@ It prints the outline and every problem it finds, for a single pack or a whole c
 
 ## Limits
 
-A pack may be at most 25 MB as JSON. Images (`cover` and card `image`) load only from mentria.ai, `cdn.mentria.ai`, `mentria-ai.github.io` or a data URI; the security policy blocks images on every other host, Hugging Face included, so embed small WebP files as data URIs. Pack, course, section and card ids must match `[A-Za-z0-9][A-Za-z0-9._-]{0,99}`: letters, digits, dots, dashes and underscores, starting with a letter or digit, at most 100 characters.
+A pack may be at most 25 MB as JSON. Images (`cover` and card `image`) load only from mentria.ai, `cdn.mentria.ai`, `mentria-ai.github.io` or a data URI; the security policy blocks images on every other host, Hugging Face included, so embed small WebP files as data URIs. A `cover` data URI may be PNG, JPEG, GIF, WebP or AVIF and at most 512 KB as text; a cover link may be at most 4,096 characters. Pack, course, section and card ids must match `[A-Za-z0-9][A-Za-z0-9._-]{0,99}`: letters, digits, dots, dashes and underscores, starting with a letter or digit, at most 100 characters.
 
 ## Sharing
 

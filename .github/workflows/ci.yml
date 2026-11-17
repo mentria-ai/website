@@ -45,6 +45,8 @@ jobs:
         run: node scripts/packs-logic-check.mjs
       - name: Check NITRO car handling (reverse, walls, forward fingerprint)
         run: node scripts/racer-vehicle-check.mjs
+      - name: Check the games' adaptive resolution rules
+        run: node scripts/games-adapt-check.mjs
       - name: Check story submission parsing, validation and upload checks
         run: node scripts/story-check.mjs
       - name: Check extension manifests and version bumps

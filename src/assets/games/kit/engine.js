@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { qualityPreset, normalizeQuality } from './quality.js';
+import { judgeWindow, nextScale, parseStored, formatStored } from './adapt.js';
 
 export const SIM_STEP = 1 / 120;
 export const SIM_MAX_ACCUMULATOR = 0.25;
@@ -28,6 +29,7 @@ export function createEngine(opts = {}) {
   const autoRender = opts.autoRender !== false;
   const autoResume = opts.autoResume === true;
   const adaptive = opts.adaptive !== false;
+  const adaptKey = typeof opts.adaptKey === 'string' ? opts.adaptKey : '';
   const maxDpr = finiteOr(opts.maxPixelRatio, Infinity);
 
   let renderer;
@@ -107,6 +109,8 @@ export function createEngine(opts = {}) {
     fpsBefore: 0,
     locked: false,
     windowMax: 0,
+    scaleBefore: 1,
+    hold: false,
     scale: 1
   };
   const PERF_N = 600;
@@ -194,35 +198,39 @@ export function createEngine(opts = {}) {
 
   function adaptStep(t) {
     if (!adaptive || adapt.locked) return;
+    if (adapt.hold) { adapt.windowT0 = t; adapt.windowFrames = 0; adapt.windowMax = 0; return; }
     adapt.windowFrames++;
     const span = t - adapt.windowT0;
     if (span < 1000) return;
-    const fps = adapt.windowFrames * 1000 / span;
-    const stalled = adapt.windowMax > 120;
+    const w = judgeWindow({ frames: adapt.windowFrames, spanMs: span, maxMs: adapt.windowMax });
+    const fps = w.fps;
     adapt.windowFrames = 0;
     adapt.windowMax = 0;
     adapt.windowT0 = t;
-    if (paused || hiddenStopped || stalled) return;
+    if (paused || hiddenStopped || w.stall) return;
     if (adapt.pendingCheck) {
       adapt.pendingCheck = false;
       if (fps < adapt.fpsBefore * 1.08) {
-        adapt.scale = Math.min(1, adapt.scale + 0.15);
+        adapt.scale = adapt.scaleBefore;
         adapt.locked = true;
         applySize(true);
+        saveScale();
         return;
       }
+      saveScale();
     }
-    if (fps < 45) {
+    if (w.slow) {
       adapt.slowWindows++;
       adapt.fastWindows = 0;
       if (adapt.slowWindows >= 3 && targetDpr() > Math.min(dprCap, deviceDpr(), preset.minPixelRatio || 0.75) + 0.01) {
         adapt.slowWindows = 0;
         adapt.fpsBefore = fps;
         adapt.pendingCheck = true;
-        adapt.scale = Math.max(0.5, adapt.scale - 0.15);
+        adapt.scaleBefore = adapt.scale;
+        adapt.scale = nextScale(adapt.scale, 'down');
         applySize(true);
       }
-    } else if (fps > 57) {
+    } else if (w.fast) {
       adapt.fastWindows++;
       adapt.slowWindows = 0;
     } else {
@@ -295,6 +303,33 @@ export function createEngine(opts = {}) {
       fpsT0 = t;
     }
     adaptStep(t);
+  }
+
+  function scaleKey() {
+    return adaptKey ? 'mentria.games.adapt.' + adaptKey + '.' + quality : '';
+  }
+
+  function loadScale() {
+    const k = scaleKey();
+    let r = { scale: 1, locked: false };
+    if (k) { try { r = parseStored(localStorage.getItem(k)); } catch (_) {} }
+    adapt.locked = r.locked;
+    return r.scale;
+  }
+
+  function saveScale() {
+    const k = scaleKey();
+    if (!k) return;
+    try {
+      const v = formatStored(adapt.scale, adapt.locked);
+      if (v == null) localStorage.removeItem(k);
+      else localStorage.setItem(k, v);
+    } catch (_) {}
+  }
+
+  function holdAdapt(on) {
+    adapt.hold = !!on;
+    resetAdaptWindow();
   }
 
   function resetAdaptWindow() {
@@ -400,8 +435,8 @@ export function createEngine(opts = {}) {
     quality = nq;
     preset = qualityPreset(nq);
     dprCap = Math.min(maxDpr, preset.pixelRatio);
-    adapt.scale = 1;
     adapt.locked = false;
+    adapt.scale = loadScale();
     adapt.pendingCheck = false;
     renderer.shadowMap.enabled = !!preset.shadows;
     if (prevShadows !== preset.shadows) {
@@ -515,9 +550,11 @@ export function createEngine(opts = {}) {
       for (let i = 0; i < changed.length; i += 3) changed[i][changed[i + 1]] = changed[i + 2];
     }
     if (adaptive && !adapt.locked && adapt.fastWindows >= 5 && adapt.scale < 1) {
-      adapt.scale = Math.min(1, adapt.scale + 0.1);
+      adapt.scale = nextScale(adapt.scale, 'up');
       applySize(true);
+      saveScale();
     }
+    adapt.hold = false;
     resetAdaptWindow();
     perfReset();
     return ok;
@@ -587,6 +624,7 @@ export function createEngine(opts = {}) {
     onResize,
     renderOnce: renderNow,
     prewarm,
+    holdAdapt,
     perf: perfRead,
     perfReset,
     stats,
@@ -594,6 +632,7 @@ export function createEngine(opts = {}) {
     dispose
   };
 
+  if (adaptive) adapt.scale = loadScale();
   applySize(true);
   perfOverlay();
   return api;

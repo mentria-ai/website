@@ -556,6 +556,7 @@ async function startRun(courseId, kind) {
   run.kind = kind || (course.kind === 'freestyle' ? 'freestyle' : 'race');
   run.course = course;
   hud.show(false);
+  try { engine.holdAdapt(true); } catch (_) {}
   const warm = course.id + '|' + quality + '|' + run.kind + '|' + settings.view;
   const needWarm = warm !== warmKey;
   const cached = world && worldCourseId === course.id && worldQuality === quality;
@@ -565,6 +566,7 @@ async function startRun(courseId, kind) {
     w = await ensureWorld(course);
   } catch (err) {
     console.error('[skyrush] world', err);
+    try { engine.holdAdapt(false); } catch (_) {}
     ui.loading(1);
     ui.toast(t('load.error'), { tone: 'warn', ms: 4000 });
     goMenu();
@@ -575,6 +577,8 @@ async function startRun(courseId, kind) {
   if (needWarm) {
     try { engine.prewarm(); } catch (_) {}
     warmKey = warm;
+  } else {
+    try { engine.holdAdapt(false); } catch (_) {}
   }
   if (!cached || needWarm) ui.loading(1);
   return true;
@@ -1505,6 +1509,7 @@ function boot() {
     engine = KitEngine.createEngine({
       canvas,
       quality,
+      adaptKey: 'fpv-drone',
       fov: settings.fov,
       near: 0.04,
       far: (preset.drawDistance || 1100) * 1.4,

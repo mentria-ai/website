@@ -190,6 +190,7 @@ try {
   engine = createEngine({
     canvas,
     quality: qualityName(),
+    adaptKey: 'nitro-racer',
     autoRender: false,
     onStep,
     onRender,
@@ -652,6 +653,7 @@ async function startRace(m, trackId) {
   ui.hide();
   hud.show(false);
   setRaceChrome(false);
+  try { engine.holdAdapt(true); } catch (_) {}
   const def = trackById(trackId);
   const ready = world && worldKey === trackId + '|' + qualityName();
   const warm = trackId + '|' + qualityName() + '|' + settings.car + '|' + settings.paint + '|' + mode;
@@ -663,6 +665,7 @@ async function startRace(m, trackId) {
     await ensureWorld(trackId);
   } catch (err) {
     ui.loading(null);
+    try { engine.holdAdapt(false); } catch (_) {}
     try { console.error('[nitro-racer] world build failed', err); } catch (_) {}
     ui.toast(t('fail_body'), { tone: 'warn', ms: 4000 });
     showMain();
@@ -672,6 +675,8 @@ async function startRace(m, trackId) {
   if (needWarm) {
     try { engine.prewarm(); } catch (_) {}
     warmKey = warm;
+  } else {
+    try { engine.holdAdapt(false); } catch (_) {}
   }
   if (!ready || needWarm) ui.loading(1);
 }
@@ -1599,8 +1604,11 @@ function prebuildWorld() {
   const id = settings.track;
   setTimeout(function () {
     if (world || worldPromise || state === 'loading') return;
-    ensureWorld(id).catch(function (err) {
+    try { engine.holdAdapt(true); } catch (_) {}
+    const release = function () { if (state !== 'loading') { try { engine.holdAdapt(false); } catch (_) {} } };
+    ensureWorld(id).then(release, function (err) {
       try { console.warn('[nitro-racer] background world build failed: ' + (err && err.message)); } catch (_) {}
+      release();
     });
   }, 450);
 }

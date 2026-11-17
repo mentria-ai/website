@@ -36,7 +36,7 @@ const HUD_CSS = [
   'display:flex;flex-direction:column;align-items:flex-end;gap:6px}',
   '.nrh-times{display:grid;grid-template-columns:auto auto;column-gap:12px;row-gap:6px;align-items:baseline;padding:calc(9*var(--nrh-u)) calc(13*var(--nrh-u))}',
   '.nrh-times .nrh-k{text-align:right}',
-  '.nrh-t{font:700 calc(15*var(--nrh-u))/1 var(--font-mono,monospace);font-variant-numeric:tabular-nums;color:rgba(242,251,248,.86);text-align:right;min-width:7.4ch}',
+  '.nrh-t{font:700 calc(15*var(--nrh-u))/1 var(--font-mono,monospace);font-variant-numeric:tabular-nums;color:rgba(242,251,248,.86);text-align:right;min-width:7.4ch;will-change:transform}',
   '.nrh-t--main{font-size:calc(21*var(--nrh-u));color:#fff}',
   '.nrh-t--best{color:var(--nrh-mint)}',
   '.nrh-delta{font:800 calc(15*var(--nrh-u))/1 var(--font-mono,monospace);font-variant-numeric:tabular-nums;padding:6px 10px;border-radius:999px;',
@@ -56,7 +56,7 @@ const HUD_CSS = [
   'border:1px solid rgba(var(--nrh-mint-rgb),.32);margin-bottom:calc(6*var(--nrh-u))}',
   '.nrh-gear__v{font:800 calc(20*var(--nrh-u))/1 var(--font-mono,monospace);color:var(--nrh-mint);min-width:1.1ch;text-align:center}',
   '.nrh-speed{font:italic 900 calc(64*var(--nrh-u))/.84 var(--font-body,system-ui,sans-serif);font-variant-numeric:tabular-nums;',
-  'letter-spacing:-.035em;color:#fff;min-width:3.05ch;text-align:right;text-shadow:0 0 22px rgba(var(--nrh-mint-rgb),.28),0 3px 10px rgba(0,0,0,.6)}',
+  'letter-spacing:-.035em;color:#fff;min-width:3.05ch;text-align:right;text-shadow:0 0 22px rgba(var(--nrh-mint-rgb),.28),0 3px 10px rgba(0,0,0,.6);will-change:transform}',
   '.nrh-speedo.is-boost .nrh-speed{color:#dffcff;text-shadow:0 0 22px rgba(80,200,255,.75),0 0 44px rgba(80,200,255,.35),0 3px 10px rgba(0,0,0,.6)}',
   '.nrh-unit{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:calc(7*var(--nrh-u))}',
   '.nrh-unit__v{font:800 calc(13*var(--nrh-u))/1 var(--font-mono,monospace);letter-spacing:.1em;color:rgba(234,243,240,.82);text-transform:uppercase}',
@@ -66,7 +66,7 @@ const HUD_CSS = [
   '.nrh-nitro__bar{flex:1;height:calc(10*var(--nrh-u));border-radius:3px;background:rgba(88,200,255,.12);position:relative;overflow:hidden;',
   '-webkit-mask:repeating-linear-gradient(90deg,#000 0 calc(12.5% - 2px),transparent calc(12.5% - 2px) 12.5%);',
   'mask:repeating-linear-gradient(90deg,#000 0 calc(12.5% - 2px),transparent calc(12.5% - 2px) 12.5%)}',
-  '.nrh-nitro__fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#2f8bff,#58c8ff 60%,#b6f0ff);transition:width .08s linear}',
+  '.nrh-nitro__fill{position:absolute;left:0;top:0;bottom:0;width:100%;background:linear-gradient(90deg,#2f8bff,#58c8ff 60%,#b6f0ff);transform:scaleX(0);transform-origin:0 50%;transition:transform .08s linear;will-change:transform}',
   '.nrh-nitro.is-full .nrh-nitro__fill{animation:nrh-glow 1s ease-in-out infinite}',
   '.nrh-speedo.is-boost .nrh-nitro__fill{background:linear-gradient(90deg,#ff7a1a,#ffd36b 60%,#fff6d0)}',
   '.nrh-speedo.is-boost{border-color:rgba(88,200,255,.55);box-shadow:0 0 26px rgba(88,200,255,.28),0 6px 22px rgba(0,0,0,.32)}',
@@ -105,6 +105,11 @@ const HUD_CSS = [
   '.nrh-toast--bad{--nrh-tc:rgba(255,77,94,.7)}',
   '.nrh-toast--bad .nrh-toast__label{color:#ffc4ca}',
   '.nrh-toast--info .nrh-toast__label{font-size:calc(19*var(--nrh-u));letter-spacing:.08em}',
+  '.nrh--lite .nrh-speed,.nrh--lite .nrh-speedo.is-boost .nrh-speed{text-shadow:0 2px 0 rgba(0,0,0,.55)}',
+  '.nrh--lite .nrh-rpm i{transition:none}',
+  '.nrh--lite .nrh-rpm i.is-on{box-shadow:none}',
+  '.nrh--lite .nrh-nitro.is-full .nrh-nitro__fill{animation:none}',
+  '.nrh--lite .nrh-speedo.is-boost{box-shadow:none}',
   '@keyframes nrh-pop{0%{transform:scale(1.45)}100%{transform:scale(1)}}',
   '@keyframes nrh-glow{50%{filter:brightness(1.55) saturate(1.2)}}',
   '@keyframes nrh-blink{0%{opacity:1}50%{opacity:.35}}',
@@ -332,6 +337,10 @@ export function createRacerHud(stage, opts = {}) {
     applyCopy();
   }
 
+  function setLite(on) {
+    root.classList.toggle('nrh--lite', !!on);
+  }
+
   function setTouch(on) {
     root.classList.toggle('is-touch', !!on);
   }
@@ -368,9 +377,14 @@ export function createRacerHud(stage, opts = {}) {
 
   function update(f) {
     if (disposed || !f) return;
+    const now = performance.now();
+    const fastDue = !(now - (last.fastAt || 0) < 50);
+    const slowDue = !(now - (last.slowAt || 0) < 100);
+    if (fastDue) last.fastAt = now;
+    if (slowDue) last.slowAt = now;
     const sp = Math.max(0, f.speed || 0) * (units === 'mph' ? MPH : KMH);
     const spi = Math.round(sp);
-    if (spi !== last.speed) {
+    if (fastDue && spi !== last.speed) {
       last.speed = spi;
       speedV.textContent = String(spi);
     }
@@ -380,7 +394,7 @@ export function createRacerHud(stage, opts = {}) {
       gearV.textContent = g;
     }
     const on = Math.max(0, Math.min(RPM_SEGMENTS, Math.round((f.rpm || 0) * RPM_SEGMENTS)));
-    if (on !== last.rpmOn) {
+    if (fastDue && on !== last.rpmOn) {
       for (let i = 0; i < RPM_SEGMENTS; i++) {
         const want = i < on;
         if ((last.rpmOn < 0) || (i < on) !== (i < last.rpmOn)) rpmSegs[i].classList.toggle('is-on', want);
@@ -389,11 +403,11 @@ export function createRacerHud(stage, opts = {}) {
     }
     const n = Math.max(0, Math.min(1, f.nitro || 0));
     const nq = Math.round(n * 240) / 240;
-    if (nq !== last.nitro) {
+    if (fastDue && nq !== last.nitro) {
       last.nitro = nq;
       for (let i = 0; i < 3; i++) {
         const part = Math.max(0, Math.min(1, nq * 3 - i));
-        nitroFills[i].style.width = (part * 100).toFixed(1) + '%';
+        nitroFills[i].style.transform = 'scaleX(' + part.toFixed(3) + ')';
       }
     }
     const full = n >= 0.995;
@@ -408,13 +422,15 @@ export function createRacerHud(stage, opts = {}) {
     }
     if (f.position != null) setPosition(f.position, f.total || 6);
     if (f.lap != null) setLap(f.lap, f.laps || 1);
-    const ts = hudTime(f.time);
-    if (ts !== last.time) { last.time = ts; timeV.textContent = ts; }
-    const ls = hudTime(f.lapTime);
-    if (ls !== last.lapTime) { last.lapTime = ls; lapTV.textContent = ls; }
+    if (slowDue) {
+      const ts = hudTime(f.time);
+      if (ts !== last.time) { last.time = ts; timeV.textContent = ts; }
+      const ls = hudTime(f.lapTime);
+      if (ls !== last.lapTime) { last.lapTime = ls; lapTV.textContent = ls; }
+    }
     const bs = hudTime(f.bestLap);
     if (bs !== last.best) { last.best = bs; bestV.textContent = bs; }
-    if (f.delta != null && isFinite(f.delta)) {
+    if (slowDue && f.delta != null && isFinite(f.delta)) {
       const dv = Math.abs(f.delta) < 0.005 ? 0 : f.delta;
       const ds = hudDelta(dv);
       if (ds !== last.delta) {
@@ -428,7 +444,7 @@ export function createRacerHud(stage, opts = {}) {
         deltaEl.classList.toggle('is-bad', !good);
       }
       deltaEl.hidden = false;
-    } else if (!deltaEl.hidden) {
+    } else if (slowDue && !deltaEl.hidden) {
       deltaEl.hidden = true;
       last.delta = '';
     }
@@ -682,6 +698,7 @@ export function createRacerHud(stage, opts = {}) {
     show,
     setDim,
     setUnits,
+    setLite,
     setTouch,
     setStandingVisible,
     applyCopy,

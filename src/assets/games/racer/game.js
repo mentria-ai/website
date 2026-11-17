@@ -786,6 +786,7 @@ function setupRace(quick) {
   hud.reset();
   hud.setUnits(settings.units);
   hud.setTouch(input.method && input.method() === 'touch');
+  if (hud.setLite) hud.setLite(qualityName() === 'low');
   hud.setStandingVisible(mode !== 'tt');
   const mm = track.minimap(220);
   hud.setTrackMap(mm.points, mm.bounds || track.bounds);

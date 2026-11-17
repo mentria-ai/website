@@ -408,8 +408,8 @@ export function createHud(stage, copyIn) {
     readoutClock -= dt || 0;
     const slow = readoutClock <= 0;
     if (slow) readoutClock = 1 / 15;
-    setText(timeV, cache, 'time', formatTime(d.time || 0));
     if (slow) {
+      setText(timeV, cache, 'time', formatTime(d.time || 0));
       syncTouchScale();
       setText(gateV, cache, 'gate', (d.gate || 0) + '/' + (d.gates || 0));
       setText(ringV, cache, 'ring', (d.rings || 0) + '/' + (d.ringsTotal || 0));
@@ -425,7 +425,7 @@ export function createHud(stage, copyIn) {
     }
     const thr = Math.max(0, Math.min(1, d.throttle || 0));
     const pct = Math.round(thr * 100);
-    if (cache.thr !== pct) {
+    if (slow && cache.thr !== pct) {
       cache.thr = pct;
       barFill.style.width = pct + '%';
       thrV.textContent = pct + '%';

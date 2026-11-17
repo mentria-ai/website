@@ -931,6 +931,30 @@ const WALL_PROFILE = [[0, -0.2], [0, 1.45], [0.42, 1.45], [0.42, -0.2]];
 const NEON_PROFILE = [[0, -0.2], [0, 1.15], [0.36, 1.15], [0.36, -0.2]];
 const RAIL_PROFILE = [[0.16, 0.52], [0.2, 0.6], [0.16, 0.68], [0.2, 0.76], [0.16, 0.84]];
 
+function joinBoxes(THREE, geos) {
+  const pos = [], nor = [], uv = [], idx = [];
+  let base = 0;
+  for (const g of geos) {
+    const p = g.getAttribute('position'), n = g.getAttribute('normal'), u = g.getAttribute('uv');
+    for (let i = 0; i < p.count; i++) {
+      pos.push(p.getX(i), p.getY(i), p.getZ(i));
+      nor.push(n.getX(i), n.getY(i), n.getZ(i));
+      uv.push(u.getX(i), u.getY(i));
+    }
+    const ix = g.getIndex();
+    for (let i = 0; i < ix.count; i++) idx.push(ix.getX(i) + base);
+    base += p.count;
+    g.dispose();
+  }
+  const out = new THREE.BufferGeometry();
+  out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  out.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  out.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  out.setIndex(idx);
+  out.computeBoundingSphere();
+  return out;
+}
+
 export function buildTrackMeshes(THREE, track, opts = {}) {
   const style = Object.assign({}, TRACK_STYLE_DEFAULT, track.def && track.def.style || {}, opts.style || {});
   const step = opts.step || (opts.quality === 'low' ? 3.5 : 2);
@@ -1360,47 +1384,45 @@ export function buildTrackMeshes(THREE, track, opts = {}) {
     const span = half + 1.6;
     const frameMat = own(new THREE.MeshStandardMaterial({ color: 0x23262b, roughness: 0.45, metalness: 0.7, envMap: opts.envMap || null }));
     const bannerMat = own(new THREE.MeshStandardMaterial({ map: tex.checker, roughness: 0.6 }));
-    const pillar = new THREE.BoxGeometry(0.7, 8, 0.7);
-    pillar.translate(0, 4, 0);
-    const beam = new THREE.BoxGeometry(span * 2 + 0.7, 1.1, 1.0);
+    const frameParts = [-1, 1].map((side) => new THREE.BoxGeometry(0.7, 8, 0.7).translate(side * span, 4, 0));
+    frameParts.push(new THREE.BoxGeometry(span * 2 + 0.7, 1.1, 1.0).translate(0, 7.4, 0));
+    const frame = joinBoxes(THREE, frameParts);
     const banner = new THREE.BoxGeometry(span * 2 - 1, 0.9, 0.12);
-    disposables.push(pillar, beam, banner);
-    for (const side of [-1, 1]) {
-      const p = new THREE.Mesh(pillar, frameMat);
-      p.position.set(side * span, 0, 0);
-      p.castShadow = shadows;
-      gantry.add(p);
-    }
-    const bm = new THREE.Mesh(beam, frameMat);
-    bm.position.set(0, 7.4, 0);
-    bm.castShadow = shadows;
-    gantry.add(bm);
+    disposables.push(frame, banner);
+    const fm = new THREE.Mesh(frame, frameMat);
+    fm.castShadow = shadows;
+    gantry.add(fm);
     const bn = new THREE.Mesh(banner, bannerMat);
     bn.position.set(0, 6.4, 0);
     gantry.add(bn);
-    const lightGeo = new THREE.BoxGeometry(0.55, 0.55, 0.2);
+    const lightBoxes = [];
+    for (let k = 0; k < 5; k++) lightBoxes.push(new THREE.BoxGeometry(0.55, 0.55, 0.2).translate((k - 2) * 1.0, 7.4, 0.58));
+    const lightGeo = joinBoxes(THREE, lightBoxes);
+    const perLight = lightGeo.getAttribute('position').count / 5;
+    lightGeo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(perLight * 5 * 3), 3));
     disposables.push(lightGeo);
-    for (let k = 0; k < 5; k++) {
-      const lm = own(new THREE.MeshBasicMaterial({ color: 0x220707, toneMapped: false }));
-      const l = new THREE.Mesh(lightGeo, lm);
-      l.position.set((k - 2) * 1.0, 7.4, 0.58);
-      gantry.add(l);
-      lights.push(l);
-    }
+    const lightMat = own(new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: true, toneMapped: false }));
+    gantry.add(new THREE.Mesh(lightGeo, lightMat));
+    for (let k = 0; k < 5; k++) lights.push({ start: k * perLight, count: perLight });
+    lights.geo = lightGeo;
     const roadY = sm.pos.y;
     gantry.position.set(sm.pos.x, roadY, sm.pos.z);
     gantry.rotation.y = sm.heading;
     group.add(gantry);
   }
 
+  const lampColor = new THREE.Color();
   function setStartLights(state) {
+    const col = lights.geo.getAttribute('color');
     for (let k = 0; k < lights.length; k++) {
-      const m = lights[k].material;
-      if (state === 'go') m.color.setHex(0x22ff66);
-      else if (state === 'off' || state == null) m.color.setHex(0x220707);
-      else m.color.setHex(k < state ? 0xff2020 : 0x220707);
+      if (state === 'go') lampColor.setHex(0x22ff66);
+      else if (state === 'off' || state == null) lampColor.setHex(0x220707);
+      else lampColor.setHex(k < state ? 0xff2020 : 0x220707);
+      for (let i = lights[k].start; i < lights[k].start + lights[k].count; i++) col.setXYZ(i, lampColor.r, lampColor.g, lampColor.b);
     }
+    col.needsUpdate = true;
   }
+  setStartLights('off');
 
   const checkpoints = track.checkpoints(opts.checkpoints);
   if (opts.showCheckpoints) {

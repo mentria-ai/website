@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { carById, paintById } from './cars.js';
 
 const COLS = 8;
@@ -1420,12 +1421,71 @@ function buildAssets(spec, hi) {
   };
 }
 
+const WHEEL_ORDER = [[0, 1], [0, -1], [1, 1], [1, -1]];
+const RIG_HEAD = 'attribute float wheelId;\nuniform mat4 uWheel[8];\n';
+
+function mirrorX(g) {
+  const m = g.clone();
+  for (const name of ['position', 'normal']) {
+    const a = m.getAttribute(name);
+    if (!a) continue;
+    for (let i = 0; i < a.count; i++) a.setX(i, -a.getX(i));
+  }
+  const ix = m.getIndex();
+  if (ix) {
+    const arr = ix.array;
+    for (let i = 0; i + 2 < arr.length; i += 3) { const t = arr[i + 1]; arr[i + 1] = arr[i + 2]; arr[i + 2] = t; }
+  }
+  return m;
+}
+
+function tagWheel(g, id) {
+  const t = g.clone();
+  t.setAttribute('wheelId', new THREE.Float32BufferAttribute(new Float32Array(t.getAttribute('position').count).fill(id), 1));
+  return t;
+}
+
+function buildRig(body, wheelGeo) {
+  const parts = [tagWheel(body, 0)];
+  const temp = [];
+  WHEEL_ORDER.forEach(([k, sx], i) => {
+    const wg = wheelGeo[k];
+    const spin = sx > 0 ? wg.spin : mirrorX(wg.spin);
+    if (sx < 0) temp.push(spin);
+    parts.push(tagWheel(spin, 1 + i));
+    if (wg.caliper) {
+      const cal = sx > 0 ? wg.caliper : mirrorX(wg.caliper);
+      if (sx < 0) temp.push(cal);
+      parts.push(tagWheel(cal, 5 + i));
+    }
+  });
+  const rig = mergeGeometries(parts, false);
+  for (const g of parts) g.dispose();
+  for (const g of temp) g.dispose();
+  if (!rig) return null;
+  rig.computeBoundingBox();
+  rig.computeBoundingSphere();
+  return rig;
+}
+
+function rigMaterial(mat, uniform) {
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uWheel = uniform;
+    sh.vertexShader = RIG_HEAD + sh.vertexShader
+      .replace('#include <beginnormal_vertex>', '#include <beginnormal_vertex>\n\tif (wheelId > 0.5) objectNormal = mat3(uWheel[int(wheelId + 0.5) - 1]) * objectNormal;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\n\tif (wheelId > 0.5) transformed = (uWheel[int(wheelId + 0.5) - 1] * vec4(transformed, 1.0)).xyz;');
+  };
+  mat.customProgramCacheKey = () => 'nr-wheel-rig';
+  return mat;
+}
+
 function acquireAssets(spec, lod) {
   const hi = lod !== 'low';
   const key = `${hashBody(spec)}|${hi ? 'h' : 'l'}`;
   let a = geometryCache.get(key);
   if (!a) {
     a = buildAssets(spec, hi);
+    try { a.rig = buildRig(a.geometry, a.wheelGeo); } catch (_) { a.rig = null; }
     a.key = key;
     geometryCache.set(key, a);
   }
@@ -1438,6 +1498,7 @@ function releaseAssets(a) {
   if (a.refs > 0) return;
   geometryCache.delete(a.key);
   a.geometry.dispose();
+  if (a.rig) a.rig.dispose();
   a.decal.dispose();
   for (const w of a.wheelGeo) { w.spin.dispose(); if (w.caliper) w.caliper.dispose(); }
   a.shadow.dispose();
@@ -1558,33 +1619,57 @@ export function createCar(specIn, opts = {}) {
     });
   if (opts.envMap) material.envMap = opts.envMap;
   material.name = 'car-atlas';
-  const body = new THREE.Mesh(assets.geometry, material);
+  const rigged = !!assets.rig;
+  const rigMats = Array.from({ length: 8 }, () => new THREE.Matrix4());
+  const rigUniform = { value: rigMats };
+  let depthMat = null;
+  if (rigged) {
+    rigMaterial(material, rigUniform);
+    depthMat = rigMaterial(new THREE.MeshDepthMaterial(), rigUniform);
+  }
+  const body = new THREE.Mesh(rigged ? assets.rig : assets.geometry, material);
   body.name = 'car-body';
   body.castShadow = opts.castShadow !== false;
   body.receiveShadow = opts.receiveShadow !== false;
+  if (depthMat) body.customDepthMaterial = depthMat;
   group.add(body);
   const wheels = [];
-  const order = [[0, 1], [0, -1], [1, 1], [1, -1]];
-  for (const [k, sx] of order) {
+  for (const [k, sx] of WHEEL_ORDER) {
     const wd = assets.wheels[k];
     const wg = assets.wheelGeo[k];
     const pivot = new THREE.Group();
     pivot.name = `wheel-${k ? 'rear' : 'front'}-${sx > 0 ? 'right' : 'left'}`;
     pivot.position.set(wd.x * sx, wd.r, wd.z);
     const spin = new THREE.Group();
-    const mesh = new THREE.Mesh(wg.spin, material);
-    mesh.scale.x = sx;
-    mesh.castShadow = body.castShadow;
-    mesh.receiveShadow = body.receiveShadow;
-    spin.add(mesh);
     pivot.add(spin);
-    if (wg.caliper) {
-      const cal = new THREE.Mesh(wg.caliper, material);
-      cal.scale.x = sx;
-      pivot.add(cal);
+    if (!rigged) {
+      const mesh = new THREE.Mesh(wg.spin, material);
+      mesh.scale.x = sx;
+      mesh.castShadow = body.castShadow;
+      mesh.receiveShadow = body.receiveShadow;
+      spin.add(mesh);
+      if (wg.caliper) {
+        const cal = new THREE.Mesh(wg.caliper, material);
+        cal.scale.x = sx;
+        pivot.add(cal);
+      }
     }
     group.add(pivot);
     wheels.push({ pivot, spin, front: k === 0, side: sx, radius: wd.r, base: pivot.position.clone() });
+  }
+  if (rigged) {
+    const updateRig = () => {
+      for (let i = 0; i < 4; i++) {
+        const w = wheels[i];
+        w.pivot.updateMatrix();
+        w.spin.updateMatrix();
+        rigMats[i].multiplyMatrices(w.pivot.matrix, w.spin.matrix);
+        rigMats[4 + i].copy(w.pivot.matrix);
+      }
+    };
+    updateRig();
+    body.onBeforeRender = updateRig;
+    body.onBeforeShadow = updateRig;
   }
   const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, map: assets.shadow, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, toneMapped: false });
   const shadowGeo = new THREE.PlaneGeometry(assets.dims.shadowExtent[0] * 2, assets.dims.shadowExtent[1] * 2);
@@ -1687,7 +1772,7 @@ export function createCar(specIn, opts = {}) {
     stats: {
       triangles: assets.stats.carTriangles + 4 * assets.wheelGeo.reduce((s, w) => s + w.tris, 0) / 2,
       bodyTriangles: assets.stats.bodyTriangles,
-      drawCalls: 1 + 4 + (hi ? 4 : 0) + (opts.contactShadow !== false ? 1 : 0)
+      drawCalls: (rigged ? 1 : 1 + 4 + (hi ? 4 : 0)) + (opts.contactShadow !== false ? 1 : 0)
     },
     setSteer(rad) {
       steerState.angle = rad;
@@ -1750,6 +1835,7 @@ export function createCar(specIn, opts = {}) {
     dispose() {
       group.removeFromParent();
       material.dispose();
+      if (depthMat) depthMat.dispose();
       atlas.color.dispose();
       atlas.pbr.dispose();
       atlas.emissive.dispose();

@@ -581,6 +581,8 @@ function makeGhostLook(view) {
     const list = Array.isArray(o.material) ? o.material : [o.material];
     const next = list.map(function (m) {
       const c = m.clone();
+      if (m.onBeforeCompile) c.onBeforeCompile = m.onBeforeCompile;
+      if (m.customProgramCacheKey) c.customProgramCacheKey = m.customProgramCacheKey;
       c.transparent = true;
       c.opacity = 0.32;
       c.depthWrite = false;

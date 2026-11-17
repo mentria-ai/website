@@ -66,6 +66,8 @@ function engineAmps(cylinders, tone) {
   return a;
 }
 
+const OUTPUT_TRIM = 0.45;
+
 export function createAudio(opts) {
   const options = opts && typeof opts === 'object' ? opts : {};
   const S = {
@@ -214,9 +216,11 @@ export function createAudio(opts) {
     S.limiter.ratio.value = 16;
     S.limiter.attack.value = 0.002;
     S.limiter.release.value = 0.16;
+    S.trim = gainNode(OUTPUT_TRIM);
     S.master.connect(S.muteGain);
     S.muteGain.connect(S.limiter);
-    S.limiter.connect(c.destination);
+    S.limiter.connect(S.trim);
+    S.trim.connect(c.destination);
     S.noise = noiseBuffer(2.3, 1);
     S.pinkStereo = pinkBuffer(3.1, 2);
     S.pink = pinkBuffer(2.7, 1);

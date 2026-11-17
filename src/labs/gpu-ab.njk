@@ -1,0 +1,405 @@
+---
+permalink: /labs/gpu-ab/index.html
+eleventyExcludeFromCollections: true
+layout: false
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Renderer test</title>
+<style>
+html,body{margin:0;height:100%;background:#05070c;overflow:hidden}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;left:8px;top:calc(8px + env(safe-area-inset-top,0px));right:8px;font:11px/1.3 ui-monospace,Menlo,monospace;color:#bff;white-space:pre-wrap;pointer-events:none;text-shadow:0 1px 2px #000;max-height:90vh;overflow:hidden}
+</style>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var leg = (q.get('leg') || 'A').toUpperCase();
+  var V = '/assets/vendor/three-0.186.0/';
+  var imports = {};
+  imports[V + 'build/three.core.js'] = V + 'build/three.core.min.js';
+  imports['three/addons/'] = V + 'examples/jsm/';
+  if (leg === 'A') {
+    imports['three'] = V + 'build/three.module.min.js';
+  } else {
+    imports['three'] = V + 'build/three.webgpu.min.js';
+    imports['three/webgpu'] = V + 'build/three.webgpu.min.js';
+    imports['three/tsl'] = V + 'build/three.tsl.min.js';
+  }
+  var s = document.createElement('script');
+  s.type = 'importmap';
+  s.textContent = JSON.stringify({ imports: imports });
+  document.currentScript.after(s);
+})();
+</script>
+</head>
+<body>
+<div id="hud">loading</div>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const LEG = (q.get('leg') || 'A').toUpperCase();
+const PR = Math.max(0.5, Math.min(3, parseFloat(q.get('pr') || '1.5')));
+const DUR = Math.max(3, parseFloat(q.get('dur') || '45'));
+const WARM = Math.max(0, parseFloat(q.get('warm') || '5'));
+const hud = document.getElementById('hud');
+const out = { leg: LEG, pr: PR, dur: DUR, gpu: !!navigator.gpu, ua: navigator.userAgent, t: {}, done: false };
+window.__ab = out;
+const show = () => { hud.textContent = JSON.stringify(out, null, 1); };
+const pct = (a, p) => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return +s[Math.min(s.length - 1, Math.floor(p * (s.length - 1)))].toFixed(2); };
+
+function rng(seed) {
+  let t = seed >>> 0;
+  return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ (t >>> 15), 1 | t); r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
+}
+
+function windowTexture(THREE, seed, tint) {
+  const r = rng(seed);
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 256;
+  const g = c.getContext('2d');
+  g.fillStyle = '#07080c';
+  g.fillRect(0, 0, 128, 256);
+  for (let y = 6; y < 250; y += 12) {
+    for (let x = 6; x < 124; x += 10) {
+      const on = r() < 0.38;
+      g.fillStyle = on ? tint[Math.floor(r() * tint.length)] : '#11141c';
+      g.fillRect(x, y, 6, 8);
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+
+function softTexture(THREE) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, 'rgba(255,255,255,0.55)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+function buildWorld(THREE) {
+  const r = rng(7);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x070a14);
+  scene.fog = new THREE.FogExp2(0x0b0f1e, 0.0065);
+  const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.3, 900);
+  scene.add(new THREE.HemisphereLight(0x5a6aa8, 0x0b0a10, 0.55));
+  const moon = new THREE.DirectionalLight(0xa8b8ff, 0.9);
+  moon.castShadow = true;
+  moon.shadow.mapSize.set(1024, 1024);
+  Object.assign(moon.shadow.camera, { left: -45, right: 45, top: 45, bottom: -45, near: 1, far: 220 });
+  scene.add(moon, moon.target);
+  const spot = new THREE.SpotLight(0xffd2a0, 260, 70, 0.6, 0.5, 1.6);
+  spot.castShadow = true;
+  spot.shadow.mapSize.set(512, 512);
+  scene.add(spot, spot.target);
+
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(900, 900, 200, 200), new THREE.MeshStandardMaterial({ color: 0x0c0d12, roughness: 0.95 }));
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.04;
+  ground.receiveShadow = true;
+  scene.add(ground);
+  const walkMat = new THREE.MeshStandardMaterial({ color: 0x2a2c33, roughness: 0.85 });
+  for (const sx of [-1, 1]) {
+    const walk = new THREE.Mesh(new THREE.BoxGeometry(5, 0.18, 800), walkMat);
+    walk.position.set(sx * 9.5, 0.09, 0);
+    walk.receiveShadow = true;
+    scene.add(walk);
+  }
+  const lineGeo = new THREE.PlaneGeometry(0.15, 3);
+  lineGeo.rotateX(-Math.PI / 2);
+  const lines = new THREE.InstancedMesh(lineGeo, new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.5 }), 400);
+  const m = new THREE.Matrix4();
+  let li = 0;
+  for (const lx of [-2.33, 2.33]) for (let z = -395; z < 395; z += 4) { m.makeTranslation(lx, 0.012, z); lines.setMatrixAt(li++, m); }
+  lines.count = li;
+  scene.add(lines);
+
+  const winTints = [['#ffd8a0', '#ffe9c8', '#9fd8ff'], ['#ff9fe0', '#ffd8a0', '#ffffff'], ['#9fffe0', '#ffe9c8', '#a0b8ff'], ['#ffc070', '#ffd8a0', '#ff8080']];
+  const bMats = winTints.map((tint, i) => {
+    const tex = windowTexture(THREE, 11 + i, tint);
+    return new THREE.MeshStandardMaterial({ map: tex, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 1.4, roughness: 0.6, metalness: 0.2 });
+  });
+  const bGeo = new THREE.BoxGeometry(1, 1, 1, 6, 18, 6);
+  for (let i = 0; i < 80; i++) {
+    const side = i % 2 ? 1 : -1;
+    const w = 14 + r() * 20, d = 12 + r() * 18, h = 18 + Math.pow(r(), 1.6) * 90;
+    const b = new THREE.Mesh(bGeo, bMats[i % 4]);
+    b.scale.set(w, h, d);
+    b.position.set(side * (12 + w / 2 + r() * 6), h / 2, -390 + Math.floor(i / 2) * 19.5 + r() * 4);
+    b.castShadow = true;
+    b.receiveShadow = true;
+    scene.add(b);
+  }
+  const poleGeo = new THREE.CylinderGeometry(0.09, 0.14, 7, 16);
+  const headGeo = new THREE.BoxGeometry(1.4, 0.2, 0.5);
+  const poleMat = new THREE.MeshStandardMaterial({ color: 0x30333b, roughness: 0.5, metalness: 0.7 });
+  const headMat = new THREE.MeshStandardMaterial({ color: 0x222222, emissive: 0xffc98a, emissiveIntensity: 6 });
+  for (let i = 0; i < 24; i++) {
+    const side = i % 2 ? 1 : -1;
+    const z = -380 + i * 33;
+    const pole = new THREE.Mesh(poleGeo, poleMat);
+    pole.position.set(side * 7.6, 3.5, z);
+    pole.castShadow = true;
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.set(side * 6.9, 7, z);
+    scene.add(pole, head);
+  }
+  const neonCols = [0xff2fd2, 0x2ee6ff, 0x7d5cff, 0xffb02e];
+  for (let i = 0; i < 12; i++) {
+    const side = i % 2 ? 1 : -1;
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(6, 2.4), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: neonCols[i % 4], emissiveIntensity: 3.5 }));
+    sign.position.set(side * 11.9, 7 + (i % 3) * 2, -360 + i * 62);
+    sign.rotation.y = side > 0 ? -Math.PI / 2 : Math.PI / 2;
+    scene.add(sign);
+  }
+
+  const cars = [];
+  const bodyGeo = new THREE.SphereGeometry(1, 72, 36);
+  const glassGeo = new THREE.SphereGeometry(1, 40, 20);
+  const wheelGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.26, 28);
+  wheelGeo.rotateZ(Math.PI / 2);
+  const tailGeo = new THREE.BoxGeometry(1.5, 0.08, 0.05);
+  const paints = [0xe0482a, 0x2a7de0, 0xf2f2f2, 0x18c08a, 0x111111, 0xd9b030];
+  for (let i = 0; i < 6; i++) {
+    const car = new THREE.Group();
+    const body = new THREE.Mesh(bodyGeo, new THREE.MeshPhysicalMaterial({ color: paints[i], roughness: 0.28, metalness: 0.55, clearcoat: 1, clearcoatRoughness: 0.06 }));
+    body.scale.set(0.98, 0.42, 2.25);
+    body.position.y = 0.62;
+    const glass = new THREE.Mesh(glassGeo, new THREE.MeshPhysicalMaterial({ color: 0x0a0d12, roughness: 0.05, metalness: 0.2, clearcoat: 1 }));
+    glass.scale.set(0.78, 0.36, 1.1);
+    glass.position.set(0, 0.95, 0.15);
+    const tail = new THREE.Mesh(tailGeo, new THREE.MeshStandardMaterial({ color: 0x220000, emissive: 0xff1a2a, emissiveIntensity: 8 }));
+    tail.position.set(0, 0.72, 2.2);
+    body.castShadow = true;
+    car.add(body, glass, tail);
+    for (const [wx, wz] of [[-0.86, -1.35], [0.86, -1.35], [-0.86, 1.35], [0.86, 1.35]]) {
+      const wheel = new THREE.Mesh(wheelGeo, new THREE.MeshStandardMaterial({ color: 0x15161a, roughness: 0.7, metalness: 0.3 }));
+      wheel.position.set(wx, 0.34, wz);
+      car.add(wheel);
+    }
+    car.userData = { lane: [-3.6, 0, 3.6][i % 3], speed: 16 + i * 1.7, offset: i * 23 };
+    scene.add(car);
+    cars.push(car);
+  }
+
+  const sparks = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.05, 0), new THREE.MeshBasicMaterial({ color: 0xffb060, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }), 200);
+  const smoke = new THREE.InstancedMesh(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshBasicMaterial({ map: softTexture(THREE), color: 0x8890a0, transparent: true, depthWrite: false }), 60);
+  scene.add(sparks, smoke);
+  const sp = Array.from({ length: 200 }, () => ({ x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, life: 0 }));
+  const sm = Array.from({ length: 60 }, (_, k) => ({ a: k / 60 }));
+  const sr = rng(99);
+  const v = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3(1, 1, 1);
+  const curvePts = [];
+  for (let k = 0; k <= 12; k++) curvePts.push(new THREE.Vector3(Math.sin(k * 1.3) * 3, 2.6 + Math.sin(k * 0.7) * 0.9, 370 - k * 62));
+  const path = new THREE.CatmullRomCurve3(curvePts);
+  const look = new THREE.Vector3();
+
+  function update(t) {
+    const u = (t / 60) % 1;
+    path.getPointAt(u, camera.position);
+    path.getPointAt(Math.min(1, u + 0.02), look);
+    look.y -= 1.2;
+    camera.lookAt(look);
+    moon.position.set(camera.position.x + 30, 80, camera.position.z + 20);
+    moon.target.position.set(camera.position.x, 0, camera.position.z - 20);
+    spot.position.set(0, 9, camera.position.z - 18);
+    spot.target.position.set(0, 0, camera.position.z - 26);
+    for (const car of cars) {
+      const d = car.userData;
+      const z = 380 - ((t * d.speed + d.offset * 8) % 760);
+      car.position.set(d.lane, 0, z);
+    }
+    const lead = cars[0].position;
+    for (let k = 0; k < sp.length; k++) {
+      const p = sp[k];
+      if (p.life <= 0) { p.x = lead.x + (sr() - 0.5); p.y = 0.3; p.z = lead.z + 2.3; p.vx = (sr() - 0.5) * 4; p.vy = sr() * 3; p.vz = sr() * 6; p.life = 0.4 + sr() * 0.5; }
+      p.life -= 1 / 60; p.vy -= 9.8 / 60; p.x += p.vx / 60; p.y = Math.max(0.02, p.y + p.vy / 60); p.z += p.vz / 60;
+      m.compose(v.set(p.x, p.y, p.z), q.identity(), s.set(1, 1, 1));
+      sparks.setMatrixAt(k, m);
+    }
+    sparks.instanceMatrix.needsUpdate = true;
+    for (let k = 0; k < sm.length; k++) {
+      const a = (sm[k].a + t * 0.25) % 1;
+      const car = cars[k % 6].position;
+      m.compose(v.set(car.x + Math.sin(k) * 0.6, 0.4 + a * 2.2, car.z + 2.5 + a * 6), camera.quaternion, s.setScalar(0.6 + a * 2.2));
+      smoke.setMatrixAt(k, m);
+    }
+    smoke.instanceMatrix.needsUpdate = true;
+  }
+  return { scene, camera, update, ground };
+}
+
+const ROAD_W = 14, ROAD_L = 800, REFL = 0.85, BLUR = 0.12;
+
+async function roadGL(THREE, world, renderer) {
+  const { Reflector } = await import('three/addons/objects/Reflector.js');
+  const w = Math.round(innerWidth * PR * 0.5), h = Math.round(innerHeight * PR * 0.5);
+  const geo = new THREE.PlaneGeometry(ROAD_W, ROAD_L);
+  const refl = new Reflector(geo, { textureWidth: w, textureHeight: h, clipBias: 0.003 });
+  refl.rotation.x = -Math.PI / 2;
+  refl.material.colorWrite = false;
+  refl.material.depthWrite = false;
+  refl.renderOrder = -10;
+  const rt = refl.getRenderTarget();
+  rt.texture.generateMipmaps = true;
+  rt.texture.minFilter = THREE.LinearMipmapLinearFilter;
+  const maxMip = Math.floor(Math.log2(Math.max(w, h)));
+  const mat = new THREE.MeshStandardMaterial({ color: 0x16181d, roughness: 0.35, metalness: 0 });
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.tMirror = { value: rt.texture };
+    sh.uniforms.mirrorMatrix = refl.material.uniforms.textureMatrix;
+    sh.uniforms.uBias = { value: BLUR * maxMip };
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nuniform mat4 mirrorMatrix;\nvarying vec4 vMirrorUv;\nvarying vec3 vRoadW;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvMirrorUv = mirrorMatrix * vec4(position, 1.0);\nvRoadW = (modelMatrix * vec4(position, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform sampler2D tMirror;\nuniform float uBias;\nvarying vec4 vMirrorUv;\nvarying vec3 vRoadW;')
+      .replace('#include <opaque_fragment>', 'vec2 roadD = vec2(sin(vRoadW.x * 3.1 + vRoadW.z * 1.7), cos(vRoadW.z * 2.3)) * 0.004;\noutgoingLight += texture(tMirror, vMirrorUv.xy / vMirrorUv.w + roadD, uBias).rgb * ' + REFL.toFixed(2) + ';\n#include <opaque_fragment>');
+  };
+  const road = new THREE.Mesh(geo, mat);
+  road.rotation.x = -Math.PI / 2;
+  road.receiveShadow = true;
+  const before = refl.onBeforeRender;
+  refl.onBeforeRender = function (a, b, c) { road.visible = false; world.ground.visible = false; before.call(this, a, b, c); road.visible = true; world.ground.visible = true; };
+  world.scene.add(road, refl);
+}
+
+async function roadGPU(THREE, world) {
+  const TSL = await import('three/tsl');
+  const reflection = TSL.reflector({ resolutionScale: 0.5, generateMipmaps: true, bounces: false });
+  reflection.target.rotateX(-Math.PI / 2);
+  world.scene.add(reflection.target);
+  const pw = TSL.positionWorld;
+  const d = TSL.vec2(TSL.sin(pw.x.mul(3.1).add(pw.z.mul(1.7))), TSL.cos(pw.z.mul(2.3))).mul(0.004);
+  reflection.uvNode = reflection.uvNode.add(d);
+  const mat = new THREE.MeshStandardNodeMaterial({ color: 0x16181d, roughness: 0.35, metalness: 0 });
+  mat.emissiveNode = reflection.blur(TSL.float(BLUR)).rgb.mul(REFL);
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(ROAD_W, ROAD_L), mat);
+  road.rotation.x = -Math.PI / 2;
+  road.receiveShadow = true;
+  world.scene.add(road);
+  const base = reflection.reflector;
+  const upd = base.updateBefore.bind(base);
+  base.updateBefore = (frame) => { road.visible = false; world.ground.visible = false; const res = upd(frame); road.visible = true; world.ground.visible = true; return res; };
+}
+
+async function postGL(THREE, renderer, scene, camera) {
+  const { EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js');
+  const { RenderPass } = await import('three/addons/postprocessing/RenderPass.js');
+  const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
+  const { OutputPass } = await import('three/addons/postprocessing/OutputPass.js');
+  const { ShaderPass } = await import('three/addons/postprocessing/ShaderPass.js');
+  const { FXAAShader } = await import('three/addons/shaders/FXAAShader.js');
+  const target = new THREE.WebGLRenderTarget(innerWidth * PR, innerHeight * PR, { type: THREE.HalfFloatType });
+  const composer = new EffectComposer(renderer, target);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.6, 0.5, 0.82));
+  composer.addPass(new OutputPass());
+  const fx = new ShaderPass(FXAAShader);
+  fx.material.uniforms.resolution.value.set(1 / (innerWidth * PR), 1 / (innerHeight * PR));
+  composer.addPass(fx);
+  return { render: () => composer.render() };
+}
+
+async function postGPU(THREE, renderer, scene, camera) {
+  const TSL = await import('three/tsl');
+  const { bloom } = await import('three/addons/tsl/display/BloomNode.js');
+  const { fxaa } = await import('three/addons/tsl/display/FXAANode.js');
+  const post = new THREE.PostProcessing(renderer);
+  post.outputColorTransform = false;
+  const scenePass = TSL.pass(scene, camera);
+  const color = scenePass.getTextureNode('output');
+  const lit = color.add(bloom(color, 0.6, 0.5, 0.82));
+  post.outputNode = fxaa(TSL.renderOutput(lit));
+  return { render: () => post.render() };
+}
+
+async function main() {
+  const THREE = await import('three');
+  out.t.moduleMs = Math.round(performance.now());
+  let renderer;
+  if (LEG === 'A') {
+    renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+  } else {
+    if (LEG === 'B' && !navigator.gpu) throw new Error('WebGPU is not available in this browser');
+    renderer = new THREE.WebGPURenderer({ antialias: false, forceWebGL: LEG === 'C', powerPreference: 'high-performance' });
+    await renderer.init();
+  }
+  out.backend = LEG === 'A' ? 'webgl2' : (renderer.backend && renderer.backend.isWebGPUBackend ? 'webgpu' : 'webgl2 via WebGPURenderer');
+  renderer.setPixelRatio(PR);
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+  if (renderer.info) renderer.info.autoReset = false;
+  document.body.appendChild(renderer.domElement);
+  out.t.rendererMs = Math.round(performance.now());
+  const world = buildWorld(THREE);
+  if (LEG === 'A') await roadGL(THREE, world, renderer); else await roadGPU(THREE, world);
+  const post = LEG === 'A' ? await postGL(THREE, renderer, world.scene, world.camera) : await postGPU(THREE, renderer, world.scene, world.camera);
+  world.update(0);
+  await renderer.compileAsync(world.scene, world.camera);
+  out.t.compiledMs = Math.round(performance.now());
+  post.render();
+  await new Promise((r) => requestAnimationFrame(r));
+  out.t.firstFrameMs = Math.round(performance.now());
+  show();
+  const frames = [], cpu = [], entry = [];
+  let last = null, measuring = false, mStart = 0;
+  const t0 = performance.now();
+  const loop = (ts) => {
+    const now = performance.now();
+    const tSec = (now - t0) / 1000;
+    world.update(tSec);
+    if (renderer.info && renderer.info.reset) renderer.info.reset();
+    const c0 = performance.now();
+    post.render();
+    const c1 = performance.now() - c0;
+    if (last != null) {
+      const dt = ts - last;
+      if (tSec <= 10) entry.push(dt);
+      if (measuring) { frames.push(dt); cpu.push(c1); }
+    }
+    last = ts;
+    if (!measuring && tSec >= WARM) { measuring = true; mStart = now; }
+    if (measuring && (now - mStart) / 1000 >= DUR) {
+      const info = renderer.info && renderer.info.render ? renderer.info.render : {};
+      Object.assign(out, {
+        frames: frames.length,
+        fps: +(frames.length / ((now - mStart) / 1000)).toFixed(1),
+        p50: pct(frames, 0.5), p95: pct(frames, 0.95), p99: pct(frames, 0.99), worst: pct(frames, 1),
+        over20: frames.filter((x) => x > 20).length, over33: frames.filter((x) => x > 33.4).length,
+        cpuP50: pct(cpu, 0.5), cpuP95: pct(cpu, 0.95),
+        entryWorst: pct(entry, 1), entryOver50: entry.filter((x) => x > 50).length,
+        calls: info.calls ?? info.drawCalls ?? null, triangles: info.triangles ?? null,
+        size: [innerWidth, innerHeight], done: true,
+      });
+      try { const k = 'gpu-ab-runs'; const all = JSON.parse(localStorage.getItem(k) || '[]'); all.push(out); localStorage.setItem(k, JSON.stringify(all.slice(-40))); } catch (_) {}
+      show();
+      return;
+    }
+    if (frames.length % 30 === 0) { hud.textContent = LEG + ' pr ' + PR + ' ' + (measuring ? 'measuring ' + Math.round((now - mStart) / 1000) + '/' + DUR + ' s' : 'warming up'); }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+
+main().catch((e) => { out.error = String((e && e.stack) || e).slice(0, 600); out.done = true; show(); });
+</script>
+</body>
+</html>

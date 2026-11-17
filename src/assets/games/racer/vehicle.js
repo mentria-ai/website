@@ -224,6 +224,26 @@ function updatePose(car, track, blend) {
   qFromYawPitchRoll(car.quat, car.yaw, car.pitch, car.roll);
 }
 
+function bodyHeading(car) {
+  return wrapAngle(car.yaw - car.slip + (car.reverse ? Math.PI : 0));
+}
+
+function headingFromVelocity(car) {
+  const h = bodyHeading(car);
+  if (car.vx * -Math.sin(h) + car.vz * -Math.cos(h) < 0) {
+    car.vx = 0; car.vz = 0; car.speed = 0;
+    return h;
+  }
+  car.speed = Math.hypot(car.vx, car.vz);
+  return Math.atan2(-car.vx, -car.vz);
+}
+
+function keepBody(car) {
+  const yaw = car.yaw;
+  car.vHeading = headingFromVelocity(car);
+  car.slip = wrapAngle(yaw - car.vHeading - (car.reverse ? Math.PI : 0));
+}
+
 export function stepVehicle(car, input, dt, track) {
   const p = car.params;
   const ev = resetEvents(car.ev);
@@ -245,12 +265,19 @@ export function stepVehicle(car, input, dt, track) {
   car.brake = brk;
 
   let speed = Math.hypot(car.vx, car.vz);
-  if (speed > 0.25) car.vHeading = Math.atan2(-car.vx, -car.vz);
-  else car.vHeading = car.reverse ? wrapAngle(car.yaw + Math.PI) : car.yaw;
-
   if (speed < 0.6) {
-    if (brk > 0.1 && thr < 0.1) car.reverse = true;
-    else if (thr > 0.1) car.reverse = false;
+    const want = brk > 0.1 && thr < 0.1 ? true : thr > 0.1 ? false : car.reverse;
+    if (want !== car.reverse) {
+      car.reverse = want;
+      car.vx = 0; car.vz = 0; speed = 0;
+    }
+  }
+  if (speed > 0.25) {
+    car.vHeading = headingFromVelocity(car);
+    speed = car.speed;
+  } else {
+    car.vHeading = car.reverse ? wrapAngle(car.yaw + Math.PI) : car.yaw;
+    car.slip = 0;
   }
 
   const wasBoosting = car.boosting;
@@ -362,7 +389,7 @@ export function stepVehicle(car, input, dt, track) {
       ev.scrape = Math.max(ev.scrape, 0.12);
     }
     car.speed = Math.hypot(car.vx, car.vz);
-    if (car.speed > 0.25) car.vHeading = Math.atan2(-car.vx, -car.vz);
+    if (car.speed > 0.25) keepBody(car);
     car.yaw = wrapAngle(car.vHeading + car.slip + (car.reverse ? Math.PI : 0));
   }
   car.wallT = Math.max(0, car.wallT - dt);
@@ -536,7 +563,7 @@ export function resolveVehicleContacts(cars, dt, opts = {}) {
       b.spin += clamp(tB * 0.08 / mb, -2.5, 2.5);
       for (const c of [a, b]) {
         c.speed = Math.hypot(c.vx, c.vz);
-        if (c.speed > 0.25) c.vHeading = Math.atan2(-c.vx, -c.vz);
+        if (c.speed > 0.25) keepBody(c);
         c.yaw = wrapAngle(c.vHeading + c.slip + (c.reverse ? Math.PI : 0));
       }
       const hit = clamp(J / 9, 0, 1);

@@ -641,6 +641,8 @@ function focusStage() {
   } catch (_) {}
 }
 
+let warmKey = '';
+
 async function startRace(m, trackId) {
   mode = m === 'tt' ? 'tt' : 'race';
   garage.close();
@@ -652,7 +654,11 @@ async function startRace(m, trackId) {
   setRaceChrome(false);
   const def = trackById(trackId);
   const ready = world && worldKey === trackId + '|' + qualityName();
-  if (!ready) ui.loading(0.02, t('loading_track'), { kicker: trackName(def), tip: touchDevice ? t('start_hint_touch') : t('start_hint_keys'), image: def.env && def.env.backdrop ? '/assets/games/backdrops/' + def.env.backdrop + '.webp' : '' });
+  const warm = trackId + '|' + qualityName() + '|' + settings.car + '|' + settings.paint + '|' + mode;
+  const loadInfo = { kicker: trackName(def), tip: touchDevice ? t('start_hint_touch') : t('start_hint_keys'), image: def.env && def.env.backdrop ? '/assets/games/backdrops/' + def.env.backdrop + '.webp' : '' };
+  const needWarm = warm !== warmKey;
+  if (!ready) ui.loading(0.02, t('loading_track'), loadInfo);
+  else if (needWarm) ui.loading(0.9, t('loading_track'), loadInfo);
   try {
     await ensureWorld(trackId);
   } catch (err) {
@@ -662,8 +668,12 @@ async function startRace(m, trackId) {
     showMain();
     return;
   }
-  if (!ready) ui.loading(1);
   setupRace(false);
+  if (needWarm) {
+    try { engine.prewarm(); } catch (_) {}
+    warmKey = warm;
+  }
+  if (!ready || needWarm) ui.loading(1);
 }
 
 function setupRace(quick) {

@@ -462,7 +462,6 @@ async function ensureWorld(course) {
   if (postFx && typeof postFx.setPreset === 'function') {
     try { postFx.setPreset(course.env.preset); } catch (_) {}
   }
-  ui.loading(1);
   return w;
 }
 
@@ -547,6 +546,8 @@ function setupRun() {
   if (engine.paused) engine.pause(false);
 }
 
+let warmKey = '';
+
 async function startRun(courseId, kind) {
   const course = courseById(courseId);
   if (!course) return false;
@@ -555,6 +556,10 @@ async function startRun(courseId, kind) {
   run.kind = kind || (course.kind === 'freestyle' ? 'freestyle' : 'race');
   run.course = course;
   hud.show(false);
+  const warm = course.id + '|' + quality + '|' + run.kind + '|' + settings.view;
+  const needWarm = warm !== warmKey;
+  const cached = world && worldCourseId === course.id && worldQuality === quality;
+  if (cached && needWarm) ui.loading(0.9, t('load.shaders'), { kicker: t('load.kicker'), title: courseName(course), tip: '', image: ART });
   let w = null;
   try {
     w = await ensureWorld(course);
@@ -567,6 +572,11 @@ async function startRun(courseId, kind) {
   }
   if (!w || run.course !== course) return false;
   setupRun();
+  if (needWarm) {
+    try { engine.prewarm(); } catch (_) {}
+    warmKey = warm;
+  }
+  if (!cached || needWarm) ui.loading(1);
   return true;
 }
 

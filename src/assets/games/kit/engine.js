@@ -106,8 +106,14 @@ export function createEngine(opts = {}) {
     pendingCheck: false,
     fpsBefore: 0,
     locked: false,
+    windowMax: 0,
     scale: 1
   };
+  const PERF_N = 600;
+  const perfBuf = new Float32Array(PERF_N);
+  const perf = { n: 0, i: 0, long: 0, programs0: 0 };
+  let perfEl = null;
+  let perfTimer = 0;
 
   function deviceDpr() {
     try { return window.devicePixelRatio || 1; } catch (_) { return 1; }
@@ -153,6 +159,7 @@ export function createEngine(opts = {}) {
     }
     const buf = new THREE.Vector2();
     renderer.getDrawingBufferSize(buf);
+    if (buf.x !== stats.width || buf.y !== stats.height) stats.resizes = (stats.resizes || 0) + 1;
     stats.dpr = Math.round(d * 100) / 100;
     stats.width = buf.x;
     stats.height = buf.y;
@@ -191,9 +198,11 @@ export function createEngine(opts = {}) {
     const span = t - adapt.windowT0;
     if (span < 1000) return;
     const fps = adapt.windowFrames * 1000 / span;
+    const stalled = adapt.windowMax > 120;
     adapt.windowFrames = 0;
+    adapt.windowMax = 0;
     adapt.windowT0 = t;
-    if (paused || hiddenStopped) return;
+    if (paused || hiddenStopped || stalled) return;
     if (adapt.pendingCheck) {
       adapt.pendingCheck = false;
       if (fps < adapt.fpsBefore * 1.08) {
@@ -216,11 +225,6 @@ export function createEngine(opts = {}) {
     } else if (fps > 57) {
       adapt.fastWindows++;
       adapt.slowWindows = 0;
-      if (adapt.fastWindows >= 5 && adapt.scale < 1) {
-        adapt.fastWindows = 0;
-        adapt.scale = Math.min(1, adapt.scale + 0.1);
-        applySize(true);
-      }
     } else {
       adapt.slowWindows = 0;
       adapt.fastWindows = 0;
@@ -274,7 +278,15 @@ export function createEngine(opts = {}) {
     stats.stepMs += ((c1 - c0) - stats.stepMs) * k;
     stats.renderMs += ((c2 - c1) - stats.renderMs) * k;
     stats.cpuMs += ((c2 - c0) - stats.cpuMs) * k;
-    if (dt > 0) stats.frameMs += (dt * 1000 - stats.frameMs) * k;
+    if (dt > 0) {
+      const ms = dt * 1000;
+      stats.frameMs += (ms - stats.frameMs) * k;
+      perfBuf[perf.i] = ms;
+      perf.i = (perf.i + 1) % PERF_N;
+      if (perf.n < PERF_N) perf.n++;
+      if (ms > 25) perf.long++;
+      if (ms > adapt.windowMax) adapt.windowMax = ms;
+    }
     fpsFrames++;
     const span = t - fpsT0;
     if (span >= 500) {
@@ -288,6 +300,7 @@ export function createEngine(opts = {}) {
   function resetAdaptWindow() {
     adapt.windowT0 = nowMs();
     adapt.windowFrames = 0;
+    adapt.windowMax = 0;
     adapt.slowWindows = 0;
     adapt.fastWindows = 0;
     adapt.pendingCheck = false;
@@ -438,11 +451,116 @@ export function createEngine(opts = {}) {
     try { window.removeEventListener('resize', onWindowResize); } catch (_) {}
     try { document.removeEventListener('visibilitychange', onVisibility); } catch (_) {}
     try { if (io) io.disconnect(); } catch (_) {}
+    if (perfTimer) clearInterval(perfTimer);
+    try { if (perfEl && perfEl.parentNode) perfEl.parentNode.removeChild(perfEl); } catch (_) {}
     canvas.removeEventListener('webglcontextlost', onLost, false);
     canvas.removeEventListener('webglcontextrestored', onRestored, false);
     try { if (composer && typeof composer.dispose === 'function') composer.dispose(); } catch (_) {}
     try { renderer.dispose(); } catch (_) {}
     resizeListeners.length = 0;
+  }
+
+  function textureReady(v) {
+    if (!v || !v.isTexture || v.isRenderTargetTexture || v.isVideoTexture || !(v.version > 0)) return false;
+    const img = v.image;
+    if (!img) return false;
+    if (img.complete === false) return false;
+    return !!(img.width || img.data || (Array.isArray(img) && img.length));
+  }
+
+  function uploadTextures() {
+    const seen = new Set();
+    const up = function (v) {
+      if (!v || seen.has(v)) return;
+      seen.add(v);
+      if (textureReady(v)) { try { renderer.initTexture(v); } catch (_) {} }
+    };
+    scene.traverse(function (o) {
+      const ms = Array.isArray(o.material) ? o.material : (o.material ? [o.material] : []);
+      for (let i = 0; i < ms.length; i++) {
+        const m = ms[i];
+        for (const key in m) {
+          const v = m[key];
+          if (v && v.isTexture) up(v);
+        }
+        if (m.uniforms) {
+          for (const key in m.uniforms) {
+            const u = m.uniforms[key];
+            const v = u && u.value;
+            if (v && v.isTexture) up(v);
+            else if (Array.isArray(v)) for (let j = 0; j < v.length; j++) if (v[j] && v[j].isTexture) up(v[j]);
+          }
+        }
+      }
+    });
+    if (scene.background && scene.background.isTexture) up(scene.background);
+    if (scene.environment && scene.environment.isTexture) up(scene.environment);
+  }
+
+  function prewarm() {
+    if (lost || disposed || !camera) return false;
+    const changed = [];
+    scene.traverse(function (o) {
+      if (o.visible === false) { changed.push(o, 'visible', false); o.visible = true; }
+      if (o.frustumCulled === true) { changed.push(o, 'frustumCulled', true); o.frustumCulled = false; }
+    });
+    let ok = true;
+    try {
+      uploadTextures();
+      renderNow();
+      renderNow();
+    } catch (_) {
+      ok = false;
+    } finally {
+      for (let i = 0; i < changed.length; i += 3) changed[i][changed[i + 1]] = changed[i + 2];
+    }
+    if (adaptive && !adapt.locked && adapt.fastWindows >= 5 && adapt.scale < 1) {
+      adapt.scale = Math.min(1, adapt.scale + 0.1);
+      applySize(true);
+    }
+    resetAdaptWindow();
+    perfReset();
+    return ok;
+  }
+
+  function perfReset() {
+    perf.n = 0;
+    perf.i = 0;
+    perf.long = 0;
+    perf.programs0 = stats.programs || 0;
+    stats.resizes = 0;
+  }
+
+  function perfRead() {
+    const n = perf.n;
+    const a = Array.prototype.slice.call(perfBuf, 0, n).sort(function (x, y) { return x - y; });
+    const q = function (f) { return n ? Math.round(a[Math.min(n - 1, Math.floor(f * n))] * 10) / 10 : 0; };
+    return {
+      p50: q(0.5), p95: q(0.95), p99: q(0.99), frames: n, long: perf.long,
+      programs: stats.programs || 0, newPrograms: Math.max(0, (stats.programs || 0) - perf.programs0),
+      textures: stats.textures || 0, geometries: stats.geometries || 0,
+      calls: stats.drawCalls || 0, triangles: stats.triangles || 0,
+      dpr: stats.dpr || 0, scale: Math.round(adapt.scale * 100) / 100, locked: adapt.locked, resizes: stats.resizes || 0,
+      width: stats.width || 0, height: stats.height || 0
+    };
+  }
+
+  function perfOverlay() {
+    let on = false;
+    try { on = /(?:^|[?&])perf=1(?:&|$)/.test(location.search); } catch (_) {}
+    if (!on || perfEl || !canvas.parentElement) return;
+    perfEl = document.createElement('div');
+    perfEl.setAttribute('aria-hidden', 'true');
+    perfEl.style.cssText = 'position:absolute;left:max(8px,env(safe-area-inset-left,0px));bottom:max(8px,env(safe-area-inset-bottom,0px));z-index:60;pointer-events:none;' +
+      'font:11px/1.35 ui-monospace,Menlo,monospace;color:#6ef3c5;background:rgba(4,7,10,.72);padding:6px 8px;border-radius:6px;white-space:pre;';
+    canvas.parentElement.appendChild(perfEl);
+    perfTimer = setInterval(function () {
+      const r = perfRead();
+      perfEl.textContent = 'frame p50 ' + r.p50 + '  p95 ' + r.p95 + '  p99 ' + r.p99 + ' ms\n' +
+        'long>25ms ' + r.long + ' of ' + r.frames + '   shaders ' + r.programs + ' (+' + r.newPrograms + ')\n' +
+        'calls ' + r.calls + '  tris ' + Math.round(r.triangles / 1000) + 'k  tex ' + r.textures + '  geo ' + r.geometries + '\n' +
+        r.width + 'x' + r.height + '  dpr ' + r.dpr + ' x' + r.scale + (r.locked ? ' locked' : '') + '  rebuilds ' + r.resizes;
+    }, 500);
   }
 
   const api = {
@@ -468,11 +586,15 @@ export function createEngine(opts = {}) {
     get timeScale() { return timeScale; },
     onResize,
     renderOnce: renderNow,
+    prewarm,
+    perf: perfRead,
+    perfReset,
     stats,
     step: SIM_STEP,
     dispose
   };
 
   applySize(true);
+  perfOverlay();
   return api;
 }
